@@ -1,20 +1,17 @@
 import React from 'react';
 import {
     Button,
-    Icon,
-    Input,
-    Paper,
-    Typography,
-    Grid, Popover
+    Grid
 } from '@material-ui/core';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
-import { AddCircleOutline as AddIcon } from '@material-ui/icons';
 import ShareIcon from '@material-ui/icons/Share';
 import SendIcon from '@material-ui/icons/Send';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import { FuseAnimate, FuseAnimateGroup, FusePageSimple } from '@fuse';
-import HighLighter from './temp';
-import { Element } from './element';
+import { FuseAnimate } from '@fuse';
+import "./editorStyles.module.css";
+
+import MyEditor from "./MyEditor"
+
 const useStyles = makeStyles(theme => ({
     disabledText: {
         // color: theme.palette.secondary.contrastText,
@@ -46,49 +43,21 @@ const useStyles = makeStyles(theme => ({
     },
     highlight: {
         backgroundColor: "yellow"
+    },
+    popover: {
+        backgroundColor: "green",
+        color: theme.palette.primary.contrastText
+    },
+    font: {
+        fontFamily: "Arial, Courier"
     }
 }));
-const onSelect = (e, value) => {
-    console.log("on select")
-    console.log(value)
-    console.log(e.target.select())
-}
-
 
 const Bill = (props) => {
-    // const selectedText = () => {
 
-    // }
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const [left, setLeft] = React.useState(null);
-    const [right, setRight] = React.useState(null);
-    const [open, setOpen] = React.useState(null);
-    const [content, setContent] = React.useState("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem. Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum tincidunt massa, ac vulputate tellus aliquam quis")
-    const onClick = (e) => {
-        console.log(e.currentTarget)
-        setAnchorEl(e.currentTarget)
-    }
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
-    const onSelectText = (e) => {
-        console.log(window.getSelection().toString())
-        console.log(e.clientX)
-        setLeft(e.clientX)
-        setRight(e.clientY)
-        console.log(e.clientY)
-        setAnchorEl(e.currentTarget)
-        setOpen(!open)
-    }
-    // const open = Boolean(anchorEl);
-    // const id = open ? 'simple-popover' : undefined;
     const classes = useStyles(props)
     return (
-        <div>
-            {open ? (<div style={{ backgroundColor: "white", position: "fixed", position: "absolute", transform: `translate(${left}px,${right}px)` }}>
-                <Button onClick={handleClose}>Highlight</Button>
-                <Button onClick={handleClose}>Add comment</Button>
-            </div>) : null}
+        <div className={classes.font}>
             <div className=" items-center justify-between pr-8 sm:px-12 my-4 ">
                 {/* <ThemeProvider theme={mainTheme}>
                             </ThemeProvider> */}
@@ -117,7 +86,6 @@ const Bill = (props) => {
                             color="primary"
                             variant="contained"
                             className="mx-4"
-                            onClick={onClick}
                         >
                             History version
                             <ArrowDropDownIcon className="mx-4" />
@@ -140,26 +108,8 @@ const Bill = (props) => {
             <Grid container className={classes.grid}>
                 <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
                     <h1 className={classes.disabledText}>shipper/exporter </h1>
-                    {/* <Grid className={classes.normalText} onMouseUp={onSelectText} contentEditable onInput={(e) => { setContent(e.target.innerHTML) }} >{content}
-                    </Grid> */}
-                    <Element value={content} toolbar={<div style={{ backgroundColor: "white", position: "fixed", position: "absolute" }}>
-                        <Button onClick={handleClose}>Highlight</Button>
-                        <Button onClick={handleClose}>Add comment</Button>
-                    </div>} />
-                    {/* <Popover
-                        id={id}
-                        open={open}
-                        positionLeft={278} positionTop={511}
-                        onClose={handleClose}
-                    // anchorOrigin={{
-                    //     vertical: 'bottom',
-                    //     horizontal: 'left',
-                    // }}
-                    > */}
+                    <MyEditor>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem. Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum tincidunt massa, ac vulputate tellus aliquam quis </MyEditor>
 
-
-                    {/* <Typography sx={{ p: 2 }}>The content of the Popover.</Typography> */}
-                    {/* </Popover> */}
                 </Grid>
                 <Grid item xs={6} className={classes.gridBottom}>
                     <Grid container className="my-0" className={classes.gridBottom}>
@@ -177,31 +127,31 @@ const Bill = (props) => {
                     <Grid>
                         <h1 className={classes.disabledText} >export references Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nib</h1>
                         <Grid sx={{ height: "50px" }} >
-                            <HighLighter text="export references Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nib" selectionHandler={(selection) => console.log(selection)} customClass={classes.highlight} />
+                            <MyEditor content="export references Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nib" />
                         </Grid>
                     </Grid>
                 </Grid>
                 <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
                     <h1 className={classes.disabledText}>consignee</h1>
-                    <Grid className={classes.normalText} contentEditable="true" >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem. Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum tincidunt massa, ac vulputate tellus aliquam quis</Grid>
+                    <MyEditor>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem. Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum tincidunt massa, ac vulputate tellus aliquam quis </MyEditor>
                 </Grid>
                 <Grid item xs={6} className={`${classes.gridBottom}`}>
                     <h1 className={classes.disabledText}>Forward agent references (FMC NO)</h1>
-                    <Grid className={classes.normalText} contentEditable="true" >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem. Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum tincidunt massa, ac vulputate tellus aliquam quis</Grid>
+                    <MyEditor>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem. Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum tincidunt massa, ac vulputate tellus aliquam quis </MyEditor>
                 </Grid>
                 <Grid item xs={6} className={classes.gridBottom} >
                     <Grid container className={`${classes.gridLeft} ${classes.gridBottom}`}>
                         <h1 className={classes.disabledText}>Notify party</h1>
-                        <Grid className={classes.normalText} contentEditable="true" >Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem. Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum tincidunt massa, ac vulputate tellus aliquam quis</Grid>
+                        <MyEditor>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem. Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum tincidunt massa, ac vulputate tellus aliquam quis </MyEditor>
                     </Grid>
                     <Grid container >
                         <Grid item xs={6} className={`${classes.gridLeft} `}>
                             <h1 className={classes.disabledText}>pre carrilage by</h1>
-                            <Grid className={classes.normalText} contentEditable="true" ></Grid>
+                            <MyEditor> </MyEditor>
                         </Grid>
                         <Grid item xs={6} className={`${classes.gridLeft} `}>
                             <h1 className={classes.disabledText}>place of receipt (service type)</h1>
-                            <Grid className={classes.normalText} contentEditable="true" >Singapore</Grid>
+                            <MyEditor>Singapore </MyEditor>
                         </Grid>
                     </Grid>
 
@@ -213,30 +163,30 @@ const Bill = (props) => {
                     <Grid container >
                         <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
                             <h1 className={classes.disabledText}>Ocean vessel voyage NO Flag</h1>
-                            <Grid className={classes.normalText} contentEditable="true" ></Grid>
+                            <MyEditor> </MyEditor>
                         </Grid>
                         <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
                             <h1 className={classes.disabledText}>Port of loading</h1>
-                            <Grid className={classes.normalText} contentEditable="true" >Singapore</Grid>
+                            <MyEditor> </MyEditor>
                         </Grid>
                         <Grid item xs={6} className={`${classes.gridLeft} `}>
                             <h1 className={classes.disabledText}>Port of discharged</h1>
-                            <Grid className={classes.normalText} contentEditable="true" ></Grid>
+                            <MyEditor />
                         </Grid>
                         <Grid item xs={6} className={`${classes.gridLeft} `}>
                             <h1 className={classes.disabledText}>Place of delivery (service type)</h1>
-                            <Grid className={classes.normalText} contentEditable="true" >Singapore</Grid>
+                            <MyEditor >Singapore</MyEditor>
                         </Grid>
                     </Grid>
                 </Grid>
                 <Grid item xs={6} className={classes.gridBottom}>
                     <Grid item xs={12} className={classes.gridBottom}>
                         <h1 className={classes.disabledText}>Final Destination(for line merchant's reference only</h1>
-                        <Grid className={classes.normalText} contentEditable="true" ></Grid>
+                        <MyEditor> </MyEditor>
                     </Grid>
                     <Grid item xs={12}>
                         <h1 className={classes.disabledText}>Type of movement (if mixedm use description of packages and good field)</h1>
-                        <Grid className={classes.normalText} contentEditable="true" ></Grid>
+                        <MyEditor> </MyEditor>
                     </Grid>
                 </Grid>
                 <Grid container>
