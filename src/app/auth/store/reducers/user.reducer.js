@@ -3,7 +3,7 @@ import * as Actions from '../actions';
 const initialState = {
     role: [],//guest
     data: {
-        'displayName': 'Custom Services',
+        'displayName': 'Offshore Center',
         'photoURL': 'assets/images/logos/one_ocean_network-logo.png',
         'email': 'offshore@one-line.com',
         shortcuts: [
