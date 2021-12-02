@@ -24,7 +24,7 @@ const navigationConfig = [
             },
             {
                 'id': 'customer-confirmed',
-                'title': 'Customer Confirmed',
+                'title': 'B/L Confirmed by Shipper',
                 'type': 'item',
                 'icon': 'check_box',
                 'url': '/apps/customer-confirmed'
@@ -45,17 +45,10 @@ const navigationConfig = [
             },
             {
                 'id': 'completed-draft-bl',
-                'title': 'Completed Draft B/L ',
+                'title': 'B/L Data Completed',
                 'type': 'item',
                 'icon': 'check_circle',
                 'url': '/apps/completed-draft-bl'
-            },
-            {
-                'id': 'expired',
-                'title': 'Expired',
-                'type': 'item',
-                'icon': 'warning',
-                'url': '/apps/expired',
             },
         ]
     },
