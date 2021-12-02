@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  portal:
+    restart: "always"
+    working_dir: /shine/portal
+    env_file:
+      - .env
+    image: "advanced-shine:1.0"
+    build:
+      context: .
+    ports:
+      - "${PORT}:8080"
+    command: ./scripts/start.sh # bash -c "npm i && npm run build && mv build dist && node index.js"
+    volumes:
+      - ./:/shine/portal

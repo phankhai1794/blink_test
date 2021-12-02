@@ -1,5 +1,10 @@
+# ADVANCED SHINE
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Prerequire
+
+NodeJS version: 10.0.0 <= node_version <= 11.0.0
 ## Available Scripts
 
 In the project directory, you can run:
