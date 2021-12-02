@@ -46,7 +46,7 @@ function InquiringTable(props) {
     }
 
     function handleClick(item) {
-        props.history.push('/apps/dashboards/monitor/' + item.id + '/' + item.handle);
+        props.history.push('/apps/bill/' + item.id + '/hashcode');
     }
 
     function handleCheck(event, id) {
@@ -115,7 +115,7 @@ function InquiringTable(props) {
                                     // tabIndex={-1}
                                     // key={n.id}
                                     // selected={isSelected}
-                                    // onClick={event => handleClick(n)}
+                                        onClick={() => handleClick(h)}
                                     >
                                         <TableCell className="w-48 px-4 sm:px-12" padding="checkbox">
                                             <Checkbox
