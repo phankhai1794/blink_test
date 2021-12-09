@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const BillAppConfig = {
+export const WorkspaceAppConfig = {
     settings: {
         layout: {
             config: {}
@@ -8,8 +8,8 @@ export const BillAppConfig = {
     },
     routes: [
         {
-            path: '/apps/bill',
-            component: React.lazy(() => import('./BillApp'))
+            path: '/apps/workplace',
+            component: React.lazy(() => import('./WorkspaceApp'))
         },
     ]
 };

@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import Bill from './Bill';
+import Workspace from './Workspace';
 import * as Actions from 'app/store/actions';
 import { useDispatch, useSelector } from 'react-redux';
 import { FuseAnimate, FuseAnimateGroup, FusePageSimple } from '@fuse';
 import _ from '@lodash';
-function BillApp(props) {
+function WorkspaceApp(props) {
     const { history } = props;
 
     const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
@@ -26,7 +26,7 @@ function BillApp(props) {
                     leftSidebar: "w-256 border-0",
                 }}
                 content={
-                    <Bill status={history.location.state} />
+                    <Workspace status={history.location.state} />
                 }
 
                 sidebarInner
@@ -37,4 +37,4 @@ function BillApp(props) {
     );
 }
 
-export default BillApp;
+export default WorkspaceApp;

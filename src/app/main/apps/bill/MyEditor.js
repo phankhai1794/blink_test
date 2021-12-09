@@ -112,7 +112,8 @@ class MyEditor extends Component {
 
         <div
           style={{
-            margin: "1rem 0"
+            margin: "1rem 0",
+            fontSize: "17px"
           }}
           onKeyUp={this._onMouseOrKeyUp}
           onMouseUp={this._onMouseOrKeyUp}
