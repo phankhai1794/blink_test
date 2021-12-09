@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     Button,
     Grid
@@ -7,6 +7,7 @@ import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import ShareIcon from '@material-ui/icons/Share';
 import SendIcon from '@material-ui/icons/Send';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import HelpIcon from '@material-ui/icons/Help';
 import { FuseAnimate } from '@fuse';
 import "./editorStyles.module.css";
 
@@ -22,7 +23,7 @@ const useStyles = makeStyles(theme => ({
     disabledText1: {
         // color: theme.palette.secondary.contrastText,
         color: "blue",
-        fontSize: "1rem",
+        fontSize: "1.1rem",
         display: "block",
         lineHeight: "1.2"
     },
@@ -45,7 +46,7 @@ const useStyles = makeStyles(theme => ({
     normalText: {
         color: "grey",
         textTransform: "uppercase",
-        fontSize: "1rem"
+        fontSize: "1.1rem"
     },
     highlight: {
         backgroundColor: "yellow"
@@ -60,6 +61,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Bill = (props) => {
+    const { status } = props;
 
     const classes = useStyles(props)
     return (
@@ -68,43 +70,103 @@ const Bill = (props) => {
                 {/* <ThemeProvider theme={mainTheme}>
                             </ThemeProvider> */}
                 <FuseAnimate animation="transition.slideUpIn" delay={350}>
-                    <div className="flex justify-end">
-
-                        <Button
-                            color="primary"
-                            variant="contained"
+                    <div className="flex">
+                        <>
+                            {status === "amended" ?
+                            <>
+                                <HelpIcon fontSize="large" className="mx-4" /> 
+                                <span className="sm:mt-12">Show Inquiry</span>
+                            </> 
+                            : status === "request" ?
+                            <>
+                                <HelpIcon fontSize="large" className="mx-4" /> 
+                                <span className="sm:mt-12">Add Inquiry</span>
+                            </> : <></>
+                            }
+                        </>   
+                        <div className="flex ml-auto">
+                        {status === "inquiry" ?
+                            <><Button
+                                color="primary"
+                                variant="contained"
+                                // onClick={handleCreateBooking}
+                                className="mx-4"
+                            >
+                                <ShareIcon className="mx-4" />
+                                Share
+                            </Button>
+                            <Button
+                                color="primary"
+                                variant="contained"
+                                className="mx-4"
                             // onClick={handleCreateBooking}
-                            className="mx-4"
-                        >
-                            <ShareIcon className="mx-4" />
-                            Share
-                        </Button>
-                        <Button
-                            color="primary"
-                            variant="contained"
-                            className="mx-4"
-                        // onClick={handleCreateBooking}
-                        >
-                            <SendIcon className="mx-4" />
-                            Send & Confirm
-                        </Button>
-                        <Button
-                            color="primary"
-                            variant="contained"
-                            className="mx-4"
-                        >
-                            History version
-                            <ArrowDropDownIcon className="mx-4" />
-                        </Button>
+                            >
+                                <SendIcon className="mx-4" />
+                                Send & Confirm
+                            </Button></>
+                            : status === "confirm" ? 
+                            <Button
+                                color="primary"
+                                variant="contained"
+                                // onClick={handleCreateBooking}
+                                className="mx-4"
+                            >
+                                <ShareIcon className="mx-4" />
+                                Update to Opus
+                            </Button> 
+                            : status === "amended" ? 
+                            <>
+                            <div>Attachment: <br></br> <a href="https://drive.google.com/file/d/1gS-CJ0nu1i4j0uVY7azbQ1y8OoicaZ8j/view">
+                            <img src='http://wwwimages.adobe.com/content/dam/acom/en/legal/images/badges/Adobe_PDF_file_icon_32x32.png'></img></a> </div>
+                            <Button
+                                color="primary"
+                                variant="contained"
+                                // onClick={handleCreateBooking}
+                                className="mx-4"
+                            >
+                                <ShareIcon className="mx-4" />
+                                Upload to Opus
+                            </Button> </> : 
+                            <> 
+                            <div>Attachment: <br></br> <a href="https://drive.google.com/file/d/1gS-CJ0nu1i4j0uVY7azbQ1y8OoicaZ8j/view">
+                            <img src='http://wwwimages.adobe.com/content/dam/acom/en/legal/images/badges/Adobe_PDF_file_icon_32x32.png'></img></a> </div>
+                            <Button
+                                color="primary"
+                                variant="contained"
+                                // onClick={handleCreateBooking}
+                                className="mx-4"
+                            >
+                                <ShareIcon className="mx-4" />
+                                Send Inquiry
+                            </Button>
+                            <Button
+                                color="primary"
+                                variant="contained"
+                                className="mx-4"
+                            // onClick={handleCreateBooking}
+                            >
+                                <SendIcon className="mx-4" />
+                                Upload to Opus
+                            </Button></>
+                            }
+                            <Button
+                                color="primary"
+                                variant="contained"
+                                className="mx-4"
+                            >
+                                History version
+                                <ArrowDropDownIcon className="mx-4" />
+                            </Button>
+                        </div>
                     </div>
-                </FuseAnimate>
+                </FuseAnimate> 
             </div>
             <div className="flex mt-2">
                 <div className="flex-auto">
                     <img src="./assets/images/logos/one_ocean_network-logo.png" className="object-scale-down h-40 w-50 pt-24" />
                 </div>
                 <div className="flex-auto mr-2">
-                    <p className={`text-2xl font-extrabold`}>COPY NONE NEGOTIABLE</p>
+                    <p className={`text-2xl font-extrabold`}>COPY NON NEGOTIABLE</p>
                 </div>
                 <div className="flex-auto">
                     {/* <Typography>SEA WAY BILL</Typography> */}
@@ -114,7 +176,11 @@ const Bill = (props) => {
             <Grid container className={classes.grid}>
                 <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
                     <h1 className={classes.disabledText}>shipper/exporter </h1>
-                    <MyEditor>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem. Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum tincidunt massa, ac vulputate tellus aliquam quis </MyEditor>
+                    <MyEditor>DSV AIR & SEA CO. LTD. AS AGENT OF
+                            DSV OCEAN TRANSPORT A/S
+                            3F IXINAL MONZEN-NAKACHO BLDG.
+                            2-5-4 FUKUZUMI, KOTO-KU, TOKYO,
+                            135-0032, JAPAN                SH</MyEditor>
 
                 </Grid>
                 <Grid item xs={6} className={classes.gridBottom}>

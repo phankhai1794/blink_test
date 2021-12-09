@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Icon, Table, TableBody, TableCell, TablePagination, TableRow, Checkbox, Box } from '@material-ui/core';
+import { Icon, Table, TableBody, TableCell, TablePagination, TableRow, Checkbox, Box, Chip } from '@material-ui/core';
 import { FuseScrollbars } from '@fuse';
 import { Avatar } from '@material-ui/core';
 import { withRouter } from 'react-router-dom';
@@ -7,7 +7,22 @@ import { Typography } from '@material-ui/core';
 import _ from '@lodash';
 import { useDispatch, useSelector } from 'react-redux';
 import { data } from './data';
+import { makeStyles } from '@material-ui/styles';
+
+const useStyles = makeStyles(theme => ({
+    root: {
+        // color: theme.palette.secondary.contrastText,
+        border: "1px solid orange",
+        backgroundColor: "#FCC4191A"
+    },
+    outlined:{
+        color: "#8F6400",
+        fontWeight: "700"
+    }
+}))
+
 function InquiringTable(props) {
+    const classes = useStyles()
 
     const dispatch = useDispatch();
     // const products = useSelector(({ eCommerceApp }) => eCommerceApp.products.data);
@@ -46,7 +61,10 @@ function InquiringTable(props) {
     }
 
     function handleClick(item) {
-        props.history.push('/apps/bill/' + item.id + '/hashcode');
+        props.history.push({
+            pathname:'/apps/workplace/' + item.id + '/hashcode',
+            state: 'inquiry'
+        });
     }
 
     function handleCheck(event, id) {
@@ -153,9 +171,13 @@ function InquiringTable(props) {
                                         </TableCell>
 
                                         <TableCell component="th" scope="row">
-                                            <Box sx={{ p: 1, backgroundColor: "orange", borderRadius: '7px', border: "1px solid orange", maxWidth: "fit-content" }}>
-                                                {h.status}
-                                            </Box>
+                                            <Chip label="Inquiring" 
+                                                variant="outlined"
+                                                classes={{
+                                                    root: classes.root, 
+                                                    outlined: classes.outlined, 
+                                                }}
+                                            />
                                         </TableCell>
 
                                         <TableCell component="th" scope="row" align="right">

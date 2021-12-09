@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Icon, Table, TableBody, TableCell, TablePagination, TableRow, Checkbox, Box } from '@material-ui/core';
+import { Icon, Table, TableBody, TableCell, TablePagination, TableRow, Checkbox, Box, Chip } from '@material-ui/core';
 import { FuseScrollbars } from '@fuse';
 import { Avatar } from '@material-ui/core';
 import { withRouter } from 'react-router-dom';
@@ -7,7 +7,21 @@ import { Typography } from '@material-ui/core';
 import _ from '@lodash';
 import { useDispatch, useSelector } from 'react-redux';
 import { data } from './data';
+import { makeStyles } from '@material-ui/styles';
+
+const useStyles = makeStyles(theme => ({
+    root: {
+        // color: theme.palette.secondary.contrastText,
+        border: "1px solid #F1C40F",
+        backgroundColor: "#FAFAD2"
+    },
+    outlined:{
+        color: "#FFBF00",
+        fontWeight: "700"
+    }
+}))
 function CompletedDraftBLTable(props) {
+    const classes = useStyles()
 
     const dispatch = useDispatch();
     // const products = useSelector(({ eCommerceApp }) => eCommerceApp.products.data);
@@ -46,7 +60,10 @@ function CompletedDraftBLTable(props) {
     }
 
     function handleClick(item) {
-        props.history.push('/apps/dashboards/monitor/' + item.id + '/' + item.handle);
+        props.history.push({
+            pathname:'/apps/workplace/' + item.id + '/hashcode',
+            state:"amended"
+        });
     }
 
     function handleCheck(event, id) {
@@ -115,7 +132,7 @@ function CompletedDraftBLTable(props) {
                                 // tabIndex={-1}
                                 // key={n.id}
                                 // selected={isSelected}
-                                // onClick={event => handleClick(n)}
+                                    onClick={() => handleClick(h)}
                                 >
                                     <TableCell className="w-48 px-4 sm:px-12" padding="checkbox">
                                         <Checkbox
@@ -153,9 +170,13 @@ function CompletedDraftBLTable(props) {
                                     </TableCell>
 
                                     <TableCell component="th" scope="row">
-                                        <Box sx={{ p: 1, backgroundColor: "orange", borderRadius: '7px', border: "1px solid orange", maxWidth: "fit-content" }}>
-                                            {h.status}
-                                        </Box>
+                                        <Chip label="Amended" 
+                                            variant="outlined"
+                                            classes={{
+                                                root: classes.root, 
+                                                outlined: classes.outlined, 
+                                            }}
+                                        />
                                     </TableCell>
 
                                     <TableCell component="th" scope="row" align="right">

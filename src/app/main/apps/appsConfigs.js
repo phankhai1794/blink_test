@@ -18,6 +18,8 @@ import { NotesAppConfig } from './notes/NotesAppConfig';
 import { ImportAppConfig } from './import/ImportAppConfig';
 import { ExportAppConfig } from './export/ExportAppConfig';
 import { BillAppConfig } from './bill/BillConfig';
+import { WorkspaceAppConfig } from './workspace/WorkspaceAppConfig';
+
 
 export const appsConfigs = [
     ProjectDashboardAppConfig,
@@ -39,5 +41,6 @@ export const appsConfigs = [
     AmendmentRequestAppConfig,
     CompletedDraftBLAppConfig,
     ExpiredAppConfig,
-    CustomerAmendedAppConfig
+    CustomerAmendedAppConfig,
+    WorkspaceAppConfig
 ];

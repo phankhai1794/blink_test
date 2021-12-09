@@ -43,10 +43,10 @@ function Widget5(props)
                         options={widget.mainChart.options}
                     />
                 </div>
-                <div className="flex w-full md:w-1/2 flex-wrap p-8">
+                <div className="flex w-full flex-wrap p-8">
                     {Object.entries(widget.supporting).map(([key, item]) => {
                         return (
-                            <div key={key} className="w-full sm:w-1/2 p-12">
+                            <div key={key} className="w-full sm:w-1/3 md:w-1/5 p-12">
                                 <Typography className="text-15 whitespace-no-wrap" color="textSecondary">{item.label}</Typography>
                                 <Typography className="text-32">{item.count[currentRange]}</Typography>
                                 <div className="h-64 w-full">

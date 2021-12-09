@@ -30,11 +30,11 @@ const navigationConfig = [
                 'url': '/apps/customer-confirmed'
             },
             {
-                'id': 'customer-amended',
-                'title': 'Customer Amended',
-                'icon': 'edit',
+                'id': 'completed-draft-bl',
+                'title': 'B/L Data Completed',
                 'type': 'item',
-                'url': '/apps/customer-amended'
+                'icon': 'check_circle',
+                'url': '/apps/completed-draft-bl'
             },
             {
                 'id': 'amendment-request',
@@ -44,12 +44,12 @@ const navigationConfig = [
                 'url': '/apps/amendment-request'
             },
             {
-                'id': 'completed-draft-bl',
-                'title': 'B/L Data Completed',
+                'id': 'customer-amended',
+                'title': 'Customer Amended',
+                'icon': 'edit',
                 'type': 'item',
-                'icon': 'check_circle',
-                'url': '/apps/completed-draft-bl'
-            },
+                'url': '/apps/customer-amended'
+            },   
         ]
     },
     {
