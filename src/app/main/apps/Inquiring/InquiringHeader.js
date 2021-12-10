@@ -41,7 +41,7 @@ function InquiringHeader(props) {
 
             </div>
             <FuseAnimate animation="transition.slideRightIn" delay={300}>
-                <Button component={Link} to="/apps/bill" className="whitespace-no-wrap mr-52" variant="contained">
+                <Button component={Link} to="/apps/workplace/mybl" className="whitespace-no-wrap mr-52" variant="contained">
                     <span className="hidden sm:flex">Create workspace</span>
                     <span className="flex sm:hidden">New</span>
                 </Button>
