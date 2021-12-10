@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
         border: "1px solid orange",
         backgroundColor: "#FCC4191A"
     },
-    outlined:{
+    outlined: {
         color: "#8F6400",
         fontWeight: "700"
     }
@@ -62,7 +62,7 @@ function InquiringTable(props) {
 
     function handleClick(item) {
         props.history.push({
-            pathname:'/apps/workplace/' + item.id + '/hashcode',
+            pathname: '/apps/workplace/' + item.id + '/hashcode',
             state: 'inquiry'
         });
     }
@@ -129,10 +129,10 @@ function InquiringTable(props) {
                                         className="h-64 cursor-pointer"
                                         hover
                                         role="checkbox"
-                                    // aria-checked={isSelected}
-                                    // tabIndex={-1}
-                                    // key={n.id}
-                                    // selected={isSelected}
+                                        // aria-checked={isSelected}
+                                        // tabIndex={-1}
+                                        // key={n.id}
+                                        // selected={isSelected}
                                         onClick={() => handleClick(h)}
                                     >
                                         <TableCell className="w-48 px-4 sm:px-12" padding="checkbox">
@@ -171,11 +171,11 @@ function InquiringTable(props) {
                                         </TableCell>
 
                                         <TableCell component="th" scope="row">
-                                            <Chip label="Inquiring" 
+                                            <Chip label="Inquiring"
                                                 variant="outlined"
                                                 classes={{
-                                                    root: classes.root, 
-                                                    outlined: classes.outlined, 
+                                                    root: classes.root,
+                                                    outlined: classes.outlined,
                                                 }}
                                             />
                                         </TableCell>

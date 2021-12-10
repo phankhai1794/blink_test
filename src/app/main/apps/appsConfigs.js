@@ -17,7 +17,6 @@ import { AcademyAppConfig } from './academy/AcademyAppConfig';
 import { NotesAppConfig } from './notes/NotesAppConfig';
 import { ImportAppConfig } from './import/ImportAppConfig';
 import { ExportAppConfig } from './export/ExportAppConfig';
-import { BillAppConfig } from './bill/BillConfig';
 import { WorkspaceAppConfig } from './workspace/WorkspaceAppConfig';
 
 
@@ -35,7 +34,6 @@ export const appsConfigs = [
     NotesAppConfig,
     ImportAppConfig,
     ExportAppConfig,
-    BillAppConfig,
     InquiringAppConfig,
     CustomerConfirmedAppConfig,
     AmendmentRequestAppConfig,

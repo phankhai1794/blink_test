@@ -3,9 +3,20 @@ import { Avatar, Button, Icon, ListItemIcon, ListItemText, Popover, MenuItem, Ty
 import { useSelector, useDispatch } from 'react-redux';
 import * as authActions from 'app/auth/store/actions';
 import { Link } from 'react-router-dom';
+import { makeStyles } from '@material-ui/core';
 
+const useStyles = makeStyles(theme => ({
+    // zoom out to show full logo in user photo
+    avatar:
+    {
+        '& > img': {
+            objectFit: 'contain'
+        }
+    }
+}))
 function UserMenu(props) {
     const dispatch = useDispatch();
+    const classes = useStyles()
     const user = useSelector(({ auth }) => auth.user);
 
     const [userMenu, setUserMenu] = useState(null);
@@ -23,7 +34,7 @@ function UserMenu(props) {
             <Button className="h-64" onClick={userMenuClick}>
                 {user.data.photoURL ?
                     (
-                        <Avatar className="" alt="user photo" src={user.data.photoURL} />
+                        <Avatar className={classes.avatar} alt="user photo" src={user.data.photoURL} />
                     )
                     :
                     (
