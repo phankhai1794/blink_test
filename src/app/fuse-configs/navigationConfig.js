@@ -17,7 +17,7 @@ const navigationConfig = [
             },
             {
                 'id': 'inquiring',
-                'title': 'Inquiring',
+                'title': 'B/L Inquired',
                 'type': 'item',
                 'icon': 'help_outline',
                 'url': '/apps/inquiring'
@@ -42,14 +42,7 @@ const navigationConfig = [
                 'type': 'item',
                 'icon': 'assignment',
                 'url': '/apps/amendment-request'
-            },
-            {
-                'id': 'customer-amended',
-                'title': 'Customer Amended',
-                'icon': 'edit',
-                'type': 'item',
-                'url': '/apps/customer-amended'
-            },   
+            } 
         ]
     },
     {
