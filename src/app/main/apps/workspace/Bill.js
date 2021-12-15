@@ -10,8 +10,6 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import HelpIcon from '@material-ui/icons/Help';
 import { FuseAnimate } from '@fuse';
 
-import MyEditor from "./MyEditor"
-
 const useStyles = makeStyles(theme => ({
     disabledText: {
         // color: theme.palette.secondary.contrastText,
@@ -68,7 +66,6 @@ const useStyles = makeStyles(theme => ({
         marginLeft: "-1px"
     }
 }));
-
 const Bill = (props) => {
     const { status } = props;
 
@@ -222,9 +219,9 @@ const Bill = (props) => {
                             <h1 className={classes.disabledText}>pre-carriage by</h1>
                             em ipsum dolor sit amet,
                         </Grid>
-                        <Grid item xs={6} style={{ paddingTop: "0px" }}>
-                            {/* <h1 className={classes.disabledText}>place of receipt</h1> */}
-                            <MyEditor title="place of receipt" paddingBottom="78px">Singapore </MyEditor>
+                        <Grid item xs={6} style={{ paddingTop: "0px", paddingBottom: "78px" }}>
+                            <h1 className={classes.disabledText}>Place of Receipt</h1>
+                            Singapore
                         </Grid>
                     </Grid>
 
@@ -246,7 +243,10 @@ const Bill = (props) => {
                             em ipsum dolor sit amet
                         </Grid>
                         <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom} ${classes.hasComment}`}>
-                            <MyEditor title="Port of loading" hasComment={true} paddingBottom="">Singapore</MyEditor>
+                            <Grid item xs={6} style={{ paddingTop: "0px" }}>
+                                <h1 className={classes.disabledText}>Port of loading</h1>
+                                Singapore
+                            </Grid>
                         </Grid>
                         <Grid item xs={6} className={`${classes.gridLeft} `}>
                             <h1 className={classes.disabledText}>Port of discharge</h1>
