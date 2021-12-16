@@ -1,38 +1,43 @@
 import React, { useState } from 'react';
-import { Button, Checkbox, TextField, Select, Menu, MenuItem, InputLabel, NativeSelect, IconButton, Link } from '@material-ui/core';
+import { Button, Checkbox, TextField, Select, IconButton, Link, OutlinedInput, Popover, Grid, MenuItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { FormControl } from '@material-ui/core';
+import SaveIcon from '@material-ui/icons/Save';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
-import ImageIcon from '@material-ui/icons/Image';
 import CloseIcon from '@material-ui/icons/Close';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
 import _ from '@lodash'
-const useStyles = makeStyles(theme => ({
-    submit_btn: {
-        paddingLeft: "4rem",
-        paddingRight: "4rem",
-        borderRadius: "20px"
-    },
-    active_btn: {
-        backgroundColor: theme.palette.primary.dark,
-        color: theme.palette.primary.contrastText,
-        "&:hover": {
-            //you want this to be the same as the backgroundColor above
-            backgroundColor: theme.palette.primary.dark,
-            color: theme.palette.primary.contrastText,
-        }
-    },
-    choice_btn: {
-        width: "100%",
-        justifyContent: 'left',
-        marginBottom: "2rem"
-    },
-    title: {
-        marginBottom: "4px",
-        marginTop: "0px"
-    },
-}))
+import QuestionBox from './QuestionBox';
+import UserInfo from './UserInfo';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
+import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
+// const useStyles = makeStyles(theme => ({
+//     submit_btn: {
+//         paddingLeft: "4rem",
+//         paddingRight: "4rem",
+//         borderRadius: "20px"
+//     },
+//     active_btn: {
+//         backgroundColor: theme.palette.primary.dark,
+//         color: theme.palette.primary.contrastText,
+//         "&:hover": {
+//             //you want this to be the same as the backgroundColor above
+//             backgroundColor: theme.palette.primary.dark,
+//             color: theme.palette.primary.contrastText,
+//         }
+//     },
+//     choice_btn: {
+//         width: "100%",
+//         justifyContent: 'left',
+//         marginBottom: "2rem"
+//     },
+//     title: {
+//         marginBottom: "4px",
+//         marginTop: "0px"
+//     },
+// }))
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
     color: grey['500']
 })
@@ -97,11 +102,6 @@ const FirstChoice = (props) => {
             </div>
             {isHover && (
                 <>
-                    <IconButton
-                        style={{ marginLeft: "1rem" }}
-                    >
-                        <ImageIcon />
-                    </IconButton>
                     {/* blank space because first choice dont have close button */}
                     <div style={{ marginLeft: "1rem", width: "48px", height: "48px" }}>
 
@@ -131,11 +131,6 @@ const Choice = (props) => {
             />
             <IconButton
                 style={{ marginLeft: "1rem" }}
-            >
-                <ImageIcon />
-            </IconButton>
-            <IconButton
-                style={{ marginLeft: "1rem" }}
                 onClick={() => handleRemoveQuestion(id)}>
                 <CloseIcon />
             </IconButton>
@@ -146,19 +141,33 @@ const Choice = (props) => {
 const InformationForm = (props) => {
     const classesDisabled = inputStyleDisabled()
     const classes = inputStyle()
-    const [questionInfo, setQuestionInfo] = useState(!_.isEmpty(question) ? { name: question.name, type: question.type } : { name: "", type: "" })
-    const { question } = props
+    const { question, questionIsEmpty } = props
+    const [questionInfo, setQuestionInfo] = useState(!questionIsEmpty ?
+        {
+            name: question.name,
+            type: question.type,
+            answerType: question.answerType,
+            selectedChoice: question.selectedChoice
+        } :
+        {
+            name: "",
+            type: "ROUTING INQUIRY/DISCREPANCY",
+            answerType: "Multiple choices",
+            selectedChoice: ""
+        })
     const [haveOtherChoice, setHaveOtherChoice] = useState(false)
-    const [choiceList, setChoiceList] = useState(!_.isEmpty(question) ? question.choices : [
+    const [isEdit, setIsEdit] = useState(false)
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [choiceList, setChoiceList] = useState(!questionIsEmpty ? question.choices : [
         {
             id: 1,
-            content: "add option1"
+            content: "SINGAPORE"
         }
     ])
     const handleAddQuestion = () => {
         setChoiceList(prevQuestion => [...prevQuestion, {
             id: choiceList[choiceList.length - 1].id + 1,
-            content: `add option ${choiceList.length + 1}`
+            content: `Add Option ${choiceList.length + 1}`
         }])
     }
     const handleRemoveQuestion = (id) => {
@@ -173,18 +182,50 @@ const InformationForm = (props) => {
         setChoiceList(temp)
     }
     const handleTypeChange = (e) => {
-        // console.log(typeToNameDict[e.target.value])
         setQuestionInfo({
             type: e.target.value,
             name: typeToNameDict[e.target.value]
         })
-        // console.log(type)
-        // console.log(name)
+    }
+    const handleAnswerTypeChange = (e) => {
+        setQuestionInfo({
+            ...questionInfo,
+            answerType: e.target.value
+        })
     }
     const onSave = (e) => {
         let savedQuestion = {
             name: questionInfo.name,
             type: questionInfo.type,
+            answerType: questionInfo.answerType,
+            choices: choiceList,
+            addOther: haveOtherChoice
+        }
+        props.onSave(savedQuestion)
+        props.onCloseForm(e)
+        setIsEdit(true)
+    }
+    const onEdit = () => {
+        setIsEdit(true)
+    }
+    {/* if questionIsEmpty -> show Form */ }
+    {/* if questionIs Empty -> check isEdit to show Form or QuestionBox */ }
+    const isShowForm = () => {
+        if (questionIsEmpty === true) {
+            return questionIsEmpty
+        }
+        return isEdit
+    }
+    const onSaveSelectedChoice = (e, choice) => {
+        setQuestionInfo({
+            ...questionInfo,
+            selectedChoice: choice
+        })
+        let savedQuestion = {
+            name: questionInfo.name,
+            type: questionInfo.type,
+            answerType: questionInfo.answerType,
+            selectedChoice: choice,
             choices: choiceList,
             addOther: haveOtherChoice
         }
@@ -192,76 +233,135 @@ const InformationForm = (props) => {
         props.onCloseForm(e)
     }
     return (
-        <div style={{ padding: "3rem", maxHeight: "450px" }}>
-            <div className="flex justify-between">
-                {/* <FormControl style={{ marginLeft: "3rem" }}>
-                    <NativeSelect
-                        name="question name"
-                    >
-                        
-                        <option value={10}>Multiple choice question</option>
-                        <option value={20}>Place of receipt</option>
-                        <option value={30}>Port of loading</option>
-                    </NativeSelect>
-                </FormControl> */}
-                <TextField value={questionInfo.name} disabled fullWidth />
-                <ImageIcon style={{ marginLeft: "3rem" }} />
-                <FormControl style={{ marginLeft: "3rem" }}>
-                    <NativeSelect
-                        value={questionInfo.type}
-                        name="Question type"
-                        onChange={handleTypeChange}
-                    >
-                        <option aria-label="None" value="" />
-                        <option value="ROUTING INQUIRY/DISCREPANCY"> ROUTING INQUIRY/DISCREPANCY</option>
-                        <option value="MISSING DESTINATION REQUIREMENT">MISSING DESTINATION REQUIREMENT</option>
-                        <option value="BROKEN ROUTE ERROR">BROKEN ROUTE ERROR</option>
-                    </NativeSelect>
-                </FormControl>
-            </div>
-            <div style={{ paddingTop: "2rem" }}>
-                {/* if there are 1 choice -> remove close button in the end */}
-                {choiceList.length === 1 ? (
-                    <FirstChoice question={choiceList[0].content} id={choiceList[0].id} handleChange={handleChange} />
-                ) : (
-                    choiceList.map((question) => {
-                        return (
-                            <Choice question={question.content} id={question.id} handleChange={handleChange} handleRemoveQuestion={handleRemoveQuestion} handleChange={handleChange} />
-                        )
-                    })
-                )}
-                <div className="flex">
-                    <div style={{ paddingTop: "6px", marginRight: "1rem" }}>
-                        <DisabledRadioButtonUncheckedIcon />
-                    </div>
-                    <TextField style={{ border: "none" }} placeholder="Add option" onClick={handleAddQuestion} InputProps={{ classes }} />
-                    {!haveOtherChoice &&
-                        (
-                            <div className="flex" style={{ paddingTop: "6px" }}>
-                                <p style={{ margin: "0px 1rem 0px 1rem", fontSize: "20px" }}> or </p>
-                                <Link style={{ fontSize: "20px" }} onClick={() => setHaveOtherChoice(true)}>add "Other"</Link>
-                            </div>
-                        )
-                    }
-                </div>
-                {haveOtherChoice &&
-                    (
-                        <div className='flex'>
-                            <div style={{ paddingTop: "6px", marginRight: "1rem" }}>
-                                <DisabledRadioButtonUncheckedIcon />
-                            </div>
-                            <TextField style={{ border: "none" }} disabled placeholder='add "Other"' fullWidth InputProps={{ classesDisabled }} />
-                            <IconButton
-                                style={{ marginLeft: "1rem" }}
-                                onClick={() => setHaveOtherChoice(false)}>
-                                <CloseIcon />
+        <div style={{ padding: "4rem 5.5rem", minWdith: "350px", maxWidth: "480px" }}>
+            <div >
+                <div className="flex justify-between">
+                    <UserInfo name="Andrew" date="Today" time="10:45PM" />
+                    {!isShowForm() && (
+                        <>
+                            <Popover
+                                id={Boolean(anchorEl) ? 'simple-popover' : undefined}
+                                open={Boolean(anchorEl)}
+                                anchorEl={anchorEl}
+                                onClose={() => setAnchorEl(null)}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'center',
+                                }}
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'center',
+                                }}
+                            >
+                                <Button onClick={onEdit}>
+                                    Edit
+                                </Button>
+                            </Popover>
+                            <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
+                                <MoreVertIcon />
                             </IconButton>
-                        </div>
-                    )
-                }
+                        </>
+                    )}
+
+                </div>
             </div>
-            <div className="block justify-center mt-12 text-center ">
-                <Button color="primary" variant="contained" onClick={onSave}> Save</Button>
+
+            {isShowForm() ?
+                (
+                    <>
+                        <Grid container >
+
+                            <Grid item xs={8}>
+                                <TextField value={questionInfo.name} variant="outlined" multiline onFocus={(e) => e.target.select()} onChange={(e) => setQuestionInfo({
+                                    ...questionInfo,
+                                    name: e.target.value
+                                })} style={{ width: "90%" }} />
+                            </Grid>
+                            <Grid item xs={4}>
+                                <FormControl style={{ width: "100%" }}>
+                                    <Select
+                                        value={questionInfo.type}
+                                        name="Question type"
+                                        onChange={handleTypeChange}
+                                        input={<OutlinedInput />}
+                                    >
+                                        <MenuItem value="ROUTING INQUIRY/DISCREPANCY"> ROUTING INQUIRY/DISCREPANCY</MenuItem>
+                                        <MenuItem value="MISSING DESTINATION REQUIREMENT">MISSING DESTINATION REQUIREMENT</MenuItem>
+                                        <MenuItem value="BROKEN ROUTE ERROR">BROKEN ROUTE ERROR</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            {/* <Grid item xs={4}>
+                                        <FormControl style={{ width: "100%" }} >
+                                            <Select
+                                                value={questionInfo.answerType}
+                                                name="Question answer type"
+                                                onChange={handleAnswerTypeChange}
+                                                input={<OutlinedInput />}
+                                            >
+                                                <MenuItem value="Multiple choices"> Choices Answer</MenuItem>
+                                                <MenuItem value="Signle choice">Short Answer</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Grid> */}
+                        </Grid>
+                        <div style={{ paddingTop: "2rem" }}>
+                            {/* if there are 1 choice -> remove close button in the end */}
+                            {choiceList.length === 1 ? (
+                                <FirstChoice question={choiceList[0].content} id={choiceList[0].id} handleChange={handleChange} />
+                            ) : (
+                                choiceList.map((question, index) => {
+                                    return (
+                                        <Choice question={question.content} id={question.id} key={index} handleChange={handleChange} handleRemoveQuestion={handleRemoveQuestion} handleChange={handleChange} />
+                                    )
+                                })
+                            )}
+                            <div className="flex">
+                                <div style={{ paddingTop: "6px", marginRight: "1rem" }}>
+                                    <DisabledRadioButtonUncheckedIcon />
+                                </div>
+                                <TextField style={{ border: "none" }} placeholder="Add Option" onClick={handleAddQuestion} InputProps={{ classes }} />
+                                {!haveOtherChoice &&
+                                    (
+                                        <div className="flex" style={{ paddingTop: "6px" }}>
+                                            <p style={{ margin: "0px 1rem 0px 1rem", fontSize: "20px" }}> OR </p>
+                                            <Link style={{ fontSize: "20px" }} onClick={() => setHaveOtherChoice(true)}>Add "Customer Input"</Link>
+                                        </div>
+                                    )
+                                }
+                            </div>
+                            {haveOtherChoice &&
+                                (
+                                    <div className='flex'>
+                                        <div style={{ paddingTop: "6px", marginRight: "1rem" }}>
+                                            <DisabledRadioButtonUncheckedIcon />
+                                        </div>
+                                        <TextField style={{ border: "none" }} placeholder='Add "Customer Input"' fullWidth InputProps={{ classesDisabled }} />
+                                        <IconButton
+                                            style={{ marginLeft: "1rem" }}
+                                            onClick={() => setHaveOtherChoice(false)}>
+                                            <CloseIcon />
+                                        </IconButton>
+                                    </div>
+                                )
+                            }
+                        </div>
+                        <div className="flex justify-end mt-12 mr-2 ">
+                            <Button color="primary" variant="contained" onClick={onSave}> <SaveIcon />Save</Button>
+                        </div>
+
+
+                    </>
+                ) :
+                (<QuestionBox question={question} onEdit={onEdit} onSaveSelectedChoice={onSaveSelectedChoice} />)
+            }
+            <hr />
+            <div className="flex justify-between pt-1">
+                <Link style={{ fontSize: "20px" }}>Open All Inquiries</Link>
+                <div>
+                    <ArrowBackIosIcon />
+                    <ArrowForwardIosIcon />
+                </div>
             </div>
         </div>
     );

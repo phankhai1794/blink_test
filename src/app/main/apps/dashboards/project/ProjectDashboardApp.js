@@ -101,7 +101,7 @@ function ProjectDashboardApp(props) {
             header={
                 <div className="flex flex-col justify-between flex-1 px-24 pt-24">
                     <div className="flex justify-between items-start">
-                        <Typography className="py-0 sm:py-24" variant="h4">Welcome back, John!</Typography>
+                        <Typography className="py-0 sm:py-24" variant="h4">Welcome back, OffShore</Typography>
                         <Hidden lgUp>
                             <IconButton
                                 onClick={(ev) => pageLayout.current.toggleRightSidebar()}

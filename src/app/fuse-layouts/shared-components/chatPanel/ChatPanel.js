@@ -7,8 +7,8 @@ import clsx from 'clsx';
 import * as Actions from './store/actions';
 import reducer from './store/reducers';
 import withReducer from 'app/store/withReducer';
-import ContactList from './ContactList';
-import Chat from './Chat';
+// import ContactList from './ContactList';
+// import Chat from './Chat';
 
 const useStyles = makeStyles(theme => ({
     root : {
@@ -118,10 +118,10 @@ function ChatPanel(props)
                             </IconButton>
                         </Toolbar>
                     </AppBar>
-                    <Paper className="flex flex-1 flex-row min-h-px">
+                    {/* <Paper className="flex flex-1 flex-row min-h-px">
                         <ContactList className="flex flex-shrink-0"/>
                         <Chat className="flex flex-1 z-10"/>
-                    </Paper>
+                    </Paper> */}
                 </div>
             </ClickAwayListener>
         </div>

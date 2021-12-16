@@ -1,11 +1,10 @@
-import React, { Component } from "react";
+import React from "react";
 import AddCommentIcon from '@material-ui/icons/AddComment';
 import { Popover, IconButton } from "@material-ui/core";
 import InformationForm from "./InformationForm";
 import { makeStyles } from "@material-ui/styles";
 import { useState } from "react";
 import { useRef } from "react";
-import { TextField } from "@material-ui/core";
 import _ from '@lodash'
 const useStyles = makeStyles(theme => ({
 	popover: {
@@ -39,9 +38,13 @@ const PopoverTextField = (props) => {
 	const idCmtBtn = openCmtBtn ? 'comment-button-popover' : undefined;
 	const openCmtBox = Boolean(anchorCmtBox);
 	const idCmtBox = openCmtBox ? 'comment-box-popover' : undefined;
-	// let isRightMost = false
 	const divRef = useRef()
-
+	let questionIsEmpty = true
+	if (question) {
+		if (question.name !== "") {
+			questionIsEmpty = false
+		}
+	}
 	const onOpenCommentButton = (event) => {
 		event.preventDefault()
 		const { x, width } = divRef.current.getBoundingClientRect()
@@ -94,7 +97,7 @@ const PopoverTextField = (props) => {
 				classes={{
 					paper: classes.popoverContent
 				}}
-				PaperProps={{ onMouseEnter: `${!_.isEmpty(question) ? onOpenCommentButton : onOpenCommentBox}`, onMouseLeave: onCloseCommentButton }}
+				PaperProps={{ onMouseEnter: (questionIsEmpty ? onOpenCommentButton : onOpenCommentBox), onMouseLeave: onCloseCommentButton }}
 			>
 				<IconButton color="primary" onClick={onOpenCommentBox}><AddCommentIcon style={{ transform: `${isRightMost ? "scaleX(1)" : "scaleX(-1)"}` }} /></IconButton>
 			</Popover>
@@ -119,16 +122,31 @@ const PopoverTextField = (props) => {
 
 			>
 				<div>
-					<InformationForm onClose={onCloseCommentBox} hasComment={hasComment} question={question} onSave={onSave} onCloseForm={onCloseForm} />
+					<InformationForm onClose={onCloseCommentBox} hasComment={hasComment} question={question} onSave={onSave} onCloseForm={onCloseForm} questionIsEmpty={questionIsEmpty} />
 				</div>
 
 			</Popover>
 			<div
 				ref={divRef}
-				onMouseEnter={hasComment ? onOpenCommentBox : onOpenCommentButton}
-				onMouseLeave={hasComment ? onCloseCommentBox : onCloseCommentButton}
-				style={{ width: `${fullWidth}`, border: `${!_.isEmpty(question) && "1px solid red"}` }}
+				onMouseEnter={!questionIsEmpty ? onOpenCommentBox : onOpenCommentButton}
+				onMouseLeave={!questionIsEmpty ? onCloseCommentBox : onCloseCommentButton}
+				style={{ width: `${fullWidth}`, border: `${!questionIsEmpty && "1px solid red"}` }}
 			>
+				{/* CODE TEST QUESTIONBOX UI 
+				<QuestionBox question={{
+					name: "We found discrepancy in the routing information between SI and OPUS booking details",
+					choices: [
+						{
+							id: 1,
+							content: "OPTION1"
+						},
+						{
+							id: 2,
+							content: "OPTION2"
+						}
+					],
+					addOther: true
+				}} /> */}
 				{children}
 				{/* <TextField disabled id="outlined-disabled"
 
