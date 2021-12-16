@@ -1,7 +1,7 @@
 #!/bin/bash
 # @author DangTran
 # @description: 
-npm ci
+#npm i
 npm run build
 BASEDIR=$(dirname "$0")
 echo "Build deployed to dist folder"

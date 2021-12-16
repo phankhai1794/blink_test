@@ -1,6 +1,6 @@
 import axios from 'axios';
-import {setselectedContactId} from './contacts.actions';
-import {closeMobileChatsSidebar} from 'app/main/apps/chat/store/actions/sidebars.actions';
+// import {setselectedContactId} from './contacts.actions';
+// import {closeMobileChatsSidebar} from 'app/main/apps/chat/store/actions/sidebars.actions';
 
 export const GET_CHAT = '[CHAT PANEL] GET CHAT';
 export const REMOVE_CHAT = '[CHAT PANEL] REMOVE CHAT';
@@ -19,9 +19,9 @@ export function getChat(contactId)
 
         return request.then((response) => {
 
-            dispatch(setselectedContactId(contactId));
+            // dispatch(setselectedContactId(contactId));
 
-            dispatch(closeMobileChatsSidebar());
+            // dispatch(closeMobileChatsSidebar());
 
             return dispatch({
                 type        : GET_CHAT,

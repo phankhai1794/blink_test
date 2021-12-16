@@ -31,12 +31,6 @@ function Logo()
 
     return (
         <div className={clsx(classes.root, "flex items-center")}>
-           {/* <img
-                className="logo-icon"
-                src="assets/images/logos/windlogs-logo.png"
-                alt="logo"
-                width="16"
-            /> */}
             <div className={clsx(classes.reactBadge, "react-badge flex items-center ml-12 mr-8 py-4 px-8 rounded")}>
                 <span className="react-text text-12 ml-4"> CYBERLOGITEC</span>
             </div>

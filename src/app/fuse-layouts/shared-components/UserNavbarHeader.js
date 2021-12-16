@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
             easing: theme.transitions.easing.easeInOut,
         }),
         '& > img': {
-            borderRadius: '50%',
+            // borderRadius: '50%',
             // zoom out to show full logo
             objectFit: 'contain'
         }
