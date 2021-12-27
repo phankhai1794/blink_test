@@ -9,6 +9,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import PopoverTextField from './components/PopoverTextField';
 import { useState } from 'react';
+import WorkSpaceData from './WorkSpaceData';
 const useStyles = makeStyles(theme => ({
     root: {
         // color: theme.palette.secondary.contrastText,
@@ -30,7 +31,6 @@ const useStyles = makeStyles(theme => ({
         pointerEvents: "auto"
     },
     root: {
-        // color: theme.palette.secondary.contrastText,
         backgroundColor: "#f5f8fa",
     },
     input: {
@@ -38,57 +38,54 @@ const useStyles = makeStyles(theme => ({
     }
 
 }))
-// const data = {
-//     id: 1,
-//     content: "PlACE OF RECEIPT",
-//     questions:
-//         {
-//             name: "place of receipt",
-//             type: "Multiplechoice question",
-//             choices: [
-//                 {
-//                     id: 1,
-//                     content: "Malaysia"
-//                 },
-//                 {
-//                     id: 2,
-//                     content: "Indonesia"
-//                 }
-//             ],
-//             addOther: false
-//         },
-// }
-const mockData = {
-    id: 1,
-    content: "PlACE OF RECEIPT",
-    question: {
-        name: "",
-        type: "",
-        choices: [],
-        selectedChoice: ""
+/*
+MOCK DATA STRUCTURE
+const data = [
+    {
+        id: 1,
+        content: "PlACE OF RECEIPT",
+        questions:
+            {
+                name: "place of receipt",
+                type: "Multiplechoice data",
+                choices: [
+                    {
+                        id: 1,
+                        content: "Malaysia"
+                    },
+                    {
+                        id: 2,
+                        content: "Indonesia"
+                    }
+                ],
+                addOther: false
+            },
     },
-    value: "SINGAPORE"
-}
-const mockData2 = {
-    id: 1,
-    content: "PlACE OF RECEIPT",
-    question: {
-        name: "",
-        type: "",
-        choices: [],
-        selectedChoice: ""
-    },
-    value: "SINGAPORE"
-
-}
+    ...
+]
+*/
 const Workspace = (props) => {
     const classes = useStyles(props)
-    const [data, setData] = useState(mockData)
-    const [data2, setData2] = useState(mockData2)
-    const onSave = (savedQuestion) => {
+    const [data, setData] = useState(WorkSpaceData)
+    const onSave = (savedQuestion, title) => {
+        // console.log(title)
+        let newData = data
+        newData[title] = {
+            ...data[title],
+            question: savedQuestion,
+            content: (savedQuestion.selectedChoice === undefined || savedQuestion.selectedChoice === "") ?
+                data[title].content : savedQuestion.selectedChoice
+        }
+
+        setData(newData)
+    }
+    const onSaveContentOnly = (newContent, title) => {
         setData({
             ...data,
-            question: savedQuestion,
+            title: {
+                ...data[title],
+                content: newContent
+            }
         })
     }
     return (
@@ -97,128 +94,89 @@ const Workspace = (props) => {
                 <Grid item xs={5}>
                     <Grid item xs={11}>
                         <h3>Shipper/Exporter </h3>
-                        <PopoverTextField question={data2.question} onSave={onSave}>
-                            <TextField disabled id="outlined-disabled"
-                                defaultValue="DSV AIR & SEA CO. LTD. AS AGENT OF
-                            DSV OCEAN TRANSPORT A/S
-                            3F IXINAL MONZEN-NAKACHO BLDG.
-                            2-5-4 FUKUZUMI, KOTO-KU, TOKYO,
-                            135-0032, JAPAN"
-                                variant="outlined"
-                                fullWidth={true}
-                                multiline
-                                classes={{ root: classes.root }}
-                                InputProps={{ classes: { root: classes.input } }}
-                            />
+                        <PopoverTextField
+                            onSave={onSave}
+                            data={data}
+                            onSaveContentOnly={onSaveContentOnly}
+                            title="Shipper/Exporter">
                         </PopoverTextField>
                     </Grid>
                     <Grid item xs={11}>
                         <h3>Consignee</h3>
-                        <PopoverTextField question={data2.question} onSave={onSave}>
-                            <TextField disabled id="outlined-disabled"
-                                defaultValue=" DSV AIR & SEA LTD. -1708
-                                16TH FLOOR, HANSSEM BLDG 179,
-                                SEONGAM-RO. MAPO-GU SEOUL 03929
-                                KOREA"
-                                variant="outlined"
-                                multiline
-                                fullWidth={true}
-                                classes={{ root: classes.root }}
-                                InputProps={{ classes: { root: classes.input } }}
-                            />
+                        <PopoverTextField
+                            data={data}
+                            onSave={onSave}
+                            onSaveContentOnly={onSaveContentOnly}
+                            title="Consignee">
                         </PopoverTextField>
                     </Grid>
                     <Grid item xs={11}>
                         <h3>NOTIFY PARTY (It is agreed that no responsibility shall be <br></br> attached to the Carrier or its Agents for failure to notify)</h3>
-                        <PopoverTextField question={data2.question} onSave={onSave}>
-                            <TextField disabled id="outlined-disabled"
-                                defaultValue=" DSV AIR & SEA LTD. -1708
-                                16TH FLOOR, HANSSEM BLDG 179,
-                                SEONGAM-RO. MAPO-GU SEOUL 03929
-                                KOREA"
-                                variant="outlined"
-                                multiline
-                                fullWidth={true}
-                                classes={{ root: classes.root }}
-                                InputProps={{ classes: { root: classes.input } }}
-                            />
+                        <PopoverTextField
+                            data={data}
+                            onSave={onSave}
+                            onSaveContentOnly={onSaveContentOnly}
+                            title="NOTIFY PARTY (It is agreed that no responsibility shall be <br></br> attached to the Carrier or its Agents for failure to notify)">
                         </PopoverTextField>
                     </Grid>
                     <Grid container xs={11} >
-                        <Grid item xs={7} question={data2.question} onSave={onSave}>
+                        <Grid item xs={7} >
                             <h3>PRE-CARRIAGE BY</h3>
-                            <PopoverTextField fullWidth={false} >
-                                <TextField disabled id="outlined-disabled"
-                                    defaultValue=""
-                                    variant="outlined"
-                                    classes={{ root: classes.root }}
-                                    InputProps={{ classes: { root: classes.input } }}
-                                />
+                            <PopoverTextField
+                                fullWidth={false}
+                                data={data}
+                                onSave={onSave}
+                                onSaveContentOnly={onSaveContentOnly}
+                                title="PRE-CARRIAGE BY">
                             </PopoverTextField>
                         </Grid>
                         <Grid item xs={5} >
                             <h3>PLACE OF RECEIPT</h3>
-                            <PopoverTextField question={data.question} onSave={onSave} >
-                                <TextField disabled id="outlined-disabled"
-                                    // defaultValue={`${data.question.selectedChoice === undefined ?
-                                    //     data.value : data.question.selectedChoice
-                                    //     }`}
-                                    value={data.question.selectedChoice === "" ?
-                                        data.value : data.question.selectedChoice}
-                                    variant="outlined"
-                                    fullWidth={true}
-                                    classes={{ root: classes.root }}
-                                    InputProps={{ classes: { root: classes.input } }}
-                                />
+                            <PopoverTextField
+                                data={data}
+                                onSave={onSave}
+                                onSaveContentOnly={onSaveContentOnly}
+                                title="PLACE OF RECEIPT" >
                             </PopoverTextField>
                         </Grid>
                     </Grid>
                     <Grid container xs={11}>
                         <Grid item xs={7} >
                             <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
-                            <PopoverTextField fullWidth={false} question={data2.question} onSave={onSave}>
-                                <TextField disabled id="outlined-disabled"
-                                    defaultValue="CONFIDENCE 021W"
-                                    variant="outlined"
-                                    classes={{ root: classes.root }}
-                                    InputProps={{ classes: { root: classes.input } }}
-                                />
+                            <PopoverTextField
+                                fullWidth={false}
+                                data={data}
+                                onSave={onSave}
+                                onSaveContentOnly={onSaveContentOnly}
+                                title="OCEAN VESSEL VOYAGE NO. FlAG">
                             </PopoverTextField>
                         </Grid>
                         <Grid item xs={5} >
                             <h3>PORT OF LOADING</h3>
-                            <PopoverTextField question={data2.question} onSave={onSave}>
-                                <TextField disabled id="outlined-disabled"
-                                    defaultValue="TOKYO,JAPAN"
-                                    variant="outlined"
-                                    fullWidth={true}
-                                    classes={{ root: classes.root }}
-                                    InputProps={{ classes: { root: classes.input } }}
-                                />
+                            <PopoverTextField
+                                data={data}
+                                onSave={onSave}
+                                onSaveContentOnly={onSaveContentOnly}
+                                title="PORT OF LOADING">
                             </PopoverTextField>
                         </Grid>
                         <Grid item xs={7} >
                             <h3>PORT OF DISCHARGE</h3>
-                            <PopoverTextField fullWidth={false} question={data2.question} onSave={onSave}>
-                                <TextField disabled id="outlined-disabled"
-                                    defaultValue="BUSAN, KOREA"
-                                    variant="outlined"
-                                    classes={{ root: classes.root }}
-                                    InputProps={{ classes: { root: classes.input } }}
-                                />
+                            <PopoverTextField
+                                fullWidth={false}
+                                data={data}
+                                onSave={onSave}
+                                onSaveContentOnly={onSaveContentOnly}
+                                title="PORT OF DISCHARGE">
                             </PopoverTextField>
                         </Grid>
                         <Grid item xs={5} >
                             <h3>PLACE OF DELIVERY</h3>
-                            <PopoverTextField question={data2.question} onSave={onSave}>
-
-                                <TextField disabled id="outlined-disabled"
-                                    defaultValue="BUSAN"
-                                    variant="outlined"
-                                    fullWidth={true}
-                                    classes={{ root: classes.root }}
-                                    InputProps={{ classes: { root: classes.input } }}
-                                />
+                            <PopoverTextField
+                                data={data}
+                                onSave={onSave}
+                                onSaveContentOnly={onSaveContentOnly}
+                                title="PLACE OF DELIVERY">
                             </PopoverTextField>
                         </Grid>
                     </Grid>
@@ -227,40 +185,31 @@ const Workspace = (props) => {
                     <Grid container spacing={10} >
                         <Grid item xs={5} >
                             <h3 >BOOKING NO.</h3>
-                            <PopoverTextField question={data2.question} onSave={onSave}>
-                                <TextField disabled id="outlined-disabled"
-                                    defaultValue="TYOBD9739500"
-                                    variant="outlined"
-                                    fullWidth={true}
-                                    classes={{ root: classes.root }}
-                                    InputProps={{ classes: { root: classes.input } }}
-                                />
+                            <PopoverTextField
+                                data={data}
+                                onSave={onSave}
+                                onSaveContentOnly={onSaveContentOnly}
+                                title="BOOKING NO.">
                             </PopoverTextField>
                         </Grid>
                         <Grid item xs={5}>
                             <h3>SEA WAYBILL NO.</h3>
-                            <PopoverTextField question={data2.question} onSave={onSave}>
-                                <TextField disabled id="outlined-disabled"
-                                    defaultValue="ONEYTOBD9739500"
-                                    variant="outlined"
-                                    fullWidth={true}
-                                    classes={{ root: classes.root }}
-                                    InputProps={{ classes: { root: classes.input } }}
-                                />
+                            <PopoverTextField
+                                data={data}
+                                onSave={onSave}
+                                onSaveContentOnly={onSaveContentOnly}
+                                title="SEA WAYBILL NO.">
                             </PopoverTextField>
                         </Grid>
                     </Grid>
                     <Grid item xs={10}>
                         <h3>EXPORT REFERENCES (for the merchant's and/or Carrier's reference only. See back clause 8. (4.))</h3>
-                        <PopoverTextField question={data2.question} onSave={onSave}>
+                        <PopoverTextField
+                            data={data}
+                            onSave={onSave}
+                            onSaveContentOnly={onSaveContentOnly}
+                            title="EXPORT REFERENCES (for the merchant's and/or Carrier's reference only. See back clause 8. (4.))">
                             <Grid sx={{ height: "50px" }} >
-                                <TextField disabled id="outlined-disabled"
-                                    defaultValue=""
-                                    variant="outlined"
-                                    fullWidth={true}
-                                    classes={{ root: classes.root }}
-                                    InputProps={{ classes: { root: classes.input } }}
-                                />
                             </Grid>
                         </PopoverTextField>
                     </Grid>
@@ -276,29 +225,23 @@ const Workspace = (props) => {
                     </Grid>
                     <Grid item xs={10}>
                         <h3>FINAL DESTINATION(for line merchant's reference only)</h3>
-                        <PopoverTextField question={data2.question} onSave={onSave}>
+                        <PopoverTextField
+                            data={data}
+                            onSave={onSave}
+                            onSaveContentOnly={onSaveContentOnly}
+                            title="FINAL DESTINATION(for line merchant's reference only)">
                             <Grid sx={{ height: "50px" }} >
-                                <TextField disabled id="outlined-disabled"
-                                    defaultValue="BUSAN, KOREA"
-                                    variant="outlined"
-                                    fullWidth={true}
-                                    classes={{ root: classes.root }}
-                                    InputProps={{ classes: { root: classes.input } }}
-                                />
                             </Grid>
                         </PopoverTextField>
                     </Grid>
                     <Grid item xs={10}>
                         <h3>TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)</h3>
-                        <PopoverTextField question={data2.question} onSave={onSave}>
+                        <PopoverTextField
+                            data={data}
+                            onSave={onSave}
+                            onSaveContentOnly={onSaveContentOnly}
+                            title="TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)">
                             <Grid sx={{ height: "50px" }} >
-                                <TextField disabled id="outlined-disabled"
-                                    defaultValue="R1CB118000"
-                                    variant="outlined"
-                                    fullWidth={true}
-                                    classes={{ root: classes.root }}
-                                    InputProps={{ classes: { root: classes.input } }}
-                                />
                             </Grid>
                         </PopoverTextField>
                     </Grid>
@@ -310,36 +253,27 @@ const Workspace = (props) => {
                     <h3> Container No.1 </h3>
                 </Grid>
                 <Grid item xs={2} >
-                    <PopoverTextField question={data2.question} onSave={onSave}>
-                        <TextField disabled id="outlined-disabled"
-                            defaultValue="262 Packages"
-                            variant="outlined"
-                            fullWidth={true}
-                            classes={{ root: classes.root }}
-                            InputProps={{ classes: { root: classes.input } }}
-                        />
+                    <PopoverTextField
+                        data={data}
+                        onSave={onSave}
+                        onSaveContentOnly={onSaveContentOnly}
+                        title="Container No.1-1">
                     </PopoverTextField>
                 </Grid>
                 <Grid item xs={2}>
-                    <PopoverTextField question={data2.question} onSave={onSave}>
-                        <TextField disabled id="outlined-disabled"
-                            defaultValue="1,716.000 KGS"
-                            variant="outlined"
-                            fullWidth={true}
-                            classes={{ root: classes.root }}
-                            InputProps={{ classes: { root: classes.input } }}
-                        />
+                    <PopoverTextField
+                        data={data}
+                        onSave={onSave}
+                        onSaveContentOnly={onSaveContentOnly}
+                        title="Container No.1-2">
                     </PopoverTextField>
                 </Grid>
                 <Grid item xs={2}>
-                    <PopoverTextField question={data2.question} onSave={onSave}>
-                        <TextField disabled id="outlined-disabled"
-                            defaultValue="3,560 CBM"
-                            variant="outlined"
-                            fullWidth={true}
-                            classes={{ root: classes.root }}
-                            InputProps={{ classes: { root: classes.input } }}
-                        />
+                    <PopoverTextField
+                        data={data}
+                        onSave={onSave}
+                        onSaveContentOnly={onSaveContentOnly}
+                        title="Container No.1-3">
                     </PopoverTextField>
                 </Grid>
             </Grid>
@@ -348,36 +282,27 @@ const Workspace = (props) => {
                     <h3> Container No.2 </h3>
                 </Grid>
                 <Grid item xs={2} >
-                    <PopoverTextField question={data2.question} onSave={onSave}>
-                        <TextField disabled id="outlined-disabled"
-                            defaultValue="262 Packages"
-                            variant="outlined"
-                            fullWidth={true}
-                            classes={{ root: classes.root }}
-                            InputProps={{ classes: { root: classes.input } }}
-                        />
+                    <PopoverTextField
+                        data={data}
+                        onSave={onSave}
+                        onSaveContentOnly={onSaveContentOnly}
+                        title="Container No.2-1">
                     </PopoverTextField>
                 </Grid>
                 <Grid item xs={2}>
-                    <PopoverTextField question={data2.question} onSave={onSave}>
-                        <TextField disabled id="outlined-disabled"
-                            defaultValue="1,716.000 KGS"
-                            variant="outlined"
-                            fullWidth={true}
-                            classes={{ root: classes.root }}
-                            InputProps={{ classes: { root: classes.input } }}
-                        />
+                    <PopoverTextField
+                        data={data}
+                        onSave={onSave}
+                        onSaveContentOnly={onSaveContentOnly}
+                        title="Container No.2-2">
                     </PopoverTextField>
                 </Grid>
                 <Grid item xs={2}>
-                    <PopoverTextField question={data2.question} onSave={onSave}>
-                        <TextField disabled id="outlined-disabled"
-                            defaultValue="3,560 CBM"
-                            variant="outlined"
-                            fullWidth={true}
-                            classes={{ root: classes.root }}
-                            InputProps={{ classes: { root: classes.input } }}
-                        />
+                    <PopoverTextField
+                        data={data}
+                        onSave={onSave}
+                        onSaveContentOnly={onSaveContentOnly}
+                        title="Container No.2-3">
                     </PopoverTextField>
                 </Grid>
             </Grid>

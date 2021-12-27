@@ -17,7 +17,7 @@ const useStyles = makeStyles(theme => ({
         marginTop: "0px"
     },
     normal: {
-        marginTop: "0px"
+        marginTop: "0px",
     },
     message: {
         marginLeft: "1rem",
@@ -36,7 +36,7 @@ const UserInfo = (props) => {
                 <p className={classes.name}>{name}</p>
                 <div className="flex" style={{ marginLeft: "1rem" }}>
                     <p className={classes.normal}>{date}</p>
-                    <p className={classes.normal}>{time}</p>
+                    <p className={classes.normal} style={{ marginLeft: "2px" }}>{time}</p>
                 </div>
             </div>
         </div>

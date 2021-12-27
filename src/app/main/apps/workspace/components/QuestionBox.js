@@ -1,20 +1,37 @@
 import React from 'react';
 import { TextField, Radio, Button } from '@material-ui/core';
 import { useState } from 'react';
+import UserInfo from './UserInfo';
+import SaveIcon from '@material-ui/icons/Save';
 const QuestionBox = (props) => {
     const { question } = props
-    const [selectedChoice, setSelectedChoice] = useState("")
-    const [otherChoiceContent, setOtherChoiceContent] = useState("")
+    let questionIsEmpty = props.question === undefined
+    let prevChoiceArray = question.choices.filter(choice => choice.content === question.selectedChoice)
+    const [selectedChoice, setSelectedChoice] = useState(
+        questionIsEmpty ? "" :
+            prevChoiceArray.length === 0 ?
+                `${question.otherChoice === undefined ? "" : "other"}` :
+                prevChoiceArray[0].content
+    )
+    const [otherChoiceContent, setOtherChoiceContent] = useState(question.otherChoice)
+    const [lastSelectedChoice, setLastSelectedChoice] = useState(selectedChoice === "other" ? otherChoiceContent : selectedChoice)
+    const [showSaveBtn, setShowSaveBtn] = useState(false)
     const handleChange = (e) => {
         setSelectedChoice(e.target.value)
+        setShowSaveBtn(true)
+    }
+    const handleSaveSelectedChoice = (e) => {
+        props.onSaveSelectedChoice(e, selectedChoice === "other" ? otherChoiceContent : selectedChoice, otherChoiceContent)
+        setLastSelectedChoice(selectedChoice === "other" ? otherChoiceContent : selectedChoice)
+        setShowSaveBtn(false)
     }
     const handleFocus = (e) => {
         setSelectedChoice("other")
         e.target.select()
+        setShowSaveBtn(true)
     }
-    let questionIsEmpty = props.question === undefined
     return (
-        <div style={{ width: '100%', height: "100%" }}>
+        <div style={{ width: '400px', height: "100%" }}>
             <h2>
                 {questionIsEmpty ? "" : question.name}
             </h2>
@@ -33,7 +50,7 @@ const QuestionBox = (props) => {
                     </div>
                 )
                 )}
-                {!questionIsEmpty && question.addOther &&
+                {question.addOther &&
                     (
                         <div style={{ display: "flex", marginTop: "1rem" }} >
                             <Radio
@@ -44,11 +61,13 @@ const QuestionBox = (props) => {
                                 style={{ marginLeft: "0rem" }} />
                             <TextField placeholder="INPUT YOUR INFORMATION"
                                 InputProps={{
-                                    classes: {
-                                        input: {
-                                            fontSize: "1.7rem"
-
-                                        },
+                                    style: {
+                                        fontSize: "1.7rem",
+                                    },
+                                }}
+                                InputLabelProps={{
+                                    style: {
+                                        fontSize: "1.7rem",
                                     },
                                 }}
                                 style={{ margin: "auto 1rem" }}
@@ -60,10 +79,17 @@ const QuestionBox = (props) => {
                         </div>
                     )}
             </div>
-            {selectedChoice !== "" &&
+            {lastSelectedChoice !== "" && !showSaveBtn &&
                 (
-                    <div className="flex justify-end">
-                        <Button variant="contained" color="primary" onClick={(e) => props.onSaveSelectedChoice(e, selectedChoice === "other" ? otherChoiceContent : selectedChoice)}>Save</Button>
+                    <div>
+                        <UserInfo name="Anrew" date="today" time="10:50PM" />
+                        <h3 style={{ margin: "1rem 2rem" }}>{lastSelectedChoice}</h3>
+                    </div>
+                )}
+            {showSaveBtn &&
+                (
+                    <div className="flex">
+                        <Button variant="contained" color="primary" onClick={handleSaveSelectedChoice} style={{ margin: "auto" }}> <SaveIcon />Save</Button>
                     </div>
                 )}
 
