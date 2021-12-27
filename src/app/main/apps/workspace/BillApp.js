@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Bill from './Bill';
 import * as Actions from 'app/store/actions';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { FusePageSimple } from '@fuse';
 import _ from '@lodash';
 function BillApp(props) {
@@ -11,7 +11,11 @@ function BillApp(props) {
     const pageLayout = useRef(null);
 
     useEffect(() => {
-        dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.navbar.folded', true)))
+        dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)))
+        return () => {
+            dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)))
+
+        }
     }, [dispatch])
     return (
         <div className="flex flex-col flex-1 w-full">

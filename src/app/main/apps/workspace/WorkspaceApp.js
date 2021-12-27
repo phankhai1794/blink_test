@@ -1,24 +1,24 @@
 import React, { useEffect, useRef } from 'react';
 import Workspace from './Workspace';
 import * as Actions from 'app/store/actions';
-import { useDispatch, useSelector } from 'react-redux';
-import { FuseAnimate, FuseAnimateGroup, FusePageSimple } from '@fuse';
+import { useDispatch } from 'react-redux';
+import { FusePageSimple } from '@fuse';
 import _ from '@lodash';
 function WorkspaceApp(props) {
     const { history } = props;
-
-    const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
-    const settings = useSelector(({ fuse }) => fuse.settings.current);
     const dispatch = useDispatch();
 
     const pageLayout = useRef(null);
 
     useEffect(() => {
-        dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.navbar.folded', !settings.layout.config.navbar.folded)))
+        dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)))
+        return () => {
+            dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)))
+
+        }
     }, [dispatch])
     return (
         <div className="flex flex-col flex-1 w-full">
-            {/* <ExportAppHeader className="p-0 sm:px-24" /> */}
             <FusePageSimple
                 classes={{
                     contentWrapper: "p-0 sm:p-24 pb-80 sm:pb-80 h-full",
@@ -28,7 +28,6 @@ function WorkspaceApp(props) {
                 content={
                     <Workspace status={history.location.state} />
                 }
-
                 sidebarInner
                 ref={pageLayout}
                 innerScroll
