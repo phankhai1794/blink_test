@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button,TextField, Select, IconButton, Link, OutlinedInput, Popover, Grid, MenuItem } from '@material-ui/core';
+import { Button, TextField, Select, IconButton, Link, OutlinedInput, Popover, Grid, MenuItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { FormControl } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
@@ -13,7 +13,7 @@ import UserInfo from './UserInfo';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
-
+import TemporaryDrawer from './TemporaryDrawer';
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
     color: grey['500']
 })
@@ -126,12 +126,13 @@ const InformationForm = (props) => {
             answerType: question.answerType,
             selectedChoice: question.selectedChoice,
             addOther: question.addOther,
-            otherChoice: question.otherChoice
+            otherChoice: question.otherChoice,
+            // divRef will be add on function OnSave to prevent storing too much temp state info
         } :
         {
             name: typeToNameDict["ROUTING INQUIRY/DISCREPANCY"],
             type: "ROUTING INQUIRY/DISCREPANCY",
-            answerType: "CHOICE ANSWER",
+            answerType: "Choice Answer",
             selectedChoice: "",
             addOther: false,
             otherChoice: ""
@@ -192,13 +193,16 @@ const InformationForm = (props) => {
             type: questionInfo.type,
             answerType: questionInfo.answerType,
             choices: choiceList,
-            addOther: questionInfo.addOther
+            addOther: questionInfo.addOther,
         }
         props.onSave(savedQuestion, props.title)
         setIsEdit(true)
     }
     const onEdit = () => {
         setIsEdit(true)
+    }
+    const toggleDrawer = () => {
+        props.toggleDrawer()
     }
     /* if questionIsEmpty -> show Form */
     /* if questionIs Empty -> check isEdit to show Form or QuestionBox */
@@ -236,9 +240,9 @@ const InformationForm = (props) => {
                                     onChange={handleTypeChange}
                                     input={<OutlinedInput />}
                                 >
-                                    <MenuItem value="ROUTING INQUIRY/DISCREPANCY"> ROUTING INQUIRY/DISCREPANCY</MenuItem>
-                                    <MenuItem value="MISSING DESTINATION REQUIREMENT">MISSING DESTINATION REQUIREMENT</MenuItem>
-                                    <MenuItem value="BROKEN ROUTE ERROR">BROKEN ROUTE ERROR</MenuItem>
+                                    <MenuItem value="ROUTING INQUIRY/DISCREPANCY"> Routing Inquiry/Discripancy</MenuItem>
+                                    <MenuItem value="MISSING DESTINATION REQUIREMENT">Missing Destination Requirment</MenuItem>
+                                    <MenuItem value="BROKEN ROUTE ERROR">Broken Route Error</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -250,10 +254,9 @@ const InformationForm = (props) => {
                                     onChange={handleAnswerTypeChange}
                                     input={<OutlinedInput />}
                                 >
-                                    <MenuItem value="CHOICE ANSWER"> CHOICE ANSWER</MenuItem>
-                                    <MenuItem value="SHORT ANSWER">SHORT ANSWER</MenuItem>
-                                    <MenuItem value="ATTACHMENT ANSWER">ATTACHMENT ANSWER</MenuItem>
-                                    <MenuItem value="PARAGRAPH ANSWER">PARAGRAPH ANSWER</MenuItem>
+                                    <MenuItem value="CHOICE ANSWER"> Choice Answer</MenuItem>
+                                    <MenuItem value="SHORT ANSWER">Input Answer</MenuItem>
+                                    <MenuItem value="ATTACHMENT ANSWER">Attachment Answer</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -376,7 +379,7 @@ const InformationForm = (props) => {
             }
             <hr />
             <div className="flex justify-between pt-1">
-                <Link style={{ fontSize: "20px" }}>Open All Inquiries</Link>
+                <Link style={{ fontSize: "20px" }} onClick={toggleDrawer}>Open All Inquiries</Link>
                 <div>
                     <ArrowBackIosIcon />
                     <ArrowForwardIosIcon />

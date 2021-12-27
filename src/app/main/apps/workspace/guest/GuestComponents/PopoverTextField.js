@@ -46,7 +46,6 @@ const PopoverTextField = (props) => {
 	const { question, content, title, open } = data[props.title]
 	const [inputContent, setInputContent] = useState(content)
 	const openCmtBtn = Boolean(anchorCmtBtn);
-	const idCmtBtn = openCmtBtn ? 'comment-button-popover' : undefined;
 	const openCmtBox = Boolean(anchorCmtBox);
 	const idCmtBox = openCmtBox ? 'comment-box-popover' : undefined;
 	const divRef = useRef()
@@ -54,20 +53,12 @@ const PopoverTextField = (props) => {
 	if (question.choices.length > 0) {
 		questionIsEmpty = false
 	}
-	const onOpenCommentButton = (event) => {
-		event.preventDefault()
+	const onOpenCommentBox = () => {
 		const { x, width } = divRef.current.getBoundingClientRect()
 		// check if div is on the right most of screen -> change posiition of popover
 		if (x + width >= 900) {
 			setIsRightMost(true)
 		}
-		setAnchorCmtBtn(event.currentTarget)
-	}
-	const onCloseCommentButton = (event) => {
-		event.preventDefault()
-		setAnchorCmtBtn(null)
-	}
-	const onOpenCommentBox = () => {
 		// event.preventDefault()
 		setAnchorCmtBox(divRef.current)
 	}
@@ -98,34 +89,6 @@ const PopoverTextField = (props) => {
 	}
 	return (
 		<>
-			<Popover
-				id={idCmtBtn}
-				open={openCmtBtn}
-				anchorEl={anchorCmtBtn}
-				onClose={onCloseCommentButton}
-				anchorOrigin={{
-					vertical: 'center',
-					horizontal: `${isRightMost ? 'left' : 'right'}`,
-				}}
-				transformOrigin={{
-					vertical: 'center',
-					horizontal: `${isRightMost ? 'right' : 'left'}`,
-				}}
-				className={`${classes.circlePopover} `}
-				style={{
-					pointerEvents: `${allowEdit ? "auto" : "none"}`
-				}}
-				classes={{
-					paper: classes.popoverContent
-				}}
-				PaperProps={{ onMouseEnter: (questionIsEmpty ? onOpenCommentButton : onOpenCommentBox), onMouseLeave: onCloseCommentButton }}
-			>
-				<IconButton
-					color="primary"
-					onClick={onOpenCommentBox}>
-					<AddCommentIcon style={{ transform: `${isRightMost ? "scaleX(1)" : "scaleX(-1)"}` }} />
-				</IconButton>
-			</Popover>
 			<Popover
 				id={idCmtBox}
 				open={openCmtBox}
@@ -164,8 +127,8 @@ const PopoverTextField = (props) => {
 			</Popover>
 			<div
 				ref={divRef}
-				onMouseEnter={!questionIsEmpty ? onOpenCommentBox : onOpenCommentButton}
-				onMouseLeave={!questionIsEmpty ? onCloseCommentBox : onCloseCommentButton}
+				onMouseEnter={!questionIsEmpty && onOpenCommentBox}
+				onMouseLeave={!questionIsEmpty && onCloseCommentBox}
 				style={{
 					width: `${fullWidth}`,
 				}}
