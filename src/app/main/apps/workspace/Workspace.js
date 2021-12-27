@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
     Button,
     Grid,
-    TextField,
     Divider,
     Drawer
 } from '@material-ui/core';
@@ -10,9 +9,12 @@ import { makeStyles } from '@material-ui/styles';
 import PopoverTextField from './components/PopoverTextField';
 import { useState } from 'react';
 import WorkSpaceData from './WorkSpaceData';
+import QuestionBoxViewOnly from "./components/QuestionBoxViewOnly"
+import TemporaryDrawer from './components/TemporaryDrawer';
+import Link from "@material-ui/core/Link"
+import BasicCard from "./components/DrawerTest"
 const useStyles = makeStyles(theme => ({
     root: {
-        // color: theme.palette.secondary.contrastText,
         backgroundColor: "#f5f8fa",
     },
     input: {
@@ -67,8 +69,9 @@ const data = [
 const Workspace = (props) => {
     const classes = useStyles(props)
     const [data, setData] = useState(WorkSpaceData)
+    const [defaultTitle, setDefaultTitle] = useState("")
+    const [openDrawer, setOpenDrawer] = useState("")
     const onSave = (savedQuestion, title) => {
-        // console.log(title)
         let newData = data
         newData[title] = {
             ...data[title],
@@ -88,13 +91,47 @@ const Workspace = (props) => {
             }
         })
     }
+    const getDataPopover = (title) => {
+        let newData = data
+        newData[defaultTitle] = {
+            ...data[defaultTitle],
+            open: false
+        }
+        newData[title] = {
+            ...data[title],
+            open: true
+        }
+        setData(newData)
+        setDefaultTitle(title)
+    }
+    const toggleDrawer = (title) => {
+        setDefaultTitle(title)
+        setOpenDrawer(true)
+        let newData = data
+        newData[title] = {
+            ...data[title],
+            open: true
+        }
+
+        setData(newData)
+    }
+    const closeDrawer = () => {
+        setOpenDrawer(false)
+    }
     return (
         <div className="ml-20" style={{ fontFamily: "Courier New" }}>
+            <TemporaryDrawer
+                data={data}
+                openDrawer={openDrawer}
+                defaultTitle={defaultTitle}
+                getDataPopover={getDataPopover}
+                closeDrawer={closeDrawer}
+            />
             <Grid container>
                 <Grid item xs={5}>
                     <Grid item xs={11}>
                         <h3>Shipper/Exporter </h3>
-                        <PopoverTextField
+                        <PopoverTextField toggleDrawer={toggleDrawer}
                             onSave={onSave}
                             data={data}
                             onSaveContentOnly={onSaveContentOnly}
@@ -103,7 +140,7 @@ const Workspace = (props) => {
                     </Grid>
                     <Grid item xs={11}>
                         <h3>Consignee</h3>
-                        <PopoverTextField
+                        <PopoverTextField toggleDrawer={toggleDrawer}
                             data={data}
                             onSave={onSave}
                             onSaveContentOnly={onSaveContentOnly}
@@ -112,7 +149,7 @@ const Workspace = (props) => {
                     </Grid>
                     <Grid item xs={11}>
                         <h3>NOTIFY PARTY (It is agreed that no responsibility shall be <br></br> attached to the Carrier or its Agents for failure to notify)</h3>
-                        <PopoverTextField
+                        <PopoverTextField toggleDrawer={toggleDrawer}
                             data={data}
                             onSave={onSave}
                             onSaveContentOnly={onSaveContentOnly}
@@ -122,7 +159,7 @@ const Workspace = (props) => {
                     <Grid container xs={11} >
                         <Grid item xs={7} >
                             <h3>PRE-CARRIAGE BY</h3>
-                            <PopoverTextField
+                            <PopoverTextField toggleDrawer={toggleDrawer}
                                 fullWidth={false}
                                 data={data}
                                 onSave={onSave}
@@ -132,7 +169,7 @@ const Workspace = (props) => {
                         </Grid>
                         <Grid item xs={5} >
                             <h3>PLACE OF RECEIPT</h3>
-                            <PopoverTextField
+                            <PopoverTextField toggleDrawer={toggleDrawer}
                                 data={data}
                                 onSave={onSave}
                                 onSaveContentOnly={onSaveContentOnly}
@@ -143,7 +180,7 @@ const Workspace = (props) => {
                     <Grid container xs={11}>
                         <Grid item xs={7} >
                             <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
-                            <PopoverTextField
+                            <PopoverTextField toggleDrawer={toggleDrawer}
                                 fullWidth={false}
                                 data={data}
                                 onSave={onSave}
@@ -153,16 +190,17 @@ const Workspace = (props) => {
                         </Grid>
                         <Grid item xs={5} >
                             <h3>PORT OF LOADING</h3>
-                            <PopoverTextField
+                            <PopoverTextField toggleDrawer={toggleDrawer}
                                 data={data}
                                 onSave={onSave}
                                 onSaveContentOnly={onSaveContentOnly}
-                                title="PORT OF LOADING">
+                                title="PORT OF LOADING"
+                            >
                             </PopoverTextField>
                         </Grid>
                         <Grid item xs={7} >
                             <h3>PORT OF DISCHARGE</h3>
-                            <PopoverTextField
+                            <PopoverTextField toggleDrawer={toggleDrawer}
                                 fullWidth={false}
                                 data={data}
                                 onSave={onSave}
@@ -172,7 +210,7 @@ const Workspace = (props) => {
                         </Grid>
                         <Grid item xs={5} >
                             <h3>PLACE OF DELIVERY</h3>
-                            <PopoverTextField
+                            <PopoverTextField toggleDrawer={toggleDrawer}
                                 data={data}
                                 onSave={onSave}
                                 onSaveContentOnly={onSaveContentOnly}
@@ -185,7 +223,7 @@ const Workspace = (props) => {
                     <Grid container spacing={10} >
                         <Grid item xs={5} >
                             <h3 >BOOKING NO.</h3>
-                            <PopoverTextField
+                            <PopoverTextField toggleDrawer={toggleDrawer}
                                 data={data}
                                 onSave={onSave}
                                 onSaveContentOnly={onSaveContentOnly}
@@ -194,7 +232,7 @@ const Workspace = (props) => {
                         </Grid>
                         <Grid item xs={5}>
                             <h3>SEA WAYBILL NO.</h3>
-                            <PopoverTextField
+                            <PopoverTextField toggleDrawer={toggleDrawer}
                                 data={data}
                                 onSave={onSave}
                                 onSaveContentOnly={onSaveContentOnly}
@@ -204,7 +242,7 @@ const Workspace = (props) => {
                     </Grid>
                     <Grid item xs={10}>
                         <h3>EXPORT REFERENCES (for the merchant's and/or Carrier's reference only. See back clause 8. (4.))</h3>
-                        <PopoverTextField
+                        <PopoverTextField toggleDrawer={toggleDrawer}
                             data={data}
                             onSave={onSave}
                             onSaveContentOnly={onSaveContentOnly}
@@ -225,7 +263,7 @@ const Workspace = (props) => {
                     </Grid>
                     <Grid item xs={10}>
                         <h3>FINAL DESTINATION(for line merchant's reference only)</h3>
-                        <PopoverTextField
+                        <PopoverTextField toggleDrawer={toggleDrawer}
                             data={data}
                             onSave={onSave}
                             onSaveContentOnly={onSaveContentOnly}
@@ -236,7 +274,7 @@ const Workspace = (props) => {
                     </Grid>
                     <Grid item xs={10}>
                         <h3>TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)</h3>
-                        <PopoverTextField
+                        <PopoverTextField toggleDrawer={toggleDrawer}
                             data={data}
                             onSave={onSave}
                             onSaveContentOnly={onSaveContentOnly}
@@ -253,7 +291,7 @@ const Workspace = (props) => {
                     <h3> Container No.1 </h3>
                 </Grid>
                 <Grid item xs={2} >
-                    <PopoverTextField
+                    <PopoverTextField toggleDrawer={toggleDrawer}
                         data={data}
                         onSave={onSave}
                         onSaveContentOnly={onSaveContentOnly}
@@ -261,7 +299,7 @@ const Workspace = (props) => {
                     </PopoverTextField>
                 </Grid>
                 <Grid item xs={2}>
-                    <PopoverTextField
+                    <PopoverTextField toggleDrawer={toggleDrawer}
                         data={data}
                         onSave={onSave}
                         onSaveContentOnly={onSaveContentOnly}
@@ -269,7 +307,7 @@ const Workspace = (props) => {
                     </PopoverTextField>
                 </Grid>
                 <Grid item xs={2}>
-                    <PopoverTextField
+                    <PopoverTextField toggleDrawer={toggleDrawer}
                         data={data}
                         onSave={onSave}
                         onSaveContentOnly={onSaveContentOnly}
@@ -282,7 +320,7 @@ const Workspace = (props) => {
                     <h3> Container No.2 </h3>
                 </Grid>
                 <Grid item xs={2} >
-                    <PopoverTextField
+                    <PopoverTextField toggleDrawer={toggleDrawer}
                         data={data}
                         onSave={onSave}
                         onSaveContentOnly={onSaveContentOnly}
@@ -290,7 +328,7 @@ const Workspace = (props) => {
                     </PopoverTextField>
                 </Grid>
                 <Grid item xs={2}>
-                    <PopoverTextField
+                    <PopoverTextField toggleDrawer={toggleDrawer}
                         data={data}
                         onSave={onSave}
                         onSaveContentOnly={onSaveContentOnly}
@@ -298,7 +336,7 @@ const Workspace = (props) => {
                     </PopoverTextField>
                 </Grid>
                 <Grid item xs={2}>
-                    <PopoverTextField
+                    <PopoverTextField toggleDrawer={toggleDrawer}
                         data={data}
                         onSave={onSave}
                         onSaveContentOnly={onSaveContentOnly}
