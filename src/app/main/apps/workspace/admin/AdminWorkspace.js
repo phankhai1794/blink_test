@@ -7,7 +7,10 @@ import { makeStyles } from '@material-ui/styles';
 import PopoverTextField from './components/PopoverTextField';
 import { useState } from 'react';
 import WorkSpaceData from '../WorkSpaceData';
+import QuestionBoxViewOnly from "./components/QuestionBoxViewOnly"
+// import TemporaryDrawer from './components/TemporaryDrawer';
 import TemporaryDrawer from '../shared-components/TemporaryDrawer';
+
 const useStyles = makeStyles(theme => ({
     root: {
         backgroundColor: "#f5f8fa",
@@ -26,12 +29,6 @@ const useStyles = makeStyles(theme => ({
     },
     popoverContent: {
         pointerEvents: "auto"
-    },
-    root: {
-        backgroundColor: "#f5f8fa",
-    },
-    input: {
-        fontFamily: "Courier New"
     }
 
 }))
@@ -61,17 +58,19 @@ const data = [
     ...
 ]
 */
-const GuestWorkspace = (props) => {
+const AdminWorkspace = (props) => {
     const classes = useStyles(props)
     const [data, setData] = useState(WorkSpaceData)
     const [defaultTitle, setDefaultTitle] = useState("")
     const [openDrawer, setOpenDrawer] = useState("")
+
     const onSave = (savedQuestion, title) => {
         let newData = data
         newData[title] = {
             ...data[title],
             question: savedQuestion,
-            content: (savedQuestion.selectedChoice === undefined || savedQuestion.selectedChoice === "") ? data[title].content : savedQuestion.selectedChoice
+            content: (savedQuestion.selectedChoice === undefined || savedQuestion.selectedChoice === "") ?
+                data[title].content : savedQuestion.selectedChoice
         }
 
         setData(newData)
@@ -102,14 +101,14 @@ const GuestWorkspace = (props) => {
     }
     const toggleDrawer = (title) => {
         setDefaultTitle(title)
-        setOpenDrawer(true)
         let newData = data
         newData[title] = {
             ...data[title],
             open: true
         }
-
         setData(newData)
+        setOpenDrawer(true)
+
     }
     const closeDrawer = (title) => {
         if (title) {
@@ -119,6 +118,7 @@ const GuestWorkspace = (props) => {
                 ...data[title],
                 open: false
             }
+            setData(newData)
         }
         setOpenDrawer(false)
     }
@@ -130,8 +130,8 @@ const GuestWorkspace = (props) => {
                 defaultTitle={defaultTitle}
                 getDataPopover={getDataPopover}
                 closeDrawer={closeDrawer}
+                role="admin"
                 onSave={onSave}
-                role="customer"
             />
             <Grid container>
                 <Grid item xs={5}>
@@ -353,4 +353,4 @@ const GuestWorkspace = (props) => {
         </div>
     )
 }
-export default GuestWorkspace;
+export default AdminWorkspace;

@@ -1,10 +1,9 @@
 import React from 'react';
-import {Icon, IconButton} from '@material-ui/core';
+import { Icon, IconButton } from '@material-ui/core';
 import * as quickPanelActions from './store/actions';
-import {useDispatch} from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-function QuickPanelToggleButton(props)
-{
+function QuickPanelToggleButton(props) {
     const dispatch = useDispatch();
 
     return (

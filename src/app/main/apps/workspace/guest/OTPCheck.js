@@ -1,17 +1,16 @@
 import React, { createRef, useMemo, useState } from 'react';
-import { Input, TextField } from '@material-ui/core';
-import { Redirect } from 'react-router-dom';
 import GuestWorkspace from './GuestWorkspace';
 import OtpInput from "react-otp-input"
-const OtpCheck = () => {
+const OtpCheck = ({ status }) => {
+    const CODE = "1111"
     const [otpCode, setOtpCode] = useState("");
     const handleChange = (code) => {
         setOtpCode(code)
     }
     return (
         <>
-            {otpCode === "111111" ? (
-                <GuestWorkspace />
+            {otpCode === CODE ? (
+                <GuestWorkspace status={status} />
             ) :
                 (
                     <div>
@@ -25,7 +24,7 @@ const OtpCheck = () => {
                             <OtpInput
                                 value={otpCode}
                                 onChange={handleChange}
-                                numInputs={6}
+                                numInputs={4}
                                 inputStyle={{
                                     fontSize: "4rem",
                                     margin: "auto 5rem",
@@ -38,7 +37,7 @@ const OtpCheck = () => {
                                 }}
                             />
                         </div>
-                        {otpCode.length === 6 && otpCode !== "111111" && (
+                        {otpCode.length === CODE.length && otpCode !== CODE && (
                             <h2 style={{ color: "red", margin: "auto", textAlign: "center" }}> Incorrect OTP Code</h2>
                         )}
                     </div>
@@ -48,6 +47,5 @@ const OtpCheck = () => {
 
     )
 }
-{/* < input type="number" ref={inputRefs[index]} onChange={handleChange(index)} /> */ }
 
 export default OtpCheck;

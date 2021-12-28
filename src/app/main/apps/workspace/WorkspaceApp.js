@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import Workspace from './Workspace';
-import GuestWorkspace from './guest/GuestWorkspace';
+import AdminWorkspace from './admin/AdminWorkspace';
 import * as Actions from 'app/store/actions';
 import { useDispatch } from 'react-redux';
 import { FusePageSimple } from '@fuse';
@@ -10,10 +9,10 @@ import OtpCheck from './guest/OTPCheck';
 function RoleRedirect({ history }) {
     if (history.location.pathname.includes("/customer")) {
         // return <GuestWorkspace status={history.location.state} />
-        return <OtpCheck />
+        return <OtpCheck status={history.location.state} />
     }
     else {
-        return <Workspace status={history.location.state} />
+        return <AdminWorkspace status={history.location.state} />
     }
 }
 function WorkspaceApp(props) {
