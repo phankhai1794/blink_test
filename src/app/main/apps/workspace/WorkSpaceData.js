@@ -97,6 +97,7 @@ const WorkSpaceData = {
                     content: "BUSAN, KOREA"
                 }
             ],
+            addOther: true,
             selectedChoice: ""
         },
         content: "TOKYO,JAPAN",

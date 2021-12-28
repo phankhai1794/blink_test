@@ -1,25 +1,24 @@
 import React from 'react';
-import {AppBar, Hidden, Toolbar} from '@material-ui/core';
-import {makeStyles, ThemeProvider} from '@material-ui/styles';
-import {FuseSearch, FuseShortcuts} from '@fuse';
+import { AppBar, Hidden, Toolbar } from '@material-ui/core';
+import { makeStyles, ThemeProvider } from '@material-ui/styles';
+import { FuseSearch, FuseShortcuts } from '@fuse';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
 import QuickPanelToggleButton from 'app/fuse-layouts/shared-components/quickPanel/QuickPanelToggleButton';
 import ChatPanelToggleButton from 'app/fuse-layouts/shared-components/chatPanel/ChatPanelToggleButton';
 import UserMenu from 'app/fuse-layouts/shared-components/UserMenu';
-import {useSelector} from 'react-redux';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles(theme => ({
     separator: {
-        width          : 1,
-        height         : 64,
+        width: 1,
+        height: 64,
         backgroundColor: theme.palette.divider
     }
 }));
 
-function ToolbarLayout1(props)
-{
-    const config = useSelector(({fuse}) => fuse.settings.current.layout.config);
-    const toolbarTheme = useSelector(({fuse}) => fuse.settings.toolbarTheme);
+function ToolbarLayout1(props) {
+    const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
+    const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
 
     const classes = useStyles(props);
 
@@ -30,40 +29,40 @@ function ToolbarLayout1(props)
 
                     {config.navbar.display && config.navbar.position === 'left' && (
                         <Hidden lgUp>
-                            <NavbarMobileToggleButton className="w-64 h-64 p-0"/>
-                            <div className={classes.separator}/>
+                            <NavbarMobileToggleButton className="w-64 h-64 p-0" />
+                            <div className={classes.separator} />
                         </Hidden>
                     )}
 
                     <div className="flex flex-1">
                         <Hidden mdDown>
-                            <FuseShortcuts className="px-16"/>
+                            <FuseShortcuts className="px-16" />
                         </Hidden>
                     </div>
 
                     <div className="flex">
 
-                        <UserMenu/>
+                        <UserMenu />
 
-                        <div className={classes.separator}/>
+                        <div className={classes.separator} />
 
-                        <FuseSearch/>
+                        <FuseSearch />
 
                         <Hidden lgUp>
 
-                            <div className={classes.separator}/>
+                            <div className={classes.separator} />
 
-                            <ChatPanelToggleButton/>
+                            <ChatPanelToggleButton />
                         </Hidden>
 
-                        <div className={classes.separator}/>
+                        <div className={classes.separator} />
 
-                        <QuickPanelToggleButton/>
+                        <QuickPanelToggleButton />
                     </div>
 
                     {config.navbar.display && config.navbar.position === 'right' && (
                         <Hidden lgUp>
-                            <NavbarMobileToggleButton/>
+                            <NavbarMobileToggleButton />
                         </Hidden>
                     )}
                 </Toolbar>

@@ -46,7 +46,8 @@ function UserMenu(props) {
 
                 <div className="hidden md:flex flex-col ml-12 items-start">
                     <Typography component="span" className="normal-case font-600 flex">
-                        {user.data.displayName}
+                        {/* custom header for customer workplace only */}
+                        {window.location.pathname.includes("apps/workplace/customer") ? "Customer" : user.data.displayName}
                     </Typography>
                     <Typography className="text-11 capitalize" color="textSecondary">
                         {user.role.toString()}
