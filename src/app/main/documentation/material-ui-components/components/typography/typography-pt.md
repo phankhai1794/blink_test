@@ -10,14 +10,17 @@ O uso de diferentes tamanhos e estilos de uma só vez pode estragar qualquer lay
 
 ## Geral
 
-A fonte *Roboto* **não** será carregada automaticamente pelo Material-UI. O desenvolvedor é responsável por carregar todas as fontes usadas em sua aplicação. A fonte Roboto possui algumas maneiras fáceis de começar. Para configuração mais avançadas, dê uma olhada na [seção de personalização de temas](/customization/typography/).
+A fonte _Roboto_ **não** será carregada automaticamente pelo Material-UI. O desenvolvedor é responsável por carregar todas as fontes usadas em sua aplicação. A fonte Roboto possui algumas maneiras fáceis de começar. Para configuração mais avançadas, dê uma olhada na [seção de personalização de temas](/customization/typography/).
 
 ## CDN da fonte Roboto
 
 Temos abaixo um exemplo de markup de link usado para carregar a fonte Roboto de um CDN:
 
 ```html
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap"
+/>
 ```
 
 ## Instalar via npm
@@ -53,10 +56,12 @@ O componente de Tipografia (Typography) usa a propriedade `variantMapping` para 
 - Você pode alterar o elemento subjacente para uma ocasião única com a propriedade `component`:
 
 ```jsx
-{/* Já temos um h1 na página, não vamos duplicá-lo. */}
+{
+  /* Já temos um h1 na página, não vamos duplicá-lo. */
+}
 <Typography variant="h1" component="h2">
   h1. Título (Heading)
-</Typography>
+</Typography>;
 ```
 
 - Você pode alterar o mapeamento [globalmente usando o tema](/customization/globals/#default-props):
@@ -75,9 +80,9 @@ const theme = createMuiTheme({
         subtitle1: 'h2',
         subtitle2: 'h2',
         body1: 'span',
-        body2: 'span',
-      },
-    },
-  },
+        body2: 'span'
+      }
+    }
+  }
 });
 ```

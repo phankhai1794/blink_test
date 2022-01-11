@@ -61,11 +61,11 @@ components: AppBar, Toolbar, Menu
 
 #### 参数
 
-1. `options` (*Object* [optional]):
-    
-    - `options.disableHysteresis` (*Boolean* [optional]): 默认值为`false`。 禁用迟滞的效果。 在决定 `trigger` 的值时会忽略在滚动的方向。
-    - `options.target` （*Node* [optional]）：默认值时 `window`。
-    - `options.threshold` （*Number* [optional]）：默认值为 `100`。当垂直滚动超过此阈值时，则会更改 ` trigger ` 的值。
+1. `options` (_Object_ [optional]):
+
+   - `options.disableHysteresis` (_Boolean_ [optional]): 默认值为`false`。 禁用迟滞的效果。 在决定 `trigger` 的值时会忽略在滚动的方向。
+   - `options.target` （_Node_ [optional]）：默认值时 `window`。
+   - `options.threshold` （_Number_ [optional]）：默认值为 `100`。当垂直滚动超过此阈值时，则会更改 `trigger` 的值。
 
 #### 返回结果
 

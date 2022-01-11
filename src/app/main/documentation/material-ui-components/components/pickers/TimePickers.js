@@ -2,16 +2,16 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   textField: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),
-    width: 200,
-  },
+    width: 200
+  }
 }));
 
 export default function TimePickers() {
@@ -26,10 +26,10 @@ export default function TimePickers() {
         defaultValue="07:30"
         className={classes.textField}
         InputLabelProps={{
-          shrink: true,
+          shrink: true
         }}
         inputProps={{
-          step: 300, // 5 min
+          step: 300 // 5 min
         }}
       />
     </form>

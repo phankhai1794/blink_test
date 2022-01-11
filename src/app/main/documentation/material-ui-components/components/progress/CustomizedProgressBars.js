@@ -5,44 +5,44 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 
 const ColorCircularProgress = withStyles({
   root: {
-    color: '#00695c',
-  },
+    color: '#00695c'
+  }
 })(CircularProgress);
 
 const ColorLinearProgress = withStyles({
   colorPrimary: {
-    backgroundColor: '#b2dfdb',
+    backgroundColor: '#b2dfdb'
   },
   barColorPrimary: {
-    backgroundColor: '#00695c',
-  },
+    backgroundColor: '#00695c'
+  }
 })(LinearProgress);
 
 const BorderLinearProgress = withStyles({
   root: {
     height: 10,
-    backgroundColor: lighten('#ff6c5c', 0.5),
+    backgroundColor: lighten('#ff6c5c', 0.5)
   },
   bar: {
     borderRadius: 20,
-    backgroundColor: '#ff6c5c',
-  },
+    backgroundColor: '#ff6c5c'
+  }
 })(LinearProgress);
 
 // Inspired by the Facebook spinners.
 const useStylesFacebook = makeStyles({
   root: {
-    position: 'relative',
+    position: 'relative'
   },
   top: {
-    color: '#eef3fd',
+    color: '#eef3fd'
   },
   bottom: {
     color: '#6798e5',
     animationDuration: '550ms',
     position: 'absolute',
-    left: 0,
-  },
+    left: 0
+  }
 });
 
 function FacebookProgress(props) {
@@ -70,13 +70,13 @@ function FacebookProgress(props) {
   );
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   margin: {
-    margin: theme.spacing(1),
-  },
+    margin: theme.spacing(1)
+  }
 }));
 
 export default function CustomizedProgressBars() {

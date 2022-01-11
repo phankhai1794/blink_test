@@ -8,28 +8,28 @@ import Button from '@material-ui/core/Button';
 import Fade from '@material-ui/core/Fade';
 import Paper from '@material-ui/core/Paper';
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
-    width: 500,
+    width: 500
   },
   typography: {
-    padding: theme.spacing(2),
-  },
+    padding: theme.spacing(2)
+  }
 });
 
 class PositionedPopper extends React.Component {
   state = {
     anchorEl: null,
     open: false,
-    placement: null,
+    placement: null
   };
 
-  handleClick = placement => event => {
+  handleClick = (placement) => (event) => {
     const { currentTarget } = event;
-    this.setState(state => ({
+    this.setState((state) => ({
       anchorEl: currentTarget,
       open: state.placement !== placement || !state.open,
-      placement,
+      placement
     }));
   };
 
@@ -88,7 +88,7 @@ class PositionedPopper extends React.Component {
 }
 
 PositionedPopper.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(PositionedPopper);

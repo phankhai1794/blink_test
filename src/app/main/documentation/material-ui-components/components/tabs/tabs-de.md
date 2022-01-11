@@ -69,8 +69,6 @@ Hier ist ein Beispiel zum Anpassen der Komponente. Mehr dazu erfahren Sie auf de
 
 {{"demo": "pages/components/tabs/CustomizedTabs.js"}}
 
-
-
 ## Nav-Tabs
 
 Standardmäßig verwenden Tabs ein `Button` -Element, aber Sie können Ihren eigenen benutzerdefinierten Tag oder eine Komponente zur Verfügung stellen. Hier ein Beispiel für die Implementierung der Tabnavigation:

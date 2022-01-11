@@ -7,14 +7,14 @@ components: Grid
 
 <p class="description">Material Design 响应式布局的栅格可适应屏幕大小和方向，确保布局之间的一致性。</p>
 
-[Grid](https://material.io/design/layout/responsive-layout-grid.html): 栅格(Grid)组件能确保不同布局间的视觉一致性，同时在众多不同设计中保持灵活性。 Material Design 的响应式 UI 是基于12列的栅格布局。
+[Grid](https://material.io/design/layout/responsive-layout-grid.html): 栅格(Grid)组件能确保不同布局间的视觉一致性，同时在众多不同设计中保持灵活性。 Material Design 的响应式 UI 是基于 12 列的栅格布局。
 
 ## 它是如何工作的
 
 栅格系统使用 `Grid` 组件实现：
 
 - 为了达到高度的灵活性，它运用了用 [CSS 的 Flexible Box 模块](https://www.w3.org/TR/css-flexbox-1/) 。
-- 它有两种类型的布局： *containers* ， *items*。
+- 它有两种类型的布局： _containers_ ， _items_。
 - 项目宽度以百分比设置，因此它们总是相对于其父元素是流动的和变换大小的。
 - 子项自带 padding 来和其他元素之间产生间距。
 - 有五个网格断点：xs，sm，md，lg 和 xl。
@@ -23,7 +23,7 @@ components: Grid
 
 ## Spacing（间距）
 
-响应式栅格侧重于一致的间距宽度，而不是列宽。 Material design 外边距和列遵循** 8px **的方块形基线栅格。 spacing 属性设置为一个在0和10之间的整数，且并包括0和10。 默认情况下，两个网格项之间的间距遵循这样的线性函数： `output(spacing) = spacing * 8px`，例如 `spacing={2}` 会创建一个 16px 的宽间距。
+响应式栅格侧重于一致的间距宽度，而不是列宽。 Material design 外边距和列遵循** 8px **的方块形基线栅格。 spacing 属性设置为一个在 0 和 10 之间的整数，且并包括 0 和 10。 默认情况下，两个网格项之间的间距遵循这样的线性函数： `output(spacing) = spacing * 8px`，例如 `spacing={2}` 会创建一个 16px 的宽间距。
 
 通过[使用主题](/customization/spacing/)，该变换函数的输出是可定制的。
 
@@ -80,13 +80,13 @@ https://www.w3.org/TR/css-flexbox-1/#box-model
 当我们使用负边距来实现项目之间的间距的时候，会有一个限制。 如果负边距超出`<body>`元素，则会出现水平滚动。 有以下三种解决方法： 1。 不使用 spacing 的特性并且设置成默认的`spacing={0}` 2。 将填充应用于父级元素，并且将至少一半的间距值赋予子级元素：
 
 ```jsx
-  <body>
-    <div style={{ padding: 20 }}>
-      <Grid container spacing={5}>
-        //...
-      </Grid>
-    </div>
-  </body>
+<body>
+  <div style={{ padding: 20 }}>
+    <Grid container spacing={5}>
+      //...
+    </Grid>
+  </div>
+</body>
 ```
 
 1. 3。将父元素设置为 `overflow-x: hidden;`。

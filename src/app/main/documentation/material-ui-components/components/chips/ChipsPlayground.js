@@ -14,17 +14,17 @@ import Chip from '@material-ui/core/Chip';
 import FaceIcon from '@material-ui/icons/Face';
 import DoneIcon from '@material-ui/icons/Done';
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   control: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(2)
   },
   chipWrapper: {
     height: theme.spacing(8),
-    marginBottom: theme.spacing(4),
-  },
+    marginBottom: theme.spacing(4)
+  }
 });
 
 class ChipsPlayground extends React.Component {
@@ -34,12 +34,12 @@ class ChipsPlayground extends React.Component {
     avatar: 'none',
     icon: 'none',
     variant: 'default',
-    size: 'medium',
+    size: 'medium'
   };
 
-  handleChange = key => (event, value) => {
+  handleChange = (key) => (event, value) => {
     this.setState({
-      [key]: value,
+      [key]: value
     });
   };
 
@@ -242,7 +242,7 @@ class ChipsPlayground extends React.Component {
 }
 
 ChipsPlayground.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(ChipsPlayground);

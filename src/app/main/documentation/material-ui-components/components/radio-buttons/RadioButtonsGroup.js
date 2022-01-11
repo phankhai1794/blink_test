@@ -7,16 +7,16 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    display: 'flex',
+    display: 'flex'
   },
   formControl: {
-    margin: theme.spacing(3),
+    margin: theme.spacing(3)
   },
   group: {
-    margin: theme.spacing(1, 0),
-  },
+    margin: theme.spacing(1, 0)
+  }
 }));
 
 export default function RadioButtonsGroup() {

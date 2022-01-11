@@ -43,7 +43,7 @@ const suggestions = [
   { label: 'Bouvet Island' },
   { label: 'Brazil' },
   { label: 'British Indian Ocean Territory' },
-  { label: 'Brunei Darussalam' },
+  { label: 'Brunei Darussalam' }
 ];
 
 function renderInputComponent(inputProps) {
@@ -53,13 +53,13 @@ function renderInputComponent(inputProps) {
     <TextField
       fullWidth
       InputProps={{
-        inputRef: node => {
+        inputRef: (node) => {
           ref(node);
           inputRef(node);
         },
         classes: {
-          input: classes.input,
-        },
+          input: classes.input
+        }
       }}
       {...other}
     />
@@ -73,7 +73,7 @@ function renderSuggestion(suggestion, { query, isHighlighted }) {
   return (
     <MenuItem selected={isHighlighted} component="div">
       <div>
-        {parts.map(part => (
+        {parts.map((part) => (
           <span key={part.text} style={{ fontWeight: part.highlight ? 500 : 400 }}>
             {part.text}
           </span>
@@ -90,7 +90,7 @@ function getSuggestions(value) {
 
   return inputLength === 0
     ? []
-    : suggestions.filter(suggestion => {
+    : suggestions.filter((suggestion) => {
         const keep =
           count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
 
@@ -106,32 +106,32 @@ function getSuggestionValue(suggestion) {
   return suggestion.label;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     height: 250,
-    flexGrow: 1,
+    flexGrow: 1
   },
   container: {
-    position: 'relative',
+    position: 'relative'
   },
   suggestionsContainerOpen: {
     position: 'absolute',
     zIndex: 1,
     marginTop: theme.spacing(1),
     left: 0,
-    right: 0,
+    right: 0
   },
   suggestion: {
-    display: 'block',
+    display: 'block'
   },
   suggestionsList: {
     margin: 0,
     padding: 0,
-    listStyleType: 'none',
+    listStyleType: 'none'
   },
   divider: {
-    height: theme.spacing(2),
-  },
+    height: theme.spacing(2)
+  }
 }));
 
 export default function IntegrationAutosuggest() {
@@ -139,7 +139,7 @@ export default function IntegrationAutosuggest() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [state, setState] = React.useState({
     single: '',
-    popper: '',
+    popper: ''
   });
 
   const [stateSuggestions, setSuggestions] = React.useState([]);
@@ -152,12 +152,14 @@ export default function IntegrationAutosuggest() {
     setSuggestions([]);
   };
 
-  const handleChange = name => (event, { newValue }) => {
-    setState({
-      ...state,
-      [name]: newValue,
-    });
-  };
+  const handleChange =
+    (name) =>
+    (event, { newValue }) => {
+      setState({
+        ...state,
+        [name]: newValue
+      });
+    };
 
   const autosuggestProps = {
     renderInputComponent,
@@ -165,7 +167,7 @@ export default function IntegrationAutosuggest() {
     onSuggestionsFetchRequested: handleSuggestionsFetchRequested,
     onSuggestionsClearRequested: handleSuggestionsClearRequested,
     getSuggestionValue,
-    renderSuggestion,
+    renderSuggestion
   };
 
   return (
@@ -178,15 +180,15 @@ export default function IntegrationAutosuggest() {
           label: 'Country',
           placeholder: 'Search a country (start with a)',
           value: state.single,
-          onChange: handleChange('single'),
+          onChange: handleChange('single')
         }}
         theme={{
           container: classes.container,
           suggestionsContainerOpen: classes.suggestionsContainerOpen,
           suggestionsList: classes.suggestionsList,
-          suggestion: classes.suggestion,
+          suggestion: classes.suggestion
         }}
-        renderSuggestionsContainer={options => (
+        renderSuggestionsContainer={(options) => (
           <Paper {...options.containerProps} square>
             {options.children}
           </Paper>
@@ -202,18 +204,18 @@ export default function IntegrationAutosuggest() {
           placeholder: 'With Popper',
           value: state.popper,
           onChange: handleChange('popper'),
-          inputRef: node => {
+          inputRef: (node) => {
             setAnchorEl(node);
           },
           InputLabelProps: {
-            shrink: true,
-          },
+            shrink: true
+          }
         }}
         theme={{
           suggestionsList: classes.suggestionsList,
-          suggestion: classes.suggestion,
+          suggestion: classes.suggestion
         }}
-        renderSuggestionsContainer={options => (
+        renderSuggestionsContainer={(options) => (
           <Popper anchorEl={anchorEl} open={Boolean(options.children)}>
             <Paper
               square

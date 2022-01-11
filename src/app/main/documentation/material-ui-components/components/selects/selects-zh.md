@@ -31,7 +31,7 @@ components: Select, NativeSelect
 
 `Select` 组件可以处理多个选项。这可以通过启用 `multiple` 属性来实现。
 
-与单项选择一样，您可以通过访问 `onChange` 属性中的回调的 ` event.target.value ` 来提取一个新的值。并且它总是一个数组。
+与单项选择一样，您可以通过访问 `onChange` 属性中的回调的 `event.target.value` 来提取一个新的值。并且它总是一个数组。
 
 {{"demo": "pages/components/selects/MultipleSelect.js"}}
 
@@ -47,4 +47,4 @@ components: Select, NativeSelect
 
 ## 文本输入框
 
-`TextField` 包装器组件是一个完整的表单控件，它包括了标签、输入和帮助文本。 您可以在本节中找到具有[select模式](/components/text-fields/#textfield)的示例
+`TextField` 包装器组件是一个完整的表单控件，它包括了标签、输入和帮助文本。 您可以在本节中找到具有[select 模式](/components/text-fields/#textfield)的示例

@@ -24,10 +24,10 @@ function ListItemLink(props) {
 
 <ListItemLink href="#simple-list">
   <ListItemText primary="Spam" />
-</ListItemLink>
+</ListItemLink>;
 ```
 
-你可以从这里查看 [React Router与文档此部分结合使用的相关样例](/guides/composition/#react-router)。
+你可以从这里查看 [React Router 与文档此部分结合使用的相关样例](/guides/composition/#react-router)。
 
 ## Nested List（嵌套列表）
 
@@ -49,7 +49,7 @@ function ListItemLink(props) {
 
 ## 对齐列表项
 
-在显示3行或更多行时，您应该更改列表项的对齐，设置 `alignItems="flex-start"` 这样的属性。
+在显示 3 行或更多行时，您应该更改列表项的对齐，设置 `alignItems="flex-start"` 这样的属性。
 
 {{"demo": "pages/components/lists/AlignItemsList.js"}}
 
@@ -87,7 +87,7 @@ function ListItemLink(props) {
 
 ## 大型列表渲染（Virtualized Table）
 
-在下面的示例中，我们演示了如何将 [react-window](https://github.com/bvaughn/react-window) 与 `List` 组件一起使用 它渲染了200行，可以轻松处理更多行。 可视化优化了整体的性能。
+在下面的示例中，我们演示了如何将 [react-window](https://github.com/bvaughn/react-window) 与 `List` 组件一起使用 它渲染了 200 行，可以轻松处理更多行。 可视化优化了整体的性能。
 
 {{"demo": "pages/components/lists/VirtualizedList.js"}}
 

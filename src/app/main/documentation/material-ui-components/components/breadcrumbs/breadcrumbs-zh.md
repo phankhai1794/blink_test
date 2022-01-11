@@ -13,7 +13,7 @@ components: Breadcrumbs, Link, Typography
 
 ## 自定义分隔符
 
-在以下的示例中，我们使用了两个字符串分隔符和一个SVG图标。
+在以下的示例中，我们使用了两个字符串分隔符和一个 SVG 图标。
 
 {{"demo": "pages/components/breadcrumbs/CustomSeparator.js"}}
 

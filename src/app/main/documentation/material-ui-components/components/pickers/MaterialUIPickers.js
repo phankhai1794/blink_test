@@ -6,13 +6,13 @@ import DateFnsUtils from '@date-io/date-fns';
 import {
   MuiPickersUtilsProvider,
   KeyboardTimePicker,
-  KeyboardDatePicker,
+  KeyboardDatePicker
 } from '@material-ui/pickers';
 
 const useStyles = makeStyles({
   grid: {
-    width: '60%',
-  },
+    width: '60%'
+  }
 });
 
 export default function MaterialUIPickers() {
@@ -35,7 +35,7 @@ export default function MaterialUIPickers() {
           value={selectedDate}
           onChange={handleDateChange}
           KeyboardButtonProps={{
-            'aria-label': 'change date',
+            'aria-label': 'change date'
           }}
         />
         <KeyboardTimePicker
@@ -45,7 +45,7 @@ export default function MaterialUIPickers() {
           value={selectedDate}
           onChange={handleDateChange}
           KeyboardButtonProps={{
-            'aria-label': 'change time',
+            'aria-label': 'change time'
           }}
         />
       </Grid>

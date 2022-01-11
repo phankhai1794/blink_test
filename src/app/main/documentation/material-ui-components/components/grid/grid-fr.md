@@ -14,7 +14,7 @@ components: Grid
 Le système de grille est implémenté avec le composant `Grid`:
 
 - Il utilise le [module Flexible Box CSS](https://www.w3.org/TR/css-flexbox-1/) pour une grande flexibilité.
-- Il y a deux types de mise en page : *conteneurs* et *éléments*.
+- Il y a deux types de mise en page : _conteneurs_ et _éléments_.
 - La largeur des éléments est définie en pourcentage, ils sont donc toujours fluides et dimensionnés par rapport à leur élément parent.
 - Les éléments ont un rembourrage (padding) pour créer l'espacement entre les éléments individuels.
 - Il existe cinq points de rupture de grille: xs, sm, md, lg et xl.
@@ -53,7 +53,7 @@ Vous trouverez ci-dessous une démo interactive vous permettant d'explorer les r
 
 ## Mise en page automatique
 
-La mise en page automatique fait en sorte que les *items* partagent équitablement l'espace disponible. Cela signifie également que vous pouvez définir la largeur d'un *item* et les autres se redimensionnent automatiquement autour.
+La mise en page automatique fait en sorte que les _items_ partagent équitablement l'espace disponible. Cela signifie également que vous pouvez définir la largeur d'un _item_ et les autres se redimensionnent automatiquement autour.
 
 {{"demo": "pages/components/grid/AutoGrid.js"}}
 
@@ -80,13 +80,13 @@ https://www.w3.org/TR/css-flexbox-1/#box-model
 Il existe une limitation à la marge négative utilisée pour mettre en œuvre l'espacement entre les éléments. Un défilement horizontal apparaîtra si une marge négative dépasse le `<body>`. Il existe 3 alternatives: 1. Ne pas utiliser la fonctionnalité d'espacement et l'implémenter dans l'espace utilisateur `spacing={0}` (par défaut). 2. Appliquer un rembourrage (padding) au parent avec au moins la moitié de la valeur d'espacement appliquée à l'enfant:
 
 ```jsx
-  <body>
-    <div style={{ padding: 20 }}>
-      <Grid container spacing={5}>
-        //...
-      </Grid>
-    </div>
-  </body>
+<body>
+  <div style={{ padding: 20 }}>
+    <Grid container spacing={5}>
+      //...
+    </Grid>
+  </div>
+</body>
 ```
 
 1. Ajouter `overflow-x: hidden;` au parent.

@@ -11,25 +11,25 @@ import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import Snackbar from '@material-ui/core/Snackbar';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   '@global': {
     body: {
-      backgroundColor: theme.palette.background.paper,
-    },
+      backgroundColor: theme.palette.background.paper
+    }
   },
   menuButton: {
-    marginRight: theme.spacing(2),
+    marginRight: theme.spacing(2)
   },
   fab: {
     position: 'absolute',
     bottom: theme.spacing(2),
-    right: theme.spacing(2),
+    right: theme.spacing(2)
   },
   snackbar: {
     [theme.breakpoints.down('xs')]: {
-      bottom: 90,
-    },
-  },
+      bottom: 90
+    }
+  }
 }));
 
 export default function FabIntegrationSnackbar() {
@@ -61,7 +61,7 @@ export default function FabIntegrationSnackbar() {
           open
           autoHideDuration={4000}
           ContentProps={{
-            'aria-describedby': 'snackbar-fab-message-id',
+            'aria-describedby': 'snackbar-fab-message-id'
           }}
           message={<span id="snackbar-fab-message-id">Archived</span>}
           action={

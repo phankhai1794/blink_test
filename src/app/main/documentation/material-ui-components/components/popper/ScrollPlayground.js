@@ -15,31 +15,31 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   scrollContainer: {
     height: 400,
     overflow: 'auto',
-    marginBottom: theme.spacing(3),
+    marginBottom: theme.spacing(3)
   },
   scroll: {
     position: 'relative',
     width: '230%',
     backgroundColor: theme.palette.background.paper,
-    height: '230%',
+    height: '230%'
   },
   legend: {
     marginTop: theme.spacing(2),
-    maxWidth: 300,
+    maxWidth: 300
   },
   paper: {
     maxWidth: 400,
-    overflow: 'auto',
+    overflow: 'auto'
   },
   select: {
-    width: 200,
+    width: 200
   },
   popper: {
     zIndex: 1,
@@ -51,8 +51,8 @@ const styles = theme => ({
       height: '1em',
       '&::before': {
         borderWidth: '0 1em 1em 1em',
-        borderColor: `transparent transparent ${theme.palette.common.white} transparent`,
-      },
+        borderColor: `transparent transparent ${theme.palette.common.white} transparent`
+      }
     },
     '&[x-placement*="top"] $arrow': {
       bottom: 0,
@@ -62,8 +62,8 @@ const styles = theme => ({
       height: '1em',
       '&::before': {
         borderWidth: '1em 1em 0 1em',
-        borderColor: `${theme.palette.common.white} transparent transparent transparent`,
-      },
+        borderColor: `${theme.palette.common.white} transparent transparent transparent`
+      }
     },
     '&[x-placement*="right"] $arrow': {
       left: 0,
@@ -72,8 +72,8 @@ const styles = theme => ({
       width: '1em',
       '&::before': {
         borderWidth: '1em 1em 1em 0',
-        borderColor: `transparent ${theme.palette.common.white} transparent transparent`,
-      },
+        borderColor: `transparent ${theme.palette.common.white} transparent transparent`
+      }
     },
     '&[x-placement*="left"] $arrow': {
       right: 0,
@@ -82,9 +82,9 @@ const styles = theme => ({
       width: '1em',
       '&::before': {
         borderWidth: '1em 0 1em 1em',
-        borderColor: `transparent transparent transparent ${theme.palette.common.white}`,
-      },
-    },
+        borderColor: `transparent transparent transparent ${theme.palette.common.white}`
+      }
+    }
   },
   arrow: {
     position: 'absolute',
@@ -97,9 +97,9 @@ const styles = theme => ({
       display: 'block',
       width: 0,
       height: 0,
-      borderStyle: 'solid',
-    },
-  },
+      borderStyle: 'solid'
+    }
+  }
 });
 
 class ScrollPlayground extends React.Component {
@@ -112,34 +112,34 @@ class ScrollPlayground extends React.Component {
     flip: true,
     open: false,
     placement: 'bottom',
-    preventOverflow: 'scrollParent',
+    preventOverflow: 'scrollParent'
   };
 
-  handleChange = key => (event, value) => {
+  handleChange = (key) => (event, value) => {
     this.setState({
-      [key]: value,
+      [key]: value
     });
   };
 
-  handleChangeTarget = key => event => {
+  handleChangeTarget = (key) => (event) => {
     this.setState({
-      [key]: event.target.value,
+      [key]: event.target.value
     });
   };
 
   handleClickButton = () => {
-    this.setState(state => ({
-      open: !state.open,
+    this.setState((state) => ({
+      open: !state.open
     }));
   };
 
-  handleArrowRef = node => {
+  handleArrowRef = (node) => {
     this.setState({
-      arrowRef: node,
+      arrowRef: node
     });
   };
 
-  centerScroll = ref => {
+  centerScroll = (ref) => {
     if (!ref) {
       return;
     }
@@ -207,17 +207,17 @@ class ScrollPlayground extends React.Component {
                 className={classes.popper}
                 modifiers={{
                   flip: {
-                    enabled: flip,
+                    enabled: flip
                   },
                   arrow: {
                     enabled: arrow,
-                    element: arrowRef,
+                    element: arrowRef
                   },
                   preventOverflow: {
                     enabled: preventOverflow !== 'disabled',
                     boundariesElement:
-                      preventOverflow === 'disabled' ? 'scrollParent' : preventOverflow,
-                  },
+                      preventOverflow === 'disabled' ? 'scrollParent' : preventOverflow
+                  }
                 }}
               >
                 {arrow ? <span className={classes.arrow} ref={this.handleArrowRef} /> : null}
@@ -253,7 +253,7 @@ class ScrollPlayground extends React.Component {
                 InputLabelProps={{ id: 'scroll-playground-placement-label' }}
                 SelectProps={{
                   native: true,
-                  inputProps: { 'aria-labelledby': 'scroll-playground-placement-label' },
+                  inputProps: { 'aria-labelledby': 'scroll-playground-placement-label' }
                 }}
                 value={placement}
                 onChange={this.handleChangeTarget('placement')}
@@ -296,7 +296,7 @@ class ScrollPlayground extends React.Component {
                 InputLabelProps={{ id: 'scroll-playground-overflow-label' }}
                 SelectProps={{
                   native: true,
-                  inputProps: { 'aria-labelledby': 'scroll-playground-overflow-label' },
+                  inputProps: { 'aria-labelledby': 'scroll-playground-overflow-label' }
                 }}
                 value={preventOverflow}
                 onChange={this.handleChangeTarget('preventOverflow')}
@@ -311,7 +311,7 @@ class ScrollPlayground extends React.Component {
               control={<Switch checked={flip} onChange={this.handleChange('flip')} value="flip" />}
               label={[
                 'Flip',
-                '(flip the popper’s placement when it starts to overlap its reference element)',
+                '(flip the popper’s placement when it starts to overlap its reference element)'
               ].join(' ')}
             />
             <FormControlLabel
@@ -329,7 +329,7 @@ class ScrollPlayground extends React.Component {
 }
 
 ScrollPlayground.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(ScrollPlayground);

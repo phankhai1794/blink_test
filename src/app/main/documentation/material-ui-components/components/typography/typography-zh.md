@@ -10,14 +10,17 @@ components: Typography
 
 ## 常规
 
-*Roboto*字体将**不** 由Material-UI 自动加载。 开发人员负责加载应用程序中使用的所有字体。 Roboto字体有几个简单的方法来开始。 For more advanced configuration, check out [the theme customization section](/customization/typography/).
+*Roboto*字体将**不** 由 Material-UI 自动加载。 开发人员负责加载应用程序中使用的所有字体。 Roboto 字体有几个简单的方法来开始。 For more advanced configuration, check out [the theme customization section](/customization/typography/).
 
 ## Roboto 字体 CDN
 
 Shown below is a sample link markup used to load the Roboto font from a CDN:
 
 ```html
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap"
+/>
 ```
 
 ## 通过 npm 安装
@@ -34,7 +37,7 @@ import 'typeface-roboto';
 
 有关详细信息, 请查看 [typeface](https://github.com/KyleAMathews/typefaces/tree/master/packages/roboto) 项目。
 
-⚠️使用这种方法时要小心。 确保您的包不急于加载所有字体变体 (100/300/400/500/700/900, 斜体/常规, SVG/woff)。 内联所有字体文件可以显着增加捆绑包的大小。 Material-UI默认排版配置仅依赖于300,400和500字体权重。
+⚠️ 使用这种方法时要小心。 确保您的包不急于加载所有字体变体 (100/300/400/500/700/900, 斜体/常规, SVG/woff)。 内联所有字体文件可以显着增加捆绑包的大小。 Material-UI 默认排版配置仅依赖于 300,400 和 500 字体权重。
 
 ## 组件
 
@@ -53,10 +56,12 @@ The Typography component uses the `variantMapping` property to associate a UI va
 - You can change the underlying element for a one time occassion with the `component` property:
 
 ```jsx
-{/* We already have an h1 in the page, let's not duplicate it. */}
+{
+  /* We already have an h1 in the page, let's not duplicate it. */
+}
 <Typography variant="h1" component="h2">
   h1. Heading
-</Typography>
+</Typography>;
 ```
 
 - You can change the mapping [globally using the theme](/customization/globals/#default-props):
@@ -75,9 +80,9 @@ const theme = createMuiTheme({
         subtitle1: 'h2',
         subtitle2: 'h2',
         body1: 'span',
-        body2: 'span',
-      },
-    },
-  },
+        body2: 'span'
+      }
+    }
+  }
 });
 ```

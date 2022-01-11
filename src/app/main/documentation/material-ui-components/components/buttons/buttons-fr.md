@@ -100,8 +100,6 @@ Voici quelques exemples de personnalisation du composant. Vous pouvez en apprend
 
 {{"demo": "pages/components/buttons/CustomizedButtons.js"}}
 
-
-
 ## Boutons complexes
 
 Les boutons texte, les boutons contained, les bouton d'action flottante et les boutons icône sont tous basés sur le composant `ButtonBase`. Vous pouvez tirer parti de ce composant de niveau inférieur pour créer des interactions personnalisées.
@@ -114,4 +112,4 @@ Un cas d'utilisation courant consiste à utiliser le bouton pour déclencher une
 
 {{"demo": "pages/components/buttons/ButtonRouter.js", "defaultCodeOpen": true}}
 
-*Note : La création de composants Button est nécessaire pour éviter une erreur inattendu. Vous pouvez en lire plus dans notre [guide de propriété de composant](/guides/composition/#component-property).*
+_Note : La création de composants Button est nécessaire pour éviter une erreur inattendu. Vous pouvez en lire plus dans notre [guide de propriété de composant](/guides/composition/#component-property)._

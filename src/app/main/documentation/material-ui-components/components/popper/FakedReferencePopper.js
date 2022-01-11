@@ -6,16 +6,16 @@ import Typography from '@material-ui/core/Typography';
 import Fade from '@material-ui/core/Fade';
 import Paper from '@material-ui/core/Paper';
 
-const styles = theme => ({
+const styles = (theme) => ({
   typography: {
-    padding: theme.spacing(2),
-  },
+    padding: theme.spacing(2)
+  }
 });
 
 class FakedReferencePopper extends React.Component {
   state = {
     anchorEl: null,
-    open: false,
+    open: false
   };
 
   handleMouseUp = () => {
@@ -34,8 +34,8 @@ class FakedReferencePopper extends React.Component {
       anchorEl: {
         clientWidth: getBoundingClientRect().width,
         clientHeight: getBoundingClientRect().height,
-        getBoundingClientRect,
-      },
+        getBoundingClientRect
+      }
     });
   };
 
@@ -78,7 +78,7 @@ class FakedReferencePopper extends React.Component {
 }
 
 FakedReferencePopper.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(FakedReferencePopper);

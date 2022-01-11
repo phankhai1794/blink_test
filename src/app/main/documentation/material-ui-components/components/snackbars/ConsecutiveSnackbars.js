@@ -6,23 +6,23 @@ import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 
-const styles = theme => ({
+const styles = (theme) => ({
   close: {
-    padding: theme.spacing(0.5),
-  },
+    padding: theme.spacing(0.5)
+  }
 });
 
 class ConsecutiveSnackbars extends React.Component {
   queue = [];
 
   state = {
-    open: false,
+    open: false
   };
 
-  handleClick = message => () => {
+  handleClick = (message) => () => {
     this.queue.push({
       message,
-      key: new Date().getTime(),
+      key: new Date().getTime()
     });
 
     if (this.state.open) {
@@ -38,7 +38,7 @@ class ConsecutiveSnackbars extends React.Component {
     if (this.queue.length > 0) {
       this.setState({
         messageInfo: this.queue.shift(),
-        open: true,
+        open: true
       });
     }
   };
@@ -66,14 +66,14 @@ class ConsecutiveSnackbars extends React.Component {
           key={messageInfo.key}
           anchorOrigin={{
             vertical: 'bottom',
-            horizontal: 'left',
+            horizontal: 'left'
           }}
           open={this.state.open}
           autoHideDuration={6000}
           onClose={this.handleClose}
           onExited={this.handleExited}
           ContentProps={{
-            'aria-describedby': 'message-id',
+            'aria-describedby': 'message-id'
           }}
           message={<span id="message-id">{messageInfo.message}</span>}
           action={[
@@ -88,7 +88,7 @@ class ConsecutiveSnackbars extends React.Component {
               onClick={this.handleClose}
             >
               <CloseIcon />
-            </IconButton>,
+            </IconButton>
           ]}
         />
       </div>
@@ -97,7 +97,7 @@ class ConsecutiveSnackbars extends React.Component {
 }
 
 ConsecutiveSnackbars.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(ConsecutiveSnackbars);

@@ -4,13 +4,13 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   alert: {
     padding: theme.spacing(1),
     margin: theme.spacing(1, 0),
     border: '1px solid',
-    borderColor: theme.palette.text.primary,
-  },
+    borderColor: theme.palette.text.primary
+  }
 }));
 
 export default function SimplePortal() {

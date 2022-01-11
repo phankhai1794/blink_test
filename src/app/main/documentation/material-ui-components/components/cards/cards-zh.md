@@ -13,7 +13,7 @@ components: Card, CardActionArea, CardActions, CardContent, CardHeader, CardMedi
 
 ## 简单的卡片
 
-尽管卡片支持多操作、多UI控件和过长的菜单，但请克制使用，切记，卡片只是那些复杂且详细信息的入口。
+尽管卡片支持多操作、多 UI 控件和过长的菜单，但请克制使用，切记，卡片只是那些复杂且详细信息的入口。
 
 {{"demo": "pages/components/cards/SimpleCard.js"}}
 
@@ -33,7 +33,7 @@ components: Card, CardActionArea, CardActions, CardContent, CardHeader, CardMedi
 
 {{"demo": "pages/components/cards/ImgMediaCard.js"}}
 
-> 当 `component="img"` 时，CardMedia依靠 `object-fit` 进行图像居中。而 IE11 不支持此功能。
+> 当 `component="img"` 时，CardMedia 依靠 `object-fit` 进行图像居中。而 IE11 不支持此功能。
 
 ## UI 控件
 

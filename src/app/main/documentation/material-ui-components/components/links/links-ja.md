@@ -30,7 +30,7 @@ However, the Link has different default properties than the Typography:
 When you use `target="_blank"` with Links it is [recommended](https://developers.google.com/web/tools/lighthouse/audits/noopener) to always set `rel="noopener"` or `rel="noreferrer"` when linking to third party content.
 
 - `rel="noopener"` prevents the new page from being able to access the window.opener property and ensures it runs in a separate process. Without this the target page can potentially redirect your page to a malicious URL.
-- `rel="noreferrer""` has the same effect, but also prevents the *Referer* header from being sent to the new page. ⚠️ Removing the referrer header will affect analytics.
+- `rel="noreferrer""` has the same effect, but also prevents the _Referer_ header from being sent to the new page. ⚠️ Removing the referrer header will affect analytics.
 
 ## サードパーティ製ルーティングライブラリ
 
@@ -38,4 +38,4 @@ One common use case is to perform the navigation on the client only, without doi
 
 {{"demo": "pages/components/links/LinkRouter.js", "defaultCodeOpen": true}}
 
-*Note: Creating the Link components is necessary to prevent unexpected unmounting. You can read more about it in our [component property guide](/guides/composition/#component-property).*
+_Note: Creating the Link components is necessary to prevent unexpected unmounting. You can read more about it in our [component property guide](/guides/composition/#component-property)._

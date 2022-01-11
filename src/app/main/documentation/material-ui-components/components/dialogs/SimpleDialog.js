@@ -18,8 +18,8 @@ const emails = ['username@gmail.com', 'user02@gmail.com'];
 const useStyles = makeStyles({
   avatar: {
     backgroundColor: blue[100],
-    color: blue[600],
-  },
+    color: blue[600]
+  }
 });
 
 function SimpleDialog(props) {
@@ -38,7 +38,7 @@ function SimpleDialog(props) {
     <Dialog onClose={handleClose} aria-labelledby="simple-dialog-title" {...other}>
       <DialogTitle id="simple-dialog-title">Set backup account</DialogTitle>
       <List>
-        {emails.map(email => (
+        {emails.map((email) => (
           <ListItem button onClick={() => handleListItemClick(email)} key={email}>
             <ListItemAvatar>
               <Avatar className={classes.avatar}>
@@ -65,7 +65,7 @@ function SimpleDialog(props) {
 SimpleDialog.propTypes = {
   onClose: PropTypes.func,
   open: PropTypes.bool,
-  selectedValue: PropTypes.string,
+  selectedValue: PropTypes.string
 };
 
 export default function SimpleDialogDemo() {
@@ -76,7 +76,7 @@ export default function SimpleDialogDemo() {
     setOpen(true);
   }
 
-  const handleClose = value => {
+  const handleClose = (value) => {
     setOpen(false);
     setSelectedValue(value);
   };

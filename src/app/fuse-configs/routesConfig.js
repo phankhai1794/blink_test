@@ -10,26 +10,26 @@ import { RegisterConfig } from 'app/main/register/RegisterConfig';
 import { LogoutConfig } from 'app/main/logout/LogoutConfig';
 import { CallbackConfig } from 'app/main/callback/CallbackConfig';
 const routeConfigs = [
-    ...appsConfigs,
-    ...pagesConfigs,
-    ...authRoleExamplesConfigs,
-    DocumentationConfig,
-    LoginConfig,
-    RegisterConfig,
-    LogoutConfig,
-    CallbackConfig
+  ...appsConfigs,
+  ...pagesConfigs,
+  ...authRoleExamplesConfigs,
+  DocumentationConfig,
+  LoginConfig,
+  RegisterConfig,
+  LogoutConfig,
+  CallbackConfig
 ];
 
 const routes = [
-    ...FuseUtils.generateRoutesFromConfigs(routeConfigs),
-    {
-        path: '/',
-        exact: true,
-        component: () => <Redirect to="/apps/dashboards/" />
-    },
-    {
-        component: () => <Redirect to="/pages/errors/error-404" />
-    }
+  ...FuseUtils.generateRoutesFromConfigs(routeConfigs),
+  {
+    path: '/',
+    exact: true,
+    component: () => <Redirect to="/apps/dashboards/" />
+  },
+  {
+    component: () => <Redirect to="/pages/errors/error-404" />
+  }
 ];
 
 export default routes;

@@ -100,8 +100,6 @@ Aqui estão alguns exemplos de customização do componente. Você pode aprender
 
 {{"demo": "pages/components/buttons/CustomizedButtons.js"}}
 
-
-
 ## Botões complexos
 
 O botões de texto, botões contidos, botões de ação flutuante e ícone botões são construídos em cima do mesmo componente: O componente `ButtonBase `. Você pode tirar vantagem deste componente de nível mais abastrato para construir interações personalizadas.
@@ -114,4 +112,4 @@ Um caso de uso comum é usar o botão para acionar uma navegação para uma nova
 
 {{"demo": "pages/components/buttons/ButtonRouter.js", "defaultCodeOpen": true}}
 
-*Nota: A criação do componente Botão é necessária para impedir uma desmontagem inesperada. Você pode ler mais sobre isso em nosso [guia de propriedades de componentes](/guides/composition/#component-property).*
+_Nota: A criação do componente Botão é necessária para impedir uma desmontagem inesperada. Você pode ler mais sobre isso em nosso [guia de propriedades de componentes](/guides/composition/#component-property)._

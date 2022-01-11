@@ -8,18 +8,18 @@ import HomeIcon from '@material-ui/icons/Home';
 import WhatshotIcon from '@material-ui/icons/Whatshot';
 import GrainIcon from '@material-ui/icons/Grain';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    padding: theme.spacing(1, 2),
+    padding: theme.spacing(1, 2)
   },
   link: {
-    display: 'flex',
+    display: 'flex'
   },
   icon: {
     marginRight: theme.spacing(0.5),
     width: 20,
-    height: 20,
-  },
+    height: 20
+  }
 }));
 
 function handleClick(event) {

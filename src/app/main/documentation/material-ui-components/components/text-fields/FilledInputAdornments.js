@@ -11,29 +11,29 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 const ranges = [
   {
     value: '0-20',
-    label: '0 to 20',
+    label: '0 to 20'
   },
   {
     value: '21-50',
-    label: '21 to 50',
+    label: '21 to 50'
   },
   {
     value: '51-100',
-    label: '51 to 100',
-  },
+    label: '51 to 100'
+  }
 ];
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   margin: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   textField: {
-    flexBasis: 200,
-  },
+    flexBasis: 200
+  }
 }));
 
 export default function FilledInputAdornments() {
@@ -43,10 +43,10 @@ export default function FilledInputAdornments() {
     password: '',
     weight: '',
     weightRange: '',
-    showPassword: false,
+    showPassword: false
   });
 
-  const handleChange = prop => event => {
+  const handleChange = (prop) => (event) => {
     setValues({ ...values, [prop]: event.target.value });
   };
 
@@ -62,7 +62,7 @@ export default function FilledInputAdornments() {
         variant="filled"
         label="With filled TextField"
         InputProps={{
-          startAdornment: <InputAdornment position="start">Kg</InputAdornment>,
+          startAdornment: <InputAdornment position="start">Kg</InputAdornment>
         }}
       />
       <TextField
@@ -73,10 +73,10 @@ export default function FilledInputAdornments() {
         value={values.weightRange}
         onChange={handleChange('weightRange')}
         InputProps={{
-          startAdornment: <InputAdornment position="start">Kg</InputAdornment>,
+          startAdornment: <InputAdornment position="start">Kg</InputAdornment>
         }}
       >
-        {ranges.map(option => (
+        {ranges.map((option) => (
           <MenuItem key={option.value} value={option.value}>
             {option.label}
           </MenuItem>
@@ -90,7 +90,7 @@ export default function FilledInputAdornments() {
         value={values.amount}
         onChange={handleChange('amount')}
         InputProps={{
-          startAdornment: <InputAdornment position="start">$</InputAdornment>,
+          startAdornment: <InputAdornment position="start">$</InputAdornment>
         }}
       />
       <TextField
@@ -102,7 +102,7 @@ export default function FilledInputAdornments() {
         onChange={handleChange('weight')}
         helperText="Weight"
         InputProps={{
-          endAdornment: <InputAdornment position="end">Kg</InputAdornment>,
+          endAdornment: <InputAdornment position="end">Kg</InputAdornment>
         }}
       />
       <TextField
@@ -124,7 +124,7 @@ export default function FilledInputAdornments() {
                 {values.showPassword ? <VisibilityOff /> : <Visibility />}
               </IconButton>
             </InputAdornment>
-          ),
+          )
         }}
       />
     </div>

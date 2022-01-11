@@ -7,37 +7,37 @@ import TextField from '@material-ui/core/TextField';
 const currencies = [
   {
     value: 'USD',
-    label: '$',
+    label: '$'
   },
   {
     value: 'EUR',
-    label: '€',
+    label: '€'
   },
   {
     value: 'BTC',
-    label: '฿',
+    label: '฿'
   },
   {
     value: 'JPY',
-    label: '¥',
-  },
+    label: '¥'
+  }
 ];
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   textField: {
     marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
+    marginRight: theme.spacing(1)
   },
   dense: {
-    marginTop: theme.spacing(2),
+    marginTop: theme.spacing(2)
   },
   menu: {
-    width: 200,
-  },
+    width: 200
+  }
 }));
 
 export default function OutlinedTextFields() {
@@ -46,10 +46,10 @@ export default function OutlinedTextFields() {
     name: 'Cat in the Hat',
     age: '',
     multiline: 'Controlled',
-    currency: 'EUR',
+    currency: 'EUR'
   });
 
-  const handleChange = name => event => {
+  const handleChange = (name) => (event) => {
     setValues({ ...values, [name]: event.target.value });
   };
 
@@ -125,7 +125,7 @@ export default function OutlinedTextFields() {
         className={classes.textField}
         margin="normal"
         InputProps={{
-          readOnly: true,
+          readOnly: true
         }}
         variant="outlined"
       />
@@ -201,7 +201,7 @@ export default function OutlinedTextFields() {
         type="number"
         className={classes.textField}
         InputLabelProps={{
-          shrink: true,
+          shrink: true
         }}
         margin="normal"
         variant="outlined"
@@ -223,14 +223,14 @@ export default function OutlinedTextFields() {
         onChange={handleChange('currency')}
         SelectProps={{
           MenuProps: {
-            className: classes.menu,
-          },
+            className: classes.menu
+          }
         }}
         helperText="Please select your currency"
         margin="normal"
         variant="outlined"
       >
-        {currencies.map(option => (
+        {currencies.map((option) => (
           <MenuItem key={option.value} value={option.value}>
             {option.label}
           </MenuItem>
@@ -246,14 +246,14 @@ export default function OutlinedTextFields() {
         SelectProps={{
           native: true,
           MenuProps: {
-            className: classes.menu,
-          },
+            className: classes.menu
+          }
         }}
         helperText="Please select your currency"
         margin="normal"
         variant="outlined"
       >
-        {currencies.map(option => (
+        {currencies.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
@@ -269,7 +269,7 @@ export default function OutlinedTextFields() {
         margin="normal"
         variant="outlined"
         InputLabelProps={{
-          shrink: true,
+          shrink: true
         }}
       />
       <TextField

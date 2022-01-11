@@ -7,15 +7,15 @@ import Hidden from '@material-ui/core/Hidden';
 import withWidth from '@material-ui/core/withWidth';
 import Typography from '@material-ui/core/Typography';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   paper: {
     padding: theme.spacing(2),
     textAlign: 'center',
-    color: theme.palette.text.secondary,
-  },
+    color: theme.palette.text.secondary
+  }
 }));
 
 function GridIntegration(props) {
@@ -59,7 +59,7 @@ function GridIntegration(props) {
 }
 
 GridIntegration.propTypes = {
-  width: PropTypes.string,
+  width: PropTypes.string
 };
 
 export default withWidth()(GridIntegration);

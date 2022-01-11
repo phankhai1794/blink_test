@@ -9,9 +9,9 @@ components: Popper
 
 Einige wichtige Funktionen der `Popper` Komponente:
 
-- 
-- 
-- 
+-
+-
+-
 - Das untergeordnete Element des Hauptteils des Dokuments ist ein [`Portal`](/components/portal/), um Probleme beim Rendern zu vermeiden. Sie können dieses Verhalten mit `disablePortal` deaktivieren.
 - Bildlauf wird nicht wie bei der Komponente [`Popover`](/components/popover/) blockiert. Die Platzierung des Popper wird mit dem verfügbaren Bereich im Ansichtsfenster aktualisiert.
 - Durch Wegklicken wird die `Popper` Komponente ausgeblendet. Wenn Sie dieses Verhalten benötigen, können Sie den [`ClickAwayListener`](/components/click-away-listener/) verwenden - siehe das Beispiel im [Menü Dokumentation Abschnitt](/components/menus/#menulist-composition).

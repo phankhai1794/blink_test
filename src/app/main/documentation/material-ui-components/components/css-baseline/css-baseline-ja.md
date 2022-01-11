@@ -2,7 +2,7 @@
 components: CssBaseline
 ---
 
-# CSSベースライン
+# CSS ベースライン
 
 <p class="description">Material-UI provides a CssBaseline component to kickstart an elegant, consistent, and simple baseline to build upon.</p>
 

@@ -4,8 +4,8 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 
 const useStyles = makeStyles({
   root: {
-    flexGrow: 1,
-  },
+    flexGrow: 1
+  }
 });
 
 export default function LinearDeterminate() {
@@ -14,7 +14,7 @@ export default function LinearDeterminate() {
 
   React.useEffect(() => {
     function progress() {
-      setCompleted(oldCompleted => {
+      setCompleted((oldCompleted) => {
         if (oldCompleted === 100) {
           return 0;
         }

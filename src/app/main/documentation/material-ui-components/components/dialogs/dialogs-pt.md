@@ -72,7 +72,7 @@ Você pode definir uma largura máxima usando um enumerador na propriedade `maxW
 
 ## Tela cheia responsiva
 
-Você pode fazer uma caixa de diálogo responsiva em tela cheia usando a propriedade `withMobileDialog`. Por padrão, `withMobileDialog()(Dialog)` responsivamente enche a tela *em ou abaixo* do ponto de interrupção (breakpoint) de [tamanhos de tela](/customization/breakpoints/) `sm`. Você pode escolher seu próprio ponto de interrupção, por exemplo, `xs` passando o `argumento` do ponto de interrupção: `withMobileDialog ({breakpoint: 'xs'}) (Dialog)`.
+Você pode fazer uma caixa de diálogo responsiva em tela cheia usando a propriedade `withMobileDialog`. Por padrão, `withMobileDialog()(Dialog)` responsivamente enche a tela _em ou abaixo_ do ponto de interrupção (breakpoint) de [tamanhos de tela](/customization/breakpoints/) `sm`. Você pode escolher seu próprio ponto de interrupção, por exemplo, `xs` passando o `argumento` do ponto de interrupção: `withMobileDialog ({breakpoint: 'xs'}) (Dialog)`.
 
 {{"demo": "pages/components/dialogs/ResponsiveDialog.js"}}
 

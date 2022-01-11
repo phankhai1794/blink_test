@@ -13,7 +13,7 @@ components: Switch, FormControl, FormGroup, FormLabel, FormControlLabel
 
 ## 多个 Switch 和 FormControlLabel 的使用
 
-通过使用` FormControlLabel ` 组件, ` Switch ` 也可与标签描述一起使用。
+通过使用`FormControlLabel` 组件, `Switch` 也可与标签描述一起使用。
 
 {{"demo": "pages/components/switches/SwitchLabels.js"}}
 
@@ -42,8 +42,5 @@ components: Switch, FormControl, FormGroup, FormLabel, FormControlLabel
 如果无法使用标签，则必须直接在输入组件中添加属性。 在这种情况下，可以应用附加的属性（例如 `arial-label`， `aria-labelledby`， `title`）经由 `inputProps` 属性。
 
 ```jsx
-<Switch
-  value="checkedA"
-  inputProps={{ 'aria-label': 'Switch A' } }
-/>
+<Switch value="checkedA" inputProps={{ 'aria-label': 'Switch A' }} />
 ```

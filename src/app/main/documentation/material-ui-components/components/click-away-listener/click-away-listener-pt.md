@@ -7,7 +7,7 @@ components: ClickAwayListener
 
 <p class="description">Detecta se um evento de clique aconteceu fora de um elemento. Ele observa cliques que ocorrem em algum lugar no documento.</p>
 
-- 
+-
 
 ## Menu suspenso simples
 

@@ -7,7 +7,7 @@ components: TextField, Paper, MenuItem, Popper
 
 <p class="description">自动补全是一个通过一组建议选项来帮助用户输入的普通文本输入框。</p>
 
-Material-UI不提供任何高级 API 来解决此问题。我们鼓励大家参考那些 React 社区已有的解决方案。
+Material-UI 不提供任何高级 API 来解决此问题。我们鼓励大家参考那些 React 社区已有的解决方案。
 
 ## downshift
 

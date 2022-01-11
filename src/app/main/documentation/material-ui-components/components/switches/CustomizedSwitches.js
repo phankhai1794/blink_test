@@ -11,22 +11,22 @@ const PurpleSwitch = withStyles({
   switchBase: {
     color: purple[300],
     '&$checked': {
-      color: purple[500],
+      color: purple[500]
     },
     '&$checked + $track': {
-      backgroundColor: purple[500],
-    },
+      backgroundColor: purple[500]
+    }
   },
   checked: {},
-  track: {},
+  track: {}
 })(Switch);
 
-const IOSSwitch = withStyles(theme => ({
+const IOSSwitch = withStyles((theme) => ({
   root: {
     width: 42,
     height: 26,
     padding: 0,
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   switchBase: {
     padding: 1,
@@ -36,27 +36,27 @@ const IOSSwitch = withStyles(theme => ({
       '& + $track': {
         backgroundColor: '#52d869',
         opacity: 1,
-        border: 'none',
-      },
+        border: 'none'
+      }
     },
     '&$focusVisible $thumb': {
       color: '#52d869',
-      border: '6px solid #fff',
-    },
+      border: '6px solid #fff'
+    }
   },
   thumb: {
     width: 24,
-    height: 24,
+    height: 24
   },
   track: {
     borderRadius: 26 / 2,
     border: `1px solid ${theme.palette.grey[400]}`,
     backgroundColor: theme.palette.grey[50],
     opacity: 1,
-    transition: theme.transitions.create(['background-color', 'border']),
+    transition: theme.transitions.create(['background-color', 'border'])
   },
   checked: {},
-  focusVisible: {},
+  focusVisible: {}
 }))(({ classes, ...props }) => {
   return (
     <Switch
@@ -67,19 +67,19 @@ const IOSSwitch = withStyles(theme => ({
         switchBase: classes.switchBase,
         thumb: classes.thumb,
         track: classes.track,
-        checked: classes.checked,
+        checked: classes.checked
       }}
       {...props}
     />
   );
 });
 
-const AntSwitch = withStyles(theme => ({
+const AntSwitch = withStyles((theme) => ({
   root: {
     width: 28,
     height: 16,
     padding: 0,
-    display: 'flex',
+    display: 'flex'
   },
   switchBase: {
     padding: 2,
@@ -90,32 +90,32 @@ const AntSwitch = withStyles(theme => ({
       '& + $track': {
         opacity: 1,
         backgroundColor: theme.palette.primary.main,
-        borderColor: theme.palette.primary.main,
-      },
-    },
+        borderColor: theme.palette.primary.main
+      }
+    }
   },
   thumb: {
     width: 12,
     height: 12,
-    boxShadow: 'none',
+    boxShadow: 'none'
   },
   track: {
     border: `1px solid ${theme.palette.grey[500]}`,
     borderRadius: 16 / 2,
     opacity: 1,
-    backgroundColor: theme.palette.common.white,
+    backgroundColor: theme.palette.common.white
   },
-  checked: {},
+  checked: {}
 }))(Switch);
 
 export default function CustomizedSwitches() {
   const [state, setState] = React.useState({
     checkedA: true,
     checkedB: true,
-    checkedC: true,
+    checkedC: true
   });
 
-  const handleChange = name => event => {
+  const handleChange = (name) => (event) => {
     setState({ ...state, [name]: event.target.checked });
   };
 

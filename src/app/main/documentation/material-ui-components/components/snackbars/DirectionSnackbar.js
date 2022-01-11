@@ -21,10 +21,10 @@ function TransitionDown(props) {
 
 class DirectionSnackbar extends React.Component {
   state = {
-    open: false,
+    open: false
   };
 
-  handleClick = Transition => () => {
+  handleClick = (Transition) => () => {
     this.setState({ open: true, Transition });
   };
 
@@ -44,7 +44,7 @@ class DirectionSnackbar extends React.Component {
           onClose={this.handleClose}
           TransitionComponent={this.state.Transition}
           ContentProps={{
-            'aria-describedby': 'message-id',
+            'aria-describedby': 'message-id'
           }}
           message={<span id="message-id">I love snacks</span>}
         />

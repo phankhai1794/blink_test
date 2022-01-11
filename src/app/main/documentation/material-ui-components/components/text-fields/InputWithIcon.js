@@ -8,10 +8,10 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   margin: {
-    margin: theme.spacing(1),
-  },
+    margin: theme.spacing(1)
+  }
 }));
 
 export default function InputWithIcon() {
@@ -39,7 +39,7 @@ export default function InputWithIcon() {
             <InputAdornment position="start">
               <AccountCircle />
             </InputAdornment>
-          ),
+          )
         }}
       />
       <div className={classes.margin}>

@@ -42,7 +42,7 @@ gain depth while clicked or touched.
 
 ## Small Chip
 
-You can use the `size` prop to define a small Chip. 
+You can use the `size` prop to define a small Chip.
 
 ### Default variant
 

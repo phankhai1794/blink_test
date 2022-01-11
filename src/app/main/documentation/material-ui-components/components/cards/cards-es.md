@@ -29,7 +29,7 @@ Un ejemplo de una tarjeta usando una imagen para reforzar contenido.
 
 {{"demo": "pages/components/cards/MediaCard.js"}}
 
-Por defecto usamos una combinacion de un `<div>` y una *imagen de fondo* para mostrar contenido multimedia. Esto puede ser problemático en ciertas situaciones. Por ejemplo, tal vez queremos mostrar un vídeo o una imagen responsiva. En estos casos podemos usar la propiedad `component`:
+Por defecto usamos una combinacion de un `<div>` y una _imagen de fondo_ para mostrar contenido multimedia. Esto puede ser problemático en ciertas situaciones. Por ejemplo, tal vez queremos mostrar un vídeo o una imagen responsiva. En estos casos podemos usar la propiedad `component`:
 
 {{"demo": "pages/components/cards/ImgMediaCard.js"}}
 

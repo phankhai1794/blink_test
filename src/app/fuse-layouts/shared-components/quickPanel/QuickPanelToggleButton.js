@@ -4,17 +4,20 @@ import * as quickPanelActions from './store/actions';
 import { useDispatch } from 'react-redux';
 
 function QuickPanelToggleButton(props) {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-    return (
-        <IconButton className="w-64 h-64" onClick={ev => dispatch(quickPanelActions.toggleQuickPanel())}>
-            {props.children}
-        </IconButton>
-    );
+  return (
+    <IconButton
+      className="w-64 h-64"
+      onClick={(ev) => dispatch(quickPanelActions.toggleQuickPanel())}
+    >
+      {props.children}
+    </IconButton>
+  );
 }
 
 QuickPanelToggleButton.defaultProps = {
-    children: <Icon>format_list_bulleted</Icon>
+  children: <Icon>format_list_bulleted</Icon>
 };
 
 export default QuickPanelToggleButton;

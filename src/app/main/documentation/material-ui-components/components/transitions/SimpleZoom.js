@@ -5,25 +5,25 @@ import Zoom from '@material-ui/core/Zoom';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    height: 180,
+    height: 180
   },
   container: {
-    display: 'flex',
+    display: 'flex'
   },
   paper: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   svg: {
     width: 100,
-    height: 100,
+    height: 100
   },
   polygon: {
     fill: theme.palette.common.white,
     stroke: theme.palette.divider,
-    strokeWidth: 1,
-  },
+    strokeWidth: 1
+  }
 }));
 
 export default function SimpleZoom() {
@@ -31,7 +31,7 @@ export default function SimpleZoom() {
   const [checked, setChecked] = React.useState(false);
 
   function handleChange() {
-    setChecked(prev => !prev);
+    setChecked((prev) => !prev);
   }
 
   return (

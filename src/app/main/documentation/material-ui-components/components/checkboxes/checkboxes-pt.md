@@ -36,10 +36,7 @@ Todos os controles de formulário devem ter rótulos, e isso inclui Botões de O
 Quando um rótulo não pode ser usado, é necessário adicionar um atributo diretamente no componente de entrada. Nesse caso você pode aplicar um atributo adicional (e.g.`aria-label`,`aria-labelledby`, `title`) através da propriedade `inputProps`.
 
 ```jsx
-<Checkbox
-  value="checkedA"
-  inputProps={{ 'aria-label': 'Caixa de seleção A' } }
-/>
+<Checkbox value="checkedA" inputProps={{ 'aria-label': 'Caixa de seleção A' }} />
 ```
 
 ## Guia

@@ -7,7 +7,7 @@ import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state';
 function MenuPopupState() {
   return (
     <PopupState variant="popover" popupId="demo-popup-menu">
-      {popupState => (
+      {(popupState) => (
         <React.Fragment>
           <Button variant="contained" {...bindTrigger(popupState)}>
             Open Menu

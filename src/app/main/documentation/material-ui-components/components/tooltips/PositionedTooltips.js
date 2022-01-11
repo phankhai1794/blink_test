@@ -6,8 +6,8 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles({
   root: {
-    width: 500,
-  },
+    width: 500
+  }
 });
 
 export default function PositionedTooltips() {

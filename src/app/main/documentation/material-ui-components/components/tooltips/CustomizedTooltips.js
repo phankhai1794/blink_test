@@ -15,8 +15,8 @@ function arrowGenerator(color) {
       height: '1em',
       '&::before': {
         borderWidth: '0 1em 1em 1em',
-        borderColor: `transparent transparent ${color} transparent`,
-      },
+        borderColor: `transparent transparent ${color} transparent`
+      }
     },
     '&[x-placement*="top"] $arrow': {
       bottom: 0,
@@ -26,8 +26,8 @@ function arrowGenerator(color) {
       height: '1em',
       '&::before': {
         borderWidth: '1em 1em 0 1em',
-        borderColor: `${color} transparent transparent transparent`,
-      },
+        borderColor: `${color} transparent transparent transparent`
+      }
     },
     '&[x-placement*="right"] $arrow': {
       left: 0,
@@ -36,8 +36,8 @@ function arrowGenerator(color) {
       width: '1em',
       '&::before': {
         borderWidth: '1em 1em 1em 0',
-        borderColor: `transparent ${color} transparent transparent`,
-      },
+        borderColor: `transparent ${color} transparent transparent`
+      }
     },
     '&[x-placement*="left"] $arrow': {
       right: 0,
@@ -46,22 +46,22 @@ function arrowGenerator(color) {
       width: '1em',
       '&::before': {
         borderWidth: '1em 0 1em 1em',
-        borderColor: `transparent transparent transparent ${color}`,
-      },
-    },
+        borderColor: `transparent transparent transparent ${color}`
+      }
+    }
   };
 }
 
-const LightTooltip = withStyles(theme => ({
+const LightTooltip = withStyles((theme) => ({
   tooltip: {
     backgroundColor: theme.palette.common.white,
     color: 'rgba(0, 0, 0, 0.87)',
     boxShadow: theme.shadows[1],
-    fontSize: 11,
-  },
+    fontSize: 11
+  }
 }))(Tooltip);
 
-const useStylesArrow = makeStyles(theme => ({
+const useStylesArrow = makeStyles((theme) => ({
   arrow: {
     position: 'absolute',
     fontSize: 6,
@@ -73,10 +73,10 @@ const useStylesArrow = makeStyles(theme => ({
       display: 'block',
       width: 0,
       height: 0,
-      borderStyle: 'solid',
-    },
+      borderStyle: 'solid'
+    }
   },
-  popper: arrowGenerator(theme.palette.grey[700]),
+  popper: arrowGenerator(theme.palette.grey[700])
 }));
 
 function ArrowTooltip(props) {
@@ -91,10 +91,10 @@ function ArrowTooltip(props) {
           modifiers: {
             arrow: {
               enabled: Boolean(arrowRef),
-              element: arrowRef,
-            },
-          },
-        },
+              element: arrowRef
+            }
+          }
+        }
       }}
       {...props}
       title={
@@ -108,10 +108,10 @@ function ArrowTooltip(props) {
 }
 
 ArrowTooltip.propTypes = {
-  title: PropTypes.node,
+  title: PropTypes.node
 };
 
-const useStylesBootstrap = makeStyles(theme => ({
+const useStylesBootstrap = makeStyles((theme) => ({
   arrow: {
     position: 'absolute',
     fontSize: 6,
@@ -123,25 +123,25 @@ const useStylesBootstrap = makeStyles(theme => ({
       display: 'block',
       width: 0,
       height: 0,
-      borderStyle: 'solid',
-    },
+      borderStyle: 'solid'
+    }
   },
   popper: arrowGenerator(theme.palette.common.black),
   tooltip: {
-    backgroundColor: theme.palette.common.black,
+    backgroundColor: theme.palette.common.black
   },
   tooltipPlacementLeft: {
-    margin: '0 8px',
+    margin: '0 8px'
   },
   tooltipPlacementRight: {
-    margin: '0 8px',
+    margin: '0 8px'
   },
   tooltipPlacementTop: {
-    margin: '8px 0',
+    margin: '8px 0'
   },
   tooltipPlacementBottom: {
-    margin: '8px 0',
-  },
+    margin: '8px 0'
+  }
 }));
 
 function BootstrapTooltip(props) {
@@ -156,10 +156,10 @@ function BootstrapTooltip(props) {
           modifiers: {
             arrow: {
               enabled: Boolean(arrowRef),
-              element: arrowRef,
-            },
-          },
-        },
+              element: arrowRef
+            }
+          }
+        }
       }}
       {...props}
       title={
@@ -173,17 +173,17 @@ function BootstrapTooltip(props) {
 }
 
 BootstrapTooltip.propTypes = {
-  title: PropTypes.node,
+  title: PropTypes.node
 };
 
-const HtmlTooltip = withStyles(theme => ({
+const HtmlTooltip = withStyles((theme) => ({
   tooltip: {
     backgroundColor: '#f5f5f9',
     color: 'rgba(0, 0, 0, 0.87)',
     maxWidth: 220,
     fontSize: theme.typography.pxToRem(12),
-    border: '1px solid #dadde9',
-  },
+    border: '1px solid #dadde9'
+  }
 }))(Tooltip);
 
 export default function CustomizedTooltips() {

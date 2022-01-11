@@ -5,10 +5,10 @@ export default function Checkboxes() {
   const [state, setState] = React.useState({
     checkedA: true,
     checkedB: true,
-    checkedF: true,
+    checkedF: true
   });
 
-  const handleChange = name => event => {
+  const handleChange = (name) => (event) => {
     setState({ ...state, [name]: event.target.checked });
   };
 
@@ -19,7 +19,7 @@ export default function Checkboxes() {
         onChange={handleChange('checkedA')}
         value="checkedA"
         inputProps={{
-          'aria-label': 'primary checkbox',
+          'aria-label': 'primary checkbox'
         }}
       />
       <Checkbox
@@ -28,20 +28,20 @@ export default function Checkboxes() {
         value="checkedB"
         color="primary"
         inputProps={{
-          'aria-label': 'secondary checkbox',
+          'aria-label': 'secondary checkbox'
         }}
       />
       <Checkbox
         value="checkedC"
         inputProps={{
-          'aria-label': 'uncontrolled-checkbox',
+          'aria-label': 'uncontrolled-checkbox'
         }}
       />
       <Checkbox
         disabled
         value="checkedD"
         inputProps={{
-          'aria-label': 'disabled checkbox',
+          'aria-label': 'disabled checkbox'
         }}
       />
       <Checkbox
@@ -49,7 +49,7 @@ export default function Checkboxes() {
         checked
         value="checkedE"
         inputProps={{
-          'aria-label': 'disabled checked checkbox',
+          'aria-label': 'disabled checked checkbox'
         }}
       />
       <Checkbox
@@ -58,7 +58,7 @@ export default function Checkboxes() {
         value="checkedF"
         indeterminate
         inputProps={{
-          'aria-label': 'indeterminate checkbox',
+          'aria-label': 'indeterminate checkbox'
         }}
       />
       <Checkbox
@@ -66,7 +66,7 @@ export default function Checkboxes() {
         color="default"
         value="checkedG"
         inputProps={{
-          'aria-label': 'checkbox with default color',
+          'aria-label': 'checkbox with default color'
         }}
       />
     </div>

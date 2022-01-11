@@ -7,14 +7,14 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     justifyContent: 'center',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   paper: {
-    padding: theme.spacing(1, 2),
-  },
+    padding: theme.spacing(1, 2)
+  }
 }));
 
 function handleClick(event) {

@@ -30,7 +30,7 @@ Here are some examples of customizing the component. You can learn more about th
 ## Custom child element
 
 The tooltip needs to apply DOM event listeners to its child element.
-If the child is a custom React element, you need to make sure that it spreads its properties  to the underlying DOM element.
+If the child is a custom React element, you need to make sure that it spreads its properties to the underlying DOM element.
 
 ```jsx
 function MyComponent(props) {

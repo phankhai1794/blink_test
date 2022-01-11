@@ -30,7 +30,7 @@ No entanto, o Link possui propriedades padrão diferentes do componente Typograp
 Quando você usa `target="_blank"` com Links é [recomendado](https://developers.google.com/web/tools/lighthouse/audits/noopener) sempre definir `rel="noopener"` ou `rel="noreferrer"` quando conectando a conteúdo de terceiros.
 
 - `rel="noopener"` impede que a nova página possa acessar a propriedade window.opener e garante que ela seja executada em um processo separado. Sem isso, a página de destino pode potencialmente redirecionar sua página para uma URL mal-intencionada.
-- `rel="noreferrer""` tem o mesmo efeito, mas também impede que o cabeçalho *Referer* seja enviado para a nova página. ⚠️ A remoção do cabeçalho referrer afetará a análise.
+- `rel="noreferrer""` tem o mesmo efeito, mas também impede que o cabeçalho _Referer_ seja enviado para a nova página. ⚠️ A remoção do cabeçalho referrer afetará a análise.
 
 ## Biblioteca de roteamento de terceiros
 
@@ -38,4 +38,4 @@ Um caso comum é executar a navegação apenas no cliente, sem fazer uma ida e v
 
 {{"demo": "pages/components/links/LinkRouter.js", "defaultCodeOpen": true}}
 
-*Nota: A criação de componentes de link é necessária para impedir a desmontagem inesperada. Você pode ler mais sobre isso em nosso [ guia de propriedades de componente](/guides/composition/#component-property).*
+_Nota: A criação de componentes de link é necessária para impedir a desmontagem inesperada. Você pode ler mais sobre isso em nosso [ guia de propriedades de componente](/guides/composition/#component-property)._

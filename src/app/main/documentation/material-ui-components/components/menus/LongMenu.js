@@ -18,7 +18,7 @@ const options = [
   'Sedna',
   'Titania',
   'Triton',
-  'Umbriel',
+  'Umbriel'
 ];
 
 const ITEM_HEIGHT = 48;
@@ -54,11 +54,11 @@ export default function LongMenu() {
         PaperProps={{
           style: {
             maxHeight: ITEM_HEIGHT * 4.5,
-            width: 200,
-          },
+            width: 200
+          }
         }}
       >
-        {options.map(option => (
+        {options.map((option) => (
           <MenuItem key={option} selected={option === 'Pyxis'} onClick={handleClose}>
             {option}
           </MenuItem>

@@ -6,15 +6,15 @@ import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import { grey } from '@material-ui/core/colors';
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
-    position: 'relative',
+    position: 'relative'
   },
   paper: {
     position: 'absolute',
     top: 36,
     right: 0,
-    left: 0,
+    left: 0
   },
   fake: {
     backgroundColor: grey[200],
@@ -22,25 +22,25 @@ const styles = theme => ({
     margin: theme.spacing(2),
     // Selects every two elements among any group of siblings.
     '&:nth-child(2n)': {
-      marginRight: theme.spacing(3),
-    },
-  },
+      marginRight: theme.spacing(3)
+    }
+  }
 });
 
 class ClickAway extends React.Component {
   state = {
-    open: false,
+    open: false
   };
 
   handleClick = () => {
-    this.setState(state => ({
-      open: !state.open,
+    this.setState((state) => ({
+      open: !state.open
     }));
   };
 
   handleClickAway = () => {
     this.setState({
-      open: false,
+      open: false
     });
   };
 
@@ -71,7 +71,7 @@ class ClickAway extends React.Component {
 }
 
 ClickAway.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(ClickAway);

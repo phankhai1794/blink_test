@@ -23,7 +23,7 @@ components: Drawer, SwipeableDrawer
 
 您可以使用 `SwipeableDrawer` 组件来实现滑动抽屉。
 
-此组件附带 2 kB gzip 的负载开销。 一些低端移动设备无法以60 FPS 的速度跟随手指的移动。 您可以使用 `disableBackdropTransition` 属性来解决这个问题。
+此组件附带 2 kB gzip 的负载开销。 一些低端移动设备无法以 60 FPS 的速度跟随手指的移动。 您可以使用 `disableBackdropTransition` 属性来解决这个问题。
 
 {{"demo": "pages/components/drawers/SwipeableTemporaryDrawer.js"}}
 
@@ -32,12 +32,12 @@ components: Drawer, SwipeableDrawer
 ```jsx
 const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-<SwipeableDrawer disableBackdropTransition={!iOS} disableDiscovery={iOS} />
+<SwipeableDrawer disableBackdropTransition={!iOS} disableDiscovery={iOS} />;
 ```
 
 ## 响应式抽屉
 
-利用` Hidden `组件，可以根据屏幕宽度显示不同类型的抽屉。 显示小屏幕的 `temporary` 抽屉，而更宽屏幕显示 `permanent` 抽屉。
+利用`Hidden`组件，可以根据屏幕宽度显示不同类型的抽屉。 显示小屏幕的 `temporary` 抽屉，而更宽屏幕显示 `permanent` 抽屉。
 
 {{"demo": "pages/components/drawers/ResponsiveDrawer.js", "iframe": true}}
 

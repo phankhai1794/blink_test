@@ -15,53 +15,53 @@ import Popover from '@material-ui/core/Popover';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 
-const styles = theme => ({
+const styles = (theme) => ({
   buttonWrapper: {
     position: 'relative',
-    marginBottom: theme.spacing(4),
+    marginBottom: theme.spacing(4)
   },
   anchor: {
     backgroundColor: green[500],
     width: 10,
     height: 10,
     borderRadius: '50%',
-    position: 'absolute',
+    position: 'absolute'
   },
   radioAnchor: {
     color: green[600],
     '&$checked': {
-      color: green[500],
-    },
+      color: green[500]
+    }
   },
   checked: {},
   typography: {
-    margin: theme.spacing(2),
-  },
+    margin: theme.spacing(2)
+  }
 });
 
 const inlineStyles = {
   anchorVertical: {
     top: {
-      top: -5,
+      top: -5
     },
     center: {
-      top: 'calc(50% - 5px)',
+      top: 'calc(50% - 5px)'
     },
     bottom: {
-      bottom: -5,
-    },
+      bottom: -5
+    }
   },
   anchorHorizontal: {
     left: {
-      left: -5,
+      left: -5
     },
     center: {
-      left: 'calc(50% - 5px)',
+      left: 'calc(50% - 5px)'
     },
     right: {
-      right: -5,
-    },
-  },
+      right: -5
+    }
+  }
 };
 
 class AnchorPlayground extends React.Component {
@@ -75,30 +75,30 @@ class AnchorPlayground extends React.Component {
     transformOriginHorizontal: 'left',
     positionTop: 200, // Just so the popover can be spotted more easily
     positionLeft: 400, // Same as above
-    anchorReference: 'anchorEl',
+    anchorReference: 'anchorEl'
   };
 
-  handleChange = key => (event, value) => {
+  handleChange = (key) => (event, value) => {
     this.setState({
-      [key]: value,
+      [key]: value
     });
   };
 
-  handleNumberInputChange = key => event => {
+  handleNumberInputChange = (key) => (event) => {
     this.setState({
-      [key]: parseInt(event.target.value, 10),
+      [key]: parseInt(event.target.value, 10)
     });
   };
 
   handleClickButton = () => {
     this.setState({
-      open: true,
+      open: true
     });
   };
 
   handleClose = () => {
     this.setState({
-      open: false,
+      open: false
     });
   };
 
@@ -112,7 +112,7 @@ class AnchorPlayground extends React.Component {
       transformOriginHorizontal,
       positionTop,
       positionLeft,
-      anchorReference,
+      anchorReference
     } = this.state;
 
     let mode = '';
@@ -154,7 +154,7 @@ class AnchorPlayground extends React.Component {
                 className={classes.anchor}
                 style={{
                   ...inlineStyles.anchorVertical[anchorOriginVertical],
-                  ...inlineStyles.anchorHorizontal[anchorOriginHorizontal],
+                  ...inlineStyles.anchorHorizontal[anchorOriginHorizontal]
                 }}
               />
             )}
@@ -168,11 +168,11 @@ class AnchorPlayground extends React.Component {
           onClose={this.handleClose}
           anchorOrigin={{
             vertical: anchorOriginVertical,
-            horizontal: anchorOriginHorizontal,
+            horizontal: anchorOriginHorizontal
           }}
           transformOrigin={{
             vertical: transformOriginVertical,
-            horizontal: transformOriginHorizontal,
+            horizontal: transformOriginHorizontal
           }}
         >
           <Typography className={classes.typography}>The content of the Popover.</Typography>
@@ -324,7 +324,7 @@ class AnchorPlayground extends React.Component {
 }
 
 AnchorPlayground.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(AnchorPlayground);

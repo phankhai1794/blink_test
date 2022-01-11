@@ -13,20 +13,20 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import Switch from '@material-ui/core/Switch';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   form: {
     display: 'flex',
     flexDirection: 'column',
     margin: 'auto',
-    width: 'fit-content',
+    width: 'fit-content'
   },
   formControl: {
     marginTop: theme.spacing(2),
-    minWidth: 120,
+    minWidth: 120
   },
   formControlLabel: {
-    marginTop: theme.spacing(1),
-  },
+    marginTop: theme.spacing(1)
+  }
 }));
 
 export default function MaxWidthDialog() {
@@ -76,7 +76,7 @@ export default function MaxWidthDialog() {
                 onChange={handleMaxWidthChange}
                 inputProps={{
                   name: 'max-width',
-                  id: 'max-width',
+                  id: 'max-width'
                 }}
               >
                 <MenuItem value={false}>false</MenuItem>

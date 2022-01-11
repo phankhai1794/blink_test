@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Icon, Table, TableBody, TableCell, TablePagination, TableRow, Checkbox, Box, Chip } from '@material-ui/core';
+import {
+  Icon,
+  Table,
+  TableBody,
+  TableCell,
+  TablePagination,
+  TableRow,
+  Checkbox,
+  Box,
+  Chip
+} from '@material-ui/core';
 import { FuseScrollbars } from '@fuse';
 import { Avatar } from '@material-ui/core';
 import { withRouter } from 'react-router-dom';
@@ -9,208 +19,201 @@ import { useDispatch, useSelector } from 'react-redux';
 import { data } from './data';
 import { makeStyles } from '@material-ui/styles';
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        // color: theme.palette.secondary.contrastText,
-        border: "1px solid orange",
-        backgroundColor: "#FCC4191A"
-    },
-    outlined: {
-        color: "#8F6400",
-        fontWeight: "700"
-    }
-}))
+const useStyles = makeStyles((theme) => ({
+  root: {
+    // color: theme.palette.secondary.contrastText,
+    border: '1px solid orange',
+    backgroundColor: '#FCC4191A'
+  },
+  outlined: {
+    color: '#8F6400',
+    fontWeight: '700'
+  }
+}));
 
 function InquiringTable(props) {
-    const classes = useStyles()
+  const classes = useStyles();
 
-    const dispatch = useDispatch();
-    // const products = useSelector(({ eCommerceApp }) => eCommerceApp.products.data);
-    // const searchText = useSelector(({ eCommerceApp }) => eCommerceApp.products.searchText);
+  const dispatch = useDispatch();
+  // const products = useSelector(({ eCommerceApp }) => eCommerceApp.products.data);
+  // const searchText = useSelector(({ eCommerceApp }) => eCommerceApp.products.searchText);
 
-    const [selected, setSelected] = useState([]);
-    // const [data, setData] = useState(0);
+  const [selected, setSelected] = useState([]);
+  // const [data, setData] = useState(0);
 
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [order, setOrder] = useState({
-        direction: 'asc',
-        id: null
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [order, setOrder] = useState({
+    direction: 'asc',
+    id: null
+  });
+
+  function handleRequestSort(event, property) {
+    const id = property;
+    let direction = 'desc';
+
+    if (order.id === property && order.direction === 'desc') {
+      direction = 'asc';
+    }
+
+    setOrder({
+      direction,
+      id
     });
+  }
 
-    function handleRequestSort(event, property) {
-        const id = property;
-        let direction = 'desc';
+  function handleSelectAllClick(event) {
+    if (event.target.checked) {
+      setSelected(data.map((n) => n.id));
+      return;
+    }
+    setSelected([]);
+  }
 
-        if (order.id === property && order.direction === 'desc') {
-            direction = 'asc';
-        }
+  function handleClick(item) {
+    props.history.push({
+      pathname: '/apps/workplace/' + item.id + '/gciUIQActrGonB3VEirVTGHe7qhY12rk',
+      state: 'inquiry'
+    });
+  }
 
-        setOrder({
-            direction,
-            id
-        });
+  function handleCheck(event, id) {
+    const selectedIndex = selected.indexOf(id);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, id);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1)
+      );
     }
 
-    function handleSelectAllClick(event) {
-        if (event.target.checked) {
-            setSelected(data.map(n => n.id));
-            return;
-        }
-        setSelected([]);
-    }
+    setSelected(newSelected);
+  }
 
-    function handleClick(item) {
-        props.history.push({
-            pathname: '/apps/workplace/' + item.id + '/gciUIQActrGonB3VEirVTGHe7qhY12rk',
-            state: 'inquiry'
-        });
-    }
+  function handleChangePage(event, page) {
+    setPage(page);
+  }
 
-    function handleCheck(event, id) {
-        const selectedIndex = selected.indexOf(id);
-        let newSelected = [];
+  function handleChangeRowsPerPage(event) {
+    setRowsPerPage(event.target.value);
+  }
+  // function renderNumber(num) {
+  //     var indents = [];
+  //     for (var i = 0; i < num; i++) {
+  // indents.push(<Box sx={{ mr: "-10px" }} >
+  //             <Avatar src/>
+  //         </Box>)
+  //     }
+  //     return indents;
+  // }
 
-        if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, id);
-        }
-        else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1));
-        }
-        else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1));
-        }
-        else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(
-                selected.slice(0, selectedIndex),
-                selected.slice(selectedIndex + 1)
-            );
-        }
-
-        setSelected(newSelected);
-    }
-
-    function handleChangePage(event, page) {
-        setPage(page);
-    }
-
-    function handleChangeRowsPerPage(event) {
-        setRowsPerPage(event.target.value);
-    }
-    // function renderNumber(num) {
-    //     var indents = [];
-    //     for (var i = 0; i < num; i++) {
-    // indents.push(<Box sx={{ mr: "-10px" }} >
-    //             <Avatar src/>
-    //         </Box>)
-    //     }
-    //     return indents;
-    // }
-
-    return (
-        <div className="w-full flex flex-col mr-52">
-
-            <FuseScrollbars className="flex-grow overflow-x-auto">
-
-                <Table className="min-w-xl" aria-labelledby="tableTitle">
-
-                    {/* <ProductsTableHead
+  return (
+    <div className="w-full flex flex-col mr-52">
+      <FuseScrollbars className="flex-grow overflow-x-auto">
+        <Table className="min-w-xl" aria-labelledby="tableTitle">
+          {/* <ProductsTableHead
                         numSelected={selected.length}
                         order={order}
                         onSelectAllClick={handleSelectAllClick}
                         onRequestSort={handleRequestSort}
                         rowCount={data.length}
                     /> */}
-                    <TableBody>
-                        {_.orderBy(data, ['id'], ['asc']).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                            .map(h => {
-                                return (
-                                    <TableRow
-                                        className="h-64 cursor-pointer"
-                                        hover
-                                        role="checkbox"
-                                        // aria-checked={isSelected}
-                                        // tabIndex={-1}
-                                        // key={n.id}
-                                        // selected={isSelected}
-                                        onClick={() => handleClick(h)}
-                                    >
-                                        <TableCell className="w-48 px-4 sm:px-12" padding="checkbox">
-                                            <Checkbox
-                                            // checked={isSelected}
-                                            // onClick={event => event.stopPropagation()}
-                                            // onChange={event => handleCheck(event, n.id)}
-                                            />
-                                        </TableCell>
+          <TableBody>
+            {_.orderBy(data, ['id'], ['asc'])
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((h) => {
+                return (
+                  <TableRow
+                    className="h-64 cursor-pointer"
+                    hover
+                    role="checkbox"
+                    // aria-checked={isSelected}
+                    // tabIndex={-1}
+                    // key={n.id}
+                    // selected={isSelected}
+                    onClick={() => handleClick(h)}
+                  >
+                    <TableCell className="w-48 px-4 sm:px-12" padding="checkbox">
+                      <Checkbox
+                      // checked={isSelected}
+                      // onClick={event => event.stopPropagation()}
+                      // onChange={event => handleCheck(event, n.id)}
+                      />
+                    </TableCell>
 
-                                        <TableCell className="w-52" component="th" scope="row" padding="none">
-                                            <Avatar src={h.avatar} />
-                                        </TableCell>
+                    <TableCell className="w-52" component="th" scope="row" padding="none">
+                      <Avatar src={h.avatar} />
+                    </TableCell>
 
-                                        <TableCell component="th" scope="row">
-                                            <Box>
-                                                <Box>
-                                                    {h.id}
-                                                </Box>
-                                                <Box>
-                                                    {h.position}
-                                                </Box>
-                                            </Box>
-                                        </TableCell>
+                    <TableCell component="th" scope="row">
+                      <Box>
+                        <Box>{h.id}</Box>
+                        <Box>{h.position}</Box>
+                      </Box>
+                    </TableCell>
 
+                    <TableCell component="th" scope="row" align="center">
+                      <Box display="flex" alignItems="center">
+                        {/* {renderNumber(h.memberNumber)} */}
+                        {h.members.map((member, index) => {
+                          return (
+                            <Box key={index} sx={{ mr: '-10px' }}>
+                              <Avatar src={member.avatar} />
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    </TableCell>
 
-                                        <TableCell component="th" scope="row" align="center">
-                                            <Box display="flex" alignItems="center">
-                                                {/* {renderNumber(h.memberNumber)} */}
-                                                {h.members.map((member, index) => {
-                                                    return (<Box key={index} sx={{ mr: "-10px" }} >
-                                                        <Avatar src={member.avatar} />
-                                                    </Box>)
-                                                })}
-                                            </Box>
-                                        </TableCell>
+                    <TableCell component="th" scope="row">
+                      <Chip
+                        label="Inquiring"
+                        variant="outlined"
+                        classes={{
+                          root: classes.root,
+                          outlined: classes.outlined
+                        }}
+                      />
+                    </TableCell>
 
-                                        <TableCell component="th" scope="row">
-                                            <Chip label="Inquiring"
-                                                variant="outlined"
-                                                classes={{
-                                                    root: classes.root,
-                                                    outlined: classes.outlined,
-                                                }}
-                                            />
-                                        </TableCell>
+                    <TableCell component="th" scope="row" align="right">
+                      <Box sx={{ mt: '-25px' }}>
+                        <Typography variant="subtitle2" color="textSecondary">
+                          {h.dateCreated}
+                        </Typography>
+                      </Box>
+                      {/* {h.dateCreated} */}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+          </TableBody>
+        </Table>
+      </FuseScrollbars>
 
-                                        <TableCell component="th" scope="row" align="right">
-                                            <Box sx={{ mt: "-25px" }}>
-                                                <Typography variant="subtitle2" color="textSecondary">{h.dateCreated}</Typography>
-                                            </Box>
-                                            {/* {h.dateCreated} */}
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            })}
-
-
-                    </TableBody>
-                </Table>
-            </FuseScrollbars>
-
-            <TablePagination
-                component="div"
-                count={data.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                backIconButtonProps={{
-                    'aria-label': 'Previous Page'
-                }}
-                nextIconButtonProps={{
-                    'aria-label': 'Next Page'
-                }}
-                onChangePage={handleChangePage}
-                onChangeRowsPerPage={handleChangeRowsPerPage}
-            />
-        </div>
-    );
+      <TablePagination
+        component="div"
+        count={data.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        backIconButtonProps={{
+          'aria-label': 'Previous Page'
+        }}
+        nextIconButtonProps={{
+          'aria-label': 'Next Page'
+        }}
+        onChangePage={handleChangePage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
+    </div>
+  );
 }
 
 export default withRouter(InquiringTable);

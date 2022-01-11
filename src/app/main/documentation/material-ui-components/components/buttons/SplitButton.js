@@ -27,7 +27,7 @@ export default function SplitButton() {
   }
 
   function handleToggle() {
-    setOpen(prevOpen => !prevOpen);
+    setOpen((prevOpen) => !prevOpen);
   }
 
   function handleClose(event) {
@@ -59,7 +59,7 @@ export default function SplitButton() {
             <Grow
               {...TransitionProps}
               style={{
-                transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+                transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'
               }}
             >
               <Paper id="menu-list-grow">
@@ -70,7 +70,7 @@ export default function SplitButton() {
                         key={option}
                         disabled={index === 2}
                         selected={index === selectedIndex}
-                        onClick={event => handleMenuItemClick(event, index)}
+                        onClick={(event) => handleMenuItemClick(event, index)}
                       >
                         {option}
                       </MenuItem>

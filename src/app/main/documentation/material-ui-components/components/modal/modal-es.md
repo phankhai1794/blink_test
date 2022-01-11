@@ -9,12 +9,12 @@ components: Modal
 
 The component renders its `children` node in front of a backdrop component. The `Modal` offers important features:
 
-- 
-- 
-- 
+-
+-
+-
 - ♿️ It properly manages focus; moving to the modal content, and keeping it there until the modal is closed.
 - ♿️ Adds the appropriate ARIA roles automatically.
-- 
+-
 
 > **Terminology note**. The term "modal" is sometimes used to mean "dialog", but this is a misnomer. A Modal window describes parts of a UI. An element is considered modal if [it blocks interaction with the rest of the application](https://en.wikipedia.org/wiki/Modal_window).
 
@@ -46,7 +46,7 @@ However, creating React elements has a cost too. Consider the following case:
       </TableRow>
     </TableHead>
     <TableBody>
-      {rows.map(row => (
+      {rows.map((row) => (
         <TableRow key={row.id}>
           <TableCell component="th" scope="row">
             {row.name}
@@ -60,7 +60,7 @@ However, creating React elements has a cost too. Consider the following case:
 </Modal>
 ```
 
-We create a lot of React elements that will never be mounted. It's wasteful 
+We create a lot of React elements that will never be mounted. It's wasteful
 
 ```jsx
 <Modal open={false}>
@@ -75,10 +75,7 @@ This way, you take advantage of [React render laziness evaluation](https://overr
 - Be sure to add `aria-labelledby="id..."`, referencing the modal title, to the `Modal`. Additionally, you may give a description of your modal with the `aria-describedby="id..."` property on the `Modal`.
 
 ```jsx
-<Modal
-  aria-labelledby="simple-modal-title"
-  aria-describedby="simple-modal-description"
->
+<Modal aria-labelledby="simple-modal-title" aria-describedby="simple-modal-description">
   <Typography variant="h6" id="modal-title">
     My Title
   </Typography>

@@ -35,19 +35,19 @@ mdDown      |                     hide | show
 
 ## 断点了
 
-使用任何断点 `up` 属性，给定 *孩子* 将被隐藏 *或高于* 的断点。
+使用任何断点 `up` 属性，给定 _孩子_ 将被隐藏 _或高于_ 的断点。
 
 {{"demo": "pages/components/hidden/BreakpointUp.js"}}
 
 ## 断点下来
 
-使用任何断点 `down` 属性，给定 *孩子* 将被隐藏 *或低于* 的断点。
+使用任何断点 `down` 属性，给定 _孩子_ 将被隐藏 _或低于_ 的断点。
 
 {{"demo": "pages/components/hidden/BreakpointDown.js"}}
 
 ## 仅限断点
 
-利用断点 `only` 属性，给定 *孩子* 将被隐藏 *在* 指定的断点（多个）。
+利用断点 `only` 属性，给定 _孩子_ 将被隐藏 _在_ 指定的断点（多个）。
 
 `only` 属性可以两种方式使用：
 

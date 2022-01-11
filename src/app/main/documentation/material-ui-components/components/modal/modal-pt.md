@@ -9,12 +9,12 @@ components: Modal
 
 O componente torna seus nós `children` na frente de um componente de plano de fundo. O `Modal` oferece recursos importantes:
 
-- 
-- 
-- 
+-
+-
+-
 - ♿️ Gerencia adequadamente o foco; movendo para o conteúdo modal, e mantendo-o lá até que o modal seja fechado.
 - ♿️ Adiciona as funções ARIA apropriadas automaticamente.
-- 
+-
 
 > **Nota sobre a terminologia**. O termo "modal" algumas vezes é usado com o sentido de "diálogo", mas isto é um equívoco. Uma janela Modal descreve partes de uma UI. Um elemento é considerado modal se [ele bloqueia interações com o resto da aplicação](https://en.wikipedia.org/wiki/Modal_window).
 
@@ -46,7 +46,7 @@ Porém, criar elementos React tem um preço também. Considere o caso a seguir:
       </TableRow>
     </TableHead>
     <TableBody>
-      {rows.map(row => (
+      {rows.map((row) => (
         <TableRow key={row.id}>
           <TableCell component="th" scope="row">
             {row.name}
@@ -60,7 +60,7 @@ Porém, criar elementos React tem um preço também. Considere o caso a seguir:
 </Modal>
 ```
 
-Criamos muitos elementos React que nunca serão montados. É um desperdício 🐢. Você pode ** acelerar ** a renderização movendo o corpo do modal para seu próprio componente. 
+Criamos muitos elementos React que nunca serão montados. É um desperdício 🐢. Você pode ** acelerar ** a renderização movendo o corpo do modal para seu próprio componente.
 
 ```jsx
 <Modal open={false}>
@@ -75,10 +75,7 @@ Desta forma, você tem a vantagem do [React render laziness evaluation](https://
 - Certifique-se de adicionar `aria-labelledby="id..."`, referenciando o título modal, ao `Modal`. Adicionalmente, você pode dar uma descrição do seu modal com a propriedade `aria-describedby = "id..."` no `Modal`.
 
 ```jsx
-<Modal
-  aria-labelledby="simple-modal-title"
-  aria-describedby="simple-modal-description"
->
+<Modal aria-labelledby="simple-modal-title" aria-describedby="simple-modal-description">
   <Typography variant="h6" id="modal-title">
     Meu título
   </Typography>

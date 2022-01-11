@@ -9,15 +9,15 @@ import Paper from '@material-ui/core/Paper';
 
 const TAX_RATE = 0.07;
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     marginTop: theme.spacing(3),
-    overflowX: 'auto',
+    overflowX: 'auto'
   },
   table: {
-    minWidth: 700,
-  },
+    minWidth: 700
+  }
 }));
 
 function ccyFormat(num) {
@@ -40,7 +40,7 @@ function subtotal(items) {
 const rows = [
   createRow('Paperclips (Box)', 100, 1.15),
   createRow('Paper (Case)', 10, 45.99),
-  createRow('Waste Basket', 2, 17.99),
+  createRow('Waste Basket', 2, 17.99)
 ];
 
 const invoiceSubtotal = subtotal(rows);
@@ -62,7 +62,7 @@ export default function SpanningTable() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map(row => (
+          {rows.map((row) => (
             <TableRow key={row.desc}>
               <TableCell>{row.desc}</TableCell>
               <TableCell align="right">{row.qty}</TableCell>

@@ -4,8 +4,8 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 
 const useStyles = makeStyles({
   root: {
-    flexGrow: 1,
-  },
+    flexGrow: 1
+  }
 });
 
 export default function LinearBuffer() {

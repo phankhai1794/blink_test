@@ -6,14 +6,14 @@ import Typography from '@material-ui/core/Typography';
 
 const AntTabs = withStyles({
   root: {
-    borderBottom: '1px solid #e8e8e8',
+    borderBottom: '1px solid #e8e8e8'
   },
   indicator: {
-    backgroundColor: '#1890ff',
-  },
+    backgroundColor: '#1890ff'
+  }
 })(Tabs);
 
-const AntTab = withStyles(theme => ({
+const AntTab = withStyles((theme) => ({
   root: {
     textTransform: 'none',
     minWidth: 72,
@@ -29,22 +29,22 @@ const AntTab = withStyles(theme => ({
       'sans-serif',
       '"Apple Color Emoji"',
       '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
+      '"Segoe UI Symbol"'
     ].join(','),
     '&:hover': {
       color: '#40a9ff',
-      opacity: 1,
+      opacity: 1
     },
     '&$selected': {
       color: '#1890ff',
-      fontWeight: theme.typography.fontWeightMedium,
+      fontWeight: theme.typography.fontWeightMedium
     },
     '&:focus': {
-      color: '#40a9ff',
-    },
+      color: '#40a9ff'
+    }
   },
-  selected: {},
-}))(props => <Tab disableRipple {...props} />);
+  selected: {}
+}))((props) => <Tab disableRipple {...props} />);
 
 const StyledTabs = withStyles({
   indicator: {
@@ -54,12 +54,12 @@ const StyledTabs = withStyles({
     '& > div': {
       maxWidth: 40,
       width: '100%',
-      backgroundColor: '#635ee7',
-    },
-  },
-})(props => <Tabs {...props} TabIndicatorProps={{ children: <div /> }} />);
+      backgroundColor: '#635ee7'
+    }
+  }
+})((props) => <Tabs {...props} TabIndicatorProps={{ children: <div /> }} />);
 
-const StyledTab = withStyles(theme => ({
+const StyledTab = withStyles((theme) => ({
   root: {
     textTransform: 'none',
     color: '#fff',
@@ -67,24 +67,24 @@ const StyledTab = withStyles(theme => ({
     fontSize: theme.typography.pxToRem(15),
     marginRight: theme.spacing(1),
     '&:focus': {
-      opacity: 1,
-    },
-  },
-}))(props => <Tab disableRipple {...props} />);
+      opacity: 1
+    }
+  }
+}))((props) => <Tab disableRipple {...props} />);
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   typography: {
-    padding: theme.spacing(3),
+    padding: theme.spacing(3)
   },
   demo1: {
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.paper
   },
   demo2: {
-    backgroundColor: '#2e1534',
-  },
+    backgroundColor: '#2e1534'
+  }
 }));
 
 export default function CustomizedTabs() {

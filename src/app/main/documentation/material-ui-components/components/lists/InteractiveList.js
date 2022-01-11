@@ -16,24 +16,24 @@ import Typography from '@material-ui/core/Typography';
 import FolderIcon from '@material-ui/icons/Folder';
 import DeleteIcon from '@material-ui/icons/Delete';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    maxWidth: 752,
+    maxWidth: 752
   },
   demo: {
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.paper
   },
   title: {
-    margin: theme.spacing(4, 0, 2),
-  },
+    margin: theme.spacing(4, 0, 2)
+  }
 }));
 
 function generate(element) {
-  return [0, 1, 2].map(value =>
+  return [0, 1, 2].map((value) =>
     React.cloneElement(element, {
-      key: value,
-    }),
+      key: value
+    })
   );
 }
 
@@ -49,7 +49,7 @@ export default function InteractiveList() {
           control={
             <Checkbox
               checked={dense}
-              onChange={event => setDense(event.target.checked)}
+              onChange={(event) => setDense(event.target.checked)}
               value="dense"
             />
           }
@@ -59,7 +59,7 @@ export default function InteractiveList() {
           control={
             <Checkbox
               checked={secondary}
-              onChange={event => setSecondary(event.target.checked)}
+              onChange={(event) => setSecondary(event.target.checked)}
               value="secondary"
             />
           }
@@ -79,7 +79,7 @@ export default function InteractiveList() {
                     primary="Single-line item"
                     secondary={secondary ? 'Secondary text' : null}
                   />
-                </ListItem>,
+                </ListItem>
               )}
             </List>
           </div>
@@ -99,7 +99,7 @@ export default function InteractiveList() {
                     primary="Single-line item"
                     secondary={secondary ? 'Secondary text' : null}
                   />
-                </ListItem>,
+                </ListItem>
               )}
             </List>
           </div>
@@ -123,7 +123,7 @@ export default function InteractiveList() {
                     primary="Single-line item"
                     secondary={secondary ? 'Secondary text' : null}
                   />
-                </ListItem>,
+                </ListItem>
               )}
             </List>
           </div>
@@ -150,7 +150,7 @@ export default function InteractiveList() {
                       <DeleteIcon />
                     </IconButton>
                   </ListItemSecondaryAction>
-                </ListItem>,
+                </ListItem>
               )}
             </List>
           </div>

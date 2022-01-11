@@ -12,11 +12,11 @@ import MailIcon from '@material-ui/icons/Mail';
 
 const useStyles = makeStyles({
   list: {
-    width: 250,
+    width: 250
   },
   fullList: {
-    width: 'auto',
-  },
+    width: 'auto'
+  }
 });
 
 export default function TemporaryDrawer() {
@@ -25,10 +25,10 @@ export default function TemporaryDrawer() {
     top: false,
     left: false,
     bottom: false,
-    right: false,
+    right: false
   });
 
-  const toggleDrawer = (side, open) => event => {
+  const toggleDrawer = (side, open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
     }
@@ -36,7 +36,7 @@ export default function TemporaryDrawer() {
     setState({ ...state, [side]: open });
   };
 
-  const sideList = side => (
+  const sideList = (side) => (
     <div
       className={classes.list}
       role="presentation"
@@ -63,7 +63,7 @@ export default function TemporaryDrawer() {
     </div>
   );
 
-  const fullList = side => (
+  const fullList = (side) => (
     <div
       className={classes.fullList}
       role="presentation"

@@ -61,11 +61,11 @@ An App Bar that elevates on scroll.
 
 #### Arguments
 
-1. `options` (*Object* [optional]):
+1. `options` (_Object_ [optional]):
 
-    - `options.disableHysteresis` (*Boolean* [optional]): Defaults to `false`. Disable the hysteresis. Ignore the scroll direction when determining the `trigger` value.
-    - `options.target` (*Node* [optional]): Defaults to `window`.
-    - `options.threshold` (*Number* [optional]): Defaults to `100`. Change the `trigger` value when the vertical scroll strictly crosses this threshold (exclusive).
+   - `options.disableHysteresis` (_Boolean_ [optional]): Defaults to `false`. Disable the hysteresis. Ignore the scroll direction when determining the `trigger` value.
+   - `options.target` (_Node_ [optional]): Defaults to `window`.
+   - `options.threshold` (_Number_ [optional]): Defaults to `100`. Change the `trigger` value when the vertical scroll strictly crosses this threshold (exclusive).
 
 #### Returns
 

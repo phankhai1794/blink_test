@@ -34,10 +34,7 @@ Todos os controles de formulário devem ter rótulos, e isso inclui os botões d
 Quando uma label não pode ser usada, é necessário adicionar um atributo diretamente no componente de input. Nesse caso você pode aplicar um atributo adicional (e.g.`aria-label`,`aria-labelledby`, `title`) através do `inputProps`.
 
 ```jsx
-<RadioButton
-  value="radioA"
-  inputProps={{ 'aria-label': 'Opção A' } }
-/>
+<RadioButton value="radioA" inputProps={{ 'aria-label': 'Opção A' }} />
 ```
 
 ## Orientação

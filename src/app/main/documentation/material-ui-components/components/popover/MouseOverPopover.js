@@ -3,13 +3,13 @@ import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   popover: {
-    pointerEvents: 'none',
+    pointerEvents: 'none'
   },
   paper: {
-    padding: theme.spacing(1),
-  },
+    padding: theme.spacing(1)
+  }
 }));
 
 function MouseOverPopover() {
@@ -40,17 +40,17 @@ function MouseOverPopover() {
         id="mouse-over-popover"
         className={classes.popover}
         classes={{
-          paper: classes.paper,
+          paper: classes.paper
         }}
         open={open}
         anchorEl={anchorEl}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'left'
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'left',
+          horizontal: 'left'
         }}
         onClose={handlePopoverClose}
         disableRestoreFocus

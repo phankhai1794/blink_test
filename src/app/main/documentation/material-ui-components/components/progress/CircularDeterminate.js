@@ -2,10 +2,10 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   progress: {
-    margin: theme.spacing(2),
-  },
+    margin: theme.spacing(2)
+  }
 }));
 
 export default function CircularDeterminate() {
@@ -15,7 +15,7 @@ export default function CircularDeterminate() {
   React.useEffect(() => {
     function tick() {
       // reset when reaching 100%
-      setProgress(oldProgress => (oldProgress >= 100 ? 0 : oldProgress + 1));
+      setProgress((oldProgress) => (oldProgress >= 100 ? 0 : oldProgress + 1));
     }
 
     const timer = setInterval(tick, 20);

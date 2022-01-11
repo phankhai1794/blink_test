@@ -10,14 +10,17 @@ Zu viele Schriftgrößen und -stile gleichzeitig können jedes Layout beeinträc
 
 ## Allgemein
 
-Die *Roboto* Schriftart wird **nicht** automatisch durch Material UI geladen werden. Der Entwickler ist dafür verantwortlich, alle, in seiner Anwendung verwendeten, Schriftarten zu laden. Roboto Font bietet einige einfache Einstiegsmöglichkeiten. Für anspruchsvollere Konfiguration, besuche [den Theme Anpassung Abschnitt](/customization/typography/).
+Die _Roboto_ Schriftart wird **nicht** automatisch durch Material UI geladen werden. Der Entwickler ist dafür verantwortlich, alle, in seiner Anwendung verwendeten, Schriftarten zu laden. Roboto Font bietet einige einfache Einstiegsmöglichkeiten. Für anspruchsvollere Konfiguration, besuche [den Theme Anpassung Abschnitt](/customization/typography/).
 
 ## Die Roboto Schrift
 
 Unten ist ein Beispiel für ein Link-Markup zum Laden der Roboto-Schriftart von einem CDN dargestellt:
 
 ```html
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css?family=Roboto:300,400,500&display=swap"
+/>
 ```
 
 ## Mit npm installieren
@@ -53,10 +56,12 @@ Die Komponente Typografie verwendet die Eigenschaft `variantMapping` um eine UI-
 - Sie können das zugrunde liegende Element einmalig mit der Eigenschaft `component` ändern:
 
 ```jsx
-{/ * Wir haben bereits eine h1 auf der Seite, wir wollen diese nicht kopieren. * /}
+{
+  / * Wir haben bereits eine h1 auf der Seite, wir wollen diese nicht kopieren. * /;
+}
 <Typography variant="h1" component="h2">
   h1. Überschrift
-</Typography>
+</Typography>;
 ```
 
 - Sie können das Mapping [global mit dem Theme](/customization/globals/#default-props) ändern:
@@ -75,9 +80,9 @@ const theme = createMuiTheme({
         subtitle1: 'h2',
         subtitle2: 'h2',
         body1: 'span',
-        body2: 'span',
-      },
-    },
-  },
+        body2: 'span'
+      }
+    }
+  }
 });
 ```

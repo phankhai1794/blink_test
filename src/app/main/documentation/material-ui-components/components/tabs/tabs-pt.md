@@ -69,8 +69,6 @@ Aqui está um exemplo de personalização do componente. Você pode aprender mai
 
 {{"demo": "pages/components/tabs/CustomizedTabs.js"}}
 
-
-
 ## Guias de navegação
 
 Por padrão as guias usam um elemento `button`, mas você pode definir sua própria tag ou seu próprio componente. Aqui vai um exemplo de implementação de guia de navegação:

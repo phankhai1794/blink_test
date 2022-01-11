@@ -6,18 +6,18 @@ import Grid from '@material-ui/core/Grid';
 
 const useStyles = makeStyles({
   avatar: {
-    margin: 10,
+    margin: 10
   },
   orangeAvatar: {
     margin: 10,
     color: '#fff',
-    backgroundColor: deepOrange[500],
+    backgroundColor: deepOrange[500]
   },
   purpleAvatar: {
     margin: 10,
     color: '#fff',
-    backgroundColor: deepPurple[500],
-  },
+    backgroundColor: deepPurple[500]
+  }
 });
 
 export default function LetterAvatars() {

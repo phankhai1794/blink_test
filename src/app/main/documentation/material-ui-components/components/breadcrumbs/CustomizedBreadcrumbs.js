@@ -7,20 +7,20 @@ import Avatar from '@material-ui/core/Avatar';
 import HomeIcon from '@material-ui/icons/Home';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-const StyledBreadcrumb = withStyles(theme => ({
+const StyledBreadcrumb = withStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.grey[100],
     height: 24,
     color: theme.palette.grey[800],
     fontWeight: theme.typography.fontWeightRegular,
     '&:hover, &:focus': {
-      backgroundColor: theme.palette.grey[300],
+      backgroundColor: theme.palette.grey[300]
     },
     '&:active': {
       boxShadow: theme.shadows[1],
-      backgroundColor: emphasize(theme.palette.grey[300], 0.12),
-    },
-  },
+      backgroundColor: emphasize(theme.palette.grey[300], 0.12)
+    }
+  }
 }))(Chip); // TypeScript only: need a type cast here because https://github.com/Microsoft/TypeScript/issues/26591
 
 function handleClick(event) {
@@ -28,14 +28,14 @@ function handleClick(event) {
   alert('You clicked a breadcrumb.');
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    padding: theme.spacing(1),
+    padding: theme.spacing(1)
   },
   avatar: {
     background: 'none',
-    marginRight: -theme.spacing(1.5),
-  },
+    marginRight: -theme.spacing(1.5)
+  }
 }));
 
 export default function CustomizedBreadcrumbs() {

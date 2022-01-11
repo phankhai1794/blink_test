@@ -9,18 +9,18 @@ import BeachAccessIcon from '@material-ui/icons/BeachAccess';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.paper
   },
   dividerFullWidth: {
-    margin: `5px 0 0 ${theme.spacing(2)}px`,
+    margin: `5px 0 0 ${theme.spacing(2)}px`
   },
   dividerInset: {
-    margin: `5px 0 0 ${theme.spacing(9)}px`,
-  },
+    margin: `5px 0 0 ${theme.spacing(9)}px`
+  }
 }));
 
 export default function SubheaderDividers() {

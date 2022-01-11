@@ -34,10 +34,7 @@ Alle Formularsteuerelemente sollten Beschriftungen haben. Dazu gehören Optionsf
 Wenn ein Label nicht verwendet werden kann, muss der Eingabekomponente ein Attribut direkt hinzugefügt werden. In diesem Fall können Sie das zusätzliche Attribut (z. B. `aria-label`, `aria-labelby`, `title`) über die Eigenschaft `inputProps` anwenden.
 
 ```jsx
-<RadioButton
-  value="radioA"
-  inputProps={{ 'aria-label': 'Radio A' } }
-/>
+<RadioButton value="radioA" inputProps={{ 'aria-label': 'Radio A' }} />
 ```
 
 ## Anleitung

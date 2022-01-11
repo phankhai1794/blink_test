@@ -3,11 +3,11 @@ import { makeStyles } from '@material-ui/core/styles';
 import Badge from '@material-ui/core/Badge';
 import MailIcon from '@material-ui/icons/Mail';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   margin: {
     margin: theme.spacing(2),
-    marginRight: theme.spacing(3),
-  },
+    marginRight: theme.spacing(3)
+  }
 }));
 
 export default function BadgeMax() {

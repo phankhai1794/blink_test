@@ -12,21 +12,21 @@ import { makeStyles } from '@material-ui/core/styles';
 // @ts-ignore
 import MarkdownElement from 'app/main/documentation/material-ui-components/MarkdownElement';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   demo: {
-    height: 240,
+    height: 240
   },
   paper: {
     padding: theme.spacing(2),
     height: '100%',
-    color: theme.palette.text.secondary,
+    color: theme.palette.text.secondary
   },
   control: {
-    padding: theme.spacing(2),
-  },
+    padding: theme.spacing(2)
+  }
 }));
 
 export default function InteractiveGrid() {
@@ -57,7 +57,7 @@ export default function InteractiveGrid() {
           direction={direction}
           justify={justify}
         >
-          {[0, 1, 2].map(value => (
+          {[0, 1, 2].map((value) => (
             <Grid key={value} item>
               <Paper
                 className={classes.paper}

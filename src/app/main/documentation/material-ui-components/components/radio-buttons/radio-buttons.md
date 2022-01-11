@@ -36,10 +36,7 @@ When a label can't be used, it's necessary to add an attribute directly to the i
 In this case, you can apply the additional attribute (e.g. `aria-label`, `aria-labelledby`, `title`) via the `inputProps` property.
 
 ```jsx
-<RadioButton
-  value="radioA"
-  inputProps={{ 'aria-label': 'Radio A' } }
-/>
+<RadioButton value="radioA" inputProps={{ 'aria-label': 'Radio A' }} />
 ```
 
 ## Guidance
