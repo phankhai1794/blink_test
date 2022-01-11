@@ -36,10 +36,7 @@ components: Checkbox, FormControl, FormGroup, FormLabel, FormControlLabel
 Когда метка не может быть использована, необходимо добавить атрибут непосредственно на поле ввода. В этом случае можно применить дополнительный атрибут (например, `aria-label`, `aria-labelledby`, `title`) через свойство `inputProps`.
 
 ```jsx
-<Checkbox
-  value="checkedA"
-  inputProps={{ 'aria-label': 'Checkbox A' } }
-/>
+<Checkbox value="checkedA" inputProps={{ 'aria-label': 'Checkbox A' }} />
 ```
 
 ## Guidance

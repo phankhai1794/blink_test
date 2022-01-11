@@ -8,8 +8,8 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 const useStyles = makeStyles({
   root: {
     maxWidth: 400,
-    flexGrow: 1,
-  },
+    flexGrow: 1
+  }
 });
 
 export default function DotsMobileStepper() {
@@ -18,11 +18,11 @@ export default function DotsMobileStepper() {
   const [activeStep, setActiveStep] = React.useState(0);
 
   function handleNext() {
-    setActiveStep(prevActiveStep => prevActiveStep + 1);
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   }
 
   function handleBack() {
-    setActiveStep(prevActiveStep => prevActiveStep - 1);
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
   }
 
   return (

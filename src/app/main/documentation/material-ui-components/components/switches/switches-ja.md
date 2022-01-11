@@ -19,7 +19,7 @@ components: Switch, FormControl, FormGroup, FormLabel, FormControlLabel
 
 ## Switches with FormGroup
 
-`FormGroup` は、より簡単なAPIを提供する選択コントロールコンポーネントをグループ化するために使用される便利なラッパーです。 However, we encourage you to use a [Checkbox](#checkboxes) instead.
+`FormGroup` は、より簡単な API を提供する選択コントロールコンポーネントをグループ化するために使用される便利なラッパーです。 However, we encourage you to use a [Checkbox](#checkboxes) instead.
 
 {{"demo": "pages/components/switches/SwitchesGroup.js"}}
 
@@ -42,8 +42,5 @@ Here are some examples of customizing the component. You can learn more about th
 ラベルを使用できない場合は、入力コンポーネントに直接属性を追加する必要があります。 この場合、追加の属性（例： `aria-label`, `aria-labelledby`, `title`)を経由して `inputProps` プロパティを追加します。
 
 ```jsx
-<Switch
-  value="checkedA"
-  inputProps={{ 'aria-label': 'Switch A' } }
-/>
+<Switch value="checkedA" inputProps={{ 'aria-label': 'Switch A' }} />
 ```

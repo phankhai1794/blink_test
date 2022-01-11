@@ -29,7 +29,7 @@ Exemple de carte utilisant une image pour renforcer le contenu.
 
 {{"demo": "pages/components/cards/MediaCard.js"}}
 
-Par défaut, nous utilisons la combinaison d'un élément `<div>` et *background-image* pour afficher le support. Cela peut être problématique dans certaines situations. Par exemple, vous voudrez peut-être afficher une vidéo ou une image sensible. Utilisez la propriété `component` pour ces cas d'utilisation:
+Par défaut, nous utilisons la combinaison d'un élément `<div>` et _background-image_ pour afficher le support. Cela peut être problématique dans certaines situations. Par exemple, vous voudrez peut-être afficher une vidéo ou une image sensible. Utilisez la propriété `component` pour ces cas d'utilisation:
 
 {{"demo": "pages/components/cards/ImgMediaCard.js"}}
 

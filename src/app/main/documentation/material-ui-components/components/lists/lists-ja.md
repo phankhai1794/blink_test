@@ -9,7 +9,7 @@ components: Collapse, Divider, List, ListItem, ListItemAvatar, ListItemIcon, Lis
 
 [List](https://material.io/design/components/lists.html) は、テキストまたは画像が連続するまとまりです。 それらは、アイコンとテキストで表される主要または補足的なアクションを含む項目で構成されています。
 
-## シンプルなList
+## シンプルな List
 
 {{"demo": "pages/components/lists/SimpleList.js"}}
 
@@ -24,16 +24,16 @@ function ListItemLink(props) {
 
 <ListItemLink href="#simple-list">
   <ListItemText primary="Spam" />
-</ListItemLink>
+</ListItemLink>;
 ```
 
-ドキュメントには[このセクションに続くReact Routerを用いたデモ](/guides/composition/#react-router)があります。
+ドキュメントには[このセクションに続く React Router を用いたデモ](/guides/composition/#react-router)があります。
 
-## ネストしたList
+## ネストした List
 
 {{"demo": "pages/components/lists/NestedList.js"}}
 
-## フォルダのList
+## フォルダの List
 
 {{"demo": "pages/components/lists/FolderList.js"}}
 
@@ -43,13 +43,13 @@ function ListItemLink(props) {
 
 {{"demo": "pages/components/lists/InteractiveList.js"}}
 
-## 選択されたListItem
+## 選択された ListItem
 
 {{"demo": "pages/components/lists/SelectedListItem.js"}}
 
-## Listの項目の整列
+## List の項目の整列
 
-3行以上を表示するときは、項目の配置を変更する必要があり、`alignItems="flex-start"`プロパティを設定してください。
+3 行以上を表示するときは、項目の配置を変更する必要があり、`alignItems="flex-start"`プロパティを設定してください。
 
 {{"demo": "pages/components/lists/AlignItemsList.js"}}
 
@@ -57,27 +57,27 @@ function ListItemLink(props) {
 
 ### Checkbox
 
-Checkboxは、主要なアクションまたは補助的なアクションのどちらかになります。
+Checkbox は、主要なアクションまたは補助的なアクションのどちらかになります。
 
-Checkboxは、Listの項目の主要なアクションであり状態を表します。コメントボタンは補助的なアクションであり別のターゲットになります。
+Checkbox は、List の項目の主要なアクションであり状態を表します。コメントボタンは補助的なアクションであり別のターゲットになります。
 
 {{"demo": "pages/components/lists/CheckboxList.js"}}
 
-Checkboxは、Listの項目と異なるターゲットに対する補助的なアクションです。
+Checkbox は、List の項目と異なるターゲットに対する補助的なアクションです。
 
 {{"demo": "pages/components/lists/CheckboxListSecondary.js"}}
 
 ### Switch
 
-Switchは補助的なアクションであり異なるターゲットです。
+Switch は補助的なアクションであり異なるターゲットです。
 
 {{"demo": "pages/components/lists/SwitchListSecondary.js"}}
 
-## ピン止めされたサブヘッダー付きList
+## ピン止めされたサブヘッダー付き List
 
 スクロールする上で、サブヘッダーは次のサブヘッダーによって画面から押し出されるまで画面の上部に固定されたままになります。
 
-この機能はCSSのSticky positioningに依存しています。 残念ながら、私たちがサポートしている全てのブラウザで[実装されている訳ではありません](https://caniuse.com/#search=sticky)。 サポートされていない場合、デフォルトは `disableSticky` となります。
+この機能は CSS の Sticky positioning に依存しています。 残念ながら、私たちがサポートしている全てのブラウザで[実装されている訳ではありません](https://caniuse.com/#search=sticky)。 サポートされていない場合、デフォルトは `disableSticky` となります。
 
 {{"demo": "pages/components/lists/PinnedSubheaderList.js"}}
 
@@ -87,7 +87,7 @@ Switchは補助的なアクションであり異なるターゲットです。
 
 ## Virtualized List
 
-次の例では、 `リスト` コンポーネントで [react-window](https://github.com/bvaughn/react-window) を使用する方法を示します。 これは200行をレンダリングし、より多くを簡単に処理できます。 仮想化はパフォーマンスの問題に役立ちます。
+次の例では、 `リスト` コンポーネントで [react-window](https://github.com/bvaughn/react-window) を使用する方法を示します。 これは 200 行をレンダリングし、より多くを簡単に処理できます。 仮想化はパフォーマンスの問題に役立ちます。
 
 {{"demo": "pages/components/lists/VirtualizedList.js"}}
 

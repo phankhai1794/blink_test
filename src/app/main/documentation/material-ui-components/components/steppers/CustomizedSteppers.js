@@ -7,35 +7,35 @@ import StepConnector from '@material-ui/core/StepConnector';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    width: '90%',
+    width: '90%'
   },
   button: {
-    marginRight: theme.spacing(1),
+    marginRight: theme.spacing(1)
   },
   instructions: {
     marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(1)
   },
   connectorActive: {
     '& $connectorLine': {
-      borderColor: theme.palette.secondary.main,
-    },
+      borderColor: theme.palette.secondary.main
+    }
   },
   connectorCompleted: {
     '& $connectorLine': {
-      borderColor: theme.palette.primary.main,
-    },
+      borderColor: theme.palette.primary.main
+    }
   },
   connectorDisabled: {
     '& $connectorLine': {
-      borderColor: theme.palette.grey[100],
-    },
+      borderColor: theme.palette.grey[100]
+    }
   },
   connectorLine: {
-    transition: theme.transitions.create('border-color'),
-  },
+    transition: theme.transitions.create('border-color')
+  }
 }));
 
 function getSteps() {
@@ -61,11 +61,11 @@ export default function CustomizedSteppers() {
   const steps = getSteps();
 
   function handleNext() {
-    setActiveStep(prevActiveStep => prevActiveStep + 1);
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   }
 
   function handleBack() {
-    setActiveStep(prevActiveStep => prevActiveStep - 1);
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
   }
 
   function handleReset() {
@@ -78,7 +78,7 @@ export default function CustomizedSteppers() {
         active: classes.connectorActive,
         completed: classes.connectorCompleted,
         disabled: classes.connectorDisabled,
-        line: classes.connectorLine,
+        line: classes.connectorLine
       }}
     />
   );
@@ -86,14 +86,14 @@ export default function CustomizedSteppers() {
   return (
     <div className={classes.root}>
       <Stepper activeStep={activeStep} connector={connector}>
-        {steps.map(label => (
+        {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
           </Step>
         ))}
       </Stepper>
       <Stepper alternativeLabel activeStep={activeStep} connector={connector}>
-        {steps.map(label => (
+        {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
           </Step>

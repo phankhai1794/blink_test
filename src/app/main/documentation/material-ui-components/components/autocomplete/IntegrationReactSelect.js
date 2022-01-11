@@ -45,60 +45,60 @@ const suggestions = [
   { label: 'Bouvet Island' },
   { label: 'Brazil' },
   { label: 'British Indian Ocean Territory' },
-  { label: 'Brunei Darussalam' },
-].map(suggestion => ({
+  { label: 'Brunei Darussalam' }
+].map((suggestion) => ({
   value: suggestion.label,
-  label: suggestion.label,
+  label: suggestion.label
 }));
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    height: 250,
+    height: 250
   },
   input: {
     display: 'flex',
     padding: 0,
-    height: 'auto',
+    height: 'auto'
   },
   valueContainer: {
     display: 'flex',
     flexWrap: 'wrap',
     flex: 1,
     alignItems: 'center',
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
   chip: {
-    margin: theme.spacing(0.5, 0.25),
+    margin: theme.spacing(0.5, 0.25)
   },
   chipFocused: {
     backgroundColor: emphasize(
       theme.palette.type === 'light' ? theme.palette.grey[300] : theme.palette.grey[700],
-      0.08,
-    ),
+      0.08
+    )
   },
   noOptionsMessage: {
-    padding: theme.spacing(1, 2),
+    padding: theme.spacing(1, 2)
   },
   singleValue: {
-    fontSize: 16,
+    fontSize: 16
   },
   placeholder: {
     position: 'absolute',
     left: 2,
     bottom: 6,
-    fontSize: 16,
+    fontSize: 16
   },
   paper: {
     position: 'absolute',
     zIndex: 1,
     marginTop: theme.spacing(1),
     left: 0,
-    right: 0,
+    right: 0
   },
   divider: {
-    height: theme.spacing(2),
-  },
+    height: theme.spacing(2)
+  }
 }));
 
 function NoOptionsMessage(props) {
@@ -116,7 +116,7 @@ function NoOptionsMessage(props) {
 NoOptionsMessage.propTypes = {
   children: PropTypes.node,
   innerProps: PropTypes.object,
-  selectProps: PropTypes.object.isRequired,
+  selectProps: PropTypes.object.isRequired
 };
 
 function inputComponent({ inputRef, ...props }) {
@@ -124,7 +124,7 @@ function inputComponent({ inputRef, ...props }) {
 }
 
 inputComponent.propTypes = {
-  inputRef: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
+  inputRef: PropTypes.oneOfType([PropTypes.func, PropTypes.object])
 };
 
 function Control(props) {
@@ -132,7 +132,7 @@ function Control(props) {
     children,
     innerProps,
     innerRef,
-    selectProps: { classes, TextFieldProps },
+    selectProps: { classes, TextFieldProps }
   } = props;
 
   return (
@@ -144,8 +144,8 @@ function Control(props) {
           className: classes.input,
           ref: innerRef,
           children,
-          ...innerProps,
-        },
+          ...innerProps
+        }
       }}
       {...TextFieldProps}
     />
@@ -156,7 +156,7 @@ Control.propTypes = {
   children: PropTypes.node,
   innerProps: PropTypes.object,
   innerRef: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
-  selectProps: PropTypes.object.isRequired,
+  selectProps: PropTypes.object.isRequired
 };
 
 function Option(props) {
@@ -166,7 +166,7 @@ function Option(props) {
       selected={props.isFocused}
       component="div"
       style={{
-        fontWeight: props.isSelected ? 500 : 400,
+        fontWeight: props.isSelected ? 500 : 400
       }}
       {...props.innerProps}
     >
@@ -180,7 +180,7 @@ Option.propTypes = {
   innerProps: PropTypes.object,
   innerRef: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
   isFocused: PropTypes.bool,
-  isSelected: PropTypes.bool,
+  isSelected: PropTypes.bool
 };
 
 function Placeholder(props) {
@@ -198,7 +198,7 @@ function Placeholder(props) {
 Placeholder.propTypes = {
   children: PropTypes.node,
   innerProps: PropTypes.object,
-  selectProps: PropTypes.object.isRequired,
+  selectProps: PropTypes.object.isRequired
 };
 
 function SingleValue(props) {
@@ -212,7 +212,7 @@ function SingleValue(props) {
 SingleValue.propTypes = {
   children: PropTypes.node,
   innerProps: PropTypes.object,
-  selectProps: PropTypes.object.isRequired,
+  selectProps: PropTypes.object.isRequired
 };
 
 function ValueContainer(props) {
@@ -221,7 +221,7 @@ function ValueContainer(props) {
 
 ValueContainer.propTypes = {
   children: PropTypes.node,
-  selectProps: PropTypes.object.isRequired,
+  selectProps: PropTypes.object.isRequired
 };
 
 function MultiValue(props) {
@@ -230,7 +230,7 @@ function MultiValue(props) {
       tabIndex={-1}
       label={props.children}
       className={clsx(props.selectProps.classes.chip, {
-        [props.selectProps.classes.chipFocused]: props.isFocused,
+        [props.selectProps.classes.chipFocused]: props.isFocused
       })}
       onDelete={props.removeProps.onClick}
       deleteIcon={<CancelIcon {...props.removeProps} />}
@@ -242,7 +242,7 @@ MultiValue.propTypes = {
   children: PropTypes.node,
   isFocused: PropTypes.bool,
   removeProps: PropTypes.object.isRequired,
-  selectProps: PropTypes.object.isRequired,
+  selectProps: PropTypes.object.isRequired
 };
 
 function Menu(props) {
@@ -256,7 +256,7 @@ function Menu(props) {
 Menu.propTypes = {
   children: PropTypes.node,
   innerProps: PropTypes.object,
-  selectProps: PropTypes.object,
+  selectProps: PropTypes.object
 };
 
 const components = {
@@ -267,7 +267,7 @@ const components = {
   Option,
   Placeholder,
   SingleValue,
-  ValueContainer,
+  ValueContainer
 };
 
 export default function IntegrationReactSelect() {
@@ -285,13 +285,13 @@ export default function IntegrationReactSelect() {
   }
 
   const selectStyles = {
-    input: base => ({
+    input: (base) => ({
       ...base,
       color: theme.palette.text.primary,
       '& input': {
-        font: 'inherit',
-      },
-    }),
+        font: 'inherit'
+      }
+    })
   };
 
   return (
@@ -305,9 +305,9 @@ export default function IntegrationReactSelect() {
             label: 'Country',
             InputLabelProps: {
               htmlFor: 'react-select-single',
-              shrink: true,
+              shrink: true
             },
-            placeholder: 'Search a country (start with a)',
+            placeholder: 'Search a country (start with a)'
           }}
           options={suggestions}
           components={components}
@@ -323,9 +323,9 @@ export default function IntegrationReactSelect() {
             label: 'Countries',
             InputLabelProps: {
               htmlFor: 'react-select-multiple',
-              shrink: true,
+              shrink: true
             },
-            placeholder: 'Select multiple countries',
+            placeholder: 'Select multiple countries'
           }}
           options={suggestions}
           components={components}

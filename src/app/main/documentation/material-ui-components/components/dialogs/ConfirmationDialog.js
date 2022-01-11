@@ -27,7 +27,7 @@ const options = [
   'Sedna',
   'Titania',
   'Triton',
-  'Umbriel',
+  'Umbriel'
 ];
 
 function ConfirmationDialogRaw(props) {
@@ -78,7 +78,7 @@ function ConfirmationDialogRaw(props) {
           value={value}
           onChange={handleChange}
         >
-          {options.map(option => (
+          {options.map((option) => (
             <FormControlLabel value={option} key={option} control={<Radio />} label={option} />
           ))}
         </RadioGroup>
@@ -98,19 +98,19 @@ function ConfirmationDialogRaw(props) {
 ConfirmationDialogRaw.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired
 };
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.paper
   },
   paper: {
     width: '80%',
-    maxHeight: 435,
-  },
+    maxHeight: 435
+  }
 }));
 
 export default function ConfirmationDialog() {
@@ -152,7 +152,7 @@ export default function ConfirmationDialog() {
         </ListItem>
         <ConfirmationDialogRaw
           classes={{
-            paper: classes.paper,
+            paper: classes.paper
           }}
           id="ringtone-menu"
           keepMounted

@@ -70,7 +70,7 @@ ButtonGroup can also be used to create a split button. The dropdown can change t
 
 Кнопка с плавающим действием, которая охватывает несколько боковых экранов (например, экраны с вкладками), должна анимироваться при переходах.
 
-Переход масштабирование (Zoom) может быть использован для достижения этой цели. Обратите внимание, что так как выход и вход анимации запускаются одновременно, мы используем ` enterDelay `, чтобы разрешить исходящим кнопкам плавающего действия анимироваться постепенно.
+Переход масштабирование (Zoom) может быть использован для достижения этой цели. Обратите внимание, что так как выход и вход анимации запускаются одновременно, мы используем `enterDelay`, чтобы разрешить исходящим кнопкам плавающего действия анимироваться постепенно.
 
 {{"demo": "pages/components/buttons/FloatingActionButtonZoom.js"}}
 
@@ -100,8 +100,6 @@ ButtonGroup can also be used to create a split button. The dropdown can change t
 
 {{"demo": "pages/components/buttons/CustomizedButtons.js"}}
 
-
-
 ## Сложные кнопки
 
 Текстовые кнопки, плавающие кнопки действий, блочные кнопки построены на основе одного и того же компонента: `ButtonBase`. Вы можете воспользоваться этим более низкоуровневым компонентом для создания пользовательских взаимодействий.
@@ -114,4 +112,4 @@ ButtonGroup can also be used to create a split button. The dropdown can change t
 
 {{"demo": "pages/components/buttons/ButtonRouter.js", "defaultCodeOpen": true}}
 
-*Note: Creating the Button components is necessary to prevent unexpected unmounting. You can read more about it in our [component property guide](/guides/composition/#component-property).*
+_Note: Creating the Button components is necessary to prevent unexpected unmounting. You can read more about it in our [component property guide](/guides/composition/#component-property)._

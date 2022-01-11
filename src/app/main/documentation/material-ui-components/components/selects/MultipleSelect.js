@@ -10,26 +10,26 @@ import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
 import Chip from '@material-ui/core/Chip';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   formControl: {
     margin: theme.spacing(1),
     minWidth: 120,
-    maxWidth: 300,
+    maxWidth: 300
   },
   chips: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   chip: {
-    margin: 2,
+    margin: 2
   },
   noLabel: {
-    marginTop: theme.spacing(3),
-  },
+    marginTop: theme.spacing(3)
+  }
 }));
 
 const ITEM_HEIGHT = 48;
@@ -38,9 +38,9 @@ const MenuProps = {
   PaperProps: {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
+      width: 250
+    }
+  }
 };
 
 const names = [
@@ -53,7 +53,7 @@ const names = [
   'Miriam Wagner',
   'Bradley Wilkerson',
   'Virginia Andrews',
-  'Kelly Snyder',
+  'Kelly Snyder'
 ];
 
 function getStyles(name, personName, theme) {
@@ -61,7 +61,7 @@ function getStyles(name, personName, theme) {
     fontWeight:
       personName.indexOf(name) === -1
         ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
+        : theme.typography.fontWeightMedium
   };
 }
 
@@ -96,7 +96,7 @@ export default function MultipleSelect() {
           input={<Input id="select-multiple" />}
           MenuProps={MenuProps}
         >
-          {names.map(name => (
+          {names.map((name) => (
             <MenuItem key={name} value={name} style={getStyles(name, personName, theme)}>
               {name}
             </MenuItem>
@@ -110,10 +110,10 @@ export default function MultipleSelect() {
           value={personName}
           onChange={handleChange}
           input={<Input id="select-multiple-checkbox" />}
-          renderValue={selected => selected.join(', ')}
+          renderValue={(selected) => selected.join(', ')}
           MenuProps={MenuProps}
         >
-          {names.map(name => (
+          {names.map((name) => (
             <MenuItem key={name} value={name}>
               <Checkbox checked={personName.indexOf(name) > -1} />
               <ListItemText primary={name} />
@@ -128,16 +128,16 @@ export default function MultipleSelect() {
           value={personName}
           onChange={handleChange}
           input={<Input id="select-multiple-chip" />}
-          renderValue={selected => (
+          renderValue={(selected) => (
             <div className={classes.chips}>
-              {selected.map(value => (
+              {selected.map((value) => (
                 <Chip key={value} label={value} className={classes.chip} />
               ))}
             </div>
           )}
           MenuProps={MenuProps}
         >
-          {names.map(name => (
+          {names.map((name) => (
             <MenuItem key={name} value={name} style={getStyles(name, personName, theme)}>
               {name}
             </MenuItem>
@@ -151,7 +151,7 @@ export default function MultipleSelect() {
           value={personName}
           onChange={handleChange}
           input={<Input id="select-multiple-placeholder" />}
-          renderValue={selected => {
+          renderValue={(selected) => {
             if (selected.length === 0) {
               return <em>Placeholder</em>;
             }
@@ -163,7 +163,7 @@ export default function MultipleSelect() {
           <MenuItem disabled value="">
             <em>Placeholder</em>
           </MenuItem>
-          {names.map(name => (
+          {names.map((name) => (
             <MenuItem key={name} value={name} style={getStyles(name, personName, theme)}>
               {name}
             </MenuItem>
@@ -180,10 +180,10 @@ export default function MultipleSelect() {
           value={personName}
           onChange={handleChangeMultiple}
           inputProps={{
-            id: 'select-multiple-native',
+            id: 'select-multiple-native'
           }}
         >
-          {names.map(name => (
+          {names.map((name) => (
             <option key={name} value={name}>
               {name}
             </option>

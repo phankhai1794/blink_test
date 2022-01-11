@@ -15,32 +15,32 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 const ranges = [
   {
     value: '0-20',
-    label: '0 to 20',
+    label: '0 to 20'
   },
   {
     value: '21-50',
-    label: '21 to 50',
+    label: '21 to 50'
   },
   {
     value: '51-100',
-    label: '51 to 100',
-  },
+    label: '51 to 100'
+  }
 ];
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   margin: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   withoutLabel: {
-    marginTop: theme.spacing(3),
+    marginTop: theme.spacing(3)
   },
   textField: {
-    flexBasis: 200,
-  },
+    flexBasis: 200
+  }
 }));
 
 export default function InputAdornments() {
@@ -50,10 +50,10 @@ export default function InputAdornments() {
     password: '',
     weight: '',
     weightRange: '',
-    showPassword: false,
+    showPassword: false
   });
 
-  const handleChange = prop => event => {
+  const handleChange = (prop) => (event) => {
     setValues({ ...values, [prop]: event.target.value });
   };
 
@@ -68,7 +68,7 @@ export default function InputAdornments() {
         id="simple-start-adornment"
         className={clsx(classes.margin, classes.textField)}
         InputProps={{
-          startAdornment: <InputAdornment position="start">Kg</InputAdornment>,
+          startAdornment: <InputAdornment position="start">Kg</InputAdornment>
         }}
       />
       <TextField
@@ -78,10 +78,10 @@ export default function InputAdornments() {
         value={values.weightRange}
         onChange={handleChange('weightRange')}
         InputProps={{
-          startAdornment: <InputAdornment position="start">Kg</InputAdornment>,
+          startAdornment: <InputAdornment position="start">Kg</InputAdornment>
         }}
       >
-        {ranges.map(option => (
+        {ranges.map((option) => (
           <MenuItem key={option.value} value={option.value}>
             {option.label}
           </MenuItem>
@@ -104,7 +104,7 @@ export default function InputAdornments() {
           endAdornment={<InputAdornment position="end">Kg</InputAdornment>}
           aria-describedby="weight-helper-text"
           inputProps={{
-            'aria-label': 'Weight',
+            'aria-label': 'Weight'
           }}
         />
         <FormHelperText id="weight-helper-text">Weight</FormHelperText>

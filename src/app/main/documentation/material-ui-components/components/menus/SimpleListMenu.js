@@ -6,19 +6,19 @@ import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
-  },
+    backgroundColor: theme.palette.background.paper
+  }
 }));
 
 const options = [
   'Show some love to Material-UI',
   'Show all notification content',
   'Hide sensitive notification content',
-  'Hide all notification content',
+  'Hide all notification content'
 ];
 
 export default function SimpleListMenu() {
@@ -64,7 +64,7 @@ export default function SimpleListMenu() {
             key={option}
             disabled={index === 0}
             selected={index === selectedIndex}
-            onClick={event => handleMenuItemClick(event, index)}
+            onClick={(event) => handleMenuItemClick(event, index)}
           >
             {option}
           </MenuItem>

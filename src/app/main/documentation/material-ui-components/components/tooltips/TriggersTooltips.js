@@ -38,7 +38,7 @@ export default function TriggersTooltips() {
             <div>
               <Tooltip
                 PopperProps={{
-                  disablePortal: true,
+                  disablePortal: true
                 }}
                 onClose={handleTooltipClose}
                 open={open}

@@ -100,8 +100,6 @@ Here are some examples of customizing the component. You can learn more about th
 
 {{"demo": "pages/components/buttons/CustomizedButtons.js"}}
 
-
-
 ## Botones Complejos
 
 Los Botones de Texto, los Botones Contenidos, los Botones de Acción Flotantes y los Botones con Iconos se construyen sobre el mismo componente: el `ButtonBase`. Se puede sacar partido de este componente básico para construir interacciones personalizadas.
@@ -114,4 +112,4 @@ Un uso común es usar el botón para empezar la navegación hacia una página nu
 
 {{"demo": "pages/components/buttons/ButtonRouter.js", "defaultCodeOpen": true}}
 
-*Note: Creating the Button components is necessary to prevent unexpected unmounting. You can read more about it in our [component property guide](/guides/composition/#component-property).*
+_Note: Creating the Button components is necessary to prevent unexpected unmounting. You can read more about it in our [component property guide](/guides/composition/#component-property)._

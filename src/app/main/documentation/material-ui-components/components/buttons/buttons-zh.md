@@ -46,7 +46,7 @@ components: Button, ButtonGroup, Fab, IconButton, ButtonBase, Zoom
 
 ## Grouped Buttons（按钮组）
 
-ButtonGroup组件可用于对描边按钮(默认) 或者实心按钮进行分组。
+ButtonGroup 组件可用于对描边按钮(默认) 或者实心按钮进行分组。
 
 {{"demo": "pages/components/buttons/GroupedButtons.js"}}
 
@@ -58,9 +58,9 @@ ButtonGroup can also be used to create a split button. The dropdown can change t
 
 ## Floating Action Buttons（提升动作按钮）
 
-[提升动作按钮](https://material.io/design/components/buttons-floating-action-button.html) (FAB) 在屏幕上执行主要的或最常用的操作。 它出现在所有屏幕内容的前面, 通常作为圆形形状, 其中心有一个图标。 FAB有两种类型：常规的和扩展的。
+[提升动作按钮](https://material.io/design/components/buttons-floating-action-button.html) (FAB) 在屏幕上执行主要的或最常用的操作。 它出现在所有屏幕内容的前面, 通常作为圆形形状, 其中心有一个图标。 FAB 有两种类型：常规的和扩展的。
 
-只使用FAB是最适合呈现屏幕主要操作的方法。
+只使用 FAB 是最适合呈现屏幕主要操作的方法。
 
 在每个屏幕中，我们建议只有一个浮动操作按钮来表示最常见的操作。
 
@@ -100,8 +100,6 @@ ButtonGroup can also be used to create a split button. The dropdown can change t
 
 {{"demo": "pages/components/buttons/CustomizedButtons.js"}}
 
-
-
 ## 复杂按钮
 
 文本按钮，包含按钮，浮动操作按钮和图标按钮构建在同一组件之上：`ButtonBase`。 您可以利用此较底层的组件来构建自定义交互。
@@ -114,4 +112,4 @@ ButtonGroup can also be used to create a split button. The dropdown can change t
 
 {{"demo": "pages/components/buttons/ButtonRouter.js", "defaultCodeOpen": true}}
 
-*请注意：为了防止组件被意外地移除，创建一个 Button 组件是有必要的。您可以在我们的[组件属性指南](/guides/composition/#component-property)中阅读更多相关信息。*
+_请注意：为了防止组件被意外地移除，创建一个 Button 组件是有必要的。您可以在我们的[组件属性指南](/guides/composition/#component-property)中阅读更多相关信息。_

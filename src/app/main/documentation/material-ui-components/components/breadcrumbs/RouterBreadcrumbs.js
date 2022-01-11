@@ -20,7 +20,7 @@ const breadcrumbNameMap = {
   '/inbox/important': 'Important',
   '/trash': 'Trash',
   '/spam': 'Spam',
-  '/drafts': 'Drafts',
+  '/drafts': 'Drafts'
 };
 
 function ListItemLink(props) {
@@ -39,33 +39,33 @@ function ListItemLink(props) {
 
 ListItemLink.propTypes = {
   open: PropTypes.bool,
-  to: PropTypes.string.isRequired,
+  to: PropTypes.string.isRequired
 };
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: 'flex',
     flexDirection: 'column',
-    width: 360,
+    width: 360
   },
   lists: {
     backgroundColor: theme.palette.background.paper,
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(1)
   },
   nested: {
-    paddingLeft: theme.spacing(4),
-  },
+    paddingLeft: theme.spacing(4)
+  }
 });
 
-const LinkRouter = props => <Link {...props} component={RouterLink} />;
+const LinkRouter = (props) => <Link {...props} component={RouterLink} />;
 
 class RouterBreadcrumbs extends React.Component {
   state = {
-    open: true,
+    open: true
   };
 
   handleClick = () => {
-    this.setState(state => ({ open: !state.open }));
+    this.setState((state) => ({ open: !state.open }));
   };
 
   render() {
@@ -76,7 +76,7 @@ class RouterBreadcrumbs extends React.Component {
         <div className={classes.root}>
           <Route>
             {({ location }) => {
-              const pathnames = location.pathname.split('/').filter(x => x);
+              const pathnames = location.pathname.split('/').filter((x) => x);
 
               return (
                 <Breadcrumbs aria-label="Breadcrumb">
@@ -120,7 +120,7 @@ class RouterBreadcrumbs extends React.Component {
 }
 
 RouterBreadcrumbs.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(RouterBreadcrumbs);

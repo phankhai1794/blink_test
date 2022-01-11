@@ -29,7 +29,7 @@ Beispiel für eine Karte, die ein Bild verwendet, um den Inhalt zu verstärken.
 
 {{"demo": "pages/components/cards/MediaCard.js"}}
 
-Standardmäßig verwenden wir die Kombination aus einem `<div>`-Element und einem *Hintergrundbild*, um das Medium anzuzeigen. In manchen Situationen kann es problematisch sein. Sie möchten beispielsweise ein Video oder ein responsives Bild anzeigen. Verwenden Sie für diese Anwendungsfälle die Eigenschaft `component`:
+Standardmäßig verwenden wir die Kombination aus einem `<div>`-Element und einem _Hintergrundbild_, um das Medium anzuzeigen. In manchen Situationen kann es problematisch sein. Sie möchten beispielsweise ein Video oder ein responsives Bild anzeigen. Verwenden Sie für diese Anwendungsfälle die Eigenschaft `component`:
 
 {{"demo": "pages/components/cards/ImgMediaCard.js"}}
 

@@ -10,30 +10,30 @@ import { green } from '@material-ui/core/colors';
 const CssTextField = withStyles({
   root: {
     '& label.Mui-focused': {
-      color: 'green',
+      color: 'green'
     },
     '& .MuiInput-underline:after': {
-      borderBottomColor: 'green',
+      borderBottomColor: 'green'
     },
     '& .MuiOutlinedInput-root': {
       '& fieldset': {
-        borderColor: 'red',
+        borderColor: 'red'
       },
       '&:hover fieldset': {
-        borderColor: 'yellow',
+        borderColor: 'yellow'
       },
       '&.Mui-focused fieldset': {
-        borderColor: 'green',
-      },
-    },
-  },
+        borderColor: 'green'
+      }
+    }
+  }
 })(TextField);
 
-const BootstrapInput = withStyles(theme => ({
+const BootstrapInput = withStyles((theme) => ({
   root: {
     'label + &': {
-      marginTop: theme.spacing(3),
-    },
+      marginTop: theme.spacing(3)
+    }
   },
   input: {
     borderRadius: 4,
@@ -55,16 +55,16 @@ const BootstrapInput = withStyles(theme => ({
       'sans-serif',
       '"Apple Color Emoji"',
       '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
+      '"Segoe UI Symbol"'
     ].join(','),
     '&:focus': {
       boxShadow: `${fade(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
-      borderColor: theme.palette.primary.main,
-    },
-  },
+      borderColor: theme.palette.primary.main
+    }
+  }
 }))(InputBase);
 
-const useStylesReddit = makeStyles(theme => ({
+const useStylesReddit = makeStyles((theme) => ({
   root: {
     border: '1px solid #e2e2e1',
     overflow: 'hidden',
@@ -72,15 +72,15 @@ const useStylesReddit = makeStyles(theme => ({
     backgroundColor: '#fcfcfb',
     transition: theme.transitions.create(['border-color', 'box-shadow']),
     '&:hover': {
-      backgroundColor: '#fff',
+      backgroundColor: '#fff'
     },
     '&$focused': {
       backgroundColor: '#fff',
       boxShadow: `${fade(theme.palette.primary.main, 0.25)} 0 0 0 2px`,
-      borderColor: theme.palette.primary.main,
-    },
+      borderColor: theme.palette.primary.main
+    }
   },
-  focused: {},
+  focused: {}
 }));
 
 function RedditTextField(props) {
@@ -89,20 +89,20 @@ function RedditTextField(props) {
   return <TextField InputProps={{ classes, disableUnderline: true }} {...props} />;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   margin: {
-    margin: theme.spacing(1),
-  },
+    margin: theme.spacing(1)
+  }
 }));
 
 const theme = createMuiTheme({
   palette: {
-    primary: green,
-  },
+    primary: green
+  }
 });
 
 export default function CustomizedInputs() {

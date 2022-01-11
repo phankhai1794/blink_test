@@ -66,13 +66,13 @@ components: Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
 
 ## 大小选择项
 
-您可以使用 `maxWidth`的 enumerable 和 `fullWidth`的 boolean 来设定对话框的最大宽度。 当 `fullWidth` 属性为true时，对话框将根据 `maxWidth` 的值进行自我调整。
+您可以使用 `maxWidth`的 enumerable 和 `fullWidth`的 boolean 来设定对话框的最大宽度。 当 `fullWidth` 属性为 true 时，对话框将根据 `maxWidth` 的值进行自我调整。
 
 {{"demo": "pages/components/dialogs/MaxWidthDialog.js"}}
 
 ## 响应式全屏
 
-您可以使用 `withMobileDialog` 显示响应式的全屏对话框。 默认情况下, `withMobileDialog() (Dialog)` 在 [屏幕大小](/customization/breakpoints/)*小于等于* `sm`时响应式全屏。 通过传递 `breakpoint`参数，您可以自主选择全屏切换点，比如使用`xs`：`withMobileDialog({breakpoint: 'xs'})(Dialog)`。
+您可以使用 `withMobileDialog` 显示响应式的全屏对话框。 默认情况下, `withMobileDialog() (Dialog)` 在 [屏幕大小](/customization/breakpoints/)_小于等于_ `sm`时响应式全屏。 通过传递 `breakpoint`参数，您可以自主选择全屏切换点，比如使用`xs`：`withMobileDialog({breakpoint: 'xs'})(Dialog)`。
 
 {{"demo": "pages/components/dialogs/ResponsiveDialog.js"}}
 

@@ -72,7 +72,7 @@ The dialog has a close button added to aide usability.
 
 ## Отзывчивый полноэкранный режим
 
-You may make a dialog responsively full screen using `withMobileDialog`. By default, `withMobileDialog()(Dialog)` responsively full screens *at or below* the `sm` [screen size](/customization/breakpoints/). Вы можете выбрать собственную точку остановки, например `xs`, передав аргумент `breakpoint`: `withMobileDialog({breakpoint: 'xs'})(Dialog)`.
+You may make a dialog responsively full screen using `withMobileDialog`. By default, `withMobileDialog()(Dialog)` responsively full screens _at or below_ the `sm` [screen size](/customization/breakpoints/). Вы можете выбрать собственную точку остановки, например `xs`, передав аргумент `breakpoint`: `withMobileDialog({breakpoint: 'xs'})(Dialog)`.
 
 {{"demo": "pages/components/dialogs/ResponsiveDialog.js"}}
 

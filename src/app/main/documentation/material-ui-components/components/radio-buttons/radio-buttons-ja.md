@@ -34,12 +34,9 @@ Radio buttons should have the most commonly used option selected by default.
 ラベルを使用できない場合は、入力コンポーネントに直接属性を追加する必要があります。 この場合、追加の属性（例： `aria-label`, `aria-labelledby`, `title`)を経由して `inputProps` プロパティを追加します。
 
 ```jsx
-<RadioButton
-  value="radioA"
-  inputProps={{ 'aria-label': 'Radio A' } }
-/>
+<RadioButton value="radioA" inputProps={{ 'aria-label': 'Radio A' }} />
 ```
 
 ## ガイド
 
-- [Checkboxと Radio Buttons](https://www.nngroup.com/articles/checkboxes-vs-radio-buttons/)
+- [Checkbox と Radio Buttons](https://www.nngroup.com/articles/checkboxes-vs-radio-buttons/)

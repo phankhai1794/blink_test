@@ -11,33 +11,33 @@ import SendIcon from '@material-ui/icons/Send';
 
 const StyledMenu = withStyles({
   paper: {
-    border: '1px solid #d3d4d5',
-  },
-})(props => (
+    border: '1px solid #d3d4d5'
+  }
+})((props) => (
   <Menu
     elevation={0}
     getContentAnchorEl={null}
     anchorOrigin={{
       vertical: 'bottom',
-      horizontal: 'center',
+      horizontal: 'center'
     }}
     transformOrigin={{
       vertical: 'top',
-      horizontal: 'center',
+      horizontal: 'center'
     }}
     {...props}
   />
 ));
 
-const StyledMenuItem = withStyles(theme => ({
+const StyledMenuItem = withStyles((theme) => ({
   root: {
     '&:focus': {
       backgroundColor: theme.palette.primary.main,
       '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
-        color: theme.palette.common.white,
-      },
-    },
-  },
+        color: theme.palette.common.white
+      }
+    }
+  }
 }))(MenuItem);
 
 export default function CustomizedMenus() {

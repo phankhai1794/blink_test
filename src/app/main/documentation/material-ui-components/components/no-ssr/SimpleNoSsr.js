@@ -4,11 +4,11 @@ import { withStyles } from '@material-ui/core/styles';
 import NoSsr from '@material-ui/core/NoSsr';
 import Button from '@material-ui/core/Button';
 
-const styles = theme => ({
+const styles = (theme) => ({
   button: {
     display: 'block',
-    margin: theme.spacing(2),
-  },
+    margin: theme.spacing(2)
+  }
 });
 
 function SimpleNoSsr(props) {
@@ -29,7 +29,7 @@ function SimpleNoSsr(props) {
 }
 
 SimpleNoSsr.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(SimpleNoSsr);

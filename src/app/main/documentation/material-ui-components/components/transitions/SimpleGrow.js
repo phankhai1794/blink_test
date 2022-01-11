@@ -5,25 +5,25 @@ import Paper from '@material-ui/core/Paper';
 import Grow from '@material-ui/core/Grow';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    height: 180,
+    height: 180
   },
   container: {
-    display: 'flex',
+    display: 'flex'
   },
   paper: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   svg: {
     width: 100,
-    height: 100,
+    height: 100
   },
   polygon: {
     fill: theme.palette.common.white,
     stroke: theme.palette.divider,
-    strokeWidth: 1,
-  },
+    strokeWidth: 1
+  }
 }));
 
 function Polygon() {
@@ -43,7 +43,7 @@ export default function SimpleGrow() {
   const [checked, setChecked] = React.useState(false);
 
   function handleChange() {
-    setChecked(prev => !prev);
+    setChecked((prev) => !prev);
   }
 
   return (

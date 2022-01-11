@@ -4,41 +4,41 @@ import { makeStyles } from '@material-ui/core/styles';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   textField: {
     marginLeft: theme.spacing(1),
     marginRight: theme.spacing(1),
-    width: 200,
+    width: 200
   },
   dense: {
-    marginTop: 19,
+    marginTop: 19
   },
   menu: {
-    width: 200,
-  },
+    width: 200
+  }
 }));
 
 const currencies = [
   {
     value: 'USD',
-    label: '$',
+    label: '$'
   },
   {
     value: 'EUR',
-    label: '€',
+    label: '€'
   },
   {
     value: 'BTC',
-    label: '฿',
+    label: '฿'
   },
   {
     value: 'JPY',
-    label: '¥',
-  },
+    label: '¥'
+  }
 ];
 
 export default function TextFields() {
@@ -47,10 +47,10 @@ export default function TextFields() {
     name: 'Cat in the Hat',
     age: '',
     multiline: 'Controlled',
-    currency: 'EUR',
+    currency: 'EUR'
   });
 
-  const handleChange = name => event => {
+  const handleChange = (name) => (event) => {
     setValues({ ...values, [name]: event.target.value });
   };
 
@@ -110,7 +110,7 @@ export default function TextFields() {
         className={classes.textField}
         margin="normal"
         InputProps={{
-          readOnly: true,
+          readOnly: true
         }}
       />
       <TextField
@@ -169,7 +169,7 @@ export default function TextFields() {
         type="number"
         className={classes.textField}
         InputLabelProps={{
-          shrink: true,
+          shrink: true
         }}
         margin="normal"
       />
@@ -189,13 +189,13 @@ export default function TextFields() {
         onChange={handleChange('currency')}
         SelectProps={{
           MenuProps: {
-            className: classes.menu,
-          },
+            className: classes.menu
+          }
         }}
         helperText="Please select your currency"
         margin="normal"
       >
-        {currencies.map(option => (
+        {currencies.map((option) => (
           <MenuItem key={option.value} value={option.value}>
             {option.label}
           </MenuItem>
@@ -211,13 +211,13 @@ export default function TextFields() {
         SelectProps={{
           native: true,
           MenuProps: {
-            className: classes.menu,
-          },
+            className: classes.menu
+          }
         }}
         helperText="Please select your currency"
         margin="normal"
       >
-        {currencies.map(option => (
+        {currencies.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
@@ -232,7 +232,7 @@ export default function TextFields() {
         fullWidth
         margin="normal"
         InputLabelProps={{
-          shrink: true,
+          shrink: true
         }}
       />
       <TextField

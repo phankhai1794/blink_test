@@ -34,6 +34,6 @@ components: Grow, Popover
 
 ### PopupState helper
 
-在大多数情况下，一个第三方包 [`material-ui-popup-state`](https://github.com/jcoreio/material-ui-popup-state) 可以为你处理popper 的 state 。
+在大多数情况下，一个第三方包 [`material-ui-popup-state`](https://github.com/jcoreio/material-ui-popup-state) 可以为你处理 popper 的 state 。
 
 {{"demo": "pages/components/popover/PopoverPopupState.js"}}

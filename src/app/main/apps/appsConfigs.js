@@ -1,18 +1,17 @@
-import { InquiringAppConfig } from './Inquiring/InquiringAppConfig';
+import { InquiringAppConfig } from './inquiring/InquiringAppConfig';
 import { ProjectDashboardAppConfig } from './dashboards/project/ProjectDashboardAppConfig';
-import { CustomerConfirmedAppConfig } from './CustomerConfirmed/CustomerConfirmedAppConfig';
-import { AmendmentRequestAppConfig } from './AmendmentRequest/AmendmentRequestAppConfig';
-import { CompletedDraftBLAppConfig } from './CompletedDraftBL/CompletedDraftBLAppConfig';
-import { CustomerAmendedAppConfig } from './CustomerAmended/CustomerAmendedAppConfig';
+import { CustomerConfirmedAppConfig } from './customer-confirmed/CustomerConfirmedAppConfig';
+import { AmendmentRequestAppConfig } from './amendment-request/AmendmentRequestAppConfig';
+import { CompletedDraftBLAppConfig } from './completed-draftBL/CompletedDraftBLAppConfig';
+import { CustomerAmendedAppConfig } from './customer-amended/CustomerAmendedAppConfig';
 import { WorkspaceAppConfig } from './workspace/WorkspaceAppConfig';
 
-
 export const appsConfigs = [
-    ProjectDashboardAppConfig,
-    InquiringAppConfig,
-    CustomerConfirmedAppConfig,
-    AmendmentRequestAppConfig,
-    CompletedDraftBLAppConfig,
-    CustomerAmendedAppConfig,
-    WorkspaceAppConfig
+  ProjectDashboardAppConfig,
+  InquiringAppConfig,
+  CustomerConfirmedAppConfig,
+  AmendmentRequestAppConfig,
+  CompletedDraftBLAppConfig,
+  CustomerAmendedAppConfig,
+  WorkspaceAppConfig
 ];

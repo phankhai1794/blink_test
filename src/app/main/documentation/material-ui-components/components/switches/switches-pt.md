@@ -42,8 +42,5 @@ Todos os controles de formulário devem ter rótulos, e isso inclui botões de o
 Quando um rótulo não pode ser usado, é necessário adicionar um atributo diretamente no componente de entrada. Nesse caso você pode aplicar um atributo adicional (e.g.`aria-label`,`aria-labelledby`, `title`) através da propriedade `inputProps`.
 
 ```jsx
-<Switch
-  value="checkedA"
-  inputProps={{ 'aria-label': 'Switch A' } }
-/>
+<Switch value="checkedA" inputProps={{ 'aria-label': 'Switch A' }} />
 ```

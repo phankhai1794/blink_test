@@ -61,11 +61,11 @@ Eine App-Bar die sich beim Scrollen anhebt.
 
 #### Parameter
 
-1. `options` (*Object* [optional]):
-    
-    - `options.disableHysteresis ` (*Boolean* [optional]): Standardeinstellung ist `false`. Hysterese deaktivieren. Die Bildlaufrichtung wird beim Bestimmen des `trigger`-Werts ignoriert.
-    - `options.target` (*Node* [optional]): Standardwert `window`.
-    - `options.threshold` (*Number* [optional]): Standardwert `100`. Ändert den `trigger`-Wert wenn der vertikale Bildlauf den Schwellwert (streng) überschreitet (exklusiv).
+1. `options` (_Object_ [optional]):
+
+   - `options.disableHysteresis ` (_Boolean_ [optional]): Standardeinstellung ist `false`. Hysterese deaktivieren. Die Bildlaufrichtung wird beim Bestimmen des `trigger`-Werts ignoriert.
+   - `options.target` (_Node_ [optional]): Standardwert `window`.
+   - `options.threshold` (_Number_ [optional]): Standardwert `100`. Ändert den `trigger`-Wert wenn der vertikale Bildlauf den Schwellwert (streng) überschreitet (exklusiv).
 
 #### Rückgabewerte
 

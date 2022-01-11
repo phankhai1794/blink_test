@@ -43,7 +43,7 @@ const suggestions = [
   { label: 'Bouvet Island' },
   { label: 'Brazil' },
   { label: 'British Indian Ocean Territory' },
-  { label: 'Brunei Darussalam' },
+  { label: 'Brunei Darussalam' }
 ];
 
 function renderInput(inputProps) {
@@ -55,9 +55,9 @@ function renderInput(inputProps) {
         inputRef: ref,
         classes: {
           root: classes.inputRoot,
-          input: classes.inputInput,
+          input: classes.inputInput
         },
-        ...InputProps,
+        ...InputProps
       }}
       {...other}
     />
@@ -76,7 +76,7 @@ function renderSuggestion(suggestionProps) {
       selected={isHighlighted}
       component="div"
       style={{
-        fontWeight: isSelected ? 500 : 400,
+        fontWeight: isSelected ? 500 : 400
       }}
     >
       {suggestion.label}
@@ -88,7 +88,7 @@ renderSuggestion.propTypes = {
   index: PropTypes.number,
   itemProps: PropTypes.object,
   selectedItem: PropTypes.string,
-  suggestion: PropTypes.shape({ label: PropTypes.string }).isRequired,
+  suggestion: PropTypes.shape({ label: PropTypes.string }).isRequired
 };
 
 function getSuggestions(value, { showEmpty = false } = {}) {
@@ -98,7 +98,7 @@ function getSuggestions(value, { showEmpty = false } = {}) {
 
   return inputLength === 0 && !showEmpty
     ? []
-    : suggestions.filter(suggestion => {
+    : suggestions.filter((suggestion) => {
         const keep =
           count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
 
@@ -134,7 +134,7 @@ function DownshiftMultiple(props) {
     setSelectedItem(newSelectedItem);
   }
 
-  const handleDelete = item => () => {
+  const handleDelete = (item) => () => {
     const newSelectedItem = [...selectedItem];
     newSelectedItem.splice(newSelectedItem.indexOf(item), 1);
     setSelectedItem(newSelectedItem);
@@ -154,11 +154,11 @@ function DownshiftMultiple(props) {
         isOpen,
         inputValue: inputValue2,
         selectedItem: selectedItem2,
-        highlightedIndex,
+        highlightedIndex
       }) => {
         const { onBlur, onChange, onFocus, ...inputProps } = getInputProps({
           onKeyDown: handleKeyDown,
-          placeholder: 'Select multiple countries',
+          placeholder: 'Select multiple countries'
         });
 
         return (
@@ -169,7 +169,7 @@ function DownshiftMultiple(props) {
               label: 'Countries',
               InputLabelProps: getLabelProps(),
               InputProps: {
-                startAdornment: selectedItem.map(item => (
+                startAdornment: selectedItem.map((item) => (
                   <Chip
                     key={item}
                     tabIndex={-1}
@@ -179,13 +179,13 @@ function DownshiftMultiple(props) {
                   />
                 )),
                 onBlur,
-                onChange: event => {
+                onChange: (event) => {
                   handleInputChange(event);
                   onChange(event);
                 },
-                onFocus,
+                onFocus
               },
-              inputProps,
+              inputProps
             })}
 
             {isOpen ? (
@@ -196,8 +196,8 @@ function DownshiftMultiple(props) {
                     index,
                     itemProps: getItemProps({ item: suggestion.label }),
                     highlightedIndex,
-                    selectedItem: selectedItem2,
-                  }),
+                    selectedItem: selectedItem2
+                  })
                 )}
               </Paper>
             ) : null}
@@ -209,38 +209,38 @@ function DownshiftMultiple(props) {
 }
 
 DownshiftMultiple.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
-    height: 250,
+    height: 250
   },
   container: {
     flexGrow: 1,
-    position: 'relative',
+    position: 'relative'
   },
   paper: {
     position: 'absolute',
     zIndex: 1,
     marginTop: theme.spacing(1),
     left: 0,
-    right: 0,
+    right: 0
   },
   chip: {
-    margin: theme.spacing(0.5, 0.25),
+    margin: theme.spacing(0.5, 0.25)
   },
   inputRoot: {
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   inputInput: {
     width: 'auto',
-    flexGrow: 1,
+    flexGrow: 1
   },
   divider: {
-    height: theme.spacing(2),
-  },
+    height: theme.spacing(2)
+  }
 }));
 
 let popperNode;
@@ -259,10 +259,10 @@ export default function IntegrationDownshift() {
           highlightedIndex,
           inputValue,
           isOpen,
-          selectedItem,
+          selectedItem
         }) => {
           const { onBlur, onFocus, ...inputProps } = getInputProps({
-            placeholder: 'Search for a country (start with a)',
+            placeholder: 'Search for a country (start with a)'
           });
 
           return (
@@ -273,7 +273,7 @@ export default function IntegrationDownshift() {
                 label: 'Country',
                 InputLabelProps: getLabelProps({ shrink: true }),
                 InputProps: { onBlur, onFocus },
-                inputProps,
+                inputProps
               })}
 
               <div {...getMenuProps()}>
@@ -285,8 +285,8 @@ export default function IntegrationDownshift() {
                         index,
                         itemProps: getItemProps({ item: suggestion.label }),
                         highlightedIndex,
-                        selectedItem,
-                      }),
+                        selectedItem
+                      })
                     )}
                   </Paper>
                 ) : null}
@@ -307,10 +307,10 @@ export default function IntegrationDownshift() {
           highlightedIndex,
           inputValue,
           isOpen,
-          selectedItem,
+          selectedItem
         }) => {
           const { onBlur, onFocus, ...inputProps } = getInputProps({
-            placeholder: 'With Popper',
+            placeholder: 'With Popper'
           });
 
           return (
@@ -322,9 +322,9 @@ export default function IntegrationDownshift() {
                 InputProps: { onBlur, onFocus },
                 InputLabelProps: getLabelProps({ shrink: true }),
                 inputProps,
-                ref: node => {
+                ref: (node) => {
                   popperNode = node;
-                },
+                }
               })}
 
               <Popper open={isOpen} anchorEl={popperNode}>
@@ -339,8 +339,8 @@ export default function IntegrationDownshift() {
                         index,
                         itemProps: getItemProps({ item: suggestion.label }),
                         highlightedIndex,
-                        selectedItem,
-                      }),
+                        selectedItem
+                      })
                     )}
                   </Paper>
                 </div>
@@ -361,16 +361,16 @@ export default function IntegrationDownshift() {
           inputValue,
           isOpen,
           openMenu,
-          selectedItem,
+          selectedItem
         }) => {
           const { onBlur, onChange, onFocus, ...inputProps } = getInputProps({
-            onChange: event => {
+            onChange: (event) => {
               if (event.target.value === '') {
                 clearSelection();
               }
             },
             onFocus: openMenu,
-            placeholder: 'With the clear & show empty options',
+            placeholder: 'With the clear & show empty options'
           });
 
           return (
@@ -381,7 +381,7 @@ export default function IntegrationDownshift() {
                 label: 'Countries',
                 InputLabelProps: getLabelProps({ shrink: true }),
                 InputProps: { onBlur, onChange, onFocus },
-                inputProps,
+                inputProps
               })}
 
               <div {...getMenuProps()}>
@@ -393,8 +393,8 @@ export default function IntegrationDownshift() {
                         index,
                         itemProps: getItemProps({ item: suggestion.label }),
                         highlightedIndex,
-                        selectedItem,
-                      }),
+                        selectedItem
+                      })
                     )}
                   </Paper>
                 ) : null}

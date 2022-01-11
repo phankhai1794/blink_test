@@ -16,20 +16,20 @@ function GrowTransition(props) {
 export default function TransitionsSnackbar() {
   const [state, setState] = React.useState({
     open: false,
-    Transition: Fade,
+    Transition: Fade
   });
 
-  const handleClick = Transition => () => {
+  const handleClick = (Transition) => () => {
     setState({
       open: true,
-      Transition,
+      Transition
     });
   };
 
   function handleClose() {
     setState({
       ...state,
-      open: false,
+      open: false
     });
   }
 
@@ -43,7 +43,7 @@ export default function TransitionsSnackbar() {
         onClose={handleClose}
         TransitionComponent={state.Transition}
         ContentProps={{
-          'aria-describedby': 'message-id',
+          'aria-describedby': 'message-id'
         }}
         message={<span id="message-id">I love snacks</span>}
       />

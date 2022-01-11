@@ -7,9 +7,9 @@ components: Collapse, Fade, Grow, Slide, Zoom
 
 <p class="description">过渡动画使 UI 更富有表现力并且易于使用。</p>
 
-Material-UI提供了一系列的过渡效果, 你可以将一些基本的 [动作](https://material.io/design/motion/) 添加到你的应用的组件中.
+Material-UI 提供了一系列的过渡效果, 你可以将一些基本的 [动作](https://material.io/design/motion/) 添加到你的应用的组件中.
 
-为了更好地支持服务端渲染, Material-UI 为某些过渡组件 (Fade, Grow, Zoom, Slide) 的子级提供了 `style` 属性。 为了让动画如期实现, 必须将 `style` 属性应用到DOM上.
+为了更好地支持服务端渲染, Material-UI 为某些过渡组件 (Fade, Grow, Zoom, Slide) 的子级提供了 `style` 属性。 为了让动画如期实现, 必须将 `style` 属性应用到 DOM 上.
 
 ```jsx
 // 'props'对象包含一个'style'属性。

@@ -21,7 +21,7 @@ components: CircularProgress, LinearProgress
 
 [Circular progress（环状进度条）](https://material.io/design/components/progress-indicators.html#circular-progress-indicators)同时支持了确定的和不确定的过程。
 
-- **定量**环形指示器填充了不可见区域，指示器从0到360度推进，并用颜色来进行环形追踪。
+- **定量**环形指示器填充了不可见区域，指示器从 0 到 360 度推进，并用颜色来进行环形追踪。
 - **不定量**环形指示器在沿着隐形的轨道移动时，随之变大变小。
 
 ### 不定量的环形进度条
@@ -62,13 +62,13 @@ components: CircularProgress, LinearProgress
 
 ## 非标准区间
 
-进度条组件采用一个在0—100区间内的值。 作为默认的最小/最大值，屏幕阅读用户能够更便利地阅读。 但是有时，您可能会使用一些值超出这个范围的数据源。 通过这个例子，您可以轻松地将一个任意区间的值转换为0—100区间的值：
+进度条组件采用一个在 0—100 区间内的值。 作为默认的最小/最大值，屏幕阅读用户能够更便利地阅读。 但是有时，您可能会使用一些值超出这个范围的数据源。 通过这个例子，您可以轻松地将一个任意区间的值转换为 0—100 区间的值：
 
 ```jsx
 // MIN = 最小值
 // MAX = 最大值
 // 正常化值的函数（MIN / MAX 可相互协调）
-const normalise = value => (value - MIN) * 100 / (MAX - MIN);
+const normalise = (value) => ((value - MIN) * 100) / (MAX - MIN);
 
 // 示例组件展示了在 render 函数中，利用`normalise`这个函数
 function Progress(props) {
@@ -77,7 +77,7 @@ function Progress(props) {
       <CircularProgress variant="determinate" value={normalise(props.value)} />
       <LinearProgress variant="determinate" value={normalise(props.value)} />
     </React.Fragment>
-  )
+  );
 }
 ```
 
@@ -89,13 +89,13 @@ function Progress(props) {
 
 ## 延时的出现
 
-关于的响应时间，您需要知道这[3个重要的限制](https://www.nngroup.com/articles/response-times-3-important-limits/)。 `ButtonBase`组件的波纹效果，能够保证用户体验到实时反馈的系统。 通常情况下，在大于0.1秒且小于1.0秒间的延时不需要给与特殊的反馈。 但是在1.0秒后，您可以显示一个加载器来保证用户的思考流程不被打断。
+关于的响应时间，您需要知道这[3 个重要的限制](https://www.nngroup.com/articles/response-times-3-important-limits/)。 `ButtonBase`组件的波纹效果，能够保证用户体验到实时反馈的系统。 通常情况下，在大于 0.1 秒且小于 1.0 秒间的延时不需要给与特殊的反馈。 但是在 1.0 秒后，您可以显示一个加载器来保证用户的思考流程不被打断。
 
 {{"demo": "pages/components/progress/DelayingAppearance.js"}}
 
 ## 局限性
 
-在加载的特别慢时，您可能丢失stroke dash的动画或看到环形进度会有一些半径随机的情况。 为了不阻碍主渲染进程，您应该在web worker中或批处理中运行密集操作的处理器。
+在加载的特别慢时，您可能丢失 stroke dash 的动画或看到环形进度会有一些半径随机的情况。 为了不阻碍主渲染进程，您应该在 web worker 中或批处理中运行密集操作的处理器。
 
 ![高负载](/static/images/progress/heavy-load.gif)
 

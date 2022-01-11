@@ -68,7 +68,7 @@ Los componentes de progreso aceptan un valor en el rango 0 - 100. Esto simplific
 // MIN = valor mínimo esperado
 // MAX = valor máximo esperado
 // Función para normalizar los valores (MIN / MAX podrían estar integrados)
-const normalise = value => (value - MIN) * 100 / (MAX - MIN);
+const normalise = (value) => ((value - MIN) * 100) / (MAX - MIN);
 
 // Componente ejemplo que utiliza la función `normalise` en el punto de dibujo.
 function Progress(props) {
@@ -77,7 +77,7 @@ function Progress(props) {
       <CircularProgress variant="determinate" value={normalise(props.value)} />
       <LinearProgress variant="determinate" value={normalise(props.value)} />
     </React.Fragment>
-  )
+  );
 }
 ```
 

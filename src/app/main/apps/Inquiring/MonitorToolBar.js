@@ -4,57 +4,56 @@ import { useDispatch, useSelector } from 'react-redux';
 // import * as Actions from '../store/actions/index';
 
 function MonitorToolbar(props) {
-    const dispatch = useDispatch();
-    // const selectedMailIds = useSelector(({mailApp}) => mailApp.mails.selectedMailIds);
-    // const mails = useSelector(({mailApp}) => mailApp.mails.entities);
-    // const labels = useSelector(({mailApp}) => mailApp.labels);
-    // const folders = useSelector(({mailApp}) => mailApp.folders);
+  const dispatch = useDispatch();
+  // const selectedMailIds = useSelector(({mailApp}) => mailApp.mails.selectedMailIds);
+  // const mails = useSelector(({mailApp}) => mailApp.mails.entities);
+  // const labels = useSelector(({mailApp}) => mailApp.labels);
+  // const folders = useSelector(({mailApp}) => mailApp.folders);
 
-    const [menu, setMenu] = useState({
-        selectMenu: null,
-        foldersMenu: null,
-        labelsMenu: null
+  const [menu, setMenu] = useState({
+    selectMenu: null,
+    foldersMenu: null,
+    labelsMenu: null
+  });
+
+  function handleMenuOpen(event, menu) {
+    setMenu({
+      ...menu,
+      [menu]: event.currentTarget
     });
+  }
 
-    function handleMenuOpen(event, menu) {
-        setMenu({
-            ...menu,
-            [menu]: event.currentTarget
-        });
-    }
+  function handleMenuClose(event, menu) {
+    setMenu({
+      ...menu,
+      [menu]: null
+    });
+  }
 
-    function handleMenuClose(event, menu) {
-        setMenu({
-            ...menu,
-            [menu]: null
-        });
-    }
+  // function handleCheckChange(event)
+  // {
+  //     event.target.checked ? dispatch(Actions.selectAllMails()) : dispatch(Actions.deselectAllMails());
+  // }
 
-    // function handleCheckChange(event)
-    // {
-    //     event.target.checked ? dispatch(Actions.selectAllMails()) : dispatch(Actions.deselectAllMails());
-    // }
+  return (
+    <div className="flex flex-1 items-center sm:px-8">
+      <Checkbox
+      // onChange={handleCheckChange}
+      // checked={selectedMailIds.length === Object.keys(mails).length && selectedMailIds.length > 0}
+      // indeterminate={selectedMailIds.length !== Object.keys(mails).length && selectedMailIds.length > 0}
+      />
 
-    return (
-        <div className="flex flex-1 items-center sm:px-8">
+      <IconButton
+        className="w-24"
+        aria-label="More"
+        aria-owns={menu.select ? 'select-menu' : null}
+        aria-haspopup="true"
+        onClick={(ev) => handleMenuOpen(ev, 'select')}
+      >
+        <Icon>arrow_drop_down</Icon>
+      </IconButton>
 
-            <Checkbox
-            // onChange={handleCheckChange}
-            // checked={selectedMailIds.length === Object.keys(mails).length && selectedMailIds.length > 0}
-            // indeterminate={selectedMailIds.length !== Object.keys(mails).length && selectedMailIds.length > 0}
-            />
-
-            <IconButton
-                className="w-24"
-                aria-label="More"
-                aria-owns={menu.select ? 'select-menu' : null}
-                aria-haspopup="true"
-                onClick={(ev) => handleMenuOpen(ev, 'select')}
-            >
-                <Icon>arrow_drop_down</Icon>
-            </IconButton>
-
-            {/* <Menu
+      {/* <Menu
                 id="select-menu"
                 anchorEl={menu.select}
                 open={Boolean(menu.select)}
@@ -195,8 +194,8 @@ function MonitorToolbar(props) {
                     </Menu>
                 </React.Fragment>
             )} */}
-        </div>
-    );
+    </div>
+  );
 }
 
 export default MonitorToolbar;

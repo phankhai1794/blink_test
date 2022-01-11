@@ -78,7 +78,7 @@ When the `fullWidth` property is true, the dialog will adapt based on the `maxWi
 
 ## Responsive full-screen
 
-You may make a dialog responsively full screen using `withMobileDialog`. By default, `withMobileDialog()(Dialog)` responsively full screens *at or below* the `sm` [screen size](/customization/breakpoints/). You can choose your own breakpoint for example `xs` by passing the `breakpoint` argument: `withMobileDialog({breakpoint: 'xs'})(Dialog)`.
+You may make a dialog responsively full screen using `withMobileDialog`. By default, `withMobileDialog()(Dialog)` responsively full screens _at or below_ the `sm` [screen size](/customization/breakpoints/). You can choose your own breakpoint for example `xs` by passing the `breakpoint` argument: `withMobileDialog({breakpoint: 'xs'})(Dialog)`.
 
 {{"demo": "pages/components/dialogs/ResponsiveDialog.js"}}
 

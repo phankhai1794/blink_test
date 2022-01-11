@@ -24,7 +24,7 @@ function ListItemLink(props) {
 
 <ListItemLink href="#simple-list">
   <ListItemText primary="Spam" />
-</ListItemLink>
+</ListItemLink>;
 ```
 
 Nach diesem Abschnitt der Dokumentation finden Sie eine [Demo mit React Router](/guides/composition/#react-router).

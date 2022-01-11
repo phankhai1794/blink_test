@@ -9,7 +9,7 @@ components: Avatar
 
 ## Image avatars（图片头像）
 
-为了创建图像头像，您可以传递` src `或` srcSet `这样的标准的` img ` 的属性到组件里。
+为了创建图像头像，您可以传递`src`或`srcSet`这样的标准的`img` 的属性到组件里。
 
 {{"demo": "pages/components/avatars/ImageAvatars.js"}}
 

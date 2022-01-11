@@ -3,7 +3,7 @@ import { Menu, MenuItem, Hidden, Icon, IconButton, Tab, Tabs, Typography } from 
 import { FuseAnimateGroup, FusePageSimple } from '@fuse';
 import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
-import * as Actions from './store/actions'
+import * as Actions from './store/actions';
 import reducer from './store/reducers';
 import _ from 'lodash';
 import clsx from 'clsx';
@@ -22,132 +22,132 @@ import WidgetNow from './widgets/WidgetNow';
 import WidgetWeather from './widgets/WidgetWeather';
 import { makeStyles } from '@material-ui/styles';
 
-const useStyles = makeStyles(theme => ({
-    content: {
-        '& canvas': {
-            maxHeight: '100%'
-        }
-    },
-    selectedProject: {
-        background: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
-        borderRadius: '8px 0 0 0'
-    },
-    projectMenuButton: {
-        background: theme.palette.primary.main,
-        color: theme.palette.primary.contrastText,
-        borderRadius: '0 8px 0 0',
-        marginLeft: 1
-    },
-
+const useStyles = makeStyles((theme) => ({
+  content: {
+    '& canvas': {
+      maxHeight: '100%'
+    }
+  },
+  selectedProject: {
+    background: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    borderRadius: '8px 0 0 0'
+  },
+  projectMenuButton: {
+    background: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    borderRadius: '0 8px 0 0',
+    marginLeft: 1
+  }
 }));
 
 function ProjectDashboardApp(props) {
-    const dispatch = useDispatch();
-    const widgets = useSelector(({ projectDashboardApp }) => projectDashboardApp.widgets);
-    const projects = useSelector(({ projectDashboardApp }) => projectDashboardApp.projects);
+  const dispatch = useDispatch();
+  const widgets = useSelector(({ projectDashboardApp }) => projectDashboardApp.widgets);
+  const projects = useSelector(({ projectDashboardApp }) => projectDashboardApp.projects);
 
-    const classes = useStyles(props);
-    const pageLayout = useRef(null);
-    const [tabValue, setTabValue] = useState(0);
-    const [selectedProject, setSelectedProject] = useState({
-        id: 1,
-        menuEl: null
+  const classes = useStyles(props);
+  const pageLayout = useRef(null);
+  const [tabValue, setTabValue] = useState(0);
+  const [selectedProject, setSelectedProject] = useState({
+    id: 1,
+    menuEl: null
+  });
+
+  useEffect(() => {
+    dispatch(Actions.getWidgets());
+    dispatch(Actions.getProjects());
+  }, [dispatch]);
+
+  function handleChangeTab(event, tabValue) {
+    setTabValue(tabValue);
+  }
+
+  function handleChangeProject(id) {
+    setSelectedProject({
+      id,
+      menuEl: null
     });
+  }
 
+  function handleOpenProjectMenu(event) {
+    setSelectedProject({
+      id: selectedProject.id,
+      menuEl: event.currentTarget
+    });
+  }
 
-    useEffect(() => {
-        dispatch(Actions.getWidgets());
-        dispatch(Actions.getProjects());
-    }, [dispatch]);
+  function handleCloseProjectMenu() {
+    setSelectedProject({
+      id: selectedProject.id,
+      menuEl: null
+    });
+  }
 
-    function handleChangeTab(event, tabValue) {
-        setTabValue(tabValue);
-    }
+  if (!widgets || !projects) {
+    return null;
+  }
 
-    function handleChangeProject(id) {
-        setSelectedProject({
-            id,
-            menuEl: null
-        });
-    }
-
-    function handleOpenProjectMenu(event) {
-        setSelectedProject({
-            id: selectedProject.id,
-            menuEl: event.currentTarget
-        });
-    }
-
-    function handleCloseProjectMenu() {
-        setSelectedProject({
-            id: selectedProject.id,
-            menuEl: null
-        });
-    }
-
-    if (!widgets || !projects) {
-        return null;
-    }
-
-    return (
-        <FusePageSimple
-            classes={{
-                header: "min-h-160 h-160",
-                toolbar: "min-h-48 h-48",
-                rightSidebar: "w-288",
-                content: classes.content,
+  return (
+    <FusePageSimple
+      classes={{
+        header: 'min-h-160 h-160',
+        toolbar: 'min-h-48 h-48',
+        rightSidebar: 'w-288',
+        content: classes.content
+      }}
+      header={
+        <div className="flex flex-col justify-between flex-1 px-24 pt-24">
+          <div className="flex justify-between items-start">
+            <Typography className="py-0 sm:py-24" variant="h4">
+              Welcome back, OffShore
+            </Typography>
+            <Hidden lgUp>
+              <IconButton
+                onClick={(ev) => pageLayout.current.toggleRightSidebar()}
+                aria-label="open left sidebar"
+              >
+                <Icon>menu</Icon>
+              </IconButton>
+            </Hidden>
+          </div>
+        </div>
+      }
+      content={
+        <div className="p-12">
+          <FuseAnimateGroup
+            className="flex flex-wrap"
+            enter={{
+              animation: 'transition.slideUpBigIn'
             }}
-            header={
-                <div className="flex flex-col justify-between flex-1 px-24 pt-24">
-                    <div className="flex justify-between items-start">
-                        <Typography className="py-0 sm:py-24" variant="h4">Welcome back, OffShore</Typography>
-                        <Hidden lgUp>
-                            <IconButton
-                                onClick={(ev) => pageLayout.current.toggleRightSidebar()}
-                                aria-label="open left sidebar"
-                            >
-                                <Icon>menu</Icon>
-                            </IconButton>
-                        </Hidden>
-                    </div>
-                </div>
-            }
-            content={
-                <div className="p-12">
-                    <FuseAnimateGroup
-                        className="flex flex-wrap"
-                        enter={{
-                            animation: "transition.slideUpBigIn"
-                        }}
-                    >
-                        <div className="widget flex w-full sm:w-1/2 md:w-1/6 lg:w-1/5 p-12">
-                            <Widget1 widget={widgets.widget1} />
-                        </div>
-                        <div className="widget flex w-full sm:w-1/2 md:w-1/6 lg:w-1/5 p-12">
-                            <Widget2 widget={widgets.widget2} />
-                        </div>
-                        <div className="widget flex w-full sm:w-1/2 md:w-1/6 lg:w-1/5 p-12">
-                            <Widget3 widget={widgets.widget3} />
-                        </div>
-                        <div className="widget flex w-full sm:w-1/2 md:w-1/6 lg:w-1/5 p-12">
-                            <Widget4 widget={widgets.widget4} />
-                        </div>
-                        <div className="widget flex w-full p-12">
-                            <Widget5 widget={widgets.widget5} />
-                        </div>
-                        <div className="widget flex w-full sm:w-1/2 p-12">
-                            <Widget6 widget={widgets.widget6} />
-                        </div>
-                        <div className="widget flex w-full sm:w-1/2 p-12">
-                            <Widget7 widget={widgets.widget7} />
-                        </div>
-                    </FuseAnimateGroup>
-                </div>
-            }
-            ref={pageLayout}
-        />
-    );
+          >
+            <div className="widget flex w-full sm:w-1/2 md:w-1/6 lg:w-1/5 p-12">
+              <Widget1 widget={widgets.widget1} />
+            </div>
+            <div className="widget flex w-full sm:w-1/2 md:w-1/6 lg:w-1/5 p-12">
+              <Widget2 widget={widgets.widget2} />
+            </div>
+            <div className="widget flex w-full sm:w-1/2 md:w-1/6 lg:w-1/5 p-12">
+              <Widget3 widget={widgets.widget3} />
+            </div>
+            <div className="widget flex w-full sm:w-1/2 md:w-1/6 lg:w-1/5 p-12">
+              <Widget4 widget={widgets.widget4} />
+            </div>
+            <div className="widget flex w-full p-12">
+              <Widget5 widget={widgets.widget5} />
+            </div>
+            <div className="widget flex w-full sm:w-1/2 p-12">
+              <Widget6 widget={widgets.widget6} />
+            </div>
+            <div className="widget flex w-full sm:w-1/2 p-12">
+              <Widget7 widget={widgets.widget7} />
+            </div>
+          </FuseAnimateGroup>
+        </div>
+      }
+      ref={pageLayout}
+    />
+  );
 }
 
 export default withReducer('projectDashboardApp', reducer)(ProjectDashboardApp);

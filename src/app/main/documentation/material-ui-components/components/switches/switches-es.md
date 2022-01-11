@@ -42,8 +42,5 @@ Todos los controles de formulario deben tener etiquetas, y esto incluye radio bu
 Cuando no se puede usar una etiqueta, es necesario agregar un atributo directamente al componente de entrada. En este caso, puede aplicar el atributo adicional (por ejemplo, `aria-label`, `aria-labelledby`, `title`) a través de la propiedad `inputProps`.
 
 ```jsx
-<Switch
-  value="checkedA"
-  inputProps={{ 'aria-label': 'Switch A' } }
-/>
+<Switch value="checkedA" inputProps={{ 'aria-label': 'Switch A' }} />
 ```

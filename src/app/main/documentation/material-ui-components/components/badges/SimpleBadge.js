@@ -9,13 +9,13 @@ import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   margin: {
-    margin: theme.spacing(2),
+    margin: theme.spacing(2)
   },
   padding: {
-    padding: theme.spacing(0, 2),
-  },
+    padding: theme.spacing(0, 2)
+  }
 }));
 
 export default function SimpleBadge() {

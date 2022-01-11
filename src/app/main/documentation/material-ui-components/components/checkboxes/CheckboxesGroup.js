@@ -7,13 +7,13 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Checkbox from '@material-ui/core/Checkbox';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    display: 'flex',
+    display: 'flex'
   },
   formControl: {
-    margin: theme.spacing(3),
-  },
+    margin: theme.spacing(3)
+  }
 }));
 
 export default function CheckboxesGroup() {
@@ -21,15 +21,15 @@ export default function CheckboxesGroup() {
   const [state, setState] = React.useState({
     gilad: true,
     jason: false,
-    antoine: false,
+    antoine: false
   });
 
-  const handleChange = name => event => {
+  const handleChange = (name) => (event) => {
     setState({ ...state, [name]: event.target.checked });
   };
 
   const { gilad, jason, antoine } = state;
-  const error = [gilad, jason, antoine].filter(v => v).length !== 2;
+  const error = [gilad, jason, antoine].filter((v) => v).length !== 2;
 
   return (
     <div className={classes.root}>

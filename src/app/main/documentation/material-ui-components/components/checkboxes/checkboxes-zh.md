@@ -36,10 +36,7 @@ components: Checkbox, FormControl, FormGroup, FormLabel, FormControlLabel
 如果无法使用标签，则必须直接在输入组件中添加属性。 在这种情况下，您可以通过`inputProps` 属性，来附着一些附加的属性（例如 `arial-label`，`aria-labelledby`，`title`）。
 
 ```jsx
-<Checkbox
-  value="checkedA"
-  inputProps={{ 'aria-label': '复选框 A' }}
-/>
+<Checkbox value="checkedA" inputProps={{ 'aria-label': '复选框 A' }} />
 ```
 
 ## 指导

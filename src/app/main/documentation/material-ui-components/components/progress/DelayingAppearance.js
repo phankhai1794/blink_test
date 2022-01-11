@@ -5,18 +5,18 @@ import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   button: {
-    margin: theme.spacing(2),
+    margin: theme.spacing(2)
   },
   placeholder: {
-    height: 40,
-  },
+    height: 40
+  }
 }));
 
 export default function DelayingAppearance() {
@@ -29,11 +29,11 @@ export default function DelayingAppearance() {
     () => () => {
       clearTimeout(timerRef.current);
     },
-    [],
+    []
   );
 
   function handleClickLoading() {
-    setLoading(prevLoading => !prevLoading);
+    setLoading((prevLoading) => !prevLoading);
   }
 
   function handleClickQuery() {
@@ -56,7 +56,7 @@ export default function DelayingAppearance() {
         <Fade
           in={loading}
           style={{
-            transitionDelay: loading ? '800ms' : '0ms',
+            transitionDelay: loading ? '800ms' : '0ms'
           }}
           unmountOnExit
         >
@@ -73,7 +73,7 @@ export default function DelayingAppearance() {
           <Fade
             in={query === 'progress'}
             style={{
-              transitionDelay: query === 'progress' ? '800ms' : '0ms',
+              transitionDelay: query === 'progress' ? '800ms' : '0ms'
             }}
             unmountOnExit
           >

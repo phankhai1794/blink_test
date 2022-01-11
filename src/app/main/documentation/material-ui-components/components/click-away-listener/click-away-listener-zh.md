@@ -7,7 +7,7 @@ components: ClickAwayListener
 
 <p class="description">检测是否点击了子元素之外的元素。该组件监听在 document 的某处发生的点击事件。</p>
 
-- 
+-
 
 ## 简单的菜单下拉事例
 

@@ -6,10 +6,10 @@ import Button from '@material-ui/core/Button';
 import Popover from '@material-ui/core/Popover';
 import PopupState, { bindTrigger, bindPopover } from 'material-ui-popup-state';
 
-const styles = theme => ({
+const styles = (theme) => ({
   typography: {
-    margin: theme.spacing(2),
-  },
+    margin: theme.spacing(2)
+  }
 });
 
 function PopoverPopupState(props) {
@@ -17,7 +17,7 @@ function PopoverPopupState(props) {
 
   return (
     <PopupState variant="popover" popupId="demo-popup-popover">
-      {popupState => (
+      {(popupState) => (
         <div>
           <Button variant="contained" {...bindTrigger(popupState)}>
             Open Popover
@@ -26,11 +26,11 @@ function PopoverPopupState(props) {
             {...bindPopover(popupState)}
             anchorOrigin={{
               vertical: 'bottom',
-              horizontal: 'center',
+              horizontal: 'center'
             }}
             transformOrigin={{
               vertical: 'top',
-              horizontal: 'center',
+              horizontal: 'center'
             }}
           >
             <Typography className={classes.typography}>The content of the Popover.</Typography>
@@ -42,7 +42,7 @@ function PopoverPopupState(props) {
 }
 
 PopoverPopupState.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(PopoverPopupState);

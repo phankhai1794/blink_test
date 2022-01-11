@@ -5,13 +5,13 @@ import Grid from '@material-ui/core/Grid';
 
 const useStyles = makeStyles({
   avatar: {
-    margin: 10,
+    margin: 10
   },
   bigAvatar: {
     margin: 10,
     width: 60,
-    height: 60,
-  },
+    height: 60
+  }
 });
 
 export default function ImageAvatars() {

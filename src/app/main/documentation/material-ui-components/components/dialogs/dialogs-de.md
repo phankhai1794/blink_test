@@ -72,7 +72,7 @@ Sie können die maximale Breite eines Dialogs festlegen, indem Sie die `maxWidth
 
 ## Responsive Vollbild
 
-Sie können einen Dialog im Vollbild responsive machen, indem Sie `withMobileDialog` verwenden. Standardmäßig wird `withMobileDialog()(Dialog)` gesetzt, wenn die [Bildschirmgröße](/customization/breakpoints/) *kleiner gleich* `sm` ist. Sie können Ihre eigene Bruchstelle z. B. `xs` auswählen, indem Sie das Argument `breakpoint` `withMobileDialog({breakpoint: 'xs'}) (Dialog)` sezten.
+Sie können einen Dialog im Vollbild responsive machen, indem Sie `withMobileDialog` verwenden. Standardmäßig wird `withMobileDialog()(Dialog)` gesetzt, wenn die [Bildschirmgröße](/customization/breakpoints/) _kleiner gleich_ `sm` ist. Sie können Ihre eigene Bruchstelle z. B. `xs` auswählen, indem Sie das Argument `breakpoint` `withMobileDialog({breakpoint: 'xs'}) (Dialog)` sezten.
 
 {{"demo": "pages/components/dialogs/ResponsiveDialog.js"}}
 

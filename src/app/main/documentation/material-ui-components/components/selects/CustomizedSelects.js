@@ -7,11 +7,11 @@ import Select from '@material-ui/core/Select';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import InputBase from '@material-ui/core/InputBase';
 
-const BootstrapInput = withStyles(theme => ({
+const BootstrapInput = withStyles((theme) => ({
   root: {
     'label + &': {
-      marginTop: theme.spacing(3),
-    },
+      marginTop: theme.spacing(3)
+    }
   },
   input: {
     borderRadius: 4,
@@ -33,30 +33,30 @@ const BootstrapInput = withStyles(theme => ({
       'sans-serif',
       '"Apple Color Emoji"',
       '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
+      '"Segoe UI Symbol"'
     ].join(','),
     '&:focus': {
       borderRadius: 4,
       borderColor: '#80bdff',
-      boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
-    },
-  },
+      boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)'
+    }
+  }
 }))(InputBase);
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   margin: {
-    margin: theme.spacing(1),
-  },
+    margin: theme.spacing(1)
+  }
 }));
 
 export default function CustomizedSelects() {
   const classes = useStyles();
   const [age, setAge] = React.useState('');
-  const handleChange = event => {
+  const handleChange = (event) => {
     setAge(event.target.value);
   };
   return (

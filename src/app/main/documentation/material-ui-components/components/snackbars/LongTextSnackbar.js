@@ -9,13 +9,13 @@ const action = (
   </Button>
 );
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    maxWidth: 600,
+    maxWidth: 600
   },
   snackbar: {
-    margin: theme.spacing(1),
-  },
+    margin: theme.spacing(1)
+  }
 }));
 
 export default function LongTextSnackbar() {

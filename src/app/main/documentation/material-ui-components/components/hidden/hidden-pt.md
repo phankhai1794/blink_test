@@ -35,19 +35,19 @@ Se você estiver usando a renderização do lado do servidor, poderá definir `i
 
 ## Ponto de quebra acima
 
-Usando qualquer propriedade de ponto de quebra com `up`, o componente *children* será ocultado *em ou acima* do ponto de quebra.
+Usando qualquer propriedade de ponto de quebra com `up`, o componente _children_ será ocultado _em ou acima_ do ponto de quebra.
 
 {{"demo": "pages/components/hidden/BreakpointUp.js"}}
 
 ## Ponto de quebra abaixo
 
-Usando qualquer propriedade de ponto de quebra com `down`, o componente *children* será ocultado *em ou abaixo* do ponto de quebra.
+Usando qualquer propriedade de ponto de quebra com `down`, o componente _children_ será ocultado _em ou abaixo_ do ponto de quebra.
 
 {{"demo": "pages/components/hidden/BreakpointDown.js"}}
 
 ## Ponto de quebra somente
 
-Usando a propriedade de ponto de quebra `only`, o componente *children* será ocultado *no(s) ponto(s) de quebra* especificado(s).
+Usando a propriedade de ponto de quebra `only`, o componente _children_ será ocultado _no(s) ponto(s) de quebra_ especificado(s).
 
 A propriedade `only` pode ser usada de duas maneiras:
 

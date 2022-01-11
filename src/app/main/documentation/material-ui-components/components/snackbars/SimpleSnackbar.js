@@ -5,10 +5,10 @@ import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   close: {
-    padding: theme.spacing(0.5),
-  },
+    padding: theme.spacing(0.5)
+  }
 }));
 
 export default function SimpleSnackbar() {
@@ -33,13 +33,13 @@ export default function SimpleSnackbar() {
       <Snackbar
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'left'
         }}
         open={open}
         autoHideDuration={6000}
         onClose={handleClose}
         ContentProps={{
-          'aria-describedby': 'message-id',
+          'aria-describedby': 'message-id'
         }}
         message={<span id="message-id">Note archived</span>}
         action={[
@@ -54,7 +54,7 @@ export default function SimpleSnackbar() {
             onClick={handleClose}
           >
             <CloseIcon />
-          </IconButton>,
+          </IconButton>
         ]}
       />
     </div>

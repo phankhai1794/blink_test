@@ -5,8 +5,8 @@ import NoSsr from '@material-ui/core/NoSsr';
 const useStyles = makeStyles({
   container: {
     maxWidth: 300,
-    wordBreak: 'break-all',
-  },
+    wordBreak: 'break-all'
+  }
 });
 
 function LargeTree() {
@@ -24,7 +24,7 @@ function FrameDeferring() {
         onClick={() =>
           setState({
             open: !state.open,
-            defer: false,
+            defer: false
           })
         }
       >
@@ -35,7 +35,7 @@ function FrameDeferring() {
         onClick={() =>
           setState({
             open: !state.open,
-            defer: true,
+            defer: true
           })
         }
       >

@@ -47,7 +47,7 @@ components: FilledInput, FormControl, FormHelperText, Input, InputAdornment, Inp
 
 {{"demo": "pages/components/text-fields/CustomizedInputs.js"}}
 
-自定义不止于CSS，您可以使用组合来构建自定义组件，并给您的应用程序提供一种独特的感觉。 以下是使用受Google地图启发的 [`InputBase`](/api/input-base/) 组件的示例。
+自定义不止于 CSS，您可以使用组合来构建自定义组件，并给您的应用程序提供一种独特的感觉。 以下是使用受 Google 地图启发的 [`InputBase`](/api/input-base/) 组件的示例。
 
 {{"demo": "pages/components/text-fields/CustomizedInputBase.js"}}
 

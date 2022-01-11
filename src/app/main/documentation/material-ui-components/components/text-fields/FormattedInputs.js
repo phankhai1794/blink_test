@@ -8,14 +8,14 @@ import InputLabel from '@material-ui/core/InputLabel';
 import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   formControl: {
-    margin: theme.spacing(1),
-  },
+    margin: theme.spacing(1)
+  }
 }));
 
 function TextMaskCustom(props) {
@@ -24,7 +24,7 @@ function TextMaskCustom(props) {
   return (
     <MaskedInput
       {...other}
-      ref={ref => {
+      ref={(ref) => {
         inputRef(ref ? ref.inputElement : null);
       }}
       mask={['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}
@@ -35,7 +35,7 @@ function TextMaskCustom(props) {
 }
 
 TextMaskCustom.propTypes = {
-  inputRef: PropTypes.func.isRequired,
+  inputRef: PropTypes.func.isRequired
 };
 
 function NumberFormatCustom(props) {
@@ -45,11 +45,11 @@ function NumberFormatCustom(props) {
     <NumberFormat
       {...other}
       getInputRef={inputRef}
-      onValueChange={values => {
+      onValueChange={(values) => {
         onChange({
           target: {
-            value: values.value,
-          },
+            value: values.value
+          }
         });
       }}
       thousandSeparator
@@ -60,20 +60,20 @@ function NumberFormatCustom(props) {
 
 NumberFormatCustom.propTypes = {
   inputRef: PropTypes.func.isRequired,
-  onChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired
 };
 
 export default function FormattedInputs() {
   const classes = useStyles();
   const [values, setValues] = React.useState({
     textmask: '(1  )    -    ',
-    numberformat: '1320',
+    numberformat: '1320'
   });
 
-  const handleChange = name => event => {
+  const handleChange = (name) => (event) => {
     setValues({
       ...values,
-      [name]: event.target.value,
+      [name]: event.target.value
     });
   };
 
@@ -95,7 +95,7 @@ export default function FormattedInputs() {
         onChange={handleChange('numberformat')}
         id="formatted-numberformat-input"
         InputProps={{
-          inputComponent: NumberFormatCustom,
+          inputComponent: NumberFormatCustom
         }}
       />
     </div>

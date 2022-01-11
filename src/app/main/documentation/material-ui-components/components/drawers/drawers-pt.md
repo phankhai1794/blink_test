@@ -32,7 +32,7 @@ Estamos usando o seguinte conjunto de propriedades nesta documentação para oti
 ```jsx
 const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-<SwipeableDrawer disableBackdropTransition={!iOS} disableDiscovery={iOS} />
+<SwipeableDrawer disableBackdropTransition={!iOS} disableDiscovery={iOS} />;
 ```
 
 ## Drawer responsivo

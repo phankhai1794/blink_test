@@ -52,7 +52,7 @@ function ResponsiveDialog(props) {
 }
 
 ResponsiveDialog.propTypes = {
-  fullScreen: PropTypes.bool.isRequired,
+  fullScreen: PropTypes.bool.isRequired
 };
 
 export default withMobileDialog()(ResponsiveDialog);

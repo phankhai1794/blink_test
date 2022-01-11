@@ -6,21 +6,21 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 
-const styles = theme => ({
+const styles = (theme) => ({
   typography: {
-    padding: theme.spacing(2),
-  },
+    padding: theme.spacing(2)
+  }
 });
 
 class NoTransitionPopper extends React.Component {
   state = {
-    anchorEl: null,
+    anchorEl: null
   };
 
-  handleClick = event => {
+  handleClick = (event) => {
     const { currentTarget } = event;
-    this.setState(state => ({
-      anchorEl: state.anchorEl ? null : currentTarget,
+    this.setState((state) => ({
+      anchorEl: state.anchorEl ? null : currentTarget
     }));
   };
 
@@ -46,7 +46,7 @@ class NoTransitionPopper extends React.Component {
 }
 
 NoTransitionPopper.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(NoTransitionPopper);

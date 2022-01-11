@@ -10,8 +10,8 @@ export default function MaterialTableDemo() {
       {
         title: 'Birth Place',
         field: 'birthCity',
-        lookup: { 34: 'İstanbul', 63: 'Şanlıurfa' },
-      },
+        lookup: { 34: 'İstanbul', 63: 'Şanlıurfa' }
+      }
     ],
     data: [
       { name: 'Mehmet', surname: 'Baran', birthYear: 1987, birthCity: 63 },
@@ -19,9 +19,9 @@ export default function MaterialTableDemo() {
         name: 'Zerya Betül',
         surname: 'Baran',
         birthYear: 2017,
-        birthCity: 34,
-      },
-    ],
+        birthCity: 34
+      }
+    ]
   });
 
   return (
@@ -30,8 +30,8 @@ export default function MaterialTableDemo() {
       columns={state.columns}
       data={state.data}
       editable={{
-        onRowAdd: newData =>
-          new Promise(resolve => {
+        onRowAdd: (newData) =>
+          new Promise((resolve) => {
             setTimeout(() => {
               resolve();
               const data = [...state.data];
@@ -40,7 +40,7 @@ export default function MaterialTableDemo() {
             }, 600);
           }),
         onRowUpdate: (newData, oldData) =>
-          new Promise(resolve => {
+          new Promise((resolve) => {
             setTimeout(() => {
               resolve();
               const data = [...state.data];
@@ -48,15 +48,15 @@ export default function MaterialTableDemo() {
               setState({ ...state, data });
             }, 600);
           }),
-        onRowDelete: oldData =>
-          new Promise(resolve => {
+        onRowDelete: (oldData) =>
+          new Promise((resolve) => {
             setTimeout(() => {
               resolve();
               const data = [...state.data];
               data.splice(data.indexOf(oldData), 1);
               setState({ ...state, data });
             }, 600);
-          }),
+          })
       }}
     />
   );

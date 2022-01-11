@@ -16,11 +16,11 @@ function ElevationScroll(props) {
   const trigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 0,
-    target: window ? window() : undefined,
+    target: window ? window() : undefined
   });
 
   return React.cloneElement(children, {
-    elevation: trigger ? 4 : 0,
+    elevation: trigger ? 4 : 0
   });
 }
 
@@ -28,7 +28,7 @@ ElevationScroll.propTypes = {
   children: PropTypes.node.isRequired,
   // Injected by the documentation to work in an iframe.
   // You won't need it on your project.
-  window: PropTypes.func,
+  window: PropTypes.func
 };
 
 export default function ElevateAppBar(props) {
@@ -50,7 +50,7 @@ export default function ElevateAppBar(props) {
               () => `Cras mattis consectetur purus sit amet fermentum.
 Cras justo odio, dapibus ac facilisis in, egestas eget quam.
 Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`,
+Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`
             )
             .join('\n')}
         </Box>

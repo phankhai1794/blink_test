@@ -14,7 +14,7 @@ Uma [grade](https://material.io/design/layout/responsive-layout-grid.html) cria 
 O sistema de grade é implementado com o componente `Grid`:
 
 - Ele usa [CSS’s Flexible Box](https://www.w3.org/TR/css-flexbox-1/) para alta flexibilidade.
-- Existem dois tipos de leiautes: *contêineres* e *itens*.
+- Existem dois tipos de leiautes: _contêineres_ e _itens_.
 - Larguras de itens são definidas em porcentagens, então elas são sempre fluidas e dimensionadas em relação ao elemento pai.
 - Itens têm preenchimento para criar o espaçamento entre itens individuais.
 - Existem cinco pontos de quebra (breakpoints) na grade: xs, sm, md, lg e xl.
@@ -53,7 +53,7 @@ Abaixo está uma demonstração interativa que permite explorar os resultados vi
 
 ## Leiaute Automático
 
-O leiaute automático faz com que os *itens* compartilhem de forma equivalente o espaço disponível. Isso também significa que você pode definir a largura de um *item* e os outros serão redimensionados automaticamente em torno dele.
+O leiaute automático faz com que os _itens_ compartilhem de forma equivalente o espaço disponível. Isso também significa que você pode definir a largura de um _item_ e os outros serão redimensionados automaticamente em torno dele.
 
 {{"demo": "pages/components/grid/AutoGrid.js"}}
 
@@ -80,13 +80,13 @@ https://www.w3.org/TR/css-flexbox-1/#box-model
 Há uma limitação com a margem negativa que usamos para implementar o espaçamento entre itens. Uma barra de rolagem horizontal irá aparecer se uma margem negativa vai além do `<body>`. Existem 3 soluções alternativas disponíveis: 1. Não usar o recurso de espaçamento e implementá-lo no espaço do usuário `spacing={0}` (Padrão). 2. Aplicando padding ao pai com pelo menos metade do valor de espaçamento aplicado ao filho:
 
 ```jsx
-  <body>
-    <div style={{ padding: 20 }}>
-      <Grid container spacing={5}>
-        //...
-      </Grid>
-    </div>
-  </body>
+<body>
+  <div style={{ padding: 20 }}>
+    <Grid container spacing={5}>
+      //...
+    </Grid>
+  </div>
+</body>
 ```
 
 1. Adicionando `overflow-x: hidden;` para o pai.

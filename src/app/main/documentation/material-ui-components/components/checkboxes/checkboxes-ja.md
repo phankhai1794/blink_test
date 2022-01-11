@@ -9,7 +9,7 @@ components: Checkbox, FormControl, FormGroup, FormLabel, FormControlLabel
 
 [CheckBox コンポーネント](https://material.io/design/components/selection-controls.html#checkboxes) を使用してオプションをオンまたはオフにすることができます。
 
-リストに複数のオプションを持っている場合は、 Checkboxを使用して代わりのオン/オフスイッチのスペースを保存することができます。 選択肢が1つしかない場合は、チェックボックスを使用せずに代わりにオン/オフスイッチを使用します。
+リストに複数のオプションを持っている場合は、 Checkbox を使用して代わりのオン/オフスイッチのスペースを保存することができます。 選択肢が 1 つしかない場合は、チェックボックスを使用せずに代わりにオン/オフスイッチを使用します。
 
 {{"demo": "pages/demos/checkboxes/Checkboxes.js"}}
 
@@ -36,12 +36,9 @@ components: Checkbox, FormControl, FormGroup, FormLabel, FormControlLabel
 ラベルを使用できない場合は、入力コンポーネントに直接属性を追加する必要があります。 この場合、追加の属性（例： `aria-label`, `aria-labelledby`, `title`)を経由して `inputProps` プロパティを追加します。
 
 ```jsx
-<Checkbox
-  value="checkedA"
-  inputProps={{ 'aria-label': 'Checkbox A' } }
-/>
+<Checkbox value="checkedA" inputProps={{ 'aria-label': 'Checkbox A' }} />
 ```
 
 ## ガイド
 
-- [Checkboxと Radio Buttons](https://www.nngroup.com/articles/checkboxes-vs-radio-buttons/)
+- [Checkbox と Radio Buttons](https://www.nngroup.com/articles/checkboxes-vs-radio-buttons/)

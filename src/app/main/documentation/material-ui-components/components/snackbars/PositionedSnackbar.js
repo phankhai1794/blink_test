@@ -6,12 +6,12 @@ export default function PositionedSnackbar() {
   const [state, setState] = React.useState({
     open: false,
     vertical: 'top',
-    horizontal: 'center',
+    horizontal: 'center'
   });
 
   const { vertical, horizontal, open } = state;
 
-  const handleClick = newState => () => {
+  const handleClick = (newState) => () => {
     setState({ open: true, ...newState });
   };
 
@@ -37,7 +37,7 @@ export default function PositionedSnackbar() {
         open={open}
         onClose={handleClose}
         ContentProps={{
-          'aria-describedby': 'message-id',
+          'aria-describedby': 'message-id'
         }}
         message={<span id="message-id">I love snacks</span>}
       />

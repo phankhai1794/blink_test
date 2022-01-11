@@ -2,14 +2,14 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Input from '@material-ui/core/Input';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   input: {
-    margin: theme.spacing(1),
-  },
+    margin: theme.spacing(1)
+  }
 }));
 
 export default function Inputs() {
@@ -21,14 +21,14 @@ export default function Inputs() {
         defaultValue="Hello world"
         className={classes.input}
         inputProps={{
-          'aria-label': 'Description',
+          'aria-label': 'Description'
         }}
       />
       <Input
         placeholder="Placeholder"
         className={classes.input}
         inputProps={{
-          'aria-label': 'Description',
+          'aria-label': 'Description'
         }}
       />
       <Input
@@ -36,7 +36,7 @@ export default function Inputs() {
         className={classes.input}
         disabled
         inputProps={{
-          'aria-label': 'Description',
+          'aria-label': 'Description'
         }}
       />
       <Input
@@ -44,7 +44,7 @@ export default function Inputs() {
         className={classes.input}
         error
         inputProps={{
-          'aria-label': 'Description',
+          'aria-label': 'Description'
         }}
       />
     </div>

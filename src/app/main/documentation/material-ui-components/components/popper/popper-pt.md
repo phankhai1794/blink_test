@@ -9,9 +9,9 @@ components: Popper
 
 Algumas características importantes do componente `Popper`:
 
-- 
-- 
-- 
+-
+-
+-
 - O componente children para o corpo do documento é o [`Portal`](/components/portal/) para evitar problemas de renderização. Você pode desativar esse comportamento com `disablePortal`.
 - A rolagem não é bloqueada como no componente [`Popover`](/components/popover/). O posicionamento do popper é atualizado com a área disponível na janela de visualização (viewport).
 - Clicar fora não oculta o componente `Popper`. Se você precisar desse comportamento, você pode usar o componente [`ClickAwayListener`](/components/click-away-listener/) - veja o exemplo na [seção da documentação do menu](/components/menus/#menulist-composition).

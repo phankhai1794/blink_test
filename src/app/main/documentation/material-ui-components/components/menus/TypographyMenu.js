@@ -11,8 +11,8 @@ import PriorityHighIcon from '@material-ui/icons/PriorityHigh';
 
 const useStyles = makeStyles({
   root: {
-    width: 230,
-  },
+    width: 230
+  }
 });
 
 export default function TypographyMenu() {

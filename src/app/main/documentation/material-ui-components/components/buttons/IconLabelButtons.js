@@ -8,19 +8,19 @@ import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
 import Icon from '@material-ui/core/Icon';
 import SaveIcon from '@material-ui/icons/Save';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   button: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(1)
   },
   leftIcon: {
-    marginRight: theme.spacing(1),
+    marginRight: theme.spacing(1)
   },
   rightIcon: {
-    marginLeft: theme.spacing(1),
+    marginLeft: theme.spacing(1)
   },
   iconSmall: {
-    fontSize: 20,
-  },
+    fontSize: 20
+  }
 }));
 
 export default function IconLabelButtons() {

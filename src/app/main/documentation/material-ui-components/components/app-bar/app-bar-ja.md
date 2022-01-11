@@ -19,7 +19,7 @@ components: AppBar, Toolbar, Menu
 
 {{"demo": "pages/components/app-bar/SimpleAppBar.js"}}
 
-## 基本的な検索フィールド付きApp Bar
+## 基本的な検索フィールド付き App Bar
 
 基本的な検索バー
 
@@ -29,7 +29,7 @@ components: AppBar, Toolbar, Menu
 
 {{"demo": "pages/components/app-bar/MenuAppBar.js"}}
 
-## 検索フィールド付きApp Bar
+## 検索フィールド付き App Bar
 
 サイド検索バー
 
@@ -45,15 +45,15 @@ components: AppBar, Toolbar, Menu
 
 ## スクロール
 
-### App Barを隠す
+### App Bar を隠す
 
-スクロール時に隠れるApp Bar。
+スクロール時に隠れる App Bar。
 
 {{"demo": "pages/components/app-bar/HideAppBar.js", "iframe": true, "maxWidth": 500}}
 
-### App Barを固定する
+### App Bar を固定する
 
-スクロール時に上部に固定されたApp Bar。
+スクロール時に上部に固定された App Bar。
 
 {{"demo": "pages/components/app-bar/ElevateAppBar.js", "iframe": true, "maxWidth": 500}}
 
@@ -61,15 +61,15 @@ components: AppBar, Toolbar, Menu
 
 #### 引数
 
-1. `オプション` (*オプジェクト* [任意]):
-    
-    - `options.disableHysteresis` (*ブール値* [任意]): デフォルト値 `false`. ヒステリシスを無効にします。 ` trigger ` 値を決定するときにスクロール方向を無視します。
-    - `options.target` (*ノード* [任意]): デフォルト地 `window`.
-    - `options.threshold` （*数値* [任意]）：デフォルト値`100`。垂直スクロールがこのしきい値を厳密に横切ったときに ` trigger ` 値を変更します（排他的）。
+1. `オプション` (_オプジェクト_ [任意]):
+
+   - `options.disableHysteresis` (_ブール値_ [任意]): デフォルト値 `false`. ヒステリシスを無効にします。 `trigger` 値を決定するときにスクロール方向を無視します。
+   - `options.target` (_ノード_ [任意]): デフォルト地 `window`.
+   - `options.threshold` （_数値_ [任意]）：デフォルト値`100`。垂直スクロールがこのしきい値を厳密に横切ったときに `trigger` 値を変更します（排他的）。
 
 #### 戻り値
 
-` trigger `：スクロール位置が基準に合っているのか
+`trigger`：スクロール位置が基準に合っているのか
 
 #### 例
 

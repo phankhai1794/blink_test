@@ -9,25 +9,25 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    flexWrap: 'wrap',
+    flexWrap: 'wrap'
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
+    minWidth: 120
   },
   selectEmpty: {
-    marginTop: theme.spacing(2),
-  },
+    marginTop: theme.spacing(2)
+  }
 }));
 
 export default function SimpleSelect() {
   const classes = useStyles();
   const [values, setValues] = React.useState({
     age: '',
-    name: 'hai',
+    name: 'hai'
   });
 
   const inputLabel = React.useRef(null);
@@ -37,9 +37,9 @@ export default function SimpleSelect() {
   }, []);
 
   function handleChange(event) {
-    setValues(oldValues => ({
+    setValues((oldValues) => ({
       ...oldValues,
-      [event.target.name]: event.target.value,
+      [event.target.name]: event.target.value
     }));
   }
 
@@ -52,7 +52,7 @@ export default function SimpleSelect() {
           onChange={handleChange}
           inputProps={{
             name: 'age',
-            id: 'age-simple',
+            id: 'age-simple'
           }}
         >
           <MenuItem value="">
@@ -139,7 +139,7 @@ export default function SimpleSelect() {
           value={values.name}
           onChange={handleChange}
           name="name"
-          renderValue={value => `⚠️  - ${value}`}
+          renderValue={(value) => `⚠️  - ${value}`}
           input={<Input id="name-error" />}
         >
           <MenuItem value="">
@@ -208,7 +208,7 @@ export default function SimpleSelect() {
           onChange={handleChange}
           name="age"
           inputProps={{
-            id: 'age-required',
+            id: 'age-required'
           }}
           className={classes.selectEmpty}
         >

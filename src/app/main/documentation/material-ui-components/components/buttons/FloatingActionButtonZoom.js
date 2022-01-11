@@ -26,28 +26,28 @@ function TabContainer(props) {
 
 TabContainer.propTypes = {
   children: PropTypes.node.isRequired,
-  dir: PropTypes.string.isRequired,
+  dir: PropTypes.string.isRequired
 };
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.background.paper,
     width: 500,
     position: 'relative',
-    minHeight: 200,
+    minHeight: 200
   },
   fab: {
     position: 'absolute',
     bottom: theme.spacing(2),
-    right: theme.spacing(2),
+    right: theme.spacing(2)
   },
   fabGreen: {
     color: theme.palette.common.white,
     backgroundColor: green[500],
     '&:hover': {
-      backgroundColor: green[600],
-    },
-  },
+      backgroundColor: green[600]
+    }
+  }
 }));
 
 export default function FloatingActionButtonZoom() {
@@ -65,7 +65,7 @@ export default function FloatingActionButtonZoom() {
 
   const transitionDuration = {
     enter: theme.transitions.duration.enteringScreen,
-    exit: theme.transitions.duration.leavingScreen,
+    exit: theme.transitions.duration.leavingScreen
   };
 
   const fabs = [
@@ -73,20 +73,20 @@ export default function FloatingActionButtonZoom() {
       color: 'primary',
       className: classes.fab,
       icon: <AddIcon />,
-      label: 'Add',
+      label: 'Add'
     },
     {
       color: 'secondary',
       className: classes.fab,
       icon: <EditIcon />,
-      label: 'Edit',
+      label: 'Edit'
     },
     {
       color: 'inherit',
       className: clsx(classes.fab, classes.fabGreen),
       icon: <UpIcon />,
-      label: 'Expand',
-    },
+      label: 'Expand'
+    }
   ];
 
   return (
@@ -119,7 +119,7 @@ export default function FloatingActionButtonZoom() {
           in={value === index}
           timeout={transitionDuration}
           style={{
-            transitionDelay: `${value === index ? transitionDuration.exit : 0}ms`,
+            transitionDelay: `${value === index ? transitionDuration.exit : 0}ms`
           }}
           unmountOnExit
         >

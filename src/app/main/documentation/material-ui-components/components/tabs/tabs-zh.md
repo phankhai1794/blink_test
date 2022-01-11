@@ -23,7 +23,7 @@ components: Tabs, Tab
 
 ### 禁用的选项
 
-可以通过设置 ` disabled ` 属性来禁用选项卡。
+可以通过设置 `disabled` 属性来禁用选项卡。
 
 {{"demo": "pages/components/tabs/DisabledTabs.js"}}
 
@@ -68,8 +68,6 @@ components: Tabs, Tab
 以下是自定义组件的一个示例。您可以在[重写文档页面](/customization/components/)中了解有关此内容的更多信息。
 
 {{"demo": "pages/components/tabs/CustomizedTabs.js"}}
-
-
 
 ## 导航选项卡
 

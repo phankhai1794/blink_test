@@ -14,12 +14,12 @@ import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import LastPageIcon from '@material-ui/icons/LastPage';
 
-const useStyles1 = makeStyles(theme => ({
+const useStyles1 = makeStyles((theme) => ({
   root: {
     flexShrink: 0,
     color: theme.palette.text.secondary,
-    marginLeft: theme.spacing(2.5),
-  },
+    marginLeft: theme.spacing(2.5)
+  }
 }));
 
 function TablePaginationActions(props) {
@@ -77,7 +77,7 @@ TablePaginationActions.propTypes = {
   count: PropTypes.number.isRequired,
   onChangePage: PropTypes.func.isRequired,
   page: PropTypes.number.isRequired,
-  rowsPerPage: PropTypes.number.isRequired,
+  rowsPerPage: PropTypes.number.isRequired
 };
 
 function createData(name, calories, fat) {
@@ -97,20 +97,20 @@ const rows = [
   createData('Lollipop', 392, 0.2),
   createData('Marshmallow', 318, 0),
   createData('Nougat', 360, 19.0),
-  createData('Oreo', 437, 18.0),
+  createData('Oreo', 437, 18.0)
 ].sort((a, b) => (a.calories < b.calories ? -1 : 1));
 
-const useStyles2 = makeStyles(theme => ({
+const useStyles2 = makeStyles((theme) => ({
   root: {
     width: '100%',
-    marginTop: theme.spacing(3),
+    marginTop: theme.spacing(3)
   },
   table: {
-    minWidth: 500,
+    minWidth: 500
   },
   tableWrapper: {
-    overflowX: 'auto',
-  },
+    overflowX: 'auto'
+  }
 }));
 
 export default function CustomPaginationActionsTable() {
@@ -133,7 +133,7 @@ export default function CustomPaginationActionsTable() {
       <div className={classes.tableWrapper}>
         <Table className={classes.table}>
           <TableBody>
-            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (
+            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
               <TableRow key={row.name}>
                 <TableCell component="th" scope="row">
                   {row.name}
@@ -159,7 +159,7 @@ export default function CustomPaginationActionsTable() {
                 page={page}
                 SelectProps={{
                   inputProps: { 'aria-label': 'Rows per page' },
-                  native: true,
+                  native: true
                 }}
                 onChangePage={handleChangePage}
                 onChangeRowsPerPage={handleChangeRowsPerPage}

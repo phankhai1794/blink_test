@@ -9,12 +9,12 @@ components: Modal
 
 Die Komponente rendert den Knoten `children` vor einer Hintergrundkomponente. Der `Modal` bietet wichtige Funktionen:
 
-- 
-- 
-- 
+-
+-
+-
 - ♿️ Der Fokus wird richtig verwaltet. Wechseln des Fokus zum modalen Inhalt und diesen halten belassen, bis der Modal geschlossen ist.
 - ♿️ Fügt die entsprechenden ARIA-Rollen automatisch hinzu.
-- 
+-
 
 > **Terminologieanmerkung**. Der Begriff "modal" bedeutet manchmal "Dialog", aber das ist eine Fehlbezeichnung. Ein modales Fenster beschreibt Teile einer Benutzeroberfläche. Ein Element wird als modal betrachtet, wenn es [die Interaktion mit dem Rest der Anwendung blockiert](https://en.wikipedia.org/wiki/Modal_window).
 
@@ -46,7 +46,7 @@ Das Erstellen von React-Elementen ist jedoch ebenfalls mit Kosten verbunden. Bet
       </TableRow>
     </TableHead>
     <TableBody>
-      {rows.map(row => (
+      {rows.map((row) => (
         <TableRow key={row.id}>
           <TableCell component="th" scope="row">
             {row.name}
@@ -60,7 +60,7 @@ Das Erstellen von React-Elementen ist jedoch ebenfalls mit Kosten verbunden. Bet
 </Modal>
 ```
 
-Wir erstellen viele React-Elemente, die niemals gemounted werden. Das ist verschwenderisch 
+Wir erstellen viele React-Elemente, die niemals gemounted werden. Das ist verschwenderisch
 
 ```jsx
 <Modal open={false}>
@@ -75,10 +75,7 @@ Auf diese Weise nutzen Sie [React Rendering Laziness Evaluation](https://overrea
 - Achten Sie darauf, eine Referenzierung des modalen Titels durch `aria-labelledby = "id..."` zu dem `Modal` hinzufügen. Zusätzlich können Sie eine Beschreibung Ihres Modals mit der Eigenschaft `aria-descriptionby = "id..."` für das `Modal`angeben.
 
 ```jsx
-<Modal
-  aria-labelledby="simple-modal-title"
-  aria-describedby="simple-modal-description"
->
+<Modal aria-labelledby="simple-modal-title" aria-describedby="simple-modal-description">
   <Typography variant="h6" id="modal-title">
     Mein Titel
   </Typography>
