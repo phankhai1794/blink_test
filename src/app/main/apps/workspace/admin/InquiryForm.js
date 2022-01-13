@@ -66,12 +66,10 @@ const renderPrevInquiry = (questionNumber) => {
   return result;
 };
 const InquiryForm = (props) => {
-  const { handleAddTempQuestion, open, toggle, FabTitle, filteredTitles, tempQuestionNum } = props;
+  const { handleAddTempQuestion, FabTitle, filteredTitles, tempQuestionNum } = props;
 
   return (
     <Form
-      open={open}
-      toggleForm={toggle}
       FabTitle={FabTitle}
       onClickAddButton={handleAddTempQuestion}
       title={tempQuestionNum === 0 ? mockQuestion.choiceAnwer.title : 'open Inquiries'}

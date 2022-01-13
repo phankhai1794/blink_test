@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import * as Actions from '../admin/store/actions';
+
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -95,7 +98,11 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function Form(props) {
-  const { open, children, title, hasAddButton, FabTitle } = props;
+  const dispatch = useDispatch()
+  const { children, title, hasAddButton, FabTitle } = props;
+  const open = useSelector((state) => state.workspace.open)
+  const state = useSelector((state) => state)
+
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const handleOpenFab = () => {
@@ -106,13 +113,13 @@ export default function Form(props) {
     setIsFullScreen(open);
   };
   const toggleForm = (open) => {
-    props.toggleForm(open);
+    dispatch(Actions.toggleInquiry(open));
   };
   const handleClick = () => {
     props.onClickAddButton();
   };
   const handleClose = () => {
-    props.toggleForm(false);
+    toggleForm(false);
     setOpenFab(false);
     if (props.onClose) {
       props.onClose();

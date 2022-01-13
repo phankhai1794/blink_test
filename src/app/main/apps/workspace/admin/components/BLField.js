@@ -1,4 +1,7 @@
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import * as Actions from '../store/actions';
+
 import { TextField, InputAdornment } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core';
 import { green } from '@material-ui/core/colors';
@@ -30,16 +33,42 @@ const useStyles = makeStyles((theme) => ({
 }));
 const BLField = (props) => {
   const classes = useStyles();
+  const dispatch = useDispatch()
   const {
     children,
-    openAddPopover,
-    closeAddPopover,
     width,
     questionIsEmpty,
     selectedChoice,
     fileName,
     openInquiry
   } = props;
+  const anchorEl = useSelector((state) => state.workspace.anchorEl)
+
+  const openAddPopover = (e) => {
+    dispatch(Actions.setAnchor(e.currentTarget))
+  };
+
+  const closeAddPopover = (e) => {
+    if (anchorEl === null) {
+      dispatch(Actions.setAnchor(null))
+    } else {
+      const { x, y, width, height } = anchorEl.getBoundingClientRect();
+      if (x + width < 800) {
+        if (e.clientY + 2 > y + height || e.clientY < y) {
+          dispatch(Actions.setAnchor(null))
+        } else if (e.clientX > x + width + 48 || e.clientX < x) {
+          dispatch(Actions.setAnchor(null))
+        }
+      } else {
+        if (e.clientY + 2 > y + height || e.clientY < y) {
+          dispatch(Actions.setAnchor(null))
+        } else if (e.clientX > x + width || e.clientX > x + 48) {
+          dispatch(Actions.setAnchor(null))
+        }
+      }
+    }
+  };
+
   return (
     <div
       style={{
