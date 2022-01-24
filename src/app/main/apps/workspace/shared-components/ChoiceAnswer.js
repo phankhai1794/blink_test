@@ -4,7 +4,7 @@ import UserInfo from './UserInfo';
 import SaveIcon from '@material-ui/icons/Save';
 
 const ChoiceAnswer = (props) => {
-  const { question, disabled } = props;
+  const { question } = props;
   let questionIsEmpty = props.question === undefined;
   let prevChoiceArray = question.choices.filter(
     (choice) => choice.content === question.selectedChoice
@@ -53,24 +53,23 @@ const ChoiceAnswer = (props) => {
   };
   return (
     <>
-      {question.choices.map((choice) => (
-        <div key={choice.id} style={{ marginTop: '0.5rem' }}>
+      {question.choices.map((choice, index) => (
+        <div key={index} style={{ marginTop: '0.5rem' }}>
           <div style={{ display: 'flex', marginTop: '0.5rem' }}>
             <div>
               <Radio
-                disabled={disabled}
-                checked={selectedChoice === choice.content}
+                disabled
                 onChange={handleChange}
-                value={choice.content}
+                value={choice}
                 color="primary"
                 style={{ margin: 'auto' }}
               />
             </div>
-            <p style={{ margin: 'auto 1rem', fontSize: '1.7rem' }}>{choice.content}</p>
+            <p style={{ margin: 'auto 1rem', fontSize: '1.7rem' }}>{choice}</p>
           </div>
         </div>
-      ))}
-      {question.addOther && (
+      ))} 
+      {/* {true && (
         <div style={{ display: 'flex', marginTop: '1rem' }}>
           <Radio
             disabled={disabled}
@@ -101,22 +100,14 @@ const ChoiceAnswer = (props) => {
             onFocus={handleFocus}
           />
         </div>
-      )}
-      {lastSelectedChoice !== '' && !showSaveBtn && (
+      )} */}
+      {/* {lastSelectedChoice !== '' && !showSaveBtn && (
         <div style={{ marginTop: '1rem' }}>
           <UserInfo name="Anrew" date="today" time="10:50PM" />
           <h3 style={{ margin: '1rem 5.5rem' }}>{lastSelectedChoice}</h3>
         </div>
-      )}
-      {showSaveBtn && (
-        <div className="flex justify-end">
-          <Button variant="contained" color="primary" onClick={handleSaveSelectedChoice}>
-            {' '}
-            <SaveIcon />
-            Save
-          </Button>
-        </div>
-      )}
+      )} */}
+
     </>
   );
 };

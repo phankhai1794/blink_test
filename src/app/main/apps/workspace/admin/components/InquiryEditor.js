@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import * as Actions from '../store/actions';
+
 import {
   Button,
   TextField,
@@ -10,7 +13,7 @@ import {
   Fab,
   RadioGroup,
   FormControlLabel,
-  Radio,
+  Checkbox,
   Card
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -70,52 +73,14 @@ const useStyles = makeStyles((theme) => ({
 const typeToNameDict = {
   'ROUTING INQUIRY/DISCREPANCY':
     'We found discrepancy in the routing information between SI and OPUS booking details',
-  'MISSING DESTINATION REQUIREMENT':
-    'We found discrepancy in the routing information between SI and OPUS booking details',
+  'BL TYPE':
+    'Please provide the missing information below',
   'BROKEN ROUTE ERROR':
     'We found discrepancy in the routing information between SI and OPUS booking details'
 };
 // Sub Commporent
-const FirstChoice = (props) => {
-  const { handleChange, question } = props;
-  const [isHover, setIsHover] = useState(false);
-  const [isOnFocus, setIsOnFocus] = useState(false);
-  const classes = inputStyle();
-  const handleFocus = (e) => {
-    setIsOnFocus(true);
-    e.target.select();
-  };
-  return (
-    <>
-      <div
-        className="flex"
-        onMouseEnter={() => setIsHover(true)}
-        onMouseLeave={() => {
-          isOnFocus ? setIsHover(true) : setIsHover(false);
-        }}
-      >
-        <div style={{ paddingTop: '6px', marginRight: '1rem' }}>
-          <DisabledRadioButtonUncheckedIcon />
-        </div>
-        <div style={{ height: '50px', width: '95%' }}>
-          <TextField
-            style={{ border: 'none' }}
-            name="input"
-            value={question.content}
-            onChange={(e) => handleChange(e, question.id)}
-            fullWidth={true}
-            onFocus={handleFocus}
-            InputProps={{
-              classes
-            }}
-          />
-        </div>
-      </div>
-    </>
-  );
-};
 const Choice = (props) => {
-  const { id, question, handleChange, handleRemoveChoice } = props;
+  const { index, value, handleChangeChoice, handleRemoveChoice } = props;
   const [isHover, setIsHover] = useState(false);
   const [isOnFocus, setIsOnFocus] = useState(false);
   const handleFocus = (e) => {
@@ -124,7 +89,7 @@ const Choice = (props) => {
   };
   const classes = inputStyle();
   return (
-    <div key={id}>
+    <div key={index}>
       <div
         className="flex"
         onMouseEnter={() => setIsHover(true)}
@@ -138,11 +103,11 @@ const Choice = (props) => {
         <div style={{ height: '50px', width: '95%' }}>
           <TextField
             fullWidth
-            value={question.content}
+            value={value}
             style={{ marginLeft: '1rem' }}
             autoFocus={true}
             onFocus={(e) => e.target.select()}
-            onChange={(e) => handleChange(e, question.id)}
+            onChange={(e) => handleChangeChoice(e,index)}
             onnFocus={handleFocus}
             InputProps={{
               classes
@@ -150,7 +115,7 @@ const Choice = (props) => {
           />
         </div>
         <div style={{ marginLeft: '1rem' }}>
-          <IconButton onClick={() => handleRemoveChoice(question.id)} style={{ padding: '2px' }}>
+          <IconButton onClick={() => handleRemoveChoice(index)} style={{ padding: '2px' }}>
             <CloseIcon />
           </IconButton>
         </div>
@@ -159,37 +124,44 @@ const Choice = (props) => {
   );
 };
 const ChoiceAnswer = (props) => {
+  const dispatch = useDispatch()
+  const {questions, question, index} = props
   const classes_disabled = inputStyleDisabled();
   const classes = inputStyle();
+
+  const handleAddChoice = () => {
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion[index].choices.push("Option " + (optionsOfQuestion[index].choices.length + 1))
+    dispatch((Actions.setQuestion(optionsOfQuestion)))
+  };
+  const handleRemoveChoice = (id) => {
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion[index].choices.splice(id, 1)
+    dispatch((Actions.setQuestion(optionsOfQuestion)))
+  };
+  const handleChangeChoice = (e, id) => {
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion[index].choices[id] = e.target.value
+    dispatch((Actions.setQuestion(optionsOfQuestion)))
+  };
+
   const {
-    addOther,
-    choiceList,
-    handleAddOtherChoice,
-    handleAddChoice,
-    handleChange,
-    handleRemoveChoice,
-    handleRemoveOtherChoice,
     uploadImageAttach,
     handleRemoveImageAttach
   } = props;
   return (
     <div style={{ paddingTop: '2rem' }}>
-      {/* if there are 1 choice -> remove close button in the end */}
-      {choiceList.length === 1 ? (
-        <FirstChoice question={choiceList[0]} id={choiceList[0]} handleChange={handleChange} />
-      ) : (
-        choiceList.map((question, index) => {
+      { question.choices.map((value, k) => {
           return (
             <Choice
-              question={question}
-              key={index}
-              handleChange={handleChange}
+              value={value}
+              index={k}
+              handleChangeChoice={handleChangeChoice}
               handleRemoveChoice={handleRemoveChoice}
-              handleChange={handleChange}
             />
           );
         })
-      )}
+      }
       <div className="flex">
         <div style={{ paddingTop: '6px', marginRight: '1rem' }}>
           <DisabledRadioButtonUncheckedIcon />
@@ -230,8 +202,11 @@ const AttachmentAnswer = () => {
 // Main Component
 const InquiryEditor = (props) => {
   // custom attribute must be lowercase
+  const dispatch = useDispatch()
   const selectStyle = useStyles();
-  const { question, questionIsEmpty, defaultContent } = props;
+  const { questionIsEmpty, defaultContent, index } = props;
+  const [ftitle, questions] = useSelector((state) => [state.workspace.currentField, state.workspace.question])
+  const question = questions[index]
   const [questionInfo, setQuestionInfo] = useState(
     !questionIsEmpty
       ? {
@@ -253,102 +228,53 @@ const InquiryEditor = (props) => {
           src: ''
         }
   );
-  const [questionTitle, setQuestionTitle] = useState(props.defaultTitle || ' ');
-  const [choiceList, setChoiceList] = useState(
-    !questionIsEmpty
-      ? question.choices
-      : [
-          {
-            id: 1,
-            content: defaultContent
-          }
-        ]
-  );
-  const handleAddChoice = () => {
-    setChoiceList((prevQuestion) => [
-      ...prevQuestion,
-      {
-        id: choiceList[choiceList.length - 1].id + 1,
-        content: `Add Option ${choiceList.length + 1}`
-      }
-    ]);
-  };
-  const handleAddOtherChoice = () => {
-    setQuestionInfo({
-      ...questionInfo,
-      addOther: true
-    });
-  };
-  const handleRemoveOtherChoice = () => {
-    setQuestionInfo({
-      ...questionInfo,
-      addOther: false
-    });
-  };
-  const handleRemoveChoice = (id) => {
-    const data = choiceList.filter((question) => question.id !== id);
-    setChoiceList(data);
-  };
-  const handleChange = (e, id) => {
-    e.preventDefault();
-    const questionIndex = choiceList.findIndex((question) => question.id === id);
-    let temp = [...choiceList];
-    temp[questionIndex].content = e.target.value;
-    setChoiceList(temp);
-  };
+  const [questionTitle, setQuestionTitle] = useState(ftitle || ' ');  
+
+  const removeQuestion = () => {
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion.splice(index, 1)
+    if (index > 0) {
+      dispatch(Actions.setEdit(index - 1));
+    }
+    dispatch((Actions.setQuestion(optionsOfQuestion)))
+  }
+
+  const copyQuestion = () => {
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion.splice(index, 1)
+    dispatch((Actions.setQuestion(optionsOfQuestion)))
+  }
+
   const handleTypeChange = (e) => {
-    setQuestionInfo({
-      ...questionInfo,
-      type: e.target.value,
-      name: typeToNameDict[e.target.value]
-    });
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion[index].type = e.target.value
+    optionsOfQuestion[index].name = typeToNameDict[e.target.value]
+    dispatch((Actions.setQuestion(optionsOfQuestion)))
   };
+
   const handleTitleChange = (e) => {
     setQuestionTitle(e.target.value);
     // onSave()
     // console.log(questionTitle)
   };
-  useEffect(() => {
-    if (questionTitle && questionTitle !== ' ') {
-      let savedQuestion = {
-        name: questionInfo.name,
-        type: questionInfo.type,
-        answerType: questionInfo.answerType,
-        choices: choiceList,
-        addOther: questionInfo.addOther,
-        src: questionInfo.src
-      };
-      props.handleUpdateQuestion(
-        {
-          savedQuestion
-        },
-        questionTitle
-      );
-    }
-  }, [questionInfo, choiceList, questionTitle]);
+  const handleFieldChange = (e) => {
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion[index].field = e.target.value
+    dispatch((Actions.setQuestion(optionsOfQuestion)))
+  };
+
   const handleNameChange = (e) => {
-    setQuestionInfo({
-      ...questionInfo,
-      name: e.target.value
-    });
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion[index].name = e.target.value
+    dispatch((Actions.setQuestion(optionsOfQuestion)))
   };
+
   const handleAnswerTypeChange = (e) => {
-    setQuestionInfo({
-      ...questionInfo,
-      answerType: e.target.value
-    });
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion[index].answerType = e.target.value
+    dispatch((Actions.setQuestion(optionsOfQuestion)))
   };
-  const onSave = () => {
-    let savedQuestion = {
-      name: questionInfo.name,
-      type: questionInfo.type,
-      answerType: questionInfo.answerType,
-      choices: choiceList,
-      addOther: questionInfo.addOther,
-      src: questionInfo.src
-    };
-    props.handleUpdateQuestion(savedQuestion, questionTitle);
-  };
+
   const handleUploadImageAttach = (src) => {
     setQuestionInfo({
       ...questionInfo,
@@ -361,27 +287,17 @@ const InquiryEditor = (props) => {
       src: null
     });
   };
-  const handleAddQuestion = () => {
-    let savedQuestion = {
-      name: questionInfo.name,
-      type: questionInfo.type,
-      answerType: questionInfo.answerType,
-      choices: choiceList,
-      addOther: questionInfo.addOther,
-      src: questionInfo.src
-    };
-    props.handleAddQuestion(savedQuestion, questionTitle);
-    setQuestionTitle(' ');
-  };
+ 
   return (
-    <div>
+    <div style={{display: "flex"}}>
+      <div style={{width: "6px", backgroundColor: "#4285f4", borderTopLeftRadius: "8px", borderBottomLeftRadius: "8px"}}/>
       <Card style={{ padding: '1rem' }}>
         <div className="flex justify-end mt-12 " style={{ marginRight: '-1rem' }}>
           <RadioGroup defaultValue="onshore" aria-label="target-inquiry" name="target-inquiry" row>
-            <FormControlLabel value="onshore" control={<Radio color="primary" />} label="Onshore" />
+            <FormControlLabel value="onshore" control={<Checkbox color="primary" />} label="Onshore" />
             <FormControlLabel
               value="customer"
-              control={<Radio color="primary" />}
+              control={<Checkbox color="primary" />}
               label="Customer"
             />
           </RadioGroup>
@@ -390,7 +306,7 @@ const InquiryEditor = (props) => {
           <Grid item xs={5}>
             <FormControl>
               <Select
-                value={questionInfo.type}
+                value={question.type}
                 name="Question type"
                 onChange={handleTypeChange}
                 input={<OutlinedInput />}
@@ -399,8 +315,8 @@ const InquiryEditor = (props) => {
                   {' '}
                   Routing Inquiry/Discripancy
                 </MenuItem>
-                <MenuItem value="MISSING DESTINATION REQUIREMENT">
-                  Missing Destination Requirment
+                <MenuItem value="BL TYPE">
+                  BL Type
                 </MenuItem>
                 <MenuItem value="BROKEN ROUTE ERROR">Broken Route Error</MenuItem>
               </Select>
@@ -409,7 +325,7 @@ const InquiryEditor = (props) => {
           <Grid item xs={4}>
             <FormControl>
               <Select
-                value={questionInfo.answerType}
+                value={question.answerType}
                 name="Question answer type"
                 onChange={handleAnswerTypeChange}
                 input={<OutlinedInput />}
@@ -418,19 +334,19 @@ const InquiryEditor = (props) => {
                   {/* <ListItem style={{ p: 0 }}> */}
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <RadioButtonCheckedIcon fontSize="small" style={{ marginRight: '1rem' }} />
-                    <div>Choice Answer</div>
+                    <div>Option selection</div>
                   </div>
                 </MenuItem>
                 <MenuItem value="PARAGRAPH ANSWER">
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <SubjectIcon fontSize="small" style={{ marginRight: '1rem' }} />
-                    <div>Paragraph Answer</div>
+                    <div>Customer input</div>
                   </div>
                 </MenuItem>
                 <MenuItem value="ATTACHMENT ANSWER">
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <BackupIcon fontSize="small" style={{ marginRight: '1rem' }} />
-                    <div>Attachment Answer</div>
+                    <div>Customer add attachment</div>
                   </div>
                 </MenuItem>
               </Select>
@@ -440,19 +356,18 @@ const InquiryEditor = (props) => {
             <div className="flex justify-end" style={{ marginLeft: 'auto', width: '90%' }}>
               <FormControl style={{ width: '100%', height: '100%' }}>
                 <Select
-                  value={questionTitle}
+                  value={question.field}
                   name="Question title"
                   input={<OutlinedInput />}
-                  onChange={(e) => setQuestionTitle(e.target.value)}
+                  onChange={handleFieldChange}
                 >
-                  <MenuItem value=" ">OTHER FIELD</MenuItem>
-                  {props.filteredTitles.map((title, index) => {
-                    return (
-                      <MenuItem value={title} key={index}>
-                        {title.replace(/<[^>]*>?/gm, '')}
-                      </MenuItem>
-                    );
-                  })}
+                  <MenuItem value="other">Other Field</MenuItem>
+                  <MenuItem value="shipper">Shipper/Exporter</MenuItem>
+                  <MenuItem value="consignee">Consignee</MenuItem>
+                  <MenuItem value="port_of_loading">Poft of Loading</MenuItem>
+                  <MenuItem value="place_of_receipt">Place of Receipt</MenuItem>
+                  <MenuItem value="place_of_delivery">Place of Delivery</MenuItem>
+                  <MenuItem value="port_of_discharge">Port of Discharge</MenuItem>
                 </Select>
               </FormControl>
             </div>
@@ -460,7 +375,7 @@ const InquiryEditor = (props) => {
         </Grid>
         <div style={{ marginTop: '1rem' }}>
           <TextField
-            value={questionInfo.name}
+            value={question.name}
             variant="outlined"
             multiline
             onFocus={(e) => e.target.select()}
@@ -468,37 +383,28 @@ const InquiryEditor = (props) => {
             style={{ width: '100%', resize: 'none' }}
           />
         </div>
-        {questionInfo.answerType === 'CHOICE ANSWER' && (
+        {question.answerType === 'CHOICE ANSWER' && (
           <ChoiceAnswer
-            addOther={questionInfo.addOther}
-            choiceList={choiceList}
-            handleAddOtherChoice={handleAddOtherChoice}
-            handleAddChoice={handleAddChoice}
-            handleChange={handleChange}
-            handleRemoveChoice={handleRemoveChoice}
-            handleRemoveOtherChoice={handleRemoveOtherChoice}
+            questions={questions}
+            question={question}
+            index={index}
           />
         )}
-        {questionInfo.answerType === 'PARAGRAPH ANSWER' && (
+        {question.answerType === 'PARAGRAPH ANSWER' && (
           <div style={{ marginTop: '2rem' }}>
             <ParagraphAnswer />
           </div>
         )}
-        {questionInfo.answerType === 'ATTACHMENT ANSWER' && (
+        {question.answerType === 'ATTACHMENT ANSWER' && (
           <AttachmentAnswer style={{ marginTop: '1rem' }} />
         )}
 
         <div className="flex justify-end mt-12 mr-2 ">
-          <RadioGroup aria-label="quiz" name="quiz" row>
-            <FormControlLabel
-              value="best"
-              control={<AttachFile uploadImageAttach={handleUploadImageAttach} />}
-            />
-            <FormControlLabel value="best" control={<FileCopyIcon />} />
-            <FormControlLabel value="worst" control={<DeleteIcon />} />
-          </RadioGroup>
+          <AttachFile uploadImageAttach={handleUploadImageAttach} />
+          <IconButton style={{ padding: '2px' }} onClick={copyQuestion}><FileCopyIcon /></IconButton>
+          <IconButton style={{ padding: '2px' }} onClick={removeQuestion}><DeleteIcon /></IconButton>
         </div>
-        {questionInfo.src && (
+        {question.src && (
           <div style={{ position: 'relative' }}>
             <Fab
               color="primary"
@@ -513,7 +419,7 @@ const InquiryEditor = (props) => {
             >
               <CloseIcon />
             </Fab>
-            <ImageAttach src={questionInfo.src} style={{ margin: '1rem' }} />
+            <ImageAttach src={question.src} style={{ margin: '1rem' }} />
           </div>
         )}
       </Card>

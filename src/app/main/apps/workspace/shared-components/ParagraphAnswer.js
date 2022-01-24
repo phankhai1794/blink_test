@@ -19,7 +19,7 @@ const ParagraphAnswer = (props) => {
     <div>
       <div className="flex">
         <TextField
-          placeholder="INPUT YOUR INFORMATION"
+          placeholder="CUSTOMER INPUT"
           InputProps={{
             style: {
               fontSize: '1.7rem'
@@ -52,15 +52,6 @@ const ParagraphAnswer = (props) => {
             }}
           />
           {/* <h3 style={{ margin: "1rem 2rem" }}>{question.selectedChoice}</h3> */}
-        </div>
-      )}
-      {question.paragraph !== paragraphText && (
-        <div className="flex justify-end" style={{ marginTop: '1rem' }}>
-          <Button variant="contained" color="primary" onClick={handleSaveSelectedChoice}>
-            {' '}
-            <SaveIcon />
-            Save
-          </Button>
         </div>
       )}
     </div>

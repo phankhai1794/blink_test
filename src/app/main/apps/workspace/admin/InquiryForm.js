@@ -1,6 +1,5 @@
 import React from 'react';
-import { Grid } from '@material-ui/core';
-import SubmitInquiriesForm from './components/InquiryEditor';
+import { useDispatch, useSelector } from 'react-redux';
 import Form from '../shared-components/Form';
 import InquiryEditor from './components/InquiryEditor';
 import Inquiry from '../shared-components/Inquiry';
@@ -56,39 +55,24 @@ const mockQuestion = {
     }
   }
 };
-const renderPrevInquiry = (questionNumber) => {
-  let result = [];
-  for (var i = 0; i < questionNumber; ++i) {
-    result.push(
-      <Inquiry style={{ marginBottom: '2rem' }} mockQuestion={mockQuestion.choiceAnwer} />
-    );
-  }
-  return result;
-};
-const InquiryForm = (props) => {
-  const { handleAddTempQuestion, FabTitle, filteredTitles, tempQuestionNum } = props;
 
+
+const InquiryForm = (props) => {
+  const { FabTitle } = props;
+  const [questions , title] = useSelector((state) =>[state.workspace.question, state.workspace.currentField] )
+  const tempQuestionNum = questions.length
   return (
-    <Form
-      FabTitle={FabTitle}
-      onClickAddButton={handleAddTempQuestion}
-      title={tempQuestionNum === 0 ? mockQuestion.choiceAnwer.title : 'open Inquiries'}
-    >
-      <div>
-        {tempQuestionNum === 0 ? (
-          <Grid container>
-            <InquiryEditor filteredTitles={filteredTitles} questionIsEmpty={true} />
-          </Grid>
-        ) : (
-          <>
-            {renderPrevInquiry(tempQuestionNum)}
-            <Grid container>
-              <SubmitInquiriesForm filteredTitles={filteredTitles} questionIsEmpty={true} />
-            </Grid>
-          </>
-        )}
-      </div>
-    </Form>
+      <Form
+        FabTitle={FabTitle}
+        title={tempQuestionNum === 1 ? title : 'open Inquiries'}
+      >
+        <>
+          { questions.map((question, index) => (
+            <Inquiry style={{ marginBottom: '2rem' }} index={index} question={question} />
+          ))
+          }
+        </>
+      </Form>
   );
 };
 
