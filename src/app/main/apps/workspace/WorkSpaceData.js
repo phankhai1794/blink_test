@@ -1,5 +1,5 @@
 const WorkSpaceData = {
-  'Shipper/Exporter': {
+  'shipper': {
     // dont neet title now, but maybe used in the future
     title: 'Shipper/Exporter',
     question: {
@@ -12,7 +12,7 @@ const WorkSpaceData = {
       'DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN',
     open: false
   },
-  Consignee: {
+  'consignee': {
     title: 'Consignee',
     question: {
       name: '',
@@ -24,7 +24,7 @@ const WorkSpaceData = {
       'DSV AIR & SEA LTD. -1708 16TH FLOOR, HANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA',
     open: false
   },
-  'NOTIFY PARTY (It is agreed that no responsibility shall be <br></br> attached to the Carrier or its Agents for failure to notify)':
+  'notify':
     {
       title:
         'NOTIFY PARTY (It is agreed that no responsibility shall be <br></br> attached to the Carrier or its Agents for failure to notify)',
@@ -38,7 +38,7 @@ const WorkSpaceData = {
         'DSV AIR & SEA LTD. -1708 16TH FLOOR, HANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA',
       open: false
     },
-  'PRE-CARRIAGE BY': {
+  'pre_carriage': {
     title: 'PRE-CARRIAGE BY',
     question: {
       name: '',
@@ -49,7 +49,7 @@ const WorkSpaceData = {
     content: '',
     open: false
   },
-  'PLACE OF RECEIPT': {
+  'place_of_receipt': {
     title: 'PLACE OF RECEIPT',
     question: {
       name: 'We found discrepancy in the routing information between SI and OPUS booking details',
@@ -71,7 +71,7 @@ const WorkSpaceData = {
     content: 'SINGAPORE',
     open: false
   },
-  'OCEAN VESSEL VOYAGE NO. FlAG': {
+  'ocean_vessel': {
     title: 'OCEAN VESSEL VOYAGE NO. FlAG',
     question: {
       name: 'We found discrepancy in the routing information between SI and OPUS booking details',
@@ -83,7 +83,7 @@ const WorkSpaceData = {
     content: 'CONFIDENCE 021W',
     open: false
   },
-  'PORT OF LOADING': {
+  'port_of_loading': {
     title: 'PORT OF LOADING',
     question: {
       name: 'We found discrepancy in the routing information between SI and OPUS booking details',
@@ -106,7 +106,7 @@ const WorkSpaceData = {
     content: 'TOKYO,JAPAN',
     open: false
   },
-  'PORT OF DISCHARGE': {
+  'port_of_discharge': {
     title: 'PORT OF DISCHARGE',
     question: {
       name: 'We found discrepancy in the routing information between SI and OPUS booking details',
@@ -119,7 +119,7 @@ const WorkSpaceData = {
     content: 'BUSAN, KOREA',
     open: false
   },
-  'PLACE OF DELIVERY': {
+  'place_of_delivery': {
     title: 'PLACE OF DELIVERY',
     question: {
       name: '',
@@ -130,7 +130,7 @@ const WorkSpaceData = {
     content: 'BUSAN',
     open: false
   },
-  'BOOKING NO.': {
+  'booking_no': {
     title: 'BOOKING NO.',
     question: {
       name: '',
@@ -165,7 +165,7 @@ const WorkSpaceData = {
       content: '',
       open: false
     },
-  "FINAL DESTINATION(for line merchant's reference only)": {
+  "final_destination": {
     title: "FINAL DESTINATION(for line merchant's reference only)",
     question: {
       name: '',

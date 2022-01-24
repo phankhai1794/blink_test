@@ -40,12 +40,14 @@ const BLField = (props) => {
     questionIsEmpty,
     selectedChoice,
     fileName,
-    openInquiry
+    openInquiry,
+    id
   } = props;
   const anchorEl = useSelector((state) => state.workspace.anchorEl)
 
   const openAddPopover = (e) => {
     dispatch(Actions.setAnchor(e.currentTarget))
+    dispatch(Actions.setField(e.currentTarget.id))
   };
 
   const closeAddPopover = (e) => {
@@ -71,6 +73,7 @@ const BLField = (props) => {
 
   return (
     <div
+      id={id}
       style={{
         width: `${width}`
       }}

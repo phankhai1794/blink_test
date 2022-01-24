@@ -118,7 +118,6 @@ const mockQuestionaAnswered = {
 const BLWorkspace = (props) => {
   const [data, setData] = useState(WorkSpaceData);
   const dispatch = useDispatch()
-  const [tempQuestionNum, setTempQuestionNum] = useState(0);
   const [openInquiry, setOpenInquiry] = useState(false);
   {
     /* 
@@ -145,20 +144,12 @@ const BLWorkspace = (props) => {
     setOpenInquiry(status);
   };
  
-  const handleAddTempQuestion = () => {
-    setTempQuestionNum(tempQuestionNum + 1);
-  };
   const filteredTitles = Object.values(data)
     .filter((item) => item.question.name === '')
     .map((item) => item.title);
   return (
     <div className="ml-20">
-      <InquiryForm
-        FabTitle="Inquiry Form"
-        filteredTitles={filteredTitles}
-        tempQuestionNum={tempQuestionNum}
-        handleAddTempQuestion={handleAddTempQuestion}
-      />
+      <InquiryForm FabTitle="Inquiry Form"/>
       {/* 
                 form show the example of mockQuestionAnswered
                 use one form is enoughh
@@ -183,22 +174,19 @@ const BLWorkspace = (props) => {
         <Inquiry mockQuestion={mockQuestion.choiceAnwer} forCustomer={false} />
       </Form> */}
 
-      <AddPopover
-        onCLick={() => toggleInquiryForm(true)}
-        toggleInquiryForm={() => toggleInquiryForm(true)}
-      />
+      <AddPopover/>
       <Grid container>
         <Grid item xs={5}>
           <Grid item xs={11}>
             <h3>Shipper/Exporter</h3>
-            <BLField  >
+            <BLField id="shipper">
               DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO
               BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN
             </BLField>
           </Grid>
           <Grid item xs={11}>
             <h3>Consignee</h3>
-            <BLField  >
+            <BLField  id="consignee">
               DSV AIR & SEA LTD. -1708 16TH FLOOR, HANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929
               KOREA
             </BLField>
@@ -209,7 +197,7 @@ const BLWorkspace = (props) => {
               Carrier or its Agents for failure to notify)
             </h3>
 
-            <BLField >
+            <BLField id="notify">
               DSV AIR & SEA LTD. -1708 16TH FLOOR, HANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929
               KOREA
             </BLField>
@@ -218,12 +206,12 @@ const BLWorkspace = (props) => {
             <Grid item xs={7}>
               <h3>PRE-CARRIAGE BY</h3>
 
-              <BLField width="70%"></BLField>
+              <BLField id="pre_carriage" width="70%"></BLField>
             </Grid>
             <Grid item xs={5}>
               <h3>PLACE OF RECEIPT</h3>
 
-              <BLField  >
+              <BLField id="place_of_receipt">
                 SINGAPORE
               </BLField>
             </Grid>
@@ -233,6 +221,7 @@ const BLWorkspace = (props) => {
               <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
 
               <BLField
+                id="ocean_vessel"
                 width="70%"
                 questionIsEmpty={false}
                 openInquiry={onOpenInquiry}
@@ -243,14 +232,14 @@ const BLWorkspace = (props) => {
             <Grid item xs={5}>
               <h3>PORT OF LOADING</h3>
 
-              <BLField  >
+              <BLField id="port_of_loading">
                 TOKYO,JAPAN
               </BLField>
             </Grid>
             <Grid item xs={7}>
               <h3>PORT OF DISCHARGE</h3>
 
-              <BLField width="70%" >
+              <BLField id="port_of_discharge" width="70%" >
                 BUSAN, KOREA
               </BLField>
             </Grid>
@@ -258,6 +247,7 @@ const BLWorkspace = (props) => {
               <h3>PLACE OF DELIVERY</h3>
 
               <BLField
+                id="place_of_delivery"
                 questionIsEmpty={false}
                 selectedChoice="MANILA, MALAYSIA"
                 openInquiry={onOpenInquiry2}
@@ -272,7 +262,7 @@ const BLWorkspace = (props) => {
             <Grid item xs={5}>
               <h3>BOOKING NO.</h3>
 
-              <BLField  >
+              <BLField id="booking_no">
                 TYOBD9739500
               </BLField>
             </Grid>
@@ -324,7 +314,7 @@ const BLWorkspace = (props) => {
           <Grid item xs={10}>
             <h3>FINAL DESTINATION(for line merchant's reference only)</h3>
 
-            <BLField  >
+            <BLField id="final_destination">
               BUSAN, KOREA
             </BLField>
           </Grid>

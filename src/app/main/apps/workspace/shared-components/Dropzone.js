@@ -1,8 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@material-ui/core';
-import DescriptionIcon from '@material-ui/icons/Description';
-import PublishIcon from '@material-ui/icons/Publish';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import { useState } from 'react';
 // style
 const baseStyle = {
@@ -33,11 +32,33 @@ const rejectStyle = {
   borderColor: '#ff1744'
 };
 
+const imageStyle = {
+  width: 'auto',
+  height: '100px'
+}
 //   component
 const Dropzone = (props) => {
-  const [name, setName] = useState(props.fileName || '');
+  const [files, setFiles] = useState(props.fileName || []);
   const onDrop = (acceptedFiles) => {
-    setName(acceptedFiles[0].path);
+    if (acceptedFiles[0].type.includes("image")) {
+      setFiles([...files, {file: URL.createObjectURL(acceptedFiles[0]), type: "image" }]);
+    }
+    else {
+      const reader = new FileReader();
+      const fileByteArray = [];
+      reader.readAsArrayBuffer(acceptedFiles[0]);
+      reader.onloadend = (evt) => {
+        if (evt.target.readyState === FileReader.DONE) {
+          const arrayBuffer = evt.target.result,
+            array = new Uint8Array(arrayBuffer);
+          for (const a of array) {
+            fileByteArray.push(a);
+          }
+          const blob = new Blob(fileByteArray,{type: acceptedFiles[0].type});   
+          setFiles([...files, {name: acceptedFiles[0].name,file: URL.createObjectURL(blob) , type: "file" }]);
+        }
+      }
+    }
   };
   const { isDragActive, isDragAccept, isDragReject, getRootProps, getInputProps, open } =
     useDropzone({
@@ -57,6 +78,8 @@ const Dropzone = (props) => {
     [isDragActive, isDragReject, isDragAccept]
   );
 
+
+
   return (
     <div className="container">
       <div {...getRootProps({ style })}>
@@ -68,13 +91,24 @@ const Dropzone = (props) => {
           disabled={props.disabled || false}
           onClick={open}
         >
-          <PublishIcon />
+          <CloudUploadIcon />
         </Button>
       </div>
-      {name !== '' && (
+      {files && (
         <div style={{ marginTop: '1rem' }} display="flex">
-          <DescriptionIcon />
-          <h2 style={{ display: 'inline-block', margin: 'auto 1rem' }}>{name}</h2>
+          { files.map((file) => (
+            file.type === "image" ?
+            <img
+              src={file.file}
+              style={imageStyle}
+            /> :
+            <a download={file.name}
+              href={file.file}
+           
+          >{file.name}</a>
+          ))
+
+          }
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../admin/store/actions';
 
+import WorkSpaceData from '../WorkSpaceData';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -82,9 +83,9 @@ const DialogTitle = withStyles(styles)((props) => {
 
 const DialogContent = withStyles((theme) => ({
   root: {
-    padding: theme.spacing(2),
     margin: 'auto',
-    marginTop: '1rem'
+    marginTop: '1rem',
+    backgroundColor: "snow"
     // maxWidth: "100%",
     // width: "780px"
   }
@@ -100,9 +101,7 @@ const DialogActions = withStyles((theme) => ({
 export default function Form(props) {
   const dispatch = useDispatch()
   const { children, title, hasAddButton, FabTitle } = props;
-  const open = useSelector((state) => state.workspace.open)
-  const state = useSelector((state) => state)
-
+  const [open, index] = useSelector((state) => [state.workspace.open, state.workspace.openEdit])
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const handleOpenFab = () => {
@@ -116,7 +115,8 @@ export default function Form(props) {
     dispatch(Actions.toggleInquiry(open));
   };
   const handleClick = () => {
-    props.onClickAddButton();
+    dispatch(Actions.addQuestion())
+    dispatch(Actions.setEdit(index + 1));
   };
   const handleClose = () => {
     toggleForm(false);
