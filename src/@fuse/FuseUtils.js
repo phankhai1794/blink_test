@@ -329,16 +329,16 @@ class FuseUtils {
       // console.info("auth is null || undefined:", authArr);
       return true;
     } else if (authArr.length === 0) {
-    /**
-     * if auth array is empty means,
-     * allow only user role is guest (null or empty[])
-     */
+      /**
+       * if auth array is empty means,
+       * allow only user role is guest (null or empty[])
+       */
       // console.info("auth is empty[]:", authArr);
       return !userRole || userRole.length === 0;
     } else {
-    /**
-     * Check if user has grants
-     */
+      /**
+       * Check if user has grants
+       */
       // console.info("auth arr:", authArr);
       /*
             Check if user role is array,
