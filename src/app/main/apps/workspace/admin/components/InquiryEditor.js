@@ -14,7 +14,8 @@ import {
   RadioGroup,
   FormControlLabel,
   Checkbox,
-  Card
+  Card,
+  Divider
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { FormControl } from '@material-ui/core';
@@ -31,6 +32,7 @@ import BackupIcon from '@material-ui/icons/Backup';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AttachFile from './AttachFile';
+import CustomSelect from './CustomSelect';
 
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
@@ -42,7 +44,7 @@ const inputStyle = makeStyles((theme) => ({
       borderBottom: 'none'
     },
     '&:hover:not($disabled):before': {
-      borderBottom: `1px solid ${theme.palette.text.primary} !important`
+      borderBottom: `1px dashed ${theme.palette.text.primary} !important`
     }
   }
 }));
@@ -75,7 +77,7 @@ const typeToNameDict = {
     'We found discrepancy in the routing information between SI and OPUS booking details',
   'BL TYPE':
     'Please provide the missing information below',
-  'BROKEN ROUTE ERROR':
+  '':
     'We found discrepancy in the routing information between SI and OPUS booking details'
 };
 // Sub Commporent
@@ -162,7 +164,7 @@ const ChoiceAnswer = (props) => {
           );
         })
       }
-      <div className="flex">
+      <div className="flex items-center">
         <div style={{ paddingTop: '6px', marginRight: '1rem' }}>
           <DisabledRadioButtonUncheckedIcon />
         </div>
@@ -292,7 +294,7 @@ const InquiryEditor = (props) => {
     <div style={{display: "flex"}}>
       <div style={{width: "6px", backgroundColor: "#4285f4", borderTopLeftRadius: "8px", borderBottomLeftRadius: "8px"}}/>
       <Card style={{ padding: '1rem' }}>
-        <div className="flex justify-end mt-12 " style={{ marginRight: '-1rem' }}>
+        <div className="flex justify-end" style={{ marginRight: '-1rem' }}>
           <RadioGroup defaultValue="onshore" aria-label="target-inquiry" name="target-inquiry" row>
             <FormControlLabel value="onshore" control={<Checkbox color="primary" />} label="Onshore" />
             <FormControlLabel
@@ -303,80 +305,88 @@ const InquiryEditor = (props) => {
           </RadioGroup>
         </div>
         <Grid container style={{ width: '750px' }} spacing={1}>
-          <Grid item xs={5}>
-            <FormControl>
-              <Select
-                value={question.type}
-                name="Question type"
-                onChange={handleTypeChange}
-                input={<OutlinedInput />}
-              >
-                <MenuItem value="ROUTING INQUIRY/DISCREPANCY">
-                  {' '}
-                  Routing Inquiry/Discripancy
-                </MenuItem>
-                <MenuItem value="BL TYPE">
-                  BL Type
-                </MenuItem>
-                <MenuItem value="BROKEN ROUTE ERROR">Broken Route Error</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={4}>
-            <FormControl>
-              <Select
-                value={question.answerType}
-                name="Question answer type"
-                onChange={handleAnswerTypeChange}
-                input={<OutlinedInput />}
-              >
-                <MenuItem value="CHOICE ANSWER" classes={{ root: selectStyle.root }}>
-                  {/* <ListItem style={{ p: 0 }}> */}
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <RadioButtonCheckedIcon fontSize="small" style={{ marginRight: '1rem' }} />
-                    <div>Option selection</div>
-                  </div>
-                </MenuItem>
-                <MenuItem value="PARAGRAPH ANSWER">
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <SubjectIcon fontSize="small" style={{ marginRight: '1rem' }} />
-                    <div>Customer input</div>
-                  </div>
-                </MenuItem>
-                <MenuItem value="ATTACHMENT ANSWER">
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <BackupIcon fontSize="small" style={{ marginRight: '1rem' }} />
-                    <div>Customer add attachment</div>
-                  </div>
-                </MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={3}>
-            <div className="flex justify-end" style={{ marginLeft: 'auto', width: '90%' }}>
-              <FormControl style={{ width: '100%', height: '100%' }}>
-                <Select
-                  value={question.field}
-                  name="Question title"
-                  input={<OutlinedInput />}
-                  onChange={handleFieldChange}
-                >
-                  <MenuItem value="other">Other Field</MenuItem>
-                  <MenuItem value="shipper">Shipper/Exporter</MenuItem>
-                  <MenuItem value="consignee">Consignee</MenuItem>
-                  <MenuItem value="port_of_loading">Poft of Loading</MenuItem>
-                  <MenuItem value="place_of_receipt">Place of Receipt</MenuItem>
-                  <MenuItem value="place_of_delivery">Place of Delivery</MenuItem>
-                  <MenuItem value="port_of_discharge">Port of Discharge</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-          </Grid>
+			<Grid item xs={12} className="flex justify-between">
+				<CustomSelect 
+					value={question.type}
+					name="Question type"
+					onChange={handleTypeChange}
+					options={[
+						{
+							title: "Routing Inquiry/Discripancy",
+							value: 'ROUTING INQUIRY/DISCREPANCY',
+						},
+						{
+							title: "BL Type",
+							value: 'MISSING DESTINATION REQUIREMENT',
+						},
+						{
+							title: 'Broken Route Error',
+							value: 'BROKEN ROUTE ERROR',
+						}
+					]}
+				/>
+				<CustomSelect 
+					value={question.answerType}
+					name="Question answer type"
+					onChange={handleAnswerTypeChange}
+					options={[
+						{
+							title: 'Choice Answer',
+							value: 'CHOICE ANSWER',
+							icon: 'radio_button_checked'
+						},
+						{
+							title: 'Paragraph Answer',
+							value: 'PARAGRAPH ANSWER',
+							icon: 'subject'
+						},
+						{
+							title: 'Attachment Answer',
+							value: 'ATTACHMENT ANSWER',
+							icon: 'attachment'
+						}
+					]}
+				/>
+				<CustomSelect 
+					value={question.field}
+					name="Question title"
+					onChange={handleFieldChange}
+					options={[
+						{
+							value: 'other',
+							title: 'Other Field',
+						},
+						{
+							title: "Shipper/Exporter",
+							value: 'shipper',
+						},
+						{
+							title: "Consignee",
+							value: 'consignee',
+						},
+						{
+							title: "Port of Loading",
+							value: 'port_of_loading',
+						},
+						{
+							title: "Place of Receipt",
+							value: 'place_of_receipt',
+						},
+						{
+							title: "Place of Delivery",
+							value: 'place_of_delivery',
+						},
+						{
+							title: "Port of Discharge",
+							value: 'port_of_discharge',
+						},
+					]}
+				/>
+			</Grid>
         </Grid>
-        <div style={{ marginTop: '1rem' }}>
+        <div className="mt-32 mx-8">
           <TextField
             value={question.name}
-            variant="outlined"
             multiline
             onFocus={(e) => e.target.select()}
             onChange={handleNameChange}
@@ -384,25 +394,27 @@ const InquiryEditor = (props) => {
           />
         </div>
         {question.answerType === 'CHOICE ANSWER' && (
-          <ChoiceAnswer
-            questions={questions}
-            question={question}
-            index={index}
-          />
+			<div className="mt-16">	
+				<ChoiceAnswer
+					questions={questions}
+					question={question}
+					index={index}
+				/>
+			</div>
         )}
         {question.answerType === 'PARAGRAPH ANSWER' && (
-          <div style={{ marginTop: '2rem' }}>
+          <div className="mt-40">
             <ParagraphAnswer />
           </div>
         )}
         {question.answerType === 'ATTACHMENT ANSWER' && (
           <AttachmentAnswer style={{ marginTop: '1rem' }} />
         )}
-
-        <div className="flex justify-end mt-12 mr-2 ">
+		<Divider className='mt-12'/>
+        <div className="flex justify-end items-center mr-2 ">
           <AttachFile uploadImageAttach={handleUploadImageAttach} />
-          <IconButton style={{ padding: '2px' }} onClick={copyQuestion}><FileCopyIcon /></IconButton>
-          <IconButton style={{ padding: '2px' }} onClick={removeQuestion}><DeleteIcon /></IconButton>
+          <IconButton className='p-8' onClick={copyQuestion}><FileCopyIcon /></IconButton>
+          <IconButton className='p-8' onClick={removeQuestion}><DeleteIcon /></IconButton>
         </div>
         {question.src && (
           <div style={{ position: 'relative' }}>

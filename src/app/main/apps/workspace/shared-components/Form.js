@@ -13,6 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import MinimizeIcon from '@material-ui/icons/Minimize';
+import RemoveIcon from '@material-ui/icons/Remove';
 import { Fab } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import CropIcon from '@material-ui/icons/Crop';
@@ -22,7 +23,7 @@ import AddIcon from '@material-ui/icons/Add';
 const styles = (theme) => ({
   root: {
     margin: 0,
-    padding: theme.spacing(2)
+    padding: theme.spacing(1, 2)
   },
   dialogToolTips: {
     position: 'absolute',
@@ -53,7 +54,7 @@ const DialogTitle = withStyles(styles)((props) => {
             onClick={handleOpenSnackBar}
             style={{ textAlign: 'center' }}
           >
-            <MinimizeIcon />
+            <RemoveIcon />
           </IconButton>
           {isFullScreen ? (
             <IconButton
