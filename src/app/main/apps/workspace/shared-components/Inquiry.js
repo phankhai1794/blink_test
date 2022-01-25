@@ -6,7 +6,7 @@ import ParagraphAnswer from './ParagraphAnswer';
 import AttatchmentAnswer from './AttatchmentAnswer';
 import InquiryEditor from '../admin/components/InquiryEditor';
 import UserInfo from './UserInfo';
-import { Card } from '@material-ui/core';
+import { Card, Typography } from '@material-ui/core';
 
 const Inquiry = (props) => {
   const dispatch = useDispatch()
@@ -25,10 +25,10 @@ const Inquiry = (props) => {
     <>
       <div className="flex justify-between">
       </div>
-        <div style={{ width: '770px', height: '100%', paddingTop: "16px" }} onClick={() => changeToEditor(index)}>
+        <div style={{ width: '770px', marginBottom: "24px" }} onClick={() => changeToEditor(index)}>
         {openEdit === index ? <InquiryEditor index={index} questionIsEmpty={true} /> : 
-          <Card style={{ padding: '1rem' }}>
-            <h2>{question.name}</h2>
+          <Card style={{ padding: '1rem ' }}>
+            <Typography variant="h5">{question.name}</Typography>
               <div style={{ display: 'block', margin: '1rem 0rem' }}>
                 {question.answerType === 'CHOICE ANSWER' && (
                   <ChoiceAnswer question={question} onSaveSelectedChoice={onSaveSelectedChoice} />
