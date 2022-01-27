@@ -80,7 +80,7 @@
     "@typescript-eslint/eslint-plugin": "^5.10.0",
     "@typescript-eslint/parser": "^5.10.0",
     "cross-env": "5.2.0",
-    "eslint": "^8.7.0",
+    "eslint": "^6.6.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.28.0",
@@ -126,10 +126,10 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "prettier --write './src/*/*.{js,jsx,css,md,json}' --config ./.prettierrc"
     }
   },
   "lint-staged": {
-    "*": "prettier --write"
+    "*": "prettier --write './src/*/*.{js,jsx,css,md,json}' --config ./.prettierrc"
   }
 }
