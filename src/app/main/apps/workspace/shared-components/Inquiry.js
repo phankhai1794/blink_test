@@ -6,12 +6,12 @@ import ParagraphAnswer from './ParagraphAnswer';
 import AttatchmentAnswer from './AttatchmentAnswer';
 import InquiryEditor from '../admin/components/InquiryEditor';
 import UserInfo from './UserInfo';
-import { Card, Typography } from '@material-ui/core';
+import {  Card, Typography } from '@material-ui/core';
 
 const Inquiry = (props) => {
   const dispatch = useDispatch()
   const { forCustomer, question, index } = props;
-  const openEdit = useSelector((state) => state.workspace.openEdit)
+  const [questions , openEdit] = useSelector((state) => [state.workspace.question,state.workspace.openEdit])
   const [open, setOpen] = useState(true);
   const onSaveSelectedChoice = (savedQuestion) => {
     props.onSaveSelectedChoice(savedQuestion);
@@ -26,7 +26,7 @@ const Inquiry = (props) => {
       <div className="flex justify-between">
       </div>
         <div style={{ width: '770px', marginBottom: "24px" }} onClick={() => changeToEditor(index)}>
-        {openEdit === index ? <InquiryEditor index={index} questionIsEmpty={true} /> : 
+        {openEdit === index ? <InquiryEditor index={index} questions={questions} question={question} saveQuestion={(q) => dispatch((Actions.setQuestion(q)))}  /> : 
           <Card style={{ padding: '1rem ' }}>
             <Typography variant="h5">{question.name}</Typography>
               <div style={{ display: 'block', margin: '1rem 0rem' }}>

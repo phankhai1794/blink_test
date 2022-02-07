@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../store/actions';
 
@@ -37,19 +37,30 @@ const BLField = (props) => {
   const {
     children,
     width,
-    questionIsEmpty,
     selectedChoice,
     fileName,
-    openInquiry,
     id
   } = props;
-  const anchorEl = useSelector((state) => state.workspace.anchorEl)
+  const [questionIsEmpty, setQuestionIsEmpty] = useState(true)
+  const [anchorEl, questionSaved] = useSelector((state) => [state.workspace.anchorEl, state.workspace.questionSaved])
 
   const openAddPopover = (e) => {
-    dispatch(Actions.setAnchor(e.currentTarget))
+    if (questionIsEmpty) {
+      dispatch(Actions.setAnchor(e.currentTarget))
+    }
     dispatch(Actions.setField(e.currentTarget.id))
   };
+  useEffect(() => {
+    setQuestionIsEmpty(checkQuestionIsEmpty())
+  },[questionSaved])
 
+  const  checkQuestionIsEmpty = () => {
+    if (questionSaved.length > 0){
+      const check = questionSaved.filter(q => q.field === id)
+      return check.length > 0 ? false : true
+    }
+    return true
+  }
   const closeAddPopover = (e) => {
     if (anchorEl === null) {
       dispatch(Actions.setAnchor(null))
@@ -70,16 +81,20 @@ const BLField = (props) => {
       }
     }
   };
-
+   const onClick = () => {
+     if (!questionIsEmpty) {
+      dispatch(Actions.toggleInquiry(true))
+     }
+   }
   return (
     <div
       id={id}
       style={{
         width: `${width}`
       }}
-      onMouseEnter={questionIsEmpty !== undefined && !questionIsEmpty ? null : openAddPopover}
+      onMouseEnter={openAddPopover}
       onMouseLeave={closeAddPopover}
-      onClick={openInquiry}
+      onClick={onClick}
     >
       <TextField
         value={selectedChoice || children}
@@ -91,7 +106,7 @@ const BLField = (props) => {
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              {questionIsEmpty !== undefined && !questionIsEmpty ? (
+              {!questionIsEmpty ? (
                 <ChatBubbleIcon color="primary" />
               ) : (
                 ''
@@ -100,11 +115,9 @@ const BLField = (props) => {
           ),
           classes: {
             notchedOutline: `${
-              questionIsEmpty !== undefined && !questionIsEmpty
-                ? selectedChoice || fileName
-                  ? classes.notchedOutlineChecked
-                  : classes.notchedOutlineNotChecked
-                : ''
+              questionIsEmpty
+                ? ""
+                : classes.notchedOutlineNotChecked
             }`
           }
         }}

@@ -1,22 +1,68 @@
 import React from 'react';
-import { Link, Grid, Button } from '@material-ui/core';
+import { useDispatch, useSelector } from 'react-redux';
+import * as Actions from '../admin/store/actions';
+import { makeStyles } from '@material-ui/core/styles';
+import { Link, Grid, Button, IconButton } from '@material-ui/core';
 import TextsmsIcon from '@material-ui/icons/Textsms';
 import SaveIcon from '@material-ui/icons/Save';
+import ReplyIcon from '@material-ui/icons/Reply';
+import CheckIcon from '@material-ui/icons/Check';
+import NavigateNextIcon from '@material-ui/icons/NavigateNext';
+import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
+const useStyles = makeStyles((theme) => ({
+  button: {
+    margin: theme.spacing(1),
+  },
+}));
 const PopoverFooter = ({
   toggleInquiriresDialog,
-  prevQuestion,
-  nextQuestion,
+  title,
   forCustomer,
-  onSave
 }) => {
+  const classes = useStyles();
+  const dispatch = useDispatch()
+  const fields = useSelector((state) => state.workspace.fields)
+  const onSave = () => {
+    dispatch(Actions.saveQuestion())
+  }
+  const nextQuestion = () => {
+    var temp = fields.indexOf(title)
+    if (temp !== fields.length - 1) {
+      temp += 1 
+    }
+    else {
+      temp = 0
+    }
+    dispatch(Actions.setField(fields[temp]))
+  }
+  const prevQuestion = () => {
+    var temp = fields.indexOf(title)
+    if (temp !== 0) {
+      temp -= 1
+    }
+    else {
+      temp = fields.length - 1
+    }
+    dispatch(Actions.setField(fields[temp]))
+  }
   return (
     <Grid container style={{ margin: '3rem auto' }}>
       <Grid item xs={5}>
         <Link style={{ fontSize: '16px' }} onClick={toggleInquiriresDialog}>
           Open All Inquiries
         </Link>
+        {fields.includes(title) ?
+          <>
+            <IconButton onClick={prevQuestion}>
+              <NavigateBeforeIcon/>
+            </IconButton>
+            <IconButton onClick={nextQuestion}>
+              <NavigateNextIcon/>
+            </IconButton>
+          </> : null
+        }
       </Grid>
-      <Grid item xs={5}>
+      <Grid item xs={3}>
         {forCustomer && (
           <Grid container direction="row">
             <Grid item>
@@ -32,11 +78,25 @@ const PopoverFooter = ({
                 <ArrowBackIosIcon />
                 <ArrowForwardIosIcon />
             </Grid> */}
-      <Grid item xs={2} className="flex justify-end">
-        <Button variant="contained" color="primary" onClick={onSave}>
+      <Grid item xs={4} className="flex justify-end">
+      {fields.includes(title) ? 
+        <>
+          <Button variant="contained" className={classes.button} color="primary" onClick={onSave}>
+            <CheckIcon />
+            Resolve
+          </Button>
+          <Button variant="contained" className={classes.button} color="primary" onClick={onSave}>
+            <ReplyIcon />
+            Reply
+          </Button>
+          
+        </> : 
+        <Button variant="contained" className={classes.button} color="primary" onClick={onSave}>
           {' '}
           <SaveIcon /> Save
         </Button>
+      }
+        
       </Grid>
     </Grid>
   );

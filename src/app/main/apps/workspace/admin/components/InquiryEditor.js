@@ -127,24 +127,24 @@ const Choice = (props) => {
 };
 const ChoiceAnswer = (props) => {
   const dispatch = useDispatch()
-  const {questions, question, index} = props
+  const {questions, question, index, saveQuestion} = props
   const classes_disabled = inputStyleDisabled();
   const classes = inputStyle();
 
   const handleAddChoice = () => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion[index].choices.push("Option " + (optionsOfQuestion[index].choices.length + 1))
-    dispatch((Actions.setQuestion(optionsOfQuestion)))
+    saveQuestion(optionsOfQuestion)
   };
   const handleRemoveChoice = (id) => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion[index].choices.splice(id, 1)
-    dispatch((Actions.setQuestion(optionsOfQuestion)))
+    saveQuestion(optionsOfQuestion)
   };
   const handleChangeChoice = (e, id) => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion[index].choices[id] = e.target.value
-    dispatch((Actions.setQuestion(optionsOfQuestion)))
+    saveQuestion(optionsOfQuestion)
   };
 
   const {
@@ -206,31 +206,14 @@ const InquiryEditor = (props) => {
   // custom attribute must be lowercase
   const dispatch = useDispatch()
   const selectStyle = useStyles();
-  const { questionIsEmpty, defaultContent, index } = props;
-  const [ftitle, questions] = useSelector((state) => [state.workspace.currentField, state.workspace.question])
-  const question = questions[index]
-  const [questionInfo, setQuestionInfo] = useState(
-    !questionIsEmpty
-      ? {
-          name: question.name,
-          type: question.type,
-          answerType: question.answerType,
-          selectedChoice: question.selectedChoice,
-          addOther: question.addOther,
-          otherChoice: question.otherChoice
-          // divRef will be add on function OnSave to prevent storing too much temp state info
-        }
-      : {
-          name: typeToNameDict['ROUTING INQUIRY/DISCREPANCY'],
-          type: 'ROUTING INQUIRY/DISCREPANCY',
-          answerType: 'CHOICE ANSWER',
-          selectedChoice: '',
-          addOther: false,
-          otherChoice: '',
-          src: ''
-        }
-  );
-  const [questionTitle, setQuestionTitle] = useState(ftitle || ' ');  
+  const { defaultContent, index, question, questions, saveQuestion } = props;
+  const title = useSelector((state) => state.workspace.currentField)
+
+  useEffect(() => {
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion[index].field = title
+    saveQuestion(optionsOfQuestion)
+  },[])
 
   const removeQuestion = () => {
     var optionsOfQuestion = [...questions];
@@ -238,56 +221,49 @@ const InquiryEditor = (props) => {
     if (index > 0) {
       dispatch(Actions.setEdit(index - 1));
     }
-    dispatch((Actions.setQuestion(optionsOfQuestion)))
+    saveQuestion(optionsOfQuestion)
   }
 
   const copyQuestion = () => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion.splice(index, 1)
-    dispatch((Actions.setQuestion(optionsOfQuestion)))
+    saveQuestion(optionsOfQuestion)
   }
 
   const handleTypeChange = (e) => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion[index].type = e.target.value
     optionsOfQuestion[index].name = typeToNameDict[e.target.value]
-    dispatch((Actions.setQuestion(optionsOfQuestion)))
+    saveQuestion(optionsOfQuestion)
   };
 
-  const handleTitleChange = (e) => {
-    setQuestionTitle(e.target.value);
-    // onSave()
-    // console.log(questionTitle)
-  };
   const handleFieldChange = (e) => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion[index].field = e.target.value
-    dispatch((Actions.setQuestion(optionsOfQuestion)))
+    saveQuestion(optionsOfQuestion)
   };
 
   const handleNameChange = (e) => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion[index].name = e.target.value
-    dispatch((Actions.setQuestion(optionsOfQuestion)))
+    saveQuestion(optionsOfQuestion)
   };
 
   const handleAnswerTypeChange = (e) => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion[index].answerType = e.target.value
-    dispatch((Actions.setQuestion(optionsOfQuestion)))
+    saveQuestion(optionsOfQuestion)
   };
 
   const handleUploadImageAttach = (src) => {
-    setQuestionInfo({
-      ...questionInfo,
-      src: src
-    });
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion[index].src = src
+    saveQuestion(optionsOfQuestion)
   };
   const handleRemoveImageAttach = () => {
-    setQuestionInfo({
-      ...questionInfo,
-      src: null
-    });
+    var optionsOfQuestion = [...questions];
+    optionsOfQuestion[index].src = ""
+    saveQuestion(optionsOfQuestion)
   };
  
   return (
@@ -399,6 +375,7 @@ const InquiryEditor = (props) => {
 					questions={questions}
 					question={question}
 					index={index}
+          saveQuestion={saveQuestion}
 				/>
 			</div>
         )}
