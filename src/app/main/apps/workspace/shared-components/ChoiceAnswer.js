@@ -25,7 +25,6 @@ const ChoiceAnswer = (props) => {
     }
   };
   const [selectedChoice, setSelectedChoice] = useState(initSelectedChoice());
-  console.log(selectedChoice);
   const [otherChoiceContent, setOtherChoiceContent] = useState(question.otherChoiceContent);
   const [lastSelectedChoice, setLastSelectedChoice] = useState(
     selectedChoice === 'other' ? otherChoiceContent : selectedChoice

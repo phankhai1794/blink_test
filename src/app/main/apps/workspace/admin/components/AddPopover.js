@@ -58,7 +58,7 @@ const AddPopover = (props) => {
           paper: classes.popoverContent
         }}
       >
-        <IconButton color="primary" onClick={()=> dispatch(Actions.toggleInquiry(true))}>
+        <IconButton color="primary" onClick={()=> dispatch(Actions.toggleCreateInquiry(true))}>
           <AddCommentIcon style={{ transform: `${isRightMost ? 'scaleX(1)' : 'scaleX(-1)'}` }} />
         </IconButton>
       </Popover>

@@ -4,175 +4,31 @@ import * as Actions from './store/actions';
 
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { useState } from 'react';
-import WorkSpaceData from '../WorkSpaceData';
-import Inquiry from '../shared-components/Inquiry';
+import InquiryCreated from '../shared-components/InquiryCreated';
 import Form from '../shared-components/Form';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
-const mockQuestion = {
-  paragraphAnswer: {
-    title: 'OCEAN VESSEL VOYAGE NO. FlAG',
-    question: {
-      name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-      type: 'ROUTING INQUIRY/DISCREPANCY',
-      answerType: 'PARAGRAPH ANSWER',
-      paragraph: '',
-      selectedChoice: ''
-    },
-    content: 'CONFIDENCE 021W',
-    open: false
-  },
-  choiceAnwer: {
-    title: 'PORT OF LOADING',
-    question: {
-      name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-      type: 'ROUTING INQUIRY/DISCREPANCY',
-      answerType: 'CHOICE ANSWER',
-      choices: [
-        {
-          id: 1,
-          content: 'TOKYO, JAPPAN'
-        },
-        {
-          id: 2,
-          content: 'BUSAN, KOREA'
-        }
-      ],
-      addOther: true,
-      selectedChoice: '',
-      otherChoiceContent: 'MANILA, MALAYSIA'
-    },
-    content: 'TOKYO,JAPAN',
-    open: false
-  },
-  AttatchmentAnswer: {
-    'PORT OF DISCHARGE': {
-      title: 'PORT OF DISCHARGE',
-      question: {
-        name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-        type: 'ROUTING INQUIRY/DISCREPANCY',
-        answerType: 'ATTACHMENT ANSWER',
-        choices: [],
-        selectedChoice: '',
-        fileName: 'document.pdf'
-      },
-      content: 'BUSAN, KOREA',
-      open: false
-    }
-  }
-};
-const mockQuestionaAnswered = {
-  paragraphAnswer: {
-    title: 'OCEAN VESSEL VOYAGE NO. FlAG',
-    question: {
-      name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-      type: 'ROUTING INQUIRY/DISCREPANCY',
-      answerType: 'PARAGRAPH ANSWER',
-      paragraph: '',
-      selectedChoice: ''
-    },
-    content: 'CONFIDENCE 021W',
-    open: false
-  },
-  choiceAnwer: {
-    title: 'PORT OF LOADING',
-    question: {
-      name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-      type: 'ROUTING INQUIRY/DISCREPANCY',
-      answerType: 'CHOICE ANSWER',
-      choices: [
-        {
-          id: 1,
-          content: 'TOKYO, JAPPAN'
-        },
-        {
-          id: 2,
-          content: 'BUSAN, KOREA'
-        }
-      ],
-      addOther: true,
-      selectedChoice: 'other',
-      otherChoiceContent: 'MANILA, MALAYSIA'
-    },
-    content: 'TOKYO,JAPAN',
-    open: false
-  },
-  AttatchmentAnswer: {
-    'PORT OF DISCHARGE': {
-      title: 'PORT OF DISCHARGE',
-      question: {
-        name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-        type: 'ROUTING INQUIRY/DISCREPANCY',
-        answerType: 'ATTACHMENT ANSWER',
-        choices: [],
-        selectedChoice: '',
-        fileName: 'document.pdf'
-      },
-      content: 'BUSAN, KOREA',
-      open: false
-    }
-  }
-};
+
 const BLWorkspace = (props) => {
-  const [data, setData] = useState(WorkSpaceData);
   const dispatch = useDispatch()
-  const [openInquiry, setOpenInquiry] = useState(false);
-  {
-    /* 
-                form show the example of mockQuestionAnswered
-                use one form is enoughh
-    */
-  }
-  const [openInquiry2, setOpenInquiry2] = useState(false);
-  const onOpenInquiry = () => {
-    setOpenInquiry(true);
-  };
-  const onOpenInquiry2 = () => {
-    setOpenInquiry2(true);
-  };
-  const toggleInquiry2 = (status) => {
-    setOpenInquiry2(status);
-  };
-  //end
- 
-  const toggleInquiryForm = (status) => {
-    dispatch(Actions.toggleInquiry(status))
-  };
-  const toggleInquiry = (status) => {
-    setOpenInquiry(status);
-  };
- 
-  const filteredTitles = Object.values(data)
-    .filter((item) => item.question.name === '')
-    .map((item) => item.title);
+
+  const [openInquiry, currentField] = useSelector((state) => 
+  [state.workspace.openInquiry,  state.workspace.currentField])
+
   return (
     <div className="ml-20">
       <InquiryForm FabTitle="Inquiry Form"/>
-      {/* 
-                form show the example of mockQuestionAnswered
-                use one form is enoughh
-             */}
-      {/* <Form
-        open={openInquiry2}
-        toggleForm={toggleInquiry2}
-        hasAddButton={false}
-        FabTitle="Inquiry"
-        title={mockQuestionaAnswered.choiceAnwer.title}
-      >
-        <Inquiry mockQuestion={mockQuestionaAnswered.choiceAnwer} forCustomer={false} />
-      </Form> */}
-      {/* end */}
-      {/* <Form
+  
+      <Form
         open={openInquiry}
-        toggleForm={toggleInquiry}
+        toggleForm={(status) => dispatch(Actions.toggleInquiry(status))}
         hasAddButton={false}
         FabTitle="Inquiry"
-        title={mockQuestion.choiceAnwer.title}
+        title={currentField ? currentField : ""}
       >
-        <Inquiry mockQuestion={mockQuestion.choiceAnwer} forCustomer={false} />
-      </Form> */}
+        <InquiryCreated  />
+      </Form>
 
       <AddPopover/>
       <Grid container>
@@ -220,12 +76,7 @@ const BLWorkspace = (props) => {
             <Grid item xs={7}>
               <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
 
-              <BLField
-                id="ocean_vessel"
-                width="70%"
-                questionIsEmpty={false}
-                openInquiry={onOpenInquiry}
-              >
+              <BLField id="ocean_vessel" width="70%">
                 CONFIDENCE 021W
               </BLField>
             </Grid>
@@ -246,12 +97,7 @@ const BLWorkspace = (props) => {
             <Grid item xs={5}>
               <h3>PLACE OF DELIVERY</h3>
 
-              <BLField
-                id="place_of_delivery"
-                questionIsEmpty={false}
-                selectedChoice="MANILA, MALAYSIA"
-                openInquiry={onOpenInquiry2}
-              >
+              <BLField id="place_of_delivery" selectedChoice="MANILA, MALAYSIA">
                 BUSAN
               </BLField>
             </Grid>

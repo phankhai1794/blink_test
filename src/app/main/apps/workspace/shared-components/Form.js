@@ -4,7 +4,6 @@ import * as Actions from '../admin/store/actions';
 
 import WorkSpaceData from '../WorkSpaceData';
 import { withStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
@@ -101,8 +100,9 @@ const DialogActions = withStyles((theme) => ({
 
 export default function Form(props) {
   const dispatch = useDispatch()
-  const { children, title, hasAddButton, FabTitle } = props;
-  const [open, index] = useSelector((state) => [state.workspace.open, state.workspace.openEdit])
+  const { children, title, hasAddButton, FabTitle, open, toggleForm } = props;
+  const data = WorkSpaceData
+  const index = useSelector((state) => state.workspace.openEdit)
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const handleOpenFab = () => {
@@ -112,9 +112,7 @@ export default function Form(props) {
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
   };
-  const toggleForm = (open) => {
-    dispatch(Actions.toggleInquiry(open));
-  };
+
   const handleClick = () => {
     dispatch(Actions.addQuestion())
     dispatch(Actions.setEdit(index + 1));
@@ -154,7 +152,7 @@ export default function Form(props) {
           isFullScreen={isFullScreen}
           handleClose={handleClose}
         >
-          {title || 'openInquiry'}
+          {title && title !== "open Inquiries" ? data[title].title : "open Inquiries" }
         </DialogTitle>
         <DialogContent>{children}</DialogContent>
         <DialogActions style={{ display: 'none !important' }}>
@@ -171,7 +169,7 @@ export default function Form(props) {
             )}
             <div style={{ marginTop: '2rem', marginLeft: '2rem' }}>
               <Divider />
-              <PopoverFooter forCustomer={false} onSave={props.onSave} />
+              <PopoverFooter forCustomer={false} title={title} />
             </div>
           </div>
         </DialogActions>

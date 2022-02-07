@@ -1,15 +1,26 @@
-export const OPEN_INQUIRY_FORM = 'OPEN_INQUIRY_FORM';
+export const OPEN_CREATE_INQUIRY = 'OPEN_CREATE_INQUIRY';
+export const OPEN_INQUIRY = 'OPEN_INQUIRY';
 export const SET_ANCHOR_EL = 'SET_ANCHOR_EL';
 export const SET_CURRENT_FIELD = 'SET_CURRENT_FIELD';
 export const SET_QUESTION = 'SET_QUESTION';
 export const SET_EDIT= 'SET_EDIT';
 export const ADD_QUESTION = 'ADD_QUESTION';
 export const SAVE_QUESTION = 'SAVE_QUESTION';
+export const EDIT_QUESTION = 'EDIT_QUESTION';
+export const SAVE_FIELD = 'SAVE_FIELD'
+
+export function toggleCreateInquiry(state)
+{
+    return {
+        type: OPEN_CREATE_INQUIRY,
+        state: state
+    }
+}
 
 export function toggleInquiry(state)
 {
     return {
-        type: OPEN_INQUIRY_FORM,
+        type: OPEN_INQUIRY,
         state: state
     }
 }
@@ -38,6 +49,14 @@ export function setQuestion(question)
     }
 }
 
+export function editQuestion(question)
+{
+    return {
+        type: EDIT_QUESTION,
+        state: question,
+    }
+}
+
 export function setEdit(state)
 {
     return {
@@ -57,5 +76,12 @@ export function saveQuestion()
 {
     return {
         type: SAVE_QUESTION,
+    }
+}
+
+export function saveField()
+{
+    return {
+        type: SAVE_FIELD,
     }
 }
