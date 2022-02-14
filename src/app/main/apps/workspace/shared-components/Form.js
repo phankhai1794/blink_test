@@ -120,9 +120,7 @@ export default function Form(props) {
   const handleClose = () => {
     toggleForm(false);
     setOpenFab(false);
-    if (props.onClose) {
-      props.onClose();
-    }
+    dispatch(Actions.setReply(false))
   };
   return (
     <div>
@@ -142,7 +140,7 @@ export default function Form(props) {
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
         open={open}
-        maxWidth={800}
+        maxWidth="md"
       >
         <DialogTitle
           id="customized-dialog-title"

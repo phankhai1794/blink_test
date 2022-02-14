@@ -25,6 +25,9 @@ const PopoverFooter = ({
   const onSave = () => {
     dispatch(Actions.saveQuestion())
   }
+  const onReply = () => {
+    dispatch(Actions.setReply(true))
+  }
   const nextQuestion = () => {
     var temp = fields.indexOf(title)
     if (temp !== fields.length - 1) {
@@ -85,7 +88,7 @@ const PopoverFooter = ({
             <CheckIcon />
             Resolve
           </Button>
-          <Button variant="contained" className={classes.button} color="primary" onClick={onSave}>
+          <Button variant="contained" className={classes.button} color="primary" onClick={onReply}>
             <ReplyIcon />
             Reply
           </Button>

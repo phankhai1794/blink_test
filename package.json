@@ -57,6 +57,7 @@
     "react-router-dom": "5.0.1",
     "react-scripts": "^3.4.0",
     "react-select": "2.4.4",
+    "react-simple-image-viewer": "^1.1.1",
     "react-swipeable-views": "^0.13.3",
     "react-table": "6.10.0",
     "react-text-mask": "5.4.3",
