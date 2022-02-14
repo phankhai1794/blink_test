@@ -5,14 +5,12 @@ import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
 import AttatchmentAnswer from './AttatchmentAnswer';
 import InquiryEditor from '../admin/components/InquiryEditor';
-import UserInfo from './UserInfo';
 import {  Card, Typography } from '@material-ui/core';
 
 const Inquiry = (props) => {
   const dispatch = useDispatch()
-  const { forCustomer, question, index } = props;
+  const { question, index } = props;
   const [questions , openEdit] = useSelector((state) => [state.workspace.question,state.workspace.openEdit])
-  const [open, setOpen] = useState(true);
   const onSaveSelectedChoice = (savedQuestion) => {
     props.onSaveSelectedChoice(savedQuestion);
   };

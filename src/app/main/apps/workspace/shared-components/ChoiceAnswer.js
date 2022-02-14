@@ -68,38 +68,7 @@ const ChoiceAnswer = (props) => {
           </div>
         </div>
       ))} 
-      {/* {true && (
-        <div style={{ display: 'flex', marginTop: '1rem' }}>
-          <Radio
-            disabled={disabled}
-            checked={selectedChoice === 'other'}
-            onChange={handleChange}
-            value="other"
-            color="primary"
-            style={{ marginLeft: '0rem' }}
-          />
-          <TextField
-            placeholder="INPUT YOUR INFORMATION"
-            InputProps={{
-              style: {
-                fontSize: '1.7rem'
-              }
-            }}
-            InputLabelProps={{
-              style: {
-                fontSize: '1.7rem'
-              }
-            }}
-            style={{ margin: 'auto 1rem' }}
-            value={otherChoiceContent}
-            onChange={(e) => setOtherChoiceContent(e.target.value)}
-            fullWidth
-            multiline
-            disabled={disabled}
-            onFocus={handleFocus}
-          />
-        </div>
-      )} */}
+     
       {/* {lastSelectedChoice !== '' && !showSaveBtn && (
         <div style={{ marginTop: '1rem' }}>
           <UserInfo name="Anrew" date="today" time="10:50PM" />

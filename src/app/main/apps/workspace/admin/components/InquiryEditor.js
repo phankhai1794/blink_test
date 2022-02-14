@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../store/actions';
-
 import {
-  Button,
   TextField,
-  Select,
-  OutlinedInput,
   Grid,
-  MenuItem,
   IconButton,
   Fab,
   RadioGroup,
@@ -18,7 +13,6 @@ import {
   Divider
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { FormControl } from '@material-ui/core';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked';
 import CloseIcon from '@material-ui/icons/Close';
@@ -27,8 +21,7 @@ import { styled } from '@material-ui/core/styles';
 import _ from '@lodash';
 import Dropzone from '../../shared-components/Dropzone';
 import ImageAttach from '../../shared-components/ImageAttach';
-import SubjectIcon from '@material-ui/icons/Subject';
-import BackupIcon from '@material-ui/icons/Backup';
+import FileAttach from '../../shared-components/FileAttach';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AttachFile from './AttachFile';
@@ -63,14 +56,14 @@ const inputStyleDisabled = makeStyles((theme) => ({
 }));
 const useStyles = makeStyles((theme) => ({
   root: {
-    whiteSpace: 'unset',
-    wordBreak: 'break-all',
-    width: '100%',
-    height: '100%',
-    '& .MuiSelect-outlined': {
-      width: '100%'
-    }
-  }
+    minHeight: '15px',
+    position: 'absolute',
+    left: '215px',
+    top: '-5px',
+    height: '25px',
+    width:'25px',
+    backgroundColor: 'silver'
+}
 }));
 const typeToNameDict = {
   'ROUTING INQUIRY/DISCREPANCY':
@@ -201,11 +194,12 @@ const AttachmentAnswer = () => {
     </div>
   );
 };
+
 // Main Component
 const InquiryEditor = (props) => {
   // custom attribute must be lowercase
   const dispatch = useDispatch()
-  const selectStyle = useStyles();
+  const classes = useStyles();
   const { defaultContent, index, question, questions, saveQuestion } = props;
   const title = useSelector((state) => state.workspace.currentField)
 
@@ -225,9 +219,8 @@ const InquiryEditor = (props) => {
   }
 
   const copyQuestion = () => {
-    var optionsOfQuestion = [...questions];
-    optionsOfQuestion.splice(index, 1)
-    saveQuestion(optionsOfQuestion)
+    const temp = JSON.parse(JSON.stringify(question));
+    saveQuestion([...questions, temp])
   }
 
   const handleTypeChange = (e) => {
@@ -257,12 +250,13 @@ const InquiryEditor = (props) => {
 
   const handleUploadImageAttach = (src) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].src = src
+    var list = optionsOfQuestion[index].files
+    optionsOfQuestion[index].files = [...list, {src: URL.createObjectURL(src), type: src.type, name: src.name }]
     saveQuestion(optionsOfQuestion)
   };
-  const handleRemoveImageAttach = () => {
+  const handleRemoveImageAttach = (i) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].src = ""
+    optionsOfQuestion[index].files.splice(i, 1)
     saveQuestion(optionsOfQuestion)
   };
  
@@ -391,25 +385,25 @@ const InquiryEditor = (props) => {
         <div className="flex justify-end items-center mr-2 ">
           <AttachFile uploadImageAttach={handleUploadImageAttach} />
           <IconButton className='p-8' onClick={copyQuestion}><FileCopyIcon /></IconButton>
-          <IconButton className='p-8' onClick={removeQuestion}><DeleteIcon /></IconButton>
+          <IconButton disabled={questions.length === 1} className='p-8' onClick={removeQuestion}><DeleteIcon /></IconButton>
         </div>
-        {question.src && (
-          <div style={{ position: 'relative' }}>
-            <Fab
-              color="primary"
-              style={{
-                position: 'absolute',
-                left: '185px',
-                top: '-15px'
-              }}
-              size="small"
-              variant="contained"
-              onClick={handleRemoveImageAttach}
-            >
-              <CloseIcon />
-            </Fab>
-            <ImageAttach src={question.src} style={{ margin: '1rem' }} />
-          </div>
+        {question.files &&  (
+          question.files.map((file, index) => (
+            file.type.includes("image")  ?
+            <div style={{ position: 'relative' }}>
+              <Fab
+                classes={{
+                  root: classes.root
+                }}
+                size="small"
+                onClick={() => handleRemoveImageAttach(index)}
+              >
+                <CloseIcon style={{ fontSize: 20 }} />
+              </Fab>
+              <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+            </div> :
+              <FileAttach file={file} />
+          ))
         )}
       </Card>
     </div>

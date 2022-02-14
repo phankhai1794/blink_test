@@ -3,10 +3,11 @@ const mockData = [{
     name: "We found discrepancy in the routing information between SI and OPUS booking details",
     type: "ROUTING INQUIRY/DISCREPANCY",
     answerType: "CHOICE ANSWER",
-    field: "consignee",
-    choices: ["Option 1", "Option 2"],
+    field: "port_of_loading",
+    choices: ["TOKYO", "JAPAN"],
     addOther: "",
-    src: ""
+    files: [],
+    reply: ["Example reply"]
   },
   {
     name: "We found discrepancy in the routing information between SI and OPUS booking details",
@@ -15,16 +16,18 @@ const mockData = [{
     field: "shipper",
     choices: [],
     addOther: "",
-    src: ""
+    files: [],
+    reply: ["Example reply"]
   },
   {
     name: "We found discrepancy in the routing information between SI and OPUS booking details",
     type: "ROUTING INQUIRY/DISCREPANCY",
     answerType: "ATTACHMENT ANSWER",
-    field: "place_of_delivery",
+    field: "consignee",
     choices: [],
     addOther: "",
-    src: ""
+    files: [],
+    reply: ["Example reply"]
   }]
 const initialState = {
     open: false,
@@ -32,7 +35,7 @@ const initialState = {
     openEdit: 0,
     anchorEl: null,
     currentField: "",
-    fields: ["consignee","shipper","place_of_delivery"],
+    fields: ["port_of_loading","shipper","consignee"],
     questionSaved: mockData,
     question: [{
         name: "We found discrepancy in the routing information between SI and OPUS booking details",
@@ -41,7 +44,7 @@ const initialState = {
         field: "other",
         choices: [],
         addOther: "",
-        src: ""
+        files: []
       }]
 }
 const getList = (state) => {
@@ -65,6 +68,10 @@ const inquiryReducer = function (state = initialState, action) {
         {
             return {...state, anchorEl: action.state};
         }
+        case Actions.SET_REPLY:
+        {
+            return {...state, reply: action.state};
+        }
         case Actions.SET_CURRENT_FIELD:
         {
             return {...state, currentField: action.state};
@@ -86,7 +93,7 @@ const inquiryReducer = function (state = initialState, action) {
                 field: "other",
                 choices: [],
                 addOther: "",
-                src: ""
+                files: []
               }]};
         }
         case Actions.SAVE_QUESTION:
@@ -98,7 +105,7 @@ const inquiryReducer = function (state = initialState, action) {
                 field: "other",
                 choices: [],
                 addOther: "",
-                src: ""
+                files: []
             }]};
         }
         case Actions.EDIT_QUESTION:
