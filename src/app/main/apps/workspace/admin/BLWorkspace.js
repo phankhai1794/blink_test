@@ -27,7 +27,7 @@ const BLWorkspace = (props) => {
         FabTitle="Inquiry"
         title={currentField ? currentField : ""}
       >
-        <InquiryCreated  />
+        <InquiryCreated user="workspace" />
       </Form>
 
       <AddPopover/>

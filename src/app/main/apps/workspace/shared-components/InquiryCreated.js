@@ -141,12 +141,15 @@ const Comment = (props) => {
 
 const InquiryCreated = (props) => {
   const dispatch = useDispatch()
-  const [questionSaved, currentField] = useSelector((state) => [state.workspace.questionSaved, state.workspace.currentField])
+  const {user} = props
+  const state = useSelector((state) =>  state[user])
+  const [questionSaved, currentField] = useSelector((state) =>  [state[user].questionSaved, state[user].currentField]) 
   const question = questionSaved.filter((q) =>  q.field === currentField)
   const indexes = questionSaved.findIndex((q) => q.field === currentField)
   const [edit, setEdit] = useState("")
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  console.log("State: ",state)
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -174,9 +177,11 @@ const InquiryCreated = (props) => {
             <Card style={{ padding: '1rem ' }}>
                 <div className="flex justify-between">
                     <UserInfo name="Andrew" date="Today" time="10:45PM" />
-                    <IconButton onClick={handleClick}>
-                        <MoreVertIcon />
-                    </IconButton>
+                    {user === 'workspace' &&
+                      <IconButton onClick={handleClick}>
+                          <MoreVertIcon />
+                      </IconButton>
+                    }
                     <Menu
                         id="customized-menu"
                         anchorEl={anchorEl}
