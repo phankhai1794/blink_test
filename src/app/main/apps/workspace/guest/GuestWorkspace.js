@@ -1,199 +1,43 @@
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import * as Actions from './store/actions';
+
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { useState } from 'react';
-import Inquiry from '../shared-components/Inquiry';
+import InquiryCreated from '../shared-components/InquiryCreated';
 import Form from '../shared-components/Form';
 import BLField from './components/BLField';
 
-const mockQuestion = {
-  paragraphAnswer: {
-    title: 'OCEAN VESSEL VOYAGE NO. FlAG',
-    question: {
-      name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-      type: 'ROUTING INQUIRY/DISCREPANCY',
-      answerType: 'PARAGRAPH ANSWER',
-      paragraph: '',
-      selectedChoice: ''
-    },
-    content: 'CONFIDENCE 021W',
-    open: false
-  },
-  choiceAnwer: {
-    title: 'PORT OF LOADING',
-    question: {
-      name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-      type: 'ROUTING INQUIRY/DISCREPANCY',
-      answerType: 'CHOICE ANSWER',
-      choices: [
-        {
-          id: 1,
-          content: 'TOKYO, JAPPAN'
-        },
-        {
-          id: 2,
-          content: 'BUSAN, KOREA'
-        }
-      ],
-      addOther: true,
-      selectedChoice: '',
-      otherChoiceContent: 'MANILA, MALAYSIA'
-    },
-    content: 'TOKYO,JAPAN',
-    open: false
-  },
-  AttatchmentAnswer: {
-    'PORT OF DISCHARGE': {
-      title: 'PORT OF DISCHARGE',
-      question: {
-        name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-        type: 'ROUTING INQUIRY/DISCREPANCY',
-        answerType: 'ATTACHMENT ANSWER',
-        choices: [],
-        selectedChoice: '',
-        fileName: 'document.pdf'
-      },
-      content: 'BUSAN, KOREA',
-      open: false
-    }
-  }
-};
-const mockQuestionaAnswered = {
-  paragraphAnswer: {
-    title: 'OCEAN VESSEL VOYAGE NO. FlAG',
-    question: {
-      name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-      type: 'ROUTING INQUIRY/DISCREPANCY',
-      answerType: 'PARAGRAPH ANSWER',
-      paragraph: '',
-      selectedChoice: ''
-    },
-    content: 'CONFIDENCE 021W',
-    open: false
-  },
-  choiceAnwer: {
-    title: 'PORT OF LOADING',
-    question: {
-      name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-      type: 'ROUTING INQUIRY/DISCREPANCY',
-      answerType: 'CHOICE ANSWER',
-      choices: [
-        {
-          id: 1,
-          content: 'TOKYO, JAPPAN'
-        },
-        {
-          id: 2,
-          content: 'BUSAN, KOREA'
-        }
-      ],
-      addOther: true,
-      selectedChoice: 'other',
-      otherChoiceContent: 'MANILA, MALAYSIA'
-    },
-    content: 'TOKYO,JAPAN',
-    open: false
-  },
-  AttatchmentAnswer: {
-    'PORT OF DISCHARGE': {
-      title: 'PORT OF DISCHARGE',
-      question: {
-        name: 'We found discrepancy in the routing information between SI and OPUS booking details',
-        type: 'ROUTING INQUIRY/DISCREPANCY',
-        answerType: 'ATTACHMENT ANSWER',
-        choices: [],
-        selectedChoice: '',
-        fileName: 'document.pdf'
-      },
-      content: 'BUSAN, KOREA',
-      open: false
-    }
-  }
-};
 const GuestWorkspace = (props) => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [openInquiry, setOpenInquiry] = useState(false);
-  {
-    /* 
-                form show the example of mockQuestionAnswered
-                use one form is enoughh
-    */
-  }
-  const [openInquiry2, setOpenInquiry2] = useState(false);
-  const onOpenInquiry2 = () => {
-    setOpenInquiry2(true);
-  };
-  const toggleInquiry2 = (status) => {
-    setOpenInquiry2(status);
-  };
-  //end
-  const onOpenInquiry = () => {
-    setOpenInquiry(true);
-  };
-  const openAddPopover = (e) => {
-    setAnchorEl(e.currentTarget);
-  };
-  const toggleInquiry = (status) => {
-    setOpenInquiry(status);
-  };
-  const closeAddPopover = (e) => {
-    if (anchorEl === null) {
-      setAnchorEl(null);
-    } else {
-      const { x, y, width, height } = anchorEl.getBoundingClientRect();
-      if (x + width < 800) {
-        if (e.clientY + 2 > y + height || e.clientY < y) {
-          setAnchorEl(null);
-        } else if (e.clientX > x + width + 48 || e.clientX < x) {
-          setAnchorEl(null);
-        }
-      } else {
-        if (e.clientY + 2 > y + height || e.clientY < y) {
-          setAnchorEl(null);
-        } else if (e.clientX > x + width || e.clientX > x + 48) {
-          setAnchorEl(null);
-        }
-      }
-    }
-  };
+  const dispatch = useDispatch()
+
+  const [openInquiry, currentField] = useSelector((state) => 
+  [state.guestspace.openInquiry,  state.guestspace.currentField])
 
   return (
     <div className="ml-20">
       <Form
         open={openInquiry}
-        toggleForm={toggleInquiry}
+        toggleForm={(status) => dispatch(Actions.toggleInquiry(status))}
         hasAddButton={false}
         FabTitle="Inquiry"
-        title={mockQuestion.choiceAnwer.title}
+        title={currentField ? currentField : ""}
       >
-        <Inquiry forCustomer={true} mockQuestion={mockQuestion.choiceAnwer} />
+        <InquiryCreated user="guestspace"/>
       </Form>
-      {/* 
-                form show the example of mockQuestionAnswered
-                use one form is enoughh
-             */}
-      <Form
-        open={openInquiry2}
-        toggleForm={toggleInquiry2}
-        hasAddButton={false}
-        FabTitle="Inquiry"
-        title={mockQuestionaAnswered.choiceAnwer.title}
-      >
-        <Inquiry mockQuestion={mockQuestionaAnswered.choiceAnwer} forCustomer={false} />
-      </Form>
-      {/* end */}
+
       <Grid container>
         <Grid item xs={5}>
           <Grid item xs={11}>
             <h3>Shipper/Exporter</h3>
-            <BLField>
+            <BLField id="shipper">
               DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO
               BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN
             </BLField>
           </Grid>
           <Grid item xs={11}>
             <h3>Consignee</h3>
-            <BLField>
+            <BLField  id="consignee">
               DSV AIR & SEA LTD. -1708 16TH FLOOR, HANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929
               KOREA
             </BLField>
@@ -204,11 +48,7 @@ const GuestWorkspace = (props) => {
               Carrier or its Agents for failure to notify)
             </h3>
 
-            <BLField
-              openAddPopover={openAddPopover}
-              closeAddPopover={closeAddPopover}
-              //
-            >
+            <BLField id="notify">
               DSV AIR & SEA LTD. -1708 16TH FLOOR, HANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929
               KOREA
             </BLField>
@@ -217,42 +57,42 @@ const GuestWorkspace = (props) => {
             <Grid item xs={7}>
               <h3>PRE-CARRIAGE BY</h3>
 
-              <BLField width="70%"></BLField>
+              <BLField id="pre_carriage" width="70%"></BLField>
             </Grid>
             <Grid item xs={5}>
               <h3>PLACE OF RECEIPT</h3>
 
-              <BLField>SINGAPORE</BLField>
+              <BLField id="place_of_receipt">
+                SINGAPORE
+              </BLField>
             </Grid>
           </Grid>
           <Grid container xs={11}>
             <Grid item xs={7}>
               <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
 
-              <BLField width="70%" questionIsEmpty={false} openInquiry={onOpenInquiry}>
+              <BLField id="ocean_vessel" width="70%">
                 CONFIDENCE 021W
               </BLField>
             </Grid>
             <Grid item xs={5}>
               <h3>PORT OF LOADING</h3>
 
-              <BLField>TOKYO,JAPAN</BLField>
+              <BLField id="port_of_loading">
+                TOKYO,JAPAN
+              </BLField>
             </Grid>
             <Grid item xs={7}>
               <h3>PORT OF DISCHARGE</h3>
 
-              <BLField width="70%">BUSAN, KOREA</BLField>
+              <BLField id="port_of_discharge" width="70%" >
+                BUSAN, KOREA
+              </BLField>
             </Grid>
             <Grid item xs={5}>
               <h3>PLACE OF DELIVERY</h3>
 
-              <BLField
-                openAddPopover={openAddPopover}
-                closeAddPopover={closeAddPopover}
-                questionIsEmpty={false}
-                selectedChoice="MANILA, MALAYSIA"
-                openInquiry={onOpenInquiry2}
-              >
+              <BLField id="place_of_delivery" selectedChoice="MANILA, MALAYSIA">
                 BUSAN
               </BLField>
             </Grid>
@@ -263,12 +103,14 @@ const GuestWorkspace = (props) => {
             <Grid item xs={5}>
               <h3>BOOKING NO.</h3>
 
-              <BLField>TYOBD9739500</BLField>
+              <BLField id="booking_no">
+                TYOBD9739500
+              </BLField>
             </Grid>
             <Grid item xs={5}>
               <h3>SEA WAYBILL NO.</h3>
 
-              <BLField>
+              <BLField  >
                 "EXPORT REFERENCES (for the merchant's and/or Carrier's reference only. See back
                 clause 8. (4.))
               </BLField>
@@ -280,7 +122,7 @@ const GuestWorkspace = (props) => {
               8. (4.))
             </h3>
 
-            <BLField></BLField>
+            <BLField  ></BLField>
           </Grid>
           <Grid item xs={10} className="mt-32">
             <span>
@@ -313,14 +155,18 @@ const GuestWorkspace = (props) => {
           <Grid item xs={10}>
             <h3>FINAL DESTINATION(for line merchant's reference only)</h3>
 
-            <BLField>BUSAN, KOREA</BLField>
+            <BLField id="final_destination">
+              BUSAN, KOREA
+            </BLField>
           </Grid>
           <Grid item xs={10}>
             <h3>
               TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)
             </h3>
 
-            <BLField>R1CB118000</BLField>
+            <BLField  >
+              R1CB118000
+            </BLField>
           </Grid>
         </Grid>
       </Grid>
@@ -330,13 +176,19 @@ const GuestWorkspace = (props) => {
           <h3> Container No.1 </h3>
         </Grid>
         <Grid item xs={2}>
-          <BLField>262 Packages</BLField>
+          <BLField  >
+            262 Packages
+          </BLField>
         </Grid>
         <Grid item xs={2}>
-          <BLField>1,716.000 KGS</BLField>
+          <BLField  >
+            1,716.000 KGS
+          </BLField>
         </Grid>
         <Grid item xs={2}>
-          <BLField>3,560 CBM</BLField>
+          <BLField  >
+            3,560 CBM
+          </BLField>
         </Grid>
       </Grid>
       <Grid container spacing={8}>
@@ -344,13 +196,19 @@ const GuestWorkspace = (props) => {
           <h3> Container No.2 </h3>
         </Grid>
         <Grid item xs={2}>
-          <BLField>262 Packages</BLField>
+          <BLField  >
+            262 Packages
+          </BLField>
         </Grid>
         <Grid item xs={2}>
-          <BLField>1,716.000 KGS</BLField>
+          <BLField  >
+            1,716.000 KGS
+          </BLField>
         </Grid>
         <Grid item xs={2}>
-          <BLField>3,560 CBM</BLField>
+          <BLField  >
+            3,560 CBM
+          </BLField>
         </Grid>
       </Grid>
     </div>

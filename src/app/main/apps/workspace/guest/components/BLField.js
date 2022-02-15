@@ -1,4 +1,7 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import * as Actions from '../store/actions';
+
 import { TextField, InputAdornment } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core';
 import { green } from '@material-ui/core/colors';
@@ -30,24 +33,42 @@ const useStyles = makeStyles((theme) => ({
 }));
 const BLField = (props) => {
   const classes = useStyles();
+  const dispatch = useDispatch()
   const {
     children,
-    openAddPopover,
-    closeAddPopover,
     width,
-    questionIsEmpty,
     selectedChoice,
     fileName,
-    openInquiry
+    id
   } = props;
+  const [questionIsEmpty, setQuestionIsEmpty] = useState(true)
+  const questionSaved = useSelector((state) => state.guestspace.questionSaved)
+
+  useEffect(() => {
+    setQuestionIsEmpty(checkQuestionIsEmpty())
+  },[questionSaved])
+
+  const  checkQuestionIsEmpty = () => {
+    if (questionSaved.length > 0){
+      const check = questionSaved.filter(q => q.field === id)
+      return check.length > 0 ? false : true
+    }
+    return true
+  }
+ 
+   const onClick = (e) => {
+     if (!questionIsEmpty) {
+      dispatch(Actions.setField(e.currentTarget.id))
+      dispatch(Actions.toggleInquiry(true))
+     }
+   }
   return (
     <div
+      id={id}
       style={{
         width: `${width}`
       }}
-      onMouseEnter={openAddPopover}
-      onMouseLeave={closeAddPopover}
-      onClick={openInquiry}
+      onClick={onClick}
     >
       <TextField
         value={selectedChoice || children}
@@ -59,7 +80,7 @@ const BLField = (props) => {
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              {questionIsEmpty !== undefined && !questionIsEmpty ? (
+              {!questionIsEmpty ? (
                 <ChatBubbleIcon color="primary" />
               ) : (
                 ''
@@ -68,11 +89,9 @@ const BLField = (props) => {
           ),
           classes: {
             notchedOutline: `${
-              questionIsEmpty !== undefined && !questionIsEmpty
-                ? selectedChoice || fileName
-                  ? classes.notchedOutlineChecked
-                  : classes.notchedOutlineNotChecked
-                : ''
+              questionIsEmpty
+                ? ""
+                : classes.notchedOutlineNotChecked
             }`
           }
         }}
