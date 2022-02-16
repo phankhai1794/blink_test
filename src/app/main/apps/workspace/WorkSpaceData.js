@@ -27,7 +27,7 @@ const WorkSpaceData = {
   'notify':
     {
       title:
-        'NOTIFY PARTY (It is agreed that no responsibility shall be <br></br> attached to the Carrier or its Agents for failure to notify)',
+        'NOTIFY PARTY (It is agreed that no responsibility shall be attached to the Carrier or its Agents for failure to notify)',
       question: {
         name: '',
         type: '',

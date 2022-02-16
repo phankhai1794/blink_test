@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
+import WorkSpaceData from '../WorkSpaceData';
 
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -10,6 +11,7 @@ import BLField from './components/BLField';
 
 const GuestWorkspace = (props) => {
   const dispatch = useDispatch()
+  const data = WorkSpaceData
 
   const [openInquiry, currentField] = useSelector((state) => 
   [state.guestspace.openInquiry,  state.guestspace.currentField])
@@ -21,7 +23,8 @@ const GuestWorkspace = (props) => {
         toggleForm={(status) => dispatch(Actions.toggleInquiry(status))}
         hasAddButton={false}
         FabTitle="Inquiry"
-        title={currentField ? currentField : ""}
+        field={currentField ? currentField : ""}
+        title={currentField ? data[currentField].title : ""}
       >
         <InquiryCreated user="guestspace"/>
       </Form>
