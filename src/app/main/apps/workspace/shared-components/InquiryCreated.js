@@ -174,7 +174,7 @@ const InquiryCreated = (props) => {
               question={q} 
               saveQuestion={(q) => dispatch((Actions.editQuestion(q)))} 
             /> :
-            <Card style={{ padding: '1rem ' }}>
+            <Card style={{ padding: '1rem ', marginBottom: '24px' }}>
                 <div className="flex justify-between">
                     <UserInfo name="Andrew" date="Today" time="10:45PM" />
                     {user === 'workspace' &&

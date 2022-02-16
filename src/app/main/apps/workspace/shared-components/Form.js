@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../admin/store/actions';
 
-import WorkSpaceData from '../WorkSpaceData';
 import { withStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -45,7 +44,7 @@ const DialogTitle = withStyles(styles)((props) => {
   } = props;
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
-      <Typography variant="h6">{children}</Typography>
+      <Typography style={{width: '600px'}} variant="h6">{children}</Typography>
       <>
         <div className={classes.dialogToolTips}>
           <IconButton
@@ -100,8 +99,7 @@ const DialogActions = withStyles((theme) => ({
 
 export default function Form(props) {
   const dispatch = useDispatch()
-  const { children, title, hasAddButton, FabTitle, open, toggleForm } = props;
-  const data = WorkSpaceData
+  const { children, title, field, hasAddButton, FabTitle, open, toggleForm } = props;
   const index = useSelector((state) => state.workspace.openEdit)
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -150,7 +148,7 @@ export default function Form(props) {
           isFullScreen={isFullScreen}
           handleClose={handleClose}
         >
-          {title && title !== "open Inquiries" ? data[title].title : "open Inquiries" }
+          {title && title !== "open Inquiries" ? title : "open Inquiries" }
         </DialogTitle>
         <DialogContent>{children}</DialogContent>
         <DialogActions style={{ display: 'none !important' }}>
@@ -167,7 +165,7 @@ export default function Form(props) {
             )}
             <div style={{ marginTop: '2rem', marginLeft: '2rem' }}>
               <Divider />
-              <PopoverFooter forCustomer={false} title={title} />
+              <PopoverFooter forCustomer={false} title={field} />
             </div>
           </div>
         </DialogActions>
