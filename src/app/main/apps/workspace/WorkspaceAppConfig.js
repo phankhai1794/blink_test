@@ -13,9 +13,14 @@ export const WorkspaceAppConfig = {
       component: React.lazy(() => import('./WorkspaceApp'))
     },
     {
+      path: '/apps/workplace/draft-bl',
+      exact: true,
+      component: React.lazy(() => import('./draft-bl/DraftWorkspace'))
+    },
+    {
       path: '/apps/workplace/mybl',
       exact: true,
       component: React.lazy(() => import('./BillApp'))
-    }
+    },
   ]
 };

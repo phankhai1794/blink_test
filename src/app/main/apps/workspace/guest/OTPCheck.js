@@ -1,12 +1,21 @@
-import React, { createRef, useMemo, useState } from 'react';
+import React, { createRef, useMemo, useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import * as HeaderActions from 'app/store/actions/header';
 import GuestWorkspace from './GuestWorkspace';
 import OtpInput from 'react-otp-input';
+
 const OtpCheck = ({ status }) => {
   const CODE = '1111';
+  const dispatch = useDispatch();
   const [otpCode, setOtpCode] = useState('');
   const handleChange = (code) => {
     setOtpCode(code);
   };
+  useEffect(() => {
+    dispatch(HeaderActions.showBtnDraftBL(false));
+    dispatch(HeaderActions.showBtnEdit(false));
+  }, []);
+
   return (
     <>
       {otpCode === CODE ? (
