@@ -11,6 +11,7 @@ import { useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
+import SendInquiryForm from 'app/main/apps/workspace/admin/SendInquiryForm';
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -71,11 +72,13 @@ function ToolbarLayout1(props) {
 
           <div className="flex">
             <UserMenu />
-
+            
             <div className={classes.separator} />
-
+            <SendInquiryForm/>
+            
+            <div className={classes.separator} />
             <FuseSearch />
-
+        
             <Hidden lgUp>
               <div className={classes.separator} />
 
