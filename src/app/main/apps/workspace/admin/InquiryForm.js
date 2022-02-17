@@ -29,4 +29,5 @@ const InquiryForm = (props) => {
   );
 };
 
+
 export default InquiryForm;

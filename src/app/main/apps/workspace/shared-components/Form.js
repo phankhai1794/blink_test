@@ -99,7 +99,7 @@ const DialogActions = withStyles((theme) => ({
 
 export default function Form(props) {
   const dispatch = useDispatch()
-  const { children, title, field, hasAddButton, FabTitle, open, toggleForm } = props;
+  const { children, title, field, hasAddButton, FabTitle, open, toggleForm, hiddenActions } = props;
   const index = useSelector((state) => state.workspace.openEdit)
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -151,7 +151,7 @@ export default function Form(props) {
           {title && title !== "open Inquiries" ? title : "open Inquiries" }
         </DialogTitle>
         <DialogContent>{children}</DialogContent>
-        <DialogActions style={{ display: 'none !important' }}>
+        {!hiddenActions &&(<DialogActions style={{ display: 'none !important' }}>
           <div style={{ position: 'relative' }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
               <Fab
@@ -169,6 +169,7 @@ export default function Form(props) {
             </div>
           </div>
         </DialogActions>
+         ) }
       </Dialog>
     </div>
   );
