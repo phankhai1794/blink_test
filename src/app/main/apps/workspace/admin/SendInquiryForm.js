@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../admin/store/actions';
 import Form from '../shared-components/Form';
-import { TextField, Box, Button, Grid, Icon, Dialog, Typography } from '@material-ui/core';
+import { TextField, Box, Button, Grid, Icon, Dialog, Typography, Divider } from '@material-ui/core';
 import TagsInput from './components/TagsInput';
+import { Editor } from 'react-draft-wysiwyg';
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+
 const SendInquiryForm = (props) => {
   const [questions, title] = useSelector((state) => [
     state.workspace.question,
@@ -26,14 +29,26 @@ const SendInquiryForm = (props) => {
 
   return (
     <React.Fragment>
-      <Button onClick={openSendInquiryDialog}>
-        <div>
-          <Typography component="span" className="normal-case font-600 flex">
-            {/* custom header for customer workplace only */}
-            Send Inquired
-          </Typography>
-        </div>
-      </Button>
+      <div
+        style={{
+          paddingLeft: 5,
+          paddingRight: 5,
+          paddingTop: 17
+        }}>
+        <Button
+          style={{
+            width: 120,
+            height: 30,
+            color: 'white',
+            backgroundColor: '#bd1874',
+            borderRadius: 20
+          }}
+          variant="text"
+          size="small"
+          onClick={openSendInquiryDialog}>
+          E-Mail
+        </Button>
+      </div>
 
       <Form
         title={'Send Inquiry'}
@@ -46,76 +61,75 @@ const SendInquiryForm = (props) => {
         FabTitle={''}
         title={'New Mail'}>
         <>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <label>To Customer</label>
-              <TagsInput />
-              {/* <TextField
-                style={{ borderColor: '#000000', height: 40, marginTop: 5 }}
-                id="full-width-text-field"
-                placeholder="Customer email"
-                variant="outlined"
-                fullWidth // this may override your custom width
-              /> */}
-            </Grid>
-            <Grid item xs={6}>
-              <label>To Onshore</label>
-              <TagsInput />
-              {/* <TextField
-                style={{ borderColor: '#000000', height: 40, marginTop: 5 }}
-                id="full-width-text-field"
-                placeholder="Onshore email"
-                variant="outlined"
-                fullWidth // this may override your custom width
-              /> */}
-            </Grid>
-          </Grid>
-          <Grid style={{ paddingTop: 10 }} container spacing={2}>
-            <Grid item xs={6}>
-              <label>From</label>
-              <TagsInput />
-              {/* <TextField
-                style={{ borderColor: '#000000', height: 40, marginTop: 5 }}
-                id="full-width-text-field"
-                placeholder="From email"
-                variant="outlined"
-                fullWidth // this may override your custom width
-              /> */}
-            </Grid>
-            <Grid item xs={6}></Grid>
-          </Grid>
-
-          <Grid style={{ paddingTop: 10 }} container spacing={2}>
-            <Grid item xs={12}>
-              <label>Subject</label>
-              <TextField
-                style={{ borderColor: '#000000', height: 40, marginTop: 5 }}
-                id="full-width-text-field"
-                placeholder=""
-                variant="outlined"
-                fullWidth // this may override your custom width
-              />
-            </Grid>
-          </Grid>
-          <Grid style={{ paddingTop: 10 }} container spacing={2}>
-            <Grid item xs={12}>
-              <label>Message</label>
-              <TextField
-                style={{ textAlign: 'left' }}
-                style={{ borderColor: '#000000', marginTop: 5 }}
-                id="full-width-text-field"
-                multiline
-                rows={4}
-                placeholder=""
-                variant="outlined"
-                fullWidth // t
-              />
-            </Grid>
-          </Grid>
-
           <Grid
+            style={{ marginTop: 8 }}
             container
-            style={{ 'justify-content': 'center', paddingTop: 20, paddingBottom: 20 }}>
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center">
+            <Grid item xs={1}>
+              <label style={{ color: '#89949B', fontSize: 13 }}>To Customer </label>
+            </Grid>
+            <Grid style={{ paddingLeft: 2 }} item xs={11}>
+              <TagsInput />
+            </Grid>
+          </Grid>
+          <Grid
+            style={{ marginTop: 8 }}
+            container
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center">
+            <Grid item xs={1}>
+              <label style={{ color: '#89949B', fontSize: 13 }}>To Onshore </label>
+            </Grid>
+            <Grid style={{ paddingLeft: 2 }} item xs={11}>
+              <TagsInput />
+            </Grid>
+          </Grid>
+          <Grid
+            style={{ marginTop: 8 }}
+            container
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center">
+            <Grid item xs={1}>
+              <label style={{ color: '#89949B', fontSize: 13 }}>From </label>
+            </Grid>
+            <Grid style={{ paddingLeft: 2 }} item xs={11}>
+              <TagsInput />
+            </Grid>
+          </Grid>
+          <Grid
+            style={{ marginTop: 8 }}
+            container
+            direction="row"
+            justifyContent="flex-start"
+            alignItems="center">
+            <Grid item xs={1}>
+              <label style={{ color: '#89949B', fontSize: 13 }}>Subject</label>
+            </Grid>
+            <Grid style={{ paddingLeft: 2 }} item xs={11}>
+              <TextField
+                style={{ borderColor: 'lightgray', height: 37 }}
+                id="full-width-text-field"
+                placeholder=""
+                variant="outlined"
+                fullWidth // this may override your custom width
+              />
+            </Grid>
+          </Grid>
+          <div style={{ minHeight: 300 }}>
+            <Editor
+              // editorState={editorState}
+              toolbarClassName="toolbarClassName"
+              wrapperClassName="wrapperClassName"
+              editorClassName="editorClassName"
+              // onEditorStateChange={this.onEditorStateChange}
+            />
+          </div>
+          <Divider></Divider>
+          <Grid container style={{ 'justify-content': 'center', paddingTop: 20 }}>
             <Grid>
               <Button
                 style={{
@@ -147,6 +161,7 @@ const SendInquiryForm = (props) => {
               </Button>
             </Grid>
           </Grid>
+          ,
         </>
       </Form>
     </React.Fragment>

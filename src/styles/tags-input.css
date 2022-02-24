@@ -1,9 +1,8 @@
 .tags-input-container{
-  border: 2px solid lightgray;
-  padding: .5em;
+  border: 1px solid lightgray;
+  padding: 5px;
   border-radius: 4px;
-  width: min(80vw, 400px);
-  margin-top: 1em;
+  /* width: min(80vw, 400px); */
   display: flex;
   align-items: center;
   flex-wrap: wrap;
