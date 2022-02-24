@@ -84,7 +84,7 @@ const DialogContent = withStyles((theme) => ({
   root: {
     margin: 'auto',
     marginTop: '1rem',
-    backgroundColor: "snow"
+    backgroundColor: "white"
     // maxWidth: "100%",
     // width: "780px"
   }

@@ -28,7 +28,7 @@ function TagsInput() {
         onKeyDown={handleKeyDown}
         type="text"
         className="tags-input"
-        placeholder={tags.length> 0?'Type email': 'Enter emails (Example: abc@gmail.com, ...)'}
+        placeholder={tags.length> 0?'Type email':'Enter emails (Example: abc@gmail.com, ...)'}
       />
     </div>
   );
