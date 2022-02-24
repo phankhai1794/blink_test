@@ -31,6 +31,7 @@ const mockData = [{
   }]
 const initialState = {
     open: false,
+    openAllInquiry: false,
     openInquiry: false,
     openEdit: 0,
     anchorEl: null,
@@ -60,6 +61,10 @@ const inquiryReducer = function (state = initialState, action) {
         {
             return {...state, open: action.state};
         }
+        case Actions.OPEN_ALL_INQUIRY:
+        {
+            return {...state, openAllInquiry: !state.openAllInquiry};
+        }
         case Actions.OPEN_INQUIRY:
         {
             return {...state, openInquiry: action.state};
@@ -87,6 +92,18 @@ const inquiryReducer = function (state = initialState, action) {
         case Actions.ADD_QUESTION:
         {
             return {...state, question: [...state.question, {
+                name: "We found discrepancy in the routing information between SI and OPUS booking details",
+                type: "ROUTING INQUIRY/DISCREPANCY",
+                answerType: "CHOICE ANSWER",
+                field: "other",
+                choices: [],
+                addOther: "",
+                files: []
+              }]};
+        }
+        case Actions.ADD_QUESTION1:
+        {
+            return {...state, questionSaved: [...state.questionSaved, {
                 name: "We found discrepancy in the routing information between SI and OPUS booking details",
                 type: "ROUTING INQUIRY/DISCREPANCY",
                 answerType: "CHOICE ANSWER",

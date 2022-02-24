@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../admin/store/actions';
 import { makeStyles } from '@material-ui/core/styles';
@@ -15,7 +15,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 const PopoverFooter = ({
-  toggleInquiriresDialog,
   title,
   forCustomer,
 }) => {
@@ -24,6 +23,9 @@ const PopoverFooter = ({
   const fields = useSelector((state) => state.workspace.fields)
   const onSave = () => {
     dispatch(Actions.saveQuestion())
+  }
+  const toggleInquiriresDialog = () => {
+    dispatch(Actions.toggleAllInquiry())
   }
   const onReply = () => {
     dispatch(Actions.setReply(true))
@@ -77,10 +79,7 @@ const PopoverFooter = ({
           </Grid>
         )}
       </Grid>
-      {/* <Grid item xs={1} style={{ display: "flex", justifyContent: "flex-end" }}>
-                <ArrowBackIosIcon />
-                <ArrowForwardIosIcon />
-            </Grid> */}
+     
       <Grid item xs={4} className="flex justify-end">
       {fields.includes(title) ? 
         <>

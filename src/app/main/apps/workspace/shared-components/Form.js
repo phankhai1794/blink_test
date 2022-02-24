@@ -100,7 +100,7 @@ const DialogActions = withStyles((theme) => ({
 export default function Form(props) {
   const dispatch = useDispatch()
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, hiddenActions } = props;
-  const index = useSelector((state) => state.workspace.openEdit)
+  const [index, openAllInquiry] = useSelector((state) => [state.workspace.openEdit, state.workspace.openAllInquiry])
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const handleOpenFab = () => {
@@ -112,13 +112,21 @@ export default function Form(props) {
   };
 
   const handleClick = () => {
-    dispatch(Actions.addQuestion())
+    if (openAllInquiry) {
+      dispatch(Actions.addQuestion1())
+    }
+    else {
+      dispatch(Actions.addQuestion())
+    }
     dispatch(Actions.setEdit(index + 1));
   };
   const handleClose = () => {
     toggleForm(false);
     setOpenFab(false);
     dispatch(Actions.setReply(false))
+    if (openAllInquiry) {
+      dispatch(Actions.toggleAllInquiry())
+    }
   };
   return (
     <div>
@@ -165,7 +173,7 @@ export default function Form(props) {
             )}
             <div style={{ marginTop: '2rem', marginLeft: '2rem' }}>
               <Divider />
-              <PopoverFooter forCustomer={false} title={field} />
+              {!openAllInquiry && <PopoverFooter forCustomer={false} title={field} /> }
             </div>
           </div>
         </DialogActions>

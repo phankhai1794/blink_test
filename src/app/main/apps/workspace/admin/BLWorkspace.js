@@ -7,6 +7,7 @@ import WorkSpaceData from '../WorkSpaceData';
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import InquiryCreated from '../shared-components/InquiryCreated';
+import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
@@ -29,8 +30,8 @@ const BLWorkspace = (props) => {
   const dispatch = useDispatch();
   const data = WorkSpaceData;
 
-  const [openInquiry, currentField] = useSelector((state) => 
-  [state.workspace.openInquiry,  state.workspace.currentField])
+  const [openInquiry, openAllInquiry, currentField] = useSelector((state) => 
+  [state.workspace.openInquiry, state.workspace.openAllInquiry,  state.workspace.currentField])
 
   return (
     <div className="px-52">
@@ -39,12 +40,12 @@ const BLWorkspace = (props) => {
       <Form
         open={openInquiry}
         toggleForm={(status) => dispatch(Actions.toggleInquiry(status))}
-        hasAddButton={false}
+        hasAddButton={openAllInquiry}
         FabTitle="Inquiry"
         field={currentField ? currentField : ""}
-        title={currentField ? data[currentField].title : ""}
+        title={openAllInquiry ? "All Inquiries" : (currentField ? data[currentField].title : "")}
       >
-        <InquiryCreated user="workspace" />
+        {openAllInquiry ? <AllInquiry user="workspace"/> : <InquiryCreated user="workspace" /> }
       </Form>
 
       <AddPopover/>
