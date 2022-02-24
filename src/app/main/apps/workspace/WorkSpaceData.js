@@ -2,24 +2,14 @@ const WorkSpaceData = {
   'shipper': {
     // dont neet title now, but maybe used in the future
     title: 'Shipper/Exporter',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content:
       'DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN',
     open: false
   },
   'consignee': {
     title: 'Consignee',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content:
       'DSV AIR & SEA LTD. -1708 16TH FLOOR, HANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA',
     open: false
@@ -40,12 +30,7 @@ const WorkSpaceData = {
     },
   'pre_carriage': {
     title: 'PRE-CARRIAGE BY',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: '',
     open: false
   },
@@ -121,34 +106,19 @@ const WorkSpaceData = {
   },
   'place_of_delivery': {
     title: 'PLACE OF DELIVERY',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: 'BUSAN',
     open: false
   },
   'booking_no': {
     title: 'BOOKING NO.',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: 'TYOBD9739500',
     open: false
   },
   'SEA WAYBILL NO.': {
     title: 'SEA WAYBILL NO.',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: 'ONEYTOBD9739500',
     open: false
   },
@@ -167,89 +137,49 @@ const WorkSpaceData = {
     },
   "final_destination": {
     title: "FINAL DESTINATION(for line merchant's reference only)",
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: 'BUSAN, KOREA',
     open: false
   },
   'TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)': {
     title: 'TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: 'R1CB118000',
     open: false
   },
   'Container No.1-1': {
     title: 'Container No.1-1',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: '262 Packages',
     open: false
   },
   'Container No.1-2': {
     title: 'Container No.1-2',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: '1,716.000 KGS',
     open: false
   },
   'Container No.1-3': {
     title: 'Container No.1-3',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: '3,560 CBM',
     open: false
   },
   'Container No.2-1': {
     title: 'Container No.2-1',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: '262 Packages',
     open: false
   },
   'Container No.2-2': {
     title: 'Container No.2-2',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: '1,716.000 KGS',
     open: false
   },
   'Container No.2-3': {
     title: 'Container No.2-3',
-    question: {
-      name: '',
-      type: '',
-      choices: [],
-      selectedChoice: ''
-    },
+    
     content: '3,560 CBM',
     open: false
   }

@@ -203,12 +203,6 @@ const InquiryEditor = (props) => {
   const { defaultContent, index, question, questions, saveQuestion } = props;
   const title = useSelector((state) => state.workspace.currentField)
 
-  useEffect(() => {
-    var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].field = title
-    saveQuestion(optionsOfQuestion)
-  },[])
-
   const removeQuestion = () => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion.splice(index, 1)
