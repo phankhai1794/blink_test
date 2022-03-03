@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../store/actions';
 
@@ -29,7 +29,12 @@ const useStyles = makeStyles((theme) => ({
   },
   notchedOutlineNotChecked: {
     borderColor: `red !important`
-  }
+  },
+  adornment: {
+    height: '6em',
+    maxHeight: '6em',
+    alignItems: 'flex-end',
+  },
 }));
 const BLField = (props) => {
   const classes = useStyles();
@@ -37,6 +42,8 @@ const BLField = (props) => {
   const {
     children,
     width,
+    multiline,
+    rows,
     selectedChoice,
     fileName,
     id
@@ -74,12 +81,17 @@ const BLField = (props) => {
         value={selectedChoice || children}
         variant="outlined"
         fullWidth={true}
+        multiline={multiline}
+        rows={rows}
         classes={{
           root: classes.root
         }}
         InputProps={{
           endAdornment: (
-            <InputAdornment position="end">
+            <InputAdornment
+              position="end"
+              className={multiline && rows > 3 ? classes.adornment : ""}
+            >
               {!questionIsEmpty ? (
                 <ChatBubbleIcon color="primary" />
               ) : (
