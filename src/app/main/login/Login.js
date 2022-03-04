@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Card, CardContent, Typography, Tabs, Tab } from '@material-ui/core';
 import { FuseAnimate } from '@fuse';
 import { Link } from 'react-router-dom';
@@ -23,9 +24,28 @@ function Login(props) {
     setSelectedTab(value);
   }
 
-  function handleDemoLogin() {
-    history.push('/');
+  function handleDemoLogin(model) {
+    let data = { user_name: model.username, password: model.password };
+    axios.post('http://si-automation.cyberlogitec.com.vn:9001/auth/login', data, { 
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "country": "TH"
+      },
+    }).then((res) => {
+      if (res.status === 200) {
+        localStorage.setItem("AUTH_TOKEN", res.data.Authorization);
+        localStorage.setItem("REFRESH_TOKEN", res.data.refresh_token);
+        history.push('/');
+      }
+    });
   }
+
+  useEffect(() => {
+    if (localStorage.getItem("AUTH_TOKEN")) {
+      history.push('/');
+    }
+  }, []);
 
   return (
     <div

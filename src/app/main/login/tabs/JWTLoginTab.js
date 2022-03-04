@@ -13,7 +13,7 @@ function JWTLoginTab(props) {
   const formRef = useRef(null);
 
   useEffect(() => {
-    if (login.error && (login.error.email || login.error.password)) {
+    if (login.error && (login.error.username || login.error.password)) {
       formRef.current.updateInputsWithError({
         ...login.error
       });
@@ -31,7 +31,7 @@ function JWTLoginTab(props) {
 
   function handleSubmit(model) {
     // dispatch(authActions.submitLogin(model));
-    props.onLogged();
+    props.onLogged(model);
   }
 
   return (
@@ -46,8 +46,8 @@ function JWTLoginTab(props) {
         <TextFieldFormsy
           className="mb-16"
           type="text"
-          name="email"
-          label="Username/Email"
+          name="username"
+          label="Username"
           validations={{
             minLength: 4
           }}
@@ -58,7 +58,7 @@ function JWTLoginTab(props) {
             endAdornment: (
               <InputAdornment position="end">
                 <Icon className="text-20" color="action">
-                  email
+                  person
                 </Icon>
               </InputAdornment>
             )

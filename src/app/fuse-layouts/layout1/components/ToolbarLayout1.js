@@ -1,19 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import history from '@history';
+import axios from 'axios';
 import clsx from 'clsx';
-import { AppBar, Hidden, Toolbar, Avatar, Typography, Badge } from '@material-ui/core';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
-import { FuseSearch, FuseShortcuts } from '@fuse';
+import { useSelector, useDispatch } from 'react-redux';
+import { AppBar, Toolbar, Avatar, Badge, Button, Hidden } from '@material-ui/core';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
-import QuickPanelToggleButton from 'app/fuse-layouts/shared-components/quickPanel/QuickPanelToggleButton';
-import ChatPanelToggleButton from 'app/fuse-layouts/shared-components/chatPanel/ChatPanelToggleButton';
-import History from 'app/fuse-layouts/shared-components/History';
-import { useSelector } from 'react-redux';
-import Button from '@material-ui/core/Button';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
+import History from 'app/fuse-layouts/shared-components/History';
+import UserProfile from 'app/fuse-layouts/shared-components/userProfile';
 import SendInquiryForm from 'app/main/apps/workspace/admin/SendInquiryForm';
+import * as userActions from 'app/auth/store/actions';
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -30,13 +29,12 @@ const useStyles = makeStyles((theme) => ({
   logo: {
     borderRadius: 0,
     width: "5em",
-    paddingLeft: "50px",
-    paddingRight: "30px",
+    paddingLeft: 50,
+    paddingRight: 15,
   },
   iconWrapper: {
     display: "flex",
     alignItems: "center",
-    paddingRight: "22px",
   },
   avatar: {
     width: theme.spacing(3),
@@ -50,6 +48,7 @@ const useStyles = makeStyles((theme) => ({
 
 function ToolbarLayout1(props) {
   const classes = useStyles(props);
+  const dispatch = useDispatch();
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
   const user = useSelector(({ auth }) => auth.user);
@@ -58,6 +57,29 @@ function ToolbarLayout1(props) {
   const handleRedirect = (url) => {
     history.push(url);
   }
+
+  useEffect(() => {
+    if (!localStorage.getItem("AUTH_TOKEN")) {
+      handleRedirect('/login');
+    }
+    axios.post('http://si-automation.cyberlogitec.com.vn:9001/auth/status', {}, {
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("AUTH_TOKEN")}`,
+        "country": "TH"
+      },
+    }).then((res) => {
+      let payload = {
+        data: {
+          ...user.data,
+          displayName: res.data.data.full_name,
+          settigs: {}
+        }
+      };
+      dispatch(userActions.setUserData(payload));
+    });
+  }, []);
 
   return (
     <ThemeProvider theme={toolbarTheme}>
@@ -71,34 +93,27 @@ function ToolbarLayout1(props) {
           )}
 
           <div className="flex flex-1 px-16">
-            {/* <Hidden mdDown>
-              <FuseShortcuts className="px-16" />
-            </Hidden> */}
-            <Avatar
-              src="assets/images/logos/one_ocean_network-logo.png"
-              className={clsx(classes.logo, classes.fitAvatar)}
-              alt="one-logo"
-            />
-
             <div className={classes.iconWrapper}>
               <Avatar
-                src={user.data.photoURL}
-                className={classes.fitAvatar}
-                alt="user photo"
+                src="assets/images/logos/one_ocean_network-logo.png"
+                className={clsx(classes.logo, classes.fitAvatar)}
+                alt="one-logo"
               />
-              <Typography component="span" className="normal-case font-600 ml-8 flex">
-                {/* custom header for customer workplace only */}
-                {window.location.pathname.includes('apps/workplace/customer')
-                  ? 'Customer'
-                  : user.data.displayName}
-              </Typography>
+            </div>
+
+            <div className={classes.iconWrapper}>
+              <UserProfile
+                classes={classes}
+                user={user}
+                history={history}
+              />
             </div>
 
             <div className={classes.iconWrapper}>
               <Button
                 variant="text"
                 size="medium"
-                className={classes.button}
+                className={clsx("h-64", classes.button)}
               >
                 <Badge color="primary" badgeContent={0} showZero>
                   <NotificationsIcon />
