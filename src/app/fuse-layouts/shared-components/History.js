@@ -23,11 +23,11 @@ function History(props) {
 
   return (
     <React.Fragment>
-      <Button className="h-64" onClick={historyClick}>
-        <div className="hidden md:flex flex-col ml-12 items-start">
+      <Button className="h-64 px-12 ml-12" onClick={historyClick}>
+        <div className="hidden md:flex flex-col items-start">
           <Typography component="span" className="normal-case font-600 flex">B/L Version History</Typography>
         </div>
-        <Icon className="text-16 ml-12 hidden sm:flex" variant="action">
+        <Icon className="text-16 ml-4 hidden sm:flex" variant="action">
           keyboard_arrow_down
         </Icon>
       </Button>
@@ -38,28 +38,28 @@ function History(props) {
         onClose={historyClose}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center'
+          horizontal: 'right'
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'center'
+          horizontal: 'right'
         }}
         classes={{
           paper: 'py-8'
         }}
       >
         <React.Fragment>
-          <MenuItem component={Link} to="/login">
+          <MenuItem component={Link} to="#">
             <ListItemIcon className="min-w-40">
-              <Icon>lock</Icon>
+              <Icon>label</Icon>
             </ListItemIcon>
-            <ListItemText className="pl-0" primary="Login" />
+            <ListItemText className="pl-0" primary="Menu Item" />
           </MenuItem>
-          <MenuItem component={Link} to="/register">
+          <MenuItem component={Link} to="#">
             <ListItemIcon className="min-w-40">
-              <Icon>person_add</Icon>
+              <Icon>label</Icon>
             </ListItemIcon>
-            <ListItemText className="pl-0" primary="Register" />
+            <ListItemText className="pl-0" primary="Menu Item" />
           </MenuItem>
         </React.Fragment>
       </Popover>
