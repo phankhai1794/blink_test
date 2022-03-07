@@ -2,10 +2,23 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../admin/store/actions';
 import Form from '../shared-components/Form';
-import { TextField, Box, Button, Grid, Icon, Dialog, Typography, Divider } from '@material-ui/core';
+import {
+  TextField,
+  Box,
+  Button,
+  Grid,
+  Icon,
+  Dialog,
+  Typography,
+  Divider,
+  Tabs,
+  Tab
+} from '@material-ui/core';
 import TagsInput from './components/TagsInput';
+import InquiryPreviewForm from './InquiryPreviewForm';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import InquirySaved from '../shared-components/InquirySaved';
 
 const SendInquiryForm = (props) => {
   const [questions, title] = useSelector((state) => [
@@ -14,17 +27,26 @@ const SendInquiryForm = (props) => {
   ]);
   const dispatch = useDispatch();
   const [opened, setopened] = useState(null);
+  const [opendPreview, setopendPreview] = useState(null);
 
   const openSendInquiryDialog = (event) => {
     setopened(true);
+  };
+
+  const opendPreviewForm = (event) => {
+    setopendPreview(true);
+  };
+  const closePreviewForm = () => {
+    setopendPreview(null);
   };
 
   const closeSendInquiry = () => {
     setopened(null);
   };
 
-  const selectedTags = (tags) => {
-    console.log(tags);
+  const [value, setValue] = React.useState(0);
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
   };
 
   return (
@@ -68,9 +90,11 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label style={{ color: '#89949B', fontSize: 13 }}>To Customer </label>
+              <label style={{ color: '#89949B', fontSize: 13, fontFamily: 'sans-serif' }}>
+                To Customer{' '}
+              </label>
             </Grid>
-            <Grid style={{ paddingLeft: 2 }} item xs={11}>
+            <Grid style={{ paddingLeft: 5 }} item xs={11}>
               <TagsInput />
             </Grid>
           </Grid>
@@ -81,9 +105,11 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label style={{ color: '#89949B', fontSize: 13 }}>To Onshore </label>
+              <label style={{ color: '#89949B', fontSize: 13, fontFamily: 'sans-serif' }}>
+                To Onshore{' '}
+              </label>
             </Grid>
-            <Grid style={{ paddingLeft: 2 }} item xs={11}>
+            <Grid style={{ paddingLeft: 5 }} item xs={11}>
               <TagsInput />
             </Grid>
           </Grid>
@@ -94,9 +120,11 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label style={{ color: '#89949B', fontSize: 13 }}>From </label>
+              <label style={{ color: '#89949B', fontSize: 13, fontFamily: 'sans-serif' }}>
+                From{' '}
+              </label>
             </Grid>
-            <Grid style={{ paddingLeft: 2 }} item xs={11}>
+            <Grid style={{ paddingLeft: 5 }} item xs={11}>
               <TagsInput />
             </Grid>
           </Grid>
@@ -107,19 +135,24 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label style={{ color: '#89949B', fontSize: 13 }}>Subject</label>
+              <label style={{ color: '#89949B', fontSize: 13, fontFamily: 'sans-serif' }}>
+                Subject
+              </label>
             </Grid>
-            <Grid style={{ paddingLeft: 2 }} item xs={11}>
-              <TextField
-                style={{ borderColor: 'lightgray', height: 37 }}
-                id="full-width-text-field"
-                placeholder=""
-                variant="outlined"
-                fullWidth // this may override your custom width
-              />
+            <Grid style={{ paddingLeft: 5 }} item xs={11}>
+              <input
+                style={{
+                  padding: '5px',
+                  width: '100%',
+                  borderWidth: '0.5px',
+                  borderRadius: '4px',
+                  height: '25px',
+                  borderStyle: 'solid',
+                  borderColor: 'lightgray'
+                }}></input>
             </Grid>
           </Grid>
-          <div style={{ minHeight: 300 }}>
+          <div style={{ minHeight: 300, marginTop: 10 }}>
             <Editor
               // editorState={editorState}
               toolbarClassName="toolbarClassName"
@@ -139,9 +172,7 @@ const SendInquiryForm = (props) => {
                   marginRight: 10,
                   borderRadius: 20
                 }}
-                onClick={() => {
-                  alert('clicked');
-                }}>
+                onClick={opendPreviewForm}>
                 Preview
               </Button>
             </Grid>
@@ -161,8 +192,35 @@ const SendInquiryForm = (props) => {
               </Button>
             </Grid>
           </Grid>
-          ,
         </>
+        {opendPreview ? (
+          <Form
+            title={'Send Inquiry'}
+            open={opendPreview}
+            toggleForm={(status) => {
+              closePreviewForm();
+            }}
+            openFab={false}
+            hiddenActions={true}>
+            <>
+              <Box style={{ position: 'absolute', 
+              zIndex: 1, 
+              top: 50, 
+              left: 0, 
+              right: 0 }} sx={{}}>
+                <Tabs
+                  indicatorColor="secondary"
+                  style={{ margin: 0 }}
+                  value={value}
+                  onChange={handleChange}>
+                  <Tab label="Customer" />
+                  <Tab label="Onshore" />
+                </Tabs>
+              </Box>
+              <InquirySaved user="guestspace" />
+            </>
+          </Form>
+        ) : null}
       </Form>
     </React.Fragment>
   );
