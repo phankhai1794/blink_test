@@ -1,8 +1,8 @@
 .tags-input-container{
-  border: 1px solid lightgray;
+  border: 0.5px solid lightgray;
   padding: 5px;
   border-radius: 4px;
-  /* width: min(80vw, 400px); */
+  width: 100%;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -44,5 +44,6 @@
   padding: .5em 0;
   border: none;
   outline: none;
+  font-family: 'sans-serif';
   background-color: transparent;
 }
