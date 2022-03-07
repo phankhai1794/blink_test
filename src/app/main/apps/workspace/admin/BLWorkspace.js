@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
+import * as HeaderActions from 'app/store/actions/header';
 import WorkSpaceData from '../WorkSpaceData';
 
 import { Grid, Divider } from '@material-ui/core';
@@ -15,10 +16,10 @@ import BLField from './components/BLField';
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
-    paddingTop: '0 !important',
+    paddingTop: '0 !important'
   },
   pbGridItem: {
-    paddingBottom: '0 !important',
+    paddingBottom: '0 !important'
   },
   grayText: {
     color: '#69696E'
@@ -30,25 +31,31 @@ const BLWorkspace = (props) => {
   const dispatch = useDispatch();
   const data = WorkSpaceData;
 
-  const [openInquiry, openAllInquiry, currentField] = useSelector((state) => 
-  [state.workspace.openInquiry, state.workspace.openAllInquiry,  state.workspace.currentField])
+  const [openInquiry, openAllInquiry, currentField] = useSelector((state) => [
+    state.workspace.openInquiry,
+    state.workspace.openAllInquiry,
+    state.workspace.currentField
+  ]);
+
+  useEffect(() => {
+    dispatch(HeaderActions.displayBtn());
+  }, []);
 
   return (
     <div className="px-52">
-      <InquiryForm FabTitle="Inquiry Form"/>
-  
+      <InquiryForm FabTitle="Inquiry Form" />
+
       <Form
         open={openInquiry}
         toggleForm={(status) => dispatch(Actions.toggleInquiry(status))}
         hasAddButton={openAllInquiry}
         FabTitle="Inquiry"
-        field={currentField ? currentField : ""}
-        title={openAllInquiry ? "All Inquiries" : (currentField ? data[currentField].title : "")}
-      >
-        {openAllInquiry ? <AllInquiry user="workspace"/> : <InquiryCreated user="workspace" /> }
+        field={currentField ? currentField : ''}
+        title={openAllInquiry ? 'All Inquiries' : currentField ? data[currentField].title : ''}>
+        {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}
       </Form>
 
-      <AddPopover/>
+      <AddPopover />
       <Grid container spacing={6}>
         <Grid item xs={6}>
           <Grid item>
@@ -83,21 +90,15 @@ const BLWorkspace = (props) => {
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
-              <BLField id="ocean_vessel">
-                CONFIDENCE 021W
-              </BLField>
+              <BLField id="ocean_vessel">CONFIDENCE 021W</BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF LOADING</h3>
-              <BLField id="port_of_loading">
-                TOKYO,JAPAN
-              </BLField>
+              <BLField id="port_of_loading">TOKYO,JAPAN</BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF DISCHARGE</h3>
-              <BLField id="port_of_discharge">
-                BUSAN, KOREA
-              </BLField>
+              <BLField id="port_of_discharge">BUSAN, KOREA</BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PLACE OF DELIVERY</h3>
@@ -111,9 +112,7 @@ const BLWorkspace = (props) => {
           <Grid container spacing={6}>
             <Grid item xs={6}>
               <h3>BOOKING NO.</h3>
-              <BLField id="booking_no">
-                TYOBD9739500
-              </BLField>
+              <BLField id="booking_no">TYOBD9739500</BLField>
             </Grid>
             <Grid item xs={6}>
               <h3>SEA WAYBILL NO.</h3>
@@ -135,17 +134,13 @@ const BLWorkspace = (props) => {
           </Grid>
           <Grid item>
             <h3>FINAL DESTINATION(for line merchant's reference only)</h3>
-            <BLField id="final_destination">
-              BUSAN, KOREA
-            </BLField>
+            <BLField id="final_destination">BUSAN, KOREA</BLField>
           </Grid>
           <Grid item>
             <h3>
               TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)
             </h3>
-            <BLField  >
-              R1CB118000
-            </BLField>
+            <BLField>R1CB118000</BLField>
           </Grid>
         </Grid>
       </Grid>
@@ -224,7 +219,9 @@ const BLWorkspace = (props) => {
 
       <Divider className="my-32" />
 
-      <h2 className={classes.grayText}>PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER</h2>
+      <h2 className={classes.grayText}>
+        PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
+      </h2>
       <Grid container spacing={6}>
         <Grid item xs={6}>
           <Grid item>
@@ -258,11 +255,7 @@ const BLWorkspace = (props) => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid
-          container
-          alignItems="center"
-          justify="center"
-        >
+        <Grid container alignItems="center" justify="center">
           <h2 className={classes.grayText}>** TO BE CONTINUED ON ATTACHED LIST **</h2>
         </Grid>
       </Grid>

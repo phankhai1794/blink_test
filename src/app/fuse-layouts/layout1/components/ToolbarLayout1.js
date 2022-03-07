@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import history from '@history';
 import axios from 'axios';
 import clsx from 'clsx';
+import { Link } from 'react-router-dom';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppBar, Toolbar, Avatar, Badge, Button, Hidden } from '@material-ui/core';
@@ -23,27 +24,25 @@ const useStyles = makeStyles((theme) => ({
   fitAvatar: {
     // zoom out to show full logo in avatar
     '& > img': {
-      objectFit: 'contain',
-    },
+      objectFit: 'contain'
+    }
   },
   logo: {
     borderRadius: 0,
-    width: "5em",
-    paddingLeft: 50,
-    paddingRight: 15,
+    width: '5em'
   },
   iconWrapper: {
-    display: "flex",
-    alignItems: "center",
+    display: 'flex',
+    alignItems: 'center'
   },
   avatar: {
     width: theme.spacing(3),
-    height: theme.spacing(3),
+    height: theme.spacing(3)
   },
   button: {
-    textTransform: "none",
-    fontWeight: "bold",
-  },
+    textTransform: 'none',
+    fontWeight: 'bold'
+  }
 }));
 
 function ToolbarLayout1(props) {
@@ -52,33 +51,43 @@ function ToolbarLayout1(props) {
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
   const user = useSelector(({ auth }) => auth.user);
-  const [showBtnDraftBL, showBtnEdit] = useSelector((state) => [state.header.showBtnDraftBL, state.header.showBtnEdit]);
+  const [hideAll, displayDraftBLBtn, displayEditBtn] = useSelector((state) => [
+    state.header.hideAll,
+    state.header.displayDraftBLBtn,
+    state.header.displayEditBtn
+  ]);
 
   const handleRedirect = (url) => {
     history.push(url);
-  }
+  };
 
   useEffect(() => {
-    if (!localStorage.getItem("AUTH_TOKEN")) {
+    if (!localStorage.getItem('AUTH_TOKEN')) {
       handleRedirect('/login');
     }
-    axios.post('http://si-automation.cyberlogitec.com.vn:9001/auth/status', {}, {
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("AUTH_TOKEN")}`,
-        "country": "TH"
-      },
-    }).then((res) => {
-      let payload = {
-        data: {
-          ...user.data,
-          displayName: res.data.data.full_name,
-          settigs: {}
+    axios
+      .post(
+        'http://si-automation.cyberlogitec.com.vn:9001/auth/status',
+        {},
+        {
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('AUTH_TOKEN')}`,
+            country: 'TH'
+          }
         }
-      };
-      dispatch(userActions.setUserData(payload));
-    });
+      )
+      .then((res) => {
+        let payload = {
+          data: {
+            ...user.data,
+            displayName: res.data.data.full_name,
+            settings: {}
+          }
+        };
+        dispatch(userActions.setUserData(payload));
+      });
   }, []);
 
   return (
@@ -93,63 +102,74 @@ function ToolbarLayout1(props) {
           )}
 
           <div className="flex flex-1 px-16">
-            <div className={classes.iconWrapper}>
+            <div
+              style={{
+                paddingLeft: 50,
+                paddingRight: 15
+              }}
+              className={classes.iconWrapper}>
               <Avatar
                 src="assets/images/logos/one_ocean_network-logo.png"
                 className={clsx(classes.logo, classes.fitAvatar)}
                 alt="one-logo"
+                component={Link}
+                to="/"
               />
             </div>
 
-            <div className={classes.iconWrapper}>
-              <UserProfile
-                classes={classes}
-                user={user}
-                history={history}
-              />
-            </div>
+            {!hideAll ? <UserProfile classes={classes} user={user} history={history} /> : <></>}
 
-            <div className={classes.iconWrapper}>
-              <Button
-                variant="text"
-                size="medium"
-                className={clsx("h-64", classes.button)}
-              >
+            {hideAll ? (
+              <></>
+            ) : (
+              <Button variant="text" size="medium" className={clsx('h-64', classes.button)}>
                 <Badge color="primary" badgeContent={0} showZero>
                   <NotificationsIcon />
                 </Badge>
-                <span className='pl-12'>Inquiry</span>
+                <span className="pl-12">Inquiry</span>
               </Button>
-            </div>
+            )}
 
-            {
-              showBtnDraftBL ?
-              <Button
-                variant="text"
-                size="medium"
-                className={classes.button}
-                onClick={() => handleRedirect('/apps/workplace/draft-bl')}
-              >
-                <VisibilityIcon />
-                <span className='px-2'>Draft BL</span>
-              </Button> :
-              showBtnEdit ?
-              <Button
-                variant="text"
-                size="medium"
-                className={classes.button}
-                onClick={() => handleRedirect('/apps/workplace/customer/TYOBH3669500/gciUIQActrGonB3VEirVTGHe7qhY12rk')}
-              >
-                <EditIcon />
-                <span className='px-2'>Edit</span>
-              </Button> :
+            {hideAll || !displayDraftBLBtn ? (
               <></>
-            }
+            ) : (
+              <Button
+                variant="text"
+                size="medium"
+                className={classes.button}
+                onClick={() => handleRedirect('/apps/workplace/draft-bl')}>
+                <VisibilityIcon />
+                <span className="px-2">Draft BL</span>
+              </Button>
+            )}
+
+            {hideAll || !displayEditBtn ? (
+              <></>
+            ) : (
+              <Button
+                variant="text"
+                size="medium"
+                className={classes.button}
+                onClick={() =>
+                  handleRedirect(
+                    '/apps/workplace/customer/TYOBH3669500/gciUIQActrGonB3VEirVTGHe7qhY12rk'
+                  )
+                }>
+                <EditIcon />
+                <span className="px-2">Edit</span>
+              </Button>
+            )}
           </div>
 
           <div className="flex mr-24">
-            <SendInquiryForm/>
-            <History />
+            {hideAll ? (
+              <UserProfile classes={classes} user={user} history={history} />
+            ) : (
+              <>
+                <SendInquiryForm />
+                <History />
+              </>
+            )}
           </div>
 
           {config.navbar.display && config.navbar.position === 'right' && (
