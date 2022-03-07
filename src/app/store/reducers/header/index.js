@@ -1,26 +1,26 @@
 import * as Actions from '../../actions/header';
 
 const initialState = {
-    showBtnDraftBL: false,
-    showBtnEdit: false,
-}
+  hideAll: false,
+  displayDraftBLBtn: false,
+  displayEditBtn: false
+};
 
 const headerReducer = function (state = initialState, action) {
-    switch ( action.type )
-    {
-        case Actions.SHOW_BTN_DRAFT_BL:
-        {
-            return {...state, showBtnDraftBL: action.state};
-        }
-        case Actions.SHOW_BTN_EDIT:
-        {
-            return {...state, showBtnEdit: action.state};
-        }
-        default:
-        {
-            return state;
-        }
+  switch (action.type) {
+    case Actions.DISPLAY_BTN: {
+      return {
+        ...state,
+        hideAll: false,
+        displayDraftBLBtn: false,
+        displayEditBtn: false,
+        ...action.state
+      };
     }
+    default: {
+      return state;
+    }
+  }
 };
 
 export default headerReducer;

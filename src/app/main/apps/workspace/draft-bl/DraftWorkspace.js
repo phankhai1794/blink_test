@@ -15,8 +15,7 @@ const DraftWorkspace = (props) => {
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(HeaderActions.showBtnDraftBL(false));
-    dispatch(HeaderActions.showBtnEdit(true));
+    dispatch(HeaderActions.displayBtn({ displayEditBtn: true }));
   }, []);
 
   return (

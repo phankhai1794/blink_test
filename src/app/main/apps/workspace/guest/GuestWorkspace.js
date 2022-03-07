@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
@@ -12,10 +12,10 @@ import WorkSpaceData from '../WorkSpaceData';
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
-    paddingTop: '0 !important',
+    paddingTop: '0 !important'
   },
   pbGridItem: {
-    paddingBottom: '0 !important',
+    paddingBottom: '0 !important'
   },
   grayText: {
     color: '#69696E'
@@ -26,25 +26,25 @@ const GuestWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const data = WorkSpaceData;
-  const [openInquiry, currentField] = useSelector((state) => 
-  [state.guestspace.openInquiry,  state.guestspace.currentField]);
+  const [openInquiry, currentField] = useSelector((state) => [
+    state.guestspace.openInquiry,
+    state.guestspace.currentField
+  ]);
 
   useEffect(() => {
-    dispatch(HeaderActions.showBtnDraftBL(true));
-    dispatch(HeaderActions.showBtnEdit(false));
+    dispatch(HeaderActions.displayBtn({ displayDraftBLBtn: true }));
   }, []);
 
   return (
-    <div className='px-52'>
+    <div className="px-52">
       <Form
         open={openInquiry}
         toggleForm={(status) => dispatch(Actions.toggleInquiry(status))}
         hasAddButton={false}
         FabTitle="Inquiry"
-        field={currentField ? currentField : ""}
-        title={currentField ? data[currentField].title : ""}
-      >
-        <InquiryCreated user="guestspace"/>
+        field={currentField ? currentField : ''}
+        title={currentField ? data[currentField].title : ''}>
+        <InquiryCreated user="guestspace" />
       </Form>
 
       <Grid container spacing={6}>
@@ -81,9 +81,7 @@ const GuestWorkspace = (props) => {
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
-              <BLField>
-                CONFIDENCE 021W
-              </BLField>
+              <BLField>CONFIDENCE 021W</BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF LOADING</h3>
@@ -95,9 +93,7 @@ const GuestWorkspace = (props) => {
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PLACE OF DELIVERY</h3>
-              <BLField selectedChoice="MANILA, MALAYSIA">
-                BUSAN
-              </BLField>
+              <BLField selectedChoice="MANILA, MALAYSIA">BUSAN</BLField>
             </Grid>
           </Grid>
         </Grid>
@@ -183,9 +179,7 @@ const GuestWorkspace = (props) => {
           <BLField>3,560 CBM</BLField>
         </Grid>
         <Grid item xs={2}>
-          <BLField  >
-            1,716.000 KGS
-          </BLField>
+          <BLField>1,716.000 KGS</BLField>
         </Grid>
       </Grid>
       <Grid container spacing={4}>
@@ -205,9 +199,7 @@ const GuestWorkspace = (props) => {
           <BLField>40HQ</BLField>
         </Grid>
         <Grid item xs={2}>
-          <BLField  >
-            3,560 CBM
-          </BLField>
+          <BLField>3,560 CBM</BLField>
         </Grid>
         <Grid item xs={2}>
           <BLField>1,716.000 KGS</BLField>
@@ -216,7 +208,9 @@ const GuestWorkspace = (props) => {
 
       <Divider className="my-32" />
 
-      <h2 className={classes.grayText}>PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER</h2>
+      <h2 className={classes.grayText}>
+        PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
+      </h2>
       <Grid container spacing={6}>
         <Grid item xs={6}>
           <Grid item>
@@ -250,11 +244,7 @@ const GuestWorkspace = (props) => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid
-          container
-          alignItems="center"
-          justify="center"
-        >
+        <Grid container alignItems="center" justify="center">
           <h2 className={classes.grayText}>** TO BE CONTINUED ON ATTACHED LIST **</h2>
         </Grid>
       </Grid>
