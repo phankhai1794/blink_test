@@ -34,6 +34,7 @@ const initialState = {
     openAllInquiry: false,
     openInquiry: false,
     openEdit: 0,
+    openEdit1: null,
     anchorEl: null,
     currentField: "",
     fields: ["port_of_loading","shipper","consignee"],
@@ -88,6 +89,10 @@ const inquiryReducer = function (state = initialState, action) {
         case Actions.SET_EDIT:
         {
             return {...state, openEdit: action.state};
+        }
+        case Actions.SET_EDIT1:
+        {
+            return {...state, openEdit1: action.state};
         }
         case Actions.ADD_QUESTION:
         {

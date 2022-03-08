@@ -69,11 +69,9 @@ const BLField = (props) => {
     return true
   }
   const closeAddPopover = (e) => {
-    if (anchorEl === null) {
-      dispatch(Actions.setAnchor(null))
-    } else {
+    if (anchorEl !== null) {
       const { x, y, width, height } = anchorEl.getBoundingClientRect();
-      if (x + width < 800) {
+      if (x + width < 1400) {
         if (e.clientY + 2 > y + height || e.clientY < y) {
           dispatch(Actions.setAnchor(null))
         } else if (e.clientX > x + width + 48 || e.clientX < x) {
