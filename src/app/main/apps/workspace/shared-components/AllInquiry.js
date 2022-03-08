@@ -12,12 +12,11 @@ import { Card, Typography } from '@material-ui/core';
 const AllInquiry = (props) => {
   const dispatch = useDispatch()
   const {user} = props
-  const state = useSelector((state) =>  state[user])
-  const [question , openEdit] = useSelector((state) => [state[user].questionSaved,state[user].openEdit])
+  const [question , openEdit] = useSelector((state) => [state[user].questionSaved,state[user].openEdit1])
 
   const changeToEditor = (index) => {
     if (index !== openEdit)
-      dispatch(Actions.setEdit(index));
+      dispatch(Actions.setEdit1(index));
   };
   return (
     <>

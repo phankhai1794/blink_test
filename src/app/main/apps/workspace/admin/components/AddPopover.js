@@ -34,7 +34,7 @@ const AddPopover = (props) => {
   const dispatch = useDispatch()
   const anchorEl = useSelector((state) => state.workspace.anchorEl)
   const { x, width } = anchorEl !== null && anchorEl.getBoundingClientRect();
-  const isRightMost = x + width > 800;
+  const isRightMost = x + width > 1400;
   return (
     <>
       <Popover
@@ -49,7 +49,6 @@ const AddPopover = (props) => {
           vertical: 'center',
           horizontal: `${isRightMost ? 'right' : 'left'}`
         }}
-        onMouseLeave={()=> dispatch(Actions.setAnchor(null))}
         className={`${classes.circlePopover}`}
         style={{
           pointerEvents: 'none'

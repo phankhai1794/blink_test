@@ -6,6 +6,7 @@ export const SET_CURRENT_FIELD = 'SET_CURRENT_FIELD';
 export const SET_QUESTION = 'SET_QUESTION';
 export const SET_REPLY = 'SET_REPLY';
 export const SET_EDIT= 'SET_EDIT';
+export const SET_EDIT1= 'SET_EDIT1';
 export const ADD_QUESTION = 'ADD_QUESTION';
 export const ADD_QUESTION1 = 'ADD_QUESTION1';
 export const SAVE_QUESTION = 'SAVE_QUESTION';
@@ -78,6 +79,14 @@ export function setEdit(state)
 {
     return {
         type: SET_EDIT,
+        state: state,
+    }
+}
+
+export function setEdit1(state)
+{
+    return {
+        type: SET_EDIT1,
         state: state,
     }
 }
