@@ -15,7 +15,6 @@ import {
   Tab
 } from '@material-ui/core';
 import TagsInput from './components/TagsInput';
-import InquiryPreviewForm from './InquiryPreviewForm';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import InquirySaved from '../shared-components/InquirySaved';
@@ -210,11 +209,11 @@ const SendInquiryForm = (props) => {
               right: 0 }} sx={{}}>
                 <Tabs
                   indicatorColor="secondary"
-                  style={{ margin: 0 }}
+                  style={{ margin: 0, backgroundColor:'#102536' }}
                   value={value}
                   onChange={handleChange}>
-                  <Tab label="Customer" />
-                  <Tab label="Onshore" />
+                  <Tab style={{color: 'white'}} label="Customer" />
+                  <Tab style={{color: 'white'}} label="Onshore" />
                 </Tabs>
               </Box>
               <InquirySaved user="guestspace" />
