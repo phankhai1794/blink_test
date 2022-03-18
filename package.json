@@ -28,6 +28,7 @@
     "jss-extend": "6.2.0",
     "jwt-decode": "2.2.0",
     "keycode": "2.2.0",
+    "lint-staged": "^12.3.7",
     "lodash": "^4.17.21",
     "material-table": "1.39.2",
     "material-ui-popup-state": "1.4.0",
@@ -106,7 +107,8 @@
     "format": "prettier --write './src/*/*.{js,jsx,css,md,json}' --config ./.prettierrc",
     "build-docs": "find ./src/app/main/documentation/material-ui-components \\( -name '*.ts' -o -name '*.tsx' \\) -type f -delete && babel-node src/app/main/documentation/material-ui-components/build.js",
     "build-stats": "yarn run build --stats",
-    "bundle-report": "yarn run build-stats && webpack-bundle-analyzer build/bundle-stats.json -m static -r build/bundle-stats.html -O"
+    "bundle-report": "yarn run build-stats && webpack-bundle-analyzer build/bundle-stats.json -m static -r build/bundle-stats.html -O",
+    "configure-husky": "npx husky install && npx husky add .husky/pre-commit \"npx --no-install lint-staged\""
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -129,7 +131,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "prettier --write './src/*/*.{js,jsx,css,md,json}' --config ./.prettierrc"
+      "pre-commit": "lint-staged"
     }
   },
   "lint-staged": {
