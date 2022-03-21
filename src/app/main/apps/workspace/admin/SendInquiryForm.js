@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../admin/store/actions';
 import Form from '../shared-components/Form';
+import clsx from 'clsx';
 import {
   TextField,
   Box,
@@ -18,6 +19,7 @@ import TagsInput from './components/TagsInput';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import InquirySaved from '../shared-components/InquirySaved';
+import { makeStyles } from '@material-ui/styles';
 
 const SendInquiryForm = (props) => {
   const [questions, title] = useSelector((state) => [
@@ -47,6 +49,13 @@ const SendInquiryForm = (props) => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  const useStyles = makeStyles(() => ({
+    label: {
+      color: '#89949B', fontSize: 13, fontFamily: 'Roboto, Helvetica Neue, Arial, sans-serif'
+  }
+  }));
+  const classes = useStyles(props);
 
   return (
     <React.Fragment>
@@ -78,7 +87,7 @@ const SendInquiryForm = (props) => {
           closeSendInquiry();
         }}
         openFab={false}
-        hiddenActions={true}
+        customActions={<ActionUI openPreviewClick={opendPreviewForm}></ActionUI>}
         FabTitle={''}
         title={'New Mail'}>
         <>
@@ -89,7 +98,7 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label style={{ color: '#89949B', fontSize: 13, fontFamily: 'sans-serif' }}>
+              <label className={clsx(classes.label)}>
                 To Customer{' '}
               </label>
             </Grid>
@@ -104,7 +113,7 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label style={{ color: '#89949B', fontSize: 13, fontFamily: 'sans-serif' }}>
+              <label className={clsx(classes.label)}>
                 To Onshore{' '}
               </label>
             </Grid>
@@ -119,7 +128,7 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label style={{ color: '#89949B', fontSize: 13, fontFamily: 'sans-serif' }}>
+              <label className={clsx(classes.label)}>
                 From{' '}
               </label>
             </Grid>
@@ -134,7 +143,7 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label style={{ color: '#89949B', fontSize: 13, fontFamily: 'sans-serif' }}>
+              <label className={clsx(classes.label)}>
                 Subject
               </label>
             </Grid>
@@ -161,36 +170,6 @@ const SendInquiryForm = (props) => {
             />
           </div>
           <Divider></Divider>
-          <Grid container style={{ 'justify-content': 'center', paddingTop: 20 }}>
-            <Grid>
-              <Button
-                style={{
-                  width: 120,
-                  color: 'white',
-                  backgroundColor: '#092D33',
-                  marginRight: 10,
-                  borderRadius: 20
-                }}
-                onClick={opendPreviewForm}>
-                Preview
-              </Button>
-            </Grid>
-            <Grid>
-              <Button
-                style={{
-                  width: 120,
-                  color: 'white',
-                  marginLeft: 10,
-                  backgroundColor: '#bd1874',
-                  borderRadius: 20
-                }}
-                onClick={() => {
-                  alert('clicked');
-                }}>
-                SEND
-              </Button>
-            </Grid>
-          </Grid>
         </>
         {opendPreview ? (
           <Form
@@ -199,8 +178,7 @@ const SendInquiryForm = (props) => {
             toggleForm={(status) => {
               closePreviewForm();
             }}
-            openFab={false}
-            hiddenActions={true}>
+            openFab={false}>
             <>
               <Box style={{ position: 'absolute', 
               zIndex: 1, 
@@ -223,6 +201,45 @@ const SendInquiryForm = (props) => {
       </Form>
     </React.Fragment>
   );
+ 
 };
+
+const ActionUI = (props)=> {
+  const dispatch = useDispatch()
+  const {openPreviewClick} = props
+  return( <div style={{padding: 10}}>
+    <Grid container style={{ 'justify-content': 'center', paddingTop: 20 }}>
+      <Grid>
+        <Button
+          style={{
+            width: 120,
+            color: 'white',
+            backgroundColor: '#092D33',
+            marginRight: 10,
+            borderRadius: 20
+          }}
+          onClick={openPreviewClick}>
+          Preview
+        </Button>
+      </Grid>
+      <Grid>
+        <Button
+          style={{
+            width: 120,
+            color: 'white',
+            marginLeft: 10,
+            backgroundColor: '#bd1874',
+            borderRadius: 20
+          }}
+          onClick={() => {
+            alert('clicked');
+          }}>
+          SEND
+        </Button>
+      </Grid>
+    </Grid>
+  </div>
+  );
+}
 
 export default SendInquiryForm;
