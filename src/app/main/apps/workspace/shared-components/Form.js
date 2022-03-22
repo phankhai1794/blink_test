@@ -18,6 +18,11 @@ import CropIcon from '@material-ui/icons/Crop';
 import PopoverFooter from './PopoverFooter';
 import { Divider } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import {
+  Box,
+  Tabs,
+  Tab
+} from '@material-ui/core';
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -99,7 +104,7 @@ const DialogActions = withStyles((theme) => ({
 
 export default function Form(props) {
   const dispatch = useDispatch()
-  const { children, title, field, hasAddButton, FabTitle, open, toggleForm,  customActions } = props;
+  const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs } = props;
   const [index, openAllInquiry] = useSelector((state) => [state.workspace.openEdit, state.workspace.openAllInquiry])
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -127,6 +132,10 @@ export default function Form(props) {
     if (openAllInquiry) {
       dispatch(Actions.toggleAllInquiry())
     }
+  };
+  const [value, setValue] = React.useState(0);
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
   };
   return (
     <div>
@@ -158,6 +167,18 @@ export default function Form(props) {
         >
           {title && title !== "open Inquiries" ? title : "open Inquiries" }
         </DialogTitle>
+        {
+          tabs&&  <Box style={{ }} sx={{}}>
+          <Tabs
+            indicatorColor="secondary"
+            style={{ margin: 0, backgroundColor:'#102536' }}
+            value={value}
+            onChange={handleChange}>
+            <Tab style={{color: 'white'}} label="Customer" />
+            <Tab style={{color: 'white'}} label="Onshore" />
+          </Tabs>
+        </Box>
+        }
         <DialogContent>{children}</DialogContent>
         {customActions==null &&(<DialogActions style={{ display: 'none !important' }}>
           <div style={{ position: 'relative' }}>
