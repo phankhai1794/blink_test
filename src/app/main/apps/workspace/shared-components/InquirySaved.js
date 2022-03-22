@@ -14,6 +14,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import UserInfo from './UserInfo';
 import { Menu, MenuItem, ListItemIcon, Card, ListItemText, Typography, IconButton } from '@material-ui/core';
 import InquiryPreview from '../admin/components/InquiryPreview';
+import AllInquiry from './AllInquiry';
 
 const Comment = (props) => {
   const inputStyle = {
@@ -156,7 +157,7 @@ const InquirySaved = (props) => {
         const type = q.answerType
        return (
         <>
-           <InquiryPreview
+           <AllInquiry
               index={1} 
               questions={questionSaved} 
               question={q} 

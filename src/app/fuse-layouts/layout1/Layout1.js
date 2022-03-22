@@ -93,8 +93,8 @@ function Layout1(props) {
           id="fuse-layout"
           className={clsx(classes.root, config.mode, 'scroll-' + config.scroll)}
         >
-          {config.leftSidePanel.display && <LeftSideLayout1 />}
-
+          {config.leftSidePanel.display && 
+          <LeftSideLayout1 />}
           <div className="flex flex-1 flex-col overflow-hidden relative">
             {config.toolbar.display &&
               config.toolbar.style === 'fixed' &&

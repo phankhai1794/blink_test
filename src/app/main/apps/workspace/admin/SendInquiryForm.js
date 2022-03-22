@@ -20,6 +20,7 @@ import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import InquirySaved from '../shared-components/InquirySaved';
 import { makeStyles } from '@material-ui/styles';
+import AllInquiry from '../shared-components/AllInquiry';
 
 const SendInquiryForm = (props) => {
   const [questions, title] = useSelector((state) => [
@@ -35,6 +36,7 @@ const SendInquiryForm = (props) => {
   };
 
   const opendPreviewForm = (event) => {
+    dispatch(Actions.setEdit1(-1));
     setopendPreview(true);
   };
   const closePreviewForm = () => {
@@ -52,7 +54,7 @@ const SendInquiryForm = (props) => {
 
   const useStyles = makeStyles(() => ({
     label: {
-      color: '#89949B', fontSize: 13, fontFamily: 'Roboto, Helvetica Neue, Arial, sans-serif'
+      color: '#89949B', fontSize: 14, fontFamily: 'Roboto, Helvetica Neue, Arial, sans-serif'
   }
   }));
   const classes = useStyles(props);
@@ -173,28 +175,16 @@ const SendInquiryForm = (props) => {
         </>
         {opendPreview ? (
           <Form
-            title={'Send Inquiry'}
+            title={'Sending inquiry preview'}
+            tabs={["Offshore", "Onshore"]}
             open={opendPreview}
             toggleForm={(status) => {
               closePreviewForm();
             }}
-            openFab={false}>
+            openFab={false}
+            customActions={<div></div>}>
             <>
-              <Box style={{ position: 'absolute', 
-              zIndex: 1, 
-              top: 50, 
-              left: 0, 
-              right: 0 }} sx={{}}>
-                <Tabs
-                  indicatorColor="secondary"
-                  style={{ margin: 0, backgroundColor:'#102536' }}
-                  value={value}
-                  onChange={handleChange}>
-                  <Tab style={{color: 'white'}} label="Customer" />
-                  <Tab style={{color: 'white'}} label="Onshore" />
-                </Tabs>
-              </Box>
-              <InquirySaved user="guestspace" />
+                  <AllInquiry user="workspace" collapse={true} />
             </>
           </Form>
         ) : null}
