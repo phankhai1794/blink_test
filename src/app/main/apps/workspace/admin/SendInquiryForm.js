@@ -54,7 +54,8 @@ const SendInquiryForm = (props) => {
 
   const useStyles = makeStyles(() => ({
     label: {
-      color: '#89949B', fontSize: 14, fontFamily: 'Roboto, Helvetica Neue, Arial, sans-serif'
+      whiteSpace: 'nowrap',
+      color: '#4a4a4a', fontSize: 14, fontFamily: 'Roboto, Helvetica Neue, Arial, sans-serif'
   }
   }));
   const classes = useStyles(props);
@@ -63,7 +64,7 @@ const SendInquiryForm = (props) => {
     <React.Fragment>
       <div
         style={{
-          paddingLeft: 5,
+          paddingLeft: 15,
           paddingRight: 5,
           paddingTop: 17
         }}>
@@ -100,11 +101,11 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label className={clsx(classes.label)}>
-                To Customer{' '}
+              <label style={{fontSize: 14}} className={clsx(classes.label)}>
+                To Customer
               </label>
             </Grid>
-            <Grid style={{ paddingLeft: 5 }} item xs={11}>
+            <Grid style={{ paddingLeft: 15 }} item xs={11}>
               <TagsInput />
             </Grid>
           </Grid>
@@ -116,10 +117,10 @@ const SendInquiryForm = (props) => {
             alignItems="center">
             <Grid item xs={1}>
               <label className={clsx(classes.label)}>
-                To Onshore{' '}
+                To Onshore
               </label>
             </Grid>
-            <Grid style={{ paddingLeft: 5 }} item xs={11}>
+            <Grid style={{ paddingLeft: 15 }} item xs={11}>
               <TagsInput />
             </Grid>
           </Grid>
@@ -131,10 +132,10 @@ const SendInquiryForm = (props) => {
             alignItems="center">
             <Grid item xs={1}>
               <label className={clsx(classes.label)}>
-                From{' '}
+                From
               </label>
             </Grid>
-            <Grid style={{ paddingLeft: 5 }} item xs={11}>
+            <Grid style={{ paddingLeft: 15 }} item xs={11}>
               <TagsInput />
             </Grid>
           </Grid>
@@ -149,7 +150,7 @@ const SendInquiryForm = (props) => {
                 Subject
               </label>
             </Grid>
-            <Grid style={{ paddingLeft: 5 }} item xs={11}>
+            <Grid style={{ paddingLeft: 15 }} item xs={11}>
               <input
                 style={{
                   padding: '5px',
