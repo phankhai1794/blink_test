@@ -1,7 +1,7 @@
 import * as Actions from '../../actions/header';
 
 const initialState = {
-  hideAll: false,
+  hideAll: true,
   displayDraftBLBtn: false,
   displayEditBtn: false
 };
