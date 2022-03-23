@@ -12,7 +12,7 @@ const OtpCheck = ({ status }) => {
     setOtpCode(code);
   };
   useEffect(() => {
-    dispatch(HeaderActions.displayBtn());
+    dispatch(HeaderActions.displayBtn({ hideAll: true }));
   }, []);
 
   return (
