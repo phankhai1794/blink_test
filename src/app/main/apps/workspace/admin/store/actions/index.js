@@ -5,116 +5,129 @@ export const SET_ANCHOR_EL = 'SET_ANCHOR_EL';
 export const SET_CURRENT_FIELD = 'SET_CURRENT_FIELD';
 export const SET_QUESTION = 'SET_QUESTION';
 export const SET_REPLY = 'SET_REPLY';
-export const SET_EDIT= 'SET_EDIT';
-export const SET_EDIT1= 'SET_EDIT1';
+export const SET_EDIT = 'SET_EDIT';
+export const SET_EDIT1 = 'SET_EDIT1';
 export const ADD_QUESTION = 'ADD_QUESTION';
 export const ADD_QUESTION1 = 'ADD_QUESTION1';
-export const SAVE_QUESTION = 'SAVE_QUESTION';
-export const EDIT_QUESTION = 'EDIT_QUESTION';
+export const EDIT_INQUIRY = 'EDIT_INQUIRY';
 export const SAVE_FIELD = 'SAVE_FIELD'
+export const RELOAD = 'RELOAD'
+export const DISPLAY_SUCCESS = 'DISPLAY_SUCCESS'
+export const DISPLAY_FAIL = 'DISPLAY_FAIL'
+export const SAVE_METADATA = 'SAVE_METADATA'
 
-export function toggleCreateInquiry(state)
-{
+export function toggleCreateInquiry(state) {
     return {
         type: OPEN_CREATE_INQUIRY,
         state: state
     }
 }
-export function toggleAllInquiry()
-{
+export function toggleAllInquiry() {
     return {
         type: OPEN_ALL_INQUIRY,
     }
 }
 
-export function toggleInquiry(state)
-{
+export function toggleReload() {
+    return {
+        type: RELOAD,
+    }
+}
+
+export function toggleInquiry(state) {
     return {
         type: OPEN_INQUIRY,
         state: state
     }
 }
 
-export function setAnchor(state)
-{
+export function setAnchor(state) {
     return {
         type: SET_ANCHOR_EL,
         state: state
     }
 }
 
-export function setField(state)
-{
+export function setField(state) {
     return {
         type: SET_CURRENT_FIELD,
         state: state
     }
 }
 
-export function setQuestion(question)
-{
+export function setQuestion(question) {
     return {
         type: SET_QUESTION,
         state: question,
     }
 }
 
-export function setReply(question)
-{
+export function setReply(question) {
     return {
         type: SET_REPLY,
         state: question,
     }
 }
 
-export function editQuestion(question)
-{
+export function editInquiry(question) {
     return {
-        type: EDIT_QUESTION,
+        type: EDIT_INQUIRY,
         state: question,
     }
 }
 
-export function setEdit(state)
-{
+export function setEdit(state) {
     return {
         type: SET_EDIT,
         state: state,
     }
 }
 
-export function setEdit1(state)
-{
+export function setEdit1(state) {
     return {
         type: SET_EDIT1,
         state: state,
     }
 }
 
-export function addQuestion()
-{
+export function addQuestion() {
     return {
         type: ADD_QUESTION,
     }
 }
 
-export function addQuestion1()
-{
+export function addQuestion1() {
     return {
         type: ADD_QUESTION1,
     }
 }
 
-export function saveQuestion()
-{
+export function saveField(state) {
     return {
-        type: SAVE_QUESTION,
+        type: SAVE_FIELD,
+        state: state,
     }
 }
 
-export function saveField()
-{
+export function displaySuccess(state) {
     return {
-        type: SAVE_FIELD,
+        type: DISPLAY_SUCCESS,
+        state: state,
     }
 }
+
+export function displayFail(state, message) {
+    return {
+        type: DISPLAY_FAIL,
+        state: state,
+        message: message
+    }
+}
+
+export function saveMetadata(state) {
+    return {
+        type: SAVE_METADATA,
+        state: state,
+    }
+}
+

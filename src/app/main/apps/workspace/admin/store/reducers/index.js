@@ -1,143 +1,145 @@
 import * as Actions from '../actions';
-const mockData = [{
-    name: "We found discrepancy in the routing information between SI and OPUS booking details",
-    type: "ROUTING INQUIRY/DISCREPANCY",
-    answerType: "CHOICE ANSWER",
-    field: "port_of_loading",
-    choices: ["TOKYO", "JAPAN"],
-    addOther: "",
-    files: [],
-    reply: ["Example reply"]
-  },
-  {
-    name: "We found discrepancy in the routing information between SI and OPUS booking details",
-    type: "ROUTING INQUIRY/DISCREPANCY",
-    answerType: "PARAGRAPH ANSWER",
-    field: "shipper",
-    choices: [],
-    addOther: "",
-    files: [],
-    reply: ["Example reply"]
-  },
-  {
-    name: "We found discrepancy in the routing information between SI and OPUS booking details",
-    type: "ROUTING INQUIRY/DISCREPANCY",
-    answerType: "ATTACHMENT ANSWER",
-    field: "consignee",
-    choices: [],
-    addOther: "",
-    files: [],
-    reply: ["Example reply"]
-  }]
+const mockData = [
+    {
+        content: "We found discrepancy in the routing information between SI and OPUS booking details",
+        inqType: "ROUTING INQUIRY/DISCREPANCY",
+        answerType: "ATTACHMENT ANSWER",
+        field: "consignee",
+        choices: [],
+        addOther: "",
+        files: [],
+        reply: ["Example reply"]
+    }]
 const initialState = {
-    open: false,
+    success: false,
+    fail: false,
+    metadata: {},
+    openDialog: false,
     openAllInquiry: false,
     openInquiry: false,
     openEdit: 0,
     openEdit1: null,
     anchorEl: null,
     currentField: "",
-    fields: ["port_of_loading","shipper","consignee"],
-    questionSaved: mockData,
+    reload: false,
+    fields: [],
+    inquiries: [],
     question: [{
-        name: "We found discrepancy in the routing information between SI and OPUS booking details",
-        type: "ROUTING INQUIRY/DISCREPANCY",
-        answerType: "CHOICE ANSWER",
+        content: "We found discrepancy in the routing information between SI and OPUS booking details",
+        inqType: "12cb6526-a6b1-11ec-b909-0242ac120002",
+        ansType: "97883952-a6b0-11ec-b909-0242ac120002",
         field: "other",
         choices: [],
         addOther: "",
+        receiver: "",
         files: []
-      }]
+    }]
 }
-const getList = (state) => {
-    var array = state.question.filter(f => !state.fields.includes(f.field))
-    var list = []
-    array.forEach(e => list.push(e.field))
-    return list
-}
+
 const inquiryReducer = function (state = initialState, action) {
-    switch ( action.type )
-    {
+    switch (action.type) {
         case Actions.OPEN_CREATE_INQUIRY:
-        {
-            return {...state, open: action.state};
-        }
+            {
+                return { ...state, openDialog: action.state };
+            }
         case Actions.OPEN_ALL_INQUIRY:
-        {
-            return {...state, openAllInquiry: !state.openAllInquiry};
-        }
+            {
+                return { ...state, openAllInquiry: !state.openAllInquiry };
+            }
         case Actions.OPEN_INQUIRY:
-        {
-            return {...state, openInquiry: action.state};
-        }
+            {
+                return { ...state, openInquiry: action.state };
+            }
         case Actions.SET_ANCHOR_EL:
-        {
-            return {...state, anchorEl: action.state};
-        }
+            {
+                return { ...state, anchorEl: action.state };
+            }
         case Actions.SET_REPLY:
-        {
-            return {...state, reply: action.state};
-        }
+            {
+                return { ...state, reply: action.state };
+            }
         case Actions.SET_CURRENT_FIELD:
-        {
-            return {...state, currentField: action.state};
-        }
+            {
+                return { ...state, currentField: action.state };
+            }
         case Actions.SET_QUESTION:
-        {
-            return {...state, question: action.state};
-        }
+            {
+                return { ...state, question: action.state };
+            }
         case Actions.SET_EDIT:
-        {
-            return {...state, openEdit: action.state};
-        }
+            {
+                return { ...state, openEdit: action.state };
+            }
         case Actions.SET_EDIT1:
-        {
-            return {...state, openEdit1: action.state};
-        }
+            {
+                return { ...state, openEdit1: action.state };
+            }
         case Actions.ADD_QUESTION:
-        {
-            return {...state, question: [...state.question, {
-                name: "We found discrepancy in the routing information between SI and OPUS booking details",
-                type: "ROUTING INQUIRY/DISCREPANCY",
-                answerType: "CHOICE ANSWER",
-                field: "other",
-                choices: [],
-                addOther: "",
-                files: []
-              }]};
-        }
+            {
+                return {
+                    ...state, question: [...state.question, {
+                        content: "We found discrepancy in the routing information between SI and OPUS booking details",
+                        inqType: "12cb6526-a6b1-11ec-b909-0242ac120002",
+                        ansType: "97883952-a6b0-11ec-b909-0242ac120002",
+                        field: "other",
+                        choices: [],
+                        addOther: "",
+                        receiver: "",
+                        files: []
+                    }]
+                };
+            }
         case Actions.ADD_QUESTION1:
+            {
+                return {
+                    ...state, inquiries: [...state.inquiries, {
+                        content: "We found discrepancy in the routing information between SI and OPUS booking details",
+                        inqType: "12cb6526-a6b1-11ec-b909-0242ac120002",
+                        ansType: "97883952-a6b0-11ec-b909-0242ac120002",
+                        field: "other",
+                        choices: [],
+                        addOther: "",
+                        files: []
+                    }]
+                };
+            }
+        case Actions.EDIT_INQUIRY:
+            {
+                return { ...state, inquiries: action.state };
+            }
+        case Actions.RELOAD:
         {
-            return {...state, questionSaved: [...state.questionSaved, {
-                name: "We found discrepancy in the routing information between SI and OPUS booking details",
-                type: "ROUTING INQUIRY/DISCREPANCY",
-                answerType: "CHOICE ANSWER",
+            return { ...state, reload: !state.reload, openEdit: 0, openDialog: false, question: [{
+                content: "We found discrepancy in the routing information between SI and OPUS booking details",
+                inqType: "12cb6526-a6b1-11ec-b909-0242ac120002",
+                ansType: "97883952-a6b0-11ec-b909-0242ac120002",
                 field: "other",
                 choices: [],
                 addOther: "",
+                receiver: "",
                 files: []
-              }]};
+            }] };
         }
-        case Actions.SAVE_QUESTION:
+        case Actions.SAVE_FIELD:
         {
-            return {...state, open: false, openEdit: 0,fields:[...state.fields, ...getList(state)], questionSaved: [...state.questionSaved, ...state.question], question: [{
-                name: "We found discrepancy in the routing information between SI and OPUS booking details",
-                type: "ROUTING INQUIRY/DISCREPANCY",
-                answerType: "CHOICE ANSWER",
-                field: "other",
-                choices: [],
-                addOther: "",
-                files: []
-            }]};
+            return { ...state, fields: action.state };
         }
-        case Actions.EDIT_QUESTION:
+        case Actions.SAVE_METADATA:
         {
-            return {...state, questionSaved: action.state};
+            return { ...state, metadata: action.state };
+        }
+        case Actions.DISPLAY_SUCCESS:
+        {
+            return { ...state, success: action.state };
+        }
+        case Actions.DISPLAY_FAIL:
+        {
+            return { ...state, fail: {openDialog : action.state, error: action.message} };
         }
         default:
-        {
-            return state;
-        }
+            {
+                return state;
+            }
     }
 };
 

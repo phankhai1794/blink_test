@@ -53,6 +53,7 @@
     "react-dropzone": "^11.5.1",
     "react-frame-component": "4.1.0",
     "react-masonry-css": "1.0.12",
+    "react-notifications-component": "^3.4.1",
     "react-number-format": "4.0.8",
     "react-onclickoutside": "^6.12.1",
     "react-otp-input": "^2.4.0",
@@ -73,6 +74,7 @@
     "shallowequal": "^1.1.0",
     "styled-components": "^5.3.3",
     "typeface-muli": "0.0.71",
+    "uuid": "^8.3.2",
     "velocity-react": "1.4.3"
   },
   "resolutions": {

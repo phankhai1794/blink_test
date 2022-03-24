@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../admin/store/actions';
 
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
@@ -49,9 +49,11 @@ const DialogTitle = withStyles(styles)((props) => {
   } = props;
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
-      <Typography style={{width: '600px'}} variant="h6">{children}</Typography>
-      <>
-        <div className={classes.dialogToolTips}>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ width: "70%" }}>
+          <Typography variant="h6">{children}</Typography>
+        </div>
+        <div style={{ width: "20%" }}>
           <IconButton
             aria-label="close"
             onClick={handleOpenSnackBar}
@@ -80,7 +82,7 @@ const DialogTitle = withStyles(styles)((props) => {
             <CloseIcon />
           </IconButton>
         </div>
-      </>
+      </div>
     </MuiDialogTitle>
   );
 });
@@ -102,8 +104,14 @@ const DialogActions = withStyles((theme) => ({
   }
 }))(MuiDialogActions);
 
+const useStyles = makeStyles(() => ({
+  dialogPaper: {
+    width: '838px'
+  }
+}))
 export default function Form(props) {
   const dispatch = useDispatch()
+  const classes = useStyles()
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs } = props;
   const [index, openAllInquiry] = useSelector((state) => [state.workspace.openEdit, state.workspace.openAllInquiry])
   const [openFab, setOpenFab] = useState(false);
@@ -156,6 +164,7 @@ export default function Form(props) {
         aria-labelledby="customized-dialog-title"
         open={open}
         maxWidth="md"
+        classes={{ paperScrollPaper: isFullScreen ? null : classes.dialogPaper }}
       >
         <DialogTitle
           id="customized-dialog-title"
@@ -165,22 +174,22 @@ export default function Form(props) {
           isFullScreen={isFullScreen}
           handleClose={handleClose}
         >
-          {title && title !== "open Inquiries" ? title : "open Inquiries" }
+          {title && title !== "open Inquiries" ? title : "open Inquiries"}
         </DialogTitle>
         {
-          tabs&&  <Box style={{ }} sx={{}}>
-          <Tabs
-            indicatorColor="secondary"
-            style={{ margin: 0, backgroundColor:'#102536' }}
-            value={value}
-            onChange={handleChange}>
-            <Tab style={{color: 'white'}} label="Customer" />
-            <Tab style={{color: 'white'}} label="Onshore" />
-          </Tabs>
-        </Box>
+          tabs && <Box style={{}} sx={{}}>
+            <Tabs
+              indicatorColor="secondary"
+              style={{ margin: 0, backgroundColor: '#102536' }}
+              value={value}
+              onChange={handleChange}>
+              <Tab style={{ color: 'white' }} label="Customer" />
+              <Tab style={{ color: 'white' }} label="Onshore" />
+            </Tabs>
+          </Box>
         }
         <DialogContent>{children}</DialogContent>
-        {customActions==null &&(<DialogActions style={{ display: 'none !important' }}>
+        {customActions == null && (<DialogActions style={{ display: 'none !important' }}>
           <div style={{ position: 'relative' }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
               <Fab
@@ -194,14 +203,14 @@ export default function Form(props) {
             )}
             <div style={{ marginTop: '2rem', marginLeft: '2rem' }}>
               <Divider />
-              {!openAllInquiry && <PopoverFooter forCustomer={false} title={field} /> }
+              {!openAllInquiry && <PopoverFooter forCustomer={false} title={field} />}
             </div>
           </div>
         </DialogActions>
-         ) }
-         {
-           customActions
-         }
+        )}
+        {
+          customActions
+        }
       </Dialog>
     </div>
   );

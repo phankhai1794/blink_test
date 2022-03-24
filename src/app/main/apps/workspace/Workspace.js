@@ -3,7 +3,6 @@ import { Button, Grid, Divider, Drawer } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import PopoverTextField from './components/PopoverTextField';
 import { useState } from 'react';
-import WorkSpaceData from './WorkSpaceData';
 import QuestionBoxViewOnly from './components/QuestionBoxViewOnly';
 import TemporaryDrawer from './components/TemporaryDrawer';
 import Link from '@material-ui/core/Link';
@@ -61,7 +60,6 @@ const data = [
 */
 const Workspace = (props) => {
   const classes = useStyles(props);
-  const [data, setData] = useState(WorkSpaceData);
   const [defaultTitle, setDefaultTitle] = useState('');
   const [openDrawer, setOpenDrawer] = useState('');
   const onSave = (savedQuestion, title) => {

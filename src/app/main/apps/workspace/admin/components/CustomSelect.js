@@ -51,8 +51,8 @@ const CustomSelect = ({ options, iconProps, ...rootProps }) => {
                 { options.map(({ title, icon, value }) => (
                     <MenuItem key={title} value={value}>
                         <div className="flex items-center">
-                            {!!icon && <Icon {...iconProps}>{icon}</Icon> }
-                            <p className={!!icon && 'pl-12'}>{ title || value }</p>                                        
+                            {icon && <Icon {...iconProps}>{icon}</Icon> }
+                            <p className={icon && 'pl-12'}>{ title || value }</p>                                        
                         </div>
                     </MenuItem>
                 ))}

@@ -8,7 +8,6 @@ import { Grid, Divider } from '@material-ui/core';
 import InquiryCreated from '../shared-components/InquiryCreated';
 import Form from '../shared-components/Form';
 import BLField from './components/BLField';
-import WorkSpaceData from '../WorkSpaceData';
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -25,7 +24,6 @@ const useStyles = makeStyles((theme) => ({
 const GuestWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const data = WorkSpaceData;
   const [openInquiry, currentField] = useSelector((state) => [
     state.guestspace.openInquiry,
     state.guestspace.currentField
@@ -43,7 +41,7 @@ const GuestWorkspace = (props) => {
         hasAddButton={false}
         FabTitle="Inquiry"
         field={currentField ? currentField : ''}
-        title={currentField ? data[currentField].title : ''}>
+        title={''}>
         <InquiryCreated user="guestspace" />
       </Form>
 
