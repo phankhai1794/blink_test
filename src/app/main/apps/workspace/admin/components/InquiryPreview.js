@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../store/actions';
 import {
@@ -14,7 +14,6 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
-import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked';
 import CloseIcon from '@material-ui/icons/Close';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
@@ -61,9 +60,9 @@ const useStyles = makeStyles((theme) => ({
     left: '215px',
     top: '-5px',
     height: '25px',
-    width:'25px',
+    width: '25px',
     backgroundColor: 'silver'
-}
+  }
 }));
 const typeToNameDict = {
   'ROUTING INQUIRY/DISCREPANCY':
@@ -102,7 +101,7 @@ const Choice = (props) => {
             style={{ marginLeft: '1rem' }}
             autoFocus={true}
             onFocus={(e) => e.target.select()}
-            onChange={(e) => handleChangeChoice(e,index)}
+            onChange={(e) => handleChangeChoice(e, index)}
             onnFocus={handleFocus}
             InputProps={{
               classes
@@ -120,7 +119,7 @@ const Choice = (props) => {
 };
 const ChoiceAnswer = (props) => {
   const dispatch = useDispatch()
-  const {questions, question, index, saveQuestion} = props
+  const { questions, question, index, saveQuestion } = props
   const classes_disabled = inputStyleDisabled();
   const classes = inputStyle();
 
@@ -146,16 +145,16 @@ const ChoiceAnswer = (props) => {
   } = props;
   return (
     <div style={{ paddingTop: '2rem' }}>
-      { question.choices.map((value, k) => {
-          return (
-            <Choice
-              value={value}
-              index={k}
-              handleChangeChoice={handleChangeChoice}
-              handleRemoveChoice={handleRemoveChoice}
-            />
-          );
-        })
+      {question.choices.map((value, k) => {
+        return (
+          <Choice
+            value={value}
+            index={k}
+            handleChangeChoice={handleChangeChoice}
+            handleRemoveChoice={handleRemoveChoice}
+          />
+        );
+      })
       }
       <div className="flex items-center">
         <div style={{ paddingTop: '6px', marginRight: '1rem' }}>
@@ -201,13 +200,7 @@ const InquiryPreview = (props) => {
   const dispatch = useDispatch()
   const classes = useStyles();
   const { defaultContent, index, question, questions, saveQuestion } = props;
-  const title = useSelector((state) => state.workspace.currentField)
-
-  useEffect(() => {
-    var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].field = title
-    saveQuestion(optionsOfQuestion)
-  },[])
+  const metadata = useSelector((state) => state.workspace.metadata)
 
   const removeQuestion = () => {
     var optionsOfQuestion = [...questions];
@@ -225,8 +218,8 @@ const InquiryPreview = (props) => {
 
   const handleTypeChange = (e) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].type = e.target.value
-    optionsOfQuestion[index].name = typeToNameDict[e.target.value]
+    optionsOfQuestion[index].inqType = e.target.value
+    optionsOfQuestion[index].content = typeToNameDict[e.target.value]
     saveQuestion(optionsOfQuestion)
   };
 
@@ -238,20 +231,20 @@ const InquiryPreview = (props) => {
 
   const handleNameChange = (e) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].name = e.target.value
+    optionsOfQuestion[index].content = e.target.value
     saveQuestion(optionsOfQuestion)
   };
 
   const handleAnswerTypeChange = (e) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerType = e.target.value
+    optionsOfQuestion[index].ansType = e.target.value
     saveQuestion(optionsOfQuestion)
   };
 
   const handleUploadImageAttach = (src) => {
     var optionsOfQuestion = [...questions];
     var list = optionsOfQuestion[index].files
-    optionsOfQuestion[index].files = [...list, {src: URL.createObjectURL(src), type: src.type, name: src.name }]
+    optionsOfQuestion[index].files = [...list, { src: URL.createObjectURL(src), type: src.type, name: src.name }]
     saveQuestion(optionsOfQuestion)
   };
   const handleRemoveImageAttach = (i) => {
@@ -259,10 +252,10 @@ const InquiryPreview = (props) => {
     optionsOfQuestion[index].files.splice(i, 1)
     saveQuestion(optionsOfQuestion)
   };
- 
+
   return (
-    <div style={{display: "flex"}}>
-      <div style={{width: "6px", backgroundColor: "#4285f4", borderTopLeftRadius: "8px", borderBottomLeftRadius: "8px"}}/>
+    <div style={{ display: "flex" }}>
+      <div style={{ width: "6px", backgroundColor: "#4285f4", borderTopLeftRadius: "8px", borderBottomLeftRadius: "8px" }} />
       <Card style={{ padding: '1rem' }}>
         <div className="flex justify-end" style={{ marginRight: '-1rem' }}>
           <RadioGroup defaultValue="onshore" aria-label="target-inquiry" name="target-inquiry" row>
@@ -275,133 +268,91 @@ const InquiryPreview = (props) => {
           </RadioGroup>
         </div>
         <Grid container style={{ width: '750px' }} spacing={1}>
-			<Grid item xs={12} className="flex justify-between">
-				<CustomSelect 
-					value={question.type}
-					name="Question type"
-					onChange={handleTypeChange}
-					options={[
-						{
-							title: "Routing Inquiry/Discripancy",
-							value: 'ROUTING INQUIRY/DISCREPANCY',
-						},
-						{
-							title: "BL Type",
-							value: 'MISSING DESTINATION REQUIREMENT',
-						},
-						{
-							title: 'Broken Route Error',
-							value: 'BROKEN ROUTE ERROR',
-						}
-					]}
-				/>
-				<CustomSelect 
-					value={question.answerType}
-					name="Question answer type"
-					onChange={handleAnswerTypeChange}
-					options={[
-						{
-							title: 'Choice Answer',
-							value: 'CHOICE ANSWER',
-							icon: 'radio_button_checked'
-						},
-						{
-							title: 'Paragraph Answer',
-							value: 'PARAGRAPH ANSWER',
-							icon: 'subject'
-						},
-						{
-							title: 'Attachment Answer',
-							value: 'ATTACHMENT ANSWER',
-							icon: 'attachment'
-						}
-					]}
-				/>
-				<CustomSelect 
-					value={question.field}
-					name="Question title"
-					onChange={handleFieldChange}
-					options={[
-						{
-							value: 'other',
-							title: 'Other Field',
-						},
-						{
-							title: "Shipper/Exporter",
-							value: 'shipper',
-						},
-						{
-							title: "Consignee",
-							value: 'consignee',
-						},
-						{
-							title: "Port of Loading",
-							value: 'port_of_loading',
-						},
-						{
-							title: "Place of Receipt",
-							value: 'place_of_receipt',
-						},
-						{
-							title: "Place of Delivery",
-							value: 'place_of_delivery',
-						},
-						{
-							title: "Port of Discharge",
-							value: 'port_of_discharge',
-						},
-					]}
-				/>
-			</Grid>
+          <Grid item xs={12} className="flex justify-between">
+            <CustomSelect
+              value={question.inqType}
+              name="Question type"
+              onChange={handleTypeChange}
+              options={metadata.inq_type_options}
+            />
+            <CustomSelect
+              value={question.ansType}
+              name="Question answer type"
+              onChange={handleAnswerTypeChange}
+              options={[
+                {
+                  title: 'Choice Answer',
+                  value: metadata.ans_type.choice,
+                  icon: 'radio_button_checked'
+                },
+                {
+                  title: 'Paragraph Answer',
+                  value: metadata.ans_type.paragraph,
+                  icon: 'subject'
+                },
+                {
+                  title: 'Attachment Answer',
+                  value: metadata.ans_type.attachment,
+                  icon: 'attachment'
+                }
+              ]}
+            />
+            <CustomSelect
+              value={question.field}
+              name="Question title"
+              onChange={handleFieldChange}
+              options={metadata.field_options}
+            />
+          </Grid>
         </Grid>
         <div className="mt-32 mx-8">
           <TextField
-            value={question.name}
+            value={question.content}
             multiline
             onFocus={(e) => e.target.select()}
             onChange={handleNameChange}
             style={{ width: '100%', resize: 'none' }}
           />
         </div>
-        {question.answerType === 'CHOICE ANSWER' && (
-			<div className="mt-16">	
-				<ChoiceAnswer
-					questions={questions}
-					question={question}
-					index={index}
-          saveQuestion={saveQuestion}
-				/>
-			</div>
+        {question.ansType === metadata.ans_type.choice && (
+          <div className="mt-16">
+            <ChoiceAnswer
+              questions={questions}
+              question={question}
+              index={index}
+              saveQuestion={saveQuestion}
+            />
+          </div>
         )}
-        {question.answerType === 'PARAGRAPH ANSWER' && (
+        {question.ansType === metadata.ans_type.paragraph && (
           <div className="mt-40">
             <ParagraphAnswer />
           </div>
         )}
-        {question.answerType === 'ATTACHMENT ANSWER' && (
+        {question.ansType === metadata.ans_type.attachment && (
           <AttachmentAnswer style={{ marginTop: '1rem' }} />
         )}
-		<Divider className='mt-12'/>
+        <Divider className='mt-12' />
         <div className="flex justify-end items-center mr-2 ">
           <AttachFile uploadImageAttach={handleUploadImageAttach} />
           <IconButton className='p-8' onClick={copyQuestion}><FileCopyIcon /></IconButton>
           <IconButton disabled={questions.length === 1} className='p-8' onClick={removeQuestion}><DeleteIcon /></IconButton>
         </div>
-        {question.files &&  (
+        {question.files && (
           question.files.map((file, index) => (
-            file.type.includes("image")  ?
-            <div style={{ position: 'relative' }}>
-              <Fab
-                classes={{
-                  root: classes.root
-                }}
-                size="small"
-                onClick={() => handleRemoveImageAttach(index)}
-              >
-                <CloseIcon style={{ fontSize: 20 }} />
-              </Fab>
-              <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-            </div> :
+            file.type.includes("image") ?
+              <div style={{ position: 'relative' }}>
+                <Fab
+                  classes={{
+                    root: classes.root
+                  }}
+                  size="small"
+                  onClick={() => handleRemoveImageAttach(index)}
+                >
+                  <CloseIcon style={{ fontSize: 20 }} />
+                </Fab>
+                <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+              </div> :
               <FileAttach file={file} />
           ))
         )}

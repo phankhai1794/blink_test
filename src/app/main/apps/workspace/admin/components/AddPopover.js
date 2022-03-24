@@ -5,7 +5,6 @@ import * as Actions from '../store/actions';
 import AddCommentIcon from '@material-ui/icons/AddComment';
 import { Popover, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import _ from '@lodash';
 import { green } from '@material-ui/core/colors';
 const useStyles = makeStyles((theme) => ({
   popover: {

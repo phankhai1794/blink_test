@@ -45,12 +45,10 @@ const BLField = (props) => {
     multiline,
     rows,
     selectedChoice,
-    fileName,
     id
   } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true)
-  const [anchorEl, questionSaved] = useSelector((state) => [state.workspace.anchorEl, state.workspace.questionSaved])
-
+  const [anchorEl, inquiries, metadata] = useSelector((state) => [state.workspace.anchorEl, state.workspace.inquiries, state.workspace.metadata])
   const openAddPopover = (e) => {
     if (questionIsEmpty) {
       dispatch(Actions.setAnchor(e.currentTarget))
@@ -59,11 +57,11 @@ const BLField = (props) => {
   };
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty())
-  },[questionSaved])
+  }, [inquiries, metadata])
 
-  const  checkQuestionIsEmpty = () => {
-    if (questionSaved.length > 0){
-      const check = questionSaved.filter(q => q.field === id)
+  const checkQuestionIsEmpty = () => {
+    if (inquiries.length > 0) {
+      const check = inquiries.filter(q => q.field === id)
       return check.length > 0 ? false : true
     }
     return true
@@ -86,11 +84,11 @@ const BLField = (props) => {
       }
     }
   };
-   const onClick = () => {
-     if (!questionIsEmpty) {
+  const onClick = () => {
+    if (!questionIsEmpty) {
       dispatch(Actions.toggleInquiry(true))
-     }
-   }
+    }
+  }
   return (
     <div
       id={id}
@@ -124,11 +122,10 @@ const BLField = (props) => {
             </InputAdornment>
           ),
           classes: {
-            notchedOutline: `${
-              questionIsEmpty
+            notchedOutline: `${questionIsEmpty
                 ? ""
                 : classes.notchedOutlineNotChecked
-            }`
+              }`
           }
         }}
       />

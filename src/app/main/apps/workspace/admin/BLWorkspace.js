@@ -1,18 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
 import * as HeaderActions from 'app/store/actions/header';
-import WorkSpaceData from '../WorkSpaceData';
+import { loadInquiry, loadMetadata } from '../api/inquiry';
 
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import InquiryCreated from '../shared-components/InquiryCreated';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
+import {getKeyByValue} from '../shared-functions';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
+import 'react-notifications-component/dist/theme.css'
+import { ReactNotifications, Store } from 'react-notifications-component'
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -29,20 +32,98 @@ const useStyles = makeStyles((theme) => ({
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const data = WorkSpaceData;
-
-  const [openInquiry, openAllInquiry, currentField] = useSelector((state) => [
+  const [openInquiry, openAllInquiry, currentField, reload, success, fail, metadata] = useSelector((state) => [
     state.workspace.openInquiry,
     state.workspace.openAllInquiry,
-    state.workspace.currentField
+    state.workspace.currentField,
+    state.workspace.reload,
+    state.workspace.success,
+    state.workspace.fail,
+    state.workspace.metadata,
   ]);
+  const filterData = (data) => {
+    let result = data
+    for(let i in result) {
+      let list = []
+      for(let k in result[i].TB_INQ_ANs) {
+        list.push(result[i].TB_INQ_ANs[k].answer_TB_ANSWER.content)
+      }
+      result[i]["choices"] = list
+    }
+    return result
+  }
+  const filterMetadata = (data) => {
+    const dict = {field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: []}
+    for(let i in data["field"]) {
+      dict["field"][data["field"][i].name] = data["field"][i].id
+      dict["field_options"].push( {title: data["field"][i].name, value: data["field"][i].id })
+    }
+    for(let i in data["inq_type"]) {
+      dict["inq_type"][data["inq_type"][i].name] = data["inq_type"][i].id
+      dict["inq_type_options"].push( {title: data["inq_type"][i].name, value: data["inq_type"][i].id })
+    }
+    for(let i in data["ans_type"]) {
+      dict["ans_type"][data["ans_type"][i].name] = data["ans_type"][i].id
+    }
+    return dict
+  }
+  const getList = (data) => {
+    var list = []
+    data.forEach(e => list.push(e.field))
+    return list
+}
+  useEffect(() => {
+    if (success) {
+      dispatch(Actions.displaySuccess(false))
+      Store.addNotification({
+        title: "Success",
+        message: "Save Inquiry Successful",
+        type: "success",
+        insert: "top",
+        container: "bottom-right",
+        animationIn: ["animate__animated", "animate__fadeIn"],
+        animationOut: ["animate__animated", "animate__fadeOut"],
+        dismiss: {
+          duration: 5000,
+          onScreen: true
+        }
+      });
+    }
+    if (fail.open) {
+      dispatch(Actions.displayFail(false, ""))
+      Store.addNotification({
+        title: "Error",
+        message: fail.message,
+        type: "danger",
+        insert: "top",
+        container: "bottom-right",
+        animationIn: ["animate__animated", "animate__fadeIn"],
+        animationOut: ["animate__animated", "animate__fadeOut"],
+        dismiss: {
+          duration: 5000,
+          onScreen: true
+        }
+      });
+    }
+    loadInquiry("24c0e17a-a6c5-11ec-b909-0242ac120002").then(res => {
+      const data = filterData(res)
+      const field_list = getList(res)
+      dispatch(Actions.saveField(field_list))
+      dispatch(Actions.editInquiry(data))
+    }).catch(error => console.log(error))
+  }, [reload]);
 
   useEffect(() => {
+    loadMetadata().then((res) => {
+      const data = filterMetadata(res)
+      dispatch(Actions.saveMetadata(data))
+    })
     dispatch(HeaderActions.displayBtn());
   }, []);
 
   return (
     <div className="px-52">
+      <ReactNotifications />
       <InquiryForm FabTitle="Inquiry Form" />
 
       <Form
@@ -51,7 +132,7 @@ const BLWorkspace = (props) => {
         hasAddButton={openAllInquiry}
         FabTitle="Inquiry"
         field={currentField ? currentField : ''}
-        title={openAllInquiry ? 'All Inquiries' : currentField ? data[currentField].title : ''}>
+        title={openAllInquiry ? 'All Inquiries' : currentField ? getKeyByValue(metadata["field"], currentField) : ''}>
         {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}
       </Form>
 
@@ -60,13 +141,13 @@ const BLWorkspace = (props) => {
         <Grid item xs={6}>
           <Grid item>
             <h3>Shipper/Exporter</h3>
-            <BLField id="shipper" multiline={true} rows={5}>
+            <BLField id={metadata.field ? metadata.field["Shipper"] : ""} multiline={true} rows={5}>
               {`DSV AIR & SEA CO. LTD.\nAS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO\nBLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN`}
             </BLField>
           </Grid>
           <Grid item>
             <h3>Consignee</h3>
-            <BLField id="consignee" multiline={true} rows={5}>
+            <BLField id={metadata.field ? metadata.field["Consignee"] : ""} multiline={true} rows={5}>
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
@@ -86,7 +167,7 @@ const BLWorkspace = (props) => {
             </Grid>
             <Grid item xs={6} className={classes.pbGridItem}>
               <h3>PLACE OF RECEIPT</h3>
-              <BLField id="place_of_receipt">SINGAPORE</BLField>
+              <BLField id={metadata.field ? metadata.field["Place of Receipt"] : ""}>SINGAPORE</BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
@@ -94,15 +175,15 @@ const BLWorkspace = (props) => {
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF LOADING</h3>
-              <BLField id="port_of_loading">TOKYO,JAPAN</BLField>
+              <BLField id={metadata.field ? metadata.field["PORT OF LOADING"] : ""}>TOKYO,JAPAN</BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF DISCHARGE</h3>
-              <BLField id="port_of_discharge">BUSAN, KOREA</BLField>
+              <BLField id={metadata.field ? metadata.field["Port of Discharge"] : ""}>BUSAN, KOREA</BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PLACE OF DELIVERY</h3>
-              <BLField id="place_of_delivery" selectedChoice="MANILA, MALAYSIA">
+              <BLField id={metadata.field ? metadata.field["Place of Delivery"] : ""} selectedChoice="MANILA, MALAYSIA">
                 BUSAN
               </BLField>
             </Grid>

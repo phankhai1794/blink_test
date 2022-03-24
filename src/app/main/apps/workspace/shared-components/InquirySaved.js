@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../admin/store/actions';
 import ChoiceAnswer from './ChoiceAnswer';
@@ -26,7 +26,7 @@ const Comment = (props) => {
     width: "97%"
   };
   const dispatch = useDispatch()
-  const {q, questionSaved, indexes} = props
+  const { q, inquiries, indexes } = props
   const [value, setValue] = useState("")
   const [key, setKey] = useState()
   const [anchorEl, setAnchorEl] = useState(null);
@@ -39,18 +39,18 @@ const Comment = (props) => {
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
- 
+
   const changeValue = (e) => {
     setValue(e.target.value)
   }
   const changeValue1 = (e, id) => {
-    var optionsOfQuestion = [...questionSaved];
+    var optionsOfQuestion = [...inquiries];
     optionsOfQuestion[indexes].reply[id] = e.target.value
-    dispatch((Actions.editQuestion(optionsOfQuestion)))
+    dispatch((Actions.editInquiry(optionsOfQuestion)))
   }
   const addComment = (e) => {
-    if(e.key === "Enter"){
-      var optionsOfQuestion = [...questionSaved];
+    if (e.key === "Enter") {
+      var optionsOfQuestion = [...inquiries];
       var list = []
       if ('reply' in optionsOfQuestion[indexes]) {
         list = optionsOfQuestion[indexes].reply
@@ -59,83 +59,83 @@ const Comment = (props) => {
         list.push(e.target.value)
       }
       optionsOfQuestion[indexes].reply = list
-      dispatch((Actions.editQuestion(optionsOfQuestion)))
+      dispatch((Actions.editInquiry(optionsOfQuestion)))
       setValue("")
-   }
+    }
   }
-  
+
   const editComment = (e, id) => {
-    if(e.key === "Enter"){
-      var optionsOfQuestion = [...questionSaved];
+    if (e.key === "Enter") {
+      var optionsOfQuestion = [...inquiries];
       optionsOfQuestion[indexes].reply[id] = e.target.value
-      dispatch((Actions.editQuestion(optionsOfQuestion)))
+      dispatch((Actions.editInquiry(optionsOfQuestion)))
       setEdit("")
-   }
+    }
   }
   const onDelete = (id) => {
-    var optionsOfQuestion = [...questionSaved];
+    var optionsOfQuestion = [...inquiries];
     optionsOfQuestion[indexes].reply.splice(id, 1)
-    dispatch((Actions.editQuestion(optionsOfQuestion)))
+    dispatch((Actions.editInquiry(optionsOfQuestion)))
     setAnchorEl(null);
   }
   const onEdit = (id) => {
-    setEdit(id) 
+    setEdit(id)
     setAnchorEl(null)
   }
   return (
     <>
-      {q.reply !== undefined && q.reply.map((k,id) => (
-        <div style={{marginBottom: "20px"}}>
-        {edit === id ?
-          <input 
-            placeholder="Comment here"
-            style={inputStyle} 
-            onKeyPress={(e) => editComment(e,id)} 
-            value={k} 
-            onChange={(e) => changeValue1(e, id)} />
+      {q.reply !== undefined && q.reply.map((k, id) => (
+        <div style={{ marginBottom: "20px" }}>
+          {edit === id ?
+            <input
+              placeholder="Comment here"
+              style={inputStyle}
+              onKeyPress={(e) => editComment(e, id)}
+              value={k}
+              onChange={(e) => changeValue1(e, id)} />
             :
-         <>
-          <div className="flex justify-between" onMouseEnter={() => setKey(id)} onMouseLeave={() => setKey("")}>
-            <UserInfo name="Carl" date="Today" time="10:48PM" />
-            {key === id &&
-                <>
+            <>
+              <div className="flex justify-between" onMouseEnter={() => setKey(id)} onMouseLeave={() => setKey("")}>
+                <UserInfo name="Carl" date="Today" time="10:48PM" />
+                {key === id &&
+                  <>
                     <IconButton onClick={handleClick}>
                       <MoreVertIcon />
                     </IconButton>
                     <Menu
-                        id="customized-menu"
-                        anchorEl={anchorEl}
-                        open={open}
-                        onClose={handleClose}
-                        keepMounted
+                      id="customized-menu"
+                      anchorEl={anchorEl}
+                      open={open}
+                      onClose={handleClose}
+                      keepMounted
                     >
-                    <MenuItem onClick={() => onEdit(id)}>
+                      <MenuItem onClick={() => onEdit(id)}>
                         <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-                        <EditIcon fontSize="small" />
+                          <EditIcon fontSize="small" />
                         </ListItemIcon>
                         <ListItemText primary="Edit" />
-                    </MenuItem>
-                    <MenuItem onClick={() => onDelete(key)}>
+                      </MenuItem>
+                      <MenuItem onClick={() => onDelete(key)}>
                         <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-                        <DeleteIcon fontSize="small" />
+                          <DeleteIcon fontSize="small" />
                         </ListItemIcon>
                         <ListItemText primary="Delete" />
-                    </MenuItem>
-                  </Menu>
-                </>
-            }
-          </div>
-          <Typography variant="h5">{k}</Typography> </> 
-        }
+                      </MenuItem>
+                    </Menu>
+                  </>
+                }
+              </div>
+              <Typography variant="h5">{k}</Typography> </>
+          }
         </div>
       ))}
-      {reply &&  
-        <input 
+      {reply &&
+        <input
           placeholder="Comment here"
-          style={inputStyle} 
-          onKeyPress={addComment} 
-          value={value} 
-          onChange={changeValue}   />
+          style={inputStyle}
+          onKeyPress={addComment}
+          value={value}
+          onChange={changeValue} />
       }
     </>
   )
@@ -143,29 +143,28 @@ const Comment = (props) => {
 
 const InquirySaved = (props) => {
   const dispatch = useDispatch()
-  const {user} = props
-  const state = useSelector((state) =>  state[user])
-  const [questionSaved, currentField] = useSelector((state) =>  [state[user].questionSaved, state[user].currentField]) 
-  const question = questionSaved
+  const { user } = props
+  const state = useSelector((state) => state[user])
+  const [inquiries, currentField] = useSelector((state) => [state[user].inquiries, state[user].currentField])
+  const question = inquiries
   const [edit, setEdit] = useState("")
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  
+
   return (
     <>
       {question.map((q, index) => {
-        const type = q.answerType
+        const type = q.ansType
        return (
         <>
            <AllInquiry
               index={1} 
-              questions={questionSaved} 
+              questions={inquiries} 
               question={q} 
-              saveQuestion={(q) => dispatch((Actions.editQuestion(q)))} 
+              saveQuestion={(q) => dispatch((Actions.editInquiry(q)))} 
             /> 
         </>)})
         }
-    
     </>
   );
 };

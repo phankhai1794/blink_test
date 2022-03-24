@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Button, IconButton } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import { useState } from 'react';
-import UserInfo from './UserInfo';
 import SaveIcon from '@material-ui/icons/Save';
 // style
 const baseStyle = {

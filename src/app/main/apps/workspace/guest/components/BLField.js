@@ -49,26 +49,26 @@ const BLField = (props) => {
     id
   } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true)
-  const questionSaved = useSelector((state) => state.guestspace.questionSaved)
+  const inquiries = useSelector((state) => state.guestspace.inquiries)
 
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty())
-  },[questionSaved])
+  }, [inquiries])
 
-  const  checkQuestionIsEmpty = () => {
-    if (questionSaved.length > 0){
-      const check = questionSaved.filter(q => q.field === id)
+  const checkQuestionIsEmpty = () => {
+    if (inquiries.length > 0) {
+      const check = inquiries.filter(q => q.field === id)
       return check.length > 0 ? false : true
     }
     return true
   }
- 
-   const onClick = (e) => {
-     if (!questionIsEmpty) {
+
+  const onClick = (e) => {
+    if (!questionIsEmpty) {
       dispatch(Actions.setField(e.currentTarget.id))
       dispatch(Actions.toggleInquiry(true))
-     }
-   }
+    }
+  }
   return (
     <div
       id={id}
@@ -100,11 +100,10 @@ const BLField = (props) => {
             </InputAdornment>
           ),
           classes: {
-            notchedOutline: `${
-              questionIsEmpty
+            notchedOutline: `${questionIsEmpty
                 ? ""
                 : classes.notchedOutlineNotChecked
-            }`
+              }`
           }
         }}
       />

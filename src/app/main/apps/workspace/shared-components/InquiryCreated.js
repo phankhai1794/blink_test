@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from '../admin/store/actions';
 import ChoiceAnswer from './ChoiceAnswer';
@@ -24,7 +24,7 @@ const Comment = (props) => {
     width: "97%"
   };
   const dispatch = useDispatch()
-  const {q, questionSaved, indexes} = props
+  const { q, inquiries, indexes } = props
   const [value, setValue] = useState("")
   const [key, setKey] = useState()
   const [anchorEl, setAnchorEl] = useState(null);
@@ -37,18 +37,18 @@ const Comment = (props) => {
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
- 
+
   const changeValue = (e) => {
     setValue(e.target.value)
   }
   const changeValue1 = (e, id) => {
-    var optionsOfQuestion = [...questionSaved];
+    var optionsOfQuestion = [...inquiries];
     optionsOfQuestion[indexes].reply[id] = e.target.value
-    dispatch((Actions.editQuestion(optionsOfQuestion)))
+    dispatch((Actions.editInquiry(optionsOfQuestion)))
   }
   const addComment = (e) => {
-    if(e.key === "Enter"){
-      var optionsOfQuestion = [...questionSaved];
+    if (e.key === "Enter") {
+      var optionsOfQuestion = [...inquiries];
       var list = []
       if ('reply' in optionsOfQuestion[indexes]) {
         list = optionsOfQuestion[indexes].reply
@@ -57,83 +57,83 @@ const Comment = (props) => {
         list.push(e.target.value)
       }
       optionsOfQuestion[indexes].reply = list
-      dispatch((Actions.editQuestion(optionsOfQuestion)))
+      dispatch((Actions.editInquiry(optionsOfQuestion)))
       setValue("")
-   }
+    }
   }
-  
+
   const editComment = (e, id) => {
-    if(e.key === "Enter"){
-      var optionsOfQuestion = [...questionSaved];
+    if (e.key === "Enter") {
+      var optionsOfQuestion = [...inquiries];
       optionsOfQuestion[indexes].reply[id] = e.target.value
-      dispatch((Actions.editQuestion(optionsOfQuestion)))
+      dispatch((Actions.editInquiry(optionsOfQuestion)))
       setEdit("")
-   }
+    }
   }
   const onDelete = (id) => {
-    var optionsOfQuestion = [...questionSaved];
+    var optionsOfQuestion = [...inquiries];
     optionsOfQuestion[indexes].reply.splice(id, 1)
-    dispatch((Actions.editQuestion(optionsOfQuestion)))
+    dispatch((Actions.editInquiry(optionsOfQuestion)))
     setAnchorEl(null);
   }
   const onEdit = (id) => {
-    setEdit(id) 
+    setEdit(id)
     setAnchorEl(null)
   }
   return (
     <>
-      {q.reply !== undefined && q.reply.map((k,id) => (
-        <div style={{marginBottom: "20px"}}>
-        {edit === id ?
-          <input 
-            placeholder="Comment here"
-            style={inputStyle} 
-            onKeyPress={(e) => editComment(e,id)} 
-            value={k} 
-            onChange={(e) => changeValue1(e, id)} />
+      {q.reply !== undefined && q.reply.map((k, id) => (
+        <div style={{ marginBottom: "20px" }}>
+          {edit === id ?
+            <input
+              placeholder="Comment here"
+              style={inputStyle}
+              onKeyPress={(e) => editComment(e, id)}
+              value={k}
+              onChange={(e) => changeValue1(e, id)} />
             :
-         <>
-          <div className="flex justify-between" onMouseEnter={() => setKey(id)} onMouseLeave={() => setKey("")}>
-            <UserInfo name="Carl" date="Today" time="10:48PM" />
-            {key === id &&
-                <>
+            <>
+              <div className="flex justify-between" onMouseEnter={() => setKey(id)} onMouseLeave={() => setKey("")}>
+                <UserInfo name="Carl" date="Today" time="10:48PM" />
+                {key === id &&
+                  <>
                     <IconButton onClick={handleClick}>
                       <MoreVertIcon />
                     </IconButton>
                     <Menu
-                        id="customized-menu"
-                        anchorEl={anchorEl}
-                        open={open}
-                        onClose={handleClose}
-                        keepMounted
+                      id="customized-menu"
+                      anchorEl={anchorEl}
+                      open={open}
+                      onClose={handleClose}
+                      keepMounted
                     >
-                    <MenuItem onClick={() => onEdit(id)}>
+                      <MenuItem onClick={() => onEdit(id)}>
                         <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-                        <EditIcon fontSize="small" />
+                          <EditIcon fontSize="small" />
                         </ListItemIcon>
                         <ListItemText primary="Edit" />
-                    </MenuItem>
-                    <MenuItem onClick={() => onDelete(key)}>
+                      </MenuItem>
+                      <MenuItem onClick={() => onDelete(key)}>
                         <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-                        <DeleteIcon fontSize="small" />
+                          <DeleteIcon fontSize="small" />
                         </ListItemIcon>
                         <ListItemText primary="Delete" />
-                    </MenuItem>
-                  </Menu>
-                </>
-            }
-          </div>
-          <Typography variant="h5">{k}</Typography> </> 
-        }
+                      </MenuItem>
+                    </Menu>
+                  </>
+                }
+              </div>
+              <Typography variant="h5">{k}</Typography> </>
+          }
         </div>
       ))}
-      {reply &&  
-        <input 
+      {reply &&
+        <input
           placeholder="Comment here"
-          style={inputStyle} 
-          onKeyPress={addComment} 
-          value={value} 
-          onChange={changeValue}   />
+          style={inputStyle}
+          onKeyPress={addComment}
+          value={value}
+          onChange={changeValue} />
       }
     </>
   )
@@ -141,19 +141,18 @@ const Comment = (props) => {
 
 const InquiryCreated = (props) => {
   const dispatch = useDispatch()
-  const {user} = props
-  const state = useSelector((state) =>  state[user])
-  const [questionSaved, currentField] = useSelector((state) =>  [state[user].questionSaved, state[user].currentField]) 
-  const question = questionSaved.filter((q) =>  q.field === currentField)
-  const indexes = questionSaved.findIndex((q) => q.field === currentField)
+  const { user } = props
+  const state = useSelector((state) => state[user])
+  const [inquiries, currentField, metadata] = useSelector((state) => [state[user].inquiries, state[user].currentField, state[user].metadata])
+  const question = inquiries.filter((q) => q.field === currentField)
+  const indexes = inquiries.findIndex((q) => q.field === currentField)
   const [edit, setEdit] = useState("")
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  console.log("State: ",state)
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-
+  console.log("state: ",state)
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -164,71 +163,72 @@ const InquiryCreated = (props) => {
   return (
     <>
       {question.map((q, index) => {
-        const type = q.answerType
-       return (
-        <>
-          {edit === index ? 
-            <InquiryEditor 
-              index={indexes} 
-              questions={questionSaved} 
-              question={q} 
-              saveQuestion={(q) => dispatch((Actions.editQuestion(q)))} 
-            /> :
-            <Card style={{width: '770px', padding: '1rem ', marginBottom: '24px' }}>
+        const type = q.ansType
+        return (
+          <>
+            {edit === index ?
+              <InquiryEditor
+                index={indexes}
+                questions={inquiries}
+                question={q}
+                saveQuestion={(q) => dispatch((Actions.editInquiry(q)))}
+              /> :
+              <Card style={{ width: '770px', padding: '1rem ', marginBottom: '24px' }}>
                 <div className="flex justify-between">
-                    <UserInfo name="Andrew" date="Today" time="10:45PM" />
-                    {user === 'workspace' &&
-                      <IconButton onClick={handleClick}>
-                          <MoreVertIcon />
-                      </IconButton>
-                    }
-                    <Menu
-                        id="customized-menu"
-                        anchorEl={anchorEl}
-                        open={open}
-                        onClose={handleClose}
-                        keepMounted
-                    >
-                      <MenuItem onClick={() => toggleEdit(index)}>
-                          <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-                          <EditIcon fontSize="small" />
-                          </ListItemIcon>
-                          <ListItemText primary="Edit" />
-                      </MenuItem>
-                      <MenuItem>
-                          <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-                          <NoteAddIcon fontSize="small" />
-                          </ListItemIcon>
-                          <ListItemText primary="Add Inquiry" />
-                      </MenuItem>
-                    </Menu>
+                  <UserInfo name="Andrew" date="Today" time="10:45PM" />
+                  {user === 'workspace' &&
+                    <IconButton onClick={handleClick}>
+                      <MoreVertIcon />
+                    </IconButton>
+                  }
+                  <Menu
+                    id="customized-menu"
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    keepMounted
+                  >
+                    <MenuItem onClick={() => toggleEdit(index)}>
+                      <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
+                        <EditIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Edit" />
+                    </MenuItem>
+                    <MenuItem>
+                      <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
+                        <NoteAddIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Add Inquiry" />
+                    </MenuItem>
+                  </Menu>
                 </div>
-            <Typography variant="h5">{q.name}</Typography>
-              <div style={{ display: 'block', margin: '1rem 0rem' }}>
-                {type === 'CHOICE ANSWER' && (
-                  <ChoiceAnswer question={q}  />
-                )}
-                {type === 'PARAGRAPH ANSWER' && (
-                  <ParagraphAnswer question={q}  />
-                )}
-                {type === 'ATTACHMENT ANSWER' && (
-                  <AttatchmentAnswer
-                    question={q}
+                <Typography variant="h5">{q.content}</Typography>
+                <div style={{ display: 'block', margin: '1rem 0rem' }}>
+                  {type === metadata.ans_type.choice && (
+                    <ChoiceAnswer question={q} />
+                  )}
+                  {type === metadata.ans_type.paragraph && (
+                    <ParagraphAnswer question={q} />
+                  )}
+                  {type === metadata.ans_type.attachment && (
+                    <AttatchmentAnswer
+                      question={q}
                     // disabled={true}
-                  />
+                    />
+                  )}
+                </div>
+                {q.files && (
+                  q.files.map((file, index) => (
+                    file.type.includes("image") ?
+                      <ImageAttach src={file.src} style={{ margin: '1rem' }} /> : <FileAttach file={file} />
+                  ))
                 )}
-              </div>
-              {q.files && (
-                q.files.map((file, index) => (
-                  file.type.includes("image") ? 
-                  <ImageAttach src={file.src} style={{ margin: '1rem' }} /> : <FileAttach file={file} />
-                ))
-              )}
-              <Comment q={q} questionSaved={questionSaved} indexes={indexes}/>
-          </Card> } 
-        </>)})
-        }
-    
+                <Comment q={q} inquiries={inquiries} indexes={indexes} />
+              </Card>}
+          </>)
+      })
+      }
+
     </>
   );
 };
