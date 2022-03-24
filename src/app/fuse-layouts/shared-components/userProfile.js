@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import {
   Button,
   Icon,
@@ -10,10 +11,12 @@ import {
   Avatar
 } from '@material-ui/core';
 import { Link } from 'react-router-dom';
+import * as userActions from 'app/auth/store/actions';
 
 function UserProfile(props) {
   const { user, classes, history } = props;
   const [open, setOpen] = useState(null);
+  const dispatch = useDispatch();
 
   const handleClick = (event) => {
     setOpen(event.currentTarget);
@@ -25,8 +28,12 @@ function UserProfile(props) {
 
   const handleLogOut = () => {
     localStorage.clear();
-    history.push('/login');
+    dispatch(userActions.removeUserData());
   };
+
+  useEffect(() => {
+    if (!localStorage.getItem('AUTH_TOKEN') && user.displayName == '') history.push('/login');
+  }, [user]);
 
   return (
     <React.Fragment>
