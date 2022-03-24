@@ -2,6 +2,7 @@
 # @author DangTran
 # @description: 
 #npm i
+yarn install
 npm run build
 BASEDIR=$(dirname "$0")
 echo "Build deployed to dist folder"
