@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
 import { Card, CardContent, Typography, Tabs, Tab } from '@material-ui/core';
 import { FuseAnimate } from '@fuse';
@@ -6,6 +7,7 @@ import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import JWTLoginTab from './tabs/JWTLoginTab';
 import { makeStyles } from '@material-ui/styles';
+import * as userActions from 'app/auth/store/actions';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -17,40 +19,56 @@ const useStyles = makeStyles((theme) => ({
 
 function Login(props) {
   const { history } = props;
+  const dispatch = useDispatch();
   const classes = useStyles();
+  const user = useSelector(({ auth }) => auth.user);
   const [selectedTab, setSelectedTab] = useState(0);
 
   function handleTabChange(event, value) {
     setSelectedTab(value);
   }
 
-  function handleDemoLogin(model) {
-    let data = { user_name: model.username, password: model.password };
-    axios.post('http://si-automation.cyberlogitec.com.vn:9001/auth/login', data, { 
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "country": "TH"
-      },
-    }).then((res) => {
-      if (res.status === 200) {
-        localStorage.setItem("AUTH_TOKEN", res.data.Authorization);
-        localStorage.setItem("REFRESH_TOKEN", res.data.refresh_token);
-        history.push('/');
-      }
-    });
+  function handleLogin(model) {
+    let data = { username: model.username, password: model.password };
+    axios
+      .post(`${process.env.REACT_APP_API}/authentication/login`, data, {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          const { role, userName, avatar, permissions } = res.data.user;
+          let userInfo = {
+            displayName: userName,
+            photoURL: avatar,
+            role,
+            permissions,
+          };
+          let payload = { ...user, ...userInfo };
+
+          localStorage.setItem('AUTH_TOKEN', res.data.token);
+          localStorage.setItem('USER', JSON.stringify(userInfo));
+
+          dispatch(userActions.setUserData(payload));
+          history.push('/');
+        }
+      })
+      .catch((error) => {
+        console.log('Error: ', error);
+      });
   }
 
   useEffect(() => {
-    if (localStorage.getItem("AUTH_TOKEN")) {
+    if (localStorage.getItem('AUTH_TOKEN')) {
       history.push('/');
     }
   }, []);
 
   return (
     <div
-      className={clsx(classes.root, 'flex flex-col flex-1 flex-shrink-0 p-24 md:flex-row md:p-0')}
-    >
+      className={clsx(classes.root, 'flex flex-col flex-1 flex-shrink-0 p-24 md:flex-row md:p-0')}>
       <div className="flex flex-col flex-grow-0 items-center text-white p-16 text-center md:p-128 md:items-start md:flex-shrink-0 md:flex-1 md:text-left">
         <FuseAnimate animation="transition.slideUpIn" delay={300}>
           <Typography variant="h3" color="inherit" className="font-light">
@@ -77,8 +95,7 @@ function Login(props) {
               value={selectedTab}
               onChange={handleTabChange}
               variant="fullWidth"
-              className="mb-32"
-            >
+              className="mb-32">
               <Tab
                 icon={
                   <img
@@ -91,7 +108,7 @@ function Login(props) {
               />
             </Tabs>
 
-            {selectedTab === 0 && <JWTLoginTab onLogged={handleDemoLogin} />}
+            {selectedTab === 0 && <JWTLoginTab onLogged={handleLogin} />}
 
             <div className="flex flex-col items-center justify-center pt-32">
               <span className="font-medium">Don't have an account?</span>

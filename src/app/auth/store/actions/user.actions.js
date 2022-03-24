@@ -94,7 +94,7 @@ export function setUserData(user) {
     /*
         Set User Settings
          */
-    dispatch(setDefaultSettings(user.data.settings));
+    // dispatch(setDefaultSettings(user.data.settings));
 
     /*
         Set User Data

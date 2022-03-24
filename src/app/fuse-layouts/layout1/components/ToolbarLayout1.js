@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import history from '@history';
-import axios from 'axios';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
@@ -65,29 +64,17 @@ function ToolbarLayout1(props) {
     if (!localStorage.getItem('AUTH_TOKEN')) {
       handleRedirect('/login');
     }
-    axios
-      .post(
-        'http://si-automation.cyberlogitec.com.vn:9001/auth/status',
-        {},
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('AUTH_TOKEN')}`,
-            country: 'TH'
-          }
-        }
-      )
-      .then((res) => {
-        let payload = {
-          data: {
-            ...user.data,
-            displayName: res.data.data.full_name,
-            settings: {}
-          }
-        };
-        dispatch(userActions.setUserData(payload));
-      });
+    if (localStorage.getItem('USER') && user.displayName == '') {
+      let userInfo = JSON.parse(localStorage.getItem('USER'));
+      let payload = {
+        ...user,
+        role: userInfo.role,
+        displayName: userInfo.displayName,
+        photoURL: userInfo.photoURL,
+        permissions: userInfo.permissions
+      };
+      dispatch(userActions.setUserData(payload));
+    }
   }, []);
 
   return (

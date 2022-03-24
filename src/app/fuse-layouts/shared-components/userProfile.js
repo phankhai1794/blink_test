@@ -7,7 +7,7 @@ import {
   Popover,
   MenuItem,
   Typography,
-  Avatar,
+  Avatar
 } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 
@@ -25,17 +25,17 @@ function UserProfile(props) {
 
   const handleLogOut = () => {
     localStorage.clear();
-    history.push("/login");
-  }
+    history.push('/login');
+  };
 
   return (
     <React.Fragment>
       <Button className="h-64 px-12" onClick={handleClick}>
-        <Avatar src={user.data.photoURL} className={classes.fitAvatar} alt="user photo" />
+        <Avatar src={user.photoURL} className={classes.fitAvatar} alt="user photo" />
         <Typography component="span" className="normal-case font-600 ml-8 flex">
           {window.location.pathname.includes('apps/workplace/customer')
             ? 'Customer'
-            : user.data.displayName}
+            : user.displayName}
         </Typography>
         <Icon className="text-16 ml-4 hidden sm:flex" variant="action">
           keyboard_arrow_down
