@@ -53,7 +53,7 @@ const DialogTitle = withStyles(styles)((props) => {
         <div style={{ width: "70%" }}>
           <Typography variant="h6">{children}</Typography>
         </div>
-        <div style={{ width: "20%" }}>
+        <div style={{ width: "30%", textAlign: "right" }}>
           <IconButton
             aria-label="close"
             onClick={handleOpenSnackBar}

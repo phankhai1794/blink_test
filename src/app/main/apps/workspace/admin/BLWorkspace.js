@@ -156,7 +156,7 @@ const BLWorkspace = (props) => {
               NOTIFY PARTY (It is agreed that no responsibility shall be <br></br> attached to the
               Carrier or its Agents for failure to notify)
             </h3>
-            <BLField id="notify" multiline={true} rows={5}>
+            <BLField id={metadata.field ? metadata.field["NOTIFY PARTY"] : ""} multiline={true} rows={5}>
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
