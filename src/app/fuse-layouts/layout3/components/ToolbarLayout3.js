@@ -6,7 +6,6 @@ import clsx from 'clsx';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
 import QuickPanelToggleButton from 'app/fuse-layouts/shared-components/quickPanel/QuickPanelToggleButton';
 import ChatPanelToggleButton from 'app/fuse-layouts/shared-components/chatPanel/ChatPanelToggleButton';
-import UserMenu from 'app/fuse-layouts/shared-components/UserMenu';
 import Logo from 'app/fuse-layouts/shared-components/Logo';
 import { useSelector } from 'react-redux';
 
@@ -52,8 +51,6 @@ function ToolbarLayout3(props) {
               <FuseSearch />
               <div className={classes.separator} />
             </Hidden>
-
-            <UserMenu />
 
             <Hidden lgUp>
               <div className={classes.separator} />

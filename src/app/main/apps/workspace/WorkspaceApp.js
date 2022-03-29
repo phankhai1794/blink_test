@@ -1,15 +1,17 @@
 import React, { useEffect, useRef } from 'react';
-import BLWorkspace from './admin/BLWorkspace';
-import * as Actions from 'app/store/actions';
-import { useDispatch } from 'react-redux';
 import { FusePageSimple } from '@fuse';
 import _ from '@lodash';
+import { useDispatch } from 'react-redux';
+import * as Actions from 'app/store/actions';
+import BLWorkspace from './admin/BLWorkspace';
 import OtpCheck from './guest/OTPCheck';
+import DraftBL from './draft-bl/DraftWorkspace';
 
 function RoleRedirect({ history }) {
-  if (history.location.pathname.includes('/customer')) {
-    // return <GuestWorkspace status={history.location.state} />
+  if (history.location.pathname.includes('/guest')) {
     return <OtpCheck status={history.location.state} />;
+  } else if (history.location.pathname.includes('/draft-bl')) {
+    return <DraftBL status={history.location.state} />;
   } else {
     return <BLWorkspace status={history.location.state} />;
   }

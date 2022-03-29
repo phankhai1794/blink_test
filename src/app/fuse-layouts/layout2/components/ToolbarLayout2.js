@@ -5,7 +5,6 @@ import { FuseSearch, FuseShortcuts } from '@fuse';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
 import QuickPanelToggleButton from 'app/fuse-layouts/shared-components/quickPanel/QuickPanelToggleButton';
 import ChatPanelToggleButton from 'app/fuse-layouts/shared-components/chatPanel/ChatPanelToggleButton';
-import UserMenu from 'app/fuse-layouts/shared-components/UserMenu';
 import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
@@ -40,8 +39,6 @@ function ToolbarLayout2(props) {
           </div>
 
           <div className="flex">
-            <UserMenu />
-
             <div className={classes.separator} />
 
             <FuseSearch />

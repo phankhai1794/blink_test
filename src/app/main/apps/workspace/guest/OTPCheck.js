@@ -1,8 +1,12 @@
 import React, { createRef, useMemo, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import _ from '@lodash';
+import OtpInput from 'react-otp-input';
+
+import * as AppActions from 'app/store/actions';
 import * as HeaderActions from 'app/store/actions/header';
 import GuestWorkspace from './GuestWorkspace';
-import OtpInput from 'react-otp-input';
+import { checkExistBkg } from '../shared-functions';
 
 const OtpCheck = ({ status }) => {
   const CODE = '1111';
@@ -11,8 +15,17 @@ const OtpCheck = ({ status }) => {
   const handleChange = (code) => {
     setOtpCode(code);
   };
+
+  useEffect(() => {
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
+    return () => {
+      dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
+    };
+  }, [dispatch]);
+
   useEffect(() => {
     dispatch(HeaderActions.displayBtn({ hideAll: true }));
+    checkExistBkg();
   }, []);
 
   return (

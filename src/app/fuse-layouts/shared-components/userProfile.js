@@ -40,9 +40,7 @@ function UserProfile(props) {
       <Button className="h-64 px-12" onClick={handleClick}>
         <Avatar src={user.photoURL} className={classes.fitAvatar} alt="user photo" />
         <Typography component="span" className="normal-case font-600 ml-8 flex">
-          {window.location.pathname.includes('apps/workplace/customer')
-            ? 'Customer'
-            : user.displayName}
+          {user.displayName}
         </Typography>
         <Icon className="text-16 ml-4 hidden sm:flex" variant="action">
           keyboard_arrow_down
@@ -63,7 +61,8 @@ function UserProfile(props) {
         }}
         classes={{
           paper: 'py-8'
-        }}>
+        }}
+      >
         <React.Fragment>
           <MenuItem component={Link} to="#" onClick={() => handleLogOut()}>
             <ListItemIcon className="min-w-40">
