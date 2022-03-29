@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
-import * as Actions from 'app/store/actions';
-import * as HeaderActions from 'app/store/actions/header';
 import { useDispatch } from 'react-redux';
 import _ from '@lodash';
+
+import * as Actions from 'app/store/actions';
+import * as HeaderActions from 'app/store/actions/header';
+import { checkExistBkg } from '../shared-functions';
 
 const DraftWorkspace = (props) => {
   const dispatch = useDispatch();
@@ -16,6 +18,7 @@ const DraftWorkspace = (props) => {
 
   useEffect(() => {
     dispatch(HeaderActions.displayBtn({ displayEditBtn: true }));
+    checkExistBkg();
   }, []);
 
   return (

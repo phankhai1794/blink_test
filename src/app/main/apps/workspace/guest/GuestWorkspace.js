@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
+import _ from '@lodash';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
+import * as AppActions from 'app/store/actions';
 import * as Actions from './store/actions';
 import * as HeaderActions from 'app/store/actions/header';
 import { Grid, Divider } from '@material-ui/core';
@@ -28,6 +30,13 @@ const GuestWorkspace = (props) => {
     state.guestspace.openInquiry,
     state.guestspace.currentField
   ]);
+
+  useEffect(() => {
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
+    return () => {
+      dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(HeaderActions.displayBtn({ displayDraftBLBtn: true }));

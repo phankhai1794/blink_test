@@ -40,7 +40,7 @@ function InquiringHeader(props) {
       <FuseAnimate animation="transition.slideRightIn" delay={300}>
         <Button
           component={Link}
-          to="/apps/workplace/NGOB29899900/gciUIQActrGonB3VEirVTGHe7qhY12rk"
+          to="/apps/workplace/NGOB29899900" // /gciUIQActrGonB3VEirVTGHe7qhY12rk"
           className="whitespace-no-wrap mr-52"
           variant="contained"
         >

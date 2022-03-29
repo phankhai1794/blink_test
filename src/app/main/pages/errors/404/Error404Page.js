@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Icon, Input, Paper, Typography } from '@material-ui/core';
 import { FuseAnimate } from '@fuse';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import * as HeaderActions from 'app/store/actions/header';
 
 function Error404Page() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(HeaderActions.displayBtn({ hideAll: true }));
+  }, []);
+
   return (
     <div className="flex flex-col flex-1 items-center justify-center p-16">
       <div className="max-w-512 text-center">

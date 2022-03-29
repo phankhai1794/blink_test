@@ -10,7 +10,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import History from 'app/fuse-layouts/shared-components/History';
-import UserProfile from 'app/fuse-layouts/shared-components/userProfile';
+import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import SendInquiryForm from 'app/main/apps/workspace/admin/SendInquiryForm';
 import * as userActions from 'app/auth/store/actions';
 
@@ -94,7 +94,8 @@ function ToolbarLayout1(props) {
                 paddingLeft: 50,
                 paddingRight: 15
               }}
-              className={classes.iconWrapper}>
+              className={classes.iconWrapper}
+            >
               <Avatar
                 src="assets/images/logos/one_ocean_network-logo.png"
                 className={clsx(classes.logo, classes.fitAvatar)}
@@ -124,7 +125,8 @@ function ToolbarLayout1(props) {
                 variant="text"
                 size="medium"
                 className={classes.button}
-                onClick={() => handleRedirect('/apps/workplace/draft-bl')}>
+                onClick={() => handleRedirect(`/apps/workplace/draft-bl/${window.location.search}`)}
+              >
                 <VisibilityIcon />
                 <span className="px-2">Draft BL</span>
               </Button>
@@ -137,11 +139,8 @@ function ToolbarLayout1(props) {
                 variant="text"
                 size="medium"
                 className={classes.button}
-                onClick={() =>
-                  handleRedirect(
-                    '/apps/workplace/customer/TYOBH3669500/gciUIQActrGonB3VEirVTGHe7qhY12rk'
-                  )
-                }>
+                onClick={() => handleRedirect(`/apps/workplace/guest/${window.location.search}`)}
+              >
                 <EditIcon />
                 <span className="px-2">Edit</span>
               </Button>

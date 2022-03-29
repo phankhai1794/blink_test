@@ -71,7 +71,7 @@ function CustomerConfirmedTable(props) {
 
   function handleClick(item) {
     props.history.push({
-      pathname: '/apps/workplace/' + item.id + '/gciUIQActrGonB3VEirVTGHe7qhY12rk',
+      pathname: '/apps/workplace/' + item.id, // + '/gciUIQActrGonB3VEirVTGHe7qhY12rk',
       state: 'confirm'
     });
   }
