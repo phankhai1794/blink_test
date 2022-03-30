@@ -8,9 +8,9 @@ const mockData = [
         choices: [],
         addOther: "",
         files: [],
-        reply: ["Example reply"]
     }]
 const initialState = {
+    user: {},
     success: false,
     fail: false,
     metadata: {},
@@ -22,6 +22,7 @@ const initialState = {
     anchorEl: null,
     currentField: "",
     reload: false,
+    reply: false,
     fields: [],
     inquiries: [],
     question: [{
@@ -32,7 +33,7 @@ const initialState = {
         choices: [],
         addOther: "",
         receiver: "",
-        files: []
+        files: [],
     }]
 }
 
@@ -107,7 +108,7 @@ const inquiryReducer = function (state = initialState, action) {
             {
                 return { ...state, inquiries: action.state };
             }
-        case Actions.RELOAD:
+        case Actions.SAVE_INQUIRY:
         {
             return { ...state, reload: !state.reload, openEdit: 0, openDialog: false, question: [{
                 content: "We found discrepancy in the routing information between SI and OPUS booking details",
@@ -120,6 +121,10 @@ const inquiryReducer = function (state = initialState, action) {
                 files: []
             }] };
         }
+        case Actions.RELOAD:
+        {
+            return { ...state, reload: !state.reload, openInquiry: false};
+        }
         case Actions.SAVE_FIELD:
         {
             return { ...state, fields: action.state };
@@ -127,6 +132,10 @@ const inquiryReducer = function (state = initialState, action) {
         case Actions.SAVE_METADATA:
         {
             return { ...state, metadata: action.state };
+        }
+        case Actions.SAVE_USER:
+        {
+            return { ...state, user: action.state };
         }
         case Actions.DISPLAY_SUCCESS:
         {

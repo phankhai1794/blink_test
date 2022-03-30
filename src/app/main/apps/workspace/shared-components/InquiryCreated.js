@@ -12,7 +12,10 @@ import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import EditIcon from '@material-ui/icons/Edit';
 import UserInfo from './UserInfo';
+import { saveComment, loadComment, editComment, deleteComment } from '../api/inquiry';
+import { displayTime } from '../shared-functions';
 import { Menu, MenuItem, ListItemIcon, Card, ListItemText, Typography, IconButton } from '@material-ui/core';
+import { v1 as uuidv1 } from 'uuid';
 
 const Comment = (props) => {
   const inputStyle = {
@@ -27,10 +30,16 @@ const Comment = (props) => {
   const { q, inquiries, indexes } = props
   const [value, setValue] = useState("")
   const [key, setKey] = useState()
+  const [comment, setComment] = useState([])
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState("")
-  const reply = useSelector((state) => state.workspace.reply)
+  const [reply, user] = useSelector((state) => [state.workspace.reply, state.auth.user])
   const open = Boolean(anchorEl);
+  useEffect(() => {
+    loadComment(q.id).then((res) => {
+      setComment(res)
+    }).catch(error => console.log(error))
+  }, [])
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -41,39 +50,53 @@ const Comment = (props) => {
   const changeValue = (e) => {
     setValue(e.target.value)
   }
-  const changeValue1 = (e, id) => {
-    var optionsOfQuestion = [...inquiries];
-    optionsOfQuestion[indexes].reply[id] = e.target.value
-    dispatch((Actions.editInquiry(optionsOfQuestion)))
+  const changeComment = (e, id) => {
+    var temp = [...comment];
+    temp[id].answer_TB_ANSWER.content = e.target.value
+    setComment(temp)
   }
   const addComment = (e) => {
     if (e.key === "Enter") {
-      var optionsOfQuestion = [...inquiries];
-      var list = []
-      if ('reply' in optionsOfQuestion[indexes]) {
-        list = optionsOfQuestion[indexes].reply
-      }
       if (e.target.value) {
-        list.push(e.target.value)
+        const ans_id = uuidv1()
+        const inqAns = {
+          inquiry: q.id,
+          answer: ans_id,
+          confirm: false,
+          type: 'REP',
+        }
+        const answer = {
+          id: ans_id,
+          content: e.target.value,
+          type: q.ansType,
+        }
+        saveComment({ inqAns, answer })
+        setComment([...comment, {
+          answer: ans_id,
+          createdAt: new Date(),
+          answer_TB_ANSWER: {
+            content: e.target.value
+          },
+          createdBy_TB_ACCOUNT: {
+            userName: user.displayName
+          }
+        }])
       }
-      optionsOfQuestion[indexes].reply = list
-      dispatch((Actions.editInquiry(optionsOfQuestion)))
       setValue("")
     }
   }
 
-  const editComment = (e, id) => {
+  const onEnterComment = (e, id) => {
     if (e.key === "Enter") {
-      var optionsOfQuestion = [...inquiries];
-      optionsOfQuestion[indexes].reply[id] = e.target.value
-      dispatch((Actions.editInquiry(optionsOfQuestion)))
+      editComment(comment[id].answer, e.target.value)
       setEdit("")
     }
   }
   const onDelete = (id) => {
-    var optionsOfQuestion = [...inquiries];
-    optionsOfQuestion[indexes].reply.splice(id, 1)
-    dispatch((Actions.editInquiry(optionsOfQuestion)))
+    deleteComment(comment[id].answer)
+    var temp = [...comment];
+    temp.splice(id, 1)
+    setComment(temp)
     setAnchorEl(null);
   }
   const onEdit = (id) => {
@@ -82,51 +105,56 @@ const Comment = (props) => {
   }
   return (
     <>
-      {q.reply !== undefined && q.reply.map((k, id) => (
-        <div style={{ marginBottom: "20px" }}>
-          {edit === id ?
-            <input
-              placeholder="Comment here"
-              style={inputStyle}
-              onKeyPress={(e) => editComment(e, id)}
-              value={k}
-              onChange={(e) => changeValue1(e, id)} />
-            :
-            <>
-              <div className="flex justify-between" onMouseEnter={() => setKey(id)} onMouseLeave={() => setKey("")}>
-                <UserInfo name="Carl" date="Today" time="10:48PM" />
-                {key === id &&
-                  <>
-                    <IconButton onClick={handleClick}>
-                      <MoreVertIcon />
-                    </IconButton>
-                    <Menu
-                      id="customized-menu"
-                      anchorEl={anchorEl}
-                      open={open}
-                      onClose={handleClose}
-                      keepMounted
-                    >
-                      <MenuItem onClick={() => onEdit(id)}>
-                        <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-                          <EditIcon fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText primary="Edit" />
-                      </MenuItem>
-                      <MenuItem onClick={() => onDelete(key)}>
-                        <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-                          <DeleteIcon fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText primary="Delete" />
-                      </MenuItem>
-                    </Menu>
-                  </>
-                }
-              </div>
-              <Typography variant="h5">{k}</Typography> </>
-          }
-        </div>
-      ))}
+      {comment.map((k, id) => {
+        const content = k.answer_TB_ANSWER.content
+        const username = k.createdBy_TB_ACCOUNT.userName
+        const time = k.createdAt
+        return (
+          <div style={{ marginBottom: "20px" }}>
+            {edit === id ?
+              <input
+                placeholder="Comment here"
+                style={inputStyle}
+                onKeyPress={(e) => onEnterComment(e, id)}
+                value={content}
+                onChange={(e) => changeComment(e, id)} />
+              :
+              <>
+                <div className="flex justify-between" onMouseEnter={() => setKey(id)} onMouseLeave={() => setKey("")}>
+                  <UserInfo name={username} time={displayTime(time)} />
+                  {user.username === username && key === id &&
+                    <>
+                      <IconButton onClick={handleClick}>
+                        <MoreVertIcon />
+                      </IconButton>
+                      <Menu
+                        id="customized-menu"
+                        anchorEl={anchorEl}
+                        open={open}
+                        onClose={handleClose}
+                        keepMounted
+                      >
+                        <MenuItem onClick={() => onEdit(id)}>
+                          <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
+                            <EditIcon fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText primary="Edit" />
+                        </MenuItem>
+                        <MenuItem onClick={() => onDelete(key)}>
+                          <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
+                            <DeleteIcon fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText primary="Delete" />
+                        </MenuItem>
+                      </Menu>
+                    </>
+                  }
+                </div>
+                <Typography variant="h5">{content}</Typography> </>
+            }
+          </div>
+        )
+      })}
       {reply &&
         <input
           placeholder="Comment here"
@@ -142,8 +170,11 @@ const Comment = (props) => {
 const InquiryCreated = (props) => {
   const dispatch = useDispatch()
   const { user } = props
-  const state = useSelector((state) => state[user])
-  const [inquiries, currentField, metadata] = useSelector((state) => [state[user].inquiries, state[user].currentField, state[user].metadata])
+  const [inquiries, currentField, metadata] = useSelector((state) => [
+    state[user].inquiries,
+    state[user].currentField,
+    state[user].metadata
+  ])
   const question = inquiries.filter((q) => q.field === currentField)
   const indexes = inquiries.findIndex((q) => q.field === currentField)
   const [edit, setEdit] = useState("")
@@ -152,7 +183,6 @@ const InquiryCreated = (props) => {
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  console.log("state: ",state)
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -164,6 +194,7 @@ const InquiryCreated = (props) => {
     <>
       {question.map((q, index) => {
         const type = q.ansType
+        const username = q.createdBy_TB_ACCOUNT.userName
         return (
           <>
             {edit === index ?
@@ -175,7 +206,7 @@ const InquiryCreated = (props) => {
               /> :
               <Card style={{ width: '770px', padding: '1rem ', marginBottom: '24px' }}>
                 <div className="flex justify-between">
-                  <UserInfo name="Andrew" date="Today" time="10:45PM" />
+                  <UserInfo name={username} time={displayTime(q.createdAt)} />
                   {user === 'workspace' &&
                     <IconButton onClick={handleClick}>
                       <MoreVertIcon />

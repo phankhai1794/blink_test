@@ -12,9 +12,12 @@ export const ADD_QUESTION1 = 'ADD_QUESTION1';
 export const EDIT_INQUIRY = 'EDIT_INQUIRY';
 export const SAVE_FIELD = 'SAVE_FIELD'
 export const RELOAD = 'RELOAD'
+export const SAVE_INQUIRY = 'SAVE_INQUIRY'
 export const DISPLAY_SUCCESS = 'DISPLAY_SUCCESS'
 export const DISPLAY_FAIL = 'DISPLAY_FAIL'
 export const SAVE_METADATA = 'SAVE_METADATA'
+export const SAVE_USER = 'SAVE_USER'
+
 
 export function toggleCreateInquiry(state) {
     return {
@@ -76,6 +79,12 @@ export function editInquiry(question) {
     }
 }
 
+export function saveInquiry() {
+    return {
+        type: SAVE_INQUIRY,
+    }
+}
+
 export function setEdit(state) {
     return {
         type: SET_EDIT,
@@ -127,6 +136,13 @@ export function displayFail(state, message) {
 export function saveMetadata(state) {
     return {
         type: SAVE_METADATA,
+        state: state,
+    }
+}
+
+export function saveUser(state) {
+    return {
+        type: SAVE_USER,
         state: state,
     }
 }

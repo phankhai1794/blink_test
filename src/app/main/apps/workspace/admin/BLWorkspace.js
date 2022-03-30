@@ -17,8 +17,8 @@ import { getKeyByValue } from '../shared-functions';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
-import 'react-notifications-component/dist/theme.css';
-import { ReactNotifications, Store } from 'react-notifications-component';
+import 'react-notifications-component/dist/theme.css'
+import { ReactNotifications, Store } from 'react-notifications-component'
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -35,24 +35,22 @@ const useStyles = makeStyles((theme) => ({
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [openInquiry, openAllInquiry, currentField, reload, success, fail, metadata] = useSelector(
-    (state) => [
-      state.workspace.openInquiry,
-      state.workspace.openAllInquiry,
-      state.workspace.currentField,
-      state.workspace.reload,
-      state.workspace.success,
-      state.workspace.fail,
-      state.workspace.metadata
-    ]
-  );
-
+  const [openInquiry, openAllInquiry, currentField, reload, success, fail, metadata, user] = useSelector((state) => [
+    state.workspace.openInquiry,
+    state.workspace.openAllInquiry,
+    state.workspace.currentField,
+    state.workspace.reload,
+    state.workspace.success,
+    state.workspace.fail,
+    state.workspace.metadata,
+    state.auth.user
+  ]);
   const filterData = (data) => {
-    let result = data;
+    let result = data
     for (let i in result) {
-      let list = [];
+      let list = []
       for (let k in result[i].TB_INQ_ANs) {
-        list.push(result[i].TB_INQ_ANs[k].answer_TB_ANSWER.content);
+        list.push(result[i].TB_INQ_ANs[k].answer_TB_ANSWER.content)
       }
       result[i]['choices'] = list;
     }
@@ -60,30 +58,26 @@ const BLWorkspace = (props) => {
   };
 
   const filterMetadata = (data) => {
-    const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [] };
-    for (let i in data['field']) {
-      dict['field'][data['field'][i].name] = data['field'][i].id;
-      dict['field_options'].push({ title: data['field'][i].name, value: data['field'][i].id });
+    const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [] }
+    for (let i in data["field"]) {
+      dict["field"][data["field"][i].name] = data["field"][i].id
+      dict["field_options"].push({ title: data["field"][i].name, value: data["field"][i].id })
     }
-    for (let i in data['inq_type']) {
-      dict['inq_type'][data['inq_type'][i].name] = data['inq_type'][i].id;
-      dict['inq_type_options'].push({
-        title: data['inq_type'][i].name,
-        value: data['inq_type'][i].id
-      });
+    for (let i in data["inqType"]) {
+      dict["inq_type"][data["inqType"][i].name] = data["inqType"][i].id
+      dict["inq_type_options"].push({ title: data["inqType"][i].name, value: data["inqType"][i].id })
     }
-    for (let i in data['ans_type']) {
-      dict['ans_type'][data['ans_type'][i].name] = data['ans_type'][i].id;
+    for (let i in data["ansType"]) {
+      dict["ans_type"][data["ansType"][i].name] = data["ansType"][i].id
     }
     return dict;
   };
 
   const getList = (data) => {
-    var list = [];
-    data.forEach((e) => list.push(e.field));
-    return list;
-  };
-
+    var list = []
+    data.forEach(e => list.push(e.field))
+    return list
+  }
   useEffect(() => {
     if (success) {
       dispatch(Actions.displaySuccess(false));
@@ -149,11 +143,11 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     loadMetadata().then((res) => {
-      const data = filterMetadata(res);
-      dispatch(Actions.saveMetadata(data));
-    });
-
+      const data = filterMetadata(res)
+      dispatch(Actions.saveMetadata(data))
+    })
     dispatch(HeaderActions.displayBtn());
+    dispatch(Actions.saveUser(user))
   }, []);
 
   return (
