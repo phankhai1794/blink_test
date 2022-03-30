@@ -9,7 +9,7 @@ import ReplyIcon from '@material-ui/icons/Reply';
 import CheckIcon from '@material-ui/icons/Check';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
-import { saveInquiry } from '../api/inquiry';
+import { saveInquiry, changeStatus } from '../api/inquiry';
 import { v1 as uuidv1 } from 'uuid';
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -22,56 +22,57 @@ const PopoverFooter = ({
 }) => {
   const classes = useStyles();
   const dispatch = useDispatch()
-  const [question, fields] = useSelector((state) => [state.workspace.question, state.workspace.fields])
+  const [currentField, question, fields, user] = useSelector((state) => [
+    state.workspace.currentField, state.workspace.question, state.workspace.fields, state.workspace.user])
   const onSave = () => {
-    let list = [], list1 = [], list2 = []
+    let inquiry = [], answer = [], inqAns = []
     for (let i in question) {
-      const ing_id = uuidv1()
+      const inq_id = uuidv1()
       const inq = {
-        id: ing_id,
+        id: inq_id,
         content: question[i].content,
         field: question[i].field,
         inqType: question[i].inqType,
         ansType: question[i].ansType,
         receiver: question[i].receiver,
-        createdBy: "84336880-a6c5-11ec-b909-0242ac120002",
-        updatedBy: "84336880-a6c5-11ec-b909-0242ac120002",
+        createdBy: user.userId,
+        updatedBy: user.userId,
         mybl: "24c0e17a-a6c5-11ec-b909-0242ac120002"
       }
       for (let k in question[i].choices) {
         const ans_id = uuidv1()
         const inq_ans = {
-          inquiry: ing_id,
+          inquiry: inq_id,
           answer: ans_id,
           confirm: false,
-          createdBy: "84336880-a6c5-11ec-b909-0242ac120002",
-          updatedBy: "84336880-a6c5-11ec-b909-0242ac120002",
+          createdBy: user.userId,
+          updatedBy: user.userId,
         }
         const ans = {
           id: ans_id,
           content: question[i].choices[k],
           type: question[i].ansType,
-          createdBy: "84336880-a6c5-11ec-b909-0242ac120002",
-          updatedBy: "84336880-a6c5-11ec-b909-0242ac120002",
+          createdBy: user.userId,
+          updatedBy: user.userId,
         }
-        list1.push(ans)
-        list2.push(inq_ans)
+        answer.push(ans)
+        inqAns.push(inq_ans)
       }
-      list.push(inq)
+      inquiry.push(inq)
     }
-    const data = {
-      inquiry: list,
-      ing_ans: list2,
-      answer: list1
-    }
-    saveInquiry(data).then(() => {
+    saveInquiry({ inquiry, inqAns, answer }).then(() => {
       dispatch(Actions.displaySuccess(true))
-      dispatch(Actions.toggleReload())
+      dispatch(Actions.saveInquiry())
     }).catch(error => dispatch(Actions.displayFail(true, error)))
 
   }
   const toggleInquiriresDialog = () => {
     dispatch(Actions.toggleAllInquiry())
+  }
+  const onResolve = () => {
+    changeStatus(currentField, "COMPL").then(() => {
+      dispatch(Actions.toggleReload())
+    }).catch(error => dispatch(Actions.displayFail(true, error)))
   }
   const onReply = () => {
     dispatch(Actions.setReply(true))
@@ -129,7 +130,7 @@ const PopoverFooter = ({
       <Grid item xs={4} className="flex justify-end">
         {fields.includes(title) ?
           <>
-            <Button variant="contained" className={classes.button} color="primary" onClick={onSave}>
+            <Button variant="contained" className={classes.button} color="primary" onClick={onResolve}>
               <CheckIcon />
               Resolve
             </Button>
