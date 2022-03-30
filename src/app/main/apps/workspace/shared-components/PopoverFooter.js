@@ -22,8 +22,8 @@ const PopoverFooter = ({
 }) => {
   const classes = useStyles();
   const dispatch = useDispatch()
-  const [currentField, question, fields, user] = useSelector((state) => [
-    state.workspace.currentField, state.workspace.question, state.workspace.fields, state.workspace.user])
+  const [currentField, question, fields] = useSelector((state) => [
+    state.workspace.currentField, state.workspace.question, state.workspace.fields])
   const onSave = () => {
     let inquiry = [], answer = [], inqAns = []
     for (let i in question) {
@@ -35,8 +35,6 @@ const PopoverFooter = ({
         inqType: question[i].inqType,
         ansType: question[i].ansType,
         receiver: question[i].receiver,
-        createdBy: user.userId,
-        updatedBy: user.userId,
         mybl: "24c0e17a-a6c5-11ec-b909-0242ac120002"
       }
       for (let k in question[i].choices) {
@@ -45,15 +43,11 @@ const PopoverFooter = ({
           inquiry: inq_id,
           answer: ans_id,
           confirm: false,
-          createdBy: user.userId,
-          updatedBy: user.userId,
         }
         const ans = {
           id: ans_id,
           content: question[i].choices[k],
           type: question[i].ansType,
-          createdBy: user.userId,
-          updatedBy: user.userId,
         }
         answer.push(ans)
         inqAns.push(inq_ans)
