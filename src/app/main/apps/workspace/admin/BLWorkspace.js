@@ -65,7 +65,7 @@ const BLWorkspace = (props) => {
     }
     for (let i in data["inqType"]) {
       dict["inq_type"][data["inqType"][i].name] = data["inqType"][i].id
-      dict["inq_type_options"].push({ title: data["inqType"][i].name, value: data["inqType"][i].id })
+      dict["inq_type_options"].push({ label: data["inqType"][i].name, value: data["inqType"][i].id })
     }
     for (let i in data["ansType"]) {
       dict["ans_type"][data["ansType"][i].name] = data["ansType"][i].id
@@ -165,8 +165,8 @@ const BLWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-            ? getKeyByValue(metadata['field'], currentField)
-            : ''
+              ? getKeyByValue(metadata['field'], currentField)
+              : ''
         }>
         {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}
       </Form>
