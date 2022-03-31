@@ -25,7 +25,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AttachFile from './AttachFile';
 import CustomSelect from './CustomSelect';
-
+import Select from 'react-select'
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
 });
@@ -200,8 +200,9 @@ const InquiryEditor = (props) => {
   const dispatch = useDispatch()
   const classes = useStyles();
   const { defaultContent, index, question, questions, saveQuestion } = props;
-  const metadata = useSelector((state) => state.workspace.metadata)
-
+  const [metadata, removeOptions] = useSelector((state) => [state.workspace.metadata, state.workspace.removeOptions])
+  const [valueType, setValueType] = useState(metadata.inq_type_options.filter(v => question.inqType === v.value))
+  const [fieldType, setFieldType] = useState(metadata.field_options)
   const removeQuestion = () => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion.splice(index, 1)
@@ -211,6 +212,12 @@ const InquiryEditor = (props) => {
     saveQuestion(optionsOfQuestion)
   }
 
+  useEffect(() => {
+    let list = [...removeOptions]
+    list[index] = ""
+    setFieldType(metadata.field_options.filter(v => !list.includes(v.value)))
+  }, [])
+
   const copyQuestion = () => {
     const temp = JSON.parse(JSON.stringify(question));
     saveQuestion([...questions, temp])
@@ -218,14 +225,17 @@ const InquiryEditor = (props) => {
 
   const handleTypeChange = (e) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].inqType = e.target.value
-    optionsOfQuestion[index].name = typeToNameDict[e.target.value]
+    optionsOfQuestion[index].inqType = e.value
+    setValueType(e)
     saveQuestion(optionsOfQuestion)
   };
 
   const handleFieldChange = (e) => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion[index].field = e.target.value
+    var options = [...removeOptions]
+    options[index] = e.target.value
+    dispatch(Actions.removeSelectedOption(options));
     saveQuestion(optionsOfQuestion)
   };
 
@@ -237,7 +247,13 @@ const InquiryEditor = (props) => {
 
   const handleReceiverChange = (e) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].receiver = e.target.value
+    if (e.target.checked) {
+      optionsOfQuestion[index].receiver.push(e.target.value)
+    }
+    else {
+      const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
+      optionsOfQuestion[index].receiver.splice(i, 1)
+    }
     saveQuestion(optionsOfQuestion)
   };
 
@@ -265,21 +281,29 @@ const InquiryEditor = (props) => {
       <Card style={{ padding: '1rem' }}>
         <div className="flex justify-end" style={{ marginRight: '-1rem' }}>
           <FormGroup row>
-            <FormControlLabel value="onshore" control={<Checkbox checked={question.receiver === "onshore"} onChange={handleReceiverChange} color="primary" />} label="Onshore" />
+            <FormControlLabel
+              value="onshore"
+              control={<Checkbox
+                checked={question.receiver.includes("onshore")}
+                onChange={handleReceiverChange}
+                color="primary" />}
+              label="Onshore" />
             <FormControlLabel
               value="customer"
-              control={<Checkbox checked={question.receiver === "customer"} onChange={handleReceiverChange} color="primary" />}
+              control={<Checkbox
+                checked={question.receiver.includes("customer")}
+                onChange={handleReceiverChange}
+                color="primary" />}
               label="Customer"
             />
           </FormGroup>
         </div>
         <Grid container style={{ width: '750px' }} spacing={1}>
           <Grid item xs={12} className="flex justify-between">
-            <CustomSelect
-              value={question.inqType}
-              name="Question type"
-              onChange={handleTypeChange}
+            <Select
+              value={valueType}
               options={metadata.inq_type_options}
+              onChange={handleTypeChange}
             />
             <CustomSelect
               value={question.ansType}
@@ -307,7 +331,7 @@ const InquiryEditor = (props) => {
               value={question.field}
               name="Question title"
               onChange={handleFieldChange}
-              options={metadata.field_options}
+              options={fieldType}
             />
           </Grid>
         </Grid>

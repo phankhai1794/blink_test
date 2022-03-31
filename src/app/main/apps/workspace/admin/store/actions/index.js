@@ -17,6 +17,7 @@ export const DISPLAY_SUCCESS = 'DISPLAY_SUCCESS'
 export const DISPLAY_FAIL = 'DISPLAY_FAIL'
 export const SAVE_METADATA = 'SAVE_METADATA'
 export const SAVE_USER = 'SAVE_USER'
+export const REMOVE_SELECTED_OPTION = 'REMOVE_SELECTED_OPTION'
 
 
 export function toggleCreateInquiry(state) {
@@ -143,6 +144,13 @@ export function saveMetadata(state) {
 export function saveUser(state) {
     return {
         type: SAVE_USER,
+        state: state,
+    }
+}
+
+export function removeSelectedOption(state) {
+    return {
+        type: REMOVE_SELECTED_OPTION,
         state: state,
     }
 }

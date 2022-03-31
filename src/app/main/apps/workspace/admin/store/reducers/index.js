@@ -24,6 +24,7 @@ const initialState = {
     reload: false,
     reply: false,
     fields: [],
+    removeOptions: [],
     inquiries: [],
     question: [{
         content: "We found discrepancy in the routing information between SI and OPUS booking details",
@@ -32,7 +33,7 @@ const initialState = {
         field: "other",
         choices: [],
         addOther: "",
-        receiver: "",
+        receiver: [],
         files: [],
     }]
 }
@@ -85,7 +86,7 @@ const inquiryReducer = function (state = initialState, action) {
                         field: "other",
                         choices: [],
                         addOther: "",
-                        receiver: "",
+                        receiver: [],
                         files: []
                     }]
                 };
@@ -109,42 +110,48 @@ const inquiryReducer = function (state = initialState, action) {
                 return { ...state, inquiries: action.state };
             }
         case Actions.SAVE_INQUIRY:
-        {
-            return { ...state, reload: !state.reload, openEdit: 0, openDialog: false, question: [{
-                content: "We found discrepancy in the routing information between SI and OPUS booking details",
-                inqType: "12cb6526-a6b1-11ec-b909-0242ac120002",
-                ansType: "97883952-a6b0-11ec-b909-0242ac120002",
-                field: "other",
-                choices: [],
-                addOther: "",
-                receiver: "",
-                files: []
-            }] };
-        }
+            {
+                return {
+                    ...state, reload: !state.reload, openEdit: 0, openDialog: false, question: [{
+                        content: "We found discrepancy in the routing information between SI and OPUS booking details",
+                        inqType: "12cb6526-a6b1-11ec-b909-0242ac120002",
+                        ansType: "97883952-a6b0-11ec-b909-0242ac120002",
+                        field: "other",
+                        choices: [],
+                        addOther: "",
+                        receiver: [],
+                        files: []
+                    }]
+                };
+            }
         case Actions.RELOAD:
-        {
-            return { ...state, reload: !state.reload, openInquiry: false};
-        }
+            {
+                return { ...state, reload: !state.reload, openInquiry: false };
+            }
         case Actions.SAVE_FIELD:
-        {
-            return { ...state, fields: action.state };
-        }
+            {
+                return { ...state, fields: action.state };
+            }
         case Actions.SAVE_METADATA:
-        {
-            return { ...state, metadata: action.state };
-        }
+            {
+                return { ...state, metadata: action.state };
+            }
         case Actions.SAVE_USER:
-        {
-            return { ...state, user: action.state };
-        }
+            {
+                return { ...state, user: action.state };
+            }
         case Actions.DISPLAY_SUCCESS:
-        {
-            return { ...state, success: action.state };
-        }
+            {
+                return { ...state, success: action.state };
+            }
         case Actions.DISPLAY_FAIL:
-        {
-            return { ...state, fail: {openDialog : action.state, error: action.message} };
-        }
+            {
+                return { ...state, fail: { openDialog: action.state, error: action.message } };
+            }
+        case Actions.REMOVE_SELECTED_OPTION:
+            {
+                return { ...state, removeOptions: action.state };
+            }
         default:
             {
                 return state;
