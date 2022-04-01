@@ -25,7 +25,8 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import AttachFile from './AttachFile';
 import CustomSelect from './CustomSelect';
-import Select from 'react-select'
+import { FuseChipSelect } from '@fuse';
+
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
 });
@@ -300,10 +301,16 @@ const InquiryEditor = (props) => {
         </div>
         <Grid container style={{ width: '750px' }} spacing={1}>
           <Grid item xs={12} className="flex justify-between">
-            <Select
+            <FuseChipSelect
+              className="m-auto"
               value={valueType}
-              options={metadata.inq_type_options}
               onChange={handleTypeChange}
+              placeholder="Select Inquiry Type"
+              textFieldProps={{
+                
+                variant: 'outlined'
+              }}
+              options={metadata.inq_type_options}
             />
             <CustomSelect
               value={question.ansType}

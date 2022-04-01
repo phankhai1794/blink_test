@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
 import * as HeaderActions from 'app/store/actions/header';
 import { loadInquiry, loadMetadata } from '../api/inquiry';
-import { createBL, loadBL } from '../api/mybl';
+import { createBL } from '../api/mybl';
 
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -17,8 +17,8 @@ import { getKeyByValue } from '../shared-functions';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
-import 'react-notifications-component/dist/theme.css'
-import { ReactNotifications, Store } from 'react-notifications-component'
+import { ReactNotifications, Store } from 'react-notifications-component';
+import 'react-notifications-component/dist/theme.css';
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -35,22 +35,24 @@ const useStyles = makeStyles((theme) => ({
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [openInquiry, openAllInquiry, currentField, reload, success, fail, metadata, user] = useSelector((state) => [
-    state.workspace.openInquiry,
-    state.workspace.openAllInquiry,
-    state.workspace.currentField,
-    state.workspace.reload,
-    state.workspace.success,
-    state.workspace.fail,
-    state.workspace.metadata,
-    state.auth.user
-  ]);
+  const [openInquiry, openAllInquiry, currentField, reload, success, fail, metadata, user, myBL] =
+    useSelector((state) => [
+      state.workspace.openInquiry,
+      state.workspace.openAllInquiry,
+      state.workspace.currentField,
+      state.workspace.reload,
+      state.workspace.success,
+      state.workspace.fail,
+      state.workspace.metadata,
+      state.auth.user,
+      state.workspace.myBL,
+    ]);
   const filterData = (data) => {
-    let result = data
+    let result = data;
     for (let i in result) {
-      let list = []
+      let list = [];
       for (let k in result[i].TB_INQ_ANs) {
-        list.push(result[i].TB_INQ_ANs[k].answer_TB_ANSWER.content)
+        list.push(result[i].TB_INQ_ANs[k].answer_TB_ANSWER.content);
       }
       result[i]['choices'] = list;
     }
@@ -58,26 +60,29 @@ const BLWorkspace = (props) => {
   };
 
   const filterMetadata = (data) => {
-    const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [] }
-    for (let i in data["field"]) {
-      dict["field"][data["field"][i].name] = data["field"][i].id
-      dict["field_options"].push({ title: data["field"][i].name, value: data["field"][i].id })
+    const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [] };
+    for (let i in data['field']) {
+      dict['field'][data['field'][i].name] = data['field'][i].id;
+      dict['field_options'].push({ title: data['field'][i].name, value: data['field'][i].id });
     }
-    for (let i in data["inqType"]) {
-      dict["inq_type"][data["inqType"][i].name] = data["inqType"][i].id
-      dict["inq_type_options"].push({ label: data["inqType"][i].name, value: data["inqType"][i].id })
+    for (let i in data['inqType']) {
+      dict['inq_type'][data['inqType'][i].name] = data['inqType'][i].id;
+      dict['inq_type_options'].push({
+        label: data['inqType'][i].name,
+        value: data['inqType'][i].id
+      });
     }
-    for (let i in data["ansType"]) {
-      dict["ans_type"][data["ansType"][i].name] = data["ansType"][i].id
+    for (let i in data['ansType']) {
+      dict['ans_type'][data['ansType'][i].name] = data['ansType'][i].id;
     }
     return dict;
   };
 
   const getList = (data) => {
-    var list = []
-    data.forEach(e => list.push(e.field))
-    return list
-  }
+    var list = [];
+    data.forEach((e) => list.push(e.field));
+    return list;
+  };
   useEffect(() => {
     if (success) {
       dispatch(Actions.displaySuccess(false));
@@ -111,43 +116,41 @@ const BLWorkspace = (props) => {
         }
       });
     }
-    loadInquiry('24c0e17a-a6c5-11ec-b909-0242ac120002')
-      .then((res) => {
-        const data = filterData(res);
-        const field_list = getList(res);
-        dispatch(Actions.saveField(field_list));
-        dispatch(Actions.editInquiry(data));
-      })
-      .catch((error) => console.log(error));
-  }, [reload]);
+    if (myBL.id) {
+      loadInquiry(myBL.id)
+        .then((res) => {
+          const data = filterData(res);
+          const field_list = getList(res);
+          dispatch(Actions.saveField(field_list));
+          dispatch(Actions.editInquiry(data));
+        })
+        .catch((error) => console.log(error));
+    }
+  }, [reload, myBL]);
 
   useEffect(() => {
-    const id = window.location.pathname.split('/')[3];
+    const bkgNo = window.location.pathname.split('/')[3];
 
-    createBL(id)
+    createBL(bkgNo)
       .then((res) => {
-        if (res.status === 200) {
-          history.push(`/apps/workplace/${id}`);
+        if (res) {
+          dispatch(Actions.setMyBL(res.myBL));
+          history.push(`/apps/workplace/${bkgNo}`);
         }
       })
       .catch((error) => {
-        if (error.response.status === 403) {
-          loadBL(id).catch((error) => {
-            if (error.response.status === 404) {
-              history.push(`/pages/errors/error-404`);
-            }
-          });
-        }
+        console.log(error);
+        history.push(`/pages/errors/error-404`);
       });
   }, []);
 
   useEffect(() => {
     loadMetadata().then((res) => {
-      const data = filterMetadata(res)
-      dispatch(Actions.saveMetadata(data))
-    })
+      const data = filterMetadata(res);
+      dispatch(Actions.saveMetadata(data));
+    });
     dispatch(HeaderActions.displayBtn());
-    dispatch(Actions.saveUser(user))
+    dispatch(Actions.saveUser(user));
   }, []);
 
   return (
@@ -167,7 +170,8 @@ const BLWorkspace = (props) => {
             : currentField
               ? getKeyByValue(metadata['field'], currentField)
               : ''
-        }>
+        }
+      >
         {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}
       </Form>
 
@@ -185,7 +189,8 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['Consignee'] : ''}
               multiline={true}
-              rows={5}>
+              rows={5}
+            >
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
@@ -197,7 +202,8 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['NOTIFY PARTY'] : ''}
               multiline={true}
-              rows={5}>
+              rows={5}
+            >
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
@@ -232,7 +238,8 @@ const BLWorkspace = (props) => {
               <h3>PLACE OF DELIVERY</h3>
               <BLField
                 id={metadata.field ? metadata.field['Place of Delivery'] : ''}
-                selectedChoice="MANILA, MALAYSIA">
+                selectedChoice="MANILA, MALAYSIA"
+              >
                 BUSAN
               </BLField>
             </Grid>

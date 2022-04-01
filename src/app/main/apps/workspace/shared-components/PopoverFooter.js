@@ -10,7 +10,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import { saveInquiry, changeStatus } from '../api/inquiry';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(1),
@@ -22,12 +22,12 @@ const PopoverFooter = ({
 }) => {
   const classes = useStyles();
   const dispatch = useDispatch()
-  const [currentField, question, fields] = useSelector((state) => [
-    state.workspace.currentField, state.workspace.question, state.workspace.fields])
+  const [currentField, question, fields, myBL] = useSelector((state) => [
+    state.workspace.currentField, state.workspace.question, state.workspace.fields, state.workspace.myBL])
   const onSave = () => {
     let inquiry = [], answer = [], inqAns = []
     for (let i in question) {
-      const inq_id = uuidv1()
+      const inq_id = uuidv4()
       const inq = {
         id: inq_id,
         content: question[i].content,
@@ -35,10 +35,10 @@ const PopoverFooter = ({
         inqType: question[i].inqType,
         ansType: question[i].ansType,
         receiver: question[i].receiver,
-        mybl: "24c0e17a-a6c5-11ec-b909-0242ac120002"
+        mybl: myBL.id
       }
       for (let k in question[i].choices) {
-        const ans_id = uuidv1()
+        const ans_id = uuidv4()
         const inq_ans = {
           inquiry: inq_id,
           answer: ans_id,

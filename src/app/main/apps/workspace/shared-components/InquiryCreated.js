@@ -15,7 +15,7 @@ import UserInfo from './UserInfo';
 import { saveComment, loadComment, editComment, deleteComment } from '../api/inquiry';
 import { displayTime } from '../shared-functions';
 import { Menu, MenuItem, ListItemIcon, Card, ListItemText, Typography, IconButton } from '@material-ui/core';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 const Comment = (props) => {
   const inputStyle = {
@@ -58,7 +58,7 @@ const Comment = (props) => {
   const addComment = (e) => {
     if (e.key === "Enter") {
       if (e.target.value) {
-        const ans_id = uuidv1()
+        const ans_id = uuidv4()
         const inqAns = {
           inquiry: q.id,
           answer: ans_id,
