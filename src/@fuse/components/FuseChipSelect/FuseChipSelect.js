@@ -35,23 +35,22 @@ const useStyles = makeStyles((theme) => ({
       },
       '& $valueContainer': {
         paddingLeft: 12,
-        paddingTop: 12
+        paddingTop: 4
       }
     }
   },
   input: {
     display: 'flex',
     padding: 0,
-    height: 'auto'
+    height: 'auto',
   },
   valueContainer: {
     display: 'flex',
-    flexWrap: 'wrap',
+    // flexWrap: 'wrap',
     flex: 1,
     alignItems: 'center',
-    paddingBottom: 4,
-    paddingTop: 12,
-    minHeight: 40
+    paddingTop: 4,
+    minHeight: 45
   },
   chip: {
     margin: '4px 4px 4px 0'
@@ -66,7 +65,11 @@ const useStyles = makeStyles((theme) => ({
     padding: `${theme.spacing()}px ${theme.spacing(2)}px`
   },
   singleValue: {
-    fontSize: 16
+    fontSize: 16,
+    whiteSpace: "nowrap",
+    width:"220px",
+    textOverflow: "ellipsis",
+    overflow: "hidden"
   },
   placeholder: {
     position: 'absolute',
@@ -105,7 +108,6 @@ function Control(props) {
 
   return (
     <TextField
-      fullWidth
       className={clsx(classes.root, props.selectProps.textFieldProps.variant)}
       InputProps={{
         inputComponent,
