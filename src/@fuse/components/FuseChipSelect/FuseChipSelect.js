@@ -43,6 +43,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     padding: 0,
     height: 'auto',
+    width: "280px"
   },
   valueContainer: {
     display: 'flex',

@@ -91,7 +91,7 @@ const BLWorkspace = (props) => {
         message: 'Save Inquiry Successful',
         type: 'success',
         insert: 'top',
-        container: 'bottom-right',
+        container: 'top-right',
         animationIn: ['animate__animated', 'animate__fadeIn'],
         animationOut: ['animate__animated', 'animate__fadeOut'],
         dismiss: {
@@ -107,7 +107,7 @@ const BLWorkspace = (props) => {
         message: fail.message,
         type: 'danger',
         insert: 'top',
-        container: 'bottom-right',
+        container: 'top-right',
         animationIn: ['animate__animated', 'animate__fadeIn'],
         animationOut: ['animate__animated', 'animate__fadeOut'],
         dismiss: {
@@ -180,14 +180,14 @@ const BLWorkspace = (props) => {
         <Grid item xs={6}>
           <Grid item>
             <h3>Shipper/Exporter</h3>
-            <BLField id={metadata.field ? metadata.field['Shipper'] : ''} multiline={true} rows={5}>
+            <BLField id={metadata.field ? metadata.field['SHIPPER/EXPORTER'] : ''} multiline={true} rows={5}>
               {`DSV AIR & SEA CO. LTD.\nAS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO\nBLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN`}
             </BLField>
           </Grid>
           <Grid item>
             <h3>Consignee</h3>
             <BLField
-              id={metadata.field ? metadata.field['Consignee'] : ''}
+              id={metadata.field ? metadata.field['CONSIGNEE'] : ''}
               multiline={true}
               rows={5}
             >
@@ -210,17 +210,17 @@ const BLWorkspace = (props) => {
           <Grid container spacing={6}>
             <Grid item xs={6} className={classes.pbGridItem}>
               <h3>PRE-CARRIAGE BY</h3>
-              <BLField id="pre_carriage"></BLField>
+              <BLField id={metadata.field ? metadata.field['PRE-CARRIAGE BY'] : ''}></BLField>
             </Grid>
             <Grid item xs={6} className={classes.pbGridItem}>
               <h3>PLACE OF RECEIPT</h3>
-              <BLField id={metadata.field ? metadata.field['Place of Receipt'] : ''}>
+              <BLField id={metadata.field ? metadata.field['PLACE OF RECEIPT'] : ''}>
                 SINGAPORE
               </BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
-              <BLField id="ocean_vessel">CONFIDENCE 021W</BLField>
+              <BLField id={metadata.field ? metadata.field['OCEAN VESSEL VOYAGE NO. FLAG'] : ''}>CONFIDENCE 021W</BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF LOADING</h3>
@@ -230,14 +230,14 @@ const BLWorkspace = (props) => {
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF DISCHARGE</h3>
-              <BLField id={metadata.field ? metadata.field['Port of Discharge'] : ''}>
+              <BLField id={metadata.field ? metadata.field['PORT OF DISCHARGE'] : ''}>
                 BUSAN, KOREA
               </BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PLACE OF DELIVERY</h3>
               <BLField
-                id={metadata.field ? metadata.field['Place of Delivery'] : ''}
+                id={metadata.field ? metadata.field['PLACE OF DELIVERY'] : ''}
                 selectedChoice="MANILA, MALAYSIA"
               >
                 BUSAN
@@ -261,23 +261,23 @@ const BLWorkspace = (props) => {
               EXPORT REFERENCES (for the merchant's and/or Carrier's reference only. See back clause
               8. (4.))
             </h3>
-            <BLField multiline={true} rows={2}></BLField>
+            <BLField id={metadata.field ? metadata.field['EXPORT REFERENCES'] : ''} multiline={true} rows={2}></BLField>
           </Grid>
           <Grid item>
             <h3>FORWARDING AGENT-REFERENCES FMC NO.</h3>
-            <BLField multiline={true} rows={5}>
+            <BLField id={metadata.field ? metadata.field['FORWARDING AGENT-REFERENCES'] : ''} multiline={true} rows={5}>
               DSV AIR & SEA CO. LTD.
             </BLField>
           </Grid>
           <Grid item>
             <h3>FINAL DESTINATION(for line merchant's reference only)</h3>
-            <BLField id="final_destination">BUSAN, KOREA</BLField>
+            <BLField id={metadata.field ? metadata.field['FINAL DESTINATION'] : ''}>BUSAN, KOREA</BLField>
           </Grid>
           <Grid item>
             <h3>
               TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)
             </h3>
-            <BLField>R1CB118000</BLField>
+            <BLField id={metadata.field ? metadata.field['TYPE OF MOVEMENT'] : ''}>R1CB118000</BLField>
           </Grid>
         </Grid>
       </Grid>

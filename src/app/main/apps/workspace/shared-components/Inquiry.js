@@ -28,7 +28,7 @@ const Inquiry = (props) => {
         {openEdit === index ? <InquiryEditor index={index} questions={questions} question={question} saveQuestion={(q) => dispatch((Actions.setQuestion(q)))} /> :
           <Card style={{ padding: '1rem ' }}>
             <Typography color='primary' variant="h5">{getKeyByValue(metadata["field"], question.field)}</Typography>
-            <Typography variant="h5">{question.content}</Typography>
+            <Typography variant="h5">{question.content.replace("{{INQ_TYPE}}", "")}</Typography>
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {question.ansType === metadata.ans_type.choice && (
                 <ChoiceAnswer question={question} onSaveSelectedChoice={onSaveSelectedChoice} />

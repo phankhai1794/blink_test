@@ -1,15 +1,5 @@
 import * as Actions from '../actions';
-const mockData = [
-  {
-    content: 'We found discrepancy in the routing information between SI and OPUS booking details',
-    inqType: 'ROUTING INQUIRY/DISCREPANCY',
-    answerType: 'ATTACHMENT ANSWER',
-    field: 'consignee',
-    choices: [],
-    addOther: '',
-    files: []
-  }
-];
+
 const initialState = {
   myBL: {},
   user: {},
@@ -31,9 +21,9 @@ const initialState = {
   question: [
     {
       content:
-        'We found discrepancy in the routing information between SI and OPUS booking details',
-      inqType: '12cb6526-a6b1-11ec-b909-0242ac120002',
-      ansType: '97883952-a6b0-11ec-b909-0242ac120002',
+        'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
+      inqType: '',
+      ansType: '',
       field: 'other',
       choices: [],
       addOther: '',
@@ -82,9 +72,9 @@ const inquiryReducer = function (state = initialState, action) {
           ...state.question,
           {
             content:
-              'We found discrepancy in the routing information between SI and OPUS booking details',
-            inqType: '12cb6526-a6b1-11ec-b909-0242ac120002',
-            ansType: '97883952-a6b0-11ec-b909-0242ac120002',
+              'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
+            inqType: '',
+            ansType: '',
             field: 'other',
             choices: [],
             addOther: '',
@@ -101,9 +91,9 @@ const inquiryReducer = function (state = initialState, action) {
           ...state.inquiries,
           {
             content:
-              'We found discrepancy in the routing information between SI and OPUS booking details',
-            inqType: '12cb6526-a6b1-11ec-b909-0242ac120002',
-            ansType: '97883952-a6b0-11ec-b909-0242ac120002',
+              'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
+            inqType: '',
+            ansType: '',
             field: 'other',
             choices: [],
             addOther: '',
@@ -124,9 +114,9 @@ const inquiryReducer = function (state = initialState, action) {
         question: [
           {
             content:
-              'We found discrepancy in the routing information between SI and OPUS booking details',
-            inqType: '12cb6526-a6b1-11ec-b909-0242ac120002',
-            ansType: '97883952-a6b0-11ec-b909-0242ac120002',
+              'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
+            inqType: '',
+            ansType: '',
             field: 'other',
             choices: [],
             addOther: '',

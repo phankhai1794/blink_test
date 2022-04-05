@@ -202,7 +202,8 @@ const InquiryEditor = (props) => {
   const classes = useStyles();
   const { defaultContent, index, question, questions, saveQuestion } = props;
   const [metadata, removeOptions] = useSelector((state) => [state.workspace.metadata, state.workspace.removeOptions])
-  const [valueType, setValueType] = useState(metadata.inq_type_options.filter(v => question.inqType === v.value))
+  const [valueType, setValueType] = useState(metadata.inq_type_options.filter(v => question.inqType === v.value)[0])
+
   const [fieldType, setFieldType] = useState(metadata.field_options)
   const removeQuestion = () => {
     var optionsOfQuestion = [...questions];
@@ -217,6 +218,11 @@ const InquiryEditor = (props) => {
     let list = [...removeOptions]
     list[index] = ""
     setFieldType(metadata.field_options.filter(v => !list.includes(v.value)))
+    if (!question.ansType) {
+      let optionsOfQuestion = [...questions];
+      optionsOfQuestion[index].ansType = metadata.ans_type.choice
+      saveQuestion(optionsOfQuestion)
+    }
   }, [])
 
   const copyQuestion = () => {
@@ -227,6 +233,9 @@ const InquiryEditor = (props) => {
   const handleTypeChange = (e) => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion[index].inqType = e.value
+    const temp = valueType ? `\\b${valueType.label}\\b` : "{{INQ_TYPE}}"
+    let re = new RegExp(`${temp}`, 'g');
+    optionsOfQuestion[index].content = question.content.replace(re, e.label)
     setValueType(e)
     saveQuestion(optionsOfQuestion)
   };
@@ -301,16 +310,12 @@ const InquiryEditor = (props) => {
         </div>
         <Grid container style={{ width: '750px' }} spacing={1}>
           <Grid item xs={12} className="flex justify-between">
-            <FuseChipSelect
-              className="m-auto"
-              value={valueType}
-              onChange={handleTypeChange}
-              placeholder="Select Inquiry Type"
-              textFieldProps={{
-                
-                variant: 'outlined'
-              }}
-              options={metadata.inq_type_options}
+            <CustomSelect
+              label="Field"
+              value={question.field}
+              name="Question title"
+              onChange={handleFieldChange}
+              options={fieldType}
             />
             <CustomSelect
               value={question.ansType}
@@ -334,17 +339,22 @@ const InquiryEditor = (props) => {
                 }
               ]}
             />
-            <CustomSelect
-              value={question.field}
-              name="Question title"
-              onChange={handleFieldChange}
-              options={fieldType}
+            <FuseChipSelect
+              className="m-auto"
+              value={valueType}
+              onChange={handleTypeChange}
+              placeholder="Select Inquiry Type"
+              textFieldProps={{
+
+                variant: 'outlined'
+              }}
+              options={metadata.inq_type_options}
             />
           </Grid>
         </Grid>
         <div className="mt-32 mx-8">
           <TextField
-            value={question.content}
+            value={question.content.replace("{{INQ_TYPE}}", "")}
             multiline
             onFocus={(e) => e.target.select()}
             onChange={handleNameChange}
