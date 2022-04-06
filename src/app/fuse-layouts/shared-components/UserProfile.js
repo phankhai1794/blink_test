@@ -32,8 +32,32 @@ function UserProfile(props) {
   };
 
   useEffect(() => {
-    if (!localStorage.getItem('AUTH_TOKEN') && user.displayName == '') history.push('/login');
-  }, [user]);
+    if (user.displayName == '' || user.displayName == null) {
+      let curRole = '';
+      const guestUrl = ['/guest', '/draft-bl'];
+      const isGuest = guestUrl.some((el) => history.location.pathname.includes(el));
+
+      if (!isGuest) {
+        if (localStorage.getItem('AUTH_TOKEN') && localStorage.getItem('USER')) curRole = 'USER';
+        else history.push('/login');
+      } else {
+        if (localStorage.getItem('GUEST_TOKEN') && localStorage.getItem('GUEST')) curRole = 'GUEST';
+        else history.push(`/guest${window.location.search}`);
+      }
+
+      let userInfo = JSON.parse(localStorage.getItem(curRole));
+      if (userInfo) {
+        let payload = {
+          ...user,
+          role: userInfo.role,
+          displayName: userInfo.displayName,
+          photoURL: userInfo.photoURL,
+          permissions: userInfo.permissions
+        };
+        dispatch(userActions.setUserData(payload));
+      }
+    }
+  }, [user, history.location.pathname]);
 
   return (
     <React.Fragment>

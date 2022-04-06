@@ -4,12 +4,12 @@ import _ from '@lodash';
 import { useDispatch } from 'react-redux';
 import * as Actions from 'app/store/actions';
 import BLWorkspace from './admin/BLWorkspace';
-import OtpCheck from './guest/OTPCheck';
+import GuestWorkspace from './guest/GuestWorkspace';
 import DraftBL from './draft-bl/DraftWorkspace';
 
 function RoleRedirect({ history }) {
   if (history.location.pathname.includes('/guest')) {
-    return <OtpCheck status={history.location.state} />;
+    return <GuestWorkspace status={history.location.state} />;
   } else if (history.location.pathname.includes('/draft-bl')) {
     return <DraftBL status={history.location.state} />;
   } else {

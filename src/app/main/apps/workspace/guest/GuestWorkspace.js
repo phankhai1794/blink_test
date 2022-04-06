@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import _ from '@lodash';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
+import { makeStyles } from '@material-ui/styles';
+import { Grid, Divider } from '@material-ui/core';
+
 import * as AppActions from 'app/store/actions';
 import * as Actions from './store/actions';
 import * as HeaderActions from 'app/store/actions/header';
-import { Grid, Divider } from '@material-ui/core';
 import InquiryCreated from '../shared-components/InquiryCreated';
 import Form from '../shared-components/Form';
 import BLField from './components/BLField';
@@ -50,7 +51,8 @@ const GuestWorkspace = (props) => {
         hasAddButton={false}
         FabTitle="Inquiry"
         field={currentField ? currentField : ''}
-        title={''}>
+        title={''}
+      >
         <InquiryCreated user="guestspace" />
       </Form>
 

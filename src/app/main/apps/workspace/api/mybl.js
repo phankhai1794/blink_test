@@ -11,10 +11,3 @@ export async function createBL(bkgNo) {
   );
   return response.data;
 }
-
-export async function loadBL(id) {
-  const response = await axios.get(`${process.env.REACT_APP_API}/mybl/${id}`, {
-    headers: getHeaders('get')
-  });
-  return response.data;
-}
