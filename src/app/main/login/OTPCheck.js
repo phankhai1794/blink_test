@@ -13,9 +13,8 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import * as AppActions from 'app/store/actions';
 import * as HeaderActions from 'app/store/actions/header';
 import * as userActions from 'app/auth/store/actions';
-import GuestWorkspace from './GuestWorkspace';
-import { verifyGuest } from '../api/verify';
-import { getAccountByEmail } from '../api/account';
+import GuestWorkspace from '../apps/workspace/guest/GuestWorkspace';
+import { verifyEmail, verifyGuest } from '../apps/workspace/api/verify';
 
 const otpLength = 4;
 
@@ -63,8 +62,8 @@ const OtpCheck = ({ status }) => {
 
   const handleCheckMail = (e) => {
     if (e.key == 'Enter') e.preventDefault();
-    if (mail.isValid && (e.key == 'Enter' || e.key == undefined)) {
-      getAccountByEmail(mail.value)
+    if (myBL.id && myBL.id.length && mail.isValid && (e.key == 'Enter' || e.key == undefined)) {
+      verifyEmail({ bl: myBL.id, email: mail.value })
         .then((res) => {
           if (res) setStep(1);
         })
@@ -89,10 +88,9 @@ const OtpCheck = ({ status }) => {
     dispatch(HeaderActions.displayBtn({ hideAll: true, displayUserProfile: false }));
 
     const id = new URLSearchParams(window.location.search).get('bl');
-    if (!id) history.push(`/pages/errors/error-404`);
-    setMyBL({ ...myBL, id });
+    if (id) setMyBL({ ...myBL, id });
 
-    let userInfo = localStorage.getItem('GUEST_USER');
+    let userInfo = localStorage.getItem('GUEST');
     if (userInfo) {
       userInfo = JSON.parse(userInfo);
       setMail({
@@ -119,11 +117,11 @@ const OtpCheck = ({ status }) => {
             let payload = { ...user, ...userInfo };
 
             localStorage.setItem('GUEST_TOKEN', res.token);
-            localStorage.setItem('GUEST_USER', JSON.stringify(userInfo));
+            localStorage.setItem('GUEST', JSON.stringify(userInfo));
 
             dispatch(userActions.setUserData(payload));
+            history.push(`/apps/workplace/guest${window.location.search}`);
           }
-          setStep(2);
         })
         .catch((error) => {
           console.log(error);
