@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import history from '@history';
 import {
   Icon,
   Table,
@@ -8,16 +9,18 @@ import {
   TableRow,
   Checkbox,
   Box,
-  Chip
+  Chip,
+  Tooltip
 } from '@material-ui/core';
 import { FuseScrollbars } from '@fuse';
 import { Avatar } from '@material-ui/core';
 import { withRouter } from 'react-router-dom';
 import { Typography } from '@material-ui/core';
 import _ from '@lodash';
-import { useDispatch, useSelector } from 'react-redux';
-import { data } from './data';
 import { makeStyles } from '@material-ui/styles';
+import moment from 'moment';
+import axios from 'axios';
+import { getHeaders } from '../workspace/shared-functions';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,13 +37,12 @@ const useStyles = makeStyles((theme) => ({
 function InquiringTable(props) {
   const classes = useStyles();
 
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   // const products = useSelector(({ eCommerceApp }) => eCommerceApp.products.data);
   // const searchText = useSelector(({ eCommerceApp }) => eCommerceApp.products.searchText);
 
   const [selected, setSelected] = useState([]);
-  // const [data, setData] = useState(0);
-
+  const [mybls, setMybls] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [order, setOrder] = useState({
@@ -64,7 +66,7 @@ function InquiringTable(props) {
 
   function handleSelectAllClick(event) {
     if (event.target.checked) {
-      setSelected(data.map((n) => n.id));
+      setSelected(mybls.map((n) => n.id));
       return;
     }
     setSelected([]);
@@ -72,7 +74,7 @@ function InquiringTable(props) {
 
   function handleClick(item) {
     props.history.push({
-      pathname: '/apps/workplace/' + item.id, // + '/gciUIQActrGonB3VEirVTGHe7qhY12rk',
+      pathname: '/apps/workplace/' + item.bkgNo,
       state: 'inquiry'
     });
   }
@@ -114,6 +116,24 @@ function InquiringTable(props) {
   //     return indents;
   // }
 
+  async function getAllBl() {
+    await axios
+      .get(`${process.env.REACT_APP_API}/mybl/`, {
+        headers: getHeaders('get')
+      })
+      .then(({ data }) => {
+        setMybls(data.myBLs);
+      })
+      .catch((error) => {
+        console.error(error);
+        history.push(`/pages/errors/error-404`);
+      });
+  }
+
+  useEffect(() => {
+    getAllBl();
+  }, []);
+
   return (
     <div className="w-full flex flex-col mr-52">
       <FuseScrollbars className="flex-grow overflow-x-auto">
@@ -123,22 +143,22 @@ function InquiringTable(props) {
                         order={order}
                         onSelectAllClick={handleSelectAllClick}
                         onRequestSort={handleRequestSort}
-                        rowCount={data.length}
+                        rowCount={mybls.length}
                     /> */}
           <TableBody>
-            {_.orderBy(data, ['id'], ['asc'])
+            {_.orderBy(mybls, ['id'], ['asc'])
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((h) => {
+              .map((record) => {
                 return (
                   <TableRow
                     className="h-64 cursor-pointer"
                     hover
                     role="checkbox"
+                    key={record.id}
                     // aria-checked={isSelected}
                     // tabIndex={-1}
-                    // key={n.id}
                     // selected={isSelected}
-                    onClick={() => handleClick(h)}
+                    onClick={() => handleClick(record)}
                   >
                     <TableCell className="w-48 px-4 sm:px-12" padding="checkbox">
                       <Checkbox
@@ -149,32 +169,26 @@ function InquiringTable(props) {
                     </TableCell>
 
                     <TableCell className="w-52" component="th" scope="row" padding="none">
-                      <Avatar src={h.avatar} />
+                      <Tooltip title={record.createdBy_TB_ACCOUNT.userName} arrow placement="top">
+                        <Avatar src={record.createdBy_TB_ACCOUNT.avatar} />
+                      </Tooltip>
                     </TableCell>
 
                     <TableCell component="th" scope="row">
                       <Box>
-                        <Box>{h.id}</Box>
-                        <Box>{h.position}</Box>
+                        <Box>{record.bkgNo}</Box>
                       </Box>
                     </TableCell>
 
-                    <TableCell component="th" scope="row" align="center">
-                      <Box display="flex" alignItems="center">
-                        {/* {renderNumber(h.memberNumber)} */}
-                        {h.members.map((member, index) => {
-                          return (
-                            <Box key={index} sx={{ mr: '-10px' }}>
-                              <Avatar src={member.avatar} />
-                            </Box>
-                          );
-                        })}
-                      </Box>
+                    <TableCell className="w-52" component="th" scope="row" padding="none">
+                      <Tooltip title={record.updatedBy_TB_ACCOUNT.userName} arrow placement="top">
+                        <Avatar src={record.updatedBy_TB_ACCOUNT.avatar} />
+                      </Tooltip>
                     </TableCell>
 
                     <TableCell component="th" scope="row">
                       <Chip
-                        label="Inquiring"
+                        label={record.state}
                         variant="outlined"
                         classes={{
                           root: classes.root,
@@ -186,10 +200,9 @@ function InquiringTable(props) {
                     <TableCell component="th" scope="row" align="right">
                       <Box sx={{ mt: '-25px' }}>
                         <Typography variant="subtitle2" color="textSecondary">
-                          {h.dateCreated}
+                          {moment(record.updatedAt).format('DD MMM YYYY')}
                         </Typography>
                       </Box>
-                      {/* {h.dateCreated} */}
                     </TableCell>
                   </TableRow>
                 );
@@ -200,7 +213,7 @@ function InquiringTable(props) {
 
       <TablePagination
         component="div"
-        count={data.length}
+        count={mybls.length}
         rowsPerPage={rowsPerPage}
         page={page}
         backIconButtonProps={{
