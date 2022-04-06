@@ -108,7 +108,7 @@
     "test": "react-scripts test --env=node",
     "eject": "react-scripts eject",
     "lint": "eslint --fix",
-    "format": "prettier --write ./src/*/*.{js,jsx,css,md} --config ./.prettierrc",
+    "format": "prettier --write ./src/*/*.{js,jsx,css,md} --config ./.prettierrc --no-error-on-unmatched-pattern",
     "build-docs": "find ./src/app/main/documentation/material-ui-components \\( -name '*.ts' -o -name '*.tsx' \\) -type f -delete && babel-node src/app/main/documentation/material-ui-components/build.js",
     "build-stats": "yarn run build --stats",
     "bundle-report": "yarn run build-stats && webpack-bundle-analyzer build/bundle-stats.json -m static -r build/bundle-stats.html -O",
@@ -140,8 +140,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,css,md}": [
-      "yarn format",
-      "git add"
+      "yarn format"
     ]
   }
 }
