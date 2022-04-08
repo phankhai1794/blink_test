@@ -2,11 +2,11 @@ export const getKeyByValue = (object, value) => {
   return Object.keys(object).find((key) => object[key] === value);
 };
 
-export const getHeaders = (action) => {
+export const getHeaders = (action = '', token = 'AUTH_TOKEN') => {
   return {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    Authorization: localStorage.getItem('AUTH_TOKEN'),
+    Authorization: localStorage.getItem(token),
     action
   };
 };

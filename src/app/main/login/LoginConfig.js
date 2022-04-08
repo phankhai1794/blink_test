@@ -1,5 +1,4 @@
 import Login from './Login';
-import OTPCheck from './OTPCheck';
 import { authRoles } from 'app/auth';
 
 export const LoginConfig = {
@@ -29,10 +28,6 @@ export const LoginConfig = {
     {
       path: '/login',
       component: Login
-    },
-    {
-      path: '/guest',
-      component: OTPCheck
     }
   ]
 };

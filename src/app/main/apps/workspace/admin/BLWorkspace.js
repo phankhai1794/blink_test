@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import history from '@history';
+import _ from 'lodash';
 
 import { useDispatch, useSelector } from 'react-redux';
+import * as AppActions from 'app/store/actions';
 import * as Actions from './store/actions';
 import * as HeaderActions from 'app/store/actions/header';
 import { loadInquiry, loadMetadata } from '../api/inquiry';
@@ -45,7 +47,7 @@ const BLWorkspace = (props) => {
       state.workspace.fail,
       state.workspace.metadata,
       state.auth.user,
-      state.workspace.myBL,
+      state.workspace.myBL
     ]);
   const filterData = (data) => {
     let result = data;
@@ -145,11 +147,13 @@ const BLWorkspace = (props) => {
   }, []);
 
   useEffect(() => {
+    dispatch(HeaderActions.displayBtn());
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+
     loadMetadata().then((res) => {
       const data = filterMetadata(res);
       dispatch(Actions.saveMetadata(data));
     });
-    dispatch(HeaderActions.displayBtn());
     dispatch(Actions.saveUser(user));
   }, []);
 
@@ -168,8 +172,8 @@ const BLWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-              ? getKeyByValue(metadata['field'], currentField)
-              : ''
+            ? getKeyByValue(metadata['field'], currentField)
+            : ''
         }
       >
         {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}
@@ -180,7 +184,11 @@ const BLWorkspace = (props) => {
         <Grid item xs={6}>
           <Grid item>
             <h3>Shipper/Exporter</h3>
-            <BLField id={metadata.field ? metadata.field['SHIPPER/EXPORTER'] : ''} multiline={true} rows={5}>
+            <BLField
+              id={metadata.field ? metadata.field['SHIPPER/EXPORTER'] : ''}
+              multiline={true}
+              rows={5}
+            >
               {`DSV AIR & SEA CO. LTD.\nAS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO\nBLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN`}
             </BLField>
           </Grid>
@@ -220,7 +228,9 @@ const BLWorkspace = (props) => {
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
-              <BLField id={metadata.field ? metadata.field['OCEAN VESSEL VOYAGE NO. FLAG'] : ''}>CONFIDENCE 021W</BLField>
+              <BLField id={metadata.field ? metadata.field['OCEAN VESSEL VOYAGE NO. FLAG'] : ''}>
+                CONFIDENCE 021W
+              </BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF LOADING</h3>
@@ -261,23 +271,35 @@ const BLWorkspace = (props) => {
               EXPORT REFERENCES (for the merchant's and/or Carrier's reference only. See back clause
               8. (4.))
             </h3>
-            <BLField id={metadata.field ? metadata.field['EXPORT REFERENCES'] : ''} multiline={true} rows={2}></BLField>
+            <BLField
+              id={metadata.field ? metadata.field['EXPORT REFERENCES'] : ''}
+              multiline={true}
+              rows={2}
+            ></BLField>
           </Grid>
           <Grid item>
             <h3>FORWARDING AGENT-REFERENCES FMC NO.</h3>
-            <BLField id={metadata.field ? metadata.field['FORWARDING AGENT-REFERENCES'] : ''} multiline={true} rows={5}>
+            <BLField
+              id={metadata.field ? metadata.field['FORWARDING AGENT-REFERENCES'] : ''}
+              multiline={true}
+              rows={5}
+            >
               DSV AIR & SEA CO. LTD.
             </BLField>
           </Grid>
           <Grid item>
             <h3>FINAL DESTINATION(for line merchant's reference only)</h3>
-            <BLField id={metadata.field ? metadata.field['FINAL DESTINATION'] : ''}>BUSAN, KOREA</BLField>
+            <BLField id={metadata.field ? metadata.field['FINAL DESTINATION'] : ''}>
+              BUSAN, KOREA
+            </BLField>
           </Grid>
           <Grid item>
             <h3>
               TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)
             </h3>
-            <BLField id={metadata.field ? metadata.field['TYPE OF MOVEMENT'] : ''}>R1CB118000</BLField>
+            <BLField id={metadata.field ? metadata.field['TYPE OF MOVEMENT'] : ''}>
+              R1CB118000
+            </BLField>
           </Grid>
         </Grid>
       </Grid>

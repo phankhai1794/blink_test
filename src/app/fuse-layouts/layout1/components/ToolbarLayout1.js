@@ -47,7 +47,6 @@ function ToolbarLayout1(props) {
   const classes = useStyles(props);
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
-  const user = useSelector(({ auth }) => auth.user);
   const [hideAll, displayUserProfile, displayDraftBLBtn, displayEditBtn] = useSelector((state) => [
     state.header.hideAll,
     state.header.displayUserProfile,
@@ -136,11 +135,7 @@ function ToolbarLayout1(props) {
             ) : (
               <></>
             )}
-            {displayUserProfile ? (
-              <UserProfile classes={classes} user={user} history={history} />
-            ) : (
-              <></>
-            )}
+            {displayUserProfile ? <UserProfile classes={classes} history={history} /> : <></>}
           </div>
 
           {config.navbar.display && config.navbar.position === 'right' && (

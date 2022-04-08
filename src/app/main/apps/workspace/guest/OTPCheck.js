@@ -10,12 +10,9 @@ import { Paper, InputBase, IconButton, Divider } from '@material-ui/core';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
-import * as AppActions from 'app/store/actions';
 import * as HeaderActions from 'app/store/actions/header';
-import * as userActions from 'app/auth/store/actions';
+import { verifyEmail, verifyGuest, isVerified } from '../api/verify';
 import GuestWorkspace from './GuestWorkspace';
-import { verifyGuest } from '../api/verify';
-import { getAccountByEmail } from '../api/account';
 
 const otpLength = 4;
 
@@ -63,8 +60,8 @@ const OtpCheck = ({ status }) => {
 
   const handleCheckMail = (e) => {
     if (e.key == 'Enter') e.preventDefault();
-    if (mail.isValid && (e.key == 'Enter' || e.key == undefined)) {
-      getAccountByEmail(mail.value)
+    if (myBL.id && myBL.id.length && mail.isValid && (e.key == 'Enter' || e.key == undefined)) {
+      verifyEmail({ bl: myBL.id, email: mail.value })
         .then((res) => {
           if (res) setStep(1);
         })
@@ -79,27 +76,23 @@ const OtpCheck = ({ status }) => {
   };
 
   useEffect(() => {
-    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
-    return () => {
-      dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
-    };
-  }, [dispatch]);
-
-  useEffect(() => {
-    dispatch(HeaderActions.displayBtn({ hideAll: true, displayUserProfile: false }));
+    dispatch(HeaderActions.displayBtn({ hideAll: true }));
 
     const id = new URLSearchParams(window.location.search).get('bl');
-    if (!id) history.push(`/pages/errors/error-404`);
-    setMyBL({ ...myBL, id });
+    if (id) setMyBL({ ...myBL, id });
 
-    let userInfo = localStorage.getItem('GUEST_USER');
-    if (userInfo) {
+    let userInfo = localStorage.getItem('GUEST');
+    if (userInfo && localStorage.getItem('GUEST_TOKEN')) {
       userInfo = JSON.parse(userInfo);
       setMail({
         ...mail,
         value: userInfo.mail || '',
         isValid: isEmail(userInfo.mail)
       });
+
+      isVerified({ mail: userInfo.mail, id })
+        .then(() => setStep(2))
+        .catch((error) => console.log(error));
     }
   }, []);
 
@@ -116,14 +109,12 @@ const OtpCheck = ({ status }) => {
               permissions,
               mail: mail.value
             };
-            let payload = { ...user, ...userInfo };
 
             localStorage.setItem('GUEST_TOKEN', res.token);
-            localStorage.setItem('GUEST_USER', JSON.stringify(userInfo));
+            localStorage.setItem('GUEST', JSON.stringify(userInfo));
 
-            dispatch(userActions.setUserData(payload));
+            setStep(2);
           }
-          setStep(2);
         })
         .catch((error) => {
           console.log(error);
@@ -134,10 +125,10 @@ const OtpCheck = ({ status }) => {
   return (
     <>
       {step === 2 ? (
-        <GuestWorkspace status={status} />
+        <GuestWorkspace status={history.location.state} />
       ) : (
         <div>
-          <div style={{ margin: '2rem auto 4rem auto', textAlign: 'center' }}>
+          <div style={{ margin: '12rem auto 4rem auto', textAlign: 'center' }}>
             <img src="../assets/images/logos/one_ocean_network-logo.png" alt="company logo" />
           </div>
           {step === 0 ? (
@@ -176,6 +167,7 @@ const OtpCheck = ({ status }) => {
                   value={otpCode}
                   onChange={handleChangeCode}
                   numInputs={otpLength}
+                  shouldAutoFocus={true}
                   inputStyle={{
                     fontSize: '4rem',
                     margin: 'auto 5rem',
@@ -192,7 +184,7 @@ const OtpCheck = ({ status }) => {
                 <IconButton
                   color="primary"
                   className={classes.iconButton}
-                  onClick={(e) => setStep(0)}
+                  onClick={() => setStep(0)}
                 >
                   <ArrowBackIcon />
                 </IconButton>

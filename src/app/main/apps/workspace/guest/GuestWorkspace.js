@@ -33,14 +33,8 @@ const GuestWorkspace = (props) => {
   ]);
 
   useEffect(() => {
-    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
-    return () => {
-      dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
-    };
-  }, [dispatch]);
-
-  useEffect(() => {
-    dispatch(HeaderActions.displayBtn({ displayDraftBLBtn: true }));
+    dispatch(HeaderActions.displayBtn());
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
   }, []);
 
   return (

@@ -2,7 +2,7 @@ import * as Actions from '../../actions/header';
 
 const initialState = {
   hideAll: true,
-  displayUserProfile: true,
+  displayUserProfile: false,
   displayDraftBLBtn: false,
   displayEditBtn: false
 };
@@ -13,7 +13,7 @@ const headerReducer = function (state = initialState, action) {
       return {
         ...state,
         hideAll: false,
-        displayUserProfile: true,
+        displayUserProfile: false,
         displayDraftBLBtn: false,
         displayEditBtn: false,
         ...action.state

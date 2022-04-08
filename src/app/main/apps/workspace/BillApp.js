@@ -1,21 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import Bill from './Bill';
-import * as Actions from 'app/store/actions';
-import { useDispatch } from 'react-redux';
 import { FusePageSimple } from '@fuse';
 import _ from '@lodash';
 function BillApp(props) {
   const { history } = props;
-  const dispatch = useDispatch();
-
   const pageLayout = useRef(null);
 
-  useEffect(() => {
-    dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
-    return () => {
-      dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
-    };
-  }, [dispatch]);
   return (
     <div className="flex flex-col flex-1 w-full">
       {/* <ExportAppHeader className="p-0 sm:px-24" /> */}

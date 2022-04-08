@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
 import * as Actions from './store/actions';
 import * as HeaderActions from 'app/store/actions/header';
+import * as AppActions from 'app/store/actions';
 import reducer from './store/reducers';
 import _ from 'lodash';
 import clsx from 'clsx';
@@ -59,6 +60,8 @@ function ProjectDashboardApp(props) {
     dispatch(Actions.getWidgets());
     dispatch(Actions.getProjects());
     dispatch(HeaderActions.displayBtn({ hideAll: true }));
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
   }, [dispatch]);
 
   function handleChangeTab(event, tabValue) {
@@ -107,7 +110,8 @@ function ProjectDashboardApp(props) {
             <Hidden lgUp>
               <IconButton
                 onClick={(ev) => pageLayout.current.toggleRightSidebar()}
-                aria-label="open left sidebar">
+                aria-label="open left sidebar"
+              >
                 <Icon>menu</Icon>
               </IconButton>
             </Hidden>
@@ -120,7 +124,8 @@ function ProjectDashboardApp(props) {
             className="flex flex-wrap"
             enter={{
               animation: 'transition.slideUpBigIn'
-            }}>
+            }}
+          >
             <div className="widget flex w-full sm:w-1/2 md:w-1/6 lg:w-1/5 p-12">
               <Widget1 widget={widgets.widget1} />
             </div>
