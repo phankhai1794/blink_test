@@ -58,7 +58,6 @@ const BLField = (props) => {
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty())
   }, [inquiries, metadata])
-
   const checkQuestionIsEmpty = () => {
     if (inquiries.length > 0) {
       const check = inquiries.filter(q => q.field === id)

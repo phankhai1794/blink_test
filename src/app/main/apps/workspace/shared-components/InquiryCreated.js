@@ -13,6 +13,7 @@ import FileAttach from './FileAttach';
 import EditIcon from '@material-ui/icons/Edit';
 import UserInfo from './UserInfo';
 import { saveComment, loadComment, editComment, deleteComment } from '../api/inquiry';
+import { getFile } from '../api/file';
 import { displayTime } from '../shared-functions';
 import { Menu, MenuItem, ListItemIcon, Card, ListItemText, Typography, IconButton } from '@material-ui/core';
 import { v4 as uuidv4 } from 'uuid';
@@ -51,8 +52,8 @@ const Comment = (props) => {
     setValue(e.target.value)
   }
   const changeComment = (e, id) => {
-    var temp = [...comment];
-    temp[id].answer_TB_ANSWER.content = e.target.value
+    const temp = [...comment];
+    temp[id].content = e.target.value
     setComment(temp)
   }
   const addComment = (e) => {
@@ -74,12 +75,8 @@ const Comment = (props) => {
         setComment([...comment, {
           answer: ans_id,
           createdAt: new Date(),
-          answer_TB_ANSWER: {
-            content: e.target.value
-          },
-          createdBy_TB_ACCOUNT: {
-            userName: user.displayName
-          }
+          content: e.target.value,
+          creator: user.displayName
         }])
       }
       setValue("")
@@ -94,7 +91,7 @@ const Comment = (props) => {
   }
   const onDelete = (id) => {
     deleteComment(comment[id].answer)
-    var temp = [...comment];
+    const temp = [...comment];
     temp.splice(id, 1)
     setComment(temp)
     setAnchorEl(null);
@@ -106,9 +103,6 @@ const Comment = (props) => {
   return (
     <>
       {comment.map((k, id) => {
-        const content = k.answer_TB_ANSWER.content
-        const username = k.createdBy_TB_ACCOUNT.userName
-        const time = k.createdAt
         return (
           <div style={{ marginBottom: "20px" }}>
             {edit === id ?
@@ -116,13 +110,13 @@ const Comment = (props) => {
                 placeholder="Comment here"
                 style={inputStyle}
                 onKeyPress={(e) => onEnterComment(e, id)}
-                value={content}
+                value={k.content}
                 onChange={(e) => changeComment(e, id)} />
               :
               <>
                 <div className="flex justify-between" onMouseEnter={() => setKey(id)} onMouseLeave={() => setKey("")}>
-                  <UserInfo name={username} time={displayTime(time)} />
-                  {user.username === username && key === id &&
+                  <UserInfo name={k.creator} time={displayTime(k.createdAt)} />
+                  {user.username === k.creator && key === id &&
                     <>
                       <IconButton onClick={handleClick}>
                         <MoreVertIcon />
@@ -150,7 +144,7 @@ const Comment = (props) => {
                     </>
                   }
                 </div>
-                <Typography variant="h5">{content}</Typography> </>
+                <Typography variant="h5">{k.content}</Typography> </>
             }
           </div>
         )
@@ -173,7 +167,7 @@ const InquiryCreated = (props) => {
   const [inquiries, currentField, metadata] = useSelector((state) => [
     state[user].inquiries,
     state[user].currentField,
-    state[user].metadata
+    state[user].metadata,
   ])
   const question = inquiries.filter((q) => q.field === currentField)
   const indexes = inquiries.findIndex((q) => q.field === currentField)
@@ -190,11 +184,29 @@ const InquiryCreated = (props) => {
   const toggleEdit = (id) => {
     setEdit(id)
   }
+  useEffect(() => {
+    if (question[0].media.length && !question[0].files[0].src) {
+      const optionsOfQuestion = [...inquiries];
+      for (let f in question[0].media) {
+        getFile(question[0].media[f].id).then((file) => {
+          let url = ""
+          if (question[0].files[f].type.match(/jpeg|jpg|png/g)) {
+            url = URL.createObjectURL(new Blob([file], { type: "image/jpeg" }))
+          }
+          else {
+            url = URL.createObjectURL(new Blob([file]))
+          }
+          optionsOfQuestion[indexes].files[f].src = url
+          dispatch(Actions.editInquiry(optionsOfQuestion));
+        }).catch(error => console.log(error))
+      }
+    }
+  }, [])
   return (
     <>
       {question.map((q, index) => {
         const type = q.ansType
-        const username = q.createdBy_TB_ACCOUNT.userName
+        const username = q.creator
         return (
           <>
             {edit === index ?
@@ -250,7 +262,7 @@ const InquiryCreated = (props) => {
                 </div>
                 {q.files && (
                   q.files.map((file, index) => (
-                    file.type.includes("image") ?
+                    file.type.match(/jpeg|jpg|png/g) ?
                       <ImageAttach src={file.src} style={{ margin: '1rem' }} /> : <FileAttach file={file} />
                   ))
                 )}

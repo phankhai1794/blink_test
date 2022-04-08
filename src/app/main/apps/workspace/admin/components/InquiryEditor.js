@@ -10,7 +10,9 @@ import {
   Checkbox,
   Card,
   Divider,
-  FormGroup
+  FormGroup,
+  FormControl,
+  FormHelperText
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
@@ -26,7 +28,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import AttachFile from './AttachFile';
 import CustomSelect from './CustomSelect';
 import { FuseChipSelect } from '@fuse';
-
+import Select from 'react-select';
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
 });
@@ -65,14 +67,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: 'silver'
   }
 }));
-const typeToNameDict = {
-  'ROUTING INQUIRY/DISCREPANCY':
-    'We found discrepancy in the routing information between SI and OPUS booking details',
-  'BL TYPE':
-    'Please provide the missing information below',
-  '':
-    'We found discrepancy in the routing information between SI and OPUS booking details'
-};
+
 // Sub Commporent
 const Choice = (props) => {
   const { index, value, handleChangeChoice, handleRemoveChoice } = props;
@@ -125,17 +120,17 @@ const ChoiceAnswer = (props) => {
   const classes = inputStyle();
 
   const handleAddChoice = () => {
-    var optionsOfQuestion = [...questions];
+    const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].choices.push("Option " + (optionsOfQuestion[index].choices.length + 1))
     saveQuestion(optionsOfQuestion)
   };
   const handleRemoveChoice = (id) => {
-    var optionsOfQuestion = [...questions];
+    const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].choices.splice(id, 1)
     saveQuestion(optionsOfQuestion)
   };
   const handleChangeChoice = (e, id) => {
-    var optionsOfQuestion = [...questions];
+    const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].choices[id] = e.target.value
     saveQuestion(optionsOfQuestion)
   };
@@ -201,12 +196,27 @@ const InquiryEditor = (props) => {
   const dispatch = useDispatch()
   const classes = useStyles();
   const { defaultContent, index, question, questions, saveQuestion } = props;
-  const [metadata, removeOptions] = useSelector((state) => [state.workspace.metadata, state.workspace.removeOptions])
-  const [valueType, setValueType] = useState(metadata.inq_type_options.filter(v => question.inqType === v.value)[0])
-
+  const [metadata, removeOptions, currentField, fields, valid] = useSelector((state) => [
+    state.workspace.metadata,
+    state.workspace.removeOptions,
+    state.workspace.currentField,
+    state.workspace.fields,
+    state.workspace.validation
+  ])
   const [fieldType, setFieldType] = useState(metadata.field_options)
+  const [valueType, setValueType] = useState(metadata.inq_type_options.filter(v => question.inqType === v.value)[0])
+  const [fieldValue, setFieldValue] = useState(metadata.field_options.filter(v => question.field === v.value)[0])
+  const styles = (valid, width) => {
+    return {
+      control: {
+        border: valid ? '1px solid #ddd' : '1px solid red',
+        borderRadius: "9px",
+        width: `${width}px`
+      }
+    }
+  }
   const removeQuestion = () => {
-    var optionsOfQuestion = [...questions];
+    const optionsOfQuestion = [...questions];
     optionsOfQuestion.splice(index, 1)
     if (index > 0) {
       dispatch(Actions.setEdit(index - 1));
@@ -215,14 +225,23 @@ const InquiryEditor = (props) => {
   }
 
   useEffect(() => {
-    let list = [...removeOptions]
+    const list = [...removeOptions]
     list[index] = ""
-    setFieldType(metadata.field_options.filter(v => !list.includes(v.value)))
+    const temp = metadata.field_options.filter(v => !list.includes(v.value))
+    setFieldType(temp.filter(v => !fields.includes(v.value)))
+    const optionsOfQuestion = [...questions];
+
     if (!question.ansType) {
-      let optionsOfQuestion = [...questions];
       optionsOfQuestion[index].ansType = metadata.ans_type.choice
-      saveQuestion(optionsOfQuestion)
     }
+    if (!question.field && !removeOptions.includes(currentField)) {
+      optionsOfQuestion[index].field = currentField
+      setFieldValue(metadata.field_options.filter(v => currentField === v.value)[0])
+      const options = [...removeOptions]
+      options[index] = currentField
+      dispatch(Actions.removeSelectedOption(options));
+    }
+    saveQuestion(optionsOfQuestion)
   }, [])
 
   const copyQuestion = () => {
@@ -231,8 +250,9 @@ const InquiryEditor = (props) => {
   }
 
   const handleTypeChange = (e) => {
-    var optionsOfQuestion = [...questions];
+    const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].inqType = e.value
+    dispatch(Actions.validate({ ...valid, inqType: true }));
     const temp = valueType ? `\\b${valueType.label}\\b` : "{{INQ_TYPE}}"
     let re = new RegExp(`${temp}`, 'g');
     optionsOfQuestion[index].content = question.content.replace(re, e.label)
@@ -241,22 +261,24 @@ const InquiryEditor = (props) => {
   };
 
   const handleFieldChange = (e) => {
-    var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].field = e.target.value
-    var options = [...removeOptions]
-    options[index] = e.target.value
+    const optionsOfQuestion = [...questions];
+    optionsOfQuestion[index].field = e.value
+    dispatch(Actions.validate({ ...valid, field: true }));
+    const options = [...removeOptions]
+    options[index] = e.value
     dispatch(Actions.removeSelectedOption(options));
+    setFieldValue(e)
     saveQuestion(optionsOfQuestion)
   };
 
   const handleNameChange = (e) => {
-    var optionsOfQuestion = [...questions];
+    const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].content = e.target.value
     saveQuestion(optionsOfQuestion)
   };
 
   const handleReceiverChange = (e) => {
-    var optionsOfQuestion = [...questions];
+    const optionsOfQuestion = [...questions];
     if (e.target.checked) {
       optionsOfQuestion[index].receiver.push(e.target.value)
     }
@@ -268,19 +290,22 @@ const InquiryEditor = (props) => {
   };
 
   const handleAnswerTypeChange = (e) => {
-    var optionsOfQuestion = [...questions];
+    const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].ansType = e.target.value
     saveQuestion(optionsOfQuestion)
   };
 
   const handleUploadImageAttach = (src) => {
-    var optionsOfQuestion = [...questions];
-    var list = optionsOfQuestion[index].files
-    optionsOfQuestion[index].files = [...list, { src: URL.createObjectURL(src), type: src.type, name: src.name }]
+    const optionsOfQuestion = [...questions];
+    const list = optionsOfQuestion[index].files
+    const formData = new FormData();
+    formData.append("file", src);
+    formData.append("name", src.name);
+    optionsOfQuestion[index].files = [...list, { src: URL.createObjectURL(src), type: src.type, name: src.name, data: formData }]
     saveQuestion(optionsOfQuestion)
   };
   const handleRemoveImageAttach = (i) => {
-    var optionsOfQuestion = [...questions];
+    const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].files.splice(i, 1)
     saveQuestion(optionsOfQuestion)
   };
@@ -310,13 +335,34 @@ const InquiryEditor = (props) => {
         </div>
         <Grid container style={{ width: '750px' }} spacing={1}>
           <Grid item xs={12} className="flex justify-between">
-            <CustomSelect
-              label="Field"
-              value={question.field}
-              name="Question title"
-              onChange={handleFieldChange}
-              options={fieldType}
-            />
+            <FormControl error={!valid.field}>
+              <FuseChipSelect
+                className="m-auto"
+                customStyle={styles(valid.field, 220)}
+                value={fieldValue}
+                onChange={handleFieldChange}
+                placeholder="Select Field Type"
+                textFieldProps={{
+                  variant: 'outlined'
+                }}
+                options={fieldType}
+              />
+              {!valid.field && <FormHelperText>This is required!</FormHelperText>}
+            </FormControl>
+            <FormControl error={!valid.inqType}>
+              <FuseChipSelect
+                className="m-auto"
+                value={valueType}
+                customStyle={styles(valid.inqType, 270)}
+                onChange={handleTypeChange}
+                placeholder="Select Inquiry Type"
+                textFieldProps={{
+                  variant: 'outlined'
+                }}
+                options={metadata.inq_type_options}
+              />
+              {!valid.inqType && <FormHelperText>This is required!</FormHelperText>}
+            </FormControl>
             <CustomSelect
               value={question.ansType}
               name="Question answer type"
@@ -338,17 +384,6 @@ const InquiryEditor = (props) => {
                   icon: 'attachment'
                 }
               ]}
-            />
-            <FuseChipSelect
-              className="m-auto"
-              value={valueType}
-              onChange={handleTypeChange}
-              placeholder="Select Inquiry Type"
-              textFieldProps={{
-
-                variant: 'outlined'
-              }}
-              options={metadata.inq_type_options}
             />
           </Grid>
         </Grid>

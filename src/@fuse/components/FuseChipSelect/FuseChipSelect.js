@@ -43,7 +43,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     padding: 0,
     height: 'auto',
-    width: "280px"
   },
   valueContainer: {
     display: 'flex',
@@ -68,7 +67,6 @@ const useStyles = makeStyles((theme) => ({
   singleValue: {
     fontSize: 16,
     whiteSpace: "nowrap",
-    width:"220px",
     textOverflow: "ellipsis",
     overflow: "hidden"
   },
@@ -106,10 +104,10 @@ function inputComponent({ inputRef, ...props }) {
 
 function Control(props) {
   const classes = useStyles();
-
   return (
     <TextField
       className={clsx(classes.root, props.selectProps.textFieldProps.variant)}
+      style={props.selectProps.customStyle.control}
       InputProps={{
         inputComponent,
         inputProps: {

@@ -51,37 +51,40 @@ const BLWorkspace = (props) => {
     ]);
   const filterData = (data) => {
     let result = data;
-    for (let i in result) {
-      let list = [];
-      for (let k in result[i].TB_INQ_ANs) {
-        list.push(result[i].TB_INQ_ANs[k].answer_TB_ANSWER.content);
+    for (const i in result) {
+      const list1 = []
+      for (const k of result[i].media) {
+        list1.push({
+          name: k.name,
+          type: k.ext
+        });
       }
-      result[i]['choices'] = list;
+      result[i]['files'] = list1
     }
     return result;
   };
 
   const filterMetadata = (data) => {
     const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [] };
-    for (let i in data['field']) {
-      dict['field'][data['field'][i].name] = data['field'][i].id;
-      dict['field_options'].push({ title: data['field'][i].name, value: data['field'][i].id });
+    for (const field of data['field']) {
+      dict['field'][field.name] = field.id;
+      dict['field_options'].push({ label: field.name, value: field.id });
     }
-    for (let i in data['inqType']) {
-      dict['inq_type'][data['inqType'][i].name] = data['inqType'][i].id;
+    for (const inq of data['inqType']) {
+      dict['inq_type'][inq.name] = inq.id;
       dict['inq_type_options'].push({
-        label: data['inqType'][i].name,
-        value: data['inqType'][i].id
+        label: inq.name,
+        value: inq.id
       });
     }
-    for (let i in data['ansType']) {
-      dict['ans_type'][data['ansType'][i].name] = data['ansType'][i].id;
+    for (const ans of data['ansType']) {
+      dict['ans_type'][ans.name] = ans.id;
     }
     return dict;
   };
 
   const getList = (data) => {
-    var list = [];
+    const list = [];
     data.forEach((e) => list.push(e.field));
     return list;
   };

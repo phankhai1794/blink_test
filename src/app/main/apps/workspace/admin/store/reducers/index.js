@@ -17,6 +17,7 @@ const initialState = {
   reply: false,
   fields: [],
   removeOptions: [],
+  validation: { inqType: true, field: true },
   inquiries: [],
   question: [
     {
@@ -24,7 +25,7 @@ const initialState = {
         'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
       inqType: '',
       ansType: '',
-      field: 'other',
+      field: '',
       choices: [],
       addOther: '',
       receiver: [],
@@ -75,7 +76,7 @@ const inquiryReducer = function (state = initialState, action) {
               'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
             inqType: '',
             ansType: '',
-            field: 'other',
+            field: '',
             choices: [],
             addOther: '',
             receiver: [],
@@ -94,7 +95,7 @@ const inquiryReducer = function (state = initialState, action) {
               'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
             inqType: '',
             ansType: '',
-            field: 'other',
+            field: '',
             choices: [],
             addOther: '',
             files: []
@@ -117,7 +118,7 @@ const inquiryReducer = function (state = initialState, action) {
               'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
             inqType: '',
             ansType: '',
-            field: 'other',
+            field: '',
             choices: [],
             addOther: '',
             receiver: [],
@@ -146,6 +147,9 @@ const inquiryReducer = function (state = initialState, action) {
     }
     case Actions.REMOVE_SELECTED_OPTION: {
       return { ...state, removeOptions: action.state };
+    }
+    case Actions.VALIDATE: {
+      return { ...state, validation: action.state };
     }
     default: {
       return state;
