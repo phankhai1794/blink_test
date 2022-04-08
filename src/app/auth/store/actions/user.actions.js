@@ -89,20 +89,10 @@ export function createUserSettingsFirebase(authUser) {
 /**
  * Set User Data
  */
-export function setUserData(user) {
-  return (dispatch) => {
-    /*
-        Set User Settings
-         */
-    // dispatch(setDefaultSettings(user.data.settings));
-
-    /*
-        Set User Data
-         */
-    dispatch({
-      type: SET_USER_DATA,
-      payload: user
-    });
+export function setUserData(data) {
+  return {
+    type: SET_USER_DATA,
+    payload: data
   };
 }
 

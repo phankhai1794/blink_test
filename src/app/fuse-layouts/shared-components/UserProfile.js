@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Button,
   Icon,
@@ -14,10 +14,10 @@ import { Link } from 'react-router-dom';
 import * as userActions from 'app/auth/store/actions';
 
 function UserProfile(props) {
-  const { user, classes, history } = props;
-  const [open, setOpen] = useState(null);
+  const { classes, history } = props;
   const dispatch = useDispatch();
-
+  const [open, setOpen] = useState(null);
+  const user = useSelector(({ auth }) => auth.user);
   const handleClick = (event) => {
     setOpen(event.currentTarget);
   };
@@ -30,34 +30,6 @@ function UserProfile(props) {
     localStorage.clear();
     dispatch(userActions.removeUserData());
   };
-
-  useEffect(() => {
-    if (user.displayName == '' || user.displayName == null) {
-      let curRole = '';
-      const guestUrl = ['/guest', '/draft-bl'];
-      const isGuest = guestUrl.some((el) => history.location.pathname.includes(el));
-
-      if (!isGuest) {
-        if (localStorage.getItem('AUTH_TOKEN') && localStorage.getItem('USER')) curRole = 'USER';
-        else history.push('/login');
-      } else {
-        if (localStorage.getItem('GUEST_TOKEN') && localStorage.getItem('GUEST')) curRole = 'GUEST';
-        else history.push(`/guest${window.location.search}`);
-      }
-
-      let userInfo = JSON.parse(localStorage.getItem(curRole));
-      if (userInfo) {
-        let payload = {
-          ...user,
-          role: userInfo.role,
-          displayName: userInfo.displayName,
-          photoURL: userInfo.photoURL,
-          permissions: userInfo.permissions
-        };
-        dispatch(userActions.setUserData(payload));
-      }
-    }
-  }, [user, history.location.pathname]);
 
   return (
     <React.Fragment>

@@ -1,20 +1,10 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import _ from '@lodash';
-import history from '@history';
-
-import * as Actions from 'app/store/actions';
 import * as HeaderActions from 'app/store/actions/header';
 
 const DraftWorkspace = (props) => {
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
-    return () => {
-      dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
-    };
-  }, [dispatch]);
 
   useEffect(() => {
     dispatch(HeaderActions.displayBtn({ displayEditBtn: true }));

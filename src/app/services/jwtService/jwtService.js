@@ -4,7 +4,7 @@ import FuseUtils from '@fuse/FuseUtils';
 
 class jwtService extends FuseUtils.EventEmitter {
   init() {
-    this.setInterceptors();
+    // this.setInterceptors();
     this.handleAuthentication();
   }
 
