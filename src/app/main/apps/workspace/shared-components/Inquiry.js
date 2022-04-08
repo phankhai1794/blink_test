@@ -5,7 +5,7 @@ import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
 import AttatchmentAnswer from './AttatchmentAnswer';
 import InquiryEditor from '../admin/components/InquiryEditor';
-import { Card, Typography } from '@material-ui/core';
+import { Card, Typography, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
 import { getKeyByValue } from '../shared-functions';
 
 const Inquiry = (props) => {
@@ -27,7 +27,26 @@ const Inquiry = (props) => {
       <div style={{ width: '770px', marginBottom: "24px" }} onClick={() => changeToEditor(index)}>
         {openEdit === index ? <InquiryEditor index={index} questions={questions} question={question} saveQuestion={(q) => dispatch((Actions.setQuestion(q)))} /> :
           <Card style={{ padding: '1rem ' }}>
-            <Typography color='primary' variant="h5">{getKeyByValue(metadata["field"], question.field)}</Typography>
+            <div className="flex justify-between">
+              <Typography color='primary' variant="h5">{getKeyByValue(metadata["field"], question.field)}</Typography>
+              <FormGroup row>
+                <FormControlLabel
+                  value="onshore"
+                  control={<Checkbox
+                    checked={question.receiver.includes("onshore")}
+                    // onChange={handleReceiverChange}
+                    color="primary" />}
+                  label="Onshore" />
+                <FormControlLabel
+                  value="customer"
+                  control={<Checkbox
+                    checked={question.receiver.includes("customer")}
+                    // onChange={handleReceiverChange}
+                    color="primary" />}
+                  label="Customer"
+                />
+              </FormGroup>
+            </div>
             <Typography variant="h5">{question.content.replace("{{INQ_TYPE}}", "")}</Typography>
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {question.ansType === metadata.ans_type.choice && (

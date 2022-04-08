@@ -10,7 +10,10 @@ import CheckIcon from '@material-ui/icons/Check';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import { saveInquiry, changeStatus } from '../api/inquiry';
+import { uploadFile } from '../api/file';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
+
 const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(1),
@@ -25,19 +28,30 @@ const PopoverFooter = ({
   const [currentField, question, fields, myBL] = useSelector((state) => [
     state.workspace.currentField, state.workspace.question, state.workspace.fields, state.workspace.myBL])
   const onSave = () => {
-    let inquiry = [], answer = [], inqAns = []
-    for (let i in question) {
+    let inquiry = [], answer = [], inqAns = [], inqMedia = [], formData = []
+    for (const q of question) {
       const inq_id = uuidv4()
       const inq = {
         id: inq_id,
-        content: question[i].content,
-        field: question[i].field,
-        inqType: question[i].inqType,
-        ansType: question[i].ansType,
-        receiver: question[i].receiver,
+        content: q.content,
+        field: q.field,
+        inqType: q.inqType,
+        ansType: q.ansType,
+        receiver: q.receiver,
         mybl: myBL.id
       }
-      for (let k in question[i].choices) {
+      for (const f of q.files) {
+        const media_id = uuidv4()
+        const inq_media = {
+          media: media_id,
+          inquiry: inq_id
+        }
+        inqMedia.push(inq_media)
+        const form_data = f.data
+        form_data.append("id", media_id)
+        formData.push(form_data)
+      }
+      for (const k of q.choices) {
         const ans_id = uuidv4()
         const inq_ans = {
           inquiry: inq_id,
@@ -46,19 +60,20 @@ const PopoverFooter = ({
         }
         const ans = {
           id: ans_id,
-          content: question[i].choices[k],
-          type: question[i].ansType,
+          content: k,
+          type: q.ansType,
         }
         answer.push(ans)
         inqAns.push(inq_ans)
       }
       inquiry.push(inq)
     }
-    saveInquiry({ inquiry, inqAns, answer }).then(() => {
-      dispatch(Actions.displaySuccess(true))
-      dispatch(Actions.saveInquiry())
+    axios.all(formData.map((endpoint) => uploadFile(endpoint))).then(() => {
+      saveInquiry({ inquiry, inqAns, answer, inqMedia }).then(() => {
+        dispatch(Actions.displaySuccess(true))
+        dispatch(Actions.saveInquiry())
+      }).catch(error => dispatch(Actions.displayFail(true, error)))
     }).catch(error => dispatch(Actions.displayFail(true, error)))
-
   }
   const toggleInquiriresDialog = () => {
     dispatch(Actions.toggleAllInquiry())

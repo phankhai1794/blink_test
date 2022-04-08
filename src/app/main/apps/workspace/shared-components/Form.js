@@ -113,9 +113,23 @@ export default function Form(props) {
   const dispatch = useDispatch()
   const classes = useStyles()
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs } = props;
-  const [index, openAllInquiry] = useSelector((state) => [state.workspace.openEdit, state.workspace.openAllInquiry])
+  const [index, openAllInquiry, question] = useSelector((state) => [
+    state.workspace.openEdit,
+    state.workspace.openAllInquiry,
+    state.workspace.question
+  ])
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const checkValidate = () => {
+    if (!question[index].inqType || !question[index].field) {
+      dispatch(Actions.validate({
+        field: Boolean(question[index].field),
+        inqType: Boolean(question[index].inqType)
+      }));
+      return false
+    }
+    return true
+  }
   const handleOpenFab = () => {
     setOpenFab(true);
     toggleForm(false);
@@ -128,10 +142,10 @@ export default function Form(props) {
     if (openAllInquiry) {
       dispatch(Actions.addQuestion1())
     }
-    else {
+    else if (checkValidate()) {
       dispatch(Actions.addQuestion())
+      dispatch(Actions.setEdit(index + 1));
     }
-    dispatch(Actions.setEdit(index + 1));
   };
   const handleClose = () => {
     toggleForm(false);
