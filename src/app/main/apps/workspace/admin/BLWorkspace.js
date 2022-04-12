@@ -52,14 +52,14 @@ const BLWorkspace = (props) => {
   const filterData = (data) => {
     let result = data;
     for (const i in result) {
-      const list1 = []
+      const list1 = [];
       for (const k of result[i].media) {
         list1.push({
           name: k.name,
           type: k.ext
         });
       }
-      result[i]['files'] = list1
+      result[i]['files'] = list1;
     }
     return result;
   };
@@ -150,8 +150,9 @@ const BLWorkspace = (props) => {
   }, []);
 
   useEffect(() => {
-    dispatch(HeaderActions.displayBtn());
+    dispatch(HeaderActions.displayBtn({ displayUserProfile: true }));
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
 
     loadMetadata().then((res) => {
       const data = filterMetadata(res);

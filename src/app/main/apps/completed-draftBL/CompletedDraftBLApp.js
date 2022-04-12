@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import _ from 'lodash';
 import { FusePageCarded } from '@fuse';
 import { makeStyles } from '@material-ui/styles';
 import CompletedDraftBLHeader from './CompletedDraftBLHeader';
 import CompletedDraftBLTable from './CompletedDraftBLTable';
+import * as AppActions from 'app/store/actions';
+import * as HeaderActions from 'app/store/actions/header';
+
 const useStyles = makeStyles((theme) => ({
   content: {
     '& canvas': {
@@ -21,8 +26,17 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 1
   }
 }));
+
 function CompletedDraftBLApp(props) {
   const classes = useStyles(props);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+    dispatch(HeaderActions.displayBtn({ hideAll: true, displayUserProfile: true }));
+  }, []);
+
   return (
     <FusePageCarded
       classes={{

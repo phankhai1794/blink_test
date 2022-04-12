@@ -31,6 +31,24 @@ function UserProfile(props) {
     dispatch(userActions.removeUserData());
   };
 
+  useEffect(() => {
+    if (user.displayName == '' || user.displayName == null) {
+      let userInfo = JSON.parse(localStorage.getItem('USER'));
+      if (localStorage.getItem('AUTH_TOKEN') && userInfo) {
+        let payload = {
+          ...user,
+          role: userInfo.role,
+          displayName: userInfo.displayName,
+          photoURL: userInfo.photoURL,
+          permissions: userInfo.permissions
+        };
+        dispatch(userActions.setUserData(payload));
+      } else {
+        history.push('/login');
+      }
+    }
+  }, [user]);
+
   return (
     <React.Fragment>
       <Button className="h-64 px-12" onClick={handleClick}>

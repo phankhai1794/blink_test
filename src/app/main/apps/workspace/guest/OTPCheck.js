@@ -76,8 +76,6 @@ const OtpCheck = ({ status }) => {
   };
 
   useEffect(() => {
-    dispatch(HeaderActions.displayBtn({ hideAll: true }));
-
     const id = new URLSearchParams(window.location.search).get('bl');
     if (id) setMyBL({ ...myBL, id });
 
