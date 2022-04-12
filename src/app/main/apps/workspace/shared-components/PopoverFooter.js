@@ -109,11 +109,11 @@ const PopoverFooter = ({
   return (
     <Grid container style={{ margin: '3rem auto' }}>
       <Grid item xs={5}>
-        <Link style={{ fontSize: '16px' }} onClick={toggleInquiriresDialog}>
-          Open All Inquiries
-        </Link>
         {fields.includes(title) ?
           <>
+            <Link style={{ fontSize: '16px' }} onClick={toggleInquiriresDialog}>
+              Open All Inquiries
+            </Link>
             <IconButton onClick={prevQuestion}>
               <NavigateBeforeIcon />
             </IconButton>
