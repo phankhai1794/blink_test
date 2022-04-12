@@ -52,14 +52,12 @@ const BLWorkspace = (props) => {
   const filterData = (data) => {
     let result = data;
     for (const i in result) {
-      const list1 = [];
-      for (const k of result[i].media) {
-        list1.push({
+      result[i]['files'] = result[i].media.map(k => {
+        return {
           name: k.name,
           type: k.ext
-        });
-      }
-      result[i]['files'] = list1;
+        }
+      });
     }
     return result;
   };
@@ -83,11 +81,6 @@ const BLWorkspace = (props) => {
     return dict;
   };
 
-  const getList = (data) => {
-    const list = [];
-    data.forEach((e) => list.push(e.field));
-    return list;
-  };
   useEffect(() => {
     if (success) {
       dispatch(Actions.displaySuccess(false));
@@ -125,7 +118,7 @@ const BLWorkspace = (props) => {
       loadInquiry(myBL.id)
         .then((res) => {
           const data = filterData(res);
-          const field_list = getList(res);
+          const field_list = res.map(e => e.field);
           dispatch(Actions.saveField(field_list));
           dispatch(Actions.editInquiry(data));
         })
@@ -176,8 +169,8 @@ const BLWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-            ? getKeyByValue(metadata['field'], currentField)
-            : ''
+              ? getKeyByValue(metadata['field'], currentField)
+              : ''
         }
       >
         {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}

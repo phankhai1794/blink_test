@@ -47,11 +47,12 @@ function ToolbarLayout1(props) {
   const classes = useStyles(props);
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
-  const [hideAll, displayUserProfile, displayDraftBLBtn, displayEditBtn] = useSelector((state) => [
+  const [hideAll, displayUserProfile, displayDraftBLBtn, displayEditBtn, badge] = useSelector((state) => [
     state.header.hideAll,
     state.header.displayUserProfile,
     state.header.displayDraftBLBtn,
-    state.header.displayEditBtn
+    state.header.displayEditBtn,
+    state.workspace.inquiries.length
   ]);
 
   const handleRedirect = (url) => {
@@ -90,7 +91,7 @@ function ToolbarLayout1(props) {
               <></>
             ) : (
               <Button variant="text" size="medium" className={clsx('h-64', classes.button)}>
-                <Badge color="primary" badgeContent={0} showZero>
+                <Badge color="primary" badgeContent={badge} showZero>
                   <NotificationsIcon />
                 </Badge>
                 <span className="pl-12">Inquiry</span>
