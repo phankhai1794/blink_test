@@ -169,8 +169,12 @@ function InquiringTable(props) {
                     </TableCell>
 
                     <TableCell className="w-52" component="th" scope="row" padding="none">
-                      <Tooltip title={record.createdBy_TB_ACCOUNT.userName} arrow placement="top">
-                        <Avatar src={record.createdBy_TB_ACCOUNT.avatar} />
+                      <Tooltip
+                        title={'Undefined' || record.createdBy_TB_ACCOUNT.userName}
+                        arrow
+                        placement="top"
+                      >
+                        <Avatar src={'Undefined' || record.createdBy_TB_ACCOUNT.avatar} />
                       </Tooltip>
                     </TableCell>
 
@@ -181,8 +185,12 @@ function InquiringTable(props) {
                     </TableCell>
 
                     <TableCell className="w-52" component="th" scope="row" padding="none">
-                      <Tooltip title={record.updatedBy_TB_ACCOUNT.userName} arrow placement="top">
-                        <Avatar src={record.updatedBy_TB_ACCOUNT.avatar} />
+                      <Tooltip
+                        title={'Undefined' || record.createdBy_TB_ACCOUNT.userName}
+                        arrow
+                        placement="top"
+                      >
+                        <Avatar src={'Undefined' || record.createdBy_TB_ACCOUNT.avatar} />
                       </Tooltip>
                     </TableCell>
 
