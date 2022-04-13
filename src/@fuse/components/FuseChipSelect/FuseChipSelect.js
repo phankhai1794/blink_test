@@ -50,7 +50,8 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     alignItems: 'center',
     paddingTop: 4,
-    minHeight: 45
+    minHeight: 45,
+    width: '100px'
   },
   chip: {
     margin: '4px 4px 4px 0'

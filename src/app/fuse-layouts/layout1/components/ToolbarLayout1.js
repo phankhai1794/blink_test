@@ -3,7 +3,7 @@ import history from '@history';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { AppBar, Toolbar, Avatar, Badge, Button, Hidden } from '@material-ui/core';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
 import VisibilityIcon from '@material-ui/icons/Visibility';
@@ -12,6 +12,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import History from 'app/fuse-layouts/shared-components/History';
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import SendInquiryForm from 'app/main/apps/workspace/admin/SendInquiryForm';
+import * as Actions from 'app/main/apps/workspace/admin/store/actions';
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -44,6 +45,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ToolbarLayout1(props) {
+  const dispatch = useDispatch()
   const classes = useStyles(props);
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
@@ -58,7 +60,10 @@ function ToolbarLayout1(props) {
   const handleRedirect = (url) => {
     history.push(url);
   };
-
+  const openInquiry = () => {
+    dispatch(Actions.toggleInquiry(true))
+    dispatch(Actions.toggleAllInquiry())
+  };
   return (
     <ThemeProvider theme={toolbarTheme}>
       <AppBar id="fuse-toolbar" className="flex relative z-10" color="default">
@@ -90,7 +95,7 @@ function ToolbarLayout1(props) {
             {hideAll ? (
               <></>
             ) : (
-              <Button variant="text" size="medium" className={clsx('h-64', classes.button)}>
+              <Button variant="text" size="medium" className={clsx('h-64', classes.button)} onClick={openInquiry}>
                 <Badge color="primary" badgeContent={badge} showZero>
                   <NotificationsIcon />
                 </Badge>

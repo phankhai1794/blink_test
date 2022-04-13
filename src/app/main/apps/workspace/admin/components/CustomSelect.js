@@ -13,12 +13,11 @@ const useStyles = makeStyles(theme => ({
     wideInput: {
         display: 'flex',
         alignItems: 'center',
-        width: 200,
+        width: 180,
         height: 30,
         padding: theme.spacing(1),
     },
     formControl: {
-        margin: theme.spacing(1),
         minWidth: 120,
     },
 }))

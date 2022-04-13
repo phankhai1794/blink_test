@@ -333,7 +333,7 @@ const InquiryEditor = (props) => {
             />
           </FormGroup>
         </div>
-        <Grid container style={{ width: '750px' }} spacing={1}>
+        <Grid container style={{ width: '750px', marginTop: '5px' }} spacing={1}>
           <Grid item xs={12} className="flex justify-between">
             <FormControl error={!valid.field}>
               <FuseChipSelect

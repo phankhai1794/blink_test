@@ -185,7 +185,7 @@ const InquiryCreated = (props) => {
     setEdit(id)
   }
   useEffect(() => {
-    if (question[0].media.length && !question[0].files[0].src) {
+    if (question[0].media && question[0].media.length && !question[0].files[0].src) {
       const optionsOfQuestion = [...inquiries];
       for (let f in question[0].media) {
         getFile(question[0].media[f].id).then((file) => {
