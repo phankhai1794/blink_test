@@ -106,7 +106,7 @@ const DialogActions = withStyles((theme) => ({
 
 const useStyles = makeStyles(() => ({
   dialogPaper: {
-    width: '838px'
+    width: '850px'
   }
 }))
 export default function Form(props) {
@@ -150,10 +150,12 @@ export default function Form(props) {
   const handleClose = () => {
     toggleForm(false);
     setOpenFab(false);
-    dispatch(Actions.setReply(false))
     if (openAllInquiry) {
-      dispatch(Actions.toggleAllInquiry())
+      setTimeout(() => {
+        dispatch(Actions.toggleAllInquiry())
+      }, 400)
     }
+    dispatch(Actions.setReply(false))
   };
   const [value, setValue] = React.useState(0);
   const handleChange = (event, newValue) => {
