@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import history from '@history';
 import {
   Icon,
   Table,
@@ -35,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function InquiringTable(props) {
+  const { history } = props;
   const classes = useStyles();
 
   // const dispatch = useDispatch();
@@ -72,9 +72,9 @@ function InquiringTable(props) {
     setSelected([]);
   }
 
-  function handleClick(item) {
-    props.history.push({
-      pathname: '/apps/workplace/' + item.bkgNo,
+  function handleClick(bkgNo) {
+    history.push({
+      pathname: '/apps/workplace/' + bkgNo,
       state: 'inquiry'
     });
   }
@@ -149,16 +149,17 @@ function InquiringTable(props) {
             {_.orderBy(mybls, ['id'], ['asc'])
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((record) => {
+                const { id, bkgNo, state, createdBy, updatedBy, updatedAt } = record;
                 return (
                   <TableRow
                     className="h-64 cursor-pointer"
                     hover
                     role="checkbox"
-                    key={record.id}
+                    key={id}
                     // aria-checked={isSelected}
                     // tabIndex={-1}
                     // selected={isSelected}
-                    onClick={() => handleClick(record)}
+                    onClick={() => handleClick(bkgNo)}
                   >
                     <TableCell className="w-48 px-4 sm:px-12" padding="checkbox">
                       <Checkbox
@@ -170,33 +171,33 @@ function InquiringTable(props) {
 
                     <TableCell className="w-52" component="th" scope="row" padding="none">
                       <Tooltip
-                        title={'Undefined' || record.createdBy_TB_ACCOUNT.userName}
+                        title={createdBy ? createdBy.userName : 'Undefined'}
                         arrow
                         placement="top"
                       >
-                        <Avatar src={'Undefined' || record.createdBy_TB_ACCOUNT.avatar} />
+                        <Avatar src={createdBy ? createdBy.avatar : 'Undefined'} />
                       </Tooltip>
                     </TableCell>
 
                     <TableCell component="th" scope="row">
                       <Box>
-                        <Box>{record.bkgNo}</Box>
+                        <Box>{bkgNo}</Box>
                       </Box>
                     </TableCell>
 
                     <TableCell className="w-52" component="th" scope="row" padding="none">
                       <Tooltip
-                        title={'Undefined' || record.createdBy_TB_ACCOUNT.userName}
+                        title={updatedBy ? updatedBy.userName : 'Undefined'}
                         arrow
                         placement="top"
                       >
-                        <Avatar src={'Undefined' || record.createdBy_TB_ACCOUNT.avatar} />
+                        <Avatar src={updatedBy ? updatedBy.avatar : 'Undefined'} />
                       </Tooltip>
                     </TableCell>
 
                     <TableCell component="th" scope="row">
                       <Chip
-                        label={record.state}
+                        label={state}
                         variant="outlined"
                         classes={{
                           root: classes.root,
@@ -208,7 +209,7 @@ function InquiringTable(props) {
                     <TableCell component="th" scope="row" align="right">
                       <Box sx={{ mt: '-25px' }}>
                         <Typography variant="subtitle2" color="textSecondary">
-                          {moment(record.updatedAt).format('DD MMM YYYY')}
+                          {moment(updatedAt).format('DD MMM YYYY')}
                         </Typography>
                       </Box>
                     </TableCell>
