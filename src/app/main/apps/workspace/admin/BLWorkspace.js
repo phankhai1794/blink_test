@@ -7,15 +7,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as AppActions from 'app/store/actions';
 import * as Actions from './store/actions';
 import * as HeaderActions from 'app/store/actions/header';
-import { loadInquiry, loadMetadata } from '../api/inquiry';
-import { createBL } from '../api/mybl';
+import { loadInquiry, loadMetadata } from 'app/main/api/inquiry';
+import { createBL } from 'app/main/api/mybl';
 
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import InquiryCreated from '../shared-components/InquiryCreated';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
-import { getKeyByValue } from '../shared-functions';
+import { getKeyByValue } from 'app/main/shared-functions';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
@@ -52,11 +52,11 @@ const BLWorkspace = (props) => {
   const filterData = (data) => {
     let result = data;
     for (const i in result) {
-      result[i]['files'] = result[i].media.map(k => {
+      result[i]['files'] = result[i].media.map((k) => {
         return {
           name: k.name,
           type: k.ext
-        }
+        };
       });
     }
     return result;
@@ -118,7 +118,7 @@ const BLWorkspace = (props) => {
       loadInquiry(myBL.id)
         .then((res) => {
           const data = filterData(res);
-          const field_list = res.map(e => e.field);
+          const field_list = res.map((e) => e.field);
           dispatch(Actions.saveField(field_list));
           dispatch(Actions.editInquiry(data));
         })
@@ -169,8 +169,8 @@ const BLWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-              ? getKeyByValue(metadata['field'], currentField)
-              : ''
+            ? getKeyByValue(metadata['field'], currentField)
+            : ''
         }
       >
         {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}

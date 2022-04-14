@@ -6,79 +6,99 @@ import ParagraphAnswer from './ParagraphAnswer';
 import AttatchmentAnswer from './AttatchmentAnswer';
 import InquiryEditor from '../admin/components/InquiryEditor';
 import { Card, Typography, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
-import { getKeyByValue } from '../shared-functions';
+import { getKeyByValue } from 'app/main/shared-functions';
 
 const Inquiry = (props) => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const { question, index } = props;
-  const [questions, openEdit, metadata] = useSelector((state) => [state.workspace.question, state.workspace.openEdit, state.workspace.metadata])
+  const [questions, openEdit, metadata] = useSelector((state) => [
+    state.workspace.question,
+    state.workspace.openEdit,
+    state.workspace.metadata
+  ]);
   const onSaveSelectedChoice = (savedQuestion) => {
     props.onSaveSelectedChoice(savedQuestion);
   };
 
   const changeToEditor = (index) => {
-    if (index !== openEdit)
-      dispatch(Actions.setEdit(index));
+    if (index !== openEdit) dispatch(Actions.setEdit(index));
   };
 
   const handleReceiverChange = (e) => {
     const optionsOfQuestion = [...questions];
     if (e.target.checked) {
-      optionsOfQuestion[index].receiver.push(e.target.value)
-    }
-    else {
+      optionsOfQuestion[index].receiver.push(e.target.value);
+    } else {
       const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
-      optionsOfQuestion[index].receiver.splice(i, 1)
+      optionsOfQuestion[index].receiver.splice(i, 1);
     }
-    dispatch((Actions.setQuestion(optionsOfQuestion)))
+    dispatch(Actions.setQuestion(optionsOfQuestion));
   };
   return (
     <>
-      <div className="flex justify-between">
-      </div>
-      <div style={{ width: '770px', marginBottom: "24px" }}>
-        {openEdit === index ? <InquiryEditor index={index} questions={questions} question={question} saveQuestion={(q) => dispatch((Actions.setQuestion(q)))} /> :
+      <div className="flex justify-between"></div>
+      <div style={{ width: '770px', marginBottom: '24px' }}>
+        {openEdit === index ? (
+          <InquiryEditor
+            index={index}
+            questions={questions}
+            question={question}
+            saveQuestion={(q) => dispatch(Actions.setQuestion(q))}
+          />
+        ) : (
           <Card style={{ padding: '1rem ' }}>
             <div className="flex justify-between">
-              <Typography color='primary' variant="h5">{getKeyByValue(metadata["field"], question.field)}</Typography>
+              <Typography color="primary" variant="h5">
+                {getKeyByValue(metadata['field'], question.field)}
+              </Typography>
               <FormGroup row>
                 <FormControlLabel
                   value="onshore"
-                  control={<Checkbox
-                    checked={question.receiver.includes("onshore")}
-                    onChange={handleReceiverChange}
-                    color="primary" />}
-                  label="Onshore" />
+                  control={
+                    <Checkbox
+                      checked={question.receiver.includes('onshore')}
+                      onChange={handleReceiverChange}
+                      color="primary"
+                    />
+                  }
+                  label="Onshore"
+                />
                 <FormControlLabel
                   value="customer"
-                  control={<Checkbox
-                    checked={question.receiver.includes("customer")}
-                    onChange={handleReceiverChange}
-                    color="primary" />}
+                  control={
+                    <Checkbox
+                      checked={question.receiver.includes('customer')}
+                      onChange={handleReceiverChange}
+                      color="primary"
+                    />
+                  }
                   label="Customer"
                 />
               </FormGroup>
             </div>
             <div onClick={() => changeToEditor(index)}>
-              <Typography variant="h5">{question.content.replace("{{INQ_TYPE}}", "")}</Typography>
+              <Typography variant="h5">{question.content.replace('{{INQ_TYPE}}', '')}</Typography>
               <div style={{ display: 'block', margin: '1rem 0rem' }}>
                 {question.ansType === metadata.ans_type.choice && (
                   <ChoiceAnswer question={question} onSaveSelectedChoice={onSaveSelectedChoice} />
                 )}
                 {question.ansType === metadata.ans_type.paragraph && (
-                  <ParagraphAnswer question={question} onSaveSelectedChoice={onSaveSelectedChoice} />
+                  <ParagraphAnswer
+                    question={question}
+                    onSaveSelectedChoice={onSaveSelectedChoice}
+                  />
                 )}
                 {question.ansType === metadata.ans_type.attachment && (
                   <AttatchmentAnswer
                     question={question}
                     onSaveSelectedChoice={onSaveSelectedChoice}
-                  // disabled={true}
+                    // disabled={true}
                   />
                 )}
               </div>
             </div>
           </Card>
-        }
+        )}
       </div>
     </>
   );

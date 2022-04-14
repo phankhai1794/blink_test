@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 // import * as Actions from '../store/actions';
 
-function CustomerConfirmedHeader(props) {
+function InquiringHeader(props) {
   const dispatch = useDispatch();
   // const searchText = useSelector(({ eCommerceApp }) => eCommerceApp.products.searchText);
   const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
@@ -38,9 +38,10 @@ function CustomerConfirmedHeader(props) {
         </ThemeProvider>
       </div>
       <FuseAnimate animation="transition.slideRightIn" delay={300}>
+        {/* TODO: Update BKG_NO */}
         <Button
           component={Link}
-          to="/apps/e-commerce/products/new"
+          to="/apps/workplace/NGOB29899900" // /gciUIQActrGonB3VEirVTGHe7qhY12rk"
           className="whitespace-no-wrap mr-52"
           variant="contained"
         >
@@ -52,4 +53,4 @@ function CustomerConfirmedHeader(props) {
   );
 }
 
-export default CustomerConfirmedHeader;
+export default InquiringHeader;
