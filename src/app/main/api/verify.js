@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getHeaders } from '../shared-functions';
+import { getHeaders } from 'app/main/shared-functions';
 
 export async function verifyEmail(data) {
   const response = await axios.post(`${process.env.REACT_APP_API}/authentication/email`, data);

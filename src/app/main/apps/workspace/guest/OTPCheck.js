@@ -11,7 +11,7 @@ import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 import * as HeaderActions from 'app/store/actions/header';
-import { verifyEmail, verifyGuest, isVerified } from '../api/verify';
+import { verifyEmail, verifyGuest, isVerified } from 'app/main/api/verify';
 import GuestWorkspace from './GuestWorkspace';
 
 const otpLength = 4;

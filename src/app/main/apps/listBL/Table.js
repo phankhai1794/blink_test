@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import moment from 'moment';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Icon,
   Table,
@@ -8,38 +10,85 @@ import {
   TableRow,
   Checkbox,
   Box,
-  Chip
+  Chip,
+  Tooltip
 } from '@material-ui/core';
 import { FuseScrollbars } from '@fuse';
 import { Avatar } from '@material-ui/core';
 import { withRouter } from 'react-router-dom';
 import { Typography } from '@material-ui/core';
 import _ from '@lodash';
-import { useDispatch, useSelector } from 'react-redux';
-import { data } from './data';
 import { makeStyles } from '@material-ui/styles';
+import { getAllBl } from 'app/main/api/mybl';
+import * as Actions from './store/actions';
+
+const blStateStyles = {
+  REQUEST: {
+    root: {
+      border: '1px solid red',
+      backgroundColor: '#FF505F1A'
+    },
+    outlined: {
+      color: '#EB0014',
+      fontWeight: '700'
+    }
+  },
+  INQUIRED: {
+    root: {
+      border: '1px solid orange',
+      backgroundColor: '#FCC4191A'
+    },
+    outlined: {
+      color: '#8F6400',
+      fontWeight: '700'
+    }
+  },
+  CONFIRM: {
+    root: {
+      border: '1px solid green',
+      backgroundColor: '#21CC661A'
+    },
+    outlined: {
+      color: '#178D46',
+      fontWeight: '700'
+    }
+  },
+  COMPLETED: {
+    root: {
+      border: '1px solid #F1C40F',
+      backgroundColor: '#FAFAD2'
+    },
+    outlined: {
+      color: '#FFBF00',
+      fontWeight: '700'
+    }
+  }
+};
+function getFilterStateFromPath(pathname) {
+  const paths = pathname.split('/');
+  return paths[paths.length - 1].replaceAll('/', '').toUpperCase();
+}
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    // color: theme.palette.secondary.contrastText,
-    border: '1px solid #F1C40F',
-    backgroundColor: '#FAFAD2'
+  root: ({ location }) => {
+    const state = getFilterStateFromPath(location.pathname);
+    return blStateStyles[state].root;
   },
-  outlined: {
-    color: '#FFBF00',
-    fontWeight: '700'
+  outlined: ({ location }) => {
+    const state = getFilterStateFromPath(location.pathname);
+    return blStateStyles[state].outlined;
   }
 }));
-function CustomerAmendedTable(props) {
-  const classes = useStyles();
 
+function InquiringTable(props) {
+  const { location, history } = props;
+  const classes = useStyles(props);
+
+  const filterState = getFilterStateFromPath(location.pathname);
+  const myBLs = useSelector(({ listBlReducer }) => listBlReducer.myBLs);
   const dispatch = useDispatch();
-  // const products = useSelector(({ eCommerceApp }) => eCommerceApp.products.data);
-  // const searchText = useSelector(({ eCommerceApp }) => eCommerceApp.products.searchText);
 
   const [selected, setSelected] = useState([]);
-  // const [data, setData] = useState(0);
-
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [order, setOrder] = useState({
@@ -63,16 +112,16 @@ function CustomerAmendedTable(props) {
 
   function handleSelectAllClick(event) {
     if (event.target.checked) {
-      setSelected(data.map((n) => n.id));
+      setSelected(myBLs.map((n) => n.id));
       return;
     }
     setSelected([]);
   }
 
-  function handleClick(item) {
-    props.history.push({
-      pathname: '/apps/workplace/' + item.id, // + '/gciUIQActrGonB3VEirVTGHe7qhY12rk',
-      state: 'c-amended'
+  function handleClick(bkgNo) {
+    history.push({
+      pathname: '/apps/workplace/' + bkgNo,
+      state: 'inquiry'
     });
   }
 
@@ -103,6 +152,7 @@ function CustomerAmendedTable(props) {
   function handleChangeRowsPerPage(event) {
     setRowsPerPage(event.target.value);
   }
+
   // function renderNumber(num) {
   //     var indents = [];
   //     for (var i = 0; i < num; i++) {
@@ -113,31 +163,42 @@ function CustomerAmendedTable(props) {
   //     return indents;
   // }
 
+  useEffect(() => {
+    getAllBl(filterState)
+      .then(({ myBLs: data }) => {
+        if (data) dispatch(Actions.setMyBLs(data));
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
+
   return (
     <div className="w-full flex flex-col mr-52">
       <FuseScrollbars className="flex-grow overflow-x-auto">
         <Table className="min-w-xl" aria-labelledby="tableTitle">
           {/* <ProductsTableHead
-                        numSelected={selected.length}
-                        order={order}
-                        onSelectAllClick={handleSelectAllClick}
-                        onRequestSort={handleRequestSort}
-                        rowCount={data.length}
-                    /> */}
+            numSelected={selected.length}
+            order={order}
+            onSelectAllClick={handleSelectAllClick}
+            onRequestSort={handleRequestSort}
+            rowCount={myBLs.length}
+          /> */}
           <TableBody>
-            {_.orderBy(data, ['id'], ['asc'])
+            {_.orderBy(myBLs, ['id'], ['asc'])
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((h) => {
+              .map((record) => {
+                const { id, bkgNo, state, createdBy, updatedBy, updatedAt } = record;
                 return (
                   <TableRow
                     className="h-64 cursor-pointer"
                     hover
                     role="checkbox"
+                    key={id}
                     // aria-checked={isSelected}
                     // tabIndex={-1}
-                    // key={n.id}
                     // selected={isSelected}
-                    onClick={() => handleClick(h)}
+                    onClick={() => handleClick(bkgNo)}
                   >
                     <TableCell className="w-48 px-4 sm:px-12" padding="checkbox">
                       <Checkbox
@@ -148,32 +209,34 @@ function CustomerAmendedTable(props) {
                     </TableCell>
 
                     <TableCell className="w-52" component="th" scope="row" padding="none">
-                      <Avatar src={h.avatar} />
+                      <Tooltip
+                        title={createdBy ? createdBy.userName : 'Undefined'}
+                        placement="top"
+                        arrow="true"
+                      >
+                        <Avatar src={createdBy ? createdBy.avatar : 'Undefined'} />
+                      </Tooltip>
                     </TableCell>
 
                     <TableCell component="th" scope="row">
                       <Box>
-                        <Box>{h.id}</Box>
-                        <Box>{h.position}</Box>
+                        <Box>{bkgNo}</Box>
                       </Box>
                     </TableCell>
 
-                    <TableCell component="th" scope="row" align="center">
-                      <Box display="flex" alignItems="center">
-                        {/* {renderNumber(h.memberNumber)} */}
-                        {h.members.map((member, index) => {
-                          return (
-                            <Box key={index} sx={{ mr: '-10px' }}>
-                              <Avatar src={member.avatar} />
-                            </Box>
-                          );
-                        })}
-                      </Box>
+                    <TableCell className="w-52" component="th" scope="row" padding="none">
+                      <Tooltip
+                        title={updatedBy ? updatedBy.userName : 'Undefined'}
+                        placement="top"
+                        arrow="true"
+                      >
+                        <Avatar src={updatedBy ? updatedBy.avatar : 'Undefined'} />
+                      </Tooltip>
                     </TableCell>
 
                     <TableCell component="th" scope="row">
                       <Chip
-                        label="Amended"
+                        label={state}
                         variant="outlined"
                         classes={{
                           root: classes.root,
@@ -185,10 +248,9 @@ function CustomerAmendedTable(props) {
                     <TableCell component="th" scope="row" align="right">
                       <Box sx={{ mt: '-25px' }}>
                         <Typography variant="subtitle2" color="textSecondary">
-                          {h.dateCreated}
+                          {moment(updatedAt).format('DD MMM YYYY')}
                         </Typography>
                       </Box>
-                      {/* {h.dateCreated} */}
                     </TableCell>
                   </TableRow>
                 );
@@ -199,7 +261,7 @@ function CustomerAmendedTable(props) {
 
       <TablePagination
         component="div"
-        count={data.length}
+        count={myBLs.length}
         rowsPerPage={rowsPerPage}
         page={page}
         backIconButtonProps={{
@@ -215,4 +277,4 @@ function CustomerAmendedTable(props) {
   );
 }
 
-export default withRouter(CustomerAmendedTable);
+export default withRouter(InquiringTable);

@@ -12,35 +12,45 @@ import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import EditIcon from '@material-ui/icons/Edit';
 import UserInfo from './UserInfo';
-import { saveComment, loadComment, editComment, deleteComment } from '../api/inquiry';
-import { getFile } from '../api/file';
-import { displayTime } from '../shared-functions';
-import { Menu, MenuItem, ListItemIcon, Card, ListItemText, Typography, IconButton } from '@material-ui/core';
+import { saveComment, loadComment, editComment, deleteComment } from 'app/main/api/inquiry';
+import { getFile } from 'app/main/api/file';
+import { displayTime } from 'app/main/shared-functions';
+import {
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  Card,
+  ListItemText,
+  Typography,
+  IconButton
+} from '@material-ui/core';
 import { v4 as uuidv4 } from 'uuid';
 
 const Comment = (props) => {
   const inputStyle = {
-    borderRadius: "18px",
-    padding: "10px",
-    borderStyle: "none",
-    backgroundColor: "#f0f2f5",
-    fontSize: "17px",
-    width: "97%"
+    borderRadius: '18px',
+    padding: '10px',
+    borderStyle: 'none',
+    backgroundColor: '#f0f2f5',
+    fontSize: '17px',
+    width: '97%'
   };
-  const dispatch = useDispatch()
-  const { q, inquiries, indexes } = props
-  const [value, setValue] = useState("")
-  const [key, setKey] = useState()
-  const [comment, setComment] = useState([])
+  const dispatch = useDispatch();
+  const { q, inquiries, indexes } = props;
+  const [value, setValue] = useState('');
+  const [key, setKey] = useState();
+  const [comment, setComment] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [edit, setEdit] = useState("")
-  const [reply, user] = useSelector((state) => [state.workspace.reply, state.auth.user])
+  const [edit, setEdit] = useState('');
+  const [reply, user] = useSelector((state) => [state.workspace.reply, state.auth.user]);
   const open = Boolean(anchorEl);
   useEffect(() => {
-    loadComment(q.id).then((res) => {
-      setComment(res)
-    }).catch(error => console.log(error))
-  }, [])
+    loadComment(q.id)
+      .then((res) => {
+        setComment(res);
+      })
+      .catch((error) => console.log(error));
+  }, []);
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -49,74 +59,82 @@ const Comment = (props) => {
   };
 
   const changeValue = (e) => {
-    setValue(e.target.value)
-  }
+    setValue(e.target.value);
+  };
   const changeComment = (e, id) => {
     const temp = [...comment];
-    temp[id].content = e.target.value
-    setComment(temp)
-  }
+    temp[id].content = e.target.value;
+    setComment(temp);
+  };
   const addComment = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       if (e.target.value) {
-        const ans_id = uuidv4()
+        const ans_id = uuidv4();
         const inqAns = {
           inquiry: q.id,
           answer: ans_id,
           confirm: false,
-          type: 'REP',
-        }
+          type: 'REP'
+        };
         const answer = {
           id: ans_id,
           content: e.target.value,
-          type: q.ansType,
-        }
-        saveComment({ inqAns, answer })
-        setComment([...comment, {
-          answer: ans_id,
-          createdAt: new Date(),
-          content: e.target.value,
-          creator: user.displayName
-        }])
+          type: q.ansType
+        };
+        saveComment({ inqAns, answer });
+        setComment([
+          ...comment,
+          {
+            answer: ans_id,
+            createdAt: new Date(),
+            content: e.target.value,
+            creator: user.displayName
+          }
+        ]);
       }
-      setValue("")
+      setValue('');
     }
-  }
+  };
 
   const onEnterComment = (e, id) => {
-    if (e.key === "Enter") {
-      editComment(comment[id].answer, e.target.value)
-      setEdit("")
+    if (e.key === 'Enter') {
+      editComment(comment[id].answer, e.target.value);
+      setEdit('');
     }
-  }
+  };
   const onDelete = (id) => {
-    deleteComment(comment[id].answer)
+    deleteComment(comment[id].answer);
     const temp = [...comment];
-    temp.splice(id, 1)
-    setComment(temp)
+    temp.splice(id, 1);
+    setComment(temp);
     setAnchorEl(null);
-  }
+  };
   const onEdit = (id) => {
-    setEdit(id)
-    setAnchorEl(null)
-  }
+    setEdit(id);
+    setAnchorEl(null);
+  };
   return (
     <>
       {comment.map((k, id) => {
         return (
-          <div style={{ marginBottom: "20px" }}>
-            {edit === id ?
+          <div style={{ marginBottom: '20px' }}>
+            {edit === id ? (
               <input
                 placeholder="Comment here"
                 style={inputStyle}
                 onKeyPress={(e) => onEnterComment(e, id)}
                 value={k.content}
-                onChange={(e) => changeComment(e, id)} />
-              :
+                onChange={(e) => changeComment(e, id)}
+              />
+            ) : (
               <>
-                <div className="flex justify-between" onMouseEnter={() => setKey(id)} onMouseLeave={() => setKey("")}>
+                <div
+                  className="flex justify-between"
+                  onMouseEnter={() => setKey(id)}
+                  onMouseLeave={() => setKey('')}
+                >
                   <UserInfo name={k.creator} time={displayTime(k.createdAt)} />
-                  {user.username === k.creator && key === id &&
+                  {user.username === k.creator && key === id && (
                     <>
                       <IconButton onClick={handleClick}>
                         <MoreVertIcon />
@@ -142,36 +160,38 @@ const Comment = (props) => {
                         </MenuItem>
                       </Menu>
                     </>
-                  }
+                  )}
                 </div>
-                <Typography variant="h5">{k.content}</Typography> </>
-            }
+                <Typography variant="h5">{k.content}</Typography>{' '}
+              </>
+            )}
           </div>
-        )
+        );
       })}
-      {reply &&
+      {reply && (
         <input
           placeholder="Comment here"
           style={inputStyle}
           onKeyPress={addComment}
           value={value}
-          onChange={changeValue} />
-      }
+          onChange={changeValue}
+        />
+      )}
     </>
-  )
-}
+  );
+};
 
 const InquiryCreated = (props) => {
-  const dispatch = useDispatch()
-  const { user } = props
+  const dispatch = useDispatch();
+  const { user } = props;
   const [inquiries, currentField, metadata] = useSelector((state) => [
     state[user].inquiries,
     state[user].currentField,
-    state[user].metadata,
-  ])
-  const question = inquiries.filter((q) => q.field === currentField)
-  const indexes = inquiries.findIndex((q) => q.field === currentField)
-  const [edit, setEdit] = useState("")
+    state[user].metadata
+  ]);
+  const question = inquiries.filter((q) => q.field === currentField);
+  const indexes = inquiries.findIndex((q) => q.field === currentField);
+  const [edit, setEdit] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -182,48 +202,50 @@ const InquiryCreated = (props) => {
   };
 
   const toggleEdit = (id) => {
-    setEdit(id)
-  }
+    setEdit(id);
+  };
   useEffect(() => {
     if (question[0].media && question[0].media.length && !question[0].files[0].src) {
       const optionsOfQuestion = [...inquiries];
       for (let f in question[0].media) {
-        getFile(question[0].media[f].id).then((file) => {
-          let url = ""
-          if (question[0].files[f].type.match(/jpeg|jpg|png/g)) {
-            url = URL.createObjectURL(new Blob([file], { type: "image/jpeg" }))
-          }
-          else {
-            url = URL.createObjectURL(new Blob([file]))
-          }
-          optionsOfQuestion[indexes].files[f].src = url
-          dispatch(Actions.editInquiry(optionsOfQuestion));
-        }).catch(error => console.log(error))
+        getFile(question[0].media[f].id)
+          .then((file) => {
+            let url = '';
+            if (question[0].files[f].type.match(/jpeg|jpg|png/g)) {
+              url = URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
+            } else {
+              url = URL.createObjectURL(new Blob([file]));
+            }
+            optionsOfQuestion[indexes].files[f].src = url;
+            dispatch(Actions.editInquiry(optionsOfQuestion));
+          })
+          .catch((error) => console.log(error));
       }
     }
-  }, [])
+  }, []);
   return (
     <>
       {question.map((q, index) => {
-        const type = q.ansType
-        const username = q.creator
+        const type = q.ansType;
+        const username = q.creator;
         return (
           <>
-            {edit === index ?
+            {edit === index ? (
               <InquiryEditor
                 index={indexes}
                 questions={inquiries}
                 question={q}
-                saveQuestion={(q) => dispatch((Actions.editInquiry(q)))}
-              /> :
+                saveQuestion={(q) => dispatch(Actions.editInquiry(q))}
+              />
+            ) : (
               <Card style={{ width: '770px', padding: '1rem ', marginBottom: '24px' }}>
                 <div className="flex justify-between">
                   <UserInfo name={username} time={displayTime(q.createdAt)} />
-                  {user === 'workspace' &&
+                  {user === 'workspace' && (
                     <IconButton onClick={handleClick}>
                       <MoreVertIcon />
                     </IconButton>
-                  }
+                  )}
                   <Menu
                     id="customized-menu"
                     anchorEl={anchorEl}
@@ -247,31 +269,29 @@ const InquiryCreated = (props) => {
                 </div>
                 <Typography variant="h5">{q.content}</Typography>
                 <div style={{ display: 'block', margin: '1rem 0rem' }}>
-                  {type === metadata.ans_type.choice && (
-                    <ChoiceAnswer question={q} />
-                  )}
-                  {type === metadata.ans_type.paragraph && (
-                    <ParagraphAnswer question={q} />
-                  )}
+                  {type === metadata.ans_type.choice && <ChoiceAnswer question={q} />}
+                  {type === metadata.ans_type.paragraph && <ParagraphAnswer question={q} />}
                   {type === metadata.ans_type.attachment && (
                     <AttatchmentAnswer
                       question={q}
-                    // disabled={true}
+                      // disabled={true}
                     />
                   )}
                 </div>
-                {q.files && (
-                  q.files.map((file, index) => (
-                    file.type.match(/jpeg|jpg|png/g) ?
-                      <ImageAttach src={file.src} style={{ margin: '1rem' }} /> : <FileAttach file={file} />
-                  ))
-                )}
+                {q.files &&
+                  q.files.map((file, index) =>
+                    file.type.match(/jpeg|jpg|png/g) ? (
+                      <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+                    ) : (
+                      <FileAttach file={file} />
+                    )
+                  )}
                 <Comment q={q} inquiries={inquiries} indexes={indexes} />
-              </Card>}
-          </>)
-      })
-      }
-
+              </Card>
+            )}
+          </>
+        );
+      })}
     </>
   );
 };

@@ -3,8 +3,8 @@ import { useDispatch } from 'react-redux';
 import _ from 'lodash';
 import { FusePageCarded } from '@fuse';
 import { makeStyles } from '@material-ui/styles';
-import InquiringHeader from './InquiringHeader';
-import InquiringTable from './InquiringTable';
+import InquiringHeader from './Header';
+import InquiringTable from './Table';
 import * as AppActions from 'app/store/actions';
 import * as HeaderActions from 'app/store/actions/header';
 
