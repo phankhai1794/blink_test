@@ -15,7 +15,7 @@ import { makeStyles } from '@material-ui/styles';
 import InquiryCreated from '../shared-components/InquiryCreated';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
-import { getKeyByValue } from 'app/main/shared-functions';
+import { getKeyByValue, filterMetadata, filterData } from 'app/main/shared-functions';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
@@ -49,37 +49,6 @@ const BLWorkspace = (props) => {
       state.auth.user,
       state.workspace.myBL
     ]);
-  const filterData = (data) => {
-    let result = data;
-    for (const i in result) {
-      result[i]['files'] = result[i].media.map((k) => {
-        return {
-          name: k.name,
-          type: k.ext
-        };
-      });
-    }
-    return result;
-  };
-
-  const filterMetadata = (data) => {
-    const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [] };
-    for (const field of data['field']) {
-      dict['field'][field.name] = field.id;
-      dict['field_options'].push({ label: field.name, value: field.id });
-    }
-    for (const inq of data['inqType']) {
-      dict['inq_type'][inq.name] = inq.id;
-      dict['inq_type_options'].push({
-        label: inq.name,
-        value: inq.id
-      });
-    }
-    for (const ans of data['ansType']) {
-      dict['ans_type'][ans.name] = ans.id;
-    }
-    return dict;
-  };
 
   useEffect(() => {
     if (success) {
@@ -171,8 +140,7 @@ const BLWorkspace = (props) => {
             : currentField
             ? getKeyByValue(metadata['field'], currentField)
             : ''
-        }
-      >
+        }>
         {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}
       </Form>
 
@@ -184,8 +152,7 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['SHIPPER/EXPORTER'] : ''}
               multiline={true}
-              rows={5}
-            >
+              rows={5}>
               {`DSV AIR & SEA CO. LTD.\nAS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO\nBLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN`}
             </BLField>
           </Grid>
@@ -194,8 +161,7 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['CONSIGNEE'] : ''}
               multiline={true}
-              rows={5}
-            >
+              rows={5}>
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
@@ -207,8 +173,7 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['NOTIFY PARTY'] : ''}
               multiline={true}
-              rows={5}
-            >
+              rows={5}>
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
@@ -245,8 +210,7 @@ const BLWorkspace = (props) => {
               <h3>PLACE OF DELIVERY</h3>
               <BLField
                 id={metadata.field ? metadata.field['PLACE OF DELIVERY'] : ''}
-                selectedChoice="MANILA, MALAYSIA"
-              >
+                selectedChoice="MANILA, MALAYSIA">
                 BUSAN
               </BLField>
             </Grid>
@@ -271,16 +235,14 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['EXPORT REFERENCES'] : ''}
               multiline={true}
-              rows={2}
-            ></BLField>
+              rows={2}></BLField>
           </Grid>
           <Grid item>
             <h3>FORWARDING AGENT-REFERENCES FMC NO.</h3>
             <BLField
               id={metadata.field ? metadata.field['FORWARDING AGENT-REFERENCES'] : ''}
               multiline={true}
-              rows={5}
-            >
+              rows={5}>
               DSV AIR & SEA CO. LTD.
             </BLField>
           </Grid>

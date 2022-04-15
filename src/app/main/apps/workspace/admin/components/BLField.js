@@ -6,6 +6,7 @@ import { TextField, InputAdornment } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core';
 import { green } from '@material-ui/core/colors';
 import ChatBubbleIcon from '@material-ui/icons/ChatBubble';
+
 const useStyles = makeStyles((theme) => ({
   popover: {
     pointerEvents: 'none'
@@ -33,61 +34,65 @@ const useStyles = makeStyles((theme) => ({
   adornment: {
     height: '6em',
     maxHeight: '6em',
-    alignItems: 'flex-end',
-  },
+    alignItems: 'flex-end'
+  }
 }));
+
 const BLField = (props) => {
   const classes = useStyles();
-  const dispatch = useDispatch()
-  const {
-    children,
-    width,
-    multiline,
-    rows,
-    selectedChoice,
-    id
-  } = props;
-  const [questionIsEmpty, setQuestionIsEmpty] = useState(true)
-  const [anchorEl, inquiries, metadata] = useSelector((state) => [state.workspace.anchorEl, state.workspace.inquiries, state.workspace.metadata])
+  const dispatch = useDispatch();
+  const { children, width, multiline, rows, selectedChoice, id } = props;
+  const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
+  const [anchorEl, inquiries, metadata] = useSelector((state) => [
+    state.workspace.anchorEl,
+    state.workspace.inquiries,
+    state.workspace.metadata
+  ]);
+
   const openAddPopover = (e) => {
     if (questionIsEmpty) {
-      dispatch(Actions.setAnchor(e.currentTarget))
+      dispatch(Actions.setAnchor(e.currentTarget));
     }
-    dispatch(Actions.setField(e.currentTarget.id))
+    dispatch(Actions.setField(e.currentTarget.id));
   };
-  useEffect(() => {
-    setQuestionIsEmpty(checkQuestionIsEmpty())
-  }, [inquiries, metadata])
-  const checkQuestionIsEmpty = () => {
-    if (inquiries.length > 0) {
-      const check = inquiries.filter(q => q.field === id)
-      return check.length > 0 ? false : true
-    }
-    return true
-  }
+
   const closeAddPopover = (e) => {
     if (anchorEl !== null) {
       const { x, y, width, height } = anchorEl.getBoundingClientRect();
       if (x + width < 1400) {
         if (e.clientY + 2 > y + height || e.clientY < y) {
-          dispatch(Actions.setAnchor(null))
+          dispatch(Actions.setAnchor(null));
         } else if (e.clientX > x + width + 48 || e.clientX < x) {
-          dispatch(Actions.setAnchor(null))
+          dispatch(Actions.setAnchor(null));
         }
       } else {
         if (e.clientY + 2 > y + height || e.clientY < y) {
-          dispatch(Actions.setAnchor(null))
+          dispatch(Actions.setAnchor(null));
         } else if (e.clientX > x + width || e.clientX > x + 48) {
-          dispatch(Actions.setAnchor(null))
+          dispatch(Actions.setAnchor(null));
         }
       }
     }
   };
+
   const onClick = () => {
     if (!questionIsEmpty) {
-      dispatch(Actions.toggleInquiry(true))
+      dispatch(Actions.toggleInquiry(true));
     }
-  }
+  };
+
+  const checkQuestionIsEmpty = () => {
+    if (inquiries.length > 0) {
+      const check = inquiries.filter((q) => q.field === id);
+      return check.length == 0;
+    }
+    return true;
+  };
+
+  useEffect(() => {
+    setQuestionIsEmpty(checkQuestionIsEmpty());
+  }, [inquiries, metadata]);
+
   return (
     <div
       id={id}
@@ -111,20 +116,13 @@ const BLField = (props) => {
           endAdornment: (
             <InputAdornment
               position="end"
-              className={multiline && rows > 3 ? classes.adornment : ""}
+              className={multiline && rows > 3 ? classes.adornment : ''}
             >
-              {!questionIsEmpty ? (
-                <ChatBubbleIcon color="primary" />
-              ) : (
-                ''
-              )}
+              {!questionIsEmpty ? <ChatBubbleIcon color="primary" /> : ''}
             </InputAdornment>
           ),
           classes: {
-            notchedOutline: `${questionIsEmpty
-                ? ""
-                : classes.notchedOutlineNotChecked
-              }`
+            notchedOutline: `${questionIsEmpty ? '' : classes.notchedOutlineNotChecked}`
           }
         }}
       />

@@ -123,7 +123,7 @@ const OtpCheck = ({ status }) => {
   return (
     <>
       {step === 2 ? (
-        <GuestWorkspace status={history.location.state} />
+        <GuestWorkspace status={history.location.state} myBL={myBL} />
       ) : (
         <div>
           <div style={{ margin: '12rem auto 4rem auto', textAlign: 'center' }}>

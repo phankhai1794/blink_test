@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../store/actions';
+import * as Actions from '../../admin/store/actions';
 
 import { TextField, InputAdornment } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core';
 import { green } from '@material-ui/core/colors';
 import ChatBubbleIcon from '@material-ui/icons/ChatBubble';
+
 const useStyles = makeStyles((theme) => ({
   popover: {
     pointerEvents: 'none'
@@ -33,48 +34,57 @@ const useStyles = makeStyles((theme) => ({
   adornment: {
     height: '6em',
     maxHeight: '6em',
-    alignItems: 'flex-end',
-  },
+    alignItems: 'flex-end'
+  }
 }));
+
 const BLField = (props) => {
   const classes = useStyles();
-  const dispatch = useDispatch()
-  const {
-    children,
-    width,
-    multiline,
-    rows,
-    selectedChoice,
-    fileName,
-    id
-  } = props;
-  const [questionIsEmpty, setQuestionIsEmpty] = useState(true)
-  const inquiries = useSelector((state) => state.guestspace.inquiries)
+  const dispatch = useDispatch();
+  const { children, width, multiline, rows, selectedChoice, id } = props;
+  const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
+  const [inquiries, metadata] = useSelector((state) => [
+    state.workspace.inquiries,
+    state.workspace.metadata
+  ]);
 
-  useEffect(() => {
-    setQuestionIsEmpty(checkQuestionIsEmpty())
-  }, [inquiries])
+  const onMouseEnter = (e) => {
+    if (questionIsEmpty) {
+      dispatch(Actions.setAnchor(e.currentTarget));
+    }
+    dispatch(Actions.setField(e.currentTarget.id));
+  };
+
+  const onMouseLeave = (e) => {
+    dispatch(Actions.setAnchor(null));
+  };
+
+  const onClick = () => {
+    if (!questionIsEmpty) {
+      dispatch(Actions.toggleInquiry(true));
+    }
+  };
 
   const checkQuestionIsEmpty = () => {
     if (inquiries.length > 0) {
-      const check = inquiries.filter(q => q.field === id)
-      return check.length > 0 ? false : true
+      const check = inquiries.filter((q) => q.field === id);
+      return check.length == 0;
     }
-    return true
-  }
+    return true;
+  };
 
-  const onClick = (e) => {
-    if (!questionIsEmpty) {
-      dispatch(Actions.setField(e.currentTarget.id))
-      dispatch(Actions.toggleInquiry(true))
-    }
-  }
+  useEffect(() => {
+    setQuestionIsEmpty(checkQuestionIsEmpty());
+  }, [inquiries, metadata]);
+
   return (
     <div
       id={id}
       style={{
         width: `${width}`
       }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       onClick={onClick}
     >
       <TextField
@@ -90,20 +100,13 @@ const BLField = (props) => {
           endAdornment: (
             <InputAdornment
               position="end"
-              className={multiline && rows > 3 ? classes.adornment : ""}
+              className={multiline && rows > 3 ? classes.adornment : ''}
             >
-              {!questionIsEmpty ? (
-                <ChatBubbleIcon color="primary" />
-              ) : (
-                ''
-              )}
+              {!questionIsEmpty ? <ChatBubbleIcon color="primary" /> : ''}
             </InputAdornment>
           ),
           classes: {
-            notchedOutline: `${questionIsEmpty
-                ? ""
-                : classes.notchedOutlineNotChecked
-              }`
+            notchedOutline: `${questionIsEmpty ? '' : classes.notchedOutlineNotChecked}`
           }
         }}
       />
