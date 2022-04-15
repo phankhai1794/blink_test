@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../admin/store/actions';
 import Form from '../shared-components/Form';
+import draftToHtml from 'draftjs-to-html';
 import clsx from 'clsx';
 import {
   TextField,
@@ -15,30 +15,77 @@ import {
   Tabs,
   Tab
 } from '@material-ui/core';
+
 import TagsInput from './components/TagsInput';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
-import InquirySaved from '../shared-components/InquirySaved';
 import { makeStyles } from '@material-ui/styles';
 import AllInquiry from '../shared-components/AllInquiry';
+import { useForm } from '@fuse/hooks';
+import * as Actions from 'app/store/actions';
+import * as mailActions from './store/actions/mail.actions';
+import { SENDMAIL_NONE,SENDMAIL_LOADING } from './store/actions/mail.actions';
 
 const SendInquiryForm = (props) => {
-  const [questions, title] = useSelector((state) => [
+  const [questions, title, mybl] = useSelector((state) => [
     state.workspace.question,
-    state.workspace.currentField
+    state.workspace.currentField,
+    state.workspace.myBL
   ]);
+  const { success, error } = useSelector(({ mail }) => mail);
+  const { form, handleChange, resetForm } = useForm({
+    toCustomer: '',
+    toOnshore: '',
+    from: '',
+    subject: '',
+    content: ''
+  });
+
+  function isFormValid() {
+    return form.email.length > 0 && form.password.length > 0;
+  }
+
   const dispatch = useDispatch();
   const [opened, setopened] = useState(null);
   const [opendPreview, setopendPreview] = useState(null);
+  useEffect(() => {
+    if (success) {
+      dispatch(
+        Actions.showMessage({
+          message: 'Mail sent successfully'
+        })
+      );
+      dispatch({
+        type: SENDMAIL_NONE
+      });
+      setTimeout(() => {
+        setopened(false);
+      }, 1000);
+    } else if (error) {
+      dispatch(
+        Actions.showMessage({
+          message: 'Mail not sent!. Please try again'
+        })
+      );
+      dispatch({
+        type: SENDMAIL_NONE
+      });
+    }
+  }, [success, error]);
 
   const openSendInquiryDialog = (event) => {
     setopened(true);
   };
 
   const opendPreviewForm = (event) => {
-    dispatch(Actions.setEdit1(-1));
     setopendPreview(true);
   };
+
+  const sendMailClick = (event) => {
+    dispatch({type: SENDMAIL_LOADING});
+    dispatch(mailActions.sendMail({ myblId: mybl.id, ...form }));
+  };
+
   const closePreviewForm = () => {
     setopendPreview(null);
   };
@@ -48,15 +95,35 @@ const SendInquiryForm = (props) => {
   };
 
   const [value, setValue] = React.useState(0);
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+
+  const handleFieldChange = (key, tags) => {
+    form[key] = tags.join(',');
+    setValue(key);
+  };
+
+  const onEditorStateChange = (event, newValue) => {
+    console.log(newValue);
+    // this.setState({ value: newValue });
+    // setValue(newValue);
+  };
+  const onContentStateChange = (contentState) => {
+    form.content = draftToHtml(contentState);
+  };
+
+  const onInputChange = (event) => {
+    console.log(value);
+    form.subject = event.target.value;
+    // this.setState({ value: newValue });
+    // setValue(newValue);
   };
 
   const useStyles = makeStyles(() => ({
     label: {
       whiteSpace: 'nowrap',
-      color: '#4a4a4a', fontSize: 14, fontFamily: 'Roboto, Helvetica Neue, Arial, sans-serif'
-  }
+      color: '#4a4a4a',
+      fontSize: 14,
+      fontFamily: 'Roboto, Helvetica Neue, Arial, sans-serif'
+    }
   }));
   const classes = useStyles(props);
 
@@ -90,7 +157,9 @@ const SendInquiryForm = (props) => {
           closeSendInquiry();
         }}
         openFab={false}
-        customActions={<ActionUI openPreviewClick={opendPreviewForm}></ActionUI>}
+        customActions={
+          <ActionUI openPreviewClick={opendPreviewForm} sendMailClick={sendMailClick}></ActionUI>
+        }
         FabTitle={''}
         title={'New Mail'}>
         <>
@@ -101,12 +170,12 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label style={{fontSize: 14}} className={clsx(classes.label)}>
+              <label style={{ fontSize: 14 }} className={clsx(classes.label)}>
                 To Customer
               </label>
             </Grid>
             <Grid style={{ paddingLeft: 15 }} item xs={11}>
-              <TagsInput />
+              <TagsInput id={'toCustomer'} tagLimit={10} onChanged={handleFieldChange} />
             </Grid>
           </Grid>
           <Grid
@@ -116,12 +185,10 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label className={clsx(classes.label)}>
-                To Onshore
-              </label>
+              <label className={clsx(classes.label)}>To Onshore</label>
             </Grid>
             <Grid style={{ paddingLeft: 15 }} item xs={11}>
-              <TagsInput />
+              <TagsInput id={'toOnshore'} tagLimit={10} onChanged={handleFieldChange} />
             </Grid>
           </Grid>
           <Grid
@@ -131,12 +198,10 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label className={clsx(classes.label)}>
-                From
-              </label>
+              <label className={clsx(classes.label)}>From</label>
             </Grid>
             <Grid style={{ paddingLeft: 15 }} item xs={11}>
-              <TagsInput />
+              <TagsInput id={'from'} tagLimit={1} onChanged={handleFieldChange} />
             </Grid>
           </Grid>
           <Grid
@@ -146,9 +211,7 @@ const SendInquiryForm = (props) => {
             justifyContent="flex-start"
             alignItems="center">
             <Grid item xs={1}>
-              <label className={clsx(classes.label)}>
-                Subject
-              </label>
+              <label className={clsx(classes.label)}>Subject</label>
             </Grid>
             <Grid style={{ paddingLeft: 15 }} item xs={11}>
               <input
@@ -160,7 +223,8 @@ const SendInquiryForm = (props) => {
                   height: '25px',
                   borderStyle: 'solid',
                   borderColor: 'lightgray'
-                }}></input>
+                }}
+                onChange={onInputChange}></input>
             </Grid>
           </Grid>
           <div style={{ minHeight: 300, marginTop: 10 }}>
@@ -169,7 +233,8 @@ const SendInquiryForm = (props) => {
               toolbarClassName="toolbarClassName"
               wrapperClassName="wrapperClassName"
               editorClassName="editorClassName"
-              // onEditorStateChange={this.onEditorStateChange}
+              onContentStateChange={onContentStateChange}
+              onEditorStateChange={onEditorStateChange}
             />
           </div>
           <Divider></Divider>
@@ -177,7 +242,7 @@ const SendInquiryForm = (props) => {
         {opendPreview ? (
           <Form
             title={'Sending inquiry preview'}
-            tabs={["Offshore", "Onshore"]}
+            tabs={['Offshore', 'Onshore']}
             open={opendPreview}
             toggleForm={(status) => {
               closePreviewForm();
@@ -185,52 +250,53 @@ const SendInquiryForm = (props) => {
             openFab={false}
             customActions={<div></div>}>
             <>
-                  <AllInquiry user="workspace" collapse={true} />
+              <AllInquiry user="workspace" collapse={true} />
             </>
           </Form>
         ) : null}
       </Form>
     </React.Fragment>
   );
- 
 };
 
-const ActionUI = (props)=> {
-  const dispatch = useDispatch()
-  const {openPreviewClick} = props
-  return( <div style={{padding: 10}}>
-    <Grid container style={{ 'justify-content': 'center', paddingTop: 20 }}>
-      <Grid>
-        <Button
-          style={{
-            width: 120,
-            color: 'white',
-            backgroundColor: '#092D33',
-            marginRight: 10,
-            borderRadius: 20
-          }}
-          onClick={openPreviewClick}>
-          Preview
-        </Button>
+const ActionUI = (props) => {
+  const dispatch = useDispatch();
+  const { openPreviewClick, sendMailClick } = props;
+  const { success, error,isLoading } = useSelector(({ mail }) => mail);
+
+  return (
+    <div style={{ padding: 10 }}>
+      <Grid container style={{ 'justify-content': 'center', paddingTop: 20 }}>
+        <Grid>
+          <Button
+            style={{
+              width: 120,
+              color: 'white',
+              backgroundColor: '#092D33',
+              marginRight: 10,
+              borderRadius: 20
+            }}
+            onClick={openPreviewClick}>
+            Preview
+          </Button>
+        </Grid>
+        <Grid>
+          <Button
+            loading={isLoading}
+            style={{
+              width: 120,
+              color: 'white',
+              marginLeft: 10,
+              backgroundColor: '#bd1874',
+              borderRadius: 20
+            }}
+            onClick={sendMailClick}>
+            SEND
+          </Button>
+        </Grid>
       </Grid>
-      <Grid>
-        <Button
-          style={{
-            width: 120,
-            color: 'white',
-            marginLeft: 10,
-            backgroundColor: '#bd1874',
-            borderRadius: 20
-          }}
-          onClick={() => {
-            alert('clicked');
-          }}>
-          SEND
-        </Button>
-      </Grid>
-    </Grid>
-  </div>
+    </div>
   );
-}
+};
 
 export default SendInquiryForm;
