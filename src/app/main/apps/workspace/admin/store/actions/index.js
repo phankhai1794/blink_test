@@ -20,6 +20,7 @@ export const SAVE_METADATA = 'SAVE_METADATA';
 export const SAVE_USER = 'SAVE_USER';
 export const VALIDATE = 'VALIDATE';
 export const REMOVE_SELECTED_OPTION = 'REMOVE_SELECTED_OPTION';
+export * from './mail.actions';
 
 export function setMyBL(state) {
   return {

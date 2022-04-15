@@ -29,30 +29,30 @@ class Auth extends Component {
   }
 
   jwtCheck = () => {
-    jwtService.on('onAutoLogin', () => {
-      this.props.showMessage({ message: 'Logging in with JWT' });
+    // jwtService.on('onAutoLogin', () => {
+    //   this.props.showMessage({ message: 'Logging in with JWT' });
 
-      /**
-       * Sign in and retrieve user data from Api
-       */
-      jwtService
-        .signInWithToken()
-        .then((user) => {
-          this.props.setUserData(user);
+    //   /**
+    //    * Sign in and retrieve user data from Api
+    //    */
+    //   jwtService
+    //     .signInWithToken()
+    //     .then((user) => {
+    //       this.props.setUserData(user);
 
-          this.props.showMessage({ message: 'Logged in with JWT' });
-        })
-        .catch((error) => {
-          this.props.showMessage({ message: error });
-        });
-    });
+    //       this.props.showMessage({ message: 'Logged in with JWT' });
+    //     })
+    //     .catch((error) => {
+    //       this.props.showMessage({ message: error });
+    //     });
+    // });
 
-    jwtService.on('onAutoLogout', (message) => {
-      if (message) {
-        this.props.showMessage({ message });
-      }
-      this.props.logout();
-    });
+    // jwtService.on('onAutoLogout', (message) => {
+    //   if (message) {
+    //     this.props.showMessage({ message });
+    //   }
+    //   this.props.logout();
+    // });
 
     jwtService.init();
   };
