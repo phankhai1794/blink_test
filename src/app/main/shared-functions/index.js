@@ -37,3 +37,35 @@ export const displayTime = (time) => {
     return years === 1 ? 'one year ago' : `${years} years ago`;
   }
 };
+
+export const filterMetadata = (data) => {
+  const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [] };
+  for (const field of data['field']) {
+    dict['field'][field.name] = field.id;
+    dict['field_options'].push({ label: field.name, value: field.id });
+  }
+  for (const inq of data['inqType']) {
+    dict['inq_type'][inq.name] = inq.id;
+    dict['inq_type_options'].push({
+      label: inq.name,
+      value: inq.id
+    });
+  }
+  for (const ans of data['ansType']) {
+    dict['ans_type'][ans.name] = ans.id;
+  }
+  return dict;
+};
+
+export const filterData = (data) => {
+  let result = data;
+  for (const i in result) {
+    result[i]['files'] = result[i].media.map((k) => {
+      return {
+        name: k.name,
+        type: k.ext
+      };
+    });
+  }
+  return result;
+};

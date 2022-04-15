@@ -6,11 +6,14 @@ import { makeStyles } from '@material-ui/styles';
 import { Grid, Divider } from '@material-ui/core';
 
 import * as AppActions from 'app/store/actions';
-import * as Actions from './store/actions';
+import * as WSActions from '../admin/store/actions';
 import * as HeaderActions from 'app/store/actions/header';
 import InquiryCreated from '../shared-components/InquiryCreated';
+import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
 import BLField from './components/BLField';
+import { filterMetadata, filterData, getKeyByValue } from 'app/main/shared-functions';
+import { loadMetadata, loadInquiry } from 'app/main/api/inquiry';
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -25,42 +28,75 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const GuestWorkspace = (props) => {
+  const { myBL } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [openInquiry, currentField] = useSelector((state) => [
-    state.guestspace.openInquiry,
-    state.guestspace.currentField
+  const [openInquiry, openAllInquiry, currentField, metadata] = useSelector((state) => [
+    state.workspace.openInquiry,
+    state.workspace.openAllInquiry,
+    state.workspace.currentField,
+    state.workspace.metadata
   ]);
 
   useEffect(() => {
     dispatch(HeaderActions.displayBtn());
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+
+    loadMetadata()
+      .then((res) => {
+        const data = filterMetadata(res);
+        dispatch(WSActions.saveMetadata(data));
+      })
+      .then(() => {
+        loadInquiry(myBL.id)
+          .then((res) => {
+            const data = filterData(res);
+            const field_list = res.map((e) => e.field);
+            dispatch(WSActions.saveField(field_list));
+            dispatch(WSActions.editInquiry(data));
+          })
+          .catch((error) => console.log(error));
+      });
   }, []);
 
   return (
     <div className="px-52">
       <Form
         open={openInquiry}
-        toggleForm={(status) => dispatch(Actions.toggleInquiry(status))}
+        toggleForm={(status) => dispatch(WSActions.toggleInquiry(status))}
         hasAddButton={false}
         FabTitle="Inquiry"
         field={currentField ? currentField : ''}
-        title={''}
+        title={
+          openAllInquiry
+            ? 'All Inquiries'
+            : currentField
+            ? getKeyByValue(metadata['field'], currentField)
+            : ''
+        }
       >
-        <InquiryCreated user="guestspace" />
+        {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}
       </Form>
 
       <Grid container spacing={6}>
         <Grid item xs={6}>
           <Grid item>
             <h3>Shipper/Exporter</h3>
-            <BLField id="shipper" multiline={true} rows={5}>
+            <BLField
+              id={metadata.field ? metadata.field['SHIPPER/EXPORTER'] : ''}
+              multiline={true}
+              rows={5}
+            >
               {`DSV AIR & SEA CO. LTD.\nAS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO\nBLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN`}
             </BLField>
           </Grid>
           <Grid item>
             <h3>Consignee</h3>
-            <BLField id="consignee" multiline={true} rows={5}>
+            <BLField
+              id={metadata.field ? metadata.field['CONSIGNEE'] : ''}
+              multiline={true}
+              rows={5}
+            >
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
@@ -69,34 +105,51 @@ const GuestWorkspace = (props) => {
               NOTIFY PARTY (It is agreed that no responsibility shall be <br></br> attached to the
               Carrier or its Agents for failure to notify)
             </h3>
-            <BLField id="notify" multiline={true} rows={5}>
+            <BLField
+              id={metadata.field ? metadata.field['NOTIFY PARTY'] : ''}
+              multiline={true}
+              rows={5}
+            >
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
           <Grid container spacing={6}>
             <Grid item xs={6} className={classes.pbGridItem}>
               <h3>PRE-CARRIAGE BY</h3>
-              <BLField></BLField>
+              <BLField id={metadata.field ? metadata.field['PRE-CARRIAGE BY'] : ''}></BLField>
             </Grid>
             <Grid item xs={6} className={classes.pbGridItem}>
               <h3>PLACE OF RECEIPT</h3>
-              <BLField>SINGAPORE</BLField>
+              <BLField id={metadata.field ? metadata.field['PLACE OF RECEIPT'] : ''}>
+                SINGAPORE
+              </BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
-              <BLField>CONFIDENCE 021W</BLField>
+              <BLField id={metadata.field ? metadata.field['OCEAN VESSEL VOYAGE NO. FLAG'] : ''}>
+                CONFIDENCE 021W
+              </BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF LOADING</h3>
-              <BLField id="port_of_loading">TOKYO,JAPAN</BLField>
+              <BLField id={metadata.field ? metadata.field['PORT OF LOADING'] : ''}>
+                TOKYO,JAPAN
+              </BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF DISCHARGE</h3>
-              <BLField>BUSAN, KOREA</BLField>
+              <BLField id={metadata.field ? metadata.field['PORT OF DISCHARGE'] : ''}>
+                BUSAN, KOREA
+              </BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PLACE OF DELIVERY</h3>
-              <BLField selectedChoice="MANILA, MALAYSIA">BUSAN</BLField>
+              <BLField
+                id={metadata.field ? metadata.field['PLACE OF DELIVERY'] : ''}
+                selectedChoice="MANILA, MALAYSIA"
+              >
+                BUSAN
+              </BLField>
             </Grid>
           </Grid>
         </Grid>
@@ -116,23 +169,35 @@ const GuestWorkspace = (props) => {
               EXPORT REFERENCES (for the merchant's and/or Carrier's reference only. See back clause
               8. (4.))
             </h3>
-            <BLField multiline={true} rows={2}></BLField>
+            <BLField
+              id={metadata.field ? metadata.field['EXPORT REFERENCES'] : ''}
+              multiline={true}
+              rows={2}
+            ></BLField>
           </Grid>
           <Grid item>
             <h3>FORWARDING AGENT-REFERENCES FMC NO.</h3>
-            <BLField multiline={true} rows={5}>
+            <BLField
+              id={metadata.field ? metadata.field['FORWARDING AGENT-REFERENCES'] : ''}
+              multiline={true}
+              rows={5}
+            >
               DSV AIR & SEA CO. LTD.
             </BLField>
           </Grid>
           <Grid item>
             <h3>FINAL DESTINATION(for line merchant's reference only)</h3>
-            <BLField>BUSAN, KOREA</BLField>
+            <BLField id={metadata.field ? metadata.field['FINAL DESTINATION'] : ''}>
+              BUSAN, KOREA
+            </BLField>
           </Grid>
           <Grid item>
             <h3>
               TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)
             </h3>
-            <BLField>R1CB118000</BLField>
+            <BLField id={metadata.field ? metadata.field['TYPE OF MOVEMENT'] : ''}>
+              R1CB118000
+            </BLField>
           </Grid>
         </Grid>
       </Grid>
