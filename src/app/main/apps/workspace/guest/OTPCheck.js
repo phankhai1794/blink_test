@@ -96,7 +96,7 @@ const OtpCheck = ({ status }) => {
 
   useEffect(() => {
     if (otpCode.length == otpLength) {
-      verifyGuest({ mail: mail.value, id: myBL.id, otpCode })
+      verifyGuest({ mail: mail.value, bl: myBL.id, otpCode })
         .then((res) => {
           if (res) {
             const { role, userName, avatar, permissions } = res.userData;
