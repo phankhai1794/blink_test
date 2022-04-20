@@ -13,6 +13,7 @@ import { saveInquiry, changeStatus } from 'app/main/api/inquiry';
 import { uploadFile } from 'app/main/api/file';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import { PERMISSION, PermissionProvider } from 'app/main/shared-functions';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -147,33 +148,44 @@ const PopoverFooter = ({ title, forCustomer }) => {
       </Grid>
 
       <Grid item xs={4} className="flex justify-end">
-        {fields.includes(title) ? (
-          <>
-            <Button
-              variant="contained"
-              className={classes.button}
-              color="primary"
-              onClick={onResolve}
-            >
-              <CheckIcon />
-              Resolve
-            </Button>
-            <Button
-              variant="contained"
-              className={classes.button}
-              color="primary"
-              onClick={onReply}
-            >
-              <ReplyIcon />
-              Reply
-            </Button>
-          </>
-        ) : (
+        <PermissionProvider
+          action={PERMISSION.RESOLVE_INQUIRY}
+          extraCondition={fields.includes(title)}
+        >
+          <Button
+            variant="contained"
+            className={classes.button}
+            color="primary"
+            onClick={onResolve}
+          >
+            <CheckIcon />
+            Resolve
+          </Button>
+        </PermissionProvider>
+        <PermissionProvider
+          action={PERMISSION.REPLY_INQUIRY}
+          extraCondition={fields.includes(title)}
+        >
+          <Button variant="contained" className={classes.button} color="primary" onClick={onReply}>
+            <ReplyIcon />
+            Reply
+          </Button>
+        </PermissionProvider>
+        <PermissionProvider
+          action={PERMISSION.SAVE_INQUIRY}
+          extraCondition={!fields.includes(title)}
+        >
           <Button variant="contained" className={classes.button} color="primary" onClick={onSave}>
             {' '}
             <SaveIcon /> Save
           </Button>
-        )}
+        </PermissionProvider>
+        <PermissionProvider action={PERMISSION.SAVE_COMMENT}>
+          <Button variant="contained" className={classes.button} color="primary">
+            {' '}
+            <SaveIcon /> Save
+          </Button>
+        </PermissionProvider>
       </Grid>
     </Grid>
   );
