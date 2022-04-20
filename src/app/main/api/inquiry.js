@@ -17,6 +17,11 @@ export async function loadInquiry(id) {
   return response.data;
 }
 
+export async function updateInquiry(id, data) {
+  const response = await axios.put(`${process.env.REACT_APP_API}/inquiry/${id}`, data);
+  return response.data;
+}
+
 export async function loadMetadata() {
   const response = await axios.get(`${process.env.REACT_APP_API}/inquiry/metadata`);
   return response.data;

@@ -13,31 +13,30 @@ import { Card, Typography } from '@material-ui/core';
 
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
-  const { user } = props;
   const [inquiries, openEdit, metadata] = useSelector((state) => [
-    state[user].inquiries,
-    state[user].openEdit1,
-    state[user].metadata
+    state.workspace.inquiries,
+    state.workspace.openEditInq,
+    state.workspace.metadata
   ]);
 
   const changeToEditor = (index) => {
-    if (index !== openEdit) dispatch(Actions.setEdit1(index));
+    if (index !== openEdit) dispatch(Actions.setEditInq(index));
   };
 
   useEffect(() => {
     const optionsOfQuestion = [...inquiries];
     for (let i in inquiries) {
-      if (inquiries[i].media.length && !inquiries[i].files[0].src) {
-        for (let f in inquiries[i].media) {
-          getFile(inquiries[i].media[f].id)
+      if (inquiries[i].mediaFile.length && !inquiries[i].mediaFile[0].src) {
+        for (let f in inquiries[i].mediaFile) {
+          getFile(inquiries[i].mediaFile[f].id)
             .then((file) => {
               let url = '';
-              if (inquiries[i].files[f].type.match(/jpeg|jpg|png/g)) {
+              if (inquiries[i].mediaFile[f].ext.match(/jpeg|jpg|png/g)) {
                 url = URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
               } else {
                 url = URL.createObjectURL(new Blob([file]));
               }
-              optionsOfQuestion[i].files[f].src = url;
+              optionsOfQuestion[i].mediaFile[f].src = url;
               dispatch(Actions.editInquiry(optionsOfQuestion));
             })
             .catch((error) => console.log(error));
@@ -77,18 +76,17 @@ const AllInquiry = (props) => {
                   {type === metadata.ans_type.attachment && (
                     <AttatchmentAnswer
                       question={q}
-                      // disabled={true}
+                    // disabled={true}
                     />
                   )}
                 </div>
-                {q.files &&
-                  q.files.map((file, index) =>
-                    file.type.match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-                    ) : (
-                      <FileAttach file={file} />
-                    )
-                  )}
+                {q.mediaFile.map((file, index) =>
+                  file.ext.match(/jpeg|jpg|png/g) ? (
+                    <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+                  ) : (
+                    <FileAttach file={file} />
+                  )
+                )}
               </Card>
             )}
           </div>

@@ -20,6 +20,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
 import _ from '@lodash';
+import { v4 as uuidv4 } from 'uuid';
 import Dropzone from '../../shared-components/Dropzone';
 import ImageAttach from '../../shared-components/ImageAttach';
 import FileAttach from '../../shared-components/FileAttach';
@@ -121,17 +122,17 @@ const ChoiceAnswer = (props) => {
 
   const handleAddChoice = () => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].choices.push("Option " + (optionsOfQuestion[index].choices.length + 1))
+    optionsOfQuestion[index].answerObj.push({ id: null, content: "Option " + (optionsOfQuestion[index].answerObj.length + 1) })
     saveQuestion(optionsOfQuestion)
   };
   const handleRemoveChoice = (id) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].choices.splice(id, 1)
+    optionsOfQuestion[index].answerObj.splice(id, 1)
     saveQuestion(optionsOfQuestion)
   };
   const handleChangeChoice = (e, id) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].choices[id] = e.target.value
+    optionsOfQuestion[index].answerObj[id].content = e.target.value
     saveQuestion(optionsOfQuestion)
   };
 
@@ -141,10 +142,10 @@ const ChoiceAnswer = (props) => {
   } = props;
   return (
     <div style={{ paddingTop: '2rem' }}>
-      {question.choices.map((value, k) => {
+      {question.answerObj.map((value, k) => {
         return (
           <Choice
-            value={value}
+            value={value.content}
             index={k}
             handleChangeChoice={handleChangeChoice}
             handleRemoveChoice={handleRemoveChoice}
@@ -297,16 +298,16 @@ const InquiryEditor = (props) => {
 
   const handleUploadImageAttach = (src) => {
     const optionsOfQuestion = [...questions];
-    const list = optionsOfQuestion[index].files
+    const list = optionsOfQuestion[index].mediaFile
     const formData = new FormData();
     formData.append("file", src);
     formData.append("name", src.name);
-    optionsOfQuestion[index].files = [...list, { src: URL.createObjectURL(src), type: src.type, name: src.name, data: formData }]
+    optionsOfQuestion[index].mediaFile = [...list, { id: uuidv4(), src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }]
     saveQuestion(optionsOfQuestion)
   };
   const handleRemoveImageAttach = (i) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].files.splice(i, 1)
+    optionsOfQuestion[index].mediaFile.splice(i, 1)
     saveQuestion(optionsOfQuestion)
   };
 
@@ -420,24 +421,23 @@ const InquiryEditor = (props) => {
           <IconButton className='p-8' onClick={copyQuestion}><FileCopyIcon /></IconButton>
           <IconButton disabled={questions.length === 1} className='p-8' onClick={removeQuestion}><DeleteIcon /></IconButton>
         </div>
-        {question.files && (
-          question.files.map((file, index) => (
-            file.type.includes("image") ?
-              <div style={{ position: 'relative' }}>
-                <Fab
-                  classes={{
-                    root: classes.root
-                  }}
-                  size="small"
-                  onClick={() => handleRemoveImageAttach(index)}
-                >
-                  <CloseIcon style={{ fontSize: 20 }} />
-                </Fab>
-                <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-              </div> :
-              <FileAttach file={file} />
-          ))
-        )}
+        {question.mediaFile.map((file, index) => (
+          file.ext.match(/jpeg|jpg|png/g) ?
+            <div style={{ position: 'relative' }}>
+              <Fab
+                classes={{
+                  root: classes.root
+                }}
+                size="small"
+                onClick={() => handleRemoveImageAttach(index)}
+              >
+                <CloseIcon style={{ fontSize: 20 }} />
+              </Fab>
+              <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+            </div> :
+            <FileAttach file={file} />
+        ))
+        }
       </Card>
     </div>
   );

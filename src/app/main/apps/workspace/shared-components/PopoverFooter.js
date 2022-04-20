@@ -46,18 +46,17 @@ const PopoverFooter = ({ title, forCustomer }) => {
         receiver: q.receiver,
         mybl: myBL.id
       };
-      for (const f of q.files) {
-        const media_id = uuidv4();
+      for (const f of q.mediaFile) {
         const inq_media = {
-          media: media_id,
+          media: f.id,
           inquiry: inq_id
         };
         inqMedia.push(inq_media);
         const form_data = f.data;
-        form_data.append('id', media_id);
+        form_data.append('id', f.id);
         formData.push(form_data);
       }
-      for (const k of q.choices) {
+      for (const k of q.answerObj) {
         const ans_id = uuidv4();
         const inq_ans = {
           inquiry: inq_id,
@@ -66,7 +65,7 @@ const PopoverFooter = ({ title, forCustomer }) => {
         };
         const ans = {
           id: ans_id,
-          content: k,
+          content: k.content,
           type: q.ansType
         };
         answer.push(ans);

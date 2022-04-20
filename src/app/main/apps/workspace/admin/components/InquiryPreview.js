@@ -125,17 +125,17 @@ const ChoiceAnswer = (props) => {
 
   const handleAddChoice = () => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].choices.push("Option " + (optionsOfQuestion[index].choices.length + 1))
+    optionsOfQuestion[index].answerObj.push("Option " + (optionsOfQuestion[index].answerObj.length + 1))
     saveQuestion(optionsOfQuestion)
   };
   const handleRemoveChoice = (id) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].choices.splice(id, 1)
+    optionsOfQuestion[index].answerObj.splice(id, 1)
     saveQuestion(optionsOfQuestion)
   };
   const handleChangeChoice = (e, id) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].choices[id] = e.target.value
+    optionsOfQuestion[index].answerObj[id] = e.target.value
     saveQuestion(optionsOfQuestion)
   };
 
@@ -145,7 +145,7 @@ const ChoiceAnswer = (props) => {
   } = props;
   return (
     <div style={{ paddingTop: '2rem' }}>
-      {question.choices.map((value, k) => {
+      {question.answerObj.map((value, k) => {
         return (
           <Choice
             value={value}
@@ -243,13 +243,13 @@ const InquiryPreview = (props) => {
 
   const handleUploadImageAttach = (src) => {
     var optionsOfQuestion = [...questions];
-    var list = optionsOfQuestion[index].files
-    optionsOfQuestion[index].files = [...list, { src: URL.createObjectURL(src), type: src.type, name: src.name }]
+    var list = optionsOfQuestion[index].mediaFile
+    optionsOfQuestion[index].mediaFile = [...list, { src: URL.createObjectURL(src), type: src.type, name: src.name }]
     saveQuestion(optionsOfQuestion)
   };
   const handleRemoveImageAttach = (i) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].files.splice(i, 1)
+    optionsOfQuestion[index].mediaFile.splice(i, 1)
     saveQuestion(optionsOfQuestion)
   };
 
@@ -338,24 +338,23 @@ const InquiryPreview = (props) => {
           <IconButton className='p-8' onClick={copyQuestion}><FileCopyIcon /></IconButton>
           <IconButton disabled={questions.length === 1} className='p-8' onClick={removeQuestion}><DeleteIcon /></IconButton>
         </div>
-        {question.files && (
-          question.files.map((file, index) => (
-            file.type.includes("image") ?
-              <div style={{ position: 'relative' }}>
-                <Fab
-                  classes={{
-                    root: classes.root
-                  }}
-                  size="small"
-                  onClick={() => handleRemoveImageAttach(index)}
-                >
-                  <CloseIcon style={{ fontSize: 20 }} />
-                </Fab>
-                <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-              </div> :
-              <FileAttach file={file} />
-          ))
-        )}
+        {question.mediaFile.map((file, index) => (
+          file.ext.includes("image") ?
+            <div style={{ position: 'relative' }}>
+              <Fab
+                classes={{
+                  root: classes.root
+                }}
+                size="small"
+                onClick={() => handleRemoveImageAttach(index)}
+              >
+                <CloseIcon style={{ fontSize: 20 }} />
+              </Fab>
+              <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+            </div> :
+            <FileAttach file={file} />
+        ))
+        }
       </Card>
     </div>
   );

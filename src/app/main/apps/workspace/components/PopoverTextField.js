@@ -49,7 +49,7 @@ const PopoverTextField = (props) => {
   const idCmtBox = openCmtBox ? 'comment-box-popover' : undefined;
   const divRef = useRef();
   let questionIsEmpty = true;
-  if (question.choices.length > 0) {
+  if (question.answerObj.length > 0) {
     questionIsEmpty = false;
   }
   const onOpenCommentButton = (event) => {

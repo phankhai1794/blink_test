@@ -15,7 +15,7 @@ import { makeStyles } from '@material-ui/styles';
 import InquiryCreated from '../shared-components/InquiryCreated';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
-import { getKeyByValue, filterMetadata, filterData } from 'app/main/shared-functions';
+import { getKeyByValue, filterMetadata } from 'app/main/shared-functions';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
@@ -86,10 +86,10 @@ const BLWorkspace = (props) => {
     if (myBL.id) {
       loadInquiry(myBL.id)
         .then((res) => {
-          const data = filterData(res);
           const field_list = res.map((e) => e.field);
           dispatch(Actions.saveField(field_list));
-          dispatch(Actions.editInquiry(data));
+          dispatch(Actions.editInquiry(res));
+          dispatch(Actions.setOriginalInquiry(JSON.parse(JSON.stringify(res))));
         })
         .catch((error) => console.log(error));
     }
@@ -138,8 +138,8 @@ const BLWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-            ? getKeyByValue(metadata['field'], currentField)
-            : ''
+              ? getKeyByValue(metadata['field'], currentField)
+              : ''
         }>
         {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}
       </Form>
