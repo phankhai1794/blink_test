@@ -15,7 +15,7 @@ export async function isVerified(data) {
   const response = await axios.post(
     `${process.env.REACT_APP_API}/authentication/is-verified`,
     data,
-    { headers: getHeaders('', 'GUEST_TOKEN') }
+    { headers: getHeaders() }
   );
   return response.data;
 }

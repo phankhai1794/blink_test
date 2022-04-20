@@ -76,11 +76,11 @@ const OtpCheck = ({ status }) => {
   };
 
   useEffect(() => {
-    const id = new URLSearchParams(window.location.search).get('bl');
-    if (id) setMyBL({ ...myBL, id });
+    const bl = new URLSearchParams(window.location.search).get('bl');
+    if (bl) setMyBL({ ...myBL, id: bl });
 
-    let userInfo = localStorage.getItem('GUEST');
-    if (userInfo && localStorage.getItem('GUEST_TOKEN')) {
+    let userInfo = localStorage.getItem('USER');
+    if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
       userInfo = JSON.parse(userInfo);
       setMail({
         ...mail,
@@ -88,7 +88,7 @@ const OtpCheck = ({ status }) => {
         isValid: isEmail(userInfo.mail)
       });
 
-      isVerified({ mail: userInfo.mail, id })
+      isVerified({ mail: userInfo.mail, bl })
         .then(() => setStep(2))
         .catch((error) => console.log(error));
     }
@@ -104,12 +104,12 @@ const OtpCheck = ({ status }) => {
               displayName: userName,
               photoURL: avatar,
               role,
-              permissions,
+              permissions: permissions.filter((p) => p.controller == 'view'),
               mail: mail.value
             };
 
-            localStorage.setItem('GUEST_TOKEN', res.token);
-            localStorage.setItem('GUEST', JSON.stringify(userInfo));
+            localStorage.setItem('AUTH_TOKEN', res.token);
+            localStorage.setItem('USER', JSON.stringify(userInfo));
 
             setStep(2);
           }

@@ -1,12 +1,19 @@
+export const PERMISSION = {
+  SAVE_INQUIRY: 'save_inquiry',
+  RESOLVE_INQUIRY: 'resolve_inquiry',
+  REPLY_INQUIRY: 'reply_inquiry',
+  SAVE_COMMENT: 'save_comment'
+};
+
 export const getKeyByValue = (object, value) => {
   return Object.keys(object).find((key) => object[key] === value);
 };
 
-export const getHeaders = (action = '', token = 'AUTH_TOKEN') => {
+export const getHeaders = (action = '') => {
   return {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    Authorization: localStorage.getItem(token),
+    Authorization: localStorage.getItem('AUTH_TOKEN'),
     action
   };
 };
@@ -68,4 +75,13 @@ export const filterData = (data) => {
     });
   }
   return result;
+};
+
+export const PermissionProvider = ({ action, extraCondition = true, children }) => {
+  const user = localStorage.getItem('USER');
+  if (!user) return null;
+
+  const isAllowed =
+    JSON.parse(user).permissions.filter((p) => p.action === action && p.enable).length > 0;
+  return isAllowed && extraCondition ? children : null;
 };
