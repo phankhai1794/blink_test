@@ -6,7 +6,7 @@ import SaveIcon from '@material-ui/icons/Save';
 const ChoiceAnswer = (props) => {
   const { question } = props;
   let questionIsEmpty = props.question === undefined;
-  let prevChoiceArray = question.choices.filter(
+  let prevChoiceArray = question.answerObj.filter(
     (choice) => choice.content === question.selectedChoice
   );
   const initSelectedChoice = () => {
@@ -52,19 +52,19 @@ const ChoiceAnswer = (props) => {
   };
   return (
     <>
-      {question.choices.map((choice, index) => (
+      {question.answerObj.map((choice, index) => (
         <div key={index} style={{ marginTop: '0.5rem' }}>
           <div style={{ display: 'flex', marginTop: '0.5rem' }}>
             <div>
               <Radio
                 disabled
                 onChange={handleChange}
-                value={choice}
+                value={choice.content}
                 color="primary"
                 style={{ margin: 'auto' }}
               />
             </div>
-            <p style={{ margin: 'auto 1rem', fontSize: '1.7rem' }}>{choice}</p>
+            <p style={{ margin: 'auto 1rem', fontSize: '1.7rem' }}>{choice.content}</p>
           </div>
         </div>
       ))} 

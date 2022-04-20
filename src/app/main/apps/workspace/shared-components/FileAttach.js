@@ -3,10 +3,10 @@ import DescriptionIcon from '@material-ui/icons/Description';
 const FileAttach = ({ file }) => {
   return (
     <div style={{ margin: '1rem 5rem' }} display="flex">
-        {file.type.includes("pdf")  ? 
+        {file.ext.includes("pdf")  ? 
             <img style={{ height: '30px', width: '30px'}} src={`../../assets/images/logos/pdf_icon.png`}/>
             :
-        (file.type.includes("vnd.") || file.type.includes("csv") ?  <img style={{ height: '30px', width: '30px'}} src={`../../assets/images/logos/excel_icon.png`}/>
+        (file.ext.includes("vnd.") || file.ext.includes("csv") ?  <img style={{ height: '30px', width: '30px'}} src={`../../assets/images/logos/excel_icon.png`}/>
             : 
         <DescriptionIcon />  )
         }

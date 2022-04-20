@@ -97,7 +97,7 @@ const Dropzone = (props) => {
       {files && (
         <div style={{ marginTop: '1rem' }} display="flex">
           { files.map((file) => (
-            file.type === "image" ?
+            file.ext === "image" ?
             <img
               src={file.file}
               style={imageStyle}

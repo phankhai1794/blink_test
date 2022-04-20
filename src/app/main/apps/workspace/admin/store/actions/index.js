@@ -7,7 +7,7 @@ export const SET_CURRENT_FIELD = 'SET_CURRENT_FIELD';
 export const SET_QUESTION = 'SET_QUESTION';
 export const SET_REPLY = 'SET_REPLY';
 export const SET_EDIT = 'SET_EDIT';
-export const SET_EDIT1 = 'SET_EDIT1';
+export const SET_EDIT_INQUIRY = 'SET_EDIT_INQUIRY';
 export const ADD_QUESTION = 'ADD_QUESTION';
 export const ADD_QUESTION1 = 'ADD_QUESTION1';
 export const EDIT_INQUIRY = 'EDIT_INQUIRY';
@@ -21,6 +21,7 @@ export const SAVE_USER = 'SAVE_USER';
 export const VALIDATE = 'VALIDATE';
 export const REMOVE_SELECTED_OPTION = 'REMOVE_SELECTED_OPTION';
 export * from './mail.actions';
+export const SET_ORIGINAL_INQUIRY = 'SET_ORIGINAL_INQUIRY';
 
 export function setMyBL(state) {
   return {
@@ -103,9 +104,9 @@ export function setEdit(state) {
   };
 }
 
-export function setEdit1(state) {
+export function setEditInq(state) {
   return {
-    type: SET_EDIT1,
+    type: SET_EDIT_INQUIRY,
     state: state
   };
 }
@@ -168,6 +169,13 @@ export function validate(state) {
 export function removeSelectedOption(state) {
   return {
     type: REMOVE_SELECTED_OPTION,
+    state: state
+  };
+}
+
+export function setOriginalInquiry(state) {
+  return {
+    type: SET_ORIGINAL_INQUIRY,
     state: state
   };
 }

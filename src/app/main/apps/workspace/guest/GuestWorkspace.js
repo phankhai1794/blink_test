@@ -12,7 +12,7 @@ import InquiryCreated from '../shared-components/InquiryCreated';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
 import BLField from './components/BLField';
-import { filterMetadata, filterData, getKeyByValue } from 'app/main/shared-functions';
+import { filterMetadata, getKeyByValue } from 'app/main/shared-functions';
 import { loadMetadata, loadInquiry } from 'app/main/api/inquiry';
 
 const useStyles = makeStyles((theme) => ({
@@ -50,10 +50,9 @@ const GuestWorkspace = (props) => {
       .then(() => {
         loadInquiry(myBL.id)
           .then((res) => {
-            const data = filterData(res);
             const field_list = res.map((e) => e.field);
             dispatch(WSActions.saveField(field_list));
-            dispatch(WSActions.editInquiry(data));
+            dispatch(WSActions.editInquiry(res));
           })
           .catch((error) => console.log(error));
       });
@@ -75,7 +74,7 @@ const GuestWorkspace = (props) => {
             : ''
         }
       >
-        {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}
+        {openAllInquiry ? <AllInquiry user="guest"  /> : <InquiryCreated user="guest"  />}
       </Form>
 
       <Grid container spacing={6}>

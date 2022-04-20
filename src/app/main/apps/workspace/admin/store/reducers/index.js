@@ -10,7 +10,7 @@ const initialState = {
   openAllInquiry: false,
   openInquiry: false,
   openEdit: 0,
-  openEdit1: null,
+  openEditInq: null,
   anchorEl: null,
   currentField: '',
   reload: false,
@@ -18,6 +18,7 @@ const initialState = {
   fields: [],
   removeOptions: [],
   validation: { inqType: true, field: true },
+  originalInquiry: [],
   inquiries: [],
   question: [
     {
@@ -26,10 +27,10 @@ const initialState = {
       inqType: '',
       ansType: '',
       field: '',
-      choices: [],
+      answerObj: [],
       addOther: '',
       receiver: [],
-      files: []
+      mediaFile: []
     }
   ]
 };
@@ -63,8 +64,8 @@ const inquiryReducer = function (state = initialState, action) {
     case Actions.SET_EDIT: {
       return { ...state, openEdit: action.state };
     }
-    case Actions.SET_EDIT1: {
-      return { ...state, openEdit1: action.state };
+    case Actions.SET_EDIT_INQUIRY: {
+      return { ...state, openEditInq: action.state };
     }
     case Actions.ADD_QUESTION: {
       return {
@@ -77,10 +78,10 @@ const inquiryReducer = function (state = initialState, action) {
             inqType: '',
             ansType: '',
             field: '',
-            choices: [],
+            answerObj: [],
             addOther: '',
             receiver: [],
-            files: []
+            mediaFile: []
           }
         ]
       };
@@ -96,9 +97,10 @@ const inquiryReducer = function (state = initialState, action) {
             inqType: '',
             ansType: '',
             field: '',
-            choices: [],
+            answerObj: [],
             addOther: '',
-            files: []
+            receiver: [],
+            mediaFile: []
           }
         ]
       };
@@ -119,16 +121,16 @@ const inquiryReducer = function (state = initialState, action) {
             inqType: '',
             ansType: '',
             field: '',
-            choices: [],
+            answerObj: [],
             addOther: '',
             receiver: [],
-            files: []
+            mediaFile: []
           }
         ]
       };
     }
     case Actions.RELOAD: {
-      return { ...state, reload: !state.reload, openInquiry: false };
+      return { ...state, reload: !state.reload, openInquiry: false, openAllInquiry: false };
     }
     case Actions.SAVE_FIELD: {
       return { ...state, fields: action.state };
@@ -150,6 +152,9 @@ const inquiryReducer = function (state = initialState, action) {
     }
     case Actions.VALIDATE: {
       return { ...state, validation: action.state };
+    }
+    case Actions.SET_ORIGINAL_INQUIRY: {
+      return { ...state, originalInquiry: action.state };
     }
     default: {
       return state;

@@ -10,12 +10,12 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
-import MinimizeIcon from '@material-ui/icons/Minimize';
 import RemoveIcon from '@material-ui/icons/Remove';
 import { Fab } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import CropIcon from '@material-ui/icons/Crop';
 import PopoverFooter from './PopoverFooter';
+import PopoverFooterAdmin from '../admin/components/PopoverFooter';
 import { Divider } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import {
@@ -219,7 +219,7 @@ export default function Form(props) {
             )}
             <div style={{ marginTop: '2rem', marginLeft: '2rem' }}>
               <Divider />
-              {!openAllInquiry && <PopoverFooter forCustomer={false} title={field} />}
+              {!openAllInquiry ? <PopoverFooter forCustomer={false} title={field} /> : <PopoverFooterAdmin />}
             </div>
           </div>
         </DialogActions>
