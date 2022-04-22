@@ -10,9 +10,9 @@ import { Paper, InputBase, IconButton, Divider } from '@material-ui/core';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
-import * as HeaderActions from 'app/store/actions/header';
 import { verifyEmail, verifyGuest, isVerified } from 'app/main/api/verify';
 import GuestWorkspace from './GuestWorkspace';
+import { displayToast } from 'app/main/shared-functions';
 
 const otpLength = 4;
 
@@ -46,7 +46,7 @@ const OtpCheck = ({ status }) => {
   const dispatch = useDispatch();
   const user = useSelector(({ auth }) => auth.user);
   const [mail, setMail] = useState({ value: '', isValid: false });
-  const [myBL, setMyBL] = useState({});
+  const [myBL, setMyBL] = useState({ id: '' });
   const [otpCode, setOtpCode] = useState('');
   const [step, setStep] = useState(0);
 
@@ -60,13 +60,15 @@ const OtpCheck = ({ status }) => {
 
   const handleCheckMail = (e) => {
     if (e.key == 'Enter') e.preventDefault();
-    if (myBL.id && myBL.id.length && mail.isValid && (e.key == 'Enter' || e.key == undefined)) {
+    if (myBL.id && mail.isValid && (e.key == 'Enter' || e.key == undefined)) {
       verifyEmail({ bl: myBL.id, email: mail.value })
         .then((res) => {
           if (res) setStep(1);
         })
         .catch((error) => {
           console.log(error);
+          const { message } = error.response.data.error;
+          displayToast('error', message);
         });
     }
   };
@@ -81,16 +83,20 @@ const OtpCheck = ({ status }) => {
 
     let userInfo = localStorage.getItem('USER');
     if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
-      userInfo = JSON.parse(userInfo);
-      setMail({
-        ...mail,
-        value: userInfo.mail || '',
-        isValid: isEmail(userInfo.mail)
-      });
+      const email = JSON.parse(userInfo).mail;
+      if (email) {
+        setMail({
+          ...mail,
+          value: email || '',
+          isValid: isEmail(email)
+        });
 
-      isVerified({ mail: userInfo.mail, bl })
-        .then(() => setStep(2))
-        .catch((error) => console.log(error));
+        isVerified({ mail: email, bl })
+          .then(() => setStep(2))
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     }
   }, []);
 
@@ -110,12 +116,15 @@ const OtpCheck = ({ status }) => {
 
             localStorage.setItem('AUTH_TOKEN', res.token);
             localStorage.setItem('USER', JSON.stringify(userInfo));
+            // Auto save user data to redux store at ToolbarLayout1.js
 
             setStep(2);
           }
         })
         .catch((error) => {
           console.log(error);
+          const { message } = error.response.data.error;
+          displayToast('error', message);
         });
     }
   }, [otpCode]);

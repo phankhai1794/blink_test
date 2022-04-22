@@ -15,12 +15,10 @@ import { makeStyles } from '@material-ui/styles';
 import InquiryCreated from '../shared-components/InquiryCreated';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
-import { getKeyByValue, filterMetadata } from 'app/main/shared-functions';
+import { getKeyByValue, filterMetadata, displayToast } from 'app/main/shared-functions';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
-import { ReactNotifications, Store } from 'react-notifications-component';
-import 'react-notifications-component/dist/theme.css';
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -53,35 +51,11 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     if (success) {
       dispatch(Actions.displaySuccess(false));
-      Store.addNotification({
-        title: 'Success',
-        message: 'Save Inquiry Successful',
-        type: 'success',
-        insert: 'top',
-        container: 'top-right',
-        animationIn: ['animate__animated', 'animate__fadeIn'],
-        animationOut: ['animate__animated', 'animate__fadeOut'],
-        dismiss: {
-          duration: 5000,
-          onScreen: true
-        }
-      });
+      displayToast('success', 'Save inquiry successfully');
     }
     if (fail.open) {
       dispatch(Actions.displayFail(false, ''));
-      Store.addNotification({
-        title: 'Error',
-        message: fail.message,
-        type: 'danger',
-        insert: 'top',
-        container: 'top-right',
-        animationIn: ['animate__animated', 'animate__fadeIn'],
-        animationOut: ['animate__animated', 'animate__fadeOut'],
-        dismiss: {
-          duration: 5000,
-          onScreen: true
-        }
-      });
+      displayToast('error', fail.message);
     }
     if (myBL.id) {
       loadInquiry(myBL.id)
@@ -107,12 +81,11 @@ const BLWorkspace = (props) => {
       })
       .catch((error) => {
         console.log(error);
-        history.push(`/pages/errors/error-404`);
       });
   }, []);
 
   useEffect(() => {
-    dispatch(HeaderActions.displayBtn({ displayUserProfile: true }));
+    dispatch(HeaderActions.displayBtn());
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
 
@@ -125,7 +98,6 @@ const BLWorkspace = (props) => {
 
   return (
     <div className="px-52">
-      <ReactNotifications />
       <InquiryForm FabTitle="Inquiry Form" />
 
       <Form
@@ -138,9 +110,10 @@ const BLWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-              ? getKeyByValue(metadata['field'], currentField)
-              : ''
-        }>
+            ? getKeyByValue(metadata['field'], currentField)
+            : ''
+        }
+      >
         {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}
       </Form>
 
@@ -152,7 +125,8 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['SHIPPER/EXPORTER'] : ''}
               multiline={true}
-              rows={5}>
+              rows={5}
+            >
               {`DSV AIR & SEA CO. LTD.\nAS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO\nBLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN`}
             </BLField>
           </Grid>
@@ -161,7 +135,8 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['CONSIGNEE'] : ''}
               multiline={true}
-              rows={5}>
+              rows={5}
+            >
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
@@ -173,7 +148,8 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['NOTIFY PARTY'] : ''}
               multiline={true}
-              rows={5}>
+              rows={5}
+            >
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
@@ -210,7 +186,8 @@ const BLWorkspace = (props) => {
               <h3>PLACE OF DELIVERY</h3>
               <BLField
                 id={metadata.field ? metadata.field['PLACE OF DELIVERY'] : ''}
-                selectedChoice="MANILA, MALAYSIA">
+                selectedChoice="MANILA, MALAYSIA"
+              >
                 BUSAN
               </BLField>
             </Grid>
@@ -235,14 +212,16 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['EXPORT REFERENCES'] : ''}
               multiline={true}
-              rows={2}></BLField>
+              rows={2}
+            ></BLField>
           </Grid>
           <Grid item>
             <h3>FORWARDING AGENT-REFERENCES FMC NO.</h3>
             <BLField
               id={metadata.field ? metadata.field['FORWARDING AGENT-REFERENCES'] : ''}
               multiline={true}
-              rows={5}>
+              rows={5}
+            >
               DSV AIR & SEA CO. LTD.
             </BLField>
           </Grid>

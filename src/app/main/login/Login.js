@@ -8,6 +8,7 @@ import clsx from 'clsx';
 import JWTLoginTab from './tabs/JWTLoginTab';
 import { makeStyles } from '@material-ui/styles';
 import * as userActions from 'app/auth/store/actions';
+import { displayToast } from 'app/main/shared-functions';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Login(props) {
-  const { history } = props;
+  const { history, location } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const user = useSelector(({ auth }) => auth.user);
@@ -39,24 +40,28 @@ function Login(props) {
       })
       .then((res) => {
         if (res.status === 200) {
-          const { role, userName, avatar, permissions } = res.data.userData;
-          let userInfo = {
+          const { userData, token, message } = res.data;
+          const { role, userName, avatar, permissions } = userData;
+          const userInfo = {
             displayName: userName,
             photoURL: avatar,
             role,
             permissions
           };
-          let payload = { ...user, ...userInfo };
+          const payload = { ...user, ...userInfo };
 
-          localStorage.setItem('AUTH_TOKEN', res.data.token);
+          localStorage.setItem('AUTH_TOKEN', token);
           localStorage.setItem('USER', JSON.stringify(userInfo));
 
           dispatch(userActions.setUserData(payload));
-          history.push('/');
+          displayToast('success', message);
+          history.push(location.cachePath ? `${location.cachePath + location.cacheSearch}` : '/');
         }
       })
       .catch((error) => {
         console.log('Error: ', error);
+        const { message } = error.response.data.error;
+        displayToast('error', message);
       });
   }
 
@@ -68,7 +73,8 @@ function Login(props) {
 
   return (
     <div
-      className={clsx(classes.root, 'flex flex-col flex-1 flex-shrink-0 p-24 md:flex-row md:p-0')}>
+      className={clsx(classes.root, 'flex flex-col flex-1 flex-shrink-0 p-24 md:flex-row md:p-0')}
+    >
       <div className="flex flex-col flex-grow-0 items-center text-white p-16 text-center md:p-128 md:items-start md:flex-shrink-0 md:flex-1 md:text-left">
         <FuseAnimate animation="transition.slideUpIn" delay={300}>
           <Typography variant="h3" color="inherit" className="font-light">
@@ -95,7 +101,8 @@ function Login(props) {
               value={selectedTab}
               onChange={handleTabChange}
               variant="fullWidth"
-              className="mb-32">
+              className="mb-32"
+            >
               <Tab
                 icon={
                   <img

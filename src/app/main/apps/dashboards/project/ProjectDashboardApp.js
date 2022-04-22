@@ -59,7 +59,7 @@ function ProjectDashboardApp(props) {
   useEffect(() => {
     dispatch(Actions.getWidgets());
     dispatch(Actions.getProjects());
-    dispatch(HeaderActions.displayBtn({ hideAll: true, displayUserProfile: true }));
+    dispatch(HeaderActions.displayBtn({ hideAll: true }));
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
   }, [dispatch]);

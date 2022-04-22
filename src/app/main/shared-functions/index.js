@@ -1,4 +1,7 @@
+import { Store } from 'react-notifications-component';
+
 export const PERMISSION = {
+  SHOW_USER_PROFILE: 'show_user_profile',
   SAVE_INQUIRY: 'save_inquiry',
   RESOLVE_INQUIRY: 'resolve_inquiry',
   REPLY_INQUIRY: 'reply_inquiry',
@@ -84,4 +87,28 @@ export const PermissionProvider = ({ action, extraCondition = true, children }) 
   const isAllowed =
     JSON.parse(user).permissions.filter((p) => p.action === action && p.enable).length > 0;
   return isAllowed && extraCondition ? children : null;
+};
+
+export const displayToast = (type, message) => {
+  const dictionary = {
+    success: { title: 'Success', type: 'success' },
+    warning: { title: 'Warning', type: 'warning' },
+    error: { title: 'Error', type: 'danger' }
+    // info: { title: '', type: 'info' },
+    // default: { title: '', type: 'default' },
+  };
+  if (dictionary) {
+    const el = dictionary[type];
+    return Store.addNotification({
+      title: el.title,
+      type: el.type,
+      message,
+      insert: 'top',
+      container: 'top-right',
+      animationIn: ['animate__animated', 'animate__fadeIn'],
+      animationOut: ['animate__animated', 'animate__fadeOut'],
+      dismiss: { duration: 3000, onScreen: true }
+    });
+  }
+  return null;
 };
