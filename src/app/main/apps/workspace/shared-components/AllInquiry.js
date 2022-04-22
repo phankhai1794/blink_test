@@ -13,6 +13,7 @@ import { Card, Typography } from '@material-ui/core';
 
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
+  const { user, receiver } = props;
   const [inquiries, openEdit, metadata] = useSelector((state) => [
     state.workspace.inquiries,
     state.workspace.openEditInq,
@@ -46,7 +47,17 @@ const AllInquiry = (props) => {
   }, []);
   return (
     <>
-      {inquiries.map((q, index) => {
+      {
+      inquiries.map((q, index) => {
+        if (receiver && !q.receiver.includes(receiver)) {
+            return (
+              <div
+                style={{display: "flex", width: '770px', marginBottom: '24px' }}
+                onClick={() => changeToEditor(index)}
+              >
+              </div> 
+            );
+        }
         const type = q.ansType;
         return (
           <div
