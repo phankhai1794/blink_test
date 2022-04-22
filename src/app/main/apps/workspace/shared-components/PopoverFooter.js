@@ -23,11 +23,12 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = ({ title, forCustomer }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [currentField, question, fields, myBL] = useSelector((state) => [
+  const [currentField, question, fields, myBL, adminComment] = useSelector((state) => [
     state.workspace.currentField,
     state.workspace.question,
     state.workspace.fields,
-    state.workspace.myBL
+    state.workspace.myBL,
+    state.workspace.adminComment
   ]);
   const onSave = () => {
     let inquiry = [],
@@ -149,7 +150,7 @@ const PopoverFooter = ({ title, forCustomer }) => {
       <Grid item xs={4} className="flex justify-end">
         <PermissionProvider
           action={PERMISSION.RESOLVE_INQUIRY}
-          extraCondition={fields.includes(title)}
+          extraCondition={[fields.includes(title), adminComment]}
         >
           <Button
             variant="contained"
@@ -163,7 +164,7 @@ const PopoverFooter = ({ title, forCustomer }) => {
         </PermissionProvider>
         <PermissionProvider
           action={PERMISSION.REPLY_INQUIRY}
-          extraCondition={fields.includes(title)}
+          extraCondition={[fields.includes(title), adminComment]}
         >
           <Button variant="contained" className={classes.button} color="primary" onClick={onReply}>
             <ReplyIcon />
@@ -172,7 +173,7 @@ const PopoverFooter = ({ title, forCustomer }) => {
         </PermissionProvider>
         <PermissionProvider
           action={PERMISSION.SAVE_INQUIRY}
-          extraCondition={!fields.includes(title)}
+          extraCondition={[!fields.includes(title)]}
         >
           <Button variant="contained" className={classes.button} color="primary" onClick={onSave}>
             {' '}

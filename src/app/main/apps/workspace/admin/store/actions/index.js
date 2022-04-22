@@ -22,6 +22,7 @@ export const VALIDATE = 'VALIDATE';
 export const REMOVE_SELECTED_OPTION = 'REMOVE_SELECTED_OPTION';
 export * from './mail.actions';
 export const SET_ORIGINAL_INQUIRY = 'SET_ORIGINAL_INQUIRY';
+export const SET_ADMIN_COMMENT = 'SET_ADMIN_COMMENT';
 
 export function setMyBL(state) {
   return {
@@ -66,6 +67,13 @@ export function setAnchor(state) {
 export function setField(state) {
   return {
     type: SET_CURRENT_FIELD,
+    state: state
+  };
+}
+
+export function setAdminComment(state) {
+  return {
+    type: SET_ADMIN_COMMENT,
     state: state
   };
 }

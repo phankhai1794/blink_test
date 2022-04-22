@@ -23,6 +23,8 @@ import {
   Tabs,
   Tab
 } from '@material-ui/core';
+import { PERMISSION, PermissionProvider } from 'app/main/shared-functions';
+
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -220,7 +222,11 @@ export default function Form(props) {
             )}
             <div style={{ marginTop: '2rem', marginLeft: '2rem' }}>
               <Divider />
-              {!openAllInquiry ? <PopoverFooter forCustomer={false} title={field} /> : <PopoverFooterAdmin />}
+              {!openAllInquiry ? <PopoverFooter forCustomer={false} title={field} /> :
+                <PermissionProvider action={PERMISSION.SAVE_INQUIRY}>
+                  <PopoverFooterAdmin />
+                </PermissionProvider>
+              }
             </div>
           </div>
         </DialogActions>

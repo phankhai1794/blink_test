@@ -43,12 +43,13 @@ const Comment = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState('');
   const [reply, userInfo] = useSelector((state) => [state.workspace.reply, state.auth.user]);
-  const user = userType === "workspace" ? userInfo : JSON.parse(localStorage.getItem('GUEST'))
+  const user = JSON.parse(localStorage.getItem('USER'))
   const open = Boolean(anchorEl);
 
   useEffect(() => {
     loadComment(q.id)
       .then((res) => {
+        dispatch(Actions.setAdminComment(Boolean(res.length || userType === "guest")));
         setComment(res);
       })
       .catch((error) => console.log(error));
@@ -185,7 +186,7 @@ const Comment = (props) => {
 
 const InquiryCreated = (props) => {
   const dispatch = useDispatch();
-  const { user, userType } = props;
+  const { user } = props;
   const [inquiries, currentField, metadata] = useSelector((state) => [
     state.workspace.inquiries,
     state.workspace.currentField,
@@ -224,7 +225,7 @@ const InquiryCreated = (props) => {
           .catch((error) => console.log(error));
       }
     }
-  }, []);
+  }, [currentField]);
   return (
     <>
       {question.map((q, index) => {

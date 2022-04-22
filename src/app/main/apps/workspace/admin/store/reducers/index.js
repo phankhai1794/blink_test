@@ -11,6 +11,7 @@ const initialState = {
   openInquiry: false,
   openEdit: 0,
   openEditInq: null,
+  adminComment: false,
   anchorEl: null,
   currentField: '',
   reload: false,
@@ -155,6 +156,9 @@ const inquiryReducer = function (state = initialState, action) {
     }
     case Actions.SET_ORIGINAL_INQUIRY: {
       return { ...state, originalInquiry: action.state };
+    }
+    case Actions.SET_ADMIN_COMMENT: {
+      return { ...state, adminComment: action.state };
     }
     default: {
       return state;

@@ -77,11 +77,11 @@ export const filterData = (data) => {
   return result;
 };
 
-export const PermissionProvider = ({ action, extraCondition = true, children }) => {
+export const PermissionProvider = ({ action, extraCondition = [], children }) => {
   const user = localStorage.getItem('USER');
   if (!user) return null;
 
   const isAllowed =
     JSON.parse(user).permissions.filter((p) => p.action === action && p.enable).length > 0;
-  return isAllowed && extraCondition ? children : null;
+  return isAllowed && extraCondition.every(condition => condition) ? children : null;
 };
