@@ -48,6 +48,9 @@ const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
   const [opened, setopened] = useState(null);
   const [opendPreview, setopendPreview] = useState(null);
+  const [value, setValue] = React.useState(0);
+  const [tabSelected, settabSelected] = useState(null);
+
   useEffect(() => {
     if (success) {
       dispatch(
@@ -94,7 +97,7 @@ const SendInquiryForm = (props) => {
     setopened(null);
   };
 
-  const [value, setValue] = React.useState(0);
+  
 
   const handleFieldChange = (key, tags) => {
     form[key] = tags.join(',');
@@ -161,7 +164,8 @@ const SendInquiryForm = (props) => {
           <ActionUI openPreviewClick={opendPreviewForm} sendMailClick={sendMailClick}></ActionUI>
         }
         FabTitle={''}
-        title={'New Mail'}>
+        title={'New Mail'}
+        >
         <>
           <Grid
             style={{ marginTop: 8 }}
@@ -242,15 +246,20 @@ const SendInquiryForm = (props) => {
         {opendPreview ? (
           <Form
             title={'Sending inquiry preview'}
-            tabs={['Offshore', 'Onshore']}
+            tabs={['Customer', 'Onshore']}
             open={opendPreview}
             toggleForm={(status) => {
               closePreviewForm();
             }}
+            tabChange={(newValue) => {
+              settabSelected(newValue);
+            }}
             openFab={false}
             customActions={<div></div>}>
             <>
-              <AllInquiry user="workspace" collapse={true} />
+              <div style={{ height: '800px'}}>
+                  <AllInquiry user="workspace" receiver= {tabSelected==0?'customer': 'onshore'} collapse={true} />
+              </div>
             </>
           </Form>
         ) : null}
