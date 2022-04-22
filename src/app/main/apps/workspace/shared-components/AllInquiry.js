@@ -12,6 +12,8 @@ import { getFile } from 'app/main/api/file';
 import { Card, Typography } from '@material-ui/core';
 
 const AllInquiry = (props) => {
+  const { user } = props
+  const isAdmin = user === "workspace"
   const dispatch = useDispatch();
   const { user, receiver } = props;
   const [inquiries, openEdit, metadata] = useSelector((state) => [
@@ -64,7 +66,7 @@ const AllInquiry = (props) => {
             style={{ width: '770px', marginBottom: '24px' }}
             onClick={() => changeToEditor(index)}
           >
-            {openEdit === index ? (
+            {isAdmin && openEdit === index ? (
               <InquiryEditor
                 index={index}
                 questions={inquiries}
