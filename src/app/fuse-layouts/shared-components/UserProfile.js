@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Button,
@@ -10,11 +10,12 @@ import {
   Typography,
   Avatar
 } from '@material-ui/core';
+import { cyan } from '@material-ui/core/colors';
 import { Link } from 'react-router-dom';
 import * as userActions from 'app/auth/store/actions';
 
 function UserProfile(props) {
-  const { classes, history } = props;
+  const { classes } = props;
   const dispatch = useDispatch();
   const [open, setOpen] = useState(null);
   const user = useSelector(({ auth }) => auth.user);
@@ -28,31 +29,21 @@ function UserProfile(props) {
 
   const handleLogOut = () => {
     localStorage.clear();
+    window.location.logout = true;
     dispatch(userActions.removeUserData());
   };
-
-  useEffect(() => {
-    if (user.displayName == '' || user.displayName == null) {
-      let userInfo = JSON.parse(localStorage.getItem('USER'));
-      if (localStorage.getItem('AUTH_TOKEN') && userInfo) {
-        let payload = {
-          ...user,
-          role: userInfo.role,
-          displayName: userInfo.displayName,
-          photoURL: userInfo.photoURL,
-          permissions: userInfo.permissions
-        };
-        dispatch(userActions.setUserData(payload));
-      } else {
-        history.push('/login');
-      }
-    }
-  }, [user]);
 
   return (
     <React.Fragment>
       <Button className="h-64 px-12" onClick={handleClick}>
-        <Avatar src={user.photoURL} className={classes.fitAvatar} alt="user photo" />
+        <Avatar
+          className={classes.fitAvatar}
+          style={{ background: cyan[400] }}
+          src={user.photoURL ? user.photoURL : ''}
+          alt="User photo"
+        >
+          {!user.photoURL ? user.displayName.charAt(0).toUpperCase() : ''}
+        </Avatar>
         <Typography component="span" className="normal-case font-600 ml-8 flex">
           {user.displayName}
         </Typography>

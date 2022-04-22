@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppBar, Avatar, Typography } from '@material-ui/core';
+import { cyan } from '@material-ui/core/colors';
 import { makeStyles } from '@material-ui/styles';
-import clsx from 'clsx';
 import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
@@ -16,12 +16,12 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   avatar: {
-    width: 72,
-    height: 72,
+    width: 80,
+    height: 80,
     position: 'absolute',
-    top: 92,
-    padding: 8,
-    background: '#fff',
+    top: 72,
+    fontSize: 50,
+    background: cyan[500],
     boxSizing: 'content-box',
     left: '50%',
     transform: 'translateX(-50%)',
@@ -30,9 +30,8 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.easeInOut
     }),
     '& > img': {
-      // borderRadius: '50%',
-      // zoom out to show full logo
-      objectFit: 'contain'
+      borderRadius: '50%',
+      objectFit: 'contain' // zoom out to show full logo
     }
   }
 }));
@@ -53,18 +52,9 @@ function UserNavbarHeader(props) {
       <Typography className="username text-16 whitespace-no-wrap" color="inherit">
         {user.displayName}
       </Typography>
-      <Typography className="email text-13 mt-8 opacity-50 whitespace-no-wrap" color="inherit">
-        {user.email}
-      </Typography>
-      <Avatar
-        className={clsx(classes.avatar, 'avatar')}
-        alt="user photo"
-        src={
-          user.photoURL && user.photoURL !== ''
-            ? user.photoURL
-            : 'assets/images/avatars/profile.jpg'
-        }
-      />
+      <Avatar className={classes.avatar} src={user.photoURL ? user.photoURL : ''} alt="User photo">
+        {!user.photoURL ? user.displayName.charAt(0).toUpperCase() : ''}
+      </Avatar>
     </AppBar>
   );
 }
