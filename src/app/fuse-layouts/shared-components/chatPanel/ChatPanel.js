@@ -5,7 +5,6 @@ import {
   Icon,
   IconButton,
   ClickAwayListener,
-  Paper,
   Avatar,
   Typography
 } from '@material-ui/core';

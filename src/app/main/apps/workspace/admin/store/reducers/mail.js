@@ -1,32 +1,32 @@
-import * as Actions from '../actions';
+import * as Actions from '../actions/mail';
 
 const initialState = {
   isloading: false,
   success: false,
-  error: "",
+  error: ''
 };
 
-const sendMail = function (state = initialState, action) {
+const mailReducer = function (state = initialState, action) {
   switch (action.type) {
     case Actions.SENDMAIL_NONE: {
       return {
         ...initialState,
         success: false,
-        error: "",
-        isloading: false,
+        error: '',
+        isloading: false
       };
     }
     case Actions.SENDMAIL_LOADING: {
       return {
         ...initialState,
-        isloading: true,
+        isloading: true
       };
     }
     case Actions.SENDMAIL_SUCCESS: {
       return {
         ...initialState,
         success: true,
-        isloading: false,
+        isloading: false
       };
     }
     case Actions.SENDMAIL_ERROR: {
@@ -42,4 +42,4 @@ const sendMail = function (state = initialState, action) {
   }
 };
 
-export default sendMail;
+export default mailReducer;

@@ -2,32 +2,21 @@ import * as Actions from '../actions';
 
 const initialState = {
   myBLs: [],
-  user: {},
-  metadata: {},
+  loading: false,
   success: false,
-  fail: false,
-  reload: false
+  error: false
 };
 
 const listBlReducer = function (state = initialState, action) {
   switch (action.type) {
-    case Actions.SET_MYBLS: {
-      return { ...state, myBLs: action.state };
+    case Actions.PROCESSING: {
+      return { ...state, loading: true };
     }
-    case Actions.SAVE_USER: {
-      return { ...state, user: action.state };
+    case Actions.SET_MYBLS_SUCCESS: {
+      return { ...state, myBLs: action.state, success: true, loading: false };
     }
-    case Actions.SAVE_METADATA: {
-      return { ...state, metadata: action.state };
-    }
-    case Actions.DISPLAY_SUCCESS: {
-      return { ...state, success: action.state };
-    }
-    case Actions.DISPLAY_FAIL: {
-      return { ...state, fail: { openDialog: action.state, error: action.message } };
-    }
-    case Actions.RELOAD: {
-      return { ...state, reload: !state.reload, openInquiry: false };
+    case Actions.SET_MYBLS_ERROR: {
+      return { ...state, error: action.message, loading: false };
     }
     default: {
       return state;

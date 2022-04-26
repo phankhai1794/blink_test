@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Icon,
   Table,
   TableBody,
   TableCell,
@@ -19,8 +18,8 @@ import { withRouter } from 'react-router-dom';
 import { Typography } from '@material-ui/core';
 import _ from '@lodash';
 import { makeStyles } from '@material-ui/styles';
-import { getAllBl } from 'app/main/api/mybl';
 import * as Actions from './store/actions';
+import { displayToast } from '@shared';
 
 const blStateStyles = {
   REQUEST: {
@@ -64,6 +63,7 @@ const blStateStyles = {
     }
   }
 };
+
 function getFilterStateFromPath(pathname) {
   const paths = pathname.split('/');
   return paths[paths.length - 1].replaceAll('/', '').toUpperCase();
@@ -85,7 +85,11 @@ function InquiringTable(props) {
   const classes = useStyles(props);
 
   const filterState = getFilterStateFromPath(location.pathname);
-  const myBLs = useSelector(({ listBlReducer }) => listBlReducer.myBLs);
+  const [myBLs, success, error] = useSelector(({ listBlReducer }) => [
+    listBlReducer.myBLs,
+    listBlReducer.success,
+    listBlReducer.error
+  ]);
   const dispatch = useDispatch();
 
   const [selected, setSelected] = useState([]);
@@ -164,14 +168,14 @@ function InquiringTable(props) {
   // }
 
   useEffect(() => {
-    getAllBl(filterState)
-      .then(({ myBLs: data }) => {
-        if (data) dispatch(Actions.setMyBLs(data));
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    dispatch(Actions.loadListMyBL(filterState));
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      displayToast('error', error);
+    }
+  }, [success, error]);
 
   return (
     <div className="w-full flex flex-col mr-52">

@@ -11,19 +11,14 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import RemoveIcon from '@material-ui/icons/Remove';
-import { Fab } from '@material-ui/core';
+import { Box, Tabs, Tab, Fab, Divider } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import CropIcon from '@material-ui/icons/Crop';
+import AddIcon from '@material-ui/icons/Add';
+
+import { PERMISSION, PermissionProvider } from '@shared';
 import PopoverFooter from './PopoverFooter';
 import PopoverFooterAdmin from '../admin/components/PopoverFooter';
-import { Divider } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import {
-  Box,
-  Tabs,
-  Tab
-} from '@material-ui/core';
-import { PERMISSION, PermissionProvider } from 'app/main/shared-functions';
 
 const styles = (theme) => ({
   root: {
@@ -52,10 +47,10 @@ const DialogTitle = withStyles(styles)((props) => {
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div style={{ width: "70%" }}>
+        <div style={{ width: '70%' }}>
           <Typography variant="h6">{children}</Typography>
         </div>
-        <div style={{ width: "30%", textAlign: "right" }}>
+        <div style={{ width: '30%', textAlign: 'right' }}>
           <IconButton
             aria-label="close"
             onClick={handleOpenSnackBar}
@@ -93,7 +88,7 @@ const DialogContent = withStyles((theme) => ({
   root: {
     margin: 'auto',
     marginTop: '1rem',
-    backgroundColor: "white"
+    backgroundColor: 'white'
     // maxWidth: "100%",
     // width: "780px"
   }
@@ -110,28 +105,31 @@ const useStyles = makeStyles(() => ({
   dialogPaper: {
     width: '850px'
   }
-}))
+}));
 export default function Form(props) {
-  const dispatch = useDispatch()
-  const classes = useStyles()
-  const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs } = props;
+  const dispatch = useDispatch();
+  const classes = useStyles();
+  const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs } =
+    props;
   const [index, openAllInquiry, question] = useSelector((state) => [
-    state.workspace.openEdit,
-    state.workspace.openAllInquiry,
-    state.workspace.question
-  ])
+    state.workspace.inquiryReducer.openEdit,
+    state.workspace.inquiryReducer.openAllInquiry,
+    state.workspace.inquiryReducer.question
+  ]);
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const checkValidate = () => {
     if (!question[index].inqType || !question[index].field) {
-      dispatch(Actions.validate({
-        field: Boolean(question[index].field),
-        inqType: Boolean(question[index].inqType)
-      }));
-      return false
+      dispatch(
+        Actions.validate({
+          field: Boolean(question[index].field),
+          inqType: Boolean(question[index].inqType)
+        })
+      );
+      return false;
     }
-    return true
-  }
+    return true;
+  };
   const handleOpenFab = () => {
     setOpenFab(true);
     toggleForm(false);
@@ -142,10 +140,9 @@ export default function Form(props) {
 
   const handleClick = () => {
     if (openAllInquiry) {
-      dispatch(Actions.addQuestion1())
-    }
-    else if (checkValidate()) {
-      dispatch(Actions.addQuestion())
+      dispatch(Actions.addQuestion1());
+    } else if (checkValidate()) {
+      dispatch(Actions.addQuestion());
       dispatch(Actions.setEdit(index + 1));
     }
   };
@@ -154,10 +151,10 @@ export default function Form(props) {
     setOpenFab(false);
     if (openAllInquiry) {
       setTimeout(() => {
-        dispatch(Actions.toggleAllInquiry())
-      }, 400)
+        dispatch(Actions.toggleAllInquiry());
+      }, 400);
     }
-    dispatch(Actions.setReply(false))
+    dispatch(Actions.setReply(false));
   };
   const [value, setValue] = React.useState(0);
   const handleChange = (event, newValue) => {
@@ -193,47 +190,49 @@ export default function Form(props) {
           isFullScreen={isFullScreen}
           handleClose={handleClose}
         >
-          {title && title !== "open Inquiries" ? title : "open Inquiries"}
+          {title && title !== 'open Inquiries' ? title : 'open Inquiries'}
         </DialogTitle>
-        {
-          tabs && <Box style={{}} sx={{}}>
+        {tabs && (
+          <Box style={{}} sx={{}}>
             <Tabs
               indicatorColor="secondary"
               style={{ margin: 0, backgroundColor: '#102536' }}
               value={value}
-              onChange={handleChange}>
+              onChange={handleChange}
+            >
               <Tab style={{ color: 'white' }} label="Customer" />
               <Tab style={{ color: 'white' }} label="Onshore" />
             </Tabs>
           </Box>
-        }
-        <DialogContent>{children}</DialogContent>
-        {customActions == null && (<DialogActions style={{ display: 'none !important' }}>
-          <div style={{ position: 'relative' }}>
-            {(hasAddButton === undefined || hasAddButton === true) && (
-              <Fab
-                size="small"
-                color="primary"
-                style={{ right: '0.5rem', bottom: '5rem', position: 'absolute' }}
-                onClick={handleClick}
-              >
-                <AddIcon />
-              </Fab>
-            )}
-            <div style={{ marginTop: '2rem', marginLeft: '2rem' }}>
-              <Divider />
-              {!openAllInquiry ? <PopoverFooter forCustomer={false} title={field} /> :
-                <PermissionProvider action={PERMISSION.SAVE_INQUIRY}>
-                  <PopoverFooterAdmin />
-                </PermissionProvider>
-              }
-            </div>
-          </div>
-        </DialogActions>
         )}
-        {
-          customActions
-        }
+        <DialogContent>{children}</DialogContent>
+        {customActions == null && (
+          <DialogActions style={{ display: 'none !important' }}>
+            <div style={{ position: 'relative' }}>
+              {(hasAddButton === undefined || hasAddButton === true) && (
+                <Fab
+                  size="small"
+                  color="primary"
+                  style={{ right: '0.5rem', bottom: '5rem', position: 'absolute' }}
+                  onClick={handleClick}
+                >
+                  <AddIcon />
+                </Fab>
+              )}
+              <div style={{ marginTop: '2rem', marginLeft: '2rem' }}>
+                <Divider />
+                {!openAllInquiry ? (
+                  <PopoverFooter forCustomer={false} title={field} />
+                ) : (
+                  <PermissionProvider action={PERMISSION.SAVE_INQUIRY}>
+                    <PopoverFooterAdmin />
+                  </PermissionProvider>
+                )}
+              </div>
+            </div>
+          </DialogActions>
+        )}
+        {customActions}
       </Dialog>
     </div>
   );

@@ -1,3 +1,5 @@
+import { createBL } from 'app/services/myBLService';
+
 export const SET_MYBL = 'SET_MYBL';
 export const OPEN_CREATE_INQUIRY = 'OPEN_CREATE_INQUIRY';
 export const OPEN_INQUIRY = 'OPEN_INQUIRY';
@@ -20,9 +22,17 @@ export const SAVE_METADATA = 'SAVE_METADATA';
 export const SAVE_USER = 'SAVE_USER';
 export const VALIDATE = 'VALIDATE';
 export const REMOVE_SELECTED_OPTION = 'REMOVE_SELECTED_OPTION';
-export * from './mail.actions';
 export const SET_ORIGINAL_INQUIRY = 'SET_ORIGINAL_INQUIRY';
 export const SET_ADMIN_COMMENT = 'SET_ADMIN_COMMENT';
+// export * from './mail.actions';
+
+export const initBL = (bkgNo) => async (dispatch) => {
+  createBL(bkgNo)
+    .then((res) => {
+      if (res) dispatch(setMyBL(res.myBL));
+    })
+    .catch((err) => console.log(err));
+};
 
 export function setMyBL(state) {
   return {

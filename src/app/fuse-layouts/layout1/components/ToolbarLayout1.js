@@ -14,7 +14,7 @@ import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import SendInquiryForm from 'app/main/apps/workspace/admin/SendInquiryForm';
 import * as Actions from 'app/main/apps/workspace/admin/store/actions';
 import * as userActions from 'app/auth/store/actions';
-import { PERMISSION, PermissionProvider } from 'app/main/shared-functions';
+import { PERMISSION, PermissionProvider } from '@shared';
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -56,7 +56,7 @@ function ToolbarLayout1(props) {
     state.header.hideAll,
     state.header.displayDraftBLBtn,
     state.header.displayEditBtn,
-    state.workspace.inquiries.length
+    state.workspace.inquiryReducer.inquiries.length
   ]);
 
   const openInquiry = () => {

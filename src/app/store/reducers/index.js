@@ -5,7 +5,7 @@ import workspace from 'app/main/apps/workspace/admin/store/reducers';
 import guestspace from 'app/main/apps/workspace/guest/store/reducers';
 import listBlReducer from 'app/main/apps/listBL/store/reducers';
 import header from './header';
-import mail from 'app/main/apps/workspace/admin/store/reducers/mail.reducer';
+import mailReducer from 'app/main/apps/workspace/admin/store/reducers/mail';
 
 const createReducer = (asyncReducers) =>
   combineReducers({
@@ -15,7 +15,7 @@ const createReducer = (asyncReducers) =>
     guestspace,
     header,
     listBlReducer,
-    mail,
+    mailReducer,
     ...asyncReducers
   });
 

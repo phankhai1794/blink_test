@@ -10,9 +10,9 @@ import { Paper, InputBase, IconButton, Divider } from '@material-ui/core';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
-import { verifyEmail, verifyGuest, isVerified } from 'app/main/api/verify';
+import { verifyEmail, verifyGuest, isVerified } from 'app/services/authService';
 import GuestWorkspace from './GuestWorkspace';
-import { displayToast } from 'app/main/shared-functions';
+import { displayToast } from '@shared';
 
 const otpLength = 4;
 

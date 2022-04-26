@@ -67,10 +67,8 @@ const useStyles = makeStyles((theme) => ({
 const typeToNameDict = {
   'ROUTING INQUIRY/DISCREPANCY':
     'We found discrepancy in the routing information between SI and OPUS booking details',
-  'BL TYPE':
-    'Please provide the missing information below',
-  '':
-    'We found discrepancy in the routing information between SI and OPUS booking details'
+  'BL TYPE': 'Please provide the missing information below',
+  '': 'We found discrepancy in the routing information between SI and OPUS booking details'
 };
 // Sub Commporent
 const Choice = (props) => {
@@ -118,31 +116,30 @@ const Choice = (props) => {
   );
 };
 const ChoiceAnswer = (props) => {
-  const dispatch = useDispatch()
-  const { questions, question, index, saveQuestion } = props
+  const dispatch = useDispatch();
+  const { questions, question, index, saveQuestion } = props;
   const classes_disabled = inputStyleDisabled();
   const classes = inputStyle();
 
   const handleAddChoice = () => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj.push("Option " + (optionsOfQuestion[index].answerObj.length + 1))
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].answerObj.push(
+      'Option ' + (optionsOfQuestion[index].answerObj.length + 1)
+    );
+    saveQuestion(optionsOfQuestion);
   };
   const handleRemoveChoice = (id) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj.splice(id, 1)
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].answerObj.splice(id, 1);
+    saveQuestion(optionsOfQuestion);
   };
   const handleChangeChoice = (e, id) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj[id] = e.target.value
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].answerObj[id] = e.target.value;
+    saveQuestion(optionsOfQuestion);
   };
 
-  const {
-    uploadImageAttach,
-    handleRemoveImageAttach
-  } = props;
+  const { uploadImageAttach, handleRemoveImageAttach } = props;
   return (
     <div style={{ paddingTop: '2rem' }}>
       {question.answerObj.map((value, k) => {
@@ -154,8 +151,7 @@ const ChoiceAnswer = (props) => {
             handleRemoveChoice={handleRemoveChoice}
           />
         );
-      })
-      }
+      })}
       <div className="flex items-center">
         <div style={{ paddingTop: '6px', marginRight: '1rem' }}>
           <DisabledRadioButtonUncheckedIcon />
@@ -197,69 +193,83 @@ const AttachmentAnswer = () => {
 // Main Component
 const InquiryPreview = (props) => {
   // custom attribute must be lowercase
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const classes = useStyles();
   const { defaultContent, index, question, questions, saveQuestion } = props;
-  const metadata = useSelector((state) => state.workspace.metadata)
+  const metadata = useSelector((state) => state.workspace.inquiryReducer.metadata);
 
   const removeQuestion = () => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion.splice(index, 1)
+    optionsOfQuestion.splice(index, 1);
     if (index > 0) {
       dispatch(Actions.setEdit(index - 1));
     }
-    saveQuestion(optionsOfQuestion)
-  }
+    saveQuestion(optionsOfQuestion);
+  };
 
   const copyQuestion = () => {
     const temp = JSON.parse(JSON.stringify(question));
-    saveQuestion([...questions, temp])
-  }
+    saveQuestion([...questions, temp]);
+  };
 
   const handleTypeChange = (e) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].inqType = e.target.value
-    optionsOfQuestion[index].content = typeToNameDict[e.target.value]
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].inqType = e.target.value;
+    optionsOfQuestion[index].content = typeToNameDict[e.target.value];
+    saveQuestion(optionsOfQuestion);
   };
 
   const handleFieldChange = (e) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].field = e.target.value
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].field = e.target.value;
+    saveQuestion(optionsOfQuestion);
   };
 
   const handleNameChange = (e) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].content = e.target.value
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].content = e.target.value;
+    saveQuestion(optionsOfQuestion);
   };
 
   const handleAnswerTypeChange = (e) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].ansType = e.target.value
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].ansType = e.target.value;
+    saveQuestion(optionsOfQuestion);
   };
 
   const handleUploadImageAttach = (src) => {
     var optionsOfQuestion = [...questions];
-    var list = optionsOfQuestion[index].mediaFile
-    optionsOfQuestion[index].mediaFile = [...list, { src: URL.createObjectURL(src), type: src.type, name: src.name }]
-    saveQuestion(optionsOfQuestion)
+    var list = optionsOfQuestion[index].mediaFile;
+    optionsOfQuestion[index].mediaFile = [
+      ...list,
+      { src: URL.createObjectURL(src), type: src.type, name: src.name }
+    ];
+    saveQuestion(optionsOfQuestion);
   };
   const handleRemoveImageAttach = (i) => {
     var optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].mediaFile.splice(i, 1)
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].mediaFile.splice(i, 1);
+    saveQuestion(optionsOfQuestion);
   };
 
   return (
-    <div style={{ display: "flex" }}>
-      <div style={{ width: "6px", backgroundColor: "#4285f4", borderTopLeftRadius: "8px", borderBottomLeftRadius: "8px" }} />
+    <div style={{ display: 'flex' }}>
+      <div
+        style={{
+          width: '6px',
+          backgroundColor: '#4285f4',
+          borderTopLeftRadius: '8px',
+          borderBottomLeftRadius: '8px'
+        }}
+      />
       <Card style={{ padding: '1rem' }}>
         <div className="flex justify-end" style={{ marginRight: '-1rem' }}>
           <RadioGroup defaultValue="onshore" aria-label="target-inquiry" name="target-inquiry" row>
-            <FormControlLabel value="onshore" control={<Checkbox color="primary" />} label="Onshore" />
+            <FormControlLabel
+              value="onshore"
+              control={<Checkbox color="primary" />}
+              label="Onshore"
+            />
             <FormControlLabel
               value="customer"
               control={<Checkbox color="primary" />}
@@ -332,14 +342,18 @@ const InquiryPreview = (props) => {
         {question.ansType === metadata.ans_type.attachment && (
           <AttachmentAnswer style={{ marginTop: '1rem' }} />
         )}
-        <Divider className='mt-12' />
+        <Divider className="mt-12" />
         <div className="flex justify-end items-center mr-2 ">
           <AttachFile uploadImageAttach={handleUploadImageAttach} />
-          <IconButton className='p-8' onClick={copyQuestion}><FileCopyIcon /></IconButton>
-          <IconButton disabled={questions.length === 1} className='p-8' onClick={removeQuestion}><DeleteIcon /></IconButton>
+          <IconButton className="p-8" onClick={copyQuestion}>
+            <FileCopyIcon />
+          </IconButton>
+          <IconButton disabled={questions.length === 1} className="p-8" onClick={removeQuestion}>
+            <DeleteIcon />
+          </IconButton>
         </div>
-        {question.mediaFile.map((file, index) => (
-          file.ext.includes("image") ?
+        {question.mediaFile.map((file, index) =>
+          file.ext.includes('image') ? (
             <div style={{ position: 'relative' }}>
               <Fab
                 classes={{
@@ -351,10 +365,11 @@ const InquiryPreview = (props) => {
                 <CloseIcon style={{ fontSize: 20 }} />
               </Fab>
               <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-            </div> :
+            </div>
+          ) : (
             <FileAttach file={file} />
-        ))
-        }
+          )
+        )}
       </Card>
     </div>
   );

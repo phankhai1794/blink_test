@@ -44,8 +44,8 @@ const BLField = (props) => {
   const { children, width, multiline, rows, selectedChoice, id } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
   const [inquiries, metadata] = useSelector((state) => [
-    state.workspace.inquiries,
-    state.workspace.metadata
+    state.workspace.inquiryReducer.inquiries,
+    state.workspace.inquiryReducer.metadata
   ]);
 
   const onMouseEnter = (e) => {

@@ -7,19 +7,18 @@ import AttatchmentAnswer from './AttatchmentAnswer';
 import InquiryEditor from '../admin/components/InquiryEditor';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
-import { getKeyByValue } from 'app/main/shared-functions';
-import { getFile } from 'app/main/api/file';
+import { getKeyByValue } from '@shared';
+import { getFile } from 'app/services/fileService';
 import { Card, Typography } from '@material-ui/core';
 
 const AllInquiry = (props) => {
-  const { user } = props
-  const isAdmin = user === "workspace"
-  const dispatch = useDispatch();
   const { user, receiver } = props;
+  const isAdmin = user === 'workspace';
+  const dispatch = useDispatch();
   const [inquiries, openEdit, metadata] = useSelector((state) => [
-    state.workspace.inquiries,
-    state.workspace.openEditInq,
-    state.workspace.metadata
+    state.workspace.inquiryReducer.inquiries,
+    state.workspace.inquiryReducer.openEditInq,
+    state.workspace.inquiryReducer.metadata
   ]);
 
   const changeToEditor = (index) => {
@@ -49,16 +48,14 @@ const AllInquiry = (props) => {
   }, []);
   return (
     <>
-      {
-      inquiries.map((q, index) => {
+      {inquiries.map((q, index) => {
         if (receiver && !q.receiver.includes(receiver)) {
-            return (
-              <div
-                style={{display: "flex", width: '770px', marginBottom: '24px' }}
-                onClick={() => changeToEditor(index)}
-              >
-              </div> 
-            );
+          return (
+            <div
+              style={{ display: 'flex', width: '770px', marginBottom: '24px' }}
+              onClick={() => changeToEditor(index)}
+            ></div>
+          );
         }
         const type = q.ansType;
         return (
@@ -89,7 +86,7 @@ const AllInquiry = (props) => {
                   {type === metadata.ans_type.attachment && (
                     <AttatchmentAnswer
                       question={q}
-                    // disabled={true}
+                      // disabled={true}
                     />
                   )}
                 </div>

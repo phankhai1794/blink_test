@@ -115,31 +115,31 @@ const Choice = (props) => {
   );
 };
 const ChoiceAnswer = (props) => {
-  const dispatch = useDispatch()
-  const { questions, question, index, saveQuestion } = props
+  const dispatch = useDispatch();
+  const { questions, question, index, saveQuestion } = props;
   const classes_disabled = inputStyleDisabled();
   const classes = inputStyle();
 
   const handleAddChoice = () => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj.push({ id: null, content: "Option " + (optionsOfQuestion[index].answerObj.length + 1) })
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].answerObj.push({
+      id: null,
+      content: 'Option ' + (optionsOfQuestion[index].answerObj.length + 1)
+    });
+    saveQuestion(optionsOfQuestion);
   };
   const handleRemoveChoice = (id) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj.splice(id, 1)
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].answerObj.splice(id, 1);
+    saveQuestion(optionsOfQuestion);
   };
   const handleChangeChoice = (e, id) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj[id].content = e.target.value
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].answerObj[id].content = e.target.value;
+    saveQuestion(optionsOfQuestion);
   };
 
-  const {
-    uploadImageAttach,
-    handleRemoveImageAttach
-  } = props;
+  const { uploadImageAttach, handleRemoveImageAttach } = props;
   return (
     <div style={{ paddingTop: '2rem' }}>
       {question.answerObj.map((value, k) => {
@@ -151,8 +151,7 @@ const ChoiceAnswer = (props) => {
             handleRemoveChoice={handleRemoveChoice}
           />
         );
-      })
-      }
+      })}
       <div className="flex items-center">
         <div style={{ paddingTop: '6px', marginRight: '1rem' }}>
           <DisabledRadioButtonUncheckedIcon />
@@ -194,142 +193,162 @@ const AttachmentAnswer = () => {
 // Main Component
 const InquiryEditor = (props) => {
   // custom attribute must be lowercase
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const classes = useStyles();
   const { defaultContent, index, question, questions, saveQuestion } = props;
   const [metadata, removeOptions, currentField, fields, valid] = useSelector((state) => [
-    state.workspace.metadata,
-    state.workspace.removeOptions,
-    state.workspace.currentField,
-    state.workspace.fields,
-    state.workspace.validation
-  ])
-  const [fieldType, setFieldType] = useState(metadata.field_options)
-  const [valueType, setValueType] = useState(metadata.inq_type_options.filter(v => question.inqType === v.value)[0])
-  const [fieldValue, setFieldValue] = useState(metadata.field_options.filter(v => question.field === v.value)[0])
+    state.workspace.inquiryReducer.metadata,
+    state.workspace.inquiryReducer.removeOptions,
+    state.workspace.inquiryReducer.currentField,
+    state.workspace.inquiryReducer.fields,
+    state.workspace.inquiryReducer.validation
+  ]);
+  const [fieldType, setFieldType] = useState(metadata.field_options);
+  const [valueType, setValueType] = useState(
+    metadata.inq_type_options.filter((v) => question.inqType === v.value)[0]
+  );
+  const [fieldValue, setFieldValue] = useState(
+    metadata.field_options.filter((v) => question.field === v.value)[0]
+  );
   const styles = (valid, width) => {
     return {
       control: {
         border: valid ? '1px solid #ddd' : '1px solid red',
-        borderRadius: "9px",
+        borderRadius: '9px',
         width: `${width}px`
       }
-    }
-  }
+    };
+  };
   const removeQuestion = () => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion.splice(index, 1)
+    optionsOfQuestion.splice(index, 1);
     if (index > 0) {
       dispatch(Actions.setEdit(index - 1));
     }
-    saveQuestion(optionsOfQuestion)
-  }
+    saveQuestion(optionsOfQuestion);
+  };
 
   useEffect(() => {
-    const list = [...removeOptions]
-    list[index] = ""
-    const temp = metadata.field_options.filter(v => !list.includes(v.value))
-    setFieldType(temp.filter(v => !fields.includes(v.value)))
+    const list = [...removeOptions];
+    list[index] = '';
+    const temp = metadata.field_options.filter((v) => !list.includes(v.value));
+    setFieldType(temp.filter((v) => !fields.includes(v.value)));
     const optionsOfQuestion = [...questions];
 
     if (!question.ansType) {
-      optionsOfQuestion[index].ansType = metadata.ans_type.choice
+      optionsOfQuestion[index].ansType = metadata.ans_type.choice;
     }
     if (!question.field && !removeOptions.includes(currentField)) {
-      optionsOfQuestion[index].field = currentField
-      setFieldValue(metadata.field_options.filter(v => currentField === v.value)[0])
-      const options = [...removeOptions]
-      options[index] = currentField
+      optionsOfQuestion[index].field = currentField;
+      setFieldValue(metadata.field_options.filter((v) => currentField === v.value)[0]);
+      const options = [...removeOptions];
+      options[index] = currentField;
       dispatch(Actions.removeSelectedOption(options));
     }
-    saveQuestion(optionsOfQuestion)
-  }, [])
+    saveQuestion(optionsOfQuestion);
+  }, []);
 
   const copyQuestion = () => {
     const temp = JSON.parse(JSON.stringify(question));
-    saveQuestion([...questions, temp])
-  }
+    saveQuestion([...questions, temp]);
+  };
 
   const handleTypeChange = (e) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].inqType = e.value
+    optionsOfQuestion[index].inqType = e.value;
     dispatch(Actions.validate({ ...valid, inqType: true }));
-    const temp = valueType ? `\\b${valueType.label}\\b` : "{{INQ_TYPE}}"
+    const temp = valueType ? `\\b${valueType.label}\\b` : '{{INQ_TYPE}}';
     let re = new RegExp(`${temp}`, 'g');
-    optionsOfQuestion[index].content = question.content.replace(re, e.label)
-    setValueType(e)
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].content = question.content.replace(re, e.label);
+    setValueType(e);
+    saveQuestion(optionsOfQuestion);
   };
 
   const handleFieldChange = (e) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].field = e.value
+    optionsOfQuestion[index].field = e.value;
     dispatch(Actions.validate({ ...valid, field: true }));
-    const options = [...removeOptions]
-    options[index] = e.value
+    const options = [...removeOptions];
+    options[index] = e.value;
     dispatch(Actions.removeSelectedOption(options));
-    setFieldValue(e)
-    saveQuestion(optionsOfQuestion)
+    setFieldValue(e);
+    saveQuestion(optionsOfQuestion);
   };
 
   const handleNameChange = (e) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].content = e.target.value
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].content = e.target.value;
+    saveQuestion(optionsOfQuestion);
   };
 
   const handleReceiverChange = (e) => {
     const optionsOfQuestion = [...questions];
     if (e.target.checked) {
-      optionsOfQuestion[index].receiver.push(e.target.value)
-    }
-    else {
+      optionsOfQuestion[index].receiver.push(e.target.value);
+    } else {
       const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
-      optionsOfQuestion[index].receiver.splice(i, 1)
+      optionsOfQuestion[index].receiver.splice(i, 1);
     }
-    saveQuestion(optionsOfQuestion)
+    saveQuestion(optionsOfQuestion);
   };
 
   const handleAnswerTypeChange = (e) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].ansType = e.target.value
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].ansType = e.target.value;
+    saveQuestion(optionsOfQuestion);
   };
 
   const handleUploadImageAttach = (src) => {
     const optionsOfQuestion = [...questions];
-    const list = optionsOfQuestion[index].mediaFile
+    const list = optionsOfQuestion[index].mediaFile;
     const formData = new FormData();
-    formData.append("file", src);
-    formData.append("name", src.name);
-    optionsOfQuestion[index].mediaFile = [...list, { id: uuidv4(), src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }]
-    saveQuestion(optionsOfQuestion)
+    formData.append('file', src);
+    formData.append('name', src.name);
+    optionsOfQuestion[index].mediaFile = [
+      ...list,
+      { id: uuidv4(), src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }
+    ];
+    saveQuestion(optionsOfQuestion);
   };
   const handleRemoveImageAttach = (i) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].mediaFile.splice(i, 1)
-    saveQuestion(optionsOfQuestion)
+    optionsOfQuestion[index].mediaFile.splice(i, 1);
+    saveQuestion(optionsOfQuestion);
   };
 
   return (
-    <div style={{ display: "flex" }}>
-      <div style={{ width: "6px", backgroundColor: "#4285f4", borderTopLeftRadius: "8px", borderBottomLeftRadius: "8px" }} />
+    <div style={{ display: 'flex' }}>
+      <div
+        style={{
+          width: '6px',
+          backgroundColor: '#4285f4',
+          borderTopLeftRadius: '8px',
+          borderBottomLeftRadius: '8px'
+        }}
+      />
       <Card style={{ padding: '1rem' }}>
         <div className="flex justify-end" style={{ marginRight: '-1rem' }}>
           <FormGroup row>
             <FormControlLabel
               value="onshore"
-              control={<Checkbox
-                checked={question.receiver.includes("onshore")}
-                onChange={handleReceiverChange}
-                color="primary" />}
-              label="Onshore" />
+              control={
+                <Checkbox
+                  checked={question.receiver.includes('onshore')}
+                  onChange={handleReceiverChange}
+                  color="primary"
+                />
+              }
+              label="Onshore"
+            />
             <FormControlLabel
               value="customer"
-              control={<Checkbox
-                checked={question.receiver.includes("customer")}
-                onChange={handleReceiverChange}
-                color="primary" />}
+              control={
+                <Checkbox
+                  checked={question.receiver.includes('customer')}
+                  onChange={handleReceiverChange}
+                  color="primary"
+                />
+              }
               label="Customer"
             />
           </FormGroup>
@@ -390,7 +409,7 @@ const InquiryEditor = (props) => {
         </Grid>
         <div className="mt-32 mx-8">
           <TextField
-            value={question.content.replace("{{INQ_TYPE}}", "")}
+            value={question.content.replace('{{INQ_TYPE}}', '')}
             multiline
             onFocus={(e) => e.target.select()}
             onChange={handleNameChange}
@@ -415,14 +434,18 @@ const InquiryEditor = (props) => {
         {question.ansType === metadata.ans_type.attachment && (
           <AttachmentAnswer style={{ marginTop: '1rem' }} />
         )}
-        <Divider className='mt-12' />
+        <Divider className="mt-12" />
         <div className="flex justify-end items-center mr-2 ">
           <AttachFile uploadImageAttach={handleUploadImageAttach} />
-          <IconButton className='p-8' onClick={copyQuestion}><FileCopyIcon /></IconButton>
-          <IconButton disabled={questions.length === 1} className='p-8' onClick={removeQuestion}><DeleteIcon /></IconButton>
+          <IconButton className="p-8" onClick={copyQuestion}>
+            <FileCopyIcon />
+          </IconButton>
+          <IconButton disabled={questions.length === 1} className="p-8" onClick={removeQuestion}>
+            <DeleteIcon />
+          </IconButton>
         </div>
-        {question.mediaFile.map((file, index) => (
-          file.ext.match(/jpeg|jpg|png/g) ?
+        {question.mediaFile.map((file, index) =>
+          file.ext.match(/jpeg|jpg|png/g) ? (
             <div style={{ position: 'relative' }}>
               <Fab
                 classes={{
@@ -434,10 +457,11 @@ const InquiryEditor = (props) => {
                 <CloseIcon style={{ fontSize: 20 }} />
               </Fab>
               <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-            </div> :
+            </div>
+          ) : (
             <FileAttach file={file} />
-        ))
-        }
+          )
+        )}
       </Card>
     </div>
   );

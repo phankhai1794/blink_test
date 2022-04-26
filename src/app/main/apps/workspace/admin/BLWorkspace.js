@@ -7,15 +7,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as AppActions from 'app/store/actions';
 import * as Actions from './store/actions';
 import * as HeaderActions from 'app/store/actions/header';
-import { loadInquiry, loadMetadata } from 'app/main/api/inquiry';
-import { createBL } from 'app/main/api/mybl';
+import { loadInquiry, loadMetadata } from 'app/services/inquiryService';
 
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import InquiryCreated from '../shared-components/InquiryCreated';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
-import { getKeyByValue, filterMetadata, displayToast } from 'app/main/shared-functions';
+import { getKeyByValue, filterMetadata, displayToast } from '@shared';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
@@ -35,17 +34,17 @@ const useStyles = makeStyles((theme) => ({
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [openInquiry, openAllInquiry, currentField, reload, success, fail, metadata, user, myBL] =
+  const [openInquiry, openAllInquiry, currentField, reload, success, fail, metadata, myBL, user] =
     useSelector((state) => [
-      state.workspace.openInquiry,
-      state.workspace.openAllInquiry,
-      state.workspace.currentField,
-      state.workspace.reload,
-      state.workspace.success,
-      state.workspace.fail,
-      state.workspace.metadata,
-      state.auth.user,
-      state.workspace.myBL
+      state.workspace.inquiryReducer.openInquiry,
+      state.workspace.inquiryReducer.openAllInquiry,
+      state.workspace.inquiryReducer.currentField,
+      state.workspace.inquiryReducer.reload,
+      state.workspace.inquiryReducer.success,
+      state.workspace.inquiryReducer.fail,
+      state.workspace.inquiryReducer.metadata,
+      state.workspace.inquiryReducer.myBL,
+      state.auth.user
     ]);
 
   useEffect(() => {
@@ -70,21 +69,6 @@ const BLWorkspace = (props) => {
   }, [reload, myBL]);
 
   useEffect(() => {
-    const bkgNo = window.location.pathname.split('/')[3];
-
-    createBL(bkgNo)
-      .then((res) => {
-        if (res) {
-          dispatch(Actions.setMyBL(res.myBL));
-          history.push(`/apps/workplace/${bkgNo}`);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
-
-  useEffect(() => {
     dispatch(HeaderActions.displayBtn());
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
@@ -94,6 +78,9 @@ const BLWorkspace = (props) => {
       dispatch(Actions.saveMetadata(data));
     });
     dispatch(Actions.saveUser(user));
+
+    const bkgNo = window.location.pathname.split('/')[3];
+    dispatch(Actions.initBL(bkgNo));
   }, []);
 
   return (

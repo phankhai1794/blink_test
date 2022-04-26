@@ -6,15 +6,15 @@ import ParagraphAnswer from './ParagraphAnswer';
 import AttatchmentAnswer from './AttatchmentAnswer';
 import InquiryEditor from '../admin/components/InquiryEditor';
 import { Card, Typography, FormGroup, FormControlLabel, Checkbox } from '@material-ui/core';
-import { getKeyByValue } from 'app/main/shared-functions';
+import { getKeyByValue } from '@shared';
 
 const Inquiry = (props) => {
   const dispatch = useDispatch();
   const { question, index } = props;
   const [questions, openEdit, metadata] = useSelector((state) => [
-    state.workspace.question,
-    state.workspace.openEdit,
-    state.workspace.metadata
+    state.workspace.inquiryReducer.question,
+    state.workspace.inquiryReducer.openEdit,
+    state.workspace.inquiryReducer.metadata
   ]);
   const onSaveSelectedChoice = (savedQuestion) => {
     props.onSaveSelectedChoice(savedQuestion);

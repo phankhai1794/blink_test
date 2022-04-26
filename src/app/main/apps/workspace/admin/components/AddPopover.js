@@ -30,8 +30,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 const AddPopover = (props) => {
   const classes = useStyles();
-  const dispatch = useDispatch()
-  const anchorEl = useSelector((state) => state.workspace.anchorEl)
+  const dispatch = useDispatch();
+  const anchorEl = useSelector((state) => state.workspace.inquiryReducer.anchorEl);
   const { x, width } = anchorEl !== null && anchorEl.getBoundingClientRect();
   const isRightMost = x + width > 1400;
   return (
@@ -56,7 +56,7 @@ const AddPopover = (props) => {
           paper: classes.popoverContent
         }}
       >
-        <IconButton color="primary" onClick={()=> dispatch(Actions.toggleCreateInquiry(true))}>
+        <IconButton color="primary" onClick={() => dispatch(Actions.toggleCreateInquiry(true))}>
           <AddCommentIcon style={{ transform: `${isRightMost ? 'scaleX(1)' : 'scaleX(-1)'}` }} />
         </IconButton>
       </Popover>

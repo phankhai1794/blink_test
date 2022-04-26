@@ -12,15 +12,6 @@ export const getKeyByValue = (object, value) => {
   return Object.keys(object).find((key) => object[key] === value);
 };
 
-export const getHeaders = (action = '') => {
-  return {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: localStorage.getItem('AUTH_TOKEN'),
-    action
-  };
-};
-
 export const displayTime = (time) => {
   let current_time = new Date();
   let time_difference = current_time.getTime() - new Date(time).getTime();
@@ -86,7 +77,7 @@ export const PermissionProvider = ({ action, extraCondition = [], children }) =>
 
   const isAllowed =
     JSON.parse(user).permissions.filter((p) => p.action === action && p.enable).length > 0;
-  return isAllowed && extraCondition.every(condition => condition) ? children : null;
+  return isAllowed && extraCondition.every((condition) => condition) ? children : null;
 };
 
 export const displayToast = (type, message) => {
