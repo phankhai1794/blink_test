@@ -12,8 +12,8 @@ import InquiryCreated from '../shared-components/InquiryCreated';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
 import BLField from './components/BLField';
-import { filterMetadata, getKeyByValue } from 'app/main/shared-functions';
-import { loadMetadata, loadInquiry } from 'app/main/api/inquiry';
+import { filterMetadata, filterData, getKeyByValue } from '@shared';
+import { loadMetadata, loadInquiry } from 'app/services/inquiryService';
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -32,10 +32,10 @@ const GuestWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [openInquiry, openAllInquiry, currentField, metadata] = useSelector((state) => [
-    state.workspace.openInquiry,
-    state.workspace.openAllInquiry,
-    state.workspace.currentField,
-    state.workspace.metadata
+    state.workspace.inquiryReducer.openInquiry,
+    state.workspace.inquiryReducer.openAllInquiry,
+    state.workspace.inquiryReducer.currentField,
+    state.workspace.inquiryReducer.metadata
   ]);
 
   useEffect(() => {
@@ -74,7 +74,7 @@ const GuestWorkspace = (props) => {
             : ''
         }
       >
-        {openAllInquiry ? <AllInquiry user="guest"  /> : <InquiryCreated user="guest"  />}
+        {openAllInquiry ? <AllInquiry user="guest" /> : <InquiryCreated user="guest" />}
       </Form>
 
       <Grid container spacing={6}>

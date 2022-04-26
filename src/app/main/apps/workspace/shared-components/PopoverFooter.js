@@ -9,11 +9,11 @@ import ReplyIcon from '@material-ui/icons/Reply';
 import CheckIcon from '@material-ui/icons/Check';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
-import { saveInquiry, changeStatus } from 'app/main/api/inquiry';
-import { uploadFile } from 'app/main/api/file';
+import { saveInquiry, changeStatus } from 'app/services/inquiryService';
+import { uploadFile } from 'app/services/fileService';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { PERMISSION, PermissionProvider } from 'app/main/shared-functions';
+import { PERMISSION, PermissionProvider } from '@shared';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -24,11 +24,11 @@ const PopoverFooter = ({ title, forCustomer }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [currentField, question, fields, myBL, adminComment] = useSelector((state) => [
-    state.workspace.currentField,
-    state.workspace.question,
-    state.workspace.fields,
-    state.workspace.myBL,
-    state.workspace.adminComment
+    state.workspace.inquiryReducer.currentField,
+    state.workspace.inquiryReducer.question,
+    state.workspace.inquiryReducer.fields,
+    state.workspace.inquiryReducer.myBL,
+    state.workspace.inquiryReducer.adminComment
   ]);
   const onSave = () => {
     let inquiry = [],

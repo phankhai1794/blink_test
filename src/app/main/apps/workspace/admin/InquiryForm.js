@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Actions from './store/actions';
-import { getKeyByValue } from 'app/main/shared-functions';
+import { getKeyByValue } from '@shared';
 
 import Form from '../shared-components/Form';
 import Inquiry from '../shared-components/Inquiry';
@@ -10,10 +10,10 @@ const InquiryForm = (props) => {
   const { FabTitle } = props;
   const dispatch = useDispatch();
   const [questions, currentField, open, metadata] = useSelector((state) => [
-    state.workspace.question,
-    state.workspace.currentField,
-    state.workspace.openDialog,
-    state.workspace.metadata
+    state.workspace.inquiryReducer.question,
+    state.workspace.inquiryReducer.currentField,
+    state.workspace.inquiryReducer.openDialog,
+    state.workspace.inquiryReducer.metadata
   ]);
   const tempQuestionNum = questions.length;
   return (

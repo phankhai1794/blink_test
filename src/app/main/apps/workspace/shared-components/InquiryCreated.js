@@ -12,9 +12,9 @@ import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import EditIcon from '@material-ui/icons/Edit';
 import UserInfo from './UserInfo';
-import { saveComment, loadComment, editComment, deleteComment } from 'app/main/api/inquiry';
-import { getFile } from 'app/main/api/file';
-import { displayTime } from 'app/main/shared-functions';
+import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
+import { getFile } from 'app/services/fileService';
+import { displayTime } from '@shared';
 import {
   Menu,
   MenuItem,
@@ -42,14 +42,17 @@ const Comment = (props) => {
   const [comment, setComment] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState('');
-  const [reply, userInfo] = useSelector((state) => [state.workspace.reply, state.auth.user]);
-  const user = JSON.parse(localStorage.getItem('USER'))
+  const [reply, userInfo] = useSelector((state) => [
+    state.workspace.inquiryReducer.reply,
+    state.auth.user
+  ]);
+  const user = JSON.parse(localStorage.getItem('USER'));
   const open = Boolean(anchorEl);
 
   useEffect(() => {
     loadComment(q.id)
       .then((res) => {
-        dispatch(Actions.setAdminComment(Boolean(res.length || userType === "guest")));
+        dispatch(Actions.setAdminComment(Boolean(res.length || userType === 'guest')));
         setComment(res);
       })
       .catch((error) => console.log(error));
@@ -188,9 +191,9 @@ const InquiryCreated = (props) => {
   const dispatch = useDispatch();
   const { user } = props;
   const [inquiries, currentField, metadata] = useSelector((state) => [
-    state.workspace.inquiries,
-    state.workspace.currentField,
-    state.workspace.metadata
+    state.workspace.inquiryReducer.inquiries,
+    state.workspace.inquiryReducer.currentField,
+    state.workspace.inquiryReducer.metadata
   ]);
   const question = inquiries.filter((q) => q.field === currentField);
   const indexes = inquiries.findIndex((q) => q.field === currentField);
@@ -277,7 +280,7 @@ const InquiryCreated = (props) => {
                   {type === metadata.ans_type.attachment && (
                     <AttatchmentAnswer
                       question={q}
-                    // disabled={true}
+                      // disabled={true}
                     />
                   )}
                 </div>

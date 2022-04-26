@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import axios from 'axios';
 import { Card, CardContent, Typography, Tabs, Tab } from '@material-ui/core';
 import { FuseAnimate } from '@fuse';
 import { Link } from 'react-router-dom';
@@ -8,7 +7,8 @@ import clsx from 'clsx';
 import JWTLoginTab from './tabs/JWTLoginTab';
 import { makeStyles } from '@material-ui/styles';
 import * as userActions from 'app/auth/store/actions';
-import { displayToast } from 'app/main/shared-functions';
+import { displayToast } from '@shared';
+import { login } from 'app/services/authService';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -30,17 +30,11 @@ function Login(props) {
   }
 
   function handleLogin(model) {
-    let data = { username: model.username, password: model.password };
-    axios
-      .post(`${process.env.REACT_APP_API}/authentication/login`, data, {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        }
-      })
+    const { username, password } = model;
+    login({ username, password })
       .then((res) => {
-        if (res.status === 200) {
-          const { userData, token, message } = res.data;
+        if (res) {
+          const { userData, token, message } = res;
           const { role, userName, avatar, permissions } = userData;
           const userInfo = {
             displayName: userName,

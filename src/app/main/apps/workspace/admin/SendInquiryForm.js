@@ -3,18 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Form from '../shared-components/Form';
 import draftToHtml from 'draftjs-to-html';
 import clsx from 'clsx';
-import {
-  TextField,
-  Box,
-  Button,
-  Grid,
-  Icon,
-  Dialog,
-  Typography,
-  Divider,
-  Tabs,
-  Tab
-} from '@material-ui/core';
+import { Button, Grid, Divider } from '@material-ui/core';
 
 import TagsInput from './components/TagsInput';
 import { Editor } from 'react-draft-wysiwyg';
@@ -23,16 +12,16 @@ import { makeStyles } from '@material-ui/styles';
 import AllInquiry from '../shared-components/AllInquiry';
 import { useForm } from '@fuse/hooks';
 import * as Actions from 'app/store/actions';
-import * as mailActions from './store/actions/mail.actions';
-import { SENDMAIL_NONE,SENDMAIL_LOADING } from './store/actions/mail.actions';
+import * as mailActions from './store/actions/mail';
+import { SENDMAIL_NONE, SENDMAIL_LOADING } from './store/actions/mail';
 
 const SendInquiryForm = (props) => {
   const [questions, title, mybl] = useSelector((state) => [
-    state.workspace.question,
-    state.workspace.currentField,
-    state.workspace.myBL
+    state.workspace.inquiryReducer.question,
+    state.workspace.inquiryReducer.currentField,
+    state.workspace.inquiryReducer.myBL
   ]);
-  const { success, error } = useSelector(({ mail }) => mail);
+  const { success, error } = useSelector(({ mailReducer }) => mailReducer);
   const { form, handleChange, resetForm } = useForm({
     toCustomer: '',
     toOnshore: '',
@@ -85,7 +74,7 @@ const SendInquiryForm = (props) => {
   };
 
   const sendMailClick = (event) => {
-    dispatch({type: SENDMAIL_LOADING});
+    dispatch({ type: SENDMAIL_LOADING });
     dispatch(mailActions.sendMail({ myblId: mybl.id, ...form }));
   };
 
@@ -96,8 +85,6 @@ const SendInquiryForm = (props) => {
   const closeSendInquiry = () => {
     setopened(null);
   };
-
-  
 
   const handleFieldChange = (key, tags) => {
     form[key] = tags.join(',');
@@ -137,7 +124,8 @@ const SendInquiryForm = (props) => {
           paddingLeft: 15,
           paddingRight: 5,
           paddingTop: 17
-        }}>
+        }}
+      >
         <Button
           style={{
             width: 120,
@@ -148,13 +136,14 @@ const SendInquiryForm = (props) => {
           }}
           variant="text"
           size="small"
-          onClick={openSendInquiryDialog}>
+          onClick={openSendInquiryDialog}
+        >
           E-Mail
         </Button>
       </div>
 
       <Form
-        title={'Send Inquiry'}
+        title={'New Mail'}
         open={opened}
         toggleForm={(status) => {
           closeSendInquiry();
@@ -164,15 +153,15 @@ const SendInquiryForm = (props) => {
           <ActionUI openPreviewClick={opendPreviewForm} sendMailClick={sendMailClick}></ActionUI>
         }
         FabTitle={''}
-        title={'New Mail'}
-        >
+      >
         <>
           <Grid
             style={{ marginTop: 8 }}
             container
             direction="row"
             justifyContent="flex-start"
-            alignItems="center">
+            alignItems="center"
+          >
             <Grid item xs={1}>
               <label style={{ fontSize: 14 }} className={clsx(classes.label)}>
                 To Customer
@@ -187,7 +176,8 @@ const SendInquiryForm = (props) => {
             container
             direction="row"
             justifyContent="flex-start"
-            alignItems="center">
+            alignItems="center"
+          >
             <Grid item xs={1}>
               <label className={clsx(classes.label)}>To Onshore</label>
             </Grid>
@@ -200,7 +190,8 @@ const SendInquiryForm = (props) => {
             container
             direction="row"
             justifyContent="flex-start"
-            alignItems="center">
+            alignItems="center"
+          >
             <Grid item xs={1}>
               <label className={clsx(classes.label)}>From</label>
             </Grid>
@@ -213,7 +204,8 @@ const SendInquiryForm = (props) => {
             container
             direction="row"
             justifyContent="flex-start"
-            alignItems="center">
+            alignItems="center"
+          >
             <Grid item xs={1}>
               <label className={clsx(classes.label)}>Subject</label>
             </Grid>
@@ -228,7 +220,8 @@ const SendInquiryForm = (props) => {
                   borderStyle: 'solid',
                   borderColor: 'lightgray'
                 }}
-                onChange={onInputChange}></input>
+                onChange={onInputChange}
+              ></input>
             </Grid>
           </Grid>
           <div style={{ minHeight: 300, marginTop: 10 }}>
@@ -255,10 +248,15 @@ const SendInquiryForm = (props) => {
               settabSelected(newValue);
             }}
             openFab={false}
-            customActions={<div></div>}>
+            customActions={<div></div>}
+          >
             <>
-              <div style={{ height: '800px'}}>
-                  <AllInquiry user="workspace" receiver= {tabSelected==0?'customer': 'onshore'} collapse={true} />
+              <div style={{ height: '800px' }}>
+                <AllInquiry
+                  user="workspace"
+                  receiver={tabSelected == 0 ? 'customer' : 'onshore'}
+                  collapse={true}
+                />
               </div>
             </>
           </Form>
@@ -271,7 +269,7 @@ const SendInquiryForm = (props) => {
 const ActionUI = (props) => {
   const dispatch = useDispatch();
   const { openPreviewClick, sendMailClick } = props;
-  const { success, error,isLoading } = useSelector(({ mail }) => mail);
+  const { success, error, isLoading } = useSelector(({ mailReducer }) => mailReducer);
 
   return (
     <div style={{ padding: 10 }}>
@@ -285,7 +283,8 @@ const ActionUI = (props) => {
               marginRight: 10,
               borderRadius: 20
             }}
-            onClick={openPreviewClick}>
+            onClick={openPreviewClick}
+          >
             Preview
           </Button>
         </Grid>
@@ -299,7 +298,8 @@ const ActionUI = (props) => {
               backgroundColor: '#bd1874',
               borderRadius: 20
             }}
-            onClick={sendMailClick}>
+            onClick={sendMailClick}
+          >
             SEND
           </Button>
         </Grid>

@@ -6,7 +6,6 @@ import * as Actions from 'app/store/actions';
 import NavbarLayout1 from './NavbarLayout1';
 
 import { useDispatch, useSelector } from 'react-redux';
-import _ from '@lodash';
 const navbarWidth = 280;
 
 const useStyles = makeStyles((theme) => ({

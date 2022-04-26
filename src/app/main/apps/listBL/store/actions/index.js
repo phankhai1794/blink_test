@@ -1,43 +1,25 @@
-export const SET_MYBLS = 'SET_MYBLS';
-export const SAVE_USER = 'SAVE_USER';
-export const SAVE_METADATA = 'SAVE_METADATA';
-export const DISPLAY_SUCCESS = 'DISPLAY_SUCCESS';
-export const DISPLAY_FAIL = 'DISPLAY_FAIL';
-export const RELOAD = 'RELOAD';
+import { getAllBl } from 'app/services/myBLService';
 
-export function setMyBLs(state) {
-  return {
-    type: SET_MYBLS,
-    state: state
-  };
-}
-export function saveUser(state) {
-  return {
-    type: SAVE_USER,
-    state: state
-  };
-}
-export function saveMetadata(state) {
-  return {
-    type: SAVE_METADATA,
-    state: state
-  };
-}
-export function displaySuccess(state) {
-  return {
-    type: DISPLAY_SUCCESS,
-    state: state
-  };
-}
-export function displayFail(state, message) {
-  return {
-    type: DISPLAY_FAIL,
-    state: state,
-    message: message
-  };
-}
-export function toggleReload() {
-  return {
-    type: RELOAD
-  };
-}
+export const PROCESSING = 'PROCESSING';
+export const SET_MYBLS_SUCCESS = 'SET_MYBLS_SUCCESS';
+export const SET_MYBLS_ERROR = 'SET_MYBLS_ERROR';
+
+export const loadListMyBL = (type) => async (dispatch) => {
+  dispatch({ type: PROCESSING });
+  getAllBl(type)
+    .then(({ myBLs: data }) => {
+      if (data.length) {
+        return dispatch({
+          type: SET_MYBLS_SUCCESS,
+          state: data
+        });
+      }
+    })
+    .catch((err) => {
+      return dispatch({
+        type: SET_MYBLS_ERROR,
+        state: false,
+        message: err
+      });
+    });
+};

@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import Bill from './Bill';
 import { FusePageSimple } from '@fuse';
-import _ from '@lodash';
 function BillApp(props) {
   const { history } = props;
   const pageLayout = useRef(null);

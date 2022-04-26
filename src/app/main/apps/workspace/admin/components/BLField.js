@@ -44,9 +44,9 @@ const BLField = (props) => {
   const { children, width, multiline, rows, selectedChoice, id } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
   const [anchorEl, inquiries, metadata] = useSelector((state) => [
-    state.workspace.anchorEl,
-    state.workspace.inquiries,
-    state.workspace.metadata
+    state.workspace.inquiryReducer.anchorEl,
+    state.workspace.inquiryReducer.inquiries,
+    state.workspace.inquiryReducer.metadata
   ]);
 
   const openAddPopover = (e) => {
