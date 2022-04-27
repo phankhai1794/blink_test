@@ -12,8 +12,8 @@ import Inquiry from '../shared-components/Inquiry';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
 import BLField from './components/BLField';
-import { filterMetadata, getKeyByValue } from '@shared';
-import { loadMetadata, loadInquiry } from 'app/services/inquiryService';
+import { filterMetadata, filterData, getKeyByValue } from '@shared';
+import * as GuestActions from './store/actions';
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -42,20 +42,9 @@ const GuestWorkspace = (props) => {
     dispatch(HeaderActions.displayBtn());
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
 
-    loadMetadata()
-      .then((res) => {
-        const data = filterMetadata(res);
-        dispatch(WSActions.saveMetadata(data));
-      })
-      .then(() => {
-        loadInquiry(myBL.id)
-          .then((res) => {
-            const field_list = res.map((e) => e.field);
-            dispatch(WSActions.saveField(field_list));
-            dispatch(WSActions.editInquiry(res));
-          })
-          .catch((error) => console.log(error));
-      });
+    dispatch(WSActions.loadMetadata());
+    dispatch(GuestActions.loadInquiry(myBL.id));
+
   }, []);
 
   return (

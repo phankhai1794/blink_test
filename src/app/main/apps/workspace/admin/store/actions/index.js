@@ -1,3 +1,5 @@
+import { filterMetadata } from '@shared';
+import { getInquiryById, getMetadata } from 'app/services/inquiryService';
 import { createBL } from 'app/services/myBLService';
 
 export const SET_MYBL = 'SET_MYBL';
@@ -31,6 +33,23 @@ export const initBL = (bkgNo) => async (dispatch) => {
       if (res) dispatch(setMyBL(res.myBL));
     })
     .catch((err) => console.log(err));
+};
+
+export const loadMetadata = () => async (dispatch) => {
+  getMetadata().then((res) => {
+    const data = filterMetadata(res);
+    dispatch(saveMetadata(data));
+  }).catch((err) => console.log(err));
+};
+
+
+export const loadInquiry = (myBL_Id) => async (dispatch) => {
+  getInquiryById(myBL_Id).then((res) => {
+    const field_list = res.map(e => e.field);
+    dispatch(saveField(field_list));
+    dispatch(editInquiry(res));
+    dispatch(setOriginalInquiry(JSON.parse(JSON.stringify(res))));
+  }).catch((err) => console.log(err));
 };
 
 export function setMyBL(state) {
