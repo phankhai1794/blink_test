@@ -20,17 +20,22 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1)
   }
 }));
-const PopoverFooter = ({ title, forCustomer }) => {
+const PopoverFooter = ({ title, checkValidate }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [currentField, question, fields, myBL, adminComment] = useSelector((state) => [
+  const [index, currentField, question, fields, myBL, displayCmt, valid] = useSelector((state) => [
+    state.workspace.inquiryReducer.currentEdit,
     state.workspace.inquiryReducer.currentField,
     state.workspace.inquiryReducer.question,
     state.workspace.inquiryReducer.fields,
     state.workspace.inquiryReducer.myBL,
-    state.workspace.inquiryReducer.adminComment
+    state.workspace.inquiryReducer.displayCmt,
+    state.workspace.inquiryReducer.validation
+
   ]);
   const onSave = () => {
+    if (!checkValidate(question[index]) || !valid.receiver) return;
+
     let inquiry = [],
       answer = [],
       inqAns = [],
@@ -120,7 +125,7 @@ const PopoverFooter = ({ title, forCustomer }) => {
   return (
     <Grid container style={{ margin: '3rem auto' }}>
       <Grid item xs={5}>
-        {fields.includes(title) ? (
+        {fields.includes(title) && (
           <>
             <Link style={{ fontSize: '16px' }} onClick={toggleInquiriresDialog}>
               Open All Inquiries
@@ -132,25 +137,13 @@ const PopoverFooter = ({ title, forCustomer }) => {
               <NavigateNextIcon />
             </IconButton>
           </>
-        ) : null}
-      </Grid>
-      <Grid item xs={3}>
-        {forCustomer && (
-          <Grid container direction="row">
-            <Grid item>
-              <TextsmsIcon />
-            </Grid>
-            <Grid item>
-              <h2 style={{ margin: '0', fontSize: '16px' }}>Leave a comment</h2>
-            </Grid>
-          </Grid>
         )}
       </Grid>
 
-      <Grid item xs={4} className="flex justify-end">
+      <Grid item xs={7} className="flex justify-end">
         <PermissionProvider
           action={PERMISSION.RESOLVE_INQUIRY}
-          extraCondition={[fields.includes(title), adminComment]}
+          extraCondition={[fields.includes(title), displayCmt]}
         >
           <Button
             variant="contained"
@@ -164,7 +157,7 @@ const PopoverFooter = ({ title, forCustomer }) => {
         </PermissionProvider>
         <PermissionProvider
           action={PERMISSION.REPLY_INQUIRY}
-          extraCondition={[fields.includes(title), adminComment]}
+          extraCondition={[fields.includes(title), displayCmt]}
         >
           <Button variant="contained" className={classes.button} color="primary" onClick={onReply}>
             <ReplyIcon />
