@@ -3,7 +3,7 @@ import * as Actions from '../actions';
 const initialState = {
   user: {},
   openInquiry: false,
-  openEdit: 0,
+  currentEdit: 0,
   anchorEl: null,
   currentField: '',
   fields: [],
@@ -25,7 +25,7 @@ const inquiryReducer = function (state = initialState, action) {
       return { ...state, currentField: action.state };
     }
     case Actions.SET_EDIT: {
-      return { ...state, openEdit: action.state };
+      return { ...state, currentEdit: action.state };
     }
     default: {
       return state;

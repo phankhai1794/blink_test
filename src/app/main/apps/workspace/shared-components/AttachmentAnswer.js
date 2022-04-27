@@ -34,7 +34,7 @@ const rejectStyle = {
 };
 
 //   component
-const AttatchmentAnswer = (props) => {
+const AttachmentAnswer = (props) => {
   const { question } = props;
   const [name, setName] = useState(question.fileName || '');
   const [showBtn, setShowBtn] = useState(false);
@@ -98,4 +98,4 @@ const AttatchmentAnswer = (props) => {
   );
 };
 
-export default AttatchmentAnswer;
+export default AttachmentAnswer;

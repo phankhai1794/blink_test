@@ -5,7 +5,8 @@ export const PERMISSION = {
   SAVE_INQUIRY: 'save_inquiry',
   RESOLVE_INQUIRY: 'resolve_inquiry',
   REPLY_INQUIRY: 'reply_inquiry',
-  SAVE_COMMENT: 'save_comment'
+  SAVE_COMMENT: 'save_comment',
+  EDIT_INQUIRY: 'edit_inquiry'
 };
 
 export const getKeyByValue = (object, value) => {
@@ -58,26 +59,13 @@ export const filterMetadata = (data) => {
   return dict;
 };
 
-export const filterData = (data) => {
-  let result = data;
-  for (const i in result) {
-    result[i]['files'] = result[i].media.map((k) => {
-      return {
-        name: k.name,
-        type: k.ext
-      };
-    });
-  }
-  return result;
-};
-
-export const PermissionProvider = ({ action, extraCondition = [], children }) => {
+export const PermissionProvider = ({ action, extraCondition = [], children, fallback = null }) => {
   const user = localStorage.getItem('USER');
   if (!user) return null;
 
   const isAllowed =
     JSON.parse(user).permissions.filter((p) => p.action === action && p.enable).length > 0;
-  return isAllowed && extraCondition.every((condition) => condition) ? children : null;
+  return isAllowed && extraCondition.every(condition => condition) ? children : fallback;
 };
 
 export const displayToast = (type, message) => {

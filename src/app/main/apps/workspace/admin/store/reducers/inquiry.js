@@ -2,23 +2,22 @@ import * as Actions from '../actions';
 
 const initialState = {
   myBL: {},
-  user: {},
   success: false,
   fail: false,
   metadata: {},
   openDialog: false,
   openAllInquiry: false,
   openInquiry: false,
-  openEdit: 0,
-  openEditInq: null,
-  adminComment: false,
+  currentEdit: 0,
+  currentEditInq: null,
+  displayCmt: false,
   anchorEl: null,
   currentField: '',
   reload: false,
   reply: false,
   fields: [],
   removeOptions: [],
-  validation: { inqType: true, field: true },
+  validation: { inqType: true, field: true, receiver: true, error: false },
   originalInquiry: [],
   inquiries: [],
   question: [
@@ -63,10 +62,10 @@ const inquiryReducer = function (state = initialState, action) {
       return { ...state, question: action.state };
     }
     case Actions.SET_EDIT: {
-      return { ...state, openEdit: action.state };
+      return { ...state, currentEdit: action.state };
     }
     case Actions.SET_EDIT_INQUIRY: {
-      return { ...state, openEditInq: action.state };
+      return { ...state, currentEditInq: action.state };
     }
     case Actions.ADD_QUESTION: {
       return {
@@ -113,7 +112,7 @@ const inquiryReducer = function (state = initialState, action) {
       return {
         ...state,
         reload: !state.reload,
-        openEdit: 0,
+        currentEdit: 0,
         openDialog: false,
         question: [
           {
@@ -139,9 +138,6 @@ const inquiryReducer = function (state = initialState, action) {
     case Actions.SAVE_METADATA: {
       return { ...state, metadata: action.state };
     }
-    case Actions.SAVE_USER: {
-      return { ...state, user: action.state };
-    }
     case Actions.DISPLAY_SUCCESS: {
       return { ...state, success: action.state };
     }
@@ -157,8 +153,8 @@ const inquiryReducer = function (state = initialState, action) {
     case Actions.SET_ORIGINAL_INQUIRY: {
       return { ...state, originalInquiry: action.state };
     }
-    case Actions.SET_ADMIN_COMMENT: {
-      return { ...state, adminComment: action.state };
+    case Actions.DISPLAY_COMMENT: {
+      return { ...state, displayCmt: action.state };
     }
     default: {
       return state;

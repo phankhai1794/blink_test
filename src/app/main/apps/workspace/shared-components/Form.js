@@ -112,21 +112,21 @@ export default function Form(props) {
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs } =
     props;
   const [index, openAllInquiry, question] = useSelector((state) => [
-    state.workspace.inquiryReducer.openEdit,
+    state.workspace.inquiryReducer.currentEdit,
     state.workspace.inquiryReducer.openAllInquiry,
     state.workspace.inquiryReducer.question
   ]);
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const checkValidate = () => {
-    if (!question[index].inqType || !question[index].field) {
-      dispatch(
-        Actions.validate({
-          field: Boolean(question[index].field),
-          inqType: Boolean(question[index].inqType)
-        })
-      );
-      return false;
+  const checkValidate = (question) => {
+    if (!question.inqType || !question.field || !question.receiver.length) {
+      dispatch(Actions.validate({
+        field: Boolean(question.field),
+        inqType: Boolean(question.inqType),
+        receiver: Boolean(question.receiver.length),
+        error: true
+      }));
+      return false
     }
     return true;
   };
@@ -140,9 +140,9 @@ export default function Form(props) {
 
   const handleClick = () => {
     if (openAllInquiry) {
-      dispatch(Actions.addQuestion1());
-    } else if (checkValidate()) {
-      dispatch(Actions.addQuestion());
+      dispatch(Actions.addQuestion1())
+    } else if (checkValidate(question[index])) {
+      dispatch(Actions.addQuestion())
       dispatch(Actions.setEdit(index + 1));
     }
   };
@@ -206,7 +206,8 @@ export default function Form(props) {
           </Box>
         )}
         <DialogContent>{children}</DialogContent>
-        {customActions == null && (
+        {
+          customActions == null &&
           <DialogActions style={{ display: 'none !important' }}>
             <div style={{ position: 'relative' }}>
               {(hasAddButton === undefined || hasAddButton === true) && (
@@ -221,17 +222,16 @@ export default function Form(props) {
               )}
               <div style={{ marginTop: '2rem', marginLeft: '2rem' }}>
                 <Divider />
-                {!openAllInquiry ? (
-                  <PopoverFooter forCustomer={false} title={field} />
-                ) : (
+                {!openAllInquiry ?
+                  <PopoverFooter title={field} checkValidate={checkValidate} /> :
                   <PermissionProvider action={PERMISSION.SAVE_INQUIRY}>
                     <PopoverFooterAdmin />
                   </PermissionProvider>
-                )}
+                }
               </div>
             </div>
           </DialogActions>
-        )}
+        }
         {customActions}
       </Dialog>
     </div>

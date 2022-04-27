@@ -11,7 +11,7 @@ import { loadInquiry, loadMetadata } from 'app/services/inquiryService';
 
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import InquiryCreated from '../shared-components/InquiryCreated';
+import Inquiry from '../shared-components/Inquiry';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
 import { getKeyByValue, filterMetadata, displayToast } from '@shared';
@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [openInquiry, openAllInquiry, currentField, reload, success, fail, metadata, myBL, user] =
+  const [openInquiry, openAllInquiry, currentField, reload, success, fail, metadata, myBL] =
     useSelector((state) => [
       state.workspace.inquiryReducer.openInquiry,
       state.workspace.inquiryReducer.openAllInquiry,
@@ -44,7 +44,6 @@ const BLWorkspace = (props) => {
       state.workspace.inquiryReducer.fail,
       state.workspace.inquiryReducer.metadata,
       state.workspace.inquiryReducer.myBL,
-      state.auth.user
     ]);
 
   useEffect(() => {
@@ -77,7 +76,6 @@ const BLWorkspace = (props) => {
       const data = filterMetadata(res);
       dispatch(Actions.saveMetadata(data));
     });
-    dispatch(Actions.saveUser(user));
 
     const bkgNo = window.location.pathname.split('/')[3];
     dispatch(Actions.initBL(bkgNo));
@@ -97,11 +95,11 @@ const BLWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-            ? getKeyByValue(metadata['field'], currentField)
-            : ''
+              ? getKeyByValue(metadata['field'], currentField)
+              : ''
         }
       >
-        {openAllInquiry ? <AllInquiry user="workspace" /> : <InquiryCreated user="workspace" />}
+        {openAllInquiry ? <AllInquiry user="workspace" /> : <Inquiry user="workspace" />}
       </Form>
 
       <AddPopover />

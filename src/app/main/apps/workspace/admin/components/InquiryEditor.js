@@ -284,7 +284,8 @@ const InquiryEditor = (props) => {
   const handleReceiverChange = (e) => {
     const optionsOfQuestion = [...questions];
     if (e.target.checked) {
-      optionsOfQuestion[index].receiver.push(e.target.value);
+      dispatch(Actions.validate({ ...valid, receiver: true, error: false }));
+      optionsOfQuestion[index].receiver.push(e.target.value)
     } else {
       const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
       optionsOfQuestion[index].receiver.splice(i, 1);
@@ -328,30 +329,26 @@ const InquiryEditor = (props) => {
       />
       <Card style={{ padding: '1rem' }}>
         <div className="flex justify-end" style={{ marginRight: '-1rem' }}>
-          <FormGroup row>
-            <FormControlLabel
-              value="onshore"
-              control={
-                <Checkbox
-                  checked={question.receiver.includes('onshore')}
+          <FormControl error={valid.error && !question.receiver.length}>
+            <FormGroup row>
+              <FormControlLabel
+                value="onshore"
+                control={<Checkbox
+                  checked={question.receiver.includes("onshore")}
                   onChange={handleReceiverChange}
-                  color="primary"
-                />
-              }
-              label="Onshore"
-            />
-            <FormControlLabel
-              value="customer"
-              control={
-                <Checkbox
-                  checked={question.receiver.includes('customer')}
+                  color="primary" />}
+                label="Onshore" />
+              <FormControlLabel
+                value="customer"
+                control={<Checkbox
+                  checked={question.receiver.includes("customer")}
                   onChange={handleReceiverChange}
-                  color="primary"
-                />
-              }
-              label="Customer"
-            />
-          </FormGroup>
+                  color="primary" />}
+                label="Customer"
+              />
+            </FormGroup>
+            {valid.error && !question.receiver.length && <FormHelperText>Pick at least one!</FormHelperText>}
+          </FormControl>
         </div>
         <Grid container style={{ width: '750px', marginTop: '5px' }} spacing={1}>
           <Grid item xs={12} className="flex justify-between">
@@ -416,24 +413,30 @@ const InquiryEditor = (props) => {
             style={{ width: '100%', resize: 'none' }}
           />
         </div>
-        {question.ansType === metadata.ans_type.choice && (
-          <div className="mt-16">
-            <ChoiceAnswer
-              questions={questions}
-              question={question}
-              index={index}
-              saveQuestion={saveQuestion}
-            />
-          </div>
-        )}
-        {question.ansType === metadata.ans_type.paragraph && (
-          <div className="mt-40">
-            <ParagraphAnswer />
-          </div>
-        )}
-        {question.ansType === metadata.ans_type.attachment && (
-          <AttachmentAnswer style={{ marginTop: '1rem' }} />
-        )}
+        {
+          question.ansType === metadata.ans_type.choice && (
+            <div className="mt-16">
+              <ChoiceAnswer
+                questions={questions}
+                question={question}
+                index={index}
+                saveQuestion={saveQuestion}
+              />
+            </div>
+          )
+        }
+        {
+          question.ansType === metadata.ans_type.paragraph && (
+            <div className="mt-40">
+              <ParagraphAnswer />
+            </div>
+          )
+        }
+        {
+          question.ansType === metadata.ans_type.attachment && (
+            <AttachmentAnswer style={{ marginTop: '1rem' }} />
+          )
+        }
         <Divider className="mt-12" />
         <div className="flex justify-end items-center mr-2 ">
           <AttachFile uploadImageAttach={handleUploadImageAttach} />
@@ -444,26 +447,28 @@ const InquiryEditor = (props) => {
             <DeleteIcon />
           </IconButton>
         </div>
-        {question.mediaFile.map((file, index) =>
-          file.ext.match(/jpeg|jpg|png/g) ? (
-            <div style={{ position: 'relative' }}>
-              <Fab
-                classes={{
-                  root: classes.root
-                }}
-                size="small"
-                onClick={() => handleRemoveImageAttach(index)}
-              >
-                <CloseIcon style={{ fontSize: 20 }} />
-              </Fab>
-              <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-            </div>
-          ) : (
-            <FileAttach file={file} />
+        {
+          question.mediaFile.map((file, index) =>
+            file.ext.match(/jpeg|jpg|png/g) ? (
+              <div style={{ position: 'relative' }}>
+                <Fab
+                  classes={{
+                    root: classes.root
+                  }}
+                  size="small"
+                  onClick={() => handleRemoveImageAttach(index)}
+                >
+                  <CloseIcon style={{ fontSize: 20 }} />
+                </Fab>
+                <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+              </div>
+            ) : (
+              <FileAttach file={file} />
+            )
           )
-        )}
-      </Card>
-    </div>
+        }
+      </Card >
+    </div >
   );
 };
 

@@ -19,11 +19,10 @@ export const SAVE_INQUIRY = 'SAVE_INQUIRY';
 export const DISPLAY_SUCCESS = 'DISPLAY_SUCCESS';
 export const DISPLAY_FAIL = 'DISPLAY_FAIL';
 export const SAVE_METADATA = 'SAVE_METADATA';
-export const SAVE_USER = 'SAVE_USER';
 export const VALIDATE = 'VALIDATE';
 export const REMOVE_SELECTED_OPTION = 'REMOVE_SELECTED_OPTION';
 export const SET_ORIGINAL_INQUIRY = 'SET_ORIGINAL_INQUIRY';
-export const SET_ADMIN_COMMENT = 'SET_ADMIN_COMMENT';
+export const DISPLAY_COMMENT = 'DISPLAY_COMMENT';
 // export * from './mail.actions';
 
 export const initBL = (bkgNo) => async (dispatch) => {
@@ -81,9 +80,9 @@ export function setField(state) {
   };
 }
 
-export function setAdminComment(state) {
+export function setDisplayComment(state) {
   return {
-    type: SET_ADMIN_COMMENT,
+    type: DISPLAY_COMMENT,
     state: state
   };
 }
@@ -166,13 +165,6 @@ export function displayFail(state, message) {
 export function saveMetadata(state) {
   return {
     type: SAVE_METADATA,
-    state: state
-  };
-}
-
-export function saveUser(state) {
-  return {
-    type: SAVE_USER,
     state: state
   };
 }

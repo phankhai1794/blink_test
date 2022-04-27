@@ -8,11 +8,11 @@ import { Grid, Divider } from '@material-ui/core';
 import * as AppActions from 'app/store/actions';
 import * as WSActions from '../admin/store/actions';
 import * as HeaderActions from 'app/store/actions/header';
-import InquiryCreated from '../shared-components/InquiryCreated';
+import Inquiry from '../shared-components/Inquiry';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
 import BLField from './components/BLField';
-import { filterMetadata, filterData, getKeyByValue } from '@shared';
+import { filterMetadata, getKeyByValue } from '@shared';
 import { loadMetadata, loadInquiry } from 'app/services/inquiryService';
 
 const useStyles = makeStyles((theme) => ({
@@ -70,11 +70,11 @@ const GuestWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-            ? getKeyByValue(metadata['field'], currentField)
-            : ''
+              ? getKeyByValue(metadata['field'], currentField)
+              : ''
         }
       >
-        {openAllInquiry ? <AllInquiry user="guest" /> : <InquiryCreated user="guest" />}
+        {openAllInquiry ? <AllInquiry user="guest" /> : <Inquiry user="guest" />}
       </Form>
 
       <Grid container spacing={6}>
