@@ -144,7 +144,7 @@ const SendInquiryForm = (props) => {
 
       <Form
         title={'New Mail'}
-        open={opened}
+        open={opened || false}
         toggleForm={(status) => {
           closeSendInquiry();
         }}

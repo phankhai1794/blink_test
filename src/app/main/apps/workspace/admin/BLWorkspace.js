@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as AppActions from 'app/store/actions';
 import * as Actions from './store/actions';
 import * as HeaderActions from 'app/store/actions/header';
-import { loadInquiry, loadMetadata } from 'app/services/inquiryService';
 
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -18,7 +17,6 @@ import { getKeyByValue, filterMetadata, displayToast } from '@shared';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
-
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
     paddingTop: '0 !important'
@@ -56,14 +54,7 @@ const BLWorkspace = (props) => {
       displayToast('error', fail.message);
     }
     if (myBL.id) {
-      loadInquiry(myBL.id)
-        .then((res) => {
-          const field_list = res.map((e) => e.field);
-          dispatch(Actions.saveField(field_list));
-          dispatch(Actions.editInquiry(res));
-          dispatch(Actions.setOriginalInquiry(JSON.parse(JSON.stringify(res))));
-        })
-        .catch((error) => console.log(error));
+      dispatch(Actions.loadInquiry(myBL.id));
     }
   }, [reload, myBL]);
 
@@ -72,10 +63,7 @@ const BLWorkspace = (props) => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
 
-    loadMetadata().then((res) => {
-      const data = filterMetadata(res);
-      dispatch(Actions.saveMetadata(data));
-    });
+    dispatch(Actions.loadMetadata());
 
     const bkgNo = window.location.pathname.split('/')[3];
     dispatch(Actions.initBL(bkgNo));

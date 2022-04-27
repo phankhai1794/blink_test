@@ -11,7 +11,7 @@ export async function saveComment(data) {
   return response.data;
 }
 
-export async function loadInquiry(id) {
+export async function getInquiryById(id) {
   const response = await axios().get(`${PATH}/${id}`);
   return response.data;
 }
@@ -21,7 +21,7 @@ export async function updateInquiry(id, data) {
   return response.data;
 }
 
-export async function loadMetadata() {
+export async function getMetadata() {
   const response = await axios().get(`${PATH}/metadata`);
   return response.data;
 }
