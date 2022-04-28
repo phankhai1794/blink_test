@@ -1,21 +1,13 @@
 import * as Actions from '../../actions/header';
 
 const initialState = {
-  hideAll: true,
-  displayDraftBLBtn: false,
-  displayEditBtn: false
+  allow: true
 };
 
 const headerReducer = function (state = initialState, action) {
   switch (action.type) {
-    case Actions.DISPLAY_BTN: {
-      return {
-        ...state,
-        hideAll: false,
-        displayDraftBLBtn: false,
-        displayEditBtn: false,
-        ...action.state
-      };
+    case Actions.CHECK_ALLOW: {
+      return { ...state, allow: action.state };
     }
     default: {
       return state;

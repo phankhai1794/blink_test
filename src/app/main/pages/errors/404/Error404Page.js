@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react';
+import _ from 'lodash';
 import { Icon, Input, Paper, Typography } from '@material-ui/core';
 import { FuseAnimate } from '@fuse';
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import * as HeaderActions from 'app/store/actions/header';
+import * as AppActions from 'app/store/actions';
 
 function Error404Page() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(HeaderActions.displayBtn({ hideAll: true }));
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
   }, []);
 
   return (

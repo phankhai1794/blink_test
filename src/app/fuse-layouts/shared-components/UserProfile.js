@@ -12,13 +12,13 @@ import {
 } from '@material-ui/core';
 import { cyan } from '@material-ui/core/colors';
 import { Link } from 'react-router-dom';
-import * as userActions from 'app/auth/store/actions';
+import * as AppActions from 'app/store/actions';
 
 function UserProfile(props) {
   const { classes } = props;
   const dispatch = useDispatch();
   const [open, setOpen] = useState(null);
-  const user = useSelector(({ auth }) => auth.user);
+  const user = useSelector(({ user }) => user);
   const handleClick = (event) => {
     setOpen(event.currentTarget);
   };
@@ -30,7 +30,8 @@ function UserProfile(props) {
   const handleLogOut = () => {
     localStorage.clear();
     window.location.logout = true;
-    dispatch(userActions.removeUserData());
+    dispatch(AppActions.removeUser());
+    dispatch(AppActions.checkAllow(false));
   };
 
   return (

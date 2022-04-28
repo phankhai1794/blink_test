@@ -4,7 +4,6 @@ import { FuseAnimateGroup, FusePageSimple } from '@fuse';
 import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
 import * as Actions from './store/actions';
-import * as HeaderActions from 'app/store/actions/header';
 import * as AppActions from 'app/store/actions';
 import reducer from './store/reducers';
 import _ from 'lodash';
@@ -23,6 +22,7 @@ import Widget11 from './widgets/Widget11';
 import WidgetNow from './widgets/WidgetNow';
 import WidgetWeather from './widgets/WidgetWeather';
 import { makeStyles } from '@material-ui/styles';
+import { PERMISSION, PermissionProvider } from '@shared';
 
 const useStyles = makeStyles((theme) => ({
   content: {
@@ -59,10 +59,10 @@ function ProjectDashboardApp(props) {
   useEffect(() => {
     dispatch(Actions.getWidgets());
     dispatch(Actions.getProjects());
-    dispatch(HeaderActions.displayBtn({ hideAll: true }));
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-  }, [dispatch]);
+    dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.ACCESS_DASHBOARD })));
+  }, []);
 
   function handleChangeTab(event, tabValue) {
     setTabValue(tabValue);

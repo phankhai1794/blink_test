@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
 const OtpCheck = ({ status }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const user = useSelector(({ auth }) => auth.user);
+  const user = useSelector(({ user }) => user);
   const [mail, setMail] = useState({ value: '', isValid: false });
   const [myBL, setMyBL] = useState({ id: '' });
   const [otpCode, setOtpCode] = useState('');
@@ -110,7 +110,7 @@ const OtpCheck = ({ status }) => {
               displayName: userName,
               photoURL: avatar,
               role,
-              permissions: permissions.filter((p) => p.controller == 'view'),
+              permissions,
               mail: mail.value
             };
 

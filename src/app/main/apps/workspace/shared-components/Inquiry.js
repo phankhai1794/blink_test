@@ -42,8 +42,7 @@ const Comment = (props) => {
   const [comment, setComment] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState('');
-  const reply = useSelector((state) => state.workspace.inquiryReducer.reply);
-  const user = JSON.parse(localStorage.getItem('USER'));
+  const [reply, user] = useSelector((state) => [state.workspace.inquiryReducer.reply, state.user]);
   const open = Boolean(anchorEl);
 
   useEffect(() => {

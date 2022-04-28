@@ -1,14 +1,10 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import _ from '@lodash';
-import * as HeaderActions from 'app/store/actions/header';
+import * as AppActions from 'app/store/actions';
 
 const DraftWorkspace = (props) => {
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(HeaderActions.displayBtn({ displayEditBtn: true }));
-  }, []);
 
   return (
     <>
