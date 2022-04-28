@@ -1,6 +1,8 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../admin/store/actions';
+import * as InquiryActions from '../admin/store/actions/inquiry';
+import * as FormActions from '../admin/store/actions/form';
+
 import { makeStyles } from '@material-ui/core/styles';
 import { Link, Grid, Button, IconButton } from '@material-ui/core';
 import TextsmsIcon from '@material-ui/icons/Textsms';
@@ -31,7 +33,6 @@ const PopoverFooter = ({ title, checkValidate }) => {
     state.workspace.inquiryReducer.myBL,
     state.workspace.inquiryReducer.displayCmt,
     state.workspace.inquiryReducer.validation
-
   ]);
   const onSave = () => {
     if (!checkValidate(question[index]) || !valid.receiver) return;
@@ -84,25 +85,26 @@ const PopoverFooter = ({ title, checkValidate }) => {
       .then(() => {
         saveInquiry({ inquiry, inqAns, answer, inqMedia })
           .then(() => {
-            dispatch(Actions.displaySuccess(true));
-            dispatch(Actions.saveInquiry());
+            dispatch(FormActions.displaySuccess(true));
+            dispatch(InquiryActions.saveInquiry());
+            dispatch(FormActions.toggleReload());
           })
-          .catch((error) => dispatch(Actions.displayFail(true, error)));
+          .catch((error) => dispatch(FormActions.displayFail(true, error)));
       })
-      .catch((error) => dispatch(Actions.displayFail(true, error)));
+      .catch((error) => dispatch(FormActions.displayFail(true, error)));
   };
   const toggleInquiriresDialog = () => {
-    dispatch(Actions.toggleAllInquiry());
+    dispatch(FormActions.toggleAllInquiry());
   };
   const onResolve = () => {
     changeStatus(currentField, 'COMPL')
       .then(() => {
-        dispatch(Actions.toggleReload());
+        dispatch(FormActions.toggleReload());
       })
-      .catch((error) => dispatch(Actions.displayFail(true, error)));
+      .catch((error) => dispatch(FormActions.displayFail(true, error)));
   };
   const onReply = () => {
-    dispatch(Actions.setReply(true));
+    dispatch(InquiryActions.setReply(true));
   };
   const nextQuestion = () => {
     var temp = fields.indexOf(title);
@@ -111,7 +113,7 @@ const PopoverFooter = ({ title, checkValidate }) => {
     } else {
       temp = 0;
     }
-    dispatch(Actions.setField(fields[temp]));
+    dispatch(InquiryActions.setField(fields[temp]));
   };
   const prevQuestion = () => {
     var temp = fields.indexOf(title);
@@ -120,7 +122,7 @@ const PopoverFooter = ({ title, checkValidate }) => {
     } else {
       temp = fields.length - 1;
     }
-    dispatch(Actions.setField(fields[temp]));
+    dispatch(InquiryActions.setField(fields[temp]));
   };
   return (
     <Grid container style={{ margin: '3rem auto' }}>

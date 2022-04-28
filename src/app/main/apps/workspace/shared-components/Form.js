@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../admin/store/actions';
+import * as InquiryActions from '../admin/store/actions/inquiry';
+import * as FormActions from '../admin/store/actions/form';
 
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
@@ -10,7 +11,7 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
-import RemoveIcon from '@material-ui/icons/Remove';
+import MinimizeIcon from '@material-ui/icons/Minimize';
 import { Box, Tabs, Tab, Fab, Divider } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import CropIcon from '@material-ui/icons/Crop';
@@ -44,6 +45,11 @@ const DialogTitle = withStyles(styles)((props) => {
     handleClose,
     ...other
   } = props;
+  const dispatch = useDispatch()
+  const openFullScreen = (state) => {
+    dispatch(FormActions.setFullscreen(state));
+    toggleFullScreen(state)
+  }
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -56,12 +62,12 @@ const DialogTitle = withStyles(styles)((props) => {
             onClick={handleOpenSnackBar}
             style={{ textAlign: 'center' }}
           >
-            <RemoveIcon />
+            <MinimizeIcon />
           </IconButton>
           {isFullScreen ? (
             <IconButton
               aria-label="close"
-              onClick={() => toggleFullScreen(false)}
+              onClick={() => openFullScreen(false)}
               style={{ textAlign: 'center' }}
             >
               <CropIcon />
@@ -69,7 +75,7 @@ const DialogTitle = withStyles(styles)((props) => {
           ) : (
             <IconButton
               aria-label="close"
-              onClick={() => toggleFullScreen(true)}
+              onClick={() => openFullScreen(true)}
               style={{ textAlign: 'center' }}
             >
               <CropDinIcon />
@@ -84,15 +90,6 @@ const DialogTitle = withStyles(styles)((props) => {
   );
 });
 
-const DialogContent = withStyles((theme) => ({
-  root: {
-    margin: 'auto',
-    marginTop: '1rem',
-    backgroundColor: 'white'
-    // maxWidth: "100%",
-    // width: "780px"
-  }
-}))(MuiDialogContent);
 const DialogActions = withStyles((theme) => ({
   root: {
     margin: 0,
@@ -104,23 +101,35 @@ const DialogActions = withStyles((theme) => ({
 const useStyles = makeStyles(() => ({
   dialogPaper: {
     width: '850px'
+  },
+  dialogContent: {
+    margin: 'auto',
+    marginTop: '1rem',
+    backgroundColor: 'white',
+    width: props => props.isFullScreen ? '1200px' : '770px'
   }
 }));
+
 export default function Form(props) {
   const dispatch = useDispatch();
-  const classes = useStyles();
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs } =
     props;
-  const [index, openAllInquiry, question] = useSelector((state) => [
+  const [index, question] = useSelector((state) => [
     state.workspace.inquiryReducer.currentEdit,
-    state.workspace.inquiryReducer.openAllInquiry,
     state.workspace.inquiryReducer.question
   ]);
+
+  const [openAllInquiry] = useSelector((state) => [
+    state.workspace.formReducer.openAllInquiry,
+  ])
+
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const classes = useStyles({ isFullScreen });
+
   const checkValidate = (question) => {
     if (!question.inqType || !question.field || !question.receiver.length) {
-      dispatch(Actions.validate({
+      dispatch(InquiryActions.validate({
         field: Boolean(question.field),
         inqType: Boolean(question.inqType),
         receiver: Boolean(question.receiver.length),
@@ -131,6 +140,7 @@ export default function Form(props) {
     return true;
   };
   const handleOpenFab = () => {
+    dispatch(FormActions.minimize(true));
     setOpenFab(true);
     toggleForm(false);
   };
@@ -140,21 +150,22 @@ export default function Form(props) {
 
   const handleClick = () => {
     if (openAllInquiry) {
-      dispatch(Actions.addQuestion1())
+      dispatch(InquiryActions.addQuestion1())
     } else if (checkValidate(question[index])) {
-      dispatch(Actions.addQuestion())
-      dispatch(Actions.setEdit(index + 1));
+      dispatch(InquiryActions.addQuestion())
+      dispatch(InquiryActions.setEdit(index + 1));
     }
   };
   const handleClose = () => {
+    dispatch(FormActions.minimize(false));
     toggleForm(false);
     setOpenFab(false);
     if (openAllInquiry) {
       setTimeout(() => {
-        dispatch(Actions.toggleAllInquiry());
+        dispatch(FormActions.toggleAllInquiry());
       }, 400);
     }
-    dispatch(Actions.setReply(false));
+    dispatch(InquiryActions.setReply(false));
   };
   const [value, setValue] = React.useState(0);
   const handleChange = (event, newValue) => {
@@ -205,7 +216,7 @@ export default function Form(props) {
             </Tabs>
           </Box>
         )}
-        <DialogContent>{children}</DialogContent>
+        <MuiDialogContent classes={{ root: classes.dialogContent }} >{children}</MuiDialogContent>
         {
           customActions == null &&
           <DialogActions style={{ display: 'none !important' }}>

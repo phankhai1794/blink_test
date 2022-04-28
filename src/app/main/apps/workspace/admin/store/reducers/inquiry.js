@@ -1,19 +1,12 @@
-import * as Actions from '../actions';
+import * as Actions from '../actions/inquiry';
 
 const initialState = {
   myBL: {},
-  success: false,
-  fail: false,
   metadata: {},
-  openDialog: false,
-  openAllInquiry: false,
-  openInquiry: false,
   currentEdit: 0,
   currentEditInq: null,
   displayCmt: false,
-  anchorEl: null,
   currentField: '',
-  reload: false,
   reply: false,
   fields: [],
   removeOptions: [],
@@ -39,18 +32,6 @@ const inquiryReducer = function (state = initialState, action) {
   switch (action.type) {
     case Actions.SET_MYBL: {
       return { ...state, myBL: action.state };
-    }
-    case Actions.OPEN_CREATE_INQUIRY: {
-      return { ...state, openDialog: action.state };
-    }
-    case Actions.OPEN_ALL_INQUIRY: {
-      return { ...state, openAllInquiry: !state.openAllInquiry };
-    }
-    case Actions.OPEN_INQUIRY: {
-      return { ...state, openInquiry: action.state };
-    }
-    case Actions.SET_ANCHOR_EL: {
-      return { ...state, anchorEl: action.state };
     }
     case Actions.SET_REPLY: {
       return { ...state, reply: action.state };
@@ -111,9 +92,7 @@ const inquiryReducer = function (state = initialState, action) {
     case Actions.SAVE_INQUIRY: {
       return {
         ...state,
-        reload: !state.reload,
         currentEdit: 0,
-        openDialog: false,
         question: [
           {
             content:
@@ -129,20 +108,11 @@ const inquiryReducer = function (state = initialState, action) {
         ]
       };
     }
-    case Actions.RELOAD: {
-      return { ...state, reload: !state.reload, openInquiry: false, openAllInquiry: false };
-    }
     case Actions.SAVE_FIELD: {
       return { ...state, fields: action.state };
     }
     case Actions.SAVE_METADATA: {
       return { ...state, metadata: action.state };
-    }
-    case Actions.DISPLAY_SUCCESS: {
-      return { ...state, success: action.state };
-    }
-    case Actions.DISPLAY_FAIL: {
-      return { ...state, fail: { openDialog: action.state, error: action.message } };
     }
     case Actions.REMOVE_SELECTED_OPTION: {
       return { ...state, removeOptions: action.state };

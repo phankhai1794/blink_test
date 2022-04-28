@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../store/actions';
+import * as FormActions from '../store/actions/form';
 
 import AddCommentIcon from '@material-ui/icons/AddComment';
 import { Popover, IconButton } from '@material-ui/core';
@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
 const AddPopover = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const anchorEl = useSelector((state) => state.workspace.inquiryReducer.anchorEl);
+  const anchorEl = useSelector((state) => state.workspace.formReducer.anchorEl);
   const { x, width } = anchorEl !== null && anchorEl.getBoundingClientRect();
   const isRightMost = x + width > 1400;
   return (
@@ -56,7 +56,7 @@ const AddPopover = (props) => {
           paper: classes.popoverContent
         }}
       >
-        <IconButton color="primary" onClick={() => dispatch(Actions.toggleCreateInquiry(true))}>
+        <IconButton color="primary" onClick={() => dispatch(FormActions.toggleCreateInquiry(true))}>
           <AddCommentIcon style={{ transform: `${isRightMost ? 'scaleX(1)' : 'scaleX(-1)'}` }} />
         </IconButton>
       </Popover>

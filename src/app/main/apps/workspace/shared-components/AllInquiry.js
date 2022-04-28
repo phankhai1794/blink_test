@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../admin/store/actions';
+import * as InquiryActions from '../admin/store/actions/inquiry';
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
 import AttachmentAnswer from './AttachmentAnswer';
@@ -22,7 +22,7 @@ const AllInquiry = (props) => {
   ]);
 
   const changeToEditor = (index) => {
-    if (index !== currentEdit) dispatch(Actions.setEditInq(index));
+    if (index !== currentEdit) dispatch(InquiryActions.setEditInq(index));
   };
 
   useEffect(() => {
@@ -39,7 +39,7 @@ const AllInquiry = (props) => {
                 url = URL.createObjectURL(new Blob([file]));
               }
               optionsOfQuestion[i].mediaFile[f].src = url;
-              dispatch(Actions.editInquiry(optionsOfQuestion));
+              dispatch(InquiryActions.editInquiry(optionsOfQuestion));
             })
             .catch((error) => console.log(error));
         }
@@ -52,7 +52,7 @@ const AllInquiry = (props) => {
         if (receiver && !q.receiver.includes(receiver)) {
           return (
             <div
-              style={{ display: 'flex', width: '770px', marginBottom: '24px' }}
+              style={{ display: 'flex', marginBottom: '24px' }}
               onClick={() => changeToEditor(index)}
             ></div>
           );
@@ -60,7 +60,7 @@ const AllInquiry = (props) => {
         const type = q.ansType;
         return (
           <div
-            style={{ width: '770px', marginBottom: '24px' }}
+            style={{ marginBottom: '24px' }}
             onClick={() => changeToEditor(index)}
           >
             <PermissionProvider
@@ -99,7 +99,7 @@ const AllInquiry = (props) => {
                 index={index}
                 questions={inquiries}
                 question={q}
-                saveQuestion={(e) => dispatch(Actions.editInquiry(e))}
+                saveQuestion={(e) => dispatch(InquiryActions.editInquiry(e))}
               />
             </PermissionProvider>
           </div>

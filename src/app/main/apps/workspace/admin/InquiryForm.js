@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from './store/actions';
+import * as InquiryActions from './store/actions/inquiry';
+import * as FormActions from './store/actions/form';
 import { getKeyByValue } from '@shared';
 
 import { Card, Typography, FormGroup, FormControlLabel, Checkbox, FormControl, FormHelperText } from '@material-ui/core';
@@ -13,28 +14,30 @@ import Form from '../shared-components/Form';
 const InquiryForm = (props) => {
   const { FabTitle } = props;
   const dispatch = useDispatch();
-  const [questions, currentField, open, metadata, valid, currentEdit] = useSelector((state) => [
+  const [questions, currentField, metadata, valid, currentEdit] = useSelector((state) => [
     state.workspace.inquiryReducer.question,
     state.workspace.inquiryReducer.currentField,
-    state.workspace.inquiryReducer.openDialog,
     state.workspace.inquiryReducer.metadata,
     state.workspace.inquiryReducer.validation,
     state.workspace.inquiryReducer.currentEdit,
   ]);
+  const [open] = useSelector((state) => [
+    state.workspace.formReducer.openDialog,
+  ])
   const tempQuestionNum = questions.length;
   useEffect(() => {
     const check = questions.filter((q) => !q.receiver.length)
-    dispatch(Actions.validate({ ...valid, receiver: !Boolean(check.length) }));
+    dispatch(InquiryActions.validate({ ...valid, receiver: !Boolean(check.length) }));
   }, [questions])
 
   const changeToEditor = (index) => {
     if (!questions[currentEdit].inqType || !questions[currentEdit].field || !questions[currentEdit].receiver.length) {
-      dispatch(Actions.validate({
+      dispatch(InquiryActions.validate({
         field: Boolean(questions[currentEdit].field),
         inqType: Boolean(questions[currentEdit].inqType),
         receiver: Boolean(questions[currentEdit].receiver.length)
       }))
-    } else if (index !== currentEdit) dispatch(Actions.setEdit(index));
+    } else if (index !== currentEdit) dispatch(InquiryActions.setEdit(index));
   };
   const handleReceiverChange = (e, index) => {
     const optionsOfQuestion = [...questions];
@@ -44,7 +47,7 @@ const InquiryForm = (props) => {
       const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
       optionsOfQuestion[index].receiver.splice(i, 1);
     }
-    dispatch(Actions.setQuestion(optionsOfQuestion));
+    dispatch(InquiryActions.setQuestion(optionsOfQuestion));
   };
   return (
     <Form
@@ -56,20 +59,19 @@ const InquiryForm = (props) => {
             : ''
           : 'open Inquiries'
       }
-      toggleForm={(status) => dispatch(Actions.toggleCreateInquiry(status))}
+      toggleForm={(status) => dispatch(FormActions.toggleCreateInquiry(status))}
       open={open}
     >
       <>
         {questions.map((question, index) => (
           <>
-            <div className="flex justify-between"></div>
-            <div style={{ width: '770px', marginBottom: '24px' }}>
+            <div style={{ marginBottom: '24px' }}>
               {currentEdit === index ? (
                 <InquiryEditor
                   index={index}
                   questions={questions}
                   question={question}
-                  saveQuestion={(q) => dispatch(Actions.setQuestion(q))}
+                  saveQuestion={(q) => dispatch(InquiryActions.setQuestion(q))}
                 />
               ) : (
                 <Card style={{ padding: '1rem ' }}>

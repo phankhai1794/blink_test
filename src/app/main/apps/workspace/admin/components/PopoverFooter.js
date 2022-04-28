@@ -1,5 +1,5 @@
 import React from 'react';
-import * as Actions from '../store/actions';
+import * as FormActions from '../store/actions/form';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
@@ -65,10 +65,10 @@ const PopoverFooter = () => {
           });
         }
       }
-      dispatch(Actions.displaySuccess(true));
-      dispatch(Actions.toggleReload());
+      dispatch(FormActions.displaySuccess(true));
+      dispatch(FormActions.toggleReload());
     } catch (error) {
-      dispatch(Actions.displayFail(true, error));
+      dispatch(FormActions.displayFail(true, error));
       console.log(error);
     }
   };

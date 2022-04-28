@@ -6,6 +6,11 @@ export async function getAllBl(state) {
   return response.data;
 }
 
+export async function getBlInfo(id) {
+  const response = await axios().get(`${PATH}/${id}`);
+  return response.data;
+}
+
 export async function createBL(bkgNo) {
   const response = await axios().post(`${PATH}/${bkgNo}`, {});
   return response.data;

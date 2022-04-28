@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../store/actions';
+import * as InquiryActions from '../store/actions/inquiry';
 import {
   TextField,
   Grid,
@@ -203,6 +203,9 @@ const InquiryEditor = (props) => {
     state.workspace.inquiryReducer.fields,
     state.workspace.inquiryReducer.validation
   ]);
+
+  const fullscreen = useSelector((state) => state.workspace.formReducer.fullscreen)
+
   const [fieldType, setFieldType] = useState(metadata.field_options);
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => question.inqType === v.value)[0]
@@ -223,7 +226,7 @@ const InquiryEditor = (props) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion.splice(index, 1);
     if (index > 0) {
-      dispatch(Actions.setEdit(index - 1));
+      dispatch(InquiryActions.setEdit(index - 1));
     }
     saveQuestion(optionsOfQuestion);
   };
@@ -243,7 +246,7 @@ const InquiryEditor = (props) => {
       setFieldValue(metadata.field_options.filter((v) => currentField === v.value)[0]);
       const options = [...removeOptions];
       options[index] = currentField;
-      dispatch(Actions.removeSelectedOption(options));
+      dispatch(InquiryActions.removeSelectedOption(options));
     }
     saveQuestion(optionsOfQuestion);
   }, []);
@@ -256,7 +259,7 @@ const InquiryEditor = (props) => {
   const handleTypeChange = (e) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].inqType = e.value;
-    dispatch(Actions.validate({ ...valid, inqType: true }));
+    dispatch(InquiryActions.validate({ ...valid, inqType: true }));
     const temp = valueType ? `\\b${valueType.label}\\b` : '{{INQ_TYPE}}';
     let re = new RegExp(`${temp}`, 'g');
     optionsOfQuestion[index].content = question.content.replace(re, e.label);
@@ -267,10 +270,10 @@ const InquiryEditor = (props) => {
   const handleFieldChange = (e) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].field = e.value;
-    dispatch(Actions.validate({ ...valid, field: true }));
+    dispatch(InquiryActions.validate({ ...valid, field: true }));
     const options = [...removeOptions];
     options[index] = e.value;
-    dispatch(Actions.removeSelectedOption(options));
+    dispatch(InquiryActions.removeSelectedOption(options));
     setFieldValue(e);
     saveQuestion(optionsOfQuestion);
   };
@@ -284,7 +287,7 @@ const InquiryEditor = (props) => {
   const handleReceiverChange = (e) => {
     const optionsOfQuestion = [...questions];
     if (e.target.checked) {
-      dispatch(Actions.validate({ ...valid, receiver: true, error: false }));
+      dispatch(InquiryActions.validate({ ...valid, receiver: true, error: false }));
       optionsOfQuestion[index].receiver.push(e.target.value)
     } else {
       const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
@@ -318,157 +321,147 @@ const InquiryEditor = (props) => {
   };
 
   return (
-    <div style={{ display: 'flex' }}>
-      <div
-        style={{
-          width: '6px',
-          backgroundColor: '#4285f4',
-          borderTopLeftRadius: '8px',
-          borderBottomLeftRadius: '8px'
-        }}
-      />
-      <Card style={{ padding: '1rem' }}>
-        <div className="flex justify-end" style={{ marginRight: '-1rem' }}>
-          <FormControl error={valid.error && !question.receiver.length}>
-            <FormGroup row>
-              <FormControlLabel
-                value="onshore"
-                control={<Checkbox
-                  checked={question.receiver.includes("onshore")}
-                  onChange={handleReceiverChange}
-                  color="primary" />}
-                label="Onshore" />
-              <FormControlLabel
-                value="customer"
-                control={<Checkbox
-                  checked={question.receiver.includes("customer")}
-                  onChange={handleReceiverChange}
-                  color="primary" />}
-                label="Customer"
-              />
-            </FormGroup>
-            {valid.error && !question.receiver.length && <FormHelperText>Pick at least one!</FormHelperText>}
-          </FormControl>
-        </div>
-        <Grid container style={{ width: '750px', marginTop: '5px' }} spacing={1}>
-          <Grid item xs={12} className="flex justify-between">
-            <FormControl error={!valid.field}>
-              <FuseChipSelect
-                className="m-auto"
-                customStyle={styles(valid.field, 220)}
-                value={fieldValue}
-                onChange={handleFieldChange}
-                placeholder="Select Field Type"
-                textFieldProps={{
-                  variant: 'outlined'
-                }}
-                options={fieldType}
-              />
-              {!valid.field && <FormHelperText>This is required!</FormHelperText>}
-            </FormControl>
-            <FormControl error={!valid.inqType}>
-              <FuseChipSelect
-                className="m-auto"
-                value={valueType}
-                customStyle={styles(valid.inqType, 270)}
-                onChange={handleTypeChange}
-                placeholder="Select Inquiry Type"
-                textFieldProps={{
-                  variant: 'outlined'
-                }}
-                options={metadata.inq_type_options}
-              />
-              {!valid.inqType && <FormHelperText>This is required!</FormHelperText>}
-            </FormControl>
-            <CustomSelect
-              value={question.ansType}
-              name="Question answer type"
-              onChange={handleAnswerTypeChange}
-              options={[
-                {
-                  title: 'Choice Answer',
-                  value: metadata.ans_type.choice,
-                  icon: 'radio_button_checked'
-                },
-                {
-                  title: 'Paragraph Answer',
-                  value: metadata.ans_type.paragraph,
-                  icon: 'subject'
-                },
-                {
-                  title: 'Attachment Answer',
-                  value: metadata.ans_type.attachment,
-                  icon: 'attachment'
-                }
-              ]}
+    <Card style={{ padding: '1rem' }}>
+      <div className="flex justify-end" style={{ marginRight: '-1rem' }}>
+        <FormControl error={valid.error && !question.receiver.length}>
+          <FormGroup row>
+            <FormControlLabel
+              value="onshore"
+              control={<Checkbox
+                checked={question.receiver.includes("onshore")}
+                onChange={handleReceiverChange}
+                color="primary" />}
+              label="Onshore" />
+            <FormControlLabel
+              value="customer"
+              control={<Checkbox
+                checked={question.receiver.includes("customer")}
+                onChange={handleReceiverChange}
+                color="primary" />}
+              label="Customer"
             />
-          </Grid>
-        </Grid>
-        <div className="mt-32 mx-8">
-          <TextField
-            value={question.content.replace('{{INQ_TYPE}}', '')}
-            multiline
-            onFocus={(e) => e.target.select()}
-            onChange={handleNameChange}
-            style={{ width: '100%', resize: 'none' }}
+          </FormGroup>
+          {valid.error && !question.receiver.length && <FormHelperText>Pick at least one!</FormHelperText>}
+        </FormControl>
+      </div>
+      <Grid container style={{ marginTop: '5px' }} spacing={1}>
+        <Grid item xs={12} className="flex justify-between">
+          <FormControl error={!valid.field}>
+            <FuseChipSelect
+              className="m-auto"
+              customStyle={styles(valid.field, fullscreen ? 290 : 220)}
+              value={fieldValue}
+              onChange={handleFieldChange}
+              placeholder="Select Field Type"
+              textFieldProps={{
+                variant: 'outlined'
+              }}
+              options={fieldType}
+            />
+            {!valid.field && <FormHelperText>This is required!</FormHelperText>}
+          </FormControl>
+          <FormControl error={!valid.inqType}>
+            <FuseChipSelect
+              className="m-auto"
+              value={valueType}
+              customStyle={styles(valid.inqType, fullscreen ? 330 : 270)}
+              onChange={handleTypeChange}
+              placeholder="Select Inquiry Type"
+              textFieldProps={{
+                variant: 'outlined'
+              }}
+              options={metadata.inq_type_options}
+            />
+            {!valid.inqType && <FormHelperText>This is required!</FormHelperText>}
+          </FormControl>
+          <CustomSelect
+            value={question.ansType}
+            name="Question answer type"
+            onChange={handleAnswerTypeChange}
+            options={[
+              {
+                title: 'Choice Answer',
+                value: metadata.ans_type.choice,
+                icon: 'radio_button_checked'
+              },
+              {
+                title: 'Paragraph Answer',
+                value: metadata.ans_type.paragraph,
+                icon: 'subject'
+              },
+              {
+                title: 'Attachment Answer',
+                value: metadata.ans_type.attachment,
+                icon: 'attachment'
+              }
+            ]}
           />
-        </div>
-        {
-          question.ansType === metadata.ans_type.choice && (
-            <div className="mt-16">
-              <ChoiceAnswer
-                questions={questions}
-                question={question}
-                index={index}
-                saveQuestion={saveQuestion}
-              />
+        </Grid>
+      </Grid>
+      <div className="mt-32 mx-8">
+        <TextField
+          value={question.content.replace('{{INQ_TYPE}}', '')}
+          multiline
+          onFocus={(e) => e.target.select()}
+          onChange={handleNameChange}
+          style={{ width: '100%', resize: 'none' }}
+        />
+      </div>
+      {
+        question.ansType === metadata.ans_type.choice && (
+          <div className="mt-16">
+            <ChoiceAnswer
+              questions={questions}
+              question={question}
+              index={index}
+              saveQuestion={saveQuestion}
+            />
+          </div>
+        )
+      }
+      {
+        question.ansType === metadata.ans_type.paragraph && (
+          <div className="mt-40">
+            <ParagraphAnswer />
+          </div>
+        )
+      }
+      {
+        question.ansType === metadata.ans_type.attachment && (
+          <AttachmentAnswer style={{ marginTop: '1rem' }} />
+        )
+      }
+      <Divider className="mt-12" />
+      <div className="flex justify-end items-center mr-2 ">
+        <AttachFile uploadImageAttach={handleUploadImageAttach} />
+        <IconButton className="p-8" onClick={copyQuestion}>
+          <FileCopyIcon />
+        </IconButton>
+        <IconButton disabled={questions.length === 1} className="p-8" onClick={removeQuestion}>
+          <DeleteIcon />
+        </IconButton>
+      </div>
+      {
+        question.mediaFile.map((file, index) =>
+          file.ext.match(/jpeg|jpg|png/g) ? (
+            <div style={{ position: 'relative' }}>
+              <Fab
+                classes={{
+                  root: classes.root
+                }}
+                size="small"
+                onClick={() => handleRemoveImageAttach(index)}
+              >
+                <CloseIcon style={{ fontSize: 20 }} />
+              </Fab>
+              <ImageAttach src={file.src} style={{ margin: '1rem' }} />
             </div>
+          ) : (
+            <FileAttach file={file} />
           )
-        }
-        {
-          question.ansType === metadata.ans_type.paragraph && (
-            <div className="mt-40">
-              <ParagraphAnswer />
-            </div>
-          )
-        }
-        {
-          question.ansType === metadata.ans_type.attachment && (
-            <AttachmentAnswer style={{ marginTop: '1rem' }} />
-          )
-        }
-        <Divider className="mt-12" />
-        <div className="flex justify-end items-center mr-2 ">
-          <AttachFile uploadImageAttach={handleUploadImageAttach} />
-          <IconButton className="p-8" onClick={copyQuestion}>
-            <FileCopyIcon />
-          </IconButton>
-          <IconButton disabled={questions.length === 1} className="p-8" onClick={removeQuestion}>
-            <DeleteIcon />
-          </IconButton>
-        </div>
-        {
-          question.mediaFile.map((file, index) =>
-            file.ext.match(/jpeg|jpg|png/g) ? (
-              <div style={{ position: 'relative' }}>
-                <Fab
-                  classes={{
-                    root: classes.root
-                  }}
-                  size="small"
-                  onClick={() => handleRemoveImageAttach(index)}
-                >
-                  <CloseIcon style={{ fontSize: 20 }} />
-                </Fab>
-                <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-              </div>
-            ) : (
-              <FileAttach file={file} />
-            )
-          )
-        }
-      </Card >
-    </div >
+        )
+      }
+    </Card >
   );
 };
 
