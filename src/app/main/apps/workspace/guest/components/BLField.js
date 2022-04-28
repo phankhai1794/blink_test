@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../../admin/store/actions';
+import * as FormActions from '../../admin/store/actions/form';
+import * as InquiryActions from '../../admin/store/actions/inquiry';
 
 import { TextField, InputAdornment } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core';
@@ -50,18 +51,18 @@ const BLField = (props) => {
 
   const onMouseEnter = (e) => {
     if (questionIsEmpty) {
-      dispatch(Actions.setAnchor(e.currentTarget));
+      dispatch(FormActions.setAnchor(e.currentTarget));
     }
-    dispatch(Actions.setField(e.currentTarget.id));
+    dispatch(InquiryActions.setField(e.currentTarget.id));
   };
 
   const onMouseLeave = (e) => {
-    dispatch(Actions.setAnchor(null));
+    dispatch(FormActions.setAnchor(null));
   };
 
   const onClick = () => {
     if (!questionIsEmpty) {
-      dispatch(Actions.toggleInquiry(true));
+      dispatch(FormActions.toggleInquiry(true));
     }
   };
 

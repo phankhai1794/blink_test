@@ -12,7 +12,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import History from 'app/fuse-layouts/shared-components/History';
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import SendInquiryForm from 'app/main/apps/workspace/admin/SendInquiryForm';
-import * as Actions from 'app/main/apps/workspace/admin/store/actions';
+import * as FormActions from 'app/main/apps/workspace/admin/store/actions/form';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared';
 
@@ -59,8 +59,8 @@ function ToolbarLayout1(props) {
   ]);
 
   const openInquiry = () => {
-    dispatch(Actions.toggleInquiry(true));
-    dispatch(Actions.toggleAllInquiry());
+    dispatch(FormActions.toggleInquiry(true));
+    dispatch(FormActions.toggleAllInquiry());
   };
 
   useEffect(() => {

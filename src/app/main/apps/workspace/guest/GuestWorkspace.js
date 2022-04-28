@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import _ from '@lodash';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
@@ -6,13 +6,14 @@ import { makeStyles } from '@material-ui/styles';
 import { Grid, Divider } from '@material-ui/core';
 
 import * as AppActions from 'app/store/actions';
-import * as WSActions from '../admin/store/actions';
+import * as FormActions from '../admin/store/actions/form';
 import Inquiry from '../shared-components/Inquiry';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
 import BLField from './components/BLField';
-import { filterMetadata, filterData, getKeyByValue } from '@shared';
+import { getKeyByValue } from '@shared';
 import * as GuestActions from './store/actions';
+import { getBlInfo } from "app/services/myBLService";
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -29,27 +30,40 @@ const useStyles = makeStyles((theme) => ({
 const GuestWorkspace = (props) => {
   const { myBL } = props;
   const classes = useStyles();
+  const [content, setContent] = useState({})
   const dispatch = useDispatch();
   const [openInquiry, openAllInquiry, currentField, metadata] = useSelector((state) => [
-    state.workspace.inquiryReducer.openInquiry,
-    state.workspace.inquiryReducer.openAllInquiry,
+    state.workspace.formReducer.openInquiry,
+    state.workspace.formReducer.openAllInquiry,
     state.workspace.inquiryReducer.currentField,
     state.workspace.inquiryReducer.metadata
   ]);
+  const getField = (field) => {
+    return metadata.field ? metadata.field[field] : ''
+  }
 
+  const getValueField = (field) => {
+    return content[getField(field)] || ''
+  }
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
 
-    dispatch(WSActions.loadMetadata());
     dispatch(GuestActions.loadInquiry(myBL.id));
 
   }, []);
 
+  useEffect(() => {
+    if (myBL.id) {
+      getBlInfo(myBL.id).then((res) => {
+        setContent(res.myBL.content)
+      })
+    }
+  }, [myBL])
   return (
     <div className="px-52">
       <Form
         open={openInquiry}
-        toggleForm={(status) => dispatch(WSActions.toggleInquiry(status))}
+        toggleForm={(status) => dispatch(FormActions.toggleInquiry(status))}
         hasAddButton={false}
         FabTitle="Inquiry"
         field={currentField ? currentField : ''}
@@ -69,21 +83,21 @@ const GuestWorkspace = (props) => {
           <Grid item>
             <h3>Shipper/Exporter</h3>
             <BLField
-              id={metadata.field ? metadata.field['SHIPPER/EXPORTER'] : ''}
+              id={getField('SHIPPER/EXPORTER')}
               multiline={true}
               rows={5}
             >
-              {`DSV AIR & SEA CO. LTD.\nAS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO\nBLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN`}
+              {getValueField('SHIPPER/EXPORTER')}
             </BLField>
           </Grid>
           <Grid item>
             <h3>Consignee</h3>
             <BLField
-              id={metadata.field ? metadata.field['CONSIGNEE'] : ''}
+              id={getField('CONSIGNEE')}
               multiline={true}
               rows={5}
             >
-              {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
+              {getValueField('CONSIGNEE')}
             </BLField>
           </Grid>
           <Grid item>
@@ -92,49 +106,46 @@ const GuestWorkspace = (props) => {
               Carrier or its Agents for failure to notify)
             </h3>
             <BLField
-              id={metadata.field ? metadata.field['NOTIFY PARTY'] : ''}
+              id={getField('NOTIFY PARTY')}
               multiline={true}
               rows={5}
             >
-              {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
+              {getValueField('NOTIFY PARTY')}
             </BLField>
           </Grid>
           <Grid container spacing={6}>
             <Grid item xs={6} className={classes.pbGridItem}>
               <h3>PRE-CARRIAGE BY</h3>
-              <BLField id={metadata.field ? metadata.field['PRE-CARRIAGE BY'] : ''}></BLField>
+              <BLField id={getField('PRE-CARRIAGE BY')}></BLField>
             </Grid>
             <Grid item xs={6} className={classes.pbGridItem}>
               <h3>PLACE OF RECEIPT</h3>
-              <BLField id={metadata.field ? metadata.field['PLACE OF RECEIPT'] : ''}>
-                SINGAPORE
+              <BLField id={getField('PLACE OF RECEIPT')}>
+                {getValueField('PLACE OF RECEIPT')}
               </BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
-              <BLField id={metadata.field ? metadata.field['OCEAN VESSEL VOYAGE NO. FLAG'] : ''}>
-                CONFIDENCE 021W
+              <BLField id={getField('OCEAN VESSEL VOYAGE NO. FLAG')}>
+                {getValueField('OCEAN VESSEL VOYAGE NO. FLAG')}
               </BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF LOADING</h3>
-              <BLField id={metadata.field ? metadata.field['PORT OF LOADING'] : ''}>
-                TOKYO,JAPAN
+              <BLField id={getField('PORT OF LOADING')}>
+                {getValueField('PORT OF LOADING')}
               </BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF DISCHARGE</h3>
-              <BLField id={metadata.field ? metadata.field['PORT OF DISCHARGE'] : ''}>
-                BUSAN, KOREA
+              <BLField id={getField('PORT OF DISCHARGE')}>
+                {getValueField('PORT OF DISCHARGE')}
               </BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PLACE OF DELIVERY</h3>
-              <BLField
-                id={metadata.field ? metadata.field['PLACE OF DELIVERY'] : ''}
-                selectedChoice="MANILA, MALAYSIA"
-              >
-                BUSAN
+              <BLField id={getField('PLACE OF DELIVERY')}>
+                {getValueField('PLACE OF DELIVERY')}
               </BLField>
             </Grid>
           </Grid>
@@ -143,7 +154,7 @@ const GuestWorkspace = (props) => {
           <Grid container spacing={6}>
             <Grid item xs={6}>
               <h3>BOOKING NO.</h3>
-              <BLField>TYOBD9739500</BLField>
+              <BLField id="booking_no">TYOBD9739500</BLField>
             </Grid>
             <Grid item xs={6}>
               <h3>SEA WAYBILL NO.</h3>
@@ -156,7 +167,7 @@ const GuestWorkspace = (props) => {
               8. (4.))
             </h3>
             <BLField
-              id={metadata.field ? metadata.field['EXPORT REFERENCES'] : ''}
+              id={getField('EXPORT REFERENCES')}
               multiline={true}
               rows={2}
             ></BLField>
@@ -164,25 +175,25 @@ const GuestWorkspace = (props) => {
           <Grid item>
             <h3>FORWARDING AGENT-REFERENCES FMC NO.</h3>
             <BLField
-              id={metadata.field ? metadata.field['FORWARDING AGENT-REFERENCES'] : ''}
+              id={getField('FORWARDING AGENT-REFERENCES')}
               multiline={true}
               rows={5}
             >
-              DSV AIR & SEA CO. LTD.
+              {getValueField('FORWARDING AGENT-REFERENCES')}
             </BLField>
           </Grid>
           <Grid item>
             <h3>FINAL DESTINATION(for line merchant's reference only)</h3>
-            <BLField id={metadata.field ? metadata.field['FINAL DESTINATION'] : ''}>
-              BUSAN, KOREA
+            <BLField id={getField('FINAL DESTINATION')}>
+              {getValueField('FINAL DESTINATION')}
             </BLField>
           </Grid>
           <Grid item>
             <h3>
               TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)
             </h3>
-            <BLField id={metadata.field ? metadata.field['TYPE OF MOVEMENT'] : ''}>
-              R1CB118000
+            <BLField id={getField('TYPE OF MOVEMENT')}>
+              {getValueField('TYPE OF MOVEMENT')}
             </BLField>
           </Grid>
         </Grid>

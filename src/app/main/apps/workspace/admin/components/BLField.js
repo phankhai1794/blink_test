@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../store/actions';
+import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
 
 import { TextField, InputAdornment } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core';
@@ -43,17 +44,21 @@ const BLField = (props) => {
   const dispatch = useDispatch();
   const { children, width, multiline, rows, selectedChoice, id } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
-  const [anchorEl, inquiries, metadata] = useSelector((state) => [
-    state.workspace.inquiryReducer.anchorEl,
+  const [inquiries, metadata] = useSelector((state) => [
     state.workspace.inquiryReducer.inquiries,
     state.workspace.inquiryReducer.metadata
   ]);
-
+  const [minimize, anchorEl] = useSelector((state) => [
+    state.workspace.formReducer.minimize,
+    state.workspace.formReducer.anchorEl,
+  ])
   const openAddPopover = (e) => {
     if (questionIsEmpty) {
-      dispatch(Actions.setAnchor(e.currentTarget));
+      dispatch(FormActions.setAnchor(e.currentTarget));
     }
-    dispatch(Actions.setField(e.currentTarget.id));
+    if (!minimize) {
+      dispatch(InquiryActions.setField(e.currentTarget.id));
+    }
   };
 
   const closeAddPopover = (e) => {
@@ -61,23 +66,23 @@ const BLField = (props) => {
       const { x, y, width, height } = anchorEl.getBoundingClientRect();
       if (x + width < 1400) {
         if (e.clientY + 2 > y + height || e.clientY < y) {
-          dispatch(Actions.setAnchor(null));
+          dispatch(FormActions.setAnchor(null));
         } else if (e.clientX > x + width + 48 || e.clientX < x) {
-          dispatch(Actions.setAnchor(null));
+          dispatch(FormActions.setAnchor(null));
         }
       } else {
         if (e.clientY + 2 > y + height || e.clientY < y) {
-          dispatch(Actions.setAnchor(null));
+          dispatch(FormActions.setAnchor(null));
         } else if (e.clientX > x + width || e.clientX > x + 48) {
-          dispatch(Actions.setAnchor(null));
+          dispatch(FormActions.setAnchor(null));
         }
       }
     }
   };
 
   const onClick = () => {
-    if (!questionIsEmpty) {
-      dispatch(Actions.toggleInquiry(true));
+    if (!questionIsEmpty && !minimize) {
+      dispatch(FormActions.toggleInquiry(true));
     }
   };
 

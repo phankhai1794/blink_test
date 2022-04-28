@@ -1,5 +1,5 @@
 import { getInquiryById } from "app/services/inquiryService";
-import { editInquiry } from "app/main/apps/workspace/admin/store/actions";
+import { editInquiry } from "app/main/apps/workspace/admin/store/actions/inquiry";
 
 export const OPEN_INQUIRY = 'OPEN_INQUIRY';
 export const SET_ANCHOR_EL = 'SET_ANCHOR_EL';

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../admin/store/actions';
+import * as InquiryActions from '../admin/store/actions/inquiry';
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
 import AttachmentAnswer from './AttachmentAnswer';
@@ -48,7 +48,7 @@ const Comment = (props) => {
   useEffect(() => {
     loadComment(q.id)
       .then((res) => {
-        dispatch(Actions.setDisplayComment(Boolean(res.length || userType === "guest")));
+        dispatch(InquiryActions.setDisplayComment(Boolean(res.length || userType === "guest")));
         setComment(res);
       })
       .catch((error) => console.log(error));
@@ -219,7 +219,7 @@ const Inquiry = (props) => {
               url = URL.createObjectURL(new Blob([file]));
             }
             optionsOfQuestion[indexes].mediaFile[f].src = url;
-            dispatch(Actions.editInquiry(optionsOfQuestion));
+            dispatch(InquiryActions.editInquiry(optionsOfQuestion));
           })
           .catch((error) => console.log(error));
       }
@@ -237,10 +237,10 @@ const Inquiry = (props) => {
                 index={indexes}
                 questions={inquiries}
                 question={q}
-                saveQuestion={(q) => dispatch(Actions.editInquiry(q))}
+                saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
               />
             ) : (
-              <Card style={{ width: '770px', padding: '1rem ', marginBottom: '24px' }}>
+              <Card style={{ padding: '1rem ', marginBottom: '24px' }}>
                 <div className="flex justify-between">
                   <UserInfo name={username} time={displayTime(q.createdAt)} />
                   {user === 'workspace' && (
