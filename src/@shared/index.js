@@ -1,12 +1,20 @@
 import { Store } from 'react-notifications-component';
 
 export const PERMISSION = {
+  ACCESS_DASHBOARD: 'access_dashboard',
+  ACCESS_INQUIRING: 'access_inquiring',
+  ACCESS_WORKSPACE: 'access_workspace',
   SHOW_USER_PROFILE: 'show_user_profile',
   SAVE_INQUIRY: 'save_inquiry',
   RESOLVE_INQUIRY: 'resolve_inquiry',
   REPLY_INQUIRY: 'reply_inquiry',
   SAVE_COMMENT: 'save_comment',
-  EDIT_INQUIRY: 'edit_inquiry'
+  EDIT_INQUIRY: 'edit_inquiry',
+  SHOW_DRAFT_BL: 'show_draft_bl',
+  EDIT_BL: 'edit_bl',
+  SHOW_ALL_INQUIRY: 'show_all_inquiry',
+  SHOW_HISTORY: 'show_history',
+  SEND_MAIL: 'send_mail'
 };
 
 export const getKeyByValue = (object, value) => {
@@ -65,7 +73,11 @@ export const PermissionProvider = ({ action, extraCondition = [], children, fall
 
   const isAllowed =
     JSON.parse(user).permissions.filter((p) => p.action === action && p.enable).length > 0;
-  return isAllowed && extraCondition.every(condition => condition) ? children : fallback;
+  return isAllowed && extraCondition.every((condition) => condition)
+    ? children
+      ? children
+      : true
+    : fallback;
 };
 
 export const displayToast = (type, message) => {

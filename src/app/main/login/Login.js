@@ -6,9 +6,10 @@ import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import JWTLoginTab from './tabs/JWTLoginTab';
 import { makeStyles } from '@material-ui/styles';
-import * as userActions from 'app/auth/store/actions';
+import * as AppAction from 'app/store/actions';
 import { displayToast } from '@shared';
 import { login } from 'app/services/authService';
+import { PERMISSION, PermissionProvider } from '@shared';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -22,7 +23,7 @@ function Login(props) {
   const { history, location } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
-  const user = useSelector(({ auth }) => auth.user);
+  const user = useSelector(({ user }) => user);
   const [selectedTab, setSelectedTab] = useState(0);
 
   function handleTabChange(event, value) {
@@ -47,9 +48,11 @@ function Login(props) {
           localStorage.setItem('AUTH_TOKEN', token);
           localStorage.setItem('USER', JSON.stringify(userInfo));
 
-          dispatch(userActions.setUserData(payload));
+          dispatch(AppAction.setUser(payload));
           displayToast('success', message);
-          history.push(location.cachePath ? `${location.cachePath + location.cacheSearch}` : '/');
+
+          const { cachePath, cacheSearch } = location;
+          history.push(cachePath ? `${cachePath + cacheSearch}` : '/');
         }
       })
       .catch((error) => {
@@ -60,9 +63,11 @@ function Login(props) {
   }
 
   useEffect(() => {
-    if (localStorage.getItem('AUTH_TOKEN')) {
+    if (
+      localStorage.getItem('AUTH_TOKEN') &&
+      PermissionProvider({ action: PERMISSION.ACCESS_DASHBOARD })
+    )
       history.push('/');
-    }
   }, []);
 
   return (

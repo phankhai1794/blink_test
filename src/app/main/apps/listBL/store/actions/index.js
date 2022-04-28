@@ -1,11 +1,9 @@
 import { getAllBl } from 'app/services/myBLService';
 
-export const PROCESSING = 'PROCESSING';
 export const SET_MYBLS_SUCCESS = 'SET_MYBLS_SUCCESS';
 export const SET_MYBLS_ERROR = 'SET_MYBLS_ERROR';
 
 export const loadListMyBL = (type) => async (dispatch) => {
-  dispatch({ type: PROCESSING });
   getAllBl(type)
     .then(({ myBLs: data }) => {
       if (data.length) {
@@ -16,10 +14,11 @@ export const loadListMyBL = (type) => async (dispatch) => {
       }
     })
     .catch((err) => {
+      const { message } = err.response.data.error;
       return dispatch({
         type: SET_MYBLS_ERROR,
         state: false,
-        message: err
+        message
       });
     });
 };

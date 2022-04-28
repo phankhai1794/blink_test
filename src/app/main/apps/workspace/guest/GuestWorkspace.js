@@ -7,7 +7,6 @@ import { Grid, Divider } from '@material-ui/core';
 
 import * as AppActions from 'app/store/actions';
 import * as WSActions from '../admin/store/actions';
-import * as HeaderActions from 'app/store/actions/header';
 import Inquiry from '../shared-components/Inquiry';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
@@ -39,7 +38,6 @@ const GuestWorkspace = (props) => {
   ]);
 
   useEffect(() => {
-    dispatch(HeaderActions.displayBtn());
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
 
     dispatch(WSActions.loadMetadata());

@@ -9,9 +9,6 @@ const initialState = {
 
 const listBlReducer = function (state = initialState, action) {
   switch (action.type) {
-    case Actions.PROCESSING: {
-      return { ...state, loading: true };
-    }
     case Actions.SET_MYBLS_SUCCESS: {
       return { ...state, myBLs: action.state, success: true, loading: false };
     }

@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react';
 import clsx from 'clsx';
-import history from '@history';
 import _ from 'lodash';
 
 import { useDispatch, useSelector } from 'react-redux';
 import * as AppActions from 'app/store/actions';
 import * as Actions from './store/actions';
-import * as HeaderActions from 'app/store/actions/header';
+import { loadInquiry, loadMetadata } from 'app/services/inquiryService';
 
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -17,6 +16,8 @@ import { getKeyByValue, filterMetadata, displayToast } from '@shared';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
+import { PERMISSION, PermissionProvider } from '@shared';
+
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
     paddingTop: '0 !important'
@@ -41,7 +42,7 @@ const BLWorkspace = (props) => {
       state.workspace.inquiryReducer.success,
       state.workspace.inquiryReducer.fail,
       state.workspace.inquiryReducer.metadata,
-      state.workspace.inquiryReducer.myBL,
+      state.workspace.inquiryReducer.myBL
     ]);
 
   useEffect(() => {
@@ -59,9 +60,9 @@ const BLWorkspace = (props) => {
   }, [reload, myBL]);
 
   useEffect(() => {
-    dispatch(HeaderActions.displayBtn());
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
+    dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.ACCESS_WORKSPACE })));
 
     dispatch(Actions.loadMetadata());
 
@@ -83,10 +84,9 @@ const BLWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-              ? getKeyByValue(metadata['field'], currentField)
-              : ''
-        }
-      >
+            ? getKeyByValue(metadata['field'], currentField)
+            : ''
+        }>
         {openAllInquiry ? <AllInquiry user="workspace" /> : <Inquiry user="workspace" />}
       </Form>
 
@@ -98,8 +98,7 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['SHIPPER/EXPORTER'] : ''}
               multiline={true}
-              rows={5}
-            >
+              rows={5}>
               {`DSV AIR & SEA CO. LTD.\nAS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO\nBLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN`}
             </BLField>
           </Grid>
@@ -108,8 +107,7 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['CONSIGNEE'] : ''}
               multiline={true}
-              rows={5}
-            >
+              rows={5}>
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
@@ -121,8 +119,7 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['NOTIFY PARTY'] : ''}
               multiline={true}
-              rows={5}
-            >
+              rows={5}>
               {`DSV AIR & SEA LTD. -1708 16TH FLOOR,\nHANSSEM BLDG 179,SEONGAM-RO. MAPO-GU SEOUL 03929 KOREA`}
             </BLField>
           </Grid>
@@ -159,8 +156,7 @@ const BLWorkspace = (props) => {
               <h3>PLACE OF DELIVERY</h3>
               <BLField
                 id={metadata.field ? metadata.field['PLACE OF DELIVERY'] : ''}
-                selectedChoice="MANILA, MALAYSIA"
-              >
+                selectedChoice="MANILA, MALAYSIA">
                 BUSAN
               </BLField>
             </Grid>
@@ -185,16 +181,14 @@ const BLWorkspace = (props) => {
             <BLField
               id={metadata.field ? metadata.field['EXPORT REFERENCES'] : ''}
               multiline={true}
-              rows={2}
-            ></BLField>
+              rows={2}></BLField>
           </Grid>
           <Grid item>
             <h3>FORWARDING AGENT-REFERENCES FMC NO.</h3>
             <BLField
               id={metadata.field ? metadata.field['FORWARDING AGENT-REFERENCES'] : ''}
               multiline={true}
-              rows={5}
-            >
+              rows={5}>
               DSV AIR & SEA CO. LTD.
             </BLField>
           </Grid>

@@ -1,8 +1,8 @@
-export const DISPLAY_BTN = 'DISPLAY_BTN';
+export const CHECK_ALLOW = 'CHECK_ALLOW';
 
-export function displayBtn(state = {}) {
+export function checkAllow(state = true) {
   return {
-    type: DISPLAY_BTN,
+    type: CHECK_ALLOW,
     state: state
   };
 }

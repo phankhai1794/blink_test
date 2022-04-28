@@ -13,7 +13,7 @@ import History from 'app/fuse-layouts/shared-components/History';
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import SendInquiryForm from 'app/main/apps/workspace/admin/SendInquiryForm';
 import * as Actions from 'app/main/apps/workspace/admin/store/actions';
-import * as userActions from 'app/auth/store/actions';
+import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared';
 
 const useStyles = makeStyles((theme) => ({
@@ -47,15 +47,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ToolbarLayout1(props) {
+  const { pathname, search, logout } = window.location;
   const dispatch = useDispatch();
   const classes = useStyles(props);
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
-  const user = useSelector(({ auth }) => auth.user);
-  const [hideAll, displayDraftBLBtn, displayEditBtn, badge] = useSelector((state) => [
-    state.header.hideAll,
-    state.header.displayDraftBLBtn,
-    state.header.displayEditBtn,
+  const user = useSelector(({ user }) => user);
+  const [allow, badge] = useSelector((state) => [
+    state.header.allow,
     state.workspace.inquiryReducer.inquiries.length
   ]);
 
@@ -65,9 +64,16 @@ function ToolbarLayout1(props) {
   };
 
   useEffect(() => {
-    if (!user.displayName || user.displayName === '') {
+    if (!user.displayName) {
+      if (!allow) {
+        history.push({
+          pathname: '/login',
+          ...(!logout && { cachePath: pathname, cacheSearch: search })
+        });
+      }
+
       let userInfo = JSON.parse(localStorage.getItem('USER'));
-      if (localStorage.getItem('AUTH_TOKEN') && userInfo) {
+      if (userInfo) {
         let payload = {
           ...user,
           role: userInfo.role,
@@ -75,16 +81,10 @@ function ToolbarLayout1(props) {
           photoURL: userInfo.photoURL,
           permissions: userInfo.permissions
         };
-        dispatch(userActions.setUserData(payload));
-      } else {
-        const { pathname, search, logout } = window.location;
-        history.push({
-          pathname: '/login',
-          ...(!logout && { cachePath: pathname, cacheSearch: search })
-        });
+        dispatch(AppActions.setUser(payload));
       }
     }
-  }, [user]);
+  }, [user, allow]);
 
   return (
     <ThemeProvider theme={toolbarTheme}>
@@ -114,9 +114,10 @@ function ToolbarLayout1(props) {
               />
             </div>
 
-            {hideAll ? (
-              <></>
-            ) : (
+            <PermissionProvider
+              action={PERMISSION.SHOW_ALL_INQUIRY}
+              extraCondition={[['/workplace', '/guest'].some((el) => pathname.includes(el))]}
+            >
               <Button
                 variant="text"
                 size="medium"
@@ -128,36 +129,42 @@ function ToolbarLayout1(props) {
                 </Badge>
                 <span className="pl-12">Inquiry</span>
               </Button>
-            )}
+            </PermissionProvider>
 
-            {hideAll || !displayDraftBLBtn ? (
-              <></>
-            ) : (
+            <PermissionProvider
+              action={PERMISSION.SHOW_DRAFT_BL}
+              extraCondition={[pathname.includes('/guest')]}
+            >
               <Button variant="text" size="medium" className={classes.button}>
                 <VisibilityIcon />
                 <span className="px-2">Draft BL</span>
               </Button>
-            )}
+            </PermissionProvider>
 
-            {hideAll || !displayEditBtn ? (
-              <></>
-            ) : (
+            <PermissionProvider
+              action={PERMISSION.EDIT_BL}
+              extraCondition={[pathname.includes('/draft-bl')]}
+            >
               <Button variant="text" size="medium" className={classes.button}>
                 <EditIcon />
                 <span className="px-2">Edit</span>
               </Button>
-            )}
+            </PermissionProvider>
           </div>
 
           <div className="flex mr-24">
-            {!hideAll ? (
-              <>
-                <SendInquiryForm />
-                <History />
-              </>
-            ) : (
-              <></>
-            )}
+            <PermissionProvider
+              action={PERMISSION.SEND_MAIL}
+              extraCondition={[pathname.includes('/workplace')]}
+            >
+              <SendInquiryForm />
+            </PermissionProvider>
+            <PermissionProvider
+              action={PERMISSION.SHOW_HISTORY}
+              extraCondition={[pathname.includes('/workplace')]}
+            >
+              <History />
+            </PermissionProvider>
             <PermissionProvider action={PERMISSION.SHOW_USER_PROFILE}>
               <UserProfile classes={classes} history={history} />
             </PermissionProvider>
