@@ -81,11 +81,11 @@ const Comment = (props) => {
           content: e.target.value,
           type: q.ansType
         };
-        const id = await saveComment({ inqAns, answer });
+        const res = await saveComment({ inqAns, answer });
         setComment([
           ...comment,
           {
-            answer: id,
+            answer: res.id,
             createdAt: new Date(),
             content: e.target.value,
             creator: user.displayName
