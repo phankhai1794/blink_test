@@ -24,7 +24,6 @@ import {
   Typography,
   IconButton
 } from '@material-ui/core';
-import { v4 as uuidv4 } from 'uuid';
 
 const Comment = (props) => {
   const inputStyle = {
@@ -68,26 +67,25 @@ const Comment = (props) => {
     temp[id].content = e.target.value;
     setComment(temp);
   };
-  const addComment = (e) => {
+  const addComment = async (e) => {
     if (e.key === 'Enter') {
       if (e.target.value) {
-        const ans_id = uuidv4();
         const inqAns = {
           inquiry: q.id,
-          answer: ans_id,
+          answer: null,
           confirm: false,
           type: 'REP'
         };
         const answer = {
-          id: ans_id,
+          id: null,
           content: e.target.value,
           type: q.ansType
         };
-        saveComment({ inqAns, answer });
+        const id = await saveComment({ inqAns, answer });
         setComment([
           ...comment,
           {
-            answer: ans_id,
+            answer: id,
             createdAt: new Date(),
             content: e.target.value,
             creator: user.displayName

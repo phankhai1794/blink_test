@@ -47,10 +47,10 @@ const PopoverFooter = () => {
         const mediaDelete = originalInquiry[i].mediaFile.filter(
           ({ id: id1 }) => !inquiries[i].mediaFile.some(({ id: id2 }) => id2 === id1)
         );
-        for (const form of mediaCreate) {
-          const form_data = form.data;
-          form_data.append('id', form.id);
-          await uploadFile(form_data);
+        for (const f in mediaCreate) {
+          const form_data = mediaCreate[f].data;
+          const res = await uploadFile(form_data);
+          mediaCreate[f].id = res.id
         }
         if (
           JSON.stringify(inq(inquiries[i])) !== JSON.stringify(inq(originalInquiry[i])) ||

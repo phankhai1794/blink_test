@@ -20,7 +20,6 @@ import CloseIcon from '@material-ui/icons/Close';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
 import _ from '@lodash';
-import { v4 as uuidv4 } from 'uuid';
 import Dropzone from '../../shared-components/Dropzone';
 import ImageAttach from '../../shared-components/ImageAttach';
 import FileAttach from '../../shared-components/FileAttach';
@@ -310,7 +309,7 @@ const InquiryEditor = (props) => {
     formData.append('name', src.name);
     optionsOfQuestion[index].mediaFile = [
       ...list,
-      { id: uuidv4(), src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }
+      { id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }
     ];
     saveQuestion(optionsOfQuestion);
   };

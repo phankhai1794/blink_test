@@ -201,7 +201,7 @@ export default function Form(props) {
           isFullScreen={isFullScreen}
           handleClose={handleClose}
         >
-          {title && title !== 'open Inquiries' ? title : 'open Inquiries'}
+          {title || null}
         </DialogTitle>
         {tabs && (
           <Box style={{}} sx={{}}>

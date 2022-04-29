@@ -24,7 +24,6 @@ const InquiryForm = (props) => {
   const [open] = useSelector((state) => [
     state.workspace.formReducer.openDialog,
   ])
-  const tempQuestionNum = questions.length;
   useEffect(() => {
     const check = questions.filter((q) => !q.receiver.length)
     dispatch(InquiryActions.validate({ ...valid, receiver: !Boolean(check.length) }));
@@ -52,13 +51,7 @@ const InquiryForm = (props) => {
   return (
     <Form
       FabTitle={FabTitle}
-      title={
-        tempQuestionNum === 1
-          ? currentField
-            ? getKeyByValue(metadata['field'], currentField)
-            : ''
-          : 'open Inquiries'
-      }
+      title="Inquiry Creation"
       toggleForm={(status) => dispatch(FormActions.toggleCreateInquiry(status))}
       open={open}
     >
