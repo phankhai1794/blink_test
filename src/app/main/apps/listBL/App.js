@@ -6,7 +6,7 @@ import { makeStyles } from '@material-ui/styles';
 import InquiringHeader from './Header';
 import InquiringTable from './Table';
 import * as AppActions from 'app/store/actions';
-import { PERMISSION, PermissionProvider } from '@shared';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 const useStyles = makeStyles((theme) => ({
   content: {
@@ -34,7 +34,14 @@ function InquiringApp(props) {
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-    dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.ACCESS_INQUIRING })));
+    dispatch(
+      AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_INQUIRING }))
+    );
+
+    return () => {
+      dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
+      dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', false)));
+    };
   }, []);
 
   return (

@@ -13,7 +13,7 @@ import Form from '../shared-components/Form';
 import BLField from './components/BLField';
 import { getKeyByValue } from '@shared';
 import * as GuestActions from './store/actions';
-import { getBlInfo } from "app/services/myBLService";
+import { getBlInfo } from 'app/services/myBLService';
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 const GuestWorkspace = (props) => {
   const { myBL } = props;
   const classes = useStyles();
-  const [content, setContent] = useState({})
+  const [content, setContent] = useState({});
   const dispatch = useDispatch();
   const [openInquiry, openAllInquiry, currentField, metadata] = useSelector((state) => [
     state.workspace.formReducer.openInquiry,
@@ -39,26 +39,24 @@ const GuestWorkspace = (props) => {
     state.workspace.inquiryReducer.metadata
   ]);
   const getField = (field) => {
-    return metadata.field ? metadata.field[field] : ''
-  }
+    return metadata.field ? metadata.field[field] : '';
+  };
 
   const getValueField = (field) => {
-    return content[getField(field)] || ''
-  }
+    return content[getField(field)] || '';
+  };
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-
     dispatch(GuestActions.loadInquiry(myBL.id));
-
   }, []);
 
   useEffect(() => {
     if (myBL.id) {
       getBlInfo(myBL.id).then((res) => {
-        setContent(res.myBL.content)
-      })
+        setContent(res.myBL.content);
+      });
     }
-  }, [myBL])
+  }, [myBL]);
   return (
     <div className="px-52">
       <Form
@@ -71,8 +69,8 @@ const GuestWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-              ? getKeyByValue(metadata['field'], currentField)
-              : ''
+            ? getKeyByValue(metadata['field'], currentField)
+            : ''
         }
       >
         {openAllInquiry ? <AllInquiry user="guest" /> : <Inquiry user="guest" />}
@@ -82,21 +80,13 @@ const GuestWorkspace = (props) => {
         <Grid item xs={6}>
           <Grid item>
             <h3>Shipper/Exporter</h3>
-            <BLField
-              id={getField('SHIPPER/EXPORTER')}
-              multiline={true}
-              rows={5}
-            >
+            <BLField id={getField('SHIPPER/EXPORTER')} multiline={true} rows={5}>
               {getValueField('SHIPPER/EXPORTER')}
             </BLField>
           </Grid>
           <Grid item>
             <h3>Consignee</h3>
-            <BLField
-              id={getField('CONSIGNEE')}
-              multiline={true}
-              rows={5}
-            >
+            <BLField id={getField('CONSIGNEE')} multiline={true} rows={5}>
               {getValueField('CONSIGNEE')}
             </BLField>
           </Grid>
@@ -105,11 +95,7 @@ const GuestWorkspace = (props) => {
               NOTIFY PARTY (It is agreed that no responsibility shall be <br></br> attached to the
               Carrier or its Agents for failure to notify)
             </h3>
-            <BLField
-              id={getField('NOTIFY PARTY')}
-              multiline={true}
-              rows={5}
-            >
+            <BLField id={getField('NOTIFY PARTY')} multiline={true} rows={5}>
               {getValueField('NOTIFY PARTY')}
             </BLField>
           </Grid>
@@ -132,9 +118,7 @@ const GuestWorkspace = (props) => {
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF LOADING</h3>
-              <BLField id={getField('PORT OF LOADING')}>
-                {getValueField('PORT OF LOADING')}
-              </BLField>
+              <BLField id={getField('PORT OF LOADING')}>{getValueField('PORT OF LOADING')}</BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
               <h3>PORT OF DISCHARGE</h3>
@@ -166,19 +150,11 @@ const GuestWorkspace = (props) => {
               EXPORT REFERENCES (for the merchant's and/or Carrier's reference only. See back clause
               8. (4.))
             </h3>
-            <BLField
-              id={getField('EXPORT REFERENCES')}
-              multiline={true}
-              rows={2}
-            ></BLField>
+            <BLField id={getField('EXPORT REFERENCES')} multiline={true} rows={2}></BLField>
           </Grid>
           <Grid item>
             <h3>FORWARDING AGENT-REFERENCES FMC NO.</h3>
-            <BLField
-              id={getField('FORWARDING AGENT-REFERENCES')}
-              multiline={true}
-              rows={5}
-            >
+            <BLField id={getField('FORWARDING AGENT-REFERENCES')} multiline={true} rows={5}>
               {getValueField('FORWARDING AGENT-REFERENCES')}
             </BLField>
           </Grid>
@@ -192,9 +168,7 @@ const GuestWorkspace = (props) => {
             <h3>
               TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)
             </h3>
-            <BLField id={getField('TYPE OF MOVEMENT')}>
-              {getValueField('TYPE OF MOVEMENT')}
-            </BLField>
+            <BLField id={getField('TYPE OF MOVEMENT')}>{getValueField('TYPE OF MOVEMENT')}</BLField>
           </Grid>
         </Grid>
       </Grid>

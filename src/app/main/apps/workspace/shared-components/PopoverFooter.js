@@ -15,7 +15,7 @@ import { saveInquiry, changeStatus } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import { PERMISSION, PermissionProvider } from '@shared';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -144,8 +144,8 @@ const PopoverFooter = ({ title, checkValidate }) => {
 
       <Grid item xs={7} className="flex justify-end">
         <PermissionProvider
-          action={PERMISSION.RESOLVE_INQUIRY}
-          extraCondition={[fields.includes(title), displayCmt]}
+          action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
+          extraCondition={fields.includes(title) && displayCmt}
         >
           <Button
             variant="contained"
@@ -158,8 +158,8 @@ const PopoverFooter = ({ title, checkValidate }) => {
           </Button>
         </PermissionProvider>
         <PermissionProvider
-          action={PERMISSION.REPLY_INQUIRY}
-          extraCondition={[fields.includes(title), displayCmt]}
+          action={PERMISSION.INQUIRY_CREATE_COMMENT}
+          extraCondition={fields.includes(title) && displayCmt}
         >
           <Button variant="contained" className={classes.button} color="primary" onClick={onReply}>
             <ReplyIcon />
@@ -167,16 +167,10 @@ const PopoverFooter = ({ title, checkValidate }) => {
           </Button>
         </PermissionProvider>
         <PermissionProvider
-          action={PERMISSION.SAVE_INQUIRY}
-          extraCondition={[!fields.includes(title)]}
+          action={PERMISSION.VIEW_SAVE_INQUIRY}
+          extraCondition={!fields.includes(title)}
         >
           <Button variant="contained" className={classes.button} color="primary" onClick={onSave}>
-            {' '}
-            <SaveIcon /> Save
-          </Button>
-        </PermissionProvider>
-        <PermissionProvider action={PERMISSION.SAVE_COMMENT}>
-          <Button variant="contained" className={classes.button} color="primary">
             {' '}
             <SaveIcon /> Save
           </Button>

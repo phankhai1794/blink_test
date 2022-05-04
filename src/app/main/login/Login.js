@@ -9,7 +9,7 @@ import { makeStyles } from '@material-ui/styles';
 import * as AppAction from 'app/store/actions';
 import { displayToast } from '@shared';
 import { login } from 'app/services/authService';
-import { PERMISSION, PermissionProvider } from '@shared';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -65,7 +65,7 @@ function Login(props) {
   useEffect(() => {
     if (
       localStorage.getItem('AUTH_TOKEN') &&
-      PermissionProvider({ action: PERMISSION.ACCESS_DASHBOARD })
+      PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD })
     )
       history.push('/');
   }, []);
