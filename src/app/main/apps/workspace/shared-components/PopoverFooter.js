@@ -5,7 +5,6 @@ import * as FormActions from '../admin/store/actions/form';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { Link, Grid, Button, IconButton } from '@material-ui/core';
-import TextsmsIcon from '@material-ui/icons/Textsms';
 import SaveIcon from '@material-ui/icons/Save';
 import ReplyIcon from '@material-ui/icons/Reply';
 import CheckIcon from '@material-ui/icons/Check';
@@ -13,7 +12,6 @@ import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import { saveInquiry, changeStatus } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
-import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
@@ -37,53 +35,17 @@ const PopoverFooter = ({ title, checkValidate }) => {
   const onSave = () => {
     if (!checkValidate(question[index]) || !valid.receiver) return;
 
-    let inquiry = [],
-      answer = [],
-      inqAns = [],
-      inqMedia = [],
-      formData = [];
+    const formData = [];
     for (const q of question) {
-      const inq_id = uuidv4();
-      const inq = {
-        id: inq_id,
-        content: q.content,
-        field: q.field,
-        inqType: q.inqType,
-        ansType: q.ansType,
-        receiver: q.receiver,
-        mybl: myBL.id
-      };
       for (const f of q.mediaFile) {
-        const inq_media = {
-          media: f.id,
-          inquiry: inq_id
-        };
-        inqMedia.push(inq_media);
         const form_data = f.data;
-        form_data.append('id', f.id);
         formData.push(form_data);
       }
-      for (const k of q.answerObj) {
-        const ans_id = uuidv4();
-        const inq_ans = {
-          inquiry: inq_id,
-          answer: ans_id,
-          confirm: false
-        };
-        const ans = {
-          id: ans_id,
-          content: k.content,
-          type: q.ansType
-        };
-        answer.push(ans);
-        inqAns.push(inq_ans);
-      }
-      inquiry.push(inq);
     }
     axios
       .all(formData.map((endpoint) => uploadFile(endpoint)))
-      .then(() => {
-        saveInquiry({ inquiry, inqAns, answer, inqMedia })
+      .then((media) => {
+        saveInquiry({ question, media, blId: myBL.id })
           .then(() => {
             dispatch(FormActions.displaySuccess(true));
             dispatch(InquiryActions.saveInquiry());
