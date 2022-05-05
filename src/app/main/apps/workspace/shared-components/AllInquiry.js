@@ -10,7 +10,7 @@ import FileAttach from './FileAttach';
 import { getKeyByValue } from '@shared';
 import { getFile } from 'app/services/fileService';
 import { Card, Typography } from '@material-ui/core';
-import { PERMISSION, PermissionProvider } from '@shared';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
@@ -59,13 +59,10 @@ const AllInquiry = (props) => {
         }
         const type = q.ansType;
         return (
-          <div
-            style={{ marginBottom: '24px' }}
-            onClick={() => changeToEditor(index)}
-          >
+          <div style={{ marginBottom: '24px' }} onClick={() => changeToEditor(index)}>
             <PermissionProvider
-              action={PERMISSION.EDIT_INQUIRY}
-              extraCondition={[currentEdit === index]}
+              action={PERMISSION.VIEW_EDIT_INQUIRY}
+              extraCondition={currentEdit === index}
               fallback={
                 <Card style={{ padding: '1rem ', marginBottom: '24px' }}>
                   <div className="flex justify-between">
@@ -81,7 +78,6 @@ const AllInquiry = (props) => {
                     {type === metadata.ans_type.attachment && (
                       <AttachmentAnswer
                         question={q}
-                      // disabled={true}
                       />
                     )}
                   </div>

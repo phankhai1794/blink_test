@@ -22,7 +22,7 @@ import Widget11 from './widgets/Widget11';
 import WidgetNow from './widgets/WidgetNow';
 import WidgetWeather from './widgets/WidgetWeather';
 import { makeStyles } from '@material-ui/styles';
-import { PERMISSION, PermissionProvider } from '@shared';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 const useStyles = makeStyles((theme) => ({
   content: {
@@ -61,7 +61,14 @@ function ProjectDashboardApp(props) {
     dispatch(Actions.getProjects());
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', true)));
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-    dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.ACCESS_DASHBOARD })));
+    dispatch(
+      AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }))
+    );
+
+    return () => {
+      dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
+      dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', false)));
+    };
   }, []);
 
   function handleChangeTab(event, tabValue) {

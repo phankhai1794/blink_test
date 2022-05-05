@@ -17,7 +17,7 @@ import CropDinIcon from '@material-ui/icons/CropDin';
 import CropIcon from '@material-ui/icons/Crop';
 import AddIcon from '@material-ui/icons/Add';
 
-import { PERMISSION, PermissionProvider } from '@shared';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 import PopoverFooter from './PopoverFooter';
 import PopoverFooterAdmin from '../admin/components/PopoverFooter';
 
@@ -45,11 +45,11 @@ const DialogTitle = withStyles(styles)((props) => {
     handleClose,
     ...other
   } = props;
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const openFullScreen = (state) => {
     dispatch(FormActions.setFullscreen(state));
-    toggleFullScreen(state)
-  }
+    toggleFullScreen(state);
+  };
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -106,7 +106,7 @@ const useStyles = makeStyles(() => ({
     margin: 'auto',
     marginTop: '1rem',
     backgroundColor: 'white',
-    width: props => props.isFullScreen ? '1200px' : '770px'
+    width: (props) => (props.isFullScreen ? '1200px' : '770px')
   }
 }));
 
@@ -119,9 +119,7 @@ export default function Form(props) {
     state.workspace.inquiryReducer.question
   ]);
 
-  const [openAllInquiry] = useSelector((state) => [
-    state.workspace.formReducer.openAllInquiry,
-  ])
+  const [openAllInquiry] = useSelector((state) => [state.workspace.formReducer.openAllInquiry]);
 
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -129,13 +127,15 @@ export default function Form(props) {
 
   const checkValidate = (question) => {
     if (!question.inqType || !question.field || !question.receiver.length) {
-      dispatch(InquiryActions.validate({
-        field: Boolean(question.field),
-        inqType: Boolean(question.inqType),
-        receiver: Boolean(question.receiver.length),
-        error: true
-      }));
-      return false
+      dispatch(
+        InquiryActions.validate({
+          field: Boolean(question.field),
+          inqType: Boolean(question.inqType),
+          receiver: Boolean(question.receiver.length),
+          error: true
+        })
+      );
+      return false;
     }
     return true;
   };
@@ -150,9 +150,9 @@ export default function Form(props) {
 
   const handleClick = () => {
     if (openAllInquiry) {
-      dispatch(InquiryActions.addQuestion1())
+      dispatch(InquiryActions.addQuestion1());
     } else if (checkValidate(question[index])) {
-      dispatch(InquiryActions.addQuestion())
+      dispatch(InquiryActions.addQuestion());
       dispatch(InquiryActions.setEdit(index + 1));
     }
   };
@@ -216,9 +216,8 @@ export default function Form(props) {
             </Tabs>
           </Box>
         )}
-        <MuiDialogContent classes={{ root: classes.dialogContent }} >{children}</MuiDialogContent>
-        {
-          customActions == null &&
+        <MuiDialogContent classes={{ root: classes.dialogContent }}>{children}</MuiDialogContent>
+        {customActions == null && (
           <DialogActions style={{ display: 'none !important' }}>
             <div style={{ position: 'relative' }}>
               {(hasAddButton === undefined || hasAddButton === true) && (
@@ -233,16 +232,17 @@ export default function Form(props) {
               )}
               <div style={{ marginTop: '2rem', marginLeft: '2rem' }}>
                 <Divider />
-                {!openAllInquiry ?
-                  <PopoverFooter title={field} checkValidate={checkValidate} /> :
-                  <PermissionProvider action={PERMISSION.SAVE_INQUIRY}>
+                {!openAllInquiry ? (
+                  <PopoverFooter title={field} checkValidate={checkValidate} />
+                ) : (
+                  <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>
                     <PopoverFooterAdmin />
                   </PermissionProvider>
-                }
+                )}
               </div>
             </div>
           </DialogActions>
-        }
+        )}
         {customActions}
       </Dialog>
     </div>

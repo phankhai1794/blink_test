@@ -14,7 +14,7 @@ import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import SendInquiryForm from 'app/main/apps/workspace/admin/SendInquiryForm';
 import * as FormActions from 'app/main/apps/workspace/admin/store/actions/form';
 import * as AppActions from 'app/store/actions';
-import { PERMISSION, PermissionProvider } from '@shared';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -115,8 +115,8 @@ function ToolbarLayout1(props) {
             </div>
 
             <PermissionProvider
-              action={PERMISSION.SHOW_ALL_INQUIRY}
-              extraCondition={[['/workplace', '/guest'].some((el) => pathname.includes(el))]}
+              action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
+              extraCondition={['/workplace', '/guest'].some((el) => pathname.includes(el))}
             >
               <Button
                 variant="text"
@@ -132,8 +132,8 @@ function ToolbarLayout1(props) {
             </PermissionProvider>
 
             <PermissionProvider
-              action={PERMISSION.SHOW_DRAFT_BL}
-              extraCondition={[pathname.includes('/guest')]}
+              action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
+              extraCondition={pathname.includes('/guest')}
             >
               <Button variant="text" size="medium" className={classes.button}>
                 <VisibilityIcon />
@@ -142,8 +142,8 @@ function ToolbarLayout1(props) {
             </PermissionProvider>
 
             <PermissionProvider
-              action={PERMISSION.EDIT_BL}
-              extraCondition={[pathname.includes('/draft-bl')]}
+              action={PERMISSION.VIEW_REDIRECT_GUEST_BL}
+              extraCondition={pathname.includes('/draft-bl')}
             >
               <Button variant="text" size="medium" className={classes.button}>
                 <EditIcon />
@@ -154,18 +154,18 @@ function ToolbarLayout1(props) {
 
           <div className="flex mr-24">
             <PermissionProvider
-              action={PERMISSION.SEND_MAIL}
-              extraCondition={[pathname.includes('/workplace')]}
+              action={PERMISSION.MAIL_SEND_MAIL}
+              extraCondition={pathname.includes('/workplace')}
             >
               <SendInquiryForm />
             </PermissionProvider>
             <PermissionProvider
-              action={PERMISSION.SHOW_HISTORY}
-              extraCondition={[pathname.includes('/workplace')]}
+              action={PERMISSION.VIEW_SHOW_BL_HISTORY}
+              extraCondition={pathname.includes('/workplace')}
             >
               <History />
             </PermissionProvider>
-            <PermissionProvider action={PERMISSION.SHOW_USER_PROFILE}>
+            <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>
               <UserProfile classes={classes} history={history} />
             </PermissionProvider>
           </div>
