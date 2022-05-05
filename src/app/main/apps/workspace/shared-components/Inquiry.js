@@ -72,12 +72,10 @@ const Comment = (props) => {
       if (e.target.value) {
         const inqAns = {
           inquiry: q.id,
-          answer: null,
           confirm: false,
           type: 'REP'
         };
         const answer = {
-          id: null,
           content: e.target.value,
           type: q.ansType
         };
