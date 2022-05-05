@@ -78,7 +78,6 @@ const AllInquiry = (props) => {
                     {type === metadata.ans_type.attachment && (
                       <AttachmentAnswer
                         question={q}
-                        // disabled={true}
                       />
                     )}
                   </div>
