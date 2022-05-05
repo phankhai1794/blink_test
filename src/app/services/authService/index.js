@@ -20,3 +20,8 @@ export async function isVerified(data) {
   const response = await axios().post(`${PATH}/is-verified`, data);
   return response.data;
 }
+
+export async function forgotPassword(data) {
+  const response = await axios().post(`${PATH}/forgot`, data);
+  return response.data;
+}

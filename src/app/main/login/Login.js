@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Card, CardContent, Typography, Tabs, Tab } from '@material-ui/core';
 import { FuseAnimate } from '@fuse';
-import { Link } from 'react-router-dom';
-import clsx from 'clsx';
-import JWTLoginTab from './tabs/JWTLoginTab';
+import { Card, CardContent, Tab, Tabs, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppAction from 'app/store/actions';
 import { login } from 'app/services/authService';
+import { displayToast } from '@shared';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import { login } from 'app/services/authService';
+import clsx from 'clsx';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import ForgotPasswordTab from './tabs/ForgotPasswordTab';
+import JWTLoginTab from './tabs/JWTLoginTab';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,6 +27,7 @@ function Login(props) {
   const classes = useStyles();
   const user = useSelector(({ user }) => user);
   const [selectedTab, setSelectedTab] = useState(0);
+  const [isLoginTabViewed, setIsLoginTabViewed] = useState(true);
 
   function handleTabChange(event, value) {
     setSelectedTab(value);
@@ -87,46 +91,92 @@ function Login(props) {
           </Typography>
         </FuseAnimate>
       </div>
+      {
+        isLoginTabViewed ? (
+          <FuseAnimate animation={{ translateX: [0, '100%'] }}>
+            <Card className="w-full max-w-400 mx-auto m-16 md:m-0" square>
+              <CardContent className="flex flex-col items-center justify-center p-32 md:p-48 md:pt-60 ">
+                <Typography variant="h6" className="text-center md:w-full mb-24">
+                  LOGIN TO YOUR ACCOUNT
+                </Typography>
 
-      <FuseAnimate animation={{ translateX: [0, '100%'] }}>
-        <Card className="w-full max-w-400 mx-auto m-16 md:m-0" square>
-          <CardContent className="flex flex-col items-center justify-center p-32 md:p-48 md:pt-60 ">
-            <Typography variant="h6" className="text-center md:w-full mb-24">
-              LOGIN TO YOUR ACCOUNT
-            </Typography>
-
-            <Tabs
-              value={selectedTab}
-              onChange={handleTabChange}
-              variant="fullWidth"
-              className="mb-32"
-            >
-              <Tab
-                icon={
-                  <img
-                    className="h-40 p-4 rounded-12"
-                    src="assets/images/logos/one_ocean_network-logo.png"
-                    alt="logo"
+                <Tabs
+                  value={selectedTab}
+                  onChange={handleTabChange}
+                  variant="fullWidth"
+                  className="mb-32"
+                >
+                  <Tab
+                    icon={
+                      <img
+                        className="h-40 p-4 rounded-12"
+                        src="assets/images/logos/one_ocean_network-logo.png"
+                        alt="logo"
+                      />
+                    }
+                    className="min-w-0"
                   />
-                }
-                className="min-w-0"
-              />
-            </Tabs>
+                </Tabs>
 
-            {selectedTab === 0 && <JWTLoginTab onLogged={handleLogin} />}
+                {selectedTab === 0 && <JWTLoginTab onLogged={handleLogin} />}
 
-            <div className="flex flex-col items-center justify-center pt-32">
-              <span className="font-medium">Don't have an account?</span>
-              <Link className="font-medium" to="/register">
-                Create an account
-              </Link>
-              <Link className="font-medium mt-8" to="/">
-                Back to Dashboard
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </FuseAnimate>
+                <div className="flex flex-col items-center justify-center pt-32">
+                  <a className="font-medium text-primary" onClick={() => setIsLoginTabViewed(false)} >
+                    Forgot passwords
+                  </a>
+                  <span className="font-medium">Don't have an account?</span>
+                  <Link className="font-medium" to="/register">
+                    Create an account
+                  </Link>
+                  <Link className="font-medium mt-8" to="/">
+                    Back to Dashboard
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </FuseAnimate>
+        ) : (
+          <FuseAnimate animation={{ translateX: [0, '100%'] }}>
+            <Card className="w-full max-w-400 mx-auto m-16 md:m-0" square>
+              <CardContent className="flex flex-col items-center justify-center p-32 md:p-48 md:pt-60 ">
+                <Typography variant="h6" className="text-center md:w-full mb-24">
+                  Forgot password
+                </Typography>
+
+                <Tabs
+                  value={selectedTab}
+                  onChange={handleTabChange}
+                  variant="fullWidth"
+                  className="mb-32"
+                >
+                  <Tab
+                    icon={
+                      <img
+                        className="h-40 p-4 rounded-12"
+                        src="assets/images/logos/one_ocean_network-logo.png"
+                        alt="logo"
+                      />
+                    }
+                    className="min-w-0"
+                  />
+                </Tabs>
+
+                {selectedTab === 0 && <ForgotPasswordTab onLogged={handleLogin} loginTabView={setIsLoginTabViewed} />}
+
+                <div className="flex flex-col items-center justify-center pt-32">
+                  <span className="font-medium">Don't have an account?</span>
+                  <Link className="font-medium" to="/register">
+                    Create an account
+                  </Link>
+                  <a className="font-medium text-primary" onClick={() => setIsLoginTabViewed(true)} >
+                    Back to login
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+          </FuseAnimate>
+        )
+      }
     </div>
   );
 }
