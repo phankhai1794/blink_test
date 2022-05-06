@@ -10,6 +10,7 @@ const initialState = {
     success: false,
     fail: false,
     reload: false,
+    openTrans: false
 }
 
 const formReducer = function (state = initialState, action) {
@@ -41,6 +42,10 @@ const formReducer = function (state = initialState, action) {
         case Actions.RELOAD: {
             return { ...state, reload: !state.reload, openDialog: false, openInquiry: false, openAllInquiry: false };
         }
+        case Actions.OPEN_TRANSACTION: {
+            return { ...state, openTrans: !state.openTrans };
+        }
+
         default: {
             return state;
         }

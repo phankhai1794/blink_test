@@ -8,6 +8,7 @@ import ToolbarLayout1 from './components/ToolbarLayout1';
 import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
 import SettingsPanel from 'app/fuse-layouts/shared-components/SettingsPanel';
 import AppContext from 'app/AppContext';
+import Transaction from 'app/main/transactions/Transaction';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -79,6 +80,9 @@ function Layout1(props) {
   const appContext = useContext(AppContext);
   const { routes } = appContext;
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
+  const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
+  const openTrans = useSelector((state) => state.workspace.formReducer.openTrans);
+  const user = useSelector(({ user }) => user);
 
   return (
     <div id="fuse-layout" className={clsx(classes.root, config.mode, 'scroll-' + config.scroll)}>
@@ -95,6 +99,7 @@ function Layout1(props) {
               {props.children}
             </FuseScrollbars>
           </div>
+          {openTrans&&<Transaction />}
         </div>
         {/* <SettingsPanel /> */}
       </div>

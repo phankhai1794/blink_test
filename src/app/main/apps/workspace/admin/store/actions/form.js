@@ -7,6 +7,7 @@ export const SET_ANCHOR_EL = 'SET_ANCHOR_EL';
 export const DISPLAY_SUCCESS = 'DISPLAY_SUCCESS';
 export const DISPLAY_FAIL = 'DISPLAY_FAIL';
 export const RELOAD = 'RELOAD';
+export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 
 export function minimize(state) {
     return {
@@ -67,5 +68,11 @@ export function displayFail(state, message) {
 export function toggleReload() {
     return {
         type: RELOAD
+    };
+}
+
+export function openTrans() {
+    return {
+        type: OPEN_TRANSACTION
     };
 }

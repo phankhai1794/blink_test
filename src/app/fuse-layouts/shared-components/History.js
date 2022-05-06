@@ -10,15 +10,22 @@ import {
 } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 
+import * as FormActions from 'app/main/apps/workspace/admin/store/actions/form';
+import { useSelector, useDispatch } from 'react-redux';
+
+
 function History(props) {
+  const dispatch = useDispatch();
   const [history, setHistory] = useState(null);
 
   const historyClick = (event) => {
     setHistory(event.currentTarget);
+    dispatch(FormActions.openTrans());
   };
 
   const historyClose = () => {
     setHistory(null);
+    dispatch(FormActions.openTrans());
   };
 
   return (
@@ -32,7 +39,7 @@ function History(props) {
         </Icon>
       </Button>
 
-      <Popover
+      {/* <Popover
         open={Boolean(history)}
         anchorEl={history}
         onClose={historyClose}
@@ -62,7 +69,7 @@ function History(props) {
             <ListItemText className="pl-0" primary="Menu Item" />
           </MenuItem>
         </React.Fragment>
-      </Popover>
+      </Popover> */}
     </React.Fragment>
   );
 }
