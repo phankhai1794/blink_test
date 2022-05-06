@@ -72,7 +72,7 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     if (myBL.id) {
       getBlInfo(myBL.id).then((res) => {
-        setContent(res.myBL);
+        setContent(res.myBL.content);
       });
     }
   }, [myBL]);
