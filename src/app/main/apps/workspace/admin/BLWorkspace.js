@@ -78,6 +78,7 @@ const BLWorkspace = (props) => {
   }, [myBL]);
 
   useEffect(() => {
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(
       AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_WORKSPACE }))
     );
