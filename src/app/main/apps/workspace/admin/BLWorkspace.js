@@ -17,7 +17,6 @@ import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { getBlInfo } from 'app/services/myBLService';
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -71,9 +70,7 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     if (myBL.id) {
-      getBlInfo(myBL.id).then((res) => {
-        setContent(res.myBL.content);
-      });
+      Actions.loadBlInfo(myBL.id, setContent)
     }
   }, [myBL]);
 
@@ -102,8 +99,8 @@ const BLWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-            ? getKeyByValue(metadata['field'], currentField)
-            : ''
+              ? getKeyByValue(metadata['field'], currentField)
+              : ''
         }
       >
         {openAllInquiry ? <AllInquiry user="workspace" /> : <Inquiry user="workspace" />}

@@ -1,8 +1,8 @@
 import { filterMetadata } from '@shared';
 import { getInquiryById, getMetadata } from 'app/services/inquiryService';
-import { createBL } from 'app/services/myBLService';
+import { createBL, getBlInfo } from 'app/services/myBLService';
 import { setMyBL, saveField, editInquiry, setOriginalInquiry, saveMetadata } from './inquiry'
-// export * from './mail.actions';
+// export * from './mail.actions'
 
 export const initBL = (bkgNo) => async (dispatch) => {
   createBL(bkgNo)
@@ -26,5 +26,11 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
     dispatch(saveField(field_list));
     dispatch(editInquiry(res));
     dispatch(setOriginalInquiry(JSON.parse(JSON.stringify(res))));
+  }).catch((err) => console.log(err));
+};
+
+export const loadBlInfo = (myBL_Id, setContent) => {
+  getBlInfo(myBL_Id).then((res) => {
+    setContent(res.myBL.content)
   }).catch((err) => console.log(err));
 };

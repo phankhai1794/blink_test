@@ -6,13 +6,9 @@ import {
   Grid,
   IconButton,
   Fab,
-  FormControlLabel,
-  Checkbox,
-  Card,
   Divider,
-  FormGroup,
   FormControl,
-  FormHelperText
+  FormHelperText,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
@@ -23,12 +19,9 @@ import _ from '@lodash';
 import Dropzone from '../../shared-components/Dropzone';
 import ImageAttach from '../../shared-components/ImageAttach';
 import FileAttach from '../../shared-components/FileAttach';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import DeleteIcon from '@material-ui/icons/Delete';
-import AttachFile from './AttachFile';
+
 import CustomSelect from './CustomSelect';
 import { FuseChipSelect } from '@fuse';
-import Select from 'react-select';
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
 });
@@ -212,23 +205,22 @@ const InquiryEditor = (props) => {
   const [fieldValue, setFieldValue] = useState(
     metadata.field_options.filter((v) => question.field === v.value)[0]
   );
+  const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options)
   const styles = (valid, width) => {
     return {
       control: {
-        border: valid ? '1px solid #ddd' : '1px solid red',
+        border: !valid && '1px solid red',
         borderRadius: '9px',
         width: `${width}px`
       }
     };
   };
-  const removeQuestion = () => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion.splice(index, 1);
-    if (index > 0) {
-      dispatch(InquiryActions.setEdit(index - 1));
+  useEffect(() => {
+    if (fieldValue) {
+      setValueType(null)
+      setInqTypeOption(metadata.inq_type_options.filter((v) => fieldValue.value === v.field || !v.field))
     }
-    saveQuestion(optionsOfQuestion);
-  };
+  }, [fieldValue])
 
   useEffect(() => {
     const list = [...removeOptions];
@@ -249,11 +241,6 @@ const InquiryEditor = (props) => {
     }
     saveQuestion(optionsOfQuestion);
   }, []);
-
-  const copyQuestion = () => {
-    const temp = JSON.parse(JSON.stringify(question));
-    saveQuestion([...questions, temp]);
-  };
 
   const handleTypeChange = (e) => {
     const optionsOfQuestion = [...questions];
@@ -283,36 +270,12 @@ const InquiryEditor = (props) => {
     saveQuestion(optionsOfQuestion);
   };
 
-  const handleReceiverChange = (e) => {
-    const optionsOfQuestion = [...questions];
-    if (e.target.checked) {
-      dispatch(InquiryActions.validate({ ...valid, receiver: true, error: false }));
-      optionsOfQuestion[index].receiver.push(e.target.value)
-    } else {
-      const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
-      optionsOfQuestion[index].receiver.splice(i, 1);
-    }
-    saveQuestion(optionsOfQuestion);
-  };
-
   const handleAnswerTypeChange = (e) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].ansType = e.target.value;
     saveQuestion(optionsOfQuestion);
   };
 
-  const handleUploadImageAttach = (src) => {
-    const optionsOfQuestion = [...questions];
-    const list = optionsOfQuestion[index].mediaFile;
-    const formData = new FormData();
-    formData.append('file', src);
-    formData.append('name', src.name);
-    optionsOfQuestion[index].mediaFile = [
-      ...list,
-      { id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }
-    ];
-    saveQuestion(optionsOfQuestion);
-  };
   const handleRemoveImageAttach = (i) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].mediaFile.splice(i, 1);
@@ -320,35 +283,13 @@ const InquiryEditor = (props) => {
   };
 
   return (
-    <Card style={{ padding: '1rem' }}>
-      <div className="flex justify-end" style={{ marginRight: '-1rem' }}>
-        <FormControl error={valid.error && !question.receiver.length}>
-          <FormGroup row>
-            <FormControlLabel
-              value="onshore"
-              control={<Checkbox
-                checked={question.receiver.includes("onshore")}
-                onChange={handleReceiverChange}
-                color="primary" />}
-              label="Onshore" />
-            <FormControlLabel
-              value="customer"
-              control={<Checkbox
-                checked={question.receiver.includes("customer")}
-                onChange={handleReceiverChange}
-                color="primary" />}
-              label="Customer"
-            />
-          </FormGroup>
-          {valid.error && !question.receiver.length && <FormHelperText>Pick at least one!</FormHelperText>}
-        </FormControl>
-      </div>
-      <Grid container style={{ marginTop: '5px' }} spacing={1}>
+    <>
+      <Grid container spacing={1}>
         <Grid item xs={12} className="flex justify-between">
           <FormControl error={!valid.field}>
             <FuseChipSelect
               className="m-auto"
-              customStyle={styles(valid.field, fullscreen ? 290 : 220)}
+              customStyle={styles(valid.field, fullscreen ? 320 : 290)}
               value={fieldValue}
               onChange={handleFieldChange}
               placeholder="Select Field Type"
@@ -363,13 +304,13 @@ const InquiryEditor = (props) => {
             <FuseChipSelect
               className="m-auto"
               value={valueType}
-              customStyle={styles(valid.inqType, fullscreen ? 330 : 270)}
+              customStyle={styles(valid.inqType, fullscreen ? 330 : 290)}
               onChange={handleTypeChange}
               placeholder="Select Inquiry Type"
               textFieldProps={{
                 variant: 'outlined'
               }}
-              options={metadata.inq_type_options}
+              options={inqTypeOption}
             />
             {!valid.inqType && <FormHelperText>This is required!</FormHelperText>}
           </FormControl>
@@ -431,15 +372,7 @@ const InquiryEditor = (props) => {
         )
       }
       <Divider className="mt-12" />
-      <div className="flex justify-end items-center mr-2 ">
-        <AttachFile uploadImageAttach={handleUploadImageAttach} />
-        <IconButton className="p-8" onClick={copyQuestion}>
-          <FileCopyIcon />
-        </IconButton>
-        <IconButton disabled={questions.length === 1} className="p-8" onClick={removeQuestion}>
-          <DeleteIcon />
-        </IconButton>
-      </div>
+
       {
         question.mediaFile.map((file, index) =>
           file.ext.match(/jpeg|jpg|png/g) ? (
@@ -460,7 +393,7 @@ const InquiryEditor = (props) => {
           )
         )
       }
-    </Card >
+    </>
   );
 };
 

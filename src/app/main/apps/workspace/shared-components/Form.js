@@ -12,10 +12,10 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import MinimizeIcon from '@material-ui/icons/Minimize';
-import { Box, Tabs, Tab, Fab, Divider } from '@material-ui/core';
+import { Box, Tabs, Tab, Fab, Divider, Link } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import CropIcon from '@material-ui/icons/Crop';
-import AddIcon from '@material-ui/icons/Add';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import PopoverFooter from './PopoverFooter';
@@ -53,8 +53,8 @@ const DialogTitle = withStyles(styles)((props) => {
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div style={{ width: '70%' }}>
-          <Typography variant="h6">{children}</Typography>
+        <div style={{ width: '70%', padding: '1rem' }}>
+          <div style={{ color: '#8A97A3', fontSize: '26px', fontWeight: '600' }}>{children}</div>
         </div>
         <div style={{ width: '30%', textAlign: 'right' }}>
           <IconButton
@@ -100,13 +100,17 @@ const DialogActions = withStyles((theme) => ({
 
 const useStyles = makeStyles(() => ({
   dialogPaper: {
-    width: '850px'
+    width: '950px',
+    minHeight: '600px'
   },
   dialogContent: {
     margin: 'auto',
-    marginTop: '1rem',
+    marginTop: '2rem',
     backgroundColor: 'white',
-    width: (props) => (props.isFullScreen ? '1200px' : '770px')
+    width: (props) => (props.isFullScreen ? '1200px' : '900px')
+  },
+  divider: {
+    backgroundColor: '#8A97A3'
   }
 }));
 
@@ -203,6 +207,7 @@ export default function Form(props) {
         >
           {title || null}
         </DialogTitle>
+        <Divider classes={{ root: classes.divider }} />
         {tabs && (
           <Box style={{}} sx={{}}>
             <Tabs
@@ -217,29 +222,30 @@ export default function Form(props) {
           </Box>
         )}
         <MuiDialogContent classes={{ root: classes.dialogContent }}>{children}</MuiDialogContent>
+        <Divider classes={{ root: classes.divider }} />
         {customActions == null && (
           <DialogActions style={{ display: 'none !important' }}>
-            <div style={{ position: 'relative' }}>
-              {(hasAddButton === undefined || hasAddButton === true) && (
-                <Fab
-                  size="small"
-                  color="primary"
-                  style={{ right: '0.5rem', bottom: '5rem', position: 'absolute' }}
+            {(hasAddButton === undefined || hasAddButton === true) && !openAllInquiry && (
+              <div style={{ right: '3rem', bottom: '2.6rem', position: 'absolute' }}>
+                <Link
+                  component="button"
+                  variant="body2"
                   onClick={handleClick}
+                  style={{ display: 'flex', alignItems: 'center' }}
                 >
-                  <AddIcon />
-                </Fab>
-              )}
-              <div style={{ marginTop: '2rem', marginLeft: '2rem' }}>
-                <Divider />
-                {!openAllInquiry ? (
-                  <PopoverFooter title={field} checkValidate={checkValidate} />
-                ) : (
-                  <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>
-                    <PopoverFooterAdmin />
-                  </PermissionProvider>
-                )}
+                  <AddCircleOutlineIcon fontSize="large" />
+                  <span style={{ color: '#BD0F72', fontSize: '16px', marginLeft: '5px', fontWeight: 'bold' }}>Add Inquiry</span>
+                </Link>
               </div>
+            )}
+            <div style={{ marginLeft: '2rem' }}>
+              {!openAllInquiry ? (
+                <PopoverFooter title={field} checkValidate={checkValidate} />
+              ) : (
+                <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>
+                  <PopoverFooterAdmin />
+                </PermissionProvider>
+              )}
             </div>
           </DialogActions>
         )}

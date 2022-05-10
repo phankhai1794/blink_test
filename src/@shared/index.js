@@ -41,7 +41,8 @@ export const filterMetadata = (data) => {
     dict['inq_type'][inq.name] = inq.id;
     dict['inq_type_options'].push({
       label: inq.name,
-      value: inq.id
+      value: inq.id,
+      field: inq.field
     });
   }
   for (const ans of data['ansType']) {
