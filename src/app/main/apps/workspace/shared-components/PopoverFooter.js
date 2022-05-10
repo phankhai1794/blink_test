@@ -16,6 +16,10 @@ import axios from 'axios';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 const useStyles = makeStyles((theme) => ({
+  root: {
+    borderRadius: '34px',
+    width: '120px'
+  },
   button: {
     margin: theme.spacing(1)
   }
@@ -87,19 +91,19 @@ const PopoverFooter = ({ title, checkValidate }) => {
     dispatch(InquiryActions.setField(fields[temp]));
   };
   return (
-    <Grid container style={{ margin: '3rem auto' }}>
+    <div style={{ margin: '1.6rem auto' }}>
       <Grid item xs={5}>
         {fields.includes(title) && (
           <>
-            <Link style={{ fontSize: '16px' }} onClick={toggleInquiriresDialog}>
-              Open All Inquiries
-            </Link>
             <IconButton onClick={prevQuestion}>
               <NavigateBeforeIcon />
             </IconButton>
             <IconButton onClick={nextQuestion}>
               <NavigateNextIcon />
             </IconButton>
+            <Link style={{ fontSize: '16px' }} component="button" onClick={toggleInquiriresDialog}>
+              Open All Inquiries
+            </Link>
           </>
         )}
       </Grid>
@@ -111,7 +115,6 @@ const PopoverFooter = ({ title, checkValidate }) => {
         >
           <Button
             variant="contained"
-            className={classes.button}
             color="primary"
             onClick={onResolve}
           >
@@ -123,7 +126,7 @@ const PopoverFooter = ({ title, checkValidate }) => {
           action={PERMISSION.INQUIRY_CREATE_COMMENT}
           extraCondition={fields.includes(title) && displayCmt}
         >
-          <Button variant="contained" className={classes.button} color="primary" onClick={onReply}>
+          <Button variant="contained" color="primary" onClick={onReply}>
             <ReplyIcon />
             Reply
           </Button>
@@ -132,13 +135,12 @@ const PopoverFooter = ({ title, checkValidate }) => {
           action={PERMISSION.VIEW_SAVE_INQUIRY}
           extraCondition={!fields.includes(title)}
         >
-          <Button variant="contained" className={classes.button} color="primary" onClick={onSave}>
-            {' '}
-            <SaveIcon /> Save
+          <Button variant="contained" className={classes.root} color="primary" onClick={onSave}>
+            Save
           </Button>
         </PermissionProvider>
       </Grid>
-    </Grid>
+    </div>
   );
 };
 

@@ -1,12 +1,13 @@
 import React from 'react';
 import { useDropzone } from 'react-dropzone';
-import { IconButton } from '@material-ui/core';
+import { IconButton, Icon } from '@material-ui/core';
 
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 //   component
 const AttachFile = (props) => {
+  const { uploadImageAttach, index, disabled } = props
   const onDrop = (acceptedFiles) => {
-    props.uploadImageAttach(acceptedFiles[0]);
+    index || index === 0 ? uploadImageAttach(acceptedFiles[0], index) : uploadImageAttach(acceptedFiles[0]);
   };
   const { getRootProps, getInputProps, open } = useDropzone({
     // Disable click and keydown behavior
@@ -18,9 +19,10 @@ const AttachFile = (props) => {
   return (
     <div className="container">
       <div {...getRootProps({})}>
-        <input {...getInputProps()} disabled={props.disabled || false} />
+        <input {...getInputProps()} disabled={disabled || false} />
         <IconButton onClick={open} style={{ padding: '2px' }}>
-          <AttachFileIcon />
+        <Icon>attach_file</Icon>
+       
         </IconButton>
       </div>
     </div>

@@ -3,11 +3,14 @@ import * as FormActions from '../store/actions/form';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
-import SaveIcon from '@material-ui/icons/Save';
 import { updateInquiry } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
 
 const useStyles = makeStyles((theme) => ({
+  root: {
+    borderRadius: '34px',
+    width: '120px'
+  },
   button: {
     margin: theme.spacing(1)
   }
@@ -75,9 +78,8 @@ const PopoverFooter = () => {
 
   return (
     <div className="text-right p-5">
-      <Button variant="contained" className={classes.button} color="primary" onClick={onSave}>
-        {' '}
-        <SaveIcon /> Save
+      <Button variant="contained" className={classes.root} color="primary" onClick={onSave}>
+        Save
       </Button>
     </div>
   );
