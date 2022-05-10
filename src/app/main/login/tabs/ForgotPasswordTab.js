@@ -1,9 +1,9 @@
+import React, { useRef, useState } from 'react';
 import { TextFieldFormsy } from '@fuse';
 import { Button, Icon, InputAdornment } from '@material-ui/core';
 import { displayToast } from '@shared';
 import { forgotPassword } from 'app/services/authService';
 import Formsy from 'formsy-react';
-import React, { useRef, useState } from 'react';
 
 function ForgotPasswordTab(props) {
 
