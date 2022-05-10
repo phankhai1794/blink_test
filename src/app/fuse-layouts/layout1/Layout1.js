@@ -98,7 +98,7 @@ function Layout1(props) {
         </div>
         {/* <SettingsPanel /> */}
       </div>
-      {/* <FuseMessage /> */}
+      <FuseMessage />
     </div>
   );
 }
