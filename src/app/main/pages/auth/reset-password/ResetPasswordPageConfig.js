@@ -8,8 +8,12 @@ export const ResetPasswordPageConfig = {
   },
   routes: [
     {
-      path: '/pages/auth/reset-password',
+      path: '/auth/reset-password',
       component: React.lazy(() => import('./ResetPasswordPage'))
+    },
+    {
+      path: '/auth/session-expired',
+      component: React.lazy(() => import('./AuthExpired'))
     }
   ]
 };
