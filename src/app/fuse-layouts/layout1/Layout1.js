@@ -1,15 +1,12 @@
 import React, { useContext } from 'react';
+import clsx from 'clsx';
 import { renderRoutes } from 'react-router-config';
 import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense, FuseSet } from '@fuse';
 import { makeStyles } from '@material-ui/styles';
 import { useSelector } from 'react-redux';
 import ToolbarLayout1 from './components/ToolbarLayout1';
-import FooterLayout1 from './components/FooterLayout1';
-import LeftSideLayout1 from './components/LeftSideLayout1';
-import RightSideLayout1 from './components/RightSideLayout1';
 import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
 import SettingsPanel from 'app/fuse-layouts/shared-components/SettingsPanel';
-import clsx from 'clsx';
 import AppContext from 'app/AppContext';
 
 const useStyles = makeStyles((theme) => ({
@@ -78,137 +75,32 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Layout1(props) {
+  const classes = useStyles(props);
+  const appContext = useContext(AppContext);
+  const { routes } = appContext;
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
 
-  const appContext = useContext(AppContext);
-  const classes = useStyles(props);
-  const { routes } = appContext;
+  return (
+    <div id="fuse-layout" className={clsx(classes.root, config.mode, 'scroll-' + config.scroll)}>
+      <div className="flex flex-1 flex-col overflow-hidden relative">
+        <div className={classes.wrapper}>
+          {config.navbar.display && <NavbarWrapperLayout1 />}
 
-  // console.warn('FuseLayout:: rendered');
+          <div className={classes.contentWrapper}>
+            {config.toolbar.display && <ToolbarLayout1 />}
 
-  switch (config.scroll) {
-    case 'body': {
-      return (
-        <div
-          id="fuse-layout"
-          className={clsx(classes.root, config.mode, 'scroll-' + config.scroll)}
-        >
-          {config.leftSidePanel.display && 
-          <LeftSideLayout1 />}
-          <div className="flex flex-1 flex-col overflow-hidden relative">
-            {config.toolbar.display &&
-              config.toolbar.style === 'fixed' &&
-              config.toolbar.position === 'above' && <ToolbarLayout1 />}
-
-            <FuseScrollbars className="overflow-auto" scrollToTopOnChildChange>
-              {config.toolbar.display &&
-                config.toolbar.style !== 'fixed' &&
-                config.toolbar.position === 'above' && <ToolbarLayout1 />}
-
-              <div className={classes.wrapper}>
-                {config.navbar.display && config.navbar.position === 'left' && (
-                  <NavbarWrapperLayout1 />
-                )}
-
-                <div className={classes.contentWrapper}>
-                  {config.toolbar.display && config.toolbar.position === 'below' && (
-                    <ToolbarLayout1 />
-                  )}
-
-                  <div className={classes.content}>
-                    <FuseDialog />
-
-                    <FuseSuspense>{renderRoutes(routes)}</FuseSuspense>
-
-                    {props.children}
-                  </div>
-
-                  {config.footer.display && config.footer.position === 'below' && <FooterLayout1 />}
-                </div>
-
-                {config.navbar.display && config.navbar.position === 'right' && (
-                  <NavbarWrapperLayout1 />
-                )}
-              </div>
-
-              {config.footer.display &&
-                config.footer.style !== 'fixed' &&
-                config.footer.position === 'above' && <FooterLayout1 />}
+            <FuseScrollbars className={classes.content} scrollToTopOnChildChange>
+              <FuseDialog />
+              <FuseSuspense>{renderRoutes(routes)}</FuseSuspense>
+              {props.children}
             </FuseScrollbars>
-
-            {config.footer.display &&
-              config.footer.style === 'fixed' &&
-              config.footer.position === 'above' && <FooterLayout1 />}
-
-            <SettingsPanel />
           </div>
-
-          {config.rightSidePanel.display && <RightSideLayout1 />}
-
-          <FuseMessage />
         </div>
-      );
-    }
-    case 'content':
-    default: {
-      return (
-        <div
-          id="fuse-layout"
-          className={clsx(classes.root, config.mode, 'scroll-' + config.scroll)}
-        >
-          {config.leftSidePanel.display && <LeftSideLayout1 />}
-
-          <div className="flex flex-1 flex-col overflow-hidden relative">
-            {config.toolbar.display && config.toolbar.position === 'above' && <ToolbarLayout1 />}
-
-            <div className={classes.wrapper}>
-              {config.navbar.display && config.navbar.position === 'left' && (
-                <NavbarWrapperLayout1 />
-              )}
-
-              <div className={classes.contentWrapper}>
-                {config.toolbar.display &&
-                  config.toolbar.position === 'below' &&
-                  config.toolbar.style === 'fixed' && <ToolbarLayout1 />}
-
-                <FuseScrollbars className={classes.content} scrollToTopOnChildChange>
-                  {config.toolbar.display &&
-                    config.toolbar.position === 'below' &&
-                    config.toolbar.style !== 'fixed' && <ToolbarLayout1 />}
-
-                  <FuseDialog />
-
-                  <FuseSuspense>{renderRoutes(routes)}</FuseSuspense>
-
-                  {props.children}
-
-                  {config.footer.display &&
-                    config.footer.position === 'below' &&
-                    config.footer.style !== 'fixed' && <FooterLayout1 />}
-                </FuseScrollbars>
-
-                {config.footer.display &&
-                  config.footer.position === 'below' &&
-                  config.footer.style === 'fixed' && <FooterLayout1 />}
-              </div>
-
-              {config.navbar.display && config.navbar.position === 'right' && (
-                <NavbarWrapperLayout1 />
-              )}
-            </div>
-
-            {config.footer.display && config.footer.position === 'above' && <FooterLayout1 />}
-
-            <SettingsPanel />
-          </div>
-
-          {config.rightSidePanel.display && <RightSideLayout1 />}
-
-          <FuseMessage />
-        </div>
-      );
-    }
-  }
+        {/* <SettingsPanel /> */}
+      </div>
+      {/* <FuseMessage /> */}
+    </div>
+  );
 }
 
 export default Layout1;

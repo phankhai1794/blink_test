@@ -65,6 +65,8 @@ function ProjectDashboardApp(props) {
       AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }))
     );
 
+    console.log('>>>>>>>>>>>>>>>>>>>>');
+
     return () => {
       dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
       dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', false)));
