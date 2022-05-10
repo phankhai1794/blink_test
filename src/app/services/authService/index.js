@@ -25,3 +25,8 @@ export async function forgotPassword(data) {
   const response = await axios().post(`${PATH}/forgot`, data);
   return response.data;
 }
+
+export async function putUserPassword(header,payload) {
+  const response = await axios(header).put(`${PATH}/update-password`, payload);
+  return response;
+}

@@ -7,8 +7,8 @@ import { useForm } from '@fuse/hooks';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import jwt from 'jwt-decode'
-import axios from '@shared/axios';
 import { displayToast } from '@shared';
+import { putUserPassword } from 'app/services/authService';
 const useStyles = makeStyles((theme) => ({
   root: {
     background:
@@ -62,8 +62,7 @@ function ResetPasswordPage(props) {
 
   function handleSubmit(ev) {
     const { username, password } = form;
-    axios({ Authorization: `Bearer ${sessionToken}` })
-      .put('/authentication/update-password', { username, password })
+    putUserPassword({ Authorization: `Bearer ${sessionToken}` }, { username, password })
       .then(data => {
         displayToast('success', 'Password updated successfully')
       })
@@ -73,8 +72,6 @@ function ResetPasswordPage(props) {
       .finally(() => {
         props.history.push('/login');
       })
-
-
     ev.preventDefault();
   }
 
