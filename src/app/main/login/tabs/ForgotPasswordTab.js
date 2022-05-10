@@ -21,7 +21,7 @@ function ForgotPasswordTab(props) {
 
   function handleSubmit(model) {
     forgotPassword(model).then(data => {
-      let t = displayToast('success');
+      displayToast('success');
       props.loginTabView(true)
     }).catch(err => {
       displayToast('error', err.message);
