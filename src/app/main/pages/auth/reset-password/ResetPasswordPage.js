@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Card, CardContent, TextField, Typography } from '@material-ui/core';
 import { darken } from '@material-ui/core/styles/colorManipulator';
 import { makeStyles } from '@material-ui/styles';
@@ -6,7 +6,9 @@ import { FuseAnimate } from '@fuse';
 import { useForm } from '@fuse/hooks';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
-
+import jwt from 'jwt-decode'
+import axios from '@shared/axios';
+import { displayToast } from '@shared';
 const useStyles = makeStyles((theme) => ({
   root: {
     background:
@@ -19,28 +21,61 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function ResetPasswordPage() {
+function ResetPasswordPage(props) {
   const classes = useStyles();
+  const [sessionToken, setSessionToken] = useState('');
 
-  const { form, handleChange, resetForm } = useForm({
-    name: '',
+
+  const { form, handleChange, setInForm } = useForm({
+    username: '',
     email: '',
     password: '',
     passwordConfirm: ''
   });
 
+
+  useEffect(() => {
+
+    try {
+      const accessToken = new URLSearchParams(props.location.search).get('access_token');
+      const payload = jwt(accessToken)
+      if (payload.exp < Date.now() / 1000) throw new Error('Token expired')
+
+      setInForm('email', payload.email);
+      setInForm('username', payload.username)
+
+      setSessionToken(accessToken);
+
+    } catch (error) {
+      props.history.push('/auth/session-expired');
+    }
+
+  }, {})
+
   function isFormValid() {
     return (
       form.email.length > 0 &&
-      form.password.length > 0 &&
       form.password.length > 3 &&
       form.password === form.passwordConfirm
     );
   }
 
   function handleSubmit(ev) {
+    const { username, password } = form;
+    axios({ Authorization: `Bearer ${sessionToken}` })
+      .put('/authentication/update-password', { username, password })
+      .then(data => {
+        displayToast('success', 'Password updated successfully')
+      })
+      .catch(err => {
+        displayToast('error', 'Something went wrong, please try later!')
+      })
+      .finally(() => {
+        props.history.push('/login');
+      })
+
+
     ev.preventDefault();
-    resetForm();
   }
 
   return (
@@ -77,6 +112,7 @@ function ResetPasswordPage() {
                   variant="outlined"
                   required
                   fullWidth
+                  disabled={true}
                 />
 
                 <TextField
@@ -116,7 +152,7 @@ function ResetPasswordPage() {
               </form>
 
               <div className="flex flex-col items-center justify-center pt-32 pb-24">
-                <Link className="font-medium" to="/pages/auth/login">
+                <Link className="font-medium" to="/login">
                   Go back to login
                 </Link>
               </div>
