@@ -103,7 +103,7 @@ function ResetPasswordPage(props) {
               >
                 <TextField
                   className="mb-16"
-                  label="Email"
+                  label="Your Email"
                   autoFocus
                   type="email"
                   name="email"
