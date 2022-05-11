@@ -1,16 +1,16 @@
 import React, { useRef, useState } from 'react';
 import { TextFieldFormsy } from '@fuse';
 import { Button, Icon, InputAdornment } from '@material-ui/core';
-import { displayToast } from '@shared';
 import { forgotPassword } from 'app/services/authService';
+import { useDispatch } from 'react-redux';
 import Formsy from 'formsy-react';
-
+import * as AppAction from 'app/store/actions';
 function ForgotPasswordTab(props) {
 
   const [isFormValid, setIsFormValid] = useState(false);
   const formRef = useRef(null);
 
-
+  const dispatch = useDispatch();
   function disableButton() {
     setIsFormValid(false);
   }
@@ -21,12 +21,11 @@ function ForgotPasswordTab(props) {
 
   function handleSubmit(model) {
     forgotPassword(model).then(data => {
-      displayToast('success');
+      dispatch(AppAction.showMessage({ message: 'Please check your email to reset your password.', variant: 'success' }));
       props.loginTabView(true)
     }).catch(err => {
-      displayToast('error', err.message);
+      dispatch(AppAction.showMessage({ message: err.message, variant: 'error' }));
     });
-
   }
 
   return (

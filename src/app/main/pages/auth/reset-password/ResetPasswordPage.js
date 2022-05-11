@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { FuseAnimate } from '@fuse';
+import { useForm } from '@fuse/hooks';
 import { Button, Card, CardContent, TextField, Typography } from '@material-ui/core';
 import { darken } from '@material-ui/core/styles/colorManipulator';
 import { makeStyles } from '@material-ui/styles';
-import { FuseAnimate } from '@fuse';
-import { useForm } from '@fuse/hooks';
-import clsx from 'clsx';
-import { Link } from 'react-router-dom';
-import jwt from 'jwt-decode'
-import { displayToast } from '@shared';
 import { putUserPassword } from 'app/services/authService';
+import * as AppAction from 'app/store/actions';
+import clsx from 'clsx';
+import jwt from 'jwt-decode';
+import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 const useStyles = makeStyles((theme) => ({
   root: {
     background:
@@ -24,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
 function ResetPasswordPage(props) {
   const classes = useStyles();
   const [sessionToken, setSessionToken] = useState('');
+  const dispatch = useDispatch();
 
 
   const { form, handleChange, setInForm } = useForm({
@@ -64,10 +66,14 @@ function ResetPasswordPage(props) {
     const { username, password } = form;
     putUserPassword({ Authorization: `Bearer ${sessionToken}` }, { username, password })
       .then(data => {
-        displayToast('success', 'Password updated successfully')
+        dispatch(
+          AppAction.showMessage({ message: 'Password updated successfully', variant: 'success' })
+        )
       })
       .catch(err => {
-        displayToast('error', 'Something went wrong, please try later!')
+        dispatch(
+          AppAction.showMessage({ message: 'Something went wrong, please try later!', variant: 'error' })
+        )
       })
       .finally(() => {
         props.history.push('/login');
