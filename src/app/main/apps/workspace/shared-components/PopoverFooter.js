@@ -4,8 +4,7 @@ import * as InquiryActions from '../admin/store/actions/inquiry';
 import * as FormActions from '../admin/store/actions/form';
 
 import { makeStyles } from '@material-ui/core/styles';
-import { Link, Grid, Button, IconButton } from '@material-ui/core';
-import SaveIcon from '@material-ui/icons/Save';
+import { Link, Button, IconButton } from '@material-ui/core';
 import ReplyIcon from '@material-ui/icons/Reply';
 import CheckIcon from '@material-ui/icons/Check';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
@@ -91,8 +90,8 @@ const PopoverFooter = ({ title, checkValidate }) => {
     dispatch(InquiryActions.setField(fields[temp]));
   };
   return (
-    <div style={{ margin: '1.6rem auto' }}>
-      <Grid item xs={5}>
+    <div className="flex justify-between" style={{ margin: '1.6rem auto' }}>
+      <div>
         {fields.includes(title) && (
           <>
             <IconButton onClick={prevQuestion}>
@@ -106,9 +105,18 @@ const PopoverFooter = ({ title, checkValidate }) => {
             </Link>
           </>
         )}
-      </Grid>
-
-      <Grid item xs={7} className="flex justify-end">
+      </div>
+      <div >
+        <PermissionProvider
+          action={PERMISSION.VIEW_SAVE_INQUIRY}
+          extraCondition={!fields.includes(title)}
+        >
+          <Button variant="contained" className={classes.root} color="primary" onClick={onSave}>
+            Save
+          </Button>
+        </PermissionProvider>
+      </div>
+      <div className="flex justify-end">
         <PermissionProvider
           action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
           extraCondition={fields.includes(title) && displayCmt}
@@ -117,6 +125,7 @@ const PopoverFooter = ({ title, checkValidate }) => {
             variant="contained"
             color="primary"
             onClick={onResolve}
+            classes={{ root: classes.button }}
           >
             <CheckIcon />
             Resolve
@@ -126,20 +135,13 @@ const PopoverFooter = ({ title, checkValidate }) => {
           action={PERMISSION.INQUIRY_CREATE_COMMENT}
           extraCondition={fields.includes(title) && displayCmt}
         >
-          <Button variant="contained" color="primary" onClick={onReply}>
+          <Button variant="contained" classes={{ root: classes.button }} color="primary" onClick={onReply}>
             <ReplyIcon />
             Reply
           </Button>
         </PermissionProvider>
-        <PermissionProvider
-          action={PERMISSION.VIEW_SAVE_INQUIRY}
-          extraCondition={!fields.includes(title)}
-        >
-          <Button variant="contained" className={classes.root} color="primary" onClick={onSave}>
-            Save
-          </Button>
-        </PermissionProvider>
-      </Grid>
+
+      </div>
     </div>
   );
 };

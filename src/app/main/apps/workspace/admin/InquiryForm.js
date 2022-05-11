@@ -50,8 +50,9 @@ const InquiryForm = (props) => {
   }, [questions])
 
   const copyQuestion = (index) => {
-    const temp = JSON.parse(JSON.stringify(questions[index]));
-    dispatch(InquiryActions.setQuestion([...questions, temp]))
+    const optionsOfQuestion = JSON.parse(JSON.stringify(questions[index]));
+    optionsOfQuestion.field = ''
+    dispatch(InquiryActions.setQuestion([...questions, optionsOfQuestion]))
   };
 
   const removeQuestion = (index) => {
