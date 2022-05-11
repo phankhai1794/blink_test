@@ -1,6 +1,7 @@
-const Purgecss = require('purgecss');
 const fs = require('fs');
 const path = require('path');
+
+const Purgecss = require('purgecss');
 
 // Custom PurgeCSS extractor for Tailwind that allows special characters in
 // class names.
@@ -8,7 +9,7 @@ const path = require('path');
 // https://github.com/FullHuman/purgecss#extractor
 class TailwindExtractor {
   static extract(content) {
-    return content.match(/[A-Za-z0-9-_:\/]+/g) || [];
+    return content.match(/[A-Za-z0-9-_:/]+/g) || [];
   }
 }
 

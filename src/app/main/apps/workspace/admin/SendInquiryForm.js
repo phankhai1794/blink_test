@@ -44,7 +44,8 @@ const SendInquiryForm = (props) => {
     if (success) {
       dispatch(
         Actions.showMessage({
-          message: 'Mail sent successfully'
+          message: 'Mail sent successfully',
+          variant: 'success'
         })
       );
       dispatch({
@@ -56,7 +57,8 @@ const SendInquiryForm = (props) => {
     } else if (error) {
       dispatch(
         Actions.showMessage({
-          message: 'Mail not sent!. Please try again'
+          message: 'Mail not sent!. Please try again',
+          variant: 'error'
         })
       );
       dispatch({

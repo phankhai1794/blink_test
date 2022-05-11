@@ -7,7 +7,6 @@ import clsx from 'clsx';
 import JWTLoginTab from './tabs/JWTLoginTab';
 import { makeStyles } from '@material-ui/styles';
 import * as AppAction from 'app/store/actions';
-import { displayToast } from '@shared';
 import { login } from 'app/services/authService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
@@ -49,7 +48,7 @@ function Login(props) {
           localStorage.setItem('USER', JSON.stringify(userInfo));
 
           dispatch(AppAction.setUser(payload));
-          displayToast('success', message);
+          dispatch(AppAction.showMessage({message: message, variant: 'success'}));
 
           const { cachePath, cacheSearch } = location;
           history.push(cachePath ? `${cachePath + cacheSearch}` : '/');
@@ -58,7 +57,7 @@ function Login(props) {
       .catch((error) => {
         console.log('Error: ', error);
         const { message } = error.response.data.error;
-        displayToast('error', message);
+        dispatch(AppAction.showMessage({message: message, variant: 'error'}));
       });
   }
 

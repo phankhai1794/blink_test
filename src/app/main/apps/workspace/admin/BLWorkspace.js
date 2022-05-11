@@ -12,7 +12,7 @@ import { makeStyles } from '@material-ui/styles';
 import Inquiry from '../shared-components/Inquiry';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
-import { getKeyByValue, displayToast } from '@shared';
+import { getKeyByValue } from '@shared';
 import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
@@ -57,11 +57,11 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     if (success) {
       dispatch(FormActions.displaySuccess(false));
-      displayToast('success', 'Save inquiry successfully');
+      dispatch(AppActions.showMessage({message: 'Save inquiry successfully', variant: 'success'}));
     }
     if (fail.open) {
       dispatch(FormActions.displayFail(false, ''));
-      displayToast('error', fail.message);
+      dispatch(AppActions.showMessage({message: fail.message, variant: 'error'}));
     }
     if (myBL.id) {
       dispatch(Actions.loadInquiry(myBL.id));

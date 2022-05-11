@@ -10,8 +10,9 @@ import './react-chartjs-2-defaults';
 import './styles/index.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import * as serviceWorker from './serviceWorker';
 import App from 'app/App';
+
+import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

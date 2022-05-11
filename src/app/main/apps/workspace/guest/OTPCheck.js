@@ -12,7 +12,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 import { verifyEmail, verifyGuest, isVerified } from 'app/services/authService';
 import GuestWorkspace from './GuestWorkspace';
-import { displayToast } from '@shared';
+import * as Actions from 'app/store/actions';
 
 const otpLength = 4;
 
@@ -68,7 +68,7 @@ const OtpCheck = ({ status }) => {
         .catch((error) => {
           console.log(error);
           const { message } = error.response.data.error;
-          displayToast('error', message);
+          dispatch(Actions.showMessage({message: message, variant: 'error'}));
         });
     }
   };
@@ -124,7 +124,7 @@ const OtpCheck = ({ status }) => {
         .catch((error) => {
           console.log(error);
           const { message } = error.response.data.error;
-          displayToast('error', message);
+          dispatch(Actions.showMessage({message: message, variant: 'error'}));
         });
     }
   }, [otpCode]);

@@ -78,11 +78,11 @@ function FuseAuthorizationDoc() {
           </Typography>
 
           <Typography className="mb-16 italic" component="code">
-            src/app/main/auth/admin-role-example/AdminRoleExampleConfig.js
+            src/app/main/example/auth/admin-role-example/AdminRoleExampleConfig.js
           </Typography>
 
           <FuseHighlight component="pre" className="language-jsx">
-            {require('!raw-loader!app/main/auth/admin-role-example/AdminRoleExampleConfig.js')}
+            {require('!raw-loader!app/main/example/auth/admin-role-example/AdminRoleExampleConfig.js')}
           </FuseHighlight>
 
           <Typography className="my-16" component="p">
@@ -141,7 +141,7 @@ function FuseAuthorizationDoc() {
           </Typography>
 
           <FuseHighlight component="pre" className="language-js">
-            {`  
+            {`
                               const initialState = {
                                 role: [],//guest
                                 data: {

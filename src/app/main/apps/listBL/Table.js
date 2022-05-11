@@ -18,8 +18,8 @@ import { withRouter } from 'react-router-dom';
 import { Typography } from '@material-ui/core';
 import _ from '@lodash';
 import { makeStyles } from '@material-ui/styles';
-import * as Actions from './store/actions';
-import { displayToast } from '@shared';
+import * as BlActions from './store/actions';
+import * as Actions from 'app/store/actions';
 
 const blStateStyles = {
   REQUEST: {
@@ -168,12 +168,12 @@ function InquiringTable(props) {
   // }
 
   useEffect(() => {
-    dispatch(Actions.loadListMyBL(filterState));
+    dispatch(BlActions.loadListMyBL(filterState));
   }, []);
 
   useEffect(() => {
     if (error) {
-      displayToast('error', error);
+      dispatch(Actions.showMessage({message: error, variant: 'error'}));
     }
   }, [success, error]);
 

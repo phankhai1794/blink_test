@@ -51,7 +51,7 @@ export function submitLoginWithFireBase({ username, password }) {
         };
 
         if (error.code === 'auth/invalid-api-key') {
-          dispatch(Actions.showMessage({ message: error.message }));
+          dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
         }
 
         return dispatch({

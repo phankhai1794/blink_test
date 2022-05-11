@@ -1,26 +1,70 @@
 module.exports = {
+  plugins: ["prettier", "import", "react"],
   env: {
+    node: true,
     browser: true,
     es6: true
   },
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
-    'plugin:@typescript-eslint/eslint-recommended',
+    "plugin:import/errors",
+    "plugin:import/warnings",
     'plugin:prettier/recommended'
   ],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly'
   },
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaFeatures: {
-      jsx: true
-    },
-    ecmaVersion: 2018,
-    sourceType: 'module'
+  parser: 'babel-eslint',
+  rules: {
+    // Plugins
+    "import/prefer-default-export": "off",
+    // "import/no-dynamic-require": "off",
+    "import/named": "error",
+    "import/no-unresolved": "off",
+    "import/namespace": "warn",
+    // "import/no-named-as-default": "off",
+    "import/export": "warn",
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "parent", "sibling", "index"],
+        "newlines-between": "always"
+      }
+    ],
+    // React
+    'react/prop-types': 0,
+    'react/jsx-no-undef': ['error', { allowGlobals: true }],
+
+    // Possible Errors
+    "prettier/prettier": "off",
+    "no-console": "off",
+
+    // Best Practices
+    "no-multi-spaces": ["error", { "ignoreEOLComments": true }],
+    "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1}],
+
+    // Variables
+    "no-multi-assign": 1,
+    "no-param-reassign": 1,
+    // no-restricted-globals
+
+    // Node.js and CommonJS
+
+    // Stylistic Issues
+    "max-len": "off",
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
+    "no-underscore-dangle": "off",
+    "object-curly-newline": ["error", { "consistent": true }],
+    "no-unused-vars": "off",
+    "no-use-before-define": ["error", {"functions": false, "classes": false}],
+    "consistent-return": "off"
+    // JS.Next
   },
-  plugins: ['react', '@typescript-eslint'],
-  rules: {}
+  settings: {
+    "react": {
+      "version": "16.8"
+    }
+  }
 };
