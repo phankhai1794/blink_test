@@ -65,7 +65,7 @@ export function registerWithFirebase(model) {
         };
 
         if (error.code === 'auth/invalid-api-key') {
-          dispatch(Actions.showMessage({ message: error.message }));
+          dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
         }
 
         return dispatch({

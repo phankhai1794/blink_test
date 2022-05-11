@@ -1,5 +1,3 @@
-import { Store } from 'react-notifications-component';
-
 export const getKeyByValue = (object, value) => {
   return Object.keys(object).find((key) => object[key] === value);
 };
@@ -49,28 +47,4 @@ export const filterMetadata = (data) => {
     dict['ans_type'][ans.name] = ans.id;
   }
   return dict;
-};
-
-export const displayToast = (type, message) => {
-  const dictionary = {
-    success: { title: 'Success', type: 'success' },
-    warning: { title: 'Warning', type: 'warning' },
-    error: { title: 'Error', type: 'danger' }
-    // info: { title: '', type: 'info' },
-    // default: { title: '', type: 'default' },
-  };
-  if (dictionary) {
-    const el = dictionary[type];
-    return Store.addNotification({
-      title: el.title,
-      type: el.type,
-      message,
-      insert: 'top',
-      container: 'top-right',
-      animationIn: ['animate__animated', 'animate__fadeIn'],
-      animationOut: ['animate__animated', 'animate__fadeOut'],
-      dismiss: { duration: 3000, onScreen: true }
-    });
-  }
-  return null;
 };

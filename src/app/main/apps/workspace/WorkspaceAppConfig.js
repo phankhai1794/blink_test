@@ -18,7 +18,7 @@ export const WorkspaceAppConfig = {
       component: React.lazy(() => import('./guest/OTPCheck'))
     },
     {
-      path: '/apps/workplace/mybl',
+      path: '/apps/draft-bl',
       exact: true,
       component: React.lazy(() => import('./BillApp'))
     }

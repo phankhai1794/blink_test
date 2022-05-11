@@ -5,13 +5,14 @@ import Provider from 'react-redux/es/components/Provider';
 import { Router } from 'react-router-dom';
 import jssExtend from 'jss-extend';
 import history from '@history';
+import { create } from 'jss';
+import { StylesProvider, jssPreset, createGenerateClassName } from '@material-ui/styles';
+import { ReactNotifications } from 'react-notifications-component';
+
 import { Auth } from './auth';
 import store from './store';
 import AppContext from './AppContext';
 import routes from './fuse-configs/routesConfig';
-import { create } from 'jss';
-import { StylesProvider, jssPreset, createGenerateClassName } from '@material-ui/styles';
-import { ReactNotifications } from 'react-notifications-component';
 import 'react-notifications-component/dist/theme.css';
 
 const jss = create({

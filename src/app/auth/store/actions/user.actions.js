@@ -196,7 +196,7 @@ function updateUserData(user) {
           store.dispatch(Actions.showMessage({ message: 'User data saved to firebase' }));
         })
         .catch((error) => {
-          store.dispatch(Actions.showMessage({ message: error.message }));
+          store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
         });
       break;
     }
@@ -210,7 +210,7 @@ function updateUserData(user) {
           store.dispatch(Actions.showMessage({ message: 'User data saved to auth0' }));
         })
         .catch((error) => {
-          store.dispatch(Actions.showMessage({ message: error.message }));
+          store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
         });
       break;
     }
@@ -221,7 +221,7 @@ function updateUserData(user) {
           store.dispatch(Actions.showMessage({ message: 'User data saved with api' }));
         })
         .catch((error) => {
-          store.dispatch(Actions.showMessage({ message: error.message }));
+          store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
         });
       break;
     }

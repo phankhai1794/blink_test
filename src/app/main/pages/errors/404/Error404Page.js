@@ -24,7 +24,7 @@ function Error404Page() {
           </Typography>
         </FuseAnimate>
 
-        <Paper className="flex items-center w-full h-56 p-16 mt-48 mb-16" elevation={1}>
+        {/* <Paper className="flex items-center w-full h-56 p-16 mt-48 mb-16" elevation={1}>
           <Icon color="action">search</Icon>
           <Input
             placeholder="Search for anything"
@@ -35,10 +35,10 @@ function Error404Page() {
               'aria-label': 'Search'
             }}
           />
-        </Paper>
+        </Paper> */}
 
-        <Link className="font-medium" to="/apps/dashboards/project">
-          Go back to dashboard
+        <Link className="font-medium" to="/apps/dashboards">
+          Go back to main page
         </Link>
       </div>
     </div>
