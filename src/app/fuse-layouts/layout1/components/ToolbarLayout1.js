@@ -109,8 +109,10 @@ function ToolbarLayout1(props) {
                 src="assets/images/logos/one_ocean_network-logo.png"
                 className={clsx(classes.logo, classes.fitAvatar)}
                 alt="one-logo"
-                component={Link}
-                to="/"
+                {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+                  component: Link,
+                  to: '/'
+                })}
               />
             </div>
 
