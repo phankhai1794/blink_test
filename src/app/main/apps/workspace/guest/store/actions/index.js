@@ -13,14 +13,14 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
         const field_list = res.map(e => e.field);
         dispatch(saveField(field_list));
         dispatch(editInquiry(res));
-    }).catch((err) => console.log(err));
+    }).catch((err) => console.error(err));
 };
 
 export const loadMetadata = () => async (dispatch) => {
     getMetadata().then((res) => {
         const data = filterMetadata(res);
         dispatch(saveMetadata(data));
-    }).catch((err) => console.log(err));
+    }).catch((err) => console.error(err));
 };
 
 export function toggleInquiry(state) {

@@ -120,7 +120,7 @@ const Comment = (props) => {
     <>
       {comment.map((k, id) => {
         return (
-          <div style={{ marginBottom: '20px' }}>
+          <div key={id} style={{ marginBottom: '20px' }}>
             {edit === id ? (
               <input
                 placeholder="Comment here"

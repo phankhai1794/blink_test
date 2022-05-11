@@ -95,7 +95,7 @@ const AllInquiry = (props) => {
         }
         const type = q.ansType;
         return (
-          <div style={{ marginBottom: '24px' }} onClick={() => changeToEditor(index)}>
+          <div key={index} style={{ marginBottom: '24px' }} onClick={() => changeToEditor(index)}>
             <PermissionProvider
               action={PERMISSION.VIEW_EDIT_INQUIRY}
               extraCondition={currentEdit === index}
