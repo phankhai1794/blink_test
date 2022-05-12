@@ -41,9 +41,13 @@ const Comment = (props) => {
   const [comment, setComment] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState('');
-  const [reply, user] = useSelector((state) => [state.workspace.inquiryReducer.reply, state.user]);
+  const [reply, currentField, user] = useSelector((state) => [
+    state.workspace.inquiryReducer.reply,
+    state.workspace.inquiryReducer.currentField,
+    state.user
+  ]);
   const open = Boolean(anchorEl);
-
+  console.log("user: ", user)
   useEffect(() => {
     loadComment(q.id)
       .then((res) => {
@@ -51,7 +55,7 @@ const Comment = (props) => {
         setComment(res);
       })
       .catch((error) => console.log(error));
-  }, []);
+  }, [currentField]);
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -68,15 +72,16 @@ const Comment = (props) => {
     setComment(temp);
   };
   const addComment = async (e) => {
+    const targetValue = e.target.value
     if (e.key === 'Enter') {
-      if (e.target.value) {
+      if (targetValue) {
         const inqAns = {
           inquiry: q.id,
           confirm: false,
           type: 'REP'
         };
         const answer = {
-          content: e.target.value,
+          content: targetValue,
           type: q.ansType
         };
         const res = await saveComment({ inqAns, answer });
@@ -85,7 +90,7 @@ const Comment = (props) => {
           {
             answer: res.id,
             createdAt: new Date(),
-            content: e.target.value,
+            content: targetValue,
             creator: user.displayName
           }
         ]);
@@ -115,7 +120,7 @@ const Comment = (props) => {
     <>
       {comment.map((k, id) => {
         return (
-          <div style={{ marginBottom: '20px' }}>
+          <div key={id} style={{ marginBottom: '20px' }}>
             {edit === id ? (
               <input
                 placeholder="Comment here"
@@ -187,7 +192,7 @@ const Inquiry = (props) => {
     state.workspace.inquiryReducer.currentField,
     state.workspace.inquiryReducer.metadata
   ]);
-  const question = inquiries.filter((q) => q.field === currentField);
+  const inquiry = inquiries.filter((q) => q.field === currentField);
   const indexes = inquiries.findIndex((q) => q.field === currentField);
   const [edit, setEdit] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
@@ -198,18 +203,17 @@ const Inquiry = (props) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
-
   const toggleEdit = (id) => {
     setEdit(id);
   };
   useEffect(() => {
-    if (question[0].mediaFile && question[0].mediaFile.length && !question[0].mediaFile[0].src) {
+    if (inquiry[0] && inquiry[0].mediaFile.length && !inquiry[0].mediaFile[0].src) {
       const optionsOfQuestion = [...inquiries];
-      for (let f in question[0].mediaFile) {
-        getFile(question[0].mediaFile[f].id)
+      for (let f in inquiry[0].mediaFile) {
+        getFile(inquiry[0].mediaFile[f].id)
           .then((file) => {
             let url = '';
-            if (question[0].mediaFile[f].ext.match(/jpeg|jpg|png/g)) {
+            if (inquiry[0].mediaFile[f].ext.match(/jpeg|jpg|png/g)) {
               url = URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
             } else {
               url = URL.createObjectURL(new Blob([file]));
@@ -223,7 +227,7 @@ const Inquiry = (props) => {
   }, [currentField]);
   return (
     <>
-      {question.map((q, index) => {
+      {inquiry.map((q, index) => {
         const type = q.ansType;
         const username = q.creator;
         return (

@@ -80,7 +80,10 @@ const BLField = (props) => {
     }
   };
 
-  const onClick = () => {
+  const onClick = (e) => {
+    if (!minimize) {
+      dispatch(InquiryActions.setField(e.currentTarget.id));
+    }
     if (!questionIsEmpty && !minimize) {
       dispatch(FormActions.toggleInquiry(true));
     }
@@ -89,7 +92,7 @@ const BLField = (props) => {
   const checkQuestionIsEmpty = () => {
     if (inquiries.length > 0) {
       const check = inquiries.filter((q) => q.field === id);
-      return check.length == 0;
+      return check.length === 0;
     }
     return true;
   };

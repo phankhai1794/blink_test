@@ -48,6 +48,7 @@ const GuestWorkspace = (props) => {
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(GuestActions.loadInquiry(myBL.id));
+    dispatch(GuestActions.loadMetadata());
   }, []);
 
   useEffect(() => {
@@ -69,8 +70,8 @@ const GuestWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-            ? getKeyByValue(metadata['field'], currentField)
-            : ''
+              ? getKeyByValue(metadata['field'], currentField)
+              : ''
         }
       >
         {openAllInquiry ? <AllInquiry user="guest" /> : <Inquiry user="guest" />}

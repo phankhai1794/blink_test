@@ -6,25 +6,61 @@ import ParagraphAnswer from './ParagraphAnswer';
 import AttachmentAnswer from './AttachmentAnswer';
 import InquiryEditor from '../admin/components/InquiryEditor';
 import ImageAttach from './ImageAttach';
+import DeleteIcon from '@material-ui/icons/Delete';
 import FileAttach from './FileAttach';
 import { getKeyByValue } from '@shared';
 import { getFile } from 'app/services/fileService';
-import { Card, Typography } from '@material-ui/core';
+import { Card, Typography, FormControl, FormGroup, FormControlLabel, IconButton, Checkbox, FormHelperText } from '@material-ui/core';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import AttachFile from '../admin/components/AttachFile';
 
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
   const { receiver } = props;
-  const [inquiries, currentEdit, metadata] = useSelector((state) => [
+  const [inquiries, currentEdit, metadata, valid] = useSelector((state) => [
     state.workspace.inquiryReducer.inquiries,
     state.workspace.inquiryReducer.currentEditInq,
-    state.workspace.inquiryReducer.metadata
+    state.workspace.inquiryReducer.metadata,
+    state.workspace.inquiryReducer.validation,
   ]);
 
   const changeToEditor = (index) => {
     if (index !== currentEdit) dispatch(InquiryActions.setEditInq(index));
   };
 
+  const removeQuestion = (index) => {
+    const optionsOfQuestion = [...inquiries];
+    optionsOfQuestion.splice(index, 1);
+    if (index > 0) {
+      dispatch(InquiryActions.setEdit(index - 1));
+    }
+    dispatch(InquiryActions.setQuestion(optionsOfQuestion))
+  };
+
+  const handleUploadImageAttach = (src, index) => {
+    const optionsOfQuestion = [...inquiries];
+    const list = optionsOfQuestion[index].mediaFile;
+    const formData = new FormData();
+    formData.append('file', src);
+    formData.append('name', src.name);
+    optionsOfQuestion[index].mediaFile = [
+      ...list,
+      { id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }
+    ];
+    dispatch(InquiryActions.setQuestion(optionsOfQuestion))
+  };
+
+  const handleReceiverChange = (e, index) => {
+    const optionsOfQuestion = [...inquiries];
+    if (e.target.checked) {
+      dispatch(InquiryActions.validate({ ...valid, error: false }));
+      optionsOfQuestion[index].receiver.push(e.target.value);
+    } else {
+      const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
+      optionsOfQuestion[index].receiver.splice(i, 1);
+    }
+    dispatch(InquiryActions.setQuestion(optionsOfQuestion));
+  };
   useEffect(() => {
     const optionsOfQuestion = [...inquiries];
     for (let i in inquiries) {
@@ -59,7 +95,7 @@ const AllInquiry = (props) => {
         }
         const type = q.ansType;
         return (
-          <div style={{ marginBottom: '24px' }} onClick={() => changeToEditor(index)}>
+          <div key={index} style={{ marginBottom: '24px' }} onClick={() => changeToEditor(index)}>
             <PermissionProvider
               action={PERMISSION.VIEW_EDIT_INQUIRY}
               extraCondition={currentEdit === index}
@@ -91,6 +127,46 @@ const AllInquiry = (props) => {
                 </Card>
               }
             >
+              <div className="flex justify-between">
+                <div style={{ fontSize: '22px', fontWeight: 'bold', 'color': '#BD0F72' }}>
+                  {getKeyByValue(metadata['field'], q.field)}
+                </div>
+                <div className="flex justify-end">
+                  <FormControl error={valid.error && !q.receiver.length}>
+                    <FormGroup row>
+                      <FormControlLabel
+                        value="onshore"
+                        control={
+                          <Checkbox
+                            checked={q.receiver.includes('onshore')}
+                            onChange={(e) => handleReceiverChange(e, index)}
+                            color="primary"
+                          />
+                        }
+                        label="Onshore"
+                      />
+                      <FormControlLabel
+                        value="customer"
+                        control={
+                          <Checkbox
+                            checked={q.receiver.includes('customer')}
+                            onChange={(e) => handleReceiverChange(e, index)}
+                            color="primary"
+                          />
+                        }
+                        label="Customer"
+                      />
+                    </FormGroup>
+                    {valid.error && !q.receiver.length && <FormHelperText>Pick at least one!</FormHelperText>}
+                  </FormControl>
+                  <div className="flex justify-end items-center mr-2 ">
+                    <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
+                    <IconButton disabled className="p-8" onClick={() => removeQuestion(index)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </div>
+                </div>
+              </div>
               <InquiryEditor
                 index={index}
                 questions={inquiries}
