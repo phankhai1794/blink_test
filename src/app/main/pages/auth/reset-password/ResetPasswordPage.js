@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { FuseAnimate } from '@fuse';
+import { useForm } from '@fuse/hooks';
 import { Button, Card, CardContent, TextField, Typography } from '@material-ui/core';
 import { darken } from '@material-ui/core/styles/colorManipulator';
 import { makeStyles } from '@material-ui/styles';
-import { FuseAnimate } from '@fuse';
-import { useForm } from '@fuse/hooks';
+import { putUserPassword } from 'app/services/authService';
+import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
+import jwt from 'jwt-decode';
+import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-
 const useStyles = makeStyles((theme) => ({
   root: {
     background:
@@ -19,28 +22,63 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function ResetPasswordPage() {
+function ResetPasswordPage(props) {
   const classes = useStyles();
+  const [sessionToken, setSessionToken] = useState('');
+  const dispatch = useDispatch();
 
-  const { form, handleChange, resetForm } = useForm({
-    name: '',
+
+  const { form, handleChange, setInForm } = useForm({
+    username: '',
     email: '',
     password: '',
     passwordConfirm: ''
   });
 
+
+  useEffect(() => {
+
+    try {
+      const accessToken = new URLSearchParams(props.location.search).get('access_token');
+      const payload = jwt(accessToken)
+      if (payload.exp < Date.now() / 1000) throw new Error('Token expired')
+
+      setInForm('email', payload.email);
+      setInForm('username', payload.username)
+
+      setSessionToken(accessToken);
+
+    } catch (error) {
+      props.history.push('/auth/session-expired');
+    }
+
+  }, {})
+
   function isFormValid() {
     return (
       form.email.length > 0 &&
-      form.password.length > 0 &&
       form.password.length > 3 &&
       form.password === form.passwordConfirm
     );
   }
 
   function handleSubmit(ev) {
+    const { username, password } = form;
+    putUserPassword({ Authorization: `Bearer ${sessionToken}` }, { username, password })
+      .then(data => {
+        dispatch(
+          AppAction.showMessage({ message: 'Password updated successfully', variant: 'success' })
+        )
+      })
+      .catch(err => {
+        dispatch(
+          AppAction.showMessage({ message: 'Something went wrong, please try later!', variant: 'error' })
+        )
+      })
+      .finally(() => {
+        props.history.push('/login');
+      })
     ev.preventDefault();
-    resetForm();
   }
 
   return (
@@ -68,7 +106,7 @@ function ResetPasswordPage() {
               >
                 <TextField
                   className="mb-16"
-                  label="Email"
+                  label="Your Email"
                   autoFocus
                   type="email"
                   name="email"
@@ -77,6 +115,7 @@ function ResetPasswordPage() {
                   variant="outlined"
                   required
                   fullWidth
+                  disabled={true}
                 />
 
                 <TextField
@@ -116,7 +155,7 @@ function ResetPasswordPage() {
               </form>
 
               <div className="flex flex-col items-center justify-center pt-32 pb-24">
-                <Link className="font-medium" to="/pages/auth/login">
+                <Link className="font-medium" to="/login">
                   Go back to login
                 </Link>
               </div>
