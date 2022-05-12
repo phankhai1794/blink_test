@@ -7,6 +7,7 @@ import workspace from 'app/main/apps/workspace/admin/store/reducers';
 import guestspace from 'app/main/apps/workspace/guest/store/reducers';
 import listBlReducer from 'app/main/apps/listBL/store/reducers';
 import mailReducer from 'app/main/apps/workspace/admin/store/reducers/mail';
+import transReducer from 'app/main/apps/workspace/admin/store/reducers/transaction';
 
 const createReducer = (asyncReducers) =>
   combineReducers({
@@ -18,6 +19,7 @@ const createReducer = (asyncReducers) =>
     guestspace,
     listBlReducer,
     mailReducer,
+    transReducer,
     ...asyncReducers
   });
 
