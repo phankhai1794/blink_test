@@ -1,10 +1,14 @@
-import { createBlTrans } from 'app/services/transaction';
+import { createBlTrans, getMyBLTrans } from 'app/services/transaction';
 
 export const TRANSACTION_NONE = 'TRANSACTION_NONE';
 export const TRANSACTION_LOADING = 'TRANSACTION_LOADING';
 export const TRANSACTION_ERROR = 'TRANSACTION_ERROR';
 export const TRANSACTION_SUCCESS = 'TRANSACTION_SUCCESS';
 export const TRANSACTION_STATUS = 'TRANSACTION_SUCCESS';
+
+export const GET_BL_TRANS_ERROR = 'GET_BL_TRANS_ERROR';
+export const GET_BL_TRANS_SUCCESS = 'GET_BL_TRANS_SUCCESS';
+
 
 export const BlTrans =
   ( mybl, content ) =>
@@ -13,7 +17,8 @@ export const BlTrans =
       .then((res) => {
         if (res.status === 200) {
           return dispatch({
-            type: TRANSACTION_SUCCESS
+            type: TRANSACTION_SUCCESS,
+            payload: res.data,
           });
         } else {
           return dispatch({
@@ -28,7 +33,34 @@ export const BlTrans =
           payload: error
         });
       });
+      
+     
   };
+
+  export const getBlTrans =
+  ( mybl ) =>
+  async (dispatch) => {
+  getMyBLTrans(mybl)
+  .then((res) => {
+    if (res.status === 200) {
+      return dispatch({
+        type: GET_BL_TRANS_SUCCESS,
+        blTrans: res.data
+      });
+    } else {
+      return dispatch({
+        type: GET_BL_TRANS_ERROR,
+        payload: res
+      });
+    }
+  })
+  .catch((error) => {
+    return dispatch({
+      type: GET_BL_TRANS_ERROR,
+      payload: error
+    });
+  });
+}
 
 export function setStatusTransaction(state) {
     return {

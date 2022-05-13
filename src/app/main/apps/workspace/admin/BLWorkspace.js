@@ -78,14 +78,14 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     if (myBL.id) {
-      dispatch(TransActions.setStatusTransaction({'status': 'start'}));
+      dispatch(TransActions.setStatusTransaction('start'));
       Actions.loadBlInfo(myBL.id, setContent)
     }
   }, [myBL]);
 
   useEffect(() => {
     setInterval(() => {
-      if (myBL.id) {
+      if (myBL.id  && transAutoSaveStatus === 'start') {
         dispatch(TransActions.BlTrans(myBL.id, content));
       }
     }, 30000);

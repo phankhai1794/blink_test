@@ -4,6 +4,8 @@ const initialState = {
   isloading: false,
   success: false,
   error: '',
+  blTrans:[],
+
   transAutoSaveStatus: ''
 };
 
@@ -11,29 +13,33 @@ const transReducer = function (state = initialState, action) {
   switch (action.type) {
     case Actions.TRANSACTION_STATUS: {
       return {
-        ...initialState,
-        transAutoSaveStatus: state,
+        ...state,
+        transAutoSaveStatus: action.state,
       };
     }
     case Actions.TRANSACTION_LOADING: {
       return {
-        ...initialState,
+        ...state,
         isloading: true
       };
     }
     case Actions.TRANSACTION_SUCCESS: {
       return {
-        ...initialState,
+        ...state,
         success: true,
         isloading: false
       };
     }
     case Actions.TRANSACTION_ERROR: {
       return {
+        ...state,
         success: false,
         isloading: false,
         error: action.payload
       };
+    }
+    case Actions.GET_BL_TRANS_SUCCESS: {
+      return { ...state, blTrans: action.blTrans.data };
     }
     default: {
       return state;
