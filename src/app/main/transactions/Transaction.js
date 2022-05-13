@@ -45,8 +45,7 @@ function Transaction(props) {
 
   useEffect(() => {
     if (myBL) {
-      console.log('myBL', myBL);
-      dispatch(TransActions.getBlTrans('690d7f35-1b11-4219-a536-a9e87af88e16'));
+      dispatch(TransActions.getBlTrans(myBL.id));
     }
   }, [myBL]);
 
