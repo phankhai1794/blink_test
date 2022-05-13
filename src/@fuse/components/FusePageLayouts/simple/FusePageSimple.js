@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: '100%',
     minWidth: 0,
     height: '100%',
-    backgroundColor: theme.palette.background.default
+    backgroundColor: 'white'
   },
   header: {
     height: headerHeight,

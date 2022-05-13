@@ -1,26 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import _ from 'lodash';
-
 import { useDispatch, useSelector } from 'react-redux';
 import * as AppActions from 'app/store/actions';
-import * as Actions from './store/actions';
-import * as FormActions from './store/actions/form';
-
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
+import { getKeyByValue } from '@shared';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
+
 import Inquiry from '../shared-components/Inquiry';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
-import { getKeyByValue } from '@shared';
+import Label from '../shared-components/FieldLabel';
+
+import * as Actions from './store/actions';
+import * as FormActions from './store/actions/form';
 import InquiryForm from './InquiryForm';
-import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as TransActions from './store/actions/transaction';
 
-
 const useStyles = makeStyles((theme) => ({
+  root: {
+    paddingLeft: '150px',
+    paddingRight: '200px'
+  },
+  leftPanel: {
+    paddingRight: '35px'
+  },
+  rightPanel: {
+    paddingLeft: '35px'
+  },
   ptGridItem: {
     paddingTop: '0 !important'
   },
@@ -29,6 +38,9 @@ const useStyles = makeStyles((theme) => ({
   },
   grayText: {
     color: '#69696E'
+  },
+  divider: {
+    margin: '30px 0'
   }
 }));
 
@@ -39,7 +51,7 @@ const BLWorkspace = (props) => {
   const [currentField, metadata, myBL] = useSelector((state) => [
     state.workspace.inquiryReducer.currentField,
     state.workspace.inquiryReducer.metadata,
-    state.workspace.inquiryReducer.myBL,
+    state.workspace.inquiryReducer.myBL
   ]);
   const [minimize, openInquiry, openAllInquiry, reload, success, fail] = useSelector((state) => [
     state.workspace.formReducer.minimize,
@@ -50,7 +62,7 @@ const BLWorkspace = (props) => {
     state.workspace.formReducer.fail
   ]);
 
-  const {transAutoSaveStatus} = useSelector(({ transReducer }) => transReducer);
+  const { transAutoSaveStatus } = useSelector(({ transReducer }) => transReducer);
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -60,15 +72,16 @@ const BLWorkspace = (props) => {
     return content[getField(field)] || '';
   };
 
-  
   useEffect(() => {
     if (success) {
       dispatch(FormActions.displaySuccess(false));
-      dispatch(AppActions.showMessage({message: 'Save inquiry successfully', variant: 'success'}));
+      dispatch(
+        AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+      );
     }
     if (fail.open) {
       dispatch(FormActions.displayFail(false, ''));
-      dispatch(AppActions.showMessage({message: fail.message, variant: 'error'}));
+      dispatch(AppActions.showMessage({ message: fail.message, variant: 'error' }));
     }
     if (myBL.id) {
       dispatch(Actions.loadInquiry(myBL.id));
@@ -78,13 +91,13 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     if (myBL.id) {
       dispatch(TransActions.setStatusTransaction('start'));
-      Actions.loadBlInfo(myBL.id, setContent)
+      Actions.loadBlInfo(myBL.id, setContent);
     }
   }, [myBL]);
 
   useEffect(() => {
     setInterval(() => {
-      if (myBL.id  && transAutoSaveStatus === 'start') {
+      if (myBL.id && transAutoSaveStatus === 'start') {
         dispatch(TransActions.BlTrans(myBL.id, content));
       }
     }, 30000);
@@ -102,7 +115,7 @@ const BLWorkspace = (props) => {
   }, []);
 
   return (
-    <div className="px-52">
+    <div className={classes.root}>
       <InquiryForm FabTitle="Inquiry Form" />
 
       <Form
@@ -115,134 +128,158 @@ const BLWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-              ? getKeyByValue(metadata['field'], currentField)
-              : ''
-        }
-      >
+            ? getKeyByValue(metadata['field'], currentField)
+            : ''
+        }>
         {openAllInquiry ? <AllInquiry user="workspace" /> : <Inquiry user="workspace" />}
       </Form>
 
-      {!minimize && <AddPopover />}
-      <Grid container spacing={6}>
-        <Grid item xs={6}>
+      <Grid container>
+        <Grid item xs={6} className={classes.leftPanel}>
           <Grid item>
-            <h3>Shipper/Exporter</h3>
-            <BLField id={getField('SHIPPER/EXPORTER')} multiline={true} rows={5}>
+            <BLField
+              label="Shipper/Exporter"
+              id={getField('SHIPPER/EXPORTER')}
+              multiline={true}
+              rows={5}>
               {getValueField('SHIPPER/EXPORTER')}
             </BLField>
           </Grid>
           <Grid item>
-            <h3>Consignee</h3>
-            <BLField id={getField('CONSIGNEE')} multiline={true} rows={5}>
+            <BLField label="Consignee" id={getField('CONSIGNEE')} multiline={true} rows={5}>
               {getValueField('CONSIGNEE')}
             </BLField>
           </Grid>
           <Grid item>
-            <h3>
-              NOTIFY PARTY (It is agreed that no responsibility shall be <br></br> attached to the
-              Carrier or its Agents for failure to notify)
-            </h3>
-            <BLField id={getField('NOTIFY PARTY')} multiline={true} rows={5}>
+            <BLField
+              label={
+                <>
+                  {`NOTIFY PARTY (It is agreed that no responsibility shall be`} <br></br>
+                  {`attached to the Carrier or its Agents for failure to notify`})
+                </>
+              }
+              id={getField('NOTIFY PARTY')}
+              multiline={true}
+              rows={5}>
               {getValueField('NOTIFY PARTY')}
             </BLField>
           </Grid>
-          <Grid container spacing={6}>
-            <Grid item xs={6} className={classes.pbGridItem}>
-              <h3>PRE-CARRIAGE BY</h3>
-              <BLField id={getField('PRE-CARRIAGE BY')}></BLField>
+          <Grid container style={{ marginTop: '60px' }}>
+            <Grid item xs={6} className={classes.leftPanel}>
+              <Grid item>
+                <BLField label="PRE-CARRIAGE BY" id={getField('PRE-CARRIAGE BY')}></BLField>
+              </Grid>
+              <Grid item>
+                <BLField label="PORT OF LOADING" id={getField('PORT OF LOADING')}>
+                  {getValueField('PORT OF LOADING')}
+                </BLField>
+              </Grid>
             </Grid>
-            <Grid item xs={6} className={classes.pbGridItem}>
-              <h3>PLACE OF RECEIPT</h3>
-              <BLField id={getField('PLACE OF RECEIPT')}>
-                {getValueField('PLACE OF RECEIPT')}
-              </BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>OCEAN VESSEL VOYAGE NO. FlAG</h3>
-              <BLField id={getField('OCEAN VESSEL VOYAGE NO. FLAG')}>
-                {getValueField('OCEAN VESSEL VOYAGE NO. FLAG')}
-              </BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>PORT OF LOADING</h3>
-              <BLField id={getField('PORT OF LOADING')}>{getValueField('PORT OF LOADING')}</BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>PORT OF DISCHARGE</h3>
-              <BLField id={getField('PORT OF DISCHARGE')}>
-                {getValueField('PORT OF DISCHARGE')}
-              </BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>PLACE OF DELIVERY</h3>
-              <BLField id={getField('PLACE OF DELIVERY')}>
-                {getValueField('PLACE OF DELIVERY')}
-              </BLField>
+            <Grid item xs={6} className={classes.rightPanel}>
+              <Grid item>
+                <BLField label="PLACE OF RECEIPT" id={getField('PLACE OF RECEIPT')}>
+                  {getValueField('PLACE OF RECEIPT')}
+                </BLField>
+              </Grid>
+              <Grid item>
+                <BLField label="PORT OF DISCHARGE" id={getField('PORT OF DISCHARGE')}>
+                  {getValueField('PORT OF DISCHARGE')}
+                </BLField>
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={6}>
-          <Grid container spacing={6}>
-            <Grid item xs={6}>
-              <h3>BOOKING NO.</h3>
-              <BLField id="booking_no">TYOBD9739500</BLField>
+        <Grid item xs={6} className={classes.rightPanel}>
+          <Grid container>
+            <Grid item xs={6} className={classes.leftPanel}>
+              <BLField label="BOOKING NO." id="booking_no" lock={true}>
+                TYOBD9739500
+              </BLField>
             </Grid>
-            <Grid item xs={6}>
-              <h3>SEA WAYBILL NO.</h3>
-              <BLField>ONEYTYOBD9739500</BLField>
+            <Grid item xs={6} className={classes.rightPanel}>
+              <BLField label="SEA WAYBILL NO.">ONEYTYOBD9739500</BLField>
             </Grid>
           </Grid>
           <Grid item>
-            <h3>
-              EXPORT REFERENCES (for the merchant's and/or Carrier's reference only. See back clause
-              8. (4.))
-            </h3>
-            <BLField id={getField('EXPORT REFERENCES')} multiline={true} rows={2}></BLField>
+            <BLField
+              label={
+                <>
+                  {`EXPORT REFERENCES (for the Merchant's and/or Carrier's`} <br></br>
+                  {`reference only. See back clause 8. (4.)`})
+                </>
+              }
+              id={getField('EXPORT REFERENCES')}
+              multiline={true}
+              rows={2}></BLField>
           </Grid>
           <Grid item>
-            <h3>FORWARDING AGENT-REFERENCES FMC NO.</h3>
-            <BLField id={getField('FORWARDING AGENT-REFERENCES')} multiline={true} rows={5}>
+            <BLField
+              label="FORWARDING AGENT-REFERENCES FMC NO."
+              id={getField('FORWARDING AGENT-REFERENCES')}
+              multiline={true}
+              rows={5}>
               {getValueField('FORWARDING AGENT-REFERENCES')}
             </BLField>
           </Grid>
           <Grid item>
-            <h3>FINAL DESTINATION(for line merchant's reference only)</h3>
-            <BLField id={getField('FINAL DESTINATION')}>
+            <BLField
+              label={`FINAL DESTINATION(for line merchant's reference only)`}
+              id={getField('FINAL DESTINATION')}>
               {getValueField('FINAL DESTINATION')}
             </BLField>
           </Grid>
           <Grid item>
-            <h3>
-              TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)
-            </h3>
-            <BLField id={getField('TYPE OF MOVEMENT')}>{getValueField('TYPE OF MOVEMENT')}</BLField>
+            <BLField
+              label={
+                <>
+                  TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)
+                </>
+              }
+              id={getField('TYPE OF MOVEMENT')}>
+              {getValueField('TYPE OF MOVEMENT')}
+            </BLField>
+          </Grid>
+          <Grid item>
+            <Grid item>
+              <BLField
+                label="OCEAN VESSEL VOYAGE NO. FlAG"
+                id={getField('OCEAN VESSEL VOYAGE NO. FLAG')}
+                width={`calc(50% - 35px)`}>
+                {getValueField('OCEAN VESSEL VOYAGE NO. FLAG')}
+              </BLField>
+            </Grid>
+          </Grid>
+          <Grid item xs={6} className={classes.leftPanel}>
+            <BLField label="PLACE OF DELIVERY" id={getField('PLACE OF DELIVERY')}>
+              {getValueField('PLACE OF DELIVERY')}
+            </BLField>
           </Grid>
         </Grid>
       </Grid>
 
-      <Divider className="mt-60 mb-32" />
+      <Divider className={classes.divider} />
 
       <Grid container spacing={4}>
         <Grid item xs={2}>
-          <h3 className="my-0">CONTAINER NO.</h3>
+          <Label className="my-0">CONTAINER NO.</Label>
         </Grid>
         <Grid item xs={2}>
-          <h3 className="my-0">SEAL NO.</h3>
+          <Label className="my-0">SEAL NO.</Label>
         </Grid>
         <Grid item xs={2}>
-          <h3 className="my-0">PACKAGE</h3>
+          <Label className="my-0">PACKAGE</Label>
         </Grid>
         <Grid item xs={1}>
-          <h3 className="my-0">MODE</h3>
+          <Label className="my-0">MODE</Label>
         </Grid>
         <Grid item xs={1}>
-          <h3 className="my-0">TYPE</h3>
+          <Label className="my-0">TYPE</Label>
         </Grid>
         <Grid item xs={2}>
-          <h3 className="my-0">MEASUREMENT</h3>
+          <Label className="my-0">MEASUREMENT</Label>
         </Grid>
         <Grid item xs={2}>
-          <h3 className="my-0">WEIGHT</h3>
+          <Label className="my-0">WEIGHT</Label>
         </Grid>
       </Grid>
       <Grid container spacing={4}>
@@ -300,20 +337,20 @@ const BLWorkspace = (props) => {
       <Grid container spacing={6}>
         <Grid item xs={6}>
           <Grid item>
-            <h3>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</h3>
+            <Label>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</Label>
             <BLField>
               DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO
               BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN
             </BLField>
           </Grid>
           <Grid item>
-            <h3>QUANTITY (FOR CUSTOMERS DECLARATION ONLY)</h3>
+            <Label>QUANTITY (FOR CUSTOMERS DECLARATION ONLY)</Label>
             <BLField>12 PALLETS</BLField>
           </Grid>
         </Grid>
         <Grid item xs={6}>
           <Grid item>
-            <h3>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</h3>
+            <Label>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</Label>
             <BLField>
               DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO
               BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN
@@ -321,11 +358,11 @@ const BLWorkspace = (props) => {
           </Grid>
           <Grid container spacing={6}>
             <Grid item xs={6}>
-              <h3>GROSS WEIGHT</h3>
+              <Label>GROSS WEIGHT</Label>
               <BLField>509.000KGS</BLField>
             </Grid>
             <Grid item xs={6}>
-              <h3>GROSS MEASUREMENT</h3>
+              <Label>GROSS MEASUREMENT</Label>
               <BLField>19.888CBM</BLField>
             </Grid>
           </Grid>
@@ -340,32 +377,32 @@ const BLWorkspace = (props) => {
       <Grid container spacing={6}>
         <Grid item xs={6}>
           <Grid item>
-            <h3>FREIGHT & CHARGES PAYABLE AT / BY:</h3>
+            <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
             <BLField>TOKYO, TOKYO SEUOL</BLField>
           </Grid>
           <Grid container spacing={6}>
             <Grid item xs={6} className={classes.pbGridItem}>
-              <h3>COMMODITY CODE</h3>
+              <Label>COMMODITY CODE</Label>
               <BLField></BLField>
             </Grid>
             <Grid item xs={6} className={classes.pbGridItem}>
-              <h3>EXCHANGE RATE</h3>
+              <Label>EXCHANGE RATE</Label>
               <BLField></BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>FREIGHTED AS</h3>
+              <Label>FREIGHTED AS</Label>
               <BLField></BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>RATE</h3>
+              <Label>RATE</Label>
               <BLField></BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>DATE CARGO RECEIVED</h3>
+              <Label>DATE CARGO RECEIVED</Label>
               <BLField></BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>DATE LADEN ON BOARD</h3>
+              <Label>DATE LADEN ON BOARD</Label>
               <BLField>31 AUG 2021</BLField>
             </Grid>
           </Grid>
@@ -373,35 +410,35 @@ const BLWorkspace = (props) => {
         <Grid item xs={6}>
           <Grid container spacing={6}>
             <Grid item xs={6} className={classes.pbGridItem}>
-              <h3>SERVICE CONTRACT NO.</h3>
+              <Label>SERVICE CONTRACT NO.</Label>
               <BLField></BLField>
             </Grid>
             <Grid item xs={6} className={classes.pbGridItem}>
-              <h3>DOC FORM NO.</h3>
+              <Label>DOC FORM NO.</Label>
               <BLField></BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>CODE</h3>
+              <Label>CODE</Label>
               <BLField></BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>TARIFF ITEM</h3>
+              <Label>TARIFF ITEM</Label>
               <BLField></BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>PREPAID</h3>
+              <Label>PREPAID</Label>
               <BLField></BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>COLLECT</h3>
+              <Label>COLLECT</Label>
               <BLField></BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>PLACE OF BILL(S) ISSUE</h3>
+              <Label>PLACE OF BILL(S) ISSUE</Label>
               <BLField>TOKYO</BLField>
             </Grid>
             <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <h3>DATED</h3>
+              <Label>DATED</Label>
               <BLField>31 AUG 2021</BLField>
             </Grid>
           </Grid>
