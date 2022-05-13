@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Typography, ListItem, Divider, Avatar , List } from '@material-ui/core';
+import { Typography, ListItem, Divider, Avatar, List } from '@material-ui/core';
 import { FuseScrollbars } from '@fuse';
 import { cyan } from '@material-ui/core/colors';
 
@@ -18,7 +18,6 @@ const DATE_OPTIONS_WITHOUT_YEAR = {
   hour: 'numeric',
   minute: 'numeric'
 };
-
 
 function Transaction(props) {
   const dispatch = useDispatch();
@@ -40,10 +39,10 @@ function Transaction(props) {
   return (
     <div className="flex" style={{ marginTop: 70, width: 450, backgroundColor: 'white' }}>
       <div className="flex flex-col" style={{ width: '100%' }}>
-        <Typography variant="h5" style={{ margin: 10 }}>
+        <Typography variant="h5" style={{ margin: 5 }}>
           History versions
         </Typography>
-        <Divider style={{ margin: 10 }} />
+        <Divider style={{ marginTop: 5 }} />
         <FuseScrollbars scrollToTopOnChildChange>
           <List>
             {blTrans?.map((data, index) => {
@@ -68,9 +67,11 @@ function Transaction(props) {
                         : DATE_OPTIONS_FULL
                     )}
                   </Typography>
-                  {index == 0 ? <label style={{ fontSize: 11, fontStyle: 'italic'}}>Current version</label> : null}
-                  <div className="flex flex-row" style={{ alignItems: 'center' }}>
-                    <Avatar style={{ background: cyan[400], width: 10, height: 10, padding: 2 }}>
+                  {index == 0 ? (
+                    <label style={{ fontSize: 10, fontStyle: 'italic' }}>Current version</label>
+                  ) : null}
+                  <div className="flex flex-row" style={{ alignItems: 'center', paddingTop: 3 }}>
+                    <Avatar style={{ background: cyan[400], fontSize: 7, width: 14, height: 14 }}>
                       {user.displayName.charAt(0).toUpperCase()}
                     </Avatar>
                     <label style={{ paddingLeft: 8 }}>{data.creator?.userName}</label>
