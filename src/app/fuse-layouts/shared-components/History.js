@@ -4,10 +4,8 @@ import {
   Icon,
   Typography
 } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-
 import * as FormActions from 'app/main/apps/workspace/admin/store/actions/form';
-import {  useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 function History(props) {
   const dispatch = useDispatch();

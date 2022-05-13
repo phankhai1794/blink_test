@@ -4,10 +4,11 @@ import { renderRoutes } from 'react-router-config';
 import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense, FuseSet } from '@fuse';
 import { makeStyles } from '@material-ui/styles';
 import { useSelector } from 'react-redux';
-import ToolbarLayout1 from './components/ToolbarLayout1';
-import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
 import AppContext from 'app/AppContext';
 import Transaction from 'app/main/transactions/Transaction';
+
+import ToolbarLayout1 from './components/ToolbarLayout1';
+import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
 
 const useStyles = makeStyles((theme) => ({
   root: {
