@@ -79,7 +79,7 @@ function Transaction(props) {
                         : DATE_OPTIONS_FULL
                     )}
                   </Typography>
-                  {index == 0 ? <label style={{ fontSize: 12 }}>Current verions</label> : null}
+                  {index == 0 ? <label style={{ fontSize: 12 }}>Current versions</label> : null}
                   <div className="flex flex-row" style={{ alignItems: 'center' }}>
                     <Avatar style={{ background: cyan[400], width: 10, height: 10, padding: 2 }}>
                       {user.displayName.charAt(0).toUpperCase()}
