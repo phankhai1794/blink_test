@@ -17,6 +17,8 @@ import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import * as TransActions from './store/actions/transaction';
+
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -37,7 +39,7 @@ const BLWorkspace = (props) => {
   const [currentField, metadata, myBL] = useSelector((state) => [
     state.workspace.inquiryReducer.currentField,
     state.workspace.inquiryReducer.metadata,
-    state.workspace.inquiryReducer.myBL
+    state.workspace.inquiryReducer.myBL,
   ]);
   const [minimize, openInquiry, openAllInquiry, reload, success, fail] = useSelector((state) => [
     state.workspace.formReducer.minimize,
@@ -47,6 +49,9 @@ const BLWorkspace = (props) => {
     state.workspace.formReducer.success,
     state.workspace.formReducer.fail
   ]);
+
+  const {transAutoSaveStatus} = useSelector(({ transReducer }) => transReducer);
+
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
   };
@@ -54,6 +59,8 @@ const BLWorkspace = (props) => {
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
+
+  
   useEffect(() => {
     if (success) {
       dispatch(FormActions.displaySuccess(false));
@@ -70,9 +77,18 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     if (myBL.id) {
+      dispatch(TransActions.setStatusTransaction('start'));
       Actions.loadBlInfo(myBL.id, setContent)
     }
   }, [myBL]);
+
+  useEffect(() => {
+    setInterval(() => {
+      if (myBL.id  && transAutoSaveStatus === 'start') {
+        dispatch(TransActions.BlTrans(myBL.id, content));
+      }
+    }, 30000);
+  }, [transAutoSaveStatus]);
 
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));

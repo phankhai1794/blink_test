@@ -16,112 +16,110 @@ export const SET_EDIT = 'SET_EDIT';
 export const SET_EDIT_INQUIRY = 'SET_EDIT_INQUIRY';
 
 export function saveInquiry() {
-    return {
-        type: SAVE_INQUIRY
-    };
+  return {
+    type: SAVE_INQUIRY
+  };
 }
 
 export function editInquiry(question) {
-    return {
-        type: EDIT_INQUIRY,
-        state: question
-    };
+  return {
+    type: EDIT_INQUIRY,
+    state: question
+  };
 }
 
 export function saveField(state) {
-    return {
-        type: SAVE_FIELD,
-        state: state
-    };
+  return {
+    type: SAVE_FIELD,
+    state: state
+  };
 }
 
 export function addQuestion() {
-    return {
-        type: ADD_QUESTION
-    };
+  return {
+    type: ADD_QUESTION
+  };
 }
 
 export function addQuestion1() {
-    return {
-        type: ADD_QUESTION1
-    };
+  return {
+    type: ADD_QUESTION1
+  };
 }
 
 export function setOriginalInquiry(state) {
-    return {
-        type: SET_ORIGINAL_INQUIRY,
-        state: state
-    };
+  return {
+    type: SET_ORIGINAL_INQUIRY,
+    state: state
+  };
 }
 
 export function removeSelectedOption(state) {
-    return {
-        type: REMOVE_SELECTED_OPTION,
-        state: state
-    };
+  return {
+    type: REMOVE_SELECTED_OPTION,
+    state: state
+  };
 }
 
 export function setDisplayComment(state) {
-    return {
-        type: DISPLAY_COMMENT,
-        state: state
-    };
+  return {
+    type: DISPLAY_COMMENT,
+    state: state
+  };
 }
 
 export function setMyBL(state) {
-    return {
-        type: SET_MYBL,
-        state: state
-    };
+  return {
+    type: SET_MYBL,
+    state: state
+  };
 }
 
 export function saveMetadata(state) {
-    return {
-        type: SAVE_METADATA,
-        state: state
-    };
+  return {
+    type: SAVE_METADATA,
+    state: state
+  };
 }
 
 export function validate(state) {
-    return {
-        type: VALIDATE,
-        state: state
-    };
+  return {
+    type: VALIDATE,
+    state: state
+  };
 }
 
 export function setField(state) {
-    return {
-        type: SET_CURRENT_FIELD,
-        state: state
-    };
+  return {
+    type: SET_CURRENT_FIELD,
+    state: state
+  };
 }
 
-
 export function setQuestion(question) {
-    return {
-        type: SET_QUESTION,
-        state: question
-    };
+  return {
+    type: SET_QUESTION,
+    state: question
+  };
 }
 
 export function setReply(question) {
-    return {
-        type: SET_REPLY,
-        state: question
-    };
+  return {
+    type: SET_REPLY,
+    state: question
+  };
 }
 
-
 export function setEdit(state) {
-    return {
-        type: SET_EDIT,
-        state: state
-    };
+  return {
+    type: SET_EDIT,
+    state: state
+  };
 }
 
 export function setEditInq(state) {
-    return {
-        type: SET_EDIT_INQUIRY,
-        state: state
-    };
+  return {
+    type: SET_EDIT_INQUIRY,
+    state: state
+  };
 }

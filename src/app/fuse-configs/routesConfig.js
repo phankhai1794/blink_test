@@ -6,6 +6,7 @@ import { pagesConfigs } from 'app/main/pages/pagesConfigs';
 import { authRoleExamplesConfigs } from 'app/main/example/auth/authRoleExamplesConfigs';
 import { DocumentationConfig } from 'app/main/documentation/DocumentationConfig';
 import { LoginConfig } from 'app/main/login/LoginConfig';
+import { TransactionConfig } from 'app/main/transactions/TransactionConfig';
 import { RegisterConfig } from 'app/main/register/RegisterConfig';
 import { LogoutConfig } from 'app/main/logout/LogoutConfig';
 import { CallbackConfig } from 'app/main/callback/CallbackConfig';
@@ -15,6 +16,7 @@ const routeConfigs = [
   ...authRoleExamplesConfigs,
   DocumentationConfig,
   LoginConfig,
+  TransactionConfig,
   RegisterConfig,
   LogoutConfig,
   CallbackConfig
