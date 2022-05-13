@@ -36,13 +36,12 @@ function UserProfile(props) {
 
   return (
     <React.Fragment>
-      <Button className="h-64 px-12" onClick={handleClick}>
+      <Button className="h-64" onClick={handleClick}>
         <Avatar
           className={classes.fitAvatar}
           style={{ background: cyan[400] }}
           src={user.photoURL ? user.photoURL : ''}
-          alt="User photo"
-        >
+          alt="User photo">
           {!user.photoURL ? user.displayName.charAt(0).toUpperCase() : ''}
         </Avatar>
         <Typography component="span" className="normal-case font-600 ml-8 flex">
@@ -67,8 +66,7 @@ function UserProfile(props) {
         }}
         classes={{
           paper: 'py-8'
-        }}
-      >
+        }}>
         <React.Fragment>
           <MenuItem component={Link} to="#" onClick={() => handleLogOut()}>
             <ListItemIcon className="min-w-40">

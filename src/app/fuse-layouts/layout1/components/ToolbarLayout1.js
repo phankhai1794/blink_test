@@ -29,8 +29,9 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   logo: {
-    borderRadius: 0,
-    width: '5em'
+    width: '105.81px',
+    height: '50px',
+    borderRadius: 0
   },
   iconWrapper: {
     display: 'flex',
@@ -97,14 +98,8 @@ function ToolbarLayout1(props) {
             </Hidden>
           )}
 
-          <div className="flex flex-1 px-16">
-            <div
-              style={{
-                paddingLeft: 50,
-                paddingRight: 15
-              }}
-              className={classes.iconWrapper}
-            >
+          <div className="flex flex-1" style={{ paddingLeft: '53px' }}>
+            <div style={{ paddingRight: '32px' }} className={classes.iconWrapper}>
               <Avatar
                 src="assets/images/logos/one_ocean_network-logo.png"
                 className={clsx(classes.logo, classes.fitAvatar)}
@@ -118,14 +113,12 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
-              extraCondition={['/workplace', '/guest'].some((el) => pathname.includes(el))}
-            >
+              extraCondition={['/workplace', '/guest'].some((el) => pathname.includes(el))}>
               <Button
                 variant="text"
                 size="medium"
                 className={clsx('h-64', classes.button)}
-                onClick={openInquiry}
-              >
+                onClick={openInquiry}>
                 <Badge color="primary" badgeContent={badge} showZero>
                   <NotificationsIcon />
                 </Badge>
@@ -135,8 +128,7 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
-              extraCondition={pathname.includes('/guest')}
-            >
+              extraCondition={pathname.includes('/guest')}>
               <Button variant="text" size="medium" className={classes.button}>
                 <VisibilityIcon />
                 <span className="px-2">Draft BL</span>
@@ -145,8 +137,7 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.VIEW_REDIRECT_GUEST_BL}
-              extraCondition={pathname.includes('/draft-bl')}
-            >
+              extraCondition={pathname.includes('/draft-bl')}>
               <Button variant="text" size="medium" className={classes.button}>
                 <EditIcon />
                 <span className="px-2">Edit</span>
@@ -154,17 +145,15 @@ function ToolbarLayout1(props) {
             </PermissionProvider>
           </div>
 
-          <div className="flex mr-24">
+          <div className="flex" style={{ marginRight: '27px' }}>
             <PermissionProvider
               action={PERMISSION.MAIL_SEND_MAIL}
-              extraCondition={pathname.includes('/workplace')}
-            >
+              extraCondition={pathname.includes('/workplace')}>
               <SendInquiryForm />
             </PermissionProvider>
             <PermissionProvider
               action={PERMISSION.VIEW_SHOW_BL_HISTORY}
-              extraCondition={pathname.includes('/workplace')}
-            >
+              extraCondition={pathname.includes('/workplace')}>
               <History />
             </PermissionProvider>
             <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>

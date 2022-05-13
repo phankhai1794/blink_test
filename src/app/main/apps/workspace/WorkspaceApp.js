@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { FusePageSimple } from '@fuse';
 import _ from '@lodash';
+
 import BLWorkspace from './admin/BLWorkspace';
 
 function WorkspaceApp(props) {
@@ -12,7 +13,7 @@ function WorkspaceApp(props) {
     <div className="flex flex-col flex-1 w-full">
       <FusePageSimple
         classes={{
-          contentWrapper: 'p-0 sm:p-24 pb-80 sm:pb-80 h-full',
+          contentWrapper: 'p-0 pb-80 sm:pb-80 h-full',
           content: 'flex flex-col h-full',
           leftSidebar: 'w-256 border-0'
         }}
