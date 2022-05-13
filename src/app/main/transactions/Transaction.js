@@ -21,9 +21,6 @@ const DATE_OPTIONS_WITHOUT_YEAR = {
   minute: 'numeric'
 };
 
-const useStyles = makeStyles((theme) => ({
-  
-}));
 
 function Transaction(props) {
   const dispatch = useDispatch();
@@ -31,10 +28,10 @@ function Transaction(props) {
   const [myBL] = useSelector((state) => [state.workspace.inquiryReducer.myBL]);
   const { blTrans } = useSelector(({ transReducer }) => transReducer);
   const user = useSelector(({ user }) => user);
-  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   function selectedChange(index) {
-    setSelectedTab(index);
+    setSelectedIndex(index);
   }
 
   useEffect(() => {
@@ -57,15 +54,15 @@ function Transaction(props) {
                   className="flex flex-col "
                   style={{
                     alignItems: 'flex-start',
-                    backgroundColor: selectedTab == index ? '#e2f3eb' : 'white'
+                    backgroundColor: selectedIndex == index ? '#e2f3eb' : 'white'
                   }}
                   key={index}
                   button={true}
                   onClick={() => selectedChange(index)}
-                  selected={selectedTab === index}>
+                  selected={selectedIndex === index}>
                   <Typography
                     variant="h5"
-                    style={{ fontWeight: selectedTab === index ? 'bold' : '400' }}>
+                    style={{ fontWeight: selectedIndex === index ? 'bold' : '400' }}>
                     {new Date(data.createdAt).toLocaleString(
                       undefined,
                       new Date().getFullYear() == new Date(data.createdAt).getFullYear()
