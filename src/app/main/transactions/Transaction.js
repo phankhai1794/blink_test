@@ -39,8 +39,7 @@ function Transaction(props) {
   return (
     <div className="flex" style={{ marginTop: 70, width: 450, backgroundColor: 'white' }}>
       <div className="flex flex-col" style={{ width: '100%' }}>
-        <Typography variant="h5" style={{ margin: 5 }}>
-          History versions
+        <Typography variant="h5" style={{ margin: 5 }}>Version history
         </Typography>
         <Divider style={{ marginTop: 5 }} />
         <FuseScrollbars scrollToTopOnChildChange>
