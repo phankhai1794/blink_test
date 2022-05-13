@@ -1,4 +1,4 @@
-import { createBlTrans, getMyBLTrans } from 'app/services/CREATE_TRANS';
+import { createBlTrans, getMyBLTrans } from 'app/services/transaction';
 
 export const CREATE_TRANS_NONE = 'CREATE_TRANS_NONE';
 export const CREATE_TRANS_LOADING = 'CREATE_TRANS_LOADING';
@@ -62,7 +62,7 @@ export const BlTrans =
   });
 }
 
-export function setStatusCREATE_TRANS(state) {
+export function setStatusTransaction(state) {
     return {
         type: CREATE_TRANS_STATUS,
         state: state

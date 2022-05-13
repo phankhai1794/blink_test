@@ -1,4 +1,4 @@
-import * as Actions from '../actions/CREATE_TRANS';
+import * as Actions from '../actions/transaction';
 
 const initialState = {
   isloading: false,
