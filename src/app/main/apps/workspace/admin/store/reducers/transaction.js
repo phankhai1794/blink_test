@@ -1,4 +1,4 @@
-import * as Actions from '../actions/transaction';
+import * as Actions from '../actions/CREATE_TRANS';
 
 const initialState = {
   isloading: false,
@@ -11,26 +11,26 @@ const initialState = {
 
 const transReducer = function (state = initialState, action) {
   switch (action.type) {
-    case Actions.TRANSACTION_STATUS: {
+    case Actions.CREATE_TRANS_STATUS: {
       return {
         ...state,
         transAutoSaveStatus: action.state,
       };
     }
-    case Actions.TRANSACTION_LOADING: {
+    case Actions.CREATE_TRANS_LOADING: {
       return {
         ...state,
         isloading: true
       };
     }
-    case Actions.TRANSACTION_SUCCESS: {
+    case Actions.CREATE_TRANS_SUCCESS: {
       return {
         ...state,
         success: true,
         isloading: false
       };
     }
-    case Actions.TRANSACTION_ERROR: {
+    case Actions.CREATE_TRANS_ERROR: {
       return {
         ...state,
         success: false,

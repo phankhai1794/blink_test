@@ -1,10 +1,10 @@
-import { createBlTrans, getMyBLTrans } from 'app/services/transaction';
+import { createBlTrans, getMyBLTrans } from 'app/services/CREATE_TRANS';
 
-export const TRANSACTION_NONE = 'TRANSACTION_NONE';
-export const TRANSACTION_LOADING = 'TRANSACTION_LOADING';
-export const TRANSACTION_ERROR = 'TRANSACTION_ERROR';
-export const TRANSACTION_SUCCESS = 'TRANSACTION_SUCCESS';
-export const TRANSACTION_STATUS = 'TRANSACTION_SUCCESS';
+export const CREATE_TRANS_NONE = 'CREATE_TRANS_NONE';
+export const CREATE_TRANS_LOADING = 'CREATE_TRANS_LOADING';
+export const CREATE_TRANS_ERROR = 'CREATE_TRANS_ERROR';
+export const CREATE_TRANS_SUCCESS = 'CREATE_TRANS_SUCCESS';
+export const CREATE_TRANS_STATUS = 'CREATE_TRANS_SUCCESS';
 
 export const GET_BL_TRANS_ERROR = 'GET_BL_TRANS_ERROR';
 export const GET_BL_TRANS_SUCCESS = 'GET_BL_TRANS_SUCCESS';
@@ -17,19 +17,19 @@ export const BlTrans =
       .then((res) => {
         if (res.status === 200) {
           return dispatch({
-            type: TRANSACTION_SUCCESS,
+            type: CREATE_TRANS_SUCCESS,
             payload: res.data,
           });
         } else {
           return dispatch({
-            type: TRANSACTION_ERROR,
+            type: CREATE_TRANS_ERROR,
             payload: res
           });
         }
       })
       .catch((error) => {
         return dispatch({
-          type: TRANSACTION_ERROR,
+          type: CREATE_TRANS_ERROR,
           payload: error
         });
       });
@@ -62,9 +62,9 @@ export const BlTrans =
   });
 }
 
-export function setStatusTransaction(state) {
+export function setStatusCREATE_TRANS(state) {
     return {
-        type: TRANSACTION_STATUS,
+        type: CREATE_TRANS_STATUS,
         state: state
     };
 }
