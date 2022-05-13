@@ -22,16 +22,11 @@ const DATE_OPTIONS_WITHOUT_YEAR = {
 };
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    background: 'url("assets/images/backgrounds/slider-sea.jpg")',
-    backgroundSize: 'cover',
-    color: theme.palette.primary.contrastText
-  }
+  
 }));
 
 function Transaction(props) {
   const dispatch = useDispatch();
-  const classes = useStyles(props);
 
   const [myBL] = useSelector((state) => [state.workspace.inquiryReducer.myBL]);
   const { blTrans } = useSelector(({ transReducer }) => transReducer);
@@ -41,7 +36,6 @@ function Transaction(props) {
   function selectedChange(index) {
     setSelectedTab(index);
   }
-  const aaaa = false;
 
   useEffect(() => {
     if (myBL) {
@@ -55,7 +49,7 @@ function Transaction(props) {
           History versions
         </Typography>
         <Divider style={{ margin: 10 }} />
-        <FuseScrollbars className={classes.content} scrollToTopOnChildChange>
+        <FuseScrollbars scrollToTopOnChildChange>
           <List>
             {blTrans?.map((data, index) => {
               return (
