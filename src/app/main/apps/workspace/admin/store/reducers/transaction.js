@@ -4,8 +4,7 @@ const initialState = {
   isloading: false,
   success: false,
   error: '',
-  blTrans:[],
-
+  blTrans: [],
   transAutoSaveStatus: ''
 };
 
@@ -14,7 +13,7 @@ const transReducer = function (state = initialState, action) {
     case Actions.CREATE_TRANS_STATUS: {
       return {
         ...state,
-        transAutoSaveStatus: action.state,
+        transAutoSaveStatus: action.state
       };
     }
     case Actions.CREATE_TRANS_LOADING: {

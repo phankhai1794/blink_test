@@ -9,62 +9,55 @@ export const CREATE_TRANS_STATUS = 'CREATE_TRANS_SUCCESS';
 export const GET_BL_TRANS_ERROR = 'GET_BL_TRANS_ERROR';
 export const GET_BL_TRANS_SUCCESS = 'GET_BL_TRANS_SUCCESS';
 
-
-export const BlTrans =
-  ( mybl, content ) =>
-  async (dispatch) => {
-    createBlTrans(mybl, content)
-      .then((res) => {
-        if (res.status === 200) {
-          return dispatch({
-            type: CREATE_TRANS_SUCCESS,
-            payload: res.data,
-          });
-        } else {
-          return dispatch({
-            type: CREATE_TRANS_ERROR,
-            payload: res
-          });
-        }
-      })
-      .catch((error) => {
+export const BlTrans = (mybl, content) => async (dispatch) => {
+  createBlTrans(mybl, content)
+    .then((res) => {
+      if (res.status === 200) {
+        return dispatch({
+          type: CREATE_TRANS_SUCCESS,
+          payload: res.data
+        });
+      } else {
         return dispatch({
           type: CREATE_TRANS_ERROR,
-          payload: error
+          payload: res
         });
-      });
-      
-     
-  };
-
-  export const getBlTrans =
-  ( mybl ) =>
-  async (dispatch) => {
-  getMyBLTrans(mybl)
-  .then((res) => {
-    if (res.status === 200) {
+      }
+    })
+    .catch((error) => {
       return dispatch({
-        type: GET_BL_TRANS_SUCCESS,
-        blTrans: res.data
+        type: CREATE_TRANS_ERROR,
+        payload: error
       });
-    } else {
+    });
+};
+
+export const getBlTrans = (mybl) => async (dispatch) => {
+  getMyBLTrans(mybl)
+    .then((res) => {
+      if (res.status === 200) {
+        return dispatch({
+          type: GET_BL_TRANS_SUCCESS,
+          blTrans: res.data
+        });
+      } else {
+        return dispatch({
+          type: GET_BL_TRANS_ERROR,
+          payload: res
+        });
+      }
+    })
+    .catch((error) => {
       return dispatch({
         type: GET_BL_TRANS_ERROR,
-        payload: res
+        payload: error
       });
-    }
-  })
-  .catch((error) => {
-    return dispatch({
-      type: GET_BL_TRANS_ERROR,
-      payload: error
     });
-  });
-}
+};
 
 export function setStatusTransaction(state) {
-    return {
-        type: CREATE_TRANS_STATUS,
-        state: state
-    };
+  return {
+    type: CREATE_TRANS_STATUS,
+    state: state
+  };
 }

@@ -17,7 +17,6 @@ import InquiryForm from './InquiryForm';
 import AddPopover from './components/AddPopover';
 import BLField from './components/BLField';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { getBlInfo } from 'app/services/myBLService';
 import * as TransActions from './store/actions/transaction';
 
 
