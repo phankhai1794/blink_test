@@ -55,3 +55,9 @@ export async function createParagraphAnswer(state) {
   const response = await axios().post(`${PATH}/paragraph`, { state });
   return response.data;
 }
+
+export async function updateParagraphAnswer(id, state) {
+  const response = await axios().patch(`${PATH}/paragraph/${id}`, { state });
+  return response.data;
+}
+

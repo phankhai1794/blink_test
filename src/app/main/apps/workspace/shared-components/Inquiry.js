@@ -274,7 +274,13 @@ const Inquiry = (props) => {
                 <Typography variant="h5">{q.content}</Typography>
                 <div style={{ display: 'block', margin: '1rem 0rem' }}>
                   {type === metadata.ans_type.choice && <ChoiceAnswer question={q} user={user} />}
-                  {type === metadata.ans_type.paragraph && <ParagraphAnswer question={q} user={user} />}
+                  {type === metadata.ans_type.paragraph && <ParagraphAnswer
+                    question={q}
+                    user={user}
+                    index={indexes}
+                    questions={inquiries}
+                    saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                  />}
                   {type === metadata.ans_type.attachment && (
                     <AttachmentAnswer
                       question={q}
