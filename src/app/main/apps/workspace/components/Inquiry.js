@@ -1,12 +1,20 @@
-import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
-import { getFile } from 'app/services/fileService';
-import { displayTime } from '@shared';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import * as InquiryActions from '../admin/store/actions/inquiry';
+import ChoiceAnswer from './ChoiceAnswer';
+import ParagraphAnswer from './ParagraphAnswer';
+import AttachmentAnswer from './AttachmentAnswer';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import InquiryEditor from '../admin/components/InquiryEditor';
+import ImageAttach from './ImageAttach';
+import FileAttach from './FileAttach';
 import EditIcon from '@material-ui/icons/Edit';
+import UserInfo from './UserInfo';
+import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
+import { getFile } from 'app/services/fileService';
+import { displayTime } from '@shared';
 import {
   Menu,
   MenuItem,
@@ -17,18 +25,6 @@ import {
   IconButton,
   Fab
 } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import { makeStyles } from '@material-ui/styles';
-
-import * as InquiryActions from '../store/actions/inquiry';
-
-import InquiryEditor from './InquiryEditor';
-import ChoiceAnswer from './ChoiceAnswer';
-import ParagraphAnswer from './ParagraphAnswer';
-import AttachmentAnswer from './AttachmentAnswer';
-import ImageAttach from './ImageAttach';
-import FileAttach from './FileAttach';
-import UserInfo from './UserInfo';
 
 const Comment = (props) => {
   const inputStyle = {
