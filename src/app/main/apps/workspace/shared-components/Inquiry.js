@@ -1,17 +1,6 @@
 import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
 import { getFile } from 'app/services/fileService';
 import { displayTime } from '@shared';
-
-import * as InquiryActions from '../store/actions/inquiry';
-import InquiryEditor from '../admin/components/InquiryEditor';
-
-import ChoiceAnswer from './ChoiceAnswer';
-import ParagraphAnswer from './ParagraphAnswer';
-import AttachmentAnswer from './AttachmentAnswer';
-import ImageAttach from './ImageAttach';
-import FileAttach from './FileAttach';
-import UserInfo from './UserInfo';
-
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
@@ -27,6 +16,16 @@ import {
   Typography,
   IconButton
 } from '@material-ui/core';
+
+import * as InquiryActions from '../store/actions/inquiry';
+import InquiryEditor from '../admin/components/InquiryEditor';
+
+import ChoiceAnswer from './ChoiceAnswer';
+import ParagraphAnswer from './ParagraphAnswer';
+import AttachmentAnswer from './AttachmentAnswer';
+import ImageAttach from './ImageAttach';
+import FileAttach from './FileAttach';
+import UserInfo from './UserInfo';
 
 const Comment = (props) => {
   const inputStyle = {
@@ -44,16 +43,16 @@ const Comment = (props) => {
   const [comment, setComment] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState('');
-  const [reply, currentField] = useSelector(({workspace}) => [
+  const [reply, currentField] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.reply,
-    workspace.inquiryReducer.currentField,
+    workspace.inquiryReducer.currentField
   ]);
-  const user = useSelector(({ user }) => user)
+  const user = useSelector(({ user }) => user);
   const open = Boolean(anchorEl);
   useEffect(() => {
     loadComment(q.id)
       .then((res) => {
-        dispatch(InquiryActions.setDisplayComment(Boolean(res.length || userType === "guest")));
+        dispatch(InquiryActions.setDisplayComment(Boolean(res.length || userType === 'guest')));
         setComment(res);
       })
       .catch((error) => console.log(error));
@@ -74,7 +73,7 @@ const Comment = (props) => {
     setComment(temp);
   };
   const addComment = async (e) => {
-    const targetValue = e.target.value
+    const targetValue = e.target.value;
     if (e.key === 'Enter') {
       if (targetValue) {
         const inqAns = {
@@ -189,7 +188,7 @@ const Comment = (props) => {
 const Inquiry = (props) => {
   const dispatch = useDispatch();
   const { user } = props;
-  const [inquiries, currentField, metadata] = useSelector(({workspace}) => [
+  const [inquiries, currentField, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.metadata
@@ -274,17 +273,19 @@ const Inquiry = (props) => {
                 <Typography variant="h5">{q.content}</Typography>
                 <div style={{ display: 'block', margin: '1rem 0rem' }}>
                   {type === metadata.ans_type.choice && <ChoiceAnswer question={q} user={user} />}
-                  {type === metadata.ans_type.paragraph && <ParagraphAnswer
-                    question={q}
-                    user={user}
-                    index={indexes}
-                    questions={inquiries}
-                    saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-                  />}
+                  {type === metadata.ans_type.paragraph && (
+                    <ParagraphAnswer
+                      question={q}
+                      user={user}
+                      index={indexes}
+                      questions={inquiries}
+                      saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                    />
+                  )}
                   {type === metadata.ans_type.attachment && (
                     <AttachmentAnswer
                       question={q}
-                    // disabled={true}
+                      // disabled={true}
                     />
                   )}
                 </div>
