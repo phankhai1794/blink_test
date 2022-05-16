@@ -1,10 +1,11 @@
+import * as FormActions from 'app/main/apps/workspace/store/actions/form';
+
 import React, { useState } from 'react';
 import {
   Button,
   Icon,
   Typography
 } from '@material-ui/core';
-import * as FormActions from 'app/main/apps/workspace/admin/store/actions/form';
 import { useDispatch } from 'react-redux';
 
 function History(props) {

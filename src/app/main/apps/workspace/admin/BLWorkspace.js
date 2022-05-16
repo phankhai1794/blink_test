@@ -1,23 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import clsx from 'clsx';
-import _ from 'lodash';
-import { useDispatch, useSelector } from 'react-redux';
-import * as AppActions from 'app/store/actions';
-import { Grid, Divider } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
 import { getKeyByValue } from '@shared';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import * as AppActions from 'app/store/actions';
 
 import Inquiry from '../shared-components/Inquiry';
 import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
 import Label from '../shared-components/FieldLabel';
+import * as Actions from '../store/actions';
+import * as FormActions from '../store/actions/form';
+import * as TransActions from '../store/actions/transaction';
 
-import * as Actions from './store/actions';
-import * as FormActions from './store/actions/form';
-import InquiryForm from './InquiryForm';
 import BLField from './components/BLField';
-import * as TransActions from './store/actions/transaction';
+import InquiryForm from './InquiryForm';
+
+import React, { useEffect, useState } from 'react';
+import clsx from 'clsx';
+import _ from 'lodash';
+import { Grid, Divider } from '@material-ui/core';
+import { useDispatch, useSelector } from 'react-redux';
+import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,21 +49,21 @@ const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [content, setContent] = useState({});
-  const [currentField, metadata, myBL] = useSelector((state) => [
-    state.workspace.inquiryReducer.currentField,
-    state.workspace.inquiryReducer.metadata,
-    state.workspace.inquiryReducer.myBL
+  const [currentField, metadata, myBL] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.currentField,
+    workspace.inquiryReducer.metadata,
+    workspace.inquiryReducer.myBL
   ]);
-  const [minimize, openInquiry, openAllInquiry, reload, success, fail] = useSelector((state) => [
-    state.workspace.formReducer.minimize,
-    state.workspace.formReducer.openInquiry,
-    state.workspace.formReducer.openAllInquiry,
-    state.workspace.formReducer.reload,
-    state.workspace.formReducer.success,
-    state.workspace.formReducer.fail
+  const [minimize, openInquiry, openAllInquiry, reload, success, fail] = useSelector(({ workspace }) => [
+    workspace.formReducer.minimize,
+    workspace.formReducer.openInquiry,
+    workspace.formReducer.openAllInquiry,
+    workspace.formReducer.reload,
+    workspace.formReducer.success,
+    workspace.formReducer.fail
   ]);
 
-  const { transAutoSaveStatus } = useSelector(({ transReducer }) => transReducer);
+  const { transAutoSaveStatus } = useSelector(({ workspace }) => workspace.transReducer);
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -128,8 +129,8 @@ const BLWorkspace = (props) => {
           openAllInquiry
             ? 'All Inquiries'
             : currentField
-            ? getKeyByValue(metadata['field'], currentField)
-            : ''
+              ? getKeyByValue(metadata['field'], currentField)
+              : ''
         }>
         {openAllInquiry ? <AllInquiry user="workspace" /> : <Inquiry user="workspace" />}
       </Form>

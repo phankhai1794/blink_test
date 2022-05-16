@@ -1,8 +1,13 @@
+import { PERMISSION, PermissionProvider } from '@shared/permission';
+
+import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
+import PopoverFooterAdmin from '../admin/components/PopoverFooter';
+
+import PopoverFooter from './PopoverFooter';
+
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as InquiryActions from '../admin/store/actions/inquiry';
-import * as FormActions from '../admin/store/actions/form';
-
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -10,16 +15,12 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import Typography from '@material-ui/core/Typography';
 import MinimizeIcon from '@material-ui/icons/Minimize';
 import { Box, Tabs, Tab, Fab, Divider, Link } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import CropIcon from '@material-ui/icons/Crop';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 
-import { PERMISSION, PermissionProvider } from '@shared/permission';
-import PopoverFooter from './PopoverFooter';
-import PopoverFooterAdmin from '../admin/components/PopoverFooter';
 
 const styles = (theme) => ({
   root: {
@@ -118,12 +119,12 @@ export default function Form(props) {
   const dispatch = useDispatch();
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs } =
     props;
-  const [index, question] = useSelector((state) => [
-    state.workspace.inquiryReducer.currentEdit,
-    state.workspace.inquiryReducer.question
+  const [index, question] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.currentEdit,
+    workspace.inquiryReducer.question
   ]);
 
-  const [openAllInquiry] = useSelector((state) => [state.workspace.formReducer.openAllInquiry]);
+  const [openAllInquiry] = useSelector(({ workspace }) => [workspace.formReducer.openAllInquiry]);
 
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
