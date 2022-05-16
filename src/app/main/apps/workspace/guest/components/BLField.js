@@ -1,10 +1,9 @@
+import * as FormActions from '../../store/actions/form';
+import * as InquiryActions from '../../store/actions/inquiry';
+
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as FormActions from '../../admin/store/actions/form';
-import * as InquiryActions from '../../admin/store/actions/inquiry';
-
-import { TextField, InputAdornment } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core';
+import { TextField, InputAdornment , makeStyles } from '@material-ui/core';
 import { green } from '@material-ui/core/colors';
 import ChatBubbleIcon from '@material-ui/icons/ChatBubble';
 
@@ -44,9 +43,9 @@ const BLField = (props) => {
   const dispatch = useDispatch();
   const { children, width, multiline, rows, selectedChoice, id } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
-  const [inquiries, metadata] = useSelector((state) => [
-    state.workspace.inquiryReducer.inquiries,
-    state.workspace.inquiryReducer.metadata
+  const [inquiries, metadata] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.inquiries,
+    workspace.inquiryReducer.metadata
   ]);
 
   const onMouseEnter = (e) => {

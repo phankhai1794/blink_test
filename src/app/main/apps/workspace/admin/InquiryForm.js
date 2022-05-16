@@ -1,22 +1,25 @@
+import { getKeyByValue } from '@shared';
+
+import ChoiceAnswer from '../shared-components/ChoiceAnswer';
+import ParagraphAnswer from '../shared-components/ParagraphAnswer';
+import AttachmentAnswer from '../shared-components/AttachmentAnswer';
+import Form from '../shared-components/Form';
+import ImageAttach from '../shared-components/ImageAttach';
+import FileAttach from '../shared-components/FileAttach';
+import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
+
+import InquiryEditor from './components/InquiryEditor';
+import AttachFile from './components/AttachFile';
+
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as InquiryActions from './store/actions/inquiry';
-import * as FormActions from './store/actions/form';
-import { getKeyByValue } from '@shared';
 import { makeStyles } from '@material-ui/styles';
-
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CloseIcon from '@material-ui/icons/Close';
 import { Divider, FormGroup, FormControlLabel, Checkbox, FormControl, FormHelperText, IconButton, Fab } from '@material-ui/core';
-import ChoiceAnswer from '../shared-components/ChoiceAnswer';
-import ParagraphAnswer from '../shared-components/ParagraphAnswer';
-import AttachmentAnswer from '../shared-components/AttachmentAnswer';
-import InquiryEditor from './components/InquiryEditor';
-import Form from '../shared-components/Form';
-import AttachFile from './components/AttachFile';
-import ImageAttach from '../shared-components/ImageAttach';
-import FileAttach from '../shared-components/FileAttach';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,21 +35,21 @@ const useStyles = makeStyles((theme) => ({
 const InquiryForm = (props) => {
   const { FabTitle } = props;
   const dispatch = useDispatch();
-  const [questions, metadata, valid, currentEdit] = useSelector((state) => [
-    state.workspace.inquiryReducer.question,
-    state.workspace.inquiryReducer.metadata,
-    state.workspace.inquiryReducer.validation,
-    state.workspace.inquiryReducer.currentEdit,
+  const [questions, metadata, valid, currentEdit] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.question,
+    workspace.inquiryReducer.metadata,
+    workspace.inquiryReducer.validation,
+    workspace.inquiryReducer.currentEdit,
   ]);
   const classes = useStyles();
 
-  const [open] = useSelector((state) => [
-    state.workspace.formReducer.openDialog,
+  const [open] = useSelector(({ workspace }) => [
+    workspace.formReducer.openDialog,
   ])
 
   useEffect(() => {
     const check = questions.filter((q) => !q.receiver.length)
-    dispatch(InquiryActions.validate({ ...valid, receiver: !Boolean(check.length) }));
+    dispatch(InquiryActions.validate({ ...valid, receiver: !check.length }));
   }, [questions])
 
   const copyQuestion = (index) => {

@@ -1,19 +1,22 @@
-import React, { useEffect, useState } from 'react';
 import _ from '@lodash';
+import * as AppActions from 'app/store/actions';
+import { getKeyByValue } from '@shared';
+import { getBlInfo } from 'app/services/myBLService';
+
+import * as FormActions from '../store/actions/form';
+import * as GuestActions from '../store/actions';
+import Inquiry from '../shared-components/Inquiry';
+import AllInquiry from '../shared-components/AllInquiry';
+import Form from '../shared-components/Form';
+
+import BLField from './components/BLField';
+
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Grid, Divider } from '@material-ui/core';
 
-import * as AppActions from 'app/store/actions';
-import * as FormActions from '../admin/store/actions/form';
-import Inquiry from '../shared-components/Inquiry';
-import AllInquiry from '../shared-components/AllInquiry';
-import Form from '../shared-components/Form';
-import BLField from './components/BLField';
-import { getKeyByValue } from '@shared';
-import * as GuestActions from './store/actions';
-import { getBlInfo } from 'app/services/myBLService';
 
 const useStyles = makeStyles((theme) => ({
   ptGridItem: {
@@ -32,11 +35,11 @@ const GuestWorkspace = (props) => {
   const classes = useStyles();
   const [content, setContent] = useState({});
   const dispatch = useDispatch();
-  const [openInquiry, openAllInquiry, currentField, metadata] = useSelector((state) => [
-    state.workspace.formReducer.openInquiry,
-    state.workspace.formReducer.openAllInquiry,
-    state.workspace.inquiryReducer.currentField,
-    state.workspace.inquiryReducer.metadata
+  const [openInquiry, openAllInquiry, currentField, metadata] = useSelector(({ workspace }) => [
+    workspace.formReducer.openInquiry,
+    workspace.formReducer.openAllInquiry,
+    workspace.inquiryReducer.currentField,
+    workspace.inquiryReducer.metadata
   ]);
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';

@@ -1,10 +1,13 @@
+import * as Actions from '../store/actions';
+
+import UserInfo from './UserInfo';
+import AllInquiry from './AllInquiry';
+
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../admin/store/actions';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import EditIcon from '@material-ui/icons/Edit';
-import UserInfo from './UserInfo';
 import {
   Menu,
   MenuItem,
@@ -13,7 +16,7 @@ import {
   Typography,
   IconButton
 } from '@material-ui/core';
-import AllInquiry from './AllInquiry';
+
 
 const Comment = (props) => {
   const inputStyle = {
