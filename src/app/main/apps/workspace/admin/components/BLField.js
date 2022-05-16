@@ -1,3 +1,7 @@
+import Label from '../../shared-components/FieldLabel';
+import * as FormActions from '../../store/actions/form';
+import * as InquiryActions from '../../store/actions/inquiry';
+
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { createMuiTheme } from '@material-ui/core/styles';
@@ -8,9 +12,6 @@ import HelpIcon from '@material-ui/icons/Help';
 import LockIcon from '@material-ui/icons/Lock';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 
-import * as FormActions from '../store/actions/form';
-import * as InquiryActions from '../store/actions/inquiry';
-import Label from '../../shared-components/FieldLabel';
 
 const theme = createMuiTheme({
   typography: {
@@ -93,13 +94,13 @@ const BLField = (props) => {
   const dispatch = useDispatch();
   const { children, width, multiline, rows, selectedChoice, id, label, lock, readOnly } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
-  const [inquiries, metadata] = useSelector((state) => [
-    state.workspace.inquiryReducer.inquiries,
-    state.workspace.inquiryReducer.metadata
+  const [inquiries, metadata] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.inquiries,
+    workspace.inquiryReducer.metadata
   ]);
-  const [minimize, anchorEl] = useSelector((state) => [
-    state.workspace.formReducer.minimize,
-    state.workspace.formReducer.anchorEl
+  const [minimize, anchorEl] = useSelector(({ workspace }) => [
+    workspace.formReducer.minimize,
+    workspace.formReducer.anchorEl
   ]);
   const openAddPopover = (e) => {
     if (questionIsEmpty) {

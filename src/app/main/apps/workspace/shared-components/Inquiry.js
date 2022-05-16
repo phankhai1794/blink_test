@@ -1,20 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import * as InquiryActions from '../admin/store/actions/inquiry';
-import ChoiceAnswer from './ChoiceAnswer';
-import ParagraphAnswer from './ParagraphAnswer';
-import AttachmentAnswer from './AttachmentAnswer';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
-import DeleteIcon from '@material-ui/icons/Delete';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import InquiryEditor from '../admin/components/InquiryEditor';
-import ImageAttach from './ImageAttach';
-import FileAttach from './FileAttach';
-import EditIcon from '@material-ui/icons/Edit';
-import UserInfo from './UserInfo';
 import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
 import { getFile } from 'app/services/fileService';
 import { displayTime } from '@shared';
+
+import * as InquiryActions from '../store/actions/inquiry';
+import InquiryEditor from '../admin/components/InquiryEditor';
+
+import ChoiceAnswer from './ChoiceAnswer';
+import ParagraphAnswer from './ParagraphAnswer';
+import AttachmentAnswer from './AttachmentAnswer';
+import ImageAttach from './ImageAttach';
+import FileAttach from './FileAttach';
+import UserInfo from './UserInfo';
+
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import NoteAddIcon from '@material-ui/icons/NoteAdd';
+import DeleteIcon from '@material-ui/icons/Delete';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import EditIcon from '@material-ui/icons/Edit';
 import {
   Menu,
   MenuItem,
@@ -41,13 +44,12 @@ const Comment = (props) => {
   const [comment, setComment] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState('');
-  const [reply, currentField, user] = useSelector((state) => [
-    state.workspace.inquiryReducer.reply,
-    state.workspace.inquiryReducer.currentField,
-    state.user
+  const [reply, currentField] = useSelector(({workspace}) => [
+    workspace.inquiryReducer.reply,
+    workspace.inquiryReducer.currentField,
   ]);
+  const user = useSelector(({ user }) => user)
   const open = Boolean(anchorEl);
-  // console.log("user: ", user)
   useEffect(() => {
     loadComment(q.id)
       .then((res) => {
@@ -187,10 +189,10 @@ const Comment = (props) => {
 const Inquiry = (props) => {
   const dispatch = useDispatch();
   const { user } = props;
-  const [inquiries, currentField, metadata] = useSelector((state) => [
-    state.workspace.inquiryReducer.inquiries,
-    state.workspace.inquiryReducer.currentField,
-    state.workspace.inquiryReducer.metadata
+  const [inquiries, currentField, metadata] = useSelector(({workspace}) => [
+    workspace.inquiryReducer.inquiries,
+    workspace.inquiryReducer.currentField,
+    workspace.inquiryReducer.metadata
   ]);
   const inquiry = inquiries.filter((q) => q.field === currentField);
   const indexes = inquiries.findIndex((q) => q.field === currentField);

@@ -1,27 +1,31 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import * as InquiryActions from '../admin/store/actions/inquiry';
+import { getKeyByValue } from '@shared';
+import { getFile } from 'app/services/fileService';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
+
+import * as InquiryActions from '../store/actions/inquiry';
+import InquiryEditor from '../admin/components/InquiryEditor';
+import AttachFile from '../admin/components/AttachFile';
+
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
 import AttachmentAnswer from './AttachmentAnswer';
-import InquiryEditor from '../admin/components/InquiryEditor';
 import ImageAttach from './ImageAttach';
-import DeleteIcon from '@material-ui/icons/Delete';
 import FileAttach from './FileAttach';
-import { getKeyByValue } from '@shared';
-import { getFile } from 'app/services/fileService';
+
+import DeleteIcon from '@material-ui/icons/Delete';
+import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
 import { Card, Typography, FormControl, FormGroup, FormControlLabel, IconButton, Checkbox, FormHelperText } from '@material-ui/core';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
-import AttachFile from '../admin/components/AttachFile';
+
 
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
   const { receiver } = props;
-  const [inquiries, currentEdit, metadata, valid] = useSelector((state) => [
-    state.workspace.inquiryReducer.inquiries,
-    state.workspace.inquiryReducer.currentEditInq,
-    state.workspace.inquiryReducer.metadata,
-    state.workspace.inquiryReducer.validation,
+  const [inquiries, currentEdit, metadata, valid] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.inquiries,
+    workspace.inquiryReducer.currentEditInq,
+    workspace.inquiryReducer.metadata,
+    workspace.inquiryReducer.validation,
   ]);
 
   const changeToEditor = (index) => {

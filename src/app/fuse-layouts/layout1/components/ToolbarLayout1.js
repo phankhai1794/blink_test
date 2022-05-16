@@ -1,20 +1,22 @@
-import React, { useEffect } from 'react';
 import history from '@history';
+import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
+import History from 'app/fuse-layouts/shared-components/History';
+import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
+import SendInquiryForm from 'app/main/apps/workspace/admin/SendInquiryForm';
+import * as FormActions from 'app/main/apps/workspace/store/actions/form';
+import * as AppActions from 'app/store/actions';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
+
+import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppBar, Toolbar, Avatar, Badge, Button, Hidden } from '@material-ui/core';
-import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import History from 'app/fuse-layouts/shared-components/History';
-import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
-import SendInquiryForm from 'app/main/apps/workspace/admin/SendInquiryForm';
-import * as FormActions from 'app/main/apps/workspace/admin/store/actions/form';
-import * as AppActions from 'app/store/actions';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
+
 
 const useStyles = makeStyles((theme) => ({
   separator: {

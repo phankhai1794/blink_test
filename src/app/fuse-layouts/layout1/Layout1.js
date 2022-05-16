@@ -1,14 +1,16 @@
-import React, { useContext } from 'react';
-import clsx from 'clsx';
-import { renderRoutes } from 'react-router-config';
 import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense, FuseSet } from '@fuse';
-import { makeStyles } from '@material-ui/styles';
-import { useSelector } from 'react-redux';
 import AppContext from 'app/AppContext';
 import Transaction from 'app/main/transactions/Transaction';
 
 import ToolbarLayout1 from './components/ToolbarLayout1';
 import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
+
+import React, { useContext } from 'react';
+import clsx from 'clsx';
+import { renderRoutes } from 'react-router-config';
+import { makeStyles } from '@material-ui/styles';
+import { useSelector } from 'react-redux';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -80,7 +82,7 @@ function Layout1(props) {
   const appContext = useContext(AppContext);
   const { routes } = appContext;
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
-  const openTrans = useSelector((state) => state.workspace.formReducer.openTrans);
+  const openTrans = useSelector(({ workspace }) => workspace.formReducer.openTrans);
   return (
     <div id="fuse-layout" className={clsx(classes.root, config.mode, 'scroll-' + config.scroll)}>
       <div className="flex flex-1 flex-col overflow-hidden relative">
@@ -96,7 +98,7 @@ function Layout1(props) {
               {props.children}
             </FuseScrollbars>
           </div>
-          {openTrans&&<Transaction />}
+          {openTrans && <Transaction />}
         </div>
         {/* <SettingsPanel /> */}
       </div>

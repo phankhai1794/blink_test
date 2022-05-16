@@ -1,27 +1,30 @@
+import { useForm } from '@fuse/hooks';
+import * as Actions from 'app/store/actions';
+
+import Form from '../shared-components/Form';
+import * as mailActions from '../store/actions/mail';
+import { SENDMAIL_NONE, SENDMAIL_LOADING } from '../store/actions/mail';
+import AllInquiry from '../shared-components/AllInquiry';
+
+import TagsInput from './components/TagsInput';
+
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Form from '../shared-components/Form';
 import draftToHtml from 'draftjs-to-html';
 import clsx from 'clsx';
 import { Button, Grid, Divider } from '@material-ui/core';
-
-import TagsInput from './components/TagsInput';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles } from '@material-ui/styles';
-import AllInquiry from '../shared-components/AllInquiry';
-import { useForm } from '@fuse/hooks';
-import * as Actions from 'app/store/actions';
-import * as mailActions from './store/actions/mail';
-import { SENDMAIL_NONE, SENDMAIL_LOADING } from './store/actions/mail';
+
 
 const SendInquiryForm = (props) => {
-  const [questions, title, mybl] = useSelector((state) => [
-    state.workspace.inquiryReducer.question,
-    state.workspace.inquiryReducer.currentField,
-    state.workspace.inquiryReducer.myBL
+  const [questions, title, mybl] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.question,
+    workspace.inquiryReducer.currentField,
+    workspace.inquiryReducer.myBL
   ]);
-  const { success, error } = useSelector(({ mailReducer }) => mailReducer);
+  const { success, error } = useSelector(({ workspace }) => workspace.mailReducer);
   const { form, handleChange, resetForm } = useForm({
     toCustomer: '',
     toOnshore: '',
@@ -271,7 +274,7 @@ const SendInquiryForm = (props) => {
 const ActionUI = (props) => {
   const dispatch = useDispatch();
   const { openPreviewClick, sendMailClick } = props;
-  const { success, error, isLoading } = useSelector(({ mailReducer }) => mailReducer);
+  const { success, error, isLoading } = useSelector(({ workspace }) => workspace.mailReducer);
 
   return (
     <div style={{ padding: 10 }}>

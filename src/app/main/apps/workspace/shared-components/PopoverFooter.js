@@ -1,18 +1,20 @@
+import { saveInquiry, changeStatus } from 'app/services/inquiryService';
+import { uploadFile } from 'app/services/fileService';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
+
+import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
+
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as InquiryActions from '../admin/store/actions/inquiry';
-import * as FormActions from '../admin/store/actions/form';
-
 import { makeStyles } from '@material-ui/core/styles';
 import { Link, Button, IconButton } from '@material-ui/core';
 import ReplyIcon from '@material-ui/icons/Reply';
 import CheckIcon from '@material-ui/icons/Check';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
-import { saveInquiry, changeStatus } from 'app/services/inquiryService';
-import { uploadFile } from 'app/services/fileService';
 import axios from 'axios';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,14 +28,14 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = ({ title, checkValidate }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [index, currentField, question, fields, myBL, displayCmt, valid] = useSelector((state) => [
-    state.workspace.inquiryReducer.currentEdit,
-    state.workspace.inquiryReducer.currentField,
-    state.workspace.inquiryReducer.question,
-    state.workspace.inquiryReducer.fields,
-    state.workspace.inquiryReducer.myBL,
-    state.workspace.inquiryReducer.displayCmt,
-    state.workspace.inquiryReducer.validation
+  const [index, currentField, question, fields, myBL, displayCmt, valid] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.currentEdit,
+    workspace.inquiryReducer.currentField,
+    workspace.inquiryReducer.question,
+    workspace.inquiryReducer.fields,
+    workspace.inquiryReducer.myBL,
+    workspace.inquiryReducer.displayCmt,
+    workspace.inquiryReducer.validation
   ]);
   const onSave = () => {
     if (!checkValidate(question[index]) || !valid.receiver) return;

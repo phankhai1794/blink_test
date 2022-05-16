@@ -1,6 +1,15 @@
+import _ from '@lodash';
+import { FuseChipSelect } from '@fuse';
+
+import * as InquiryActions from '../../store/actions/inquiry';
+import Dropzone from '../../shared-components/Dropzone';
+import ImageAttach from '../../shared-components/ImageAttach';
+import FileAttach from '../../shared-components/FileAttach';
+
+import CustomSelect from './CustomSelect';
+
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as InquiryActions from '../store/actions/inquiry';
 import {
   TextField,
   Grid,
@@ -15,13 +24,8 @@ import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CloseIcon from '@material-ui/icons/Close';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
-import _ from '@lodash';
-import Dropzone from '../../shared-components/Dropzone';
-import ImageAttach from '../../shared-components/ImageAttach';
-import FileAttach from '../../shared-components/FileAttach';
 
-import CustomSelect from './CustomSelect';
-import { FuseChipSelect } from '@fuse';
+
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
 });
@@ -188,15 +192,15 @@ const InquiryEditor = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles();
   const { defaultContent, index, question, questions, saveQuestion } = props;
-  const [metadata, removeOptions, currentField, fields, valid] = useSelector((state) => [
-    state.workspace.inquiryReducer.metadata,
-    state.workspace.inquiryReducer.removeOptions,
-    state.workspace.inquiryReducer.currentField,
-    state.workspace.inquiryReducer.fields,
-    state.workspace.inquiryReducer.validation
+  const [metadata, removeOptions, currentField, fields, valid] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.metadata,
+    workspace.inquiryReducer.removeOptions,
+    workspace.inquiryReducer.currentField,
+    workspace.inquiryReducer.fields,
+    workspace.inquiryReducer.validation
   ]);
 
-  const fullscreen = useSelector((state) => state.workspace.formReducer.fullscreen)
+  const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen)
 
   const [fieldType, setFieldType] = useState(metadata.field_options);
   const [valueType, setValueType] = useState(
