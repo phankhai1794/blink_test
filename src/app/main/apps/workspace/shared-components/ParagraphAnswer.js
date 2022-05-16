@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import { Button, InputAdornment, TextField } from '@material-ui/core';
 import UserInfo from './UserInfo';
 import { makeStyles } from '@material-ui/styles';
-import { createParagraphAnswer, updateInquiryChoice } from '../../../../services/inquiryService';
+import {
+  createParagraphAnswer,
+  updateParagraphAnswer
+} from 'app/services/inquiryService';
+import { useDispatch } from 'react-redux';
+import * as AppAction from '../../../../store/actions';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,8 +23,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ParagraphAnswer = (props) => {
-  const { question, user } = props;
-  const [paragraphText, setParagraphText] = useState(question.paragraph || '');
+  const { question, user, index, questions, saveQuestion } = props;
+  const [paragraphText, setParagraphText] = useState(question.answerObj[0]?.content || '');
+  const dispatch = useDispatch();
   const classes = useStyles();
 
   const handleSaveSelectedChoice = (e) => {
@@ -37,7 +43,28 @@ const ParagraphAnswer = (props) => {
       inquiry: question.id,
       content: paragraphText,
     };
-    await createParagraphAnswer(body);
+    const optionsOfQuestion = [...questions];
+    const objAns = optionsOfQuestion[index].answerObj;
+    if (question.answerObj.length === 0) {
+      createParagraphAnswer(body).then(res => {
+        if (res) {
+          const { message, resultRes } = res;
+          objAns.push(resultRes);
+          saveQuestion(optionsOfQuestion);
+          dispatch(AppAction.showMessage({message: message, variant: 'success'}));
+        }
+      });
+    } else {
+      const answerId = question.answerObj[0].id;
+      updateParagraphAnswer(answerId, body).then(res => {
+        if (res) {
+          const { message } = res;
+          objAns[0].content = body.content;
+          saveQuestion(optionsOfQuestion);
+          dispatch(AppAction.showMessage({message: message, variant: 'success'}));
+        }
+      });
+    }
   }
 
   return (
@@ -61,7 +88,7 @@ const ParagraphAnswer = (props) => {
                   variant="contained"
                   onClick={addParagraph}
                 >
-                  ADD
+                  Add
                 </Button>
               </InputAdornment>
             )
