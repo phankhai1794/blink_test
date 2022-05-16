@@ -47,7 +47,7 @@ const Comment = (props) => {
     state.user
   ]);
   const open = Boolean(anchorEl);
-  console.log("user: ", user)
+  // console.log("user: ", user)
   useEffect(() => {
     loadComment(q.id)
       .then((res) => {
@@ -271,8 +271,8 @@ const Inquiry = (props) => {
                 </div>
                 <Typography variant="h5">{q.content}</Typography>
                 <div style={{ display: 'block', margin: '1rem 0rem' }}>
-                  {type === metadata.ans_type.choice && <ChoiceAnswer question={q} />}
-                  {type === metadata.ans_type.paragraph && <ParagraphAnswer question={q} />}
+                  {type === metadata.ans_type.choice && <ChoiceAnswer question={q} user={user} />}
+                  {type === metadata.ans_type.paragraph && <ParagraphAnswer question={q} user={user} />}
                   {type === metadata.ans_type.attachment && (
                     <AttachmentAnswer
                       question={q}
