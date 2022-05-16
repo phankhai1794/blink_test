@@ -29,17 +29,6 @@ import {
   Fab
 } from '@material-ui/core';
 
-import * as InquiryActions from '../store/actions/inquiry';
-
-import InquiryEditor from './InquiryEditor';
-import ChoiceAnswer from './ChoiceAnswer';
-import ParagraphAnswer from './ParagraphAnswer';
-import AttachmentAnswer from './AttachmentAnswer';
-import ImageAttach from './ImageAttach';
-import FileAttach from './FileAttach';
-import UserInfo from './UserInfo';
-
-
 const Comment = (props) => {
   const inputStyle = {
     borderRadius: '18px',

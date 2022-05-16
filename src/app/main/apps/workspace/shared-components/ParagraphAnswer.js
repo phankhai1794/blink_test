@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Button, InputAdornment, TextField } from '@material-ui/core';
-import UserInfo from './UserInfo';
 import { makeStyles } from '@material-ui/styles';
-import {
-  createParagraphAnswer,
-  updateParagraphAnswer
-} from 'app/services/inquiryService';
+import { createParagraphAnswer, updateParagraphAnswer } from 'app/services/inquiryService';
 import { useDispatch } from 'react-redux';
+
 import * as AppAction from '../../../../store/actions';
+
+import UserInfo from './UserInfo';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,31 +40,31 @@ const ParagraphAnswer = (props) => {
   const addParagraph = async () => {
     const body = {
       inquiry: question.id,
-      content: paragraphText,
+      content: paragraphText
     };
     const optionsOfQuestion = [...questions];
     const objAns = optionsOfQuestion[index].answerObj;
     if (question.answerObj.length === 0) {
-      createParagraphAnswer(body).then(res => {
+      createParagraphAnswer(body).then((res) => {
         if (res) {
           const { message, resultRes } = res;
           objAns.push(resultRes);
           saveQuestion(optionsOfQuestion);
-          dispatch(AppAction.showMessage({message: message, variant: 'success'}));
+          dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }
       });
     } else {
       const answerId = question.answerObj[0].id;
-      updateParagraphAnswer(answerId, body).then(res => {
+      updateParagraphAnswer(answerId, body).then((res) => {
         if (res) {
           const { message } = res;
           objAns[0].content = body.content;
           saveQuestion(optionsOfQuestion);
-          dispatch(AppAction.showMessage({message: message, variant: 'success'}));
+          dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }
       });
     }
-  }
+  };
 
   return (
     <div>
@@ -74,12 +73,11 @@ const ParagraphAnswer = (props) => {
           placeholder="Customer Input"
           classes={{ root: classes.root }}
           disabled={user !== 'guest'}
-          InputProps={
-          {
+          InputProps={{
             style: {
               fontSize: '1.7rem'
             },
-             endAdornment: ( user === 'guest' &&
+            endAdornment: user === 'guest' && (
               <InputAdornment position="end">
                 <Button
                   aria-label="Add"
@@ -92,8 +90,7 @@ const ParagraphAnswer = (props) => {
                 </Button>
               </InputAdornment>
             )
-          }
-        }
+          }}
           InputLabelProps={{
             style: {
               fontSize: '1.7rem'
