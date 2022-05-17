@@ -14,8 +14,10 @@ import {
   Card,
   ListItemText,
   Typography,
-  IconButton
+  IconButton, Fab
 } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import { makeStyles } from '@material-ui/styles';
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -186,9 +188,22 @@ const Comment = (props) => {
   );
 };
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    minHeight: '10px',
+    position: 'absolute',
+    left: '0',
+    top: '38px',
+    height: '25px',
+    width: '25px',
+    backgroundColor: 'silver'
+  }
+}));
+
 const Inquiry = (props) => {
   const dispatch = useDispatch();
   const { user } = props;
+  const classes = useStyles();
   const [inquiries, currentField, metadata] = useSelector(({workspace}) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentField,
@@ -227,6 +242,11 @@ const Inquiry = (props) => {
       }
     }
   }, [currentField]);
+  const handleRemoveImageAttach = (mediaIndex, inquiryIndex) => {
+    const optionsOfQuestion = [...inquiries];
+    optionsOfQuestion[inquiryIndex].mediaFile.splice(mediaIndex, 1);
+    dispatch(InquiryActions.setEdit(optionsOfQuestion));
+  }
   return (
     <>
       {inquiry.map((q, index) => {
@@ -293,17 +313,32 @@ const Inquiry = (props) => {
                   {type === metadata.ans_type.attachment && (
                     <AttachmentAnswer
                       question={q}
+                      user={user}
+                      index={indexes}
+                      questions={inquiries}
+                      saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
                     // disabled={true}
                     />
                   )}
                 </div>
-                {q.mediaFile.map((file, index) =>
-                  file.ext.match(/jpeg|jpg|png/g) ? (
-                    <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-                  ) : (
-                    <FileAttach file={file} />
-                  )
-                )}
+                {q.mediaFile.map((file, mediaIndex) => (
+                  <div style={{ position: 'relative' }} key={mediaIndex}>
+                    <Fab
+                      classes={{
+                        root: classes.root
+                      }}
+                      size="small"
+                      onClick={() => handleRemoveImageAttach(mediaIndex, indexes)}
+                    >
+                      <CloseIcon style={{ fontSize: 20 }} />
+                    </Fab>
+                    {file.ext.match(/jpeg|jpg|png/g) ? (
+                      <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
+                    ) : (
+                      <FileAttach file={file} />
+                    )}
+                  </div>
+                ))}
                 <Comment q={q} inquiries={inquiries} indexes={indexes} userType={user} />
               </Card>
             )}

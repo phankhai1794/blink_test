@@ -10,11 +10,11 @@ import { Grid, Divider } from '@material-ui/core';
 
 import * as FormActions from '../store/actions/form';
 import * as GuestActions from '../store/actions';
-import Inquiry from '../shared-components/Inquiry';
-import AllInquiry from '../shared-components/AllInquiry';
-import Form from '../shared-components/Form';
 
-import BLField from './components/BLField';
+import Inquiry from './Inquiry';
+import AllInquiry from './AllInquiry';
+import Form from './Form';
+import BLField from './BLField';
 
 
 const useStyles = makeStyles((theme) => ({
