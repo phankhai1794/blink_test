@@ -1,7 +1,10 @@
-import React, { useRef } from 'react';
-import Bill from './Bill';
 import { FusePageSimple } from '@fuse';
-function BillApp(props) {
+import React, { useRef } from 'react';
+
+import DraftPage from './Page';
+
+
+function DraftApp(props) {
   const { history } = props;
   const pageLayout = useRef(null);
 
@@ -14,7 +17,7 @@ function BillApp(props) {
           content: 'flex flex-col h-full',
           leftSidebar: 'w-256 border-0'
         }}
-        content={<Bill status={history.location.state} />}
+        content={<DraftPage status={history.location.state} />}
         sidebarInner
         ref={pageLayout}
         innerScroll
@@ -23,4 +26,4 @@ function BillApp(props) {
   );
 }
 
-export default BillApp;
+export default DraftApp;

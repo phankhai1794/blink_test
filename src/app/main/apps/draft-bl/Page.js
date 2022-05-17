@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: '-1px'
   }
 }));
-const Bill = (props) => {
+const DraftPage = (props) => {
   const { status } = props;
 
   const classes = useStyles(props);
@@ -199,7 +199,7 @@ const Bill = (props) => {
           tincidunt massa, ac vulputate tellus aliquam quis
         </Grid>
         <Grid item xs={6} className={classes.gridBottom}>
-          <Grid container className="my-0" className={classes.gridBottom}>
+          <Grid container className={classes.gridBottom}>
             <Grid item xs={6} className={`${classes.gridLeft}`}>
               <h1 className={classes.disabledText}>Booking no.</h1>
             </Grid>
@@ -209,8 +209,8 @@ const Bill = (props) => {
           </Grid>
           <Grid>
             <h1 className={classes.disabledText}>
-              export references(for the merchant's and/or Carrier's reference only. See back clause
-              8.(4.))
+              {`export references(for the merchant's and/or Carrier's reference only. See back clause
+              8.(4.))`}
             </h1>
             <Grid sx={{ height: '50px' }}>
               export references Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac
@@ -256,7 +256,7 @@ const Bill = (props) => {
         </Grid>
         <Grid item xs={6} className={classes.gridBottom}>
           <span className={classes.disabledText1}>
-            RECEIVED by the Carrier in apparent good order and condition (unless otherwise stated
+            {`RECEIVED by the Carrier in apparent good order and condition (unless otherwise stated
             herein) the total number or quantity of Containers or other packages or units indicated
             in the box entitled "Carrier's Receipt",to be carried subject to all the terms and
             conditions hereof from the Place of Receipt or Port of Loading to thePort of Discharge
@@ -278,7 +278,7 @@ const Bill = (props) => {
             theCarrier, or in accordance with the national law at the Port of Discharge or Place of
             Delivery as applicable. INWITNESS WHEREOF the Carrier or their Agent has signed the
             number of Bills of Lading stated at the top,all of this tenor and date, and whenever one
-            original Bill of Lading has been surrendered all other Bills ofLading shall be void.
+            original Bill of Lading has been surrendered all other Bills ofLading shall be void.`}
           </span>
         </Grid>
         <Grid item xs={6} className={classes.gridBottom}>
@@ -310,7 +310,7 @@ const Bill = (props) => {
         <Grid item xs={6} className={classes.gridBottom}>
           <Grid item xs={12} className={classes.gridBottom}>
             <h1 className={classes.disabledText}>
-              Final Destination(for line merchant's reference only)
+              {`Final Destination(for line merchant's reference only)`}
             </h1>
             em ipsum dolor sit amet
           </Grid>
@@ -324,7 +324,7 @@ const Bill = (props) => {
         <Grid container>
           <Grid item xs={4}>
             <h1 className={classes.disabledText} style={{ marginRight: '4.0rem' }}>
-              (check "HM" column if hazardous material)
+              {`(check "HM" column if hazardous material)`}
             </h1>
           </Grid>
           <Grid item xs={8}>
@@ -501,4 +501,4 @@ const Bill = (props) => {
   );
 };
 
-export default Bill;
+export default DraftPage;
