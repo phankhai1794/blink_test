@@ -2,8 +2,8 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
-import PopoverFooterAdmin from '../admin/components/PopoverFooter';
 
+import PopoverFooterAdmin from './PopoverFooter1';
 import PopoverFooter from './PopoverFooter';
 
 import React, { useState } from 'react';

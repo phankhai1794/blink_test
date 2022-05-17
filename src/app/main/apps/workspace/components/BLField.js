@@ -1,6 +1,7 @@
-import Label from '../../shared-components/FieldLabel';
-import * as FormActions from '../../store/actions/form';
-import * as InquiryActions from '../../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
+import * as InquiryActions from '../store/actions/inquiry';
+
+import Label from './FieldLabel';
 
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';

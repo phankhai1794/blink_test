@@ -1,11 +1,11 @@
 import _ from '@lodash';
 import { FuseChipSelect } from '@fuse';
 
-import * as InquiryActions from '../../store/actions/inquiry';
-import Dropzone from '../../shared-components/Dropzone';
-import ImageAttach from '../../shared-components/ImageAttach';
-import FileAttach from '../../shared-components/FileAttach';
+import * as InquiryActions from '../store/actions/inquiry';
 
+import Dropzone from './Dropzone';
+import ImageAttach from './ImageAttach';
+import FileAttach from './FileAttach';
 import CustomSelect from './CustomSelect';
 
 import React, { useState, useEffect } from 'react';

@@ -3,9 +3,9 @@ import { getFile } from 'app/services/fileService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as InquiryActions from '../store/actions/inquiry';
-import InquiryEditor from '../admin/components/InquiryEditor';
-import AttachFile from '../admin/components/AttachFile';
 
+import InquiryEditor from './InquiryEditor';
+import AttachFile from './AttachFile';
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
 import AttachmentAnswer from './AttachmentAnswer';

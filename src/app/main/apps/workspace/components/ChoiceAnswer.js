@@ -1,19 +1,14 @@
+import { updateInquiryChoice } from 'app/services/inquiryService';
+
 import React, { useState } from 'react';
 import {
   Radio,
-  TextField,
-  Button,
   FormControl,
   RadioGroup,
   FormControlLabel
 } from '@material-ui/core';
-import SaveIcon from '@material-ui/icons/Save';
 import { useSelector } from 'react-redux';
-import { updateInquiryChoice } from 'app/services/inquiryService';
 
-import * as GuestActions from '../guest/store/actions';
-
-import UserInfo from './UserInfo';
 
 const ChoiceAnswer = (props) => {
   const { index, questions, question, saveQuestion } = props;
@@ -93,12 +88,6 @@ const ChoiceAnswer = (props) => {
           ))}
         </RadioGroup>
       </FormControl>
-      {/* {lastSelectedChoice !== '' && !showSaveBtn && (
-        <div style={{ marginTop: '1rem' }}>
-          <UserInfo name="Anrew" date="today" time="10:50PM" />
-          <h3 style={{ margin: '1rem 5.5rem' }}>{lastSelectedChoice}</h3>
-        </div>
-      )} */}
     </>
   );
 };

@@ -1,16 +1,16 @@
 import { getKeyByValue } from '@shared';
 
-import ChoiceAnswer from '../shared-components/ChoiceAnswer';
-import ParagraphAnswer from '../shared-components/ParagraphAnswer';
-import AttachmentAnswer from '../shared-components/AttachmentAnswer';
-import Form from '../shared-components/Form';
-import ImageAttach from '../shared-components/ImageAttach';
-import FileAttach from '../shared-components/FileAttach';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 
-import InquiryEditor from './components/InquiryEditor';
-import AttachFile from './components/AttachFile';
+import ChoiceAnswer from './ChoiceAnswer';
+import ParagraphAnswer from './ParagraphAnswer';
+import AttachmentAnswer from './AttachmentAnswer';
+import Form from './Form';
+import ImageAttach from './ImageAttach';
+import FileAttach from './FileAttach';
+import InquiryEditor from './InquiryEditor';
+import AttachFile from './AttachFile';
 
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';

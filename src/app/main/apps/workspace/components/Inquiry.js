@@ -3,8 +3,8 @@ import { getFile } from 'app/services/fileService';
 import { displayTime } from '@shared';
 
 import * as InquiryActions from '../store/actions/inquiry';
-import InquiryEditor from '../admin/components/InquiryEditor';
 
+import InquiryEditor from './InquiryEditor';
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
 import AttachmentAnswer from './AttachmentAnswer';

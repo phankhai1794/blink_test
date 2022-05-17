@@ -1,5 +1,5 @@
-import * as FormActions from '../../store/actions/form';
-import * as InquiryActions from '../../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
+import * as InquiryActions from '../store/actions/inquiry';
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const BLField = (props) => {
+const GuestBLField = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const { children, width, multiline, rows, selectedChoice, id } = props;
@@ -114,4 +114,4 @@ const BLField = (props) => {
   );
 };
 
-export default BLField;
+export default GuestBLField;

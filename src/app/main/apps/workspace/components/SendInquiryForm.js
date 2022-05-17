@@ -1,12 +1,12 @@
 import { useForm } from '@fuse/hooks';
 import * as Actions from 'app/store/actions';
 
-import Form from '../shared-components/Form';
 import * as mailActions from '../store/actions/mail';
 import { SENDMAIL_NONE, SENDMAIL_LOADING } from '../store/actions/mail';
-import AllInquiry from '../shared-components/AllInquiry';
 
-import TagsInput from './components/TagsInput';
+import Form from './Form';
+import AllInquiry from './AllInquiry';
+import TagsInput from './TagsInput';
 
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
