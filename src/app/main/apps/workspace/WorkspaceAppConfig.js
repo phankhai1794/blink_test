@@ -16,11 +16,6 @@ export const WorkspaceAppConfig = {
       path: '/guest',
       exact: false,
       component: React.lazy(() => import('./components/OTPCheck'))
-    },
-    {
-      path: '/apps/draft-bl',
-      exact: true,
-      component: React.lazy(() => import('./BillApp'))
     }
   ]
 };

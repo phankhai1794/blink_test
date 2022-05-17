@@ -44,6 +44,7 @@ module.exports = {
     // Best Practices
     "no-multi-spaces": ["error", { "ignoreEOLComments": true }],
     "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1}],
+    "indent": ["error", 2],
 
     // Variables
     "no-multi-assign": 1,
