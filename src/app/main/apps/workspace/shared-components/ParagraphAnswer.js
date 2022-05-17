@@ -47,8 +47,8 @@ const ParagraphAnswer = (props) => {
     if (question.answerObj.length === 0) {
       createParagraphAnswer(body).then((res) => {
         if (res) {
-          const { message, resultRes } = res;
-          objAns.push(resultRes);
+          const { message, answerObj } = res;
+          objAns.push(answerObj);
           saveQuestion(optionsOfQuestion);
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }
