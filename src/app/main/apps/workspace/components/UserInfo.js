@@ -25,16 +25,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const UserInfo = (props) => {
-  const { name, date, time } = props;
+  const { name, time } = props;
   const classes = useStyles();
   return (
     <div className="flex">
-      <Avatar src={`../../assets/images/avatars/Barrera.jpg`} />
+      <Avatar src={`../../assets/images/avatars/andrew.jpg`} />
       <div>
         <p className={classes.name}>{name}</p>
         <div className="flex" style={{ marginLeft: '1rem' }}>
-          <p className={classes.normal}>{date}</p>
-          <p className={classes.normal} style={{ marginLeft: '2px' }}>
+          <p className={classes.normal}>
             {time}
           </p>
         </div>

@@ -1,4 +1,6 @@
-import { createBlTrans, getMyBLTrans } from 'app/services/transaction';
+import { createBlTrans, getMyBLTrans, getInqsTrans } from 'app/services/transaction';
+
+import { editInquiry } from './inquiry'
 
 export const CREATE_TRANS_NONE = 'CREATE_TRANS_NONE';
 export const CREATE_TRANS_LOADING = 'CREATE_TRANS_LOADING';
@@ -29,6 +31,16 @@ export const BlTrans = (mybl, content) => async (dispatch) => {
         type: CREATE_TRANS_ERROR,
         payload: error
       });
+    });
+};
+
+export const getInqTrans = (id) => async (dispatch) => {
+  getInqsTrans(id)
+    .then((res) => {
+      dispatch(editInquiry(res.data))
+    })
+    .catch((e) => {
+      console.error(e)
     });
 };
 

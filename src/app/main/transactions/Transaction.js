@@ -35,6 +35,11 @@ function Transaction(props) {
     setSelectedIndex(index);
   }
 
+  const loadTransaction = (id, index) => {
+    dispatch(TransActions.getInqTrans(id))
+    selectedChange(index)
+  }
+
   useEffect(() => {
     if (myBL) {
       dispatch(TransActions.getBlTrans(myBL.id));
@@ -58,7 +63,7 @@ function Transaction(props) {
                   }}
                   key={index}
                   button={true}
-                  onClick={() => selectedChange(index)}
+                  onClick={() => loadTransaction(data.id, index)}
                   selected={selectedIndex === index}>
                   <Typography
                     variant="h5"
