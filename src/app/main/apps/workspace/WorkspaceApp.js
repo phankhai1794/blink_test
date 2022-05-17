@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { FusePageSimple } from '@fuse';
 import _ from '@lodash';
 
-import BLWorkspace from './admin/BLWorkspace';
+import BLWorkspace from './components/BLWorkspace';
 
 function WorkspaceApp(props) {
   const { history } = props;

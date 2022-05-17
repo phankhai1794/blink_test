@@ -1,10 +1,6 @@
 import { saveInquiry, changeStatus } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-
-import * as InquiryActions from '../store/actions/inquiry';
-import * as FormActions from '../store/actions/form';
-
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
@@ -14,6 +10,9 @@ import CheckIcon from '@material-ui/icons/Check';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import axios from 'axios';
+
+import * as FormActions from '../store/actions/form';
+import * as InquiryActions from '../store/actions/inquiry';
 
 
 const useStyles = makeStyles((theme) => ({

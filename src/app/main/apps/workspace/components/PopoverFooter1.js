@@ -1,12 +1,11 @@
 import { uploadFile } from 'app/services/fileService';
 import { updateInquiry } from 'app/services/inquiryService';
-
-import * as FormActions from '../../store/actions/form';
-
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
+
+import * as FormActions from '../store/actions/form';
 
 
 const useStyles = makeStyles((theme) => ({

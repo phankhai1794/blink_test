@@ -1,6 +1,4 @@
-import Label from '../../shared-components/FieldLabel';
-import * as FormActions from '../../store/actions/form';
-import * as InquiryActions from '../../store/actions/inquiry';
+
 
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
@@ -11,6 +9,11 @@ import { TextField, InputAdornment, makeStyles } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import LockIcon from '@material-ui/icons/Lock';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+
+import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
+
+import Label from './FieldLabel';
 
 
 const theme = createMuiTheme({

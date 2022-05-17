@@ -2,6 +2,11 @@ import _ from '@lodash';
 import * as AppActions from 'app/store/actions';
 import { getKeyByValue } from '@shared';
 import { getBlInfo } from 'app/services/myBLService';
+import React, { useEffect, useState } from 'react';
+import clsx from 'clsx';
+import { useDispatch, useSelector } from 'react-redux';
+import { makeStyles } from '@material-ui/styles';
+import { Grid, Divider } from '@material-ui/core';
 
 import * as FormActions from '../store/actions/form';
 import * as GuestActions from '../store/actions';
@@ -10,12 +15,6 @@ import AllInquiry from '../shared-components/AllInquiry';
 import Form from '../shared-components/Form';
 
 import BLField from './components/BLField';
-
-import React, { useEffect, useState } from 'react';
-import clsx from 'clsx';
-import { useDispatch, useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/styles';
-import { Grid, Divider } from '@material-ui/core';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -75,8 +74,7 @@ const GuestWorkspace = (props) => {
             : currentField
               ? getKeyByValue(metadata['field'], currentField)
               : ''
-        }
-      >
+        }>
         {openAllInquiry ? <AllInquiry user="guest" /> : <Inquiry user="guest" />}
       </Form>
 
@@ -151,7 +149,7 @@ const GuestWorkspace = (props) => {
           </Grid>
           <Grid item>
             <h3>
-              EXPORT REFERENCES (for the merchant's and/or Carrier's reference only. See back clause
+              EXPORT REFERENCES (for the merchant	&apos; s and/or Carrier &apos;s reference only. See back clause
               8. (4.))
             </h3>
             <BLField id={getField('EXPORT REFERENCES')} multiline={true} rows={2}></BLField>
@@ -163,7 +161,7 @@ const GuestWorkspace = (props) => {
             </BLField>
           </Grid>
           <Grid item>
-            <h3>FINAL DESTINATION(for line merchant's reference only)</h3>
+            <h3>FINAL DESTINATION(for line merchant &apos; s reference only)</h3>
             <BLField id={getField('FINAL DESTINATION')}>
               {getValueField('FINAL DESTINATION')}
             </BLField>

@@ -1,8 +1,8 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect , useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@material-ui/core';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import { useState } from 'react';
+
 // style
 const baseStyle = {
   flex: 1,
@@ -79,7 +79,6 @@ const Dropzone = (props) => {
   );
 
 
-
   return (
     <div className="container">
       <div {...getRootProps({ style })}>
@@ -98,14 +97,14 @@ const Dropzone = (props) => {
         <div style={{ marginTop: '1rem' }} display="flex">
           { files.map((file) => (
             file.ext === "image" ?
-            <img
-              src={file.file}
-              style={imageStyle}
-            /> :
-            <a download={file.name}
-              href={file.file}
+              <img
+                src={file.file}
+                style={imageStyle}
+              /> :
+              <a download={file.name}
+                href={file.file}
            
-          >{file.name}</a>
+              >{file.name}</a>
           ))
 
           }

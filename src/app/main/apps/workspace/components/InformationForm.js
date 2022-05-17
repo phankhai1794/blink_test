@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Button,
+import {Button,
   TextField,
   Select,
   IconButton,
@@ -9,20 +8,20 @@ import {
   Popover,
   Grid,
   MenuItem
-} from '@material-ui/core';
+  , FormControl } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { FormControl } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CloseIcon from '@material-ui/icons/Close';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
 import _ from '@lodash';
-import QuestionBox from './QuestionBox';
-import UserInfo from './UserInfo';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
+
+import UserInfo from './UserInfo';
+import QuestionBox from './QuestionBox';
 import TemporaryDrawer from './TemporaryDrawer';
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
@@ -41,14 +40,12 @@ const inputStyle = makeStyles((theme) => ({
 const inputStyleDisabled = makeStyles((theme) => ({
   underline: {
     '&&&:before': {
-      borderBottom: 'none'
+      borderBottom: 'none',
+      borderStyle: 'dashed'
     },
     '&:hover:not($disabled):before': {
       borderBottom: `1px dashed ${theme.palette.text.primary} !important`
     },
-    '&&&:before': {
-      borderStyle: 'dashed'
-    }
   }
 }));
 const typeToNameDict = {
@@ -132,22 +129,22 @@ const InformationForm = (props) => {
   const [questionInfo, setQuestionInfo] = useState(
     !questionIsEmpty
       ? {
-          name: question.name,
-          type: question.type,
-          answerType: question.answerType,
-          selectedChoice: question.selectedChoice,
-          addOther: question.addOther,
-          otherChoice: question.otherChoice
-          // divRef will be add on function OnSave to prevent storing too much temp state info
-        }
+        name: question.name,
+        type: question.type,
+        answerType: question.answerType,
+        selectedChoice: question.selectedChoice,
+        addOther: question.addOther,
+        otherChoice: question.otherChoice
+        // divRef will be add on function OnSave to prevent storing too much temp state info
+      }
       : {
-          name: typeToNameDict['ROUTING INQUIRY/DISCREPANCY'],
-          type: 'ROUTING INQUIRY/DISCREPANCY',
-          answerType: 'Choice Answer',
-          selectedChoice: '',
-          addOther: false,
-          otherChoice: ''
-        }
+        name: typeToNameDict['ROUTING INQUIRY/DISCREPANCY'],
+        type: 'ROUTING INQUIRY/DISCREPANCY',
+        answerType: 'Choice Answer',
+        selectedChoice: '',
+        addOther: false,
+        otherChoice: ''
+      }
   );
   const [isEdit, setIsEdit] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -155,11 +152,11 @@ const InformationForm = (props) => {
     !questionIsEmpty
       ? question.choices
       : [
-          {
-            id: 1,
-            content: content
-          }
-        ]
+        {
+          id: 1,
+          content: content
+        }
+      ]
   );
   const handleAddChoice = () => {
     setChoiceList((prevQuestion) => [
@@ -292,7 +289,7 @@ const InformationForm = (props) => {
             <UserInfo name="Andrew" date="Today" time="10:45PM" />
           </div>
           <Popover
-            id={Boolean(anchorEl) ? 'simple-popover' : undefined}
+            id={anchorEl ? 'simple-popover' : undefined}
             open={Boolean(anchorEl)}
             anchorEl={anchorEl}
             onClose={() => setAnchorEl(null)}
@@ -347,7 +344,6 @@ const InformationForm = (props) => {
                     key={index}
                     handleChange={handleChange}
                     handleRemoveChoice={handleRemoveChoice}
-                    handleChange={handleChange}
                   />
                 );
               })
@@ -366,7 +362,7 @@ const InformationForm = (props) => {
                 <div className="flex" style={{ paddingTop: '6px' }}>
                   <p style={{ margin: '0px 1rem 0px 1rem', fontSize: '20px' }}> OR </p>
                   <Link style={{ fontSize: '20px' }} onClick={handleAddOtherChoice}>
-                    Add "Customer Input"
+                    Add 	&quot;Customer Input	&quot;
                   </Link>
                 </div>
               )}

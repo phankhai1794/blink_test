@@ -2,11 +2,10 @@ import history from '@history';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
 import History from 'app/fuse-layouts/shared-components/History';
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
-import SendInquiryForm from 'app/main/apps/workspace/admin/SendInquiryForm';
+import SendInquiryForm from 'app/main/apps/workspace/components/SendInquiryForm';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-
 import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';

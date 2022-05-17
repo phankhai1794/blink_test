@@ -14,7 +14,8 @@ export const loadListMyBL = (type) => async (dispatch) => {
       }
     })
     .catch((err) => {
-      const { message } = err.response.data.error;
+      console.error(err)
+      const { message } = err.message;
       return dispatch({
         type: SET_MYBLS_ERROR,
         state: false,

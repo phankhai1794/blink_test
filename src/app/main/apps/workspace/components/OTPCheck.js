@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
 import _ from '@lodash';
 import history from '@history';
+import { verifyEmail, verifyGuest, isVerified } from 'app/services/authService';
+import * as Actions from 'app/store/actions';
+import React, { useState, useEffect } from 'react';
 import OtpInput from 'react-otp-input';
 import { useSelector, useDispatch } from 'react-redux';
 import { isEmail } from 'validator';
-
 import { makeStyles } from '@material-ui/core/styles';
 import { Paper, InputBase, IconButton, Divider } from '@material-ui/core';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
-import { verifyEmail, verifyGuest, isVerified } from 'app/services/authService';
 import GuestWorkspace from './GuestWorkspace';
-import * as Actions from 'app/store/actions';
+
 
 const otpLength = 4;
 

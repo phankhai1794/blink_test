@@ -1,24 +1,24 @@
 import { getKeyByValue } from '@shared';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
-
-import Inquiry from '../shared-components/Inquiry';
-import AllInquiry from '../shared-components/AllInquiry';
-import Form from '../shared-components/Form';
-import Label from '../shared-components/FieldLabel';
-import * as Actions from '../store/actions';
-import * as FormActions from '../store/actions/form';
-import * as TransActions from '../store/actions/transaction';
-
-import BLField from './components/BLField';
-import InquiryForm from './InquiryForm';
-
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import _ from 'lodash';
 import { Grid, Divider } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
+
+import * as Actions from '../store/actions';
+import * as FormActions from '../store/actions/form';
+import * as TransActions from '../store/actions/transaction';
+
+import Inquiry from './Inquiry';
+import AllInquiry from './AllInquiry';
+import Form from './Form';
+import Label from './FieldLabel';
+import BLField from './BLField';
+import InquiryForm from './InquiryForm';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -54,8 +54,7 @@ const BLWorkspace = (props) => {
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.myBL
   ]);
-  const [minimize, openInquiry, openAllInquiry, reload, success, fail] = useSelector(({ workspace }) => [
-    workspace.formReducer.minimize,
+  const [openInquiry, openAllInquiry, reload, success, fail] = useSelector(({ workspace }) => [
     workspace.formReducer.openInquiry,
     workspace.formReducer.openAllInquiry,
     workspace.formReducer.reload,
