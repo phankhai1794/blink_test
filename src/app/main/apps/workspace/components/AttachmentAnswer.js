@@ -4,6 +4,12 @@ import { Button, Fab } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import SaveIcon from '@material-ui/icons/Save';
 import { useDispatch } from 'react-redux';
+import CloseIcon from '@material-ui/icons/Close';
+import * as InquiryActions from '../store/actions/inquiry';
+
+import ImageAttach from './ImageAttach';
+import FileAttach from './FileAttach';
+import { useDispatch } from 'react-redux';
 import axios from 'axios';
 
 import { uploadFile } from '../../../../services/fileService';
