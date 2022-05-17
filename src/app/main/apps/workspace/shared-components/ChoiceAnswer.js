@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
-import { Radio, TextField, Button } from '@material-ui/core';
-import UserInfo from './UserInfo';
+import {
+  Radio,
+  TextField,
+  Button,
+  FormControl,
+  RadioGroup,
+  FormControlLabel
+} from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
+import { useSelector } from 'react-redux';
+import { updateInquiryChoice } from 'app/services/inquiryService';
+
+import * as GuestActions from '../guest/store/actions';
+
+import UserInfo from './UserInfo';
 
 const ChoiceAnswer = (props) => {
-  const { question } = props;
+  const { index, questions, question, saveQuestion } = props;
   let questionIsEmpty = props.question === undefined;
-  let prevChoiceArray = question.answerObj.filter(
-    (choice) => choice.content === question.selectedChoice
-  );
+  let prevChoiceArray = question.answerObj.filter((choice) => {
+    return choice.confirmed;
+  });
+  const user = useSelector(({ user }) => user);
   const initSelectedChoice = () => {
-    if (!questionIsEmpty) {
-      if (question.selectedChoice === '') {
-        return '';
-      } else if (question.selectedChoice === 'other') {
-        return 'other';
-      } else {
-        return prevChoiceArray.length === 0
-          ? `${question.otherChoiceContent === undefined ? '' : 'other'}`
-          : prevChoiceArray[0].content;
-      }
+    if (!questionIsEmpty && prevChoiceArray.length > 0) {
+      return prevChoiceArray[0].id;
     } else {
       return '';
     }
@@ -30,9 +35,26 @@ const ChoiceAnswer = (props) => {
     selectedChoice === 'other' ? otherChoiceContent : selectedChoice
   );
   const [showSaveBtn, setShowSaveBtn] = useState(false);
-  const handleChange = (e) => {
+
+  const handleChange = async (e) => {
     setSelectedChoice(e.target.value);
-    setShowSaveBtn(true);
+    // setShowSaveBtn(true);
+    const selectedObj = {
+      inquiry: question.id,
+      answer: e.target.value,
+      confirmed: true
+    };
+    await updateInquiryChoice(selectedObj);
+
+    const optionsOfQuestion = [...questions];
+    const answersObj = optionsOfQuestion[index].answerObj;
+    answersObj.forEach((item, i) => {
+      answersObj[i].confirmed = false;
+    });
+    const answerIndex = answersObj.findIndex((item) => item.id === selectedObj.answer);
+    const answerUpdate = answersObj[answerIndex];
+    answerUpdate.confirmed = true;
+    saveQuestion(optionsOfQuestion);
   };
   const handleSaveSelectedChoice = () => {
     let savedQuestion = question;
@@ -52,30 +74,31 @@ const ChoiceAnswer = (props) => {
   };
   return (
     <>
-      {question.answerObj.map((choice, index) => (
-        <div key={index} style={{ marginTop: '0.5rem' }}>
-          <div style={{ display: 'flex', marginTop: '0.5rem' }}>
-            <div>
-              <Radio
-                disabled
-                onChange={handleChange}
-                value={choice.content}
-                color="primary"
-                style={{ margin: 'auto' }}
+      <FormControl>
+        <RadioGroup
+          aria-labelledby="demo-controlled-radio-buttons-group"
+          name="controlled-radio-buttons-group"
+          onChange={handleChange}
+        >
+          {question.answerObj.map((choice, index) => (
+            <div key={index} style={{ marginTop: '0.5rem' }}>
+              <FormControlLabel
+                disabled={user.role !== 'Guest'}
+                checked={selectedChoice === choice.id}
+                value={choice.id}
+                control={<Radio color={'primary'} />}
+                label={<span style={{ fontSize: '1.7rem' }}>{choice.content}</span>}
               />
             </div>
-            <p style={{ margin: 'auto 1rem', fontSize: '1.7rem' }}>{choice.content}</p>
-          </div>
-        </div>
-      ))} 
-     
+          ))}
+        </RadioGroup>
+      </FormControl>
       {/* {lastSelectedChoice !== '' && !showSaveBtn && (
         <div style={{ marginTop: '1rem' }}>
           <UserInfo name="Anrew" date="today" time="10:50PM" />
           <h3 style={{ margin: '1rem 5.5rem' }}>{lastSelectedChoice}</h3>
         </div>
       )} */}
-
     </>
   );
 };
