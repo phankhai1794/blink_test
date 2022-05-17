@@ -1,47 +1,96 @@
+import React, { useEffect, useState } from 'react';
+import clsx from 'clsx';
+import { createMuiTheme } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/styles';
+import { useDispatch, useSelector } from 'react-redux';
+import { TextField, InputAdornment, makeStyles } from '@material-ui/core';
+import HelpIcon from '@material-ui/icons/Help';
+import LockIcon from '@material-ui/icons/Lock';
+
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
+import Label from '../components/FieldLabel';
 
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { TextField, InputAdornment , makeStyles } from '@material-ui/core';
-import { green } from '@material-ui/core/colors';
-import ChatBubbleIcon from '@material-ui/icons/ChatBubble';
+const theme = createMuiTheme({
+  typography: {
+    fontFamily: 'Montserrat'
+  }
+});
+
+const themeInput = '#BAC3CB';
+const lightThemeInput = '#F5F8FA';
+const darkThemeInput = '#515E6A';
+const themeInq = '#BD0F72';
+const lightThemeInq = '#FAF1F5';
 
 const useStyles = makeStyles((theme) => ({
-  popover: {
-    pointerEvents: 'none'
-  },
-  circlePopover: {
-    '& > div': {
-      borderRadius: '200px'
-    }
-  },
-  popoverContent: {
-    pointerEvents: 'auto'
-  },
   root: {
-    backgroundColor: '#f5f8fa',
-    '&:hover': {
-      backgroundColor: 'yellow'
+    padding: 0,
+    '& fieldset': {
+      borderColor: themeInput,
+      backgroundColor: lightThemeInput,
+      borderRadius: '8px',
+      zIndex: '-1'
+    },
+    '&:hover fieldset': {
+      borderColor: `${themeInq} !important`
+    },
+    '&:focus-within fieldset': {
+      border: `1px solid ${themeInq} !important`
     }
   },
-  notchedOutlineChecked: {
-    borderColor: `${green[500]} !important`
+  hasInquiry: {
+    '& fieldset': {
+      backgroundColor: lightThemeInq
+    }
+  },
+  input: {
+    fontSize: '15px',
+    color: darkThemeInput,
+    padding: '9px 16px',
+    lineHeight: '22px'
   },
   notchedOutlineNotChecked: {
-    borderColor: `red !important`
+    borderColor: `${themeInq} !important`
   },
   adornment: {
-    height: '6em',
-    maxHeight: '6em',
+    padding: '10px',
+    margin: 0
+  },
+  adornmentMultiline: {
     alignItems: 'flex-end'
+  },
+  adornmentRow_2: {
+    height: '4em',
+    maxHeight: '4em'
+  },
+  adornmentRow_3: {
+    height: '6em',
+    maxHeight: '6em'
+  },
+  adornmentRow_4: {
+    height: '8em',
+    maxHeight: '8em'
+  },
+  adornmentRow_5: {
+    height: '10.7em',
+    maxHeight: '10.7em'
+  },
+  sizeIcon: {
+    fontSize: '18px'
+  },
+  colorHasInqIcon: {
+    color: `${themeInq} !important`
+  },
+  colorLockIcon: {
+    color: darkThemeInput
   }
 }));
 
 const GuestBLField = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const { children, width, multiline, rows, selectedChoice, id } = props;
+  const { children, width, multiline, rows, selectedChoice, id, label, lock, readOnly } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
   const [inquiries, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
@@ -78,39 +127,48 @@ const GuestBLField = (props) => {
   }, [inquiries, metadata]);
 
   return (
-    <div
-      id={id}
-      style={{
-        width: `${width}`
-      }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      onClick={onClick}
-    >
-      <TextField
-        value={selectedChoice || children}
-        variant="outlined"
-        fullWidth={true}
-        multiline={multiline}
-        rows={rows}
-        classes={{
-          root: classes.root
-        }}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment
-              position="end"
-              className={multiline && rows > 3 ? classes.adornment : ''}
-            >
-              {!questionIsEmpty ? <ChatBubbleIcon color="primary" /> : ''}
-            </InputAdornment>
-          ),
-          classes: {
-            notchedOutline: `${questionIsEmpty ? '' : classes.notchedOutlineNotChecked}`
-          }
-        }}
-      />
-    </div>
+    <>
+      {label && <Label className={!questionIsEmpty ? classes.colorHasInqIcon : ''}>{label}</Label>}
+      <div
+        id={id}
+        style={{ width }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        onClick={onClick}>
+        <ThemeProvider theme={theme}>
+          <TextField
+            value={selectedChoice || children}
+            variant="outlined"
+            fullWidth={true}
+            multiline={multiline}
+            rows={rows}
+            className={clsx(classes.root, !questionIsEmpty ? classes.hasInquiry : '')}
+            InputProps={{
+              readOnly: readOnly || true,
+              endAdornment: (
+                <InputAdornment
+                  position="end"
+                  className={clsx(
+                    classes.adornment,
+                    multiline ? classes.adornmentMultiline : '',
+                    rows ? classes[`adornmentRow_${rows}`] : ''
+                  )}>
+                  {!questionIsEmpty && (
+                    <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
+                  )}
+                  {lock && <LockIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />}
+                </InputAdornment>
+              ),
+              classes: {
+                root: classes.root,
+                input: classes.input,
+                notchedOutline: questionIsEmpty ? '' : classes.notchedOutlineNotChecked
+              }
+            }}
+          />
+        </ThemeProvider>
+      </div>
+    </>
   );
 };
 
