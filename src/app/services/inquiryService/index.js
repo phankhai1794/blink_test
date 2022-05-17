@@ -45,3 +45,8 @@ export async function changeStatus(id, state) {
   const response = await axios().patch(`${PATH}/status/${id}`, { state });
   return response.data;
 }
+
+export async function updateInquiryChoice(state) {
+  const response = await axios().patch(`${PATH}/choice`, { state });
+  return response.data;
+}
