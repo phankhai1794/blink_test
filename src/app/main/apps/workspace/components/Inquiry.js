@@ -1,17 +1,6 @@
 import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
 import { getFile } from 'app/services/fileService';
 import { displayTime } from '@shared';
-
-import * as InquiryActions from '../store/actions/inquiry';
-import InquiryEditor from '../admin/components/InquiryEditor';
-
-import ChoiceAnswer from './ChoiceAnswer';
-import ParagraphAnswer from './ParagraphAnswer';
-import AttachmentAnswer from './AttachmentAnswer';
-import ImageAttach from './ImageAttach';
-import FileAttach from './FileAttach';
-import UserInfo from './UserInfo';
-
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
@@ -28,6 +17,8 @@ import {
   IconButton,
   Fab
 } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import { makeStyles } from '@material-ui/styles';
 
 const Comment = (props) => {
   const inputStyle = {

@@ -9,7 +9,6 @@ import * as InquiryActions from '../store/actions/inquiry';
 
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
-import { useDispatch } from 'react-redux';
 import axios from 'axios';
 
 import { uploadFile } from '../../../../services/fileService';
