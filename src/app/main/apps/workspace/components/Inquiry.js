@@ -55,7 +55,7 @@ const Comment = (props) => {
   useEffect(() => {
     loadComment(q.id)
       .then((res) => {
-        dispatch(InquiryActions.setDisplayComment(Boolean(res.length || userType === "guest")));
+        dispatch(InquiryActions.setDisplayComment(Boolean(res.length || userType === 'guest')));
         setComment(res);
       })
       .catch((error) => console.log(error));
@@ -76,7 +76,7 @@ const Comment = (props) => {
     setComment(temp);
   };
   const addComment = async (e) => {
-    const targetValue = e.target.value
+    const targetValue = e.target.value;
     if (e.key === 'Enter') {
       if (targetValue) {
         const inqAns = {
