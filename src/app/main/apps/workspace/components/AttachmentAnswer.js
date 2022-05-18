@@ -1,15 +1,11 @@
-import React, { useMemo , useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button, Fab } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import SaveIcon from '@material-ui/icons/Save';
 import { useDispatch } from 'react-redux';
-import CloseIcon from '@material-ui/icons/Close';
 
-import * as InquiryActions from '../store/actions/inquiry';
 
-import ImageAttach from './ImageAttach';
-import FileAttach from './FileAttach';
 // style
 const baseStyle = {
   flex: 1,
@@ -41,19 +37,11 @@ const rejectStyle = {
 
 //   component
 const AttachmentAnswer = (props) => {
-  const { question, user, index, questions, saveQuestion } = props;
+  const { question, user, index, questions, saveQuestion, isShowBtn } = props;
   const [name, setName] = useState(question.fileName || '');
   const [showBtn, setShowBtn] = useState(false);
   const dispatch = useDispatch();
-  const handleSaveSelectedChoice = () => {
-    let savedQuestion = question;
-    savedQuestion = {
-      ...savedQuestion,
-      fileName: name
-    };
-    setShowBtn(false);
-    props.onSaveSelectedChoice(savedQuestion);
-  };
+
   const uploadImageAttach = (files) => {
     const optionsOfQuestion = [...questions];
     files.forEach((src) => {
@@ -63,7 +51,11 @@ const AttachmentAnswer = (props) => {
       optionsOfQuestion[index].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
     });
     dispatch(saveQuestion(optionsOfQuestion));
+    setShowBtn(true);
   }
+  useEffect(() => {
+    setShowBtn(isShowBtn);
+  }, [isShowBtn]);
   const onDrop = (acceptedFiles) => {
     uploadImageAttach(acceptedFiles);
   }
@@ -74,6 +66,16 @@ const AttachmentAnswer = (props) => {
       noKeyboard: true,
       onDrop,
     });
+  const handleSaveSelectedChoice = () => {
+    // let savedQuestion = question;
+    // savedQuestion = {
+    //   ...savedQuestion,
+    //   fileName: name
+    // };
+    // setShowBtn(false);
+    // props.onSaveSelectedChoice(savedQuestion);
+    console.log(question);
+  };
   const style = useMemo(
     () => ({
       ...baseStyle,
