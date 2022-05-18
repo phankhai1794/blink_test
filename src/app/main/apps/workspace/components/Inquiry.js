@@ -46,16 +46,16 @@ const Comment = (props) => {
   const [comment, setComment] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState('');
-  const [reply, currentField] = useSelector(({workspace}) => [
+  const [reply, currentField] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.reply,
-    workspace.inquiryReducer.currentField,
+    workspace.inquiryReducer.currentField
   ]);
-  const user = useSelector(({ user }) => user)
+  const user = useSelector(({ user }) => user);
   const open = Boolean(anchorEl);
   useEffect(() => {
     loadComment(q.id)
       .then((res) => {
-        dispatch(InquiryActions.setDisplayComment(Boolean(res.length || userType === "guest")));
+        dispatch(InquiryActions.setDisplayComment(Boolean(res.length || userType === 'guest')));
         setComment(res);
       })
       .catch((error) => console.log(error));
@@ -76,7 +76,7 @@ const Comment = (props) => {
     setComment(temp);
   };
   const addComment = async (e) => {
-    const targetValue = e.target.value
+    const targetValue = e.target.value;
     if (e.key === 'Enter') {
       if (targetValue) {
         const inqAns = {
