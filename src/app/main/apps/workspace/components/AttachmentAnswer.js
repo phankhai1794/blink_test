@@ -53,7 +53,9 @@ const AttachmentAnswer = (props) => {
       const formData = new FormData();
       formData.append('file', src);
       formData.append('name', src.name);
-      optionsOfQuestion[index].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+      if (optionsOfQuestion[index].answerObj.length > 0) {
+        optionsOfQuestion[index].answerObj[0].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+      }
     });
     dispatch(saveQuestion(optionsOfQuestion));
     setShowBtn(true);
@@ -71,7 +73,7 @@ const AttachmentAnswer = (props) => {
       noKeyboard: true,
       onDrop,
     });
-  const handleSaveSelectedChoice = () => {
+  const handleSave = () => {
     const formData = [];
     for (const f of question.mediaFile) {
       const form_data = f.data;
@@ -85,7 +87,7 @@ const AttachmentAnswer = (props) => {
       .all(formData.map((endpoint) => uploadFile(endpoint)))
       .then((media) => {
         createAttachmentAnswer({ question: questionMap, mediaFile: media }).then(() => {
-
+          dispatch(FormActions.displaySuccess(true));
         }).catch((error) => dispatch(FormActions.displayFail(true, error)));
       }).catch((error) => dispatch(FormActions.displayFail(true, error)));
   };
@@ -103,12 +105,12 @@ const AttachmentAnswer = (props) => {
     <div>
       <div className="container">
         <div {...getRootProps({ style })}>
-          <input {...getInputProps()} disabled={props.disabled || false} />
+          <input {...getInputProps()} disabled={user !== 'guest'} />
           <p>Drag and drop some files here</p>
           <Button
             color="primary"
             variant="contained"
-            disabled={props.disabled || false}
+            disabled={user !== 'guest'}
             onClick={open}
           >
             <PublishIcon />
@@ -117,7 +119,7 @@ const AttachmentAnswer = (props) => {
       </div>
       {showBtn && (
         <div className="justify-end flex" style={{ marginTop: '1rem' }}>
-          <Button variant="contained" color="primary" onClick={handleSaveSelectedChoice}>
+          <Button variant="contained" color="primary" onClick={handleSave}>
             {' '}
             <SaveIcon />
             Save

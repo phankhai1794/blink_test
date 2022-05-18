@@ -327,25 +327,51 @@ const Inquiry = (props) => {
                     />
                   )}
                 </div>
-                {q.mediaFile.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
-                    <Fab
-                      size="small"
-                      onClick={() => handleRemoveImageAttach(mediaIndex, indexes)}
-                      classes={
-                        file.ext.match(/jpeg|jpg|png/g)
-                          ? { root: classes.positionBtnImg }
-                          : { root: classes.positionBtnNotImg }
-                      }>
-                      <CloseIcon style={{ fontSize: 20 }} />
-                    </Fab>
-                    {file.ext.match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
-                    ) : (
-                      <FileAttach file={file} />
-                    )}
-                  </div>
-                ))}
+                <>
+                  {q.mediaFile.length > 0 && <h3>Attachment Inquiry:</h3>}
+                  {q.mediaFile.map((file, mediaIndex) => (
+                    <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
+                      <Fab
+                        size="small"
+                        onClick={() => handleRemoveImageAttach(mediaIndex, indexes)}
+                        classes={
+                          file.ext.match(/jpeg|jpg|png/g)
+                            ? { root: classes.positionBtnImg }
+                            : { root: classes.positionBtnNotImg }
+                        }>
+                        <CloseIcon style={{ fontSize: 20 }} />
+                      </Fab>
+                      {file.ext.match(/jpeg|jpg|png/g) ? (
+                        <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
+                      ) : (
+                        <FileAttach file={file} />
+                      )}
+                    </div>
+                  ))}
+                </>
+                <>
+                  {q.answerObj[0].mediaFiles.length > 0 && <h3>Attachment Answer:</h3>}
+                  {q.answerObj[0].mediaFiles.map((file, mediaIndex) => (
+                    <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
+                      {user === 'guest' && <Fab
+                        size="small"
+                        onClick={() => handleRemoveImageAttach(mediaIndex, indexes)}
+                        classes={
+                          file.ext.match(/jpeg|jpg|png/g)
+                            ? { root: classes.positionBtnImg }
+                            : { root: classes.positionBtnNotImg }
+                        }>
+                        <CloseIcon style={{ fontSize: 20 }} />
+                      </Fab>
+                      }
+                      {file.ext.match(/jpeg|jpg|png/g) ? (
+                        <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
+                      ) : (
+                        <FileAttach file={file} />
+                      )}
+                    </div>
+                  ))}
+                </>
                 <Comment q={q} inquiries={inquiries} indexes={indexes} userType={user} />
               </Card>
             )}
