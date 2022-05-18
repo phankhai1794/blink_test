@@ -1,7 +1,7 @@
+import UserInfo from './UserInfo';
+
 import React, { useState } from 'react';
 import { TextField, Button } from '@material-ui/core';
-import UserInfo from './UserInfo';
-import SaveIcon from '@material-ui/icons/Save';
 const ParagraphAnswer = (props) => {
   const { question } = props;
   const [paragraphText, setParagraphText] = useState(question.paragraph || '');

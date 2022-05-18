@@ -112,6 +112,10 @@ const BLWorkspace = (props) => {
 
     const bkgNo = window.location.pathname.split('/')[3];
     dispatch(Actions.initBL(bkgNo));
+
+    return function unMount() {
+      dispatch(FormActions.toggleReload());
+    }
   }, []);
 
   return (

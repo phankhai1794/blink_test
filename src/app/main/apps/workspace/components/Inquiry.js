@@ -44,7 +44,7 @@ const Comment = (props) => {
   const [comment, setComment] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState('');
-  const [reply, currentField] = useSelector(({workspace}) => [
+  const [reply, currentField] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.reply,
     workspace.inquiryReducer.currentField,
   ]);
@@ -189,7 +189,7 @@ const Comment = (props) => {
 const Inquiry = (props) => {
   const dispatch = useDispatch();
   const { user } = props;
-  const [inquiries, currentField, metadata] = useSelector(({workspace}) => [
+  const [inquiries, currentField, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.metadata
@@ -274,10 +274,10 @@ const Inquiry = (props) => {
                 <Typography variant="h5">{q.content}</Typography>
                 <div style={{ display: 'block', margin: '1rem 0rem' }}>
                   {type === metadata.ans_type.choice && <ChoiceAnswer
-                      index={indexes}
-                      questions={inquiries}
-                      question={q}
-                      saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                    index={indexes}
+                    questions={inquiries}
+                    question={q}
+                    saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
                   />}
                   {type === metadata.ans_type.paragraph && <ParagraphAnswer question={q} />}
                   {type === metadata.ans_type.attachment && (

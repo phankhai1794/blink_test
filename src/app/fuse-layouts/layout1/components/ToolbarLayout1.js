@@ -62,8 +62,10 @@ function ToolbarLayout1(props) {
   ]);
 
   const openInquiry = () => {
-    dispatch(FormActions.toggleInquiry(true));
-    dispatch(FormActions.toggleAllInquiry());
+    if (badge) {
+      dispatch(FormActions.toggleInquiry(true));
+      dispatch(FormActions.toggleAllInquiry());
+    }
   };
 
   useEffect(() => {
