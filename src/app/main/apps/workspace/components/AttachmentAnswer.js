@@ -4,6 +4,11 @@ import { Button, Fab } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import SaveIcon from '@material-ui/icons/Save';
 import { useDispatch } from 'react-redux';
+import axios from 'axios';
+
+import { uploadFile } from '../../../../services/fileService';
+import { createAttachmentAnswer } from '../../../../services/inquiryService';
+import * as FormActions from '../store/actions/form';
 
 
 // style
@@ -67,14 +72,22 @@ const AttachmentAnswer = (props) => {
       onDrop,
     });
   const handleSaveSelectedChoice = () => {
-    // let savedQuestion = question;
-    // savedQuestion = {
-    //   ...savedQuestion,
-    //   fileName: name
-    // };
-    // setShowBtn(false);
-    // props.onSaveSelectedChoice(savedQuestion);
-    console.log(question);
+    const formData = [];
+    for (const f of question.mediaFile) {
+      const form_data = f.data;
+      formData.push(form_data);
+    }
+    const questionMap = {
+      ansType: question.ansType,
+      inqId: question.id
+    }
+    axios
+      .all(formData.map((endpoint) => uploadFile(endpoint)))
+      .then((media) => {
+        createAttachmentAnswer({ question: questionMap, mediaFile: media }).then(() => {
+
+        }).catch((error) => dispatch(FormActions.displayFail(true, error)));
+      }).catch((error) => dispatch(FormActions.displayFail(true, error)));
   };
   const style = useMemo(
     () => ({
