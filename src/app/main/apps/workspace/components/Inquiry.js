@@ -328,8 +328,8 @@ const Inquiry = (props) => {
                   )}
                 </div>
                 <>
-                  {q.mediaFile.length > 0 && <h3>Attachment Inquiry:</h3>}
-                  {q.mediaFile.map((file, mediaIndex) => (
+                  {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+                  {q.mediaFile?.map((file, mediaIndex) => (
                     <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
                       <Fab
                         size="small"
@@ -350,8 +350,8 @@ const Inquiry = (props) => {
                   ))}
                 </>
                 <>
-                  {q.answerObj[0].mediaFiles.length > 0 && <h3>Attachment Answer:</h3>}
-                  {q.answerObj[0].mediaFiles.map((file, mediaIndex) => (
+                  {q.answerObj[0]?.mediaFiles.length > 0 && <h3>Attachment Answer:</h3>}
+                  {q.answerObj[0]?.mediaFiles.map((file, mediaIndex) => (
                     <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
                       {user === 'guest' && <Fab
                         size="small"
