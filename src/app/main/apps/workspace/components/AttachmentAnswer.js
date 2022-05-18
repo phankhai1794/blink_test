@@ -75,7 +75,7 @@ const AttachmentAnswer = (props) => {
     });
   const handleSave = () => {
     const formData = [];
-    for (const f of question.mediaFile) {
+    for (const f of question.answerObj[0].mediaFiles) {
       const form_data = f.data;
       formData.push(form_data);
     }
