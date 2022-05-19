@@ -102,7 +102,6 @@ const Dropzone = (props) => {
               /> :
               <a download={file.name}
                 href={file.file}
-
               >{file.name}</a>
           ))
 

@@ -1,7 +1,6 @@
 import _ from '@lodash';
 import React, { useState } from 'react';
-import {
-  Button,
+import {Button,
   TextField,
   Select,
   IconButton,
@@ -10,8 +9,7 @@ import {
   Popover,
   Grid,
   MenuItem,
-  FormControl
-} from '@material-ui/core';
+  FormControl} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import SaveIcon from '@material-ui/icons/Save';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';

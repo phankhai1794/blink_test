@@ -1,11 +1,4 @@
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-
-import * as InquiryActions from '../store/actions/inquiry';
-import * as FormActions from '../store/actions/form';
-
-import PopoverFooterAdmin from './PopoverFooter1';
-import PopoverFooter from './PopoverFooter';
-
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
@@ -20,6 +13,12 @@ import { Box, Tabs, Tab, Fab, Divider, Link } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import CropIcon from '@material-ui/icons/Crop';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+
+import * as FormActions from '../store/actions/form';
+import * as InquiryActions from '../store/actions/inquiry';
+
+import PopoverFooter from './PopoverFooter';
+import PopoverFooterAdmin from './PopoverFooter1';
 
 
 const styles = (theme) => ({

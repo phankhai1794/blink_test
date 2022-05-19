@@ -9,7 +9,7 @@ import {
   Fab,
   Divider,
   FormControl,
-  FormHelperText,
+  FormHelperText
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
@@ -23,7 +23,6 @@ import CustomSelect from './CustomSelect';
 import FileAttach from './FileAttach';
 import ImageAttach from './ImageAttach';
 import Dropzone from './Dropzone';
-
 
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
