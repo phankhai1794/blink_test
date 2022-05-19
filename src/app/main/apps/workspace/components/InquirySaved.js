@@ -88,7 +88,7 @@ const Comment = (props) => {
     <>
       {q.reply !== undefined &&
         q.reply.map((k, id) => (
-          <div style={{ marginBottom: '20px' }}>
+          <div key={id} style={{ marginBottom: '20px' }}>
             {edit === id ? (
               <input
                 placeholder="Comment here"

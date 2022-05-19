@@ -112,6 +112,10 @@ const BLWorkspace = (props) => {
 
     const bkgNo = window.location.pathname.split('/')[3];
     dispatch(Actions.initBL(bkgNo));
+
+    return () => {
+      dispatch(FormActions.toggleReload());
+    }
   }, []);
 
   return (
@@ -167,7 +171,9 @@ const BLWorkspace = (props) => {
           <Grid container style={{ marginTop: '60px' }}>
             <Grid item xs={6} className={classes.leftPanel}>
               <Grid item>
-                <BLField label="PRE-CARRIAGE BY" id={getField('PRE-CARRIAGE BY')}></BLField>
+                <BLField label="PRE-CARRIAGE BY" id={getField('PRE-CARRIAGE BY')}>
+                  {getValueField('PRE-CARRIAGE BY')}
+                </BLField>
               </Grid>
               <Grid item>
                 <BLField label="PORT OF LOADING" id={getField('PORT OF LOADING')}>

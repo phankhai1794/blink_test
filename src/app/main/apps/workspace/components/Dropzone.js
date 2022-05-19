@@ -1,8 +1,7 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@material-ui/core';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import { useState } from 'react';
 // style
 const baseStyle = {
   flex: 1,
@@ -41,7 +40,7 @@ const Dropzone = (props) => {
   const [files, setFiles] = useState(props.fileName || []);
   const onDrop = (acceptedFiles) => {
     if (acceptedFiles[0].type.includes("image")) {
-      setFiles([...files, {file: URL.createObjectURL(acceptedFiles[0]), type: "image" }]);
+      setFiles([...files, { file: URL.createObjectURL(acceptedFiles[0]), type: "image" }]);
     }
     else {
       const reader = new FileReader();
@@ -54,8 +53,8 @@ const Dropzone = (props) => {
           for (const a of array) {
             fileByteArray.push(a);
           }
-          const blob = new Blob(fileByteArray,{type: acceptedFiles[0].type});   
-          setFiles([...files, {name: acceptedFiles[0].name,file: URL.createObjectURL(blob) , type: "file" }]);
+          const blob = new Blob(fileByteArray, { type: acceptedFiles[0].type });
+          setFiles([...files, { name: acceptedFiles[0].name, file: URL.createObjectURL(blob), type: "file" }]);
         }
       }
     }
@@ -79,7 +78,6 @@ const Dropzone = (props) => {
   );
 
 
-
   return (
     <div className="container">
       <div {...getRootProps({ style })}>
@@ -96,16 +94,16 @@ const Dropzone = (props) => {
       </div>
       {files && (
         <div style={{ marginTop: '1rem' }} display="flex">
-          { files.map((file) => (
+          {files.map((file) => (
             file.ext === "image" ?
-            <img
-              src={file.file}
-              style={imageStyle}
-            /> :
-            <a download={file.name}
-              href={file.file}
-           
-          >{file.name}</a>
+              <img
+                src={file.file}
+                style={imageStyle}
+              /> :
+              <a download={file.name}
+                href={file.file}
+
+              >{file.name}</a>
           ))
 
           }

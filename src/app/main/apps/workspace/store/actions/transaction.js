@@ -1,6 +1,6 @@
 import { createBlTrans, getMyBLTrans, getInqsTrans } from 'app/services/transaction';
 
-import { editInquiry } from './inquiry'
+import { editInquiry, saveField } from './inquiry'
 
 export const CREATE_TRANS_NONE = 'CREATE_TRANS_NONE';
 export const CREATE_TRANS_LOADING = 'CREATE_TRANS_LOADING';
@@ -37,6 +37,8 @@ export const BlTrans = (mybl, content) => async (dispatch) => {
 export const getInqTrans = (id) => async (dispatch) => {
   getInqsTrans(id)
     .then((res) => {
+      const field_list = res.data.map(e => e.field);
+      dispatch(saveField(field_list));
       dispatch(editInquiry(res.data))
     })
     .catch((e) => {
