@@ -50,3 +50,19 @@ export async function updateInquiryChoice(state) {
   const response = await axios().patch(`${PATH}/choice`, { state });
   return response.data;
 }
+
+export async function createParagraphAnswer(state) {
+  const response = await axios().post(`${PATH}/paragraph`, { state });
+  return response.data;
+}
+
+export async function updateParagraphAnswer(id, state) {
+  const response = await axios().patch(`${PATH}/paragraph/${id}`, { state });
+  return response.data;
+}
+
+export async function createAttachmentAnswer(state) {
+  const response = await axios().post(`${PATH}/attachment`, { state });
+  return response.data;
+}
+
