@@ -12,6 +12,7 @@ export const PERMISSION = {
   VIEW_SAVE_INQUIRY: 'view_saveInquiry',
 
   // UI + API
+  INQUIRY_CREATE_INQUIRY: 'inquiry_createInquiry',
   INQUIRY_CREATE_COMMENT: 'inquiry_createComment',
   INQUIRY_UPDATE_INQUIRY_STATUS: 'inquiry_updateInquiryStatus',
   MAIL_SEND_MAIL: 'mail_sendMail'

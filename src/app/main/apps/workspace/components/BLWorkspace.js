@@ -1,10 +1,16 @@
 import { getKeyByValue } from '@shared';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
+import React, { useEffect, useState } from 'react';
+import clsx from 'clsx';
+import _ from 'lodash';
+import { Grid, Divider } from '@material-ui/core';
+import { useDispatch, useSelector } from 'react-redux';
+import { makeStyles } from '@material-ui/styles';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
 import * as TransActions from '../store/actions/transaction';
+import * as InquiryActions from '../store/actions/inquiry';
 
 import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
@@ -12,13 +18,6 @@ import Form from './Form';
 import Label from './FieldLabel';
 import BLField from './BLField';
 import InquiryForm from './InquiryForm';
-
-import React, { useEffect, useState } from 'react';
-import clsx from 'clsx';
-import _ from 'lodash';
-import { Grid, Divider } from '@material-ui/core';
-import { useDispatch, useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -61,7 +60,6 @@ const BLWorkspace = (props) => {
     workspace.formReducer.success,
     workspace.formReducer.fail
   ]);
-
   const { transAutoSaveStatus } = useSelector(({ workspace }) => workspace.transReducer);
 
   const getField = (field) => {
@@ -105,17 +103,15 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-    dispatch(
-      AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_WORKSPACE }))
-    );
     dispatch(Actions.loadMetadata());
 
     const bkgNo = window.location.pathname.split('/')[3];
-    dispatch(Actions.initBL(bkgNo));
+    if (bkgNo) dispatch(Actions.initBL(bkgNo));
+    else if (props.myBL) dispatch(InquiryActions.setMyBL(props.myBL));
 
     return () => {
       dispatch(FormActions.toggleReload());
-    }
+    };
   }, []);
 
   return (
@@ -125,7 +121,7 @@ const BLWorkspace = (props) => {
       <Form
         open={openInquiry}
         toggleForm={(status) => dispatch(FormActions.toggleInquiry(status))}
-        hasAddButton={openAllInquiry}
+        hasAddButton={props.user == 'workspace' ? openAllInquiry : false}
         FabTitle="Inquiry"
         field={currentField || ''}
         title={
@@ -135,7 +131,7 @@ const BLWorkspace = (props) => {
               ? getKeyByValue(metadata['field'], currentField)
               : ''
         }>
-        {openAllInquiry ? <AllInquiry user="workspace" /> : <Inquiry user="workspace" />}
+        {openAllInquiry ? <AllInquiry user={props.user} /> : <Inquiry user={props.user} />}
       </Form>
 
       <Grid container>

@@ -6,7 +6,6 @@ import SendInquiryForm from 'app/main/apps/workspace/components/SendInquiryForm'
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-
 import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
@@ -16,7 +15,6 @@ import { AppBar, Toolbar, Avatar, Badge, Button, Hidden } from '@material-ui/cor
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -56,8 +54,8 @@ function ToolbarLayout1(props) {
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
   const user = useSelector(({ user }) => user);
-  const [allow, badge] = useSelector((state) => [
-    state.header.allow,
+  const [allowAccess, badge] = useSelector((state) => [
+    state.header.allowAccess,
     state.workspace.inquiryReducer.inquiries.length
   ]);
 
@@ -70,7 +68,7 @@ function ToolbarLayout1(props) {
 
   useEffect(() => {
     if (!user.displayName) {
-      if (!allow) {
+      if (!allowAccess) {
         history.push({
           pathname: '/login',
           ...(!logout && { cachePath: pathname, cacheSearch: search })
@@ -89,7 +87,7 @@ function ToolbarLayout1(props) {
         dispatch(AppActions.setUser(payload));
       }
     }
-  }, [user, allow]);
+  }, [user, allowAccess]);
 
   return (
     <ThemeProvider theme={toolbarTheme}>
