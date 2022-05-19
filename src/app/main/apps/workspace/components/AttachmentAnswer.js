@@ -53,9 +53,10 @@ const AttachmentAnswer = (props) => {
       const formData = new FormData();
       formData.append('file', src);
       formData.append('name', src.name);
-      if (optionsOfQuestion[index].answerObj.length > 0) {
-        optionsOfQuestion[index].answerObj[0].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+      if (optionsOfQuestion[index].answerObj.length === 0) {
+        optionsOfQuestion[index].answerObj = [{ mediaFiles: [] }];
       }
+      optionsOfQuestion[index].answerObj[0].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
     });
     dispatch(saveQuestion(optionsOfQuestion));
     setShowBtn(true);
@@ -63,6 +64,11 @@ const AttachmentAnswer = (props) => {
   useEffect(() => {
     setShowBtn(isShowBtn);
   }, [isShowBtn]);
+  useEffect(() => {
+    if (question.answerObj.length > 0 && question.answerObj[0]?.mediaFiles.length > 0) {
+      setShowBtn(true);
+    }
+  }, [question]);
   const onDrop = (acceptedFiles) => {
     uploadImageAttach(acceptedFiles);
   }
@@ -75,18 +81,36 @@ const AttachmentAnswer = (props) => {
     });
   const handleSave = () => {
     const formData = [];
-    for (const f of question.answerObj[0].mediaFiles) {
-      const form_data = f.data;
-      formData.push(form_data);
+    const mediaRest = [];
+    const optionsOfQuestion = [...questions];
+    for (const f of optionsOfQuestion[index].answerObj[0]?.mediaFiles) {
+      if (f.id === null) {
+        const form_data = f.data;
+        formData.push(form_data);
+      } else {
+        mediaRest.push(f.id);
+      }
     }
     const questionMap = {
       ansType: question.ansType,
-      inqId: question.id
+      inqId: question.id,
     }
     axios
       .all(formData.map((endpoint) => uploadFile(endpoint)))
       .then((media) => {
-        createAttachmentAnswer({ question: questionMap, mediaFile: media }).then(() => {
+        createAttachmentAnswer({ question: questionMap, mediaFile: media, mediaRest }).then(() => {
+          const answerObjMediaFiles = optionsOfQuestion[index].answerObj[0]?.mediaFiles.filter((q, index) => {
+            return q.id !== null;
+          });
+          media.forEach((item) => {
+            answerObjMediaFiles.push({
+              id: item.id,
+              name: item.name,
+              ext: item.ext
+            })
+          });
+          optionsOfQuestion[index].answerObj[0].mediaFiles = answerObjMediaFiles;
+          dispatch(saveQuestion(optionsOfQuestion));
           dispatch(FormActions.displaySuccess(true));
         }).catch((error) => dispatch(FormActions.displayFail(true, error)));
       }).catch((error) => dispatch(FormActions.displayFail(true, error)));

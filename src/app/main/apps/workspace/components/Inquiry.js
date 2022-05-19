@@ -247,9 +247,10 @@ const Inquiry = (props) => {
   }, [currentField]);
   const handleRemoveImageAttach = (mediaIndex, inquiryIndex) => {
     const optionsOfQuestion = [...inquiries];
-    optionsOfQuestion[inquiryIndex].mediaFile.splice(mediaIndex, 1);
+    const mediaFiles = optionsOfQuestion[inquiryIndex].answerObj[0]?.mediaFiles;
+    mediaFiles.splice(mediaIndex, 1);
     dispatch(InquiryActions.setEdit(optionsOfQuestion));
-    if (optionsOfQuestion[inquiryIndex].mediaFile.length === 0) {
+    if (optionsOfQuestion[inquiryIndex].answerObj[0]?.mediaFiles.length === 0) {
       setShowBtn(false);
     }
   };
@@ -333,7 +334,6 @@ const Inquiry = (props) => {
                     <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
                       <Fab
                         size="small"
-                        onClick={() => handleRemoveImageAttach(mediaIndex, indexes)}
                         classes={
                           file.ext.match(/jpeg|jpg|png/g)
                             ? { root: classes.positionBtnImg }
