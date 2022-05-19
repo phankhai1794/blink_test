@@ -1,4 +1,11 @@
 import { getKeyByValue } from '@shared';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { makeStyles } from '@material-ui/styles';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import DeleteIcon from '@material-ui/icons/Delete';
+import CloseIcon from '@material-ui/icons/Close';
+import { Divider, FormGroup, FormControlLabel, Checkbox, FormControl, FormHelperText, IconButton, Fab } from '@material-ui/core';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -11,14 +18,6 @@ import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import InquiryEditor from './InquiryEditor';
 import AttachFile from './AttachFile';
-
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/styles';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CloseIcon from '@material-ui/icons/Close';
-import { Divider, FormGroup, FormControlLabel, Checkbox, FormControl, FormHelperText, IconButton, Fab } from '@material-ui/core';
 
 
 const useStyles = makeStyles((theme) => ({

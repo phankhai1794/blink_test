@@ -1,7 +1,6 @@
 import React from 'react';
 import { useDropzone } from 'react-dropzone';
 import { IconButton, Icon } from '@material-ui/core';
-
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 //   component
 const AttachFile = (props) => {
@@ -21,7 +20,7 @@ const AttachFile = (props) => {
       <div {...getRootProps({})}>
         <input {...getInputProps()} disabled={disabled || false} />
         <IconButton onClick={open} style={{ padding: '2px' }}>
-        <Icon>attach_file</Icon>
+          <Icon>attach_file</Icon>
        
         </IconButton>
       </div>

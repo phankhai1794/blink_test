@@ -1,8 +1,4 @@
 import _ from '@lodash';
-
-import QuestionBox from './QuestionBox';
-import UserInfo from './UserInfo';
-
 import React, { useState } from 'react';
 import {
   Button,
@@ -26,6 +22,9 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 
+import UserInfo from './UserInfo';
+import QuestionBox from './QuestionBox';
+
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
 });
@@ -43,14 +42,12 @@ const inputStyle = makeStyles((theme) => ({
 const inputStyleDisabled = makeStyles((theme) => ({
   underline: {
     '&&&:before': {
-      borderBottom: 'none'
+      borderBottom: 'none',
+      borderStyle: 'dashed'
     },
     '&:hover:not($disabled):before': {
       borderBottom: `1px dashed ${theme.palette.text.primary} !important`
     },
-    '&&&:before': {
-      borderStyle: 'dashed'
-    }
   }
 }));
 const typeToNameDict = {
@@ -367,7 +364,7 @@ const InformationForm = (props) => {
                 <div className="flex" style={{ paddingTop: '6px' }}>
                   <p style={{ margin: '0px 1rem 0px 1rem', fontSize: '20px' }}> OR </p>
                   <Link style={{ fontSize: '20px' }} onClick={handleAddOtherChoice}>
-                    Add "Customer Input"
+                    Add 	&quot;Customer Input	&quot;
                   </Link>
                 </div>
               )}
