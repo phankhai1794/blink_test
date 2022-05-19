@@ -99,7 +99,7 @@ const AttachmentAnswer = (props) => {
     }
     const questionMap = {
       ansType: question.ansType,
-      inqId: question.id
+      inqId: question.id,
     }
     axios
       .all(formData.map((endpoint) => uploadFile(endpoint)))
