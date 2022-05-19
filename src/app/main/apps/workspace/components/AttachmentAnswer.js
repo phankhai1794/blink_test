@@ -9,6 +9,7 @@ import axios from 'axios';
 import { uploadFile } from '../../../../services/fileService';
 import { createAttachmentAnswer } from '../../../../services/inquiryService';
 import * as FormActions from '../store/actions/form';
+import * as AppAction from '../../../../store/actions';
 
 
 // style
@@ -98,7 +99,8 @@ const AttachmentAnswer = (props) => {
     axios
       .all(formData.map((endpoint) => uploadFile(endpoint)))
       .then((media) => {
-        createAttachmentAnswer({ question: questionMap, mediaFile: media, mediaRest }).then(() => {
+        createAttachmentAnswer({ question: questionMap, mediaFile: media, mediaRest }).then((res) => {
+          const { message } = res;
           const answerObjMediaFiles = optionsOfQuestion[index].answerObj[0]?.mediaFiles.filter((q, index) => {
             return q.id !== null;
           });
@@ -111,7 +113,7 @@ const AttachmentAnswer = (props) => {
           });
           optionsOfQuestion[index].answerObj[0].mediaFiles = answerObjMediaFiles;
           dispatch(saveQuestion(optionsOfQuestion));
-          dispatch(FormActions.displaySuccess(true));
+          dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }).catch((error) => dispatch(FormActions.displayFail(true, error)));
       }).catch((error) => dispatch(FormActions.displayFail(true, error)));
   };
