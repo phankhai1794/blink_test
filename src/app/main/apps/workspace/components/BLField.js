@@ -1,8 +1,3 @@
-import * as FormActions from '../store/actions/form';
-import * as InquiryActions from '../store/actions/inquiry';
-
-import Label from './FieldLabel';
-
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { createMuiTheme } from '@material-ui/core/styles';
@@ -12,7 +7,12 @@ import { TextField, InputAdornment, makeStyles } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import LockIcon from '@material-ui/icons/Lock';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 
+import * as FormActions from '../store/actions/form';
+import * as InquiryActions from '../store/actions/inquiry';
+
+import Label from './FieldLabel';
 
 const theme = createMuiTheme({
   typography: {
@@ -90,6 +90,8 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
+
 const BLField = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -123,7 +125,7 @@ const BLField = (props) => {
     if (!questionIsEmpty && !minimize) {
       dispatch(FormActions.toggleInquiry(true));
     }
-    if (anchorEl && anchorEl.id === id && !minimize && !lock) {
+    if (anchorEl && anchorEl.id === id && allowAddInquiry && !minimize && !lock) {
       dispatch(FormActions.toggleCreateInquiry(true));
     }
   };
@@ -174,7 +176,8 @@ const BLField = (props) => {
                     <LockIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
                   ) : (
                     anchorEl &&
-                    anchorEl.id === id && (
+                    anchorEl.id === id &&
+                    allowAddInquiry && (
                       <AddCircleOutlineIcon
                         className={clsx(classes.sizeIcon, classes.colorHasInqIcon)}
                       />

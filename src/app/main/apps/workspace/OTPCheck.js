@@ -1,19 +1,17 @@
 import _ from '@lodash';
-import history from '@history';
 import { verifyEmail, verifyGuest, isVerified } from 'app/services/authService';
+import { FusePageSimple } from '@fuse';
 import * as Actions from 'app/store/actions';
-
-import GuestWorkspace from './GuestWorkspace';
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import OtpInput from 'react-otp-input';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { isEmail } from 'validator';
 import { makeStyles } from '@material-ui/core/styles';
 import { Paper, InputBase, IconButton, Divider } from '@material-ui/core';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
+import BLWorkspace from './components/BLWorkspace';
 
 const otpLength = 4;
 
@@ -45,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
 const OtpCheck = ({ status }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const user = useSelector(({ user }) => user);
+  const pageLayout = useRef(null);
   const [mail, setMail] = useState({ value: '', isValid: false });
   const [myBL, setMyBL] = useState({ id: '' });
   const [otpCode, setOtpCode] = useState('');
@@ -69,7 +67,7 @@ const OtpCheck = ({ status }) => {
         .catch((error) => {
           console.log(error);
           const { message } = error.response.data.error;
-          dispatch(Actions.showMessage({message: message, variant: 'error'}));
+          dispatch(Actions.showMessage({ message: message, variant: 'error' }));
         });
     }
   };
@@ -88,7 +86,7 @@ const OtpCheck = ({ status }) => {
       if (email) {
         setMail({
           ...mail,
-          value: email || '',
+          value: email,
           isValid: isEmail(email)
         });
 
@@ -125,7 +123,7 @@ const OtpCheck = ({ status }) => {
         .catch((error) => {
           console.log(error);
           const { message } = error.response.data.error;
-          dispatch(Actions.showMessage({message: message, variant: 'error'}));
+          dispatch(Actions.showMessage({ message: message, variant: 'error' }));
         });
     }
   }, [otpCode]);
@@ -133,7 +131,19 @@ const OtpCheck = ({ status }) => {
   return (
     <>
       {step === 2 ? (
-        <GuestWorkspace status={history.location.state} myBL={myBL} />
+        <div className="flex flex-col flex-1 w-full">
+          <FusePageSimple
+            classes={{
+              contentWrapper: 'p-0 pb-80 sm:pb-80 h-full',
+              content: 'flex flex-col h-full',
+              leftSidebar: 'w-256 border-0'
+            }}
+            content={<BLWorkspace myBL={myBL} user="guest" />}
+            sidebarInner
+            ref={pageLayout}
+            innerScroll
+          />
+        </div>
       ) : (
         <div>
           <div style={{ margin: '12rem auto 4rem auto', textAlign: 'center' }}>
@@ -156,8 +166,7 @@ const OtpCheck = ({ status }) => {
                     color="primary"
                     className={classes.iconButton}
                     disabled={!mail.isValid}
-                    onClick={(e) => handleCheckMail(e)}
-                  >
+                    onClick={(e) => handleCheckMail(e)}>
                     <ArrowForwardIcon />
                   </IconButton>
                 </Paper>
@@ -192,8 +201,7 @@ const OtpCheck = ({ status }) => {
                 <IconButton
                   color="primary"
                   className={classes.iconButton}
-                  onClick={() => setStep(0)}
-                >
+                  onClick={() => setStep(0)}>
                   <ArrowBackIcon />
                 </IconButton>
               </div>
