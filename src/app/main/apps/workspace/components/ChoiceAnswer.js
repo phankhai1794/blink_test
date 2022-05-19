@@ -1,5 +1,4 @@
 import { updateInquiryChoice } from 'app/services/inquiryService';
-
 import React, { useState } from 'react';
 import {
   Radio,

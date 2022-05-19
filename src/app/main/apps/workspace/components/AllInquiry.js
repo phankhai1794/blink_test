@@ -1,6 +1,10 @@
 import { getKeyByValue } from '@shared';
 import { getFile } from 'app/services/fileService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { Card, Typography, FormControl, FormGroup, FormControlLabel, IconButton, Checkbox, FormHelperText } from '@material-ui/core';
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -11,11 +15,6 @@ import ParagraphAnswer from './ParagraphAnswer';
 import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
-
-import DeleteIcon from '@material-ui/icons/Delete';
-import { useDispatch, useSelector } from 'react-redux';
-import React, { useEffect } from 'react';
-import { Card, Typography, FormControl, FormGroup, FormControlLabel, IconButton, Checkbox, FormHelperText } from '@material-ui/core';
 
 
 const AllInquiry = (props) => {
