@@ -1,13 +1,5 @@
 import _ from '@lodash';
 import { FuseChipSelect } from '@fuse';
-
-import * as InquiryActions from '../store/actions/inquiry';
-
-import Dropzone from './Dropzone';
-import ImageAttach from './ImageAttach';
-import FileAttach from './FileAttach';
-import CustomSelect from './CustomSelect';
-
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -17,7 +9,7 @@ import {
   Fab,
   Divider,
   FormControl,
-  FormHelperText,
+  FormHelperText
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
@@ -25,6 +17,12 @@ import CloseIcon from '@material-ui/icons/Close';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
 
+import * as InquiryActions from '../store/actions/inquiry';
+
+import CustomSelect from './CustomSelect';
+import FileAttach from './FileAttach';
+import ImageAttach from './ImageAttach';
+import Dropzone from './Dropzone';
 
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
@@ -43,14 +41,12 @@ const inputStyle = makeStyles((theme) => ({
 const inputStyleDisabled = makeStyles((theme) => ({
   underline: {
     '&&&:before': {
-      borderBottom: 'none'
+      borderBottom: 'none',
+      borderStyle: 'dashed'
     },
     '&:hover:not($disabled):before': {
       borderBottom: `1px dashed ${theme.palette.text.primary} !important`
     },
-    '&&&:before': {
-      borderStyle: 'dashed'
-    }
   }
 }));
 const useStyles = makeStyles((theme) => ({
@@ -82,8 +78,7 @@ const Choice = (props) => {
         onMouseEnter={() => setIsHover(true)}
         onMouseLeave={() => {
           isOnFocus ? setIsHover(true) : setIsHover(false);
-        }}
-      >
+        }}>
         <div style={{ paddingTop: '6px', marginRight: '1rem' }}>
           <DisabledRadioButtonUncheckedIcon />
         </div>
@@ -141,6 +136,7 @@ const ChoiceAnswer = (props) => {
       {question.answerObj.map((value, k) => {
         return (
           <Choice
+            key={k}
             value={value.content}
             index={k}
             handleChangeChoice={handleChangeChoice}
@@ -200,7 +196,7 @@ const InquiryEditor = (props) => {
     workspace.inquiryReducer.validation
   ]);
 
-  const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen)
+  const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
 
   const [fieldType, setFieldType] = useState(metadata.field_options);
   const [valueType, setValueType] = useState(
@@ -209,7 +205,7 @@ const InquiryEditor = (props) => {
   const [fieldValue, setFieldValue] = useState(
     metadata.field_options.filter((v) => question.field === v.value)[0]
   );
-  const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options)
+  const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
   const styles = (valid, width) => {
     return {
       control: {
@@ -221,10 +217,12 @@ const InquiryEditor = (props) => {
   };
   useEffect(() => {
     if (fieldValue) {
-      setValueType(null)
-      setInqTypeOption(metadata.inq_type_options.filter((v) => fieldValue.value === v.field || !v.field))
+      setValueType(null);
+      setInqTypeOption(
+        metadata.inq_type_options.filter((v) => fieldValue.value === v.field || !v.field)
+      );
     }
-  }, [fieldValue])
+  }, [fieldValue]);
 
   useEffect(() => {
     const list = [...removeOptions];
@@ -351,52 +349,43 @@ const InquiryEditor = (props) => {
           style={{ width: '100%', resize: 'none' }}
         />
       </div>
-      {
-        question.ansType === metadata.ans_type.choice && (
-          <div className="mt-16">
-            <ChoiceAnswer
-              questions={questions}
-              question={question}
-              index={index}
-              saveQuestion={saveQuestion}
-            />
-          </div>
-        )
-      }
-      {
-        question.ansType === metadata.ans_type.paragraph && (
-          <div className="mt-40">
-            <ParagraphAnswer />
-          </div>
-        )
-      }
-      {
-        question.ansType === metadata.ans_type.attachment && (
-          <AttachmentAnswer style={{ marginTop: '1rem' }} />
-        )
-      }
+      {question.ansType === metadata.ans_type.choice && (
+        <div className="mt-16">
+          <ChoiceAnswer
+            questions={questions}
+            question={question}
+            index={index}
+            saveQuestion={saveQuestion}
+          />
+        </div>
+      )}
+      {question.ansType === metadata.ans_type.paragraph && (
+        <div className="mt-40">
+          <ParagraphAnswer />
+        </div>
+      )}
+      {question.ansType === metadata.ans_type.attachment && (
+        <AttachmentAnswer style={{ marginTop: '1rem' }} />
+      )}
       <Divider className="mt-12" />
 
-      {
-        question.mediaFile.map((file, index) =>
-          file.ext.match(/jpeg|jpg|png/g) ? (
-            <div style={{ position: 'relative' }}>
-              <Fab
-                classes={{
-                  root: classes.root
-                }}
-                size="small"
-                onClick={() => handleRemoveImageAttach(index)}
-              >
-                <CloseIcon style={{ fontSize: 20 }} />
-              </Fab>
-              <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-            </div>
-          ) : (
-            <FileAttach file={file} />
-          )
+      {question.mediaFile.map((file, index) =>
+        file.ext.match(/jpeg|jpg|png/g) ? (
+          <div style={{ position: 'relative' }}>
+            <Fab
+              classes={{
+                root: classes.root
+              }}
+              size="small"
+              onClick={() => handleRemoveImageAttach(index)}>
+              <CloseIcon style={{ fontSize: 20 }} />
+            </Fab>
+            <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+          </div>
+        ) : (
+          <FileAttach file={file} />
         )
-      }
+      )}
     </>
   );
 };

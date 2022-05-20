@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import * as Actions from '../store/actions';
 import {
   TextField,
   Grid,
@@ -18,11 +17,14 @@ import CloseIcon from '@material-ui/icons/Close';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
 import _ from '@lodash';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import DeleteIcon from '@material-ui/icons/Delete';
+
 import Dropzone from '../../shared-components/Dropzone';
 import ImageAttach from '../../shared-components/ImageAttach';
 import FileAttach from '../../shared-components/FileAttach';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import DeleteIcon from '@material-ui/icons/Delete';
+import * as Actions from '../store/actions';
+
 import AttachFile from './AttachFile';
 import CustomSelect from './CustomSelect';
 
@@ -43,14 +45,12 @@ const inputStyle = makeStyles((theme) => ({
 const inputStyleDisabled = makeStyles((theme) => ({
   underline: {
     '&&&:before': {
-      borderBottom: 'none'
+      borderBottom: 'none',
+      borderStyle: 'dashed'
     },
     '&:hover:not($disabled):before': {
       borderBottom: `1px dashed ${theme.palette.text.primary} !important`
     },
-    '&&&:before': {
-      borderStyle: 'dashed'
-    }
   }
 }));
 const useStyles = makeStyles((theme) => ({
@@ -145,6 +145,7 @@ const ChoiceAnswer = (props) => {
       {question.answerObj.map((value, k) => {
         return (
           <Choice
+            key={k}
             value={value}
             index={k}
             handleChangeChoice={handleChangeChoice}

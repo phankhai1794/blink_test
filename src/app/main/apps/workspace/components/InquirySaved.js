@@ -1,7 +1,4 @@
-import * as Actions from '../store/actions';
 
-import UserInfo from './UserInfo';
-import AllInquiry from './AllInquiry';
 
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,6 +13,11 @@ import {
   Typography,
   IconButton
 } from '@material-ui/core';
+
+import * as Actions from '../store/actions';
+
+import AllInquiry from './AllInquiry';
+import UserInfo from './UserInfo';
 
 
 const Comment = (props) => {

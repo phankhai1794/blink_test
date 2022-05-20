@@ -1,11 +1,10 @@
 import { FuseScrollbars } from '@fuse';
-
-import * as TransActions from '../apps/workspace/store/actions/transaction';
-
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Typography, ListItem, Divider, Avatar, List } from '@material-ui/core';
 import { cyan } from '@material-ui/core/colors';
+
+import * as TransActions from '../apps/workspace/store/actions/transaction';
 
 const DATE_OPTIONS_FULL = {
   year: 'numeric',

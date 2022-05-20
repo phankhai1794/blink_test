@@ -1,17 +1,6 @@
 import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
 import { getFile } from 'app/services/fileService';
 import { displayTime } from '@shared';
-
-import * as InquiryActions from '../store/actions/inquiry';
-
-import InquiryEditor from './InquiryEditor';
-import ChoiceAnswer from './ChoiceAnswer';
-import ParagraphAnswer from './ParagraphAnswer';
-import AttachmentAnswer from './AttachmentAnswer';
-import ImageAttach from './ImageAttach';
-import FileAttach from './FileAttach';
-import UserInfo from './UserInfo';
-
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
@@ -27,6 +16,17 @@ import {
   Typography,
   IconButton
 } from '@material-ui/core';
+
+import * as InquiryActions from '../store/actions/inquiry';
+
+import InquiryEditor from './InquiryEditor';
+import ChoiceAnswer from './ChoiceAnswer';
+import ParagraphAnswer from './ParagraphAnswer';
+import AttachmentAnswer from './AttachmentAnswer';
+import ImageAttach from './ImageAttach';
+import FileAttach from './FileAttach';
+import UserInfo from './UserInfo';
+
 
 const Comment = (props) => {
   const inputStyle = {
@@ -273,13 +273,23 @@ const Inquiry = (props) => {
                 </div>
                 <Typography variant="h5">{q.content}</Typography>
                 <div style={{ display: 'block', margin: '1rem 0rem' }}>
-                  {type === metadata.ans_type.choice && <ChoiceAnswer
-                    index={indexes}
-                    questions={inquiries}
-                    question={q}
-                    saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-                  />}
-                  {type === metadata.ans_type.paragraph && <ParagraphAnswer question={q} />}
+                  {type === metadata.ans_type.choice && (
+                    <ChoiceAnswer
+                      index={indexes}
+                      questions={inquiries}
+                      question={q}
+                      saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                    />
+                  )}
+                  {type === metadata.ans_type.paragraph && (
+                    <ParagraphAnswer
+                      question={q}
+                      user={user}
+                      index={indexes}
+                      questions={inquiries}
+                      saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                    />
+                  )}
                   {type === metadata.ans_type.attachment && (
                     <AttachmentAnswer
                       question={q}

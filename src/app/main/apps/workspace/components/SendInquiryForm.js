@@ -1,13 +1,5 @@
 import { useForm } from '@fuse/hooks';
 import * as Actions from 'app/store/actions';
-
-import * as mailActions from '../store/actions/mail';
-import { SENDMAIL_NONE, SENDMAIL_LOADING } from '../store/actions/mail';
-
-import Form from './Form';
-import AllInquiry from './AllInquiry';
-import TagsInput from './TagsInput';
-
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import draftToHtml from 'draftjs-to-html';
@@ -16,6 +8,13 @@ import { Button, Grid, Divider } from '@material-ui/core';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles } from '@material-ui/styles';
+
+import { SENDMAIL_NONE, SENDMAIL_LOADING } from '../store/actions/mail';
+import * as mailActions from '../store/actions/mail';
+
+import TagsInput from './TagsInput';
+import AllInquiry from './AllInquiry';
+import Form from './Form';
 
 
 const SendInquiryForm = (props) => {
