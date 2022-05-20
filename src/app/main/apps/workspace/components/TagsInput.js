@@ -1,5 +1,5 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
+
 function TagsInput(props) {
   const [tags, setTags] = useState([]);
   const { id , tagLimit} = props;
@@ -16,9 +16,9 @@ function TagsInput(props) {
     e.target.value = '';
   }
   function validateEmail (email) {
-  const regexp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return regexp.test(email);
-}
+    const regexp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return regexp.test(email);
+  }
   function handleKeyUp(e) {
     if (e.key !== 'Enter') return;
     props.onChanged(id, tags);
