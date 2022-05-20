@@ -16,7 +16,6 @@ import TagsInput from './TagsInput';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
 
-
 const SendInquiryForm = (props) => {
   const [questions, title, mybl] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.question,
@@ -40,7 +39,7 @@ const SendInquiryForm = (props) => {
   const [opened, setopened] = useState(null);
   const [opendPreview, setopendPreview] = useState(null);
   const [value, setValue] = React.useState(0);
-  const [tabSelected, settabSelected] = useState(null);
+  const [tabSelected, settabSelected] = useState(0);
 
   useEffect(() => {
     if (success) {
@@ -100,6 +99,7 @@ const SendInquiryForm = (props) => {
     // this.setState({ value: newValue });
     // setValue(newValue);
   };
+  
   const onContentStateChange = (contentState) => {
     form.content = draftToHtml(contentState);
   };
@@ -119,6 +119,7 @@ const SendInquiryForm = (props) => {
       fontFamily: 'Roboto, Helvetica Neue, Arial, sans-serif'
     }
   }));
+
   const classes = useStyles(props);
 
   return (
@@ -128,8 +129,7 @@ const SendInquiryForm = (props) => {
           paddingLeft: 15,
           paddingRight: 5,
           paddingTop: 17
-        }}
-      >
+        }}>
         <Button
           style={{
             width: 120,
@@ -140,8 +140,7 @@ const SendInquiryForm = (props) => {
           }}
           variant="text"
           size="small"
-          onClick={openSendInquiryDialog}
-        >
+          onClick={openSendInquiryDialog}>
           E-Mail
         </Button>
       </div>
@@ -156,16 +155,14 @@ const SendInquiryForm = (props) => {
         customActions={
           <ActionUI openPreviewClick={opendPreviewForm} sendMailClick={sendMailClick}></ActionUI>
         }
-        FabTitle={''}
-      >
+        FabTitle={''}>
         <>
           <Grid
             style={{ marginTop: 8 }}
             container
             direction="row"
             justifyContent="flex-start"
-            alignItems="center"
-          >
+            alignItems="center">
             <Grid item xs={1}>
               <label style={{ fontSize: 14 }} className={clsx(classes.label)}>
                 To Customer
@@ -180,8 +177,7 @@ const SendInquiryForm = (props) => {
             container
             direction="row"
             justifyContent="flex-start"
-            alignItems="center"
-          >
+            alignItems="center">
             <Grid item xs={1}>
               <label className={clsx(classes.label)}>To Onshore</label>
             </Grid>
@@ -194,8 +190,7 @@ const SendInquiryForm = (props) => {
             container
             direction="row"
             justifyContent="flex-start"
-            alignItems="center"
-          >
+            alignItems="center">
             <Grid item xs={1}>
               <label className={clsx(classes.label)}>From</label>
             </Grid>
@@ -208,8 +203,7 @@ const SendInquiryForm = (props) => {
             container
             direction="row"
             justifyContent="flex-start"
-            alignItems="center"
-          >
+            alignItems="center">
             <Grid item xs={1}>
               <label className={clsx(classes.label)}>Subject</label>
             </Grid>
@@ -225,7 +219,7 @@ const SendInquiryForm = (props) => {
                   borderColor: 'lightgray'
                 }}
                 onChange={onInputChange}
-              ></input>
+              />
             </Grid>
           </Grid>
           <div style={{ minHeight: 300, marginTop: 10 }}>
@@ -252,8 +246,7 @@ const SendInquiryForm = (props) => {
               settabSelected(newValue);
             }}
             openFab={false}
-            customActions={<div></div>}
-          >
+            customActions={<div></div>}>
             <>
               <div style={{ height: '800px' }}>
                 <AllInquiry
@@ -277,7 +270,7 @@ const ActionUI = (props) => {
 
   return (
     <div style={{ padding: 10 }}>
-      <Grid container style={{ 'justify-content': 'center', paddingTop: 20 }}>
+      <Grid container justify="center" style={{ paddingTop: 20 }}>
         <Grid>
           <Button
             style={{
@@ -287,8 +280,7 @@ const ActionUI = (props) => {
               marginRight: 10,
               borderRadius: 20
             }}
-            onClick={openPreviewClick}
-          >
+            onClick={openPreviewClick}>
             Preview
           </Button>
         </Grid>
@@ -302,8 +294,7 @@ const ActionUI = (props) => {
               backgroundColor: '#bd1874',
               borderRadius: 20
             }}
-            onClick={sendMailClick}
-          >
+            onClick={sendMailClick}>
             SEND
           </Button>
         </Grid>

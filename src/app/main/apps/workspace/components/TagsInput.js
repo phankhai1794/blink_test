@@ -1,35 +1,48 @@
 import React, { useState } from 'react';
 
-function TagsInput(props) {
+const TagsInput = ({ id, tagLimit, onChanged }) => {
+  const [input, setInput] = useState('');
   const [tags, setTags] = useState([]);
-  const { id , tagLimit} = props;
 
-  function handleKeyDown(e) {
-    if (e.key !== 'Enter') return;
-    const value = e.target.value;
-    if (!value.trim()) return;
-    if(!validateEmail(value)){
-      alert('Please enter a valid email address');
-      return;
-    }
-    setTags([...tags, value]);
-    e.target.value = '';
-  }
-  function validateEmail (email) {
-    const regexp = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const validateEmail = (email) => {
+    const regexp =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return regexp.test(email);
-  }
-  function handleKeyUp(e) {
-    if (e.key !== 'Enter') return;
-    props.onChanged(id, tags);
-  }
-  function removeTag(index) {
+  };
+
+  const handleKeyDown = (e) => {
+    if (['Enter', 'Tab'].includes(e.key)) {
+      const { value } = e.target;
+      if (value !== '') {
+        e.preventDefault();
+        if (!validateEmail(value)) return alert('Please enter a valid email address');
+
+        setTags([...tags, value]);
+        setInput('');
+        e.target.value = '';
+      }
+    }
+  };
+
+  const handleKeyUp = (e) => {
+    if (e.key !== 'Enter') return setInput(e.target.value);
+    onChanged(id, tags);
+  };
+
+  const handleBlur = (e) => {
+    if (input !== '' && validateEmail(input)) {
+      setTags([...tags, input]);
+      setInput('');
+      e.target.value = '';
+    }
+  };
+
+  const removeTag = (index) => {
     setTags(tags.filter((el, i) => i !== index));
-    props.onChanged(id, tags);
-  }
+    onChanged(id, tags);
+  };
 
-  return (    
-
+  return (
     <div className="tags-input-container">
       {tags.map((tag, index) => (
         <div className="tag-item" key={index}>
@@ -43,11 +56,18 @@ function TagsInput(props) {
         disabled={tags.length >= tagLimit}
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
+        onBlur={handleBlur}
         type="text"
         className="tags-input"
-        placeholder={tags.length> 0? (tags.length< tagLimit?'Type email':"") :'Example: abc@gmail.com, ...'}
+        placeholder={
+          tags.length > 0
+            ? tags.length < tagLimit
+              ? 'Type email'
+              : ''
+            : 'Example: abc@gmail.com, ...'
+        }
       />
     </div>
   );
-}
+};
 export default TagsInput;
