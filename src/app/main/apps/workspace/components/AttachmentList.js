@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import { Divider, Link } from '@material-ui/core';
 import DescriptionIcon from '@material-ui/icons/Description';
 
-import FileAttach from './FileAttach';
 
 const AttachmentList = (props) => {
   const [inquiries, metadata] = useSelector(({ workspace }) => [

@@ -134,6 +134,14 @@ function ToolbarLayout1(props) {
                 </Badge>
                 <span className="pl-12">Inquiry</span>
               </Button>
+              <Button
+                variant="text"
+                size="medium"
+                className={clsx('h-64', classes.button)}
+                onClick={openAttachment}>
+                <DescriptionIcon />
+                <span className="pl-4">Attachment List</span>
+              </Button>
             </PermissionProvider>
             {(openTrans && transId) && (
               <RestoreVersion/>
