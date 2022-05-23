@@ -18,6 +18,7 @@ import Form from './Form';
 import Label from './FieldLabel';
 import BLField from './BLField';
 import InquiryForm from './InquiryForm';
+import AttachmentList from './AttachmentList';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -53,7 +54,8 @@ const BLWorkspace = (props) => {
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.myBL
   ]);
-  const [openInquiry, openAllInquiry, reload, success, fail] = useSelector(({ workspace }) => [
+  const [openAttachment, openInquiry, openAllInquiry, reload, success, fail] = useSelector(({ workspace }) => [
+    workspace.formReducer.openAttachment,
     workspace.formReducer.openInquiry,
     workspace.formReducer.openAllInquiry,
     workspace.formReducer.reload,
@@ -144,6 +146,16 @@ const BLWorkspace = (props) => {
               : ''
         }>
         {openAllInquiry ? <AllInquiry user={props.user} /> : <Inquiry user={props.user} />}
+      </Form>
+
+      <Form
+        open={openAttachment}
+        toggleForm={(status) => dispatch(FormActions.toggleAttachment(status))}
+        FabTitle="Inquiry"
+        hasAddButton={false}
+        popoverfooter={true}
+        title="Attachment List">
+        {<AttachmentList user={props.user} />}
       </Form>
 
       <Grid container>

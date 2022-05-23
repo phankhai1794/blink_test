@@ -116,7 +116,7 @@ const useStyles = makeStyles(() => ({
 
 export default function Form(props) {
   const dispatch = useDispatch();
-  const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs } =
+  const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs, popoverfooter } =
     props;
   const [index, question] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
@@ -222,7 +222,7 @@ export default function Form(props) {
           </Box>
         )}
         <MuiDialogContent classes={{ root: classes.dialogContent }}>{children}</MuiDialogContent>
-        <Divider classes={{ root: classes.divider }} />
+        {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
           <DialogActions style={{ display: 'none !important' }}>
             {(hasAddButton === undefined || hasAddButton === true) && !openAllInquiry && (
@@ -238,15 +238,17 @@ export default function Form(props) {
                 </Link>
               </div>
             )}
-            <div style={{ marginLeft: '2rem' }}>
-              {!openAllInquiry ? (
-                <PopoverFooter title={field} checkValidate={checkValidate} />
-              ) : (
-                <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>
-                  <PopoverFooterAdmin />
-                </PermissionProvider>
-              )}
-            </div>
+            {!popoverfooter &&
+              <div style={{ marginLeft: '2rem' }}>
+                {!openAllInquiry ? (
+                  <PopoverFooter title={field} checkValidate={checkValidate} />
+                ) : (
+                  <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>
+                    <PopoverFooterAdmin />
+                  </PermissionProvider>
+                )}
+              </div>
+            }
           </DialogActions>
         )}
         {customActions}

@@ -108,7 +108,6 @@ const Choice = (props) => {
 const ChoiceAnswer = (props) => {
   const dispatch = useDispatch();
   const { questions, question, index, saveQuestion } = props;
-  const classes_disabled = inputStyleDisabled();
   const classes = inputStyle();
 
   const handleAddChoice = () => {
@@ -130,7 +129,6 @@ const ChoiceAnswer = (props) => {
     saveQuestion(optionsOfQuestion);
   };
 
-  const { uploadImageAttach, handleRemoveImageAttach } = props;
   return (
     <div style={{ paddingTop: '2rem' }}>
       {question.answerObj.map((value, k) => {
@@ -227,9 +225,15 @@ const InquiryEditor = (props) => {
   useEffect(() => {
     const list = [...removeOptions];
     list[index] = '';
-    const temp = metadata.field_options.filter((v) => !list.includes(v.value));
-    setFieldType(temp.filter((v) => !fields.includes(v.value)));
+    setFieldType(metadata.field_options.filter((v) => !list.includes(v.value) && !fields.includes(v.value)));
     const optionsOfQuestion = [...questions];
+
+    if (questions.length === 1) {
+      setFieldValue(metadata.field_options.filter((v) => currentField === v.value)[0]);
+      optionsOfQuestion[index].field = currentField;
+      list[index] = currentField;
+      dispatch(InquiryActions.removeSelectedOption(list));
+    }
 
     if (!question.ansType) {
       optionsOfQuestion[index].ansType = metadata.ans_type.choice;

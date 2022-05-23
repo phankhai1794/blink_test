@@ -16,7 +16,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import RestoreVersion from 'app/main/apps/workspace/components/RestoreVersion';
-
+import DescriptionIcon from '@material-ui/icons/Description';
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -70,6 +70,9 @@ function ToolbarLayout1(props) {
     }
   };
 
+  const openAttachment = () => {
+    dispatch(FormActions.toggleAttachment(true));
+  };
 
   useEffect(() => {
     if (!user.displayName) {
