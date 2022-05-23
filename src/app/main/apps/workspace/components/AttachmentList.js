@@ -11,9 +11,7 @@ const AttachmentList = (props) => {
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.metadata,
   ])
-  const handleRemove = () => {
 
-  }
   return (
     <>
       {inquiries.map((i) => {
@@ -25,13 +23,13 @@ const AttachmentList = (props) => {
                   <div key={index1} className="flex">
                     <div className="flex" style={{ width: "300px" }}>
                       {media.ext.includes("pdf") ?
-                        <img style={{ height: '25px', width: '25px' }} src={`../../assets/images/logos/pdf_icon.png`} />
+                        <img style={{ height: '25px', width: '25px' }} src={`/assets/images/logos/pdf_icon.png`} />
                         :
-                        media.ext.match(/jpeg|jpg|png/g) ? <img style={{ height: '20px', width: '20px' }} src={`../../assets/images/logos/image_icon.png`} />
+                        media.ext.match(/jpeg|jpg|png/g) ? <img style={{ height: '20px', width: '20px' }} src={`/assets/images/logos/image_icon.png`} />
                           :
-                          media.ext.match(/doc/g) ? <img style={{ height: '20px', width: '20px' }} src={`../../assets/images/logos/word_icon.png`} />
+                          media.ext.match(/doc/g) ? <img style={{ height: '20px', width: '20px' }} src={`/assets/images/logos/word_icon.png`} />
                             :
-                            (media.ext.includes("vnd.") || media.ext.match(/csv|xls/g) ? <img style={{ height: '20px', width: '20px' }} src={`../../assets/images/logos/excel_icon.png`} />
+                            (media.ext.match(/csv|xls/g) ? <img style={{ height: '20px', width: '20px' }} src={`/assets/images/logos/excel_icon.png`} />
                               :
                               <DescriptionIcon />)
                       }
@@ -47,10 +45,9 @@ const AttachmentList = (props) => {
                       <Link
                         component="button"
                         variant="body2"
-                        onClick={handleRemove}
                         style={{ display: 'flex', alignItems: 'center' }}
                       >
-                        <img style={{ height: '20px', width: '20px' }} src={`../../assets/images/logos/remove_icon.png`} />
+                        <img style={{ height: '20px', width: '20px' }} src={`/assets/images/logos/remove_icon.png`} />
                         <span style={{ fontSize: '15px', marginLeft: '5px', fontWeight: '500', color: 'gray' }}>Remove</span>
                       </Link>
                     </div>

@@ -4,11 +4,11 @@ const FileAttach = ({ file }) => {
   return (
     <div style={{ margin: '1rem 5rem' }} display="flex">
       {file.ext.includes("pdf") ?
-        <img style={{ height: '25px', width: '25px' }} src={`../../assets/images/logos/pdf_icon.png`} />
+        <img style={{ height: '25px', width: '25px' }} src={`/assets/images/logos/pdf_icon.png`} />
         :
-        (file.ext.match(/csv|xls|sheet/g) ? <img style={{ height: '25px', width: '25px' }} src={`../../assets/images/logos/excel_icon.png`} />
+        (file.ext.match(/csv|xls|sheet/g) ? <img style={{ height: '25px', width: '25px' }} src={`/assets/images/logos/excel_icon.png`} />
           :
-          (file.ext.match(/doc/g) ? <img style={{ height: '25px', width: '25px' }} src={`../../assets/images/logos/word_icon.png`} />
+          (file.ext.match(/doc/g) ? <img style={{ height: '25px', width: '25px' }} src={`/assets/images/logos/word_icon.png`} />
             :
             <DescriptionIcon />))
       }
