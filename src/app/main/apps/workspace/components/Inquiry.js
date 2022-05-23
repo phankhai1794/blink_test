@@ -30,7 +30,6 @@ import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import UserInfo from './UserInfo';
 
-
 const Comment = (props) => {
   const inputStyle = {
     borderRadius: '18px',
