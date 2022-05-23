@@ -5,16 +5,16 @@ import PublishIcon from '@material-ui/icons/Publish';
 import SaveIcon from '@material-ui/icons/Save';
 import { useDispatch } from 'react-redux';
 import CloseIcon from '@material-ui/icons/Close';
+import axios from 'axios';
+import { uploadFile } from 'app/services/fileService';
+import { createAttachmentAnswer } from 'app/services/inquiryService';
+import * as AppAction from 'app/store/actions';
+
+import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
-import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
-import axios from 'axios';
-
-import { uploadFile } from '../../../../services/fileService';
-import { createAttachmentAnswer } from '../../../../services/inquiryService';
-import * as FormActions from '../store/actions/form';
-import * as AppAction from '../../../../store/actions';
+import ImageAttach from './ImageAttach';
 
 
 // style

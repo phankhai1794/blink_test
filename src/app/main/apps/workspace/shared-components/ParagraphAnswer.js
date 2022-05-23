@@ -3,8 +3,7 @@ import { Button, InputAdornment, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { createParagraphAnswer, updateParagraphAnswer } from 'app/services/inquiryService';
 import { useDispatch } from 'react-redux';
-
-import * as AppAction from '../../../../store/actions';
+import * as AppAction from 'app/store/actions';
 
 import UserInfo from './UserInfo';
 
