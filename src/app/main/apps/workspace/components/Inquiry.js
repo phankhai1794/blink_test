@@ -14,8 +14,11 @@ import {
   Card,
   ListItemText,
   Typography,
-  IconButton
+  IconButton,
+  Fab
 } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import { makeStyles } from '@material-ui/styles';
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -26,7 +29,6 @@ import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import UserInfo from './UserInfo';
-
 
 const Comment = (props) => {
   const inputStyle = {
@@ -46,14 +48,14 @@ const Comment = (props) => {
   const [edit, setEdit] = useState('');
   const [reply, currentField] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.reply,
-    workspace.inquiryReducer.currentField,
+    workspace.inquiryReducer.currentField
   ]);
-  const user = useSelector(({ user }) => user)
+  const user = useSelector(({ user }) => user);
   const open = Boolean(anchorEl);
   useEffect(() => {
     loadComment(q.id)
       .then((res) => {
-        dispatch(InquiryActions.setDisplayComment(Boolean(res.length || userType === "guest")));
+        dispatch(InquiryActions.setDisplayComment(Boolean(res.length || userType === 'guest')));
         setComment(res);
       })
       .catch((error) => console.log(error));
@@ -74,7 +76,7 @@ const Comment = (props) => {
     setComment(temp);
   };
   const addComment = async (e) => {
-    const targetValue = e.target.value
+    const targetValue = e.target.value;
     if (e.key === 'Enter') {
       if (targetValue) {
         const inqAns = {
@@ -136,8 +138,7 @@ const Comment = (props) => {
                 <div
                   className="flex justify-between"
                   onMouseEnter={() => setKey(id)}
-                  onMouseLeave={() => setKey('')}
-                >
+                  onMouseLeave={() => setKey('')}>
                   <UserInfo name={k.creator} time={displayTime(k.createdAt)} />
                   {user.displayName === k.creator && key === id && (
                     <>
@@ -149,8 +150,7 @@ const Comment = (props) => {
                         anchorEl={anchorEl}
                         open={open}
                         onClose={handleClose}
-                        keepMounted
-                      >
+                        keepMounted>
                         <MenuItem onClick={() => onEdit(id)}>
                           <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
                             <EditIcon fontSize="small" />
@@ -186,9 +186,26 @@ const Comment = (props) => {
   );
 };
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    '& .MuiButtonBase-root': {
+      backgroundColor: 'silver !important'
+    }
+  },
+  positionBtnImg: {
+    left: '0',
+    top: '-3rem'
+  },
+  positionBtnNotImg: {
+    left: '0',
+    top: '4rem'
+  }
+}));
+
 const Inquiry = (props) => {
   const dispatch = useDispatch();
   const { user } = props;
+  const classes = useStyles();
   const [inquiries, currentField, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentField,
@@ -198,6 +215,7 @@ const Inquiry = (props) => {
   const indexes = inquiries.findIndex((q) => q.field === currentField);
   const [edit, setEdit] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
+  const [isShowBtn, setShowBtn] = useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -227,6 +245,15 @@ const Inquiry = (props) => {
       }
     }
   }, [currentField]);
+  const handleRemoveImageAttach = (mediaIndex, inquiryIndex) => {
+    const optionsOfQuestion = [...inquiries];
+    const mediaFiles = optionsOfQuestion[inquiryIndex].answerObj[0]?.mediaFiles;
+    mediaFiles.splice(mediaIndex, 1);
+    dispatch(InquiryActions.setEdit(optionsOfQuestion));
+    if (optionsOfQuestion[inquiryIndex].answerObj[0]?.mediaFiles.length === 0) {
+      setShowBtn(false);
+    }
+  };
   return (
     <>
       {inquiry.map((q, index) => {
@@ -255,8 +282,7 @@ const Inquiry = (props) => {
                     anchorEl={anchorEl}
                     open={open}
                     onClose={handleClose}
-                    keepMounted
-                  >
+                    keepMounted>
                     <MenuItem onClick={() => toggleEdit(index)}>
                       <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
                         <EditIcon fontSize="small" />
@@ -293,17 +319,59 @@ const Inquiry = (props) => {
                   {type === metadata.ans_type.attachment && (
                     <AttachmentAnswer
                       question={q}
-                    // disabled={true}
+                      user={user}
+                      index={indexes}
+                      questions={inquiries}
+                      saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                      isShowBtn={isShowBtn}
+                      // disabled={true}
                     />
                   )}
                 </div>
-                {q.mediaFile.map((file, index) =>
-                  file.ext.match(/jpeg|jpg|png/g) ? (
-                    <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-                  ) : (
-                    <FileAttach file={file} />
-                  )
-                )}
+                <>
+                  {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+                  {q.mediaFile?.map((file, mediaIndex) => (
+                    <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
+                      <Fab
+                        size="small"
+                        classes={
+                          file.ext.match(/jpeg|jpg|png/g)
+                            ? { root: classes.positionBtnImg }
+                            : { root: classes.positionBtnNotImg }
+                        }>
+                        <CloseIcon style={{ fontSize: 20 }} />
+                      </Fab>
+                      {file.ext.match(/jpeg|jpg|png/g) ? (
+                        <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
+                      ) : (
+                        <FileAttach file={file} />
+                      )}
+                    </div>
+                  ))}
+                </>
+                <>
+                  {q.answerObj[0]?.mediaFiles.length > 0 && <h3>Attachment Answer:</h3>}
+                  {q.answerObj[0]?.mediaFiles.map((file, mediaIndex) => (
+                    <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
+                      {user === 'guest' && <Fab
+                        size="small"
+                        onClick={() => handleRemoveImageAttach(mediaIndex, indexes)}
+                        classes={
+                          file.ext.match(/jpeg|jpg|png/g)
+                            ? { root: classes.positionBtnImg }
+                            : { root: classes.positionBtnNotImg }
+                        }>
+                        <CloseIcon style={{ fontSize: 20 }} />
+                      </Fab>
+                      }
+                      {file.ext.match(/jpeg|jpg|png/g) ? (
+                        <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
+                      ) : (
+                        <FileAttach file={file} />
+                      )}
+                    </div>
+                  ))}
+                </>
                 <Comment q={q} inquiries={inquiries} indexes={indexes} userType={user} />
               </Card>
             )}

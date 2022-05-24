@@ -61,3 +61,8 @@ export async function updateParagraphAnswer(id, state) {
   return response.data;
 }
 
+export async function createAttachmentAnswer(state) {
+  const response = await axios().post(`${PATH}/attachment`, { state });
+  return response.data;
+}
+
