@@ -15,7 +15,8 @@ export const PERMISSION = {
   INQUIRY_CREATE_INQUIRY: 'inquiry_createInquiry',
   INQUIRY_CREATE_COMMENT: 'inquiry_createComment',
   INQUIRY_UPDATE_INQUIRY_STATUS: 'inquiry_updateInquiryStatus',
-  MAIL_SEND_MAIL: 'mail_sendMail'
+  MAIL_SEND_MAIL: 'mail_sendMail',
+  INQUIRY_ANSWER_ATTACHMENT: 'inquiry_createAttachmentAnswer'
 };
 
 export const PermissionProvider = ({

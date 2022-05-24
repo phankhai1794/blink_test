@@ -9,6 +9,7 @@ import axios from 'axios';
 import { uploadFile } from 'app/services/fileService';
 import { createAttachmentAnswer } from 'app/services/inquiryService';
 import * as AppAction from 'app/store/actions';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -45,6 +46,8 @@ const acceptStyle = {
 const rejectStyle = {
   borderColor: '#ff1744'
 };
+
+const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
 
 //   component
 const AttachmentAnswer = (props) => {
@@ -106,9 +109,7 @@ const AttachmentAnswer = (props) => {
       .then((media) => {
         createAttachmentAnswer({ question: questionMap, mediaFile: media, mediaRest }).then((res) => {
           const { message } = res;
-          const answerObjMediaFiles = optionsOfQuestion[index].answerObj[0]?.mediaFiles.filter((q, index) => {
-            return q.id !== null;
-          });
+          const answerObjMediaFiles = optionsOfQuestion[index].answerObj[0]?.mediaFiles.filter((q, index) => q.id);
           media.forEach((item) => {
             answerObjMediaFiles.push({
               id: item.id,
@@ -136,12 +137,12 @@ const AttachmentAnswer = (props) => {
     <div>
       <div className="container">
         <div {...getRootProps({ style })}>
-          <input {...getInputProps()} disabled={user !== 'guest'} />
+          <input {...getInputProps()} disabled={!allowCreateAttachmentAnswer} />
           <p>Drag and drop some files here</p>
           <Button
             color="primary"
             variant="contained"
-            disabled={user !== 'guest'}
+            disabled={!allowCreateAttachmentAnswer}
             onClick={open}
           >
             <PublishIcon />
