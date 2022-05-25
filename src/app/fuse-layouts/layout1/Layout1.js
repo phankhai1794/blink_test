@@ -1,15 +1,14 @@
 import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense, FuseSet } from '@fuse';
 import AppContext from 'app/AppContext';
 import Transaction from 'app/main/transactions/Transaction';
-
-import ToolbarLayout1 from './components/ToolbarLayout1';
-import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
-
 import React, { useContext } from 'react';
 import clsx from 'clsx';
 import { renderRoutes } from 'react-router-config';
 import { makeStyles } from '@material-ui/styles';
 import { useSelector } from 'react-redux';
+
+import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
+import ToolbarLayout1 from './components/ToolbarLayout1';
 
 
 const useStyles = makeStyles((theme) => ({
