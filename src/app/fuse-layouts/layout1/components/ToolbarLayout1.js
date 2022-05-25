@@ -15,6 +15,8 @@ import { AppBar, Toolbar, Avatar, Badge, Button, Hidden } from '@material-ui/cor
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
+import RestoreVersion from 'app/main/apps/workspace/components/RestoreVersion';
+
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -53,6 +55,8 @@ function ToolbarLayout1(props) {
   const classes = useStyles(props);
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
+  const [transId] = useSelector(({ workspace }) => [workspace.transReducer.transId]);
+  const openTrans = useSelector(({ workspace }) => workspace.formReducer.openTrans);
   const user = useSelector(({ user }) => user);
   const [allowAccess, badge] = useSelector((state) => [
     state.header.allowAccess,
@@ -65,6 +69,7 @@ function ToolbarLayout1(props) {
       dispatch(FormActions.toggleAllInquiry());
     }
   };
+
 
   useEffect(() => {
     if (!user.displayName) {
@@ -127,7 +132,9 @@ function ToolbarLayout1(props) {
                 <span className="pl-12">Inquiry</span>
               </Button>
             </PermissionProvider>
-
+            {(openTrans && transId) && (
+              <RestoreVersion/>
+            )}
             <PermissionProvider
               action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
               extraCondition={pathname.includes('/guest')}>

@@ -22,7 +22,6 @@ const DATE_OPTIONS_WITHOUT_YEAR = {
 
 function Transaction(props) {
   const dispatch = useDispatch();
-
   const [myBL, blTrans] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.myBL,
     workspace.transReducer.blTrans
@@ -35,19 +34,22 @@ function Transaction(props) {
   }
 
   const loadTransaction = (id, index) => {
-    dispatch(TransActions.getInqTrans(id))
-    selectedChange(index)
-  }
+    dispatch(TransActions.getInqTrans(id));
+    dispatch(TransActions.setBlTransSelected(id));
+    selectedChange(index);
+  };
 
   useEffect(() => {
     if (myBL) {
       dispatch(TransActions.getBlTrans(myBL.id));
     }
   }, [myBL]);
+
   return (
     <div className="flex" style={{ marginTop: 70, width: 450, backgroundColor: 'white' }}>
       <div className="flex flex-col" style={{ width: '100%' }}>
-        <Typography variant="h5" style={{ margin: 5 }}>Version history
+        <Typography variant="h5" style={{ margin: 5 }}>
+          Version history
         </Typography>
         <Divider style={{ marginTop: 5 }} />
         <FuseScrollbars scrollToTopOnChildChange>

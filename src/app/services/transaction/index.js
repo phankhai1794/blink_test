@@ -15,3 +15,8 @@ export async function getInqsTrans(id) {
   const response = await axios().get(`${PATH}/getInqsTrans/${id}`);
   return response.data;
 }
+
+export async function restoreBLTransAPI(myblId, transId) {
+  const response = await axios().post(`${PATH}/restoreTrans`, {myblId, transId});
+  return response;
+}
