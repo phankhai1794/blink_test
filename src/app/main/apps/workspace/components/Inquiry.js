@@ -167,7 +167,7 @@ const Comment = (props) => {
                     </>
                   )}
                 </div>
-                <Typography variant="h5">{k.content}</Typography>{' '}
+                <Typography variant="h5" style={{ wordBreak: 'break-word' }}>{k.content}</Typography>
               </>
             )}
           </div>
