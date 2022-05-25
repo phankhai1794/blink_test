@@ -1,7 +1,7 @@
 import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
 import { getFile } from 'app/services/fileService';
 import { displayTime } from '@shared';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -15,10 +15,12 @@ import {
   ListItemText,
   Typography,
   IconButton,
-  Fab
+  Fab,
+  TextField, InputAdornment, Button
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -29,6 +31,26 @@ import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import UserInfo from './UserInfo';
+
+const StyledTextField = withStyles({
+  root: {
+    width: '100%',
+    margin: '1rem 0',
+    '& .MuiInputBase-root': {
+      backgroundColor: '#f0f2f5'
+    },
+    '& .MuiInputBase-root .MuiInputBase-input': {
+      fontSize: '1.5rem',
+      padding: '10px'
+    },
+    '& .MuiFormLabel-root': {
+      fontSize: '1.5rem'
+    },
+    '& .MuiInputLabel-formControl': {
+      top: '-18%'
+    }
+  }
+})(TextField);
 
 const Comment = (props) => {
   const inputStyle = {
@@ -50,6 +72,7 @@ const Comment = (props) => {
     workspace.inquiryReducer.reply,
     workspace.inquiryReducer.currentField
   ]);
+  const inputRef = useRef(null);
   const user = useSelector(({ user }) => user);
   const open = Boolean(anchorEl);
   useEffect(() => {
@@ -60,6 +83,14 @@ const Comment = (props) => {
       })
       .catch((error) => console.log(error));
   }, [currentField]);
+  const scroll = () => {
+    inputRef.current.scrollIntoView({ block: 'end', behavior: 'smooth' });
+  };
+  useEffect(() => {
+    if (reply) {
+      scroll();
+    }
+  }, [reply]);
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -126,11 +157,12 @@ const Comment = (props) => {
         return (
           <div key={id} style={{ marginBottom: '20px' }}>
             {edit === id ? (
-              <input
-                placeholder="Comment here"
-                style={inputStyle}
-                onKeyPress={(e) => onEnterComment(e, id)}
+              <StyledTextField
+                id="outlined-helperText"
+                label="Comment here"
                 value={k.content}
+                variant="outlined"
+                onKeyPress={(e) => onEnterComment(e, id)}
                 onChange={(e) => changeComment(e, id)}
               />
             ) : (
@@ -173,15 +205,19 @@ const Comment = (props) => {
           </div>
         );
       })}
-      {reply && (
-        <input
-          placeholder="Comment here"
-          style={inputStyle}
-          onKeyPress={addComment}
-          value={value}
-          onChange={changeValue}
-        />
-      )}
+
+      <div className="comment" ref={inputRef}>
+        {reply && (
+          <StyledTextField
+            id="outlined-helperText"
+            label="Comment here"
+            value={value}
+            variant="outlined"
+            onKeyPress={addComment}
+            onChange={changeValue}
+          />
+        )}
+      </div>
     </>
   );
 };
