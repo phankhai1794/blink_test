@@ -7,10 +7,11 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import ForgotPasswordTab from './tabs/ForgotPasswordTab';
-import JWTLoginTab from './tabs/JWTLoginTab';
 
+import JWTLoginTab from './tabs/JWTLoginTab';
+import ForgotPasswordTab from './tabs/ForgotPasswordTab';
+
+// import { Link } from 'react-router-dom';
 const useStyles = makeStyles((theme) => ({
   root: {
     background: 'url("assets/images/backgrounds/slider-sea.jpg")',
@@ -57,9 +58,8 @@ function Login(props) {
         }
       })
       .catch((error) => {
-        console.log('Error: ', error);
-        const { message } = error.response.data.error;
-        dispatch(AppAction.showMessage({message: message, variant: 'error'}));
+        console.error(error);
+        dispatch(AppAction.showMessage({message: error.message, variant: 'error'}));
       });
   }
 
@@ -122,13 +122,13 @@ function Login(props) {
                   <a className="font-medium text-primary" onClick={() => setIsLoginTabViewed(false)} >
                     Forgot passwords
                   </a>
-                  <span className="font-medium">Don't have an account?</span>
+                  {/* <span className="font-medium">{`Don't have an account?`}</span>
                   <Link className="font-medium" to="/register">
                     Create an account
                   </Link>
                   <Link className="font-medium mt-8" to="/">
                     Back to Dashboard
-                  </Link>
+                  </Link> */}
                 </div>
               </CardContent>
             </Card>
@@ -162,10 +162,10 @@ function Login(props) {
                 {selectedTab === 0 && <ForgotPasswordTab onLogged={handleLogin} loginTabView={setIsLoginTabViewed} />}
 
                 <div className="flex flex-col items-center justify-center pt-32">
-                  <span className="font-medium">Don't have an account?</span>
+                  {/* <span className="font-medium">{`Don't have an account?`}</span>
                   <Link className="font-medium" to="/register">
                     Create an account
-                  </Link>
+                  </Link> */}
                   <a className="font-medium text-primary" onClick={() => setIsLoginTabViewed(true)} >
                     Back to login
                   </a>

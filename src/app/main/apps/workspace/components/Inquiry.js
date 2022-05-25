@@ -58,7 +58,7 @@ const Comment = (props) => {
         dispatch(InquiryActions.setDisplayComment(Boolean(res.length || userType === 'guest')));
         setComment(res);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.error(error));
   }, [currentField]);
   const handleClose = () => {
     setAnchorEl(null);
@@ -241,7 +241,7 @@ const Inquiry = (props) => {
             optionsOfQuestion[indexes].mediaFile[f].src = url;
             dispatch(InquiryActions.editInquiry(optionsOfQuestion));
           })
-          .catch((error) => console.log(error));
+          .catch((error) => console.error(error));
       }
     }
   }, [currentField]);

@@ -80,7 +80,7 @@ const AllInquiry = (props) => {
               optionsOfQuestion[i].mediaFile[f].src = url;
               dispatch(InquiryActions.editInquiry(optionsOfQuestion));
             })
-            .catch((error) => console.log(error));
+            .catch((error) => console.error(error));
         }
       }
     }

@@ -7,24 +7,24 @@ export const SENDMAIL_SUCCESS = 'SENDMAIL_SUCCESS';
 
 export const sendMail =
   ({ myblId, toCustomer, toOnshore, from, subject, content }) =>
-  async (dispatch) => {
-    sendmail(myblId, from, toCustomer, toOnshore, subject, content)
-      .then((res) => {
-        if (res.status === 200) {
-          return dispatch({
-            type: SENDMAIL_SUCCESS
-          });
-        } else {
+    async (dispatch) => {
+      sendmail(myblId, from, toCustomer, toOnshore, subject, content)
+        .then((res) => {
+          if (res.status === 200) {
+            return dispatch({
+              type: SENDMAIL_SUCCESS
+            });
+          } else {
+            return dispatch({
+              type: SENDMAIL_ERROR,
+              payload: res
+            });
+          }
+        })
+        .catch((error) => {
           return dispatch({
             type: SENDMAIL_ERROR,
-            payload: res
+            payload: error
           });
-        }
-      })
-      .catch((error) => {
-        return dispatch({
-          type: SENDMAIL_ERROR,
-          payload: error
         });
-      });
-  };
+    };
