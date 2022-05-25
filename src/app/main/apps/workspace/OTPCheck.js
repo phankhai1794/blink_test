@@ -65,9 +65,8 @@ const OtpCheck = ({ status }) => {
           if (res) setStep(1);
         })
         .catch((error) => {
-          console.log(error);
-          const { message } = error.response.data.error;
-          dispatch(Actions.showMessage({ message: message, variant: 'error' }));
+          console.error(error);
+          dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
         });
     }
   };
@@ -93,7 +92,7 @@ const OtpCheck = ({ status }) => {
         isVerified({ mail: email, bl })
           .then(() => setStep(2))
           .catch((error) => {
-            console.log(error);
+            console.error(error);
           });
       }
     }
@@ -121,9 +120,8 @@ const OtpCheck = ({ status }) => {
           }
         })
         .catch((error) => {
-          console.log(error);
-          const { message } = error.response.data.error;
-          dispatch(Actions.showMessage({ message: message, variant: 'error' }));
+          console.error(error);
+          dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
         });
     }
   }, [otpCode]);

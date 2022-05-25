@@ -158,17 +158,17 @@ export function logoutUser() {
     });
 
     switch (user.from) {
-      case 'firebase': {
-        firebaseService.signOut();
-        break;
-      }
-      case 'auth0': {
-        auth0Service.logout();
-        break;
-      }
-      default: {
-        jwtService.logout();
-      }
+    case 'firebase': {
+      firebaseService.signOut();
+      break;
+    }
+    case 'auth0': {
+      auth0Service.logout();
+      break;
+    }
+    default: {
+      jwtService.logout();
+    }
     }
 
     dispatch(setInitialSettings());
@@ -189,41 +189,41 @@ function updateUserData(user) {
   }
 
   switch (user.from) {
-    case 'firebase': {
-      firebaseService
-        .updateUserData(user)
-        .then(() => {
-          store.dispatch(Actions.showMessage({ message: 'User data saved to firebase' }));
-        })
-        .catch((error) => {
-          store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
-        });
-      break;
-    }
-    case 'auth0': {
-      auth0Service
-        .updateUserData({
-          settings: user.data.settings,
-          shortcuts: user.data.shortcuts
-        })
-        .then(() => {
-          store.dispatch(Actions.showMessage({ message: 'User data saved to auth0' }));
-        })
-        .catch((error) => {
-          store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
-        });
-      break;
-    }
-    default: {
-      jwtService
-        .updateUserData(user)
-        .then(() => {
-          store.dispatch(Actions.showMessage({ message: 'User data saved with api' }));
-        })
-        .catch((error) => {
-          store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
-        });
-      break;
-    }
+  case 'firebase': {
+    firebaseService
+      .updateUserData(user)
+      .then(() => {
+        store.dispatch(Actions.showMessage({ message: 'User data saved to firebase' }));
+      })
+      .catch((error) => {
+        store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
+      });
+    break;
+  }
+  case 'auth0': {
+    auth0Service
+      .updateUserData({
+        settings: user.data.settings,
+        shortcuts: user.data.shortcuts
+      })
+      .then(() => {
+        store.dispatch(Actions.showMessage({ message: 'User data saved to auth0' }));
+      })
+      .catch((error) => {
+        store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
+      });
+    break;
+  }
+  default: {
+    jwtService
+      .updateUserData(user)
+      .then(() => {
+        store.dispatch(Actions.showMessage({ message: 'User data saved with api' }));
+      })
+      .catch((error) => {
+        store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
+      });
+    break;
+  }
   }
 }
