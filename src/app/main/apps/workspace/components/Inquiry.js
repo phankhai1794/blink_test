@@ -17,13 +17,14 @@ import {
   Typography,
   IconButton,
   Fab,
-  TextField, InputAdornment, Button
+  TextField
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/styles';
 import { withStyles } from '@material-ui/core/styles';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
 
 import InquiryEditor from './InquiryEditor';
 import ChoiceAnswer from './ChoiceAnswer';
@@ -54,14 +55,6 @@ const StyledTextField = withStyles({
 })(TextField);
 
 const Comment = (props) => {
-  const inputStyle = {
-    borderRadius: '18px',
-    padding: '10px',
-    borderStyle: 'none',
-    backgroundColor: '#f0f2f5',
-    fontSize: '17px',
-    width: '97%'
-  };
   const dispatch = useDispatch();
   const { q, userType } = props;
   const [value, setValue] = useState('');
@@ -242,7 +235,6 @@ const useStyles = makeStyles((theme) => ({
 
 const Inquiry = (props) => {
   const dispatch = useDispatch();
-  const { user } = props;
   const classes = useStyles();
   const [inquiries, currentField, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
@@ -262,6 +254,7 @@ const Inquiry = (props) => {
     setAnchorEl(null);
   };
   const toggleEdit = (id) => {
+    dispatch(FormActions.toggleSaveInquiry(true))
     setEdit(id);
   };
   useEffect(() => {
@@ -318,8 +311,7 @@ const Inquiry = (props) => {
                   <Menu
                     id="customized-menu"
                     anchorEl={anchorEl}
-                    // open={open}
-                    open={false}
+                    open={open}
                     onClose={handleClose}
                     keepMounted>
                     <MenuItem onClick={() => toggleEdit(index)}>
@@ -363,7 +355,7 @@ const Inquiry = (props) => {
                       questions={inquiries}
                       saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
                       isShowBtn={isShowBtn}
-                      // disabled={true}
+                    // disabled={true}
                     />
                   )}
                 </div>

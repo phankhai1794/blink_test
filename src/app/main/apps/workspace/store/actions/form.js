@@ -4,6 +4,7 @@ export const OPEN_CREATE_INQUIRY = 'OPEN_CREATE_INQUIRY';
 export const OPEN_INQUIRY = 'OPEN_INQUIRY';
 export const OPEN_ATTACHMENT = 'OPEN_ATTACHMENT';
 export const OPEN_ALL_INQUIRY = 'OPEN_ALL_INQUIRY';
+export const TOGGLE_SAVE_INQUIRY = 'TOGGLE_SAVE_INQUIRY';
 export const SET_ANCHOR_EL = 'SET_ANCHOR_EL';
 export const DISPLAY_SUCCESS = 'DISPLAY_SUCCESS';
 export const DISPLAY_FAIL = 'DISPLAY_FAIL';
@@ -40,6 +41,13 @@ export function toggleAllInquiry() {
 export function toggleInquiry(state) {
   return {
     type: OPEN_INQUIRY,
+    state: state
+  };
+}
+
+export function toggleSaveInquiry(state) {
+  return {
+    type: TOGGLE_SAVE_INQUIRY,
     state: state
   };
 }

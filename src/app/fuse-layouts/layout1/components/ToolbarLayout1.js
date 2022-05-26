@@ -67,6 +67,7 @@ function ToolbarLayout1(props) {
     if (badge) {
       dispatch(FormActions.toggleInquiry(true));
       dispatch(FormActions.toggleAllInquiry());
+      dispatch(FormActions.toggleSaveInquiry(true))
     }
   };
 
@@ -144,7 +145,7 @@ function ToolbarLayout1(props) {
               </Button>
             </PermissionProvider>
             {(openTrans && transId) && (
-              <RestoreVersion/>
+              <RestoreVersion />
             )}
             <PermissionProvider
               action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}

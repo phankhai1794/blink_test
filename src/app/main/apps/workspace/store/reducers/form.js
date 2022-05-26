@@ -5,6 +5,7 @@ const initialState = {
   fullscreen: false,
   openDialog: false,
   openAllInquiry: false,
+  showSaveInuiry: false,
   openInquiry: false,
   openAttachment: false,
   anchorEl: null,
@@ -30,6 +31,9 @@ const formReducer = function (state = initialState, action) {
     }
     case Actions.OPEN_INQUIRY: {
       return { ...state, openInquiry: action.state };
+    }
+    case Actions.TOGGLE_SAVE_INQUIRY: {
+      return { ...state, showSaveInuiry: action.state };
     }
     case Actions.OPEN_ATTACHMENT: {
       return { ...state, openAttachment: action.state };
