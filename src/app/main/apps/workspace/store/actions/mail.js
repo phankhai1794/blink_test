@@ -8,7 +8,6 @@ export const SENDMAIL_SUCCESS = 'SENDMAIL_SUCCESS';
 export const sendMail =
   ({ myblId, toCustomer, toOnshore, from, subject, content }) =>
     async (dispatch) => {
-      dispatch({ type: SENDMAIL_LOADING });
       sendmail(myblId, from, toCustomer, toOnshore, subject, content)
         .then((res) => {
           if (res.status === 200) {
