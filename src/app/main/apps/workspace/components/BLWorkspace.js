@@ -140,7 +140,7 @@ const BLWorkspace = (props) => {
         field={currentField || ''}
         title={
           openAllInquiry
-            ? 'All Inquiries'
+            ? 'Inquiry List'
             : currentField
               ? getKeyByValue(metadata['field'], currentField)
               : ''
