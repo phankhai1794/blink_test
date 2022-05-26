@@ -1,5 +1,6 @@
 import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
 import { getFile } from 'app/services/fileService';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { displayTime } from '@shared';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,13 +17,14 @@ import {
   Typography,
   IconButton,
   Fab,
-  TextField, InputAdornment, Button
+  TextField
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/styles';
 import { withStyles } from '@material-ui/core/styles';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
 
 import InquiryEditor from './InquiryEditor';
 import ChoiceAnswer from './ChoiceAnswer';
@@ -53,14 +55,6 @@ const StyledTextField = withStyles({
 })(TextField);
 
 const Comment = (props) => {
-  const inputStyle = {
-    borderRadius: '18px',
-    padding: '10px',
-    borderStyle: 'none',
-    backgroundColor: '#f0f2f5',
-    fontSize: '17px',
-    width: '97%'
-  };
   const dispatch = useDispatch();
   const { q, userType } = props;
   const [value, setValue] = useState('');
@@ -170,8 +164,9 @@ const Comment = (props) => {
                 <div
                   className="flex justify-between"
                   onMouseEnter={() => setKey(id)}
-                  onMouseLeave={() => setKey('')}>
-                  <UserInfo name={k.creator} time={displayTime(k.createdAt)} />
+                  onMouseLeave={() => setKey('')}
+                >
+                  <UserInfo name={k.creator.userName} time={displayTime(k.createdAt)} avatar={k.creator.avatar} />
                   {user.displayName === k.creator && key === id && (
                     <>
                       <IconButton onClick={handleClick}>
@@ -240,7 +235,6 @@ const useStyles = makeStyles((theme) => ({
 
 const Inquiry = (props) => {
   const dispatch = useDispatch();
-  const { user } = props;
   const classes = useStyles();
   const [inquiries, currentField, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
@@ -260,10 +254,11 @@ const Inquiry = (props) => {
     setAnchorEl(null);
   };
   const toggleEdit = (id) => {
+    dispatch(FormActions.toggleSaveInquiry(true))
     setEdit(id);
   };
   useEffect(() => {
-    if (inquiry[0] && inquiry[0].mediaFile.length && !inquiry[0].mediaFile[0].src) {
+    if (inquiry[0]?.mediaFile.length && !inquiry[0].mediaFile[0].src) {
       const optionsOfQuestion = [...inquiries];
       for (let f in inquiry[0].mediaFile) {
         getFile(inquiry[0].mediaFile[f].id)
@@ -294,7 +289,7 @@ const Inquiry = (props) => {
     <>
       {inquiry.map((q, index) => {
         const type = q.ansType;
-        const username = q.creator;
+        const user = q.creator;
         return (
           <>
             {edit === index ? (
@@ -307,12 +302,12 @@ const Inquiry = (props) => {
             ) : (
               <Card style={{ padding: '1rem ', marginBottom: '24px' }}>
                 <div className="flex justify-between">
-                  <UserInfo name={username} time={displayTime(q.createdAt)} />
-                  {user === 'workspace' && (
+                  <UserInfo name={user.userName} time={displayTime(q.createdAt)} avatar={user.avatar} />
+                  <PermissionProvider action={PERMISSION.VIEW_EDIT_INQUIRY}>
                     <IconButton onClick={handleClick}>
                       <MoreVertIcon />
                     </IconButton>
-                  )}
+                  </PermissionProvider>
                   <Menu
                     id="customized-menu"
                     anchorEl={anchorEl}
@@ -360,7 +355,7 @@ const Inquiry = (props) => {
                       questions={inquiries}
                       saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
                       isShowBtn={isShowBtn}
-                      // disabled={true}
+                    // disabled={true}
                     />
                   )}
                 </div>

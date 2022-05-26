@@ -71,6 +71,7 @@ const PopoverFooter = () => {
         }
       }
       dispatch(FormActions.displaySuccess(true));
+      dispatch(FormActions.toggleSaveInquiry(false))
       dispatch(FormActions.toggleReload());
     } catch (error) {
       dispatch(FormActions.displayFail(true, error));

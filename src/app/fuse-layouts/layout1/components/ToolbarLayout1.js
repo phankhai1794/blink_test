@@ -67,6 +67,7 @@ function ToolbarLayout1(props) {
     if (badge) {
       dispatch(FormActions.toggleInquiry(true));
       dispatch(FormActions.toggleAllInquiry());
+      dispatch(FormActions.toggleSaveInquiry(true))
     }
   };
 
@@ -129,7 +130,7 @@ function ToolbarLayout1(props) {
                 size="medium"
                 className={clsx('h-64', classes.button)}
                 onClick={openInquiry}>
-                <Badge color="primary" badgeContent={badge} showZero>
+                <Badge color="primary" badgeContent={badge}>
                   <NotificationsIcon />
                 </Badge>
                 <span className="pl-12">Inquiry</span>
@@ -144,7 +145,7 @@ function ToolbarLayout1(props) {
               </Button>
             </PermissionProvider>
             {(openTrans && transId) && (
-              <RestoreVersion/>
+              <RestoreVersion />
             )}
             <PermissionProvider
               action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}

@@ -25,11 +25,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const UserInfo = (props) => {
-  const { name, time } = props;
+  const { name, time, avatar } = props;
   const classes = useStyles();
   return (
     <div className="flex">
-      <Avatar src={`../../assets/images/avatars/andrew.jpg`} />
+      <Avatar src={avatar} />
       <div>
         <p className={classes.name}>{name}</p>
         <div className="flex" style={{ marginLeft: '1rem' }}>

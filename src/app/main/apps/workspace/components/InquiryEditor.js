@@ -106,7 +106,6 @@ const Choice = (props) => {
   );
 };
 const ChoiceAnswer = (props) => {
-  const dispatch = useDispatch();
   const { questions, question, index, saveQuestion } = props;
   const classes = inputStyle();
 
@@ -185,7 +184,7 @@ const InquiryEditor = (props) => {
   // custom attribute must be lowercase
   const dispatch = useDispatch();
   const classes = useStyles();
-  const { defaultContent, index, question, questions, saveQuestion } = props;
+  const { index, question, questions, saveQuestion } = props;
   const [metadata, removeOptions, currentField, fields, valid] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.removeOptions,
@@ -215,7 +214,9 @@ const InquiryEditor = (props) => {
   };
   useEffect(() => {
     if (fieldValue) {
-      setValueType(null);
+      if (!metadata.inq_type_options.filter((v) => (fieldValue.value === v.field || !v.field) && valueType?.value === v.value).length) {
+        setValueType(null);
+      }
       setInqTypeOption(
         metadata.inq_type_options.filter((v) => fieldValue.value === v.field || !v.field)
       );

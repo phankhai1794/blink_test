@@ -114,106 +114,102 @@ const InquiryForm = (props) => {
     >
       <>
         {questions.map((question, index) => (
-          <>
-            <div style={{ marginBottom: '12px' }}>
-              <div className="flex justify-between" style={{ padding: '0.5rem' }}>
-                <div style={{ fontSize: '22px', fontWeight: 'bold', 'color': '#BD0F72' }}>
-                  {question.field ? getKeyByValue(metadata['field'], question.field) : 'New Inquiry'}
-                </div>
-                <div className="flex">
-                  <FormControl error={valid.error && !questions[index].receiver.length}>
-                    <FormGroup row>
-                      <FormControlLabel
-                        value="onshore"
-                        control={
-                          <Checkbox
-                            checked={question.receiver.includes('onshore')}
-                            onChange={(e) => handleReceiverChange(e, index)}
-                            color="primary"
-                          />
-                        }
-                        label="Onshore"
-                      />
-                      <FormControlLabel
-                        value="customer"
-                        control={
-                          <Checkbox
-                            checked={question.receiver.includes('customer')}
-                            onChange={(e) => handleReceiverChange(e, index)}
-                            color="primary"
-                          />
-                        }
-                        label="Customer"
-                      />
-                    </FormGroup>
-                    {valid.error && !questions[index].receiver.length && <FormHelperText>Pick at least one!</FormHelperText>}
-                  </FormControl>
-                  <div className="flex justify-end items-center mr-2 ">
-                    <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
-                    <IconButton className="p-8" onClick={() => copyQuestion(index)}>
-                      <FileCopyIcon />
-                    </IconButton>
-                    <IconButton disabled={questions.length === 1} className="p-8" onClick={() => removeQuestion(index)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </div>
+          <div key={index} style={{ marginBottom: '12px' }}>
+            <div className="flex justify-between" style={{ padding: '0.5rem' }}>
+              <div style={{ fontSize: '22px', fontWeight: 'bold', 'color': '#BD0F72' }}>
+                {question.field ? getKeyByValue(metadata['field'], question.field) : 'New Inquiry'}
+              </div>
+              <div className="flex">
+                <FormControl error={valid.error && !questions[index].receiver.length}>
+                  <FormGroup row>
+                    <FormControlLabel
+                      value="onshore"
+                      control={
+                        <Checkbox
+                          checked={question.receiver.includes('onshore')}
+                          onChange={(e) => handleReceiverChange(e, index)}
+                          color="primary"
+                        />
+                      }
+                      label="Onshore"
+                    />
+                    <FormControlLabel
+                      value="customer"
+                      control={
+                        <Checkbox
+                          checked={question.receiver.includes('customer')}
+                          onChange={(e) => handleReceiverChange(e, index)}
+                          color="primary"
+                        />
+                      }
+                      label="Customer"
+                    />
+                  </FormGroup>
+                  {valid.error && !questions[index].receiver.length && <FormHelperText>Pick at least one!</FormHelperText>}
+                </FormControl>
+                <div className="flex justify-end items-center mr-2 ">
+                  <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
+                  <IconButton className="p-8" onClick={() => copyQuestion(index)}>
+                    <FileCopyIcon />
+                  </IconButton>
+                  <IconButton disabled={questions.length === 1} className="p-8" onClick={() => removeQuestion(index)}>
+                    <DeleteIcon />
+                  </IconButton>
                 </div>
               </div>
-              {currentEdit === index ? (
-                <InquiryEditor
-                  index={index}
-                  questions={questions}
-                  question={question}
-                  saveQuestion={(q) => dispatch(InquiryActions.setQuestion(q))}
-                />
-              ) : (
-                <div style={{ padding: '0.5rem ' }}>
-                  <div onClick={() => changeToEditor(index)}>
-                    <div style={{ fontSize: '19px' }}>{question.content}</div>
-                    <div style={{ display: 'block', margin: '1rem 0rem' }}>
-                      {question.ansType === metadata.ans_type.choice && (
-                        <ChoiceAnswer question={question} />
-                      )}
-                      {question.ansType === metadata.ans_type.paragraph && (
-                        <ParagraphAnswer
-                          question={question}
-                        />
-                      )}
-                      {question.ansType === metadata.ans_type.attachment && (
-                        <AttachmentAnswer
-                          question={question}
-                        // disabled={true}
-                        />
-                      )}
-                    </div>
-                  </div>
-                  {
-                    question.mediaFile.map((file, mediaIndex) =>
-                      file.ext.match(/jpeg|jpg|png/g) ? (
-                        <div style={{ position: 'relative' }}>
-                          <Fab
-                            classes={{
-                              root: classes.root
-                            }}
-                            size="small"
-                            onClick={() => handleRemoveImageAttach(mediaIndex, index)}
-                          >
-                            <CloseIcon style={{ fontSize: 20 }} />
-                          </Fab>
-                          <ImageAttach src={file.src} style={{ margin: '1rem' }} />
-                        </div>
-                      ) : (
-                        <FileAttach file={file} />
-                      )
-                    )
-                  }
-                  <Divider />
-
-                </div>
-              )}
-
             </div>
-          </>
+            {currentEdit === index ? (
+              <InquiryEditor
+                index={index}
+                questions={questions}
+                question={question}
+                saveQuestion={(q) => dispatch(InquiryActions.setQuestion(q))}
+              />
+            ) : (
+              <div style={{ padding: '0.5rem ' }}>
+                <div onClick={() => changeToEditor(index)}>
+                  <div style={{ fontSize: '19px' }}>{question.content}</div>
+                  <div style={{ display: 'block', margin: '1rem 0rem' }}>
+                    {question.ansType === metadata.ans_type.choice && (
+                      <ChoiceAnswer question={question} />
+                    )}
+                    {question.ansType === metadata.ans_type.paragraph && (
+                      <ParagraphAnswer
+                        question={question}
+                      />
+                    )}
+                    {question.ansType === metadata.ans_type.attachment && (
+                      <AttachmentAnswer
+                        question={question}
+                      // disabled={true}
+                      />
+                    )}
+                  </div>
+                </div>
+                {
+                  question.mediaFile.map((file, mediaIndex) =>
+                    file.ext.match(/jpeg|jpg|png/g) ? (
+                      <div style={{ position: 'relative' }}>
+                        <Fab
+                          classes={{
+                            root: classes.root
+                          }}
+                          size="small"
+                          onClick={() => handleRemoveImageAttach(mediaIndex, index)}
+                        >
+                          <CloseIcon style={{ fontSize: 20 }} />
+                        </Fab>
+                        <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+                      </div>
+                    ) : (
+                      <FileAttach file={file} />
+                    )
+                  )
+                }
+                <Divider />
+              </div>
+            )}
+          </div>
         ))}
       </>
     </Form>

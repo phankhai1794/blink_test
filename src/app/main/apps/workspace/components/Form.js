@@ -120,10 +120,13 @@ export default function Form(props) {
     props;
   const [index, question] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
-    workspace.inquiryReducer.question
+    workspace.inquiryReducer.question,
   ]);
 
-  const [openAllInquiry] = useSelector(({ workspace }) => [workspace.formReducer.openAllInquiry]);
+  const [openAllInquiry, showSaveInuiry] = useSelector(({ workspace }) => [
+    workspace.formReducer.openAllInquiry,
+    workspace.formReducer.showSaveInuiry
+  ]);
 
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -170,9 +173,11 @@ export default function Form(props) {
       }, 400);
     }
     dispatch(InquiryActions.setReply(false));
+    dispatch(InquiryActions.setEditInq(null))
+    dispatch(FormActions.toggleSaveInquiry(false))
   };
   const [value, setValue] = React.useState(0);
-  const handleChange = (event, newValue) => {
+  const handleChange = (_, newValue) => {
     setValue(newValue);
     props.tabChange(newValue);
   };
@@ -240,7 +245,7 @@ export default function Form(props) {
             )}
             {!popoverfooter &&
               <div style={{ marginLeft: '2rem' }}>
-                {!openAllInquiry ? (
+                {!showSaveInuiry ? (
                   <PopoverFooter title={field} checkValidate={checkValidate} />
                 ) : (
                   <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>

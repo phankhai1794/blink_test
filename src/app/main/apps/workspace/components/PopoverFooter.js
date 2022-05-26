@@ -61,6 +61,7 @@ const PopoverFooter = ({ title, checkValidate }) => {
   };
   const toggleInquiriresDialog = () => {
     dispatch(FormActions.toggleAllInquiry());
+    dispatch(FormActions.toggleSaveInquiry(true))
   };
   const onResolve = () => {
     changeStatus(currentField, 'COMPL')
