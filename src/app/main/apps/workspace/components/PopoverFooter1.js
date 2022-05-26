@@ -80,8 +80,8 @@ const PopoverFooter = () => {
   };
 
   return (
-    <div className="text-right p-5">
-      <Button variant="contained" className={classes.root} color="primary" onClick={onSave}>
+    <div className="text-center p-5">
+      <Button variant="contained" className={classes.root} color="primary" onClick={(onSave)}>
         Save
       </Button>
     </div>

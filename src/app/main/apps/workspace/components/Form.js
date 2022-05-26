@@ -13,6 +13,7 @@ import { Box, Tabs, Tab, Fab, Divider, Link } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import CropIcon from '@material-ui/icons/Crop';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import OpenInNew from '@material-ui/icons/OpenInNew';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -81,6 +82,9 @@ const DialogTitle = withStyles(styles)((props) => {
               <CropDinIcon />
             </IconButton>
           )}
+          <IconButton aria-label="close" >
+            <OpenInNew />
+          </IconButton>
           <IconButton aria-label="close" onClick={handleClose}>
             <CloseIcon />
           </IconButton>
