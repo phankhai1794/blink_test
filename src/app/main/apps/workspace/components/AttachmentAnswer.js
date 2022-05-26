@@ -47,14 +47,13 @@ const rejectStyle = {
   borderColor: '#ff1744'
 };
 
-const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
-
 //   component
 const AttachmentAnswer = (props) => {
-  const { question, user, index, questions, saveQuestion, isShowBtn } = props;
+  const { question, index, questions, saveQuestion, isShowBtn, isPermissionAttach } = props;
   const [name, setName] = useState(question.fileName || '');
   const [showBtn, setShowBtn] = useState(false);
   const dispatch = useDispatch();
+  const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
 
   const uploadImageAttach = (files) => {
     const optionsOfQuestion = [...questions];
@@ -137,19 +136,19 @@ const AttachmentAnswer = (props) => {
     <div>
       <div className="container">
         <div {...getRootProps({ style })}>
-          <input {...getInputProps()} disabled={!allowCreateAttachmentAnswer} />
+          <input {...getInputProps()} disabled={!isPermissionAttach} />
           <p>Drag and drop some files here</p>
           <Button
             color="primary"
             variant="contained"
-            disabled={!allowCreateAttachmentAnswer}
+            disabled={!isPermissionAttach}
             onClick={open}
           >
             <PublishIcon />
           </Button>
         </div>
       </div>
-      {showBtn && (
+      {showBtn && isPermissionAttach && (
         <div className="justify-end flex" style={{ marginTop: '1rem' }}>
           <Button variant="contained" color="primary" onClick={handleSave}>
             {' '}

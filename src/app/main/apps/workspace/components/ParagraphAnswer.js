@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, InputAdornment, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { createParagraphAnswer, updateParagraphAnswer } from 'app/services/inquiryService';
 import { useDispatch } from 'react-redux';
 import * as AppAction from 'app/store/actions';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import UserInfo from './UserInfo';
 
@@ -22,20 +23,22 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ParagraphAnswer = (props) => {
-  const { question, user, index, questions, saveQuestion } = props;
+  const allowCreateParagraphAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_CREATE_PARAGRAPH });
+  const allowUpdateParagraphAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH });
+  const { question, index, questions, saveQuestion } = props;
   const [paragraphText, setParagraphText] = useState(question.answerObj[0]?.content || '');
   const dispatch = useDispatch();
   const classes = useStyles();
+  const isPermission = useRef(false);
 
-  const handleSaveSelectedChoice = (e) => {
-    let savedQuestion = question;
-    savedQuestion = {
-      ...savedQuestion,
-      paragraph: paragraphText,
-      selectedChoice: paragraphText
-    };
-    props.onSaveSelectedChoice(savedQuestion);
-  };
+  useEffect(() => {
+    if ((!questions[index]?.answerObj[0]?.id && allowCreateParagraphAnswer) ||
+        (questions[index]?.answerObj[0]?.id && allowUpdateParagraphAnswer)) {
+      isPermission.current = true;
+    } else {
+      isPermission.current = false;
+    }
+  }, [questions]);
 
   const addParagraph = async () => {
     const body = {
@@ -70,14 +73,14 @@ const ParagraphAnswer = (props) => {
     <div>
       <div className="flex">
         <TextField
-          placeholder="Customer Input"
+          placeholder={isPermission.current ? 'Customer Input' : ''}
           classes={{ root: classes.root }}
-          disabled={user !== 'guest'}
+          disabled={!isPermission.current}
           InputProps={{
             style: {
               fontSize: '1.7rem'
             },
-            endAdornment: user === 'guest' && (
+            endAdornment: isPermission.current && (
               <InputAdornment position="end">
                 <Button
                   aria-label="Add"

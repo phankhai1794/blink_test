@@ -7,6 +7,7 @@ import {
   FormControlLabel
 } from '@material-ui/core';
 import { useSelector } from 'react-redux';
+import {PERMISSION, PermissionProvider} from "@shared/permission";
 
 
 const ChoiceAnswer = (props) => {
@@ -29,6 +30,7 @@ const ChoiceAnswer = (props) => {
     selectedChoice === 'other' ? otherChoiceContent : selectedChoice
   );
   const [showSaveBtn, setShowSaveBtn] = useState(false);
+  const allowUpdateChoiceAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_UPDATE_CHOICE });
 
   const handleChange = async (e) => {
     setSelectedChoice(e.target.value);
@@ -77,7 +79,7 @@ const ChoiceAnswer = (props) => {
           {question.answerObj.map((choice, index) => (
             <div key={index} style={{ marginTop: '0.5rem' }}>
               <FormControlLabel
-                disabled={user.role !== 'Guest'}
+                disabled={!allowUpdateChoiceAnswer}
                 checked={selectedChoice === choice.id}
                 value={choice.id}
                 control={<Radio color={'primary'} />}

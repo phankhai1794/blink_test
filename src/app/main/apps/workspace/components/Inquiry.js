@@ -247,6 +247,7 @@ const Inquiry = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [isShowBtn, setShowBtn] = useState(null);
   const open = Boolean(anchorEl);
+  const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -341,7 +342,6 @@ const Inquiry = (props) => {
                   {type === metadata.ans_type.paragraph && (
                     <ParagraphAnswer
                       question={q}
-                      user={user}
                       index={indexes}
                       questions={inquiries}
                       saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
@@ -350,18 +350,18 @@ const Inquiry = (props) => {
                   {type === metadata.ans_type.attachment && (
                     <AttachmentAnswer
                       question={q}
-                      user={user}
                       index={indexes}
                       questions={inquiries}
                       saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
                       isShowBtn={isShowBtn}
+                      isPermissionAttach={allowCreateAttachmentAnswer}
                     // disabled={true}
                     />
                   )}
                 </div>
                 <>
                   {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
-                  {q.mediaFile?.map((file, mediaIndex) => (
+                  {q.mediaFile?.length > 0 && q.mediaFile?.map((file, mediaIndex) => (
                     <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
                       <Fab
                         size="small"
@@ -381,10 +381,10 @@ const Inquiry = (props) => {
                   ))}
                 </>
                 <>
-                  {q.answerObj[0]?.mediaFiles.length > 0 && <h3>Attachment Answer:</h3>}
-                  {q.answerObj[0]?.mediaFiles.map((file, mediaIndex) => (
+                  {q.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
+                  {q.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
                     <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
-                      {user === 'guest' && <Fab
+                      {allowCreateAttachmentAnswer && <Fab
                         size="small"
                         onClick={() => handleRemoveImageAttach(mediaIndex, indexes)}
                         classes={

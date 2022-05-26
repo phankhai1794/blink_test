@@ -4,7 +4,16 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useEffect } from 'react';
-import { Card, Typography, FormControl, FormGroup, FormControlLabel, IconButton, Checkbox, FormHelperText } from '@material-ui/core';
+import {
+  Card,
+  Typography,
+  FormControl,
+  FormGroup,
+  FormControlLabel,
+  IconButton,
+  Checkbox,
+  FormHelperText
+} from '@material-ui/core';
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -16,17 +25,19 @@ import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 
-
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
   const { receiver } = props;
-  const [inquiries, currentEdit, metadata, valid] = useSelector(({ workspace }) => [
+  const [inquiries, currentEdit, currentField, metadata, valid] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentEditInq,
+    workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.metadata,
-    workspace.inquiryReducer.validation,
+    workspace.inquiryReducer.validation
   ]);
+  const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
 
+  const indexes = inquiries.findIndex((q) => q.field === currentField);
   const changeToEditor = (index) => {
     if (index !== currentEdit) dispatch(InquiryActions.setEditInq(index));
   };
@@ -37,7 +48,7 @@ const AllInquiry = (props) => {
     if (index > 0) {
       dispatch(InquiryActions.setEdit(index - 1));
     }
-    dispatch(InquiryActions.setQuestion(optionsOfQuestion))
+    dispatch(InquiryActions.setQuestion(optionsOfQuestion));
   };
 
   const handleUploadImageAttach = (src, index) => {
@@ -50,7 +61,7 @@ const AllInquiry = (props) => {
       ...list,
       { id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }
     ];
-    dispatch(InquiryActions.setQuestion(optionsOfQuestion))
+    dispatch(InquiryActions.setQuestion(optionsOfQuestion));
   };
 
   const handleReceiverChange = (e, index) => {
@@ -92,8 +103,7 @@ const AllInquiry = (props) => {
           return (
             <div
               style={{ display: 'flex', marginBottom: '24px' }}
-              onClick={() => changeToEditor(index)}
-            ></div>
+              onClick={() => changeToEditor(index)}></div>
           );
         }
         const type = q.ansType;
@@ -112,11 +122,30 @@ const AllInquiry = (props) => {
                   <Typography variant="h5">{q.name}</Typography>
                   <Typography variant="h5">{q.content}</Typography>
                   <div style={{ display: 'block', margin: '1rem 0rem' }}>
-                    {type === metadata.ans_type.choice && <ChoiceAnswer question={q} />}
-                    {type === metadata.ans_type.paragraph && <ParagraphAnswer question={q} />}
+                    {type === metadata.ans_type.choice && (
+                      <ChoiceAnswer
+                        index={indexes}
+                        questions={inquiries}
+                        question={q}
+                        saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                      />
+                    )}
+                    {type === metadata.ans_type.paragraph && (
+                      <ParagraphAnswer
+                        question={q}
+                        index={indexes}
+                        questions={inquiries}
+                        saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                      />
+                    )}
                     {type === metadata.ans_type.attachment && (
                       <AttachmentAnswer
                         question={q}
+                        index={indexes}
+                        questions={inquiries}
+                        saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                        isPermissionAttach={allowCreateAttachmentAnswer}
+                        // disabled={true}
                       />
                     )}
                   </div>
@@ -128,10 +157,9 @@ const AllInquiry = (props) => {
                     )
                   )}
                 </Card>
-              }
-            >
+              }>
               <div className="flex justify-between">
-                <div style={{ fontSize: '22px', fontWeight: 'bold', 'color': '#BD0F72' }}>
+                <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
                   {getKeyByValue(metadata['field'], q.field)}
                 </div>
                 <div className="flex justify-end">
@@ -160,7 +188,9 @@ const AllInquiry = (props) => {
                         label="Customer"
                       />
                     </FormGroup>
-                    {valid.error && !q.receiver.length && <FormHelperText>Pick at least one!</FormHelperText>}
+                    {valid.error && !q.receiver.length && (
+                      <FormHelperText>Pick at least one!</FormHelperText>
+                    )}
                   </FormControl>
                   <div className="flex justify-end items-center mr-2 ">
                     <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
