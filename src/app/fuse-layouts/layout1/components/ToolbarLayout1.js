@@ -129,7 +129,7 @@ function ToolbarLayout1(props) {
                 size="medium"
                 className={clsx('h-64', classes.button)}
                 onClick={openInquiry}>
-                <Badge color="primary" badgeContent={badge} showZero>
+                <Badge color="primary" badgeContent={badge}>
                   <NotificationsIcon />
                 </Badge>
                 <span className="pl-12">Inquiry</span>

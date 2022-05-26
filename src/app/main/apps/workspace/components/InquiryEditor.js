@@ -215,7 +215,9 @@ const InquiryEditor = (props) => {
   };
   useEffect(() => {
     if (fieldValue) {
-      setValueType(null);
+      if (!metadata.inq_type_options.filter((v) => fieldValue.value === v.field && valueType?.value === v.value).length) {
+        setValueType(null);
+      }
       setInqTypeOption(
         metadata.inq_type_options.filter((v) => fieldValue.value === v.field || !v.field)
       );

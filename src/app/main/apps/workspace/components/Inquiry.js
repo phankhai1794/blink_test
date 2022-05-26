@@ -1,5 +1,6 @@
 import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
 import { getFile } from 'app/services/fileService';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { displayTime } from '@shared';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -170,8 +171,9 @@ const Comment = (props) => {
                 <div
                   className="flex justify-between"
                   onMouseEnter={() => setKey(id)}
-                  onMouseLeave={() => setKey('')}>
-                  <UserInfo name={k.creator} time={displayTime(k.createdAt)} />
+                  onMouseLeave={() => setKey('')}
+                >
+                  <UserInfo name={k.creator.userName} time={displayTime(k.createdAt)} avatar={k.creator.avatar} />
                   {user.displayName === k.creator && key === id && (
                     <>
                       <IconButton onClick={handleClick}>
@@ -263,7 +265,7 @@ const Inquiry = (props) => {
     setEdit(id);
   };
   useEffect(() => {
-    if (inquiry[0] && inquiry[0].mediaFile.length && !inquiry[0].mediaFile[0].src) {
+    if (inquiry[0]?.mediaFile.length && !inquiry[0].mediaFile[0].src) {
       const optionsOfQuestion = [...inquiries];
       for (let f in inquiry[0].mediaFile) {
         getFile(inquiry[0].mediaFile[f].id)
@@ -294,7 +296,7 @@ const Inquiry = (props) => {
     <>
       {inquiry.map((q, index) => {
         const type = q.ansType;
-        const username = q.creator;
+        const user = q.creator;
         return (
           <>
             {edit === index ? (
@@ -307,16 +309,17 @@ const Inquiry = (props) => {
             ) : (
               <Card style={{ padding: '1rem ', marginBottom: '24px' }}>
                 <div className="flex justify-between">
-                  <UserInfo name={username} time={displayTime(q.createdAt)} />
-                  {user === 'workspace' && (
+                  <UserInfo name={user.userName} time={displayTime(q.createdAt)} avatar={user.avatar} />
+                  <PermissionProvider action={PERMISSION.VIEW_EDIT_INQUIRY}>
                     <IconButton onClick={handleClick}>
                       <MoreVertIcon />
                     </IconButton>
-                  )}
+                  </PermissionProvider>
                   <Menu
                     id="customized-menu"
                     anchorEl={anchorEl}
-                    open={open}
+                    // open={open}
+                    open={false}
                     onClose={handleClose}
                     keepMounted>
                     <MenuItem onClick={() => toggleEdit(index)}>
