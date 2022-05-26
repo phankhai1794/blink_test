@@ -8,7 +8,6 @@ import { Button, Grid, Divider } from '@material-ui/core';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles } from '@material-ui/styles';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { SENDMAIL_NONE, SENDMAIL_LOADING } from '../store/actions/mail';
 import * as mailActions from '../store/actions/mail';
@@ -53,7 +52,9 @@ const SendInquiryForm = (props) => {
       dispatch({
         type: SENDMAIL_NONE
       });
-      setopened(false);
+      setTimeout(() => {
+        setopened(false);
+      }, 1000);
     } else if (error) {
       dispatch(
         Actions.showMessage({
@@ -95,14 +96,19 @@ const SendInquiryForm = (props) => {
 
   const onEditorStateChange = (event, newValue) => {
     console.log(newValue);
+    // this.setState({ value: newValue });
+    // setValue(newValue);
   };
-
+  
   const onContentStateChange = (contentState) => {
     form.content = draftToHtml(contentState);
   };
 
   const onInputChange = (event) => {
+    console.log(value);
     form.subject = event.target.value;
+    // this.setState({ value: newValue });
+    // setValue(newValue);
   };
 
   const useStyles = makeStyles(() => ({
@@ -257,21 +263,10 @@ const SendInquiryForm = (props) => {
   );
 };
 
-const useStyles = makeStyles((theme) => ({
-  buttonProgress: {
-    color: 'white',
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginTop: -12,
-    marginLeft: -12
-  }
-}));
-
 const ActionUI = (props) => {
-  const classes = useStyles();
+  const dispatch = useDispatch();
   const { openPreviewClick, sendMailClick } = props;
-  const { isloading } = useSelector(({ workspace }) => workspace.mailReducer);
+  const { success, error, isLoading } = useSelector(({ workspace }) => workspace.mailReducer);
 
   return (
     <div style={{ padding: 10 }}>
@@ -290,21 +285,18 @@ const ActionUI = (props) => {
           </Button>
         </Grid>
         <Grid>
-          <div>
-            <Button
-              style={{
-                width: 120,
-                color: 'white',
-                marginLeft: 10,
-                backgroundColor: isloading ? '#515E6A' : '#bd1874',
-                borderRadius: 20
-              }}
-              disabled={isloading}
-              onClick={sendMailClick}>
-              SEND
-            </Button>
-            {isloading && <CircularProgress size={24} className={classes.buttonProgress} />}
-          </div>
+          <Button
+            loading={isLoading}
+            style={{
+              width: 120,
+              color: 'white',
+              marginLeft: 10,
+              backgroundColor: '#bd1874',
+              borderRadius: 20
+            }}
+            onClick={sendMailClick}>
+            SEND
+          </Button>
         </Grid>
       </Grid>
     </div>
