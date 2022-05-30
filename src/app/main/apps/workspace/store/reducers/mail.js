@@ -1,7 +1,7 @@
 import * as Actions from '../actions/mail';
 
 const initialState = {
-  isloading: false,
+  isLoading: false,
   success: false,
   error: ''
 };
@@ -13,26 +13,26 @@ const mailReducer = function (state = initialState, action) {
       ...initialState,
       success: false,
       error: '',
-      isloading: false
+      isLoading: false
     };
   }
   case Actions.SENDMAIL_LOADING: {
     return {
       ...initialState,
-      isloading: true
+      isLoading: true
     };
   }
   case Actions.SENDMAIL_SUCCESS: {
     return {
       ...initialState,
       success: true,
-      isloading: false
+      isLoading: false
     };
   }
   case Actions.SENDMAIL_ERROR: {
     return {
       success: false,
-      isloading: false,
+      isLoading: false,
       error: action.payload
     };
   }
