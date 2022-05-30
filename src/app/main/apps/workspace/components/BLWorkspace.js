@@ -63,7 +63,7 @@ const BLWorkspace = (props) => {
     workspace.formReducer.success,
     workspace.formReducer.fail
   ]);
-  const [transAutoSaveStatus, isloading ] = useSelector(({ workspace }) => [workspace.transReducer.transAutoSaveStatus, workspace.transReducer.isloading]);
+  const [transAutoSaveStatus, isLoading ] = useSelector(({ workspace }) => [workspace.transReducer.transAutoSaveStatus, workspace.transReducer.isLoading]);
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -91,7 +91,7 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     const unloadCallback = (event) => {
-      if (!isloading) {
+      if (!isLoading) {
         dispatch(TransActions.BlTrans(myBL.id, content));
       }
       return '';
@@ -99,7 +99,7 @@ const BLWorkspace = (props) => {
 
     window.addEventListener('beforeunload', unloadCallback);
     return () => window.removeEventListener('beforeunload', unloadCallback);
-  },[isloading]);
+  },[isLoading]);
 
   useEffect(() => {
     if (myBL.id) {

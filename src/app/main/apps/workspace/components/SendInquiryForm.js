@@ -8,8 +8,8 @@ import { Button, Grid, Divider } from '@material-ui/core';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles } from '@material-ui/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { SENDMAIL_NONE, SENDMAIL_LOADING } from '../store/actions/mail';
 import * as mailActions from '../store/actions/mail';
 
 import TagsInput from './TagsInput';
@@ -17,13 +17,13 @@ import AllInquiry from './AllInquiry';
 import Form from './Form';
 
 const SendInquiryForm = (props) => {
-  const [questions, title, mybl] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.question,
-    workspace.inquiryReducer.currentField,
-    workspace.inquiryReducer.myBL
+  const [mybl] = useSelector(({ workspace }) => [workspace.inquiryReducer.myBL]);
+
+  const [success, error] = useSelector(({ workspace }) => [
+    workspace.mailReducer.success,
+    workspace.mailReducer.error
   ]);
-  const { success, error } = useSelector(({ workspace }) => workspace.mailReducer);
-  const { form, handleChange, resetForm } = useForm({
+  const { form } = useForm({
     toCustomer: '',
     toOnshore: '',
     from: '',
@@ -32,14 +32,13 @@ const SendInquiryForm = (props) => {
   });
 
   function isFormValid() {
-    return form.email.length > 0 && form.password.length > 0;
+    return form.toCustomer.length > 0 || form.toOnshore.length > 0;
   }
 
   const dispatch = useDispatch();
-  const [opened, setopened] = useState(null);
-  const [opendPreview, setopendPreview] = useState(null);
-  const [value, setValue] = React.useState(0);
-  const [tabSelected, settabSelected] = useState(0);
+  const [opened, setOpened] = useState(null);
+  const [opendPreview, setOpendPreview] = useState(null);
+  const [tabSelected, setTabSelected] = useState(0);
 
   useEffect(() => {
     if (success) {
@@ -50,11 +49,9 @@ const SendInquiryForm = (props) => {
         })
       );
       dispatch({
-        type: SENDMAIL_NONE
+        type: mailActions.SENDMAIL_NONE
       });
-      setTimeout(() => {
-        setopened(false);
-      }, 1000);
+      setOpened(false);
     } else if (error) {
       dispatch(
         Actions.showMessage({
@@ -63,52 +60,47 @@ const SendInquiryForm = (props) => {
         })
       );
       dispatch({
-        type: SENDMAIL_NONE
+        type: mailActions.SENDMAIL_NONE
       });
     }
   }, [success, error]);
 
   const openSendInquiryDialog = (event) => {
-    setopened(true);
+    setOpened(true);
   };
 
   const opendPreviewForm = (event) => {
-    setopendPreview(true);
+    setOpendPreview(true);
   };
 
   const sendMailClick = (event) => {
-    dispatch({ type: SENDMAIL_LOADING });
-    dispatch(mailActions.sendMail({ myblId: mybl.id, ...form }));
+    if (isFormValid()) {
+      dispatch({ type: mailActions.SENDMAIL_LOADING });
+      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form }));
+    } else {
+      alert('Please fill to Customer or Onshore fields');
+    }
   };
 
   const closePreviewForm = () => {
-    setopendPreview(null);
+    setOpendPreview(null);
   };
 
   const closeSendInquiry = () => {
-    setopened(null);
+    setOpened(null);
   };
 
   const handleFieldChange = (key, tags) => {
     form[key] = tags.join(',');
-    setValue(key);
   };
 
-  const onEditorStateChange = (event, newValue) => {
-    console.log(newValue);
-    // this.setState({ value: newValue });
-    // setValue(newValue);
-  };
-  
+
   const onContentStateChange = (contentState) => {
     form.content = draftToHtml(contentState);
   };
 
   const onInputChange = (event) => {
-    console.log(value);
     form.subject = event.target.value;
-    // this.setState({ value: newValue });
-    // setValue(newValue);
   };
 
   const useStyles = makeStyles(() => ({
@@ -123,7 +115,7 @@ const SendInquiryForm = (props) => {
   const classes = useStyles(props);
 
   return (
-    <React.Fragment>
+    <>
       <div
         style={{
           paddingLeft: 15,
@@ -224,15 +216,13 @@ const SendInquiryForm = (props) => {
           </Grid>
           <div style={{ minHeight: 300, marginTop: 10 }}>
             <Editor
-              // editorState={editorState}
               toolbarClassName="toolbarClassName"
               wrapperClassName="wrapperClassName"
               editorClassName="editorClassName"
               onContentStateChange={onContentStateChange}
-              onEditorStateChange={onEditorStateChange}
             />
           </div>
-          <Divider></Divider>
+          <Divider/>
         </>
         {opendPreview ? (
           <Form
@@ -243,7 +233,7 @@ const SendInquiryForm = (props) => {
               closePreviewForm();
             }}
             tabChange={(newValue) => {
-              settabSelected(newValue);
+              setTabSelected(newValue);
             }}
             openFab={false}
             customActions={<div></div>}>
@@ -259,14 +249,25 @@ const SendInquiryForm = (props) => {
           </Form>
         ) : null}
       </Form>
-    </React.Fragment>
+    </>
   );
 };
 
+const useStyles = makeStyles((theme) => ({
+  buttonProgress: {
+    color: 'white',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12
+  }
+}));
+
 const ActionUI = (props) => {
-  const dispatch = useDispatch();
+  const classes = useStyles();
   const { openPreviewClick, sendMailClick } = props;
-  const { success, error, isLoading } = useSelector(({ workspace }) => workspace.mailReducer);
+  const [isLoading] = useSelector(({ workspace }) => [workspace.mailReducer.isLoading]);
 
   return (
     <div style={{ padding: 10 }}>
@@ -285,18 +286,21 @@ const ActionUI = (props) => {
           </Button>
         </Grid>
         <Grid>
-          <Button
-            loading={isLoading}
-            style={{
-              width: 120,
-              color: 'white',
-              marginLeft: 10,
-              backgroundColor: '#bd1874',
-              borderRadius: 20
-            }}
-            onClick={sendMailClick}>
-            SEND
-          </Button>
+          <div>
+            <Button
+              style={{
+                width: 120,
+                color: 'white',
+                marginLeft: 10,
+                backgroundColor: isLoading ? '#515E6A' : '#bd1874',
+                borderRadius: 20
+              }}
+              disabled={isLoading}
+              onClick={sendMailClick}>
+              SEND
+            </Button>
+            {isLoading && <CircularProgress size={24} className={classes.buttonProgress} />}
+          </div>
         </Grid>
       </Grid>
     </div>

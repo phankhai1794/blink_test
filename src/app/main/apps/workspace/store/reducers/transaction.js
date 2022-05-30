@@ -1,7 +1,7 @@
 import * as Actions from '../actions/transaction';
 
 const initialState = {
-  isloading: false,
+  isLoading: false,
   success: false,
   error: '',
   blTrans: [],
@@ -30,21 +30,21 @@ const transReducer = function (state = initialState, action) {
   case Actions.CREATE_TRANS_LOADING: {
     return {
       ...state,
-      isloading: true
+      isLoading: true
     };
   }
   case Actions.CREATE_TRANS_SUCCESS: {
     return {
       ...state,
       success: true,
-      isloading: false
+      isLoading: false
     };
   }
   case Actions.CREATE_TRANS_ERROR: {
     return {
       ...state,
       success: false,
-      isloading: false,
+      isLoading: false,
       error: action.payload
     };
   }
