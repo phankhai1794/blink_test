@@ -116,6 +116,7 @@ const OtpCheck = ({ status }) => {
             localStorage.setItem('USER', JSON.stringify(userInfo));
             // Auto save user data to redux store at ToolbarLayout1.js
 
+            dispatch(Actions.hideMessage());
             setStep(2);
           }
         })
