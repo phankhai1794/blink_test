@@ -23,7 +23,8 @@ import AttachmentList from './AttachmentList';
 const useStyles = makeStyles((theme) => ({
   root: {
     paddingLeft: '150px',
-    paddingRight: '200px'
+    paddingRight: '200px',
+    margin: '0 auto',
   },
   leftPanel: {
     paddingRight: '35px'
@@ -129,7 +130,7 @@ const BLWorkspace = (props) => {
   }, []);
 
   return (
-    <div className={classes.root}>
+    <div className={clsx("max-w-5xl", classes.root)}>
       <InquiryForm FabTitle="Inquiry Form" />
 
       <Form
