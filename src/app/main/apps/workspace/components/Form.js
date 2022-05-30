@@ -177,7 +177,6 @@ export default function Form(props) {
       }, 400);
     }
     dispatch(InquiryActions.setReply(false));
-    props.tabChange(0);
     dispatch(InquiryActions.setEditInq(null))
     dispatch(FormActions.toggleSaveInquiry(false))
   };
