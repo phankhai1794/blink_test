@@ -180,6 +180,7 @@ export default function Form(props) {
     props.tabChange(0);
     dispatch(InquiryActions.setEditInq(null))
     dispatch(FormActions.toggleSaveInquiry(false))
+    if (tabs) props.tabChange(0);
   };
   const [value, setValue] = React.useState(0);
   const handleChange = (_, newValue) => {
