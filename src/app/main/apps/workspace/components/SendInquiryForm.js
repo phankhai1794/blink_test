@@ -11,14 +11,17 @@ import { makeStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import * as mailActions from '../store/actions/mail';
+import * as FormActions from '../store/actions/form';
 
 import TagsInput from './TagsInput';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
 
 const SendInquiryForm = (props) => {
-  const [mybl] = useSelector(({ workspace }) => [workspace.inquiryReducer.myBL]);
-
+  const [mybl, openEmail] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.myBL,
+    workspace.formReducer.openEmail,
+  ]);
   const [success, error] = useSelector(({ workspace }) => [
     workspace.mailReducer.success,
     workspace.mailReducer.error
@@ -36,7 +39,6 @@ const SendInquiryForm = (props) => {
   }
 
   const dispatch = useDispatch();
-  const [opened, setOpened] = useState(null);
   const [opendPreview, setOpendPreview] = useState(null);
   const [tabSelected, setTabSelected] = useState(0);
 
@@ -51,7 +53,7 @@ const SendInquiryForm = (props) => {
       dispatch({
         type: mailActions.SENDMAIL_NONE
       });
-      setOpened(false);
+      dispatch(FormActions.toggleOpenEmail(false));
     } else if (error) {
       dispatch(
         Actions.showMessage({
@@ -66,7 +68,7 @@ const SendInquiryForm = (props) => {
   }, [success, error]);
 
   const openSendInquiryDialog = (event) => {
-    setOpened(true);
+    dispatch(FormActions.toggleOpenEmail(true));
   };
 
   const opendPreviewForm = (event) => {
@@ -86,15 +88,10 @@ const SendInquiryForm = (props) => {
     setOpendPreview(null);
   };
 
-  const closeSendInquiry = () => {
-    setOpened(null);
-  };
-
   const handleFieldChange = (key, tags) => {
     form[key] = tags.join(',');
   };
-
-
+  
   const onContentStateChange = (contentState) => {
     form.content = draftToHtml(contentState);
   };
@@ -139,15 +136,13 @@ const SendInquiryForm = (props) => {
 
       <Form
         title={'New Mail'}
-        open={opened || false}
-        toggleForm={(status) => {
-          closeSendInquiry();
-        }}
+        open={openEmail}
+        toggleForm={(status) => dispatch(FormActions.toggleOpenEmail(status))}
         openFab={false}
         customActions={
           <ActionUI openPreviewClick={opendPreviewForm} sendMailClick={sendMailClick}></ActionUI>
         }
-        FabTitle={''}>
+        FabTitle='e-mail'>
         <>
           <Grid
             style={{ marginTop: 8 }}
