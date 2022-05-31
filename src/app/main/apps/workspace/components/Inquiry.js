@@ -312,7 +312,7 @@ const Inquiry = (props) => {
                   <Menu
                     id="customized-menu"
                     anchorEl={anchorEl}
-                    open={open}
+                    open={false}
                     onClose={handleClose}
                     keepMounted>
                     <MenuItem onClick={() => toggleEdit(index)}>

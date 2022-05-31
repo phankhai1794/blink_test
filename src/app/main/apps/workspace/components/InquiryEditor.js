@@ -1,4 +1,3 @@
-import _ from '@lodash';
 import { FuseChipSelect } from '@fuse';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -215,7 +214,11 @@ const InquiryEditor = (props) => {
   useEffect(() => {
     if (fieldValue) {
       if (!metadata.inq_type_options.filter((v) => (fieldValue.value === v.field || !v.field) && valueType?.value === v.value).length) {
+        const optionsOfQuestion = [...questions];
+        optionsOfQuestion[index].inqType = '';
+        optionsOfQuestion[index].content = question.content.replace(valueType?.label, '{{INQ_TYPE}}');
         setValueType(null);
+        saveQuestion(optionsOfQuestion);
       }
       setInqTypeOption(
         metadata.inq_type_options.filter((v) => fieldValue.value === v.field || !v.field)

@@ -10,6 +10,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import axios from 'axios';
+import * as AppActions from 'app/store/actions';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -38,7 +39,10 @@ const PopoverFooter = ({ title, checkValidate }) => {
   ]);
   const onSave = () => {
     if (!checkValidate(question[index]) || !valid.receiver) return;
-
+    if (!valid.general) {
+      dispatch(AppActions.showMessage({ message: "There is empty field or inquiry type", variant: 'error' }));
+      return;
+    }
     const formData = [];
     for (const q of question) {
       for (const f of q.mediaFile) {
@@ -51,13 +55,15 @@ const PopoverFooter = ({ title, checkValidate }) => {
       .then((media) => {
         saveInquiry({ question, media, blId: myBL.id })
           .then(() => {
-            dispatch(FormActions.displaySuccess(true));
+            dispatch(
+              AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+            );
             dispatch(InquiryActions.saveInquiry());
             dispatch(FormActions.toggleReload());
           })
-          .catch((error) => dispatch(FormActions.displayFail(true, error)));
+          .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
       })
-      .catch((error) => dispatch(FormActions.displayFail(true, error)));
+      .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
   };
   const toggleInquiriresDialog = () => {
     dispatch(FormActions.toggleAllInquiry());
@@ -68,7 +74,7 @@ const PopoverFooter = ({ title, checkValidate }) => {
       .then(() => {
         dispatch(FormActions.toggleReload());
       })
-      .catch((error) => dispatch(FormActions.displayFail(true, error)));
+      .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
   };
   const onReply = () => {
     dispatch(InquiryActions.setReply(true));

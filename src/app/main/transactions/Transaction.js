@@ -60,7 +60,7 @@ function Transaction(props) {
                   className="flex flex-col "
                   style={{
                     alignItems: 'flex-start',
-                    backgroundColor: selectedIndex == index ? '#e2f3eb' : 'white'
+                    backgroundColor: selectedIndex === index ? '#e2f3eb' : 'white'
                   }}
                   key={index}
                   button={true}
@@ -71,12 +71,12 @@ function Transaction(props) {
                     style={{ fontWeight: selectedIndex === index ? 'bold' : '400' }}>
                     {new Date(data.createdAt).toLocaleString(
                       undefined,
-                      new Date().getFullYear() == new Date(data.createdAt).getFullYear()
+                      new Date().getFullYear() === new Date(data.createdAt).getFullYear()
                         ? DATE_OPTIONS_WITHOUT_YEAR
                         : DATE_OPTIONS_FULL
                     )}
                   </Typography>
-                  {index == 0 ? (
+                  {index === 0 ? (
                     <label style={{ fontSize: 10, fontStyle: 'italic' }}>Current version</label>
                   ) : null}
                   <div className="flex flex-row" style={{ alignItems: 'center', paddingTop: 3 }}>

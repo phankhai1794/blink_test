@@ -1,13 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Menu, MenuItem, Hidden, Icon, IconButton, Tab, Tabs, Typography } from '@material-ui/core';
+import React, { useEffect, useRef } from 'react';
+import { Hidden, Icon, IconButton, Typography } from '@material-ui/core';
 import { FuseAnimateGroup, FusePageSimple } from '@fuse';
 import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
-import * as Actions from './store/actions';
 import * as AppActions from 'app/store/actions';
-import reducer from './store/reducers';
 import _ from 'lodash';
-import clsx from 'clsx';
+import { makeStyles } from '@material-ui/styles';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
+
+import * as Actions from './store/actions';
+import reducer from './store/reducers';
 import Widget1 from './widgets/Widget1';
 import Widget2 from './widgets/Widget2';
 import Widget3 from './widgets/Widget3';
@@ -15,14 +17,7 @@ import Widget4 from './widgets/Widget4';
 import Widget5 from './widgets/Widget5';
 import Widget6 from './widgets/Widget6';
 import Widget7 from './widgets/Widget7';
-import Widget8 from './widgets/Widget8';
-import Widget9 from './widgets/Widget9';
-import Widget10 from './widgets/Widget10';
-import Widget11 from './widgets/Widget11';
-import WidgetNow from './widgets/WidgetNow';
-import WidgetWeather from './widgets/WidgetWeather';
-import { makeStyles } from '@material-ui/styles';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
+
 
 const useStyles = makeStyles((theme) => ({
   content: {
@@ -50,11 +45,6 @@ function ProjectDashboardApp(props) {
 
   const classes = useStyles(props);
   const pageLayout = useRef(null);
-  const [tabValue, setTabValue] = useState(0);
-  const [selectedProject, setSelectedProject] = useState({
-    id: 1,
-    menuEl: null
-  });
 
   useEffect(() => {
     dispatch(Actions.getWidgets());
@@ -70,31 +60,6 @@ function ProjectDashboardApp(props) {
       dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', false)));
     };
   }, []);
-
-  function handleChangeTab(event, tabValue) {
-    setTabValue(tabValue);
-  }
-
-  function handleChangeProject(id) {
-    setSelectedProject({
-      id,
-      menuEl: null
-    });
-  }
-
-  function handleOpenProjectMenu(event) {
-    setSelectedProject({
-      id: selectedProject.id,
-      menuEl: event.currentTarget
-    });
-  }
-
-  function handleCloseProjectMenu() {
-    setSelectedProject({
-      id: selectedProject.id,
-      menuEl: null
-    });
-  }
 
   if (!widgets || !projects) {
     return null;

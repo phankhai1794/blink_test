@@ -6,8 +6,6 @@ export const OPEN_ATTACHMENT = 'OPEN_ATTACHMENT';
 export const OPEN_ALL_INQUIRY = 'OPEN_ALL_INQUIRY';
 export const TOGGLE_SAVE_INQUIRY = 'TOGGLE_SAVE_INQUIRY';
 export const SET_ANCHOR_EL = 'SET_ANCHOR_EL';
-export const DISPLAY_SUCCESS = 'DISPLAY_SUCCESS';
-export const DISPLAY_FAIL = 'DISPLAY_FAIL';
 export const RELOAD = 'RELOAD';
 export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 export const OPEN_EMAIL = 'OPEN_EMAIL';
@@ -67,20 +65,6 @@ export function setAnchor(state) {
   };
 }
 
-export function displaySuccess(state) {
-  return {
-    type: DISPLAY_SUCCESS,
-    state: state
-  };
-}
-
-export function displayFail(state, message) {
-  return {
-    type: DISPLAY_FAIL,
-    state: state,
-    message: message
-  };
-}
 
 export function toggleReload() {
   return {
