@@ -4,6 +4,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
+import * as AppActions from 'app/store/actions';
 
 import * as FormActions from '../store/actions/form';
 
@@ -70,12 +71,13 @@ const PopoverFooter = () => {
           });
         }
       }
-      dispatch(FormActions.displaySuccess(true));
+      dispatch(
+        AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+      );
       dispatch(FormActions.toggleSaveInquiry(false))
       dispatch(FormActions.toggleReload());
     } catch (error) {
-      dispatch(FormActions.displayFail(true, error));
-      console.log(error);
+      dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
     }
   };
 

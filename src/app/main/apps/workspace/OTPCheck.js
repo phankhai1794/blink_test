@@ -1,4 +1,3 @@
-import _ from '@lodash';
 import { verifyEmail, verifyGuest, isVerified } from 'app/services/authService';
 import { FusePageSimple } from '@fuse';
 import * as Actions from 'app/store/actions';
@@ -58,8 +57,8 @@ const OtpCheck = ({ status }) => {
   };
 
   const handleCheckMail = (e) => {
-    if (e.key == 'Enter') e.preventDefault();
-    if (myBL.id && mail.isValid && (e.key == 'Enter' || e.key == undefined)) {
+    if (e.key === 'Enter') e.preventDefault();
+    if (myBL.id && mail.isValid && (e.key === 'Enter' || e.key === undefined)) {
       verifyEmail({ bl: myBL.id, email: mail.value })
         .then((res) => {
           if (res) setStep(1);
@@ -99,7 +98,7 @@ const OtpCheck = ({ status }) => {
   }, []);
 
   useEffect(() => {
-    if (otpCode.length == otpLength) {
+    if (otpCode.length === otpLength) {
       verifyGuest({ mail: mail.value, bl: myBL.id, otpCode })
         .then((res) => {
           if (res) {

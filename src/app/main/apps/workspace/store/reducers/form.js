@@ -9,8 +9,6 @@ const initialState = {
   openInquiry: false,
   openAttachment: false,
   anchorEl: null,
-  success: false,
-  fail: false,
   reload: false,
   openTrans: false,
   openEmail: false,
@@ -42,12 +40,6 @@ const formReducer = function (state = initialState, action) {
     }
     case Actions.SET_ANCHOR_EL: {
       return { ...state, anchorEl: action.state };
-    }
-    case Actions.DISPLAY_SUCCESS: {
-      return { ...state, success: action.state };
-    }
-    case Actions.DISPLAY_FAIL: {
-      return { ...state, fail: { openDialog: action.state, error: action.message } };
     }
     case Actions.RELOAD: {
       return { ...state, reload: !state.reload, openDialog: false, openInquiry: false, openAllInquiry: false };

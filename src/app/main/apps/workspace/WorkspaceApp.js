@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { FusePageSimple } from '@fuse';
 import { useDispatch } from 'react-redux';
-import _ from '@lodash';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 

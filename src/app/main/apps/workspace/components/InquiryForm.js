@@ -48,7 +48,8 @@ const InquiryForm = (props) => {
 
   useEffect(() => {
     const check = questions.filter((q) => !q.receiver.length)
-    dispatch(InquiryActions.validate({ ...valid, receiver: !check.length }));
+    const checkGeneral= questions.filter((q) => !q.inqType || !q.field)
+    dispatch(InquiryActions.validate({ ...valid, receiver: !check.length, general: !checkGeneral.length }));
   }, [questions])
 
   const copyQuestion = (index) => {
@@ -168,7 +169,7 @@ const InquiryForm = (props) => {
             ) : (
               <div style={{ padding: '0.5rem ' }}>
                 <div onClick={() => changeToEditor(index)}>
-                  <div style={{ fontSize: '19px' }}>{question.content}</div>
+                  <div style={{ fontSize: '19px' }}>{question.content.replace('{{INQ_TYPE}} ', '')}</div>
                   <div style={{ display: 'block', margin: '1rem 0rem' }}>
                     {question.ansType === metadata.ans_type.choice && (
                       <ChoiceAnswer question={question} />

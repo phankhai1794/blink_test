@@ -1,22 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Button, Fab } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import PublishIcon from '@material-ui/icons/Publish';
 import SaveIcon from '@material-ui/icons/Save';
 import { useDispatch } from 'react-redux';
-import CloseIcon from '@material-ui/icons/Close';
 import axios from 'axios';
 import { uploadFile } from 'app/services/fileService';
 import { createAttachmentAnswer } from 'app/services/inquiryService';
 import * as AppAction from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-
-import * as FormActions from '../store/actions/form';
-import * as InquiryActions from '../store/actions/inquiry';
-
-import FileAttach from './FileAttach';
-import ImageAttach from './ImageAttach';
-
 
 // style
 const baseStyle = {
@@ -50,7 +42,6 @@ const rejectStyle = {
 //   component
 const AttachmentAnswer = (props) => {
   const { question, index, questions, saveQuestion, isShowBtn, isPermissionAttach } = props;
-  const [name, setName] = useState(question.fileName || '');
   const [showBtn, setShowBtn] = useState(false);
   const dispatch = useDispatch();
   const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
@@ -119,8 +110,8 @@ const AttachmentAnswer = (props) => {
           optionsOfQuestion[index].answerObj[0].mediaFiles = answerObjMediaFiles;
           dispatch(saveQuestion(optionsOfQuestion));
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
-        }).catch((error) => dispatch(FormActions.displayFail(true, error)));
-      }).catch((error) => dispatch(FormActions.displayFail(true, error)));
+        }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   };
   const style = useMemo(
     () => ({

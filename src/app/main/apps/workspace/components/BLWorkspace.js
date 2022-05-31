@@ -55,15 +55,16 @@ const BLWorkspace = (props) => {
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.myBL
   ]);
-  const [openAttachment, openInquiry, openAllInquiry, reload, success, fail] = useSelector(({ workspace }) => [
+  const [openAttachment, openInquiry, openAllInquiry, reload] = useSelector(({ workspace }) => [
     workspace.formReducer.openAttachment,
     workspace.formReducer.openInquiry,
     workspace.formReducer.openAllInquiry,
     workspace.formReducer.reload,
-    workspace.formReducer.success,
-    workspace.formReducer.fail
   ]);
-  const [transAutoSaveStatus, isLoading ] = useSelector(({ workspace }) => [workspace.transReducer.transAutoSaveStatus, workspace.transReducer.isLoading]);
+  const [transAutoSaveStatus, isLoading] = useSelector(({ workspace }) => [
+    workspace.transReducer.transAutoSaveStatus,
+    workspace.transReducer.isLoading
+  ]);
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -74,16 +75,6 @@ const BLWorkspace = (props) => {
   };
 
   useEffect(() => {
-    if (success) {
-      dispatch(FormActions.displaySuccess(false));
-      dispatch(
-        AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
-      );
-    }
-    if (fail.open) {
-      dispatch(FormActions.displayFail(false, ''));
-      dispatch(AppActions.showMessage({ message: fail.message, variant: 'error' }));
-    }
     if (myBL.id) {
       dispatch(Actions.loadInquiry(myBL.id));
     }
@@ -99,7 +90,7 @@ const BLWorkspace = (props) => {
 
     window.addEventListener('beforeunload', unloadCallback);
     return () => window.removeEventListener('beforeunload', unloadCallback);
-  },[isLoading]);
+  }, [isLoading]);
 
   useEffect(() => {
     if (myBL.id) {
@@ -136,7 +127,7 @@ const BLWorkspace = (props) => {
       <Form
         open={openInquiry}
         toggleForm={(status) => dispatch(FormActions.toggleInquiry(status))}
-        hasAddButton={props.user == 'workspace' ? openAllInquiry : false}
+        hasAddButton={props.user === 'workspace' ? openAllInquiry : false}
         FabTitle="Inquiry"
         field={currentField || ''}
         title={
