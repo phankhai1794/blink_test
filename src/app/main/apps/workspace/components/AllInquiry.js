@@ -102,7 +102,7 @@ const AllInquiry = (props) => {
         if (receiver && !q.receiver.includes(receiver)) {
           return (
             <div
-              style={{ display: 'flex', marginBottom: '24px' }}
+              style={{ display: 'flex' }}
               onClick={() => changeToEditor(index)}></div>
           );
         }
