@@ -120,7 +120,7 @@ const Comment = (props) => {
             answer: res.id,
             createdAt: new Date(),
             content: targetValue,
-            creator: user.displayName
+            creator: { userName: user.displayName, avatar: null }
           }
         ]);
       }
@@ -167,7 +167,7 @@ const Comment = (props) => {
                   onMouseLeave={() => setKey('')}
                 >
                   <UserInfo name={k.creator.userName} time={displayTime(k.createdAt)} avatar={k.creator.avatar} />
-                  {user.displayName === k.creator && key === id && (
+                  {user.displayName === k.creator.userName && key === id && (
                     <>
                       <IconButton onClick={handleClick}>
                         <MoreVertIcon />
