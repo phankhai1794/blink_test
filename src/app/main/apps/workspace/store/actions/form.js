@@ -10,6 +10,7 @@ export const DISPLAY_SUCCESS = 'DISPLAY_SUCCESS';
 export const DISPLAY_FAIL = 'DISPLAY_FAIL';
 export const RELOAD = 'RELOAD';
 export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
+export const OPEN_EMAIL = 'OPEN_EMAIL';
 
 export function minimize(state) {
   return {
@@ -90,5 +91,12 @@ export function toggleReload() {
 export function openTrans() {
   return {
     type: OPEN_TRANSACTION
+  };
+}
+
+export function toggleOpenEmail(state) {
+  return {
+    type: OPEN_EMAIL,
+    state: state
   };
 }

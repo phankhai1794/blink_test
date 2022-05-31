@@ -12,7 +12,9 @@ const initialState = {
   success: false,
   fail: false,
   reload: false,
-  openTrans: false
+  openTrans: false,
+  openEmail: false,
+
 }
 
 const formReducer = function (state = initialState, action) {
@@ -52,6 +54,9 @@ const formReducer = function (state = initialState, action) {
     }
     case Actions.OPEN_TRANSACTION: {
       return { ...state, openTrans: !state.openTrans };
+    }
+    case Actions.OPEN_EMAIL: {
+      return { ...state, openEmail: action.state };
     }
     default: {
       return state;
