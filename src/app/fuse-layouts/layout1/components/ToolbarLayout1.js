@@ -75,6 +75,8 @@ function ToolbarLayout1(props) {
     dispatch(FormActions.toggleAttachment(true));
   };
 
+  const openEmail = () => dispatch(FormActions.toggleOpenEmail(true));
+
   useEffect(() => {
     if (!user.displayName) {
       if (!allowAccess) {
@@ -170,7 +172,16 @@ function ToolbarLayout1(props) {
             <PermissionProvider
               action={PERMISSION.MAIL_SEND_MAIL}
               extraCondition={pathname.includes('/workplace')}>
-              <SendInquiryForm />
+              <div style={{ paddingLeft: '15px', paddingRight: '5px', paddingTop: '17px' }}>
+                <Button
+                  style={{ width: '120px', height: '30px', color: 'white', backgroundColor: '#bd1874', borderRadius: '20px' }}
+                  variant="text"
+                  size="medium"
+                  className={clsx('h-64', classes.button)}
+                  onClick={openEmail}>
+                  <span className="pl-4">E-mail</span>
+                </Button>
+              </div>
             </PermissionProvider>
             <PermissionProvider
               action={PERMISSION.VIEW_SHOW_BL_HISTORY}

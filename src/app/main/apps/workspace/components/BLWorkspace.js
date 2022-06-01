@@ -6,6 +6,7 @@ import _ from 'lodash';
 import { Grid, Divider } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
+import SendInquiryForm from './SendInquiryForm';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -122,33 +123,37 @@ const BLWorkspace = (props) => {
 
   return (
     <div className={clsx("max-w-5xl", classes.root)}>
-      <InquiryForm FabTitle="Inquiry Form" />
+      <div style={{ display: 'flex', position: 'fixed', right: '2rem', bottom: '1rem', zIndex: 999 }}>
+        <InquiryForm FabTitle="Inquiry Form" />
 
-      <Form
-        open={openInquiry}
-        toggleForm={(status) => dispatch(FormActions.toggleInquiry(status))}
-        hasAddButton={props.user === 'workspace' ? openAllInquiry : false}
-        FabTitle="Inquiry"
-        field={currentField || ''}
-        title={
-          openAllInquiry
-            ? 'Inquiry List'
-            : currentField
-              ? getKeyByValue(metadata['field'], currentField)
-              : ''
-        }>
-        {openAllInquiry ? <AllInquiry user={props.user} /> : <Inquiry user={props.user} />}
-      </Form>
+        <Form
+          open={openInquiry}
+          toggleForm={(status) => dispatch(FormActions.toggleInquiry(status))}
+          hasAddButton={props.user === 'workspace' ? openAllInquiry : false}
+          FabTitle="Inquiry"
+          field={currentField || ''}
+          title={
+            openAllInquiry
+              ? 'Inquiry List'
+              : currentField
+                ? getKeyByValue(metadata['field'], currentField)
+                : ''
+          }>
+          {openAllInquiry ? <AllInquiry user={props.user} /> : <Inquiry user={props.user} />}
+        </Form>
 
-      <Form
-        open={openAttachment}
-        toggleForm={(status) => dispatch(FormActions.toggleAttachment(status))}
-        FabTitle="Inquiry"
-        hasAddButton={false}
-        popoverfooter={true}
-        title="Attachment List">
-        {<AttachmentList user={props.user} />}
-      </Form>
+        <Form
+          open={openAttachment}
+          toggleForm={(status) => dispatch(FormActions.toggleAttachment(status))}
+          FabTitle="Attachment"
+          hasAddButton={false}
+          popoverfooter={true}
+          title="Attachment List">
+          {<AttachmentList user={props.user} />}
+        </Form>
+
+        <SendInquiryForm />
+      </div>
 
       <Grid container>
         <Grid item xs={6} className={classes.leftPanel}>

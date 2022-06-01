@@ -113,27 +113,6 @@ const SendInquiryForm = (props) => {
 
   return (
     <>
-      <div
-        style={{
-          paddingLeft: 15,
-          paddingRight: 5,
-          paddingTop: 17
-        }}>
-        <Button
-          style={{
-            width: 120,
-            height: 30,
-            color: 'white',
-            backgroundColor: '#bd1874',
-            borderRadius: 20
-          }}
-          variant="text"
-          size="small"
-          onClick={openSendInquiryDialog}>
-          E-Mail
-        </Button>
-      </div>
-
       <Form
         title={'New Mail'}
         open={openEmail}
