@@ -9,6 +9,8 @@ import { uploadFile } from 'app/services/fileService';
 import { createAttachmentAnswer } from 'app/services/inquiryService';
 import * as AppAction from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import {validateExtensionFile} from "@shared";
+
 
 // style
 const baseStyle = {
@@ -48,17 +50,22 @@ const AttachmentAnswer = (props) => {
 
   const uploadImageAttach = (files) => {
     const optionsOfQuestion = [...questions];
-    files.forEach((src) => {
-      const formData = new FormData();
-      formData.append('file', src);
-      formData.append('name', src.name);
-      if (optionsOfQuestion[index].answerObj.length === 0) {
-        optionsOfQuestion[index].answerObj = [{ mediaFiles: [] }];
-      }
-      optionsOfQuestion[index].answerObj[0].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
-    });
-    dispatch(saveQuestion(optionsOfQuestion));
-    setShowBtn(true);
+    const inValidFile = files.find(elem => !validateExtensionFile(elem));
+    if (inValidFile) {
+      dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
+    } else {
+      files.forEach((src) => {
+        const formData = new FormData();
+        formData.append('file', src);
+        formData.append('name', src.name);
+        if (optionsOfQuestion[index].answerObj.length === 0) {
+          optionsOfQuestion[index].answerObj = [{ mediaFiles: [] }];
+        }
+        optionsOfQuestion[index].answerObj[0].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+      });
+      dispatch(saveQuestion(optionsOfQuestion));
+      setShowBtn(true);
+    }
   }
   useEffect(() => {
     setShowBtn(isShowBtn);

@@ -1,4 +1,4 @@
-import { getKeyByValue } from '@shared';
+import {getKeyByValue, validateExtensionFile} from '@shared';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
@@ -6,6 +6,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CloseIcon from '@material-ui/icons/Close';
 import { Divider, FormGroup, FormControlLabel, Checkbox, FormControl, FormHelperText, IconButton, Fab } from '@material-ui/core';
+import * as AppAction from "app/store/actions";
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -69,15 +70,19 @@ const InquiryForm = (props) => {
 
   const handleUploadImageAttach = (src, index) => {
     const optionsOfQuestion = [...questions];
-    const list = optionsOfQuestion[index].mediaFile;
-    const formData = new FormData();
-    formData.append('file', src);
-    formData.append('name', src.name);
-    optionsOfQuestion[index].mediaFile = [
-      ...list,
-      { id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }
-    ];
-    dispatch(InquiryActions.setQuestion(optionsOfQuestion))
+    if (validateExtensionFile(src)) {
+      const list = optionsOfQuestion[index].mediaFile;
+      const formData = new FormData();
+      formData.append('file', src);
+      formData.append('name', src.name);
+      optionsOfQuestion[index].mediaFile = [
+        ...list,
+        { id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }
+      ];
+      dispatch(InquiryActions.setQuestion(optionsOfQuestion))
+    } else {
+      dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
+    }
   };
   const handleRemoveImageAttach = (i, index) => {
     const optionsOfQuestion = [...questions];
