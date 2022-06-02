@@ -65,7 +65,8 @@ const OtpCheck = ({ status }) => {
         })
         .catch((error) => {
           console.error(error);
-          dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
+          const { message } = error.response.data.error || error.message;
+          dispatch(Actions.showMessage({ message, variant: 'error' }));
         });
     }
   };
@@ -121,7 +122,8 @@ const OtpCheck = ({ status }) => {
         })
         .catch((error) => {
           console.error(error);
-          dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
+          const { message } = error.response.data.error || error.message;
+          dispatch(Actions.showMessage({ message, variant: 'error' }));
         });
     }
   }, [otpCode]);
