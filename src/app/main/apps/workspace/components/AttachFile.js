@@ -6,14 +6,13 @@ import AttachFileIcon from '@material-ui/icons/AttachFile';
 const AttachFile = (props) => {
   const { uploadImageAttach, index, disabled } = props
   const onDrop = (acceptedFiles) => {
-    index || index === 0 ? uploadImageAttach(acceptedFiles[0], index) : uploadImageAttach(acceptedFiles[0]);
+    index || index === 0 ? uploadImageAttach(acceptedFiles, index) : uploadImageAttach(acceptedFiles);
   };
   const { getRootProps, getInputProps, open } = useDropzone({
     // Disable click and keydown behavior
     noClick: true,
     noKeyboard: true,
     onDrop,
-    multiple: false
   });
   return (
     <div className="container">

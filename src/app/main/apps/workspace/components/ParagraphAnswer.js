@@ -32,11 +32,13 @@ const ParagraphAnswer = (props) => {
   const isPermission = useRef(false);
 
   useEffect(() => {
-    if ((!questions[index]?.answerObj[0]?.id && allowCreateParagraphAnswer) ||
-        (questions[index]?.answerObj[0]?.id && allowUpdateParagraphAnswer)) {
-      isPermission.current = true;
-    } else {
-      isPermission.current = false;
+    if (questions) {
+      if ((!questions[index]?.answerObj[0]?.id && allowCreateParagraphAnswer) ||
+          (questions[index]?.answerObj[0]?.id && allowUpdateParagraphAnswer)) {
+        isPermission.current = true;
+      } else {
+        isPermission.current = false;
+      }
     }
   }, [questions]);
 
