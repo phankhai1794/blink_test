@@ -1,7 +1,7 @@
 import { FuseAnimate } from '@fuse';
 import { Card, CardContent, Tab, Tabs, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import * as AppAction from 'app/store/actions';
+import * as Actions from 'app/store/actions';
 import { login } from 'app/services/authService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import clsx from 'clsx';
@@ -50,8 +50,8 @@ function Login(props) {
           localStorage.setItem('AUTH_TOKEN', token);
           localStorage.setItem('USER', JSON.stringify(userInfo));
 
-          dispatch(AppAction.setUser(payload));
-          dispatch(AppAction.showMessage({message: message, variant: 'success'}));
+          dispatch(Actions.setUser(payload));
+          dispatch(Actions.showMessage({message: message, variant: 'success'}));
 
           const { cachePath, cacheSearch } = location;
           history.push(cachePath ? `${cachePath + cacheSearch}` : '/');
@@ -59,7 +59,8 @@ function Login(props) {
       })
       .catch((error) => {
         console.error(error);
-        dispatch(AppAction.showMessage({message: error.message, variant: 'error'}));
+        const { message } = error.response.data.error || error.message;
+        dispatch(Actions.showMessage({ message, variant: 'error' }));
       });
   }
 
