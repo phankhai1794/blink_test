@@ -17,7 +17,8 @@ import {
   Typography,
   IconButton,
   Fab,
-  TextField
+  TextField,
+  Divider
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/styles';
@@ -363,15 +364,6 @@ const Inquiry = (props) => {
                   {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
                   {q.mediaFile?.length > 0 && q.mediaFile?.map((file, mediaIndex) => (
                     <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
-                      <Fab
-                        size="small"
-                        classes={
-                          file.ext.match(/jpeg|jpg|png/g)
-                            ? { root: classes.positionBtnImg }
-                            : { root: classes.positionBtnNotImg }
-                        }>
-                        <CloseIcon style={{ fontSize: 20 }} />
-                      </Fab>
                       {file.ext.match(/jpeg|jpg|png/g) ? (
                         <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
                       ) : (
@@ -403,7 +395,10 @@ const Inquiry = (props) => {
                     </div>
                   ))}
                 </>
-                <Comment q={q} inquiries={inquiries} indexes={indexes} userType={user} />
+
+                <Divider className="mt-16 mb-16" />
+
+                <Comment q={q} inquiries={inquiries} indexes={indexes} userType={props.user} />
               </Card>
             )}
           </>

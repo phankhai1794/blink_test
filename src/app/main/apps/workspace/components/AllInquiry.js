@@ -1,4 +1,4 @@
-import { getKeyByValue } from '@shared';
+import { getKeyByValue, validateExtensionFile } from '@shared';
 import { getFile } from 'app/services/fileService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -14,6 +14,7 @@ import {
   Checkbox,
   FormHelperText
 } from '@material-ui/core';
+import * as AppAction from "app/store/actions";
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -51,17 +52,20 @@ const AllInquiry = (props) => {
     dispatch(InquiryActions.setQuestion(optionsOfQuestion));
   };
 
-  const handleUploadImageAttach = (src, index) => {
+  const handleUploadImageAttach = (files, index) => {
     const optionsOfQuestion = [...inquiries];
-    const list = optionsOfQuestion[index].mediaFile;
-    const formData = new FormData();
-    formData.append('file', src);
-    formData.append('name', src.name);
-    optionsOfQuestion[index].mediaFile = [
-      ...list,
-      { id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }
-    ];
-    dispatch(InquiryActions.setQuestion(optionsOfQuestion));
+    const inValidFile = files.find(elem => !validateExtensionFile(elem));
+    if (inValidFile) {
+      dispatch(AppAction.showMessage({message: 'Invalid file extension', variant: 'error'}));
+    } else {
+      files.forEach(src => {
+        const formData = new FormData();
+        formData.append('file', src);
+        formData.append('name', src.name);
+        optionsOfQuestion[index].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+      });
+      dispatch(InquiryActions.setQuestion(optionsOfQuestion));
+    }
   };
 
   const handleReceiverChange = (e, index) => {

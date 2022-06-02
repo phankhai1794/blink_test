@@ -68,20 +68,19 @@ const InquiryForm = (props) => {
     dispatch(InquiryActions.setQuestion(optionsOfQuestion))
   };
 
-  const handleUploadImageAttach = (src, index) => {
+  const handleUploadImageAttach = (files, index) => {
     const optionsOfQuestion = [...questions];
-    if (validateExtensionFile(src)) {
-      const list = optionsOfQuestion[index].mediaFile;
-      const formData = new FormData();
-      formData.append('file', src);
-      formData.append('name', src.name);
-      optionsOfQuestion[index].mediaFile = [
-        ...list,
-        { id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData }
-      ];
-      dispatch(InquiryActions.setQuestion(optionsOfQuestion))
-    } else {
+    const inValidFile = files.find(elem => !validateExtensionFile(elem));
+    if (inValidFile) {
       dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
+    } else {
+      files.forEach(src => {
+        const formData = new FormData();
+        formData.append('file', src);
+        formData.append('name', src.name);
+        optionsOfQuestion[index].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+      });
+      dispatch(InquiryActions.setQuestion(optionsOfQuestion));
     }
   };
   const handleRemoveImageAttach = (i, index) => {
