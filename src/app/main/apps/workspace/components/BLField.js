@@ -119,14 +119,13 @@ const BLField = (props) => {
   };
 
   const onClick = (e) => {
-    if (!minimize) {
-      dispatch(InquiryActions.setField(e.currentTarget.id));
-    }
-    if (!questionIsEmpty && !minimize) {
+    if (!questionIsEmpty) {
       dispatch(FormActions.toggleInquiry(true));
     }
-    if (anchorEl && anchorEl.id === id && allowAddInquiry && !minimize && !lock) {
+    if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
       dispatch(FormActions.toggleCreateInquiry(true));
+    } else {
+      dispatch(InquiryActions.setField(e.currentTarget.id));
     }
   };
 

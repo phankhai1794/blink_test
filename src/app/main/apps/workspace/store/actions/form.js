@@ -31,9 +31,10 @@ export function toggleCreateInquiry(state) {
   };
 }
 
-export function toggleAllInquiry() {
+export function toggleAllInquiry(state) {
   return {
-    type: OPEN_ALL_INQUIRY
+    type: OPEN_ALL_INQUIRY,
+    state: state
   };
 }
 

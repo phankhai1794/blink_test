@@ -63,10 +63,9 @@ function ToolbarLayout1(props) {
     state.workspace.inquiryReducer.inquiries.length
   ]);
 
-  const openInquiry = () => {
+  const openAllInquiry = () => {
     if (badge) {
-      dispatch(FormActions.toggleInquiry(true));
-      dispatch(FormActions.toggleAllInquiry());
+      dispatch(FormActions.toggleAllInquiry(true));
       dispatch(FormActions.toggleSaveInquiry(true))
     }
   };
@@ -131,11 +130,11 @@ function ToolbarLayout1(props) {
                 variant="text"
                 size="medium"
                 className={clsx('h-64', classes.button)}
-                onClick={openInquiry}>
+                onClick={openAllInquiry}>
                 <Badge color="primary" badgeContent={badge}>
                   <NotificationsIcon />
                 </Badge>
-                <span className="pl-12">Inquiry</span>
+                <span className="pl-12">Inquiry List</span>
               </Button>
               <Button
                 variant="text"

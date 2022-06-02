@@ -98,7 +98,7 @@ const ParagraphAnswer = (props) => {
           id="outlined-multiline-flexible"
           fullWidth
           multiline
-          maxRows={4}
+          rowsMax={4}
           variant="outlined"
           value={paragraphText}
           onChange={(e) => setParagraphText(e.target.value)}

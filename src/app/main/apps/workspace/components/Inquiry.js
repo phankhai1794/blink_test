@@ -293,7 +293,7 @@ const Inquiry = (props) => {
         const type = q.ansType;
         const user = q.creator;
         return (
-          <>
+          <div key={index}>
             {edit === index ? (
               <InquiryEditor
                 index={indexes}
@@ -401,7 +401,7 @@ const Inquiry = (props) => {
                 <Comment q={q} inquiries={inquiries} indexes={indexes} userType={props.user} />
               </Card>
             )}
-          </>
+          </div>
         );
       })}
     </>
