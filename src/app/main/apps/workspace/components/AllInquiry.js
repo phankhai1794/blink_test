@@ -71,7 +71,7 @@ const AllInquiry = (props) => {
   const handleReceiverChange = (e, index) => {
     const optionsOfQuestion = [...inquiries];
     if (e.target.checked) {
-      dispatch(InquiryActions.validate({ ...valid, error: false }));
+      dispatch(InquiryActions.validate({ ...valid, receiver: true }));
       optionsOfQuestion[index].receiver.push(e.target.value);
     } else {
       const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
@@ -149,7 +149,6 @@ const AllInquiry = (props) => {
                         questions={inquiries}
                         saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
                         isPermissionAttach={allowCreateAttachmentAnswer}
-                        // disabled={true}
                       />
                     )}
                   </div>
@@ -167,7 +166,7 @@ const AllInquiry = (props) => {
                   {getKeyByValue(metadata['field'], q.field)}
                 </div>
                 <div className="flex justify-end">
-                  <FormControl error={valid.error && !q.receiver.length}>
+                  <FormControl error={!valid.receiver && !q.receiver.length}>
                     <FormGroup row>
                       <FormControlLabel
                         value="onshore"
@@ -192,9 +191,9 @@ const AllInquiry = (props) => {
                         label="Customer"
                       />
                     </FormGroup>
-                    {valid.error && !q.receiver.length && (
-                      <FormHelperText>Pick at least one!</FormHelperText>
-                    )}
+                    {(!valid.receiver && !q.receiver.length) ?
+                      <FormHelperText>Pick at least one!</FormHelperText> : null
+                    }
                   </FormControl>
                   <div className="flex justify-end items-center mr-2 ">
                     <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />

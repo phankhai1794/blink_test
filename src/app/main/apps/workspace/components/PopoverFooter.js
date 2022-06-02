@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1)
   }
 }));
-const PopoverFooter = ({ title, checkValidate }) => {
+const PopoverFooter = ({ title }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [index, currentField, question, fields, myBL, displayCmt, valid] = useSelector(({ workspace }) => [
@@ -38,7 +38,14 @@ const PopoverFooter = ({ title, checkValidate }) => {
     workspace.inquiryReducer.validation
   ]);
   const onSave = () => {
-    if (!checkValidate(question[index]) || !valid.receiver) return;
+    const check = question.filter((q) => !q.receiver.length)
+    if (!question[index].inqType || !question[index].field || check.length) {
+      dispatch(InquiryActions.validate({
+        ...valid, field: Boolean(question[index].field),
+        inqType: Boolean(question[index].inqType), receiver: !check.length
+      }));
+      return;
+    }
     if (!valid.general) {
       dispatch(AppActions.showMessage({ message: "There is empty field or inquiry type", variant: 'error' }));
       return;
