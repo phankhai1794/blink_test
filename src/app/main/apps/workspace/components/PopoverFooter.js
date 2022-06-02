@@ -66,7 +66,8 @@ const PopoverFooter = ({ title, checkValidate }) => {
       .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
   };
   const toggleInquiriresDialog = () => {
-    dispatch(FormActions.toggleAllInquiry());
+    dispatch(FormActions.toggleAllInquiry(true));
+    dispatch(FormActions.toggleInquiry(true));
     dispatch(FormActions.toggleSaveInquiry(true))
   };
   const onResolve = () => {

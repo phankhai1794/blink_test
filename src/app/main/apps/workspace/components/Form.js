@@ -191,7 +191,7 @@ export default function Form(props) {
       {openFab && (
         <Fab
           variant="extended"
-          style={{ marginLeft: '0.5rem', maxWidth: '12rem', display: 'block' }}
+          style={{ marginLeft: '0.5rem', maxWidth: '12rem', maxHeight: '4rem', whiteSpace: 'nowrap', borderRadius: '1rem' }}
           onClick={() => toggleForm(true)}
           color="primary"
         >

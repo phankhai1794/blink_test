@@ -127,19 +127,23 @@ const BLWorkspace = (props) => {
         <InquiryForm FabTitle="Inquiry Form" />
 
         <Form
+          open={openAllInquiry}
+          toggleForm={(status) => dispatch(FormActions.toggleAllInquiry(status))}
+          FabTitle="Inquiry List"
+          hasAddButton={false}
+          field={''}
+          title="Inquiry List">
+          {<AllInquiry user={props.user} />}
+        </Form>
+
+        <Form
           open={openInquiry}
           toggleForm={(status) => dispatch(FormActions.toggleInquiry(status))}
-          hasAddButton={props.user === 'workspace' ? openAllInquiry : false}
           FabTitle="Inquiry"
+          hasAddButton={false}
           field={currentField || ''}
-          title={
-            openAllInquiry
-              ? 'Inquiry List'
-              : currentField
-                ? getKeyByValue(metadata['field'], currentField)
-                : ''
-          }>
-          {openAllInquiry ? <AllInquiry user={props.user} /> : <Inquiry user={props.user} />}
+          title={currentField ? getKeyByValue(metadata['field'], currentField) : ''}>
+          {<Inquiry user={props.user} />}
         </Form>
 
         <Form

@@ -27,7 +27,7 @@ const formReducer = function (state = initialState, action) {
       return { ...state, openDialog: action.state };
     }
     case Actions.OPEN_ALL_INQUIRY: {
-      return { ...state, openAllInquiry: !state.openAllInquiry };
+      return { ...state, openAllInquiry: action.state };
     }
     case Actions.OPEN_INQUIRY: {
       return { ...state, openInquiry: action.state };
