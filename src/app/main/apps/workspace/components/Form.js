@@ -143,7 +143,6 @@ export default function Form(props) {
           field: Boolean(question.field),
           inqType: Boolean(question.inqType),
           receiver: Boolean(question.receiver.length),
-          error: true
         })
       );
       return false;
@@ -251,7 +250,7 @@ export default function Form(props) {
             {!popoverfooter &&
               <div style={{ marginLeft: '2rem' }}>
                 {!showSaveInuiry ? (
-                  <PopoverFooter title={field} checkValidate={checkValidate} />
+                  <PopoverFooter title={field} />
                 ) : (
                   <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>
                     <PopoverFooterAdmin />

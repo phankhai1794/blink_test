@@ -7,7 +7,7 @@ import { Button } from '@material-ui/core';
 import * as AppActions from 'app/store/actions';
 
 import * as FormActions from '../store/actions/form';
-
+import * as InquiryActions from '../store/actions/inquiry';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -21,9 +21,10 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [inquiries, originalInquiry] = useSelector(({ workspace }) => [
+  const [inquiries, originalInquiry, valid] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.originalInquiry
+    workspace.inquiryReducer.originalInquiry,
+    workspace.inquiryReducer.validation
   ]);
 
   const inq = (inq) => {
@@ -37,6 +38,11 @@ const PopoverFooter = () => {
   };
   const onSave = async () => {
     try {
+      const check = inquiries.filter((q) => !q.receiver.length)
+      if (check.length) {
+        dispatch(InquiryActions.validate({ ...valid, receiver: !check.length }));
+        return;
+      }
       for (let i = 0; i < originalInquiry.length; i++) {
         const ansCreate = inquiries[i].answerObj.filter(
           ({ id: id1 }) => !originalInquiry[i].answerObj.some(({ id: id2 }) => id2 === id1)
@@ -76,6 +82,7 @@ const PopoverFooter = () => {
       );
       dispatch(FormActions.toggleSaveInquiry(false))
       dispatch(FormActions.toggleReload());
+      dispatch(InquiryActions.setEditInq(null))
     } catch (error) {
       dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
     }

@@ -1,4 +1,4 @@
-import {getKeyByValue, validateExtensionFile} from '@shared';
+import { getKeyByValue, validateExtensionFile } from '@shared';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
@@ -48,9 +48,8 @@ const InquiryForm = (props) => {
   ])
 
   useEffect(() => {
-    const check = questions.filter((q) => !q.receiver.length)
-    const checkGeneral= questions.filter((q) => !q.inqType || !q.field)
-    dispatch(InquiryActions.validate({ ...valid, receiver: !check.length, general: !checkGeneral.length }));
+    const checkGeneral = questions.filter((q) => !q.inqType || !q.field)
+    dispatch(InquiryActions.validate({ ...valid, general: !checkGeneral.length }));
   }, [questions])
 
   const copyQuestion = (index) => {
@@ -95,14 +94,13 @@ const InquiryForm = (props) => {
         field: Boolean(questions[currentEdit].field),
         inqType: Boolean(questions[currentEdit].inqType),
         receiver: Boolean(questions[currentEdit].receiver.length),
-        error: true
       }))
     } else if (index !== currentEdit) dispatch(InquiryActions.setEdit(index));
   };
   const handleReceiverChange = (e, index) => {
     const optionsOfQuestion = [...questions];
     if (e.target.checked) {
-      dispatch(InquiryActions.validate({ ...valid, error: false }));
+      dispatch(InquiryActions.validate({ ...valid, receiver: true }));
       optionsOfQuestion[index].receiver.push(e.target.value);
     } else {
       const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
@@ -125,7 +123,7 @@ const InquiryForm = (props) => {
                 {question.field ? getKeyByValue(metadata['field'], question.field) : 'New Inquiry'}
               </div>
               <div className="flex">
-                <FormControl error={valid.error && !questions[index].receiver.length}>
+                <FormControl error={!valid.receiver && !question.receiver.length}>
                   <FormGroup row>
                     <FormControlLabel
                       value="onshore"
@@ -150,7 +148,7 @@ const InquiryForm = (props) => {
                       label="Customer"
                     />
                   </FormGroup>
-                  {valid.error && !questions[index].receiver.length && <FormHelperText>Pick at least one!</FormHelperText>}
+                  {(!valid.receiver && !question.receiver.length) ? <FormHelperText>Pick at least one!</FormHelperText> : null}
                 </FormControl>
                 <div className="flex justify-end items-center mr-2 ">
                   <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
@@ -173,7 +171,7 @@ const InquiryForm = (props) => {
             ) : (
               <div style={{ padding: '0.5rem ' }}>
                 <div onClick={() => changeToEditor(index)}>
-                  <div style={{ fontSize: '19px' }}>{question.content.replace('{{INQ_TYPE}} ', '')}</div>
+                  <div style={{ fontSize: '19px', wordBreak: 'break-word' }}>{question.content.replace('{{INQ_TYPE}} ', '')}</div>
                   <div style={{ display: 'block', margin: '1rem 0rem' }}>
                     {question.ansType === metadata.ans_type.choice && (
                       <ChoiceAnswer question={question} />
