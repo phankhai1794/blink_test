@@ -29,16 +29,13 @@ import FileAttach from './FileAttach';
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
   const { receiver } = props;
-  const [inquiries, currentEdit, currentField, metadata, valid] = useSelector(({ workspace }) => [
+  const [inquiries, currentEdit, metadata, valid] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentEditInq,
-    workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.validation
   ]);
   const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
-
-  const indexes = inquiries.findIndex((q) => q.field === currentField);
   const changeToEditor = (index) => {
     if (index !== currentEdit) dispatch(InquiryActions.setEditInq(index));
   };
@@ -128,7 +125,7 @@ const AllInquiry = (props) => {
                   <div style={{ display: 'block', margin: '1rem 0rem' }}>
                     {type === metadata.ans_type.choice && (
                       <ChoiceAnswer
-                        index={indexes}
+                        index={index}
                         questions={inquiries}
                         question={q}
                         saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
@@ -137,7 +134,7 @@ const AllInquiry = (props) => {
                     {type === metadata.ans_type.paragraph && (
                       <ParagraphAnswer
                         question={q}
-                        index={indexes}
+                        index={index}
                         questions={inquiries}
                         saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
                       />
@@ -145,7 +142,7 @@ const AllInquiry = (props) => {
                     {type === metadata.ans_type.attachment && (
                       <AttachmentAnswer
                         question={q}
-                        index={indexes}
+                        index={index}
                         questions={inquiries}
                         saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
                         isPermissionAttach={allowCreateAttachmentAnswer}
