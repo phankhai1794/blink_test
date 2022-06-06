@@ -20,12 +20,14 @@ import Form from './Form';
 const SendInquiryForm = (props) => {
   const [mybl, openEmail] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.myBL,
-    workspace.formReducer.openEmail,
+    workspace.formReducer.openEmail
   ]);
-  const [success, error] = useSelector(({ workspace }) => [
+  const [success, error, mails] = useSelector(({ workspace }) => [
     workspace.mailReducer.success,
-    workspace.mailReducer.error
+    workspace.mailReducer.error,
+    workspace.mailReducer.mails
   ]);
+
   const { form } = useForm({
     toCustomer: '',
     toOnshore: '',
@@ -69,6 +71,9 @@ const SendInquiryForm = (props) => {
 
   const openSendInquiryDialog = (event) => {
     dispatch(FormActions.toggleOpenEmail(true));
+    if (!mails.length) {
+      dispatch(mailActions.suggestMail(''));
+    }
   };
 
   const opendPreviewForm = (event) => {
@@ -91,7 +96,7 @@ const SendInquiryForm = (props) => {
   const handleFieldChange = (key, tags) => {
     form[key] = tags.join(',');
   };
-  
+
   const onContentStateChange = (contentState) => {
     form.content = draftToHtml(contentState);
   };
@@ -121,7 +126,7 @@ const SendInquiryForm = (props) => {
         customActions={
           <ActionUI openPreviewClick={opendPreviewForm} sendMailClick={sendMailClick}></ActionUI>
         }
-        FabTitle='e-mail'>
+        FabTitle="e-mail">
         <>
           <Grid
             style={{ marginTop: 8 }}
@@ -196,7 +201,7 @@ const SendInquiryForm = (props) => {
               onContentStateChange={onContentStateChange}
             />
           </div>
-          <Divider/>
+          <Divider />
         </>
         {opendPreview ? (
           <Form

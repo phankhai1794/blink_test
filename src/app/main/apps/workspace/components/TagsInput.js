@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import TextInput from 'react-autocomplete-input';
+import 'react-autocomplete-input/dist/bundle.css';
+import { useDispatch, useSelector } from 'react-redux';
 
 const TagsInput = ({ id, tagLimit, onChanged }) => {
   const [input, setInput] = useState('');
   const [tags, setTags] = useState([]);
+  const textInput = useRef(null);
+
+  const [mails] = useSelector(({ workspace }) => [workspace.mailReducer.mails]);
 
   const validateEmail = (email) => {
     const regexp =
@@ -24,14 +30,20 @@ const TagsInput = ({ id, tagLimit, onChanged }) => {
     }
   };
 
+  const changeOnSelect = (trigger, slug) => {
+    setTags([...tags, slug]);
+    setInput('');
+    textInput.current.refInput.current.focus();
+  };
+  
   const handleKeyUp = (e) => {
     if (e.key !== 'Enter') return setInput(e.target.value);
     onChanged(id, tags);
   };
 
   const handleBlur = (e) => {
-    if (input !== '' && validateEmail(input)) {
-      setTags([...tags, input]);
+    if (input && validateEmail(input.trim())) {
+      setTags([...tags, input.trim()]);
       setInput('');
       e.target.value = '';
     }
@@ -52,11 +64,19 @@ const TagsInput = ({ id, tagLimit, onChanged }) => {
           </span>
         </div>
       ))}
-      <input
+      <TextInput
+        ref={textInput}
+        Component="input"
+        options={mails}
+        trigger={['']}
         disabled={tags.length >= tagLimit}
         onKeyDown={handleKeyDown}
+        changeOnSelect={changeOnSelect}
         onKeyUp={handleKeyUp}
         onBlur={handleBlur}
+        defaultValue=""
+        onChange={(value) => setInput(value.trim() === 'undefined' ? '' : value)}
+        value={input}
         type="text"
         className="tags-input"
         placeholder={

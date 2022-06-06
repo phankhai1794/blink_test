@@ -12,3 +12,9 @@ export async function sendmail(myblId, from, toCustomer, toOnshore, subject, con
   });
   return response;
 }
+
+
+export async function getSuggestMail(keyword) {
+  const response = await axios().get(`${PATH}/suggestMail?keyword=${keyword}`);
+  return response;
+}
