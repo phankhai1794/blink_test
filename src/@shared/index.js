@@ -50,6 +50,6 @@ export const filterMetadata = (data) => {
 };
 
 export const validateExtensionFile = (file) => {
-  const fileExt = file.name.split('.').pop();
-  return fileExt.match(/jpe|jpg|png|pdf|csv|xls|sheet|ppt|doc|txt/g);
+  const fileExt = file.name.split('.').pop().toLowerCase();
+  return fileExt.match(/jpe|jpg|png|pdf|csv|xls|sheet|ppt|doc|txt|gif/g);
 }
