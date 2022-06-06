@@ -105,7 +105,7 @@ const BLWorkspace = (props) => {
       if (myBL.id && transAutoSaveStatus === 'start') {
         dispatch(TransActions.BlTrans(myBL.id, content));
       }
-    }, 30000);
+    }, 60000);
   }, [transAutoSaveStatus]);
 
   useEffect(() => {

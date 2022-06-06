@@ -3,7 +3,8 @@ import * as Actions from '../actions/mail';
 const initialState = {
   isLoading: false,
   success: false,
-  error: ''
+  error: '',
+  mails: []
 };
 
 const mailReducer = function (state = initialState, action) {
@@ -36,6 +37,13 @@ const mailReducer = function (state = initialState, action) {
       error: action.payload
     };
   }
+  case Actions.SUGGEST_MAIL_SUCCESS: {
+    return {
+      ...state,
+      mails: action.mails
+    };
+  }
+
   default: {
     return state;
   }
