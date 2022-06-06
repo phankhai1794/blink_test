@@ -121,7 +121,7 @@ const AllInquiry = (props) => {
                     </Typography>
                   </div>
                   <Typography variant="h5">{q.name}</Typography>
-                  <Typography variant="h5">{q.content}</Typography>
+                  <Typography variant="h5" style={{ wordBreak: 'break-word' }}>{q.content}</Typography>
                   <div style={{ display: 'block', margin: '1rem 0rem' }}>
                     {type === metadata.ans_type.choice && (
                       <ChoiceAnswer
