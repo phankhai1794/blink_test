@@ -15,6 +15,7 @@ import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CloseIcon from '@material-ui/icons/Close';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
+import {PERMISSION, PermissionProvider} from "@shared/permission";
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -57,6 +58,14 @@ const useStyles = makeStyles((theme) => ({
     height: '25px',
     width: '25px',
     backgroundColor: 'silver'
+  },
+  positionBtnImg: {
+    left: '0',
+    top: '-3rem'
+  },
+  positionBtnNotImg: {
+    left: '0',
+    top: '4rem'
   }
 }));
 
@@ -191,7 +200,7 @@ const InquiryEditor = (props) => {
     workspace.inquiryReducer.fields,
     workspace.inquiryReducer.validation
   ]);
-
+  const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
 
   const [fieldType, setFieldType] = useState(metadata.field_options);
@@ -286,9 +295,9 @@ const InquiryEditor = (props) => {
     saveQuestion(optionsOfQuestion);
   };
 
-  const handleRemoveImageAttach = (i) => {
+  const handleRemoveImageAttach = (mediaIndex, inquiryIndex) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].mediaFile.splice(i, 1);
+    optionsOfQuestion[inquiryIndex].mediaFile.splice(mediaIndex, 1);
     saveQuestion(optionsOfQuestion);
   };
 
@@ -377,23 +386,51 @@ const InquiryEditor = (props) => {
       )}
       <Divider className="mt-12" />
 
-      {question.mediaFile.map((file, index) =>
-        file.ext.match(/jpeg|jpg|png/g) ? (
-          <div style={{ position: 'relative' }}>
+      <>
+        {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+        {question.mediaFile?.length > 0 && question.mediaFile?.map((file, mediaIndex) => (
+          <div style={{ position: 'relative' }} key={mediaIndex}>
             <Fab
-              classes={{
-                root: classes.root
-              }}
               size="small"
-              onClick={() => handleRemoveImageAttach(index)}>
+              onClick={() => handleRemoveImageAttach(mediaIndex, index)}
+              classes={
+                file.ext.match(/jpeg|jpg|png/g)
+                  ? { root: classes.positionBtnImg }
+                  : { root: classes.positionBtnNotImg }
+              }>
               <CloseIcon style={{ fontSize: 20 }} />
             </Fab>
-            <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+            {file.ext.match(/jpeg|jpg|png/g) ? (
+              <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
+            ) : (
+              <FileAttach file={file} />
+            )}
           </div>
-        ) : (
-          <FileAttach file={file} />
-        )
-      )}
+        ))}
+      </>
+      <>
+        {question.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
+        {question.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
+          <div style={{ position: 'relative' }} key={mediaIndex}>
+            {allowCreateAttachmentAnswer && <Fab
+              size="small"
+              onClick={() => handleRemoveImageAttach(mediaIndex, index)}
+              classes={
+                file.ext.match(/jpeg|jpg|png/g)
+                  ? { root: classes.positionBtnImg }
+                  : { root: classes.positionBtnNotImg }
+              }>
+              <CloseIcon style={{ fontSize: 20 }} />
+            </Fab>
+            }
+            {file.ext.match(/jpeg|jpg|png/g) ? (
+              <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
+            ) : (
+              <FileAttach file={file} />
+            )}
+          </div>
+        ))}
+      </>
     </>
   );
 };
