@@ -97,13 +97,15 @@ const BLField = (props) => {
   const dispatch = useDispatch();
   const { children, width, multiline, rows, selectedChoice, id, label, lock, readOnly } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
-  const [inquiries, metadata] = useSelector(({ workspace }) => [
+  const [inquiries, metadata, questions] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.metadata
+    workspace.inquiryReducer.metadata,
+    workspace.inquiryReducer.question,
   ]);
   const [minimize, anchorEl] = useSelector(({ workspace }) => [
     workspace.formReducer.minimize,
-    workspace.formReducer.anchorEl
+    workspace.formReducer.anchorEl,
+
   ]);
   const openAddPopover = (e) => {
     if (questionIsEmpty) {
@@ -122,12 +124,29 @@ const BLField = (props) => {
     if (!questionIsEmpty) {
       dispatch(FormActions.toggleInquiry(true));
     }
+    dispatch(InquiryActions.setField(e.currentTarget.id));
     if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
+      if (questions.length > 1 && !questions[questions.length - 1].id && checkValidate(questions[questions.length - 1])) {
+        dispatch(InquiryActions.addQuestion());
+        dispatch(InquiryActions.setEdit(questions.length));
+      }
       dispatch(FormActions.toggleCreateInquiry(true));
-    } else {
-      dispatch(InquiryActions.setField(e.currentTarget.id));
     }
   };
+
+  const checkValidate = (question) => {
+    if (!question.inqType || !question.receiver.length) {
+      dispatch(
+        InquiryActions.validate({
+          field: true,
+          inqType: Boolean(question.inqType),
+          receiver: Boolean(question.receiver.length),
+        })
+      );
+      return false;
+    }
+    return true;
+  }
 
   const checkQuestionIsEmpty = () => {
     if (inquiries.length > 0) {
