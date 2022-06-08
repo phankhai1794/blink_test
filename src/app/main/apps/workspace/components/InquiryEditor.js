@@ -390,16 +390,6 @@ const InquiryEditor = (props) => {
         {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
         {question.mediaFile?.length > 0 && question.mediaFile?.map((file, mediaIndex) => (
           <div style={{ position: 'relative' }} key={mediaIndex}>
-            <Fab
-              size="small"
-              onClick={() => handleRemoveImageAttach(mediaIndex, index)}
-              classes={
-                file.ext.match(/jpeg|jpg|png/g)
-                  ? { root: classes.positionBtnImg }
-                  : { root: classes.positionBtnNotImg }
-              }>
-              <CloseIcon style={{ fontSize: 20 }} />
-            </Fab>
             {file.ext.match(/jpeg|jpg|png/g) ? (
               <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
             ) : (
@@ -412,17 +402,6 @@ const InquiryEditor = (props) => {
         {question.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
         {question.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
           <div style={{ position: 'relative' }} key={mediaIndex}>
-            {allowCreateAttachmentAnswer && <Fab
-              size="small"
-              onClick={() => handleRemoveImageAttach(mediaIndex, index)}
-              classes={
-                file.ext.match(/jpeg|jpg|png/g)
-                  ? { root: classes.positionBtnImg }
-                  : { root: classes.positionBtnNotImg }
-              }>
-              <CloseIcon style={{ fontSize: 20 }} />
-            </Fab>
-            }
             {file.ext.match(/jpeg|jpg|png/g) ? (
               <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
             ) : (

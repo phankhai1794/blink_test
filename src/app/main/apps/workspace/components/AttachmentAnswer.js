@@ -5,11 +5,13 @@ import PublishIcon from '@material-ui/icons/Publish';
 import SaveIcon from '@material-ui/icons/Save';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
-import { uploadFile } from 'app/services/fileService';
+import {getFile, uploadFile} from 'app/services/fileService';
 import { createAttachmentAnswer } from 'app/services/inquiryService';
 import * as AppAction from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import {validateExtensionFile} from "@shared";
+
+import * as FormActions from "../store/actions/form";
 
 
 // style
@@ -104,18 +106,29 @@ const AttachmentAnswer = (props) => {
     axios
       .all(formData.map((endpoint) => uploadFile(endpoint)))
       .then((media) => {
-        createAttachmentAnswer({ question: questionMap, mediaFile: media, mediaRest }).then((res) => {
+        const mediaList = media?.map(file => file.response[0]);
+        createAttachmentAnswer({ question: questionMap, mediaFile: mediaList, mediaRest }).then((res) => {
           const { message } = res;
           const answerObjMediaFiles = optionsOfQuestion[index].answerObj[0]?.mediaFiles.filter((q, index) => q.id);
-          media.forEach((item) => {
-            answerObjMediaFiles.push({
-              id: item.id,
-              name: item.name,
-              ext: item.ext
+          mediaList.forEach((item, index) => {
+            getFile(item.id).then((file) => {
+              let url = '';
+              if (item.ext.match(/jpeg|jpg|png/g)) {
+                url = URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
+              } else {
+                url = URL.createObjectURL(new Blob([file]));
+              }
+              answerObjMediaFiles.push({
+                id: item.id,
+                name: item.name,
+                ext: item.ext,
+                src: url
+              })
             })
           });
           optionsOfQuestion[index].answerObj[0].mediaFiles = answerObjMediaFiles;
           dispatch(saveQuestion(optionsOfQuestion));
+          dispatch(FormActions.toggleInquiry(false));
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
@@ -146,7 +159,7 @@ const AttachmentAnswer = (props) => {
           </Button>
         </div>
       </div>
-      {showBtn && isPermissionAttach && (
+      {isPermissionAttach && (
         <div className="justify-end flex" style={{ marginTop: '1rem' }}>
           <Button variant="contained" color="primary" onClick={handleSave}>
             {' '}

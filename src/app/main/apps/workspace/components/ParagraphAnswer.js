@@ -7,6 +7,8 @@ import { useDispatch } from 'react-redux';
 import * as AppAction from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
+import * as FormActions from "../store/actions/form";
+
 import UserInfo from './UserInfo';
 
 const useStyles = makeStyles((theme) => ({
@@ -69,6 +71,7 @@ const ParagraphAnswer = (props) => {
         }
       });
     }
+    dispatch(FormActions.toggleInquiry(false))
   };
 
   return (
