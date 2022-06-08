@@ -15,7 +15,7 @@ import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CloseIcon from '@material-ui/icons/Close';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
-import {PERMISSION, PermissionProvider} from "@shared/permission";
+import { PERMISSION, PermissionProvider } from "@shared/permission";
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -241,7 +241,7 @@ const InquiryEditor = (props) => {
     setFieldType(metadata.field_options.filter((v) => !list.includes(v.value) && !fields.includes(v.value)));
     const optionsOfQuestion = [...questions];
 
-    if (questions.length === 1) {
+    if (questions.length - 1 === index && !questions.filter((q) => q.field === currentField).length) {
       setFieldValue(metadata.field_options.filter((v) => currentField === v.value)[0]);
       optionsOfQuestion[index].field = currentField;
       list[index] = currentField;
