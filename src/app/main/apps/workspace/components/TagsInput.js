@@ -31,21 +31,24 @@ const TagsInput = ({ id, tagLimit, onChanged }) => {
   };
 
   const changeOnSelect = (trigger, slug) => {
-    setTags([...tags, slug]);
+    const newTags = [...tags, slug]
+    setTags(newTags);
+    onChanged(id, newTags);
     setInput('');
     textInput.current.refInput.current.focus();
   };
   
   const handleKeyUp = (e) => {
-    if (e.key !== 'Enter') return setInput(e.target.value);
+    if (!['Enter', 'Tab'].includes(e.key)) return setInput(e.target.value);
     onChanged(id, tags);
   };
 
   const handleBlur = (e) => {
     if (input && validateEmail(input.trim())) {
-      setTags([...tags, input.trim()]);
+      const newTags = [...tags, input.trim()]
+      onChanged(id, newTags);
+      setTags(newTags);
       setInput('');
-      e.target.value = '';
     }
   };
 

@@ -234,7 +234,7 @@ const SendInquiryForm = (props) => {
 
 const useStyles = makeStyles((theme) => ({
   buttonProgress: {
-    color: 'white',
+    color: 'red',
     position: 'absolute',
     top: '50%',
     left: '50%',
