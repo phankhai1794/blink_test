@@ -60,7 +60,8 @@ const PopoverFooter = ({ title }) => {
     axios
       .all(formData.map((endpoint) => uploadFile(endpoint)))
       .then((media) => {
-        saveInquiry({ question, media, blId: myBL.id })
+        const mediaList = media?.map(file => file.response[0]);
+        saveInquiry({ question, media: mediaList, blId: myBL.id })
           .then(() => {
             dispatch(
               AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })

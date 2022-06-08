@@ -259,19 +259,31 @@ const Inquiry = (props) => {
     dispatch(FormActions.toggleSaveInquiry(true))
     setEdit(id);
   };
+  const urlMedia = (fileExt, file) => {
+    if (fileExt.match(/jpeg|jpg|png/g)) {
+      return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
+    } else {
+      return URL.createObjectURL(new Blob([file]));
+    }
+  }
   useEffect(() => {
     if (inquiry[0]?.mediaFile.length && !inquiry[0].mediaFile[0].src) {
       const optionsOfQuestion = [...inquiries];
       for (let f in inquiry[0].mediaFile) {
         getFile(inquiry[0].mediaFile[f].id)
           .then((file) => {
-            let url = '';
-            if (inquiry[0].mediaFile[f].ext.match(/jpeg|jpg|png/g)) {
-              url = URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
-            } else {
-              url = URL.createObjectURL(new Blob([file]));
-            }
-            optionsOfQuestion[indexes].mediaFile[f].src = url;
+            optionsOfQuestion[indexes].mediaFile[f].src = urlMedia(inquiry[0].mediaFile[f].ext, file);
+            dispatch(InquiryActions.editInquiry(optionsOfQuestion));
+          })
+          .catch((error) => console.error(error));
+      }
+    }
+    if (inquiry[0]?.answerObj[0]?.mediaFiles.length) {
+      const optionsOfQuestion = [...inquiries];
+      for (let f in inquiry[0]?.answerObj[0].mediaFiles) {
+        getFile(inquiry[0]?.answerObj[0].mediaFiles[f].id)
+          .then((file) => {
+            optionsOfQuestion[indexes].answerObj[0].mediaFiles[f].src = urlMedia(inquiry[0].answerObj[0].mediaFiles[f].ext, file);
             dispatch(InquiryActions.editInquiry(optionsOfQuestion));
           })
           .catch((error) => console.error(error));
@@ -283,9 +295,6 @@ const Inquiry = (props) => {
     const mediaFiles = optionsOfQuestion[inquiryIndex].answerObj[0]?.mediaFiles;
     mediaFiles.splice(mediaIndex, 1);
     dispatch(InquiryActions.setEdit(optionsOfQuestion));
-    if (optionsOfQuestion[inquiryIndex].answerObj[0]?.mediaFiles.length === 0) {
-      setShowBtn(false);
-    }
   };
   return (
     <>
@@ -376,17 +385,6 @@ const Inquiry = (props) => {
                   {q.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
                   {q.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
                     <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
-                      {allowCreateAttachmentAnswer && <Fab
-                        size="small"
-                        onClick={() => handleRemoveImageAttach(mediaIndex, indexes)}
-                        classes={
-                          file.ext.match(/jpeg|jpg|png/g)
-                            ? { root: classes.positionBtnImg }
-                            : { root: classes.positionBtnNotImg }
-                        }>
-                        <CloseIcon style={{ fontSize: 20 }} />
-                      </Fab>
-                      }
                       {file.ext.match(/jpeg|jpg|png/g) ? (
                         <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
                       ) : (
