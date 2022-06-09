@@ -122,11 +122,13 @@ export default function Form(props) {
   const dispatch = useDispatch();
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs, popoverfooter } =
     props;
-  const [index, question, inquiries, metadata] = useSelector(({ workspace }) => [
+
+  const [index, question, inquiries, metadata,currentField] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.question,
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.metadata,
+    workspace.inquiryReducer.currentField,
   ]);
 
   const [openAllInquiry, showSaveInquiry, showAddInquiry] = useSelector(({ workspace }) => [
@@ -138,6 +140,7 @@ export default function Form(props) {
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const classes = useStyles({ isFullScreen });
+  const [idBtn, setIdBtn] = useState('');
 
   const checkValidate = (question) => {
     if (!question.inqType || !question.field || !question.receiver.length) {
@@ -153,6 +156,7 @@ export default function Form(props) {
     return true;
   };
   const handleOpenFab = () => {
+    setIdBtn(currentField)
     setOpenFab(true);
     toggleForm(false);
   };
@@ -189,13 +193,18 @@ export default function Form(props) {
     setValue(newValue);
     props.tabChange(newValue);
   };
+  const openMinimize = () => {
+    dispatch(InquiryActions.setField(idBtn));
+    toggleForm(true);
+  };
   return (
     <div>
       {openFab && (
         <Fab
+          id={idBtn}
           variant="extended"
           style={{ marginLeft: '0.5rem', maxWidth: '12rem', maxHeight: '4rem', whiteSpace: 'nowrap', borderRadius: '1rem' }}
-          onClick={() => toggleForm(true)}
+          onClick={openMinimize}
           color="primary"
         >
           {' '}
