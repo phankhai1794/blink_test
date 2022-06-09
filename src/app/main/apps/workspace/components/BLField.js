@@ -97,41 +97,26 @@ const BLField = (props) => {
   const dispatch = useDispatch();
   const { children, width, multiline, rows, selectedChoice, id, label, lock, readOnly } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
-  const [inquiries, metadata, questions] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.metadata,
-    workspace.inquiryReducer.question,
-  ]);
-  const [minimize, anchorEl] = useSelector(({ workspace }) => [
-    workspace.formReducer.minimize,
-    workspace.formReducer.anchorEl,
+  const [anchorEl, setAnchorEl] = useState(null)
 
-  ]);
+  const questions = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.question
+  );
+  const inquiries = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.inquiries
+  );
+  const metadata = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.metadata
+  );
+
   const openAddPopover = (e) => {
     if (questionIsEmpty) {
-      dispatch(FormActions.setAnchor(e.currentTarget));
-    }
-    if (!minimize) {
-      dispatch(InquiryActions.setField(e.currentTarget.id));
+      setAnchorEl(e.currentTarget)
     }
   };
 
   const closeAddPopover = (e) => {
-    if (anchorEl !== null) dispatch(FormActions.setAnchor(null));
-  };
-
-  const onClick = (e) => {
-    if (!questionIsEmpty) {
-      dispatch(FormActions.toggleInquiry(true));
-    }
-    dispatch(InquiryActions.setField(e.currentTarget.id));
-    if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
-      if (questions.length > 1 && !questions[questions.length - 1].id && checkValidate(questions[questions.length - 1])) {
-        dispatch(InquiryActions.addQuestion());
-        dispatch(InquiryActions.setEdit(questions.length));
-      }
-      dispatch(FormActions.toggleCreateInquiry(true));
-    }
+    if (e.currentTarget !== null) setAnchorEl(null);
   };
 
   const checkValidate = (question) => {
@@ -147,6 +132,22 @@ const BLField = (props) => {
     }
     return true;
   }
+
+  const onClick = (e) => {
+    if (!questionIsEmpty) {
+      dispatch(FormActions.toggleInquiry(true));
+    }
+    dispatch(InquiryActions.setField(e.currentTarget.id));
+    if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
+      if (questions.length > 1 && !questions[questions.length - 1].id && checkValidate(questions[questions.length - 1])) {
+        dispatch(InquiryActions.addQuestion());
+        dispatch(InquiryActions.setEdit(questions.length));
+      }
+      dispatch(FormActions.toggleCreateInquiry(true));
+    }
+    dispatch(InquiryActions.setField(e.currentTarget.id));
+    setAnchorEl(e.currentTarget.id)
+  };
 
   const checkQuestionIsEmpty = () => {
     if (inquiries.length > 0) {

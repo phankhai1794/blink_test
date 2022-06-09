@@ -46,7 +46,8 @@ const PopoverFooter = ({ title }) => {
       }));
       return;
     }
-    if (!valid.general) {
+    const checkGeneral = question.filter((q) => !q.inqType || !q.field)
+    if (checkGeneral.length) {
       dispatch(AppActions.showMessage({ message: "There is empty field or inquiry type", variant: 'error' }));
       return;
     }

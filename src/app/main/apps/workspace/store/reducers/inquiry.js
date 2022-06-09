@@ -10,7 +10,7 @@ const initialState = {
   reply: false,
   fields: [],
   removeOptions: [],
-  validation: { inqType: true, field: true, receiver: true, general: false },
+  validation: { inqType: true, field: true, receiver: true },
   originalInquiry: [],
   inquiries: [],
   question: [

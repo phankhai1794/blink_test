@@ -122,14 +122,17 @@ export default function Form(props) {
   const dispatch = useDispatch();
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs, popoverfooter } =
     props;
-  const [index, question] = useSelector(({ workspace }) => [
+  const [index, question, inquiries, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.question,
+    workspace.inquiryReducer.inquiries,
+    workspace.inquiryReducer.metadata,
   ]);
 
-  const [openAllInquiry, showSaveInuiry] = useSelector(({ workspace }) => [
+  const [openAllInquiry, showSaveInquiry, showAddInquiry] = useSelector(({ workspace }) => [
     workspace.formReducer.openAllInquiry,
-    workspace.formReducer.showSaveInuiry
+    workspace.formReducer.showSaveInquiry,
+    workspace.formReducer.showAddInquiry,
   ]);
 
   const [openFab, setOpenFab] = useState(false);
@@ -150,7 +153,6 @@ export default function Form(props) {
     return true;
   };
   const handleOpenFab = () => {
-    dispatch(FormActions.minimize(true));
     setOpenFab(true);
     toggleForm(false);
   };
@@ -162,12 +164,14 @@ export default function Form(props) {
     if (openAllInquiry) {
       dispatch(InquiryActions.addQuestion1());
     } else if (checkValidate(question[index])) {
+      if (inquiries.length + question.length + 1 === metadata.field_options.length) {
+        dispatch(FormActions.toggleAddInquiry(false))
+      }
       dispatch(InquiryActions.addQuestion());
-      dispatch(InquiryActions.setEdit(index + 1));
+      dispatch(InquiryActions.setEdit(question.length));
     }
   };
   const handleClose = () => {
-    dispatch(FormActions.minimize(false));
     toggleForm(false);
     setOpenFab(false);
     if (openAllInquiry) {
@@ -234,7 +238,7 @@ export default function Form(props) {
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
           <DialogActions style={{ display: 'none !important' }}>
-            {(hasAddButton === undefined || hasAddButton === true) && !openAllInquiry && (
+            {(hasAddButton === undefined || hasAddButton === true) && !openAllInquiry && showAddInquiry && (
               <div style={{ right: '3rem', bottom: '2.6rem', position: 'absolute' }}>
                 <Link
                   component="button"
@@ -249,7 +253,7 @@ export default function Form(props) {
             )}
             {!popoverfooter &&
               <div style={{ marginLeft: '2rem' }}>
-                {!showSaveInuiry ? (
+                {!showSaveInquiry ? (
                   <PopoverFooter title={field} />
                 ) : (
                   <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>

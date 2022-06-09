@@ -151,7 +151,7 @@ const AllInquiry = (props) => {
                   </div>
                   {q.mediaFile.map((file, index) =>
                     file.ext.match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+                      <ImageAttach key={index} src={file.src} style={{ margin: '1rem' }} />
                     ) : (
                       <FileAttach file={file} />
                     )

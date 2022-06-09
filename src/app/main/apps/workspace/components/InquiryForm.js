@@ -32,29 +32,39 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: 'silver'
   }
 }));
+
 const InquiryForm = (props) => {
   const { FabTitle } = props;
   const dispatch = useDispatch();
-  const [questions, metadata, valid, currentEdit] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.question,
-    workspace.inquiryReducer.metadata,
-    workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.currentEdit,
-  ]);
   const classes = useStyles();
-
-  const [open] = useSelector(({ workspace }) => [
+  const questions = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.question
+  );
+  const metadata = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.metadata
+  );
+  const valid = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.validation
+  );
+  const currentEdit = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.currentEdit
+  );
+  const inquiries = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.inquiries
+  );
+  const removeOptions = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.removeOptions
+  );
+  const open = useSelector(({ workspace }) =>
     workspace.formReducer.openDialog,
-  ])
-
-  useEffect(() => {
-    const checkGeneral = questions.filter((q) => !q.inqType || !q.field)
-    dispatch(InquiryActions.validate({ ...valid, general: !checkGeneral.length }));
-  }, [questions])
+  )
 
   const copyQuestion = (index) => {
     const optionsOfQuestion = JSON.parse(JSON.stringify(questions[index]));
     optionsOfQuestion.field = ''
+    if (inquiries.length + questions.length + 1 === metadata.field_options.length) {
+      dispatch(FormActions.toggleAddInquiry(false))
+    }
     dispatch(InquiryActions.setQuestion([...questions, optionsOfQuestion]))
   };
 
@@ -64,6 +74,10 @@ const InquiryForm = (props) => {
     if (index > 0) {
       dispatch(InquiryActions.setEdit(index - 1));
     }
+    const options = [...removeOptions];
+    options.splice(index, 1);
+    dispatch(InquiryActions.removeSelectedOption(options));
+    dispatch(FormActions.toggleAddInquiry(true))
     dispatch(InquiryActions.setQuestion(optionsOfQuestion))
   };
 

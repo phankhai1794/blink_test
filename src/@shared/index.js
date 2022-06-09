@@ -32,8 +32,10 @@ export const displayTime = (time) => {
 export const filterMetadata = (data) => {
   const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [] };
   for (const field of data['field']) {
-    dict['field'][field.name] = field.id;
-    dict['field_options'].push({ label: field.name, value: field.id });
+    if (field.name !== 'OTHER') {
+      dict['field'][field.name] = field.id;
+      dict['field_options'].push({ label: field.name, value: field.id });
+    }
   }
   for (const inq of data['inqType']) {
     dict['inq_type'][inq.name] = inq.id;
