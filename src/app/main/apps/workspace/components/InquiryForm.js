@@ -58,6 +58,9 @@ const InquiryForm = (props) => {
   const open = useSelector(({ workspace }) =>
     workspace.formReducer.openDialog,
   )
+  const filesUpload = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.filesUpload,
+  )
 
   const copyQuestion = (index) => {
     const optionsOfQuestion = JSON.parse(JSON.stringify(questions[index]));
@@ -88,18 +91,13 @@ const InquiryForm = (props) => {
       dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
     } else {
       files.forEach(src => {
-        const formData = new FormData();
-        formData.append('file', src);
-        formData.append('name', src.name);
-        optionsOfQuestion[index].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+        optionsOfQuestion[index].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name });
       });
-      dispatch(InquiryActions.setQuestion(optionsOfQuestion));
+      dispatch(InquiryActions.editInquiry(optionsOfQuestion));
+      const filesUploadList = [...filesUpload];
+      filesUploadList.push(files);
+      dispatch(InquiryActions.setUploadFiles(filesUploadList));
     }
-  };
-  const handleRemoveImageAttach = (i, index) => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].mediaFile.splice(i, 1);
-    dispatch(InquiryActions.setQuestion(optionsOfQuestion));
   };
 
   const changeToEditor = (index) => {
@@ -207,15 +205,6 @@ const InquiryForm = (props) => {
                   question.mediaFile.map((file, mediaIndex) =>
                     file.ext.match(/jpeg|jpg|png/g) ? (
                       <div style={{ position: 'relative' }}>
-                        <Fab
-                          classes={{
-                            root: classes.root
-                          }}
-                          size="small"
-                          onClick={() => handleRemoveImageAttach(mediaIndex, index)}
-                        >
-                          <CloseIcon style={{ fontSize: 20 }} />
-                        </Fab>
                         <ImageAttach src={file.src} style={{ margin: '1rem' }} />
                       </div>
                     ) : (

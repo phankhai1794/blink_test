@@ -76,26 +76,39 @@ const AllInquiry = (props) => {
     }
     dispatch(InquiryActions.setQuestion(optionsOfQuestion));
   };
+  const urlMedia = (fileExt, file) => {
+    if (fileExt.match(/jpeg|jpg|png/g)) {
+      return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
+    } else {
+      return URL.createObjectURL(new Blob([file]));
+    }
+  }
   useEffect(() => {
-    const optionsOfQuestion = [...inquiries];
     for (let i in inquiries) {
       if (inquiries[i].mediaFile.length && !inquiries[i].mediaFile[0].src) {
+        const optionsOfQuestion = [...inquiries];
         for (let f in inquiries[i].mediaFile) {
           getFile(inquiries[i].mediaFile[f].id)
             .then((file) => {
-              let url = '';
-              if (inquiries[i].mediaFile[f].ext.match(/jpeg|jpg|png/g)) {
-                url = URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
-              } else {
-                url = URL.createObjectURL(new Blob([file]));
-              }
-              optionsOfQuestion[i].mediaFile[f].src = url;
+              optionsOfQuestion[i].mediaFile[f].src = urlMedia(inquiries[i].mediaFile[f].ext, file);
+              dispatch(InquiryActions.editInquiry(optionsOfQuestion));
+            })
+            .catch((error) => console.error(error));
+        }
+      }
+      if (inquiries[i]?.answerObj[0]?.mediaFiles.length) {
+        const optionsOfQuestion = [...inquiries];
+        for (let f in inquiries[i]?.answerObj[0].mediaFiles) {
+          getFile(inquiries[i]?.answerObj[0].mediaFiles[f].id)
+            .then((file) => {
+              optionsOfQuestion[i].answerObj[0].mediaFiles[f].src = urlMedia(inquiries[i].answerObj[0].mediaFiles[f].ext, file);
               dispatch(InquiryActions.editInquiry(optionsOfQuestion));
             })
             .catch((error) => console.error(error));
         }
       }
     }
+
   }, []);
   return (
     <>
@@ -149,13 +162,30 @@ const AllInquiry = (props) => {
                       />
                     )}
                   </div>
-                  {q.mediaFile.map((file, index) =>
-                    file.ext.match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach key={index} src={file.src} style={{ margin: '1rem' }} />
-                    ) : (
-                      <FileAttach file={file} />
-                    )
-                  )}
+                  <>
+                    {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+                    {q.mediaFile?.length > 0 && q.mediaFile?.map((file, mediaIndex) => (
+                      <div style={{ position: 'relative' }} key={mediaIndex}>
+                        {file.ext.match(/jpeg|jpg|png/g) ? (
+                          <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
+                        ) : (
+                          <FileAttach file={file} />
+                        )}
+                      </div>
+                    ))}
+                  </>
+                  <>
+                    {q.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
+                    {q.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
+                      <div style={{ position: 'relative' }} key={mediaIndex}>
+                        {file.ext.match(/jpeg|jpg|png/g) ? (
+                          <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
+                        ) : (
+                          <FileAttach file={file} />
+                        )}
+                      </div>
+                    ))}
+                  </>
                 </Card>
               }>
               <div className="flex justify-between">

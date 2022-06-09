@@ -62,7 +62,7 @@ const PopoverFooter = () => {
         for (const f in mediaCreate) {
           const form_data = mediaCreate[f].data;
           const res = await uploadFile(form_data);
-          mediaCreate[f].id = res.id
+          mediaCreate[f].id = res.response[0].id;
         }
         if (
           JSON.stringify(inq(inquiries[i])) !== JSON.stringify(inq(originalInquiry[i])) ||

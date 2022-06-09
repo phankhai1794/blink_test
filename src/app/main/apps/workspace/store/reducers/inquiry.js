@@ -23,9 +23,10 @@ const initialState = {
       answerObj: [],
       addOther: '',
       receiver: [],
-      mediaFile: []
+      mediaFile: [],
     }
-  ]
+  ],
+  filesUpload: []
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -125,6 +126,9 @@ const inquiryReducer = function (state = initialState, action) {
     }
     case Actions.DISPLAY_COMMENT: {
       return { ...state, displayCmt: action.state };
+    }
+    case Actions.SET_UPLOAD_FILE: {
+      return { ...state, filesUpload: action.state };
     }
     default: {
       return state;
