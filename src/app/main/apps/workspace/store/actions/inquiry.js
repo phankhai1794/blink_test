@@ -14,6 +14,7 @@ export const SET_QUESTION = 'SET_QUESTION';
 export const SET_REPLY = 'SET_REPLY';
 export const SET_EDIT = 'SET_EDIT';
 export const SET_EDIT_INQUIRY = 'SET_EDIT_INQUIRY';
+export const SET_UPLOAD_FILE = 'SET_UPLOAD_FILE';
 
 export function saveInquiry() {
   return {
@@ -120,6 +121,13 @@ export function setEdit(state) {
 export function setEditInq(state) {
   return {
     type: SET_EDIT_INQUIRY,
+    state: state
+  };
+}
+
+export function setUploadFiles(state) {
+  return {
+    type: SET_UPLOAD_FILE,
     state: state
   };
 }

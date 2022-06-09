@@ -295,12 +295,6 @@ const InquiryEditor = (props) => {
     saveQuestion(optionsOfQuestion);
   };
 
-  const handleRemoveImageAttach = (mediaIndex, inquiryIndex) => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[inquiryIndex].mediaFile.splice(mediaIndex, 1);
-    saveQuestion(optionsOfQuestion);
-  };
-
   return (
     <>
       <Grid container spacing={1}>

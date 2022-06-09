@@ -106,29 +106,26 @@ const AttachmentAnswer = (props) => {
     axios
       .all(formData.map((endpoint) => uploadFile(endpoint)))
       .then((media) => {
-        const mediaList = media?.map(file => file.response[0]);
+        const mediaList = [];
+        media.forEach(file => {
+          file.response.forEach(item => {
+            mediaList.push(item);
+          })
+        });
         createAttachmentAnswer({ question: questionMap, mediaFile: mediaList, mediaRest }).then((res) => {
           const { message } = res;
           const answerObjMediaFiles = optionsOfQuestion[index].answerObj[0]?.mediaFiles.filter((q, index) => q.id);
           mediaList.forEach((item, index) => {
-            getFile(item.id).then((file) => {
-              let url = '';
-              if (item.ext.match(/jpeg|jpg|png/g)) {
-                url = URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
-              } else {
-                url = URL.createObjectURL(new Blob([file]));
-              }
-              answerObjMediaFiles.push({
-                id: item.id,
-                name: item.name,
-                ext: item.ext,
-                src: url
-              })
+            answerObjMediaFiles.push({
+              id: item.id,
+              name: item.name,
+              ext: item.ext,
             })
           });
           optionsOfQuestion[index].answerObj[0].mediaFiles = answerObjMediaFiles;
           dispatch(saveQuestion(optionsOfQuestion));
           dispatch(FormActions.toggleInquiry(false));
+          dispatch(FormActions.toggleAllInquiry(false));
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));

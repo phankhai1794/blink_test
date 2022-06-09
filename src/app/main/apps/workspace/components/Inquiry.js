@@ -290,12 +290,7 @@ const Inquiry = (props) => {
       }
     }
   }, [currentField]);
-  const handleRemoveImageAttach = (mediaIndex, inquiryIndex) => {
-    const optionsOfQuestion = [...inquiries];
-    const mediaFiles = optionsOfQuestion[inquiryIndex].answerObj[0]?.mediaFiles;
-    mediaFiles.splice(mediaIndex, 1);
-    dispatch(InquiryActions.setEdit(optionsOfQuestion));
-  };
+
   return (
     <>
       {inquiry.map((q, index) => {
