@@ -1,14 +1,13 @@
 import * as Actions from '../actions/form';
 
 const initialState = {
-  minimize: false,
   fullscreen: false,
   openDialog: false,
   openAllInquiry: false,
-  showSaveInuiry: false,
+  showSaveInquiry: false,
+  showAddInquiry: true,
   openInquiry: false,
   openAttachment: false,
-  anchorEl: null,
   reload: false,
   openTrans: false,
   openEmail: false,
@@ -17,9 +16,6 @@ const initialState = {
 
 const formReducer = function (state = initialState, action) {
   switch (action.type) {
-    case Actions.MINIMIZE: {
-      return { ...state, minimize: action.state };
-    }
     case Actions.SET_FULLSCREEN: {
       return { ...state, fullscreen: action.state };
     }
@@ -33,13 +29,13 @@ const formReducer = function (state = initialState, action) {
       return { ...state, openInquiry: action.state };
     }
     case Actions.TOGGLE_SAVE_INQUIRY: {
-      return { ...state, showSaveInuiry: action.state };
+      return { ...state, showSaveInquiry: action.state };
+    }
+    case Actions.TOGGLE_ADD_INQUIRY: {
+      return { ...state, showAddInquiry: action.state };
     }
     case Actions.OPEN_ATTACHMENT: {
       return { ...state, openAttachment: action.state };
-    }
-    case Actions.SET_ANCHOR_EL: {
-      return { ...state, anchorEl: action.state };
     }
     case Actions.RELOAD: {
       return { ...state, reload: !state.reload, openDialog: false, openInquiry: false, openAllInquiry: false };

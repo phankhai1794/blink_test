@@ -1,21 +1,14 @@
-export const MINIMIZE = 'MINIMIZE';
 export const SET_FULLSCREEN = 'SET_FULLSCREEN';
 export const OPEN_CREATE_INQUIRY = 'OPEN_CREATE_INQUIRY';
 export const OPEN_INQUIRY = 'OPEN_INQUIRY';
 export const OPEN_ATTACHMENT = 'OPEN_ATTACHMENT';
 export const OPEN_ALL_INQUIRY = 'OPEN_ALL_INQUIRY';
 export const TOGGLE_SAVE_INQUIRY = 'TOGGLE_SAVE_INQUIRY';
-export const SET_ANCHOR_EL = 'SET_ANCHOR_EL';
+export const TOGGLE_ADD_INQUIRY = 'TOGGLE_ADD_INQUIRY';
 export const RELOAD = 'RELOAD';
 export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 export const OPEN_EMAIL = 'OPEN_EMAIL';
 
-export function minimize(state) {
-  return {
-    type: MINIMIZE,
-    state: state
-  };
-}
 
 export function setFullscreen(state) {
   return {
@@ -52,16 +45,16 @@ export function toggleSaveInquiry(state) {
   };
 }
 
-export function toggleAttachment(state) {
+export function toggleAddInquiry(state) {
   return {
-    type: OPEN_ATTACHMENT,
+    type: TOGGLE_ADD_INQUIRY,
     state: state
   };
 }
 
-export function setAnchor(state) {
+export function toggleAttachment(state) {
   return {
-    type: SET_ANCHOR_EL,
+    type: OPEN_ATTACHMENT,
     state: state
   };
 }

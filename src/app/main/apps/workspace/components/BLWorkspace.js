@@ -6,13 +6,13 @@ import _ from 'lodash';
 import { Grid, Divider } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
-import SendInquiryForm from './SendInquiryForm';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
 import * as TransActions from '../store/actions/transaction';
 import * as InquiryActions from '../store/actions/inquiry';
 
+import SendInquiryForm from './SendInquiryForm';
 import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
@@ -51,21 +51,33 @@ const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [content, setContent] = useState({});
-  const [currentField, metadata, myBL] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.currentField,
-    workspace.inquiryReducer.metadata,
+  const currentField = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.currentField
+  );
+  const metadata = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.metadata
+  );
+  const myBL = useSelector(({ workspace }) =>
     workspace.inquiryReducer.myBL
-  ]);
-  const [openAttachment, openInquiry, openAllInquiry, reload] = useSelector(({ workspace }) => [
+  );
+  const openAttachment = useSelector(({ workspace }) =>
     workspace.formReducer.openAttachment,
+  );
+  const openInquiry = useSelector(({ workspace }) =>
     workspace.formReducer.openInquiry,
+  );
+  const openAllInquiry = useSelector(({ workspace }) =>
     workspace.formReducer.openAllInquiry,
+  );
+  const reload = useSelector(({ workspace }) =>
     workspace.formReducer.reload,
-  ]);
-  const [transAutoSaveStatus, isLoading] = useSelector(({ workspace }) => [
+  );
+  const transAutoSaveStatus = useSelector(({ workspace }) =>
     workspace.transReducer.transAutoSaveStatus,
+  );
+  const isLoading = useSelector(({ workspace }) =>
     workspace.transReducer.isLoading
-  ]);
+  );
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
