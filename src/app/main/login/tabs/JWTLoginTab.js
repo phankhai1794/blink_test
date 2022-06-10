@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, Divider, Typography, InputAdornment, Icon } from '@material-ui/core';
+import { Button, InputAdornment, Icon } from '@material-ui/core';
 import { TextFieldFormsy } from '@fuse';
 import Formsy from 'formsy-react';
-import * as authActions from 'app/auth/store/actions';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-function JWTLoginTab(props) {
-  const dispatch = useDispatch();
+function JWTLoginTab({ onLogged }) {
   const login = useSelector(({ auth }) => auth.login);
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -31,7 +29,7 @@ function JWTLoginTab(props) {
 
   function handleSubmit(model) {
     // dispatch(authActions.submitLogin(model));
-    props.onLogged(model);
+    onLogged(model);
   }
 
   return (
@@ -41,24 +39,21 @@ function JWTLoginTab(props) {
         onValid={enableButton}
         onInvalid={disableButton}
         ref={formRef}
-        className="flex flex-col justify-center w-full"
-      >
+        className="flex flex-col justify-center w-full">
         <TextFieldFormsy
           className="mb-16"
           type="text"
-          name="username"
-          label="Username"
-          validations={{
-            minLength: 4
-          }}
+          name="email"
+          label="Email"
+          validations="isEmail"
           validationErrors={{
-            minLength: 'Min character length is 4'
+            isEmail: 'Invalid email'
           }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
                 <Icon className="text-20" color="action">
-                  person
+                  email
                 </Icon>
               </InputAdornment>
             )
@@ -98,8 +93,7 @@ function JWTLoginTab(props) {
           className="w-full mx-auto mt-16 normal-case"
           aria-label="LOG IN"
           disabled={!isFormValid}
-          value="legacy"
-        >
+          value="legacy">
           Login
         </Button>
       </Formsy>

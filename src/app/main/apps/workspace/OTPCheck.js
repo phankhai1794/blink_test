@@ -81,7 +81,7 @@ const OtpCheck = ({ status }) => {
 
     let userInfo = localStorage.getItem('USER');
     if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
-      const email = JSON.parse(userInfo).mail;
+      const { email } = JSON.parse(userInfo);
       if (email) {
         setMail({
           ...mail,
@@ -89,7 +89,7 @@ const OtpCheck = ({ status }) => {
           isValid: isEmail(email)
         });
 
-        isVerified({ mail: email, bl })
+        isVerified({ email, bl })
           .then(() => setStep(2))
           .catch((error) => {
             console.error(error);
@@ -100,16 +100,16 @@ const OtpCheck = ({ status }) => {
 
   useEffect(() => {
     if (otpCode.length === otpLength) {
-      verifyGuest({ mail: mail.value, bl: myBL.id, otpCode })
+      verifyGuest({ email: mail.value, bl: myBL.id, otpCode })
         .then((res) => {
           if (res) {
-            const { role, userName, avatar, permissions } = res.userData;
+            const { role, userName, avatar, email, permissions } = res.userData;
             let userInfo = {
               displayName: userName,
               photoURL: avatar,
               role,
+              email,
               permissions,
-              mail: mail.value
             };
 
             localStorage.setItem('AUTH_TOKEN', res.token);

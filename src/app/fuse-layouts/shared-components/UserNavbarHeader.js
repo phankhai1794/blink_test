@@ -47,10 +47,9 @@ function UserNavbarHeader(props) {
       color="primary"
       elevation={0}
       classes={{ root: classes.root }}
-      className="user relative flex flex-col items-center justify-center pt-24 pb-64 mb-32 z-0"
-    >
+      className="user relative flex flex-col items-center justify-center pt-24 pb-64 mb-32 z-0">
       <Typography className="username text-16 whitespace-no-wrap" color="inherit">
-        {user.displayName}
+        {user.email}
       </Typography>
       <Avatar className={classes.avatar} src={user.photoURL ? user.photoURL : ''} alt="User photo">
         {!user.photoURL ? user.displayName.charAt(0).toUpperCase() : ''}
