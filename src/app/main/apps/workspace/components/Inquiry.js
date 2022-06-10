@@ -278,7 +278,7 @@ const Inquiry = (props) => {
           .catch((error) => console.error(error));
       }
     }
-    if (inquiry[0]?.answerObj[0]?.mediaFiles.length) {
+    if (inquiry[0]?.answerObj[0]?.mediaFiles && inquiry[0]?.answerObj[0]?.mediaFiles.length) {
       const optionsOfQuestion = [...inquiries];
       for (let f in inquiry[0]?.answerObj[0].mediaFiles) {
         getFile(inquiry[0]?.answerObj[0].mediaFiles[f].id)

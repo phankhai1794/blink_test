@@ -24,9 +24,9 @@ const initialState = {
       addOther: '',
       receiver: [],
       mediaFile: [],
+      filesUpload: []
     }
   ],
-  filesUpload: []
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -56,14 +56,15 @@ const inquiryReducer = function (state = initialState, action) {
           ...state.question,
           {
             content:
-              'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
+                'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
             inqType: '',
             ansType: '',
             field: '',
             answerObj: [],
             addOther: '',
             receiver: [],
-            mediaFile: []
+            mediaFile: [],
+            filesUpload: [],
           }
         ]
       };
@@ -75,14 +76,15 @@ const inquiryReducer = function (state = initialState, action) {
           ...state.inquiries,
           {
             content:
-              'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
+                'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
             inqType: '',
             ansType: '',
             field: '',
             answerObj: [],
             addOther: '',
             receiver: [],
-            mediaFile: []
+            mediaFile: [],
+            filesUpload: [],
           }
         ]
       };
@@ -97,14 +99,15 @@ const inquiryReducer = function (state = initialState, action) {
         question: [
           {
             content:
-              'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
+                'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
             inqType: '',
             ansType: '',
             field: '',
             answerObj: [],
             addOther: '',
             receiver: [],
-            mediaFile: []
+            mediaFile: [],
+            filesUpload: []
           }
         ]
       };
