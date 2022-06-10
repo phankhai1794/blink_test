@@ -9,7 +9,7 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
-import { Box, Tabs, Tab, Fab, Divider, Link } from '@material-ui/core';
+import { Box, Tabs, Tab, Divider, Link, Chip } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import CropIcon from '@material-ui/icons/Crop';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
@@ -115,7 +115,11 @@ const useStyles = makeStyles(() => ({
   },
   divider: {
     backgroundColor: '#8A97A3'
+  },
+  chip: {
+    marginLeft: '0.2rem'
   }
+
 }));
 
 export default function Form(props) {
@@ -140,6 +144,7 @@ export default function Form(props) {
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const classes = useStyles({ isFullScreen });
+  const classesHover = useStyles();
   const [idBtn, setIdBtn] = useState('');
 
   const checkValidate = (question) => {
@@ -197,19 +202,18 @@ export default function Form(props) {
     dispatch(InquiryActions.setField(idBtn));
     toggleForm(true);
   };
+
   return (
     <div>
       {openFab && (
-        <Fab
-          id={idBtn}
-          variant="extended"
-          style={{ marginLeft: '0.5rem', maxWidth: '12rem', maxHeight: '4rem', whiteSpace: 'nowrap', borderRadius: '1rem' }}
+        <Chip
+          label={FabTitle}
           onClick={openMinimize}
-          color="primary"
-        >
-          {' '}
-          {FabTitle}
-        </Fab>
+          onDelete={handleClose}
+          color='primary'
+          size='small'
+          className={classesHover.chip}
+        />
       )}
       <Dialog
         fullScreen={isFullScreen}
