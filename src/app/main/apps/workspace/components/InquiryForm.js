@@ -65,6 +65,7 @@ const InquiryForm = (props) => {
   const copyQuestion = (index) => {
     const optionsOfQuestion = JSON.parse(JSON.stringify(questions[index]));
     optionsOfQuestion.field = ''
+    optionsOfQuestion.filesUpload = questions[index].filesUpload;
     if (inquiries.length + questions.length + 1 === metadata.field_options.length) {
       dispatch(FormActions.toggleAddInquiry(false))
     }
@@ -93,10 +94,8 @@ const InquiryForm = (props) => {
       files.forEach(src => {
         optionsOfQuestion[index].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name });
       });
-      dispatch(InquiryActions.editInquiry(optionsOfQuestion));
-      const filesUploadList = [...filesUpload];
-      filesUploadList.push(files);
-      dispatch(InquiryActions.setUploadFiles(filesUploadList));
+      optionsOfQuestion[index].filesUpload.push(files);
+      dispatch(InquiryActions.setQuestion(optionsOfQuestion));
     }
   };
 

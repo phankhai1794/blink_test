@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = ({ title }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [index, currentField, question, fields, myBL, displayCmt, valid, filesUpload] = useSelector(({ workspace }) => [
+  const [index, currentField, question, fields, myBL, displayCmt, valid] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.question,
@@ -36,7 +36,6 @@ const PopoverFooter = ({ title }) => {
     workspace.inquiryReducer.myBL,
     workspace.inquiryReducer.displayCmt,
     workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.filesUpload,
   ]);
   const onSave = () => {
     const check = question.filter((q) => !q.receiver.length)
@@ -52,17 +51,37 @@ const PopoverFooter = ({ title }) => {
       dispatch(AppActions.showMessage({ message: "There is empty field or inquiry type", variant: 'error' }));
       return;
     }
-    const formData = new FormData();
-    filesUpload.forEach((files) => {
-      files.forEach((file) => {
-        formData.append('files', file);
-      })
+    const mediaList = [];
+    const filesUpload = [];
+    question.forEach((q) => {
+      if (q.filesUpload.length > 0) {
+        q.filesUpload.forEach(files => {
+          files.forEach((file) => {
+            filesUpload.push(file)
+          })
+        })
+      }
     });
-    uploadFile(formData).then(media => {
-      const mediaList = [];
-      media.response.forEach((item) => {
-        mediaList.push(item);
-      })
+    if (filesUpload.length > 0) {
+      const formData = new FormData();
+      filesUpload.forEach((file) => {
+        formData.append('files', file);
+      });
+      uploadFile(formData).then(media => {
+        media.response.forEach((item) => {
+          mediaList.push(item);
+        });
+        saveInquiry({ question, media: mediaList, blId: myBL.id })
+          .then(() => {
+            dispatch(
+              AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+            );
+            dispatch(InquiryActions.saveInquiry());
+            dispatch(FormActions.toggleReload());
+          })
+          .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
+      }).catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
+    } else {
       saveInquiry({ question, media: mediaList, blId: myBL.id })
         .then(() => {
           dispatch(
@@ -72,7 +91,7 @@ const PopoverFooter = ({ title }) => {
           dispatch(FormActions.toggleReload());
         })
         .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
-    }).catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
+    }
   };
   const toggleInquiriresDialog = () => {
     dispatch(FormActions.toggleAllInquiry(true));

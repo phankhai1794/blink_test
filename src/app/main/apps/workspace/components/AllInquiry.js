@@ -96,7 +96,7 @@ const AllInquiry = (props) => {
             .catch((error) => console.error(error));
         }
       }
-      if (inquiries[i]?.answerObj[0]?.mediaFiles.length) {
+      if (inquiries[i]?.answerObj[0]?.mediaFiles && inquiries[i]?.answerObj[0]?.mediaFiles.length) {
         const optionsOfQuestion = [...inquiries];
         for (let f in inquiries[i]?.answerObj[0].mediaFiles) {
           getFile(inquiries[i]?.answerObj[0].mediaFiles[f].id)
