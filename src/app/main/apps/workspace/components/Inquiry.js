@@ -16,7 +16,11 @@ import {
   ListItemText,
   Typography,
   IconButton,
-  Fab,
+  FormControl,
+  FormGroup,
+  FormControlLabel,
+  FormHelperText,
+  Checkbox,
   TextField,
   Divider
 } from '@material-ui/core';
@@ -237,18 +241,29 @@ const useStyles = makeStyles((theme) => ({
 const Inquiry = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles();
-  const [inquiries, currentField, metadata] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.currentField,
+  const inquiries = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.inquiries
+  );
+  const currentField = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.currentField
+  );
+  const originalInquiry = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.originalInquiry
+  );
+  const valid = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.validation
+  );
+  const metadata = useSelector(({ workspace }) =>
     workspace.inquiryReducer.metadata
-  ]);
-  const inquiry = inquiries.filter((q) => q.field === currentField);
-  const indexes = inquiries.findIndex((q) => q.field === currentField);
+  );
+  const indexes = originalInquiry.findIndex((q) => q.field === currentField);
+  const inquiry = [inquiries[indexes]]
   const [edit, setEdit] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [isShowBtn, setShowBtn] = useState(null);
   const open = Boolean(anchorEl);
   const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -266,6 +281,18 @@ const Inquiry = (props) => {
       return URL.createObjectURL(new Blob([file]));
     }
   }
+  const handleReceiverChange = (e) => {
+    const optionsOfQuestion = [...inquiries];
+    if (e.target.checked) {
+      dispatch(InquiryActions.validate({ ...valid, receiver: true }));
+      optionsOfQuestion[indexes].receiver.push(e.target.value);
+    } else {
+      const i = optionsOfQuestion[indexes].receiver.indexOf(e.target.value);
+      optionsOfQuestion[indexes].receiver.splice(i, 1);
+    }
+    dispatch(InquiryActions.editInquiry(optionsOfQuestion));
+  };
+
   useEffect(() => {
     if (inquiry[0]?.mediaFile.length && !inquiry[0].mediaFile[0].src) {
       const optionsOfQuestion = [...inquiries];
@@ -293,18 +320,47 @@ const Inquiry = (props) => {
 
   return (
     <>
-      {inquiry.map((q, index) => {
+      {indexes >= 0 && inquiry.map((q, index) => {
         const type = q.ansType;
         const user = q.creator;
         return (
           <div key={index}>
             {edit === index ? (
-              <InquiryEditor
-                index={indexes}
-                questions={inquiries}
-                question={q}
-                saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-              />
+              <>
+                <FormControl error={!valid.receiver && !q.receiver.length}>
+                  <FormGroup row>
+                    <FormControlLabel
+                      value="onshore"
+                      control={
+                        <Checkbox
+                          checked={q.receiver.includes('onshore')}
+                          onChange={handleReceiverChange}
+                          color="primary"
+                        />
+                      }
+                      label="Onshore"
+                    />
+                    <FormControlLabel
+                      value="customer"
+                      control={
+                        <Checkbox
+                          checked={q.receiver.includes('customer')}
+                          onChange={handleReceiverChange}
+                          color="primary"
+                        />
+                      }
+                      label="Customer"
+                    />
+                  </FormGroup>
+                  {(!valid.receiver && !q.receiver.length) ? <FormHelperText>Pick at least one!</FormHelperText> : null}
+                </FormControl>
+                <InquiryEditor
+                  index={indexes}
+                  questions={inquiries}
+                  question={q}
+                  saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                />
+              </>
             ) : (
               <Card style={{ padding: '1rem ', marginBottom: '24px' }}>
                 <div className="flex justify-between">
@@ -317,7 +373,7 @@ const Inquiry = (props) => {
                   <Menu
                     id="customized-menu"
                     anchorEl={anchorEl}
-                    open={false}
+                    open={open}
                     onClose={handleClose}
                     keepMounted>
                     <MenuItem onClick={() => toggleEdit(index)}>
@@ -325,12 +381,6 @@ const Inquiry = (props) => {
                         <EditIcon fontSize="small" />
                       </ListItemIcon>
                       <ListItemText primary="Edit" />
-                    </MenuItem>
-                    <MenuItem>
-                      <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-                        <NoteAddIcon fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText primary="Add Inquiry" />
                     </MenuItem>
                   </Menu>
                 </div>

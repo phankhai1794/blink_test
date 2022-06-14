@@ -21,12 +21,15 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [inquiries, originalInquiry, valid] = useSelector(({ workspace }) => [
+  const inquiries = useSelector(({ workspace }) =>
     workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.originalInquiry,
+  );
+  const originalInquiry = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.originalInquiry
+  );
+  const valid = useSelector(({ workspace }) =>
     workspace.inquiryReducer.validation
-  ]);
-
+  );
   const inq = (inq) => {
     return {
       content: inq.content,
