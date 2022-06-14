@@ -102,8 +102,8 @@ const BLField = (props) => {
   const questions = useSelector(({ workspace }) =>
     workspace.inquiryReducer.question
   );
-  const inquiries = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.inquiries
+  const originalInquiry = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.originalInquiry
   );
   const metadata = useSelector(({ workspace }) =>
     workspace.inquiryReducer.metadata
@@ -150,8 +150,8 @@ const BLField = (props) => {
   };
 
   const checkQuestionIsEmpty = () => {
-    if (inquiries.length > 0) {
-      const check = inquiries.filter((q) => q.field === id);
+    if (originalInquiry.length > 0) {
+      const check = originalInquiry.filter((q) => q.field === id);
       return check.length === 0;
     }
     return true;
@@ -159,7 +159,7 @@ const BLField = (props) => {
 
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty());
-  }, [inquiries, metadata]);
+  }, [originalInquiry, metadata]);
 
   return (
     <>

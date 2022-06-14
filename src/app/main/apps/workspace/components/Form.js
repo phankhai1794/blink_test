@@ -127,12 +127,13 @@ export default function Form(props) {
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs, popoverfooter } =
     props;
 
-  const [index, question, inquiries, metadata, currentField] = useSelector(({ workspace }) => [
+  const [index, question, inquiries, metadata, currentField, originalInquiry] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.question,
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.currentField,
+    workspace.inquiryReducer.originalInquiry,
   ]);
 
   const [openAllInquiry, showSaveInquiry, showAddInquiry] = useSelector(({ workspace }) => [
@@ -190,6 +191,7 @@ export default function Form(props) {
     }
     dispatch(InquiryActions.setReply(false));
     dispatch(InquiryActions.setEditInq(null))
+    dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))))
     dispatch(FormActions.toggleSaveInquiry(false))
     if (tabs) props.tabChange(0);
   };

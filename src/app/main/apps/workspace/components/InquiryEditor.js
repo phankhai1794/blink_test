@@ -96,9 +96,8 @@ const Choice = (props) => {
             value={value}
             style={{ marginLeft: '1rem' }}
             autoFocus={true}
-            onFocus={(e) => e.target.select()}
+            onFocus={handleFocus}
             onChange={(e) => handleChangeChoice(e, index)}
-            onnFocus={handleFocus}
             InputProps={{
               classes
             }}

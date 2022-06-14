@@ -118,7 +118,7 @@ const BLWorkspace = (props) => {
         dispatch(TransActions.BlTrans(myBL.id, content));
       }
     }, 60000);
-  }, [transAutoSaveStatus]);
+  }, [transAutoSaveStatus, myBL]);
 
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
