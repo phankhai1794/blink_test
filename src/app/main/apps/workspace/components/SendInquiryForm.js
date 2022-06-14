@@ -126,7 +126,7 @@ const SendInquiryForm = (props) => {
         customActions={
           <ActionUI openPreviewClick={opendPreviewForm} sendMailClick={sendMailClick}></ActionUI>
         }
-        FabTitle="e-mail">
+        FabTitle="E-mail">
         <>
           <Grid
             style={{ marginTop: 8 }}

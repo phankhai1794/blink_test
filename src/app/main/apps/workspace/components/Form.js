@@ -127,7 +127,7 @@ export default function Form(props) {
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs, popoverfooter } =
     props;
 
-  const [index, question, inquiries, metadata,currentField] = useSelector(({ workspace }) => [
+  const [index, question, inquiries, metadata, currentField] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.question,
     workspace.inquiryReducer.inquiries,
@@ -211,7 +211,6 @@ export default function Form(props) {
           onClick={openMinimize}
           onDelete={handleClose}
           color='primary'
-          size='small'
           className={classesHover.chip}
         />
       )}
