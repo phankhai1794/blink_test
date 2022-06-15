@@ -8,7 +8,7 @@ export const TOGGLE_ADD_INQUIRY = 'TOGGLE_ADD_INQUIRY';
 export const RELOAD = 'RELOAD';
 export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 export const OPEN_EMAIL = 'OPEN_EMAIL';
-
+export const OPEN_INQUIRY_REVIEW = 'OPEN_INQUIRY_REVIEW';
 
 export function setFullscreen(state) {
   return {
@@ -75,6 +75,13 @@ export function openTrans() {
 export function toggleOpenEmail(state) {
   return {
     type: OPEN_EMAIL,
+    state: state
+  };
+}
+
+export function toggleOpenInquiryReview(state) {
+  return {
+    type: OPEN_INQUIRY_REVIEW,
     state: state
   };
 }

@@ -12,7 +12,6 @@ import * as FormActions from '../store/actions/form';
 import * as TransActions from '../store/actions/transaction';
 import * as InquiryActions from '../store/actions/inquiry';
 
-import SendInquiryForm from './SendInquiryForm';
 import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
@@ -20,6 +19,7 @@ import Label from './FieldLabel';
 import BLField from './BLField';
 import InquiryForm from './InquiryForm';
 import AttachmentList from './AttachmentList';
+import {InquiryReview, SendInquiryForm} from "./SendInquiryForm";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -63,11 +63,11 @@ const BLWorkspace = (props) => {
   const openAttachment = useSelector(({ workspace }) =>
     workspace.formReducer.openAttachment,
   );
-  const openInquiry = useSelector(({ workspace }) =>
-    workspace.formReducer.openInquiry,
-  );
   const openAllInquiry = useSelector(({ workspace }) =>
     workspace.formReducer.openAllInquiry,
+  );
+  const openInquiryForm = useSelector(({ workspace }) =>
+    workspace.formReducer.openDialog,
   );
   const reload = useSelector(({ workspace }) =>
     workspace.formReducer.reload,
@@ -77,6 +77,15 @@ const BLWorkspace = (props) => {
   );
   const isLoading = useSelector(({ workspace }) =>
     workspace.transReducer.isLoading
+  );
+  const inquiries = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.inquiries
+  );
+  const currentInq = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.currentInq
+  );
+  const listMinimize = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.listMinimize
   );
 
   const getField = (field) => {
@@ -132,43 +141,70 @@ const BLWorkspace = (props) => {
       dispatch(FormActions.toggleReload());
     };
   }, []);
+  const popupOpen = (inquiry, getField) => {
+    switch (inquiry.field) {
+    case 'INQUIRY_LIST':
+      return {status: openAllInquiry,
+        toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
+        fabTitle: 'Inquiry List',
+        title: 'Inquiry List',
+        hasAddButton: false,
+        field: 'INQUIRY_LIST',
+        child: <AllInquiry user={props.user} />}
+    case 'ATTACHMENT_LIST':
+      return {status: openAttachment,
+        toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
+        fabTitle: 'Attachment',
+        title: 'Attachment',
+        hasAddButton: false,
+        field: 'ATTACHMENT_LIST',
+        popoverfooter: true,
+        child: <AttachmentList user={props.user} />}
+    case 'INQUIRY_FORM':
+      return {status: openInquiryForm,
+        toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
+        fabTitle: 'Inquiry Form',
+        title: 'Inquiry Creation',
+        field: 'INQUIRY_FORM',
+        child: <InquiryForm />}
+    default:
+      return {status: inquiry.id === currentInq.id,
+        toggleForm: () => {},
+        fabTitle: getField.label,
+        title: getField.value ? getKeyByValue(metadata['field'], getField.value) : '',
+        hasAddButton: false,
+        field: getField.value,
+        child: <Inquiry user={props.user} />}
+    }
+  }
 
   return (
     <div className={clsx("max-w-5xl", classes.root)}>
       <div style={{ display: 'flex', position: 'fixed', right: '2rem', bottom: '1rem', zIndex: 999 }}>
-        <InquiryForm FabTitle="Inquiry Form" />
 
-        <Form
-          open={openAllInquiry}
-          toggleForm={(status) => dispatch(FormActions.toggleAllInquiry(status))}
-          FabTitle="Inquiry List"
-          hasAddButton={false}
-          field={''}
-          title="Inquiry List">
-          {<AllInquiry user={props.user} />}
-        </Form>
-
-        <Form
-          open={openInquiry}
-          toggleForm={(status) => dispatch(FormActions.toggleInquiry(status))}
-          FabTitle="Inquiry"
-          hasAddButton={false}
-          field={currentField || ''}
-          title={currentField ? getKeyByValue(metadata['field'], currentField) : ''}>
-          {<Inquiry user={props.user} />}
-        </Form>
-
-        <Form
-          open={openAttachment}
-          toggleForm={(status) => dispatch(FormActions.toggleAttachment(status))}
-          FabTitle="Attachment"
-          hasAddButton={false}
-          popoverfooter={true}
-          title="Attachment List">
-          {<AttachmentList user={props.user} />}
-        </Form>
-
-        <SendInquiryForm />
+        {listMinimize.map((inquiry => {
+          const getField = metadata.field_options.find((field) => inquiry.field === field.value);
+          if (inquiry.field === 'EMAIL') {
+            return (<SendInquiryForm field={'EMAIL'} key={inquiry.id} />)
+          } else if (inquiry.field === 'INQUIRY_REVIEW') {
+            return (<InquiryReview field={'INQUIRY_REVIEW'} key={inquiry.id} />)
+          } else {
+            const popupObj = popupOpen(inquiry, getField);
+            return (
+              <Form
+                key={inquiry.id}
+                open={popupObj.status}
+                toggleForm={popupObj.toggleForm}
+                FabTitle={popupObj.fabTitle}
+                hasAddButton={popupObj.hasAddButton}
+                field={popupObj.field}
+                popoverfooter={popupObj.popoverfooter}
+                title={popupObj.title}>
+                {popupObj.child}
+              </Form>
+            )
+          }
+        }))}
       </div>
 
       <Grid container>

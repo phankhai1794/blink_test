@@ -61,7 +61,7 @@ const AllInquiry = (props) => {
         formData.append('name', src.name);
         optionsOfQuestion[index].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
       });
-      dispatch(InquiryActions.setQuestion(optionsOfQuestion));
+      dispatch(InquiryActions.editInquiry(optionsOfQuestion));
     }
   };
 

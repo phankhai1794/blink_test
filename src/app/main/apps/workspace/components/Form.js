@@ -127,19 +127,22 @@ export default function Form(props) {
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs, popoverfooter } =
     props;
 
-  const [index, question, inquiries, metadata, currentField, originalInquiry] = useSelector(({ workspace }) => [
+  const [index, question, inquiries, metadata, currentField, originalInquiry, listInqMinimize, listMinimize] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.question,
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.originalInquiry,
+    workspace.inquiryReducer.listInqMinimize,
+    workspace.inquiryReducer.listMinimize
   ]);
 
-  const [openAllInquiry, showSaveInquiry, showAddInquiry] = useSelector(({ workspace }) => [
+  const [openAllInquiry, showSaveInquiry, showAddInquiry, openInquiry] = useSelector(({ workspace }) => [
     workspace.formReducer.openAllInquiry,
     workspace.formReducer.showSaveInquiry,
     workspace.formReducer.showAddInquiry,
+    workspace.formReducer.openInquiry,
   ]);
 
   const [openFab, setOpenFab] = useState(false);
@@ -165,6 +168,17 @@ export default function Form(props) {
     setIdBtn(currentField)
     setOpenFab(true);
     toggleForm(false);
+    dispatch(InquiryActions.setOneInq({}));
+    dispatch(FormActions.toggleSaveInquiry(false));
+    // sort
+    const currentInq = listMinimize.find((q) => q.field === field);
+    if (currentInq?.id && !listInqMinimize.includes(currentInq.id)) {
+      const minimizeOptions = [...listMinimize].filter(item => item.id !== currentInq.id);
+      minimizeOptions.unshift(currentInq);
+      dispatch(InquiryActions.setListMinimize(minimizeOptions));
+      listInqMinimize.push(currentInq.id);
+      dispatch(InquiryActions.setListInqMinimize(listInqMinimize));
+    }
   };
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
@@ -194,6 +208,13 @@ export default function Form(props) {
     dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))))
     dispatch(FormActions.toggleSaveInquiry(false))
     if (tabs) props.tabChange(0);
+    dispatch(InquiryActions.setOneInq({}))
+    //
+    const currentInq = listMinimize.find((q) => q.field === field);
+    if (currentInq?.id && listInqMinimize.includes(currentInq.id)) {
+      const filterInq = listInqMinimize.filter(id => id !== currentInq.id);
+      dispatch(InquiryActions.setListInqMinimize(filterInq));
+    }
   };
   const [value, setValue] = React.useState(0);
   const handleChange = (_, newValue) => {
@@ -202,8 +223,19 @@ export default function Form(props) {
   };
   const openMinimize = () => {
     dispatch(InquiryActions.setField(idBtn));
-    toggleForm(true);
+    const currentInq = listMinimize.find((q) => q.field === field);
+    if (currentInq) {
+      dispatch(InquiryActions.setOneInq(currentInq));
+      toggleForm(true)
+      if (field === 'INQUIRY_LIST') {
+        dispatch(FormActions.toggleSaveInquiry(true))
+      }
+    }
   };
+
+  const handleSetOpenFab = (status) => {
+    setOpenFab(status)
+  }
 
   return (
     <div>
@@ -271,7 +303,7 @@ export default function Form(props) {
                   <PopoverFooter title={field} />
                 ) : (
                   <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>
-                    <PopoverFooterAdmin />
+                    <PopoverFooterAdmin handleToggleFab={handleSetOpenFab}/>
                   </PermissionProvider>
                 )}
               </div>
