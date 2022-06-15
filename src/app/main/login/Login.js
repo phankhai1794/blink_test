@@ -1,5 +1,5 @@
 import { FuseAnimate } from '@fuse';
-import { Card, CardContent, Tab, Tabs, Typography } from '@material-ui/core';
+import { Card, CardContent, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as Actions from 'app/store/actions';
 import { login } from 'app/services/authService';
@@ -11,7 +11,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import JWTLoginTab from './tabs/JWTLoginTab';
 import ForgotPasswordTab from './tabs/ForgotPasswordTab';
 
-// import { Link } from 'react-router-dom';
 const useStyles = makeStyles((theme) => ({
   root: {
     background: 'url("assets/images/backgrounds/slider-sea.jpg")',
@@ -25,24 +24,19 @@ function Login(props) {
   const dispatch = useDispatch();
   const classes = useStyles();
   const user = useSelector(({ user }) => user);
-  const [selectedTab, setSelectedTab] = useState(0);
   const [isLoginTabViewed, setIsLoginTabViewed] = useState(true);
 
-  function handleTabChange(event, value) {
-    setSelectedTab(value);
-  }
-
   function handleLogin(model) {
-    const { username, password } = model;
-    login({ username, password })
+    login(model)
       .then((res) => {
         if (res) {
           const { userData, token, message } = res;
-          const { role, userName, avatar, permissions } = userData;
+          const { role, userName, avatar, email, permissions } = userData;
           const userInfo = {
             displayName: userName,
             photoURL: avatar,
             role,
+            email,
             permissions
           };
           const payload = { ...user, ...userInfo };
@@ -51,7 +45,7 @@ function Login(props) {
           localStorage.setItem('USER', JSON.stringify(userInfo));
 
           dispatch(Actions.setUser(payload));
-          dispatch(Actions.showMessage({message: message, variant: 'success'}));
+          dispatch(Actions.showMessage({ message: message, variant: 'success' }));
 
           const { cachePath, cacheSearch } = location;
           history.push(cachePath ? `${cachePath + cacheSearch}` : '/');
@@ -74,8 +68,7 @@ function Login(props) {
 
   return (
     <div
-      className={clsx(classes.root, 'flex flex-col flex-1 flex-shrink-0 p-24 md:flex-row md:p-0')}
-    >
+      className={clsx(classes.root, 'flex flex-col flex-1 flex-shrink-0 p-24 md:flex-row md:p-0')}>
       <div className="flex flex-col flex-grow-0 items-center text-white p-16 text-center md:p-128 md:items-start md:flex-shrink-0 md:flex-1 md:text-left">
         <FuseAnimate animation="transition.slideUpIn" delay={300}>
           <Typography variant="h3" color="inherit" className="font-light">
@@ -90,92 +83,45 @@ function Login(props) {
           </Typography>
         </FuseAnimate>
       </div>
-      {
-        isLoginTabViewed ? (
-          <FuseAnimate animation={{ translateX: [0, '100%'] }}>
-            <Card className="w-full max-w-400 mx-auto m-16 md:m-0" square>
-              <CardContent className="flex flex-col items-center justify-center p-32 md:p-48 md:pt-60 ">
-                <Typography variant="h6" className="text-center md:w-full mb-24">
-                  LOGIN TO YOUR ACCOUNT
-                </Typography>
-
-                <Tabs
-                  value={selectedTab}
-                  onChange={handleTabChange}
-                  variant="fullWidth"
-                  className="mb-32"
-                >
-                  <Tab
-                    icon={
-                      <img
-                        className="h-40 p-4 rounded-12"
-                        src="assets/images/logos/one_ocean_network-logo.png"
-                        alt="logo"
-                      />
-                    }
-                    className="min-w-0"
-                  />
-                </Tabs>
-
-                {selectedTab === 0 && <JWTLoginTab onLogged={handleLogin} />}
-
+      <FuseAnimate animation={{ translateX: [0, '100%'] }}>
+        <Card className="w-full max-w-400 mx-auto m-16 md:m-0" square>
+          <CardContent className="flex flex-col items-center justify-center p-32 md:p-48 md:pt-60 ">
+            <Typography variant="h6" className="text-center md:w-full mb-24">
+              {isLoginTabViewed ? 'LOGIN TO YOUR ACCOUNT' : 'FORGOT PASSWORD'}
+            </Typography>
+            <img
+              className="h-40 p-4 mb-32"
+              src="assets/images/logos/one_ocean_network-logo.png"
+              alt="logo"
+            />
+            {isLoginTabViewed ? (
+              <>
+                <JWTLoginTab onLogged={handleLogin} />
                 <div className="flex flex-col items-center justify-center pt-32">
-                  <a className="font-medium text-primary" onClick={() => setIsLoginTabViewed(false)} >
+                  <a
+                    className="font-medium text-primary"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setIsLoginTabViewed(false)}>
                     Forgot passwords
                   </a>
-                  {/* <span className="font-medium">{`Don't have an account?`}</span>
-                  <Link className="font-medium" to="/register">
-                    Create an account
-                  </Link>
-                  <Link className="font-medium mt-8" to="/">
-                    Back to Dashboard
-                  </Link> */}
                 </div>
-              </CardContent>
-            </Card>
-          </FuseAnimate>
-        ) : (
-          <FuseAnimate animation={{ translateX: [0, '100%'] }}>
-            <Card className="w-full max-w-400 mx-auto m-16 md:m-0" square>
-              <CardContent className="flex flex-col items-center justify-center p-32 md:p-48 md:pt-60 ">
-                <Typography variant="h6" className="text-center md:w-full mb-24">
-                  Forgot password
-                </Typography>
-
-                <Tabs
-                  value={selectedTab}
-                  onChange={handleTabChange}
-                  variant="fullWidth"
-                  className="mb-32"
-                >
-                  <Tab
-                    icon={
-                      <img
-                        className="h-40 p-4 rounded-12"
-                        src="assets/images/logos/one_ocean_network-logo.png"
-                        alt="logo"
-                      />
-                    }
-                    className="min-w-0"
-                  />
-                </Tabs>
-
-                {selectedTab === 0 && <ForgotPasswordTab onLogged={handleLogin} loginTabView={setIsLoginTabViewed} />}
-
+              </>
+            ) : (
+              <>
+                <ForgotPasswordTab loginTabView={setIsLoginTabViewed} />
                 <div className="flex flex-col items-center justify-center pt-32">
-                  {/* <span className="font-medium">{`Don't have an account?`}</span>
-                  <Link className="font-medium" to="/register">
-                    Create an account
-                  </Link> */}
-                  <a className="font-medium text-primary" onClick={() => setIsLoginTabViewed(true)} >
+                  <a
+                    className="font-medium text-primary"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setIsLoginTabViewed(true)}>
                     Back to login
                   </a>
                 </div>
-              </CardContent>
-            </Card>
-          </FuseAnimate>
-        )
-      }
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </FuseAnimate>
     </div>
   );
 }

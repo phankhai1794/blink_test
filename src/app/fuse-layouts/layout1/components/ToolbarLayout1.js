@@ -92,6 +92,7 @@ function ToolbarLayout1(props) {
           role: userInfo.role,
           displayName: userInfo.displayName,
           photoURL: userInfo.photoURL,
+          email: userInfo.email,
           permissions: userInfo.permissions
         };
         dispatch(AppActions.setUser(payload));
