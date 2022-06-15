@@ -11,7 +11,7 @@ const initialState = {
   reload: false,
   openTrans: false,
   openEmail: false,
-
+  openInqReview: false
 }
 
 const formReducer = function (state = initialState, action) {
@@ -45,6 +45,9 @@ const formReducer = function (state = initialState, action) {
     }
     case Actions.OPEN_EMAIL: {
       return { ...state, openEmail: action.state };
+    }
+    case Actions.OPEN_INQUIRY_REVIEW: {
+      return { ...state, openInqReview: action.state };
     }
     default: {
       return state;

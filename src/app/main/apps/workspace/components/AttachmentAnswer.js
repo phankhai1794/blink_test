@@ -12,6 +12,7 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import {validateExtensionFile} from "@shared";
 
 import * as FormActions from "../store/actions/form";
+import * as InquiryActions from "../store/actions/inquiry";
 
 
 // style
@@ -124,8 +125,8 @@ const AttachmentAnswer = (props) => {
           });
           optionsOfQuestion[index].answerObj[0].mediaFiles = answerObjMediaFiles;
           dispatch(saveQuestion(optionsOfQuestion));
-          dispatch(FormActions.toggleInquiry(false));
-          dispatch(FormActions.toggleAllInquiry(false));
+          dispatch(FormActions.toggleReload());
+          dispatch(InquiryActions.setOneInq({}));
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));

@@ -41,8 +41,6 @@ const SendInquiryForm = (props) => {
   }
 
   const dispatch = useDispatch();
-  const [opendPreview, setOpendPreview] = useState(null);
-  const [tabSelected, setTabSelected] = useState(0);
 
   useEffect(() => {
     if (success) {
@@ -77,7 +75,7 @@ const SendInquiryForm = (props) => {
   };
 
   const opendPreviewForm = (event) => {
-    setOpendPreview(true);
+    dispatch(FormActions.toggleOpenInquiryReview(true));
   };
 
   const sendMailClick = (event) => {
@@ -87,10 +85,6 @@ const SendInquiryForm = (props) => {
     } else {
       alert('Please fill to Customer or Onshore fields');
     }
-  };
-
-  const closePreviewForm = () => {
-    setOpendPreview(null);
   };
 
   const handleFieldChange = (key, tags) => {
@@ -123,6 +117,7 @@ const SendInquiryForm = (props) => {
         open={openEmail}
         toggleForm={(status) => dispatch(FormActions.toggleOpenEmail(status))}
         openFab={false}
+        field={props.field}
         customActions={
           <ActionUI openPreviewClick={opendPreviewForm} sendMailClick={sendMailClick}></ActionUI>
         }
@@ -203,34 +198,46 @@ const SendInquiryForm = (props) => {
           </div>
           <Divider />
         </>
-        {opendPreview ? (
-          <Form
-            title={'Sending inquiry preview'}
-            tabs={['Customer', 'Onshore']}
-            open={opendPreview}
-            toggleForm={(status) => {
-              closePreviewForm();
-            }}
-            tabChange={(newValue) => {
-              setTabSelected(newValue);
-            }}
-            openFab={false}
-            customActions={<div></div>}>
-            <>
-              <div style={{ height: '800px' }}>
-                <AllInquiry
-                  user="workspace"
-                  receiver={tabSelected == 0 ? 'customer' : 'onshore'}
-                  collapse={true}
-                />
-              </div>
-            </>
-          </Form>
-        ) : null}
       </Form>
     </>
   );
 };
+
+const InquiryReview = (props) => {
+  const [tabSelected, setTabSelected] = useState(0);
+  const [openInqReview] = useSelector(({ workspace }) => [
+    workspace.formReducer.openInqReview
+  ]);
+  const dispatch = useDispatch();
+
+  return (
+    <>
+      <Form
+        title={'Sending inquiry preview'}
+        tabs={['Customer', 'Onshore']}
+        open={openInqReview}
+        toggleForm={(status) => dispatch(FormActions.toggleOpenInquiryReview(status))}
+        tabChange={(newValue) => {
+          setTabSelected(newValue);
+        }}
+        field={props.field}
+        openFab={false}
+        FabTitle="Inquiry Review"
+        customActions={<div></div>}>
+        <>
+          <div style={{ height: '800px' }}>
+            <AllInquiry
+              user="workspace"
+              receiver={tabSelected == 0 ? 'customer' : 'onshore'}
+              collapse={true}
+            />
+          </div>
+        </>
+      </Form>
+    </>
+  )
+}
+
 
 const useStyles = makeStyles((theme) => ({
   buttonProgress: {
@@ -286,4 +293,4 @@ const ActionUI = (props) => {
   );
 };
 
-export default SendInquiryForm;
+export {SendInquiryForm, InquiryReview};

@@ -10,6 +10,7 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as FormActions from "../store/actions/form";
 
 import UserInfo from './UserInfo';
+import * as InquiryActions from "../store/actions/inquiry";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -57,6 +58,7 @@ const ParagraphAnswer = (props) => {
           const { message, answerObj } = res;
           objAns.push(answerObj);
           saveQuestion(optionsOfQuestion);
+          dispatch(InquiryActions.setOneInq({}));
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }
       });
@@ -67,6 +69,7 @@ const ParagraphAnswer = (props) => {
           const { message } = res;
           objAns[0].content = body.content;
           saveQuestion(optionsOfQuestion);
+          dispatch(InquiryActions.setOneInq({}));
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }
       });

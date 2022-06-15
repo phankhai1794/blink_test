@@ -15,6 +15,9 @@ export const SET_REPLY = 'SET_REPLY';
 export const SET_EDIT = 'SET_EDIT';
 export const SET_EDIT_INQUIRY = 'SET_EDIT_INQUIRY';
 export const SET_UPLOAD_FILE = 'SET_UPLOAD_FILE';
+export const SET_ONE_INQUIRY = 'SET_ONE_INQUIRY';
+export const SET_LIST_MINIMIZE_INQUIRY = 'SET_LIST_MINIMIZE_INQUIRY';
+export const SET_LIST_MINIMIZE = 'SET_LIST_MINIMIZE';
 
 export function saveInquiry() {
   return {
@@ -121,6 +124,27 @@ export function setEdit(state) {
 export function setEditInq(state) {
   return {
     type: SET_EDIT_INQUIRY,
+    state: state
+  };
+}
+
+export function setOneInq(state) {
+  return {
+    type: SET_ONE_INQUIRY,
+    state: state
+  };
+}
+
+export function setListInqMinimize(state) {
+  return {
+    type: SET_LIST_MINIMIZE_INQUIRY,
+    state: state
+  };
+}
+
+export function setListMinimize(state) {
+  return {
+    type: SET_LIST_MINIMIZE,
     state: state
   };
 }

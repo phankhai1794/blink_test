@@ -108,6 +108,9 @@ const BLField = (props) => {
   const metadata = useSelector(({ workspace }) =>
     workspace.inquiryReducer.metadata
   );
+  const inquiries = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.inquiries
+  );
 
   const openAddPopover = (e) => {
     if (questionIsEmpty) {
@@ -135,6 +138,9 @@ const BLField = (props) => {
 
   const onClick = (e) => {
     if (!questionIsEmpty) {
+      const currentInq = inquiries.find((q) => q.field === id);
+      dispatch(InquiryActions.setOneInq(currentInq));
+    } else {
       dispatch(FormActions.toggleInquiry(true));
     }
     dispatch(InquiryActions.setField(e.currentTarget.id));
@@ -146,7 +152,7 @@ const BLField = (props) => {
       dispatch(FormActions.toggleCreateInquiry(true));
     }
     dispatch(InquiryActions.setField(e.currentTarget.id));
-    setAnchorEl(e.currentTarget.id)
+    setAnchorEl(e.currentTarget.id);
   };
 
   const checkQuestionIsEmpty = () => {

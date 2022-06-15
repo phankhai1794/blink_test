@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1)
   }
 }));
-const PopoverFooter = () => {
+const PopoverFooter = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const inquiries = useSelector(({ workspace }) =>
@@ -85,7 +85,9 @@ const PopoverFooter = () => {
       );
       dispatch(FormActions.toggleSaveInquiry(false))
       dispatch(FormActions.toggleReload());
+      dispatch(InquiryActions.setOneInq({}));
       dispatch(InquiryActions.setEditInq(null))
+      props.handleToggleFab(false)
     } catch (error) {
       dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
     }

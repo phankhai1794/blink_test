@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = ({ title }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [index, currentField, question, fields, myBL, displayCmt, valid] = useSelector(({ workspace }) => [
+  const [index, currentField, question, fields, myBL, displayCmt, valid, filesUpload, inquiries] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.question,
@@ -36,6 +36,8 @@ const PopoverFooter = ({ title }) => {
     workspace.inquiryReducer.myBL,
     workspace.inquiryReducer.displayCmt,
     workspace.inquiryReducer.validation,
+    workspace.inquiryReducer.filesUpload,
+    workspace.inquiryReducer.inquiries,
   ]);
   const onSave = () => {
     const check = question.filter((q) => !q.receiver.length)
@@ -109,21 +111,23 @@ const PopoverFooter = ({ title }) => {
     dispatch(InquiryActions.setReply(true));
   };
   const nextQuestion = () => {
-    var temp = fields.indexOf(title);
+    let temp = inquiries.findIndex((inq) => inq.field === title);
     if (temp !== fields.length - 1) {
       temp += 1;
     } else {
       temp = 0;
     }
+    dispatch(InquiryActions.setOneInq(inquiries[temp]));
     dispatch(InquiryActions.setField(fields[temp]));
   };
   const prevQuestion = () => {
-    var temp = fields.indexOf(title);
+    let temp = inquiries.findIndex((inq) => inq.field === title);
     if (temp !== 0) {
       temp -= 1;
     } else {
       temp = fields.length - 1;
     }
+    dispatch(InquiryActions.setOneInq(inquiries[temp]));
     dispatch(InquiryActions.setField(fields[temp]));
   };
   return (

@@ -3,6 +3,7 @@ import { getInquiryById, getMetadata } from 'app/services/inquiryService';
 import { createBL, getBlInfo } from 'app/services/myBLService';
 
 import { setMyBL, saveField, editInquiry, setOriginalInquiry, saveMetadata } from './inquiry'
+import * as InquiryActions from "./inquiry";
 // export * from './mail.actions'
 
 export const initBL = (bkgNo) => async (dispatch) => {
@@ -27,6 +28,10 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
     dispatch(saveField(field_list));
     dispatch(editInquiry(res));
     dispatch(setOriginalInquiry(JSON.parse(JSON.stringify(res))));
+    //
+    const optionTabs = [{id: 'inquiryList', field: 'INQUIRY_LIST'}, {id: 'attachmentList', field: 'ATTACHMENT_LIST'}, {id: 'email', field: 'EMAIL'}, {id: 'inquiryForm', field: 'INQUIRY_FORM'}, {id: 'inquiryReview', field: 'INQUIRY_REVIEW'}]
+    const listMinimize = [...res, ...optionTabs];
+    dispatch(InquiryActions.setListMinimize(listMinimize));
   }).catch((err) => console.error(err));
 };
 
