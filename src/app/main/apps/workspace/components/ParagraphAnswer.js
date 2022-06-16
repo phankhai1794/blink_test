@@ -8,9 +8,9 @@ import * as AppAction from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from "../store/actions/form";
+import * as InquiryActions from "../store/actions/inquiry";
 
 import UserInfo from './UserInfo';
-import * as InquiryActions from "../store/actions/inquiry";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,15 +32,15 @@ const ParagraphAnswer = (props) => {
   const [paragraphText, setParagraphText] = useState(question.answerObj[0]?.content || '');
   const dispatch = useDispatch();
   const classes = useStyles();
-  const isPermission = useRef(false);
+  const [isPermission, setPermission] = useState(false);
 
   useEffect(() => {
     if (questions) {
       if ((!questions[index]?.answerObj[0]?.id && allowCreateParagraphAnswer) ||
           (questions[index]?.answerObj[0]?.id && allowUpdateParagraphAnswer)) {
-        isPermission.current = true;
+        setPermission(true)
       } else {
-        isPermission.current = false;
+        setPermission(false)
       }
     }
   }, [questions]);
@@ -81,14 +81,14 @@ const ParagraphAnswer = (props) => {
     <div>
       <div className="flex">
         <TextField
-          placeholder={isPermission.current ? 'Customer Input' : ''}
+          placeholder={isPermission ? 'Customer Input' : ''}
           classes={{ root: classes.root }}
-          disabled={!isPermission.current}
+          disabled={!isPermission}
           InputProps={{
             style: {
               fontSize: '1.7rem'
             },
-            endAdornment: isPermission.current && (
+            endAdornment: isPermission && (
               <InputAdornment position="end">
                 <Button
                   aria-label="Add"

@@ -170,10 +170,10 @@ const BLWorkspace = (props) => {
     default:
       return {status: inquiry.id === currentInq.id,
         toggleForm: () => {},
-        fabTitle: getField.label,
-        title: getField.value ? getKeyByValue(metadata['field'], getField.value) : '',
+        fabTitle: getField?.label,
+        title: getField?.value ? getKeyByValue(metadata['field'], getField?.value) : '',
         hasAddButton: false,
-        field: getField.value,
+        field: getField?.value,
         child: <Inquiry user={props.user} />}
     }
   }
