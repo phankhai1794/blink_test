@@ -49,7 +49,6 @@ const AttachmentAnswer = (props) => {
   const { question, index, questions, saveQuestion, isShowBtn, isPermissionAttach } = props;
   const [showBtn, setShowBtn] = useState(false);
   const dispatch = useDispatch();
-  const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
 
   const uploadImageAttach = (files) => {
     const optionsOfQuestion = [...questions];
@@ -79,7 +78,9 @@ const AttachmentAnswer = (props) => {
     }
   }, [question]);
   const onDrop = (acceptedFiles) => {
-    uploadImageAttach(acceptedFiles);
+    if (isPermissionAttach) {
+      uploadImageAttach(acceptedFiles);
+    }
   }
   const { isDragActive, isDragAccept, isDragReject, getRootProps, getInputProps, open } =
     useDropzone({

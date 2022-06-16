@@ -5,7 +5,6 @@ import {
   TextField,
   Grid,
   IconButton,
-  Fab,
   Divider,
   FormControl,
   FormHelperText
@@ -22,7 +21,7 @@ import * as InquiryActions from '../store/actions/inquiry';
 import CustomSelect from './CustomSelect';
 import FileAttach from './FileAttach';
 import ImageAttach from './ImageAttach';
-import Dropzone from './Dropzone';
+import AttachmentAnswer from "./AttachmentAnswer";
 
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
@@ -174,14 +173,6 @@ const ParagraphAnswer = () => {
         disabled
         InputProps={{ classes_disabled }}
       />
-    </div>
-  );
-};
-
-const AttachmentAnswer = () => {
-  return (
-    <div style={{ marginTop: '1rem' }}>
-      <Dropzone disabled={true} />
     </div>
   );
 };
@@ -375,7 +366,11 @@ const InquiryEditor = (props) => {
         </div>
       )}
       {question.ansType === metadata.ans_type.attachment && (
-        <AttachmentAnswer style={{ marginTop: '1rem' }} />
+        <AttachmentAnswer
+          style={{ marginTop: '1rem' }}
+          question={question}
+          isPermissionAttach={allowCreateAttachmentAnswer}
+        />
       )}
       <Divider className="mt-12" />
 

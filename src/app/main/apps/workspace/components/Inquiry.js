@@ -1,7 +1,7 @@
 import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
 import { getFile } from 'app/services/fileService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { displayTime } from '@shared';
+import {displayTime, validateExtensionFile} from '@shared';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
@@ -27,6 +27,7 @@ import {
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/styles';
 import { withStyles } from '@material-ui/core/styles';
+import * as AppAction from 'app/store/actions';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -38,6 +39,7 @@ import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import UserInfo from './UserInfo';
+import AttachFile from "./AttachFile";
 
 const StyledTextField = withStyles({
   root: {
@@ -293,6 +295,22 @@ const Inquiry = (props) => {
     dispatch(InquiryActions.editInquiry(optionsOfQuestion));
   };
 
+  const handleUploadImageAttach = (files, index) => {
+    const optionsOfQuestion = [...inquiries];
+    const inValidFile = files.find(elem => !validateExtensionFile(elem));
+    if (inValidFile) {
+      dispatch(AppAction.showMessage({message: 'Invalid file extension', variant: 'error'}));
+    } else {
+      files.forEach(src => {
+        const formData = new FormData();
+        formData.append('file', src);
+        formData.append('name', src.name);
+        optionsOfQuestion[indexes].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+      });
+      dispatch(InquiryActions.editInquiry(optionsOfQuestion));
+    }
+  }
+
   useEffect(() => {
     if (inquiry[0]?.mediaFile.length && !inquiry[0].mediaFile[0].src) {
       const optionsOfQuestion = [...inquiries];
@@ -350,6 +368,11 @@ const Inquiry = (props) => {
                         />
                       }
                       label="Customer"
+                    />
+                    <FormControlLabel
+                      control={
+                        <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
+                      }
                     />
                   </FormGroup>
                   {(!valid.receiver && !q.receiver.length) ? <FormHelperText>Pick at least one!</FormHelperText> : null}

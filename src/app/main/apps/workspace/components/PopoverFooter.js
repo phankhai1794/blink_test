@@ -56,7 +56,7 @@ const PopoverFooter = ({ title }) => {
     const mediaList = [];
     const filesUpload = [];
     question.forEach((q) => {
-      if (q.filesUpload.length > 0) {
+      if (q.filesUpload && q.filesUpload.length > 0) {
         q.filesUpload.forEach(files => {
           files.forEach((file) => {
             filesUpload.push(file)
