@@ -75,8 +75,8 @@ const InquiryForm = (props) => {
   const removeQuestion = (index) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion.splice(index, 1);
-    if (index > 0) {
-      dispatch(InquiryActions.setEdit(index - 1));
+    if (currentEdit > 0 && currentEdit >= index) {
+      dispatch(InquiryActions.setEdit(currentEdit - 1));
     }
     const options = [...removeOptions];
     options.splice(index, 1);
@@ -189,7 +189,7 @@ const InquiryForm = (props) => {
                   {question.ansType === metadata.ans_type.attachment && (
                     <AttachmentAnswer
                       question={question}
-                      // disabled={true}
+                    // disabled={true}
                     />
                   )}
                 </div>
