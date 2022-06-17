@@ -129,10 +129,41 @@ const AllInquiry = (props) => {
               fallback={
                 <Card style={{ padding: '1rem ', marginBottom: '24px' }}>
                   <div className="flex justify-between">
-                    <Typography color="primary" variant="h5">
+                    <Typography color="primary" variant="h5" style = {{wordBreak: "break-word"}}>
                       Inquiry {index + 1} - {getKeyByValue(metadata['field'], q.field)}
                     </Typography>
-                  </div>
+                    <div className="flex justify-end" style = {{ width:"350px"}}>
+                      <FormControl error={!valid.receiver && !q.receiver.length}>
+                        <FormGroup row >
+                          <FormControlLabel
+                            value="onshore"
+                            control={
+                              <Checkbox
+                                checked={q.receiver.includes('onshore')}
+                                onChange={(e) => handleReceiverChange(e, index)}
+                                color="primary"
+                              />
+                            }
+                            label="Onshore"
+                          />
+                          <FormControlLabel
+                            value="customer"
+                            control={
+                              <Checkbox
+                                checked={q.receiver.includes('customer')}
+                                onChange={(e) => handleReceiverChange(e, index)}
+                                color="primary"
+                              />
+                            }
+                            label="Customer"
+                          />
+                        </FormGroup>
+                        {(!valid.receiver && !q.receiver.length) ?
+                          <FormHelperText>Pick at least one!</FormHelperText> : null
+                        }
+                      </FormControl>
+                    </div>
+                  </div> 
                   <Typography variant="h5">{q.name}</Typography>
                   <Typography variant="h5" style={{ wordBreak: 'break-word' }}>{q.content}</Typography>
                   <div style={{ display: 'block', margin: '1rem 0rem' }}>
