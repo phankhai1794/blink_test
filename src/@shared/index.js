@@ -55,3 +55,5 @@ export const validateExtensionFile = (file) => {
   const fileExt = file.name.split('.').pop().toLowerCase();
   return fileExt.match(/jpe|jpg|png|pdf|csv|xls|sheet|ppt|doc|txt|gif/g);
 }
+
+export const NUMBER_INQ_BOTTOM = 6;
