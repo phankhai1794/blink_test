@@ -1,5 +1,6 @@
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import React, { useState } from 'react';
+import { NUMBER_INQ_BOTTOM } from '@shared';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
@@ -135,7 +136,7 @@ export default function Form(props) {
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.originalInquiry,
     workspace.inquiryReducer.listInqMinimize,
-    workspace.inquiryReducer.listMinimize
+    workspace.inquiryReducer.listMinimize,
   ]);
 
   const [openAllInquiry, showSaveInquiry, showAddInquiry, openInquiry] = useSelector(({ workspace }) => [
@@ -150,6 +151,16 @@ export default function Form(props) {
   const classes = useStyles({ isFullScreen });
   const classesHover = useStyles();
   const [idBtn, setIdBtn] = useState('');
+
+  useEffect(() => {
+    const temp = listMinimize.find(e => e.field === field);
+    for (let index = 0; index < listInqMinimize.length; index++) {
+      if ((index < NUMBER_INQ_BOTTOM) && (listInqMinimize[index] === temp.id)) {
+        setOpenFab(true);
+        break;
+      }
+    }
+  }, [listInqMinimize])
 
   const checkValidate = (question) => {
     if (!question.inqType || !question.field || !question.receiver.length) {
@@ -179,6 +190,9 @@ export default function Form(props) {
       listInqMinimize.push(currentInq.id);
       dispatch(InquiryActions.setListInqMinimize(listInqMinimize));
     }
+    if (listInqMinimize.findIndex(inq => inq === currentInq.id) >= NUMBER_INQ_BOTTOM) {
+      setOpenFab(false);
+    }
   };
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
@@ -195,6 +209,12 @@ export default function Form(props) {
       dispatch(InquiryActions.setEdit(question.length));
     }
   };
+
+  const sortListClose = (list, field) => {
+    const index = list.findIndex(inp => inp.field === field)
+    const tempInq = list.splice(index, 1)[0];
+    list.splice(list.length, 0, tempInq);
+  };
   const handleClose = () => {
     toggleForm(false);
     setOpenFab(false);
@@ -203,6 +223,7 @@ export default function Form(props) {
         dispatch(FormActions.toggleAllInquiry());
       }, 400);
     }
+    sortListClose(listMinimize, field);
     dispatch(InquiryActions.setReply(false));
     dispatch(InquiryActions.setEditInq(null))
     dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))))
@@ -303,7 +324,7 @@ export default function Form(props) {
                   <PopoverFooter title={field} />
                 ) : (
                   <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>
-                    <PopoverFooterAdmin handleToggleFab={handleSetOpenFab}/>
+                    <PopoverFooterAdmin handleToggleFab={handleSetOpenFab} />
                   </PermissionProvider>
                 )}
               </div>

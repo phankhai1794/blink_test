@@ -1,11 +1,13 @@
-import { getKeyByValue } from '@shared';
+import { getKeyByValue, NUMBER_INQ_BOTTOM } from '@shared';
 import * as AppActions from 'app/store/actions';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import _ from 'lodash';
-import { Grid, Divider } from '@material-ui/core';
+import { Grid, Divider, Chip } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -19,7 +21,8 @@ import Label from './FieldLabel';
 import BLField from './BLField';
 import InquiryForm from './InquiryForm';
 import AttachmentList from './AttachmentList';
-import {InquiryReview, SendInquiryForm} from "./SendInquiryForm";
+import { InquiryReview, SendInquiryForm } from "./SendInquiryForm";
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -51,6 +54,7 @@ const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [content, setContent] = useState({});
+  const [isExpand, setIsExpand] = useState(false);
   const currentField = useSelector(({ workspace }) =>
     workspace.inquiryReducer.currentField
   );
@@ -85,7 +89,11 @@ const BLWorkspace = (props) => {
     workspace.inquiryReducer.currentInq
   );
   const listMinimize = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.listMinimize
+    workspace.inquiryReducer.listMinimize,
+  );
+
+  const listInqMinimize = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.listInqMinimize
   );
 
   const getField = (field) => {
@@ -141,32 +149,50 @@ const BLWorkspace = (props) => {
       dispatch(FormActions.toggleReload());
     };
   }, []);
+
+  const expandRef = useRef();
+  useEffect(() => {
+    const handlerEvent = (event) => {
+      if (expandRef.current && !expandRef.current.contains(event.target)) {
+        setIsExpand(false)
+      }
+    };
+    document.addEventListener('mousedown', handlerEvent);
+    return () => document.removeEventListener('mousedown', handlerEvent)
+  }, []);
+
   const popupOpen = (inquiry, getField) => {
     switch (inquiry.field) {
     case 'INQUIRY_LIST':
-      return {status: openAllInquiry,
+      return {
+        status: openAllInquiry,
         toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
         fabTitle: 'Inquiry List',
         title: 'Inquiry List',
         hasAddButton: false,
         field: 'INQUIRY_LIST',
-        child: <AllInquiry user={props.user} />}
+        child: <AllInquiry user={props.user} />
+      }
     case 'ATTACHMENT_LIST':
-      return {status: openAttachment,
+      return {
+        status: openAttachment,
         toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
         fabTitle: 'Attachment',
         title: 'Attachment',
         hasAddButton: false,
         field: 'ATTACHMENT_LIST',
         popoverfooter: true,
-        child: <AttachmentList user={props.user} />}
+        child: <AttachmentList user={props.user} />
+      }
     case 'INQUIRY_FORM':
-      return {status: openInquiryForm,
+      return {
+        status: openInquiryForm,
         toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
         fabTitle: 'Inquiry Form',
         title: 'Inquiry Creation',
         field: 'INQUIRY_FORM',
-        child: <InquiryForm />}
+        child: <InquiryForm />
+      }
     default:
       return {status: inquiry.id === currentInq.id,
         toggleForm: () => {},
@@ -178,33 +204,104 @@ const BLWorkspace = (props) => {
     }
   }
 
+  const handleExpand = () => setIsExpand(!isExpand);
+
+  const getFabTitle = (inqId) => {
+    const listTitle = {
+      inquiryList: 'Inquiry List',
+      attachmentList: 'Attachment',
+      email: 'E-mail',
+      inquiryForm: 'Inquiry Form',
+      inquiryReview: 'Inquiry Review',
+    };
+    if (Object.keys(listTitle).includes(inqId)) {
+      return listTitle[inqId];
+    } else {
+      const fieldId = listMinimize.find(inq => inq.id === inqId).field;
+      const getField = metadata.field_options.find(field => fieldId === field.value);
+      return getField && getField.label;
+    }
+  };
+
+  const handleClose = (inqId) => {
+    const index = listInqMinimize.findIndex(inp => inp === inqId);
+    listInqMinimize.splice(index, 1);
+    dispatch(InquiryActions.setListInqMinimize(listInqMinimize));
+  };
+
+  const openMinimize = (inqId) => {
+    const toggleFormType = {
+      email: (status) => dispatch(FormActions.toggleOpenEmail(status)),
+      inquiryReview: (status) => dispatch(FormActions.toggleOpenInquiryReview(status)),
+    };
+    const currentInq = listMinimize.find((q) => q.id === inqId);
+    const getField = metadata.field_options.find(field => currentInq.field === field.value);
+    dispatch(InquiryActions.setField(currentInq.field));
+    const popupObj = (Object.keys(toggleFormType).includes(inqId)) ?
+      { toggleForm: toggleFormType[inqId] }
+      : popupOpen(currentInq, getField);
+    if (currentInq) {
+      dispatch(InquiryActions.setOneInq(currentInq));
+      popupObj.toggleForm(true)
+      if (currentInq.field === 'INQUIRY_LIST') {
+        dispatch(FormActions.toggleSaveInquiry(true))
+      }
+    }
+    setIsExpand(false)
+  };
+
   return (
     <div className={clsx("max-w-5xl", classes.root)}>
-      <div style={{ display: 'flex', position: 'fixed', right: '2rem', bottom: '1rem', zIndex: 999 }}>
-
-        {listMinimize.map((inquiry => {
-          const getField = metadata.field_options.find((field) => inquiry.field === field.value);
-          if (inquiry.field === 'EMAIL') {
-            return (<SendInquiryForm field={'EMAIL'} key={inquiry.id} />)
-          } else if (inquiry.field === 'INQUIRY_REVIEW') {
-            return (<InquiryReview field={'INQUIRY_REVIEW'} key={inquiry.id} />)
-          } else {
-            const popupObj = popupOpen(inquiry, getField);
-            return (
-              <Form
-                key={inquiry.id}
-                open={popupObj.status}
-                toggleForm={popupObj.toggleForm}
-                FabTitle={popupObj.fabTitle}
-                hasAddButton={popupObj.hasAddButton}
-                field={popupObj.field}
-                popoverfooter={popupObj.popoverfooter}
-                title={popupObj.title}>
-                {popupObj.child}
-              </Form>
-            )
-          }
-        }))}
+      <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
+        {isExpand &&
+          <div
+            ref={expandRef}
+            className='flex flex-col p-4 rounded-8 shadow'
+            style={{ marginBottom: '-0.5rem' }}>
+            {listInqMinimize.map((inq, index) => {
+              if (index >= NUMBER_INQ_BOTTOM)
+                return <Chip
+                  key={index}
+                  className='flex justify-between mt-4'
+                  label={getFabTitle(inq)}
+                  onClick={() => openMinimize(inq)}
+                  onDelete={() => handleClose(inq)}
+                  color='primary'
+                />
+            }
+            )}
+          </div>
+        }
+        <div style={{ display: 'flex', position: 'fixed', right: '2rem', bottom: '1rem', zIndex: 999 }}>
+          {listMinimize.map((inquiry => {
+            const getField = metadata.field_options.find((field) => inquiry.field === field.value);
+            if (inquiry.field === 'EMAIL') {
+              return (<SendInquiryForm field={'EMAIL'} key={inquiry.id} />)
+            } else if (inquiry.field === 'INQUIRY_REVIEW') {
+              return (<InquiryReview field={'INQUIRY_REVIEW'} key={inquiry.id} />)
+            } else {
+              const popupObj = popupOpen(inquiry, getField);
+              return (
+                <Form
+                  key={inquiry.id}
+                  open={popupObj.status}
+                  toggleForm={popupObj.toggleForm}
+                  FabTitle={popupObj.fabTitle}
+                  hasAddButton={popupObj.hasAddButton}
+                  field={popupObj.field}
+                  popoverfooter={popupObj.popoverfooter}
+                  title={popupObj.title}>
+                  {popupObj.child}
+                </Form>
+              )
+            }
+          }))}
+          {listInqMinimize.length > NUMBER_INQ_BOTTOM &&
+            <div className='flex items-center pl-1' onClick={handleExpand}>
+              <span><strong>{NUMBER_INQ_BOTTOM}</strong>/{listInqMinimize.length}</span>
+              {isExpand ? <ExpandMore /> : <ExpandLess />}
+            </div>}
+        </div>
       </div>
 
       <Grid container>
