@@ -26,8 +26,7 @@ import { InquiryReview, SendInquiryForm } from "./SendInquiryForm";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    paddingLeft: '150px',
-    paddingRight: '200px',
+    width: '1170px',
     margin: '0 auto',
   },
   leftPanel: {
