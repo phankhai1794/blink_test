@@ -1,13 +1,24 @@
 import React, { useEffect } from 'react';
-import { Button, Grid } from '@material-ui/core';
-import { makeStyles, ThemeProvider } from '@material-ui/styles';
-import ShareIcon from '@material-ui/icons/Share';
-import SendIcon from '@material-ui/icons/Send';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import HelpIcon from '@material-ui/icons/Help';
-import { FuseAnimate } from '@fuse';
+import _ from 'lodash';
+import { useDispatch, useSelector } from 'react-redux';
+import { Grid } from '@material-ui/core';
+import { makeStyles } from '@material-ui/styles';
+import * as AppActions from 'app/store/actions';
+
+import * as Actions from './store/actions';
+import Textarea from './components/Textarea';
 
 const useStyles = makeStyles((theme) => ({
+  wrapper: {
+    background: '#515E6A'
+  },
+  root: {
+    fontFamily: 'Courier New',
+    width: '1170px',
+    background: 'white',
+    margin: '20px auto',
+    padding: 50
+  },
   disabledText: {
     // color: theme.palette.secondary.contrastText,
     color: 'blue',
@@ -52,9 +63,6 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: 'green',
     color: theme.palette.primary.contrastText
   },
-  font: {
-    fontFamily: 'Courier New'
-  },
   hasComment: {
     float: 'right',
     outline: '1px solid red',
@@ -65,198 +73,129 @@ const useStyles = makeStyles((theme) => ({
 }));
 const DraftPage = (props) => {
   const { status } = props;
-
   const classes = useStyles(props);
+  const dispatch = useDispatch();
+  const [metadata, content] = useSelector(({ draftBL }) => [draftBL.metadata, draftBL.content]);
+
+  const getField = (field) => {
+    return metadata.field ? metadata.field[field] : '';
+  };
+
+  const getValueField = (field) => {
+    return content[getField(field)] || '';
+  };
+
+  useEffect(() => {
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+    dispatch(Actions.loadMetadata());
+    dispatch(Actions.loadContent());
+  }, []);
+
   return (
-    <div className={classes.font}>
-      <div className=" items-center justify-between pr-8 sm:px-12 my-4 ">
-        {/* <ThemeProvider theme={mainTheme}>
-                            </ThemeProvider> */}
-        <FuseAnimate animation="transition.slideUpIn" delay={350}>
-          <div className="flex">
-            <>
-              {status === 'amended' ? (
-                <>
-                  <HelpIcon fontSize="large" className="mx-4" />
-                  <span className="sm:mt-12">Show Inquiry</span>
-                </>
-              ) : status === 'request' ? (
-                <>
-                  <HelpIcon fontSize="large" className="mx-4" />
-                  <span className="sm:mt-12">Add Inquiry</span>
-                </>
-              ) : (
-                <></>
-              )}
-            </>
-            <div className="flex ml-auto">
-              {status === 'inquiry' ? (
-                <>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    // onClick={handleCreateBooking}
-                    className="mx-4"
-                  >
-                    <ShareIcon className="mx-4" />
-                    Share
-                  </Button>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    className="mx-4"
-                    // onClick={handleCreateBooking}
-                  >
-                    <SendIcon className="mx-4" />
-                    Send & Confirm
-                  </Button>
-                </>
-              ) : status === 'confirm' ? (
-                <Button
-                  color="primary"
-                  variant="contained"
-                  // onClick={handleCreateBooking}
-                  className="mx-4"
-                >
-                  <ShareIcon className="mx-4" />
-                  Update to Opus
-                </Button>
-              ) : status === 'amended' ? (
-                <>
-                  <div>
-                    Attachment: <br></br>{' '}
-                    <a href="https://drive.google.com/file/d/1gS-CJ0nu1i4j0uVY7azbQ1y8OoicaZ8j/view">
-                      <img src="http://wwwimages.adobe.com/content/dam/acom/en/legal/images/badges/Adobe_PDF_file_icon_32x32.png"></img>
-                    </a>{' '}
-                  </div>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    // onClick={handleCreateBooking}
-                    className="mx-4"
-                  >
-                    <ShareIcon className="mx-4" />
-                    Upload to Opus
-                  </Button>{' '}
-                </>
-              ) : (
-                <>
-                  <div>
-                    Attachment: <br></br>{' '}
-                    <a href="https://drive.google.com/file/d/1gS-CJ0nu1i4j0uVY7azbQ1y8OoicaZ8j/view">
-                      <img src="http://wwwimages.adobe.com/content/dam/acom/en/legal/images/badges/Adobe_PDF_file_icon_32x32.png"></img>
-                    </a>{' '}
-                  </div>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    // onClick={handleCreateBooking}
-                    className="mx-4"
-                  >
-                    <ShareIcon className="mx-4" />
-                    Send Inquiry
-                  </Button>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    className="mx-4"
-                    // onClick={handleCreateBooking}
-                  >
-                    <SendIcon className="mx-4" />
-                    Upload to Opus
-                  </Button>
-                </>
-              )}
-              <Button color="primary" variant="contained" className="mx-4">
-                History version
-                <ArrowDropDownIcon className="mx-4" />
-              </Button>
-            </div>
+    <div className={classes.wrapper}>
+      <div className={classes.root}>
+        <div className="flex mt-2">
+          <div className="flex-auto">
+            <img
+              src="./assets/images/logos/one_ocean_network-logo.png"
+              className="object-scale-down h-40 w-50 pt-24"
+            />
           </div>
-        </FuseAnimate>
-      </div>
-      <div className="flex mt-2">
-        <div className="flex-auto">
-          <img
-            src="./assets/images/logos/one_ocean_network-logo.png"
-            className="object-scale-down h-40 w-50 pt-24"
-          />
+          <div className="flex-auto mr-2">
+            <p className={`text-2xl font-extrabold`}>COPY NON NEGOTIABLE</p>
+          </div>
+          <div className="flex-auto">
+            <p className={`text-2xl font-extrabold`}>SEA WAY BILL</p>
+          </div>
         </div>
-        <div className="flex-auto mr-2">
-          <p className={`text-2xl font-extrabold`}>COPY NON NEGOTIABLE</p>
-        </div>
-        <div className="flex-auto">
-          {/* <Typography>SEA WAY BILL</Typography> */}
-          <p className={`text-2xl font-extrabold`}>SEA WAY BILL</p>
-        </div>
-      </div>
-      <Grid container className={classes.grid}>
-        <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
-          <h1 className={classes.disabledText}>shipper/exporter </h1>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris
-          vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem.
-          Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum
-          tincidunt massa, ac vulputate tellus aliquam quis
-        </Grid>
-        <Grid item xs={6} className={classes.gridBottom}>
-          <Grid container className={classes.gridBottom}>
-            <Grid item xs={6} className={`${classes.gridLeft}`}>
-              <h1 className={classes.disabledText}>Booking no.</h1>
-            </Grid>
-            <Grid item xs={6}>
-              <h1 className={classes.disabledText}>sea waybill no.</h1>
-            </Grid>
+        <Grid container className={classes.grid}>
+          <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
+            <h1 className={classes.disabledText}>shipper/exporter </h1>
+            <Textarea
+              id={getField('SHIPPER/EXPORTER')}
+              rows={5}
+              value={`${getValueField('SHIPPER/EXPORTER')}`}
+              readOnly={true}
+            />
           </Grid>
-          <Grid>
-            <h1 className={classes.disabledText}>
-              {`export references(for the merchant's and/or Carrier's reference only. See back clause
-              8.(4.))`}
-            </h1>
-            <Grid sx={{ height: '50px' }}>
-              export references Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac
-              consectetur nib
+          <Grid item xs={6} className={classes.gridBottom}>
+            <Grid container className={classes.gridBottom}>
+              <Grid item xs={6} className={`${classes.gridLeft}`}>
+                <h1 className={classes.disabledText}>Booking no.</h1>
+              </Grid>
+              <Grid item xs={6}>
+                <h1 className={classes.disabledText}>sea waybill no.</h1>
+              </Grid>
             </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom} `}>
-          <h1 className={classes.disabledText}>consignee</h1>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris
-          vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem.
-          Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum
-          tincidunt massa, ac vulputate tellus aliquam quis
-        </Grid>
-        <Grid item xs={6} className={`${classes.gridBottom}`}>
-          <h1 className={classes.disabledText}>Forwarding agent-references FMC NO.</h1>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh. Mauris
-          vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit lorem.
-          Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse vestibulum
-          tincidunt massa, ac vulputate tellus aliquam quis
-        </Grid>
-        <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
-          <Grid container>
-            <Grid item xs={12} className={`${classes.gridBottom}`}>
+            <Grid>
               <h1 className={classes.disabledText}>
-                Notify party (It is agreed that no responsibility shall be attached to the Carrier
-                or its Agents for failure to notify)
+                {`export references(for the merchant's and/or Carrier's reference only. See back clause 8.(4.))`}
               </h1>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac consectetur nibh.
-              Mauris vel ultrices est. Duis eget tincidunt ipsum. Sed ut maximus felis, quis blandit
-              lorem. Nunc tortor leo, vestibulum a nisl id, dignissim luctus turpis. Suspendisse
-              vestibulum tincidunt massa, ac vulputate tellus aliquam quis
-            </Grid>
-            <Grid item xs={6} className={`${classes.gridLeft} `}>
-              <h1 className={classes.disabledText}>pre-carriage by</h1>
-              em ipsum dolor sit amet,
-            </Grid>
-            <Grid item xs={6} style={{ paddingTop: '0px', paddingBottom: '78px' }}>
-              <h1 className={classes.disabledText}>Place of Receipt</h1>
-              Singapore
+              <Grid sx={{ height: '50px' }}>
+                <Textarea
+                  id={getField('EXPORT REFERENCES')}
+                  rows={3}
+                  value={`${getValueField('EXPORT REFERENCES')}`}
+                  readOnly={true}
+                />
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid item xs={6} className={classes.gridBottom}>
-          <span className={classes.disabledText1}>
-            {`RECEIVED by the Carrier in apparent good order and condition (unless otherwise stated
+          <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom} `}>
+            <h1 className={classes.disabledText}>consignee</h1>
+            <Textarea
+              id={getField('CONSIGNEE')}
+              rows={5}
+              value={`${getValueField('CONSIGNEE')}`}
+              readOnly={true}
+            />
+          </Grid>
+          <Grid item xs={6} className={`${classes.gridBottom}`}>
+            <h1 className={classes.disabledText}>Forwarding agent-references FMC NO.</h1>
+            <Textarea
+              id={getField('FORWARDING AGENT-REFERENCES')}
+              rows={5}
+              value={`${getValueField('FORWARDING AGENT-REFERENCES')}`}
+              readOnly={true}
+            />
+          </Grid>
+          <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
+            <Grid container>
+              <Grid item xs={12} className={`${classes.gridBottom}`}>
+                <h1 className={classes.disabledText}>
+                  Notify party (It is agreed that no responsibility shall be attached to the Carrier
+                  or its Agents for failure to notify)
+                </h1>
+                <Textarea
+                  id={getField('NOTIFY PARTY')}
+                  rows={5}
+                  value={`${getValueField('NOTIFY PARTY')}`}
+                  readOnly={true}
+                />
+              </Grid>
+              <Grid item xs={6} className={`${classes.gridLeft} `}>
+                <h1 className={classes.disabledText}>pre-carriage by</h1>
+                <Textarea
+                  id={getField('PRE-CARRIAGE BY')}
+                  rows={1}
+                  value={`${getValueField('PRE-CARRIAGE BY')}`}
+                  readOnly={true}
+                />
+              </Grid>
+              <Grid item xs={6} style={{ paddingTop: '0px', paddingBottom: '78px' }}>
+                <h1 className={classes.disabledText}>Place of Receipt</h1>
+                <Textarea
+                  id={getField('PLACE OF RECEIPT')}
+                  rows={1}
+                  value={`${getValueField('PLACE OF RECEIPT')}`}
+                  readOnly={true}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item xs={6} className={classes.gridBottom}>
+            <span className={classes.disabledText1}>
+              {`RECEIVED by the Carrier in apparent good order and condition (unless otherwise stated
             herein) the total number or quantity of Containers or other packages or units indicated
             in the box entitled "Carrier's Receipt",to be carried subject to all the terms and
             conditions hereof from the Place of Receipt or Port of Loading to thePort of Discharge
@@ -279,224 +218,252 @@ const DraftPage = (props) => {
             Delivery as applicable. INWITNESS WHEREOF the Carrier or their Agent has signed the
             number of Bills of Lading stated at the top,all of this tenor and date, and whenever one
             original Bill of Lading has been surrendered all other Bills ofLading shall be void.`}
-          </span>
-        </Grid>
-        <Grid item xs={6} className={classes.gridBottom}>
-          <Grid container>
-            <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
-              <h1 className={classes.disabledText}>Ocean vessel voyage NO. Flag</h1>
-              em ipsum dolor sit amet
-            </Grid>
-            <Grid
-              item
-              xs={6}
-              className={`${classes.gridLeft} ${classes.gridBottom} ${classes.hasComment}`}
-            >
-              <Grid item xs={6} style={{ paddingTop: '0px' }}>
+            </span>
+          </Grid>
+          <Grid item xs={6} className={classes.gridBottom}>
+            <Grid container>
+              <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
+                <h1 className={classes.disabledText}>Ocean vessel voyage NO. Flag</h1>
+                <Textarea
+                  id={getField('OCEAN VESSEL VOYAGE NO. FLAG')}
+                  rows={1}
+                  value={`${getValueField('OCEAN VESSEL VOYAGE NO. FLAG')}`}
+                  readOnly={true}
+                />
+              </Grid>
+              <Grid
+                item
+                xs={6}
+                className={`${classes.gridLeft} ${classes.gridBottom}`}>
                 <h1 className={classes.disabledText}>Port of loading</h1>
-                Singapore
+                <Textarea
+                  id={getField('PORT OF LOADING')}
+                  rows={1}
+                  value={`${getValueField('PORT OF LOADING')}`}
+                  readOnly={true}
+                />
+              </Grid>
+              <Grid item xs={6} className={`${classes.gridLeft} `}>
+                <h1 className={classes.disabledText}>Port of discharge</h1>
+                <Textarea
+                  id={getField('PORT OF DISCHARGE')}
+                  rows={1}
+                  value={`${getValueField('PORT OF DISCHARGE')}`}
+                  readOnly={true}
+                />
+              </Grid>
+              <Grid item xs={6} className={`${classes.gridLeft} `}>
+                <h1 className={classes.disabledText}>Place of delivery</h1>
+                <Textarea
+                  id={getField('PLACE OF DELIVERY')}
+                  rows={1}
+                  value={`${getValueField('PLACE OF DELIVERY')}`}
+                  readOnly={true}
+                />
               </Grid>
             </Grid>
-            <Grid item xs={6} className={`${classes.gridLeft} `}>
-              <h1 className={classes.disabledText}>Port of discharge</h1>
-              em ipsum dolor sit amet
+          </Grid>
+          <Grid item xs={6} className={classes.gridBottom}>
+            <Grid item xs={12} className={classes.gridBottom}>
+              <h1 className={classes.disabledText}>
+                {`Final Destination(for line merchant's reference only)`}
+              </h1>
+              <Textarea
+                id={getField('FINAL DESTINATION')}
+                rows={1}
+                value={`${getValueField('FINAL DESTINATION')}`}
+                readOnly={true}
+              />
             </Grid>
-            <Grid item xs={6} className={`${classes.gridLeft} `}>
-              <h1 className={classes.disabledText}>Place of delivery</h1>
-              em ipsum dolor sit amet
+            <Grid item xs={12}>
+              <h1 className={classes.disabledText}>
+                Type of movement (if mixed, use description of packages and goods field)
+              </h1>
+              <Textarea
+                id={getField('TYPE OF MOVEMENT')}
+                rows={2}
+                value={`${getValueField('TYPE OF MOVEMENT')}`}
+                readOnly={true}
+              />
+            </Grid>
+          </Grid>
+          <Grid container>
+            <Grid item xs={4}>
+              <h1 className={classes.disabledText} style={{ marginRight: '4.0rem' }}>
+                {`(check "HM" column if hazardous material)`}
+              </h1>
+            </Grid>
+            <Grid item xs={8}>
+              <h1 className={classes.disabledText}>
+                particulars declared by shipper but not acknowledged by the carrier{' '}
+              </h1>
+            </Grid>
+          </Grid>
+          <Grid container className={classes.grid}>
+            <Grid item xs={3} className={classes.gridLeft}>
+              <h1 className={`${classes.disabledText} text-center`}>
+                cntr nos. w/seal nos. marks & numbers
+              </h1>
+            </Grid>
+            <Grid item xs={1} className={classes.gridLeft}>
+              <h1 className={`${classes.disabledText} text-center`}>
+                quantity (for customs declaration only)
+              </h1>
+            </Grid>
+            <Grid item xs={4} className={classes.gridLeft}>
+              <h1 className={`${classes.disabledText} text-center`}>description of goods</h1>
+            </Grid>
+            <Grid item xs={2} className={classes.gridLeft}>
+              <h1 className={`${classes.disabledText} text-center`}>gross weight</h1>
+            </Grid>
+            <Grid item xs={2}>
+              <h1 className={`${classes.disabledText} text-center`}>gross measurement</h1>
+            </Grid>
+          </Grid>
+          <Grid container>
+            <div className="flex">
+              <p className={classes.normalText}>count-no: 0 /</p>
+              <p className={classes.normalText}>/ /</p>
+              <p className={classes.normalText}>10 packages /</p>
+              <p className={classes.normalText}>/ /</p>
+              <p className={classes.normalText}>10.000 KGS /</p>
+              <p className={classes.normalText}>10 CBM</p>
+            </div>
+          </Grid>
+          <Grid container>
+            <div className="flex">
+              <p className={classes.normalText}>count-no: 0 /</p>
+              <p className={classes.normalText}>/ /</p>
+              <p className={classes.normalText}>10 packages /</p>
+              <p className={classes.normalText}>/ /</p>
+              <p className={classes.normalText}>10.000 KGS /</p>
+              <p className={classes.normalText}>10 CBM</p>
+            </div>
+          </Grid>
+          <Grid container style={{ borderTop: '1px dashed blue' }}>
+            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
+            </Grid>
+            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10 packages</p>
+            </Grid>
+            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
+            </Grid>
+            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10000KGS</p>
+            </Grid>
+            <Grid item xs={2}>
+              <p className={classes.normalText}>10 CBM</p>
+            </Grid>
+          </Grid>
+          <Grid container>
+            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
+            </Grid>
+            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10 packages</p>
+            </Grid>
+            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
+            </Grid>
+            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10000KGS</p>
+            </Grid>
+            <Grid item xs={2}>
+              <p className={classes.normalText}>10 CBM</p>
+            </Grid>
+          </Grid>
+          <Grid container>
+            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
+            </Grid>
+            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10 packages</p>
+            </Grid>
+            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
+            </Grid>
+            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10000KGS</p>
+            </Grid>
+            <Grid item xs={2}>
+              <p className={classes.normalText}>10 CBM</p>
+            </Grid>
+          </Grid>
+          <Grid container>
+            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
+            </Grid>
+            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10 packages</p>
+            </Grid>
+            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
+            </Grid>
+            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10000KGS</p>
+            </Grid>
+            <Grid item xs={2}>
+              <p className={classes.normalText}>10 CBM</p>
+            </Grid>
+          </Grid>
+          <Grid container>
+            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
+            </Grid>
+            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10 packages</p>
+            </Grid>
+            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
+            </Grid>
+            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10000KGS</p>
+            </Grid>
+            <Grid item xs={2}>
+              <p className={classes.normalText}>10 CBM</p>
+            </Grid>
+          </Grid>
+          <Grid container>
+            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
+            </Grid>
+            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10 packages</p>
+            </Grid>
+            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
+            </Grid>
+            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10000KGS</p>
+            </Grid>
+            <Grid item xs={2}>
+              <p className={classes.normalText}>10 CBM</p>
+            </Grid>
+          </Grid>
+          <Grid container>
+            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
+            </Grid>
+            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>10 packages</p>
+            </Grid>
+            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
+              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
+            </Grid>
+            <Grid item xs={2} style={{ borderRight: '1px solid black' }}>
+              <p className={classes.normalText}>10000KGS</p>
+            </Grid>
+            <Grid item xs={2}>
+              <p className={classes.normalText}>10 CBM</p>
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={6} className={classes.gridBottom}>
-          <Grid item xs={12} className={classes.gridBottom}>
-            <h1 className={classes.disabledText}>
-              {`Final Destination(for line merchant's reference only)`}
-            </h1>
-            em ipsum dolor sit amet
-          </Grid>
-          <Grid item xs={12}>
-            <h1 className={classes.disabledText}>
-              Type of movement (if mixed, use description of packages and goods field)
-            </h1>
-            em ipsum dolor sit amet
-          </Grid>
+        <Grid style={{ borderBottom: '1px solid blue' }}>
+          <h1 className={classes.disabledText}>Ocean Preight prepaid</h1>
         </Grid>
-        <Grid container>
-          <Grid item xs={4}>
-            <h1 className={classes.disabledText} style={{ marginRight: '4.0rem' }}>
-              {`(check "HM" column if hazardous material)`}
-            </h1>
-          </Grid>
-          <Grid item xs={8}>
-            <h1 className={classes.disabledText}>
-              particulars declared by shipper but not acknowledged by the carrier{' '}
-            </h1>
-          </Grid>
-        </Grid>
-        <Grid container className={classes.grid}>
-          <Grid item xs={3} className={classes.gridLeft}>
-            <h1 className={`${classes.disabledText} text-center`}>
-              cntr nos. w/seal nos. marks & numbers
-            </h1>
-          </Grid>
-          <Grid item xs={1} className={classes.gridLeft}>
-            <h1 className={`${classes.disabledText} text-center`}>
-              quantity (for customs declaration only)
-            </h1>
-          </Grid>
-          <Grid item xs={4} className={classes.gridLeft}>
-            <h1 className={`${classes.disabledText} text-center`}>description of goods</h1>
-          </Grid>
-          <Grid item xs={2} className={classes.gridLeft}>
-            <h1 className={`${classes.disabledText} text-center`}>gross weight</h1>
-          </Grid>
-          <Grid item xs={2}>
-            <h1 className={`${classes.disabledText} text-center`}>gross measurement</h1>
-          </Grid>
-        </Grid>
-        <Grid container>
-          <div className="flex">
-            <p className={classes.normalText}>count-no: 0 /</p>
-            <p className={classes.normalText}>/ /</p>
-            <p className={classes.normalText}>10 packages /</p>
-            <p className={classes.normalText}>/ /</p>
-            <p className={classes.normalText}>10.000 KGS /</p>
-            <p className={classes.normalText}>10 CBM</p>
-          </div>
-        </Grid>
-        <Grid container>
-          <div className="flex">
-            <p className={classes.normalText}>count-no: 0 /</p>
-            <p className={classes.normalText}>/ /</p>
-            <p className={classes.normalText}>10 packages /</p>
-            <p className={classes.normalText}>/ /</p>
-            <p className={classes.normalText}>10.000 KGS /</p>
-            <p className={classes.normalText}>10 CBM</p>
-          </div>
-        </Grid>
-        <Grid container style={{ borderTop: '1px dashed blue' }}>
-          <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-          </Grid>
-          <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10 packages</p>
-          </Grid>
-          <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-          </Grid>
-          <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10000KGS</p>
-          </Grid>
-          <Grid item xs={2}>
-            <p className={classes.normalText}>10 CBM</p>
-          </Grid>
-        </Grid>
-        <Grid container>
-          <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-          </Grid>
-          <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10 packages</p>
-          </Grid>
-          <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-          </Grid>
-          <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10000KGS</p>
-          </Grid>
-          <Grid item xs={2}>
-            <p className={classes.normalText}>10 CBM</p>
-          </Grid>
-        </Grid>
-        <Grid container>
-          <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-          </Grid>
-          <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10 packages</p>
-          </Grid>
-          <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-          </Grid>
-          <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10000KGS</p>
-          </Grid>
-          <Grid item xs={2}>
-            <p className={classes.normalText}>10 CBM</p>
-          </Grid>
-        </Grid>
-        <Grid container>
-          <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-          </Grid>
-          <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10 packages</p>
-          </Grid>
-          <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-          </Grid>
-          <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10000KGS</p>
-          </Grid>
-          <Grid item xs={2}>
-            <p className={classes.normalText}>10 CBM</p>
-          </Grid>
-        </Grid>
-        <Grid container>
-          <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-          </Grid>
-          <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10 packages</p>
-          </Grid>
-          <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-          </Grid>
-          <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10000KGS</p>
-          </Grid>
-          <Grid item xs={2}>
-            <p className={classes.normalText}>10 CBM</p>
-          </Grid>
-        </Grid>
-        <Grid container>
-          <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-          </Grid>
-          <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10 packages</p>
-          </Grid>
-          <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-          </Grid>
-          <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10000KGS</p>
-          </Grid>
-          <Grid item xs={2}>
-            <p className={classes.normalText}>10 CBM</p>
-          </Grid>
-        </Grid>
-        <Grid container>
-          <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-          </Grid>
-          <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>10 packages</p>
-          </Grid>
-          <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-            <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-          </Grid>
-          <Grid item xs={2} style={{ borderRight: '1px solid black' }}>
-            <p className={classes.normalText}>10000KGS</p>
-          </Grid>
-          <Grid item xs={2}>
-            <p className={classes.normalText}>10 CBM</p>
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid style={{ borderBottom: '1px solid blue' }}>
-        <h1 className={classes.disabledText}>Ocean Preight prepaid</h1>
-      </Grid>
+      </div>
     </div>
   );
 };

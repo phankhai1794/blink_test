@@ -13,7 +13,7 @@ function DraftApp(props) {
       {/* <ExportAppHeader className="p-0 sm:px-24" /> */}
       <FusePageSimple
         classes={{
-          contentWrapper: 'p-0 sm:p-24 pb-80 sm:pb-80 h-full',
+          contentWrapper: 'p-0 h-full',
           content: 'flex flex-col h-full',
           leftSidebar: 'w-256 border-0'
         }}

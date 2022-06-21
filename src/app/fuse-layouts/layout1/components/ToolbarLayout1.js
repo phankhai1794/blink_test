@@ -66,7 +66,7 @@ function ToolbarLayout1(props) {
   const openAllInquiry = () => {
     if (badge) {
       dispatch(FormActions.toggleAllInquiry(true));
-      dispatch(FormActions.toggleSaveInquiry(true))
+      dispatch(FormActions.toggleSaveInquiry(true));
     }
   };
 
@@ -75,6 +75,11 @@ function ToolbarLayout1(props) {
   };
 
   const openEmail = () => dispatch(FormActions.toggleOpenEmail(true));
+
+  const redirectDraftBL = () => {
+    let bl = new URLSearchParams(window.location.search).get('bl');
+    if (bl) history.push(`/apps/draft-bl/${bl}`);
+  };
 
   useEffect(() => {
     if (!user.displayName) {
@@ -146,13 +151,15 @@ function ToolbarLayout1(props) {
                 <span className="pl-4">Attachment List</span>
               </Button>
             </PermissionProvider>
-            {(openTrans && transId) && (
-              <RestoreVersion />
-            )}
+            {openTrans && transId && <RestoreVersion />}
             <PermissionProvider
               action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
               extraCondition={pathname.includes('/guest')}>
-              <Button variant="text" size="medium" className={classes.button}>
+              <Button
+                variant="text"
+                size="medium"
+                className={classes.button}
+                onClick={() => redirectDraftBL()}>
                 <VisibilityIcon />
                 <span className="px-2">Draft BL</span>
               </Button>
@@ -161,7 +168,12 @@ function ToolbarLayout1(props) {
             <PermissionProvider
               action={PERMISSION.VIEW_REDIRECT_GUEST_BL}
               extraCondition={pathname.includes('/draft-bl')}>
-              <Button variant="text" size="medium" className={classes.button}>
+              <Button
+                variant="text"
+                size="medium"
+                className={classes.button}
+                // onClick={() => switchDraftBL('/guest')}
+              >
                 <EditIcon />
                 <span className="px-2">Edit</span>
               </Button>
@@ -174,7 +186,13 @@ function ToolbarLayout1(props) {
               extraCondition={pathname.includes('/workplace')}>
               <div style={{ paddingLeft: '15px', paddingRight: '5px', paddingTop: '17px' }}>
                 <Button
-                  style={{ width: '120px', height: '30px', color: 'white', backgroundColor: '#bd1874', borderRadius: '20px' }}
+                  style={{
+                    width: '120px',
+                    height: '30px',
+                    color: 'white',
+                    backgroundColor: '#bd1874',
+                    borderRadius: '20px'
+                  }}
                   variant="text"
                   size="medium"
                   className={clsx('h-64', classes.button)}
