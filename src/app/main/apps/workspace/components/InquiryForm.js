@@ -64,8 +64,10 @@ const InquiryForm = (props) => {
 
   const copyQuestion = (index) => {
     const optionsOfQuestion = JSON.parse(JSON.stringify(questions[index]));
-    optionsOfQuestion.field = ''
-    optionsOfQuestion.filesUpload = questions[index].filesUpload;
+    optionsOfQuestion.field = '';
+    questions[index].mediaFile.map((file, i) => {
+      optionsOfQuestion.mediaFile[i].fileUpload = file.fileUpload;
+    })
     if (inquiries.length + questions.length + 1 === metadata.field_options.length) {
       dispatch(FormActions.toggleAddInquiry(false))
     }
@@ -92,9 +94,8 @@ const InquiryForm = (props) => {
       dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
     } else {
       files.forEach(src => {
-        optionsOfQuestion[index].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name });
+        optionsOfQuestion[index].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, fileUpload: src });
       });
-      optionsOfQuestion[index].filesUpload.push(files);
       dispatch(InquiryActions.setQuestion(optionsOfQuestion));
     }
   };

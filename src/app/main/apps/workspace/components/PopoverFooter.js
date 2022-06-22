@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = ({ title }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [index, currentField, question, fields, myBL, displayCmt, valid, filesUpload, inquiries] = useSelector(({ workspace }) => [
+  const [index, currentField, question, fields, myBL, displayCmt, valid, inquiries] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.question,
@@ -36,7 +36,6 @@ const PopoverFooter = ({ title }) => {
     workspace.inquiryReducer.myBL,
     workspace.inquiryReducer.displayCmt,
     workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.filesUpload,
     workspace.inquiryReducer.inquiries,
   ]);
   const onSave = () => {
@@ -53,36 +52,39 @@ const PopoverFooter = ({ title }) => {
       dispatch(AppActions.showMessage({ message: "There is empty field or inquiry type", variant: 'error' }));
       return;
     }
-    const mediaList = [];
+    let mediaList = [];
     const filesUpload = [];
     question.forEach((q) => {
-      if (q.filesUpload && q.filesUpload.length > 0) {
-        q.filesUpload.forEach(files => {
-          files.forEach((file) => {
-            filesUpload.push(file)
-          })
-        })
+      if (q.mediaFile.length > 0) {
+        filesUpload.push(q.mediaFile)
       }
     });
     if (filesUpload.length > 0) {
-      const formData = new FormData();
-      filesUpload.forEach((file) => {
-        formData.append('files', file);
-      });
-      uploadFile(formData).then(media => {
-        media.response.forEach((item) => {
-          mediaList.push(item);
+      const uploads = [];
+      filesUpload.forEach((files) => {
+        const formData = new FormData();
+        files.forEach(file => {
+          formData.append('files', file.fileUpload);
         });
-        saveInquiry({ question, media: mediaList, blId: myBL.id })
-          .then(() => {
-            dispatch(
-              AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
-            );
-            dispatch(InquiryActions.saveInquiry());
-            dispatch(FormActions.toggleReload());
-          })
-          .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
-      }).catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
+        uploads.push(formData);
+      })
+      axios
+        .all(uploads.map((endpoint) => uploadFile(endpoint)))
+        .then((media) => {
+          media.forEach(file => {
+            const mediaFileList = file.response.map(item => item);
+            mediaList = [...mediaList, ...mediaFileList];
+          });
+          saveInquiry({ question, media: mediaList, blId: myBL.id })
+            .then(() => {
+              dispatch(
+                AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+              );
+              dispatch(InquiryActions.saveInquiry());
+              dispatch(FormActions.toggleReload());
+            })
+            .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
+        }).catch((error) => console.log(error));
     } else {
       saveInquiry({ question, media: mediaList, blId: myBL.id })
         .then(() => {

@@ -24,7 +24,6 @@ const initialState = {
       addOther: '',
       receiver: [],
       mediaFile: [],
-      filesUpload: []
     }
   ],
   currentInq: {},
@@ -129,9 +128,6 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.DISPLAY_COMMENT: {
     return { ...state, displayCmt: action.state };
-  }
-  case Actions.SET_UPLOAD_FILE: {
-    return { ...state, filesUpload: action.state };
   }
   case Actions.SET_ONE_INQUIRY: {
     return { ...state, currentInq: action.state };
