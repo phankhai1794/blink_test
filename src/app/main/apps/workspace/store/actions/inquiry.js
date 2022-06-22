@@ -148,10 +148,3 @@ export function setListMinimize(state) {
     state: state
   };
 }
-
-export function setUploadFiles(state) {
-  return {
-    type: SET_UPLOAD_FILE,
-    state: state
-  };
-}

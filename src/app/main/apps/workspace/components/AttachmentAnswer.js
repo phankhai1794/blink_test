@@ -72,11 +72,6 @@ const AttachmentAnswer = (props) => {
   useEffect(() => {
     setShowBtn(isShowBtn);
   }, [isShowBtn]);
-  useEffect(() => {
-    if (question.answerObj.length > 0 && question.answerObj[0]?.mediaFiles.length > 0) {
-      setShowBtn(true);
-    }
-  }, [question]);
   const onDrop = (acceptedFiles) => {
     if (isPermissionAttach) {
       uploadImageAttach(acceptedFiles);
@@ -144,20 +139,22 @@ const AttachmentAnswer = (props) => {
 
   return (
     <div>
-      <div className="container">
-        <div {...getRootProps({ style })}>
-          <input {...getInputProps()} disabled={!isPermissionAttach} />
-          <p>Drag and drop some files here</p>
-          <Button
-            color="primary"
-            variant="contained"
-            disabled={!isPermissionAttach}
-            onClick={open}
-          >
-            <PublishIcon />
-          </Button>
+      {isPermissionAttach && (
+        <div className="container">
+          <div {...getRootProps({ style })}>
+            <input {...getInputProps()} disabled={!isPermissionAttach} />
+            <p>Drag and drop some files here</p>
+            <Button
+              color="primary"
+              variant="contained"
+              disabled={!isPermissionAttach}
+              onClick={open}
+            >
+              <PublishIcon />
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
       {isPermissionAttach && (
         <div className="justify-end flex" style={{ marginTop: '1rem' }}>
           <Button variant="contained" color="primary" onClick={handleSave}>
