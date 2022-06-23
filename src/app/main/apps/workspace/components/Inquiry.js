@@ -279,6 +279,8 @@ const Inquiry = (props) => {
   const urlMedia = (fileExt, file) => {
     if (fileExt.match(/jpeg|jpg|png/g)) {
       return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
+    } else if (fileExt.match(/pdf/g)) {
+      return URL.createObjectURL(new Blob([file], { type: 'application/pdf' }));
     } else {
       return URL.createObjectURL(new Blob([file]));
     }
@@ -442,7 +444,7 @@ const Inquiry = (props) => {
                   {q.mediaFile?.length > 0 && q.mediaFile?.map((file, mediaIndex) => (
                     <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
                       {file.ext.match(/jpeg|jpg|png/g) ? (
-                        <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
+                        <ImageAttach file={file} style={{ margin: '2.5rem' }} />
                       ) : (
                         <FileAttach file={file} />
                       )}
@@ -454,7 +456,7 @@ const Inquiry = (props) => {
                   {q.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
                     <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
                       {file.ext.match(/jpeg|jpg|png/g) ? (
-                        <ImageAttach src={file.src} style={{ margin: '2.5rem' }} />
+                        <ImageAttach file={file} style={{ margin: '2.5rem' }} />
                       ) : (
                         <FileAttach file={file} />
                       )}
