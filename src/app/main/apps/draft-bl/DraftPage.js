@@ -88,7 +88,7 @@ const DraftPage = (props) => {
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(Actions.loadMetadata());
-    dispatch(Actions.loadContent());
+    dispatch(Actions.loadContent(window.location.pathname.split('/')[3]));
   }, []);
 
   return (
