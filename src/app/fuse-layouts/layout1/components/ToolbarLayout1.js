@@ -77,8 +77,13 @@ function ToolbarLayout1(props) {
   const openEmail = () => dispatch(FormActions.toggleOpenEmail(true));
 
   const redirectDraftBL = () => {
-    let bl = new URLSearchParams(window.location.search).get('bl');
+    const bl = new URLSearchParams(window.location.search).get('bl');
     if (bl) history.push(`/apps/draft-bl/${bl}`);
+  };
+
+  const redirectEditDraftBL = () => {
+    const bl = window.location.pathname.split('/')[3];
+    if (bl) history.push(`/apps/edit/draft-bl/${bl}`);
   };
 
   useEffect(() => {
@@ -159,7 +164,7 @@ function ToolbarLayout1(props) {
                 variant="text"
                 size="medium"
                 className={classes.button}
-                onClick={() => redirectDraftBL()}>
+                onClick={redirectDraftBL}>
                 <VisibilityIcon />
                 <span className="px-2">Draft BL</span>
               </Button>
@@ -167,13 +172,12 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.VIEW_REDIRECT_GUEST_BL}
-              extraCondition={pathname.includes('/draft-bl')}>
+              extraCondition={pathname.includes('/apps/draft-bl')}>
               <Button
                 variant="text"
                 size="medium"
                 className={classes.button}
-                // onClick={() => switchDraftBL('/guest')}
-              >
+                onClick={redirectEditDraftBL}>
                 <EditIcon />
                 <span className="px-2">Edit</span>
               </Button>

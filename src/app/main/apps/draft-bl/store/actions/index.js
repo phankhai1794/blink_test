@@ -15,8 +15,7 @@ export const loadMetadata = () => (dispatch) => {
     .catch((err) => console.error(err));
 };
 
-export const loadContent = () => (dispatch) => {
-  const bl = window.location.pathname.split('/')[3];
+export const loadContent = (bl) => (dispatch) => {
   if (bl) {
     dispatch(setBL(bl));
     getBlInfo(bl)
