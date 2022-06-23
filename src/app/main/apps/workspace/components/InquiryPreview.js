@@ -365,7 +365,7 @@ const InquiryPreview = (props) => {
               >
                 <CloseIcon style={{ fontSize: 20 }} />
               </Fab>
-              <ImageAttach src={file.src} style={{ margin: '1rem' }} />
+              <ImageAttach file={file} style={{ margin: '1rem' }} />
             </div>
           ) : (
             <FileAttach file={file} />
