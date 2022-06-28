@@ -1,10 +1,14 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import clsx from 'clsx';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 import { TextField, InputAdornment, makeStyles } from '@material-ui/core';
 import LockIcon from '@material-ui/icons/Lock';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
+import {useDispatch, useSelector} from "react-redux";
+import ReplyIcon from "@material-ui/icons/Reply";
+
+import * as BLDraftActions from '../store/actions';
+
 
 const theme = createMuiTheme({
   typography: {
@@ -16,7 +20,8 @@ const themeInput = '#BAC3CB';
 const bgThemeInput = '#FFFFFF';
 const blockThemeInput = '#F5F8FA';
 const darkThemeInput = '#515E6A';
-const themeInq = '#BD0F72';
+const pinkThemeInput = '#BD0F72';
+const themeField = '#2F80ED';
 const lightThemeInq = '#FAF1F5';
 
 const useStyles = makeStyles((theme) => ({
@@ -29,11 +34,11 @@ const useStyles = makeStyles((theme) => ({
       zIndex: '-1'
     },
     '&:hover fieldset': {
-      borderColor: `${darkThemeInput} !important`
+      borderColor: `${pinkThemeInput} !important`
     },
     '&:focus-within fieldset': {
-      border: `1px solid ${darkThemeInput} !important`
-    }
+      border: `1px solid ${themeInput}`,
+    },
   },
   locked: {
     '& fieldset': {
@@ -52,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: '22px'
   },
   notchedOutlineNotChecked: {
-    borderColor: `${themeInq} !important`
+    borderColor: `${darkThemeInput} !important`
   },
   adornment: {
     padding: '10px',
@@ -80,8 +85,18 @@ const useStyles = makeStyles((theme) => ({
   sizeIcon: {
     fontSize: '18px'
   },
-  colorHasInqIcon: {
-    color: `${themeInq} !important`
+  colorFieldEdited: {
+    '& fieldset': {
+      border: `1px solid ${themeField}!important`,
+      background: '#EAF2FD',
+      borderRadius: '8px'
+    }
+  },
+  colorFieldClicked: {
+    '& fieldset': {
+      border: `1px solid ${pinkThemeInput}!important`,
+      borderRadius: '8px'
+    }
   },
   colorLockIcon: {
     color: darkThemeInput
@@ -90,9 +105,45 @@ const useStyles = makeStyles((theme) => ({
 
 const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, readOnly }) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
+  const [contentChanged, openDraftBL] = useSelector(({ draftBL }) => [
+    draftBL.contentChanged,
+    draftBL.openDraftBL,
+  ]);
+  const [fieldIsChanged, setFieldIsChanged] = useState(false);
+  const [fieldIsClicked, setFiledIsClicked] = useState(false);
+
+  const checkFieldEdited = () => {
+    if (contentChanged) {
+      const getsKey = Object.keys(contentChanged).map(key => key);
+      const check = getsKey.find(key => key === id);
+      return !!check;
+    }
+  };
+
+  useEffect(() => {
+    setFieldIsChanged(checkFieldEdited());
+    setFiledIsClicked(false);
+  }, [contentChanged]);
+
+  useEffect(() => {
+    if (!openDraftBL) {
+      setFiledIsClicked(false);
+    }
+  },[openDraftBL]);
+
+  const onClick = (e) => {
+    dispatch(BLDraftActions.toggleDraftBLEdit(true));
+    dispatch(BLDraftActions.setCurrentBLField(e.currentTarget.id));
+    setFiledIsClicked(true);
+  };
+  
+  const handleReply = () => {
+    dispatch(BLDraftActions.toggleDraftBLEdit(false))
+  }
 
   return (
-    <div id={id} style={{ width }}>
+    <div id={id} onClick={onClick} className={clsx(fieldIsChanged ? classes.colorFieldEdited : '', fieldIsClicked ? classes.colorFieldClicked : '')}>
       <ThemeProvider theme={theme}>
         <TextField
           value={selectedChoice || children}
@@ -116,6 +167,11 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
                 ) : (
                   <></>
                 )}
+                {fieldIsChanged ? (
+                  <>
+                    <ReplyIcon fontSize={'large'} style={{ color: '#2F80ED', cursor: 'pointer' }} onClick={handleReply} />
+                  </>
+                ) : <></>}
               </InputAdornment>
             ),
             classes: {

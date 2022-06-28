@@ -1,14 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { Grid, Divider, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
+import { getKeyByValue } from '@shared';
 
 import * as Actions from './store/actions';
 import Label from './components/FieldLabel';
 import BLField from './components/BLField';
+import BLFieldForm from "./components/BLFieldForm";
+import Form from './components/Form';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -58,14 +61,23 @@ const useStyles = makeStyles((theme) => ({
 const EditDraftPage = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [metadata, content] = useSelector(({ draftBL }) => [draftBL.metadata, draftBL.content]);
+  const [metadata, content, openDraftBL, currentBLField, contentEdit, contentChanged] = useSelector(({ draftBL }) => [
+    draftBL.metadata,
+    draftBL.content,
+    draftBL.openDraftBL,
+    draftBL.currentBLField,
+    draftBL.contentEdit,
+    draftBL.contentChanged,
+  ]);
+  const [titleField, setTitleField] = useState();
+  const [contentField, setContentField] = useState();
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
   };
 
   const getValueField = (field) => {
-    return content[getField(field)] || '';
+    return contentEdit[getField(field)] || '';
   };
 
   useEffect(() => {
@@ -74,8 +86,42 @@ const EditDraftPage = (props) => {
     dispatch(Actions.loadContent(window.location.pathname.split('/')[4]));
   }, []);
 
+  useEffect(() => {
+    if (currentBLField) {
+      setTitleField(getKeyByValue(metadata['field'], currentBLField));
+      setContentField(contentEdit[currentBLField]);
+    }
+  }, [currentBLField]);
+
+  const handleGetValue = (value) => {
+    setContentField(value)
+  }
+
+  const handleSave = () => {
+    const newTxt = {...contentEdit};
+    if (newTxt[currentBLField] === contentField) {
+      dispatch(Actions.toggleDraftBLEdit(false));
+      return;
+    }
+    newTxt[currentBLField] = contentField;
+    dispatch(Actions.setNewContent(newTxt));
+    //
+    const newTxtChanged = {...contentChanged, [currentBLField]: contentField};
+    dispatch(Actions.setNewContentChanged(newTxtChanged));
+    dispatch(Actions.toggleDraftBLEdit(false));
+  }
+
   return (
     <div className={clsx('max-w-5xl', classes.root)}>
+      <Form
+        open={openDraftBL}
+        toggleForm={(status) => dispatch(Actions.toggleDraftBLEdit(status))}
+        title={titleField}
+        handleSave={handleSave}
+      >
+        <BLFieldForm getValueFieldChange={handleGetValue}/>
+      </Form>
+
       <Grid container>
         <Grid item xs={6} className={classes.leftPanel}>
           <Grid item>
@@ -151,7 +197,9 @@ const EditDraftPage = (props) => {
               <br />
               {`reference only. See back clause 8. (4.)`}
             </Label>
-            <BLField id={getField('EXPORT REFERENCES')} multiline={true} rows={2}></BLField>
+            <BLField id={getField('EXPORT REFERENCES')} multiline={true} rows={2}>
+              {getValueField('EXPORT REFERENCES')}
+            </BLField>
           </Grid>
           <Grid item>
             <Label>FORWARDING AGENT-REFERENCES FMC NO.</Label>
