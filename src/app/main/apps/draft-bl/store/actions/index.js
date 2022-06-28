@@ -5,6 +5,10 @@ import { filterMetadata } from '@shared';
 export const SET_METADATA = 'SAVE_METADATA';
 export const SET_BL = 'SET_BL';
 export const SET_CONTENT = 'SET_CONTENT';
+export const OPEN_EDIT_DRAFT_BL = 'OPEN_EDIT_DRAFT_BL';
+export const SET_CURRENT_BL_FIELD = 'SET_CURRENT_BL_FIELD';
+export const SET_NEW_CONTENT = 'SET_NEW_CONTENT';
+export const SET_NEW_CONTENT_CHANGED = 'SET_NEW_CONTENT_CHANGED';
 
 export const loadMetadata = () => (dispatch) => {
   getMetadata()
@@ -21,6 +25,7 @@ export const loadContent = (bl) => (dispatch) => {
     getBlInfo(bl)
       .then((res) => {
         dispatch(setContent(res.myBL.content));
+        dispatch(setNewContent(res.myBL.content));
       })
       .catch((err) => console.error(err));
   }
@@ -43,6 +48,34 @@ export function setBL(state) {
 export function setContent(state) {
   return {
     type: SET_CONTENT,
+    state: state
+  };
+}
+
+export function toggleDraftBLEdit(state) {
+  return {
+    type: OPEN_EDIT_DRAFT_BL,
+    state: state
+  };
+}
+
+export function setCurrentBLField(state) {
+  return {
+    type: SET_CURRENT_BL_FIELD,
+    state: state
+  };
+}
+
+export function setNewContent(state) {
+  return {
+    type: SET_NEW_CONTENT,
+    state: state
+  };
+}
+
+export function setNewContentChanged(state) {
+  return {
+    type: SET_NEW_CONTENT_CHANGED,
     state: state
   };
 }
