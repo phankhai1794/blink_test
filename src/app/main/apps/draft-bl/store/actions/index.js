@@ -1,10 +1,11 @@
 import { getMetadata } from 'app/services/inquiryService';
-import { getBlInfo } from 'app/services/myBLService';
-import { filterMetadata } from '@shared';
+import { getBlInfo, updateBL } from 'app/services/myBLService';
+import { filterMetadata, draftConfirm } from '@shared';
 
 export const SET_METADATA = 'SAVE_METADATA';
 export const SET_BL = 'SET_BL';
 export const SET_CONTENT = 'SET_CONTENT';
+export const SET_MY_BL_STATE = 'SET_MY_BL_STATE';
 export const OPEN_EDIT_DRAFT_BL = 'OPEN_EDIT_DRAFT_BL';
 export const SET_CURRENT_BL_FIELD = 'SET_CURRENT_BL_FIELD';
 export const SET_NEW_CONTENT = 'SET_NEW_CONTENT';
@@ -25,6 +26,7 @@ export const loadContent = (bl) => (dispatch) => {
     getBlInfo(bl)
       .then((res) => {
         dispatch(setContent(res.myBL.content));
+        dispatch(setMyblState(res.myBL.state));
         dispatch(setNewContent(res.myBL.content));
       })
       .catch((err) => console.error(err));
@@ -52,11 +54,26 @@ export function setContent(state) {
   };
 }
 
+export function setMyblState(state) {
+  return {
+    type: SET_MY_BL_STATE,
+    state: state
+  }
+}
+
 export function toggleDraftBLEdit(state) {
   return {
     type: OPEN_EDIT_DRAFT_BL,
     state: state
   };
+}
+
+export const setConfirmDraftBL = () => (dispatch) => {
+  const bl = window.location.pathname.split('/')[3];
+  dispatch(setBL(bl));
+  updateBL(bl, { state: draftConfirm })
+    .then(() => dispatch(setMyblState(draftConfirm)))
+    .catch((err) => console.error(err));
 }
 
 export function setCurrentBLField(state) {
