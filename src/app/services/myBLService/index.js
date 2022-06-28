@@ -15,3 +15,8 @@ export async function createBL(bkgNo) {
   const response = await axios().post(`${PATH}/${bkgNo}`, {});
   return response.data;
 }
+
+export async function updateBL(id, data) {
+  const response = await axios().patch(`${PATH}/${id}`, data);
+  return response.data;
+}

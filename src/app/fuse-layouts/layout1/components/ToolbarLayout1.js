@@ -5,8 +5,10 @@ import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import SendInquiryForm from 'app/main/apps/workspace/components/SendInquiryForm';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
+import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import React, { useEffect } from 'react';
+import { draftConfirm } from '@shared';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
@@ -17,6 +19,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import RestoreVersion from 'app/main/apps/workspace/components/RestoreVersion';
 import DescriptionIcon from '@material-ui/icons/Description';
+import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -62,6 +65,13 @@ function ToolbarLayout1(props) {
     state.header.allowAccess,
     state.workspace.inquiryReducer.inquiries.length
   ]);
+  const myblState = useSelector(({ draftBL }) => draftBL.myblState);
+  const [open, setOpen] = useState(false);
+  const [disableConfirm, setDisableConfirm] = useState(false);
+
+  useEffect(() => {
+    myblState === draftConfirm && setDisableConfirm(true)
+  }, [myblState]);
 
   const openAllInquiry = () => {
     if (badge) {
@@ -75,6 +85,13 @@ function ToolbarLayout1(props) {
   };
 
   const openEmail = () => dispatch(FormActions.toggleOpenEmail(true));
+
+  const handleClose = () => setOpen(false);
+
+  const confirmBlDraft = () => {
+    setOpen(true);
+    dispatch(DraftBLActions.setConfirmDraftBL());
+  };
 
   const redirectDraftBL = () => {
     const bl = new URLSearchParams(window.location.search).get('bl');
@@ -181,6 +198,25 @@ function ToolbarLayout1(props) {
                 <EditIcon />
                 <span className="px-2">Edit</span>
               </Button>
+
+              <Button
+                style={{
+                  backgroundColor: disableConfirm ? '#CCD3D1' : '#BD0F72',
+                  color: 'white',
+                  borderRadius: '8px',
+                  fontWeight: '600',
+                  fontFamily: 'Montserrat',
+                  right: '6rem',
+                }}
+                variant="text"
+                size="medium"
+                className={clsx("normal-case absolute flex my-8 mr-10")}
+                onClick={confirmBlDraft}
+                disabled={disableConfirm}
+              >
+                <span className="pl-4">Confirm</span>
+              </Button>
+              <DialogConfirm open={open} handleClose={handleClose} />
             </PermissionProvider>
           </div>
 

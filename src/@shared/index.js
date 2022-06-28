@@ -57,3 +57,5 @@ export const validateExtensionFile = (file) => {
 }
 
 export const NUMBER_INQ_BOTTOM = 6;
+
+export const draftConfirm = 'DRF_CONF';
