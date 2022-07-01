@@ -204,8 +204,8 @@ const InquiryEditor = (props) => {
   const styles = (valid, width) => {
     return {
       control: {
-        border: !valid && '1px solid red',
-        borderRadius: '9px',
+        border: !valid && '2px solid red',
+        borderRadius: 11,
         width: `${width}px`
       }
     };
@@ -292,7 +292,7 @@ const InquiryEditor = (props) => {
           <FormControl error={!valid.field}>
             <FuseChipSelect
               className="m-auto"
-              customStyle={styles(valid.field, fullscreen ? 320 : 290)}
+              customStyle={styles(valid.field, fullscreen ? 320 : 295)}
               value={fieldValue}
               onChange={handleFieldChange}
               placeholder="Select Field Type"
@@ -307,9 +307,9 @@ const InquiryEditor = (props) => {
             <FuseChipSelect
               className="m-auto"
               value={valueType}
-              customStyle={styles(valid.inqType, fullscreen ? 330 : 290)}
+              customStyle={styles(valid.inqType, fullscreen ? 330 : 295)}
               onChange={handleTypeChange}
-              placeholder="Select Inquiry Type"
+              placeholder="Type of Inquiry"
               textFieldProps={{
                 variant: 'outlined'
               }}
@@ -325,17 +325,14 @@ const InquiryEditor = (props) => {
               {
                 title: 'Choice Answer',
                 value: metadata.ans_type.choice,
-                icon: 'radio_button_checked'
               },
               {
                 title: 'Paragraph Answer',
                 value: metadata.ans_type.paragraph,
-                icon: 'subject'
               },
               {
                 title: 'Attachment Answer',
                 value: metadata.ans_type.attachment,
-                icon: 'attachment'
               }
             ]}
           />
