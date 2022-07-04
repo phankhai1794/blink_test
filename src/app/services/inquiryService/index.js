@@ -66,3 +66,22 @@ export async function createAttachmentAnswer(state) {
   return response.data;
 }
 
+export async function updateInquiryAttachment(state) {
+  const response = await axios().patch(`${PATH}/attachment-field`, state);
+  return response.data;
+}
+
+export async function addNewMedia(state) {
+  const response = await axios().post(`${PATH}/new-attachment`, state);
+  return response.data;
+}
+
+export async function removeFile(id) {
+  const response = await axios().delete(`${PATH}/attachment/${id}`);
+  return response.data;
+}
+
+export async function replaceFile(data) {
+  const response = await axios().patch(`${PATH}/attachment`, data);
+  return response.data;
+}

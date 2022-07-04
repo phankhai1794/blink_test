@@ -2,7 +2,7 @@ import { filterMetadata } from '@shared';
 import { getInquiryById, getMetadata } from 'app/services/inquiryService';
 import { createBL, getBlInfo } from 'app/services/myBLService';
 
-import { setMyBL, saveField, editInquiry, setOriginalInquiry, saveMetadata } from './inquiry'
+import {setMyBL, saveField, editInquiry, setOriginalInquiry, saveMetadata, setListAttachment} from './inquiry'
 import * as InquiryActions from "./inquiry";
 // export * from './mail.actions'
 
@@ -32,6 +32,19 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
     const optionTabs = [{id: 'inquiryList', field: 'INQUIRY_LIST'}, {id: 'attachmentList', field: 'ATTACHMENT_LIST'}, {id: 'email', field: 'EMAIL'}, {id: 'inquiryForm', field: 'INQUIRY_FORM'}, {id: 'inquiryReview', field: 'INQUIRY_REVIEW'}]
     const listMinimize = [...res, ...optionTabs];
     dispatch(InquiryActions.setListMinimize(listMinimize));
+    //
+    let attachmentFiles = [];
+    res.forEach(e => {
+      const mediaFile = e.mediaFile.map(f => {
+        return {
+          ...f,
+          field: e.field,
+          inquiryId: e.id,
+        }
+      });
+      attachmentFiles = [...attachmentFiles, ...mediaFile];
+    });
+    dispatch(setListAttachment(attachmentFiles));
   }).catch((err) => console.error(err));
 };
 

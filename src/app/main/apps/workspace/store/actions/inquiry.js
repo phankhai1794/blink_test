@@ -18,6 +18,8 @@ export const SET_UPLOAD_FILE = 'SET_UPLOAD_FILE';
 export const SET_ONE_INQUIRY = 'SET_ONE_INQUIRY';
 export const SET_LIST_MINIMIZE_INQUIRY = 'SET_LIST_MINIMIZE_INQUIRY';
 export const SET_LIST_MINIMIZE = 'SET_LIST_MINIMIZE';
+export const SET_LIST_ATTACHMENT = 'SET_LIST_ATTACHMENT';
+export const VALIDATE_ATTACHMENT = 'VALIDATE_ATTACHMENT';
 
 export function saveInquiry() {
   return {
@@ -145,6 +147,20 @@ export function setListInqMinimize(state) {
 export function setListMinimize(state) {
   return {
     type: SET_LIST_MINIMIZE,
+    state: state
+  };
+}
+
+export function setListAttachment(state) {
+  return {
+    type: SET_LIST_ATTACHMENT,
+    state: state
+  };
+}
+
+export function validateAttachment(state) {
+  return {
+    type: VALIDATE_ATTACHMENT,
     state: state
   };
 }
