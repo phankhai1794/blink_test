@@ -1,6 +1,7 @@
 import { FuseAnimate } from '@fuse';
-import { Card, CardContent, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
+import { makeStyles, ThemeProvider } from '@material-ui/styles';
+import { Box, Card, CardContent, Typography } from '@material-ui/core';
 import * as Actions from 'app/store/actions';
 import { login } from 'app/services/authService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -11,11 +12,51 @@ import { useDispatch, useSelector } from 'react-redux';
 import JWTLoginTab from './tabs/JWTLoginTab';
 import ForgotPasswordTab from './tabs/ForgotPasswordTab';
 
+const mainColor = '#BD0F72';
+const theme = createMuiTheme({
+  typography: {
+    fontFamily: 'Montserrat'
+  }
+});
+
 const useStyles = makeStyles((theme) => ({
   root: {
-    background: 'url("assets/images/backgrounds/slider-sea.jpg")',
+    position: 'relative',
+    background: 'url("assets/images/backgrounds/login.svg")',
     backgroundSize: 'cover',
+    backgroundPosition: 'bottom',
     color: theme.palette.primary.contrastText
+  },
+  container: {
+    position: 'absolute',
+    top: 60,
+    left: '50%',
+    transform: 'translateX(-50%) !important'
+  },
+  wrapper: {
+    display: 'flex',
+    justifyContent: 'center'
+  },
+  logo: {
+    width: '106.25px',
+    height: '50px'
+  },
+  card: {
+    width: '480px',
+    borderRadius: '8px',
+    boxShadow: 'none',
+    marginTop: 40
+  },
+  cardContent: {
+    margin: '40px 55px',
+    padding: '0 !important'
+  },
+  title: {
+    color: mainColor,
+    fontWeight: 600,
+    fontSize: 20,
+    marginBottom: 24,
+    lineHeight: '24px'
   }
 }));
 
@@ -69,59 +110,52 @@ function Login(props) {
   return (
     <div
       className={clsx(classes.root, 'flex flex-col flex-1 flex-shrink-0 p-24 md:flex-row md:p-0')}>
-      <div className="flex flex-col flex-grow-0 items-center text-white p-16 text-center md:p-128 md:items-start md:flex-shrink-0 md:flex-1 md:text-left">
-        <FuseAnimate animation="transition.slideUpIn" delay={300}>
-          <Typography variant="h3" color="inherit" className="font-light">
-            Welcome to SI Portal!
-          </Typography>
+      <ThemeProvider theme={theme}>
+        <FuseAnimate animation={{ translateY: ['0%', '-100%'] }}>
+          <Box className={classes.container}>
+            <Box className={classes.wrapper}>
+              <img
+                className={classes.logo}
+                src="assets/images/logos/one_logo.svg"
+                alt="logo"
+              />
+            </Box>
+            <Card className={classes.card}>
+              <CardContent
+                className={clsx(classes.cardContent, 'flex flex-col items-center justify-center')}>
+                <Typography className={classes.title}>
+                  {isLoginTabViewed ? 'LOGIN TO YOUR ACCOUNT' : 'FORGOT PASSWORD'}
+                </Typography>
+                {isLoginTabViewed ? (
+                  <>
+                    <JWTLoginTab onLogged={handleLogin} />
+                    {/* <div className="flex flex-col items-center justify-center pt-32">
+                      <a
+                        className="font-medium text-primary"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setIsLoginTabViewed(false)}>
+                        Forgot passwords
+                      </a>
+                    </div> */}
+                  </>
+                ) : (
+                  <>
+                    <ForgotPasswordTab loginTabView={setIsLoginTabViewed} />
+                    <div className="flex flex-col items-center justify-center pt-32">
+                      <a
+                        className="font-medium text-primary"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setIsLoginTabViewed(true)}>
+                        Back to login
+                      </a>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </Box>
         </FuseAnimate>
-
-        <FuseAnimate delay={400}>
-          <Typography variant="subtitle1" color="inherit" className="max-w-512 mt-16">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus ullamcorper nisl erat,
-            vel convallis elit fermentum pellentesque. Sed mollis velit facilisis facilisis.
-          </Typography>
-        </FuseAnimate>
-      </div>
-      <FuseAnimate animation={{ translateX: [0, '100%'] }}>
-        <Card className="w-full max-w-400 mx-auto m-16 md:m-0" square>
-          <CardContent className="flex flex-col items-center justify-center p-32 md:p-48 md:pt-60 ">
-            <Typography variant="h6" className="text-center md:w-full mb-24">
-              {isLoginTabViewed ? 'LOGIN TO YOUR ACCOUNT' : 'FORGOT PASSWORD'}
-            </Typography>
-            <img
-              className="h-40 p-4 mb-32"
-              src="assets/images/logos/one_ocean_network-logo.png"
-              alt="logo"
-            />
-            {isLoginTabViewed ? (
-              <>
-                <JWTLoginTab onLogged={handleLogin} />
-                <div className="flex flex-col items-center justify-center pt-32">
-                  <a
-                    className="font-medium text-primary"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setIsLoginTabViewed(false)}>
-                    Forgot passwords
-                  </a>
-                </div>
-              </>
-            ) : (
-              <>
-                <ForgotPasswordTab loginTabView={setIsLoginTabViewed} />
-                <div className="flex flex-col items-center justify-center pt-32">
-                  <a
-                    className="font-medium text-primary"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setIsLoginTabViewed(true)}>
-                    Back to login
-                  </a>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </FuseAnimate>
+      </ThemeProvider>
     </div>
   );
 }

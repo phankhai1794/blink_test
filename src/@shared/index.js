@@ -54,8 +54,27 @@ export const filterMetadata = (data) => {
 export const validateExtensionFile = (file) => {
   const fileExt = file.name.split('.').pop().toLowerCase();
   return fileExt.match(/jpe|jpg|png|pdf|csv|xls|sheet|ppt|doc|txt|gif/g);
-}
+};
 
 export const NUMBER_INQ_BOTTOM = 6;
 
 export const draftConfirm = 'DRF_CONF';
+
+export const COUNTRIES = [
+  {
+    name: 'Vietnam',
+    value: 'VN'
+  },
+  {
+    name: 'Korea',
+    value: 'KR'
+  },
+  {
+    name: 'Singapore',
+    value: 'SG'
+  },
+  {
+    name: 'Spain',
+    value: 'ES'
+  }
+];
