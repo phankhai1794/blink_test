@@ -132,7 +132,7 @@ function JWTLoginTab({ onLogged }) {
   const [account, setAccount] = useState({
     email: { value: '', isValid: false },
     password: { value: '', isValid: false, visible: false },
-    country: { value: 'VN', selected: true }
+    country: { value: COUNTRIES[0].value, selected: true }
   });
 
   const handleChange = (e) => {
@@ -160,7 +160,7 @@ function JWTLoginTab({ onLogged }) {
 
   const handleSelect = (e) => {
     const { name, value } = e.target;
-    console.log({ name, value });
+    localStorage.setItem('country', value);
     setAccount({
       ...account,
       [name]: { ...account[name], value }
@@ -178,6 +178,12 @@ function JWTLoginTab({ onLogged }) {
   useEffect(() => {
     setIsFormValid(account.email.isValid && account.password.isValid);
   }, [account.email.isValid, account.password.isValid]);
+
+  useEffect(() => {
+    if (!localStorage.getItem('country')) {
+      localStorage.setItem('country', COUNTRIES[0].value);
+    }
+  }, []);
 
   return (
     <div className="w-full">
