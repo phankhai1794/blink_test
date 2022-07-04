@@ -128,7 +128,7 @@ export default function Form(props) {
   const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs, popoverfooter } =
     props;
 
-  const [index, question, inquiries, metadata, currentField, originalInquiry, listInqMinimize, listMinimize] = useSelector(({ workspace }) => [
+  const [index, question, inquiries, metadata, currentField, originalInquiry, listInqMinimize, listMinimize, attachmentList] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.question,
     workspace.inquiryReducer.inquiries,
@@ -137,6 +137,7 @@ export default function Form(props) {
     workspace.inquiryReducer.originalInquiry,
     workspace.inquiryReducer.listInqMinimize,
     workspace.inquiryReducer.listMinimize,
+    workspace.inquiryReducer.attachmentList,
   ]);
 
   const [openAllInquiry, showSaveInquiry, showAddInquiry, openInquiry] = useSelector(({ workspace }) => [
@@ -225,8 +226,12 @@ export default function Form(props) {
     }
     sortListClose(listMinimize, field);
     dispatch(InquiryActions.setReply(false));
-    dispatch(InquiryActions.setEditInq(null))
-    dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))))
+    dispatch(InquiryActions.setEditInq(null));
+    if (field === 'ATTACHMENT_LIST') {
+      dispatch(FormActions.toggleReload());
+    } else {
+      dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))))
+    }
     dispatch(FormActions.toggleSaveInquiry(false))
     if (tabs) props.tabChange(0);
     dispatch(InquiryActions.setOneInq({}))

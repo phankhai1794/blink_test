@@ -11,6 +11,7 @@ const initialState = {
   fields: [],
   removeOptions: [],
   validation: { inqType: true, field: true, receiver: true },
+  validationAttachment: { field: true, mediaId: true, nameFile: true },
   originalInquiry: [],
   inquiries: [],
   question: [
@@ -29,6 +30,7 @@ const initialState = {
   currentInq: {},
   listInqMinimize: [],
   listMinimize: [],
+  attachmentList: [],
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -137,6 +139,12 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SET_LIST_MINIMIZE: {
     return { ...state, listMinimize: action.state };
+  }
+  case Actions.SET_LIST_ATTACHMENT: {
+    return { ...state, attachmentList: action.state };
+  }
+  case Actions.VALIDATE_ATTACHMENT: {
+    return { ...state, validationAttachment: action.state };
   }
   default: {
     return state;

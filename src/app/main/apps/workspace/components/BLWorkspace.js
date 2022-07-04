@@ -176,8 +176,8 @@ const BLWorkspace = (props) => {
       return {
         status: openAttachment,
         toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
-        fabTitle: 'Attachment',
-        title: 'Attachment',
+        fabTitle: 'Attachment List',
+        title: 'Attachment List',
         hasAddButton: false,
         field: 'ATTACHMENT_LIST',
         popoverfooter: true,
