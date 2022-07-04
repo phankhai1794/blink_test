@@ -6,6 +6,7 @@ export default (headers = {}) =>
     headers: {
       'Content-Type': 'application/json',
       Authorization: `${localStorage.getItem('AUTH_TOKEN')}`,
+      country: `${localStorage.getItem('country')}`,
       ...headers
     }
   });
