@@ -13,13 +13,23 @@ const useStyles = makeStyles(theme => ({
   wideInput: {
     display: 'flex',
     alignItems: 'center',
-    width: 180,
+    width: 210,
     height: 30,
     padding: theme.spacing(1),
+    color: "#BD0F72",
+    paddingLeft: 12
   },
   formControl: {
     minWidth: 120,
+    '& $fieldset': {
+      borderRadius: '9px'
+    }
   },
+  selected: {
+    backgroundColor: "#FDF2F2 !important" ,
+    color: "#BD0F72",
+    fontWeight: 600
+  }
 }))
 
 const ITEM_HEIGHT = 48;
@@ -47,15 +57,14 @@ const CustomSelect = ({ options, iconProps, ...rootProps }) => {
           className: clsx(classes.wideInput, 'mr-20')
         }}
       >
-        { options.map(({ title, icon, value }) => (
-          <MenuItem key={title} value={value}>
+        {options.map(({ title, value }) => (
+          <MenuItem key={title} value={value} classes={{ selected: classes.selected }}>
             <div className="flex items-center">
-              {icon && <Icon {...iconProps}>{icon}</Icon> }
-              <p className={icon && 'pl-12'}>{ title || value }</p>                                        
+              <p >{title || value}</p>
             </div>
           </MenuItem>
         ))}
-      </Select> 
+      </Select>
     </FormControl>
   );
 };

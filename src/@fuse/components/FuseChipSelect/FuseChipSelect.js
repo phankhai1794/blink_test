@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
     '&.standard': {
       '& $placeholder': {},
       '& $valueContainer': {
-        paddingTop: 4
+        paddingTop: 2
       }
     },
     '&.filled': {
@@ -35,8 +35,11 @@ const useStyles = makeStyles((theme) => ({
       },
       '& $valueContainer': {
         paddingLeft: 12,
-        paddingTop: 4
+        paddingTop: 2
       }
+    },
+    '& $fieldset': {
+      borderRadius: 9
     }
   },
   input: {
@@ -49,9 +52,9 @@ const useStyles = makeStyles((theme) => ({
     // flexWrap: 'wrap',
     flex: 1,
     alignItems: 'center',
-    paddingTop: 4,
+    paddingTop: 2,
     minHeight: 45,
-    width: '100px'
+    width: 100
   },
   chip: {
     margin: '4px 4px 4px 0'
@@ -69,7 +72,8 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 16,
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
-    overflow: "hidden"
+    overflow: "hidden",
+    color: "#BD0F72"
   },
   placeholder: {
     position: 'absolute',
@@ -130,7 +134,9 @@ function Option(props) {
       selected={props.isFocused}
       component="div"
       style={{
-        fontWeight: props.isSelected ? 600 : 400
+        fontWeight: props.isSelected ? 600 : 400,
+        backgroundColor: props.isSelected && "#FDF2F2",
+        color: props.isSelected && "#BD0F72"
       }}
       {...props.innerProps}
     >
@@ -205,7 +211,8 @@ const components = {
   Option,
   Placeholder,
   SingleValue,
-  ValueContainer
+  ValueContainer,
+  IndicatorSeparator: () => null
 };
 
 function FuseChipSelect(props) {

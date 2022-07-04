@@ -1,11 +1,8 @@
 import { getKeyByValue, validateExtensionFile } from '@shared';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import DeleteIcon from '@material-ui/icons/Delete';
-import CloseIcon from '@material-ui/icons/Close';
-import { Divider, FormGroup, FormControlLabel, Checkbox, FormControl, FormHelperText, IconButton, Fab } from '@material-ui/core';
+import { Divider, FormGroup, FormControlLabel, Checkbox, FormControl, FormHelperText, IconButton } from '@material-ui/core';
 import * as AppAction from "app/store/actions";
 
 import * as InquiryActions from '../store/actions/inquiry';
@@ -14,7 +11,6 @@ import * as FormActions from '../store/actions/form';
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
 import AttachmentAnswer from './AttachmentAnswer';
-import Form from './Form';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import InquiryEditor from './InquiryEditor';
@@ -128,8 +124,8 @@ const InquiryForm = (props) => {
             <div style={{ fontSize: '22px', fontWeight: 'bold', 'color': '#BD0F72' }}>
               {question.field ? getKeyByValue(metadata['field'], question.field) : 'New Inquiry'}
             </div>
-            <div className="flex">
-              <FormControl error={!valid.receiver && !question.receiver.length}>
+            <FormControl error={!valid.receiver && !question.receiver.length}>
+              <div className="flex">
                 <FormGroup row>
                   <FormControlLabel
                     value="onshore"
@@ -154,18 +150,18 @@ const InquiryForm = (props) => {
                     label="Customer"
                   />
                 </FormGroup>
-                {(!valid.receiver && !question.receiver.length) ? <FormHelperText>Pick at least one!</FormHelperText> : null}
-              </FormControl>
-              <div className="flex justify-end items-center mr-2 ">
-                <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
-                <IconButton className="p-8" onClick={() => copyQuestion(index)}>
-                  <FileCopyIcon />
-                </IconButton>
-                <IconButton disabled={questions.length === 1} className="p-8" onClick={() => removeQuestion(index)}>
-                  <DeleteIcon />
-                </IconButton>
+                <div className="flex justify-end items-center mr-2 ">
+                  <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
+                  <IconButton className="p-8" onClick={() => copyQuestion(index)}>
+                    <img style={{ height: "22px" }} src="/assets/images/icons/copy.png" />
+                  </IconButton>
+                  {questions.length !== 1 && <IconButton className="p-8" onClick={() => removeQuestion(index)}>
+                    <img src="/assets/images/icons/delete.png" />
+                  </IconButton>}
+                </div>
               </div>
-            </div>
+              {(!valid.receiver && !question.receiver.length) ? <FormHelperText>Pick at least one!</FormHelperText> : null}
+            </FormControl>
           </div>
           {currentEdit === index ? (
             <InquiryEditor

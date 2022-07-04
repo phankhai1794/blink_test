@@ -63,8 +63,8 @@ const useStyles = makeStyles(() => ({
     marginLeft: '0.2rem'
   },
   buttonSave: {
-    borderRadius: '34px',
-    width: '120px'
+    borderRadius: '8px',
+    width: '130px'
   }
 }));
 
