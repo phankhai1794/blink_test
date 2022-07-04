@@ -370,23 +370,24 @@ const InquiryEditor = (props) => {
         />
       )}
       <Divider className="mt-12" />
-
       <>
         {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
         {question.mediaFile?.length > 0 && question.mediaFile?.map((file, mediaIndex) => (
-          <div style={{ position: 'relative' }} key={mediaIndex}>
-            {file.ext.match(/jpeg|jpg|png/g) ? (
-              <ImageAttach file={file} style={{ margin: '2.5rem' }} />
-            ) : (
-              <FileAttach file={file} />
-            )}
+          <div style={{ position: 'relative',  display: 'inline-block' }} key={mediaIndex}>
+      
+                  {file.ext.match(/jpeg|jpg|png/g) ? (
+                    <ImageAttach file={file} style={{  }} />
+                  ) : (
+                    <FileAttach file={file} />
+                )}
+              
           </div>
         ))}
       </>
       <>
         {question.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
         {question.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
-          <div style={{ position: 'relative' }} key={mediaIndex}>
+          <div style={{ position: 'relative', display: 'inline-block'  }} key={mediaIndex}>
             {file.ext.match(/jpeg|jpg|png/g) ? (
               <ImageAttach file={file} style={{ margin: '2.5rem' }} />
             ) : (

@@ -25,7 +25,6 @@ import ParagraphAnswer from './ParagraphAnswer';
 import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
-
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
   const { receiver } = props;
@@ -198,7 +197,7 @@ const AllInquiry = (props) => {
                   <>
                     {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
                     {q.mediaFile?.length > 0 && q.mediaFile?.map((file, mediaIndex) => (
-                      <div style={{ position: 'relative' }} key={mediaIndex}>
+                      <div style={{ position: 'relative',display: 'inline-block'}} key={mediaIndex}>
                         {file.ext.match(/jpeg|jpg|png/g) ? (
                           <ImageAttach file={file} style={{ margin: '2.5rem' }} />
                         ) : (
@@ -210,7 +209,7 @@ const AllInquiry = (props) => {
                   <>
                     {q.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
                     {q.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
-                      <div style={{ position: 'relative' }} key={mediaIndex}>
+                      <div style={{ position: 'relative',display: 'inline-block' }} key={mediaIndex}>
                         {file.ext.match(/jpeg|jpg|png/g) ? (
                           <ImageAttach file={file} style={{ margin: '2.5rem' }} />
                         ) : (
