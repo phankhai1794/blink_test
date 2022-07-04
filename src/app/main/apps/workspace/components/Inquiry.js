@@ -442,7 +442,7 @@ const Inquiry = (props) => {
                 <>
                   {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
                   {q.mediaFile?.length > 0 && q.mediaFile?.map((file, mediaIndex) => (
-                    <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
+                    <div style={{ position: 'relative',  display: 'inline-block' }} key={mediaIndex} className={classes.root}>
                       {file.ext.match(/jpeg|jpg|png/g) ? (
                         <ImageAttach file={file} style={{ margin: '2.5rem' }} />
                       ) : (

@@ -1,30 +1,36 @@
 import React, { useState } from 'react';
-import ImageViewer from "react-simple-image-viewer";
-import {makeStyles} from "@material-ui/styles";
+import ImageViewer from 'react-simple-image-viewer';
+import { makeStyles } from '@material-ui/styles';
+import CloseIcon from '@material-ui/icons/Close';
+import { IconButton } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    margin: '2rem 3rem',
+    borderWidth: '1px',
+    borderStyle: 'ridge',
+    margin: '10px',
     '& img': {
-      height: 'auto',
-      width: '220px',
-      margin: '10px'
+      height: '220px', 
+      width: '190px', 
+      objectFit: 'fill'
     },
-    '& h2': {
+    '& h3': {
       display: 'block',
-      margin: 'auto 1rem',
-      cursor: 'pointer'
+      margin: '5px',
+      cursor: 'pointer',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      width: '160px'
     },
-    '& h2:hover': {
+    '& h3:hover': {
       color: '#0000ee'
     }
-  },
+  }
 }));
-
 
 const ImageAttach = ({ file }) => {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const images = [file.src]
+  const images = [file.src];
   const classes = useStyles();
   const openImageViewer = () => {
     setIsViewerOpen(true);
@@ -36,24 +42,26 @@ const ImageAttach = ({ file }) => {
   const downloadFile = () => {
     const link = document.createElement('a');
     link.href = file.src;
-    link.setAttribute(
-      'download',
-      file.name,
-    );
+    link.setAttribute('download', file.name);
     document.body.appendChild(link);
     link.click();
     link.parentNode.removeChild(link);
-  }
+  };
+
+  const handleRemoveChoice = (id) => {};
 
   return (
     <div className={classes.root}>
       <img
         src={file.src}
-        style={{ height: 'auto', width: '220px', margin: '10px', /*objectFit: 'contain'*/ }}
         onClick={openImageViewer}
       />
-      <h2 onClick={downloadFile}>{file.name}</h2>
-
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+        <h3 onClick={downloadFile}>{file.name}</h3>
+        <IconButton onClick={() => handleRemoveChoice(1)} style={{ padding: '2px' }}>
+          <CloseIcon />
+        </IconButton>
+      </div>
       {isViewerOpen && (
         <ImageViewer
           src={images}
@@ -61,7 +69,7 @@ const ImageAttach = ({ file }) => {
           onClose={closeImageViewer}
           disableScroll={false}
           backgroundStyle={{
-            backgroundColor: "rgba(0,0,0,0.9)"
+            backgroundColor: 'rgba(0,0,0,0.9)'
           }}
           closeOnClickOutside={true}
         />
