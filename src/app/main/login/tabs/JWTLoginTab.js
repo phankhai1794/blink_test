@@ -204,7 +204,7 @@ function JWTLoginTab({ onLogged }) {
           inputProps={{
             className: classes.inputProps
           }}
-          helperText={account.email.value.length && !account.email.isValid ? 'Invalid email' : ''}
+          helperText={account.email.value.length && !account.email.isValid ? 'Error email' : ''}
         />
 
         <Box className="flex justify-between">
@@ -298,7 +298,7 @@ function JWTLoginTab({ onLogged }) {
           aria-label="Login"
           disabled={!isFormValid}
           value="legacy">
-          Login
+          Log In
         </Button>
       </Formsy>
     </div>
