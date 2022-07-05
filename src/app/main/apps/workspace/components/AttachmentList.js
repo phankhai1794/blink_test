@@ -247,7 +247,7 @@ const AttachmentList = (props) => {
                   extraCondition={pathname.includes('/workplace')}
                   fallback={
                     <div style={{ fontSize: '16px', color: '#BD0F72', fontWeight: 600, lineHeight: '20px' }}>
-                      {filter.label}
+                      {filter?.label}
                     </div>
                   }
                 >

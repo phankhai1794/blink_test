@@ -7,6 +7,7 @@ import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
+import FilterNoneIcon from '@material-ui/icons/FilterNone';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
@@ -26,7 +27,16 @@ import PopoverFooterAdmin from './PopoverFooter1';
 const styles = (theme) => ({
   root: {
     margin: 0,
-    padding: theme.spacing(1, 2)
+    padding: theme.spacing(1, 2),
+    '& .MuiIconButton-root': {
+      padding: '6px',
+      marginLeft: '4px'
+    },
+    '& .MuiIconButton-root:nth-child(1)': {
+      height: '0px',
+      padding: '0px',
+      top: '-5px'
+    }
   },
   dialogToolTips: {
     position: 'absolute',
@@ -58,7 +68,7 @@ const DialogTitle = withStyles(styles)((props) => {
         <div style={{ width: '70%', padding: '1rem' }}>
           <div style={{ color: '#8A97A3', fontSize: '26px', fontWeight: '600' }}>{children}</div>
         </div>
-        <div style={{ width: '30%', textAlign: 'right' }}>
+        <div style={{ width: '30%', textAlign: 'right', paddingRight: '16px', paddingTop: '8px' }}>
           <IconButton
             aria-label="close"
             onClick={handleOpenSnackBar}
@@ -72,7 +82,7 @@ const DialogTitle = withStyles(styles)((props) => {
               onClick={() => openFullScreen(false)}
               style={{ textAlign: 'center' }}
             >
-              <CropIcon />
+              <FilterNoneIcon style={{ width: '20px' }}/>
             </IconButton>
           ) : (
             <IconButton
