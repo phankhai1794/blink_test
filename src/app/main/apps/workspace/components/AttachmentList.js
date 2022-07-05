@@ -172,13 +172,15 @@ const AttachmentList = (props) => {
     } else {
       // update attachment list
       optionsAttachmentList.splice(index, 1);
-      dispatch(
-        InquiryActions.validateAttachment({
-          field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
-          nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name),
-        }));
-      setShowIconSuccess()
+      if (optionsAttachmentList.length > 0) {
+        dispatch(
+          InquiryActions.validateAttachment({
+            field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
+            nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name),
+          }));
+      }
       dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+      setShowIconSuccess();
     }
   };
 
