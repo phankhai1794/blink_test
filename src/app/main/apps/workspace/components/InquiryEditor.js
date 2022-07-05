@@ -373,13 +373,13 @@ const InquiryEditor = (props) => {
       <>
         {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
         {question.mediaFile?.length > 0 && question.mediaFile?.map((file, mediaIndex) => (
-          <div style={{ position: 'relative',  display: 'inline-block' }} key={mediaIndex}>
+          <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
       
-                  {file.ext.match(/jpeg|jpg|png/g) ? (
-                    <ImageAttach file={file} style={{  }} />
-                  ) : (
-                    <FileAttach file={file} />
-                )}
+            {file.ext.match(/jpeg|jpg|png/g) ? (
+              <ImageAttach file={file} style={{ }} />
+            ) : (
+              <FileAttach file={file} />
+            )}
               
           </div>
         ))}
@@ -387,7 +387,7 @@ const InquiryEditor = (props) => {
       <>
         {question.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
         {question.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
-          <div style={{ position: 'relative', display: 'inline-block'  }} key={mediaIndex}>
+          <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
             {file.ext.match(/jpeg|jpg|png/g) ? (
               <ImageAttach file={file} style={{ margin: '2.5rem' }} />
             ) : (

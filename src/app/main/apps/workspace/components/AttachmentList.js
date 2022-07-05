@@ -27,7 +27,7 @@ const AttachmentList = (props) => {
   ]);
   const { pathname } = window.location;
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const [fieldType, setFieldType] = useState(inquiries.map(inq => metadata.field_options.find(meta => meta.value === inq.field)));
+  const [fieldType, setFieldType] = useState(metadata.field_options.filter(meta => inquiries.find(inq => meta.value === inq.field)));
   const dispatch = useDispatch();
   const [isShowIconSuccess, setShowIconSuccess] = useState();
   const styles = (validationAttachment, width) => {
@@ -46,14 +46,15 @@ const AttachmentList = (props) => {
       }
     };
   }
-
   useEffect(() => {
     const optionsAttachmentList = [...attachmentList];
-    dispatch(
-      InquiryActions.validateAttachment({
-        field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
-        nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name),
-      }));
+    if (optionsAttachmentList.length > 0) {
+      dispatch(
+        InquiryActions.validateAttachment({
+          field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
+          nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name),
+        }));
+    }
   }, []);
 
   const handleFieldChange = (e, index) => {
@@ -182,16 +183,18 @@ const AttachmentList = (props) => {
   };
 
   const checkValidateAddNew = (attachment) => {
-    if (!attachment.field || !attachment.name) {
-      dispatch(
-        InquiryActions.validateAttachment({
-          field: Boolean(attachment.field),
-          nameFile: Boolean(attachment.name),
-        })
-      );
-      return true;
+    if (typeof (attachment) !== 'undefined') {
+      if (!attachment.field || !attachment.name) {
+        dispatch(
+          InquiryActions.validateAttachment({
+            field: Boolean(attachment.field),
+            nameFile: Boolean(attachment.name),
+          })
+        );
+        return true;
+      }
+      return false;
     }
-    return false;
   };
 
   const handleAddNew = (file) => {
@@ -221,7 +224,7 @@ const AttachmentList = (props) => {
   return (
     <>
       {attachmentList.map((media, index) => {
-        const filter = fieldType.filter(v => media.field === v.value)[0];
+        const filter = fieldType.filter(v => media.field === v?.value)[0];
         const lowerCaseExt = media.ext.toLowerCase();
         return (
           <div key={index}>
