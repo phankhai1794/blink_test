@@ -28,6 +28,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/styles';
 import { withStyles } from '@material-ui/core/styles';
 import * as AppAction from 'app/store/actions';
+import clsx from "clsx";
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -237,7 +238,29 @@ const useStyles = makeStyles((theme) => ({
   positionBtnNotImg: {
     left: '0',
     top: '4rem'
-  }
+  },
+  icon: {
+    border: '1px solid #BAC3CB',
+    borderRadius: 4,
+    position: 'relative',
+    width: 16,
+    height: 16,
+    backgroundColor: '#f5f8fa',
+    '&.borderChecked': {
+      border: '1px solid #BD0F72',
+    }
+  },
+  checkedIcon: {
+    display: 'block',
+    position: 'absolute',
+    top: '0px',
+    left: '4px',
+    width: '5px',
+    height: '10px',
+    border: '1px solid #BD0F72',
+    borderWidth: '0 2px 2px 0',
+    transform: 'rotate(45deg)',
+  },
 }));
 
 const Inquiry = (props) => {
@@ -356,6 +379,14 @@ const Inquiry = (props) => {
                           checked={q.receiver.includes('onshore')}
                           onChange={handleReceiverChange}
                           color="primary"
+                          checkedIcon={
+                            <>
+                              <span className={clsx(classes.icon, 'borderChecked')}>
+                                <span className={classes.checkedIcon} />
+                              </span>
+                            </>
+                          }
+                          icon={<span className={classes.icon} />}
                         />
                       }
                       label="Onshore"
@@ -367,6 +398,14 @@ const Inquiry = (props) => {
                           checked={q.receiver.includes('customer')}
                           onChange={handleReceiverChange}
                           color="primary"
+                          checkedIcon={
+                            <>
+                              <span className={clsx(classes.icon, 'borderChecked')}>
+                                <span className={classes.checkedIcon} />
+                              </span>
+                            </>
+                          }
+                          icon={<span className={classes.icon} />}
                         />
                       }
                       label="Customer"
@@ -442,7 +481,7 @@ const Inquiry = (props) => {
                 <>
                   {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
                   {q.mediaFile?.length > 0 && q.mediaFile?.map((file, mediaIndex) => (
-                    <div style={{ position: 'relative',  display: 'inline-block' }} key={mediaIndex} className={classes.root}>
+                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex} className={classes.root}>
                       {file.ext.match(/jpeg|jpg|png/g) ? (
                         <ImageAttach file={file} style={{ margin: '2.5rem' }} />
                       ) : (
