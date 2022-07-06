@@ -70,7 +70,7 @@ function ToolbarLayout1(props) {
   const [disableConfirm, setDisableConfirm] = useState(false);
 
   useEffect(() => {
-    myblState === draftConfirm && setDisableConfirm(true)
+    myblState === draftConfirm && setDisableConfirm(true);
   }, [myblState]);
 
   const openAllInquiry = () => {
@@ -129,7 +129,7 @@ function ToolbarLayout1(props) {
 
   return (
     <ThemeProvider theme={toolbarTheme}>
-      <AppBar id="fuse-toolbar" className="flex relative z-10" color="default">
+      <AppBar id="fuse-toolbar" className="flex relative z-10" color="inherit">
         <Toolbar className="p-0">
           {config.navbar.display && config.navbar.position === 'left' && (
             <Hidden lgUp>
@@ -153,7 +153,7 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
-              extraCondition={['/workplace', '/guest'].some((el) => pathname.includes(el))}>
+              extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
               <Button
                 variant="text"
                 size="medium"
@@ -206,14 +206,13 @@ function ToolbarLayout1(props) {
                   borderRadius: '8px',
                   fontWeight: '600',
                   fontFamily: 'Montserrat',
-                  right: '6rem',
+                  right: '6rem'
                 }}
                 variant="text"
                 size="medium"
-                className={clsx("normal-case absolute flex my-8 mr-10")}
+                className={clsx('normal-case absolute flex my-8 mr-10')}
                 onClick={confirmBlDraft}
-                disabled={disableConfirm}
-              >
+                disabled={disableConfirm}>
                 <span className="pl-4">Confirm</span>
               </Button>
               <DialogConfirm open={open} handleClose={handleClose} />
@@ -223,7 +222,7 @@ function ToolbarLayout1(props) {
           <div className="flex" style={{ marginRight: '27px' }}>
             <PermissionProvider
               action={PERMISSION.MAIL_SEND_MAIL}
-              extraCondition={pathname.includes('/workplace')}>
+              extraCondition={pathname.includes('/workspace')}>
               <div style={{ paddingLeft: '15px', paddingRight: '5px', paddingTop: '17px' }}>
                 <Button
                   style={{
@@ -243,7 +242,7 @@ function ToolbarLayout1(props) {
             </PermissionProvider>
             <PermissionProvider
               action={PERMISSION.VIEW_SHOW_BL_HISTORY}
-              extraCondition={pathname.includes('/workplace')}>
+              extraCondition={pathname.includes('/workspace')}>
               <History />
             </PermissionProvider>
             <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>

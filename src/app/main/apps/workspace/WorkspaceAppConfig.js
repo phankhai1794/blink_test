@@ -8,7 +8,7 @@ export const WorkspaceAppConfig = {
   },
   routes: [
     {
-      path: '/apps/workplace/:id',
+      path: '/apps/workspace/:id',
       exact: false,
       component: React.lazy(() => import('./WorkspaceApp'))
     },

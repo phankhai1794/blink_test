@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
       width: '13.67px',
       height: '13.67px',
       content: '""',
-      backgroundImage: 'url("assets/images/icons/warning.svg")',
+      backgroundImage: 'url("assets/images/icons/error.svg")',
       backgroundSize: 'cover'
     }
   },

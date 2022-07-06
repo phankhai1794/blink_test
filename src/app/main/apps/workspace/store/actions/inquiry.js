@@ -8,6 +8,7 @@ export const REMOVE_SELECTED_OPTION = 'REMOVE_SELECTED_OPTION';
 export const DISPLAY_COMMENT = 'DISPLAY_COMMENT';
 export const SET_MYBL = 'SET_MYBL';
 export const SAVE_METADATA = 'SAVE_METADATA';
+export const SET_CONTENT = 'SET_CONTENT';
 export const VALIDATE = 'VALIDATE';
 export const SET_CURRENT_FIELD = 'SET_CURRENT_FIELD';
 export const SET_QUESTION = 'SET_QUESTION';
@@ -84,6 +85,13 @@ export function setMyBL(state) {
 export function saveMetadata(state) {
   return {
     type: SAVE_METADATA,
+    state: state
+  };
+}
+
+export function setContent(state) {
+  return {
+    type: SET_CONTENT,
     state: state
   };
 }
