@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Divider, FormGroup, FormControlLabel, Checkbox, FormControl, FormHelperText, IconButton } from '@material-ui/core';
 import * as AppAction from "app/store/actions";
+import clsx from 'clsx';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -19,14 +20,32 @@ import AttachFile from './AttachFile';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    minHeight: '15px',
+    '&:hover': {
+      backgroundColor: 'transparent',
+    },
+  },
+  icon: {
+    border: '1px solid #BAC3CB',
+    borderRadius: 4,
+    position: 'relative',
+    width: 16,
+    height: 16,
+    backgroundColor: '#f5f8fa',
+    '&.borderChecked': {
+      border: '1px solid #BD0F72',
+    }
+  },
+  checkedIcon: {
+    display: 'block',
     position: 'absolute',
-    left: '215px',
-    top: '-5px',
-    height: '25px',
-    width: '25px',
-    backgroundColor: 'silver'
-  }
+    top: '0px',
+    left: '4px',
+    width: '5px',
+    height: '10px',
+    border: '1px solid #BD0F72',
+    borderWidth: '0 2px 2px 0',
+    transform: 'rotate(45deg)',
+  },
 }));
 
 const InquiryForm = (props) => {
@@ -125,7 +144,7 @@ const InquiryForm = (props) => {
               {question.field ? getKeyByValue(metadata['field'], question.field) : 'New Inquiry'}
             </div>
             <FormControl error={!valid.receiver && !question.receiver.length}>
-              <div className="flex">
+              <div className={clsx('flex')}>
                 <FormGroup row>
                   <FormControlLabel
                     value="onshore"
@@ -133,7 +152,14 @@ const InquiryForm = (props) => {
                       <Checkbox
                         checked={question.receiver.includes('onshore')}
                         onChange={(e) => handleReceiverChange(e, index)}
-                        color="primary"
+                        checkedIcon={
+                          <>
+                            <span className={clsx(classes.icon, 'borderChecked')}>
+                              <span className={classes.checkedIcon} />
+                            </span>
+                          </>
+                        }
+                        icon={<span className={classes.icon} />}
                       />
                     }
                     label="Onshore"
@@ -145,6 +171,14 @@ const InquiryForm = (props) => {
                         checked={question.receiver.includes('customer')}
                         onChange={(e) => handleReceiverChange(e, index)}
                         color="primary"
+                        checkedIcon={
+                          <>
+                            <span className={clsx(classes.icon, 'borderChecked')}>
+                              <span className={classes.checkedIcon} />
+                            </span>
+                          </>
+                        }
+                        icon={<span className={classes.icon} />}
                       />
                     }
                     label="Customer"

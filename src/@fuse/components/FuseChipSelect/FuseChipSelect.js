@@ -86,11 +86,22 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 2,
     marginTop: theme.spacing(),
     left: 0,
-    right: 0
+    right: 0,
+    borderRadius: 10
   },
   divider: {
     height: theme.spacing(2)
-  }
+  },
+  menuItem: {
+    background: '#ffffff',
+    color: '#132535',
+    fontSize: 15,
+    '&:hover': {
+      background: `#FDF2F2 !important`,
+      color: '#BD0F72',
+      fontWeight: '600 !important'
+    }
+  },
 }));
 
 function NoOptionsMessage(props) {
@@ -128,16 +139,17 @@ function Control(props) {
 }
 
 function Option(props) {
+  const classes = useStyles();
   return (
     <MenuItem
       buttonRef={props.innerRef}
-      selected={props.isFocused}
       component="div"
       style={{
         fontWeight: props.isSelected ? 600 : 400,
         backgroundColor: props.isSelected && "#FDF2F2",
         color: props.isSelected && "#BD0F72"
       }}
+      className={classes.menuItem}
       {...props.innerProps}
     >
       {props.children}
