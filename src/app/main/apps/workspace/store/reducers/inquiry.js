@@ -11,7 +11,7 @@ const initialState = {
   reply: false,
   fields: [],
   removeOptions: [],
-  validation: { inqType: true, field: true, receiver: true },
+  validation: { inqType: true, field: true, receiver: true, ansType: true },
   validationAttachment: { field: true, mediaId: true, nameFile: true },
   originalInquiry: [],
   inquiries: [],

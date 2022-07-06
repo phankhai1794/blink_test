@@ -79,7 +79,8 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     left: 0,
     fontSize: 16,
-    margin: 0
+    margin: 0,
+    color: "#BD0F72"
   },
   paper: {
     position: 'absolute',
@@ -87,7 +88,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(),
     left: 0,
     right: 0,
-    borderRadius: 10
+    borderRadius: '12px'
   },
   divider: {
     height: theme.spacing(2)

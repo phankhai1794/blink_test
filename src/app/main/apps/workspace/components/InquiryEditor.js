@@ -190,6 +190,18 @@ const InquiryEditor = (props) => {
     workspace.inquiryReducer.fields,
     workspace.inquiryReducer.validation
   ]);
+  const optionsAnsType = [{
+    label: 'Option Selection',
+    value: metadata.ans_type.choice,
+  },
+  {
+    label: 'Customer Input',
+    value: metadata.ans_type.paragraph,
+  },
+  {
+    label: 'Customer Add Attachment',
+    value: metadata.ans_type.attachment,
+  }];
   const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
 
@@ -197,10 +209,12 @@ const InquiryEditor = (props) => {
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => question.inqType === v.value)[0]
   );
+  const [valueAnsType, setValueAnsType] = useState(optionsAnsType.filter(ansType => ansType.value === question.ansType));
   const [fieldValue, setFieldValue] = useState(
     metadata.field_options.filter((v) => question.field === v.value)[0]
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
+
   const styles = (valid, width) => {
     return {
       control: {
@@ -238,9 +252,6 @@ const InquiryEditor = (props) => {
       dispatch(InquiryActions.removeSelectedOption(list));
     }
 
-    if (!question.ansType) {
-      optionsOfQuestion[index].ansType = metadata.ans_type.choice;
-    }
     if (!question.field && !removeOptions.includes(currentField)) {
       optionsOfQuestion[index].field = currentField;
       setFieldValue(metadata.field_options.filter((v) => currentField === v.value)[0]);
@@ -281,7 +292,9 @@ const InquiryEditor = (props) => {
 
   const handleAnswerTypeChange = (e) => {
     const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].ansType = e.target.value;
+    optionsOfQuestion[index].ansType = e.value;
+    dispatch(InquiryActions.validate({ ...valid, ansType: true }));
+    setValueAnsType(optionsAnsType.filter(ansType => ansType.value === e.value));
     saveQuestion(optionsOfQuestion);
   };
 
@@ -317,25 +330,20 @@ const InquiryEditor = (props) => {
             />
             {!valid.inqType && <FormHelperText>This is required!</FormHelperText>}
           </FormControl>
-          <CustomSelect
-            value={question.ansType}
-            name="Question answer type"
-            onChange={handleAnswerTypeChange}
-            options={[
-              {
-                title: 'Choice Answer',
-                value: metadata.ans_type.choice,
-              },
-              {
-                title: 'Paragraph Answer',
-                value: metadata.ans_type.paragraph,
-              },
-              {
-                title: 'Attachment Answer',
-                value: metadata.ans_type.attachment,
-              }
-            ]}
-          />
+          <FormControl error={!valid.ansType}>
+            <FuseChipSelect
+              className="m-auto"
+              value={valueAnsType}
+              customStyle={styles(valid.ansType, fullscreen ? 330 : 295)}
+              onChange={handleAnswerTypeChange}
+              placeholder="Type of Question"
+              textFieldProps={{
+                variant: 'outlined'
+              }}
+              options={optionsAnsType}
+            />
+            {!valid.ansType && <FormHelperText>This is required!</FormHelperText>}
+          </FormControl>
         </Grid>
       </Grid>
       <div className="mt-32 mx-8">
@@ -374,13 +382,11 @@ const InquiryEditor = (props) => {
         {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
         {question.mediaFile?.length > 0 && question.mediaFile?.map((file, mediaIndex) => (
           <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-      
             {file.ext.match(/jpeg|jpg|png/g) ? (
               <ImageAttach file={file} style={{ }} />
             ) : (
               <FileAttach file={file} />
             )}
-              
           </div>
         ))}
       </>
