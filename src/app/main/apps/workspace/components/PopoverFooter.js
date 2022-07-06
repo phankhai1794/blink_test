@@ -43,7 +43,9 @@ const PopoverFooter = ({ title }) => {
     if (!question[index].inqType || !question[index].field || check.length) {
       dispatch(InquiryActions.validate({
         ...valid, field: Boolean(question[index].field),
-        inqType: Boolean(question[index].inqType), receiver: !check.length
+        inqType: Boolean(question[index].inqType),
+        receiver: !check.length,
+        ansType: Boolean(question[index].ansType),
       }));
       return;
     }
@@ -119,6 +121,7 @@ const PopoverFooter = ({ title }) => {
     } else {
       temp = 0;
     }
+    dispatch(FormActions.toggleCreateInquiry(false))
     dispatch(InquiryActions.setOneInq(inquiries[temp]));
     dispatch(InquiryActions.setField(fields[temp]));
   };
@@ -129,27 +132,24 @@ const PopoverFooter = ({ title }) => {
     } else {
       temp = fields.length - 1;
     }
+    dispatch(FormActions.toggleCreateInquiry(false))
     dispatch(InquiryActions.setOneInq(inquiries[temp]));
     dispatch(InquiryActions.setField(fields[temp]));
   };
   return (
     <div className="flex justify-between" style={{ margin: '1.6rem auto' }}>
       <div>
-        {fields.includes(title) && (
-          <>
-            <IconButton onClick={prevQuestion}>
-              <NavigateBeforeIcon />
-            </IconButton>
-            <IconButton onClick={nextQuestion}>
-              <NavigateNextIcon />
-            </IconButton>
-            <Link style={{ fontSize: '16px' }} component="button" onClick={toggleInquiriresDialog}>
-              Open All Inquiries
-            </Link>
-          </>
-        )}
+        <IconButton onClick={prevQuestion}>
+          <NavigateBeforeIcon />
+        </IconButton>
+        <IconButton onClick={nextQuestion}>
+          <NavigateNextIcon />
+        </IconButton>
+        <Link style={{ fontSize: '16px', color: '#1564EE' }} component="button" onClick={toggleInquiriresDialog}>
+          Open All Inquiries
+        </Link>
       </div>
-      <div >
+      <div style={{ alignSelf: 'center', marginRight: '20rem' }}>
         <PermissionProvider
           action={PERMISSION.VIEW_SAVE_INQUIRY}
           extraCondition={!fields.includes(title)}

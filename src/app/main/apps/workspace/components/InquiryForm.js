@@ -116,11 +116,12 @@ const InquiryForm = (props) => {
   };
 
   const changeToEditor = (index) => {
-    if (!questions[currentEdit].inqType || !questions[currentEdit].field || !questions[currentEdit].receiver.length) {
+    if (!questions[currentEdit].inqType || !questions[currentEdit].field || !questions[currentEdit].receiver.length || !questions[currentEdit].ansType.length) {
       dispatch(InquiryActions.validate({
         field: Boolean(questions[currentEdit].field),
         inqType: Boolean(questions[currentEdit].inqType),
         receiver: Boolean(questions[currentEdit].receiver.length),
+        ansType: Boolean(questions[currentEdit].ansType.length),
       }))
     } else if (index !== currentEdit) dispatch(InquiryActions.setEdit(index));
   };
