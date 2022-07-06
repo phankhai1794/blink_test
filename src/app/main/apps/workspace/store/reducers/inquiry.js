@@ -3,6 +3,7 @@ import * as Actions from '../actions/inquiry';
 const initialState = {
   myBL: {},
   metadata: {},
+  content: {},
   currentEdit: 0,
   currentEditInq: null,
   displayCmt: false,
@@ -24,13 +25,13 @@ const initialState = {
       answerObj: [],
       addOther: '',
       receiver: [],
-      mediaFile: [],
+      mediaFile: []
     }
   ],
   currentInq: {},
   listInqMinimize: [],
   listMinimize: [],
-  attachmentList: [],
+  attachmentList: []
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -118,6 +119,9 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SAVE_METADATA: {
     return { ...state, metadata: action.state };
+  }
+  case Actions.SET_CONTENT: {
+    return { ...state, content: action.state };
   }
   case Actions.REMOVE_SELECTED_OPTION: {
     return { ...state, removeOptions: action.state };

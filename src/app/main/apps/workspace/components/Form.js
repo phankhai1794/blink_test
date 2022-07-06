@@ -23,7 +23,6 @@ import * as InquiryActions from '../store/actions/inquiry';
 import PopoverFooter from './PopoverFooter';
 import PopoverFooterAdmin from './PopoverFooter1';
 
-
 const styles = (theme) => ({
   root: {
     margin: 0,
@@ -72,28 +71,25 @@ const DialogTitle = withStyles(styles)((props) => {
           <IconButton
             aria-label="close"
             onClick={handleOpenSnackBar}
-            style={{ textAlign: 'center' }}
-          >
+            style={{ textAlign: 'center' }}>
             <MinimizeIcon />
           </IconButton>
           {isFullScreen ? (
             <IconButton
               aria-label="close"
               onClick={() => openFullScreen(false)}
-              style={{ textAlign: 'center' }}
-            >
-              <FilterNoneIcon style={{ width: '20px' }}/>
+              style={{ textAlign: 'center' }}>
+              <FilterNoneIcon style={{ width: '20px' }} />
             </IconButton>
           ) : (
             <IconButton
               aria-label="close"
               onClick={() => openFullScreen(true)}
-              style={{ textAlign: 'center' }}
-            >
+              style={{ textAlign: 'center' }}>
               <CropDinIcon />
             </IconButton>
           )}
-          <IconButton aria-label="close" >
+          <IconButton aria-label="close">
             <OpenInNew />
           </IconButton>
           <IconButton aria-label="close" onClick={handleClose}>
@@ -130,15 +126,34 @@ const useStyles = makeStyles(() => ({
   chip: {
     marginLeft: '0.2rem'
   }
-
 }));
 
 export default function Form(props) {
   const dispatch = useDispatch();
-  const { children, title, field, hasAddButton, FabTitle, open, toggleForm, customActions, tabs, popoverfooter } =
-    props;
+  const {
+    children,
+    title,
+    field,
+    hasAddButton,
+    FabTitle,
+    open,
+    toggleForm,
+    customActions,
+    tabs,
+    popoverfooter
+  } = props;
 
-  const [index, question, inquiries, metadata, currentField, originalInquiry, listInqMinimize, listMinimize, attachmentList] = useSelector(({ workspace }) => [
+  const [
+    index,
+    question,
+    inquiries,
+    metadata,
+    currentField,
+    originalInquiry,
+    listInqMinimize,
+    listMinimize,
+    attachmentList
+  ] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.question,
     workspace.inquiryReducer.inquiries,
@@ -147,14 +162,13 @@ export default function Form(props) {
     workspace.inquiryReducer.originalInquiry,
     workspace.inquiryReducer.listInqMinimize,
     workspace.inquiryReducer.listMinimize,
-    workspace.inquiryReducer.attachmentList,
+    workspace.inquiryReducer.attachmentList
   ]);
 
-  const [openAllInquiry, showSaveInquiry, showAddInquiry, openInquiry] = useSelector(({ workspace }) => [
+  const [openAllInquiry, showSaveInquiry, showAddInquiry] = useSelector(({ workspace }) => [
     workspace.formReducer.openAllInquiry,
     workspace.formReducer.showSaveInquiry,
-    workspace.formReducer.showAddInquiry,
-    workspace.formReducer.openInquiry,
+    workspace.formReducer.showAddInquiry
   ]);
 
   const [openFab, setOpenFab] = useState(false);
@@ -164,14 +178,14 @@ export default function Form(props) {
   const [idBtn, setIdBtn] = useState('');
 
   useEffect(() => {
-    const temp = listMinimize.find(e => e.field === field);
+    const temp = listMinimize.find((e) => e.field === field);
     for (let index = 0; index < listInqMinimize.length; index++) {
-      if ((index < NUMBER_INQ_BOTTOM) && (listInqMinimize[index] === temp.id)) {
+      if (index < NUMBER_INQ_BOTTOM && listInqMinimize[index] === temp.id) {
         setOpenFab(true);
         break;
       }
     }
-  }, [listInqMinimize])
+  }, [listInqMinimize]);
 
   const checkValidate = (question) => {
     if (!question.inqType || !question.field || !question.receiver.length) {
@@ -179,7 +193,7 @@ export default function Form(props) {
         InquiryActions.validate({
           field: Boolean(question.field),
           inqType: Boolean(question.inqType),
-          receiver: Boolean(question.receiver.length),
+          receiver: Boolean(question.receiver.length)
         })
       );
       return false;
@@ -187,7 +201,7 @@ export default function Form(props) {
     return true;
   };
   const handleOpenFab = () => {
-    setIdBtn(currentField)
+    setIdBtn(currentField);
     setOpenFab(true);
     toggleForm(false);
     dispatch(InquiryActions.setOneInq({}));
@@ -195,13 +209,13 @@ export default function Form(props) {
     // sort
     const currentInq = listMinimize.find((q) => q.field === field);
     if (currentInq?.id && !listInqMinimize.includes(currentInq.id)) {
-      const minimizeOptions = [...listMinimize].filter(item => item.id !== currentInq.id);
+      const minimizeOptions = [...listMinimize].filter((item) => item.id !== currentInq.id);
       minimizeOptions.unshift(currentInq);
       dispatch(InquiryActions.setListMinimize(minimizeOptions));
       listInqMinimize.push(currentInq.id);
       dispatch(InquiryActions.setListInqMinimize(listInqMinimize));
     }
-    if (listInqMinimize.findIndex(inq => inq === currentInq.id) >= NUMBER_INQ_BOTTOM) {
+    if (listInqMinimize.findIndex((inq) => inq === currentInq.id) >= NUMBER_INQ_BOTTOM) {
       setOpenFab(false);
     }
   };
@@ -214,7 +228,7 @@ export default function Form(props) {
       dispatch(InquiryActions.addQuestion1());
     } else if (checkValidate(question[index])) {
       if (inquiries.length + question.length + 1 === metadata.field_options.length) {
-        dispatch(FormActions.toggleAddInquiry(false))
+        dispatch(FormActions.toggleAddInquiry(false));
       }
       dispatch(InquiryActions.addQuestion());
       dispatch(InquiryActions.setEdit(question.length));
@@ -222,7 +236,7 @@ export default function Form(props) {
   };
 
   const sortListClose = (list, field) => {
-    const index = list.findIndex(inp => inp.field === field)
+    const index = list.findIndex((inp) => inp.field === field);
     const tempInq = list.splice(index, 1)[0];
     list.splice(list.length, 0, tempInq);
   };
@@ -240,15 +254,15 @@ export default function Form(props) {
     if (field === 'ATTACHMENT_LIST') {
       dispatch(FormActions.toggleReload());
     } else {
-      dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))))
+      dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))));
     }
-    dispatch(FormActions.toggleSaveInquiry(false))
+    dispatch(FormActions.toggleSaveInquiry(false));
     if (tabs) props.tabChange(0);
-    dispatch(InquiryActions.setOneInq({}))
+    dispatch(InquiryActions.setOneInq({}));
     //
     const currentInq = listMinimize.find((q) => q.field === field);
     if (currentInq?.id && listInqMinimize.includes(currentInq.id)) {
-      const filterInq = listInqMinimize.filter(id => id !== currentInq.id);
+      const filterInq = listInqMinimize.filter((id) => id !== currentInq.id);
       dispatch(InquiryActions.setListInqMinimize(filterInq));
     }
   };
@@ -262,16 +276,16 @@ export default function Form(props) {
     const currentInq = listMinimize.find((q) => q.field === field);
     if (currentInq) {
       dispatch(InquiryActions.setOneInq(currentInq));
-      toggleForm(true)
+      toggleForm(true);
       if (field === 'INQUIRY_LIST') {
-        dispatch(FormActions.toggleSaveInquiry(true))
+        dispatch(FormActions.toggleSaveInquiry(true));
       }
     }
   };
 
   const handleSetOpenFab = (status) => {
-    setOpenFab(status)
-  }
+    setOpenFab(status);
+  };
 
   return (
     <div>
@@ -280,7 +294,7 @@ export default function Form(props) {
           label={FabTitle}
           onClick={openMinimize}
           onDelete={handleClose}
-          color='primary'
+          color="primary"
           className={classesHover.chip}
         />
       )}
@@ -290,16 +304,14 @@ export default function Form(props) {
         aria-labelledby="customized-dialog-title"
         open={open}
         maxWidth="md"
-        classes={{ paperScrollPaper: isFullScreen ? null : classes.dialogPaper }}
-      >
+        classes={{ paperScrollPaper: isFullScreen ? null : classes.dialogPaper }}>
         <DialogTitle
           id="customized-dialog-title"
           toggleFullScreen={toggleFullScreen}
           handleOpenSnackBar={handleOpenFab}
           toggleForm={toggleForm}
           isFullScreen={isFullScreen}
-          handleClose={handleClose}
-        >
+          handleClose={handleClose}>
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
@@ -309,8 +321,7 @@ export default function Form(props) {
               indicatorColor="secondary"
               style={{ margin: 0, backgroundColor: '#102536' }}
               value={value}
-              onChange={handleChange}
-            >
+              onChange={handleChange}>
               <Tab style={{ color: 'white' }} label="Customer" />
               <Tab style={{ color: 'white' }} label="Onshore" />
             </Tabs>
@@ -320,20 +331,29 @@ export default function Form(props) {
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
           <DialogActions style={{ display: 'none !important' }}>
-            {(hasAddButton === undefined || hasAddButton === true) && !openAllInquiry && showAddInquiry && (
+            {(hasAddButton === undefined || hasAddButton === true) &&
+              !openAllInquiry &&
+              showAddInquiry && (
               <div style={{ right: '3rem', bottom: '2.6rem', position: 'absolute' }}>
                 <Link
                   component="button"
                   variant="body2"
                   onClick={handleClick}
-                  style={{ display: 'flex', alignItems: 'center' }}
-                >
+                  style={{ display: 'flex', alignItems: 'center' }}>
                   <AddCircleOutlineIcon fontSize="large" />
-                  <span style={{ color: '#BD0F72', fontSize: '16px', marginLeft: '5px', fontWeight: 'bold' }}>Add Inquiry</span>
+                  <span
+                    style={{
+                      color: '#BD0F72',
+                      fontSize: '16px',
+                      marginLeft: '5px',
+                      fontWeight: 'bold'
+                    }}>
+                      Add Inquiry
+                  </span>
                 </Link>
               </div>
             )}
-            {!popoverfooter &&
+            {!popoverfooter && (
               <div style={{ marginLeft: '2rem' }}>
                 {!showSaveInquiry ? (
                   <PopoverFooter title={field} />
@@ -343,7 +363,7 @@ export default function Form(props) {
                   </PermissionProvider>
                 )}
               </div>
-            }
+            )}
           </DialogActions>
         )}
         {customActions}

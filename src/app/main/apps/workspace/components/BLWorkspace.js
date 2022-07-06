@@ -18,22 +18,25 @@ import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
 import Label from './FieldLabel';
+import BtnAddInquiry from './BtnAddInquiry';
 import BLField from './BLField';
 import InquiryForm from './InquiryForm';
 import AttachmentList from './AttachmentList';
-import { InquiryReview, SendInquiryForm } from "./SendInquiryForm";
-
+import BLProcessNotification from './BLProcessNotification';
+import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '1170px',
     margin: '0 auto',
+    paddingTop: 10,
+    paddingBottom: 113
   },
   leftPanel: {
-    paddingRight: '35px'
+    paddingRight: '15px'
   },
   rightPanel: {
-    paddingLeft: '35px'
+    paddingLeft: '15px'
   },
   ptGridItem: {
     paddingTop: '0 !important'
@@ -52,48 +55,21 @@ const useStyles = makeStyles((theme) => ({
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [content, setContent] = useState({});
   const [isExpand, setIsExpand] = useState(false);
-  const currentField = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.currentField
-  );
-  const metadata = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.metadata
-  );
-  const myBL = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.myBL
-  );
-  const openAttachment = useSelector(({ workspace }) =>
-    workspace.formReducer.openAttachment,
-  );
-  const openAllInquiry = useSelector(({ workspace }) =>
-    workspace.formReducer.openAllInquiry,
-  );
-  const openInquiryForm = useSelector(({ workspace }) =>
-    workspace.formReducer.openDialog,
-  );
-  const reload = useSelector(({ workspace }) =>
-    workspace.formReducer.reload,
-  );
-  const transAutoSaveStatus = useSelector(({ workspace }) =>
-    workspace.transReducer.transAutoSaveStatus,
-  );
-  const isLoading = useSelector(({ workspace }) =>
-    workspace.transReducer.isLoading
-  );
-  const inquiries = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.inquiries
-  );
-  const currentInq = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.currentInq
-  );
-  const listMinimize = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.listMinimize,
-  );
 
-  const listInqMinimize = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.listInqMinimize
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
+  const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
+  const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
+  const transAutoSaveStatus = useSelector(
+    ({ workspace }) => workspace.transReducer.transAutoSaveStatus
   );
+  const isLoading = useSelector(({ workspace }) => workspace.transReducer.isLoading);
+  const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
+  const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
+  const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -102,12 +78,6 @@ const BLWorkspace = (props) => {
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
-
-  useEffect(() => {
-    if (myBL.id) {
-      dispatch(Actions.loadInquiry(myBL.id));
-    }
-  }, [reload, myBL]);
 
   useEffect(() => {
     const unloadCallback = (event) => {
@@ -120,13 +90,6 @@ const BLWorkspace = (props) => {
     window.addEventListener('beforeunload', unloadCallback);
     return () => window.removeEventListener('beforeunload', unloadCallback);
   }, [isLoading]);
-
-  useEffect(() => {
-    if (myBL.id) {
-      dispatch(TransActions.setStatusTransaction('start'));
-      Actions.loadBlInfo(myBL.id, setContent);
-    }
-  }, [myBL]);
 
   useEffect(() => {
     setInterval(() => {
@@ -153,11 +116,11 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     const handlerEvent = (event) => {
       if (expandRef.current && !expandRef.current.contains(event.target)) {
-        setIsExpand(false)
+        setIsExpand(false);
       }
     };
     document.addEventListener('mousedown', handlerEvent);
-    return () => document.removeEventListener('mousedown', handlerEvent)
+    return () => document.removeEventListener('mousedown', handlerEvent);
   }, []);
 
   const popupOpen = (inquiry, getField) => {
@@ -171,7 +134,7 @@ const BLWorkspace = (props) => {
         hasAddButton: false,
         field: 'INQUIRY_LIST',
         child: <AllInquiry user={props.user} />
-      }
+      };
     case 'ATTACHMENT_LIST':
       return {
         status: openAttachment,
@@ -182,7 +145,7 @@ const BLWorkspace = (props) => {
         field: 'ATTACHMENT_LIST',
         popoverfooter: true,
         child: <AttachmentList user={props.user} />
-      }
+      };
     case 'INQUIRY_FORM':
       return {
         status: openInquiryForm,
@@ -191,17 +154,19 @@ const BLWorkspace = (props) => {
         title: 'Inquiry Creation',
         field: 'INQUIRY_FORM',
         child: <InquiryForm />
-      }
+      };
     default:
-      return {status: inquiry.id === currentInq.id,
+      return {
+        status: inquiry.id === currentInq.id,
         toggleForm: () => {},
         fabTitle: getField?.label,
         title: getField?.value ? getKeyByValue(metadata['field'], getField?.value) : '',
         hasAddButton: false,
         field: getField?.value,
-        child: <Inquiry user={props.user} />}
+        child: <Inquiry user={props.user} />
+      };
     }
-  }
+  };
 
   const handleExpand = () => setIsExpand(!isExpand);
 
@@ -211,19 +176,19 @@ const BLWorkspace = (props) => {
       attachmentList: 'Attachment',
       email: 'E-mail',
       inquiryForm: 'Inquiry Form',
-      inquiryReview: 'Inquiry Review',
+      inquiryReview: 'Inquiry Review'
     };
     if (Object.keys(listTitle).includes(inqId)) {
       return listTitle[inqId];
     } else {
-      const fieldId = listMinimize.find(inq => inq.id === inqId).field;
-      const getField = metadata.field_options.find(field => fieldId === field.value);
+      const fieldId = listMinimize.find((inq) => inq.id === inqId).field;
+      const getField = metadata.field_options.find((field) => fieldId === field.value);
       return getField && getField.label;
     }
   };
 
   const handleClose = (inqId) => {
-    const index = listInqMinimize.findIndex(inp => inp === inqId);
+    const index = listInqMinimize.findIndex((inp) => inp === inqId);
     listInqMinimize.splice(index, 1);
     dispatch(InquiryActions.setListInqMinimize(listInqMinimize));
   };
@@ -231,391 +196,397 @@ const BLWorkspace = (props) => {
   const openMinimize = (inqId) => {
     const toggleFormType = {
       email: (status) => dispatch(FormActions.toggleOpenEmail(status)),
-      inquiryReview: (status) => dispatch(FormActions.toggleOpenInquiryReview(status)),
+      inquiryReview: (status) => dispatch(FormActions.toggleOpenInquiryReview(status))
     };
     const currentInq = listMinimize.find((q) => q.id === inqId);
-    const getField = metadata.field_options.find(field => currentInq.field === field.value);
+    const getField = metadata.field_options.find((field) => currentInq.field === field.value);
     dispatch(InquiryActions.setField(currentInq.field));
-    const popupObj = (Object.keys(toggleFormType).includes(inqId)) ?
-      { toggleForm: toggleFormType[inqId] }
+    const popupObj = Object.keys(toggleFormType).includes(inqId)
+      ? { toggleForm: toggleFormType[inqId] }
       : popupOpen(currentInq, getField);
     if (currentInq) {
       dispatch(InquiryActions.setOneInq(currentInq));
-      popupObj.toggleForm(true)
+      popupObj.toggleForm(true);
       if (currentInq.field === 'INQUIRY_LIST') {
-        dispatch(FormActions.toggleSaveInquiry(true))
+        dispatch(FormActions.toggleSaveInquiry(true));
       }
     }
-    setIsExpand(false)
+    setIsExpand(false);
   };
 
   return (
-    <div className={clsx("max-w-5xl", classes.root)}>
-      <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
-        {isExpand &&
+    <>
+      <BLProcessNotification />
+      <div className={clsx('max-w-5xl', classes.root)}>
+        <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
+          {isExpand && (
+            <div
+              ref={expandRef}
+              className="flex flex-col p-4 rounded-8 shadow"
+              style={{ marginBottom: '-0.5rem' }}>
+              {listInqMinimize.map((inq, index) => {
+                if (index >= NUMBER_INQ_BOTTOM)
+                  return (
+                    <Chip
+                      key={index}
+                      className="flex justify-between mt-4"
+                      label={getFabTitle(inq)}
+                      onClick={() => openMinimize(inq)}
+                      onDelete={() => handleClose(inq)}
+                      color="primary"
+                    />
+                  );
+              })}
+            </div>
+          )}
           <div
-            ref={expandRef}
-            className='flex flex-col p-4 rounded-8 shadow'
-            style={{ marginBottom: '-0.5rem' }}>
-            {listInqMinimize.map((inq, index) => {
-              if (index >= NUMBER_INQ_BOTTOM)
-                return <Chip
-                  key={index}
-                  className='flex justify-between mt-4'
-                  label={getFabTitle(inq)}
-                  onClick={() => openMinimize(inq)}
-                  onDelete={() => handleClose(inq)}
-                  color='primary'
-                />
-            }
+            style={{
+              display: 'flex',
+              position: 'fixed',
+              right: '2rem',
+              bottom: '1rem',
+              zIndex: 999
+            }}>
+            {listMinimize.map((inquiry) => {
+              const getField = metadata.field_options.find(
+                (field) => inquiry.field === field.value
+              );
+              if (inquiry.field === 'EMAIL') {
+                return <SendInquiryForm field={'EMAIL'} key={inquiry.id} />;
+              } else if (inquiry.field === 'INQUIRY_REVIEW') {
+                return <InquiryReview field={'INQUIRY_REVIEW'} key={inquiry.id} />;
+              } else {
+                const popupObj = popupOpen(inquiry, getField);
+                return (
+                  <Form
+                    key={inquiry.id}
+                    open={popupObj.status}
+                    toggleForm={popupObj.toggleForm}
+                    FabTitle={popupObj.fabTitle}
+                    hasAddButton={popupObj.hasAddButton}
+                    field={popupObj.field}
+                    popoverfooter={popupObj.popoverfooter}
+                    title={popupObj.title}>
+                    {popupObj.child}
+                  </Form>
+                );
+              }
+            })}
+            {listInqMinimize.length > NUMBER_INQ_BOTTOM && (
+              <div className="flex items-center pl-1" onClick={handleExpand}>
+                <span>
+                  <strong>{NUMBER_INQ_BOTTOM}</strong>/{listInqMinimize.length}
+                </span>
+                {isExpand ? <ExpandMore /> : <ExpandLess />}
+              </div>
             )}
           </div>
-        }
-        <div style={{ display: 'flex', position: 'fixed', right: '2rem', bottom: '1rem', zIndex: 999 }}>
-          {listMinimize.map((inquiry => {
-            const getField = metadata.field_options.find((field) => inquiry.field === field.value);
-            if (inquiry.field === 'EMAIL') {
-              return (<SendInquiryForm field={'EMAIL'} key={inquiry.id} />)
-            } else if (inquiry.field === 'INQUIRY_REVIEW') {
-              return (<InquiryReview field={'INQUIRY_REVIEW'} key={inquiry.id} />)
-            } else {
-              const popupObj = popupOpen(inquiry, getField);
-              return (
-                <Form
-                  key={inquiry.id}
-                  open={popupObj.status}
-                  toggleForm={popupObj.toggleForm}
-                  FabTitle={popupObj.fabTitle}
-                  hasAddButton={popupObj.hasAddButton}
-                  field={popupObj.field}
-                  popoverfooter={popupObj.popoverfooter}
-                  title={popupObj.title}>
-                  {popupObj.child}
-                </Form>
-              )
-            }
-          }))}
-          {listInqMinimize.length > NUMBER_INQ_BOTTOM &&
-            <div className='flex items-center pl-1' onClick={handleExpand}>
-              <span><strong>{NUMBER_INQ_BOTTOM}</strong>/{listInqMinimize.length}</span>
-              {isExpand ? <ExpandMore /> : <ExpandLess />}
-            </div>}
         </div>
-      </div>
 
-      <Grid container>
-        <Grid item xs={6} className={classes.leftPanel}>
-          <Grid item>
-            <BLField
-              label="Shipper/Exporter"
-              id={getField('SHIPPER/EXPORTER')}
-              multiline={true}
-              rows={5}>
-              {getValueField('SHIPPER/EXPORTER')}
-            </BLField>
-          </Grid>
-          <Grid item>
-            <BLField label="Consignee" id={getField('CONSIGNEE')} multiline={true} rows={5}>
-              {getValueField('CONSIGNEE')}
-            </BLField>
-          </Grid>
-          <Grid item>
-            <BLField
-              label={
-                <>
-                  {`NOTIFY PARTY (It is agreed that no responsibility shall be`} <br></br>
-                  {`attached to the Carrier or its Agents for failure to notify`})
-                </>
-              }
-              id={getField('NOTIFY PARTY')}
-              multiline={true}
-              rows={5}>
-              {getValueField('NOTIFY PARTY')}
-            </BLField>
-          </Grid>
-          <Grid container style={{ marginTop: '60px' }}>
-            <Grid item xs={6} className={classes.leftPanel}>
-              <Grid item>
-                <BLField label="PRE-CARRIAGE BY" id={getField('PRE-CARRIAGE BY')}>
-                  {getValueField('PRE-CARRIAGE BY')}
-                </BLField>
-              </Grid>
-              <Grid item>
-                <BLField label="PORT OF LOADING" id={getField('PORT OF LOADING')}>
-                  {getValueField('PORT OF LOADING')}
-                </BLField>
-              </Grid>
-            </Grid>
-            <Grid item xs={6} className={classes.rightPanel}>
-              <Grid item>
-                <BLField label="PLACE OF RECEIPT" id={getField('PLACE OF RECEIPT')}>
-                  {getValueField('PLACE OF RECEIPT')}
-                </BLField>
-              </Grid>
-              <Grid item>
-                <BLField label="PORT OF DISCHARGE" id={getField('PORT OF DISCHARGE')}>
-                  {getValueField('PORT OF DISCHARGE')}
-                </BLField>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid item xs={6} className={classes.rightPanel}>
-          <Grid container>
-            <Grid item xs={6} className={classes.leftPanel}>
-              <BLField label="BOOKING NO." id="booking_no" lock={true}>
-                TYOBD9739500
-              </BLField>
-            </Grid>
-            <Grid item xs={6} className={classes.rightPanel}>
-              <BLField label="SEA WAYBILL NO.">ONEYTYOBD9739500</BLField>
-            </Grid>
-          </Grid>
-          <Grid item>
-            <BLField
-              label={
-                <>
-                  {`EXPORT REFERENCES (for the Merchant's and/or Carrier's`} <br></br>
-                  {`reference only. See back clause 8. (4.)`})
-                </>
-              }
-              id={getField('EXPORT REFERENCES')}
-              multiline={true}
-              rows={2}></BLField>
-          </Grid>
-          <Grid item>
-            <BLField
-              label="FORWARDING AGENT-REFERENCES FMC NO."
-              id={getField('FORWARDING AGENT-REFERENCES')}
-              multiline={true}
-              rows={5}>
-              {getValueField('FORWARDING AGENT-REFERENCES')}
-            </BLField>
-          </Grid>
-          <Grid item>
-            <BLField
-              label={`FINAL DESTINATION(for line merchant's reference only)`}
-              id={getField('FINAL DESTINATION')}>
-              {getValueField('FINAL DESTINATION')}
-            </BLField>
-          </Grid>
-          <Grid item>
-            <BLField
-              label={
-                <>
-                  TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF <br></br> PACKAGES AND GOODS FIELD)
-                </>
-              }
-              id={getField('TYPE OF MOVEMENT')}>
-              {getValueField('TYPE OF MOVEMENT')}
-            </BLField>
-          </Grid>
-          <Grid item>
-            <Grid item>
-              <BLField
-                label="OCEAN VESSEL VOYAGE NO. FlAG"
-                id={getField('OCEAN VESSEL VOYAGE NO. FLAG')}
-                width={`calc(50% - 35px)`}>
-                {getValueField('OCEAN VESSEL VOYAGE NO. FLAG')}
-              </BLField>
-            </Grid>
-          </Grid>
+        <BtnAddInquiry />
+
+        <Grid container>
           <Grid item xs={6} className={classes.leftPanel}>
-            <BLField label="PLACE OF DELIVERY" id={getField('PLACE OF DELIVERY')}>
-              {getValueField('PLACE OF DELIVERY')}
-            </BLField>
+            <Grid item>
+              <Label>Shipper/Exporter</Label>
+              <BLField id={getField('SHIPPER/EXPORTER')} multiline={true} rows={5}>
+                {getValueField('SHIPPER/EXPORTER')}
+              </BLField>
+            </Grid>
+            <Grid item>
+              <Label>Consignee</Label>
+              <BLField id={getField('CONSIGNEE')} multiline={true} rows={5}>
+                {getValueField('CONSIGNEE')}
+              </BLField>
+            </Grid>
+            <Grid item>
+              <Label>
+                {`NOTIFY PARTY (It is agreed that no responsibility shall be attached to the`}{' '}
+                <br></br>
+                {`Carrier or its Agents for failure to notify`}
+              </Label>
+              <BLField id={getField('NOTIFY PARTY')} multiline={true} rows={5}>
+                {getValueField('NOTIFY PARTY')}
+              </BLField>
+            </Grid>
+            <Grid container style={{ marginTop: '53px' }}>
+              <Grid item xs={6} className={classes.leftPanel}>
+                <Grid item>
+                  <Label>PRE-CARRIAGE BY</Label>
+                  <BLField id={getField('PRE-CARRIAGE BY')}>
+                    {getValueField('PRE-CARRIAGE BY')}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>PORT OF LOADING</Label>
+                  <BLField id={getField('PORT OF LOADING')}>
+                    {getValueField('PORT OF LOADING')}
+                  </BLField>
+                </Grid>
+              </Grid>
+              <Grid item xs={6} className={classes.rightPanel}>
+                <Grid item>
+                  <Label>PLACE OF RECEIPT</Label>
+                  <BLField id={getField('PLACE OF RECEIPT')}>
+                    {getValueField('PLACE OF RECEIPT')}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>PORT OF DISCHARGE</Label>
+                  <BLField id={getField('PORT OF DISCHARGE')}>
+                    {getValueField('PORT OF DISCHARGE')}
+                  </BLField>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item xs={6} className={classes.rightPanel}>
+            <Grid container>
+              <Grid item xs={6} className={classes.leftPanel}>
+                <Label>BOOKING NO.</Label>
+                <BLField id="booking_no" lock={true}>
+                  TYOBD9739500
+                </BLField>
+              </Grid>
+              <Grid item xs={6} className={classes.rightPanel}>
+                <Label>SEA WAYBILL NO.</Label>
+                <BLField lock={true}>ONEYTYOBD9739500</BLField>
+              </Grid>
+            </Grid>
+            <Grid item>
+              <Label>
+                {`EXPORT REFERENCES (for the Merchant's and/or Carrier's reference only.`} <br></br>
+                {`See back clause 8. (4.)`}
+              </Label>
+              <BLField id={getField('EXPORT REFERENCES')} multiline={true} rows={2}></BLField>
+            </Grid>
+            <Grid item>
+              <Label>FORWARDING AGENT-REFERENCES FMC NO.</Label>
+              <BLField id={getField('FORWARDING AGENT-REFERENCES')} multiline={true} rows={5}>
+                {getValueField('FORWARDING AGENT-REFERENCES')}
+              </BLField>
+            </Grid>
+            <Grid item>
+              <Label>{`FINAL DESTINATION (for line merchant's reference only)`}</Label>
+              <BLField id={getField('FINAL DESTINATION')}>
+                {getValueField('FINAL DESTINATION')}
+              </BLField>
+            </Grid>
+            <Grid item>
+              <Label>
+                {`TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF PACKAGES AND`} <br></br>
+                {`GOODS FIELD)`}
+              </Label>
+              <BLField id={getField('TYPE OF MOVEMENT')}>
+                {getValueField('TYPE OF MOVEMENT')}
+              </BLField>
+            </Grid>
+            <Grid item>
+              <Grid item>
+                <Label>OCEAN VESSEL VOYAGE NO. FlAG</Label>
+                <BLField id={getField('OCEAN VESSEL VOYAGE NO. FLAG')} width={`calc(50% - 15px)`}>
+                  {getValueField('OCEAN VESSEL VOYAGE NO. FLAG')}
+                </BLField>
+              </Grid>
+            </Grid>
+            <Grid item xs={6} className={classes.leftPanel}>
+              <Label>PLACE OF DELIVERY</Label>
+              <BLField id={getField('PLACE OF DELIVERY')}>
+                {getValueField('PLACE OF DELIVERY')}
+              </BLField>
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>
 
-      <Divider className={classes.divider} />
+        <Divider className={classes.divider} />
 
-      <Grid container spacing={4}>
-        <Grid item xs={2}>
-          <Label className="my-0">CONTAINER NO.</Label>
+        <Grid container spacing={4}>
+          <Grid item xs={2}>
+            <Label className="my-0">CONTAINER NO.</Label>
+          </Grid>
+          <Grid item xs={2}>
+            <Label className="my-0">SEAL NO.</Label>
+          </Grid>
+          <Grid item xs={2}>
+            <Label className="my-0">PACKAGE</Label>
+          </Grid>
+          <Grid item xs={1}>
+            <Label className="my-0">MODE</Label>
+          </Grid>
+          <Grid item xs={1}>
+            <Label className="my-0">TYPE</Label>
+          </Grid>
+          <Grid item xs={2}>
+            <Label className="my-0">MEASUREMENT</Label>
+          </Grid>
+          <Grid item xs={2}>
+            <Label className="my-0">WEIGHT</Label>
+          </Grid>
         </Grid>
-        <Grid item xs={2}>
-          <Label className="my-0">SEAL NO.</Label>
+        <Grid container spacing={4}>
+          <Grid item xs={2}>
+            <BLField>SEGU5048074</BLField>
+          </Grid>
+          <Grid item xs={2}>
+            <BLField>JPC074647</BLField>
+          </Grid>
+          <Grid item xs={2}>
+            <BLField></BLField>
+          </Grid>
+          <Grid item xs={1}>
+            <BLField>FCL / FCL</BLField>
+          </Grid>
+          <Grid item xs={1}>
+            <BLField>40HQ</BLField>
+          </Grid>
+          <Grid item xs={2}>
+            <BLField>3,560 CBM</BLField>
+          </Grid>
+          <Grid item xs={2}>
+            <BLField>1,716.000 KGS</BLField>
+          </Grid>
         </Grid>
-        <Grid item xs={2}>
-          <Label className="my-0">PACKAGE</Label>
+        <Grid container spacing={4}>
+          <Grid item xs={2}>
+            <BLField>SEGU5048074</BLField>
+          </Grid>
+          <Grid item xs={2}>
+            <BLField>JPC074647</BLField>
+          </Grid>
+          <Grid item xs={2}>
+            <BLField></BLField>
+          </Grid>
+          <Grid item xs={1}>
+            <BLField>FCL / FCL</BLField>
+          </Grid>
+          <Grid item xs={1}>
+            <BLField>40HQ</BLField>
+          </Grid>
+          <Grid item xs={2}>
+            <BLField>3,560 CBM</BLField>
+          </Grid>
+          <Grid item xs={2}>
+            <BLField>1,716.000 KGS</BLField>
+          </Grid>
         </Grid>
-        <Grid item xs={1}>
-          <Label className="my-0">MODE</Label>
-        </Grid>
-        <Grid item xs={1}>
-          <Label className="my-0">TYPE</Label>
-        </Grid>
-        <Grid item xs={2}>
-          <Label className="my-0">MEASUREMENT</Label>
-        </Grid>
-        <Grid item xs={2}>
-          <Label className="my-0">WEIGHT</Label>
-        </Grid>
-      </Grid>
-      <Grid container spacing={4}>
-        <Grid item xs={2}>
-          <BLField>SEGU5048074</BLField>
-        </Grid>
-        <Grid item xs={2}>
-          <BLField>JPC074647</BLField>
-        </Grid>
-        <Grid item xs={2}>
-          <BLField></BLField>
-        </Grid>
-        <Grid item xs={1}>
-          <BLField>FCL / FCL</BLField>
-        </Grid>
-        <Grid item xs={1}>
-          <BLField>40HQ</BLField>
-        </Grid>
-        <Grid item xs={2}>
-          <BLField>3,560 CBM</BLField>
-        </Grid>
-        <Grid item xs={2}>
-          <BLField>1,716.000 KGS</BLField>
-        </Grid>
-      </Grid>
-      <Grid container spacing={4}>
-        <Grid item xs={2}>
-          <BLField>SEGU5048074</BLField>
-        </Grid>
-        <Grid item xs={2}>
-          <BLField>JPC074647</BLField>
-        </Grid>
-        <Grid item xs={2}>
-          <BLField></BLField>
-        </Grid>
-        <Grid item xs={1}>
-          <BLField>FCL / FCL</BLField>
-        </Grid>
-        <Grid item xs={1}>
-          <BLField>40HQ</BLField>
-        </Grid>
-        <Grid item xs={2}>
-          <BLField>3,560 CBM</BLField>
-        </Grid>
-        <Grid item xs={2}>
-          <BLField>1,716.000 KGS</BLField>
-        </Grid>
-      </Grid>
 
-      <Divider className="my-32" />
+        <Divider className="my-32" />
 
-      <h2 className={classes.grayText}>
-        PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
-      </h2>
-      <Grid container spacing={6}>
-        <Grid item xs={6}>
-          <Grid item>
-            <Label>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</Label>
-            <BLField>
-              DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO
-              BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN
-            </BLField>
-          </Grid>
-          <Grid item>
-            <Label>QUANTITY (FOR CUSTOMERS DECLARATION ONLY)</Label>
-            <BLField>12 PALLETS</BLField>
-          </Grid>
-        </Grid>
-        <Grid item xs={6}>
-          <Grid item>
-            <Label>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</Label>
-            <BLField>
-              DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO
-              BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN
-            </BLField>
-          </Grid>
-          <Grid container spacing={6}>
-            <Grid item xs={6}>
-              <Label>GROSS WEIGHT</Label>
-              <BLField>509.000KGS</BLField>
+        <h2 className={classes.grayText}>
+          PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
+        </h2>
+        <Grid container spacing={6}>
+          <Grid item xs={6}>
+            <Grid item>
+              <Label>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</Label>
+              <BLField>
+                DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO
+                BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN
+              </BLField>
             </Grid>
-            <Grid item xs={6}>
-              <Label>GROSS MEASUREMENT</Label>
-              <BLField>19.888CBM</BLField>
+            <Grid item>
+              <Label>QUANTITY (FOR CUSTOMERS DECLARATION ONLY)</Label>
+              <BLField>12 PALLETS</BLField>
             </Grid>
           </Grid>
+          <Grid item xs={6}>
+            <Grid item>
+              <Label>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</Label>
+              <BLField>
+                DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO
+                BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN
+              </BLField>
+            </Grid>
+            <Grid container spacing={6}>
+              <Grid item xs={6}>
+                <Label>GROSS WEIGHT</Label>
+                <BLField>509.000KGS</BLField>
+              </Grid>
+              <Grid item xs={6}>
+                <Label>GROSS MEASUREMENT</Label>
+                <BLField>19.888CBM</BLField>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid container alignItems="center" justify="center">
+            <h2 className={classes.grayText}>** TO BE CONTINUED ON ATTACHED LIST **</h2>
+          </Grid>
         </Grid>
-        <Grid container alignItems="center" justify="center">
-          <h2 className={classes.grayText}>** TO BE CONTINUED ON ATTACHED LIST **</h2>
-        </Grid>
-      </Grid>
 
-      <Divider className="my-32" />
+        <Divider className="my-32" />
 
-      <Grid container spacing={6}>
-        <Grid item xs={6}>
-          <Grid item>
-            <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
-            <BLField>TOKYO, TOKYO SEUOL</BLField>
+        <Grid container spacing={6}>
+          <Grid item xs={6}>
+            <Grid item>
+              <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
+              <BLField>TOKYO, TOKYO SEUOL</BLField>
+            </Grid>
+            <Grid container spacing={6}>
+              <Grid item xs={6} className={classes.pbGridItem}>
+                <Label>COMMODITY CODE</Label>
+                <BLField></BLField>
+              </Grid>
+              <Grid item xs={6} className={classes.pbGridItem}>
+                <Label>EXCHANGE RATE</Label>
+                <BLField></BLField>
+              </Grid>
+              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
+                <Label>FREIGHTED AS</Label>
+                <BLField></BLField>
+              </Grid>
+              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
+                <Label>RATE</Label>
+                <BLField></BLField>
+              </Grid>
+              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
+                <Label>DATE CARGO RECEIVED</Label>
+                <BLField></BLField>
+              </Grid>
+              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
+                <Label>DATE LADEN ON BOARD</Label>
+                <BLField>31 AUG 2021</BLField>
+              </Grid>
+            </Grid>
           </Grid>
-          <Grid container spacing={6}>
-            <Grid item xs={6} className={classes.pbGridItem}>
-              <Label>COMMODITY CODE</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item xs={6} className={classes.pbGridItem}>
-              <Label>EXCHANGE RATE</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <Label>FREIGHTED AS</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <Label>RATE</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <Label>DATE CARGO RECEIVED</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <Label>DATE LADEN ON BOARD</Label>
-              <BLField>31 AUG 2021</BLField>
+          <Grid item xs={6}>
+            <Grid container spacing={6}>
+              <Grid item xs={6} className={classes.pbGridItem}>
+                <Label>SERVICE CONTRACT NO.</Label>
+                <BLField></BLField>
+              </Grid>
+              <Grid item xs={6} className={classes.pbGridItem}>
+                <Label>DOC FORM NO.</Label>
+                <BLField></BLField>
+              </Grid>
+              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
+                <Label>CODE</Label>
+                <BLField></BLField>
+              </Grid>
+              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
+                <Label>TARIFF ITEM</Label>
+                <BLField></BLField>
+              </Grid>
+              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
+                <Label>PREPAID</Label>
+                <BLField></BLField>
+              </Grid>
+              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
+                <Label>COLLECT</Label>
+                <BLField></BLField>
+              </Grid>
+              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
+                <Label>PLACE OF BILL(S) ISSUE</Label>
+                <BLField>TOKYO</BLField>
+              </Grid>
+              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
+                <Label>DATED</Label>
+                <BLField>31 AUG 2021</BLField>
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={6}>
-          <Grid container spacing={6}>
-            <Grid item xs={6} className={classes.pbGridItem}>
-              <Label>SERVICE CONTRACT NO.</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item xs={6} className={classes.pbGridItem}>
-              <Label>DOC FORM NO.</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <Label>CODE</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <Label>TARIFF ITEM</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <Label>PREPAID</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <Label>COLLECT</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <Label>PLACE OF BILL(S) ISSUE</Label>
-              <BLField>TOKYO</BLField>
-            </Grid>
-            <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-              <Label>DATED</Label>
-              <BLField>31 AUG 2021</BLField>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
-    </div>
+      </div>
+    </>
   );
 };
 export default BLWorkspace;

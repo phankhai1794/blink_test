@@ -5,14 +5,12 @@ import { ThemeProvider } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { TextField, InputAdornment, makeStyles } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
-import LockIcon from '@material-ui/icons/Lock';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
-
-import Label from './FieldLabel';
 
 const theme = createMuiTheme({
   typography: {
@@ -20,41 +18,43 @@ const theme = createMuiTheme({
   }
 });
 
-const themeInput = '#BAC3CB';
-const lightThemeInput = '#F5F8FA';
-const darkThemeInput = '#515E6A';
-const themeInq = '#BD0F72';
-const lightThemeInq = '#FAF1F5';
+const gray = '#BAC3CB';
+const white = '#FFFFFF';
+const darkGray = '#515E6A';
+const lockGray = '#F5F8FA';
+const pink = '#BD0F72';
+const lightPink = '#FAF1F5';
+const red = '#DC2626';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     padding: 0,
     '& fieldset': {
-      borderColor: themeInput,
-      backgroundColor: lightThemeInput,
+      borderColor: gray,
+      backgroundColor: white,
       borderRadius: '8px',
       zIndex: '-1'
     },
     '&:hover fieldset': {
-      borderColor: `${themeInq} !important`
+      borderColor: `${pink} !important`
     },
     '&:focus-within fieldset': {
-      border: `1px solid ${themeInq} !important`
+      border: `1px solid ${pink} !important`
     }
   },
   hasInquiry: {
     '& fieldset': {
-      backgroundColor: lightThemeInq
+      backgroundColor: lightPink
     }
   },
   input: {
     fontSize: '15px',
-    color: darkThemeInput,
+    color: darkGray,
     padding: '9px 16px',
     lineHeight: '22px'
   },
   notchedOutlineNotChecked: {
-    borderColor: `${themeInq} !important`
+    borderColor: `${red} !important`
   },
   adornment: {
     padding: '10px',
@@ -80,13 +80,21 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: '10.7em'
   },
   sizeIcon: {
-    fontSize: '18px'
+    fontSize: '20px'
   },
   colorHasInqIcon: {
-    color: `${themeInq} !important`
+    color: `${red} !important`
+  },
+  colorEmptyInqIcon: {
+    color: `${pink} !important`
+  },
+  locked: {
+    '& fieldset': {
+      backgroundColor: lockGray
+    }
   },
   colorLockIcon: {
-    color: darkThemeInput
+    color: darkGray
   }
 }));
 
@@ -95,30 +103,20 @@ const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_I
 const BLField = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const { children, width, multiline, rows, selectedChoice, id, label, lock, readOnly } = props;
+  const { children, width, multiline, rows, selectedChoice, id, lock, readOnly } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
-  const [anchorEl, setAnchorEl] = useState(null)
+  const [anchorEl, setAnchorEl] = useState(null);
 
-  const questions = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.question
-  );
-  const originalInquiry = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.originalInquiry
-  );
-  const metadata = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.metadata
-  );
-  const inquiries = useSelector(({ workspace }) =>
-    workspace.inquiryReducer.inquiries
-  );
+  const questions = useSelector(({ workspace }) => workspace.inquiryReducer.question);
+  const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
 
-  const openAddPopover = (e) => {
-    if (questionIsEmpty) {
-      setAnchorEl(e.currentTarget)
-    }
+  const onMouseEnter = (e) => {
+    if (questionIsEmpty) setAnchorEl(e.currentTarget);
   };
 
-  const closeAddPopover = (e) => {
+  const onMouseLeave = (e) => {
     if (e.currentTarget !== null) setAnchorEl(null);
   };
 
@@ -128,24 +126,25 @@ const BLField = (props) => {
         InquiryActions.validate({
           field: true,
           inqType: Boolean(question.inqType),
-          receiver: Boolean(question.receiver.length),
+          receiver: Boolean(question.receiver.length)
         })
       );
       return false;
     }
     return true;
-  }
+  };
 
   const onClick = (e) => {
     if (!questionIsEmpty) {
       const currentInq = inquiries.find((q) => q.field === id);
       dispatch(InquiryActions.setOneInq(currentInq));
-    } else {
-      dispatch(FormActions.toggleInquiry(true));
     }
-    dispatch(InquiryActions.setField(e.currentTarget.id));
     if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
-      if (questions.length > 1 && !questions[questions.length - 1].id && checkValidate(questions[questions.length - 1])) {
+      if (
+        questions.length > 1 &&
+        !questions[questions.length - 1].id &&
+        checkValidate(questions[questions.length - 1])
+      ) {
         dispatch(InquiryActions.addQuestion());
         dispatch(InquiryActions.setEdit(questions.length));
       }
@@ -169,12 +168,11 @@ const BLField = (props) => {
 
   return (
     <>
-      {label && <Label className={!questionIsEmpty ? classes.colorHasInqIcon : ''}>{label}</Label>}
       <div
         id={id}
         style={{ width }}
-        onMouseEnter={openAddPopover}
-        onMouseLeave={closeAddPopover}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         onClick={onClick}>
         <ThemeProvider theme={theme}>
           <TextField
@@ -183,7 +181,11 @@ const BLField = (props) => {
             fullWidth={true}
             multiline={multiline}
             rows={rows}
-            className={clsx(classes.root, !questionIsEmpty ? classes.hasInquiry : '')}
+            className={clsx(
+              classes.root,
+              !questionIsEmpty ? classes.hasInquiry : '',
+              lock ? classes.locked : ''
+            )}
             InputProps={{
               readOnly: readOnly || true,
               endAdornment: (
@@ -198,13 +200,13 @@ const BLField = (props) => {
                     <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
                   )}
                   {lock ? (
-                    <LockIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
+                    <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
                   ) : (
                     anchorEl &&
                     anchorEl.id === id &&
                     allowAddInquiry && (
-                      <AddCircleOutlineIcon
-                        className={clsx(classes.sizeIcon, classes.colorHasInqIcon)}
+                      <AddCircleIcon
+                        className={clsx(classes.sizeIcon, classes.colorEmptyInqIcon)}
                       />
                     )
                   )}

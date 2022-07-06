@@ -249,7 +249,7 @@ const AttachmentList = (props) => {
               </div>
               <div className="flex justify-between" style={{ width: '600px' }}>
                 <PermissionProvider action={PERMISSION.INQUIRY_INQ_ATT_MEDIA}
-                  extraCondition={pathname.includes('/workplace')}
+                  extraCondition={pathname.includes('/workspace')}
                   fallback={
                     <div style={{ fontSize: '16px', color: '#BD0F72', fontWeight: 600, lineHeight: '20px' }}>
                       {filter?.label}

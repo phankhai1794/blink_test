@@ -41,10 +41,9 @@ function InquiringHeader(props) {
         {/* TODO: Update BKG_NO */}
         <Button
           component={Link}
-          to="/apps/workplace/NGOB29899900" // /gciUIQActrGonB3VEirVTGHe7qhY12rk"
+          to="/apps/workspace/NGOB29899900"
           className="whitespace-no-wrap mr-52"
-          variant="contained"
-        >
+          variant="contained">
           <span className="hidden sm:flex">Create workspace</span>
           <span className="flex sm:hidden">New</span>
         </Button>

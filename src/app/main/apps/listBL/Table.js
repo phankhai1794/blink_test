@@ -10,16 +10,17 @@ import {
   Checkbox,
   Box,
   Chip,
-  Tooltip
+  Tooltip,
+  Avatar,
+  Typography
 } from '@material-ui/core';
 import { FuseScrollbars } from '@fuse';
-import { Avatar } from '@material-ui/core';
 import { withRouter } from 'react-router-dom';
-import { Typography } from '@material-ui/core';
 import _ from '@lodash';
 import { makeStyles } from '@material-ui/styles';
-import * as BlActions from './store/actions';
 import * as Actions from 'app/store/actions';
+
+import * as BlActions from './store/actions';
 
 const blStateStyles = {
   REQUEST: {
@@ -124,7 +125,7 @@ function InquiringTable(props) {
 
   function handleClick(bkgNo) {
     history.push({
-      pathname: '/apps/workplace/' + bkgNo,
+      pathname: '/apps/workspace/' + bkgNo,
       state: 'inquiry'
     });
   }
@@ -173,7 +174,7 @@ function InquiringTable(props) {
 
   useEffect(() => {
     if (error) {
-      dispatch(Actions.showMessage({message: error, variant: 'error'}));
+      dispatch(Actions.showMessage({ message: error, variant: 'error' }));
     }
   }, [success, error]);
 
@@ -202,8 +203,7 @@ function InquiringTable(props) {
                     // aria-checked={isSelected}
                     // tabIndex={-1}
                     // selected={isSelected}
-                    onClick={() => handleClick(bkgNo)}
-                  >
+                    onClick={() => handleClick(bkgNo)}>
                     <TableCell className="w-48 px-4 sm:px-12" padding="checkbox">
                       <Checkbox
                       // checked={isSelected}
@@ -216,8 +216,7 @@ function InquiringTable(props) {
                       <Tooltip
                         title={createdBy ? createdBy.userName : 'Undefined'}
                         placement="top"
-                        arrow="true"
-                      >
+                        arrow="true">
                         <Avatar src={createdBy ? createdBy.avatar : 'Undefined'} />
                       </Tooltip>
                     </TableCell>
@@ -232,8 +231,7 @@ function InquiringTable(props) {
                       <Tooltip
                         title={updatedBy ? updatedBy.userName : 'Undefined'}
                         placement="top"
-                        arrow="true"
-                      >
+                        arrow="true">
                         <Avatar src={updatedBy ? updatedBy.avatar : 'Undefined'} />
                       </Tooltip>
                     </TableCell>

@@ -2,8 +2,16 @@ import { filterMetadata } from '@shared';
 import { getInquiryById, getMetadata } from 'app/services/inquiryService';
 import { createBL, getBlInfo } from 'app/services/myBLService';
 
-import {setMyBL, saveField, editInquiry, setOriginalInquiry, saveMetadata, setListAttachment} from './inquiry'
-import * as InquiryActions from "./inquiry";
+import {
+  setMyBL,
+  setContent,
+  saveField,
+  editInquiry,
+  setOriginalInquiry,
+  saveMetadata,
+  setListAttachment
+} from './inquiry';
+import * as InquiryActions from './inquiry';
 // export * from './mail.actions'
 
 export const initBL = (bkgNo) => async (dispatch) => {
@@ -15,41 +23,51 @@ export const initBL = (bkgNo) => async (dispatch) => {
 };
 
 export const loadMetadata = () => async (dispatch) => {
-  getMetadata().then((res) => {
-    const data = filterMetadata(res);
-    dispatch(saveMetadata(data));
-  }).catch((err) => console.error(err));
+  getMetadata()
+    .then((res) => {
+      const data = filterMetadata(res);
+      dispatch(saveMetadata(data));
+    })
+    .catch((err) => console.error(err));
 };
-
 
 export const loadInquiry = (myBL_Id) => async (dispatch) => {
-  getInquiryById(myBL_Id).then((res) => {
-    const field_list = res.map(e => e.field);
-    dispatch(saveField(field_list));
-    dispatch(editInquiry(res));
-    dispatch(setOriginalInquiry(JSON.parse(JSON.stringify(res))));
-    //
-    const optionTabs = [{id: 'inquiryList', field: 'INQUIRY_LIST'}, {id: 'attachmentList', field: 'ATTACHMENT_LIST'}, {id: 'email', field: 'EMAIL'}, {id: 'inquiryForm', field: 'INQUIRY_FORM'}, {id: 'inquiryReview', field: 'INQUIRY_REVIEW'}]
-    const listMinimize = [...res, ...optionTabs];
-    dispatch(InquiryActions.setListMinimize(listMinimize));
-    //
-    let attachmentFiles = [];
-    res.forEach(e => {
-      const mediaFile = e.mediaFile.map(f => {
-        return {
-          ...f,
-          field: e.field,
-          inquiryId: e.id,
-        }
+  getInquiryById(myBL_Id)
+    .then((res) => {
+      const field_list = res.map((e) => e.field);
+      dispatch(saveField(field_list));
+      dispatch(editInquiry(res));
+      dispatch(setOriginalInquiry(JSON.parse(JSON.stringify(res))));
+      const optionTabs = [
+        { id: 'inquiryList', field: 'INQUIRY_LIST' },
+        { id: 'attachmentList', field: 'ATTACHMENT_LIST' },
+        { id: 'email', field: 'EMAIL' },
+        { id: 'inquiryForm', field: 'INQUIRY_FORM' },
+        { id: 'inquiryReview', field: 'INQUIRY_REVIEW' }
+      ];
+      const listMinimize = [...res, ...optionTabs];
+      dispatch(InquiryActions.setListMinimize(listMinimize));
+      //
+      let attachmentFiles = [];
+      res.forEach((e) => {
+        const mediaFile = e.mediaFile.map((f) => {
+          return {
+            ...f,
+            field: e.field,
+            inquiryId: e.id
+          };
+        });
+        attachmentFiles = [...attachmentFiles, ...mediaFile];
       });
-      attachmentFiles = [...attachmentFiles, ...mediaFile];
-    });
-    dispatch(setListAttachment(attachmentFiles));
-  }).catch((err) => console.error(err));
+      dispatch(setListAttachment(attachmentFiles));
+    })
+    .catch((err) => console.error(err));
 };
 
-export const loadBlInfo = (myBL_Id, setContent) => {
-  getBlInfo(myBL_Id).then((res) => {
-    setContent(res.myBL.content)
-  }).catch((err) => console.error(err));
+export const loadContent = (myBL_Id) => async (dispatch) => {
+  getBlInfo(myBL_Id)
+    .then((res) => {
+      dispatch(setContent(res.myBL.content));
+    })
+    .catch((err) => console.error(err));
 };
