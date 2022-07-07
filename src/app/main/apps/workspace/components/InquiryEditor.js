@@ -300,8 +300,8 @@ const InquiryEditor = (props) => {
 
   return (
     <>
-      <Grid container spacing={1}>
-        <Grid item xs={12} className="flex justify-between">
+      <Grid container spacing={4}>
+        <Grid item xs={4}>
           <FormControl error={!valid.field}>
             <FuseChipSelect
               className="m-auto"
@@ -314,8 +314,12 @@ const InquiryEditor = (props) => {
               }}
               options={fieldType}
             />
-            {!valid.field && <FormHelperText>This is required!</FormHelperText>}
+            <div style={{ height: '20px' }}>
+              {!valid.field && <FormHelperText>This is required!</FormHelperText>}
+            </div>
           </FormControl>
+        </Grid>
+        <Grid item xs={4}>
           <FormControl error={!valid.inqType}>
             <FuseChipSelect
               className="m-auto"
@@ -328,8 +332,12 @@ const InquiryEditor = (props) => {
               }}
               options={inqTypeOption}
             />
-            {!valid.inqType && <FormHelperText>This is required!</FormHelperText>}
+            <div style={{ height: '20px' }}>
+              {!valid.inqType && <FormHelperText>This is required!</FormHelperText>}
+            </div>
           </FormControl>
+        </Grid>
+        <Grid item xs={4}>
           <FormControl error={!valid.ansType}>
             <FuseChipSelect
               className="m-auto"
@@ -342,7 +350,9 @@ const InquiryEditor = (props) => {
               }}
               options={optionsAnsType}
             />
-            {!valid.ansType && <FormHelperText>This is required!</FormHelperText>}
+            <div style={{ height: '15px' }}>
+              {!valid.ansType && <FormHelperText>This is required!</FormHelperText>}
+            </div>
           </FormControl>
         </Grid>
       </Grid>
@@ -383,7 +393,7 @@ const InquiryEditor = (props) => {
         {question.mediaFile?.length > 0 && question.mediaFile?.map((file, mediaIndex) => (
           <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
             {file.ext.match(/jpeg|jpg|png/g) ? (
-              <ImageAttach file={file} style={{ }} />
+              <ImageAttach file={file} style={{}} />
             ) : (
               <FileAttach file={file} />
             )}
