@@ -5,11 +5,16 @@ import CreatableSelect from 'react-select/lib/Creatable';
 import Select from 'react-select';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
+import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     '& .fuse-chip-select__input': {
       color: theme.palette.text.primary
+    },
+    '& .fuse-chip-select__indicators': {
+      color: '#BD0F72',
+      paddingRight: '1rem'
     },
     '&.standard': {
       '& $placeholder': {},
@@ -73,7 +78,8 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: "nowrap",
     textOverflow: "ellipsis",
     overflow: "hidden",
-    color: "#BD0F72"
+    color: "#BD0F72",
+    fontFamily: 'Montserrat'
   },
   placeholder: {
     position: 'absolute',
@@ -224,7 +230,8 @@ const components = {
   Placeholder,
   SingleValue,
   ValueContainer,
-  IndicatorSeparator: () => null
+  IndicatorSeparator: () => null,
+  DropdownIndicator: () => <ArrowDropDown />,
 };
 
 function FuseChipSelect(props) {
