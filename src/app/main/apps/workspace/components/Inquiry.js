@@ -429,7 +429,7 @@ const Inquiry = (props) => {
               <Card style={{ padding: '1rem ', marginBottom: '24px' }}>
                 <div className="flex justify-between">
                   <UserInfo name={user.userName} time={displayTime(q.createdAt)} avatar={user.avatar} />
-                  <PermissionProvider action={PERMISSION.VIEW_EDIT_INQUIRY}>
+                  {/* <PermissionProvider action={PERMISSION.VIEW_EDIT_INQUIRY}>
                     <IconButton onClick={handleClick}>
                       <MoreVertIcon />
                     </IconButton>
@@ -446,7 +446,7 @@ const Inquiry = (props) => {
                       </ListItemIcon>
                       <ListItemText primary="Edit" />
                     </MenuItem>
-                  </Menu>
+                  </Menu> */}
                 </div>
                 <Typography variant="h5" style={{ wordBreak: 'break-word' }}>{q.content}</Typography>
                 <div style={{ display: 'block', margin: '1rem 0rem' }}>
