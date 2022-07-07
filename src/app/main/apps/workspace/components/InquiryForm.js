@@ -267,7 +267,7 @@ const InquiryForm = (props) => {
                 question.mediaFile.map((file, mediaIndex) =>
                   file.ext.match(/jpeg|jpg|png/g) ? (
                     <div style={{ position: 'relative' }}>
-                      <ImageAttach file={file} style={{ margin: '1rem' }} />
+                      <ImageAttach hiddenRemove={true} file={file} style={{ margin: '1rem' }} />
                     </div>
                   ) : (
                     <FileAttach file={file} />

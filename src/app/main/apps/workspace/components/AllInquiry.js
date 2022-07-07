@@ -247,13 +247,14 @@ const AllInquiry = (props) => {
                     )}
                   </div>
                   <>
+                  
                     {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
                     {q.mediaFile?.length > 0 && q.mediaFile?.map((file, mediaIndex) => (
                       <div style={{ position: 'relative',display: 'inline-block'}} key={mediaIndex}>
                         {file.ext.match(/jpeg|jpg|png/g) ? (
-                          <ImageAttach file={file} style={{ margin: '2.5rem' }} />
+                          <ImageAttach file={file} field={q.field} style={{ margin: '2.5rem' }} />
                         ) : (
-                          <FileAttach file={file} />
+                          <FileAttach file={file} field={q.field} />
                         )}
                       </div>
                     ))}
@@ -263,9 +264,9 @@ const AllInquiry = (props) => {
                     {q.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
                       <div style={{ position: 'relative',display: 'inline-block' }} key={mediaIndex}>
                         {file.ext.match(/jpeg|jpg|png/g) ? (
-                          <ImageAttach file={file} style={{ margin: '2.5rem' }} />
+                          <ImageAttach file={file} field={q.field} style={{ margin: '2.5rem' }} />
                         ) : (
-                          <FileAttach file={file} />
+                          <FileAttach file={file} field={q.field} />
                         )}
                       </div>
                     ))}
