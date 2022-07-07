@@ -144,10 +144,10 @@ function ToolbarLayout1(props) {
                 src="assets/images/logos/one_ocean_network-logo.png"
                 className={clsx(classes.logo, classes.fitAvatar)}
                 alt="one-logo"
-                {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
-                  component: Link,
-                  to: '/'
-                })}
+                // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+                //   component: Link,
+                //   to: '/'
+                // })}
               />
             </div>
 
@@ -173,7 +173,7 @@ function ToolbarLayout1(props) {
                 <span className="pl-4">Attachment List</span>
               </Button>
             </PermissionProvider>
-            {openTrans && transId && <RestoreVersion />}
+            {/* {openTrans && transId && <RestoreVersion />} */}
             <PermissionProvider
               action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
               extraCondition={pathname.includes('/guest')}>
@@ -220,7 +220,7 @@ function ToolbarLayout1(props) {
           </div>
 
           <div className="flex" style={{ marginRight: '27px' }}>
-            <PermissionProvider
+            {/* <PermissionProvider
               action={PERMISSION.MAIL_SEND_MAIL}
               extraCondition={pathname.includes('/workspace')}>
               <div style={{ paddingLeft: '15px', paddingRight: '5px', paddingTop: '17px' }}>
@@ -244,7 +244,7 @@ function ToolbarLayout1(props) {
               action={PERMISSION.VIEW_SHOW_BL_HISTORY}
               extraCondition={pathname.includes('/workspace')}>
               <History />
-            </PermissionProvider>
+            </PermissionProvider> */}
             <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>
               <UserProfile classes={classes} history={history} />
             </PermissionProvider>
