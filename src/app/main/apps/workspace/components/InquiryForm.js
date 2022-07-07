@@ -1,4 +1,4 @@
-import { getKeyByValue, validateExtensionFile } from '@shared';
+import { getKeyByValue, validateExtensionFile, toFindDuplicates } from '@shared';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
@@ -100,6 +100,7 @@ const InquiryForm = (props) => {
     dispatch(InquiryActions.removeSelectedOption(options));
     dispatch(FormActions.toggleAddInquiry(true))
     dispatch(InquiryActions.setQuestion(optionsOfQuestion))
+    dispatch(InquiryActions.validate({inqType: true, field: true, receiver: true, ansType: true, content: true, answerContent: true}));
   };
 
   const handleUploadImageAttach = (files, index) => {
@@ -116,14 +117,50 @@ const InquiryForm = (props) => {
   };
 
   const changeToEditor = (index) => {
-    if (!questions[currentEdit].inqType || !questions[currentEdit].field || !questions[currentEdit].receiver.length || !questions[currentEdit].ansType.length) {
+    let check = true;
+    const ansTypeChoice = metadata.ans_type['choice'];
+    let validate = {};
+    if (!questions[currentEdit].inqType || !questions[currentEdit].field || !questions[currentEdit].receiver.length || !questions[currentEdit].ansType.length || !questions[currentEdit].content || ansTypeChoice === questions[currentEdit].ansType) {
+      validate = {
+        ...valid,
+        field: Boolean(questions[currentEdit].field),
+        inqType: Boolean(questions[currentEdit].inqType),
+        receiver: Boolean(questions[currentEdit].receiver.length),
+        ansType: Boolean(questions[currentEdit].ansType.length),
+        content: Boolean(questions[currentEdit].content),
+      };
+      if (ansTypeChoice === questions[currentEdit].ansType) {
+        // check empty a field
+        if (questions[currentEdit].answerObj.length > 0) {
+          const checkOptionEmpty = questions[currentEdit].answerObj.filter(item => !item.content);
+          if (checkOptionEmpty.length > 0) {
+            validate = {...validate, answerContent: false}
+          } else {
+            validate = {...validate, answerContent: true}
+          }
+          const dupArray = questions[currentEdit].answerObj.map(ans => ans.content)
+          if (toFindDuplicates(dupArray).length) {
+            dispatch(AppAction.showMessage({ message: "Options value must not be duplicated", variant: 'error' }));
+            return;
+          }
+        } else {
+          validate = {...validate, answerContent: false}
+        }
+      }
+      dispatch(InquiryActions.validate(validate));
+      check = validate.inqType && validate.field && validate.receiver && validate.ansType && validate.content && validate.answerContent;
+    }
+    if (ansTypeChoice !== questions[currentEdit].ansType) {
       dispatch(InquiryActions.validate({
         field: Boolean(questions[currentEdit].field),
         inqType: Boolean(questions[currentEdit].inqType),
         receiver: Boolean(questions[currentEdit].receiver.length),
         ansType: Boolean(questions[currentEdit].ansType.length),
-      }))
-    } else if (index !== currentEdit) dispatch(InquiryActions.setEdit(index));
+        content: Boolean(questions[currentEdit].content),
+        answerContent: true
+      }));
+    }
+    if (check && index !== currentEdit) dispatch(InquiryActions.setEdit(index));
   };
   const handleReceiverChange = (e, index) => {
     const optionsOfQuestion = [...questions];

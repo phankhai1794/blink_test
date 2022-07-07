@@ -2,6 +2,8 @@ export const getKeyByValue = (object, value) => {
   return Object.keys(object).find((key) => object[key] === value);
 };
 
+export const toFindDuplicates = arry => arry.filter((item, index) => arry.indexOf(item) !== index)
+
 export const displayTime = (time) => {
   let current_time = new Date();
   let time_difference = current_time.getTime() - new Date(time).getTime();

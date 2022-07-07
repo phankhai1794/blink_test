@@ -1,5 +1,5 @@
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { NUMBER_INQ_BOTTOM } from '@shared';
+import { NUMBER_INQ_BOTTOM, toFindDuplicates } from '@shared';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
@@ -16,6 +16,7 @@ import CropDinIcon from '@material-ui/icons/CropDin';
 import CropIcon from '@material-ui/icons/Crop';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import OpenInNew from '@material-ui/icons/OpenInNew';
+import * as AppActions from 'app/store/actions';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -152,7 +153,7 @@ export default function Form(props) {
     originalInquiry,
     listInqMinimize,
     listMinimize,
-    attachmentList
+    valid
   ] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.question,
@@ -162,7 +163,7 @@ export default function Form(props) {
     workspace.inquiryReducer.originalInquiry,
     workspace.inquiryReducer.listInqMinimize,
     workspace.inquiryReducer.listMinimize,
-    workspace.inquiryReducer.attachmentList
+    workspace.inquiryReducer.validation
   ]);
 
   const [openAllInquiry, showSaveInquiry, showAddInquiry] = useSelector(({ workspace }) => [
@@ -188,15 +189,41 @@ export default function Form(props) {
   }, [listInqMinimize]);
 
   const checkValidate = (question) => {
-    if (!question.inqType || !question.field || !question.receiver.length) {
+    if (!question.inqType || !question.field || !question.receiver.length || !question.content) {
       dispatch(
         InquiryActions.validate({
+          ...valid,
           field: Boolean(question.field),
           inqType: Boolean(question.inqType),
-          receiver: Boolean(question.receiver.length)
+          ansType: Boolean(question.ansType),
+          receiver: Boolean(question.receiver.length),
+          content: Boolean(question.content),
         })
       );
       return false;
+    }
+    //check empty type choice
+    const typeChoice = metadata.ans_type['choice'];
+    if (typeChoice === question.ansType) {
+      if (question.answerObj.length > 0) {
+        const checkOptionEmpty = question.answerObj.filter(item => !item.content);
+        if (checkOptionEmpty.length > 0) {
+          dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
+          return false;
+        } else {
+          dispatch(InquiryActions.validate({ ...valid, answerContent: true}));
+        }
+      } else {
+        dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
+        return false;
+      }
+    }
+    if (question.answerObj.length) {
+      const dupArray = question.answerObj.map(ans => ans.content)
+      if (toFindDuplicates(dupArray).length) {
+        dispatch(AppActions.showMessage({ message: "Options must not be duplicated", variant: 'error' }));
+        return false;
+      }
     }
     return true;
   };

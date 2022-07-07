@@ -1,24 +1,15 @@
-import { FuseChipSelect } from '@fuse';
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  TextField,
-  Grid,
-  IconButton,
-  Divider,
-  FormControl,
-  FormHelperText
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import {FuseChipSelect} from '@fuse';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Divider, FormControl, FormHelperText, Grid, IconButton, TextField} from '@material-ui/core';
+import {makeStyles} from '@material-ui/styles';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CloseIcon from '@material-ui/icons/Close';
-import { grey } from '@material-ui/core/colors';
-import { styled } from '@material-ui/core/styles';
-import { PERMISSION, PermissionProvider } from "@shared/permission";
+import {grey} from '@material-ui/core/colors';
+import {styled} from '@material-ui/core/styles';
+import {PERMISSION, PermissionProvider} from "@shared/permission";
 
 import * as InquiryActions from '../store/actions/inquiry';
-
-import CustomSelect from './CustomSelect';
 import FileAttach from './FileAttach';
 import ImageAttach from './ImageAttach';
 import AttachmentAnswer from "./AttachmentAnswer";
@@ -28,6 +19,20 @@ const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
 });
 // show border bottom when input is hovered (split to single style to prevent error)
 const inputStyle = makeStyles((theme) => ({
+  root: {
+    '& .errorChoice': {
+      color: '#f44336',
+      fontSize: '1.2rem',
+      display: 'block',
+      marginTop: '8px',
+      marginLeft: '33px',
+      minHeight: '1em',
+      textAlign: 'left',
+      fontFamily: `Roboto,"Helvetica",Arial,sans-serif`,
+      fontWeight: 400,
+      lineHeight: '1em',
+    }
+  },
   underline: {
     '&&&:before': {
       borderBottom: 'none'
@@ -114,6 +119,27 @@ const Choice = (props) => {
 const ChoiceAnswer = (props) => {
   const { questions, question, index, saveQuestion } = props;
   const classes = inputStyle();
+  const dispatch = useDispatch();
+  const [valid, metadata] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.validation,
+    workspace.inquiryReducer.metadata
+  ]);
+
+  const checkOptionsEmpty = () => {
+    const optionsOfQuestion = [...questions];
+    //check at least has one option
+    if (optionsOfQuestion[index].answerObj.length > 0) {
+      // check empty option
+      const checkEmpty = optionsOfQuestion[index].answerObj.filter(item => !item.content);
+      if (checkEmpty.length > 0) {
+        dispatch(InquiryActions.validate({...valid, answerContent: false}));
+      } else {
+        dispatch(InquiryActions.validate({...valid, answerContent: true}));
+      }
+    } else {
+      dispatch(InquiryActions.validate({...valid, answerContent: false}));
+    }
+  };
 
   const handleAddChoice = () => {
     const optionsOfQuestion = [...questions];
@@ -122,20 +148,24 @@ const ChoiceAnswer = (props) => {
       content: 'Option ' + (optionsOfQuestion[index].answerObj.length + 1)
     });
     saveQuestion(optionsOfQuestion);
+    checkOptionsEmpty();
   };
   const handleRemoveChoice = (id) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].answerObj.splice(id, 1);
     saveQuestion(optionsOfQuestion);
+    checkOptionsEmpty();
   };
+
   const handleChangeChoice = (e, id) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].answerObj[id].content = e.target.value;
     saveQuestion(optionsOfQuestion);
+    checkOptionsEmpty();
   };
 
   return (
-    <div style={{ paddingTop: '2rem' }}>
+    <div style={{ paddingTop: '2rem' }} className={classes.root}>
       {question.answerObj.map((value, k) => {
         return (
           <Choice
@@ -158,6 +188,7 @@ const ChoiceAnswer = (props) => {
           InputProps={{ classes }}
         />
       </div>
+      {!valid.answerContent && <span className={'errorChoice'}>Invalid Option !</span>}
     </div>
   );
 };
@@ -287,6 +318,7 @@ const InquiryEditor = (props) => {
   const handleNameChange = (e) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].content = e.target.value;
+    dispatch(InquiryActions.validate({ ...valid, content: optionsOfQuestion[index].content }));
     saveQuestion(optionsOfQuestion);
   };
 
@@ -304,7 +336,6 @@ const InquiryEditor = (props) => {
         <Grid item xs={4}>
           <FormControl error={!valid.field}>
             <FuseChipSelect
-              className="m-auto"
               customStyle={styles(valid.field, fullscreen ? 320 : 295)}
               value={fieldValue}
               onChange={handleFieldChange}
@@ -315,14 +346,13 @@ const InquiryEditor = (props) => {
               options={fieldType}
             />
             <div style={{ height: '20px' }}>
-              {!valid.field && <FormHelperText>This is required!</FormHelperText>}
+              {!valid.field && <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>}
             </div>
           </FormControl>
         </Grid>
         <Grid item xs={4}>
           <FormControl error={!valid.inqType}>
             <FuseChipSelect
-              className="m-auto"
               value={valueType}
               customStyle={styles(valid.inqType, fullscreen ? 330 : 295)}
               onChange={handleTypeChange}
@@ -333,14 +363,13 @@ const InquiryEditor = (props) => {
               options={inqTypeOption}
             />
             <div style={{ height: '20px' }}>
-              {!valid.inqType && <FormHelperText>This is required!</FormHelperText>}
+              {!valid.inqType && <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>}
             </div>
           </FormControl>
         </Grid>
         <Grid item xs={4}>
           <FormControl error={!valid.ansType}>
             <FuseChipSelect
-              className="m-auto"
               value={valueAnsType}
               customStyle={styles(valid.ansType, fullscreen ? 330 : 295)}
               onChange={handleAnswerTypeChange}
@@ -351,7 +380,7 @@ const InquiryEditor = (props) => {
               options={optionsAnsType}
             />
             <div style={{ height: '15px' }}>
-              {!valid.ansType && <FormHelperText>This is required!</FormHelperText>}
+              {!valid.ansType && <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>}
             </div>
           </FormControl>
         </Grid>
@@ -360,6 +389,8 @@ const InquiryEditor = (props) => {
         <TextField
           value={question.content.replace('{{INQ_TYPE}}', '')}
           multiline
+          error={!valid.content}
+          helperText={!valid.content ? 'This is required!' : ''}
           onFocus={(e) => e.target.select()}
           onChange={handleNameChange}
           style={{ width: '100%', resize: 'none' }}
@@ -393,7 +424,7 @@ const InquiryEditor = (props) => {
         {question.mediaFile?.length > 0 && question.mediaFile?.map((file, mediaIndex) => (
           <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
             {file.ext.match(/jpeg|jpg|png/g) ? (
-              <ImageAttach file={file} style={{}} />
+              <ImageAttach file={file} />
             ) : (
               <FileAttach file={file} />
             )}
