@@ -1,6 +1,7 @@
 import { saveInquiry, changeStatus } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import { toFindDuplicates } from '@shared'
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
@@ -28,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = ({ title }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [index, currentField, question, fields, myBL, displayCmt, valid, inquiries] = useSelector(({ workspace }) => [
+  const [index, currentField, question, fields, myBL, displayCmt, valid, inquiries, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.question,
@@ -37,22 +38,48 @@ const PopoverFooter = ({ title }) => {
     workspace.inquiryReducer.displayCmt,
     workspace.inquiryReducer.validation,
     workspace.inquiryReducer.inquiries,
+    workspace.inquiryReducer.metadata,
   ]);
   const onSave = () => {
-    const check = question.filter((q) => !q.receiver.length)
-    if (!question[index].inqType || !question[index].field || check.length) {
+    const check = question.filter((q) => !q.receiver.length);
+    if (!question[index].inqType || !question[index].field || check.length || !question[index].content) {
       dispatch(InquiryActions.validate({
-        ...valid, field: Boolean(question[index].field),
+        ...valid,
+        field: Boolean(question[index].field),
         inqType: Boolean(question[index].inqType),
-        receiver: !check.length,
         ansType: Boolean(question[index].ansType),
+        receiver: !check.length,
+        content: Boolean(question[index].content),
       }));
       return;
     }
+    //check empty type choice
+    const ansTypeChoice = metadata.ans_type['choice'];
+    if (ansTypeChoice === question[index].ansType) {
+      // check empty a field
+      if (question[index].answerObj.length > 0) {
+        const checkOptionEmpty = question[index].answerObj.filter(item => !item.content);
+        if (checkOptionEmpty.length > 0) {
+          dispatch(InquiryActions.validate({ ...valid, answerContent: false}));
+          return;
+        }
+      } else {
+        dispatch(InquiryActions.validate({ ...valid, answerContent: false}));
+        return;
+      }
+    }
+    //
     const checkGeneral = question.filter((q) => !q.inqType || !q.field)
     if (checkGeneral.length) {
       dispatch(AppActions.showMessage({ message: "There is empty field or inquiry type", variant: 'error' }));
       return;
+    }
+    if (question[index].answerObj.length) {
+      const dupArray = question[index].answerObj.map(ans => ans.content)
+      if (toFindDuplicates(dupArray).length) {
+        dispatch(AppActions.showMessage({ message: "Options value must not be duplicated", variant: 'error' }));
+        return;
+      }
     }
     let mediaList = [];
     const filesUpload = [];
