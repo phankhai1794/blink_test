@@ -71,7 +71,8 @@ const DialogTitle = withStyles(styles)((props) => {
         <div style={{ width: '30%', textAlign: 'right', paddingRight: '16px', paddingTop: '8px' }}>
           <IconButton
             aria-label="close"
-            onClick={handleOpenSnackBar}
+            // onClick={handleOpenSnackBar}
+            onClick={()=>{}}
             style={{ textAlign: 'center' }}>
             <MinimizeIcon />
           </IconButton>
