@@ -483,9 +483,9 @@ const Inquiry = (props) => {
                   {q.mediaFile?.length > 0 && q.mediaFile?.map((file, mediaIndex) => (
                     <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex} className={classes.root}>
                       {file.ext.match(/jpeg|jpg|png/g) ? (
-                        <ImageAttach file={file} style={{ margin: '2.5rem' }} />
+                        <ImageAttach hiddenRemove={true} file={file} field={q.field} style={{ margin: '2.5rem' }} />
                       ) : (
-                        <FileAttach file={file} />
+                        <FileAttach hiddenRemove={true} file={file} field={q.field}/>
                       )}
                     </div>
                   ))}
@@ -495,9 +495,9 @@ const Inquiry = (props) => {
                   {q.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
                     <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
                       {file.ext.match(/jpeg|jpg|png/g) ? (
-                        <ImageAttach file={file} style={{ margin: '2.5rem' }} />
+                        <ImageAttach hiddenRemove={true} file={file} field={q.field} style={{ margin: '2.5rem' }} />
                       ) : (
-                        <FileAttach file={file} />
+                        <FileAttach hiddenRemove={true} file={file} field={q.field} />
                       )}
                     </div>
                   ))}

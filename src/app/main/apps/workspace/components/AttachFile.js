@@ -1,6 +1,10 @@
 import React from 'react';
 import { useDropzone } from 'react-dropzone';
 import { IconButton } from '@material-ui/core';
+import {useDispatch, useSelector} from 'react-redux';
+import {updateInquiryAttachment, addNewMedia, removeFile, replaceFile} from 'app/services/inquiryService';
+import * as InquiryActions from "../store/actions/inquiry";
+
 //   component
 const AttachFile = (props) => {
   const { uploadImageAttach, index, disabled } = props
