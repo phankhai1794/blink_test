@@ -60,11 +60,11 @@ const PopoverFooter = ({ title }) => {
       if (question[index].answerObj.length > 0) {
         const checkOptionEmpty = question[index].answerObj.filter(item => !item.content);
         if (checkOptionEmpty.length > 0) {
-          dispatch(InquiryActions.validate({ ...valid, answerContent: false}));
+          dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
           return;
         }
       } else {
-        dispatch(InquiryActions.validate({ ...valid, answerContent: false}));
+        dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
         return;
       }
     }
@@ -74,7 +74,7 @@ const PopoverFooter = ({ title }) => {
       dispatch(AppActions.showMessage({ message: "There is empty field or inquiry type", variant: 'error' }));
       return;
     }
-    if (question[index].answerObj.length) {
+    if (ansTypeChoice === question[index].ansType && question[index].answerObj.length) {
       const dupArray = question[index].answerObj.map(ans => ans.content)
       if (toFindDuplicates(dupArray).length) {
         dispatch(AppActions.showMessage({ message: "Options value must not be duplicated", variant: 'error' }));
