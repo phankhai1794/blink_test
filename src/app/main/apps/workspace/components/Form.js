@@ -228,8 +228,8 @@ export default function Form(props) {
         return false;
       }
     }
-    if (question.answerObj.length) {
-      const dupArray = question.answerObj.map((ans) => ans.content);
+    if (typeChoice === question.ansType && question.answerObj.length) {
+      const dupArray = question.answerObj.map(ans => ans.content)
       if (toFindDuplicates(dupArray).length) {
         dispatch(
           AppActions.showMessage({ message: 'Options must not be duplicated', variant: 'error' })
