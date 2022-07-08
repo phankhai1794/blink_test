@@ -111,6 +111,7 @@ const BLField = (props) => {
   const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
 
   const onMouseEnter = (e) => {
     if (questionIsEmpty) setAnchorEl(e.currentTarget);
@@ -124,6 +125,7 @@ const BLField = (props) => {
     if (!question.inqType || !question.receiver.length) {
       dispatch(
         InquiryActions.validate({
+          ...valid,
           field: true,
           inqType: Boolean(question.inqType),
           receiver: Boolean(question.receiver.length)

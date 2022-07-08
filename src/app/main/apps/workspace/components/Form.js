@@ -81,7 +81,7 @@ const DialogTitle = withStyles(styles)((props) => {
           <IconButton
             aria-label="close"
             // onClick={handleOpenSnackBar}
-            onClick={()=>{}}
+            onClick={() => { }}
             style={{ textAlign: 'center' }}>
             <MinimizeIcon />
           </IconButton>
@@ -199,7 +199,7 @@ export default function Form(props) {
   }, [listInqMinimize]);
 
   const checkValidate = (question) => {
-    if (!question.inqType || !question.field || !question.receiver.length || !question.content) {
+    if (!question.inqType || !question.field || !question.receiver.length || !question.ansType || !question.content) {
       dispatch(
         InquiryActions.validate({
           ...valid,
