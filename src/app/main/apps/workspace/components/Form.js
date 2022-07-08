@@ -2,7 +2,8 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { NUMBER_INQ_BOTTOM, toFindDuplicates } from '@shared';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { withStyles, makeStyles } from '@material-ui/core/styles';
+import { withStyles, makeStyles, createMuiTheme } from '@material-ui/core/styles';
+import { ThemeProvider } from '@material-ui/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
@@ -23,6 +24,12 @@ import * as InquiryActions from '../store/actions/inquiry';
 
 import PopoverFooter from './PopoverFooter';
 import PopoverFooterAdmin from './PopoverFooter1';
+
+const theme = createMuiTheme({
+  typography: {
+    fontFamily: 'Montserrat'
+  }
+});
 
 const styles = (theme) => ({
   root: {
@@ -66,7 +73,9 @@ const DialogTitle = withStyles(styles)((props) => {
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div style={{ width: '70%', padding: '1rem' }}>
-          <div style={{ color: '#8A97A3', fontSize: '26px', fontWeight: '600' }}>{children}</div>
+          <ThemeProvider theme={theme}>
+            <div style={{ color: '#515F6B', fontSize: '22px', fontWeight: '600' }}>{children}</div>
+          </ThemeProvider>
         </div>
         <div style={{ width: '30%', textAlign: 'right', paddingRight: '16px', paddingTop: '8px' }}>
           <IconButton
@@ -198,7 +207,7 @@ export default function Form(props) {
           inqType: Boolean(question.inqType),
           ansType: Boolean(question.ansType),
           receiver: Boolean(question.receiver.length),
-          content: Boolean(question.content),
+          content: Boolean(question.content)
         })
       );
       return false;
@@ -207,12 +216,12 @@ export default function Form(props) {
     const typeChoice = metadata.ans_type['choice'];
     if (typeChoice === question.ansType) {
       if (question.answerObj.length > 0) {
-        const checkOptionEmpty = question.answerObj.filter(item => !item.content);
+        const checkOptionEmpty = question.answerObj.filter((item) => !item.content);
         if (checkOptionEmpty.length > 0) {
           dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
           return false;
         } else {
-          dispatch(InquiryActions.validate({ ...valid, answerContent: true}));
+          dispatch(InquiryActions.validate({ ...valid, answerContent: true }));
         }
       } else {
         dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
@@ -220,9 +229,11 @@ export default function Form(props) {
       }
     }
     if (question.answerObj.length) {
-      const dupArray = question.answerObj.map(ans => ans.content)
+      const dupArray = question.answerObj.map((ans) => ans.content);
       if (toFindDuplicates(dupArray).length) {
-        dispatch(AppActions.showMessage({ message: "Options must not be duplicated", variant: 'error' }));
+        dispatch(
+          AppActions.showMessage({ message: 'Options must not be duplicated', variant: 'error' })
+        );
         return false;
       }
     }
@@ -374,7 +385,7 @@ export default function Form(props) {
                       color: '#BD0F72',
                       fontSize: '16px',
                       marginLeft: '5px',
-                      fontWeight: 'bold'
+                      fontWeight: 'normal'
                     }}>
                       Add Inquiry
                   </span>
