@@ -204,7 +204,7 @@ function JWTLoginTab({ onLogged }) {
           inputProps={{
             className: classes.inputProps
           }}
-          helperText={account.email.value.length && !account.email.isValid ? 'Error email' : ''}
+          helperText={account.email.value.length && !account.email.isValid ? 'Invalid email' : ''}
         />
 
         <Box className="flex justify-between">
