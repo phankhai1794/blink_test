@@ -1,15 +1,16 @@
-import {FuseChipSelect} from '@fuse';
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Divider, FormControl, FormHelperText, Grid, IconButton, TextField} from '@material-ui/core';
-import {makeStyles} from '@material-ui/styles';
+import { FuseChipSelect } from '@fuse';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Divider, FormControl, FormHelperText, Grid, IconButton, TextField } from '@material-ui/core';
+import { makeStyles } from '@material-ui/styles';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CloseIcon from '@material-ui/icons/Close';
-import {grey} from '@material-ui/core/colors';
-import {styled} from '@material-ui/core/styles';
-import {PERMISSION, PermissionProvider} from "@shared/permission";
+import { grey } from '@material-ui/core/colors';
+import { styled } from '@material-ui/core/styles';
+import { PERMISSION, PermissionProvider } from "@shared/permission";
 
 import * as InquiryActions from '../store/actions/inquiry';
+
 import FileAttach from './FileAttach';
 import ImageAttach from './ImageAttach';
 import AttachmentAnswer from "./AttachmentAnswer";
@@ -132,12 +133,12 @@ const ChoiceAnswer = (props) => {
       // check empty option
       const checkEmpty = optionsOfQuestion[index].answerObj.filter(item => !item.content);
       if (checkEmpty.length > 0) {
-        dispatch(InquiryActions.validate({...valid, answerContent: false}));
+        dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
       } else {
-        dispatch(InquiryActions.validate({...valid, answerContent: true}));
+        dispatch(InquiryActions.validate({ ...valid, answerContent: true }));
       }
     } else {
-      dispatch(InquiryActions.validate({...valid, answerContent: false}));
+      dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
     }
   };
 
@@ -424,7 +425,7 @@ const InquiryEditor = (props) => {
         {question.mediaFile?.length > 0 && question.mediaFile?.map((file, mediaIndex) => (
           <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
             {file.ext.match(/jpeg|jpg|png/g) ? (
-              <ImageAttach file={file} field={question.field} indexInquiry={index} style={{ }} />
+              <ImageAttach file={file} field={question.field} indexInquiry={index} style={{}} />
             ) : (
               <FileAttach file={file} ield={question.field} indexInquiry={index} />
             )}
@@ -438,7 +439,7 @@ const InquiryEditor = (props) => {
             {file.ext.match(/jpeg|jpg|png/g) ? (
               <ImageAttach file={file} field={question.field} style={{ margin: '2.5rem' }} />
             ) : (
-              <FileAttach file={file} field={question.field}/>
+              <FileAttach file={file} field={question.field} />
             )}
           </div>
         ))}
