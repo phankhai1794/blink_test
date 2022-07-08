@@ -344,13 +344,11 @@ const BLWorkspace = (props) => {
             <Grid container>
               <Grid item xs={6} className={classes.leftPanel}>
                 <Label>BOOKING NO.</Label>
-                <BLField id="booking_no" lock={true}>
-                  TYOBD9739500
-                </BLField>
+                <BLField id="booking_no" lock={true}>{myBL.bkgNo}</BLField>
               </Grid>
               <Grid item xs={6} className={classes.rightPanel}>
                 <Label>SEA WAYBILL NO.</Label>
-                <BLField lock={true}>ONEYTYOBD9739500</BLField>
+                <BLField lock={true}>{myBL.bkgNo && `ONYE${myBL.bkgNo}`}</BLField>
               </Grid>
             </Grid>
             <Grid item>
@@ -425,48 +423,48 @@ const BLWorkspace = (props) => {
         </Grid>
         <Grid container spacing={4}>
           <Grid item xs={2}>
-            <BLField>SEGU5048074</BLField>
+            <BLField></BLField>
           </Grid>
           <Grid item xs={2}>
-            <BLField>JPC074647</BLField>
+            <BLField></BLField>
           </Grid>
           <Grid item xs={2}>
             <BLField></BLField>
           </Grid>
           <Grid item xs={1}>
-            <BLField>FCL / FCL</BLField>
+            <BLField></BLField>
           </Grid>
           <Grid item xs={1}>
-            <BLField>40HQ</BLField>
+            <BLField></BLField>
           </Grid>
           <Grid item xs={2}>
-            <BLField>3,560 CBM</BLField>
+            <BLField></BLField>
           </Grid>
           <Grid item xs={2}>
-            <BLField>1,716.000 KGS</BLField>
+            <BLField></BLField>
           </Grid>
         </Grid>
         <Grid container spacing={4}>
           <Grid item xs={2}>
-            <BLField>SEGU5048074</BLField>
+            <BLField></BLField>
           </Grid>
           <Grid item xs={2}>
-            <BLField>JPC074647</BLField>
+            <BLField></BLField>
           </Grid>
           <Grid item xs={2}>
             <BLField></BLField>
           </Grid>
           <Grid item xs={1}>
-            <BLField>FCL / FCL</BLField>
+            <BLField></BLField>
           </Grid>
           <Grid item xs={1}>
-            <BLField>40HQ</BLField>
+            <BLField></BLField>
           </Grid>
           <Grid item xs={2}>
-            <BLField>3,560 CBM</BLField>
+            <BLField></BLField>
           </Grid>
           <Grid item xs={2}>
-            <BLField>1,716.000 KGS</BLField>
+            <BLField></BLField>
           </Grid>
         </Grid>
 
@@ -479,32 +477,26 @@ const BLWorkspace = (props) => {
           <Grid item xs={6}>
             <Grid item>
               <Label>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</Label>
-              <BLField>
-                DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO
-                BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN
-              </BLField>
+              <BLField></BLField>
             </Grid>
             <Grid item>
               <Label>QUANTITY (FOR CUSTOMERS DECLARATION ONLY)</Label>
-              <BLField>12 PALLETS</BLField>
+              <BLField></BLField>
             </Grid>
           </Grid>
           <Grid item xs={6}>
             <Grid item>
               <Label>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</Label>
-              <BLField>
-                DSV AIR & SEA CO. LTD. AS AGENT OF DSV OCEAN TRANSPORT A/S 3F IXINAL MONZEN-NAKACHO
-                BLDG.2-5-4 FUKUZUMI, KOTO-KU, TOKYO,135-0032, JAPAN
-              </BLField>
+              <BLField></BLField>
             </Grid>
             <Grid container spacing={6}>
               <Grid item xs={6}>
                 <Label>GROSS WEIGHT</Label>
-                <BLField>509.000KGS</BLField>
+                <BLField></BLField>
               </Grid>
               <Grid item xs={6}>
                 <Label>GROSS MEASUREMENT</Label>
-                <BLField>19.888CBM</BLField>
+                <BLField></BLField>
               </Grid>
             </Grid>
           </Grid>
@@ -519,7 +511,7 @@ const BLWorkspace = (props) => {
           <Grid item xs={6}>
             <Grid item>
               <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
-              <BLField>TOKYO, TOKYO SEUOL</BLField>
+              <BLField></BLField>
             </Grid>
             <Grid container spacing={6}>
               <Grid item xs={6} className={classes.pbGridItem}>
@@ -544,7 +536,7 @@ const BLWorkspace = (props) => {
               </Grid>
               <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
                 <Label>DATE LADEN ON BOARD</Label>
-                <BLField>31 AUG 2021</BLField>
+                <BLField></BLField>
               </Grid>
             </Grid>
           </Grid>
@@ -576,11 +568,11 @@ const BLWorkspace = (props) => {
               </Grid>
               <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
                 <Label>PLACE OF BILL(S) ISSUE</Label>
-                <BLField>TOKYO</BLField>
+                <BLField></BLField>
               </Grid>
               <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
                 <Label>DATED</Label>
-                <BLField>31 AUG 2021</BLField>
+                <BLField></BLField>
               </Grid>
             </Grid>
           </Grid>
