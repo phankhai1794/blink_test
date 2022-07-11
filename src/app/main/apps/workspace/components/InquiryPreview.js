@@ -355,7 +355,7 @@ const InquiryPreview = (props) => {
         </div>
         {question.mediaFile.map((file, index) =>
           file.ext.includes('image') ? (
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
               <Fab
                 classes={{
                   root: classes.root
