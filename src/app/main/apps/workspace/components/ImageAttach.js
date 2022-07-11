@@ -10,21 +10,19 @@ import * as InquiryActions from '../store/actions/inquiry';
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    width: '165px',
+    height: '100%',
     borderWidth: '1px',
     borderStyle: 'ridge',
-    margin: '10px',
-    '& img': {
-      height: '220px',
-      width: '190px',
-      objectFit: 'fill'
-    },
+    marginLeft: '10px',
+    marginRight: '10px',
+    backgroundColor: '#F5F8FA',
     '& h3': {
       display: 'block',
       margin: '5px',
       cursor: 'pointer',
       whiteSpace: 'nowrap',
-      overflow: 'hidden',
-     
+      overflow: 'hidden'
     },
     '& h3:hover': {
       color: '#0000ee'
@@ -106,9 +104,19 @@ const ImageAttach = ({ file, field, hiddenRemove = false }) => {
 
   return (
     <div className={classes.root}>
-      <img src={file.src} onClick={openImageViewer} />
-      <div style={{ display: 'flex', flexDirection: 'row'}}>
-        <h3 style={{width: hiddenRemove?'180px': '160px',}} onClick={downloadFile}>{file.name}</h3>
+      <img
+        style={{
+          height: '120px',
+          width: '100%',
+          objectFit: 'cover'
+        }}
+        src={file.src}
+        onClick={openImageViewer}
+      />
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+        <h3 style={{ color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }} onClick={downloadFile}>
+          {file.name}
+        </h3>
         {!hiddenRemove && (
           <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: '2px' }}>
             <CloseIcon />
