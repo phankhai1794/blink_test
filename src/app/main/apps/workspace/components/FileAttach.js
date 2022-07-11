@@ -13,8 +13,10 @@ const useStyles = makeStyles((theme) => ({
     borderWidth: '1px',
     borderStyle: 'ridge',
     justifyContent: 'center',
-    width: '198px',
-    margin: '10px',
+    height:"100%",
+    width: '165px',
+    marginLeft: '10px',
+    marginRight: '10px',
     '& img': {
       height: '50px',
       width: '50px'
@@ -102,7 +104,7 @@ const FileAttach = ({ file ,field, hiddenRemove = false}) => {
     <div className={classes.root}>
       {file.ext.includes('pdf') ? (
         <img src={`/assets/images/logos/pdf_icon.png`} />
-      ) : file.ext.match(/csv|xls|xlsx|sheet/g) ? (
+      ) : file.ext.match(/csv|xls|xlsx|excel|sheet/g) ? (
         <img src={`/assets/images/logos/excel_icon.png`} />
       ) : file.ext.match(/doc/g) ? (
         <img src={`/assets/images/logos/word_icon.png`} />
