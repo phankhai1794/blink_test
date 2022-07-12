@@ -147,8 +147,13 @@ const BLField = (props) => {
         !questions[questions.length - 1].id &&
         checkValidate(questions[questions.length - 1])
       ) {
-        dispatch(InquiryActions.addQuestion());
-        dispatch(InquiryActions.setEdit(questions.length));
+        if (inquiries.length + questions.length + 1 === metadata.field_options.length) {
+          dispatch(FormActions.toggleAddInquiry(false));
+        }
+        if (inquiries.length + questions.length !== metadata.field_options.length) {
+          dispatch(InquiryActions.addQuestion());
+          dispatch(InquiryActions.setEdit(questions.length));
+        }
       }
       dispatch(FormActions.toggleCreateInquiry(true));
     }
