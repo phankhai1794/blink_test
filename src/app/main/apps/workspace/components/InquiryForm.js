@@ -72,7 +72,7 @@ const InquiryForm = (props) => {
   );
   const open = useSelector(({ workspace }) =>
     workspace.formReducer.openDialog,
-  )
+  );
   const filesUpload = useSelector(({ workspace }) =>
     workspace.inquiryReducer.filesUpload,
   )
@@ -100,7 +100,7 @@ const InquiryForm = (props) => {
     dispatch(InquiryActions.removeSelectedOption(options));
     dispatch(FormActions.toggleAddInquiry(true))
     dispatch(InquiryActions.setQuestion(optionsOfQuestion))
-    dispatch(InquiryActions.validate({inqType: true, field: true, receiver: true, ansType: true, content: true, answerContent: true}));
+    dispatch(InquiryActions.validate({ inqType: true, field: true, receiver: true, ansType: true, content: true, answerContent: true }));
   };
 
   const handleUploadImageAttach = (files, index) => {
@@ -134,9 +134,9 @@ const InquiryForm = (props) => {
         if (questions[currentEdit].answerObj.length > 0) {
           const checkOptionEmpty = questions[currentEdit].answerObj.filter(item => !item.content);
           if (checkOptionEmpty.length > 0) {
-            validate = {...validate, answerContent: false}
+            validate = { ...validate, answerContent: false }
           } else {
-            validate = {...validate, answerContent: true}
+            validate = { ...validate, answerContent: true }
           }
           const dupArray = questions[currentEdit].answerObj.map(ans => ans.content)
           if (toFindDuplicates(dupArray).length) {
@@ -144,7 +144,7 @@ const InquiryForm = (props) => {
             return;
           }
         } else {
-          validate = {...validate, answerContent: false}
+          validate = { ...validate, answerContent: false }
         }
       }
       dispatch(InquiryActions.validate(validate));
@@ -224,9 +224,9 @@ const InquiryForm = (props) => {
                 </FormGroup>
                 <div className="flex justify-end items-center mr-2 ">
                   <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
-                  <IconButton className="p-8" onClick={() => copyQuestion(index)}>
+                  {(inquiries.length + questions.length !== metadata.field_options.length) && <IconButton className="p-8" onClick={() => copyQuestion(index)}>
                     <img style={{ height: "22px" }} src="/assets/images/icons/copy.png" />
-                  </IconButton>
+                  </IconButton>}
                   {questions.length !== 1 && <IconButton className="p-8" onClick={() => removeQuestion(index)}>
                     <img src="/assets/images/icons/delete.png" />
                   </IconButton>}
@@ -265,8 +265,8 @@ const InquiryForm = (props) => {
               </div>
               {
                 question.mediaFile.map((file, mediaIndex) =>
-                  file.ext.match(/jpeg|jpg|png/g) ? (
-                    <div style={{ position: 'relative' }}>
+                  file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                    <div style={{ position: 'relative', display: 'inline-block'}}>
                       <ImageAttach hiddenRemove={true} file={file} style={{ margin: '1rem' }} />
                     </div>
                   ) : (

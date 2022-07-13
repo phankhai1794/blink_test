@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, InputAdornment, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -7,8 +6,8 @@ import { useDispatch } from 'react-redux';
 import * as AppAction from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
-import * as FormActions from "../store/actions/form";
-import * as InquiryActions from "../store/actions/inquiry";
+import * as FormActions from '../store/actions/form';
+import * as InquiryActions from '../store/actions/inquiry';
 
 import UserInfo from './UserInfo';
 
@@ -26,8 +25,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ParagraphAnswer = (props) => {
-  const allowCreateParagraphAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_CREATE_PARAGRAPH });
-  const allowUpdateParagraphAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH });
+  const allowCreateParagraphAnswer = PermissionProvider({
+    action: PERMISSION.INQUIRY_ANSWER_CREATE_PARAGRAPH
+  });
+  const allowUpdateParagraphAnswer = PermissionProvider({
+    action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
+  });
   const { question, index, questions, saveQuestion } = props;
   const [paragraphText, setParagraphText] = useState(question.answerObj[0]?.content || '');
   const dispatch = useDispatch();
@@ -36,11 +39,13 @@ const ParagraphAnswer = (props) => {
 
   useEffect(() => {
     if (questions) {
-      if ((!questions[index]?.answerObj[0]?.id && allowCreateParagraphAnswer) ||
-          (questions[index]?.answerObj[0]?.id && allowUpdateParagraphAnswer)) {
-        setPermission(true)
+      if (
+        (!questions[index]?.answerObj[0]?.id && allowCreateParagraphAnswer) ||
+        (questions[index]?.answerObj[0]?.id && allowUpdateParagraphAnswer)
+      ) {
+        setPermission(true);
       } else {
-        setPermission(false)
+        setPermission(false);
       }
     }
   }, [questions]);
@@ -74,7 +79,7 @@ const ParagraphAnswer = (props) => {
         }
       });
     }
-    dispatch(FormActions.toggleInquiry(false))
+    dispatch(FormActions.toggleInquiry(false));
   };
 
   return (
@@ -95,8 +100,7 @@ const ParagraphAnswer = (props) => {
                   edge="end"
                   color="primary"
                   variant="contained"
-                  onClick={addParagraph}
-                >
+                  onClick={addParagraph}>
                   Add
                 </Button>
               </InputAdornment>
