@@ -21,6 +21,8 @@ export const SET_LIST_MINIMIZE_INQUIRY = 'SET_LIST_MINIMIZE_INQUIRY';
 export const SET_LIST_MINIMIZE = 'SET_LIST_MINIMIZE';
 export const SET_LIST_ATTACHMENT = 'SET_LIST_ATTACHMENT';
 export const VALIDATE_ATTACHMENT = 'VALIDATE_ATTACHMENT';
+export const SET_LAST_FIELD = 'SET_LAST_FIELD';
+export const SET_OPENED_INQ_FORM = 'SET_OPENED_INQ_FORM';
 
 export function saveInquiry() {
   return {
@@ -169,6 +171,20 @@ export function setListAttachment(state) {
 export function validateAttachment(state) {
   return {
     type: VALIDATE_ATTACHMENT,
+    state: state
+  };
+}
+
+export function setLastField(state) {
+  return {
+    type: SET_LAST_FIELD,
+    state: state
+  };
+}
+
+export function setOpenedInqForm(state) {
+  return {
+    type: SET_OPENED_INQ_FORM,
     state: state
   };
 }

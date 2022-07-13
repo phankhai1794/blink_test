@@ -1,4 +1,5 @@
 import * as Actions from '../actions/inquiry';
+import {SET_OPENED_INQ_FORM} from "../actions/inquiry";
 
 const initialState = {
   myBL: {},
@@ -31,7 +32,9 @@ const initialState = {
   currentInq: {},
   listInqMinimize: [],
   listMinimize: [],
-  attachmentList: []
+  attachmentList: [],
+  lastField: '',
+  openedInquiresForm: false
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -149,6 +152,12 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.VALIDATE_ATTACHMENT: {
     return { ...state, validationAttachment: action.state };
+  }
+  case Actions.SET_LAST_FIELD: {
+    return { ...state, lastField: action.state };
+  }
+  case Actions.SET_OPENED_INQ_FORM: {
+    return { ...state, openedInquiresForm: action.state };
   }
   default: {
     return state;

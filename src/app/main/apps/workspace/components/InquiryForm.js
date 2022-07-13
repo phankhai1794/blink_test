@@ -72,7 +72,7 @@ const InquiryForm = (props) => {
   );
   const open = useSelector(({ workspace }) =>
     workspace.formReducer.openDialog,
-  )
+  );
   const filesUpload = useSelector(({ workspace }) =>
     workspace.inquiryReducer.filesUpload,
   )

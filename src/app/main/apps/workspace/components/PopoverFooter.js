@@ -2,7 +2,7 @@ import { saveInquiry, changeStatus } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { toFindDuplicates } from '@shared'
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Link, Button, IconButton } from '@material-ui/core';
@@ -15,6 +15,7 @@ import * as AppActions from 'app/store/actions';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
+import {setLastField} from "../store/actions/inquiry";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -29,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = ({ title }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [index, currentField, question, fields, myBL, displayCmt, valid, inquiries, metadata] = useSelector(({ workspace }) => [
+  const [index, currentField, question, fields, myBL, displayCmt, valid, inquiries, metadata, lastField, openedInquiresForm] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.question,
@@ -39,7 +40,11 @@ const PopoverFooter = ({ title }) => {
     workspace.inquiryReducer.validation,
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.metadata,
+    workspace.inquiryReducer.lastField,
+    workspace.inquiryReducer.openedInquiresForm,
   ]);
+  const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
+
   const onSave = () => {
     const check = question.filter((q) => !q.receiver.length);
     if (!question[index].inqType || !question[index].field || check.length || !question[index].content) {
@@ -111,6 +116,7 @@ const PopoverFooter = ({ title }) => {
               );
               dispatch(InquiryActions.saveInquiry());
               dispatch(FormActions.toggleReload());
+              dispatch(InquiryActions.setOpenedInqForm(false));
             })
             .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
         }).catch((error) => console.log(error));
@@ -122,6 +128,7 @@ const PopoverFooter = ({ title }) => {
           );
           dispatch(InquiryActions.saveInquiry());
           dispatch(FormActions.toggleReload());
+          dispatch(InquiryActions.setOpenedInqForm(false));
         })
         .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
     }
@@ -142,26 +149,56 @@ const PopoverFooter = ({ title }) => {
     dispatch(InquiryActions.setReply(true));
   };
   const nextQuestion = () => {
-    let temp = inquiries.findIndex((inq) => inq.field === title);
-    if (temp !== fields.length - 1) {
-      temp += 1;
-    } else {
-      temp = 0;
+    dispatch(setLastField(question[question.length - 1].field));
+    // check next if inquiry form opened
+    if (openInquiryForm) {
+      dispatch(InquiryActions.setOpenedInqForm(true));
+      dispatch(FormActions.toggleCreateInquiry(false));
     }
-    dispatch(FormActions.toggleCreateInquiry(false))
-    dispatch(InquiryActions.setOneInq(inquiries[temp]));
-    dispatch(InquiryActions.setField(fields[temp]));
+    let temp = inquiries.findIndex((inq) => inq.field === title);
+    if (temp !== inquiries.length - 1) {
+      temp += 1;
+      dispatch(InquiryActions.setOneInq(inquiries[temp]));
+      dispatch(InquiryActions.setField(fields[temp]));
+    } else {
+      if (openedInquiresForm) {
+        dispatch(InquiryActions.setOneInq({}));
+        dispatch(FormActions.toggleCreateInquiry(true));
+        dispatch(InquiryActions.setField(lastField));
+      } else {
+        temp = 0;
+        dispatch(InquiryActions.setOneInq(inquiries[temp]));
+        dispatch(InquiryActions.setField(fields[temp]));
+      }
+    }
   };
   const prevQuestion = () => {
-    let temp = inquiries.findIndex((inq) => inq.field === title);
-    if (temp !== 0) {
-      temp -= 1;
-    } else {
-      temp = fields.length - 1;
+    dispatch(setLastField(question[question.length - 1].field));
+    // check prev if inquiry form opened
+    if (openInquiryForm) {
+      dispatch(InquiryActions.setOpenedInqForm(true));
+      dispatch(FormActions.toggleCreateInquiry(false));
     }
-    dispatch(FormActions.toggleCreateInquiry(false))
-    dispatch(InquiryActions.setOneInq(inquiries[temp]));
-    dispatch(InquiryActions.setField(fields[temp]));
+    let temp = inquiries.findIndex((inq) => inq.field === title);
+    if (temp === -1) {
+      temp = inquiries.length - 1;
+      dispatch(InquiryActions.setOneInq(inquiries[temp]));
+      dispatch(InquiryActions.setField(fields[temp]));
+    } else if (temp === 0) {
+      if (openedInquiresForm) {
+        dispatch(InquiryActions.setOneInq({}));
+        dispatch(FormActions.toggleCreateInquiry(true));
+        dispatch(InquiryActions.setField(lastField));
+      } else {
+        temp = inquiries.length - 1;
+        dispatch(InquiryActions.setOneInq(inquiries[temp]));
+        dispatch(InquiryActions.setField(fields[temp]));
+      }
+    } else {
+      temp -= 1;
+      dispatch(InquiryActions.setOneInq(inquiries[temp]));
+      dispatch(InquiryActions.setField(fields[temp]));
+    }
   };
   return (
     <div className="flex justify-between" style={{ margin: '1.6rem auto' }}>
@@ -172,6 +209,7 @@ const PopoverFooter = ({ title }) => {
         <IconButton onClick={nextQuestion}>
           <NavigateNextIcon />
         </IconButton>
+       
         <Link style={{ fontSize: '16px', color: '#1564EE' }} component="button" onClick={toggleInquiriresDialog}>
           Open All Inquiries
         </Link>

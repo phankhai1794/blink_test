@@ -14,7 +14,6 @@ import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
 import { Box, Tabs, Tab, Divider, Link, Chip } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
-import CropIcon from '@material-ui/icons/Crop';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import OpenInNew from '@material-ui/icons/OpenInNew';
 import * as AppActions from 'app/store/actions';
@@ -163,7 +162,7 @@ export default function Form(props) {
     originalInquiry,
     listInqMinimize,
     listMinimize,
-    valid
+    valid,
   ] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.question,
@@ -173,7 +172,7 @@ export default function Form(props) {
     workspace.inquiryReducer.originalInquiry,
     workspace.inquiryReducer.listInqMinimize,
     workspace.inquiryReducer.listMinimize,
-    workspace.inquiryReducer.validation
+    workspace.inquiryReducer.validation,
   ]);
 
   const [openAllInquiry, showSaveInquiry, showAddInquiry] = useSelector(({ workspace }) => [
@@ -304,6 +303,8 @@ export default function Form(props) {
       const filterInq = listInqMinimize.filter((id) => id !== currentInq.id);
       dispatch(InquiryActions.setListInqMinimize(filterInq));
     }
+    //
+    dispatch(InquiryActions.setOpenedInqForm(false));
   };
   const [value, setValue] = React.useState(0);
   const handleChange = (_, newValue) => {

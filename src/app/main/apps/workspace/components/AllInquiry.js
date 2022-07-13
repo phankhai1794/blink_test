@@ -189,7 +189,7 @@ const AllInquiry = (props) => {
                             value="onshore"
                             control={
                               <Checkbox
-                                checked={q.receiver.includes('onshore')}
+                                checked={q.receiver?.includes('onshore')}
                                 onChange={(e) => handleReceiverChange(e, index)}
                                 color="primary"
                                 checkedIcon={
