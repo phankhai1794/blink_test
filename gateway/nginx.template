@@ -1,0 +1,36 @@
+client_body_buffer_size 100M;
+client_max_body_size 25M;
+
+upstream api_server {
+   server ${API_HOST};
+}
+
+server {
+    listen 80;
+    server_name ${APP_HOST};
+    #proxy_set_header    Host                    $http_host;
+    #proxy_set_header    X-Real-IP               $remote_addr;
+    #proxy_set_header    X-Forwarded-For         $proxy_add_x_forwarded_for;
+    #proxy_set_header    X-Forwarded-Proto       $scheme;
+
+    location /nginx_status {
+        stub_status;
+        access_log off;
+    }
+
+    location / {
+        proxy_pass http://portal-service:${PORTAL_PORT};
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Max-Age 3600;
+        add_header Access-Control-Expose-Headers Content-Length;
+        add_header Access-Control-Allow-Headers Range;
+    }
+    location /api {
+        rewrite ^/api?(.*)$ $1 break;
+        proxy_pass http://api_server;
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Max-Age 3600;
+        add_header Access-Control-Expose-Headers Content-Length;
+        add_header Access-Control-Allow-Headers Range;
+    }
+}

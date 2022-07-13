@@ -1,15 +1,36 @@
 version: '3.7'
 services:
-  portal:
+  nginx:
+    container_name: blink-nginx-${ENV}
+    build: ./gateway/
+    image: nginx:latest
+    restart: always
+    env_file:
+      - .env
+    command:
+      [
+        "/bin/bash",
+        "-c",
+        "envsubst '$$ENV $$API_HOST $$APP_HOST $$PORTAL_PORT' < /etc/nginx/conf.d/nginx.template > /etc/nginx/conf.d/nginx.conf && nginx -g 'daemon off;'",
+      ]
+    ports:
+      - ${GATEWAY_PORT}:80
+    volumes:
+      - "./gateway/:/etc/nginx/conf.d"
+    healthcheck:
+      test: exit 0
+
+  portal-service:
+    container_name: blink-portal-${ENV}
     restart: "always"
     working_dir: /shine/portal
     env_file:
       - .env
+    environment:
+      - PORT=${PORTAL_PORT}
     image: "advanced-shine:1.0"
     build:
       context: .
-    ports:
-      - "${PORT}:8080"
     command: ./scripts/start.sh # bash -c "npm i && npm run build && mv build dist && node index.js"
     volumes:
       - ./:/shine/portal
