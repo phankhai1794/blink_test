@@ -41,6 +41,7 @@ const BtnAddInquiry = () => {
           position: 'fixed',
           bottom: 35,
           right: 35,
+          zIndex: 10,
           width: 150,
           height: 40,
           color: '#FFFFFF',
