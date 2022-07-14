@@ -281,8 +281,8 @@ const Inquiry = (props) => {
   const metadata = useSelector(({ workspace }) =>
     workspace.inquiryReducer.metadata
   );
+  const inquiry = originalInquiry.filter((q) => q.field === currentField);
   const indexes = originalInquiry.findIndex((q) => q.field === currentField);
-  const inquiry = [inquiries[indexes]]
   const [edit, setEdit] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [isShowBtn, setShowBtn] = useState(null);
@@ -363,7 +363,7 @@ const Inquiry = (props) => {
 
   return (
     <>
-      {indexes >= 0 && inquiry.map((q, index) => {
+      {inquiry.map((q, index) => {
         const type = q.ansType;
         const user = q.creator;
         return (
