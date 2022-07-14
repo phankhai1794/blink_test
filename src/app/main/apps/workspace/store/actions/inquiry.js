@@ -23,6 +23,7 @@ export const SET_LIST_ATTACHMENT = 'SET_LIST_ATTACHMENT';
 export const VALIDATE_ATTACHMENT = 'VALIDATE_ATTACHMENT';
 export const SET_LAST_FIELD = 'SET_LAST_FIELD';
 export const SET_OPENED_INQ_FORM = 'SET_OPENED_INQ_FORM';
+export const SET_BACKGROUND_ATTACHMENT_LIST = 'SET_BACKGROUND_ATTACHMENT_LIST';
 
 export function saveInquiry() {
   return {
@@ -185,6 +186,13 @@ export function setLastField(state) {
 export function setOpenedInqForm(state) {
   return {
     type: SET_OPENED_INQ_FORM,
+    state: state
+  };
+}
+
+export function setShowBackgroundAttachmentList(state) {
+  return {
+    type: SET_BACKGROUND_ATTACHMENT_LIST,
     state: state
   };
 }

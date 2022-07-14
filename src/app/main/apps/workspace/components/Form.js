@@ -76,7 +76,7 @@ const DialogTitle = withStyles(styles)((props) => {
             <div style={{ color: '#515F6B', fontSize: '22px', fontWeight: '600' }}>{children}</div>
           </ThemeProvider>
         </div>
-        <div style={{ width: '30%', textAlign: 'right', paddingRight: '16px', paddingTop: '8px' }}>
+        <div style={{ width: '30%', textAlign: 'right', paddingRight: '2px', paddingTop: '8px' }}>
           <IconButton
             aria-label="close"
             // onClick={handleOpenSnackBar}
@@ -130,6 +130,9 @@ const useStyles = makeStyles(() => ({
     backgroundColor: 'white',
     width: (props) => (props.isFullScreen ? '1200px' : '900px')
   },
+  dialogContentAttachment: {
+    padding: '0',
+  },
   divider: {
     backgroundColor: '#8A97A3'
   },
@@ -163,6 +166,7 @@ export default function Form(props) {
     listInqMinimize,
     listMinimize,
     valid,
+    isShowBackground,
   ] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.question,
@@ -173,6 +177,7 @@ export default function Form(props) {
     workspace.inquiryReducer.listInqMinimize,
     workspace.inquiryReducer.listMinimize,
     workspace.inquiryReducer.validation,
+    workspace.inquiryReducer.isShowBackground,
   ]);
 
   const [openAllInquiry, showSaveInquiry, showAddInquiry] = useSelector(({ workspace }) => [
@@ -367,12 +372,16 @@ export default function Form(props) {
             </Tabs>
           </Box>
         )}
-        <MuiDialogContent classes={{ root: classes.dialogContent }}>{children}</MuiDialogContent>
+        <MuiDialogContent
+          classes={{ root: field === 'ATTACHMENT_LIST' ? classes.dialogContentAttachment : classes.dialogContent }}
+          style={{ overflow: field === 'ATTACHMENT_LIST' && isShowBackground ? 'hidden' : '' }}
+        >{children}</MuiDialogContent>
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
           <DialogActions style={{ display: 'none !important' }}>
             {(hasAddButton === undefined || hasAddButton === true) &&
-              !openAllInquiry && (
+              !openAllInquiry &&
+              showAddInquiry && (
               <div style={{ right: '3rem', bottom: '2.6rem', position: 'absolute' }}>
                 <Link
                   component="button"

@@ -76,8 +76,8 @@ export async function addNewMedia(state) {
   return response.data;
 }
 
-export async function removeFile(id) {
-  const response = await axios().delete(`${PATH}/attachment/${id}`);
+export async function removeMultipleMedia(state) {
+  const response = await axios().delete(`${PATH}/attachments`, {data: state});
   return response.data;
 }
 
