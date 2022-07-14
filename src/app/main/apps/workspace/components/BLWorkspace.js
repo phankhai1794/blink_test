@@ -1,4 +1,5 @@
 import { getKeyByValue, NUMBER_INQ_BOTTOM } from '@shared';
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from '@shared/keyword';
 import * as AppActions from 'app/store/actions';
 import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
@@ -24,6 +25,8 @@ import InquiryForm from './InquiryForm';
 import AttachmentList from './AttachmentList';
 import BLProcessNotification from './BLProcessNotification';
 import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
+import TableCD from './TableCD';
+import TableCM from './TableCM';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -398,108 +401,22 @@ const BLWorkspace = (props) => {
 
         <Divider className={classes.divider} />
 
-        <Grid container spacing={4}>
-          <Grid item xs={2}>
-            <Label className="my-0">CONTAINER NO.</Label>
+        <Grid container spacing={2}>
+          <Grid container alignItems="center" justify="center">
+            <h2 className={classes.grayText}>PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER</h2>
           </Grid>
-          <Grid item xs={2}>
-            <Label className="my-0">SEAL NO.</Label>
-          </Grid>
-          <Grid item xs={2}>
-            <Label className="my-0">PACKAGE</Label>
-          </Grid>
-          <Grid item xs={1}>
-            <Label className="my-0">MODE</Label>
-          </Grid>
-          <Grid item xs={1}>
-            <Label className="my-0">TYPE</Label>
-          </Grid>
-          <Grid item xs={2}>
-            <Label className="my-0">MEASUREMENT</Label>
-          </Grid>
-          <Grid item xs={2}>
-            <Label className="my-0">WEIGHT</Label>
-          </Grid>
-        </Grid>
-        <Grid container spacing={4}>
-          <Grid item xs={2}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={2}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={2}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={1}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={1}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={2}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={2}>
-            <BLField></BLField>
-          </Grid>
-        </Grid>
-        <Grid container spacing={4}>
-          <Grid item xs={2}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={2}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={2}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={1}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={1}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={2}>
-            <BLField></BLField>
-          </Grid>
-          <Grid item xs={2}>
-            <BLField></BLField>
-          </Grid>
+          {/* Table CD */}
+          <TableCD containerDetail = {content[metadata?.field?.[CONTAINER_DETAIL]]} id= {metadata?.field?.[CONTAINER_DETAIL]}/>
         </Grid>
 
-        <Divider className="my-32" />
+        <hr style={{ borderTop: '2px dashed #515E6A', marginTop: '2rem', marginBottom: '3rem' }} />
 
-        <h2 className={classes.grayText}>
-          PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
-        </h2>
-        <Grid container spacing={6}>
-          <Grid item xs={6}>
-            <Grid item>
-              <Label>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid item>
-              <Label>QUANTITY (FOR CUSTOMERS DECLARATION ONLY)</Label>
-              <BLField></BLField>
-            </Grid>
-          </Grid>
-          <Grid item xs={6}>
-            <Grid item>
-              <Label>CNTR. NOS. W/SEAL NOS. MARKS & NUMBERS</Label>
-              <BLField></BLField>
-            </Grid>
-            <Grid container spacing={6}>
-              <Grid item xs={6}>
-                <Label>GROSS WEIGHT</Label>
-                <BLField></BLField>
-              </Grid>
-              <Grid item xs={6}>
-                <Label>GROSS MEASUREMENT</Label>
-                <BLField></BLField>
-              </Grid>
-            </Grid>
-          </Grid>
+        <Grid container spacing={2}>
+          {/* Table CM */}
+          <TableCM containerManifest = {content[metadata?.field?.[CONTAINER_MANIFEST]]}  id= {metadata?.field?.[CONTAINER_MANIFEST]}/>
+        </Grid>
+
+        <Grid container spacing={6} className='mt-20'>
           <Grid container alignItems="center" justify="center">
             <h2 className={classes.grayText}>** TO BE CONTINUED ON ATTACHED LIST **</h2>
           </Grid>
