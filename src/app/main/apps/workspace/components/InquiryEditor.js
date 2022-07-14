@@ -215,12 +215,13 @@ const InquiryEditor = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles();
   const { index, question, questions, saveQuestion } = props;
-  const [metadata, removeOptions, currentField, fields, valid] = useSelector(({ workspace }) => [
+  const [metadata, removeOptions, currentField, fields, valid, inquiries] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.removeOptions,
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.fields,
-    workspace.inquiryReducer.validation
+    workspace.inquiryReducer.validation,
+    workspace.inquiryReducer.inquiries,
   ]);
   const optionsAnsType = [{
     label: 'Option Selection',
@@ -265,31 +266,27 @@ const InquiryEditor = (props) => {
         setValueType(null);
         saveQuestion(optionsOfQuestion);
       }
-      setInqTypeOption(
-        metadata.inq_type_options.filter((v) => fieldValue.value === v.field || !v.field)
-      );
+      const list = [...inquiries, ...questions]
+      const filter = metadata.inq_type_options.filter((data) => {
+        return (fieldValue.value === data.field || !data.field) && list.filter(q =>
+          q.inqType === data.value && q.field === fieldValue.value
+        ).length === 0
+      })
+      setInqTypeOption(filter);
     }
   }, [fieldValue]);
 
   useEffect(() => {
-    const list = [...removeOptions];
-    list[index] = '';
-    setFieldType(metadata.field_options.filter((v) => !list.includes(v.value) && !fields.includes(v.value)));
     const optionsOfQuestion = [...questions];
 
     if (questions.length - 1 === index && !questions.filter((q) => q.field === currentField).length) {
       setFieldValue(metadata.field_options.filter((v) => currentField === v.value)[0]);
       optionsOfQuestion[index].field = currentField;
-      list[index] = currentField;
-      dispatch(InquiryActions.removeSelectedOption(list));
     }
 
     if (!question.field && !removeOptions.includes(currentField)) {
       optionsOfQuestion[index].field = currentField;
       setFieldValue(metadata.field_options.filter((v) => currentField === v.value)[0]);
-      const options = [...removeOptions];
-      options[index] = currentField;
-      dispatch(InquiryActions.removeSelectedOption(options));
     }
     saveQuestion(optionsOfQuestion);
   }, []);
@@ -309,9 +306,6 @@ const InquiryEditor = (props) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].field = e.value;
     dispatch(InquiryActions.validate({ ...valid, field: true }));
-    const options = [...removeOptions];
-    options[index] = e.value;
-    dispatch(InquiryActions.removeSelectedOption(options));
     setFieldValue(e);
     saveQuestion(optionsOfQuestion);
   };

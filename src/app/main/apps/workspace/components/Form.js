@@ -372,8 +372,7 @@ export default function Form(props) {
         {customActions == null && (
           <DialogActions style={{ display: 'none !important' }}>
             {(hasAddButton === undefined || hasAddButton === true) &&
-              !openAllInquiry &&
-              showAddInquiry && (
+              !openAllInquiry && (
               <div style={{ right: '3rem', bottom: '2.6rem', position: 'absolute' }}>
                 <Link
                   component="button"
