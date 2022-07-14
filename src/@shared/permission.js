@@ -7,7 +7,7 @@ export const PERMISSION = {
   VIEW_SHOW_BL_HISTORY: 'view_showBLHistory',
   VIEW_SHOW_USER_MENU: 'view_showUserMenu',
   VIEW_REDIRECT_GUEST_BL: 'view_redirectGuestBL',
-  VIEW_REDIRECT_DRAFT_BL: 'view_redirectDraftBL',
+  VIEW_PREVIEW_DRAFT_BL: 'view_previewDraftBL',
   VIEW_EDIT_INQUIRY: 'view_editInquiry',
   VIEW_SAVE_INQUIRY: 'view_saveInquiry',
 
@@ -22,7 +22,7 @@ export const PERMISSION = {
   INQUIRY_REPLACE_MEDIA: 'inquiry_replaceMedia',
   INQUIRY_REMOVE_MEDIA: 'inquiry_removeMedia',
   INQUIRY_INQ_ATT_MEDIA: 'inquiry_changesInqAtt',
-  INQUIRY_ADD_MEDIA: 'inquiry_addMedia',
+  INQUIRY_ADD_MEDIA: 'inquiry_addMedia'
 };
 
 export const PermissionProvider = ({

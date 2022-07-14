@@ -14,12 +14,13 @@ import { Link } from 'react-router-dom';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppBar, Toolbar, Avatar, Badge, Button, Hidden } from '@material-ui/core';
-import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import RestoreVersion from 'app/main/apps/workspace/components/RestoreVersion';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
+
+import PreviewDraftBL from './PreviewDraftBL';
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -93,14 +94,9 @@ function ToolbarLayout1(props) {
     dispatch(DraftBLActions.setConfirmDraftBL());
   };
 
-  const redirectDraftBL = () => {
-    const bl = new URLSearchParams(window.location.search).get('bl');
-    if (bl) history.push(`/apps/draft-bl/${bl}`);
-  };
-
   const redirectEditDraftBL = () => {
     const bl = window.location.pathname.split('/')[3];
-    if (bl) history.push(`/apps/edit/draft-bl/${bl}`);
+    if (bl) history.push(`/apps/draft-bl/edit/${bl}`);
   };
 
   useEffect(() => {
@@ -175,19 +171,6 @@ function ToolbarLayout1(props) {
             </PermissionProvider>
             {/* {openTrans && transId && <RestoreVersion />} */}
             <PermissionProvider
-              action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
-              extraCondition={pathname.includes('/guest')}>
-              <Button
-                variant="text"
-                size="medium"
-                className={classes.button}
-                onClick={redirectDraftBL}>
-                <VisibilityIcon />
-                <span className="px-2">Draft BL</span>
-              </Button>
-            </PermissionProvider>
-
-            <PermissionProvider
               action={PERMISSION.VIEW_REDIRECT_GUEST_BL}
               extraCondition={pathname.includes('/apps/draft-bl')}>
               <Button
@@ -245,6 +228,9 @@ function ToolbarLayout1(props) {
               extraCondition={pathname.includes('/workspace')}>
               <History />
             </PermissionProvider> */}
+
+            <PreviewDraftBL />
+
             <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>
               <UserProfile classes={classes} history={history} />
             </PermissionProvider>
