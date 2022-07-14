@@ -1,15 +1,14 @@
 import * as Actions from '../actions';
 
-
 const initialState = {
   metadata: {},
-  bl: '',
+  myBL: {},
   content: {},
   myblState: '',
   contentEdit: {},
   contentChanged: {},
   openDraftBL: false,
-  currentBLField: '',
+  currentBLField: ''
 };
 
 const draftBL = function (state = initialState, action) {
@@ -18,7 +17,7 @@ const draftBL = function (state = initialState, action) {
     return { ...state, metadata: action.state };
   }
   case Actions.SET_BL: {
-    return { ...state, bl: action.state };
+    return { ...state, myBL: action.state };
   }
   case Actions.SET_CONTENT: {
     return { ...state, content: action.state };

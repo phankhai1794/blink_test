@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
 import { Grid } from '@material-ui/core';
@@ -10,7 +10,8 @@ import Textarea from './components/Textarea';
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
-    background: '#515E6A'
+    background: '#515E6A',
+    height: '100%'
   },
   root: {
     fontFamily: 'Courier New',
@@ -52,30 +53,21 @@ const useStyles = makeStyles((theme) => ({
     borderBottom: '1px solid blue'
   },
   normalText: {
-    color: 'grey',
-    textTransform: 'uppercase',
-    fontSize: '1.1rem'
-  },
-  highlight: {
-    backgroundColor: 'yellow'
-  },
-  popover: {
-    backgroundColor: 'green',
-    color: theme.palette.primary.contrastText
-  },
-  hasComment: {
-    float: 'right',
-    outline: '1px solid red',
-    border: '3px solid red',
-    marginTop: '-1px',
-    marginLeft: '-1px'
+    textTransform: 'uppercase'
   }
 }));
-const DraftPage = (props) => {
-  const { status } = props;
-  const classes = useStyles(props);
+
+const DraftPage = () => {
+  const { pathname } = window.location;
+  const classes = useStyles();
   const dispatch = useDispatch();
-  const [metadata, content] = useSelector(({ draftBL }) => [draftBL.metadata, draftBL.content]);
+  const [containersDetail, setContainersDetail] = useState([]);
+  const [containersManifest, setContainersManifest] = useState([]);
+  const [metadata, myBL, content] = useSelector(({ draftBL }) => [
+    draftBL.metadata,
+    draftBL.myBL,
+    draftBL.content
+  ]);
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -85,11 +77,22 @@ const DraftPage = (props) => {
     return content[getField(field)] || '';
   };
 
+  const getInqType = (field) => {
+    return metadata ? metadata.inq_type[field] : '';
+  };
+
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(Actions.loadMetadata());
-    dispatch(Actions.loadContent(window.location.pathname.split('/')[3]));
+    dispatch(Actions.loadContent(pathname.split('/')[pathname.includes('preview') ? 4 : 3]));
   }, []);
+
+  useEffect(() => {
+    if (Object.keys(content).length && Object.keys(metadata).length) {
+      setContainersDetail(getValueField('Container Detail'));
+      setContainersManifest(getValueField('Container Manifest'));
+    }
+  }, [metadata, content]);
 
   return (
     <div className={classes.wrapper}>
@@ -121,10 +124,20 @@ const DraftPage = (props) => {
           <Grid item xs={6} className={classes.gridBottom}>
             <Grid container className={classes.gridBottom}>
               <Grid item xs={6} className={`${classes.gridLeft}`}>
-                <h1 className={classes.disabledText}>Booking no.</h1>
+                <h1
+                  className={classes.disabledText}
+                  style={{ display: 'inline-block', marginRight: 10 }}>
+                  Booking no.
+                </h1>
+                <span>{myBL.bkgNo}</span>
               </Grid>
               <Grid item xs={6}>
-                <h1 className={classes.disabledText}>sea waybill no.</h1>
+                <h1
+                  className={classes.disabledText}
+                  style={{ display: 'inline-block', marginRight: 10 }}>
+                  sea waybill no.
+                </h1>
+                <span>{myBL.bkgNo && `ONYE${myBL.bkgNo}`}</span>
               </Grid>
             </Grid>
             <Grid>
@@ -231,10 +244,7 @@ const DraftPage = (props) => {
                   readOnly={true}
                 />
               </Grid>
-              <Grid
-                item
-                xs={6}
-                className={`${classes.gridLeft} ${classes.gridBottom}`}>
+              <Grid item xs={6} className={`${classes.gridLeft} ${classes.gridBottom}`}>
                 <h1 className={classes.disabledText}>Port of loading</h1>
                 <Textarea
                   id={getField('PORT OF LOADING')}
@@ -321,144 +331,42 @@ const DraftPage = (props) => {
             </Grid>
           </Grid>
           <Grid container>
-            <div className="flex">
-              <p className={classes.normalText}>count-no: 0 /</p>
-              <p className={classes.normalText}>/ /</p>
-              <p className={classes.normalText}>10 packages /</p>
-              <p className={classes.normalText}>/ /</p>
-              <p className={classes.normalText}>10.000 KGS /</p>
-              <p className={classes.normalText}>10 CBM</p>
-            </div>
-          </Grid>
-          <Grid container>
-            <div className="flex">
-              <p className={classes.normalText}>count-no: 0 /</p>
-              <p className={classes.normalText}>/ /</p>
-              <p className={classes.normalText}>10 packages /</p>
-              <p className={classes.normalText}>/ /</p>
-              <p className={classes.normalText}>10.000 KGS /</p>
-              <p className={classes.normalText}>10 CBM</p>
-            </div>
-          </Grid>
-          <Grid container style={{ borderTop: '1px dashed blue' }}>
-            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-            </Grid>
-            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10 packages</p>
-            </Grid>
-            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-            </Grid>
-            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10000KGS</p>
-            </Grid>
-            <Grid item xs={2}>
-              <p className={classes.normalText}>10 CBM</p>
+            <Grid item xs={12}>
+              {containersDetail &&
+                containersDetail.map((cd, idx) => (
+                  <span key={idx} style={{ whiteSpace: 'pre' }}>
+                    {`${cd[getInqType('Container Number')]}    / ${
+                      cd[getInqType('Container Seal')]
+                    }    /  ${cd[getInqType('Container Package')]}  /  ${
+                      cd[getInqType('Container Type')]
+                    }  /  ${cd[getInqType('Container Weight')]}  /  ${
+                      cd[getInqType('Container Measurement')]
+                    }`}
+                    <br />
+                  </span>
+                ))}
             </Grid>
           </Grid>
-          <Grid container>
-            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-            </Grid>
-            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10 packages</p>
-            </Grid>
-            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-            </Grid>
-            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10000KGS</p>
-            </Grid>
-            <Grid item xs={2}>
-              <p className={classes.normalText}>10 CBM</p>
-            </Grid>
-          </Grid>
-          <Grid container>
-            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-            </Grid>
-            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10 packages</p>
-            </Grid>
-            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-            </Grid>
-            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10000KGS</p>
-            </Grid>
-            <Grid item xs={2}>
-              <p className={classes.normalText}>10 CBM</p>
-            </Grid>
-          </Grid>
-          <Grid container>
-            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-            </Grid>
-            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10 packages</p>
-            </Grid>
-            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-            </Grid>
-            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10000KGS</p>
-            </Grid>
-            <Grid item xs={2}>
-              <p className={classes.normalText}>10 CBM</p>
-            </Grid>
-          </Grid>
-          <Grid container>
-            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-            </Grid>
-            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10 packages</p>
-            </Grid>
-            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-            </Grid>
-            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10000KGS</p>
-            </Grid>
-            <Grid item xs={2}>
-              <p className={classes.normalText}>10 CBM</p>
-            </Grid>
-          </Grid>
-          <Grid container>
-            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-            </Grid>
-            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10 packages</p>
-            </Grid>
-            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-            </Grid>
-            <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10000KGS</p>
-            </Grid>
-            <Grid item xs={2}>
-              <p className={classes.normalText}>10 CBM</p>
-            </Grid>
-          </Grid>
-          <Grid container>
-            <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD </p>
-            </Grid>
-            <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>10 packages</p>
-            </Grid>
-            <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
-              <p className={classes.normalText}>PR SINGAPORE PTE LTD</p>
-            </Grid>
-            <Grid item xs={2} style={{ borderRight: '1px solid black' }}>
-              <p className={classes.normalText}>10000KGS</p>
-            </Grid>
-            <Grid item xs={2}>
-              <p className={classes.normalText}>10 CBM</p>
-            </Grid>
-          </Grid>
+          {containersManifest &&
+            containersManifest.map((cm, idx) => (
+              <Grid key={idx} container style={idx === 0 ? { borderTop: '1px dashed blue' } : {}}>
+                <Grid item xs={3} style={{ borderRight: '1px solid blue' }}>
+                  <p className={classes.normalText}>{cm[getInqType('C/M Mark')]}</p>
+                </Grid>
+                <Grid item xs={1} style={{ borderRight: '1px solid blue' }}>
+                  <p className={classes.normalText}>{cm[getInqType('C/M Package')]}</p>
+                </Grid>
+                <Grid item xs={4} style={{ borderRight: '1px solid blue' }}>
+                  <p className={classes.normalText}>{cm[getInqType('C/M Description')]}</p>
+                </Grid>
+                <Grid item xs={2} style={{ borderRight: '1px solid blue' }}>
+                  <p className={classes.normalText}>{cm[getInqType('C/M Weight')]}</p>
+                </Grid>
+                <Grid item xs={2}>
+                  <p className={classes.normalText}>{cm[getInqType('C/M Measurement')]}</p>
+                </Grid>
+              </Grid>
+            ))}
         </Grid>
         <Grid style={{ borderBottom: '1px solid blue' }}>
           <h1 className={classes.disabledText}>Ocean Preight prepaid</h1>

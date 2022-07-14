@@ -10,7 +10,7 @@ import { getKeyByValue } from '@shared';
 import * as Actions from './store/actions';
 import Label from './components/FieldLabel';
 import BLField from './components/BLField';
-import BLFieldForm from "./components/BLFieldForm";
+import BLFieldForm from './components/BLFieldForm';
 import Form from './components/Form';
 
 const useStyles = makeStyles((theme) => ({
@@ -61,14 +61,16 @@ const useStyles = makeStyles((theme) => ({
 const EditDraftPage = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [metadata, content, openDraftBL, currentBLField, contentEdit, contentChanged] = useSelector(({ draftBL }) => [
-    draftBL.metadata,
-    draftBL.content,
-    draftBL.openDraftBL,
-    draftBL.currentBLField,
-    draftBL.contentEdit,
-    draftBL.contentChanged,
-  ]);
+  const [metadata, content, openDraftBL, currentBLField, contentEdit, contentChanged] = useSelector(
+    ({ draftBL }) => [
+      draftBL.metadata,
+      draftBL.content,
+      draftBL.openDraftBL,
+      draftBL.currentBLField,
+      draftBL.contentEdit,
+      draftBL.contentChanged
+    ]
+  );
   const [titleField, setTitleField] = useState();
   const [contentField, setContentField] = useState();
 
@@ -94,11 +96,11 @@ const EditDraftPage = (props) => {
   }, [currentBLField]);
 
   const handleGetValue = (value) => {
-    setContentField(value)
-  }
+    setContentField(value);
+  };
 
   const handleSave = () => {
-    const newTxt = {...contentEdit};
+    const newTxt = { ...contentEdit };
     if (newTxt[currentBLField] === contentField) {
       dispatch(Actions.toggleDraftBLEdit(false));
       return;
@@ -106,10 +108,10 @@ const EditDraftPage = (props) => {
     newTxt[currentBLField] = contentField;
     dispatch(Actions.setNewContent(newTxt));
     //
-    const newTxtChanged = {...contentChanged, [currentBLField]: contentField};
+    const newTxtChanged = { ...contentChanged, [currentBLField]: contentField };
     dispatch(Actions.setNewContentChanged(newTxtChanged));
     dispatch(Actions.toggleDraftBLEdit(false));
-  }
+  };
 
   return (
     <div className={clsx('max-w-5xl', classes.root)}>
@@ -117,9 +119,8 @@ const EditDraftPage = (props) => {
         open={openDraftBL}
         toggleForm={(status) => dispatch(Actions.toggleDraftBLEdit(status))}
         title={titleField}
-        handleSave={handleSave}
-      >
-        <BLFieldForm getValueFieldChange={handleGetValue}/>
+        handleSave={handleSave}>
+        <BLFieldForm getValueFieldChange={handleGetValue} />
       </Form>
 
       <Grid container>

@@ -22,11 +22,11 @@ export const loadMetadata = () => (dispatch) => {
 
 export const loadContent = (bl) => (dispatch) => {
   if (bl) {
-    dispatch(setBL(bl));
     getBlInfo(bl)
       .then((res) => {
-        dispatch(setContent(res.myBL.content));
+        dispatch(setBL({ id: bl, bkgNo: res.myBL.bkgNo }));
         dispatch(setMyblState(res.myBL.state));
+        dispatch(setContent(res.myBL.content));
         dispatch(setNewContent(res.myBL.content));
       })
       .catch((err) => console.error(err));
@@ -58,7 +58,7 @@ export function setMyblState(state) {
   return {
     type: SET_MY_BL_STATE,
     state: state
-  }
+  };
 }
 
 export function toggleDraftBLEdit(state) {
@@ -70,11 +70,10 @@ export function toggleDraftBLEdit(state) {
 
 export const setConfirmDraftBL = () => (dispatch) => {
   const bl = window.location.pathname.split('/')[3];
-  dispatch(setBL(bl));
   updateBL(bl, { state: draftConfirm })
     .then(() => dispatch(setMyblState(draftConfirm)))
     .catch((err) => console.error(err));
-}
+};
 
 export function setCurrentBLField(state) {
   return {
