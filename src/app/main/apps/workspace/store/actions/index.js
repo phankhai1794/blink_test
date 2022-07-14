@@ -47,19 +47,6 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
       ];
       const listMinimize = [...res, ...optionTabs];
       dispatch(InquiryActions.setListMinimize(listMinimize));
-      //
-      let attachmentFiles = [];
-      res.forEach((e) => {
-        const mediaFile = e.mediaFile.map((f) => {
-          return {
-            ...f,
-            field: e.field,
-            inquiryId: e.id
-          };
-        });
-        attachmentFiles = [...attachmentFiles, ...mediaFile];
-      });
-      dispatch(setListAttachment(attachmentFiles));
     })
     .catch((err) => console.error(err));
 };
