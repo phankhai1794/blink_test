@@ -368,7 +368,7 @@ const InquiryPreview = (props) => {
               <ImageAttach file={file} style={{ margin: '1rem' }} />
             </div>
           ) : (
-            <FileAttach file={file} />
+            <FileAttach file={file} field = {quesion.field} />
           )
         )}
       </Card>

@@ -421,7 +421,7 @@ const InquiryEditor = (props) => {
             {file.ext.match(/jpeg|jpg|png/g) ? (
               <ImageAttach file={file} field={question.field} indexInquiry={index} style={{}} />
             ) : (
-              <FileAttach file={file} ield={question.field} indexInquiry={index} />
+              <FileAttach file={file} field={question.field} indexInquiry={index} />
             )}
           </div>
         ))}
