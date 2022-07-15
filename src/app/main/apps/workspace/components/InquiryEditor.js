@@ -187,6 +187,7 @@ const ChoiceAnswer = (props) => {
           placeholder="Add Option"
           onClick={handleAddChoice}
           InputProps={{ classes }}
+          disabled
         />
       </div>
       {!valid.answerContent && <span className={'errorChoice'}>Invalid Option !</span>}
