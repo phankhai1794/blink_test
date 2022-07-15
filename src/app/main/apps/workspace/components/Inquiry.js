@@ -482,7 +482,7 @@ const Inquiry = (props) => {
                   {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
                   {q.mediaFile?.length > 0 && q.mediaFile?.map((file, mediaIndex) => (
                     <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex} className={classes.root}>
-                      {file.ext.match(/jpeg|jpg|png/g) ? (
+                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                         <ImageAttach hiddenRemove={true} file={file} field={q.field} style={{ margin: '2.5rem' }} />
                       ) : (
                         <FileAttach hiddenRemove={true} file={file} field={q.field}/>
@@ -493,8 +493,8 @@ const Inquiry = (props) => {
                 <>
                   {q.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
                   {q.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
-                    <div style={{ position: 'relative' }} key={mediaIndex} className={classes.root}>
-                      {file.ext.match(/jpeg|jpg|png/g) ? (
+                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex} className={classes.root}>
+                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                         <ImageAttach hiddenRemove={true} file={file} field={q.field} style={{ margin: '2.5rem' }} />
                       ) : (
                         <FileAttach hiddenRemove={true} file={file} field={q.field} />

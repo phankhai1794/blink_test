@@ -275,7 +275,7 @@ const AllInquiry = (props) => {
                         <div
                           style={{ position: 'relative', display: 'inline-block' }}
                           key={mediaIndex}>
-                          {file.ext.match(/jpeg|jpg|png/g) ? (
+                          {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                             <ImageAttach file={file} style={{ margin: '2.5rem' }} />
                           ) : (
                             <FileAttach file={file} field ={q.field}/>
@@ -289,7 +289,7 @@ const AllInquiry = (props) => {
                       <div
                         style={{ position: 'relative', display: 'inline-block' }}
                         key={mediaIndex}>
-                        {file.ext.match(/jpeg|jpg|png/g) ? (
+                        {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                           <ImageAttach file={file} field={q.field} style={{ margin: '2.5rem' }} />
                         ) : (
                           <FileAttach file={file} field={q.field} />
