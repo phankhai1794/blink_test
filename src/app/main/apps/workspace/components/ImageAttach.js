@@ -16,6 +16,7 @@ const useStyles = makeStyles((theme) => ({
     borderStyle: 'ridge',
     marginLeft: '10px',
     marginRight: '10px',
+    marginBottom: '10px',
     backgroundColor: '#F5F8FA',
     '& h3': {
       display: 'block',
@@ -113,7 +114,7 @@ const ImageAttach = ({ file, field, hiddenRemove = false }) => {
         src={file.src}
         onClick={openImageViewer}
       />
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
+      <div style={{ display: 'flex', height: '30px', flexDirection: 'row' }}>
         <h3 style={{ color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }} onClick={downloadFile}>
           {file.name}
         </h3>
