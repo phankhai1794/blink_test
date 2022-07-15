@@ -141,6 +141,7 @@ const AttachmentList = (props) => {
   const [isShowReplace, setShowReplace] = useState(false);
   const [isShowRemove, setShowRemove] = useState(false);
   const [isShowConfirm, setShowConfirm] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const isAllSelected = attachmentFiles.length > 0 && listIdMedia.length === attachmentFiles.length;
 
   const styles = (validationAttachment, width) => {
@@ -181,11 +182,15 @@ const AttachmentList = (props) => {
       });
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
     });
+    if (getAttachmentFiles.length <= 0) {
+      setIsLoading(false)
+    }
     for (let f in getAttachmentFiles) {
       getFile(getAttachmentFiles[f].id).then((file) => {
         getAttachmentFiles[f].src = urlMedia(getAttachmentFiles[f].ext, file);
         setAttachmentFile(getAttachmentFiles);
-      })
+        setIsLoading(false)
+      });
     }
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
   }, []);
@@ -309,7 +314,7 @@ const AttachmentList = (props) => {
 
   return (
     <>
-      {attachmentFiles.length <= 0 ? <ColoredLinearProgress /> : ''}
+      {isLoading ? <ColoredLinearProgress /> : ''}
       <div className={classes.root}>
         {attachmentFiles.length > 0 && (
           <>
