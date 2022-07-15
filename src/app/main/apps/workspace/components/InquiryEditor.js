@@ -321,6 +321,9 @@ const InquiryEditor = (props) => {
   const handleAnswerTypeChange = (e) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].ansType = e.value;
+    if (e.value !== metadata.ans_type.choice) {
+      optionsOfQuestion[index].answerObj = []
+    }
     dispatch(InquiryActions.validate({ ...valid, ansType: true }));
     setValueAnsType(optionsAnsType.filter(ansType => ansType.value === e.value));
     saveQuestion(optionsOfQuestion);
