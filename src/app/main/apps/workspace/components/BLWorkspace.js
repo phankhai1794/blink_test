@@ -161,7 +161,7 @@ const BLWorkspace = (props) => {
     default:
       return {
         status: inquiry?.id === currentInq?.id,
-        toggleForm: () => {},
+        toggleForm: () => { },
         fabTitle: getField?.label,
         title: getField?.value ? getKeyByValue(metadata['field'], getField?.value) : '',
         hasAddButton: false,
@@ -406,14 +406,14 @@ const BLWorkspace = (props) => {
             <h2 className={classes.grayText}>PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER</h2>
           </Grid>
           {/* Table CD */}
-          <TableCD containerDetail = {content[metadata?.field?.[CONTAINER_DETAIL]]} id= {metadata?.field?.[CONTAINER_DETAIL]}/>
+          <TableCD containerDetail={getValueField(CONTAINER_DETAIL)} id={getField(CONTAINER_DETAIL)} />
         </Grid>
 
         <hr style={{ borderTop: '2px dashed #515E6A', marginTop: '2rem', marginBottom: '3rem' }} />
 
         <Grid container spacing={2}>
           {/* Table CM */}
-          <TableCM containerManifest = {content[metadata?.field?.[CONTAINER_MANIFEST]]}  id= {metadata?.field?.[CONTAINER_MANIFEST]}/>
+          <TableCM containerManifest={getValueField(CONTAINER_MANIFEST)} id={getField(CONTAINER_MANIFEST)} />
         </Grid>
 
         <Grid container spacing={6} className='mt-20'>
