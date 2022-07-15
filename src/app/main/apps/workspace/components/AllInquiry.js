@@ -278,7 +278,7 @@ const AllInquiry = (props) => {
                           {file.ext.match(/jpeg|jpg|png/g) ? (
                             <ImageAttach file={file} style={{ margin: '2.5rem' }} />
                           ) : (
-                            <FileAttach file={file} />
+                            <FileAttach file={file} field ={q.field}/>
                           )}
                         </div>
                       ))}

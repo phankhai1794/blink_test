@@ -270,7 +270,7 @@ const InquiryForm = (props) => {
                       <ImageAttach hiddenRemove={true} file={file} style={{ margin: '1rem' }} />
                     </div>
                   ) : (
-                    <FileAttach file={file} />
+                    <FileAttach file={file} field = {question.field} />
                   )
                 )
               }
