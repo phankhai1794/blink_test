@@ -201,9 +201,8 @@ function ToolbarLayout1(props) {
               <DialogConfirm open={open} handleClose={handleClose} />
             </PermissionProvider>
           </div>
-
           <div className="flex" style={{ marginRight: '27px' }}>
-            {/* <PermissionProvider
+            <PermissionProvider
               action={PERMISSION.MAIL_SEND_MAIL}
               extraCondition={pathname.includes('/workspace')}>
               <div style={{ paddingLeft: '15px', paddingRight: '5px', paddingTop: '17px' }}>
@@ -223,14 +222,13 @@ function ToolbarLayout1(props) {
                 </Button>
               </div>
             </PermissionProvider>
-            <PermissionProvider
+            {/* <PermissionProvider
               action={PERMISSION.VIEW_SHOW_BL_HISTORY}
               extraCondition={pathname.includes('/workspace')}>
               <History />
-            </PermissionProvider> */}
-
+            </PermissionProvider> 
+             */}
             <PreviewDraftBL />
-
             <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>
               <UserProfile classes={classes} history={history} />
             </PermissionProvider>
