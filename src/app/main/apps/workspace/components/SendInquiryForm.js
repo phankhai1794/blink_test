@@ -2,9 +2,9 @@ import { useForm } from '@fuse/hooks';
 import * as Actions from 'app/store/actions';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Icon, Button, Grid } from '@material-ui/core';
 import draftToHtml from 'draftjs-to-html';
 import clsx from 'clsx';
-import { Button, Grid, Divider } from '@material-ui/core';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles } from '@material-ui/styles';
@@ -27,10 +27,18 @@ const SendInquiryForm = (props) => {
     workspace.mailReducer.error,
     workspace.mailReducer.mails
   ]);
+  const [isCustomerCc, setIsCustomerCc] = useState(false);
+  const [isCustomerBcc, setIsCustomerBcc] = useState(false);
+  const [isOnshoreCc, setIsOnshoreCc] = useState(false);
+  const [isOnshoreBcc, setIsOnshoreBcc] = useState(false);
 
   const { form } = useForm({
     toCustomer: '',
+    toCustomerCc: '',
+    toCustomerBcc: '',
     toOnshore: '',
+    toOnshoreCc: '',
+    toOnshoreBcc: '',
     from: '',
     subject: '',
     content: ''
@@ -66,13 +74,11 @@ const SendInquiryForm = (props) => {
       });
     }
   }, [success, error]);
-
-  const openSendInquiryDialog = (event) => {
-    dispatch(FormActions.toggleOpenEmail(true));
-    if (!mails.length) {
+  useEffect(() => {
+    if (openEmail && !mails.length) {
       dispatch(mailActions.suggestMail(''));
     }
-  };
+  }, [openEmail]);
 
   const opendPreviewForm = (event) => {
     dispatch(FormActions.toggleOpenInquiryReview(true));
@@ -102,14 +108,14 @@ const SendInquiryForm = (props) => {
   const useStyles = makeStyles(() => ({
     label: {
       whiteSpace: 'nowrap',
-      color: '#4a4a4a',
+      color: '#132535',
       fontSize: 14,
-      fontFamily: 'Roboto, Helvetica Neue, Arial, sans-serif'
+      fontWeight: '400',
+      fontFamily: 'Montserrat'
     }
   }));
 
   const classes = useStyles(props);
-
   return (
     <>
       <Form
@@ -123,72 +129,56 @@ const SendInquiryForm = (props) => {
         }
         FabTitle="E-mail">
         <>
-          <Grid
-            style={{ marginTop: 8 }}
-            container
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="center">
-            <Grid item xs={1}>
-              <label style={{ fontSize: 14 }} className={clsx(classes.label)}>
-                To Customer
-              </label>
-            </Grid>
-            <Grid style={{ paddingLeft: 15 }} item xs={11}>
-              <TagsInput id={'toCustomer'} tagLimit={10} onChanged={handleFieldChange} />
-            </Grid>
-          </Grid>
-          <Grid
-            style={{ marginTop: 8 }}
-            container
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="center">
-            <Grid item xs={1}>
-              <label className={clsx(classes.label)}>To Onshore</label>
-            </Grid>
-            <Grid style={{ paddingLeft: 15 }} item xs={11}>
-              <TagsInput id={'toOnshore'} tagLimit={10} onChanged={handleFieldChange} />
-            </Grid>
-          </Grid>
-          <Grid
-            style={{ marginTop: 8 }}
-            container
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="center">
-            <Grid item xs={1}>
-              <label className={clsx(classes.label)}>From</label>
-            </Grid>
-            <Grid style={{ paddingLeft: 15 }} item xs={11}>
-              <TagsInput id={'from'} tagLimit={1} onChanged={handleFieldChange} />
-            </Grid>
-          </Grid>
-          <Grid
-            style={{ marginTop: 8 }}
-            container
-            direction="row"
-            justifyContent="flex-start"
-            alignItems="center">
-            <Grid item xs={1}>
-              <label className={clsx(classes.label)}>Subject</label>
-            </Grid>
-            <Grid style={{ paddingLeft: 15 }} item xs={11}>
-              <input
-                style={{
-                  padding: '5px',
-                  width: '100%',
-                  borderWidth: '0.5px',
-                  borderRadius: '4px',
-                  height: '25px',
-                  borderStyle: 'solid',
-                  borderColor: 'lightgray'
-                }}
-                onChange={onInputChange}
-              />
-            </Grid>
-          </Grid>
-          <div style={{ minHeight: 300, marginTop: 10 }}>
+          <InputUI
+            id="toCustomer"
+            title="To Customer"
+            isCc={isCustomerCc}
+            isBcc={isCustomerBcc}
+            onCc={() => {
+              setIsCustomerCc(!isCustomerCc);
+            }}
+            onBcc={() => {
+              setIsCustomerBcc(!isCustomerBcc);
+            }}
+            onChanged={handleFieldChange}
+          />
+          {isCustomerCc && <InputUI id="toCustomerCc" title="Cc" onChanged={handleFieldChange} />}
+          {isCustomerBcc && (
+            <InputUI id="toCustomerBcc" title="Bcc" onChanged={handleFieldChange} />
+          )}
+          <InputUI
+            id="toOnshore"
+            title="To Onshore"
+            isCc={isOnshoreCc}
+            isBcc={isOnshoreBcc}
+            onCc={() => {
+              setIsOnshoreCc(!isOnshoreCc);
+            }}
+            onBcc={() => {
+              setIsOnshoreBcc(!isOnshoreBcc);
+            }}
+            onChanged={handleFieldChange}
+          />
+          {isOnshoreCc && <InputUI id = "toOnshoreCc" title = "Cc" onChanged={handleFieldChange} />}
+          {isOnshoreBcc && <InputUI id = "toOnshoreBcc" title = "Bcc" onChanged={handleFieldChange} />}
+          <div style={{ display: 'flex', marginTop: 10 }}>
+            <label className={clsx(classes.label)}>Subject</label>
+          </div>
+          <div style={{ marginTop: 5 }}>
+            <input
+              style={{
+                padding: '5px',
+                width: '100%',
+                borderWidth: '0.5px',
+                borderRadius: '4px',
+                height: '25px',
+                borderStyle: 'solid',
+                borderColor: 'lightgray'
+              }}
+              onChange={onInputChange}
+            />
+          </div>
+          <div style={{ marginTop: 10 }}>
             <Editor
               toolbarClassName="toolbarClassName"
               wrapperClassName="wrapperClassName"
@@ -196,7 +186,6 @@ const SendInquiryForm = (props) => {
               onContentStateChange={onContentStateChange}
             />
           </div>
-          <Divider />
         </>
       </Form>
     </>
@@ -205,9 +194,7 @@ const SendInquiryForm = (props) => {
 
 const InquiryReview = (props) => {
   const [tabSelected, setTabSelected] = useState(0);
-  const [openInqReview] = useSelector(({ workspace }) => [
-    workspace.formReducer.openInqReview
-  ]);
+  const [openInqReview] = useSelector(({ workspace }) => [workspace.formReducer.openInqReview]);
   const dispatch = useDispatch();
 
   return (
@@ -228,16 +215,15 @@ const InquiryReview = (props) => {
           <div style={{ height: '800px' }}>
             <AllInquiry
               user="workspace"
-              receiver={tabSelected == 0 ? 'customer' : 'onshore'}
+              receiver={tabSelected === 0 ? 'customer' : 'onshore'}
               collapse={true}
             />
           </div>
         </>
       </Form>
     </>
-  )
-}
-
+  );
+};
 
 const useStyles = makeStyles((theme) => ({
   buttonProgress: {
@@ -250,47 +236,111 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+const InputUI = (props) => {
+  const { id, title, type, onChanged, isCc, isBcc, onCc, onBcc } = props;
+  const useStyles = makeStyles(() => ({
+    label: {
+      whiteSpace: 'nowrap',
+      color: '#132535',
+      fontSize: 14,
+      fontWeight: '400',
+      fontFamily: 'Montserrat'
+    }
+  }));
+  const classes = useStyles(props);
+  return (
+    <Grid
+      style={{ marginTop: 8 }}
+      container
+      direction="row"
+      justifyContent="flex-start"
+      alignItems="center">
+      <Grid item xs={1}>
+        {title === 'Cc' || title === 'Bcc' ? (
+          <div
+            style={{
+              paddingLeft: '7px',
+              paddingRight: '7px',
+              width: 'fit-content',
+              background: '#FFFFFF',
+              border: '1px solid #BD0F72',
+              borderRadius: '4px',
+              justifyContent: 'center'
+            }}>
+            <label
+              style={{
+                fontStyle: 'normal',
+                fontWeight: '500',
+                fontSize: '14px',
+                lineHeight: '17px',
+                width: '100%',
+                fontFamily: 'Montserrat',
+                color: '#BD0F72'
+              }}
+              className={clsx(classes.label)}>
+              {title}
+            </label>
+          </div>
+        ) : (
+          <label style={{ fontSize: 14 }} className={clsx(classes.label)}>
+            {title}
+          </label>
+        )}
+      </Grid>
+      <Grid style={{ paddingLeft: 20 }} item xs={11}>
+        <TagsInput
+          id={id}
+          tagLimit={10}
+          type={title}
+          isCc={isCc}
+          isBcc={isBcc}
+          onCc={onCc}
+          onBcc={onBcc}
+          onChanged={onChanged}
+        />
+      </Grid>
+    </Grid>
+  );
+};
+
 const ActionUI = (props) => {
   const classes = useStyles();
   const { openPreviewClick, sendMailClick } = props;
   const [isLoading] = useSelector(({ workspace }) => [workspace.mailReducer.isLoading]);
 
   return (
-    <div style={{ padding: 10 }}>
-      <Grid container justify="center" style={{ paddingTop: 20 }}>
-        <Grid>
-          <Button
-            style={{
-              width: 120,
-              color: 'white',
-              backgroundColor: '#092D33',
-              marginRight: 10,
-              borderRadius: 20
-            }}
-            onClick={openPreviewClick}>
-            Preview
-          </Button>
-        </Grid>
-        <Grid>
-          <div>
-            <Button
-              style={{
-                width: 120,
-                color: 'white',
-                marginLeft: 10,
-                backgroundColor: isLoading ? '#515E6A' : '#bd1874',
-                borderRadius: 20
-              }}
-              disabled={isLoading}
-              onClick={sendMailClick}>
-              SEND
-            </Button>
-            {isLoading && <CircularProgress size={24} className={classes.buttonProgress} />}
-          </div>
-        </Grid>
-      </Grid>
+    <div
+      style={{
+        padding: 10,
+        position: 'relative',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+      <Button
+        style={{ position: 'absolute', left: '10px', top: '10px' }}
+        variant="text"
+        // className={clsx('h-64', classes.button)}
+        onClick={openPreviewClick}>
+        <Icon style={{ color: '#1564EE' }}>visibility</Icon>
+        <span className="pl-12" style={{ color: '#1564EE' }}>
+          Preview Inquiries
+        </span>
+      </Button>
+      <Button
+        style={{
+          width: 140,
+          color: 'white',
+          backgroundColor: isLoading ? '#515E6A' : '#bd1874',
+          borderRadius: 20
+        }}
+        disabled={isLoading}
+        onClick={sendMailClick}>
+        SEND
+      </Button>
+      {isLoading && <CircularProgress size={24} className={classes.buttonProgress} />}
     </div>
   );
 };
 
-export {SendInquiryForm, InquiryReview};
+export { SendInquiryForm, InquiryReview };

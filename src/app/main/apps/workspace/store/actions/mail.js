@@ -10,10 +10,10 @@ export const SUGGEST_MAIL_ERROR = 'SUGGEST_MAIL_ERROR';
 export const SUGGEST_MAIL_SUCCESS = 'SUGGEST_MAIL_SUCCESS';
 
 export const sendMail =
-  ({ myblId, toCustomer, toOnshore, from, subject, content }) =>
+  ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content }) =>
     async (dispatch) => {
       dispatch({ type: SENDMAIL_LOADING });
-      sendmail(myblId, from, toCustomer, toOnshore, subject, content)
+      sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content)
         .then((res) => {
           if (res.status === 200) {
             return dispatch({
