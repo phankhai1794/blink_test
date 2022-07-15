@@ -1,10 +1,9 @@
 import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
 import { getFile } from 'app/services/fileService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import {displayTime, validateExtensionFile} from '@shared';
+import { displayTime, validateExtensionFile } from '@shared';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import EditIcon from '@material-ui/icons/Edit';
@@ -281,7 +280,7 @@ const Inquiry = (props) => {
   const metadata = useSelector(({ workspace }) =>
     workspace.inquiryReducer.metadata
   );
-  const inquiry = originalInquiry.filter((q) => q.field === currentField);
+  const listIndex = originalInquiry.map((q, index) => q.field === currentField && index).filter(q => Number.isInteger(q));
   const indexes = originalInquiry.findIndex((q) => q.field === currentField);
   const [edit, setEdit] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
@@ -324,7 +323,7 @@ const Inquiry = (props) => {
     const optionsOfQuestion = [...inquiries];
     const inValidFile = files.find(elem => !validateExtensionFile(elem));
     if (inValidFile) {
-      dispatch(AppAction.showMessage({message: 'Invalid file extension', variant: 'error'}));
+      dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
     } else {
       files.forEach(src => {
         const formData = new FormData();
@@ -337,33 +336,36 @@ const Inquiry = (props) => {
   }
 
   useEffect(() => {
-    if (inquiry[0]?.mediaFile.length && !inquiry[0].mediaFile[0].src) {
-      const optionsOfQuestion = [...inquiries];
-      for (let f in inquiry[0].mediaFile) {
-        getFile(inquiry[0].mediaFile[f].id)
-          .then((file) => {
-            optionsOfQuestion[indexes].mediaFile[f].src = urlMedia(inquiry[0].mediaFile[f].ext, file);
-            dispatch(InquiryActions.editInquiry(optionsOfQuestion));
-          })
-          .catch((error) => console.error(error));
+    for (let i in listIndex) {
+      if (inquiries[i]?.mediaFile.length && !inquiries[i].mediaFile[0].src) {
+        const optionsOfQuestion = [...inquiries];
+        for (let f in inquiries[i].mediaFile) {
+          getFile(inquiries[i].mediaFile[f].id)
+            .then((file) => {
+              optionsOfQuestion[i].mediaFile[f].src = urlMedia(inquiries[i].mediaFile[f].ext, file);
+              dispatch(InquiryActions.editInquiry(optionsOfQuestion));
+            })
+            .catch((error) => console.error(error));
+        }
       }
-    }
-    if (inquiry[0]?.answerObj[0]?.mediaFiles && inquiry[0]?.answerObj[0]?.mediaFiles.length) {
-      const optionsOfQuestion = [...inquiries];
-      for (let f in inquiry[0]?.answerObj[0].mediaFiles) {
-        getFile(inquiry[0]?.answerObj[0].mediaFiles[f].id)
-          .then((file) => {
-            optionsOfQuestion[indexes].answerObj[0].mediaFiles[f].src = urlMedia(inquiry[0].answerObj[0].mediaFiles[f].ext, file);
-            dispatch(InquiryActions.editInquiry(optionsOfQuestion));
-          })
-          .catch((error) => console.error(error));
+      if (inquiries[i]?.answerObj[0]?.mediaFiles && inquiries[i]?.answerObj[0]?.mediaFiles.length) {
+        const optionsOfQuestion = [...inquiries];
+        for (let f in inquiries[i]?.answerObj[0].mediaFiles) {
+          getFile(inquiries[i]?.answerObj[0].mediaFiles[f].id)
+            .then((file) => {
+              optionsOfQuestion[i].answerObj[0].mediaFiles[f].src = urlMedia(inquiries[i].answerObj[0].mediaFiles[f].ext, file);
+              dispatch(InquiryActions.editInquiry(optionsOfQuestion));
+            })
+            .catch((error) => console.error(error));
+        }
       }
     }
   }, [currentField]);
 
   return (
     <>
-      {inquiry.map((q, index) => {
+      {listIndex.map((i, index) => {
+        const q = inquiries[i]
         const type = q.ansType;
         const user = q.creator;
         return (
@@ -485,7 +487,7 @@ const Inquiry = (props) => {
                       {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                         <ImageAttach hiddenRemove={true} file={file} field={q.field} style={{ margin: '2.5rem' }} />
                       ) : (
-                        <FileAttach hiddenRemove={true} file={file} field={q.field}/>
+                        <FileAttach hiddenRemove={true} file={file} field={q.field} />
                       )}
                     </div>
                   ))}
