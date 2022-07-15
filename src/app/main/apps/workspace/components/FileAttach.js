@@ -15,8 +15,10 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     height:"100%",
     width: '165px',
+    marginBottom: '10px',
     marginLeft: '10px',
     marginRight: '10px',
+    backgroundColor: '#F5F8FA',
     '& img': {
       height: '50px',
       width: '50px'
@@ -100,19 +102,20 @@ const FileAttach = ({ file ,field, hiddenRemove = false}) => {
       dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
     }
   };
+
   return (
     <div className={classes.root}>
-      {file.ext.includes('pdf') ? (
+      {file.ext.toLowerCase().includes('pdf') ? (
         <img src={`/assets/images/logos/pdf_icon.png`} />
-      ) : file.ext.match(/csv|xls|xlsx|excel|sheet/g) ? (
+      ) : file.ext.toLowerCase().match(/csv|xls|xlsx|excel|sheet/g) ? (
         <img src={`/assets/images/logos/excel_icon.png`} />
-      ) : file.ext.match(/doc/g) ? (
+      ) : file.ext.toLowerCase().match(/doc/g) ? (
         <img src={`/assets/images/logos/word_icon.png`} />
       ) : (
         <DescriptionIcon />
       )}
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
-        {file.ext.includes('pdf') ? (
+      <div style={{ display: 'flex', flexDirection: 'row',  }}>
+        {file.ext.toLowerCase().includes('pdf') ? (
           <h3 style={{ width: hiddenRemove?'180px':'160px'}} onClick={previewPDF}>{file.name}</h3>
         ) : (
           <h3 style={{ width: hiddenRemove?'180px':'160px'}} onClick={downloadFile}>{file.name}</h3>
