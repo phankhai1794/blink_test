@@ -61,6 +61,10 @@ const PopoverFooter = ({ title }) => {
     //check empty type choice
     const ansTypeChoice = metadata.ans_type['choice'];
     if (ansTypeChoice === question[index].ansType) {
+      if (question[index].answerObj.length === 1) {
+        dispatch(AppActions.showMessage({ message: "Please create another option!", variant: 'error' }));
+        return;
+      }
       // check empty a field
       if (question[index].answerObj.length > 0) {
         const checkOptionEmpty = question[index].answerObj.filter(item => !item.content);
