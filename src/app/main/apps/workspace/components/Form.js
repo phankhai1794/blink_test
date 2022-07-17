@@ -167,6 +167,7 @@ export default function Form(props) {
     listMinimize,
     valid,
     isShowBackground,
+    openInq
   ] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEdit,
     workspace.inquiryReducer.question,
@@ -178,6 +179,7 @@ export default function Form(props) {
     workspace.inquiryReducer.listMinimize,
     workspace.inquiryReducer.validation,
     workspace.inquiryReducer.isShowBackground,
+    workspace.inquiryReducer.currentInq,
   ]);
 
   const [openAllInquiry, showSaveInquiry, showAddInquiry] = useSelector(({ workspace }) => [
@@ -267,7 +269,11 @@ export default function Form(props) {
   };
 
   const handleClick = () => {
-    if (openAllInquiry) {
+    if (openInq) {
+      dispatch(FormActions.toggleCreateInquiry(true));
+      dispatch(InquiryActions.setOneInq(null));
+    }
+    else if (openAllInquiry) {
       dispatch(InquiryActions.addQuestion1());
     } else if (checkValidate(question[index])) {
       if (inquiries.length + question.length + 1 === metadata.field_options.length) {
@@ -380,8 +386,7 @@ export default function Form(props) {
         {customActions == null && (
           <DialogActions style={{ display: 'none !important' }}>
             {(hasAddButton === undefined || hasAddButton === true) &&
-              !openAllInquiry &&
-              showAddInquiry && (
+              !openAllInquiry && (
               <div style={{ right: '3rem', bottom: '2.6rem', position: 'absolute' }}>
                 <Link
                   component="button"

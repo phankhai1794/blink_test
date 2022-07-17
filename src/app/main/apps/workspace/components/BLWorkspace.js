@@ -164,7 +164,6 @@ const BLWorkspace = (props) => {
         toggleForm: () => { },
         fabTitle: getField?.label,
         title: getField?.value ? getKeyByValue(metadata['field'], getField?.value) : '',
-        hasAddButton: false,
         field: getField?.value,
         child: <Inquiry user={props.user} />
       };
