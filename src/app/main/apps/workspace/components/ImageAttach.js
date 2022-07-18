@@ -4,7 +4,6 @@ import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import { IconButton } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateInquiryAttachment, addNewMedia, removeFile } from 'app/services/inquiryService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -32,14 +31,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ImageAttach = ({ file, field, hiddenRemove = false }) => {
-  const [inquiries, metadata, questions, attachmentList, validationAttachment] = useSelector(
-    ({ workspace }) => [
-      workspace.inquiryReducer.inquiries,
-      workspace.inquiryReducer.metadata,
-      workspace.inquiryReducer.question,
-      workspace.inquiryReducer.attachmentList,
-      workspace.inquiryReducer.validationAttachment
-    ]
+  const inquiries = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.inquiries
+  );
+  const questions = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.question
+  );
+  const attachmentList = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.attachmentList
   );
   const dispatch = useDispatch();
   const [isViewerOpen, setIsViewerOpen] = useState(false);

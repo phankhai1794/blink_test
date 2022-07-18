@@ -2,7 +2,7 @@ import { saveInquiry, changeStatus } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { toFindDuplicates } from '@shared'
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Link, Button, IconButton } from '@material-ui/core';
@@ -15,7 +15,7 @@ import * as AppActions from 'app/store/actions';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
-import {setLastField} from "../store/actions/inquiry";
+import { setLastField } from "../store/actions/inquiry";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -47,7 +47,7 @@ const PopoverFooter = ({ title }) => {
 
   const onSave = () => {
     const check = question.filter((q) => !q.receiver.length);
-    if (!question[index].inqType || !question[index].field || check.length || !question[index].content) {
+    if (!question[index].inqType || !question[index].field || check.length || !question[index].ansType || !question[index].content) {
       dispatch(InquiryActions.validate({
         ...valid,
         field: Boolean(question[index].field),
@@ -213,7 +213,7 @@ const PopoverFooter = ({ title }) => {
         <IconButton onClick={nextQuestion}>
           <NavigateNextIcon />
         </IconButton>
-       
+
         <Link style={{ fontSize: '16px', color: '#1564EE' }} component="button" onClick={toggleInquiriresDialog}>
           Open All Inquiries
         </Link>

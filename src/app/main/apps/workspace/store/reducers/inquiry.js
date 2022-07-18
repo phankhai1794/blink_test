@@ -76,25 +76,7 @@ const inquiryReducer = function (state = initialState, action) {
       ]
     };
   }
-  case Actions.ADD_QUESTION1: {
-    return {
-      ...state,
-      inquiries: [
-        ...state.inquiries,
-        {
-          content:
-              'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
-          inqType: '',
-          ansType: '',
-          field: '',
-          answerObj: [],
-          addOther: '',
-          receiver: [],
-          mediaFile: []
-        }
-      ]
-    };
-  }
+  
   case Actions.EDIT_INQUIRY: {
     return { ...state, inquiries: action.state };
   }

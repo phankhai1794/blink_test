@@ -134,7 +134,6 @@ const BLWorkspace = (props) => {
         toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
         fabTitle: 'Inquiry List',
         title: 'Inquiry List',
-        hasAddButton: false,
         field: 'INQUIRY_LIST',
         child: <AllInquiry user={props.user} />
       };
@@ -164,7 +163,6 @@ const BLWorkspace = (props) => {
         toggleForm: () => { },
         fabTitle: getField?.label,
         title: getField?.value ? getKeyByValue(metadata['field'], getField?.value) : '',
-        hasAddButton: false,
         field: getField?.value,
         child: <Inquiry user={props.user} />
       };

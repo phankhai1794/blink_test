@@ -2,7 +2,6 @@ export const SAVE_INQUIRY = 'SAVE_INQUIRY';
 export const EDIT_INQUIRY = 'EDIT_INQUIRY';
 export const SAVE_FIELD = 'SAVE_FIELD';
 export const ADD_QUESTION = 'ADD_QUESTION';
-export const ADD_QUESTION1 = 'ADD_QUESTION1';
 export const SET_ORIGINAL_INQUIRY = 'SET_ORIGINAL_INQUIRY';
 export const REMOVE_SELECTED_OPTION = 'REMOVE_SELECTED_OPTION';
 export const DISPLAY_COMMENT = 'DISPLAY_COMMENT';
@@ -48,12 +47,6 @@ export function saveField(state) {
 export function addQuestion() {
   return {
     type: ADD_QUESTION
-  };
-}
-
-export function addQuestion1() {
-  return {
-    type: ADD_QUESTION1
   };
 }
 
