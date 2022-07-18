@@ -6,12 +6,13 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import ImageViewer from "react-simple-image-viewer";
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import {FuseChipSelect} from "@fuse";
 import {validateExtensionFile} from '@shared';
 import * as AppAction from "app/store/actions";
 import {useDropzone} from "react-dropzone";
 import {uploadFile, getFile} from 'app/services/fileService';
-import {updateInquiryAttachment, removeMultipleMedia, replaceFile} from 'app/services/inquiryService';
+import {updateInquiryAttachment, removeMultipleMedia, replaceFile, addNewMedia} from 'app/services/inquiryService';
 import {makeStyles} from "@material-ui/core/styles";
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import Checkbox from "@material-ui/core/Checkbox";
@@ -74,6 +75,10 @@ const attachmentStyle = makeStyles(() => ({
       },
     }
   },
+  selectField: {
+    display: 'flex',
+    alignItems: 'center'
+  },
   backgroundConfirm: {
     top: 74,
     left: 0,
@@ -118,16 +123,29 @@ const attachmentStyle = makeStyles(() => ({
     '& .MuiTypography-root': {
       color: '#515E6A',
       fontWeight: 600,
+    },
+    '& .Mui-focused': {
+      '& .MuiTypography-root': {
+        color: '#BD0F72',
+      }
     }
   },
+  selectError: {
+    '& .MuiTypography-root': {
+      color: '#BD0F72',
+      fontWeight: 600,
+    },
+    '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
+      border: '2px solid #BD0F72',
+      borderRadius: '9px'
+    }
+  }
 }));
 
 const AttachmentList = (props) => {
-  const [inquiries, metadata, questions, validationAttachment, isShowBackground] = useSelector(({ workspace }) => [
+  const [inquiries, metadata, isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.metadata,
-    workspace.inquiryReducer.question,
-    workspace.inquiryReducer.validationAttachment,
     workspace.inquiryReducer.isShowBackground,
   ]);
   const { pathname } = window.location;
@@ -136,26 +154,18 @@ const AttachmentList = (props) => {
   const [fieldType, setFieldType] = useState(metadata.field_options.filter(meta => inquiries.find(inq => meta.value === inq.field)));
   const [attachmentFiles, setAttachmentFile] = useState([]);
   const dispatch = useDispatch();
-  const [listIdMedia, setListIdMedia] = useState([]);
-  const [isShowIconSuccess, setShowIconSuccess] = useState();
+  const [selectedIndexFile, setSelectedIndexFile] = useState([]);
   const [isShowReplace, setShowReplace] = useState(false);
   const [isShowRemove, setShowRemove] = useState(false);
   const [isShowConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const isAllSelected = attachmentFiles.length > 0 && listIdMedia.length === attachmentFiles.length;
+  const isAllSelected = attachmentFiles.length > 0 && selectedIndexFile.length === attachmentFiles.length;
 
   const styles = (validationAttachment, width) => {
     return {
       control: {
         border: !validationAttachment && '1px solid red',
         borderRadius: '9px',
-        width: `${width}px`
-      }
-    };
-  };
-  const stylesNotErr = (width) => {
-    return {
-      control: {
         width: `${width}px`
       }
     };
@@ -169,7 +179,37 @@ const AttachmentList = (props) => {
     } else {
       return URL.createObjectURL(new Blob([file]));
     }
-  }
+  };
+
+  useEffect(() => {
+    if (props.newFileAttachment) {
+      const files = props.newFileAttachment;
+      const optionsAttachmentList = [...attachmentFiles];
+      const inValidFile = files.find((elem) => !validateExtensionFile(elem));
+      if (inValidFile) {
+        dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
+      } else {
+        const newFile = [];
+        files.forEach(f => {
+          const ext = f.path.split(".").pop();
+          const templateMedia = {
+            field: null,
+            inquiryId: null,
+            id: null,
+            src: null,
+            ext: `.${ext}`,
+            name: f.name,
+            fileUpload: f,
+          };
+          templateMedia.src = urlMedia(f.type, f);
+          newFile.push(templateMedia);
+        });
+        const merFile = [...optionsAttachmentList, ...newFile];
+        setAttachmentFile(merFile);
+      }
+    }
+  }, [props.newFileAttachment]);
+
   useEffect(() => {
     let getAttachmentFiles = [];
     inquiries.forEach((e) => {
@@ -197,20 +237,69 @@ const AttachmentList = (props) => {
 
   const handleFieldChange = (e, index) => {
     const optionsOfQuestion = [...inquiries];
-    const optionsAttachmentList = [...attachmentFiles];
-    // update inquiries
-    const indexInquiryOld = optionsOfQuestion.findIndex(op => optionsAttachmentList[index].field === op.field);
-    const indexInquiryNew = optionsOfQuestion.findIndex(op => e.value === op.field);
-    const data = {
-      newInquiryId: optionsOfQuestion[indexInquiryNew].id,
-      oldInquiryId: optionsOfQuestion[indexInquiryOld].id,
-      mediaId: optionsAttachmentList[index].id,
-    };
-    updateInquiryAttachment(data).then(res => {
-      // update attachment list
-      optionsAttachmentList[index].field = e.value;
-      setAttachmentFile(optionsAttachmentList);
-    }).catch((error) => console.log(error));
+    let optionsAttachmentList = [...attachmentFiles];
+    // add new replace
+    if (!optionsAttachmentList[index].field && !optionsAttachmentList[index].id) {
+      const file = optionsAttachmentList[index].fileUpload;
+      const indexInquiryOld = optionsOfQuestion.findIndex(op => e.value === op.field);
+      const formData = new FormData();
+      formData.append('file', file);
+      uploadFile(formData).then((media) => {
+        //update inquiries
+        const res = media.response[0];
+        addNewMedia({inquiryId: optionsOfQuestion[indexInquiryOld].id, mediaId: res.id}).then(rs => {
+          optionsAttachmentList = optionsAttachmentList.map(op => {
+            return {...op, success: null}
+          });
+          optionsAttachmentList[index] = {
+            ...optionsAttachmentList[index],
+            id: res.id,
+            field: e.value,
+            success: true,
+          };
+          setAttachmentFile(optionsAttachmentList);
+        }).catch((error) => {
+          console.log(error);
+          optionsAttachmentList[index] = {
+            ...optionsAttachmentList[index],
+            field: 'false',
+            success: false,
+          };
+          setAttachmentFile(optionsAttachmentList);
+        })
+      }).catch((error) => {
+        console.log(error);
+        optionsAttachmentList[index] = {
+          ...optionsAttachmentList[index],
+          field: 'false',
+          success: false,
+        };
+        setAttachmentFile(optionsAttachmentList);
+      });
+    }
+    // update
+    else {
+      // update inquiries
+      const indexInquiryOld = optionsOfQuestion.findIndex(op => optionsAttachmentList[index].field === op.field);
+      const indexInquiryNew = optionsOfQuestion.findIndex(op => e.value === op.field);
+      const data = {
+        newInquiryId: optionsOfQuestion[indexInquiryNew].id,
+        oldInquiryId: optionsOfQuestion[indexInquiryOld].id,
+        mediaId: optionsAttachmentList[index].id,
+      };
+      updateInquiryAttachment(data).then(res => {
+        // update attachment list
+        optionsAttachmentList[index].field = e.value;
+        setAttachmentFile(optionsAttachmentList);
+      }).catch((error) => {
+        console.log(error);
+        optionsAttachmentList[index] = {
+          ...optionsAttachmentList[index],
+          success: false,
+        };
+        setAttachmentFile(optionsAttachmentList);
+      });
+    }
   };
 
   const onFileReplaceChange = (file) => {
@@ -219,47 +308,94 @@ const AttachmentList = (props) => {
     if (!validateExtensionFile(file[0])) {
       dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
     } else {
-      // update replace
-      const attachmentIndex = optionsAttachmentList.findIndex(op => op.id === listIdMedia[0]);
-      const findInquiry = optionsOfQuestion.find(op => optionsAttachmentList[attachmentIndex].field === op.field);
-      const formData = new FormData();
-      formData.append('file', file[0]);
-      uploadFile(formData).then((media) => {
-        //update inquiries
-        const res = media.response[0];
-        const data = {
-          inquiryId: findInquiry.id,
-          oldMediaId: listIdMedia[0],
-          newMediaId: res.id,
+      const ext = file[0].path.split(".").pop();
+      const attachmentIndex = selectedIndexFile[0];
+      //add new replace
+      if (!optionsAttachmentList[attachmentIndex].field && !optionsAttachmentList[attachmentIndex].id) {
+        optionsAttachmentList[attachmentIndex] = {
+          ...optionsAttachmentList[attachmentIndex],
+          src: urlMedia(ext, file[0]),
+          ext: `.${ext}`,
+          name: file[0].name,
+          fileUpload: file[0],
         };
-        replaceFile(data).then(rt => {
-          //update attachment list
+        setAttachmentFile(optionsAttachmentList);
+      }
+      // update replace
+      else {
+        const formData = new FormData();
+        formData.append('file', file[0]);
+        const findInquiry = optionsOfQuestion.find(op => optionsAttachmentList[attachmentIndex].field === op.field);
+        uploadFile(formData).then((media) => {
+          //update inquiries
+          const res = media.response[0];
+          const data = {
+            inquiryId: findInquiry.id,
+            oldMediaId: optionsAttachmentList[attachmentIndex].id,
+            newMediaId: res.id,
+          };
+          replaceFile(data).then(rt => {
+            //update attachment list
+            optionsAttachmentList[attachmentIndex] = {
+              id: res.id,
+              src: urlMedia(ext, file[0]),
+              ext: `.${ext}`,
+              name: file[0].name,
+              field: optionsAttachmentList[attachmentIndex].field,
+              inquiryId: optionsAttachmentList[attachmentIndex].inquiryId
+            };
+            setAttachmentFile(optionsAttachmentList);
+          }).catch((error) => {
+            console.log(error);
+            optionsAttachmentList[attachmentIndex] = {
+              ...optionsAttachmentList[attachmentIndex],
+              success: false,
+            };
+            setAttachmentFile(optionsAttachmentList);
+          });
+        }).catch((error) => {
+          console.log(error);
           optionsAttachmentList[attachmentIndex] = {
-            id: res.id,
-            src: URL.createObjectURL(file[0]),
-            ext: file[0].type,
-            name: file[0].name,
-            field: optionsAttachmentList[attachmentIndex].field,
-            inquiryId: optionsAttachmentList[attachmentIndex].inquiryId
+            ...optionsAttachmentList[attachmentIndex],
+            success: false,
           };
           setAttachmentFile(optionsAttachmentList);
-          const listId = [res.id];
-          setListIdMedia(listId);
-        }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
-      }).catch((error) => console.log(error));
+        });
+      }
     }
   };
 
   const handleConfirm = () => {
     const optionsAttachmentList = [...attachmentFiles];
-    removeMultipleMedia({mediaIds: listIdMedia}).then(res => {
+    // update attachment list
+    const listIdMedia = [];
+    selectedIndexFile.forEach(val => {
+      if (optionsAttachmentList[val].id !== null) {
+        listIdMedia.push(optionsAttachmentList[val].id);
+      }
+    });
+    if (listIdMedia.length > 0) {
+      removeMultipleMedia({mediaIds: listIdMedia}).then(res => {
+        // update attachment list
+        let mediaR = [];
+        optionsAttachmentList.forEach((op, i) => {
+          if (!selectedIndexFile.includes(i)) {
+            mediaR = [...mediaR, op];
+          }
+        });
+        setAttachmentFile(mediaR);
+        setSelectedIndexFile([]);
+        setShowConfirm(false);
+        dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+      });
+    } else {
       // update attachment list
-      const restMedia = optionsAttachmentList.filter(op => !listIdMedia.includes(op.id));
+      const restMedia = optionsAttachmentList.filter((op, i) => !selectedIndexFile.includes(i));
       setAttachmentFile(restMedia);
-      setListIdMedia([]);
+      setSelectedIndexFile([]);
       setShowConfirm(false);
       dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-    });
+    }
   };
 
   const handleCancel = () => {
@@ -272,44 +408,33 @@ const AttachmentList = (props) => {
     dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
   };
 
-  const checkValidateAddNew = (attachment) => {
-    if (typeof (attachment) !== 'undefined') {
-      if (!attachment.field || !attachment.name) {
-        dispatch(
-          InquiryActions.validateAttachment({
-            field: Boolean(attachment.field),
-            nameFile: Boolean(attachment.name),
-          })
-        );
-        return true;
-      }
-      return false;
+  const handleCheck = (e, media, idx) => {
+    // set index
+    let listIndex = [...selectedIndexFile];
+    if (listIndex.includes(idx)) {
+      listIndex = listIndex.filter(val => val !== idx);
+    } else {
+      listIndex.push(idx);
     }
-  };
-
-  const handleCheck = (e, media) => {
-    const list = [...listIdMedia];
-    const index = list.indexOf(media.id);
-    index === -1 ? list.push(media.id) : list.splice(index, 1);
-    setListIdMedia(list);
+    setSelectedIndexFile(listIndex);
   };
 
   useEffect(() => {
-    if (listIdMedia.length > 1) {
+    if (selectedIndexFile.length > 1) {
       setShowReplace(false);
       setShowRemove(true);
-    } else if (listIdMedia.length > 0) {
+    } else if (selectedIndexFile.length > 0) {
       setShowReplace(true);
       setShowRemove(true);
-    } else if (listIdMedia.length === 0) {
+    } else if (selectedIndexFile.length === 0) {
       setShowReplace(false);
       setShowRemove(false)
     }
-  }, [listIdMedia]);
+  }, [selectedIndexFile]);
 
   const handleCheckAll = () => {
-    const mediaIds = attachmentFiles.map(at => at.id);
-    setListIdMedia(listIdMedia.length === attachmentFiles.length ? [] : mediaIds);
+    const mediaIndex = attachmentFiles.map((at, index) => index);
+    setSelectedIndexFile(selectedIndexFile.length === attachmentFiles.length ? [] : mediaIndex);
   };
 
   return (
@@ -330,7 +455,7 @@ const AttachmentList = (props) => {
                       </span>
                     </>
                   }
-                  icon={(listIdMedia.length > 0 && !isAllSelected) ? (
+                  icon={(selectedIndexFile.length > 0 && !isAllSelected) ? (
                     <>
                       <span className={clsx(classes.icon, 'borderChecked')}>
                         <span className={classes.checkedNotAllIcon} />
@@ -382,16 +507,19 @@ const AttachmentList = (props) => {
         )}
         <div className='attachmentList'>
           {attachmentFiles.map((media, index) => {
-            const filter = fieldType.filter(v => media.field === v?.value)[0];
-            const lowerCaseExt = media.ext.toLowerCase();
+            const filter = fieldType.filter(v => {
+              if (media.id && media.field) {
+                return media.field === v.value;
+              }
+            });
             return (
               <div key={index}>
                 <div className="flex justify-between">
                   <div className="flex" style={{alignItems: 'center' }}>
                     <div className='checkboxDetail' style={{ marginRight: '11px' }}>
                       <Checkbox
-                        checked={listIdMedia.includes(media.id)}
-                        onChange={(e) => handleCheck(e, media)}
+                        checked={selectedIndexFile.includes(index)}
+                        onChange={(e) => handleCheck(e, media, index)}
                         checkedIcon={
                           <>
                             <span className={clsx(classes.icon, 'borderChecked')}>
@@ -410,7 +538,7 @@ const AttachmentList = (props) => {
                       )}
                     </div>
                   </div>
-                  <div className={'selectField'}>
+                  <div className={classes.selectField}>
                     <PermissionProvider action={PERMISSION.INQUIRY_INQ_ATT_MEDIA}
                       extraCondition={pathname.includes('/workspace')}
                       fallback={
@@ -419,50 +547,33 @@ const AttachmentList = (props) => {
                         </div>
                       }
                     >
-                      {index === attachmentFiles.length - 1 && (
-                        <FormControl error={!validationAttachment.field}>
-                          <div className={clsx(classes.customSelect, "selectForm")} style={{ display: 'flex', alignItems: 'center' }}>
-                            <FuseChipSelect
-                              className="m-auto"
-                              customStyle={styles(validationAttachment.field, fullscreen ? 320 : 290)}
-                              value={filter}
-                              onChange={(e) => handleFieldChange(e, index)}
-                              placeholder="None"
-                              textFieldProps={{
-                                variant: 'outlined'
-                              }}
-                              options={fieldType}
-                            />
-                            {isShowIconSuccess &&
-                                  <CheckCircleOutlineIcon
-                                    style={{height: '25px', width: '25px', color: '#36B37E', marginLeft: '11px'}}/>
-                            }
-                          </div>
+                      {media.field && media.id && media.success &&
+                      <CheckCircleOutlineIcon
+                        style={{height: '25px', width: '25px', color: '#36B37E', marginRight: '11px'}}/>}
+                      {media.success !== null && media.success === false &&
+                      <ErrorOutlineIcon
+                        style={{height: '25px', width: '25px', color: '#DC2626', marginRight: '11px'}}/>}
 
-                          {index === attachmentFiles.length - 1 && !validationAttachment.field && <FormHelperText>This is required!</FormHelperText>}
-                        </FormControl>
-                      )}
-                      {index !== attachmentFiles.length - 1 && (
-                        <FormControl>
-                          <div className={classes.customSelect}>
-                            <FuseChipSelect
-                              className="m-auto"
-                              customStyle={stylesNotErr(fullscreen ? 320 : 290)}
-                              value={filter}
-                              onChange={(e) => handleFieldChange(e, index)}
-                              placeholder="None"
-                              textFieldProps={{
-                                variant: 'outlined'
-                              }}
-                              options={fieldType}
-                            />
-                          </div>
-                        </FormControl>
-                      )}
+                      <FormControl error={!media.field}>
+                        <div className={clsx(media.success === false ? classes.selectError : classes.customSelect)} style={{ display: 'flex', alignItems: 'center' }}>
+                          <FuseChipSelect
+                            className="m-auto"
+                            customStyle={styles(media.field, fullscreen ? 320 : 290)}
+                            value={filter}
+                            onChange={(e) => handleFieldChange(e, index)}
+                            placeholder="None"
+                            textFieldProps={{
+                              variant: 'outlined'
+                            }}
+                            options={fieldType}
+                          />
+                        </div>
+                        {!media.field && <FormHelperText style={{ color: 'red' }}>This is required!</FormHelperText>}
+                      </FormControl>
                     </PermissionProvider>
                   </div>
                 </div>
-                {index !== attachmentFiles.length && <Divider className="mt-16 mb-16" style={{ backgroundColor: listIdMedia.includes(media.id) ? '#BD0F72' : '#BAC3CB' }}/>}
+                {index !== attachmentFiles.length && <Divider className="mt-16 mb-16" style={{ backgroundColor: selectedIndexFile.includes(index) ? '#BD0F72' : '#BAC3CB' }}/>}
               </div>
             )
           })}
@@ -474,23 +585,27 @@ const AttachmentList = (props) => {
 };
 
 const useStyles = makeStyles(() => ({
+  root: {
+    position: 'relative',
+    width: 902,
+    display: 'flex',
+    padding: '0 24px',
+    justifyContent: 'flex-end',
+    margin: '10px 0 21px 0'
+  },
   styleActionReplace: {
     padding: '2px',
     display: 'flex',
     cursor: 'pointer',
     marginRight: '20px'
   },
-  styleActionAddMore: {
-    display: 'flex',
-    width: '50px',
-    justifyContent: 'flex-end',
-    margin: '36px 0 0 850px'
-  }
 }));
 const AttachFile = (props) => {
-  const { uploadImageAttach, mediaIndex, children, isAttachmentList, isShowIconSuccess, type } = props;
+  const [isShowBackground] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.isShowBackground,
+  ]);
+  const { uploadImageAttach, children, isAttachmentList, type } = props;
   const classes = useStyles();
-  const dispatch = useDispatch();
   const onDrop = (acceptedFiles) => {
     uploadImageAttach(acceptedFiles);
   };
@@ -499,29 +614,18 @@ const AttachFile = (props) => {
     // Disable click and keydown behavior
     noClick: true,
     noKeyboard: true,
-    multiple: false,
+    multiple: type === 'addNew',
     onDrop,
   });
 
   const openUploadFile = () => {
-    if (type !== 'replace') {
-      if (typeof(isShowIconSuccess) !== 'undefined' && !isShowIconSuccess) {
-        dispatch(
-          InquiryActions.validateAttachment({
-            field: false,
-            nameFile: false
-          })
-        );
-        return;
-      }
-    }
     open();
   };
 
   return (
-    <div className="container">
+    <div className={type === 'addNew' ? classes.root : ''}>
       <div {...getRootProps({})}>
-        <input {...getInputProps()} disabled={false} />
+        <input {...getInputProps()} disabled={isShowBackground} />
         <div className={isAttachmentList ? classes.styleActionAddMore : classes.styleActionReplace} onClick={openUploadFile}>
           {children}
         </div>
@@ -673,4 +777,4 @@ const ColoredLinearProgress = () => {
   );
 };
 
-export default AttachmentList;
+export {AttachmentList, AttachFile};

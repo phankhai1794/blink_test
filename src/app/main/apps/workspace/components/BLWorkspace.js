@@ -1,5 +1,6 @@
 import { getKeyByValue, NUMBER_INQ_BOTTOM } from '@shared';
 import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from '@shared/keyword';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
 import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
@@ -9,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
+import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -22,7 +24,7 @@ import Label from './FieldLabel';
 import BtnAddInquiry from './BtnAddInquiry';
 import BLField from './BLField';
 import InquiryForm from './InquiryForm';
-import AttachmentList from './AttachmentList';
+import {AttachmentList,AttachFile} from './AttachmentList';
 import BLProcessNotification from './BLProcessNotification';
 import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
 import TableCD from './TableCD';
@@ -59,6 +61,7 @@ const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [isExpand, setIsExpand] = useState(false);
+  const [newFileAttachment, setNewFileAttachment] = useState([]);
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -73,6 +76,7 @@ const BLWorkspace = (props) => {
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
+  const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -126,6 +130,10 @@ const BLWorkspace = (props) => {
     return () => document.removeEventListener('mousedown', handlerEvent);
   }, []);
 
+  useEffect(() => {
+    if (openAttachment) {setNewFileAttachment([])}
+  }, [openAttachment]);
+
   const popupOpen = (inquiry, getField) => {
     switch (inquiry.field) {
     case 'INQUIRY_LIST':
@@ -146,7 +154,18 @@ const BLWorkspace = (props) => {
         hasAddButton: false,
         field: 'ATTACHMENT_LIST',
         popoverfooter: true,
-        child: <AttachmentList user={props.user} />
+        customActions: (<>
+          <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
+            <AttachFile
+              uploadImageAttach={(files) => setNewFileAttachment(files)}
+              isAttachmentList={true}
+              type={'addNew'}
+            >
+              <AddCircleIcon style={{ color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72', width: '50px', fontSize: '50px', cursor: isShowBackground ? 'inherit' : 'pointer' }} />
+            </AttachFile>
+          </PermissionProvider>
+        </>),
+        child: <AttachmentList user={props.user} newFileAttachment={newFileAttachment} setFileAttachment={() => setNewFileAttachment([])} />
       };
     case 'INQUIRY_FORM':
       return {
@@ -267,6 +286,7 @@ const BLWorkspace = (props) => {
                     hasAddButton={popupObj.hasAddButton}
                     field={popupObj.field}
                     popoverfooter={popupObj.popoverfooter}
+                    customActions={popupObj.customActions}
                     title={popupObj.title}>
                     {popupObj.child}
                   </Form>

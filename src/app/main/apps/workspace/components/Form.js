@@ -132,6 +132,7 @@ const useStyles = makeStyles(() => ({
   },
   dialogContentAttachment: {
     padding: '0',
+    position: 'relative'
   },
   divider: {
     backgroundColor: '#8A97A3'
