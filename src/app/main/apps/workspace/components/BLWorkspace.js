@@ -134,7 +134,6 @@ const BLWorkspace = (props) => {
         toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
         fabTitle: 'Inquiry List',
         title: 'Inquiry List',
-        hasAddButton: false,
         field: 'INQUIRY_LIST',
         child: <AllInquiry user={props.user} />
       };

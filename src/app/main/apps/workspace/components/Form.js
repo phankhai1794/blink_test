@@ -156,37 +156,23 @@ export default function Form(props) {
     popoverfooter
   } = props;
 
-  const [
-    index,
-    question,
-    inquiries,
-    metadata,
-    currentField,
-    originalInquiry,
-    listInqMinimize,
-    listMinimize,
-    valid,
-    isShowBackground,
-    openInq
-  ] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.currentEdit,
-    workspace.inquiryReducer.question,
-    workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.metadata,
-    workspace.inquiryReducer.currentField,
-    workspace.inquiryReducer.originalInquiry,
-    workspace.inquiryReducer.listInqMinimize,
-    workspace.inquiryReducer.listMinimize,
-    workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.isShowBackground,
-    workspace.inquiryReducer.currentInq,
-  ]);
+  const index = useSelector(({ workspace }) => workspace.inquiryReducer.currentEdit);
+  const question = useSelector(({ workspace }) => workspace.inquiryReducer.question);
+  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
 
-  const [openAllInquiry, showSaveInquiry, showAddInquiry] = useSelector(({ workspace }) => [
-    workspace.formReducer.openAllInquiry,
-    workspace.formReducer.showSaveInquiry,
-    workspace.formReducer.showAddInquiry
-  ]);
+  const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
+  const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
+  const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
+
+  const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
+  const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
+  const openInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
+
+  const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
+  const showSaveInquiry = useSelector(({ workspace }) => workspace.formReducer.showSaveInquiry);
+
 
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -269,12 +255,14 @@ export default function Form(props) {
   };
 
   const handleClick = () => {
-    if (openInq) {
+    if (Object.keys(openInq).length) {
       dispatch(FormActions.toggleCreateInquiry(true));
-      dispatch(InquiryActions.setOneInq(null));
+      dispatch(InquiryActions.setOneInq({}));
     }
     else if (openAllInquiry) {
-      dispatch(InquiryActions.addQuestion1());
+      toggleForm(false);
+      dispatch(FormActions.toggleSaveInquiry(false));
+      dispatch(FormActions.toggleCreateInquiry(true));
     } else if (checkValidate(question[index])) {
       if (inquiries.length + question.length + 1 === metadata.field_options.length) {
         dispatch(FormActions.toggleAddInquiry(false));
@@ -294,7 +282,7 @@ export default function Form(props) {
     setOpenFab(false);
     if (openAllInquiry) {
       setTimeout(() => {
-        dispatch(FormActions.toggleAllInquiry());
+        dispatch(FormActions.toggleAllInquiry(false));
       }, 400);
     }
     sortListClose(listMinimize, field);
@@ -385,8 +373,7 @@ export default function Form(props) {
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
           <DialogActions style={{ display: 'none !important' }}>
-            {(hasAddButton === undefined || hasAddButton === true) &&
-              !openAllInquiry && (
+            {(hasAddButton === undefined || hasAddButton === true) && (
               <div style={{ right: '3rem', bottom: '2.6rem', position: 'absolute' }}>
                 <Link
                   component="button"
@@ -401,7 +388,7 @@ export default function Form(props) {
                       marginLeft: '5px',
                       fontWeight: 'normal'
                     }}>
-                      Add Inquiry
+                    Add Inquiry
                   </span>
                 </Link>
               </div>
