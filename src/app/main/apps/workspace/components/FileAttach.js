@@ -4,7 +4,6 @@ import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import { IconButton } from '@material-ui/core';
 import {useDispatch, useSelector} from 'react-redux';
-import {updateInquiryAttachment, addNewMedia, removeFile} from 'app/services/inquiryService';
 
 import * as InquiryActions from "../store/actions/inquiry";
 
