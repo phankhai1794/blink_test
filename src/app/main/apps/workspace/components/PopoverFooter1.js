@@ -12,7 +12,8 @@ import * as InquiryActions from '../store/actions/inquiry';
 const useStyles = makeStyles((theme) => ({
   root: {
     borderRadius: '34px',
-    width: '120px'
+    width: '120px',
+    textTransform: 'none',
   },
   button: {
     margin: theme.spacing(1)
