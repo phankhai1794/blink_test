@@ -21,7 +21,8 @@ import { setLastField } from "../store/actions/inquiry";
 const useStyles = makeStyles((theme) => ({
   root: {
     borderRadius: '8px',
-    width: '130px'
+    width: '130px',
+    textTransform: 'none',
   },
   button: {
     margin: theme.spacing(1)
@@ -62,7 +63,7 @@ const PopoverFooter = ({ title }) => {
     const ansTypeChoice = metadata.ans_type['choice'];
     if (ansTypeChoice === question[index].ansType) {
       if (question[index].answerObj.length === 1) {
-        dispatch(AppActions.showMessage({ message: "Please create another option!", variant: 'error' }));
+        dispatch(AppActions.showMessage({ message: "Please add more options!", variant: 'error' }));
         return;
       }
       // check empty a field
