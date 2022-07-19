@@ -210,6 +210,7 @@ const ParagraphAnswer = () => {
   );
 };
 
+
 // Main Component
 const InquiryEditor = (props) => {
   // custom attribute must be lowercase
@@ -252,9 +253,8 @@ const InquiryEditor = (props) => {
   const styles = (valid, width) => {
     return {
       control: {
-        border: !valid && '2px solid red',
-        borderRadius: 11,
-        width: `${width}px`
+        width: `${width}px`,
+        borderRadius: 11
       }
     };
   };
@@ -343,6 +343,7 @@ const InquiryEditor = (props) => {
                 variant: 'outlined'
               }}
               options={fieldType}
+              errorStyle={valid.field}
             />
             <div style={{ height: '20px' }}>
               {!valid.field && <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>}
@@ -360,6 +361,7 @@ const InquiryEditor = (props) => {
                 variant: 'outlined'
               }}
               options={inqTypeOption}
+              errorStyle={valid.inqType}
             />
             <div style={{ height: '20px' }}>
               {!valid.inqType && <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>}
@@ -377,6 +379,7 @@ const InquiryEditor = (props) => {
                 variant: 'outlined'
               }}
               options={optionsAnsType}
+              errorStyle={valid.ansType}
             />
             <div style={{ height: '15px' }}>
               {!valid.ansType && <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>}

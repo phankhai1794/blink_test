@@ -66,6 +66,7 @@ const BLWorkspace = (props) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
@@ -154,7 +155,7 @@ const BLWorkspace = (props) => {
         hasAddButton: false,
         field: 'ATTACHMENT_LIST',
         popoverfooter: true,
-        customActions: (<>
+        customActions: (inquiries.length > 0 && <>
           <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
             <AttachFile
               uploadImageAttach={(files) => setNewFileAttachment(files)}
