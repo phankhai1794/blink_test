@@ -1,9 +1,11 @@
 import { getKeyByValue, validateExtensionFile } from '@shared';
+import { stateResquest } from '@shared/keyword';
 import { getFile } from 'app/services/fileService';
+import { deleteInquiry } from 'app/services/inquiryService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   Typography,
@@ -71,26 +73,33 @@ const AllInquiry = (props) => {
   const dispatch = useDispatch();
   const { receiver } = props;
   const classes = useStyles();
-  const [inquiries, currentEdit, metadata, valid] = useSelector(({ workspace }) => [
+  const [allowDeleteInq, setAllowDeleteInq] = useState(true);
+  const [inquiries, currentEdit, metadata, valid, myBL] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.metadata,
-    workspace.inquiryReducer.validation
+    workspace.inquiryReducer.validation,
+    workspace.inquiryReducer.myBL,
   ]);
   const allowCreateAttachmentAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
+
+  useEffect(() => {
+    (myBL?.state !== stateResquest) && setAllowDeleteInq(false)
+  }, []);
+
   const changeToEditor = (index) => {
     if (index !== currentEdit) dispatch(InquiryActions.setEditInq(index));
   };
 
   const removeQuestion = (index) => {
     const optionsOfQuestion = [...inquiries];
-    optionsOfQuestion.splice(index, 1);
-    if (index > 0) {
-      dispatch(InquiryActions.setEdit(index - 1));
-    }
-    dispatch(InquiryActions.setQuestion(optionsOfQuestion));
+    const inqDelete = optionsOfQuestion.splice(index, 1)[0];
+    deleteInquiry(inqDelete.id).then(() => {
+      dispatch(InquiryActions.editInquiry(optionsOfQuestion));
+      dispatch(InquiryActions.setOriginalInquiry(optionsOfQuestion));
+    }).catch((error) => console.error(error))
   };
 
   const handleUploadImageAttach = (files, index) => {
@@ -278,7 +287,7 @@ const AllInquiry = (props) => {
                           {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                             <ImageAttach file={file} style={{ margin: '2.5rem' }} />
                           ) : (
-                            <FileAttach file={file} field ={q.field}/>
+                            <FileAttach file={file} field={q.field} />
                           )}
                         </div>
                       ))}
@@ -351,7 +360,7 @@ const AllInquiry = (props) => {
                   </FormControl>
                   <div className="flex justify-end items-center mr-2 ">
                     <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
-                    <IconButton disabled className="p-8" onClick={() => removeQuestion(index)}>
+                    <IconButton disabled={!allowDeleteInq} className="p-8" onClick={() => removeQuestion(index)}>
                       <DeleteIcon />
                     </IconButton>
                   </div>
