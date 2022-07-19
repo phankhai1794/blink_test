@@ -62,6 +62,8 @@ export const NUMBER_INQ_BOTTOM = 6;
 
 export const draftConfirm = 'DRF_CONF';
 
+export const stateResquest = 'REQUEST';
+
 export const COUNTRIES = [
   {
     name: 'Vietnam',

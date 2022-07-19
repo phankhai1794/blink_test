@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, Grid } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import AttachFile from '@material-ui/icons/AttachFile';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
@@ -45,7 +46,11 @@ const useStyles = makeStyles((theme) => ({
   labelMargin: {
     marginTop: '0.6rem !important',
     padding: '4px',
-  }
+  },
+  attachIcon: {
+    transform: 'rotate(45deg)',
+    marginLeft: '-2.5rem'
+  },
 }));
 
 const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
@@ -57,6 +62,7 @@ const TableCD = (props) => {
 
   const [showAddIcon, setShowAddIcon] = useState(false);
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
+  const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
   const questions = useSelector(({ workspace }) => workspace.inquiryReducer.question);
@@ -93,6 +99,8 @@ const TableCD = (props) => {
   const checkQuestionIsEmpty = () => {
     if (originalInquiry.length > 0) {
       const check = originalInquiry.filter((q) => q.field === id);
+      const checkMedita = originalInquiry.filter((q) => q.field === id && q.mediaFile.length);
+      checkMedita.length && setMediaFileIsEmpty(false);
       return check.length === 0;
     }
     return true;
@@ -106,7 +114,10 @@ const TableCD = (props) => {
     <>
       <div className={clsx(classes.addIcon, `justify-self-end opacity-${(showAddIcon || !questionIsEmpty) ? '100' : '0'}`)}>
         {!questionIsEmpty ?
-          < HelpIcon className={clsx(classes.colorHasInqIcon)} />
+          <>
+            {!mediaFileIsEmpty && <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />}
+            < HelpIcon className={clsx(classes.colorHasInqIcon)} />
+          </>
           : (allowAddInquiry && <AddCircleIcon className={clsx(classes.colorEmptyInqIcon)} />)}
       </div>
       <div className={clsx(!questionIsEmpty ? classes.hasInq : classes.enterTableFile)} onClick={onClick}>
@@ -116,46 +127,46 @@ const TableCD = (props) => {
           className='px-8 justify-between'>
 
           <Grid container spacing={2}>
-            <Grid item xs={2} spacing={1}>
+            <Grid container item xs={2} spacing={1}>
               <Label className={clsx(classes.labelMargin)}>CONTAINER NUMBER</Label>
             </Grid>
-            <Grid item xs={2} spacing={1}>
+            <Grid container item xs={2} spacing={1}>
               <Label className={clsx(classes.labelMargin)}>SEAL</Label>
             </Grid>
-            <Grid item xs={2} spacing={1}>
+            <Grid container item xs={2} spacing={1}>
               <Label className={clsx(classes.labelMargin)}>TYPE</Label>
             </Grid>
-            <Grid item xs={2} spacing={1}>
+            <Grid container item xs={2} spacing={1}>
               <Label className={clsx(classes.labelMargin)}>PACKAGE</Label>
             </Grid>
-            <Grid item xs={2} spacing={1}>
+            <Grid container item xs={2} spacing={1}>
               <Label className={clsx(classes.labelMargin)}>WEIGHT</Label>
             </Grid>
-            <Grid item xs={2} spacing={1}>
+            <Grid container item xs={2} spacing={1}>
               <Label className={clsx(classes.labelMargin)}>MEASUREMENT</Label>
             </Grid>
             {containerDetail?.length > 0 ?
               containerDetail.map((cd, index) =>
-                (<Grid container spacing={2} className='px-8 py-2' key={index}>
-                  <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}</BLField>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}</BLField>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}</BLField>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}</BLField>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}</BLField>
-                  </Grid>
-                </Grid>))
+              (<Grid container spacing={2} className='px-8 py-2' key={index}>
+                <Grid item xs={2}>
+                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>
+                </Grid>
+                <Grid item xs={2}>
+                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}</BLField>
+                </Grid>
+                <Grid item xs={2}>
+                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}</BLField>
+                </Grid>
+                <Grid item xs={2}>
+                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}</BLField>
+                </Grid>
+                <Grid item xs={2}>
+                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}</BLField>
+                </Grid>
+                <Grid item xs={2}>
+                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}</BLField>
+                </Grid>
+              </Grid>))
               : (<Grid container spacing={2} className='px-8 py-2'>
                 <Grid item xs={2}>
                   <BLField></BLField>

@@ -1,5 +1,5 @@
 import { getKeyByValue, validateExtensionFile } from '@shared';
-import { stateResquest } from '@shared/keyword';
+import { stateResquest } from '@shared';
 import { getFile } from 'app/services/fileService';
 import { deleteInquiry } from 'app/services/inquiryService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';

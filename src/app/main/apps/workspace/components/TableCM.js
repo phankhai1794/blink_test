@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles, Grid } from '@material-ui/core';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import HelpIcon from '@material-ui/icons/Help';
+import AttachFile from '@material-ui/icons/AttachFile';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
@@ -23,7 +24,8 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '20px',
   },
   attachIcon: {
-    transform: 'rotate(45deg)'
+    transform: 'rotate(45deg)',
+    marginLeft: '-2.5rem'
   },
   colorHasInqIcon: {
     color: `${red} !important`
@@ -63,6 +65,7 @@ const TableCM = (props) => {
 
   const [showIcons, setShowIcons] = useState(false);
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
+  const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
   const questions = useSelector(({ workspace }) => workspace.inquiryReducer.question);
@@ -98,6 +101,8 @@ const TableCM = (props) => {
   const checkQuestionIsEmpty = () => {
     if (originalInquiry.length > 0) {
       const check = originalInquiry.filter((q) => q.field === id);
+      const checkMedita = originalInquiry.filter((q) => q.field === id && q.mediaFile.length);
+      checkMedita.length && setMediaFileIsEmpty(false);
       return check.length === 0;
     }
     return true;
@@ -111,9 +116,11 @@ const TableCM = (props) => {
   return (
     <>
       <div className={clsx(classes.hoverIcon, `justify-self-end opacity-${(showIcons || !questionIsEmpty) ? '100' : '0'}`)}>
-        {/* <AttachFile className={clsx(classes.colorEmptyInqIcon, classes.attachIcon)} /> */}
         {!questionIsEmpty ?
-          < HelpIcon className={clsx(classes.colorHasInqIcon)} />
+          <>
+            {!mediaFileIsEmpty && <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />}
+            < HelpIcon className={clsx(classes.colorHasInqIcon)} />
+          </>
           : (allowAddInquiry && <AddCircleIcon className={clsx(classes.colorEmptyInqIcon)} />)}
       </div>
       <div className={clsx(!questionIsEmpty ? classes.hasInq : classes.enterTableFile)} onClick={onClick}>
@@ -121,19 +128,19 @@ const TableCM = (props) => {
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
           className='px-8 justify-between'>
-          <Grid container xs={2} spacing={1}>
+          <Grid container item xs={2} spacing={1}>
             <Label className={clsx(classes.labelMargin)}>CNTR. NOS. W/SEAL NOS.MARKS & NUMBERS</Label>
           </Grid>
-          <Grid container xs={2} spacing={1}>
+          <Grid container item xs={2} spacing={1}>
             <Label className={clsx(classes.labelMargin)}>QUANTITY (FOR CUSTOMS DECLARATION ONLY)</Label>
           </Grid>
-          <Grid container xs={4} spacing={1} className='justify-center'>
+          <Grid container item xs={4} spacing={1} className='justify-center'>
             <Label className={clsx(classes.labelMargin)}>DESCRIPTION OF GOODS</Label>
           </Grid>
-          <Grid container xs={2} spacing={1}>
+          <Grid container item xs={2} spacing={1}>
             <Label className={clsx(classes.labelMargin)}>GROSS WEIGHT</Label>
           </Grid>
-          <Grid container xs={2} spacing={1}>
+          <Grid container item xs={2} spacing={1}>
             <Label className={clsx(classes.labelMargin)}>GROSS MEASUREMENT</Label>
           </Grid>
           {containerManifest?.length > 0 ?
