@@ -3,9 +3,7 @@ import * as Actions from 'app/store/actions';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Icon, Button, Grid } from '@material-ui/core';
-import draftToHtml from 'draftjs-to-html';
 import clsx from 'clsx';
-import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -97,8 +95,8 @@ const SendInquiryForm = (props) => {
     form[key] = tags.join(',');
   };
 
-  const onContentStateChange = (contentState) => {
-    form.content = draftToHtml(contentState);
+  const handleOnChange = (event) => {
+    form.content = event.target.value;
   };
 
   const onInputChange = (event) => {
@@ -159,12 +157,12 @@ const SendInquiryForm = (props) => {
             }}
             onChanged={handleFieldChange}
           />
-          {isOnshoreCc && <InputUI id = "toOnshoreCc" title = "Cc" onChanged={handleFieldChange} />}
-          {isOnshoreBcc && <InputUI id = "toOnshoreBcc" title = "Bcc" onChanged={handleFieldChange} />}
+          {isOnshoreCc && <InputUI id="toOnshoreCc" title="Cc" onChanged={handleFieldChange} />}
+          {isOnshoreBcc && <InputUI id="toOnshoreBcc" title="Bcc" onChanged={handleFieldChange} />}
           <div style={{ display: 'flex', marginTop: 10 }}>
             <label className={clsx(classes.label)}>Subject</label>
           </div>
-          <div style={{ marginTop: 5 }}>
+          <div style={{ marginTop: 5, marginRight: 5 }}>
             <input
               style={{
                 padding: '5px',
@@ -178,14 +176,23 @@ const SendInquiryForm = (props) => {
               onChange={onInputChange}
             />
           </div>
-          <div style={{ marginTop: 10 }}>
-            <Editor
-              toolbarClassName="toolbarClassName"
-              wrapperClassName="wrapperClassName"
-              editorClassName="editorClassName"
-              onContentStateChange={onContentStateChange}
-            />
-          </div>
+          <textarea
+            style={{
+              width: '100%',
+              paddingTop: 10,
+              paddingLeft: 5,
+              marginTop: 10,
+              minHeight: 250,
+              borderWidth: '0.5px',
+              borderStyle: 'solid',
+              borderColor: 'lightgray',
+              borderRadius: 5,
+              resize: 'vertical'
+            }}
+            multiline={true}
+            type="text"
+            defaultValue=""
+            onChange={handleOnChange}></textarea>
         </>
       </Form>
     </>
@@ -318,17 +325,27 @@ const ActionUI = (props) => {
         alignItems: 'center'
       }}>
       <Button
-        style={{ position: 'absolute', left: '10px', top: '10px' }}
+        style={{
+          textTransform: 'none',
+          fontWeight: 'bold',
+          position: 'absolute',
+          left: '10px',
+          top: '10px'
+        }}
         variant="text"
         // className={clsx('h-64', classes.button)}
         onClick={openPreviewClick}>
         <Icon style={{ color: '#1564EE' }}>visibility</Icon>
-        <span className="pl-12" style={{ color: '#1564EE' }}>
+        <span className="pl-14" style={{ color: '#1564EE' }}>
           Preview Inquiries
         </span>
       </Button>
       <Button
+        variant="text"
+        size="medium"
         style={{
+          textTransform: 'none',
+          fontWeight: 'bold',
           width: 140,
           color: 'white',
           backgroundColor: isLoading ? '#515E6A' : '#bd1874',
@@ -336,7 +353,7 @@ const ActionUI = (props) => {
         }}
         disabled={isLoading}
         onClick={sendMailClick}>
-        SEND
+        Send
       </Button>
       {isLoading && <CircularProgress size={24} className={classes.buttonProgress} />}
     </div>

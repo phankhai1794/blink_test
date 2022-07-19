@@ -121,7 +121,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
           <span style={{width: '100%', color: '#515e6a'}}>+{tags.length - 3}</span>
         </div>
       }
-      <div style={{flex: 'auto', display: 'inline-block', marginRight: type=='Cc'||type=='Bcc'? '90px':'0px',}}>
+      <div style={{flex: 'auto', display: 'inline-block', marginRight: (type=='Cc'||type=='Bcc')? '0px' : '90px',}}>
         <TextInput
           style={{flex: 'auto'}}
           ref={textInput}
