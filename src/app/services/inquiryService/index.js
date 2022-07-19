@@ -85,3 +85,8 @@ export async function replaceFile(data) {
   const response = await axios().patch(`${PATH}/attachment`, data);
   return response.data;
 }
+
+export async function deleteInquiry(id) {
+  const response = await axios().delete(`${PATH}/${id}`);
+  return response.data;
+}
