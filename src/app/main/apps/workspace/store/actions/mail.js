@@ -9,6 +9,9 @@ export const SUGGEST_MAIL_NONE = 'SUGGEST_MAIL_NONE';
 export const SUGGEST_MAIL_ERROR = 'SUGGEST_MAIL_ERROR';
 export const SUGGEST_MAIL_SUCCESS = 'SUGGEST_MAIL_SUCCESS';
 
+export const VALIDATE_MAIL = 'VALIDATE_MAIL';
+export const SET_TAGS = 'SET_TAGS'
+
 export const sendMail =
   ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content }) =>
     async (dispatch) => {
@@ -51,3 +54,18 @@ export const suggestMail = (keyword) => async (dispatch) => {
       });
     });
 };
+
+export function validateMail(state) {
+  return {
+    type: VALIDATE_MAIL,
+    state: state
+  };
+}
+
+
+export function setTags(state) {
+  return {
+    type: SET_TAGS,
+    state: state
+  };
+}
