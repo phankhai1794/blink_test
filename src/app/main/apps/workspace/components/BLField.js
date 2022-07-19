@@ -50,14 +50,14 @@ const useStyles = makeStyles((theme) => ({
   input: {
     fontSize: '15px',
     color: darkGray,
-    padding: '9px 16px',
+    padding: '9px 0 9px 16px',
     lineHeight: '22px'
   },
   notchedOutlineNotChecked: {
     borderColor: `${red} !important`
   },
   adornment: {
-    padding: '10px',
+    padding: '10px 10px 10px 0',
     margin: 0
   },
   adornmentMultiline: {
