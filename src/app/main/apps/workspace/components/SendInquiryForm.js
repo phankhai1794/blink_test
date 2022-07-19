@@ -324,7 +324,7 @@ const ActionUI = (props) => {
         justifyContent: 'center',
         alignItems: 'center'
       }}>
-      <Button
+      {/* <Button
         style={{
           textTransform: 'none',
           fontWeight: 'bold',
@@ -339,7 +339,7 @@ const ActionUI = (props) => {
         <span className="pl-14" style={{ color: '#1564EE' }}>
           Preview Inquiries
         </span>
-      </Button>
+      </Button> */}
       <Button
         variant="text"
         size="medium"
