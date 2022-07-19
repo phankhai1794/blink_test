@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as Actions from './store/actions';
 import Textarea from './components/Textarea';
@@ -83,6 +84,7 @@ const DraftPage = () => {
 
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+    dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL })));
     dispatch(Actions.loadMetadata());
     dispatch(Actions.loadContent(pathname.split('/')[pathname.includes('preview') ? 4 : 3]));
   }, []);
