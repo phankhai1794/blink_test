@@ -26,6 +26,19 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     margin: theme.spacing(1)
+  },
+  nextPrev: {
+    '& .MuiButtonBase-root': {
+      marginRight: 18,
+      paddingLeft: 0,
+      paddingRight: 0,
+    },
+    '& .MuiIconButton-root:hover': {
+      backgroundColor: 'transparent'
+    },
+    '& .MuiIconButton-root:focus': {
+      backgroundColor: 'transparent'
+    },
   }
 }));
 const PopoverFooter = ({ title }) => {
@@ -206,14 +219,18 @@ const PopoverFooter = ({ title }) => {
     }
   };
   return (
-    <div className="flex justify-between" style={{ margin: '1.6rem auto' }}>
-      <div>
-        <IconButton onClick={prevQuestion}>
-          <NavigateBeforeIcon />
-        </IconButton>
-        <IconButton onClick={nextQuestion}>
-          <NavigateNextIcon />
-        </IconButton>
+    <div className="flex justify-between" style={{ margin: '1.6rem auto', alignItems: "center" }}>
+      <div className={classes.nextPrev}>
+        {inquiries.length > 0 && (
+          <>
+            <IconButton onClick={prevQuestion}>
+              <img alt={'nextIcon'} src={`/assets/images/icons/prev.svg`} />
+            </IconButton>
+            <IconButton onClick={nextQuestion}>
+              <img alt={'prevIcon'} src={`/assets/images/icons/next.svg`} />
+            </IconButton>
+          </>
+        )}
 
         <Link style={{ fontSize: '16px', color: '#1564EE' }} component="button" onClick={toggleInquiriresDialog}>
           Open All Inquiries

@@ -44,7 +44,14 @@ const useStyles = makeStyles((theme) => ({
       }
     },
     '& $fieldset': {
-      borderRadius: 9
+      borderRadius: 9,
+      borderColor: '#BD0F72'
+    },
+    '& .MuiInputBase-root fieldset': {
+      borderColor: '#BD0F72'
+    },
+    '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#BD0F72'
     }
   },
   input: {
@@ -108,6 +115,11 @@ const useStyles = makeStyles((theme) => ({
       fontWeight: '600 !important'
     }
   },
+  errorField: {
+    '& .MuiInputBase-root fieldset': {
+      border: '2px solid red',
+    }
+  }
 }));
 
 function NoOptionsMessage(props) {
@@ -126,9 +138,14 @@ function inputComponent({ inputRef, ...props }) {
 
 function Control(props) {
   const classes = useStyles();
+  const styleErr = () => {
+    if (typeof (props.selectProps.errorStyle) !== 'undefined' && !(props.selectProps.errorStyle)) {
+      return classes.errorField;
+    }
+  };
   return (
     <TextField
-      className={clsx(classes.root, props.selectProps.textFieldProps.variant)}
+      className={clsx(classes.root, props.selectProps.textFieldProps.variant, styleErr())}
       style={props.selectProps.customStyle.control}
       InputProps={{
         inputComponent,
