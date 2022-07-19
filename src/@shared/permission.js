@@ -3,6 +3,7 @@ export const PERMISSION = {
   VIEW_ACCESS_DASHBOARD: 'view_accessDashboard',
   VIEW_ACCESS_INQUIRING: 'view_accessInquiring',
   VIEW_ACCESS_WORKSPACE: 'view_accessWorkspace',
+  VIEW_ACCESS_DRAFT_BL: 'view_accessDraftBL',
   VIEW_SHOW_ALL_INQUIRIES: 'view_showAllInquiries',
   VIEW_SHOW_BL_HISTORY: 'view_showBLHistory',
   VIEW_SHOW_USER_MENU: 'view_showUserMenu',
