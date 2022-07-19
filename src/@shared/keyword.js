@@ -24,5 +24,3 @@ export const CM_WEIGHT = 'C/M Weight';
 
 export const CM_MEASUREMENT = 'C/M Measurement';
 
-export const stateResquest = 'REQUEST';
-
