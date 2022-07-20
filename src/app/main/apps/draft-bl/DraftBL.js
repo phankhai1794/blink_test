@@ -185,6 +185,12 @@ const DraftPage = () => {
     return metadata ? metadata.inq_type[field] : '';
   };
 
+  const breakCMPackage = (value) => {
+    let [first, ...rest] = value.split(' ');
+    rest = rest.join(' ');
+    return `${first}\n${rest}`;
+  };
+
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(
@@ -408,33 +414,78 @@ const DraftPage = () => {
             <div key={idx} style={{ display: 'flex' }}>
               <div
                 className={classes.content_M}
-                style={{ width: '251px', borderRight: '1px solid #ac9ef6' }}>
+                style={{
+                  width: '251px',
+                  borderRight: '1px solid #ac9ef6',
+                  whiteSpace: 'pre-wrap'
+                }}>
                 {cm[getInqType('C/M Mark')]}
+                {idx !== containersManifest.length - 1 && (
+                  <>
+                    <br />
+                    <br />
+                  </>
+                )}
               </div>
               <div
                 className={classes.content_M}
-                style={{ width: '164px', borderRight: '1px solid #ac9ef6', textAlign: 'right' }}>
-                {cm[getInqType('C/M Package')]}
+                style={{
+                  width: '164px',
+                  borderRight: '1px solid #ac9ef6',
+                  textAlign: 'right',
+                  whiteSpace: 'pre-wrap'
+                }}>
+                {breakCMPackage(cm[getInqType('C/M Package')])}
+                {idx !== containersManifest.length - 1 && (
+                  <>
+                    <br />
+                    <br />
+                  </>
+                )}
               </div>
               <div
                 className={classes.content_M}
-                style={{ width: '459px', borderRight: '1px solid #ac9ef6', paddingLeft: 5 }}>
+                style={{
+                  width: '459px',
+                  borderRight: '1px solid #ac9ef6',
+                  paddingLeft: 5,
+                  whiteSpace: 'pre-wrap'
+                }}>
                 {cm[getInqType('C/M Description')]}
+                {idx !== containersManifest.length - 1 && (
+                  <>
+                    <br />
+                    <br />
+                  </>
+                )}
               </div>
               <div
                 className={classes.content_M}
-                style={{ width: '188px', borderRight: '1px solid #ac9ef6', textAlign: 'right' }}>
+                style={{
+                  width: '188px',
+                  borderRight: '1px solid #ac9ef6',
+                  textAlign: 'right',
+                  whiteSpace: 'pre-wrap'
+                }}>
                 {cm[getInqType('C/M Weight')]}
+                {idx !== containersManifest.length - 1 && (
+                  <>
+                    <br />
+                    <br />
+                  </>
+                )}
               </div>
-              <div className={classes.content_M} style={{ width: '188px', textAlign: 'right' }}>
+              <div
+                className={classes.content_M}
+                style={{ width: '188px', textAlign: 'right', whiteSpace: 'pre-wrap' }}>
                 {cm[getInqType('C/M Measurement')]}
+                {idx !== containersManifest.length - 1 && (
+                  <>
+                    <br />
+                    <br />
+                  </>
+                )}
               </div>
-              {idx !== containersManifest.length - 1 && (
-                <>
-                  <br />
-                  <br />
-                </>
-              )}
             </div>
           ))}
         <div style={{ display: 'flex' }}>
