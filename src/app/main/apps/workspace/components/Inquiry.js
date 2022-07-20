@@ -336,7 +336,8 @@ const Inquiry = (props) => {
   }
 
   useEffect(() => {
-    for (let i in listIndex) {
+    for (let index in listIndex) {
+      const i = listIndex[index]
       if (inquiries[i]?.mediaFile.length && !inquiries[i].mediaFile[0].src) {
         const optionsOfQuestion = [...inquiries];
         for (let f in inquiries[i].mediaFile) {

@@ -2,10 +2,10 @@ import { getKeyByValue, validateExtensionFile, toFindDuplicates } from '@shared'
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
-import { Divider, FormGroup, FormControlLabel, Checkbox, FormControl, FormHelperText, IconButton } from '@material-ui/core';
+import { Divider, FormGroup, FormControlLabel, Checkbox, FormControl, FormHelperText, IconButton, Typography, Tooltip } from '@material-ui/core';
 import * as AppAction from "app/store/actions";
 import clsx from 'clsx';
-import { Typography } from '@material-ui/core';
+
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 
@@ -237,12 +237,20 @@ const InquiryForm = (props) => {
                 </FormGroup>
                 <div className="flex justify-end items-center mr-2 ">
                   <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
-                  {(inquiries.length + questions.length !== metadata.field_options.length) && <IconButton className="p-8" onClick={() => copyQuestion(index)}>
-                    <img style={{ height: "22px" }} src="/assets/images/icons/copy.png" />
-                  </IconButton>}
-                  {questions.length !== 1 && <IconButton className="p-8" onClick={() => removeQuestion(index)}>
-                    <img src="/assets/images/icons/delete.png" />
-                  </IconButton>}
+                  {(inquiries.length + questions.length !== metadata.field_options.length) &&
+                    <Tooltip title="Clone">
+                      <IconButton className="p-8" onClick={() => copyQuestion(index)}>
+                        <img style={{ height: "22px" }} src="/assets/images/icons/copy.png" />
+                      </IconButton>
+                    </Tooltip>
+                  }
+                  {questions.length !== 1 &&
+                    <Tooltip title="Delete">
+                      <IconButton className="p-8" onClick={() => removeQuestion(index)}>
+                        <img src="/assets/images/icons/delete.png" />
+                      </IconButton>
+                    </Tooltip>
+                  }
                 </div>
               </div>
               {(!valid.receiver && !question.receiver.length) ? <FormHelperText>Pick at least one!</FormHelperText> : null}
@@ -277,12 +285,12 @@ const InquiryForm = (props) => {
                 </div>
               </div>
               {
-                question.mediaFile.map((file, mediaIndex) =>(
+                question.mediaFile.map((file, mediaIndex) => (
                   <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex} className={classes.root}>
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                       <ImageAttach hiddenRemove={true} field={question.field} file={file} style={{ margin: '1rem' }} />
                     ) : (
-                      <FileAttach file={file} field={question.field}/>
+                      <FileAttach file={file} field={question.field} />
                     )
                     }
                   </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ImageViewer from 'react-simple-image-viewer';
 import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
-import { IconButton } from '@material-ui/core';
+import { IconButton, Tooltip } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 
 import * as InquiryActions from '../store/actions/inquiry';
@@ -114,9 +114,11 @@ const ImageAttach = ({ file, field, hiddenRemove = false }) => {
         onClick={openImageViewer}
       />
       <div style={{ display: 'flex', height: '30px', flexDirection: 'row' }}>
-        <h3 style={{ color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }} onClick={downloadFile}>
-          {file.name}
-        </h3>
+        <Tooltip title={file.name}>
+          <h3 style={{ color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }} onClick={downloadFile}>
+            {file.name}
+          </h3>
+        </Tooltip >
         {!hiddenRemove && (
           <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: '2px' }}>
             <CloseIcon />
