@@ -170,13 +170,15 @@ const SendInquiryForm = (props) => {
           <div style={{ display: 'flex', marginTop: 10 }}>
             <label className={clsx(classes.label)}>Subject</label>
           </div>
-          <div style={{ marginTop: 5, marginRight: 5 }}>
+          <div style={{ marginTop: 5, display: 'flex' }}>
             <input
               style={{
-                padding: '5px',
+                paddingTop: '5px',
+                paddingLeft: '5px',
+                paddingBottom: '5px',
                 width: '100%',
                 borderWidth: '0.5px',
-                borderRadius: '4px',
+                borderRadius: '6px',
                 height: '25px',
                 borderStyle: 'solid',
                 borderColor: 'lightgray'
@@ -184,25 +186,27 @@ const SendInquiryForm = (props) => {
               value={form.subject}
               onChange={onInputChange}
             />
+         
           </div>
-          <textarea
-            style={{
-              width: '100%',
-              paddingTop: 10,
-              paddingLeft: 5,
-              marginTop: 10,
-              minHeight: 250,
-              borderWidth: '0.5px',
-              borderStyle: 'solid',
-              borderColor: 'lightgray',
-              borderRadius: 5,
-              resize: 'vertical'
-            }}
-            value={form.content}
-            multiline={true}
-            type="text"
-            defaultValue=""
-            onChange={handleOnChange}></textarea>
+          <div style={{ marginTop: 5, display: 'flex' }}>
+            <textarea
+              style={{
+                width: '100%',
+                paddingTop: 10,
+                paddingLeft: 5,
+                marginTop: 10,
+                minHeight: 250,
+                borderWidth: '0.5px',
+                borderStyle: 'solid',
+                borderColor: 'lightgray',
+                borderRadius: 6,
+                resize: 'none'
+              }}
+              multiline={true}
+              type="text"
+              defaultValue=""
+              onChange={handleOnChange}></textarea>
+          </div>
         </>
       </Form>
     </>
