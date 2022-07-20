@@ -62,20 +62,21 @@ function ToolbarLayout1(props) {
   const [transId] = useSelector(({ workspace }) => [workspace.transReducer.transId]);
   const openTrans = useSelector(({ workspace }) => workspace.formReducer.openTrans);
   const user = useSelector(({ user }) => user);
-  const [allowAccess, badge] = useSelector((state) => [
+  const [allowAccess, inquiries] = useSelector((state) => [
     state.header.allowAccess,
-    state.workspace.inquiryReducer.inquiries.length
+    state.workspace.inquiryReducer.inquiries
   ]);
   const myblState = useSelector(({ draftBL }) => draftBL.myblState);
   const [open, setOpen] = useState(false);
   const [disableConfirm, setDisableConfirm] = useState(false);
+  const inquiryLength = inquiries.length
+  const attachmentLength = inquiries.map(i => i.mediaFile.length).reduce((a, b) => a + b, 0)
 
   useEffect(() => {
     myblState === draftConfirm && setDisableConfirm(true);
   }, [myblState]);
-
   const openAllInquiry = () => {
-    if (badge) {
+    if (inquiryLength) {
       dispatch(FormActions.toggleAllInquiry(true));
       dispatch(FormActions.toggleSaveInquiry(true));
     }
@@ -140,10 +141,10 @@ function ToolbarLayout1(props) {
                 src="assets/images/logos/one_ocean_network-logo.png"
                 className={clsx(classes.logo, classes.fitAvatar)}
                 alt="one-logo"
-                // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
-                //   component: Link,
-                //   to: '/'
-                // })}
+              // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+              //   component: Link,
+              //   to: '/'
+              // })}
               />
             </div>
 
@@ -155,7 +156,7 @@ function ToolbarLayout1(props) {
                 size="medium"
                 className={clsx('h-64', classes.button)}
                 onClick={openAllInquiry}>
-                <Badge color="primary" badgeContent={badge}>
+                <Badge color="primary" badgeContent={inquiryLength}>
                   <NotificationsIcon />
                 </Badge>
                 <span className="pl-12">Inquiry List</span>
@@ -165,8 +166,10 @@ function ToolbarLayout1(props) {
                 size="medium"
                 className={clsx('h-64', classes.button)}
                 onClick={openAttachment}>
-                <DescriptionIcon />
-                <span className="pl-4">Attachment List</span>
+                <Badge color="primary" badgeContent={attachmentLength}>
+                  <DescriptionIcon />
+                </Badge>
+                <span className="pl-12">Attachment List</span>
               </Button>
             </PermissionProvider>
             {/* {openTrans && transId && <RestoreVersion />} */}
