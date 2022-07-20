@@ -426,7 +426,7 @@ const InquiryEditor = (props) => {
         {question.mediaFile?.length > 0 && question.mediaFile?.map((file, mediaIndex) => (
           <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
             {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-              <ImageAttach file={file} field={question.field} indexInquiry={index} style={{}} />
+              <ImageAttach file={file} field={question.field} indexInquiry={index} />
             ) : (
               <FileAttach file={file} field={question.field} indexInquiry={index} />
             )}
