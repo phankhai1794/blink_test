@@ -4,14 +4,16 @@ const initialState = {
   isLoading: false,
   success: false,
   error: '',
-  mails: []
+  suggestMails: [],
+  validateMail: {},
+  tags: {},
 };
 
 const mailReducer = function (state = initialState, action) {
   switch (action.type) {
   case Actions.SENDMAIL_NONE: {
     return {
-      ...initialState,
+      ...state,
       success: false,
       error: '',
       isLoading: false
@@ -19,7 +21,7 @@ const mailReducer = function (state = initialState, action) {
   }
   case Actions.SENDMAIL_LOADING: {
     return {
-      ...initialState,
+      ...state,
       isLoading: true
     };
   }
@@ -32,6 +34,7 @@ const mailReducer = function (state = initialState, action) {
   }
   case Actions.SENDMAIL_ERROR: {
     return {
+      ...state,
       success: false,
       isLoading: false,
       error: action.payload
@@ -40,10 +43,21 @@ const mailReducer = function (state = initialState, action) {
   case Actions.SUGGEST_MAIL_SUCCESS: {
     return {
       ...state,
-      mails: action.mails
+      suggestMails: action.mails
     };
   }
-
+  case Actions.VALIDATE_MAIL: {
+    return {
+      ...state,
+      validateMail: action.state
+    };
+  }
+  case Actions.SET_TAGS: {
+    return {
+      ...state,
+      tags: action.state
+    };
+  }
   default: {
     return state;
   }

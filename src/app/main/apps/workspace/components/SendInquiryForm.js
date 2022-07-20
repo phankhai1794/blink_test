@@ -16,21 +16,23 @@ import AllInquiry from './AllInquiry';
 import Form from './Form';
 
 const SendInquiryForm = (props) => {
+  const dispatch = useDispatch();
   const [mybl, openEmail] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.myBL,
     workspace.formReducer.openEmail
   ]);
-  const [success, error, mails] = useSelector(({ workspace }) => [
+  const [success, error, suggestMails, validateMail] = useSelector(({ workspace }) => [
     workspace.mailReducer.success,
     workspace.mailReducer.error,
-    workspace.mailReducer.mails
+    workspace.mailReducer.suggestMails,
+    workspace.mailReducer.validateMail,
+
   ]);
   const [isCustomerCc, setIsCustomerCc] = useState(false);
   const [isCustomerBcc, setIsCustomerBcc] = useState(false);
   const [isOnshoreCc, setIsOnshoreCc] = useState(false);
   const [isOnshoreBcc, setIsOnshoreBcc] = useState(false);
-
-  const { form } = useForm({
+  const initialState = useState({
     toCustomer: '',
     toCustomerCc: '',
     toCustomerBcc: '',
@@ -42,11 +44,13 @@ const SendInquiryForm = (props) => {
     content: ''
   });
 
-  function isFormValid() {
-    return form.toCustomer.length > 0 || form.toOnshore.length > 0;
+  const [form, setForm] = useState(initialState);
+
+  const isFormValid = () => {
+    return form.toCustomer || form.toOnshore;
   }
 
-  const dispatch = useDispatch();
+  const isMailVaid = () => Object.values(validateMail).filter(e => e).length
 
   useEffect(() => {
     if (success) {
@@ -60,6 +64,7 @@ const SendInquiryForm = (props) => {
         type: mailActions.SENDMAIL_NONE
       });
       dispatch(FormActions.toggleOpenEmail(false));
+      setForm(initialState);
     } else if (error) {
       dispatch(
         Actions.showMessage({
@@ -73,7 +78,7 @@ const SendInquiryForm = (props) => {
     }
   }, [success, error]);
   useEffect(() => {
-    if (openEmail && !mails.length) {
+    if (openEmail && !suggestMails.length) {
       dispatch(mailActions.suggestMail(''));
     }
   }, [openEmail]);
@@ -83,24 +88,28 @@ const SendInquiryForm = (props) => {
   };
 
   const sendMailClick = (event) => {
-    if (isFormValid()) {
+    if (isMailVaid()) {
+      dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
+    }
+    else if (!isFormValid()) {
+      dispatch(Actions.showMessage({ message: 'Please fill to Customer or Onshore fields', variant: 'error' }));
+    }
+    else {
       dispatch({ type: mailActions.SENDMAIL_LOADING });
       dispatch(mailActions.sendMail({ myblId: mybl.id, ...form }));
-    } else {
-      alert('Please fill to Customer or Onshore fields');
     }
   };
 
   const handleFieldChange = (key, tags) => {
-    form[key] = tags.join(',');
+    setForm({ ...form, [key]: tags.join(',') })
   };
 
   const handleOnChange = (event) => {
-    form.content = event.target.value;
+    setForm({ ...form, content: event.target.value })
   };
 
   const onInputChange = (event) => {
-    form.subject = event.target.value;
+    setForm({ ...form, subject: event.target.value })
   };
 
   const useStyles = makeStyles(() => ({
@@ -173,6 +182,7 @@ const SendInquiryForm = (props) => {
                 borderStyle: 'solid',
                 borderColor: 'lightgray'
               }}
+              value={form.subject}
               onChange={onInputChange}
             />
           </div>
@@ -189,6 +199,7 @@ const SendInquiryForm = (props) => {
               borderRadius: 5,
               resize: 'vertical'
             }}
+            value={form.content}
             multiline={true}
             type="text"
             defaultValue=""
