@@ -440,9 +440,15 @@ const BLWorkspace = (props) => {
             <h2 className={classes.grayText}>** TO BE CONTINUED ON ATTACHED LIST **</h2>
           </Grid>
         </Grid>
-
+        <Grid style={{padding:0}} container spacing={6}>
+          <Grid style={{paddingTop:0, paddingBottom: 0}} item xs={3}>
+            <Label style={{fontFamily: 'Montserrat',fontWeight:600, fontSize: 14, color: '#D93025'}}>Declared Cargo Value US $</Label>
+          </Grid>
+          <Grid style={{paddingTop:0, paddingBottom: 0}} item xs={9} alignItems="flex-end" justify="center">
+            <Label style={{textAlign: 'right', fontFamily: 'Montserrat',fontWeight:600, fontSize: 14, color: '#D93025'}}>. If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged</Label>
+          </Grid>
+        </Grid>
         <Divider className="my-32" />
-
         <Grid container spacing={6}>
           <Grid item xs={6}>
             <Grid item>
