@@ -89,8 +89,11 @@ const AllInquiry = (props) => {
     (myBL?.state !== stateResquest) && setAllowDeleteInq(false)
   }, []);
 
-  const changeToEditor = (index) => {
-    if (index !== currentEdit) dispatch(InquiryActions.setEditInq(index));
+  const changeToEditor = (index, field) => {
+    if (index !== currentEdit) {
+      dispatch(InquiryActions.setEditInq(index));
+      dispatch(InquiryActions.setField(field));
+    }
   };
 
   const removeQuestion = (index) => {
@@ -177,11 +180,11 @@ const AllInquiry = (props) => {
     <>
       {inquiries.map((q, index) => {
         if (receiver && !q.receiver.includes(receiver)) {
-          return <div style={{ display: 'flex' }} onClick={() => changeToEditor(index)}></div>;
+          return <div style={{ display: 'flex' }} onClick={() => changeToEditor(index, q.field)}></div>;
         }
         const type = q.ansType;
         return (
-          <div key={index} style={{ marginBottom: '24px' }} onClick={() => changeToEditor(index)}>
+          <div key={index} style={{ marginBottom: '24px' }} onClick={() => changeToEditor(index, q.field)}>
             <PermissionProvider
               action={PERMISSION.VIEW_EDIT_INQUIRY}
               extraCondition={currentEdit === index}
