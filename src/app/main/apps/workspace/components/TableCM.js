@@ -129,7 +129,7 @@ const TableCM = (props) => {
           onMouseLeave={onMouseLeave}
           className='px-8 justify-between'>
           <Grid container item xs={2} spacing={1}>
-            <Label className={clsx(classes.labelMargin)}>CNTR. NOS. W/SEAL NOS.MARKS & NUMBERS</Label>
+            <Label className={clsx(classes.labelMargin)}>{'CNTR. NOS. W/SEAL NOS.\nMARKS & NUMBERS'}</Label>
           </Grid>
           <Grid container item xs={2} spacing={1}>
             <Label className={clsx(classes.labelMargin)}>QUANTITY (FOR CUSTOMS DECLARATION ONLY)</Label>

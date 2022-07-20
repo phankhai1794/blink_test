@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
+import AttachFile from '@material-ui/icons/AttachFile';
 import { useDispatch, useSelector } from 'react-redux';
 import { TextField, InputAdornment, makeStyles } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
@@ -95,7 +96,11 @@ const useStyles = makeStyles((theme) => ({
   },
   colorLockIcon: {
     color: darkGray
-  }
+  },
+  attachIcon: {
+    transform: 'rotate(45deg)',
+    marginLeft: '-2.5rem'
+  },
 }));
 
 const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
@@ -106,7 +111,7 @@ const BLField = (props) => {
   const { children, width, multiline, rows, selectedChoice, id, lock, readOnly } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
-
+  const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
   const questions = useSelector(({ workspace }) => workspace.inquiryReducer.question);
   const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
@@ -164,6 +169,8 @@ const BLField = (props) => {
   const checkQuestionIsEmpty = () => {
     if (originalInquiry.length > 0) {
       const check = originalInquiry.filter((q) => q.field === id);
+      const checkMedita = originalInquiry.filter((q) => q.field === id && q.mediaFile.length);
+      checkMedita.length && setMediaFileIsEmpty(false);
       return check.length === 0;
     }
     return true;
@@ -203,6 +210,8 @@ const BLField = (props) => {
                     multiline ? classes.adornmentMultiline : '',
                     rows ? classes[`adornmentRow_${rows}`] : ''
                   )}>
+                  {!mediaFileIsEmpty && <AttachFile className={clsx(classes.sizeIcon, classes.colorHasInqIcon, classes.attachIcon)} />}
+                 
                   {!questionIsEmpty && (
                     <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
                   )}
@@ -226,6 +235,7 @@ const BLField = (props) => {
               }
             }}
           />
+          
         </ThemeProvider>
       </div>
     </>
