@@ -9,6 +9,7 @@ export const RELOAD = 'RELOAD';
 export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 export const OPEN_EMAIL = 'OPEN_EMAIL';
 export const OPEN_INQUIRY_REVIEW = 'OPEN_INQUIRY_REVIEW';
+export const OPEN_NOTIFICATION_ATTACHMENT_LIST = 'OPEN_NOTIFICATION_ATTACHMENT_LIST';
 
 export function setFullscreen(state) {
   return {
@@ -82,6 +83,13 @@ export function toggleOpenEmail(state) {
 export function toggleOpenInquiryReview(state) {
   return {
     type: OPEN_INQUIRY_REVIEW,
+    state: state
+  };
+}
+
+export function toggleOpenNotificationAttachmentList(state) {
+  return {
+    type: OPEN_NOTIFICATION_ATTACHMENT_LIST,
     state: state
   };
 }

@@ -100,7 +100,8 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 2,
     left: 0,
     right: 0,
-    borderRadius: '12px'
+    borderRadius: '12px',
+    overflow: 'auto'
   },
   divider: {
     height: theme.spacing(2)

@@ -1,8 +1,6 @@
 import history from '@history';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
-import History from 'app/fuse-layouts/shared-components/History';
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
-import SendInquiryForm from 'app/main/apps/workspace/components/SendInquiryForm';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
@@ -10,13 +8,11 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { draftConfirm } from '@shared';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { Link } from 'react-router-dom';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppBar, Toolbar, Avatar, Badge, Button, Hidden } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import RestoreVersion from 'app/main/apps/workspace/components/RestoreVersion';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 
@@ -59,8 +55,6 @@ function ToolbarLayout1(props) {
   const classes = useStyles(props);
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
-  const [transId] = useSelector(({ workspace }) => [workspace.transReducer.transId]);
-  const openTrans = useSelector(({ workspace }) => workspace.formReducer.openTrans);
   const user = useSelector(({ user }) => user);
   const [allowAccess, inquiries] = useSelector((state) => [
     state.header.allowAccess,
@@ -83,7 +77,18 @@ function ToolbarLayout1(props) {
   };
 
   const openAttachment = () => {
-    dispatch(FormActions.toggleAttachment(true));
+    let isExistMedia = false;
+    inquiries.forEach(inq => {
+      if(inq.mediaFile.length > 0) {
+        isExistMedia = true;
+        return;
+      }
+    });
+    if (inquiries.length === 0 || !isExistMedia) {
+      dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
+    } else {
+      dispatch(FormActions.toggleAttachment(true))
+    }
   };
 
   const openEmail = () => dispatch(FormActions.toggleOpenEmail(true));
