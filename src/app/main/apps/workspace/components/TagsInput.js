@@ -97,8 +97,23 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
   }));
   const classes = useStyles();
 
+  const getTagsShow = (tags) => {
+    let tagsShow = [];
+    let length = 0;
+    for (const tag of tags) {
+      if(tag.length + length > 75){
+        break;
+      }
+      tagsShow.push(tag);
+      length += tag.length;
+      length +=10;
+
+    }
+    return tagsShow;
+  };
+
   return (
-    <div className="tags-input-container" onFocus={() => setIsFocus(true)}>
+    <div className="tags-input-container" style={{paddingRight: (type=='Cc'||type=='Bcc')? '0px' : '90px',}} onFocus={() => setIsFocus(true)}>
       {type !== 'Cc' && type !== 'Bcc' && <div style={{
         position: 'absolute',
         paddingLeft: '7px',
@@ -117,20 +132,20 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
         </button>
       </div>
       }
-      {(!isFocus ? tags.slice(0, 3) : tags).map((tag, index) => (
+      {(!isFocus? getTagsShow(tags):tags).map((tag, index) => (
         <div className="tag-item" key={index}>
           <span className="text">{tag}</span>
           <span className="close" onClick={() => removeTag(index)}>
-            &times;
+              &times;
           </span>
         </div>
       ))}
       {
-        !isFocus && tags.length > 3 && <div style={{ backgroundColor: '#00000008', padding: '3px', borderRadius: '4px' }}>
-          <span style={{ width: '100%', color: '#515e6a' }}>+{tags.length - 3}</span>
+        !isFocus &&tags.length>getTagsShow(tags).length&& <div style={{backgroundColor: '#00000008', padding:'3px', borderRadius: '4px'}}>
+          <span style={{width: '100%', color: '#515e6a'}}>+{tags.length - getTagsShow(tags).length}</span>
         </div>
       }
-      <div style={{ flex: 'auto', display: 'inline-block', marginRight: (type === 'Cc' || type === 'Bcc') ? '0px' : '90px', }}>
+      <div style={{flex: 'auto', display: 'inline-block'}}>
         <TextInput
           style={{ flex: 'auto' }}
           ref={textInput}
