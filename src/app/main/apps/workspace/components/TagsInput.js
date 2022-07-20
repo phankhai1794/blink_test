@@ -64,8 +64,9 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
   };
 
   const removeTag = (index) => {
-    dispatch(MailActions.setTags({ ..._tags, [id]: tags.filter((el, i) => i !== index) }))
-    onChanged(id, tags);
+    const newTags = tags.filter((el, i) => i !== index)
+    dispatch(MailActions.setTags({ ..._tags, [id]: newTags }))
+    onChanged(id, newTags);
   };
 
   const useStyles = makeStyles((theme) => ({
