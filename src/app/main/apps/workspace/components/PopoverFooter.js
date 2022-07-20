@@ -232,8 +232,18 @@ const PopoverFooter = ({ title }) => {
           </>
         )}
 
-        <Link style={{ fontSize: '16px', color: '#1564EE' }} component="button" onClick={toggleInquiriresDialog}>
-          Open All Inquiries
+        <Link
+         style={{
+          fontFamily: 'Montserrat',
+          fontSize: '16px',
+          color: '#1564EE',
+          height: '20px',
+          weight: '145px',
+          fontWeight: '600',
+          }}
+         component="button" onClick={toggleInquiriresDialog}
+        >
+          Open all inquiries
         </Link>
       </div>
       <div style={{ alignSelf: 'center', marginRight: '20rem' }}>
@@ -241,7 +251,18 @@ const PopoverFooter = ({ title }) => {
           action={PERMISSION.VIEW_SAVE_INQUIRY}
           extraCondition={!fields.includes(title)}
         >
-          <Button variant="contained" className={classes.root} color="primary" onClick={onSave}>
+          <Button 
+            variant="contained"
+            style ={{
+              textTransform:'capitalize',
+              left: '13.45%', right: '13.45%', top: '25%', bottom: '25%',
+              fontFamily: 'Montserrat', fontStyle: 'normal', fontWeight: '600', fontSize: '16px', lineHegiht: '20px',
+              textAlign: 'center',
+              backgroundColor: "#BD0F72"}}
+            className={classes.root}
+            color="primary"
+            onClick={onSave}
+          >
             Save
           </Button>
         </PermissionProvider>
