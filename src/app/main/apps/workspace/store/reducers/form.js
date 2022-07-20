@@ -10,7 +10,8 @@ const initialState = {
   reload: false,
   openTrans: false,
   openEmail: false,
-  openInqReview: false
+  openInqReview: false,
+  openNotificationAttachmentList: false,
 };
 
 const formReducer = function (state = initialState, action) {
@@ -44,6 +45,9 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.OPEN_INQUIRY_REVIEW: {
     return { ...state, openInqReview: action.state };
+  }
+  case Actions.OPEN_NOTIFICATION_ATTACHMENT_LIST: {
+    return { ...state, openNotificationAttachmentList: action.state };
   }
   default: {
     return state;

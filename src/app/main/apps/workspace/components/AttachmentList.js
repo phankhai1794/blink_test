@@ -223,13 +223,17 @@ const AttachmentList = (props) => {
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
     });
     if (getAttachmentFiles.length <= 0) {
-      setIsLoading(false)
+      setIsLoading(false);
     }
     for (let f in getAttachmentFiles) {
       getFile(getAttachmentFiles[f].id).then((file) => {
         getAttachmentFiles[f].src = urlMedia(getAttachmentFiles[f].ext, file);
         setAttachmentFile(getAttachmentFiles);
-        setIsLoading(false)
+        setIsLoading(false);
+      }).catch((error) => {
+        console.error(error);
+        setIsLoading(false);
+        setAttachmentFile(getAttachmentFiles);
       });
     }
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
@@ -567,6 +571,9 @@ const AttachmentList = (props) => {
                               variant: 'outlined'
                             }}
                             options={fieldType}
+                            maxMenuHeight={200}
+                            menuPosition={'fixed'}
+                            menuShouldBlockScroll={true}
                           />
                         </div>
                         {!media.field && <FormHelperText style={{ color: 'red' }}>This is required!</FormHelperText>}

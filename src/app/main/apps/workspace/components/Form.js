@@ -122,7 +122,8 @@ const DialogActions = withStyles((theme) => ({
 const useStyles = makeStyles(() => ({
   dialogPaper: {
     width: '950px',
-    minHeight: '600px'
+    minHeight: 600,
+    maxHeight: '80%'
   },
   dialogContent: {
     margin: 'auto',
