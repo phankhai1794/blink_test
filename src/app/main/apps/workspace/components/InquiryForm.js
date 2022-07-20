@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/styles';
 import { Divider, FormGroup, FormControlLabel, Checkbox, FormControl, FormHelperText, IconButton } from '@material-ui/core';
 import * as AppAction from "app/store/actions";
 import clsx from 'clsx';
-
+import { Typography } from '@material-ui/core';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 
@@ -43,9 +43,18 @@ const useStyles = makeStyles((theme) => ({
     width: '5px',
     height: '10px',
     border: '1px solid #BD0F72',
-    borderWidth: '0 2px 2px 0',
+    borderWidth: '0 3px 3px 0',
     transform: 'rotate(45deg)',
   },
+  fontText: {
+    fontSize: '15px',
+    fontFamily: 'Montserrat',
+    fontWeight: '500',
+    height: '18px',
+    fontStyle: 'normal',
+    lineHeight: '18px',
+    color: "#000000",
+  }
 }));
 
 const InquiryForm = (props) => {
@@ -200,7 +209,9 @@ const InquiryForm = (props) => {
                         icon={<span className={classes.icon} />}
                       />
                     }
-                    label="Onshore"
+                    label={
+                      <Typography className={classes.fontText}>Onshore</Typography>
+                    }
                   />
                   <FormControlLabel
                     value="customer"
@@ -219,7 +230,9 @@ const InquiryForm = (props) => {
                         icon={<span className={classes.icon} />}
                       />
                     }
-                    label="Customer"
+                    label={
+                      <Typography className={classes.fontText}>Customer</Typography>
+                    }
                   />
                 </FormGroup>
                 <div className="flex justify-end items-center mr-2 ">

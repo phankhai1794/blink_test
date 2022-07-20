@@ -381,13 +381,16 @@ export default function Form(props) {
                   variant="body2"
                   onClick={handleClick}
                   style={{ display: 'flex', alignItems: 'center' }}>
-                  <AddCircleOutlineIcon fontSize="large" />
+                  <AddCircleOutlineIcon style = {{ left: '8.33%', right: '8.33%', border: '2px' }} />
                   <span
                     style={{
                       color: '#BD0F72',
                       fontSize: '16px',
-                      marginLeft: '5px',
-                      fontWeight: 'normal'
+                      fontWeight: '600',
+                      fontFamily: 'Montserrat',
+                      width: '98px',
+                      height: '20px',
+                      fontStyle: 'normal'
                     }}>
                     Add Inquiry
                   </span>
