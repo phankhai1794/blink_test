@@ -1,19 +1,19 @@
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Divider, FormControl, FormHelperText, Button, LinearProgress} from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Divider, FormControl, FormHelperText, Button, LinearProgress } from '@material-ui/core';
 import CachedIcon from '@material-ui/icons/Cached';
 import DescriptionIcon from '@material-ui/icons/Description';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import ImageViewer from "react-simple-image-viewer";
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
-import {FuseChipSelect} from "@fuse";
-import {validateExtensionFile} from '@shared';
+import { FuseChipSelect } from "@fuse";
+import { validateExtensionFile } from '@shared';
 import * as AppAction from "app/store/actions";
-import {useDropzone} from "react-dropzone";
-import {uploadFile, getFile} from 'app/services/fileService';
-import {updateInquiryAttachment, removeMultipleMedia, replaceFile, addNewMedia} from 'app/services/inquiryService';
-import {makeStyles} from "@material-ui/core/styles";
+import { useDropzone } from "react-dropzone";
+import { uploadFile, getFile } from 'app/services/fileService';
+import { updateInquiryAttachment, removeMultipleMedia, replaceFile, addNewMedia } from 'app/services/inquiryService';
+import { makeStyles } from "@material-ui/core/styles";
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import Checkbox from "@material-ui/core/Checkbox";
 import clsx from "clsx";
@@ -247,9 +247,9 @@ const AttachmentList = (props) => {
       uploadFile(formData).then((media) => {
         //update inquiries
         const res = media.response[0];
-        addNewMedia({inquiryId: optionsOfQuestion[indexInquiryOld].id, mediaId: res.id}).then(rs => {
+        addNewMedia({ inquiryId: optionsOfQuestion[indexInquiryOld].id, mediaId: res.id }).then(rs => {
           optionsAttachmentList = optionsAttachmentList.map(op => {
-            return {...op, success: null}
+            return { ...op, success: null }
           });
           optionsAttachmentList[index] = {
             ...optionsAttachmentList[index],
@@ -375,7 +375,7 @@ const AttachmentList = (props) => {
       }
     });
     if (listIdMedia.length > 0) {
-      removeMultipleMedia({mediaIds: listIdMedia}).then(res => {
+      removeMultipleMedia({ mediaIds: listIdMedia }).then(res => {
         // update attachment list
         let mediaR = [];
         optionsAttachmentList.forEach((op, i) => {
@@ -387,6 +387,7 @@ const AttachmentList = (props) => {
         setSelectedIndexFile([]);
         setShowConfirm(false);
         dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+        dispatch(AppAction.showMessage({ message: 'Delete attachment successfully', variant: 'success' }));
       });
     } else {
       // update attachment list
@@ -515,7 +516,7 @@ const AttachmentList = (props) => {
             return (
               <div key={index}>
                 <div className="flex justify-between">
-                  <div className="flex" style={{alignItems: 'center' }}>
+                  <div className="flex" style={{ alignItems: 'center' }}>
                     <div className='checkboxDetail' style={{ marginRight: '11px' }}>
                       <Checkbox
                         checked={selectedIndexFile.includes(index)}
@@ -530,7 +531,7 @@ const AttachmentList = (props) => {
                         icon={<span className={classes.icon} />}
                       />
                     </div>
-                    <div className='flex' style={{alignItems: 'center' }}>
+                    <div className='flex' style={{ alignItems: 'center' }}>
                       {media.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                         <ImageAttachList file={media} style={{ margin: '2.5rem' }} />
                       ) : (
@@ -548,11 +549,11 @@ const AttachmentList = (props) => {
                       }
                     >
                       {media.field && media.id && media.success &&
-                      <CheckCircleOutlineIcon
-                        style={{height: '25px', width: '25px', color: '#36B37E', marginRight: '11px'}}/>}
+                        <CheckCircleOutlineIcon
+                          style={{ height: '25px', width: '25px', color: '#36B37E', marginRight: '11px' }} />}
                       {media.success !== null && media.success === false &&
-                      <ErrorOutlineIcon
-                        style={{height: '25px', width: '25px', color: '#DC2626', marginRight: '11px'}}/>}
+                        <ErrorOutlineIcon
+                          style={{ height: '25px', width: '25px', color: '#DC2626', marginRight: '11px' }} />}
 
                       <FormControl error={!media.field}>
                         <div className={clsx(media.success === false ? classes.selectError : classes.customSelect)} style={{ display: 'flex', alignItems: 'center' }}>
@@ -573,7 +574,7 @@ const AttachmentList = (props) => {
                     </PermissionProvider>
                   </div>
                 </div>
-                {index !== attachmentFiles.length && <Divider className="mt-16 mb-16" style={{ backgroundColor: selectedIndexFile.includes(index) ? '#BD0F72' : '#BAC3CB' }}/>}
+                {index !== attachmentFiles.length && <Divider className="mt-16 mb-16" style={{ backgroundColor: selectedIndexFile.includes(index) ? '#BD0F72' : '#BAC3CB' }} />}
               </div>
             )
           })}
@@ -777,4 +778,4 @@ const ColoredLinearProgress = () => {
   );
 };
 
-export {AttachmentList, AttachFile};
+export { AttachmentList, AttachFile };

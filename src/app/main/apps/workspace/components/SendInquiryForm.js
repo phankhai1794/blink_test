@@ -1,4 +1,3 @@
-import { useForm } from '@fuse/hooks';
 import * as Actions from 'app/store/actions';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
