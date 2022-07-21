@@ -40,6 +40,7 @@ const ImageAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   const attachmentList = useSelector(({ workspace }) =>
     workspace.inquiryReducer.attachmentList
   );
+  const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const dispatch = useDispatch();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const images = [file.src];
@@ -89,14 +90,21 @@ const ImageAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
       dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
     } else {
       // Remove attachment at local
-      const optionsOfQuestionLocal = [...questions];
-      const indexMedia = optionsOfQuestionLocal[indexInquiry].mediaFile.findIndex(
-        (f) => f.name === file.name
-      );
-      optionsOfQuestionLocal[indexInquiry].mediaFile.splice(indexMedia, 1);
-      dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
-      // update attachment list
-      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+      if (openInquiryForm) {
+        const optionsOfQuestionLocal = [...questions];
+        const indexMedia = optionsOfQuestionLocal[indexInquiry].mediaFile.findIndex(
+          (f) => f.name === file.name
+        );
+        optionsOfQuestionLocal[indexInquiry].mediaFile.splice(indexMedia, 1);
+        dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
+      } else {
+        const optionsOfQuestionLocal = [...inquiries];
+        const indexMedia = optionsOfQuestionLocal[indexInquiry].mediaFile.findIndex(
+          (f) => f.name === file.name
+        );
+        optionsOfQuestionLocal[indexInquiry].mediaFile.splice(indexMedia, 1);
+        dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
+      }
     }
   };
 
