@@ -88,6 +88,7 @@ const InquiryForm = (props) => {
 
   const copyQuestion = (index) => {
     const optionsOfQuestion = JSON.parse(JSON.stringify(questions[index]));
+    optionsOfQuestion.content = optionsOfQuestion.content.replace(getKeyByValue(metadata['inq_type'], optionsOfQuestion.inqType), '{{INQ_TYPE}}');
     optionsOfQuestion.field = '';
     questions[index].mediaFile.map((file, i) => {
       optionsOfQuestion.mediaFile[i].fileUpload = file.fileUpload;
