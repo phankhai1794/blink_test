@@ -116,7 +116,7 @@ const SendInquiryForm = (props) => {
       whiteSpace: 'nowrap',
       color: '#132535',
       fontSize: 14,
-      fontWeight: '400',
+      fontWeight: '600',
       fontFamily: 'Montserrat'
     }
   }));
@@ -264,7 +264,7 @@ const InputUI = (props) => {
       whiteSpace: 'nowrap',
       color: '#132535',
       fontSize: 14,
-      fontWeight: '400',
+      fontWeight: '600',
       fontFamily: 'Montserrat'
     }
   }));
