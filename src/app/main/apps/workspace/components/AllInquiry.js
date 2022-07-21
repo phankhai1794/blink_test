@@ -288,9 +288,9 @@ const AllInquiry = (props) => {
                           style={{ position: 'relative', display: 'inline-block' }}
                           key={mediaIndex}>
                           {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                            <ImageAttach file={file} style={{ margin: '2.5rem' }} />
+                            <ImageAttach file={file} field={q.field} indexInquiry={index} style={{ margin: '2.5rem' }} />
                           ) : (
-                            <FileAttach file={file} field={q.field} />
+                            <FileAttach file={file} field={q.field} indexInquiry={index} />
                           )}
                         </div>
                       ))}
