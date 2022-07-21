@@ -114,11 +114,9 @@ const ImageAttach = ({ file, field, hiddenRemove = false }) => {
         onClick={openImageViewer}
       />
       <div style={{ display: 'flex', height: '30px', flexDirection: 'row' }}>
-        <Tooltip title={file.name}>
-          <h3 style={{ color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }} onClick={downloadFile}>
-            {file.name}
-          </h3>
-        </Tooltip >
+        <h3 style={{ color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }} onClick={downloadFile}>
+          {file.name}
+        </h3>
         {!hiddenRemove && (
           <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: '2px' }}>
             <CloseIcon />
@@ -132,7 +130,7 @@ const ImageAttach = ({ file, field, hiddenRemove = false }) => {
           onClose={closeImageViewer}
           disableScroll={false}
           backgroundStyle={{
-            backgroundColor: 'rgba(0,0,0,0.9)'
+            backgroundColor: 'rgba(0,0,0,0.7)'
           }}
           closeOnClickOutside={true}
         />

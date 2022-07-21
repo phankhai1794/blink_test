@@ -238,14 +238,14 @@ const InquiryForm = (props) => {
                 <div className="flex justify-end items-center mr-2 ">
                   <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
                   {(inquiries.length + questions.length !== metadata.field_options.length) &&
-                    <Tooltip title="Clone">
+                    <Tooltip title="Clone Inquiry">
                       <IconButton className="p-8" onClick={() => copyQuestion(index)}>
                         <img style={{ height: "22px" }} src="/assets/images/icons/copy.png" />
                       </IconButton>
                     </Tooltip>
                   }
                   {questions.length !== 1 &&
-                    <Tooltip title="Delete">
+                    <Tooltip title="Delete Inquiry">
                       <IconButton className="p-8" onClick={() => removeQuestion(index)}>
                         <img src="/assets/images/icons/delete.png" />
                       </IconButton>
