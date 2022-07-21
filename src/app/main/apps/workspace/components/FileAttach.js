@@ -3,7 +3,7 @@ import DescriptionIcon from '@material-ui/icons/Description';
 import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import { IconButton } from '@material-ui/core';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import * as InquiryActions from "../store/actions/inquiry";
 
@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme) => ({
     borderWidth: '1px',
     borderStyle: 'ridge',
     justifyContent: 'center',
-    height:"100%",
+    height: "100%",
     width: '165px',
     marginBottom: '10px',
     marginLeft: '10px',
@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
       cursor: 'pointer',
       whiteSpace: 'nowrap',
       overflow: 'hidden',
-     
+
     },
     '& h3:hover': {
       color: '#0000ee'
@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const FileAttach = ({ file ,field, hiddenRemove = false}) => {
+const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   const classes = useStyles();
   const [inquiries, metadata, questions, attachmentList, validationAttachment] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
@@ -59,11 +59,9 @@ const FileAttach = ({ file ,field, hiddenRemove = false}) => {
     window.open(file.src);
   };
   const handleRemoveFile = (id) => {
-    
     const optionsOfQuestion = [...inquiries];
     const optionsAttachmentList = [...attachmentList];
     if (field && file.id) {
-      const indexInquiry = optionsOfQuestion.findIndex((op) => field === op.field);
       const indexMedia = optionsOfQuestion[indexInquiry].mediaFile.findIndex(
         (f) => f.id === file.id
       );
@@ -91,7 +89,6 @@ const FileAttach = ({ file ,field, hiddenRemove = false}) => {
     } else {
       // Remove attachment at local
       const optionsOfQuestionLocal = [...questions];
-      const indexInquiry = optionsOfQuestionLocal.findIndex((op) => field === op.field);
       const indexMedia = optionsOfQuestionLocal[indexInquiry].mediaFile.findIndex(
         (f) => f.name === file.name
       );
@@ -113,14 +110,14 @@ const FileAttach = ({ file ,field, hiddenRemove = false}) => {
       ) : (
         <DescriptionIcon />
       )}
-      <div style={{ display: 'flex', flexDirection: 'row',  }}>
+      <div style={{ display: 'flex', flexDirection: 'row', }}>
         {file.ext.toLowerCase().includes('pdf') ? (
-          <h3 style={{ width: hiddenRemove?'180px':'160px'}} onClick={previewPDF}>{file.name}</h3>
+          <h3 style={{ width: hiddenRemove ? '180px' : '160px' }} onClick={previewPDF}>{file.name}</h3>
         ) : (
-          <h3 style={{ width: hiddenRemove?'180px':'160px'}} onClick={downloadFile}>{file.name}</h3>
+          <h3 style={{ width: hiddenRemove ? '180px' : '160px' }} onClick={downloadFile}>{file.name}</h3>
         )}
         {
-          !hiddenRemove&&
+          !hiddenRemove &&
           <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: '2px' }}>
             <CloseIcon />
           </IconButton>
