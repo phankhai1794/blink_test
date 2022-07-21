@@ -52,7 +52,8 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '15px',
     color: darkGray,
     padding: '9px 0 9px 16px',
-    lineHeight: '22px'
+    lineHeight: '22px',
+    fontWeight: '500'
   },
   notchedOutlineNotChecked: {
     borderColor: `${red} !important`
