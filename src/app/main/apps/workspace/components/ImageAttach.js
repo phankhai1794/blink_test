@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ImageAttach = ({ file, field, hiddenRemove = false }) => {
+const ImageAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   const inquiries = useSelector(({ workspace }) =>
     workspace.inquiryReducer.inquiries
   );
@@ -64,7 +64,6 @@ const ImageAttach = ({ file, field, hiddenRemove = false }) => {
     const optionsOfQuestion = [...inquiries];
     const optionsAttachmentList = [...attachmentList];
     if (field && file.id) {
-      const indexInquiry = optionsOfQuestion.findIndex((op) => field === op.field);
       const indexMedia = optionsOfQuestion[indexInquiry].mediaFile.findIndex(
         (f) => f.id === file.id
       );
@@ -91,7 +90,6 @@ const ImageAttach = ({ file, field, hiddenRemove = false }) => {
     } else {
       // Remove attachment at local
       const optionsOfQuestionLocal = [...questions];
-      const indexInquiry = optionsOfQuestionLocal.findIndex((op) => field === op.field);
       const indexMedia = optionsOfQuestionLocal[indexInquiry].mediaFile.findIndex(
         (f) => f.name === file.name
       );

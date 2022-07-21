@@ -88,7 +88,8 @@ const InquiryForm = (props) => {
 
   const copyQuestion = (index) => {
     const optionsOfQuestion = JSON.parse(JSON.stringify(questions[index]));
-    optionsOfQuestion.field = '';
+    optionsOfQuestion.content = optionsOfQuestion.content.replace(getKeyByValue(metadata['inq_type'], optionsOfQuestion.inqType), '{{INQ_TYPE}}');
+    optionsOfQuestion.inqType = '';
     questions[index].mediaFile.map((file, i) => {
       optionsOfQuestion.mediaFile[i].fileUpload = file.fileUpload;
     })
@@ -290,7 +291,7 @@ const InquiryForm = (props) => {
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                       <ImageAttach hiddenRemove={true} field={question.field} file={file} style={{ margin: '1rem' }} />
                     ) : (
-                      <FileAttach file={file} field={question.field} />
+                      <FileAttach hiddenRemove={true} file={file} field={question.field} />
                     )
                     }
                   </div>
