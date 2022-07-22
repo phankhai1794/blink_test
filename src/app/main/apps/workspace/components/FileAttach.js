@@ -110,7 +110,7 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
 
   return (
     <div className={classes.root}>
-      <div style={{ height: 126 }}>
+      <div style={{ height: 126, textAlign: 'center' }}>
         {file.ext.toLowerCase().includes('pdf') ? (
           <img src={`/assets/images/logos/pdf_icon.png`} />
         ) : file.ext.toLowerCase().match(/csv|xls|xlsx|excel|sheet/g) ? (
