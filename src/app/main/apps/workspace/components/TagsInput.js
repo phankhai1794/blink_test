@@ -101,7 +101,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
     let tagsShow = [];
     let length = 0;
     for (const tag of tags) {
-      if(tag.length + length > 75){
+      if(tag.length + length > 66){
         break;
       }
       tagsShow.push(tag);
