@@ -10,7 +10,9 @@ import * as Actions from './store/actions';
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
-    background: '#515E6A'
+    background: '#515E6A',
+    paddingTop: 30,
+    paddingBottom: 30
   },
   layout: {
     width: 1259,
@@ -92,7 +94,7 @@ const useStyles = makeStyles((theme) => ({
   },
   declaration_L: {
     fontFamily: 'Arial, serif',
-    fontSize: 15,
+    fontSize: 13,
     color: 'rgb(0, 0, 255)'
   },
   /* ################################################################## */
@@ -192,7 +194,6 @@ const DraftPage = () => {
   };
 
   useEffect(() => {
-    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(
       AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL }))
     );
@@ -348,7 +349,7 @@ const DraftPage = () => {
           <div className={classes.declaration_L} style={{ width: '40%' }}>
             {`(CHECK "HM" COLUMN IF HAZARDOUS MATERIAL)`}
           </div>
-          <div className={classes.declaration_L} style={{ width: '45%' }}>
+          <div className={classes.declaration_L} style={{ width: '40%' }}>
             PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
           </div>
         </div>
