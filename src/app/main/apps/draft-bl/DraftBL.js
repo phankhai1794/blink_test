@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import history from '@history';
 import _ from 'lodash';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
@@ -194,9 +195,15 @@ const DraftPage = () => {
   };
 
   useEffect(() => {
-    dispatch(
-      AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL }))
-    );
+    const { pathname, search } = window.location;
+    if (pathname.includes('/draft-bl/preview')) {
+      const isAllow = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL });
+      if (!isAllow) history.push({ pathname: '/login', cachePath: pathname, cacheSearch: search });
+    } else
+      dispatch(
+        AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL }))
+      );
+
     dispatch(Actions.loadMetadata());
     dispatch(Actions.loadContent(pathname.split('/')[pathname.includes('preview') ? 4 : 3]));
   }, []);
