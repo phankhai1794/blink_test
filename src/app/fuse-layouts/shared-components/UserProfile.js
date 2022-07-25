@@ -35,7 +35,7 @@ function UserProfile(props) {
   };
 
   return (
-    <React.Fragment>
+    <>
       <Button className="h-64" onClick={handleClick}>
         <Avatar
           className={classes.fitAvatar}
@@ -67,16 +67,14 @@ function UserProfile(props) {
         classes={{
           paper: 'py-8'
         }}>
-        <React.Fragment>
-          <MenuItem component={Link} to="#" onClick={() => handleLogOut()}>
-            <ListItemIcon className="min-w-40">
-              <Icon>exit_to_app</Icon>
-            </ListItemIcon>
-            <ListItemText className="pl-0" primary="Sign Out" />
-          </MenuItem>
-        </React.Fragment>
+        <MenuItem component={Link} to="#" onClick={() => handleLogOut()}>
+          <ListItemIcon className="min-w-40">
+            <Icon>exit_to_app</Icon>
+          </ListItemIcon>
+          <ListItemText className="pl-0" primary="Sign Out" />
+        </MenuItem>
       </Popover>
-    </React.Fragment>
+    </>
   );
 }
 
