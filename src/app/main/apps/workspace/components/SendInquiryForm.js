@@ -14,6 +14,8 @@ import TagsInput from './TagsInput';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
 
+const colorBtnReview = '#1564EE';
+
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
   const [mybl, openEmail] = useSelector(({ workspace }) => [
@@ -186,7 +188,7 @@ const SendInquiryForm = (props) => {
               value={form.subject}
               onChange={onInputChange}
             />
-         
+
           </div>
           <div style={{ marginTop: 5, display: 'flex' }}>
             <textarea
@@ -338,22 +340,21 @@ const ActionUI = (props) => {
         justifyContent: 'center',
         alignItems: 'center'
       }}>
-      {/* <Button
+      <Button
         style={{
           textTransform: 'none',
-          fontWeight: 'bold',
           position: 'absolute',
           left: '10px',
-          top: '10px'
+          top: '10px',
+          fontFamily: 'Montserrat'
         }}
         variant="text"
-        // className={clsx('h-64', classes.button)}
         onClick={openPreviewClick}>
-        <Icon style={{ color: '#1564EE' }}>visibility</Icon>
-        <span className="pl-14" style={{ color: '#1564EE' }}>
+        <Icon fontSize='small' style={{ color: colorBtnReview, paddingRight: '0.5rem' }}>visibility</Icon>
+        <span className="pl-14" style={{ color: colorBtnReview }}>
           Preview Inquiries
         </span>
-      </Button> */}
+      </Button>
       <Button
         variant="text"
         size="medium"
@@ -363,7 +364,8 @@ const ActionUI = (props) => {
           width: 140,
           color: 'white',
           backgroundColor: isLoading ? '#515E6A' : '#bd1874',
-          borderRadius: 20
+          borderRadius: 20,
+          fontFamily: 'Montserrat'
         }}
         disabled={isLoading}
         onClick={sendMailClick}>
