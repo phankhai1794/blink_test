@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import AddCircleIcon from "@material-ui/icons/AddCircle";
+import AddCircleIcon from '@material-ui/icons/AddCircle';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -24,12 +24,12 @@ import Label from './FieldLabel';
 import BtnAddInquiry from './BtnAddInquiry';
 import BLField from './BLField';
 import InquiryForm from './InquiryForm';
-import {AttachmentList,AttachFile} from './AttachmentList';
+import { AttachmentList, AttachFile } from './AttachmentList';
 import BLProcessNotification from './BLProcessNotification';
 import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
 import TableCD from './TableCD';
 import TableCM from './TableCM';
-import AttachmentListNotification from "./AttachmentListNotification";
+import AttachmentListNotification from './AttachmentListNotification';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -58,6 +58,12 @@ const useStyles = makeStyles((theme) => ({
   },
   divider: {
     margin: '30px 0'
+  },
+  note: {
+    fontWeight: 600,
+    fontSize: 13,
+    lineHeight: '14px',
+    color: '#DC2626'
   }
 }));
 
@@ -81,7 +87,9 @@ const BLWorkspace = (props) => {
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
-  const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
+  const isShowBackground = useSelector(
+    ({ workspace }) => workspace.inquiryReducer.isShowBackground
+  );
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -136,7 +144,9 @@ const BLWorkspace = (props) => {
   }, []);
 
   useEffect(() => {
-    if (openAttachment) {setNewFileAttachment([])}
+    if (openAttachment) {
+      setNewFileAttachment([]);
+    }
   }, [openAttachment]);
 
   const popupOpen = (inquiry, getField) => {
@@ -159,18 +169,32 @@ const BLWorkspace = (props) => {
         hasAddButton: false,
         field: 'ATTACHMENT_LIST',
         popoverfooter: true,
-        customActions: (inquiries.length > 0 && <>
-          <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
-            <AttachFile
-              uploadImageAttach={(files) => setNewFileAttachment(files)}
-              isAttachmentList={true}
-              type={'addNew'}
-            >
-              <AddCircleIcon style={{ color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72', width: '50px', fontSize: '50px', cursor: isShowBackground ? 'inherit' : 'pointer' }} />
-            </AttachFile>
-          </PermissionProvider>
-        </>),
-        child: <AttachmentList user={props.user} newFileAttachment={newFileAttachment} setFileAttachment={() => setNewFileAttachment([])} />
+        customActions: inquiries.length > 0 && (
+          <>
+            <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
+              <AttachFile
+                uploadImageAttach={(files) => setNewFileAttachment(files)}
+                isAttachmentList={true}
+                type={'addNew'}>
+                <AddCircleIcon
+                  style={{
+                    color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
+                    width: '50px',
+                    fontSize: '50px',
+                    cursor: isShowBackground ? 'inherit' : 'pointer'
+                  }}
+                />
+              </AttachFile>
+            </PermissionProvider>
+          </>
+        ),
+        child: (
+          <AttachmentList
+            user={props.user}
+            newFileAttachment={newFileAttachment}
+            setFileAttachment={() => setNewFileAttachment([])}
+          />
+        )
       };
     case 'INQUIRY_FORM':
       return {
@@ -184,7 +208,7 @@ const BLWorkspace = (props) => {
     default:
       return {
         status: inquiry?.id === currentInq?.id,
-        toggleForm: () => { },
+        toggleForm: () => {},
         fabTitle: getField?.label,
         title: getField?.value ? getKeyByValue(metadata['field'], getField?.value) : '',
         field: getField?.value,
@@ -371,7 +395,9 @@ const BLWorkspace = (props) => {
             <Grid container>
               <Grid item xs={6} className={classes.leftPanel}>
                 <Label>BOOKING NO.</Label>
-                <BLField id="booking_no" lock={true}>{myBL.bkgNo}</BLField>
+                <BLField id="booking_no" lock={true}>
+                  {myBL.bkgNo}
+                </BLField>
               </Grid>
               <Grid item xs={6} className={classes.rightPanel}>
                 <Label>SEA WAYBILL NO.</Label>
@@ -427,33 +453,45 @@ const BLWorkspace = (props) => {
 
         <Grid container spacing={2}>
           <Grid container alignItems="center" justify="center">
-            <h2 className={classes.grayText}>PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER</h2>
+            <h2 className={classes.grayText}>
+              PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
+            </h2>
           </Grid>
           {/* Table CD */}
-          <TableCD containerDetail={getValueField(CONTAINER_DETAIL)} id={getField(CONTAINER_DETAIL)} />
+          <TableCD
+            containerDetail={getValueField(CONTAINER_DETAIL)}
+            id={getField(CONTAINER_DETAIL)}
+          />
         </Grid>
 
         <hr style={{ borderTop: '2px dashed #515E6A', marginTop: '2rem', marginBottom: '3rem' }} />
 
         <Grid container spacing={2}>
           {/* Table CM */}
-          <TableCM containerManifest={getValueField(CONTAINER_MANIFEST)} id={getField(CONTAINER_MANIFEST)} />
+          <TableCM
+            containerManifest={getValueField(CONTAINER_MANIFEST)}
+            id={getField(CONTAINER_MANIFEST)}
+          />
         </Grid>
 
-        <Grid container spacing={6} className='mt-20'>
-          <Grid container alignItems="center" justify="center">
+        <Grid container className="mt-20">
+          <Grid container justify="center">
             <h2 className={classes.grayText}>** TO BE CONTINUED ON ATTACHED LIST **</h2>
           </Grid>
-        </Grid>
-        <Grid style={{padding:0}} container spacing={6}>
-          <Grid style={{paddingTop:0, paddingBottom: 0}} item xs={3}>
-            <Label style={{fontFamily: 'Montserrat',fontWeight:600, fontSize: 13, color: '#D93025'}}>Declared Cargo Value US $</Label>
+          <Grid
+            container
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span className={classes.note}>Declared Cargo Value US $</span>
+            <span className={classes.note}>
+              {
+                "If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged"
+              }
+            </span>
           </Grid>
-          <Grid style={{paddingTop:0, paddingBottom: 0}} item xs={9} alignItems="flex-end" justify="center">
-            <Label style={{textAlign: 'right', fontFamily: 'Montserrat',fontWeight:600, fontSize: 13, color: '#D93025'}}>{"If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged"}</Label>
-          </Grid>
         </Grid>
+
         <Divider className="my-32" />
+
         <Grid container spacing={6}>
           <Grid item xs={6}>
             <Grid item>
