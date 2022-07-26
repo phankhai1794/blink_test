@@ -725,20 +725,29 @@ const useStylesFile = makeStyles((theme) => ({
 }));
 const FileAttachList = ({ file }) => {
   const classes = useStylesFile();
+
   const downloadFile = () => {
-    const link = document.createElement('a');
-    link.href = file.src;
-    link.setAttribute(
-      'download',
-      file.name,
-    );
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
+    getFile(file.id).then((f) => {
+      const link = document.createElement('a');
+      link.href = urlMedia(file.ext, f);
+      link.setAttribute(
+        'download',
+        file.name,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 
   const previewPDF = () => {
-    window.open(file.src, '_self');
+    getFile(file.id).then((f) => {
+      window.open(urlMedia(file.ext, f), '_self');
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 
   return (
