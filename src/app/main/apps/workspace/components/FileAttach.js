@@ -9,18 +9,18 @@ import * as InquiryActions from "../store/actions/inquiry";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    borderWidth: '1px',
+    borderWidth: 1,
     borderStyle: 'ridge',
     justifyContent: 'center',
     height: "100%",
-    width: '165px',
-    marginBottom: '10px',
-    marginLeft: '10px',
-    marginRight: '10px',
+    width: 165,
+    marginBottom: 10,
+    marginLeft: 10,
+    marginRight: 10,
     backgroundColor: '#F5F8FA',
     '& img': {
-      height: '50px',
-      width: '50px'
+      height: 110,
+      width: 110
     },
     '& h3': {
       display: 'block',
@@ -33,17 +33,18 @@ const useStyles = makeStyles((theme) => ({
     '& h3:hover': {
       color: '#0000ee'
     }
+  },
+  fontSizeLarge: {
+    fontSize: 110
   }
 }));
 
 const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   const classes = useStyles();
-  const [inquiries, metadata, questions, attachmentList, validationAttachment] = useSelector(({ workspace }) => [
+  const [inquiries, questions, attachmentList] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.question,
     workspace.inquiryReducer.attachmentList,
-    workspace.inquiryReducer.validationAttachment,
   ]);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const dispatch = useDispatch();
@@ -109,24 +110,27 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
 
   return (
     <div className={classes.root}>
-      {file.ext.toLowerCase().includes('pdf') ? (
-        <img src={`/assets/images/logos/pdf_icon.png`} />
-      ) : file.ext.toLowerCase().match(/csv|xls|xlsx|excel|sheet/g) ? (
-        <img src={`/assets/images/logos/excel_icon.png`} />
-      ) : file.ext.toLowerCase().match(/doc/g) ? (
-        <img src={`/assets/images/logos/word_icon.png`} />
-      ) : (
-        <DescriptionIcon />
-      )}
-      <div style={{ display: 'flex', flexDirection: 'row', }}>
+      <div style={{ height: 126, textAlign: 'center' }}>
         {file.ext.toLowerCase().includes('pdf') ? (
-          <h3 style={{ width: hiddenRemove ? '180px' : '160px' }} onClick={previewPDF}>{file.name}</h3>
+          <img src={`/assets/images/logos/pdf_icon.png`} />
+        ) : file.ext.toLowerCase().match(/csv|xls|xlsx|excel|sheet/g) ? (
+          <img src={`/assets/images/logos/excel_icon.png`} />
+        ) : file.ext.toLowerCase().match(/doc/g) ? (
+          <img src={`/assets/images/logos/word_icon.png`} />
         ) : (
-          <h3 style={{ width: hiddenRemove ? '180px' : '160px' }} onClick={downloadFile}>{file.name}</h3>
+          <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} fontSize='large' />
         )}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'row', height: 30 }}>
+        <h3
+          style={{ width: hiddenRemove ? 180 : 160 }}
+          onClick={file.ext.toLowerCase().includes('pdf') ? previewPDF : downloadFile}
+        >
+          {file.name}
+        </h3>
         {
           !hiddenRemove &&
-          <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: '2px' }}>
+          <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
             <CloseIcon />
           </IconButton>
         }

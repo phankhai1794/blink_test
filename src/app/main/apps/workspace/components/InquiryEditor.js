@@ -268,8 +268,9 @@ const InquiryEditor = (props) => {
         saveQuestion(optionsOfQuestion);
       }
       const list = [...inquiries, ...questions]
-      const filter = metadata.inq_type_options.filter((data) => {
-        return (fieldValue.value === data.field || !data.field) && list.filter(q =>
+      const found = metadata.inq_type_options.some(el => el.field === fieldValue.value);
+      const filter = metadata.inq_type_options.filter(data => {
+        return (found ? fieldValue.value === data.field : !data.field) && list.filter(q =>
           q.inqType === data.value && q.field === fieldValue.value
         ).length === 0
       })
