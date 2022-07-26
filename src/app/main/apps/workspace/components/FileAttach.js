@@ -58,7 +58,7 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   };
 
   const previewPDF = () => {
-    window.open(file.src);
+    window.open(file.src, '_self');
   };
   const handleRemoveFile = (id) => {
     const optionsOfQuestion = [...inquiries];
