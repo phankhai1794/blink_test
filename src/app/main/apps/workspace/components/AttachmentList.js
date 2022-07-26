@@ -744,7 +744,7 @@ const FileAttachList = ({ file }) => {
 
   const previewPDF = () => {
     getFile(file.id).then((f) => {
-      window.open(urlMedia(file.ext, f), '_self');
+      window.open(urlMedia(file.ext, f));
     }).catch((error) => {
       console.error(error);
     });
