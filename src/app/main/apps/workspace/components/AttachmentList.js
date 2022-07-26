@@ -746,7 +746,7 @@ const FileAttachList = ({ file }) => {
   }
 
   const previewPDF = () => {
-    window.open(file.src);
+    window.open(file.src, '_self');
   }
 
   return (
