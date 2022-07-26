@@ -142,6 +142,16 @@ const attachmentStyle = makeStyles(() => ({
   }
 }));
 
+const urlMedia = (fileExt, file) => {
+  if (fileExt.match(/jpeg|jpg|png/g)) {
+    return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
+  } else if (fileExt.match(/pdf/g)) {
+    return URL.createObjectURL(new Blob([file], { type: 'application/pdf' }));
+  } else {
+    return URL.createObjectURL(new Blob([file]));
+  }
+};
+
 const AttachmentList = (props) => {
   const [inquiries, metadata, isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
@@ -169,16 +179,6 @@ const AttachmentList = (props) => {
         width: `${width}px`
       }
     };
-  };
-
-  const urlMedia = (fileExt, file) => {
-    if (fileExt.match(/jpeg|jpg|png/g)) {
-      return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
-    } else if (fileExt.match(/pdf/g)) {
-      return URL.createObjectURL(new Blob([file], { type: 'application/pdf' }));
-    } else {
-      return URL.createObjectURL(new Blob([file]));
-    }
   };
 
   useEffect(() => {
@@ -222,20 +222,8 @@ const AttachmentList = (props) => {
       });
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
     });
-    if (getAttachmentFiles.length <= 0) {
-      setIsLoading(false);
-    }
-    for (let f in getAttachmentFiles) {
-      getFile(getAttachmentFiles[f].id).then((file) => {
-        getAttachmentFiles[f].src = urlMedia(getAttachmentFiles[f].ext, file);
-        setAttachmentFile(getAttachmentFiles);
-        setIsLoading(false);
-      }).catch((error) => {
-        console.error(error);
-        setIsLoading(false);
-        setAttachmentFile(getAttachmentFiles);
-      });
-    }
+    setIsLoading(false);
+    setAttachmentFile(getAttachmentFiles)
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
   }, []);
 
@@ -676,15 +664,19 @@ const ImageAttachList = ({ file }) => {
     setIsViewerOpen(false);
   };
   const downloadFile = () => {
-    const link = document.createElement('a');
-    link.href = file.src;
-    link.setAttribute(
-      'download',
-      file.name,
-    );
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
+    getFile(file.id).then((f) => {
+      const link = document.createElement('a');
+      link.href = urlMedia(file.ext, f);
+      link.setAttribute(
+        'download',
+        file.name,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 
   return (
@@ -733,20 +725,29 @@ const useStylesFile = makeStyles((theme) => ({
 }));
 const FileAttachList = ({ file }) => {
   const classes = useStylesFile();
+
   const downloadFile = () => {
-    const link = document.createElement('a');
-    link.href = file.src;
-    link.setAttribute(
-      'download',
-      file.name,
-    );
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
+    getFile(file.id).then((f) => {
+      const link = document.createElement('a');
+      link.href = urlMedia(file.ext, f);
+      link.setAttribute(
+        'download',
+        file.name,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 
   const previewPDF = () => {
-    window.open(file.src, '_self');
+    getFile(file.id).then((f) => {
+      window.open(urlMedia(file.ext, f), '_self');
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 
   return (
