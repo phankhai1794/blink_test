@@ -6,13 +6,13 @@ export const toFindDuplicates = arry => arry.filter((item, index) => arry.indexO
 
 export const displayTime = (time) => {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  let current_time = new Date(time);
+  let inputTime = new Date(time);
 
-  let month = months[current_time.getMonth()];
-  let day = current_time.getDate();
-  let hour = current_time.getHours()
-  let minute = current_time.getMinutes()
-  let year = current_time.getFullYear()
+  let month = months[inputTime.getMonth()];
+  let day = inputTime.getDate();
+  let hour = inputTime.getHours()
+  let minute = inputTime.getMinutes()
+  let year = inputTime.getFullYear()
   minute = minute.toString().length === 1 ? `0${minute}` : minute
   return `${month} ${day} ${year}   ${hour}:${minute}`
 };
