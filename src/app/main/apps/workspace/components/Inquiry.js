@@ -451,7 +451,7 @@ const Inquiry = (props) => {
                     </MenuItem>
                   </Menu> */}
                 </div>
-                <Typography variant="h5" style={{ wordBreak: 'break-word' }}>{q.content}</Typography>
+                <Typography variant="subtitle" style={{ wordBreak: 'break-word', fontFamily: 'Montserrat' }}>{q.content}</Typography>
                 <div style={{ display: 'block', margin: '1rem 0rem' }}>
                   {type === metadata.ans_type.choice && (
                     <ChoiceAnswer
