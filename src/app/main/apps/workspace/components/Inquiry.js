@@ -247,6 +247,9 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: '#f5f8fa',
     '&.borderChecked': {
       border: '1px solid #BD0F72',
+    },
+    '&.disabledCheck': {
+      backgroundColor: '#DDE3EE'
     }
   },
   checkedIcon: {
@@ -257,8 +260,12 @@ const useStyles = makeStyles((theme) => ({
     width: '5px',
     height: '10px',
     border: '1px solid #BD0F72',
-    borderWidth: '0 2px 2px 0',
+    borderWidth: '0 3px 3px 0',
     transform: 'rotate(45deg)',
+    '&.disabledCheck': {
+      border: '1px solid #BAC3CB',
+      borderWidth: '0 3px 3px 0',
+    }
   },
 }));
 
@@ -432,6 +439,44 @@ const Inquiry = (props) => {
               <Card style={{ padding: '1rem ', marginBottom: '24px' }}>
                 <div className="flex justify-between">
                   <UserInfo name={user.userName} time={displayTime(q.createdAt)} avatar={user.avatar} />
+                  <div>
+                    {q.receiver.includes('onshore') &&
+                      <>
+                        <Checkbox
+                          checked
+                          disabled
+                          color="primary"
+                          checkedIcon={
+                            <>
+                              <span className={clsx(classes.icon, 'disabledCheck')}>
+                                <span className={clsx(classes.checkedIcon, 'disabledCheck')} />
+                              </span>
+                            </>
+                          }
+                          icon={<span className={classes.icon} />}
+                        />
+                        <span>Onshore</span>
+                      </>
+                    }
+                    {q.receiver.includes('customer') &&
+                      <>
+                        <Checkbox
+                          checked
+                          disabled
+                          color="primary"
+                          checkedIcon={
+                            <>
+                              <span className={clsx(classes.icon, 'disabledCheck')}>
+                                <span className={clsx(classes.checkedIcon, 'disabledCheck')} />
+                              </span>
+                            </>
+                          }
+                          icon={<span className={classes.icon} />}
+                        />
+                        <span>Customer</span>
+                      </>
+                    }
+                  </div>
                   {/* <PermissionProvider action={PERMISSION.VIEW_EDIT_INQUIRY}>
                     <IconButton onClick={handleClick}>
                       <MoreVertIcon />

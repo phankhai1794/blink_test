@@ -16,8 +16,9 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: '1rem',
     marginTop: '0px'
   },
-  normal: {
-    marginTop: '0px'
+  time: {
+    marginTop: '0px',
+    whiteSpace: 'pre'
   },
   message: {
     marginLeft: '1rem',
@@ -28,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
 const UserInfo = (props) => {
   const { name, time, avatar } = props;
   const classes = useStyles();
+
   return (
     <div className="flex">
       {avatar ?
@@ -42,7 +44,7 @@ const UserInfo = (props) => {
       <div>
         <p className={classes.name}>{name}</p>
         <div className="flex" style={{ marginLeft: '1rem' }}>
-          <p className={classes.normal}>
+          <p className={classes.time}>
             {time}
           </p>
         </div>
