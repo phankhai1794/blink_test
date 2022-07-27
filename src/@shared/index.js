@@ -12,8 +12,9 @@ export const displayTime = (time) => {
   let day = current_time.getDate();
   let hour = current_time.getHours()
   let minute = current_time.getMinutes()
+  let year = current_time.getFullYear()
   minute = minute.toString().length === 1 ? `0${minute}` : minute
-  return `${month} ${day}   ${hour}:${minute}`
+  return `${month} ${day} ${year}   ${hour}:${minute}`
 };
 
 export const filterMetadata = (data) => {
