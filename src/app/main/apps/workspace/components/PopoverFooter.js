@@ -24,9 +24,6 @@ const useStyles = makeStyles((theme) => ({
     width: '130px',
     textTransform: 'none',
   },
-  button: {
-    margin: theme.spacing(1)
-  },
   nextPrev: {
     '& .MuiButtonBase-root': {
       marginRight: 18,
@@ -156,16 +153,8 @@ const PopoverFooter = ({ title }) => {
     dispatch(FormActions.toggleInquiry(true));
     dispatch(FormActions.toggleSaveInquiry(true))
   };
-  const onResolve = () => {
-    changeStatus(currentField, 'COMPL')
-      .then(() => {
-        dispatch(FormActions.toggleReload());
-      })
-      .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
-  };
-  const onReply = () => {
-    dispatch(InquiryActions.setReply(true));
-  };
+  
+  
   const nextQuestion = () => {
     dispatch(setLastField(question[question.length - 1].field));
     // check next if inquiry form opened
@@ -233,15 +222,15 @@ const PopoverFooter = ({ title }) => {
         )}
 
         <Link
-         style={{
-          fontFamily: 'Montserrat',
-          fontSize: '16px',
-          color: '#1564EE',
-          height: '20px',
-          weight: '145px',
-          fontWeight: '600',
+          style={{
+            fontFamily: 'Montserrat',
+            fontSize: '16px',
+            color: '#1564EE',
+            height: '20px',
+            weight: '145px',
+            fontWeight: '600',
           }}
-         component="button" onClick={toggleInquiriresDialog}
+          component="button" onClick={toggleInquiriresDialog}
         >
           Open all inquiries
         </Link>
@@ -251,14 +240,15 @@ const PopoverFooter = ({ title }) => {
           action={PERMISSION.VIEW_SAVE_INQUIRY}
           extraCondition={!fields.includes(title)}
         >
-          <Button 
+          <Button
             variant="contained"
-            style ={{
-              textTransform:'capitalize',
+            style={{
+              textTransform: 'capitalize',
               left: '13.45%', right: '13.45%', top: '25%', bottom: '25%',
               fontFamily: 'Montserrat', fontStyle: 'normal', fontWeight: '600', fontSize: '16px', lineHegiht: '20px',
               textAlign: 'center',
-              backgroundColor: "#BD0F72"}}
+              backgroundColor: "#BD0F72"
+            }}
             className={classes.root}
             color="primary"
             onClick={onSave}
@@ -267,32 +257,7 @@ const PopoverFooter = ({ title }) => {
           </Button>
         </PermissionProvider>
       </div>
-      <div className="flex justify-end">
-        <PermissionProvider
-          action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
-          extraCondition={fields.includes(title) && displayCmt}
-        >
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={onResolve}
-            classes={{ root: classes.button }}
-          >
-            <CheckIcon />
-            Resolve
-          </Button>
-        </PermissionProvider>
-        <PermissionProvider
-          action={PERMISSION.INQUIRY_CREATE_COMMENT}
-          extraCondition={fields.includes(title) && displayCmt}
-        >
-          <Button variant="contained" classes={{ root: classes.button }} color="primary" onClick={onReply}>
-            <ReplyIcon />
-            Reply
-          </Button>
-        </PermissionProvider>
-
-      </div>
+      
     </div>
   );
 };

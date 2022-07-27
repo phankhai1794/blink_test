@@ -1,4 +1,4 @@
-import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
+import { saveComment, loadComment, editComment, deleteComment, changeStatus } from 'app/services/inquiryService';
 import { getFile } from 'app/services/fileService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { displayTime, validateExtensionFile } from '@shared';
@@ -21,7 +21,8 @@ import {
   FormHelperText,
   Checkbox,
   TextField,
-  Divider
+  Divider,
+  Button
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/styles';
@@ -230,6 +231,20 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: 'silver !important'
     }
   },
+  button: {
+    margin: theme.spacing(1),
+    borderRadius: 8,
+    width: 120,
+    boxShadow: 'none',
+    textTransform: 'capitalize',
+    fontFamily: 'Montserrat',
+    fontWeight: 600,
+    '&.reply': {
+      backgroundColor: 'white',
+      color: '#BD0F72',
+      border: '1px solid #BD0F72'
+    }
+  },
   positionBtnImg: {
     left: '0',
     top: '-3rem'
@@ -342,6 +357,18 @@ const Inquiry = (props) => {
     }
   }
 
+  const onResolve = () => {
+    changeStatus(currentField, 'COMPL')
+      .then(() => {
+        dispatch(FormActions.toggleReload());
+      })
+      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+  };
+
+  const onReply = () => {
+    dispatch(InquiryActions.setReply(true));
+  };
+
   useEffect(() => {
     for (let index in listIndex) {
       const i = listIndex[index]
@@ -436,7 +463,7 @@ const Inquiry = (props) => {
                 />
               </>
             ) : (
-              <Card style={{ padding: '1rem ', marginBottom: '24px' }}>
+              <>
                 <div className="flex justify-between">
                   <UserInfo name={user.userName} time={displayTime(q.createdAt)} avatar={user.avatar} />
                   <div>
@@ -551,10 +578,37 @@ const Inquiry = (props) => {
                   ))}
                 </>
 
-                <Divider className="mt-16 mb-16" />
-
                 <Comment q={q} inquiries={inquiries} indexes={indexes} userType={props.user} />
-              </Card>
+                <div className="flex">
+                  <PermissionProvider
+                    action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
+                  // extraCondition={displayCmt}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      // onClick={onResolve}
+                      classes={{ root: classes.button }}
+                    >
+                      Resolved
+                    </Button>
+                  </PermissionProvider>
+                  <PermissionProvider
+                    action={PERMISSION.INQUIRY_CREATE_COMMENT}
+                  // extraCondition={displayCmt}
+                  >
+                    <Button
+                      variant="contained"
+                      classes={{ root: clsx(classes.button, 'reply') }}
+                      color="primary"
+                    // onClick={onReply}
+                    >
+                      Reply
+                    </Button>
+                  </PermissionProvider>
+                </div>
+                {listIndex.length - 1 !== index && <Divider className="mt-16 mb-16" />}
+              </>
             )}
           </div>
         );
