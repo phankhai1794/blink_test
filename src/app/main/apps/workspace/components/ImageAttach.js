@@ -6,6 +6,7 @@ import { IconButton, Tooltip } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from "../store/actions/form";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -106,6 +107,7 @@ const ImageAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
         dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
       }
     }
+    dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   return (

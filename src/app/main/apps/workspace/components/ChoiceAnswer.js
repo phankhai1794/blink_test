@@ -63,11 +63,7 @@ const ChoiceAnswer = (props) => {
     setLastSelectedChoice(selectedChoice === 'other' ? otherChoiceContent : selectedChoice);
     setShowSaveBtn(false);
   };
-  const handleFocus = (e) => {
-    setSelectedChoice('other');
-    e.target.select();
-    setShowSaveBtn(true);
-  };
+
   return (
     <>
       <FormControl>

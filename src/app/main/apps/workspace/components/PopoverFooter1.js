@@ -5,14 +5,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
 import * as AppActions from 'app/store/actions';
+import { toFindDuplicates } from '@shared'
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    borderRadius: '34px',
-    width: '120px',
+    borderRadius: 8,
+    width: 120,
     textTransform: 'none',
   },
   button: {
@@ -31,6 +32,12 @@ const PopoverFooter = (props) => {
   const valid = useSelector(({ workspace }) =>
     workspace.inquiryReducer.validation
   );
+  const enableSaveInquiriesList = useSelector(({ workspace }) =>
+    workspace.formReducer.enableSaveInquiriesList
+  );
+  const metadata = useSelector(({ workspace }) =>
+    workspace.inquiryReducer.metadata
+  );
   const inq = (inq) => {
     return {
       content: inq.content,
@@ -47,7 +54,40 @@ const PopoverFooter = (props) => {
         dispatch(InquiryActions.validate({ ...valid, receiver: !check.length }));
         return;
       }
+      if (!valid.ansType || !valid.answerContent || !valid.content || !valid.field || !valid.inqType || !valid.receiver) {
+        return;
+      }
+      let error = false;
+      const ansTypeChoice = metadata.ans_type['choice'];
       for (let i = 0; i < originalInquiry.length; i++) {
+        // validate type choice
+        if (ansTypeChoice === inquiries[i].ansType) {
+          if (inquiries[i].answerObj.length === 1) {
+            dispatch(AppActions.showMessage({ message: "Please add more options!", variant: 'error' }));
+            error = true;
+            break;
+          }
+          // check empty a field
+          if (inquiries[i].answerObj.length > 0) {
+            const checkOptionEmpty = inquiries[i].answerObj.filter(item => !item.content);
+            if (checkOptionEmpty.length > 0) {
+              dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
+              error = true;
+              break;
+            }
+          } else {
+            dispatch(AppActions.showMessage({ message: "Options not empty!", variant: 'error' }));
+            error = true;
+            break;
+          }
+        }
+        if (ansTypeChoice === inquiries[i].ansType && inquiries[i].answerObj.length) {
+          const dupArray = inquiries[i].answerObj.map(ans => ans.content)
+          if (toFindDuplicates(dupArray).length) {
+            dispatch(AppActions.showMessage({ message: "Options value must not be duplicated", variant: 'error' }));
+            return;
+          }
+        }
         const ansCreate = inquiries[i].answerObj.filter(
           ({ id: id1 }) => !originalInquiry[i].answerObj.some(({ id: id2 }) => id2 === id1)
         );
@@ -81,14 +121,18 @@ const PopoverFooter = (props) => {
           });
         }
       }
-      dispatch(
-        AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
-      );
-      dispatch(FormActions.toggleSaveInquiry(false))
-      dispatch(FormActions.toggleReload());
-      dispatch(InquiryActions.setOneInq({}));
-      dispatch(InquiryActions.setEditInq(null))
-      props.handleToggleFab(false)
+      if (!error) {
+        dispatch(
+          AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+        );
+        dispatch(FormActions.toggleSaveInquiry(false))
+        dispatch(FormActions.toggleReload());
+        dispatch(InquiryActions.setOneInq({}));
+        dispatch(InquiryActions.setEditInq(null));
+        dispatch(FormActions.setEnableSaveInquiriesList(true));
+        dispatch(FormActions.toggleOpenInquiryReview(false));
+        props.handleToggleFab(false)
+      }
     } catch (error) {
       dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
     }
@@ -96,7 +140,7 @@ const PopoverFooter = (props) => {
 
   return (
     <div className="text-center p-5">
-      <Button variant="contained" className={classes.root} color="primary" onClick={(onSave)}>
+      <Button disabled={enableSaveInquiriesList} variant="contained" className={classes.root} color="primary" onClick={(onSave)}>
         Save
       </Button>
     </div>

@@ -174,13 +174,9 @@ const InquiryForm = (props) => {
   };
   const handleReceiverChange = (e, index) => {
     const optionsOfQuestion = [...questions];
-    if (e.target.checked) {
-      dispatch(InquiryActions.validate({ ...valid, receiver: true }));
-      optionsOfQuestion[index].receiver.push(e.target.value);
-    } else {
-      const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
-      optionsOfQuestion[index].receiver.splice(i, 1);
-    }
+    optionsOfQuestion[index].receiver = [];
+    dispatch(InquiryActions.validate({ ...valid, receiver: true }));
+    optionsOfQuestion[index].receiver.push(e.target.value);
     dispatch(InquiryActions.setQuestion(optionsOfQuestion));
   };
   return (
