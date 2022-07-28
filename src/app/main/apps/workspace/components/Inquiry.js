@@ -522,6 +522,7 @@ const Inquiry = (props) => {
                       <ListItemText primary="Edit" />
                     </MenuItem>
                   </Menu> */}
+                  <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
                 </div>
                 <Typography variant="subtitle" style={{ wordBreak: 'break-word', fontFamily: 'Montserrat' }}>{q.content}</Typography>
                 <div style={{ display: 'block', margin: '1rem 0rem' }}>

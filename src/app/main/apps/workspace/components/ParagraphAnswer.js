@@ -86,6 +86,8 @@ const ParagraphAnswer = (props) => {
     <div>
       <div className="flex">
         <TextField
+          style={{ border: 'none' }}
+          fullWidth
           placeholder={isPermission ? 'Customer Input' : ''}
           classes={{ root: classes.root }}
           disabled={!isPermission}
@@ -93,18 +95,6 @@ const ParagraphAnswer = (props) => {
             style: {
               fontSize: '1.7rem'
             },
-            endAdornment: isPermission && (
-              <InputAdornment position="end">
-                <Button
-                  aria-label="Add"
-                  edge="end"
-                  color="primary"
-                  variant="contained"
-                  onClick={addParagraph}>
-                  Add
-                </Button>
-              </InputAdornment>
-            )
           }}
           InputLabelProps={{
             style: {
@@ -112,10 +102,8 @@ const ParagraphAnswer = (props) => {
             }
           }}
           id="outlined-multiline-flexible"
-          fullWidth
           multiline
           rowsMax={4}
-          variant="outlined"
           value={paragraphText}
           onChange={(e) => setParagraphText(e.target.value)}
         />
