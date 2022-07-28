@@ -1,5 +1,4 @@
-import { getKeyByValue, validateExtensionFile } from '@shared';
-import { stateResquest } from '@shared';
+import { getKeyByValue, validateExtensionFile , stateResquest } from '@shared';
 import { getFile } from 'app/services/fileService';
 import { deleteInquiry } from 'app/services/inquiryService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -21,10 +20,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
 
 import InquiryEditor from './InquiryEditor';
 import AttachFile from './AttachFile';
-import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
 import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
@@ -85,10 +84,6 @@ const AllInquiry = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
 
-  useEffect(() => {
-    (myBL?.state !== stateResquest) && setAllowDeleteInq(false)
-  }, []);
-
   const changeToEditor = (index, field) => {
     if (index !== currentEdit) {
       dispatch(InquiryActions.setEditInq(index));
@@ -124,19 +119,17 @@ const AllInquiry = (props) => {
         });
       });
       dispatch(InquiryActions.editInquiry(optionsOfQuestion));
+      dispatch(FormActions.setEnableSaveInquiriesList(false));
     }
   };
 
   const handleReceiverChange = (e, index) => {
     const optionsOfQuestion = [...inquiries];
-    if (e.target.checked) {
-      dispatch(InquiryActions.validate({ ...valid, receiver: true }));
-      optionsOfQuestion[index].receiver.push(e.target.value);
-    } else {
-      const i = optionsOfQuestion[index].receiver.indexOf(e.target.value);
-      optionsOfQuestion[index].receiver.splice(i, 1);
-    }
+    optionsOfQuestion[index].receiver = [];
+    dispatch(InquiryActions.validate({ ...valid, receiver: true }));
+    optionsOfQuestion[index].receiver.push(e.target.value);
     dispatch(InquiryActions.setQuestion(optionsOfQuestion));
+    dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
   const urlMedia = (fileExt, file) => {
     if (fileExt.match(/jpeg|jpg|png/g)) {
@@ -148,6 +141,7 @@ const AllInquiry = (props) => {
     }
   };
   useEffect(() => {
+    (myBL?.state !== stateResquest) && setAllowDeleteInq(false)
     for (let i in inquiries) {
       if (inquiries[i].mediaFile.length && !inquiries[i].mediaFile[0].src) {
         const optionsOfQuestion = [...inquiries];
@@ -176,6 +170,7 @@ const AllInquiry = (props) => {
       }
     }
   }, []);
+
   return (
     <>
       {inquiries.map((q, index) => {
@@ -254,14 +249,6 @@ const AllInquiry = (props) => {
                     {q.content}
                   </Typography>
                   <div style={{ display: 'block', margin: '1rem 0rem' }}>
-                    {type === metadata.ans_type.choice && (
-                      <ChoiceAnswer
-                        index={index}
-                        questions={inquiries}
-                        question={q}
-                        saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-                      />
-                    )}
                     {type === metadata.ans_type.paragraph && (
                       <ParagraphAnswer
                         question={q}
@@ -283,17 +270,17 @@ const AllInquiry = (props) => {
                   <>
                     {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
                     {q.mediaFile?.length > 0 &&
-                      q.mediaFile?.map((file, mediaIndex) => (
-                        <div
-                          style={{ position: 'relative', display: 'inline-block' }}
-                          key={mediaIndex}>
-                          {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                            <ImageAttach file={file} field={q.field} indexInquiry={index} style={{ margin: '2.5rem' }} />
-                          ) : (
-                            <FileAttach file={file} field={q.field} indexInquiry={index} />
-                          )}
-                        </div>
-                      ))}
+                  q.mediaFile?.map((file, mediaIndex) => (
+                    <div
+                      style={{ position: 'relative', display: 'inline-block' }}
+                      key={mediaIndex}>
+                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                        <ImageAttach file={file} field={q.field} indexInquiry={index} style={{ margin: '2.5rem' }} />
+                      ) : (
+                        <FileAttach file={file} field={q.field} indexInquiry={index} />
+                      )}
+                    </div>
+                  ))}
                   </>
                   <>
                     {q.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}

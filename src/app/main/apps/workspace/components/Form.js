@@ -174,6 +174,7 @@ export default function Form(props) {
 
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const showSaveInquiry = useSelector(({ workspace }) => workspace.formReducer.showSaveInquiry);
+  const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
 
 
   const [openFab, setOpenFab] = useState(false);
@@ -279,6 +280,8 @@ export default function Form(props) {
     const tempInq = list.splice(index, 1)[0];
     list.splice(list.length, 0, tempInq);
   };
+
+  const [value, setValue] = useState(0);
   const handleClose = () => {
     toggleForm(false);
     setOpenFab(false);
@@ -296,7 +299,6 @@ export default function Form(props) {
       dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))));
     }
     dispatch(FormActions.toggleSaveInquiry(false));
-    if (tabs) props.tabChange(0);
     dispatch(InquiryActions.setOneInq({}));
     //
     const currentInq = listMinimize.find((q) => q.field === field);
@@ -306,8 +308,8 @@ export default function Form(props) {
     }
     //
     dispatch(InquiryActions.setOpenedInqForm(false));
+    dispatch(FormActions.setEnableSaveInquiriesList(true));
   };
-  const [value, setValue] = React.useState(0);
   const handleChange = (_, newValue) => {
     setValue(newValue);
     props.tabChange(newValue);
@@ -327,6 +329,13 @@ export default function Form(props) {
   const handleSetOpenFab = (status) => {
     setOpenFab(status);
   };
+
+  useEffect(() => {
+    if (tabs) {
+      props.tabChange(0);
+      setValue(0);
+    }
+  }, [openInqReview]);
 
   return (
     <div>

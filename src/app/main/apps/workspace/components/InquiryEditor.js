@@ -14,6 +14,7 @@ import * as InquiryActions from '../store/actions/inquiry';
 import FileAttach from './FileAttach';
 import ImageAttach from './ImageAttach';
 import AttachmentAnswer from "./AttachmentAnswer";
+import * as FormActions from "../store/actions/form";
 
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
@@ -150,12 +151,14 @@ const ChoiceAnswer = (props) => {
     });
     saveQuestion(optionsOfQuestion);
     checkOptionsEmpty();
+    dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
   const handleRemoveChoice = (id) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].answerObj.splice(id, 1);
     saveQuestion(optionsOfQuestion);
     checkOptionsEmpty();
+    dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   const handleChangeChoice = (e, id) => {
@@ -163,6 +166,7 @@ const ChoiceAnswer = (props) => {
     optionsOfQuestion[index].answerObj[id].content = e.target.value;
     saveQuestion(optionsOfQuestion);
     checkOptionsEmpty();
+    dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   return (
@@ -302,6 +306,7 @@ const InquiryEditor = (props) => {
     optionsOfQuestion[index].content = question.content.replace(re, e.label);
     setValueType(e);
     saveQuestion(optionsOfQuestion);
+    dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   const handleFieldChange = (e) => {
@@ -310,6 +315,7 @@ const InquiryEditor = (props) => {
     dispatch(InquiryActions.validate({ ...valid, field: true }));
     setFieldValue(e);
     saveQuestion(optionsOfQuestion);
+    dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   const handleNameChange = (e) => {
@@ -317,6 +323,7 @@ const InquiryEditor = (props) => {
     optionsOfQuestion[index].content = e.target.value;
     dispatch(InquiryActions.validate({ ...valid, content: optionsOfQuestion[index].content }));
     saveQuestion(optionsOfQuestion);
+    dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   const handleAnswerTypeChange = (e) => {
@@ -328,6 +335,7 @@ const InquiryEditor = (props) => {
     dispatch(InquiryActions.validate({ ...valid, ansType: true }));
     setValueAnsType(optionsAnsType.filter(ansType => ansType.value === e.value));
     saveQuestion(optionsOfQuestion);
+    dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   return (

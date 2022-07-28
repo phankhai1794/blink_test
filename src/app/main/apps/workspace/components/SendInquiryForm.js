@@ -86,6 +86,7 @@ const SendInquiryForm = (props) => {
 
   const opendPreviewForm = (event) => {
     dispatch(FormActions.toggleOpenInquiryReview(true));
+    dispatch(FormActions.toggleSaveInquiry(true));
   };
 
   const sendMailClick = (event) => {
@@ -230,10 +231,11 @@ const InquiryReview = (props) => {
         tabChange={(newValue) => {
           setTabSelected(newValue);
         }}
+        hasAddButton={false}
         field={props.field}
         openFab={false}
         FabTitle="Inquiry Review"
-        customActions={<div></div>}>
+      >
         <>
           <div style={{ height: '800px' }}>
             <AllInquiry
