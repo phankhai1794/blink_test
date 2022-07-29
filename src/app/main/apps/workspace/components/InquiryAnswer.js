@@ -1,22 +1,19 @@
-import {
-  changeStatus
-} from 'app/services/inquiryService';
+import { changeStatus } from 'app/services/inquiryService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { displayTime } from '@shared';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Typography,
-  Checkbox,
-  Divider,
-  Button,
   FormControl,
   FormControlLabel,
   RadioGroup,
-  Radio
+  Radio,
+  Button,
+  IconButton,
+  Tooltip
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { withStyles } from '@material-ui/core/styles';
 import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
 
@@ -74,21 +71,22 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: '#DDE3EE'
     }
   },
-  checkedIcon: {display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
+  checkedIcon: {
+    display: 'flex',
+    alignItems: 'end',
     '& .MuiFormGroup-root': {
       flexDirection: 'row'
     },
     '& .container': {
       marginBottom: 5
-    }},
+    }
+  },
 
 }
 ));
 
 const InquiryAnswer = (props) => {
-  const { index, question } = props;
+  const { index, question, toggleEdit } = props;
   const type = question.ansType;
   const user = question.creator;
   const dispatch = useDispatch();
@@ -98,48 +96,11 @@ const InquiryAnswer = (props) => {
   const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
   const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
-  const listIndex = originalInquiry
-    .map((q, index) => q.field === currentField && index)
-    .filter((q) => Number.isInteger(q));
   const indexes = originalInquiry.findIndex((q) => q.field === currentField);
-  const [edit, setEdit] = useState('');
-  const [anchorEl, setAnchorEl] = useState(null);
   const [isShowBtn, setShowBtn] = useState(null);
-  const open = Boolean(anchorEl);
   const allowCreateAttachmentAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-  const toggleEdit = (id) => {
-    dispatch(FormActions.toggleSaveInquiry(true));
-    setEdit(id);
-  };
-  const urlMedia = (fileExt, file) => {
-    if (fileExt.match(/jpeg|jpg|png/g)) {
-      return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
-    } else if (fileExt.match(/pdf/g)) {
-      return URL.createObjectURL(new Blob([file], { type: 'application/pdf' }));
-    } else {
-      return URL.createObjectURL(new Blob([file]));
-    }
-  };
-  const handleReceiverChange = (e) => {
-    const optionsOfQuestion = [...inquiries];
-    if (e.target.checked) {
-      dispatch(InquiryActions.validate({ ...valid, receiver: true }));
-      optionsOfQuestion[indexes].receiver.push(e.target.value);
-    } else {
-      const i = optionsOfQuestion[indexes].receiver.indexOf(e.target.value);
-      optionsOfQuestion[indexes].receiver.splice(i, 1);
-    }
-    dispatch(InquiryActions.editInquiry(optionsOfQuestion));
-  };
 
   const onResolve = () => {
     changeStatus(currentField, 'COMPL')
@@ -155,39 +116,31 @@ const InquiryAnswer = (props) => {
 
   return (
     <>
+      <FormControl className={classes.checkedIcon}>
+        <RadioGroup aria-label="gender" name="gender1" value={question.receiver[0]}>
+          <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
+          <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
+        </RadioGroup>
+      </FormControl>
       <div className="flex justify-between">
-        <UserInfo
-          name={user.userName}
-          time={displayTime(question.createdAt)}
-          avatar={user.avatar}
-        />
-        <FormControl className={classes.checkedIcon}>
-          <RadioGroup aria-label="gender" name="gender1" value={question.receiver[0]} onChange={(e) => handleReceiverChange(e, index)}>
-            <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
-            <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
-          </RadioGroup>
-          <AttachFile index={index} />
-        </FormControl>
-        {/* <PermissionProvider action={PERMISSION.VIEW_EDIT_INQUIRY}>
-          <IconButton onClick={handleClick}>
-            <MoreVertIcon />
-          </IconButton>
-        </PermissionProvider>
-        <Menu
-          id="customized-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          keepMounted>
-          <MenuItem onClick={() => toggleEdit(index)}>
-            <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-              <EditIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary="Edit" />
-          </MenuItem>
-        </Menu> */}
+        <UserInfo name={user.userName} time={displayTime(question.createdAt)} avatar={user.avatar} />
+        <div className="flex items-center">
+          <PermissionProvider action={PERMISSION.VIEW_EDIT_INQUIRY}>
+            <Tooltip title="Edit Inquiry">
+              <IconButton className="p-8" onClick={toggleEdit}>
+                <img style={{ height: "22px" }} src="/assets/images/icons/edit.svg" />
+              </IconButton>
+            </Tooltip>
+            <AttachFile index={index} />
+            <Tooltip title="Delete Inquiry">
+              <IconButton className="p-8" disabled>
+                <img style={{ height: "22px" }} src="/assets/images/icons/trash.svg" />
+              </IconButton>
+            </Tooltip>
+          </PermissionProvider>
+        </div>
       </div>
-      <Typography variant="subtitle" style={{ wordBreak: 'break-word', fontFamily: 'Montserrat' }}>
+      <Typography variant="subtitle" style={{ fontSize: 15, wordBreak: 'break-word', fontFamily: 'Montserrat' }}>
         {question.content}
       </Typography>
       <div style={{ display: 'block', margin: '1rem 0rem' }}>
@@ -215,7 +168,7 @@ const InquiryAnswer = (props) => {
             saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
             isShowBtn={isShowBtn}
             isPermissionAttach={allowCreateAttachmentAnswer}
-            // disabled={true}
+          // disabled={true}
           />
         )}
       </div>
@@ -265,7 +218,7 @@ const InquiryAnswer = (props) => {
       <div className="flex">
         <PermissionProvider
           action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
-          // extraCondition={displayCmt}
+        // extraCondition={displayCmt}
         >
           <Button
             variant="contained"
@@ -277,19 +230,18 @@ const InquiryAnswer = (props) => {
         </PermissionProvider>
         <PermissionProvider
           action={PERMISSION.INQUIRY_CREATE_COMMENT}
-          // extraCondition={displayCmt}
+        // extraCondition={displayCmt}
         >
           <Button
             variant="contained"
             classes={{ root: clsx(classes.button, 'reply') }}
             color="primary"
-            // onClick={onReply}
+          // onClick={onReply}
           >
             Reply
           </Button>
         </PermissionProvider>
       </div>
-      {listIndex.length - 1 !== index && <Divider className="mt-16 mb-16" />}
     </>
   );
 };

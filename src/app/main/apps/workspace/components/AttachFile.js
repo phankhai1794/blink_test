@@ -55,8 +55,8 @@ const AttachFile = (props) => {
         <input {...getInputProps()} disabled={disabled || false} />
         <IconButton onClick={open} style={{ padding: '2px', height: '40px', width: '40px' }}>
           <Tooltip title="Add Attachment">
-            <img style={{ height: '22px' }} src="/assets/images/icons/attachment.png" />
-          </Tooltip>
+            <img style={{ height: "22px" }} src="/assets/images/icons/paperclip.svg" />
+          </Tooltip >
         </IconButton>
       </div>
     </div>
