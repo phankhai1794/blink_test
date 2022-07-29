@@ -24,7 +24,7 @@ import Label from './FieldLabel';
 import BtnAddInquiry from './BtnAddInquiry';
 import BLField from './BLField';
 import InquiryForm from './InquiryForm';
-import { AttachmentList, AttachFile } from './AttachmentList';
+import { AttachmentList, AttachFileList } from './AttachmentList';
 import BLProcessNotification from './BLProcessNotification';
 import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
 import TableCD from './TableCD';
@@ -172,7 +172,7 @@ const BLWorkspace = (props) => {
         customActions: inquiries.length > 0 && (
           <>
             <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
-              <AttachFile
+              <AttachFileList
                 uploadImageAttach={(files) => setNewFileAttachment(files)}
                 isAttachmentList={true}
                 type={'addNew'}>
@@ -184,7 +184,7 @@ const BLWorkspace = (props) => {
                     cursor: isShowBackground ? 'inherit' : 'pointer'
                   }}
                 />
-              </AttachFile>
+              </AttachFileList>
             </PermissionProvider>
           </>
         ),

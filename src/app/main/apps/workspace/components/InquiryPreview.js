@@ -10,6 +10,7 @@ import {
   Checkbox,
   Card,
   Divider
+
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
@@ -237,16 +238,7 @@ const InquiryPreview = (props) => {
     optionsOfQuestion[index].ansType = e.target.value;
     saveQuestion(optionsOfQuestion);
   };
-
-  const handleUploadImageAttach = (src) => {
-    var optionsOfQuestion = [...questions];
-    var list = optionsOfQuestion[index].mediaFile;
-    optionsOfQuestion[index].mediaFile = [
-      ...list,
-      { src: URL.createObjectURL(src), type: src.type, name: src.name }
-    ];
-    saveQuestion(optionsOfQuestion);
-  };
+  
   const handleRemoveImageAttach = (i) => {
     var optionsOfQuestion = [...questions];
     optionsOfQuestion[index].mediaFile.splice(i, 1);
@@ -345,7 +337,7 @@ const InquiryPreview = (props) => {
         )}
         <Divider className="mt-12" />
         <div className="flex justify-end items-center mr-2 ">
-          <AttachFile uploadImageAttach={handleUploadImageAttach} />
+          <AttachFile index={index}/>
           <IconButton className="p-8" onClick={copyQuestion}>
             <FileCopyIcon />
           </IconButton>
@@ -368,7 +360,9 @@ const InquiryPreview = (props) => {
               <ImageAttach file={file} style={{ margin: '1rem' }} />
             </div>
           ) : (
-            <FileAttach file={file} field = {quesion.field} />
+            
+            <FileAttach file={file} field = {question.field} />
+
           )
         )}
       </Card>

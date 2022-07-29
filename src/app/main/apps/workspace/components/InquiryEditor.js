@@ -1,60 +1,19 @@
 import { FuseChipSelect } from '@fuse';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Divider, FormControl, FormHelperText, Grid, IconButton, TextField } from '@material-ui/core';
+import { Divider, FormControl, FormHelperText, Grid, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
-import CloseIcon from '@material-ui/icons/Close';
-import { grey } from '@material-ui/core/colors';
-import { styled } from '@material-ui/core/styles';
 import { PERMISSION, PermissionProvider } from "@shared/permission";
 
 import * as InquiryActions from '../store/actions/inquiry';
-
-import FileAttach from './FileAttach';
-import ImageAttach from './ImageAttach';
-import AttachmentAnswer from "./AttachmentAnswer";
 import * as FormActions from "../store/actions/form";
 
-const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
-  color: grey['500']
-});
-// show border bottom when input is hovered (split to single style to prevent error)
-const inputStyle = makeStyles((theme) => ({
-  root: {
-    '& .errorChoice': {
-      color: '#f44336',
-      fontSize: '1.2rem',
-      display: 'block',
-      marginTop: '8px',
-      marginLeft: '33px',
-      minHeight: '1em',
-      textAlign: 'left',
-      fontFamily: `Roboto,"Helvetica",Arial,sans-serif`,
-      fontWeight: 400,
-      lineHeight: '1em',
-    }
-  },
-  underline: {
-    '&&&:before': {
-      borderBottom: 'none'
-    },
-    '&:hover:not($disabled):before': {
-      borderBottom: `1px dashed ${theme.palette.text.primary} !important`
-    }
-  }
-}));
-const inputStyleDisabled = makeStyles((theme) => ({
-  underline: {
-    '&&&:before': {
-      borderBottom: 'none',
-      borderStyle: 'dashed'
-    },
-    '&:hover:not($disabled):before': {
-      borderBottom: `1px dashed ${theme.palette.text.primary} !important`
-    },
-  }
-}));
+import ChoiceAnswerEditor from './ChoiceAnswerEditor';
+import ParagraphAnswerEditor from './ParagraphAnswerEditor';
+import AttachmentAnswer from './AttachmentAnswer';
+import ImageAttach from './ImageAttach';
+import FileAttach from './FileAttach';
+
 const useStyles = makeStyles((theme) => ({
   root: {
     minHeight: '15px',
@@ -65,6 +24,20 @@ const useStyles = makeStyles((theme) => ({
     width: '25px',
     backgroundColor: 'silver'
   },
+  button: {
+    margin: theme.spacing(1),
+    borderRadius: 8,
+    width: 120,
+    boxShadow: 'none',
+    textTransform: 'capitalize',
+    fontFamily: 'Montserrat',
+    fontWeight: 600,
+    '&.reply': {
+      backgroundColor: 'white',
+      color: '#BD0F72',
+      border: '1px solid #BD0F72'
+    }
+  },
   positionBtnImg: {
     left: '0',
     top: '-3rem'
@@ -74,145 +47,6 @@ const useStyles = makeStyles((theme) => ({
     top: '4rem'
   }
 }));
-
-// Sub Commporent
-const Choice = (props) => {
-  const { index, value, handleChangeChoice, handleRemoveChoice } = props;
-  const [isHover, setIsHover] = useState(false);
-  const [isOnFocus, setIsOnFocus] = useState(false);
-  const handleFocus = (e) => {
-    setIsOnFocus(true);
-    e.target.select();
-  };
-  const classes = inputStyle();
-  return (
-    <div key={index}>
-      <div
-        className="flex"
-        onMouseEnter={() => setIsHover(true)}
-        onMouseLeave={() => {
-          isOnFocus ? setIsHover(true) : setIsHover(false);
-        }}>
-        <div style={{ paddingTop: '6px', marginRight: '1rem' }}>
-          <DisabledRadioButtonUncheckedIcon />
-        </div>
-        <div style={{ height: '50px', width: '95%' }}>
-          <TextField
-            fullWidth
-            value={value}
-            style={{ marginLeft: '1rem' }}
-            autoFocus={true}
-            onFocus={handleFocus}
-            onChange={(e) => handleChangeChoice(e, index)}
-            InputProps={{
-              classes
-            }}
-          />
-        </div>
-        <div style={{ marginLeft: '1rem' }}>
-          <IconButton onClick={() => handleRemoveChoice(index)} style={{ padding: '2px' }}>
-            <CloseIcon />
-          </IconButton>
-        </div>
-      </div>
-    </div>
-  );
-};
-const ChoiceAnswer = (props) => {
-  const { questions, question, index, saveQuestion } = props;
-  const classes = inputStyle();
-  const dispatch = useDispatch();
-  const [valid, metadata] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.metadata
-  ]);
-
-  const checkOptionsEmpty = () => {
-    const optionsOfQuestion = [...questions];
-    //check at least has one option
-    if (optionsOfQuestion[index].answerObj.length > 0) {
-      // check empty option
-      const checkEmpty = optionsOfQuestion[index].answerObj.filter(item => !item.content);
-      if (checkEmpty.length > 0) {
-        dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
-      } else {
-        dispatch(InquiryActions.validate({ ...valid, answerContent: true }));
-      }
-    } else {
-      dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
-    }
-  };
-
-  const handleAddChoice = () => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj.push({
-      id: null,
-      content: 'Option ' + (optionsOfQuestion[index].answerObj.length + 1)
-    });
-    saveQuestion(optionsOfQuestion);
-    checkOptionsEmpty();
-    dispatch(FormActions.setEnableSaveInquiriesList(false));
-  };
-  const handleRemoveChoice = (id) => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj.splice(id, 1);
-    saveQuestion(optionsOfQuestion);
-    checkOptionsEmpty();
-    dispatch(FormActions.setEnableSaveInquiriesList(false));
-  };
-
-  const handleChangeChoice = (e, id) => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj[id].content = e.target.value;
-    saveQuestion(optionsOfQuestion);
-    checkOptionsEmpty();
-    dispatch(FormActions.setEnableSaveInquiriesList(false));
-  };
-
-  return (
-    <div style={{ paddingTop: '2rem' }} className={classes.root}>
-      {question.answerObj.map((value, k) => {
-        return (
-          <Choice
-            key={k}
-            value={value.content}
-            index={k}
-            handleChangeChoice={handleChangeChoice}
-            handleRemoveChoice={handleRemoveChoice}
-          />
-        );
-      })}
-      <div className="flex items-center">
-        <div style={{ paddingTop: '6px', marginRight: '1rem' }}>
-          <DisabledRadioButtonUncheckedIcon />
-        </div>
-        <TextField
-          style={{ border: 'none' }}
-          placeholder="Add Option"
-          onClick={handleAddChoice}
-          InputProps={{ classes }}
-          disabled
-        />
-      </div>
-      {!valid.answerContent && <span className={'errorChoice'}>Invalid Option !</span>}
-    </div>
-  );
-};
-
-const ParagraphAnswer = () => {
-  const classes_disabled = inputStyleDisabled();
-  return (
-    <div className="flex">
-      <TextField
-        style={{ border: 'none' }}
-        placeholder='Add "Customer Input"'
-        fullWidth
-        disabled
-        InputProps={{ classes_disabled }}
-      />
-    </div>
-  );
-};
 
 
 // Main Component
@@ -409,7 +243,7 @@ const InquiryEditor = (props) => {
       </div>
       {question.ansType === metadata.ans_type.choice && (
         <div className="mt-16">
-          <ChoiceAnswer
+          <ChoiceAnswerEditor
             questions={questions}
             question={question}
             index={index}
@@ -419,7 +253,7 @@ const InquiryEditor = (props) => {
       )}
       {question.ansType === metadata.ans_type.paragraph && (
         <div className="mt-40">
-          <ParagraphAnswer />
+          <ParagraphAnswerEditor />
         </div>
       )}
       {question.ansType === metadata.ans_type.attachment && (
@@ -454,6 +288,15 @@ const InquiryEditor = (props) => {
           </div>
         ))}
       </>
+      {/* <div className="flex">
+        <Button
+          variant="contained"
+          color="primary"
+          classes={{ root: classes.button }}
+        >
+        Save
+        </Button>
+      </div> */}
     </>
   );
 };

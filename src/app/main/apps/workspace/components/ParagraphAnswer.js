@@ -1,13 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, InputAdornment, TextField } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { createParagraphAnswer, updateParagraphAnswer } from 'app/services/inquiryService';
 import { useDispatch } from 'react-redux';
-import * as AppAction from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
-import * as FormActions from '../store/actions/form';
-import * as InquiryActions from '../store/actions/inquiry';
 
 import UserInfo from './UserInfo';
 
@@ -31,9 +27,9 @@ const ParagraphAnswer = (props) => {
   const allowUpdateParagraphAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
   });
-  const { question, index, questions, saveQuestion } = props;
+  const { question, index, questions } = props;
   const [paragraphText, setParagraphText] = useState(question.answerObj[0]?.content || '');
-  const dispatch = useDispatch();
+
   const classes = useStyles();
   const [isPermission, setPermission] = useState(false);
 
@@ -49,38 +45,6 @@ const ParagraphAnswer = (props) => {
       }
     }
   }, [questions]);
-
-  const addParagraph = async () => {
-    const body = {
-      inquiry: question.id,
-      content: paragraphText
-    };
-    const optionsOfQuestion = [...questions];
-    const objAns = optionsOfQuestion[index].answerObj;
-    if (question.answerObj.length === 0) {
-      createParagraphAnswer(body).then((res) => {
-        if (res) {
-          const { message, answerObj } = res;
-          objAns.push(answerObj);
-          saveQuestion(optionsOfQuestion);
-          dispatch(InquiryActions.setOneInq({}));
-          dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
-        }
-      });
-    } else {
-      const answerId = question.answerObj[0].id;
-      updateParagraphAnswer(answerId, body).then((res) => {
-        if (res) {
-          const { message } = res;
-          objAns[0].content = body.content;
-          saveQuestion(optionsOfQuestion);
-          dispatch(InquiryActions.setOneInq({}));
-          dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
-        }
-      });
-    }
-    dispatch(FormActions.toggleInquiry(false));
-  };
 
   return (
     <div>
@@ -104,6 +68,7 @@ const ParagraphAnswer = (props) => {
           id="outlined-multiline-flexible"
           multiline
           rowsMax={4}
+
           value={paragraphText}
           onChange={(e) => setParagraphText(e.target.value)}
         />

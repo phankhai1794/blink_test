@@ -463,15 +463,15 @@ const AttachmentList = (props) => {
                 {isShowReplace && (
                   <PermissionProvider action={PERMISSION.INQUIRY_REPLACE_MEDIA}>
                     <div className={'replace'}>
-                      <AttachFile
+                      <AttachFileList
                         uploadImageAttach={onFileReplaceChange}
                         // mediaIndex={index}
                         isAttachmentList={false}
-                        type={'replace'}
+                        type={'replace'}                        
                       >
                         <CachedIcon style={{ height: '22px', width: '22px', color: '#BD0F72' }} />
                         <span style={{ fontSize: '15px', marginLeft: '5px', fontWeight: '500', color: '#BD0F72' }}>Replace</span>
-                      </AttachFile>
+                      </AttachFileList>
                     </div>
                   </PermissionProvider>
                 )}
@@ -596,7 +596,7 @@ const useStyles = makeStyles(() => ({
     marginRight: '20px'
   },
 }));
-const AttachFile = (props) => {
+const AttachFileList = (props) => {
   const [isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.isShowBackground,
   ]);
@@ -786,4 +786,4 @@ const ColoredLinearProgress = () => {
   );
 };
 
-export { AttachmentList, AttachFile };
+export { AttachmentList, AttachFileList };
