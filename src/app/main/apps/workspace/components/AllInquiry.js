@@ -13,7 +13,9 @@ import {
   FormControlLabel,
   IconButton,
   Checkbox,
-  FormHelperText
+  FormHelperText,
+  RadioGroup,
+  Radio
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
@@ -47,17 +49,14 @@ const useStyles = makeStyles((theme) => ({
 
   },
   checkedIcon: {
-    display: 'block',
-    position: 'absolute',
-    top: '0px',
-    left: '4px',
-    width: '5px',
-    height: '10px',
-    border: '1px solid #BD0F72',
-    borderWidth: '0 2px 2px 0',
-    transform: 'rotate(45deg)',
-    'input:hover ~ &': {
-      backgroundColor: '#106ba3'
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    '& .MuiFormGroup-root': {
+      flexDirection: 'row'
+    },
+    '& .container': {
+      marginBottom: 5
     }
   },
   inqTitle: {
@@ -167,47 +166,16 @@ const AllInquiry = (props) => {
                       {getKeyByValue(metadata['field'], q.field)}
                     </Typography>
                     <div className="flex justify-end" style={{ width: '350px' }}>
-                      <FormControl error={!valid.receiver && !q.receiver.length}>
-                        <FormGroup row>
-                          <FormControlLabel
-                            value="onshore"
-                            control={
-                              <Checkbox
-                                checked={q.receiver?.includes('onshore')}
-                                onChange={(e) => handleReceiverChange(e, index)}
-                                color="primary"
-                                checkedIcon={
-                                  <>
-                                    <span className={clsx(classes.icon, 'borderChecked')}>
-                                      <span className={classes.checkedIcon} />
-                                    </span>
-                                  </>
-                                }
-                                icon={<span className={classes.icon} />}
-                              />
-                            }
-                            label="Onshore"
-                          />
-                          <FormControlLabel
-                            value="customer"
-                            control={
-                              <Checkbox
-                                checked={q.receiver.includes('customer')}
-                                onChange={(e) => handleReceiverChange(e, index)}
-                                color="primary"
-                                checkedIcon={
-                                  <>
-                                    <span className={clsx(classes.icon, 'borderChecked')}>
-                                      <span className={classes.checkedIcon} />
-                                    </span>
-                                  </>
-                                }
-                                icon={<span className={classes.icon} />}
-                              />
-                            }
-                            label="Customer"
-                          />
-                        </FormGroup>
+                      <FormControl error={!valid.receiver && !q.receiver.length} className={classes.checkedIcon}>
+                        <RadioGroup aria-label="receiver" name="receiver" value={q.receiver[0]} onChange={(e) => handleReceiverChange(e, index)}>
+                          <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
+                          <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
+                        </RadioGroup>
+                        <FormControlLabel
+                          control={
+                            <AttachFile index={index} />
+                          }
+                        />
                         {!valid.receiver && !q.receiver.length ? (
                           <FormHelperText>Pick at least one!</FormHelperText>
                         ) : null}
@@ -280,52 +248,16 @@ const AllInquiry = (props) => {
                   {getKeyByValue(metadata['field'], q.field)}
                 </div>
                 <div className="flex justify-end">
-                  <FormControl error={!valid.receiver && !q.receiver.length}>
-                    <FormGroup row>
-                      <FormControlLabel
-                        value="onshore"
-                        control={
-                          <Checkbox
-                            checked={q.receiver.includes('onshore')}
-                            onChange={(e) => handleReceiverChange(e, index)}
-                            color="primary"
-                            checkedIcon={
-                              <>
-                                <span className={clsx(classes.icon, 'borderChecked')}>
-                                  <span className={classes.checkedIcon} />
-                                </span>
-                              </>
-                            }
-                            icon={<span className={classes.icon} />}
-                          />
-                        }
-                        label="Onshore"
-                      />
-                      <FormControlLabel
-                        value="customer"
-                        control={
-                          <Checkbox
-                            checked={q.receiver.includes('customer')}
-                            onChange={(e) => handleReceiverChange(e, index)}
-                            color="primary"
-                            checkedIcon={
-                              <>
-                                <span className={clsx(classes.icon, 'borderChecked')}>
-                                  <span className={classes.checkedIcon} />
-                                </span>
-                              </>
-                            }
-                            icon={<span className={classes.icon} />}
-                          />
-                        }
-                        label="Customer"
-                      />
-                    </FormGroup>
+                  <FormControl error={!valid.receiver && !q.receiver.length} className={classes.checkedIcon}>
+                    <RadioGroup aria-label="receiver" name="receiver" value={q.receiver[0]} onChange={(e) => handleReceiverChange(e, index)}>
+                      <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
+                      <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
+                    </RadioGroup>
                     {!valid.receiver && !q.receiver.length ? (
                       <FormHelperText>Pick at least one!</FormHelperText>
                     ) : null}
                   </FormControl>
-                  <div className="flex justify-end items-center mr-2 ">
+                  <div className="flex justify-end items-center mr-2 " style={{ marginBottom: 2 }}>
                     <AttachFile index={index}/>
                     <IconButton disabled={!allowDeleteInq} className="p-8" onClick={() => removeQuestion(index)}>
                       <DeleteIcon />
