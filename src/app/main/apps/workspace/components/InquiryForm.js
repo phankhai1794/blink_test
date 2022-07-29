@@ -113,18 +113,6 @@ const InquiryForm = (props) => {
     dispatch(InquiryActions.validate({ inqType: true, field: true, receiver: true, ansType: true, content: true, answerContent: true }));
   };
 
-  const handleUploadImageAttach = (files, index) => {
-    const optionsOfQuestion = [...questions];
-    const inValidFile = files.find(elem => !validateExtensionFile(elem));
-    if (inValidFile) {
-      dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
-    } else {
-      files.forEach(src => {
-        optionsOfQuestion[index].mediaFile.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, fileUpload: src });
-      });
-      dispatch(InquiryActions.setQuestion(optionsOfQuestion));
-    }
-  };
 
   const changeToEditor = (index) => {
     let check = true;
@@ -233,7 +221,8 @@ const InquiryForm = (props) => {
                   />
                 </FormGroup>
                 <div className="flex justify-end items-center mr-2 ">
-                  <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
+                  <AttachFile isQuestion={true} index={index} />
+
                   {(inquiries.length + questions.length !== metadata.field_options.length) &&
                     <Tooltip title="Clone Inquiry">
                       <IconButton className="p-8" onClick={() => copyQuestion(index)}>

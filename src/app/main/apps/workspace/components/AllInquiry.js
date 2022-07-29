@@ -1,4 +1,4 @@
-import { getKeyByValue, validateExtensionFile , stateResquest } from '@shared';
+import { getKeyByValue, stateResquest } from '@shared';
 import { getFile } from 'app/services/fileService';
 import { deleteInquiry } from 'app/services/inquiryService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -15,7 +15,6 @@ import {
   Checkbox,
   FormHelperText
 } from '@material-ui/core';
-import * as AppAction from 'app/store/actions';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
@@ -45,6 +44,7 @@ const useStyles = makeStyles((theme) => ({
     '&.borderChecked': {
       border: '1px solid #BD0F72'
     }
+
   },
   checkedIcon: {
     display: 'block',
@@ -98,29 +98,6 @@ const AllInquiry = (props) => {
       dispatch(InquiryActions.editInquiry(optionsOfQuestion));
       dispatch(InquiryActions.setOriginalInquiry(optionsOfQuestion));
     }).catch((error) => console.error(error))
-  };
-
-  const handleUploadImageAttach = (files, index) => {
-    const optionsOfQuestion = [...inquiries];
-    const inValidFile = files.find((elem) => !validateExtensionFile(elem));
-    if (inValidFile) {
-      dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
-    } else {
-      files.forEach((src) => {
-        const formData = new FormData();
-        formData.append('file', src);
-        formData.append('name', src.name);
-        optionsOfQuestion[index].mediaFile.push({
-          id: null,
-          src: URL.createObjectURL(src),
-          ext: src.type,
-          name: src.name,
-          data: formData
-        });
-      });
-      dispatch(InquiryActions.editInquiry(optionsOfQuestion));
-      dispatch(FormActions.setEnableSaveInquiriesList(false));
-    }
   };
 
   const handleReceiverChange = (e, index) => {
@@ -349,7 +326,7 @@ const AllInquiry = (props) => {
                     ) : null}
                   </FormControl>
                   <div className="flex justify-end items-center mr-2 ">
-                    <AttachFile uploadImageAttach={handleUploadImageAttach} index={index} />
+                    <AttachFile index={index}/>
                     <IconButton disabled={!allowDeleteInq} className="p-8" onClick={() => removeQuestion(index)}>
                       <DeleteIcon />
                     </IconButton>
