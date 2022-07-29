@@ -259,9 +259,10 @@ const AllInquiry = (props) => {
                   </FormControl>
                   <div className="flex justify-end items-center mr-2 " style={{ marginBottom: 2 }}>
                     <AttachFile index={index}/>
-                    <IconButton disabled={!allowDeleteInq} className="p-8" onClick={() => removeQuestion(index)}>
-                      <DeleteIcon />
-                    </IconButton>
+                    {allowDeleteInq &&
+                      <IconButton className="p-8" onClick={() => removeQuestion(index)}>
+                        <DeleteIcon />
+                      </IconButton>}
                   </div>
                 </div>
               </div>
