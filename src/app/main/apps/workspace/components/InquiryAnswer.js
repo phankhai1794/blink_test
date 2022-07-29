@@ -8,9 +8,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   Typography,
   Checkbox,
-  TextField,
   Divider,
-  Button
+  Button,
+  FormControl,
+  FormControlLabel,
+  RadioGroup,
+  Radio
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { withStyles } from '@material-ui/core/styles';
@@ -71,22 +74,18 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: '#DDE3EE'
     }
   },
-  checkedIcon: {
-    display: 'block',
-    position: 'absolute',
-    top: '0px',
-    left: '4px',
-    width: '5px',
-    height: '10px',
-    border: '1px solid #BD0F72',
-    borderWidth: '0 3px 3px 0',
-    transform: 'rotate(45deg)',
-    '&.disabledCheck': {
-      border: '1px solid #BAC3CB',
-      borderWidth: '0 3px 3px 0'
-    }
-  }
-}));
+  checkedIcon: {display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    '& .MuiFormGroup-root': {
+      flexDirection: 'row'
+    },
+    '& .container': {
+      marginBottom: 5
+    }},
+
+}
+));
 
 const InquiryAnswer = (props) => {
   const { index, question } = props;
@@ -162,44 +161,13 @@ const InquiryAnswer = (props) => {
           time={displayTime(question.createdAt)}
           avatar={user.avatar}
         />
-        <div>
-          {question.receiver.includes('onshore') && (
-            <>
-              <Checkbox
-                checked
-                disabled
-                color="primary"
-                checkedIcon={
-                  <>
-                    <span className={clsx(classes.icon, 'disabledCheck')}>
-                      <span className={clsx(classes.checkedIcon, 'disabledCheck')} />
-                    </span>
-                  </>
-                }
-                icon={<span className={classes.icon} />}
-              />
-              <span>Onshore</span>
-            </>
-          )}
-          {question.receiver.includes('customer') && (
-            <>
-              <Checkbox
-                checked
-                disabled
-                color="primary"
-                checkedIcon={
-                  <>
-                    <span className={clsx(classes.icon, 'disabledCheck')}>
-                      <span className={clsx(classes.checkedIcon, 'disabledCheck')} />
-                    </span>
-                  </>
-                }
-                icon={<span className={classes.icon} />}
-              />
-              <span>Customer</span>
-            </>
-          )}
-        </div>
+        <FormControl className={classes.checkedIcon}>
+          <RadioGroup aria-label="gender" name="gender1" value={question.receiver[0]} onChange={(e) => handleReceiverChange(e, index)}>
+            <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
+            <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
+          </RadioGroup>
+          <AttachFile index={index} />
+        </FormControl>
         {/* <PermissionProvider action={PERMISSION.VIEW_EDIT_INQUIRY}>
           <IconButton onClick={handleClick}>
             <MoreVertIcon />
@@ -218,8 +186,6 @@ const InquiryAnswer = (props) => {
             <ListItemText primary="Edit" />
           </MenuItem>
         </Menu> */}
-
-        <AttachFile index={index} />
       </div>
       <Typography variant="subtitle" style={{ wordBreak: 'break-word', fontFamily: 'Montserrat' }}>
         {question.content}
