@@ -13,7 +13,7 @@ import * as Actions from 'app/store/actions';
 
 import BLWorkspace from './components/BLWorkspace';
 
-const otpLength = 4;
+const otpLength = 6;
 const mainColor = '#BD0F72';
 const borderColor = '#8D9AA6';
 const errColor = '#DC2626';
@@ -47,13 +47,14 @@ const useStyles = makeStyles((theme) => ({
     height: '50px'
   },
   card: {
-    width: '480px',
     borderRadius: '8px',
     boxShadow: 'none',
     marginTop: 40
   },
   cardContent: {
-    margin: '40px 55px',
+    marginTop: 40,
+    marginLeft: 55,
+    marginRight: 55,
     padding: '0 !important'
   },
   title: {
@@ -258,12 +259,14 @@ const OtpCheck = ({ status }) => {
                 <Box className={classes.wrapper}>
                   <img className={classes.logo} src="assets/images/logos/one_logo.svg" alt="logo" />
                 </Box>
-                <Card className={classes.card}>
+                <Card className={classes.card} style={step == 0 ? { width: 480 } : { width: 550 }}>
                   <CardContent
                     className={clsx(
                       classes.cardContent,
                       'flex flex-col items-center justify-center'
-                    )}>
+                    )}
+                    style={step == 0 ? { marginBottom: 24 } : { marginBottom: 26 }}
+                  >
                     {step === 0 ? (
                       <Formsy
                         onValidSubmit={handleCheckMail}
@@ -320,7 +323,7 @@ const OtpCheck = ({ status }) => {
                               margin: 0,
                               border: '1px solid #8D9AA6'
                             }}
-                            separator={<span style={{ width: 70 }}></span>}
+                            separator={<span style={{ width: 40 }}></span>}
                           />
                           {Boolean(otpCode.value.length) && !otpCode.isValid && (
                             <span className={classes.helperTextOTP}>
