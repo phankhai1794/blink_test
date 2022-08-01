@@ -179,7 +179,7 @@ function ToolbarLayout1(props) {
             </PermissionProvider>
             {/* {openTrans && transId && <RestoreVersion />} */}
             <PermissionProvider
-              action={PERMISSION.VIEW_REDIRECT_GUEST_BL}
+              action={PERMISSION.VIEW_EDIT_DRAFT_BL}
               extraCondition={pathname.includes('/apps/draft-bl')}>
               <Button
                 variant="text"
