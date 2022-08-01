@@ -116,27 +116,24 @@ const InquiryAnswer = (props) => {
 
   return (
     <>
-      <FormControl className={classes.checkedIcon}>
-        <RadioGroup aria-label="gender" name="gender1" value={question.receiver[0]}>
-          <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
-          <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
-        </RadioGroup>
-      </FormControl>
       <div className="flex justify-between">
         <UserInfo name={user.userName} time={displayTime(question.createdAt)} avatar={user.avatar} />
         <div className="flex items-center">
+          <FormControl className={classes.checkedIcon}>
+            <FormControlLabel control={<Radio checked disabled color={'primary'} />} label={question.receiver[0] === "onshore" ? "Onshore" : "Customer"} />
+          </FormControl>
           <PermissionProvider action={PERMISSION.VIEW_EDIT_INQUIRY}>
             <Tooltip title="Edit Inquiry">
               <IconButton className="p-8" onClick={toggleEdit}>
                 <img style={{ height: "22px" }} src="/assets/images/icons/edit.svg" />
               </IconButton>
             </Tooltip>
-            <AttachFile index={index} />
+            {/* <AttachFile index={index} />
             <Tooltip title="Delete Inquiry">
               <IconButton className="p-8" disabled>
                 <img style={{ height: "22px" }} src="/assets/images/icons/trash.svg" />
               </IconButton>
-            </Tooltip>
+            </Tooltip> */}
           </PermissionProvider>
         </div>
       </div>

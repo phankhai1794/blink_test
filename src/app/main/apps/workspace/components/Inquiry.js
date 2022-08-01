@@ -99,15 +99,11 @@ const Inquiry = (props) => {
       return URL.createObjectURL(new Blob([file]));
     }
   };
-  const handleReceiverChange = (e) => {
+  const handleReceiverChange = (e, index) => {
     const optionsOfQuestion = [...inquiries];
-    if (e.target.checked) {
-      dispatch(InquiryActions.validate({ ...valid, receiver: true }));
-      optionsOfQuestion[indexes].receiver.push(e.target.value);
-    } else {
-      const i = optionsOfQuestion[indexes].receiver.indexOf(e.target.value);
-      optionsOfQuestion[indexes].receiver.splice(i, 1);
-    }
+    optionsOfQuestion[index].receiver = [];
+    dispatch(InquiryActions.validate({ ...valid, receiver: true }));
+    optionsOfQuestion[index].receiver.push(e.target.value);
     dispatch(InquiryActions.editInquiry(optionsOfQuestion));
   };
 
@@ -140,7 +136,7 @@ const Inquiry = (props) => {
         }
       }
     }
-  }, [currentField]);
+  }, [currentField, edit]);
 
   const onCancel = () => {
     setEdit(null);
@@ -224,7 +220,7 @@ const Inquiry = (props) => {
                 <div className="flex justify-between">
                   <UserInfo name={user.userName} time={displayTime(q.createdAt)} avatar={user.avatar} />
                   <FormControl error={!valid.receiver && !q.receiver.length} className={classes.checkedIcon}>
-                    <RadioGroup aria-label="receiver" name="receiver" value={q.receiver[0]} onChange={(e) => handleReceiverChange(e, index)}>
+                    <RadioGroup aria-label="receiver" name="receiver" value={q.receiver[0]} onChange={(e) => handleReceiverChange(e, i)}>
                       <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
                       <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
                     </RadioGroup>
