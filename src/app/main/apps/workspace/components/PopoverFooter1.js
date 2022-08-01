@@ -94,7 +94,7 @@ const PopoverFooter = (props) => {
         const ansDelete = originalInquiry[i].answerObj.filter(
           ({ id: id1 }) => !inquiries[i].answerObj.some(({ id: id2 }) => id2 === id1)
         );
-        const ansUpdate = inquiries[i].answerObj.filter(({ id: id1, content: c1 }) =>
+        let ansUpdate = inquiries[i].answerObj.filter(({ id: id1, content: c1 }) =>
           originalInquiry[i].answerObj.some(({ id: id2, content: c2 }) => id2 === id1 && c1 !== c2)
         );
         const mediaCreate = inquiries[i].mediaFile.filter(
@@ -114,8 +114,14 @@ const PopoverFooter = (props) => {
           mediaCreate.length ||
           mediaDelete.length
         ) {
+          const inqContentTrim = {...inq(inquiries[i]), content: inq(inquiries[i]).content.trim()};
+          if (ansTypeChoice === inquiries[i].ansType) {
+            ansUpdate = ansUpdate.map(ans => {
+              return {...ans, content: ans.content.trim()}
+            })
+          }
           await updateInquiry(inquiries[i].id, {
-            inq: inq(inquiries[i]),
+            inq: inqContentTrim,
             ans: { ansDelete, ansCreate, ansUpdate },
             files: { mediaCreate, mediaDelete }
           });

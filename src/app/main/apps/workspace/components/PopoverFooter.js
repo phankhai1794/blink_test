@@ -108,6 +108,16 @@ const PopoverFooter = ({ title }) => {
         filesUpload.push(q.mediaFile)
       }
     });
+    const inqContentTrim = question.map(op => {
+      let contentTrim = {...op, content: op.content.trim()};
+      const ansTypeChoice = metadata.ans_type['choice'];
+      if (ansTypeChoice === op.ansType) {
+        op.answerObj.forEach(ans => {
+          ans.content = ans.content.trim();
+        });
+      }
+      return contentTrim;
+    });
     if (filesUpload.length > 0) {
       const uploads = [];
       filesUpload.forEach((files) => {
@@ -124,7 +134,7 @@ const PopoverFooter = ({ title }) => {
             const mediaFileList = file.response.map(item => item);
             mediaList = [...mediaList, ...mediaFileList];
           });
-          saveInquiry({ question, media: mediaList, blId: myBL.id })
+          saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
             .then(() => {
               dispatch(
                 AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
@@ -136,7 +146,7 @@ const PopoverFooter = ({ title }) => {
             .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
         }).catch((error) => console.log(error));
     } else {
-      saveInquiry({ question, media: mediaList, blId: myBL.id })
+      saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
         .then(() => {
           dispatch(
             AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
