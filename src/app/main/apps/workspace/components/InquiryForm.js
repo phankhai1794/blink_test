@@ -233,14 +233,14 @@ const InquiryForm = (props) => {
                 {inquiries.length + questions.length !== metadata.field_options.length && (
                   <Tooltip title="Clone Inquiry">
                     <IconButton className="p-8" onClick={() => copyQuestion(index)}>
-                      <img style={{ height: '22px' }} src="/assets/images/icons/copy.png" />
+                      <img style={{ height: '22px' }} src="/assets/images/icons/copy.svg" />
                     </IconButton>
                   </Tooltip>
                 )}
                 {questions.length !== 1 && (
                   <Tooltip title="Delete Inquiry">
                     <IconButton className="p-8" onClick={() => removeQuestion(index)}>
-                      <img src="/assets/images/icons/delete.png" />
+                      <img src="/assets/images/icons/trash.svg" />
                     </IconButton>
                   </Tooltip>
                 )}
