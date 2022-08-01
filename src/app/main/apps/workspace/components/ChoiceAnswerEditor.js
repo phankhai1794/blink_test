@@ -41,7 +41,7 @@ const inputStyle = makeStyles((theme) => ({
 
 // Sub Commporent
 const Choice = (props) => {
-  const { index, value, handleChangeChoice, handleRemoveChoice } = props;
+  const { index, value, handleChangeChoice, handleRemoveChoice, isAddChoice } = props;
   const [isHover, setIsHover] = useState(false);
   const [isOnFocus, setIsOnFocus] = useState(false);
   const handleFocus = (e) => {
@@ -65,7 +65,7 @@ const Choice = (props) => {
             fullWidth
             value={value}
             style={{ marginLeft: '1rem' }}
-            autoFocus={true}
+            autoFocus={isAddChoice}
             onFocus={handleFocus}
             onChange={(e) => handleChangeChoice(e, index)}
             InputProps={{
@@ -90,6 +90,7 @@ const ChoiceAnswerEditor = (props) => {
     workspace.inquiryReducer.validation,
     workspace.inquiryReducer.metadata
   ]);
+  const [isAddChoice, setAddChoice] = useState(false);
 
   const checkOptionsEmpty = () => {
     const optionsOfQuestion = [...questions];
@@ -116,6 +117,7 @@ const ChoiceAnswerEditor = (props) => {
     saveQuestion(optionsOfQuestion);
     checkOptionsEmpty();
     dispatch(FormActions.setEnableSaveInquiriesList(false));
+    setAddChoice(true);
   };
   const handleRemoveChoice = (id) => {
     const optionsOfQuestion = [...questions];
@@ -143,6 +145,7 @@ const ChoiceAnswerEditor = (props) => {
             index={k}
             handleChangeChoice={handleChangeChoice}
             handleRemoveChoice={handleRemoveChoice}
+            isAddChoice={isAddChoice}
           />
         );
       })}
