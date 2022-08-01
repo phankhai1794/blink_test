@@ -34,6 +34,7 @@ export const loadMetadata = () => async (dispatch) => {
 export const loadInquiry = (myBL_Id) => async (dispatch) => {
   getInquiryById(myBL_Id)
     .then((res) => {
+      res.sort((a, b) => a.createdAt < b.createdAt ? 1 : -1);
       const field_list = res.map((e) => e.field);
       dispatch(saveField(field_list));
       dispatch(editInquiry(res));

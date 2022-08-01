@@ -3,6 +3,7 @@ import { NUMBER_INQ_BOTTOM, toFindDuplicates } from '@shared';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withStyles, makeStyles, createMuiTheme } from '@material-ui/core/styles';
+import clsx from 'clsx';
 import { ThemeProvider } from '@material-ui/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -140,7 +141,32 @@ const useStyles = makeStyles(() => ({
   },
   chip: {
     marginLeft: '0.2rem'
-  }
+  },
+  colorSelectedTab: {
+    color: '#BD0F72'
+  },
+  tab: {
+    fontFamily: 'Montserrat',
+    textTransform: 'none',
+    fontSize: '18px',
+    fontWeight: '600'
+  },
+  iconLabelWrapper: {
+    display: 'flex',
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-around',
+  },
+  countBtn: {
+    background: '#E2E6EA',
+    fontSize: '14px',
+    height: '24px',
+    width: '24px',
+    borderRadius: '4px',
+    marginBottom: '0 !important'
+  },
+  colorCountBtn: {
+    background: '#FDF2F2'
+  },
 }));
 
 export default function Form(props) {
@@ -330,6 +356,12 @@ export default function Form(props) {
     setOpenFab(status);
   };
 
+  const countInq = (recevier) => {
+    let count = 0;
+    inquiries.forEach(inq => inq.receiver.includes(recevier) && count++)
+    return count;
+  };
+
   useEffect(() => {
     if (tabs) {
       props.tabChange(0);
@@ -366,14 +398,22 @@ export default function Form(props) {
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
         {tabs && (
-          <Box style={{}} sx={{}}>
+          <Box style={{ borderBottom: '1px solid #515F6B' }} sx={{}}>
             <Tabs
-              indicatorColor="secondary"
-              style={{ margin: 0, backgroundColor: '#102536' }}
+              indicatorColor="primary"
+              style={{ margin: 0 }}
               value={value}
               onChange={handleChange}>
-              <Tab style={{ color: 'white' }} label="Customer" />
-              <Tab style={{ color: 'white' }} label="Onshore" />
+              <Tab
+                classes={{ wrapper: classes.iconLabelWrapper }}
+                className={clsx(classes.tab, (value === 0) && classes.colorSelectedTab)}
+                label='Customer'
+                icon={<div className={clsx(classes.countBtn, (value === 0) && classes.colorCountBtn)}>{countInq('customer')}</div>} />
+              <Tab
+                classes={{ wrapper: classes.iconLabelWrapper }}
+                className={clsx(classes.tab, (value === 1) && classes.colorSelectedTab)}
+                label='Onshore'
+                icon={<div className={clsx(classes.countBtn, (value === 1) && classes.colorCountBtn)}>{countInq('onshore')}</div>} />
             </Tabs>
           </Box>
         )}
@@ -391,7 +431,7 @@ export default function Form(props) {
                   variant="body2"
                   onClick={handleClick}
                   style={{ display: 'flex', alignItems: 'center' }}>
-                  <AddCircleOutlineIcon style = {{ left: '8.33%', right: '8.33%', border: '2px' }} />
+                  <AddCircleOutlineIcon style={{ left: '8.33%', right: '8.33%', border: '2px' }} />
                   <span
                     style={{
                       color: '#BD0F72',
