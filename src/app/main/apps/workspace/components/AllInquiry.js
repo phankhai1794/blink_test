@@ -146,7 +146,7 @@ const AllInquiry = (props) => {
     optionsOfQuestion[index].receiver = [];
     dispatch(InquiryActions.validate({ ...valid, receiver: true }));
     optionsOfQuestion[index].receiver.push(e.target.value);
-    dispatch(InquiryActions.setQuestion(optionsOfQuestion));
+    dispatch(InquiryActions.editInquiry(optionsOfQuestion));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
   const urlMedia = (fileExt, file) => {
