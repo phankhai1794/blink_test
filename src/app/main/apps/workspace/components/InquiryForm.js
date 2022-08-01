@@ -229,7 +229,7 @@ const InquiryForm = (props) => {
                 />
               </RadioGroup>
               <div className="flex justify-end items-center mr-2" style={{ marginBottom: 2 }}>
-                <AttachFile index={index} />
+                <AttachFile index={index} isQuestion={true} />
                 {inquiries.length + questions.length !== metadata.field_options.length && (
                   <Tooltip title="Clone Inquiry">
                     <IconButton className="p-8" onClick={() => copyQuestion(index)}>
