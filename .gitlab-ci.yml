@@ -2,7 +2,7 @@ image: gitlab/dind:latest
 stages:
   - develop
   - release
-  
+
 deploy_development:
   stage: develop
   only:
@@ -12,6 +12,7 @@ deploy_development:
     name: development
   script:
     - echo "Deploy for development"
+    - 'curl -v -d "commit_id=${CI_COMMIT_SHA:0:8}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://stg-mybl.cyberlogitec.com.vn:8000/pipeline/test/portal'
     - curl -v -X GET http://si-automation.dounets.com:8804/exec/pipeline/myBL/portal?ci_commit=${CI_COMMIT_SHA:0:7}
 
 

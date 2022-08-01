@@ -1,6 +1,6 @@
 #!/bin/bash
 # @author DangTran
-# @description: 
+# @description:
 #npm i
 yarn install
 npm run build
