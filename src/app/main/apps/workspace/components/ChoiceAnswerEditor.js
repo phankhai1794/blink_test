@@ -112,7 +112,8 @@ const ChoiceAnswerEditor = (props) => {
     const optionsOfQuestion = [...questions];
     optionsOfQuestion[index].answerObj.push({
       id: null,
-      content: 'Option ' + (optionsOfQuestion[index].answerObj.length + 1)
+      content: 'Option ' + (optionsOfQuestion[index].answerObj.length + 1),
+      createdAt: new Date(),
     });
     saveQuestion(optionsOfQuestion);
     checkOptionsEmpty();
