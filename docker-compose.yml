@@ -26,8 +26,8 @@ services:
     working_dir: /shine/portal
     env_file:
       - .env
-    environment:
-      - PORT=${PORTAL_PORT}
+    # environment:
+    #   - PORT=${PORTAL_PORT}
     image: "advanced-shine:1.0"
     build:
       context: .
