@@ -124,7 +124,17 @@ const InquiryEditor = (props) => {
       optionsOfQuestion[index].field = currentField;
       setFieldValue(metadata.field_options.filter((v) => currentField === v.value)[0]);
     }
-    saveQuestion(optionsOfQuestion);
+    const contentQuestionTrim = optionsOfQuestion.map(op => {
+      let contentTrim = {...op, content: op.content.trim()};
+      const ansTypeChoice = metadata.ans_type['choice'];
+      if (ansTypeChoice === op.ansType) {
+        op.answerObj.forEach(ans => {
+          ans.content = ans.content.trim();
+        });
+      }
+      return contentTrim;
+    });
+    saveQuestion(contentQuestionTrim);
   }, []);
 
   const handleTypeChange = (e) => {
