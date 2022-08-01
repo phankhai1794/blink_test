@@ -206,14 +206,14 @@ const BLField = (props) => {
           if (findConfirmed) setHasAnswer(true);
           break;
         }
-        case `${metadata.ans_type['attachment']}`: {
-          const findAnswerMedia = checkInqAnswer.answerObj.find(inq => inq.mediaFiles.length > 0);
-          findAnswerMedia ? setHasAnswer(true) : setHasAnswer(false);
-          break;
-        }
         default: {
+          const findAnswerMedia = checkInqAnswer.answerObj.find(inq => inq.mediaFiles.length > 0);
           const findAnswer = checkInqAnswer.answerObj.find(inq => inq.content);
-          findAnswer ? setHasAnswer(true) : setHasAnswer(false);
+          if (findAnswerMedia || findAnswer) {
+            setHasAnswer(true);
+          } else {
+            setHasAnswer(false)
+          }
           break;
         }
         }
@@ -224,10 +224,6 @@ const BLField = (props) => {
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty());
   }, [originalInquiry, metadata]);
-
-  useEffect(() => {
-    checkAnswerIsEmpty();
-  }, [inquiries]);
 
   return (
     <>

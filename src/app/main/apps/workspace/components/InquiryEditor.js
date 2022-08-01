@@ -68,12 +68,8 @@ const InquiryEditor = (props) => {
     value: metadata.ans_type.choice,
   },
   {
-    label: 'Customer Input',
+    label: 'Onshore/Customer Input',
     value: metadata.ans_type.paragraph,
-  },
-  {
-    label: 'Customer Add Attachment',
-    value: metadata.ans_type.attachment,
   }];
   const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
