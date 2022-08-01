@@ -1,6 +1,6 @@
-import { getKeyByValue, stateResquest } from '@shared';
+import { getKeyByValue, stateResquest, displayTime } from '@shared';
 import { getFile } from 'app/services/fileService';
-import { deleteInquiry } from 'app/services/inquiryService';
+import { deleteInquiry, loadComment } from 'app/services/inquiryService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,9 +14,13 @@ import {
   IconButton,
   Checkbox,
   FormHelperText,
+  Divider,
   RadioGroup,
   Radio
 } from '@material-ui/core';
+import IconAttachFile from '@material-ui/icons/AttachFile';
+import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
+import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
@@ -27,8 +31,10 @@ import InquiryEditor from './InquiryEditor';
 import AttachFile from './AttachFile';
 import ParagraphAnswer from './ParagraphAnswer';
 import AttachmentAnswer from './AttachmentAnswer';
+import ChoiceAnswer from './ChoiceAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
+import UserInfo from './UserInfo';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -65,13 +71,47 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 22,
     fontWeight: 600,
     wordBreak: 'break-word'
+  },
+  attachIcon: {
+    transform: 'rotate(45deg)',
+    marginLeft: '-2.5rem',
+    color: '#BD0F72 !important'
+  },
+  viewMoreBtn: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    width: 'fit-content',
+    position: 'sticky',
+    left: '100%',
+    color: '#BD0F72',
+    fontFamily: 'Montserrat',
+    fontWeight: 600,
+    cursor: 'pointer'
+  },
+  hideText: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    '-webkit-line-clamp': 5,
+    '-webkit-box-orient': 'vertical',
+  },
+  boxItem: {
+    borderLeft: '2px solid',
+    borderColor: '#DC2626',
+    paddingLeft: '2rem'
+  },
+  boxHasComment: {
+    borderColor: '#2F80ED',
   }
 }));
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
-  const { receiver } = props;
+  const { receiver, openInquiryReview } = props;
   const classes = useStyles();
   const [allowDeleteInq, setAllowDeleteInq] = useState(true);
+  const [viewDropDown, setViewDropDown] = useState('');
+  const [inqHasComment, setInqHasComment] = useState([]);
   const [inquiries, currentEdit, metadata, valid, myBL] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentEditInq,
@@ -82,11 +122,13 @@ const AllInquiry = (props) => {
   const allowCreateAttachmentAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
+  let CURRENT_NUMBER = 0;
 
   const changeToEditor = (index, field) => {
     if (index !== currentEdit) {
       dispatch(InquiryActions.setEditInq(index));
       dispatch(InquiryActions.setField(field));
+      setViewDropDown('');
     }
   };
 
@@ -116,9 +158,22 @@ const AllInquiry = (props) => {
       return URL.createObjectURL(new Blob([file]));
     }
   };
+
+  const handleViewMore = (id) => viewDropDown === id ? setViewDropDown('') : setViewDropDown(id);
+
   useEffect(() => {
     (myBL?.state !== stateResquest) && setAllowDeleteInq(false)
     for (let i in inquiries) {
+      loadComment(inquiries[i].id)
+        .then((res) => {
+          if (res.length) {
+            const listInqId = inqHasComment;
+            listInqId.push(inquiries[i].id);
+            setInqHasComment(listInqId)
+          }
+        })
+        .catch((error) => console.error(error));
+
       if (inquiries[i].mediaFile.length && !inquiries[i].mediaFile[0].src) {
         const optionsOfQuestion = [...inquiries];
         for (let f in inquiries[i].mediaFile) {
@@ -151,129 +206,174 @@ const AllInquiry = (props) => {
     <>
       {inquiries.map((q, index) => {
         if (receiver && !q.receiver.includes(receiver)) {
-          return <div style={{ display: 'flex' }} onClick={() => changeToEditor(index, q.field)}></div>;
+          return <div key={index} style={{ display: 'flex' }} onClick={() => changeToEditor(index, q.field)}></div>;
         }
         const type = q.ansType;
+        CURRENT_NUMBER++;
         return (
-          <div key={index} style={{ marginBottom: '24px' }} onClick={() => changeToEditor(index, q.field)}>
-            <PermissionProvider
-              action={PERMISSION.VIEW_EDIT_INQUIRY}
-              extraCondition={currentEdit === index}
-              fallback={
-                <Card style={{ padding: '1rem ', marginBottom: '24px' }}>
-                  <div className="flex justify-between">
-                    <Typography color="primary" variant="h5" className={classes.inqTitle}>
-                      {getKeyByValue(metadata['field'], q.field)}
-                    </Typography>
-                    <div className="flex justify-end" style={{ width: '350px' }}>
-                      <FormControl error={!valid.receiver && !q.receiver.length} className={classes.checkedIcon}>
-                        <RadioGroup aria-label="receiver" name="receiver" value={q.receiver[0]} onChange={(e) => handleReceiverChange(e, index)}>
-                          <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
-                          <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
-                        </RadioGroup>
-                        <FormControlLabel
-                          control={
-                            <AttachFile index={index} />
-                          }
-                        />
-                        {!valid.receiver && !q.receiver.length ? (
-                          <FormHelperText>Pick at least one!</FormHelperText>
-                        ) : null}
-                      </FormControl>
-                    </div>
-                  </div>
-                  <Typography variant="h5">{q.name}</Typography>
-                  <Typography
-                    variant="h5"
-                    style={{
-                      wordBreak: 'break-word',
-                      fontFamily: 'Montserrat',
-                      fontSize: 15,
-                      color: '#132535'
-                    }}>
-                    {q.content}
-                  </Typography>
-                  <div style={{ display: 'block', margin: '1rem 0rem' }}>
-                    {type === metadata.ans_type.paragraph && (
-                      <ParagraphAnswer
-                        question={q}
-                        index={index}
-                        questions={inquiries}
-                        saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-                      />
-                    )}
-                    {type === metadata.ans_type.attachment && (
-                      <AttachmentAnswer
-                        question={q}
-                        index={index}
-                        questions={inquiries}
-                        saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-                        isPermissionAttach={allowCreateAttachmentAnswer}
-                      />
-                    )}
-                  </div>
-                  <>
-                    {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
-                    {q.mediaFile?.length > 0 &&
-                  q.mediaFile?.map((file, mediaIndex) => (
-                    <div
-                      style={{ position: 'relative', display: 'inline-block' }}
-                      key={mediaIndex}>
-                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                        <ImageAttach file={file} field={q.field} indexInquiry={index} style={{ margin: '2.5rem' }} />
-                      ) : (
-                        <FileAttach file={file} field={q.field} indexInquiry={index} />
-                      )}
-                    </div>
-                  ))}
-                  </>
-                  <>
-                    {q.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
-                    {q.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
-                      <div
-                        style={{ position: 'relative', display: 'inline-block' }}
-                        key={mediaIndex}>
-                        {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                          <ImageAttach file={file} field={q.field} style={{ margin: '2.5rem' }} />
-                        ) : (
-                          <FileAttach file={file} field={q.field} />
-                        )}
+          <PermissionProvider
+            key={index}
+            action={PERMISSION.VIEW_EDIT_INQUIRY}
+            extraCondition={currentEdit === index}
+            fallback={
+              <Card elevation={0} style={{ padding: '1rem ' }}>
+                <div className={clsx(classes.boxItem, inqHasComment.includes(q.id) && classes.boxHasComment)}>
+                  <div style={{ marginBottom: '12px' }} onClick={() => changeToEditor(index, q.field)}>
+                    <div className="flex justify-between">
+                      <Typography color="primary" variant="h5" className={classes.inqTitle}>
+                        {`${CURRENT_NUMBER}. ${getKeyByValue(metadata['field'], q.field)}`}
+                      </Typography>
+                      <div className="flex justify-end" style={{ width: '350px' }}>
+                        {openInquiryReview ?
+                          <div className="flex justify-end items-center mr-2 ">
+                            <img
+                              style={{ width: 20, paddingRight: '3rem', cursor: 'pointer' }}
+                              src='/assets/images/icons/edit.svg'
+                            />
+                            {q.mediaFile?.length > 0 && <IconAttachFile className={clsx(classes.attachIcon)} />}
+                            {/* {allowDeleteInq &&
+                              <IconButton className="p-8" onClick={() => removeQuestion(index)}>
+                                <DeleteIcon />
+                              </IconButton>} */}
+                          </div>
+                          : <FormControl error={!valid.receiver && !q.receiver.length} className={classes.checkedIcon}>
+                            <RadioGroup aria-label="receiver" name="receiver" value={q.receiver[0]} onChange={(e) => handleReceiverChange(e, index)}>
+                              <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
+                              <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
+                            </RadioGroup>
+                            <FormControlLabel
+                              control={
+                                <AttachFile index={index} />
+                              }
+                            />
+                            {!valid.receiver && !q.receiver.length ? (
+                              <FormHelperText>Pick at least one!</FormHelperText>
+                            ) : null}
+                          </FormControl>}
                       </div>
-                    ))}
-                  </>
-                </Card>
-              }>
-              <div className="flex justify-between">
-                <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
-                  {getKeyByValue(metadata['field'], q.field)}
-                </div>
-                <div className="flex justify-end">
-                  <FormControl error={!valid.receiver && !q.receiver.length} className={classes.checkedIcon}>
-                    <RadioGroup aria-label="receiver" name="receiver" value={q.receiver[0]} onChange={(e) => handleReceiverChange(e, index)}>
-                      <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
-                      <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
-                    </RadioGroup>
-                    {!valid.receiver && !q.receiver.length ? (
-                      <FormHelperText>Pick at least one!</FormHelperText>
-                    ) : null}
-                  </FormControl>
-                  <div className="flex justify-end items-center mr-2 " style={{ marginBottom: 2 }}>
-                    <AttachFile index={index}/>
-                    {allowDeleteInq &&
-                      <IconButton className="p-8" onClick={() => removeQuestion(index)}>
-                        <DeleteIcon />
-                      </IconButton>}
+                    </div>
+                    {openInquiryReview &&
+                      <div className='py-20'>
+                        <UserInfo
+                          name={q.creator.userName}
+                          time={displayTime(q.createdAt)}
+                          avatar={q.creator.avatar} />
+                      </div>}
+                    <Typography variant="h5">{q.name}</Typography>
+                    <Typography
+                      className={(viewDropDown !== q.id) ? classes.hideText : ''}
+                      variant="h5"
+                      style={{
+                        wordBreak: 'break-word',
+                        fontFamily: 'Montserrat',
+                        fontSize: 15,
+                        color: '#132535',
+                      }}>
+                      {q.content}
+                    </Typography>
+                    {(viewDropDown === q.id) &&
+                      <div style={{ display: 'block', margin: '1rem 0rem' }}>
+                        {type === metadata.ans_type.choice && (
+                          <ChoiceAnswer
+                            index={index}
+                            questions={inquiries}
+                            question={q}
+                            saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                          />
+                        )}
+                        {type === metadata.ans_type.paragraph && (
+                          <ParagraphAnswer
+                            question={q}
+                            index={index}
+                            questions={inquiries}
+                            saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                          />
+                        )}
+                        {type === metadata.ans_type.attachment && (
+                          <AttachmentAnswer
+                            question={q}
+                            index={index}
+                            questions={inquiries}
+                            saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+                            isPermissionAttach={allowCreateAttachmentAnswer}
+                          />
+                        )}
+                      </div>}
+                    <>
+                      {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+                      {q.mediaFile?.length > 0 &&
+                        q.mediaFile?.map((file, mediaIndex) => (
+                          <div
+                            style={{ position: 'relative', display: 'inline-block' }}
+                            key={mediaIndex}>
+                            {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                              <ImageAttach file={file} field={q.field} indexInquiry={index} style={{ margin: '2.5rem' }} />
+                            ) : (
+                              <FileAttach file={file} field={q.field} indexInquiry={index} />
+                            )}
+                          </div>
+                        ))}
+                    </>
+                    <>
+                      {q.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
+                      {q.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
+                        <div
+                          style={{ position: 'relative', display: 'inline-block' }}
+                          key={mediaIndex}>
+                          {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                            <ImageAttach file={file} field={q.field} style={{ margin: '2.5rem' }} />
+                          ) : (
+                            <FileAttach file={file} field={q.field} />
+                          )}
+                        </div>
+                      ))}
+                    </>
                   </div>
+                  {openInquiryReview &&
+                    <div className={classes.viewMoreBtn} onClick={() => handleViewMore(q.id)}>
+                      {viewDropDown !== q.id ?
+                        <>
+                          View All
+                          <ArrowDropDown />
+                        </> : <>
+                          Hide All
+                          <ArrowDropUp />
+                        </>}
+                    </div>}
+                </div>
+                <Divider className='my-32' variant='middle' style={{ height: '2px', color: '#BAC3CB' }} />
+              </Card>
+            }>
+            <div className="flex justify-between">
+              <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
+                {getKeyByValue(metadata['field'], q.field)}
+              </div>
+              <div className="flex justify-end">
+                <FormControl error={!valid.receiver && !q.receiver.length} className={classes.checkedIcon}>
+                  <RadioGroup aria-label="receiver" name="receiver" value={q.receiver[0]} onChange={(e) => handleReceiverChange(e, index)}>
+                    <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
+                    <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
+                  </RadioGroup>
+                  {!valid.receiver && !q.receiver.length ? (
+                    <FormHelperText>Pick at least one!</FormHelperText>
+                  ) : null}
+                </FormControl>
+                <div className="flex justify-end items-center mr-2 ">
+                  <AttachFile index={index} />
+                  {allowDeleteInq &&
+                    <IconButton className="p-8" onClick={() => removeQuestion(index)}>
+                      <DeleteIcon />
+                    </IconButton>}
                 </div>
               </div>
-              <InquiryEditor
-                index={index}
-                questions={inquiries}
-                question={q}
-                saveQuestion={(e) => dispatch(InquiryActions.editInquiry(e))}
-              />
-            </PermissionProvider>
-          </div>
+            </div>
+            <InquiryEditor
+              index={index}
+              questions={inquiries}
+              question={q}
+              saveQuestion={(e) => dispatch(InquiryActions.editInquiry(e))}
+            />
+          </PermissionProvider >
         );
       })}
     </>

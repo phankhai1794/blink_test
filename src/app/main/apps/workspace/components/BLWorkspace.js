@@ -478,17 +478,18 @@ const BLWorkspace = (props) => {
           <Grid container justify="center">
             <h2 className={classes.grayText}>** TO BE CONTINUED ON ATTACHED LIST **</h2>
           </Grid>
-          <Grid
-            container
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span className={classes.note}>Declared Cargo Value US $</span>
-            <span className={classes.note}>
-              {
-                "If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged"
-              }
-            </span>
-          </Grid>
         </Grid>
+        <Grid
+          container
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span className={classes.note}>Declared Cargo Value US $</span>
+          <span className={classes.note}>
+            {
+              "If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged"
+            }
+          </span>
+        </Grid>
+
 
         <Divider className="my-32" />
 

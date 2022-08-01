@@ -18,9 +18,10 @@ const colorBtnReview = '#1564EE';
 
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
-  const [mybl, openEmail] = useSelector(({ workspace }) => [
+  const [mybl, openEmail, inquiries] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.myBL,
-    workspace.formReducer.openEmail
+    workspace.formReducer.openEmail,
+    workspace.inquiryReducer.inquiries,
   ]);
   const [success, error, suggestMails, validateMail] = useSelector(({ workspace }) => [
     workspace.mailReducer.success,
@@ -85,8 +86,12 @@ const SendInquiryForm = (props) => {
   }, [openEmail]);
 
   const opendPreviewForm = (event) => {
-    dispatch(FormActions.toggleOpenInquiryReview(true));
-    dispatch(FormActions.toggleSaveInquiry(true));
+    if (inquiries.length) {
+      dispatch(FormActions.toggleOpenInquiryReview(true));
+      dispatch(FormActions.toggleSaveInquiry(true));
+    } else {
+      dispatch(Actions.showMessage({ message: 'Inquiry List is empty!', variant: 'info' }));
+    }
   };
 
   const sendMailClick = (event) => {
@@ -224,7 +229,7 @@ const InquiryReview = (props) => {
   return (
     <>
       <Form
-        title={'Sending inquiry preview'}
+        title={'Inquiry Preview'}
         tabs={['Customer', 'Onshore']}
         open={openInqReview}
         toggleForm={(status) => dispatch(FormActions.toggleOpenInquiryReview(status))}
@@ -242,6 +247,7 @@ const InquiryReview = (props) => {
               user="workspace"
               receiver={tabSelected === 0 ? 'customer' : 'onshore'}
               collapse={true}
+              openInquiryReview={true}
             />
           </div>
         </>
@@ -353,7 +359,7 @@ const ActionUI = (props) => {
         variant="text"
         onClick={openPreviewClick}>
         <Icon fontSize='small' style={{ color: colorBtnReview, paddingRight: '0.5rem' }}>visibility</Icon>
-        <span className="pl-14" style={{ color: colorBtnReview }}>
+        <span className="pl-14" style={{ color: colorBtnReview, fontSize: '16px' }}>
           Preview Inquiries
         </span>
       </Button>
