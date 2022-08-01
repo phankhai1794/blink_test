@@ -87,6 +87,7 @@ const useStyles = makeStyles((theme) => ({
     color: '#BD0F72',
     fontFamily: 'Montserrat',
     fontWeight: 600,
+    fontSize: '16px',
     cursor: 'pointer'
   },
   hideText: {
