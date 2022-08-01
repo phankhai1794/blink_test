@@ -2,7 +2,10 @@ client_body_buffer_size 100M;
 client_max_body_size 25M;
 
 upstream api_server {
-   server ${API_HOST};
+    server ${API_HOST};
+}
+upstream deployer_server {
+    server ${DEPLOYER_HOST};
 }
 
 server {
@@ -33,4 +36,12 @@ server {
         add_header Access-Control-Expose-Headers Content-Length;
         add_header Access-Control-Allow-Headers Range;
     }
+    location /pipeline {
+        proxy_pass http://deployer_server;
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Max-Age 3600;
+        add_header Access-Control-Expose-Headers Content-Length;
+        add_header Access-Control-Allow-Headers Range;
+    }
+
 }
