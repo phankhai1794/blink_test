@@ -16,7 +16,8 @@ import {
   FormHelperText,
   Divider,
   RadioGroup,
-  Radio
+  Radio,
+  Grid,
 } from '@material-ui/core';
 import IconAttachFile from '@material-ui/icons/AttachFile';
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
@@ -74,8 +75,7 @@ const useStyles = makeStyles((theme) => ({
   },
   attachIcon: {
     transform: 'rotate(45deg)',
-    marginLeft: '-2.5rem',
-    color: '#BD0F72 !important'
+    color: '#8A97A3 !important'
   },
   viewMoreBtn: {
     display: 'flex',
@@ -219,47 +219,36 @@ const AllInquiry = (props) => {
             fallback={
               <Card elevation={0} style={{ padding: '1rem ' }}>
                 <div className={clsx(classes.boxItem, inqHasComment.includes(q.id) && classes.boxHasComment)}>
-                  <div style={{ marginBottom: '12px' }} onClick={() => changeToEditor(index, q.field)}>
+                  <div style={{ marginBottom: '12px' }}>
                     <div className="flex justify-between">
                       <Typography color="primary" variant="h5" className={classes.inqTitle}>
                         {`${CURRENT_NUMBER}. ${getKeyByValue(metadata['field'], q.field)}`}
                       </Typography>
                       <div className="flex justify-end" style={{ width: '350px' }}>
-                        {openInquiryReview ?
-                          <div className="flex justify-end items-center mr-2 ">
-                            <img
-                              style={{ width: 20, paddingRight: '3rem', cursor: 'pointer' }}
-                              src='/assets/images/icons/edit.svg'
-                            />
-                            {q.mediaFile?.length > 0 && <IconAttachFile className={clsx(classes.attachIcon)} />}
-                            {/* {allowDeleteInq &&
+                        <div className="flex justify-end items-center mr-2 " onClick={() => changeToEditor(index, q.field)}>
+                          <img
+                            style={{ width: 20, cursor: 'pointer' }}
+                            src='/assets/images/icons/edit.svg'
+                          />
+                        </div>
+                        <div className="flex justify-end items-center mr-2 ">
+                          {q.mediaFile?.length > 0 && <IconAttachFile className={clsx(classes.attachIcon)} />}
+                          {/* {allowDeleteInq &&
                               <IconButton className="p-8" onClick={() => removeQuestion(index)}>
                                 <DeleteIcon />
                               </IconButton>} */}
-                          </div>
-                          : <FormControl error={!valid.receiver && !q.receiver.length} className={classes.checkedIcon}>
-                            <RadioGroup aria-label="receiver" name="receiver" value={q.receiver[0]} onChange={(e) => handleReceiverChange(e, index)}>
-                              <FormControlLabel value="customer" control={<Radio color={'primary'} />} label="Customer" />
-                              <FormControlLabel value="onshore" control={<Radio color={'primary'} />} label="Onshore" />
-                            </RadioGroup>
-                            <FormControlLabel
-                              control={
-                                <AttachFile index={index} />
-                              }
-                            />
-                            {!valid.receiver && !q.receiver.length ? (
-                              <FormHelperText>Pick at least one!</FormHelperText>
-                            ) : null}
-                          </FormControl>}
+                        </div>
+                        <div className="flex justify-end items-center" onClick={() => removeQuestion(index)} >
+                          {allowDeleteInq && <img style={{ height: "22px", cursor: 'pointer' }} src="/assets/images/icons/trash-gray.svg" />}
+                        </div>
                       </div>
                     </div>
-                    {openInquiryReview &&
-                      <div className='py-20'>
-                        <UserInfo
-                          name={q.creator.userName}
-                          time={displayTime(q.createdAt)}
-                          avatar={q.creator.avatar} />
-                      </div>}
+                    <div className='py-20'>
+                      <UserInfo
+                        name={q.creator.userName}
+                        time={displayTime(q.createdAt)}
+                        avatar={q.creator.avatar} />
+                    </div>
                     <Typography variant="h5">{q.name}</Typography>
                     <Typography
                       className={(viewDropDown !== q.id) ? classes.hideText : ''}
@@ -301,7 +290,23 @@ const AllInquiry = (props) => {
                         )}
                       </div>}
                     <>
-                      {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+                      <Grid container spacing={2} alignItems='center'>
+                        <Grid item xs={6}>
+                          {q.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className={classes.viewMoreBtn} onClick={() => handleViewMore(q.id)}>
+                            {viewDropDown !== q.id ?
+                              <>
+                                View All
+                                <ArrowDropDown />
+                              </> : <>
+                                Hide All
+                                <ArrowDropUp />
+                              </>}
+                          </div>
+                        </Grid>
+                      </Grid>
                       {q.mediaFile?.length > 0 &&
                         q.mediaFile?.map((file, mediaIndex) => (
                           <div
@@ -330,17 +335,6 @@ const AllInquiry = (props) => {
                       ))}
                     </>
                   </div>
-                  {openInquiryReview &&
-                    <div className={classes.viewMoreBtn} onClick={() => handleViewMore(q.id)}>
-                      {viewDropDown !== q.id ?
-                        <>
-                          View All
-                          <ArrowDropDown />
-                        </> : <>
-                          Hide All
-                          <ArrowDropUp />
-                        </>}
-                    </div>}
                 </div>
                 <Divider className='my-32' variant='middle' style={{ height: '2px', color: '#BAC3CB' }} />
               </Card>
