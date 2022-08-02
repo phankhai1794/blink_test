@@ -7,15 +7,17 @@ import {
   Typography,
   FormControl,
   FormControlLabel,
-  RadioGroup,
   Radio,
   Button,
   IconButton,
-  Tooltip
+  Tooltip,
+  Grid,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
+import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
+import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -81,7 +83,26 @@ const useStyles = makeStyles((theme) => ({
       marginBottom: 5
     }
   },
-
+  hideText: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    '-webkit-line-clamp': 5,
+    '-webkit-box-orient': 'vertical',
+  },
+  viewMoreBtn: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    width: 'fit-content',
+    position: 'sticky',
+    left: '100%',
+    color: '#BD0F72',
+    fontFamily: 'Montserrat',
+    fontWeight: 600,
+    fontSize: '16px',
+    cursor: 'pointer'
+  },
 }
 ));
 
@@ -98,6 +119,8 @@ const InquiryAnswer = (props) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const indexes = originalInquiry.findIndex((q) => q.field === currentField);
   const [isShowBtn, setShowBtn] = useState(null);
+  const [viewDropDown, setViewDropDown] = useState(false);
+
   const allowCreateAttachmentAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
@@ -113,6 +136,8 @@ const InquiryAnswer = (props) => {
   const onReply = () => {
     dispatch(InquiryActions.setReply(true));
   };
+
+  const handleViewMore = () => setViewDropDown(!viewDropDown);
 
   return (
     <>
@@ -137,40 +162,64 @@ const InquiryAnswer = (props) => {
           </PermissionProvider>
         </div>
       </div>
-      <Typography variant="subtitle" style={{ fontSize: 15, wordBreak: 'break-word', fontFamily: 'Montserrat' }}>
+      <Typography
+        className={viewDropDown ? '' : classes.hideText}
+        variant="subtitle"
+        style={{
+          fontSize: 15,
+          wordBreak: 'break-word',
+          fontFamily: 'Montserrat'
+        }}>
         {question.content}
       </Typography>
-      <div style={{ display: 'block', margin: '1rem 0rem' }}>
-        {type === metadata.ans_type.choice && (
-          <ChoiceAnswer
-            index={indexes}
-            questions={inquiries}
-            question={question}
-            saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-          />
-        )}
-        {type === metadata.ans_type.paragraph && (
-          <ParagraphAnswer
-            question={question}
-            index={indexes}
-            questions={inquiries}
-            saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-          />
-        )}
-        {type === metadata.ans_type.attachment && (
-          <AttachmentAnswer
-            question={question}
-            index={indexes}
-            questions={inquiries}
-            saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-            isShowBtn={isShowBtn}
-            isPermissionAttach={allowCreateAttachmentAnswer}
-          // disabled={true}
-          />
-        )}
-      </div>
+      {viewDropDown &&
+        <div style={{ display: 'block', margin: '1rem 0rem' }}>
+          {type === metadata.ans_type.choice && (
+            <ChoiceAnswer
+              index={indexes}
+              questions={inquiries}
+              question={question}
+              saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+            />
+          )}
+          {type === metadata.ans_type.paragraph && (
+            <ParagraphAnswer
+              question={question}
+              index={indexes}
+              questions={inquiries}
+              saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+            />
+          )}
+          {type === metadata.ans_type.attachment && (
+            <AttachmentAnswer
+              question={question}
+              index={indexes}
+              questions={inquiries}
+              saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
+              isShowBtn={isShowBtn}
+              isPermissionAttach={allowCreateAttachmentAnswer}
+            // disabled={true}
+            />
+          )}
+        </div>}
       <>
-        {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+        <Grid container spacing={2} alignItems='center'>
+          <Grid item xs={6}>
+            {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+          </Grid>
+          <Grid item xs={6}>
+            <div className={classes.viewMoreBtn} onClick={() => handleViewMore()}>
+              {viewDropDown ?
+                <>
+                  Hide All
+                  <ArrowDropUp />
+                </> : <>
+                  View All
+                  <ArrowDropDown />
+                </>}
+            </div>
+          </Grid>
+        </Grid>
         {question.mediaFile?.length > 0 &&
           question.mediaFile?.map((file, mediaIndex) => (
             <div
