@@ -1,15 +1,15 @@
 image: gitlab/dind:latest
 stages:
-  - develop
-  - release
+  - test
 
-deploy_development:
-  stage: develop
+deploy_test:
+  stage: test
   only:
     - "develop"
   when: manual
   environment:
-    name: development
+    name: test
+    url: http://stg-mybl.cyberlogitec.com.vn:8000
   script:
-    - echo "Deploying stg-mybl.cyberlogitec.com.vn:8000"
+    - echo "Sending Deployment Trigger"
     - 'curl -v -d "commit_id=${CI_COMMIT_SHA:0:8}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://stg-mybl.cyberlogitec.com.vn:8000/pipeline/test/portal'
