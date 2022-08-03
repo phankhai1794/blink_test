@@ -1,5 +1,5 @@
 import { getKeyByValue, NUMBER_INQ_BOTTOM } from '@shared';
-import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from '@shared/keyword';
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
 import React, { useEffect, useRef, useState } from 'react';
@@ -151,69 +151,69 @@ const BLWorkspace = (props) => {
 
   const popupOpen = (inquiry, getField) => {
     switch (inquiry.field) {
-    case 'INQUIRY_LIST':
-      return {
-        status: openAllInquiry,
-        toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
-        fabTitle: 'Inquiry List',
-        title: 'Inquiry List',
-        field: 'INQUIRY_LIST',
-        child: <AllInquiry user={props.user} />
-      };
-    case 'ATTACHMENT_LIST':
-      return {
-        status: openAttachment,
-        toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
-        fabTitle: 'Attachment List',
-        title: 'Attachment List',
-        hasAddButton: false,
-        field: 'ATTACHMENT_LIST',
-        popoverfooter: true,
-        customActions: inquiries.length > 0 && (
-          <>
-            <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
-              <AttachFileList
-                uploadImageAttach={(files) => setNewFileAttachment(files)}
-                isAttachmentList={true}
-                type={'addNew'}>
-                <AddCircleIcon
-                  style={{
-                    color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
-                    width: '50px',
-                    fontSize: '50px',
-                    cursor: isShowBackground ? 'inherit' : 'pointer'
-                  }}
-                />
-              </AttachFileList>
-            </PermissionProvider>
-          </>
-        ),
-        child: (
-          <AttachmentList
-            user={props.user}
-            newFileAttachment={newFileAttachment}
-            setFileAttachment={() => setNewFileAttachment([])}
-          />
-        )
-      };
-    case 'INQUIRY_FORM':
-      return {
-        status: openInquiryForm,
-        toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
-        fabTitle: 'Inquiry Form',
-        title: 'Inquiry Creation',
-        field: 'INQUIRY_FORM',
-        child: <InquiryForm />
-      };
-    default:
-      return {
-        status: inquiry?.id === currentInq?.id,
-        toggleForm: () => {},
-        fabTitle: getField?.label,
-        title: getField?.value ? getKeyByValue(metadata['field'], getField?.value) : '',
-        field: getField?.value,
-        child: <Inquiry user={props.user} />
-      };
+      case 'INQUIRY_LIST':
+        return {
+          status: openAllInquiry,
+          toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
+          fabTitle: 'Inquiry List',
+          title: 'Inquiry List',
+          field: 'INQUIRY_LIST',
+          child: <AllInquiry user={props.user} />
+        };
+      case 'ATTACHMENT_LIST':
+        return {
+          status: openAttachment,
+          toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
+          fabTitle: 'Attachment List',
+          title: 'Attachment List',
+          hasAddButton: false,
+          field: 'ATTACHMENT_LIST',
+          popoverfooter: true,
+          customActions: inquiries.length > 0 && (
+            <>
+              <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
+                <AttachFileList
+                  uploadImageAttach={(files) => setNewFileAttachment(files)}
+                  isAttachmentList={true}
+                  type={'addNew'}>
+                  <AddCircleIcon
+                    style={{
+                      color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
+                      width: '50px',
+                      fontSize: '50px',
+                      cursor: isShowBackground ? 'inherit' : 'pointer'
+                    }}
+                  />
+                </AttachFileList>
+              </PermissionProvider>
+            </>
+          ),
+          child: (
+            <AttachmentList
+              user={props.user}
+              newFileAttachment={newFileAttachment}
+              setFileAttachment={() => setNewFileAttachment([])}
+            />
+          )
+        };
+      case 'INQUIRY_FORM':
+        return {
+          status: openInquiryForm,
+          toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
+          fabTitle: 'Inquiry Form',
+          title: 'Inquiry Creation',
+          field: 'INQUIRY_FORM',
+          child: <InquiryForm />
+        };
+      default:
+        return {
+          status: inquiry?.id === currentInq?.id,
+          toggleForm: () => { },
+          fabTitle: getField?.label,
+          title: getField?.value ? getKeyByValue(metadata['field'], getField?.value) : '',
+          field: getField?.value,
+          child: <Inquiry user={props.user} />
+        };
     }
   };
 
@@ -497,7 +497,9 @@ const BLWorkspace = (props) => {
           <Grid item xs={6}>
             <Grid item>
               <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
-              <BLField></BLField>
+              <BLField id={getField(FREIGHT_CHARGES)}>
+                {getValueField(FREIGHT_CHARGES)}
+              </BLField>
             </Grid>
             <Grid container spacing={6}>
               <Grid item xs={6} className={classes.pbGridItem}>
@@ -510,19 +512,27 @@ const BLWorkspace = (props) => {
               </Grid>
               <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
                 <Label>FREIGHTED AS</Label>
-                <BLField></BLField>
+                <BLField id={getField(FREIGHTED_AS)}>
+                  {getValueField(FREIGHTED_AS)}
+                </BLField>
               </Grid>
               <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
                 <Label>RATE</Label>
-                <BLField></BLField>
+                <BLField id={getField(RATE)}>
+                  {getValueField(RATE)}
+                </BLField>
               </Grid>
               <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
                 <Label>DATE CARGO RECEIVED</Label>
-                <BLField></BLField>
+                <BLField id={getField(DATE_CARGO)}>
+                  {getValueField(DATE_CARGO)}
+                </BLField>
               </Grid>
               <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
                 <Label>DATE LADEN ON BOARD</Label>
-                <BLField></BLField>
+                <BLField id={getField(DATE_LADEN)}>
+                  {getValueField(DATE_LADEN)}
+                </BLField>
               </Grid>
             </Grid>
           </Grid>
@@ -554,7 +564,7 @@ const BLWorkspace = (props) => {
               </Grid>
               <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
                 <Label>PLACE OF BILL(S) ISSUE</Label>
-                <BLField></BLField>
+                <BLField id={getField(PLACE_OF_BILL)}></BLField>
               </Grid>
               <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
                 <Label>DATED</Label>
