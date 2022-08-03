@@ -102,9 +102,8 @@ const InquiryEditor = (props) => {
         saveQuestion(optionsOfQuestion);
       }
       const list = [...inquiries, ...questions]
-      const found = metadata.inq_type_options.some(el => el.field === fieldValue.value);
       const filter = metadata.inq_type_options.filter(data => {
-        return (found ? fieldValue.value === data.field : !data.field) && list.filter(q =>
+        return data.field.includes(fieldValue.value) && list.filter(q =>
           q.inqType === data.value && q.field === fieldValue.value
         ).length === 0
       })
@@ -125,7 +124,7 @@ const InquiryEditor = (props) => {
       setFieldValue(metadata.field_options.filter((v) => currentField === v.value)[0]);
     }
     const contentQuestionTrim = optionsOfQuestion.map(op => {
-      let contentTrim = {...op, content: op.content.trim()};
+      let contentTrim = { ...op, content: op.content.trim() };
       const ansTypeChoice = metadata.ans_type['choice'];
       if (ansTypeChoice === op.ansType) {
         op.answerObj.forEach(ans => {
