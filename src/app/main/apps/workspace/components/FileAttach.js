@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import { IconButton } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
+import { PERMISSION, PermissionProvider } from "@shared/permission";
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
@@ -132,9 +133,11 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
         </h3>
         {
           !hiddenRemove &&
-          <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
-            <CloseIcon />
-          </IconButton>
+          <PermissionProvider action={PERMISSION.INQUIRY_REMOVE_MEDIA}>
+            <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+              <CloseIcon />
+            </IconButton>
+          </PermissionProvider>
         }
       </div>
     </div>

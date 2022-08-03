@@ -103,7 +103,7 @@ const InquiryEditor = (props) => {
       }
       const list = [...inquiries, ...questions]
       const filter = metadata.inq_type_options.filter(data => {
-        return data.field.includes(fieldValue.value) && list.filter(q =>
+        return data.field?.includes(fieldValue.value) && list.filter(q =>
           q.inqType === data.value && q.field === fieldValue.value
         ).length === 0
       })

@@ -425,27 +425,29 @@ export default function Form(props) {
         {customActions == null && (
           <DialogActions style={{ display: 'none !important' }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
-              <div style={{ right: '3rem', bottom: '2.6rem', position: 'absolute' }}>
-                <Link
-                  component="button"
-                  variant="body2"
-                  onClick={handleClick}
-                  style={{ display: 'flex', alignItems: 'center' }}>
-                  <AddCircleOutlineIcon style={{ left: '8.33%', right: '8.33%', border: '2px' }} />
-                  <span
-                    style={{
-                      color: '#BD0F72',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      fontFamily: 'Montserrat',
-                      width: '98px',
-                      height: '20px',
-                      fontStyle: 'normal'
-                    }}>
-                    Add Inquiry
-                  </span>
-                </Link>
-              </div>
+              <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
+                <div style={{ right: '3rem', bottom: '2.6rem', position: 'absolute' }}>
+                  <Link
+                    component="button"
+                    variant="body2"
+                    onClick={handleClick}
+                    style={{ display: 'flex', alignItems: 'center' }}>
+                    <AddCircleOutlineIcon style={{ left: '8.33%', right: '8.33%', border: '2px' }} />
+                    <span
+                      style={{
+                        color: '#BD0F72',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        fontFamily: 'Montserrat',
+                        width: '98px',
+                        height: '20px',
+                        fontStyle: 'normal'
+                      }}>
+                      Add Inquiry
+                    </span>
+                  </Link>
+                </div>
+              </PermissionProvider>
             )}
             {!popoverfooter && (
               <div style={{ marginLeft: '2rem' }}>

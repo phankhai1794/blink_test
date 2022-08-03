@@ -10,6 +10,7 @@ import {
   Typography,
   FormControl,
   FormGroup,
+  Tooltip,
   FormControlLabel,
   IconButton,
   Checkbox,
@@ -225,12 +226,16 @@ const AllInquiry = (props) => {
                         {`${CURRENT_NUMBER}. ${getKeyByValue(metadata['field'], q.field)}`}
                       </Typography>
                       <div className="flex justify-end" style={{ width: '350px' }}>
-                        <div className="flex justify-end items-center mr-2 " onClick={() => changeToEditor(index, q.field)}>
-                          <img
-                            style={{ width: 20, cursor: 'pointer' }}
-                            src='/assets/images/icons/edit.svg'
-                          />
-                        </div>
+                        <PermissionProvider action={PERMISSION.VIEW_EDIT_INQUIRY}>
+                          <Tooltip title="Edit Inquiry">
+                            <div className="flex justify-end items-center mr-2 " onClick={() => changeToEditor(index, q.field)}>
+                              <img
+                                style={{ width: 20, cursor: 'pointer' }}
+                                src='/assets/images/icons/edit.svg'
+                              />
+                            </div>
+                          </Tooltip>
+                        </PermissionProvider>
                         <div className="flex justify-end items-center mr-2 ">
                           {q.mediaFile?.length > 0 && <IconAttachFile className={clsx(classes.attachIcon)} />}
                           {/* {allowDeleteInq &&
