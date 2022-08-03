@@ -154,7 +154,7 @@ const OtpCheck = ({ status }) => {
   const pageLayout = useRef(null);
   const [myBL, setMyBL] = useState({ id: '' });
   const [mail, setMail] = useState({ value: '', isValid: false });
-  const [otpCode, setOtpCode] = useState({ value: '', isValid: false });
+  const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true });
   const [step, setStep] = useState(0);
 
   const handleChangeMail = (e) => {
@@ -178,7 +178,7 @@ const OtpCheck = ({ status }) => {
   };
 
   const handleChangeCode = (code) =>
-    setOtpCode({ value: code, isValid: Boolean(/^\d+$/.test(code)) });
+    setOtpCode({ ...otpCode, value: code, isValid: Boolean(/^\d+$/.test(code)) });
 
   const handleSendCode = () => {
     verifyGuest({ email: mail.value, bl: myBL.id, otpCode: otpCode.value })
@@ -231,6 +231,13 @@ const OtpCheck = ({ status }) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (otpCode.value.length === otpLength && otpCode.firstTimeInput) {
+      handleSendCode();
+      setOtpCode({ ...otpCode, firstTimeInput: false });
+    }
+  }, [otpCode.value]);
+
   return (
     <>
       {step === 2 ? (
@@ -265,8 +272,7 @@ const OtpCheck = ({ status }) => {
                       classes.cardContent,
                       'flex flex-col items-center justify-center'
                     )}
-                    style={step == 0 ? { marginBottom: 24 } : { marginBottom: 26 }}
-                  >
+                    style={step == 0 ? { marginBottom: 24 } : { marginBottom: 26 }}>
                     {step === 0 ? (
                       <Formsy
                         onValidSubmit={handleCheckMail}
