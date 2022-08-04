@@ -27,24 +27,25 @@ const ParagraphAnswer = (props) => {
   const allowUpdateParagraphAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
   });
-  const { question, index, questions } = props;
+  const { question, index } = props;
   const [paragraphText, setParagraphText] = useState(question.answerObj[0]?.content || '');
 
   const classes = useStyles();
   const [isPermission, setPermission] = useState(false);
 
+  const handleChangeInput = (e) => {
+    setParagraphText(e.target.value);
+    const body = {
+      inquiry: question.id,
+      content: e.target.value
+    };
+    props.paragrapAnswer(body);
+    props.isDisableSave(false);
+  };
+
   useEffect(() => {
-    if (questions) {
-      if (
-        (!questions[index]?.answerObj[0]?.id && allowCreateParagraphAnswer) ||
-        (questions[index]?.answerObj[0]?.id && allowUpdateParagraphAnswer)
-      ) {
-        setPermission(true);
-      } else {
-        setPermission(false);
-      }
-    }
-  }, [questions]);
+    allowCreateParagraphAnswer && allowUpdateParagraphAnswer ? setPermission(true) : setPermission(false);
+  }, []);
 
   return (
     <div>
@@ -52,7 +53,7 @@ const ParagraphAnswer = (props) => {
         <TextField
           style={{ border: 'none' }}
           fullWidth
-          placeholder={isPermission ? 'Customer Input' : ''}
+          placeholder={isPermission ? 'Typing...' : ''}
           classes={{ root: classes.root }}
           disabled={!isPermission}
           InputProps={{
@@ -70,7 +71,7 @@ const ParagraphAnswer = (props) => {
           rowsMax={4}
 
           value={paragraphText}
-          onChange={(e) => setParagraphText(e.target.value)}
+          onChange={handleChangeInput}
         />
       </div>
       {question.selectedChoice && (

@@ -83,21 +83,22 @@ const Choice = (props) => {
   );
 };
 const ChoiceAnswerEditor = (props) => {
-  const { questions, question, index, saveQuestion } = props;
+  // const { questions, question, index, saveQuestion } = props;
   const classes = inputStyle();
   const dispatch = useDispatch();
-  const [valid, metadata] = useSelector(({ workspace }) => [
+  const [valid, currentEditInq] =
+  useSelector(({ workspace }) => [
     workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.metadata
+    workspace.inquiryReducer.currentEditInq
   ]);
   const [isAddChoice, setAddChoice] = useState(false);
 
   const checkOptionsEmpty = () => {
-    const optionsOfQuestion = [...questions];
+    const inq = {... currentEditInq};
     //check at least has one option
-    if (optionsOfQuestion[index].answerObj.length > 0) {
+    if (inq.answerObj.length > 0) {
       // check empty option
-      const checkEmpty = optionsOfQuestion[index].answerObj.filter((item) => !item.content);
+      const checkEmpty = inq.answerObj.filter((item) => !item.content);
       if (checkEmpty.length > 0) {
         dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
       } else {
@@ -109,36 +110,36 @@ const ChoiceAnswerEditor = (props) => {
   };
 
   const handleAddChoice = () => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj.push({
+    const inq = {... currentEditInq};
+    inq.answerObj.push({
       id: null,
-      content: 'Option ' + (optionsOfQuestion[index].answerObj.length + 1),
+      content: 'Option ' + (inq.answerObj.length + 1),
       createdAt: new Date(),
     });
-    saveQuestion(optionsOfQuestion);
+    dispatch(InquiryActions.setEditInq(inq));
     checkOptionsEmpty();
     dispatch(FormActions.setEnableSaveInquiriesList(false));
     setAddChoice(true);
   };
   const handleRemoveChoice = (id) => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj.splice(id, 1);
-    saveQuestion(optionsOfQuestion);
+    const inq = {... currentEditInq};
+    inq.answerObj.splice(id, 1);
+    dispatch(InquiryActions.setEditInq(inq));
     checkOptionsEmpty();
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   const handleChangeChoice = (e, id) => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].answerObj[id].content = e.target.value;
-    saveQuestion(optionsOfQuestion);
+    const inq = {... currentEditInq};
+    inq.answerObj[id].content = e.target.value;
+    dispatch(InquiryActions.setEditInq(inq));
     checkOptionsEmpty();
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   return (
     <div style={{ paddingTop: '2rem' }} className={classes.root}>
-      {question.answerObj.map((value, k) => {
+      {currentEditInq.answerObj.map((value, k) => {
         return (
           <Choice
             key={k}

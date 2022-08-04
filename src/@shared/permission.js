@@ -20,6 +20,7 @@ export const PERMISSION = {
   INQUIRY_ANSWER_ATTACHMENT: 'inquiry_createAttachmentAnswer',
   INQUIRY_ANSWER_CREATE_PARAGRAPH: 'inquiry_createParagraphAnswer',
   INQUIRY_ANSWER_UPDATE_PARAGRAPH: 'inquiry_updateParagraphAnswer',
+  INQUIRY_ANSWER_UPDATE_CHOICE: 'inquiry_updateInquiryChoice',
   INQUIRY_REPLACE_MEDIA: 'inquiry_replaceMedia',
   INQUIRY_REMOVE_MEDIA: 'inquiry_removeMedia',
   INQUIRY_INQ_ATT_MEDIA: 'inquiry_changesInqAtt',

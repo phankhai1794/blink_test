@@ -85,6 +85,7 @@ const AttachmentAnswer = (props) => {
       noKeyboard: true,
       onDrop,
     });
+    
   const handleSave = () => {
     const formData = [];
     const mediaRest = [];
@@ -123,7 +124,6 @@ const AttachmentAnswer = (props) => {
           optionsOfQuestion[index].answerObj[0].mediaFiles = answerObjMediaFiles;
           dispatch(saveQuestion(optionsOfQuestion));
           dispatch(FormActions.toggleReload());
-          dispatch(InquiryActions.setOneInq({}));
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));

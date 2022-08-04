@@ -7,7 +7,7 @@ import {
   setContent,
   saveField,
   editInquiry,
-  setOriginalInquiry,
+  setInquiries,
   saveMetadata,
   setListAttachment
 } from './inquiry';
@@ -39,7 +39,7 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
       const field_list = res.map((e) => e.field);
       dispatch(saveField(field_list));
       dispatch(editInquiry(res));
-      dispatch(setOriginalInquiry(JSON.parse(JSON.stringify(res))));
+      dispatch(setInquiries(JSON.parse(JSON.stringify(res))));
       const optionTabs = [
         { id: 'inquiryList', field: 'INQUIRY_LIST' },
         { id: 'attachmentList', field: 'ATTACHMENT_LIST' },

@@ -23,7 +23,6 @@ import Form from './Form';
 import Label from './FieldLabel';
 import BtnAddInquiry from './BtnAddInquiry';
 import BLField from './BLField';
-import InquiryForm from './InquiryForm';
 import { AttachmentList, AttachFileList } from './AttachmentList';
 import BLProcessNotification from './BLProcessNotification';
 import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
@@ -151,69 +150,69 @@ const BLWorkspace = (props) => {
 
   const popupOpen = (inquiry, getField) => {
     switch (inquiry.field) {
-      case 'INQUIRY_LIST':
-        return {
-          status: openAllInquiry,
-          toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
-          fabTitle: 'Inquiry List',
-          title: 'Inquiry List',
-          field: 'INQUIRY_LIST',
-          child: <AllInquiry user={props.user} />
-        };
-      case 'ATTACHMENT_LIST':
-        return {
-          status: openAttachment,
-          toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
-          fabTitle: 'Attachment List',
-          title: 'Attachment List',
-          hasAddButton: false,
-          field: 'ATTACHMENT_LIST',
-          popoverfooter: true,
-          customActions: inquiries.length > 0 && (
-            <>
-              <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
-                <AttachFileList
-                  uploadImageAttach={(files) => setNewFileAttachment(files)}
-                  isAttachmentList={true}
-                  type={'addNew'}>
-                  <AddCircleIcon
-                    style={{
-                      color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
-                      width: '50px',
-                      fontSize: '50px',
-                      cursor: isShowBackground ? 'inherit' : 'pointer'
-                    }}
-                  />
-                </AttachFileList>
-              </PermissionProvider>
-            </>
-          ),
-          child: (
-            <AttachmentList
-              user={props.user}
-              newFileAttachment={newFileAttachment}
-              setFileAttachment={() => setNewFileAttachment([])}
-            />
-          )
-        };
-      case 'INQUIRY_FORM':
-        return {
-          status: openInquiryForm,
-          toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
-          fabTitle: 'Inquiry Form',
-          title: 'Inquiry Creation',
-          field: 'INQUIRY_FORM',
-          child: <InquiryForm />
-        };
-      default:
-        return {
-          status: inquiry?.id === currentInq?.id,
-          toggleForm: () => { },
-          fabTitle: getField?.label,
-          title: getField?.value ? getKeyByValue(metadata['field'], getField?.value) : '',
-          field: getField?.value,
-          child: <Inquiry user={props.user} />
-        };
+    case 'INQUIRY_LIST':
+      return {
+        status: openAllInquiry,
+        toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
+        fabTitle: 'Inquiry List',
+        title: 'Inquiry List',
+        field: 'INQUIRY_LIST',
+        child: <AllInquiry user={props.user} />
+      };
+    case 'ATTACHMENT_LIST':
+      return {
+        status: openAttachment,
+        toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
+        fabTitle: 'Attachment List',
+        title: 'Attachment List',
+        hasAddButton: false,
+        field: 'ATTACHMENT_LIST',
+        popoverfooter: true,
+        customActions: inquiries.length > 0 && (
+          <>
+            <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
+              <AttachFileList
+                uploadImageAttach={(files) => setNewFileAttachment(files)}
+                isAttachmentList={true}
+                type={'addNew'}>
+                <AddCircleIcon
+                  style={{
+                    color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
+                    width: '50px',
+                    fontSize: '50px',
+                    cursor: isShowBackground ? 'inherit' : 'pointer'
+                  }}
+                />
+              </AttachFileList>
+            </PermissionProvider>
+          </>
+        ),
+        child: (
+          <AttachmentList
+            user={props.user}
+            newFileAttachment={newFileAttachment}
+            setFileAttachment={() => setNewFileAttachment([])}
+          />
+        )
+      };
+    case 'INQUIRY_FORM':
+      return {
+        status: openInquiryForm,
+        toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
+        fabTitle: 'Inquiry Form',
+        title: 'Inquiry Creation',
+        field: 'INQUIRY_FORM',
+        child: <Inquiry user={props.user} />
+      };
+    default:
+      return {
+        status: inquiry?.id === currentInq?.id,
+        toggleForm: () => { },
+        fabTitle: getField?.label,
+        title: getField?.value ? getKeyByValue(metadata['field'], getField?.value) : '',
+        field: getField?.value,
+        child: <Inquiry user={props.user} />
+      };
     }
   };
 
@@ -334,7 +333,7 @@ const BLWorkspace = (props) => {
           </div>
         </div>
 
-        <BtnAddInquiry />
+        {/* <BtnAddInquiry /> */}
 
         <Grid container>
           <Grid item xs={6} className={classes.leftPanel}>

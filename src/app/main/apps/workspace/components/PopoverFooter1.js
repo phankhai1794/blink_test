@@ -48,107 +48,107 @@ const PopoverFooter = (props) => {
     };
   };
   const onSave = async () => {
-    try {
-      const check = inquiries.filter((q) => !q.receiver.length)
-      if (check.length) {
-        dispatch(InquiryActions.validate({ ...valid, receiver: !check.length }));
-        return;
-      }
-      if (!valid.ansType || !valid.answerContent || !valid.content || !valid.field || !valid.inqType || !valid.receiver) {
-        return;
-      }
-      let error = false;
-      const ansTypeChoice = metadata.ans_type['choice'];
-      for (let i = 0; i < originalInquiry.length; i++) {
-        // validate type choice
-        if (ansTypeChoice === inquiries[i].ansType) {
-          if (inquiries[i].answerObj.length === 1) {
-            dispatch(AppActions.showMessage({ message: "Please add more options!", variant: 'error' }));
-            error = true;
-            break;
-          }
-          // check empty a field
-          if (inquiries[i].answerObj.length > 0) {
-            const checkOptionEmpty = inquiries[i].answerObj.filter(item => !item.content);
-            if (checkOptionEmpty.length > 0) {
-              dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
-              error = true;
-              break;
-            }
-          } else {
-            dispatch(AppActions.showMessage({ message: "Options not empty!", variant: 'error' }));
-            error = true;
-            break;
-          }
-        }
-        if (ansTypeChoice === inquiries[i].ansType && inquiries[i].answerObj.length) {
-          const dupArray = inquiries[i].answerObj.map(ans => ans.content)
-          if (toFindDuplicates(dupArray).length) {
-            dispatch(AppActions.showMessage({ message: "Options value must not be duplicated", variant: 'error' }));
-            return;
-          }
-        }
-        const ansCreate = inquiries[i].answerObj.filter(
-          ({ id: id1 }) => !originalInquiry[i].answerObj.some(({ id: id2 }) => id2 === id1)
-        );
-        const ansDelete = originalInquiry[i].answerObj.filter(
-          ({ id: id1 }) => !inquiries[i].answerObj.some(({ id: id2 }) => id2 === id1)
-        );
-        let ansUpdate = inquiries[i].answerObj.filter(({ id: id1, content: c1 }) =>
-          originalInquiry[i].answerObj.some(({ id: id2, content: c2 }) => id2 === id1 && c1 !== c2)
-        );
-        const mediaCreate = inquiries[i].mediaFile.filter(
-          ({ id: id1 }) => !originalInquiry[i].mediaFile.some(({ id: id2 }) => id2 === id1)
-        );
-        const mediaDelete = originalInquiry[i].mediaFile.filter(
-          ({ id: id1 }) => !inquiries[i].mediaFile.some(({ id: id2 }) => id2 === id1)
-        );
-        for (const f in mediaCreate) {
-          const form_data = mediaCreate[f].data;
-          const res = await uploadFile(form_data);
-          mediaCreate[f].id = res.response[0].id;
-        }
-        if (
-          JSON.stringify(inq(inquiries[i])) !== JSON.stringify(inq(originalInquiry[i])) ||
-          JSON.stringify(inquiries[i].answerObj) !== JSON.stringify(originalInquiry[i].answerObj) ||
-          mediaCreate.length ||
-          mediaDelete.length
-        ) {
-          const inqContentTrim = {...inq(inquiries[i]), content: inq(inquiries[i]).content.trim()};
-          if (ansTypeChoice === inquiries[i].ansType) {
-            ansUpdate = ansUpdate.map(ans => {
-              return {...ans, content: ans.content.trim()}
-            })
-          }
-          await updateInquiry(inquiries[i].id, {
-            inq: inqContentTrim,
-            ans: { ansDelete, ansCreate, ansUpdate },
-            files: { mediaCreate, mediaDelete }
-          });
-        }
-      }
-      if (!error) {
-        dispatch(
-          AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
-        );
-        dispatch(FormActions.toggleSaveInquiry(false))
-        dispatch(FormActions.toggleReload());
-        dispatch(InquiryActions.setOneInq({}));
-        dispatch(InquiryActions.setEditInq(null));
-        dispatch(FormActions.setEnableSaveInquiriesList(true));
-        dispatch(FormActions.toggleOpenInquiryReview(false));
-        props.handleToggleFab(false)
-      }
-    } catch (error) {
-      dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
-    }
+    // try {
+    //   const check = inquiries.filter((q) => !q.receiver.length)
+    //   if (check.length) {
+    //     dispatch(InquiryActions.validate({ ...valid, receiver: !check.length }));
+    //     return;
+    //   }
+    //   if (!valid.ansType || !valid.answerContent || !valid.content || !valid.field || !valid.inqType || !valid.receiver) {
+    //     return;
+    //   }
+    //   let error = false;
+    //   const ansTypeChoice = metadata.ans_type['choice'];
+    //   for (let i = 0; i < originalInquiry.length; i++) {
+    //     // validate type choice
+    //     if (ansTypeChoice === inquiries[i].ansType) {
+    //       if (inquiries[i].answerObj.length === 1) {
+    //         dispatch(AppActions.showMessage({ message: "Please add more options!", variant: 'error' }));
+    //         error = true;
+    //         break;
+    //       }
+    //       // check empty a field
+    //       if (inquiries[i].answerObj.length > 0) {
+    //         const checkOptionEmpty = inquiries[i].answerObj.filter(item => !item.content);
+    //         if (checkOptionEmpty.length > 0) {
+    //           dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
+    //           error = true;
+    //           break;
+    //         }
+    //       } else {
+    //         dispatch(AppActions.showMessage({ message: "Options not empty!", variant: 'error' }));
+    //         error = true;
+    //         break;
+    //       }
+    //     }
+    //     if (ansTypeChoice === inquiries[i].ansType && inquiries[i].answerObj.length) {
+    //       const dupArray = inquiries[i].answerObj.map(ans => ans.content)
+    //       if (toFindDuplicates(dupArray).length) {
+    //         dispatch(AppActions.showMessage({ message: "Options value must not be duplicated", variant: 'error' }));
+    //         return;
+    //       }
+    //     }
+    //     const ansCreate = inquiries[i].answerObj.filter(
+    //       ({ id: id1 }) => !originalInquiry[i].answerObj.some(({ id: id2 }) => id2 === id1)
+    //     );
+    //     const ansDelete = originalInquiry[i].answerObj.filter(
+    //       ({ id: id1 }) => !inquiries[i].answerObj.some(({ id: id2 }) => id2 === id1)
+    //     );
+    //     let ansUpdate = inquiries[i].answerObj.filter(({ id: id1, content: c1 }) =>
+    //       originalInquiry[i].answerObj.some(({ id: id2, content: c2 }) => id2 === id1 && c1 !== c2)
+    //     );
+    //     const mediaCreate = inquiries[i].mediaFile.filter(
+    //       ({ id: id1 }) => !originalInquiry[i].mediaFile.some(({ id: id2 }) => id2 === id1)
+    //     );
+    //     const mediaDelete = originalInquiry[i].mediaFile.filter(
+    //       ({ id: id1 }) => !inquiries[i].mediaFile.some(({ id: id2 }) => id2 === id1)
+    //     );
+    //     for (const f in mediaCreate) {
+    //       const form_data = mediaCreate[f].data;
+    //       const res = await uploadFile(form_data);
+    //       mediaCreate[f].id = res.response[0].id;
+    //     }
+    //     if (
+    //       JSON.stringify(inq(inquiries[i])) !== JSON.stringify(inq(originalInquiry[i])) ||
+    //       JSON.stringify(inquiries[i].answerObj) !== JSON.stringify(originalInquiry[i].answerObj) ||
+    //       mediaCreate.length ||
+    //       mediaDelete.length
+    //     ) {
+    //       const inqContentTrim = {...inq(inquiries[i]), content: inq(inquiries[i]).content.trim()};
+    //       if (ansTypeChoice === inquiries[i].ansType) {
+    //         ansUpdate = ansUpdate.map(ans => {
+    //           return {...ans, content: ans.content.trim()}
+    //         })
+    //       }
+    //       await updateInquiry(inquiries[i].id, {
+    //         inq: inqContentTrim,
+    //         ans: { ansDelete, ansCreate, ansUpdate },
+    //         files: { mediaCreate, mediaDelete }
+    //       });
+    //     }
+    //   }
+    //   if (!error) {
+    //     dispatch(
+    //       AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+    //     );
+    //     dispatch(FormActions.toggleSaveInquiry(false))
+    //     dispatch(FormActions.toggleReload());
+    //     dispatch(InquiryActions.setOneInq({}));
+    //     dispatch(InquiryActions.setEditInq(null));
+    //     dispatch(FormActions.setEnableSaveInquiriesList(true));
+    //     dispatch(FormActions.toggleOpenInquiryReview(false));
+    //     props.handleToggleFab(false)
+    //   }
+    // } catch (error) {
+    //   dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
+    // }
   };
 
   return (
     <div className="text-center p-5">
-      <Button disabled={enableSaveInquiriesList} variant="contained" className={classes.root} color="primary" onClick={(onSave)}>
+      {/* <Button disabled={enableSaveInquiriesList} variant="contained" className={classes.root} color="primary" onClick={(onSave)}>
         Save
-      </Button>
+      </Button> */}
     </div>
   );
 };

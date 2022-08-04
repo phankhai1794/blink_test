@@ -2,7 +2,7 @@ export const SAVE_INQUIRY = 'SAVE_INQUIRY';
 export const EDIT_INQUIRY = 'EDIT_INQUIRY';
 export const SAVE_FIELD = 'SAVE_FIELD';
 export const ADD_QUESTION = 'ADD_QUESTION';
-export const SET_ORIGINAL_INQUIRY = 'SET_ORIGINAL_INQUIRY';
+export const SET_INQUIRY = 'SET_INQUIRY';
 export const REMOVE_SELECTED_OPTION = 'REMOVE_SELECTED_OPTION';
 export const DISPLAY_COMMENT = 'DISPLAY_COMMENT';
 export const SET_MYBL = 'SET_MYBL';
@@ -12,7 +12,6 @@ export const VALIDATE = 'VALIDATE';
 export const SET_CURRENT_FIELD = 'SET_CURRENT_FIELD';
 export const SET_QUESTION = 'SET_QUESTION';
 export const SET_REPLY = 'SET_REPLY';
-export const SET_EDIT = 'SET_EDIT';
 export const SET_EDIT_INQUIRY = 'SET_EDIT_INQUIRY';
 export const SET_UPLOAD_FILE = 'SET_UPLOAD_FILE';
 export const SET_ONE_INQUIRY = 'SET_ONE_INQUIRY';
@@ -23,6 +22,8 @@ export const VALIDATE_ATTACHMENT = 'VALIDATE_ATTACHMENT';
 export const SET_LAST_FIELD = 'SET_LAST_FIELD';
 export const SET_OPENED_INQ_FORM = 'SET_OPENED_INQ_FORM';
 export const SET_BACKGROUND_ATTACHMENT_LIST = 'SET_BACKGROUND_ATTACHMENT_LIST';
+
+// export const SET_INQUIRY_EDIT = 'SET_INQUIRY_EDIT';
 
 export function saveInquiry() {
   return {
@@ -44,18 +45,26 @@ export function saveField(state) {
   };
 }
 
-export function addQuestion() {
+export function addQuestion(state) {
   return {
-    type: ADD_QUESTION
-  };
-}
-
-export function setOriginalInquiry(state) {
-  return {
-    type: SET_ORIGINAL_INQUIRY,
+    type: ADD_QUESTION,
     state: state
   };
 }
+
+export function setInquiries(state) {
+  return {
+    type: SET_INQUIRY,
+    state: state
+  };
+}
+
+// export function setInquiryEdit(state) {
+//   return {
+//     type: SET_INQUIRY_EDIT,
+//     state: state
+//   };
+// }
 
 export function removeSelectedOption(state) {
   return {
@@ -117,13 +126,6 @@ export function setReply(question) {
   return {
     type: SET_REPLY,
     state: question
-  };
-}
-
-export function setEdit(state) {
-  return {
-    type: SET_EDIT,
-    state: state
   };
 }
 

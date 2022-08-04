@@ -119,7 +119,7 @@ const useStyles = makeStyles((theme) => ({
   attachIcon: {
     transform: 'rotate(45deg)',
     marginLeft: '-2.5rem'
-  },
+  }
 }));
 
 const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
@@ -132,8 +132,7 @@ const BLField = (props) => {
   const [isHasAnswer, setHasAnswer] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
-  const questions = useSelector(({ workspace }) => workspace.inquiryReducer.question);
-  const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
+  const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
@@ -162,22 +161,20 @@ const BLField = (props) => {
   };
 
   const onClick = (e) => {
-    if (!questionIsEmpty) {
+    if (questionIsEmpty) {
+      dispatch(InquiryActions.addQuestion(id));
+    } else {
       const currentInq = inquiries.find((q) => q.field === id);
       dispatch(InquiryActions.setOneInq(currentInq));
     }
     if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
       if (
-        questions.length > 1 &&
-        !questions[questions.length - 1].id &&
-        checkValidate(questions[questions.length - 1])
+        inquiries.length > 0 &&
+        !currentEditInq &&
+        checkValidate(inquiries[inquiries.length - 1])
       ) {
-        if (inquiries.length + questions.length + 1 === metadata.field_options.length) {
+        if (inquiries.length + 1 === metadata.field_options.length) {
           dispatch(FormActions.toggleAddInquiry(false));
-        }
-        if (inquiries.length + questions.length !== metadata.field_options.length) {
-          dispatch(InquiryActions.addQuestion());
-          dispatch(InquiryActions.setEdit(questions.length));
         }
       }
       dispatch(FormActions.toggleCreateInquiry(true));
@@ -187,43 +184,18 @@ const BLField = (props) => {
   };
 
   const checkQuestionIsEmpty = () => {
-    if (originalInquiry.length > 0) {
-      const check = originalInquiry.filter((q) => q.field === id);
-      const checkMedia = originalInquiry.filter((q) => q.field === id && q.mediaFile.length);
+    if (inquiries.length > 0) {
+      const check = inquiries.filter((q) => q.field === id);
+      const checkMedia = inquiries.filter((q) => q.field === id && q.mediaFile.length);
       checkMedia.length && setMediaFileIsEmpty(false);
       return check.length === 0;
     }
     return true;
   };
 
-  const checkAnswerIsEmpty = () => {
-    if (inquiries.length > 0) {
-      const checkInqAnswer = inquiries.find(q => q.field === id && q.answerObj.length);
-      if (checkInqAnswer) {
-        switch (checkInqAnswer.ansType) {
-        case `${metadata.ans_type['choice']}`: {
-          const findConfirmed = checkInqAnswer.answerObj.find(inq => inq.confirmed);
-          if (findConfirmed) setHasAnswer(true);
-          break;
-        }
-        default: {
-          const findAnswerMedia = checkInqAnswer.answerObj.find(inq => inq.mediaFiles.length > 0);
-          const findAnswer = checkInqAnswer.answerObj.find(inq => inq.content);
-          if (findAnswerMedia || findAnswer) {
-            setHasAnswer(true);
-          } else {
-            setHasAnswer(false)
-          }
-          break;
-        }
-        }
-      }
-    }
-  };
-
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty());
-  }, [originalInquiry, metadata]);
+  }, [inquiries, metadata]);
 
   return (
     <>
@@ -244,7 +216,7 @@ const BLField = (props) => {
               classes.root,
               !questionIsEmpty ? classes.hasInquiry : '',
               lock ? classes.locked : '',
-              isHasAnswer ? classes.hasAnswer : '',
+              isHasAnswer ? classes.hasAnswer : ''
             )}
             InputProps={{
               readOnly: readOnly || true,
@@ -256,8 +228,16 @@ const BLField = (props) => {
                     multiline ? classes.adornmentMultiline : '',
                     rows ? classes[`adornmentRow_${rows}`] : ''
                   )}>
-                  {!mediaFileIsEmpty && <AttachFile className={clsx(classes.sizeIcon, !isHasAnswer ? classes.colorHasInqIcon : classes.colorHasAnswer, classes.attachIcon)} />}
-                 
+                  {!mediaFileIsEmpty && (
+                    <AttachFile
+                      className={clsx(
+                        classes.sizeIcon,
+                        !isHasAnswer ? classes.colorHasInqIcon : classes.colorHasAnswer,
+                        classes.attachIcon
+                      )}
+                    />
+                  )}
+
                   {!questionIsEmpty && !isHasAnswer && (
                     <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
                   )}
@@ -284,7 +264,6 @@ const BLField = (props) => {
               }
             }}
           />
-          
         </ThemeProvider>
       </div>
     </>

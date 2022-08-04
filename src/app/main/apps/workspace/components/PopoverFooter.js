@@ -41,8 +41,7 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = ({ title }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [index, currentField, question, fields, myBL, displayCmt, valid, inquiries, metadata, lastField, openedInquiresForm] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.currentEdit,
+  const [currentField, question, fields, myBL, displayCmt, valid, inquiries, metadata, lastField, openedInquiresForm] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.question,
     workspace.inquiryReducer.fields,
@@ -56,108 +55,7 @@ const PopoverFooter = ({ title }) => {
   ]);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
 
-  const onSave = () => {
-    const check = question.filter((q) => !q.receiver.length);
-    if (!question[index].inqType || !question[index].field || check.length || !question[index].ansType || !question[index].content) {
-      dispatch(InquiryActions.validate({
-        ...valid,
-        field: Boolean(question[index].field),
-        inqType: Boolean(question[index].inqType),
-        ansType: Boolean(question[index].ansType),
-        receiver: !check.length,
-        content: Boolean(question[index].content),
-      }));
-      return;
-    }
-    //check empty type choice
-    const ansTypeChoice = metadata.ans_type['choice'];
-    if (ansTypeChoice === question[index].ansType) {
-      if (question[index].answerObj.length === 1) {
-        dispatch(AppActions.showMessage({ message: "Please add more options!", variant: 'error' }));
-        return;
-      }
-      // check empty a field
-      if (question[index].answerObj.length > 0) {
-        const checkOptionEmpty = question[index].answerObj.filter(item => !item.content);
-        if (checkOptionEmpty.length > 0) {
-          dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
-          return;
-        }
-      } else {
-        dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
-        return;
-      }
-    }
-    //
-    const checkGeneral = question.filter((q) => !q.inqType || !q.field)
-    if (checkGeneral.length) {
-      dispatch(AppActions.showMessage({ message: "There is empty field or inquiry type", variant: 'error' }));
-      return;
-    }
-    if (ansTypeChoice === question[index].ansType && question[index].answerObj.length) {
-      const dupArray = question[index].answerObj.map(ans => ans.content)
-      if (toFindDuplicates(dupArray).length) {
-        dispatch(AppActions.showMessage({ message: "Options value must not be duplicated", variant: 'error' }));
-        return;
-      }
-    }
-    let mediaList = [];
-    const filesUpload = [];
-    question.forEach((q) => {
-      if (q.mediaFile.length > 0) {
-        filesUpload.push(q.mediaFile)
-      }
-    });
-    const inqContentTrim = question.map(op => {
-      let contentTrim = {...op, content: op.content.trim()};
-      const ansTypeChoice = metadata.ans_type['choice'];
-      if (ansTypeChoice === op.ansType) {
-        op.answerObj.forEach(ans => {
-          ans.content = ans.content.trim();
-        });
-      }
-      return contentTrim;
-    });
-    if (filesUpload.length > 0) {
-      const uploads = [];
-      filesUpload.forEach((files) => {
-        const formData = new FormData();
-        files.forEach(file => {
-          formData.append('files', file.fileUpload);
-        });
-        uploads.push(formData);
-      })
-      axios
-        .all(uploads.map((endpoint) => uploadFile(endpoint)))
-        .then((media) => {
-          media.forEach(file => {
-            const mediaFileList = file.response.map(item => item);
-            mediaList = [...mediaList, ...mediaFileList];
-          });
-          saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
-            .then(() => {
-              dispatch(
-                AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
-              );
-              dispatch(InquiryActions.saveInquiry());
-              dispatch(FormActions.toggleReload());
-              dispatch(InquiryActions.setOpenedInqForm(false));
-            })
-            .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
-        }).catch((error) => console.log(error));
-    } else {
-      saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
-        .then(() => {
-          dispatch(
-            AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
-          );
-          dispatch(InquiryActions.saveInquiry());
-          dispatch(FormActions.toggleReload());
-          dispatch(InquiryActions.setOpenedInqForm(false));
-        })
-        .catch((error) => dispatch(AppActions.showMessage({ message: error, variant: 'error' })));
-    }
-  };
+
   const toggleInquiriresDialog = () => {
     dispatch(FormActions.toggleAllInquiry(true));
     dispatch(FormActions.toggleInquiry(true));
@@ -175,11 +73,9 @@ const PopoverFooter = ({ title }) => {
     let temp = inquiries.findIndex((inq) => inq.field === title);
     if (temp !== inquiries.length - 1) {
       temp += 1;
-      dispatch(InquiryActions.setOneInq(inquiries[temp]));
       dispatch(InquiryActions.setField(fields[temp]));
     } else {
       if (openedInquiresForm) {
-        dispatch(InquiryActions.setOneInq({}));
         dispatch(FormActions.toggleCreateInquiry(true));
         dispatch(InquiryActions.setField(lastField));
       } else {
@@ -244,30 +140,7 @@ const PopoverFooter = ({ title }) => {
         >
           Open all inquiries
         </Link>
-      </div>
-      <div style={{ alignSelf: 'center', marginRight: '20rem' }}>
-        <PermissionProvider
-          action={PERMISSION.VIEW_SAVE_INQUIRY}
-          extraCondition={!fields.includes(title)}
-        >
-          <Button
-            variant="contained"
-            style={{
-              textTransform: 'capitalize',
-              left: '13.45%', right: '13.45%', top: '25%', bottom: '25%',
-              fontFamily: 'Montserrat', fontStyle: 'normal', fontWeight: '600', fontSize: '16px', lineHegiht: '20px',
-              textAlign: 'center',
-              backgroundColor: "#BD0F72"
-            }}
-            className={classes.root}
-            color="primary"
-            onClick={onSave}
-          >
-            Save
-          </Button>
-        </PermissionProvider>
-      </div>
-      
+      </div>  
     </div>
   );
 };

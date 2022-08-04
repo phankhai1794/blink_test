@@ -81,7 +81,7 @@ const DialogTitle = withStyles(styles)((props) => {
           <IconButton
             aria-label="close"
             // onClick={handleOpenSnackBar}
-            onClick={() => { }}
+            onClick={() => {}}
             style={{ textAlign: 'center' }}>
             <MinimizeIcon />
           </IconButton>
@@ -128,7 +128,7 @@ const useStyles = makeStyles(() => ({
   },
   dialogContent: {
     margin: 'auto',
-    marginTop: '1rem',
+    marginTop: '2rem',
     backgroundColor: 'white',
     width: (props) => (props.isFullScreen ? '1200px' : '900px')
   },
@@ -154,7 +154,7 @@ const useStyles = makeStyles(() => ({
   iconLabelWrapper: {
     display: 'flex',
     flexDirection: 'row-reverse',
-    justifyContent: 'space-around',
+    justifyContent: 'space-around'
   },
   countBtn: {
     background: '#E2E6EA',
@@ -166,7 +166,7 @@ const useStyles = makeStyles(() => ({
   },
   colorCountBtn: {
     background: '#FDF2F2'
-  },
+  }
 }));
 
 export default function Form(props) {
@@ -184,24 +184,22 @@ export default function Form(props) {
     popoverfooter
   } = props;
 
-  const index = useSelector(({ workspace }) => workspace.inquiryReducer.currentEdit);
-  const question = useSelector(({ workspace }) => workspace.inquiryReducer.question);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
 
-  const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
   const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
 
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
-  const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
-  const openInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
+  const isShowBackground = useSelector(
+    ({ workspace }) => workspace.inquiryReducer.isShowBackground
+  );
 
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const showSaveInquiry = useSelector(({ workspace }) => workspace.formReducer.showSaveInquiry);
   const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
-
 
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -220,7 +218,13 @@ export default function Form(props) {
   }, [listInqMinimize]);
 
   const checkValidate = (question) => {
-    if (!question.inqType || !question.field || !question.receiver.length || !question.ansType || !question.content) {
+    if (
+      !question.inqType ||
+      !question.field ||
+      !question.receiver.length ||
+      !question.ansType ||
+      !question.content
+    ) {
       dispatch(
         InquiryActions.validate({
           ...valid,
@@ -250,7 +254,7 @@ export default function Form(props) {
       }
     }
     if (typeChoice === question.ansType && question.answerObj.length) {
-      const dupArray = question.answerObj.map(ans => ans.content)
+      const dupArray = question.answerObj.map((ans) => ans.content);
       if (toFindDuplicates(dupArray).length) {
         dispatch(
           AppActions.showMessage({ message: 'Options must not be duplicated', variant: 'error' })
@@ -284,20 +288,17 @@ export default function Form(props) {
   };
 
   const handleClick = () => {
-    if (Object.keys(openInq).length) {
-      dispatch(FormActions.toggleCreateInquiry(true));
-      dispatch(InquiryActions.setOneInq({}));
-    }
-    else if (openAllInquiry) {
-      toggleForm(false);
-      dispatch(FormActions.toggleSaveInquiry(false));
-      dispatch(FormActions.toggleCreateInquiry(true));
-    } else if (checkValidate(question[index])) {
-      if (inquiries.length + question.length + 1 === metadata.field_options.length) {
-        dispatch(FormActions.toggleAddInquiry(false));
+    if (!currentEditInq ){
+      if (openAllInquiry) {
+        toggleForm(false);
+        dispatch(FormActions.toggleSaveInquiry(false));
+        dispatch(FormActions.toggleCreateInquiry(true));
+      } else {
+        if (inquiries.length + 1 === metadata.field_options.length) {
+          dispatch(FormActions.toggleAddInquiry(false));
+        }
       }
       dispatch(InquiryActions.addQuestion());
-      dispatch(InquiryActions.setEdit(question.length));
     }
   };
 
@@ -322,7 +323,7 @@ export default function Form(props) {
     if (field === 'ATTACHMENT_LIST') {
       dispatch(FormActions.toggleReload());
     } else {
-      dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))));
+      // dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))));
     }
     dispatch(FormActions.toggleSaveInquiry(false));
     dispatch(InquiryActions.setOneInq({}));
@@ -358,7 +359,7 @@ export default function Form(props) {
 
   const countInq = (recevier) => {
     let count = 0;
-    inquiries.forEach(inq => inq.receiver.includes(recevier) && count++)
+    inquiries.forEach((inq) => inq.receiver.includes(recevier) && count++);
     return count;
   };
 
@@ -406,36 +407,53 @@ export default function Form(props) {
               onChange={handleChange}>
               <Tab
                 classes={{ wrapper: classes.iconLabelWrapper }}
-                className={clsx(classes.tab, (value === 0) && classes.colorSelectedTab)}
-                label='Customer'
-                icon={<div className={clsx(classes.countBtn, (value === 0) && classes.colorCountBtn)}>{countInq('customer')}</div>} />
+                className={clsx(classes.tab, value === 0 && classes.colorSelectedTab)}
+                label="Customer"
+                icon={
+                  <div className={clsx(classes.countBtn, value === 0 && classes.colorCountBtn)}>
+                    {countInq('customer')}
+                  </div>
+                }
+              />
               <Tab
                 classes={{ wrapper: classes.iconLabelWrapper }}
-                className={clsx(classes.tab, (value === 1) && classes.colorSelectedTab)}
-                label='Onshore'
-                icon={<div className={clsx(classes.countBtn, (value === 1) && classes.colorCountBtn)}>{countInq('onshore')}</div>} />
+                className={clsx(classes.tab, value === 1 && classes.colorSelectedTab)}
+                label="Onshore"
+                icon={
+                  <div className={clsx(classes.countBtn, value === 1 && classes.colorCountBtn)}>
+                    {countInq('onshore')}
+                  </div>
+                }
+              />
             </Tabs>
           </Box>
         )}
         <MuiDialogContent
-          classes={{ root: field === 'ATTACHMENT_LIST' ? classes.dialogContentAttachment : classes.dialogContent }}
-          style={{ overflow: field === 'ATTACHMENT_LIST' && isShowBackground ? 'hidden' : '' }}
-        >{children}</MuiDialogContent>
+          classes={{
+            root:
+              field === 'ATTACHMENT_LIST' ? classes.dialogContentAttachment : classes.dialogContent
+          }}
+          style={{ overflow: field === 'ATTACHMENT_LIST' && isShowBackground ? 'hidden' : '' }}>
+          {children}
+        </MuiDialogContent>
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
           <DialogActions style={{ display: 'none !important' }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
               <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
-                <div style={{ right: '3rem', bottom: '2.6rem', position: 'absolute' }}>
+                <div style={{ right: '3rem', padding: '2.6rem', position: 'absolute' }}>
                   <Link
                     component="button"
                     variant="body2"
+                    underline= 'none'
                     onClick={handleClick}
                     style={{ display: 'flex', alignItems: 'center' }}>
-                    <AddCircleOutlineIcon style={{ left: '8.33%', right: '8.33%', border: '2px' }} />
+                    <AddCircleOutlineIcon
+                      style={{ color:currentEditInq?'#d3d3d3':'#BD0F72', left: '8.33%', right: '8.33%', border: '2px' }}
+                    />
                     <span
                       style={{
-                        color: '#BD0F72',
+                        color: currentEditInq?'#d3d3d3':'#BD0F72',
                         fontSize: '16px',
                         fontWeight: '600',
                         fontFamily: 'Montserrat',
@@ -449,6 +467,7 @@ export default function Form(props) {
                 </div>
               </PermissionProvider>
             )}
+
             {!popoverfooter && (
               <div style={{ marginLeft: '2rem' }}>
                 {!showSaveInquiry ? (
