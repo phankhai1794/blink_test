@@ -4,7 +4,6 @@ const initialState = {
   myBL: {},
   metadata: {},
   content: {},
-  currentEdit: 0,
   currentEditInq: null,
   displayCmt: false,
   currentField: '',
@@ -13,21 +12,21 @@ const initialState = {
   removeOptions: [],
   validation: { inqType: true, field: true, receiver: true, ansType: true, content: true, answerContent: true },
   validationAttachment: { field: true, mediaId: true, nameFile: true },
-  originalInquiry: [],
   inquiries: [],
-  question: [
-    {
-      content:
-        'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
-      inqType: '',
-      ansType: '',
-      field: '',
-      answerObj: [],
-      addOther: '',
-      receiver: [],
-      mediaFile: []
-    }
-  ],
+  inquiryEdit: null,
+  // question: [
+  //   {
+  //     content:
+  //       'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
+  //     inqType: '',
+  //     ansType: '',
+  //     field: '',
+  //     answerObj: [],
+  //     addOther: '',
+  //     receiver: [],
+  //     mediaFile: []
+  //   }
+  // ],
   currentInq: {},
   listInqMinimize: [],
   listMinimize: [],
@@ -51,35 +50,31 @@ const inquiryReducer = function (state = initialState, action) {
   case Actions.SET_QUESTION: {
     return { ...state, question: action.state };
   }
-  case Actions.SET_EDIT: {
-    return { ...state, currentEdit: action.state };
-  }
+
   case Actions.SET_EDIT_INQUIRY: {
     return { ...state, currentEditInq: action.state };
   }
   case Actions.ADD_QUESTION: {
     return {
       ...state,
-      question: [
-        ...state.question,
+      currentEditInq: 
         {
           content:
               'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
           inqType: '',
           ansType: '',
-          field: '',
+          field: action.state,
           answerObj: [],
           addOther: '',
           receiver: [],
           mediaFile: []
         }
-      ]
     };
   }
   
-  case Actions.EDIT_INQUIRY: {
-    return { ...state, inquiries: action.state };
-  }
+  // case Actions.EDIT_INQUIRY: {
+  //   return { ...state, inquiries: action.state };
+  // }
   case Actions.SAVE_INQUIRY: {
     return {
       ...state,
@@ -99,6 +94,10 @@ const inquiryReducer = function (state = initialState, action) {
       ]
     };
   }
+  // case Actions.SET_INQUIRY_EDIT:
+  // {
+  //   return { ...state, inquiryEdit: action.state };
+  // }
   case Actions.SAVE_FIELD: {
     return { ...state, fields: action.state };
   }
@@ -114,8 +113,8 @@ const inquiryReducer = function (state = initialState, action) {
   case Actions.VALIDATE: {
     return { ...state, validation: action.state };
   }
-  case Actions.SET_ORIGINAL_INQUIRY: {
-    return { ...state, originalInquiry: action.state };
+  case Actions.SET_INQUIRY: {
+    return { ...state, inquiries: action.state };
   }
   case Actions.DISPLAY_COMMENT: {
     return { ...state, displayCmt: action.state };

@@ -1,18 +1,35 @@
 import { FuseChipSelect } from '@fuse';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Divider, FormControl, FormHelperText, Grid, TextField } from '@material-ui/core';
+import { getKeyByValue, displayTime } from '@shared';
+import {
+  FormControl,
+  FormControlLabel,
+  FormHelperText,
+  Button,
+  Radio,
+  RadioGroup,
+  Divider,
+  Grid, TextField,
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { PERMISSION, PermissionProvider } from "@shared/permission";
+import { PERMISSION, PermissionProvider } from '@shared/permission';
+import { uploadFile, getFile } from 'app/services/fileService';
+import { updateInquiry, saveInquiry } from 'app/services/inquiryService';
+import * as AppActions from 'app/store/actions';
+import { toFindDuplicates } from '@shared';
+import clsx from 'clsx';
+import axios from 'axios';
 
 import * as InquiryActions from '../store/actions/inquiry';
-import * as FormActions from "../store/actions/form";
+import * as FormActions from '../store/actions/form';
 
 import ChoiceAnswerEditor from './ChoiceAnswerEditor';
 import ParagraphAnswerEditor from './ParagraphAnswerEditor';
 import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
+import AttachFile from './AttachFile';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,8 +41,34 @@ const useStyles = makeStyles((theme) => ({
     width: '25px',
     backgroundColor: 'silver'
   },
+  icon: {
+    border: '1px solid #BAC3CB',
+    borderRadius: 4,
+    position: 'relative',
+    width: 16,
+    height: 16,
+    backgroundColor: '#f5f8fa',
+    '&.borderChecked': {
+      border: '1px solid #BD0F72'
+    },
+    '&.disabledCheck': {
+      backgroundColor: '#DDE3EE'
+    }
+  },
+  checkedIcon: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    '& .MuiFormGroup-root': {
+      flexDirection: 'row'
+    },
+    '& .container': {
+      marginBottom: 5
+    }
+  },
   button: {
     margin: theme.spacing(1),
+    marginRight: 3,
     borderRadius: 8,
     width: 120,
     boxShadow: 'none',
@@ -48,39 +91,45 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-
 // Main Component
 const InquiryEditor = (props) => {
   // custom attribute must be lowercase
   const dispatch = useDispatch();
   const classes = useStyles();
-  const { index, question, questions, saveQuestion } = props;
-  const [metadata, removeOptions, currentField, fields, valid, inquiries] = useSelector(({ workspace }) => [
+  const { onCancel } = props;
+  const [metadata, valid, inquiries, currentEditInq, myBL] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.metadata,
-    workspace.inquiryReducer.removeOptions,
-    workspace.inquiryReducer.currentField,
-    workspace.inquiryReducer.fields,
     workspace.inquiryReducer.validation,
     workspace.inquiryReducer.inquiries,
+    workspace.inquiryReducer.currentEditInq,
+    workspace.inquiryReducer.myBL
   ]);
-  const optionsAnsType = [{
-    label: 'Option Selection',
-    value: metadata.ans_type.choice,
-  },
-  {
-    label: 'Onshore/Customer Input',
-    value: metadata.ans_type.paragraph,
-  }];
-  const allowCreateAttachmentAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
+
+  const optionsAnsType = [
+    {
+      label: 'Option Selection',
+      value: metadata.ans_type.choice
+    },
+    {
+      label: 'Onshore/Customer Input',
+      value: metadata.ans_type.paragraph
+    }
+  ];
+
+  const allowCreateAttachmentAnswer = PermissionProvider({
+    action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
+  });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
 
   const [fieldType, setFieldType] = useState(metadata.field_options);
   const [valueType, setValueType] = useState(
-    metadata.inq_type_options.filter((v) => question.inqType === v.value)[0]
+    metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
   );
-  const [valueAnsType, setValueAnsType] = useState(optionsAnsType.filter(ansType => ansType.value === question.ansType));
+  const [valueAnsType, setValueAnsType] = useState(
+    optionsAnsType.filter((ansType) => ansType.value === currentEditInq.ansType)
+  );
   const [fieldValue, setFieldValue] = useState(
-    metadata.field_options.filter((v) => question.field === v.value)[0]
+    metadata.field_options.filter((v) => currentEditInq.field === v.value)[0]
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
 
@@ -94,14 +143,18 @@ const InquiryEditor = (props) => {
   };
   useEffect(() => {
     if (fieldValue) {
-      if (!metadata.inq_type_options.filter((v) => (fieldValue.value === v.field || !v.field) && valueType?.value === v.value).length) {
-        const optionsOfQuestion = [...questions];
-        optionsOfQuestion[index].inqType = '';
-        optionsOfQuestion[index].content = question.content.replace(valueType?.label, '{{INQ_TYPE}}');
+      if (
+        !metadata.inq_type_options.filter(
+          (v) => (fieldValue.value === v.field || !v.field) && valueType?.value === v.value
+        ).length
+      ) {
+        const inq = { ...currentEditInq };
+        inq.inqType = '';
+        inq.content = currentEditInq.content.replace(valueType?.label, '{{INQ_TYPE}}');
         setValueType(null);
-        saveQuestion(optionsOfQuestion);
+        dispatch(InquiryActions.setEditInq(inq));
       }
-      const list = [...inquiries, ...questions]
+      const list = [currentEditInq]
       const filter = metadata.inq_type_options.filter(data => {
         return data.field?.includes(fieldValue.value) && list.filter(q =>
           q.inqType === data.value && q.field === fieldValue.value
@@ -111,197 +164,439 @@ const InquiryEditor = (props) => {
     }
   }, [fieldValue]);
 
-  useEffect(() => {
-    const optionsOfQuestion = [...questions];
-
-    if (questions.length - 1 === index && !questions.filter((q) => q.field === currentField).length) {
-      setFieldValue(metadata.field_options.filter((v) => currentField === v.value)[0]);
-      optionsOfQuestion[index].field = currentField;
-    }
-
-    if (!question.field && !removeOptions.includes(currentField)) {
-      optionsOfQuestion[index].field = currentField;
-      setFieldValue(metadata.field_options.filter((v) => currentField === v.value)[0]);
-    }
-    const contentQuestionTrim = optionsOfQuestion.map(op => {
-      let contentTrim = { ...op, content: op.content.trim() };
-      const ansTypeChoice = metadata.ans_type['choice'];
-      if (ansTypeChoice === op.ansType) {
-        op.answerObj.forEach(ans => {
-          ans.content = ans.content.trim();
-        });
-      }
-      return contentTrim;
-    });
-    saveQuestion(contentQuestionTrim);
-  }, []);
 
   const handleTypeChange = (e) => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].inqType = e.value;
+    const inq = { ...currentEditInq };
+    inq.inqType = e.value;
     dispatch(InquiryActions.validate({ ...valid, inqType: true }));
     const temp = valueType ? `\\b${valueType.label}\\b` : '{{INQ_TYPE}}';
     let re = new RegExp(`${temp}`, 'g');
-    optionsOfQuestion[index].content = question.content.replace(re, e.label);
+    inq.content = currentEditInq.content.replace(re, e.label);
     setValueType(e);
-    saveQuestion(optionsOfQuestion);
+    dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   const handleFieldChange = (e) => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].field = e.value;
+    const inq = { ...currentEditInq };
+    inq.field = e.value;
     dispatch(InquiryActions.validate({ ...valid, field: true }));
     setFieldValue(e);
-    saveQuestion(optionsOfQuestion);
+    dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   const handleNameChange = (e) => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].content = e.target.value;
-    dispatch(InquiryActions.validate({ ...valid, content: optionsOfQuestion[index].content }));
-    saveQuestion(optionsOfQuestion);
+    const inq = { ...currentEditInq };
+    inq.content = e.target.value;
+    dispatch(InquiryActions.validate({ ...valid, content: inq.content }));
+    dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   const handleAnswerTypeChange = (e) => {
-    const optionsOfQuestion = [...questions];
-    optionsOfQuestion[index].ansType = e.value;
+    const inq = { ...currentEditInq };
+    inq.ansType = e.value;
     if (e.value !== metadata.ans_type.choice) {
-      optionsOfQuestion[index].answerObj = []
+      inq.answerObj = [];
     }
     dispatch(InquiryActions.validate({ ...valid, ansType: true }));
-    setValueAnsType(optionsAnsType.filter(ansType => ansType.value === e.value));
-    saveQuestion(optionsOfQuestion);
+    setValueAnsType(optionsAnsType.filter((ansType) => ansType.value === e.value));
+    dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
+  };
+  const inq = (inq) => {
+    return {
+      content: inq.content,
+      field: inq.field,
+      inqType: inq.inqType,
+      ansType: inq.ansType,
+      receiver: inq.receiver
+    };
+  };
+
+  const handleReceiverChange = (e) => {
+    const optionsOfQuestion = { ...currentEditInq };
+    optionsOfQuestion.receiver = [];
+    dispatch(InquiryActions.validate({ ...valid, receiver: true }));
+    optionsOfQuestion.receiver.push(e.target.value);
+    dispatch(InquiryActions.setEditInq(optionsOfQuestion));
+  };
+
+  const onSave = async () => {
+    let check = true;
+    const ansTypeChoice = metadata.ans_type['choice'];
+    let validate = {};
+    if (
+      !currentEditInq.inqType ||
+      !currentEditInq.field ||
+      !currentEditInq.receiver.length ||
+      !currentEditInq.ansType.length ||
+      !currentEditInq.content ||
+      ansTypeChoice === currentEditInq.ansType
+    ) {
+      validate = {
+        ...valid,
+        field: Boolean(currentEditInq.field),
+        inqType: Boolean(currentEditInq.inqType),
+        receiver: Boolean(currentEditInq.receiver.length),
+        ansType: Boolean(currentEditInq.ansType.length),
+        content: Boolean(currentEditInq.content)
+      };
+      if (ansTypeChoice === currentEditInq.ansType) {
+        // check empty a field
+        if (currentEditInq.answerObj.length > 0) {
+          const checkOptionEmpty = currentEditInq.answerObj.filter((item) => !item.content);
+          if (checkOptionEmpty.length > 0) {
+            validate = { ...validate, answerContent: false };
+          } else {
+            validate = { ...validate, answerContent: true };
+          }
+          const dupArray = currentEditInq.answerObj.map((ans) => ans.content);
+          if (toFindDuplicates(dupArray).length) {
+            dispatch(
+              AppActions.showMessage({
+                message: 'Options value must not be duplicated',
+                variant: 'error'
+              })
+            );
+            return;
+          }
+        } else {
+          validate = { ...validate, answerContent: false };
+        }
+      }
+      dispatch(InquiryActions.validate(validate));
+      check =
+        validate.inqType &&
+        validate.field &&
+        validate.receiver &&
+        validate.ansType &&
+        validate.content &&
+        validate.answerContent;
+    }
+    if (ansTypeChoice !== currentEditInq.ansType) {
+      dispatch(
+        InquiryActions.validate({
+          field: Boolean(currentEditInq.field),
+          inqType: Boolean(currentEditInq.inqType),
+          receiver: Boolean(currentEditInq.receiver.length),
+          ansType: Boolean(currentEditInq.ansType.length),
+          content: Boolean(currentEditInq.content),
+          answerContent: true
+        })
+      );
+    }
+    if (!check) {
+      return;
+    }
+    let error = false;
+
+    const inquiry = inquiries.find((q) => q.id === currentEditInq.id);
+    if (inquiry) {
+      if (ansTypeChoice === inquiry.ansType) {
+        if (inquiry.answerObj.length === 1) {
+          dispatch(
+            AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
+          );
+          error = true;
+          // break;
+        }
+        // check empty a field
+        if (inquiry.answerObj.length > 0) {
+          const checkOptionEmpty = inquiry.answerObj.filter((item) => !item.content);
+          if (checkOptionEmpty.length > 0) {
+            dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
+            error = true;
+            // break;
+          }
+        } else {
+          dispatch(AppActions.showMessage({ message: 'Options not empty!', variant: 'error' }));
+          error = true;
+          // break;
+        }
+      }
+      if (ansTypeChoice === inquiry.ansType && inquiry.answerObj.length) {
+        const dupArray = inquiry.answerObj.map((ans) => ans.content);
+        if (toFindDuplicates(dupArray).length) {
+          dispatch(
+            AppActions.showMessage({
+              message: 'Options value must not be duplicated',
+              variant: 'error'
+            })
+          );
+          return;
+        }
+      }
+      const ansCreate = currentEditInq.answerObj.filter(
+        ({ id: id1 }) => !inquiry.answerObj.some(({ id: id2 }) => id2 === id1)
+      );
+      const ansDelete = inquiry.answerObj.filter(
+        ({ id: id1 }) => !currentEditInq.answerObj.some(({ id: id2 }) => id2 === id1)
+      );
+      const ansUpdate = currentEditInq.answerObj.filter(({ id: id1, content: c1 }) =>
+        inquiry.answerObj.some(({ id: id2, content: c2 }) => id2 === id1 && c1 !== c2)
+      );
+      const mediaCreate = currentEditInq.mediaFile.filter(
+        ({ id: id1 }) => !inquiry.mediaFile.some(({ id: id2 }) => id2 === id1)
+      );
+      const mediaDelete = inquiry.mediaFile.filter(
+        ({ id: id1 }) => !currentEditInq.mediaFile.some(({ id: id2 }) => id2 === id1)
+      );
+
+      for (const f in mediaCreate) {
+        const form_data = mediaCreate[f].data;
+        const res = await uploadFile(form_data);
+        mediaCreate[f].id = res.response[0].id;
+      }
+      if (
+        JSON.stringify(inq(currentEditInq)) !== JSON.stringify(inq(inquiry)) ||
+        JSON.stringify(currentEditInq.answerObj) !== JSON.stringify(inquiry.answerObj) ||
+        mediaCreate.length ||
+        mediaDelete.length
+      ) {
+        await updateInquiry(inquiry.id, {
+          inq: inq(currentEditInq),
+          ans: { ansDelete, ansCreate, ansUpdate },
+          files: { mediaCreate, mediaDelete }
+        });
+        dispatch(
+          AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+        );
+        const list = [...inquiries];
+        if (!currentEditInq.id) {
+          list.push(currentEditInq);
+        }
+        list.forEach((ls, i) => {
+          if (ls.id === currentEditInq.id) {
+            list[i] = { ...currentEditInq };
+          }
+        });
+        dispatch(InquiryActions.setInquiries(list));
+        dispatch(InquiryActions.setEditInq());
+      }
+    } else {
+      // Create INQUIRY
+      const uploads = [];
+      if (currentEditInq.mediaFile.length) {
+        currentEditInq.mediaFile.forEach((file) => {
+          const formData = new FormData();
+          formData.append('files', file.fileUpload);
+          uploads.push(formData);
+        });
+      }
+      const question = [{ ...currentEditInq }];
+      const inqContentTrim = question.map((op) => {
+        let contentTrim = { ...op, content: op.content.trim() };
+        const ansTypeChoice = metadata.ans_type['choice'];
+        if (ansTypeChoice === op.ansType) {
+          op.answerObj.forEach((ans) => {
+            ans.content = ans.content.trim();
+          });
+        }
+        return contentTrim;
+      });
+      axios
+        .all(uploads.map((endpoint) => uploadFile(endpoint)))
+        .then((media) => {
+          let mediaList = [];
+          media.forEach((file) => {
+            const mediaFileList = file.response.map((item) => item);
+            mediaList = [...mediaList, ...mediaFileList];
+          });
+          saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
+            .then(() => {
+              dispatch(
+                AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+              );
+              dispatch(InquiryActions.saveInquiry());
+              dispatch(FormActions.toggleReload());
+              dispatch(InquiryActions.setOpenedInqForm(false));
+            })
+            .catch((error) =>
+              dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
+            );
+        })
+        .catch((error) => console.log(error));
+    }
+    dispatch(InquiryActions.setEditInq());
   };
 
   return (
     <>
-      <Grid container spacing={4}>
-        <Grid item xs={4}>
-          <FormControl error={!valid.field}>
-            <FuseChipSelect
-              customStyle={styles(valid.field, fullscreen ? 320 : 295)}
-              value={fieldValue}
-              onChange={handleFieldChange}
-              placeholder="Select Field Type"
-              textFieldProps={{
-                variant: 'outlined'
-              }}
-              options={fieldType}
-              errorStyle={valid.field}
+      <div className="flex justify-between" style={{ padding: '0.5rem' }}>
+        <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
+          {currentEditInq.field
+            ? getKeyByValue(metadata['field'], currentEditInq.field)
+            : 'New Inquiry'}
+        </div>
+
+        <FormControl
+          error={!valid.receiver && !currentEditInq.receiver.length}
+          className={classes.checkedIcon}>
+          <RadioGroup
+            aria-label="receiver"
+            name="receiver"
+            value={currentEditInq.receiver[0]}
+            onChange={(e) => handleReceiverChange(e)}>
+            <FormControlLabel
+              value="customer"
+              control={<Radio color={'primary'} />}
+              label="Customer"
             />
-            <div style={{ height: '20px' }}>
-              {!valid.field && <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>}
-            </div>
-          </FormControl>
-        </Grid>
-        <Grid item xs={4}>
-          <FormControl error={!valid.inqType}>
-            <FuseChipSelect
-              value={valueType}
-              customStyle={styles(valid.inqType, fullscreen ? 330 : 295)}
-              onChange={handleTypeChange}
-              placeholder="Type of Inquiry"
-              textFieldProps={{
-                variant: 'outlined'
-              }}
-              options={inqTypeOption}
-              errorStyle={valid.inqType}
+            <FormControlLabel
+              value="onshore"
+              control={<Radio color={'primary'} />}
+              label="Onshore"
             />
-            <div style={{ height: '20px' }}>
-              {!valid.inqType && <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>}
-            </div>
-          </FormControl>
-        </Grid>
-        <Grid item xs={4}>
-          <FormControl error={!valid.ansType}>
-            <FuseChipSelect
-              value={valueAnsType}
-              customStyle={styles(valid.ansType, fullscreen ? 330 : 295)}
-              onChange={handleAnswerTypeChange}
-              placeholder="Type of Question"
-              textFieldProps={{
-                variant: 'outlined'
-              }}
-              options={optionsAnsType}
-              errorStyle={valid.ansType}
-            />
-            <div style={{ height: '15px' }}>
-              {!valid.ansType && <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>}
-            </div>
-          </FormControl>
-        </Grid>
-      </Grid>
-      <div className="mt-32 mx-8">
-        <TextField
-          value={question.content.replace('{{INQ_TYPE}}', '')}
-          multiline
-          error={!valid.content}
-          helperText={!valid.content ? 'This is required!' : ''}
-          onFocus={(e) => e.target.select()}
-          onChange={handleNameChange}
-          style={{ width: '100%', resize: 'none' }}
-        />
+          </RadioGroup>
+          <FormControlLabel control={<AttachFile/>} />
+          {!valid.receiver && !currentEditInq.receiver.length ? (
+            <FormHelperText>Pick at least one!</FormHelperText>
+          ) : null}
+        </FormControl>
       </div>
-      {question.ansType === metadata.ans_type.choice && (
-        <div className="mt-16">
-          <ChoiceAnswerEditor
-            questions={questions}
-            question={question}
-            index={index}
-            saveQuestion={saveQuestion}
-          />
-        </div>
-      )}
-      {question.ansType === metadata.ans_type.paragraph && (
-        <div className="mt-40">
-          <ParagraphAnswerEditor />
-        </div>
-      )}
-      {question.ansType === metadata.ans_type.attachment && (
-        <AttachmentAnswer
-          style={{ marginTop: '1rem' }}
-          question={question}
-          isPermissionAttach={allowCreateAttachmentAnswer}
-        />
-      )}
-      <Divider className="mt-12" />
-      <>
-        {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
-        {question.mediaFile?.length > 0 && question.mediaFile?.map((file, mediaIndex) => (
-          <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-            {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-              <ImageAttach file={file} field={question.field} indexInquiry={index} />
-            ) : (
-              <FileAttach file={file} field={question.field} indexInquiry={index} />
-            )}
+      {currentEditInq && (
+        <>
+          <Grid container spacing={4}>
+            <Grid item xs={4}>
+              <FormControl error={!valid.field}>
+                <FuseChipSelect
+                  customStyle={styles(valid.field, fullscreen ? 320 : 295)}
+                  value={fieldValue}
+                  onChange={handleFieldChange}
+                  placeholder="Select Field Type"
+                  textFieldProps={{
+                    variant: 'outlined'
+                  }}
+                  options={fieldType}
+                  errorStyle={valid.field}
+                />
+                <div style={{ height: '20px' }}>
+                  {!valid.field && (
+                    <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+                  )}
+                </div>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl error={!valid.inqType}>
+                <FuseChipSelect
+                  value={valueType}
+                  customStyle={styles(valid.inqType, fullscreen ? 330 : 295)}
+                  onChange={handleTypeChange}
+                  placeholder="Type of Inquiry"
+                  textFieldProps={{
+                    variant: 'outlined'
+                  }}
+                  options={inqTypeOption}
+                  errorStyle={valid.inqType}
+                />
+                <div style={{ height: '20px' }}>
+                  {!valid.inqType && (
+                    <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+                  )}
+                </div>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <FormControl error={!valid.ansType}>
+                <FuseChipSelect
+                  value={valueAnsType}
+                  customStyle={styles(valid.ansType, fullscreen ? 330 : 295)}
+                  onChange={handleAnswerTypeChange}
+                  placeholder="Type of Question"
+                  textFieldProps={{
+                    variant: 'outlined'
+                  }}
+                  options={optionsAnsType}
+                  errorStyle={valid.ansType}
+                />
+                <div style={{ height: '15px' }}>
+                  {!valid.ansType && (
+                    <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+                  )}
+                </div>
+              </FormControl>
+            </Grid>
+          </Grid>
+          <div className="mt-32 mx-8">
+            <TextField
+              value={currentEditInq.content.replace('{{INQ_TYPE}}', '')}
+              multiline
+              error={!valid.content}
+              helperText={!valid.content ? 'This is required!' : ''}
+              onFocus={(e) => e.target.select()}
+              onChange={handleNameChange}
+              style={{ width: '100%', resize: 'none' }}
+            />
           </div>
-        ))}
-      </>
-      <>
-        {question.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
-        {question.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
-          <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-            {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-              <ImageAttach file={file} field={question.field} style={{ margin: '2.5rem' }} />
-            ) : (
-              <FileAttach file={file} field={question.field} />
-            )}
+          {currentEditInq.ansType === metadata.ans_type.choice && (
+            <div className="mt-16">
+              <ChoiceAnswerEditor />
+            </div>
+          )}
+          {currentEditInq.ansType === metadata.ans_type.paragraph && (
+            <div className="mt-40">
+              <ParagraphAnswerEditor />
+            </div>
+          )}
+          {currentEditInq.ansType === metadata.ans_type.attachment && (
+            <AttachmentAnswer
+              style={{ marginTop: '1rem' }}
+              isPermissionAttach={allowCreateAttachmentAnswer}
+            />
+          )}
+          <Divider className="mt-12" />
+          <>
+            {currentEditInq.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+            {currentEditInq.mediaFile?.length > 0 &&
+              currentEditInq.mediaFile?.map((file, mediaIndex) => (
+                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                    <ImageAttach file={file} field={currentEditInq.field} />
+                  ) : (
+                    <FileAttach file={file} field={currentEditInq.field} />
+                  )}
+                </div>
+              ))}
+          </>
+          <>
+            {currentEditInq.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
+            {currentEditInq.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
+              <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                  <ImageAttach
+                    file={file}
+                    field={currentEditInq.field}
+                    style={{ margin: '2.5rem' }}
+                  />
+                ) : (
+                  <FileAttach file={file} field={currentEditInq.field} />
+                )}
+              </div>
+            ))}
+          </>
+          <div className="flex">
+            <div className="flex">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => onSave()}
+                classes={{ root: classes.button }}>
+                Save
+              </Button>
+              <Button
+                variant="contained"
+                classes={{ root: clsx(classes.button, 'reply') }}
+                color="primary"
+                onClick={onCancel}>
+                Cancel
+              </Button>
+            </div>
           </div>
-        ))}
-      </>
-      {/* <div className="flex">
-        <Button
-          variant="contained"
-          color="primary"
-          classes={{ root: classes.button }}
-        >
-        Save
-        </Button>
-      </div> */}
+        </>
+      )}
     </>
   );
 };

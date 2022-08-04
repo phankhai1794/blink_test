@@ -1,7 +1,7 @@
-import { changeStatus } from 'app/services/inquiryService';
+import { changeStatus, updateInquiryChoice, createParagraphAnswer, updateParagraphAnswer } from 'app/services/inquiryService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { displayTime } from '@shared';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Typography,
@@ -18,6 +18,8 @@ import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
 import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
+import { updateInquiry, saveInquiry } from 'app/services/inquiryService';
+import { uploadFile, getFile } from 'app/services/fileService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -107,23 +109,13 @@ const useStyles = makeStyles((theme) => ({
 ));
 
 const InquiryAnswer = (props) => {
-  const { index, question, toggleEdit } = props;
-  const type = question.ansType;
-  const user = question.creator;
+  const {onCancel} = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
-  const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
-  const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
-  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
-  const indexes = originalInquiry.findIndex((q) => q.field === currentField);
-  const [isShowBtn, setShowBtn] = useState(null);
-  const [viewDropDown, setViewDropDown] = useState(false);
-
-  const allowCreateAttachmentAnswer = PermissionProvider({
-    action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
-  });
+  const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
+  const [isDisableSave, setDisableSave] = useState(true);
 
   const onResolve = () => {
     changeStatus(currentField, 'COMPL')
@@ -137,131 +129,109 @@ const InquiryAnswer = (props) => {
     dispatch(InquiryActions.setReply(true));
   };
 
-  const handleViewMore = () => setViewDropDown(!viewDropDown);
+  const onSave = async () => {
+    const inq = {...currentEditInq};
+    if (inq.selectChoice) {
+      await updateInquiryChoice(inq.selectChoice);
+      //
+      const answersObj = inq.answerObj;
+      answersObj.forEach((item, i) => {
+        answersObj[i].confirmed = false;
+      });
+      const answerIndex = answersObj.findIndex((item) => item.id === inq.selectChoice.answer);
+      const answerUpdate = answersObj[answerIndex];
+      answerUpdate.confirmed = true;
+      dispatch(InquiryActions.setEditInq(inq));
+      dispatch(
+        AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+      );
+    } else if (inq.paragraphAnswer) {
+      const objAns = inq.answerObj;
+      if (inq.answerObj.length === 0) {
+        createParagraphAnswer(inq.paragraphAnswer).then((res) => {
+          if (res) {
+            const { message, answerObj } = res;
+            objAns.push(answerObj);
+            dispatch(InquiryActions.setEditInq(inq));
+            dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
+          }
+        });
+      } else {
+        const answerId = inq.answerObj[0].id;
+        updateParagraphAnswer(answerId, inq.paragraphAnswer).then((res) => {
+          if (res) {
+            const { message } = res;
+            objAns[0].content = inq.paragraphAnswer.content;
+            dispatch(InquiryActions.setEditInq(inq));
+            dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
+          }
+        });
+      }
+    }
+    // const inquiry = inquiries.find((q) => q.id === currentEditInq.id);
+    // const mediaCreate = currentEditInq.mediaFile.filter(
+    //   ({ id: id1 }) => !inquiry.mediaFile.some(({ id: id2 }) => id2 === id1)
+    // );
+    // const mediaDelete = inquiry.mediaFile.filter(
+    //   ({ id: id1 }) => !currentEditInq.mediaFile.some(({ id: id2 }) => id2 === id1)
+    // );
+
+    // for (const f in mediaCreate) {
+    //   const form_data = mediaCreate[f].data;
+    //   const res = await uploadFile(form_data);
+    //   mediaCreate[f].id = res.response[0].id;
+    // }
+    // if (
+    //   JSON.stringify(inq(currentEditInq)) !== JSON.stringify(inq(inquiry)) ||
+    //   JSON.stringify(currentEditInq.answerObj) !== JSON.stringify(inquiry.answerObj) ||
+    //   mediaCreate.length ||
+    //   mediaDelete.length
+    // ) {
+    //   await updateInquiry(inquiry.id, {
+    //     inq: inq(currentEditInq),
+    //     files: { mediaCreate, mediaDelete }
+    //   });
+    // }
+    
+    const list = [...inquiries];
+    list.forEach((ls, i) => {
+      if (ls.id === currentEditInq.id) {
+        list[i] = { ...currentEditInq };
+      }
+    });
+    dispatch(InquiryActions.setInquiries(list));
+    dispatch(InquiryActions.setEditInq());
+  };
+
+
+  useEffect(() => {
+    if (!isDisableSave) setDisableSave(false);
+  }, [isDisableSave]);
 
   return (
-    <>
-      <div className="flex justify-between">
-        <UserInfo name={user.userName} time={displayTime(question.createdAt)} avatar={user.avatar} />
-        <div className="flex items-center">
-          <FormControl className={classes.checkedIcon}>
-            <FormControlLabel control={<Radio checked disabled color={'primary'} />} label={question.receiver[0] === "onshore" ? "Onshore" : "Customer"} />
-          </FormControl>
-          <PermissionProvider action={PERMISSION.VIEW_EDIT_INQUIRY}>
-            <Tooltip title="Edit Inquiry">
-              <IconButton className="p-8" onClick={toggleEdit}>
-                <img style={{ height: "22px" }} src="/assets/images/icons/edit.svg" />
-              </IconButton>
-            </Tooltip>
-            {/* <AttachFile index={index} />
-            <Tooltip title="Delete Inquiry">
-              <IconButton className="p-8" disabled>
-                <img style={{ height: "22px" }} src="/assets/images/icons/trash.svg" />
-              </IconButton>
-            </Tooltip> */}
-          </PermissionProvider>
+    <div className='changeToEditor'>  
+      <div className="flex">
+        <div className="flex">
+          <Button
+            variant="contained"
+            color="primary"
+            // disabled={isDisableSave}
+            onClick={() => onSave()}
+            classes={{ root: classes.button }}>
+                Save
+          </Button>
+          <Button
+            variant="contained"
+            classes={{ root: clsx(classes.button, 'reply') }}
+            color="primary"
+            onClick={onCancel}>
+              Cancel
+          </Button>
         </div>
       </div>
-      <Typography
-        className={viewDropDown ? '' : classes.hideText}
-        variant="subtitle"
-        style={{
-          fontSize: 15,
-          wordBreak: 'break-word',
-          fontFamily: 'Montserrat'
-        }}>
-        {question.content}
-      </Typography>
-      {viewDropDown &&
-        <div style={{ display: 'block', margin: '1rem 0rem' }}>
-          {type === metadata.ans_type.choice && (
-            <ChoiceAnswer
-              index={indexes}
-              questions={inquiries}
-              question={question}
-              saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-            />
-          )}
-          {type === metadata.ans_type.paragraph && (
-            <ParagraphAnswer
-              question={question}
-              index={indexes}
-              questions={inquiries}
-              saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-            />
-          )}
-          {type === metadata.ans_type.attachment && (
-            <AttachmentAnswer
-              question={question}
-              index={indexes}
-              questions={inquiries}
-              saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-              isShowBtn={isShowBtn}
-              isPermissionAttach={allowCreateAttachmentAnswer}
-            // disabled={true}
-            />
-          )}
-        </div>}
-      <>
-        <Grid container spacing={2} alignItems='center'>
-          <Grid item xs={6}>
-            {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
-          </Grid>
-          <Grid item xs={6}>
-            <div className={classes.viewMoreBtn} onClick={() => handleViewMore()}>
-              {viewDropDown ?
-                <>
-                  Hide All
-                  <ArrowDropUp />
-                </> : <>
-                  View All
-                  <ArrowDropDown />
-                </>}
-            </div>
-          </Grid>
-        </Grid>
-        {question.mediaFile?.length > 0 &&
-          question.mediaFile?.map((file, mediaIndex) => (
-            <div
-              style={{ position: 'relative', display: 'inline-block' }}
-              key={mediaIndex}
-              className={classes.root}>
-              {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                <ImageAttach
-                  hiddenRemove={true}
-                  file={file}
-                  field={question.field}
-                  style={{ margin: '2.5rem' }}
-                />
-              ) : (
-                <FileAttach hiddenRemove={true} file={file} field={question.field} />
-              )}
-            </div>
-          ))}
-      </>
-      <>
-        {question.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
-        {question.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
-          <div
-            style={{ position: 'relative', display: 'inline-block' }}
-            key={mediaIndex}
-            className={classes.root}>
-            {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-              <ImageAttach
-                hiddenRemove={true}
-                file={file}
-                field={question.field}
-                style={{ margin: '2.5rem' }}
-              />
-            ) : (
-              <FileAttach hiddenRemove={true} file={file} field={question.field} />
-            )}
-          </div>
-        ))}
-      </>
 
-      <Comment q={question} inquiries={inquiries} indexes={indexes} userType={props.user} />
-      <div className="flex">
+      {/* <div className="flex">
+        <Comment q={currentEditInq} inquiries={inquiries} indexes={indexes} userType={props.user} />
         <PermissionProvider
           action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
         // extraCondition={displayCmt}
@@ -278,17 +248,21 @@ const InquiryAnswer = (props) => {
           action={PERMISSION.INQUIRY_CREATE_COMMENT}
         // extraCondition={displayCmt}
         >
-          <Button
-            variant="contained"
-            classes={{ root: clsx(classes.button, 'reply') }}
-            color="primary"
-          // onClick={onReply}
-          >
-            Reply
-          </Button>
+          {currentEditInq && props.user !== 'workspace' ? (
+            <></>
+          ) : (
+            <Button
+              variant="contained"
+              classes={{ root: clsx(classes.button, 'reply') }}
+              color="primary"
+              // onClick={onReply}
+            >
+                Reply
+            </Button>
+          )}
         </PermissionProvider>
-      </div>
-    </>
+      </div> */}
+    </div>
   );
 };
 

@@ -43,9 +43,10 @@ const useStyles = makeStyles((theme) => ({
 
 const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   const classes = useStyles();
-  const [inquiries, questions, attachmentList] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.question,
+  const [valid, currentEditInq, attachmentList] =
+  useSelector(({ workspace }) => [
+    workspace.inquiryReducer.validation,
+    workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.attachmentList,
   ]);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
@@ -63,13 +64,13 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
     window.open(file.src);
   };
   const handleRemoveFile = (id) => {
-    const optionsOfQuestion = [...inquiries];
+    const optionsOfQuestion = {...currentEditInq};
     const optionsAttachmentList = [...attachmentList];
     if (field && file.id) {
-      const indexMedia = optionsOfQuestion[indexInquiry].mediaFile.findIndex(
+      const indexMedia = optionsOfQuestion.mediaFile.findIndex(
         (f) => f.id === file.id
       );
-      optionsOfQuestion[indexInquiry].mediaFile.splice(indexMedia, 1);
+      optionsOfQuestion.mediaFile.splice(indexMedia, 1);
       dispatch(InquiryActions.editInquiry(optionsOfQuestion));
       // update attachment list
       dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
@@ -93,18 +94,18 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
     } else {
       // Remove attachment at local
       if (openInquiryForm) {
-        const optionsOfQuestionLocal = [...questions];
-        const indexMedia = optionsOfQuestionLocal[indexInquiry].mediaFile.findIndex(
+        const optionsOfQuestionLocal = {...currentEditInq};
+        const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
           (f) => f.name === file.name
         );
-        optionsOfQuestionLocal[indexInquiry].mediaFile.splice(indexMedia, 1);
+        optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
         dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
       } else {
-        const optionsOfQuestionLocal = [...inquiries];
-        const indexMedia = optionsOfQuestionLocal[indexInquiry].mediaFile.findIndex(
+        const optionsOfQuestionLocal = {...currentEditInq};
+        const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
           (f) => f.name === file.name
         );
-        optionsOfQuestionLocal[indexInquiry].mediaFile.splice(indexMedia, 1);
+        optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
         dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
       }
     }

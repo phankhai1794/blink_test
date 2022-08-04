@@ -11,31 +11,49 @@ import * as InquiryActions from '../store/actions/inquiry';
 
 //   component
 const AttachFile = (props) => {
-  const { index, isQuestion, disabled } = props;
-  const questions = useSelector(({ workspace }) => workspace.inquiryReducer.question);
+  const { index, isQuestion, disabled, isAnswer, inqIndex } = props;
   const dispatch = useDispatch();
+  const [valid, currentEditInq] =
+  useSelector(({ workspace }) => [
+    workspace.inquiryReducer.validation,
+    workspace.inquiryReducer.currentEditInq
+  ]);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const handleUploadImageAttach = (files) => {
-    const optionsOfQuestion = [...(isQuestion ? questions : inquiries)];
     const inValidFile = files.find((elem) => !validateExtensionFile(elem));
     if (inValidFile) {
       dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
     } else {
-      files.forEach((src) => {
-        const formData = new FormData();
-        formData.append('file', src);
-        formData.append('name', src.name);
-        optionsOfQuestion[index].mediaFile.push({
-          id: null,
-          src: URL.createObjectURL(src),
-          ext: src.type,
-          name: src.name,
-          data: formData,
-          fileUpload: src
+      if (!isAnswer) {
+        const inq = {...currentEditInq};
+        files.forEach((src) => {
+          const formData = new FormData();
+          formData.append('file', src);
+          formData.append('name', src.name);
+          inq.mediaFile.push({
+            id: null,
+            src: URL.createObjectURL(src),
+            ext: src.type,
+            name: src.name,
+            data: formData,
+            fileUpload: src
+          });
         });
-      });
-      dispatch(InquiryActions.editInquiry(optionsOfQuestion));
-      dispatch(FormActions.setEnableSaveInquiriesList(false));
+        dispatch(InquiryActions.editInquiry(inq));
+        dispatch(FormActions.setEnableSaveInquiriesList(false));
+      } else {
+        const optionsOfQuestion = [...inquiries];
+        files.forEach((src) => {
+          const formData = new FormData();
+          formData.append('file', src);
+          formData.append('name', src.name);
+          if (optionsOfQuestion[inqIndex].answerObj.length === 0) {
+            optionsOfQuestion[inqIndex].answerObj = [{ mediaFiles: [] }];
+          }
+          optionsOfQuestion[inqIndex].answerObj[0].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+        });
+        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+      }
     }
   };
 
