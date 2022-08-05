@@ -51,7 +51,7 @@ const ParagraphAnswer = (props) => {
     <div>
       <div className="flex">
         <TextField
-          style={{ border: 'none' }}
+          style={{ border: 'none', display: !isPermission ? (!paragraphText ? 'none' : '') : '' }}
           fullWidth
           placeholder={isPermission ? 'Typing...' : ''}
           classes={{ root: classes.root }}
