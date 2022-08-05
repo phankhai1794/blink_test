@@ -120,7 +120,7 @@ const TableCM = (props) => {
             {!mediaFileIsEmpty && <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />}
             < HelpIcon className={clsx(classes.colorHasInqIcon)} />
           </>
-          : (allowAddInquiry && showIcons && <AddCircleIcon className={clsx(classes.colorEmptyInqIcon)} />)}
+          : (allowAddInquiry && <AddCircleIcon className={clsx(classes.colorEmptyInqIcon)} />)}
       </div>
       <div className={clsx(!questionIsEmpty ? classes.hasInq : classes.enterTableFile)} onClick={onClick}>
         <Grid container
