@@ -29,6 +29,9 @@ const useStyles = makeStyles((theme) => ({
   colorEmptyInqIcon: {
     color: `${pink} !important`
   },
+  colorNoInqIcon: {
+    color: `white !important`
+  },
   enterTableFile: {
     borderRadius: '8px',
     zIndex: 0,
@@ -116,7 +119,7 @@ const TableCD = (props) => {
             {!mediaFileIsEmpty && <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />}
             < HelpIcon className={clsx(classes.colorHasInqIcon)} />
           </>
-          : (allowAddInquiry && <AddCircleIcon className={clsx(classes.colorEmptyInqIcon)} />)}
+          : (allowAddInquiry &&<AddCircleIcon className={(showAddIcon ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon))}/> )}
       </div>
       <div className={clsx(!questionIsEmpty ? classes.hasInq : classes.enterTableFile)} onClick={onClick}>
         <Grid container
