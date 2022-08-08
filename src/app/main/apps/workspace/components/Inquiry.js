@@ -36,7 +36,6 @@ const Inquiry = (props) => {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const listInqsField = inquiries.filter((q, index) => q.field === currentField);
   const indexes = inquiries.findIndex((q) => q.field === currentField);
-  const [edit, setEdit] = useState('');
   const [changeQuestion, setChangeQuestion] = useState();
 
   const toggleEdit = (index) => {
@@ -119,7 +118,8 @@ const Inquiry = (props) => {
               currentQuestion={changeQuestion}
               question={q}
               saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-              user={props.user}></InquiryViewer>
+              user={props.user}
+            />
             {isEdit && <InquiryAnswer onCancel={onCancel} />}
           </>
         );

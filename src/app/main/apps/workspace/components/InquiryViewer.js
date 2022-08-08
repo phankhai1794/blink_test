@@ -85,8 +85,6 @@ const InquiryViewer = (props) => {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
 
   const [viewDropDown, setViewDropDown] = useState();
-  //   const [selectChoice, setSelectChoice] = useState();
-  const [paragraphAnswer, setParagraphAnswer] = useState();
   const [isDisableSave, setDisableSave] = useState( true);
 
   const allowCreateAttachmentAnswer = PermissionProvider({
@@ -104,15 +102,6 @@ const InquiryViewer = (props) => {
     const inq = { ...currentEditInq };
     inq.paragraphAnswer = e;
     dispatch(InquiryActions.setEditInq(inq));
-  };
-
-  const changeToEditor = (inq) => {
-    const index = inquiries.findIndex((q) => q.id === inq.id);
-    if (index >= 0) {
-      const inqEdit = JSON.parse(JSON.stringify(inq));
-      dispatch(InquiryActions.setEditInq(inqEdit));
-      dispatch(InquiryActions.setField(inq.field));
-    }
   };
 
   return (

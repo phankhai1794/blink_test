@@ -5,6 +5,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { IconButton } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from "@shared/permission";
+import { getFile } from 'app/services/fileService';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
@@ -51,17 +52,39 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   ]);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const dispatch = useDispatch();
+  
+  const urlMedia = (fileExt, file) => {
+    if (fileExt.match(/jpeg|jpg|png/g)) {
+      return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
+    } else if (fileExt.match(/pdf/g)) {
+      return URL.createObjectURL(new Blob([file], { type: 'application/pdf' }));
+    } else {
+      return URL.createObjectURL(new Blob([file]));
+    }
+  };
+  
   const downloadFile = () => {
-    const link = document.createElement('a');
-    link.href = file.src;
-    link.setAttribute('download', file.name);
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
+    getFile(file.id).then((f) => {
+      const link = document.createElement('a');
+      link.href = urlMedia(file.ext, f);
+      link.setAttribute(
+        'download',
+        file.name,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    }).catch((error) => {
+      console.error(error);
+    });
   };
 
   const previewPDF = () => {
-    window.open(file.src);
+    getFile(file.id).then((f) => {
+      window.open(urlMedia(file.ext, f));
+    }).catch((error) => {
+      console.error(error);
+    });
   };
   const handleRemoveFile = (id) => {
     const optionsOfQuestion = {...currentEditInq};
@@ -134,7 +157,7 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
         </h3>
         {
           !hiddenRemove &&
-          <PermissionProvider action={PERMISSION.INQUIRY_REMOVE_MEDIA}>
+          <PermissionProvider action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
             <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
               <CloseIcon />
             </IconButton>
