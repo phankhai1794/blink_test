@@ -143,17 +143,6 @@ const InquiryEditor = (props) => {
   };
   useEffect(() => {
     if (fieldValue) {
-      if (
-        !metadata.inq_type_options.filter(
-          (v) => (fieldValue.value === v.field || !v.field) && valueType?.value === v.value
-        ).length
-      ) {
-        const inq = { ...currentEditInq };
-        inq.inqType = '';
-        inq.content = currentEditInq.content.replace(valueType?.label, '{{INQ_TYPE}}');
-        setValueType(null);
-        dispatch(InquiryActions.setEditInq(inq));
-      }
       const list = [currentEditInq]
       const filter = metadata.inq_type_options.filter(data => {
         return data.field?.includes(fieldValue.value) && list.filter(q =>
@@ -182,6 +171,7 @@ const InquiryEditor = (props) => {
     inq.field = e.value;
     dispatch(InquiryActions.validate({ ...valid, field: true }));
     setFieldValue(e);
+    setValueType(null);
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
