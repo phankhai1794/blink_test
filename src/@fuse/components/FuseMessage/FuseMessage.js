@@ -44,6 +44,7 @@ function FuseMessage(props) {
     <Snackbar
       {...options}
       open={state}
+      autoHideDuration={3000}
       onClose={() => dispatch(Actions.hideMessage())}
       classes={{
         root: classes.root
