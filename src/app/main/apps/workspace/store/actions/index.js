@@ -7,7 +7,7 @@ import {
   setContent,
   saveField,
   editInquiry,
-  setOriginalInquiry,
+  setInquiries,
   saveMetadata,
   setListAttachment
 } from './inquiry';
@@ -34,10 +34,12 @@ export const loadMetadata = () => async (dispatch) => {
 export const loadInquiry = (myBL_Id) => async (dispatch) => {
   getInquiryById(myBL_Id)
     .then((res) => {
+      res.sort((a, b) => a.createdAt < b.createdAt ? 1 : -1);
+      res.forEach(inq => inq.answerObj.length && inq.answerObj.sort((a, b) => a.createdAt > b.createdAt ? 1 : -1));
       const field_list = res.map((e) => e.field);
       dispatch(saveField(field_list));
       dispatch(editInquiry(res));
-      dispatch(setOriginalInquiry(JSON.parse(JSON.stringify(res))));
+      dispatch(setInquiries(JSON.parse(JSON.stringify(res))));
       const optionTabs = [
         { id: 'inquiryList', field: 'INQUIRY_LIST' },
         { id: 'attachmentList', field: 'ATTACHMENT_LIST' },

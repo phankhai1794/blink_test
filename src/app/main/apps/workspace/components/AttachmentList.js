@@ -142,6 +142,16 @@ const attachmentStyle = makeStyles(() => ({
   }
 }));
 
+const urlMedia = (fileExt, file) => {
+  if (fileExt.match(/jpeg|jpg|png/g)) {
+    return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
+  } else if (fileExt.match(/pdf/g)) {
+    return URL.createObjectURL(new Blob([file], { type: 'application/pdf' }));
+  } else {
+    return URL.createObjectURL(new Blob([file]));
+  }
+};
+
 const AttachmentList = (props) => {
   const [inquiries, metadata, isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
@@ -169,16 +179,6 @@ const AttachmentList = (props) => {
         width: `${width}px`
       }
     };
-  };
-
-  const urlMedia = (fileExt, file) => {
-    if (fileExt.match(/jpeg|jpg|png/g)) {
-      return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
-    } else if (fileExt.match(/pdf/g)) {
-      return URL.createObjectURL(new Blob([file], { type: 'application/pdf' }));
-    } else {
-      return URL.createObjectURL(new Blob([file]));
-    }
   };
 
   useEffect(() => {
@@ -222,20 +222,8 @@ const AttachmentList = (props) => {
       });
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
     });
-    if (getAttachmentFiles.length <= 0) {
-      setIsLoading(false);
-    }
-    for (let f in getAttachmentFiles) {
-      getFile(getAttachmentFiles[f].id).then((file) => {
-        getAttachmentFiles[f].src = urlMedia(getAttachmentFiles[f].ext, file);
-        setAttachmentFile(getAttachmentFiles);
-        setIsLoading(false);
-      }).catch((error) => {
-        console.error(error);
-        setIsLoading(false);
-        setAttachmentFile(getAttachmentFiles);
-      });
-    }
+    setIsLoading(false);
+    setAttachmentFile(getAttachmentFiles)
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
   }, []);
 
@@ -475,15 +463,15 @@ const AttachmentList = (props) => {
                 {isShowReplace && (
                   <PermissionProvider action={PERMISSION.INQUIRY_REPLACE_MEDIA}>
                     <div className={'replace'}>
-                      <AttachFile
+                      <AttachFileList
                         uploadImageAttach={onFileReplaceChange}
                         // mediaIndex={index}
                         isAttachmentList={false}
-                        type={'replace'}
+                        type={'replace'}                        
                       >
                         <CachedIcon style={{ height: '22px', width: '22px', color: '#BD0F72' }} />
                         <span style={{ fontSize: '15px', marginLeft: '5px', fontWeight: '500', color: '#BD0F72' }}>Replace</span>
-                      </AttachFile>
+                      </AttachFileList>
                     </div>
                   </PermissionProvider>
                 )}
@@ -608,7 +596,7 @@ const useStyles = makeStyles(() => ({
     marginRight: '20px'
   },
 }));
-const AttachFile = (props) => {
+const AttachFileList = (props) => {
   const [isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.isShowBackground,
   ]);
@@ -676,15 +664,19 @@ const ImageAttachList = ({ file }) => {
     setIsViewerOpen(false);
   };
   const downloadFile = () => {
-    const link = document.createElement('a');
-    link.href = file.src;
-    link.setAttribute(
-      'download',
-      file.name,
-    );
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
+    getFile(file.id).then((f) => {
+      const link = document.createElement('a');
+      link.href = urlMedia(file.ext, f);
+      link.setAttribute(
+        'download',
+        file.name,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 
   return (
@@ -733,20 +725,29 @@ const useStylesFile = makeStyles((theme) => ({
 }));
 const FileAttachList = ({ file }) => {
   const classes = useStylesFile();
+
   const downloadFile = () => {
-    const link = document.createElement('a');
-    link.href = file.src;
-    link.setAttribute(
-      'download',
-      file.name,
-    );
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
+    getFile(file.id).then((f) => {
+      const link = document.createElement('a');
+      link.href = urlMedia(file.ext, f);
+      link.setAttribute(
+        'download',
+        file.name,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 
   const previewPDF = () => {
-    window.open(file.src);
+    getFile(file.id).then((f) => {
+      window.open(urlMedia(file.ext, f));
+    }).catch((error) => {
+      console.error(error);
+    });
   }
 
   return (
@@ -785,4 +786,4 @@ const ColoredLinearProgress = () => {
   );
 };
 
-export { AttachmentList, AttachFile };
+export { AttachmentList, AttachFileList };

@@ -1,13 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, InputAdornment, TextField } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { createParagraphAnswer, updateParagraphAnswer } from 'app/services/inquiryService';
 import { useDispatch } from 'react-redux';
-import * as AppAction from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
-import * as FormActions from '../store/actions/form';
-import * as InquiryActions from '../store/actions/inquiry';
 
 import UserInfo from './UserInfo';
 
@@ -31,80 +27,39 @@ const ParagraphAnswer = (props) => {
   const allowUpdateParagraphAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
   });
-  const { question, index, questions, saveQuestion } = props;
+  const { question, index } = props;
   const [paragraphText, setParagraphText] = useState(question.answerObj[0]?.content || '');
-  const dispatch = useDispatch();
+
   const classes = useStyles();
   const [isPermission, setPermission] = useState(false);
 
-  useEffect(() => {
-    if (questions) {
-      if (
-        (!questions[index]?.answerObj[0]?.id && allowCreateParagraphAnswer) ||
-        (questions[index]?.answerObj[0]?.id && allowUpdateParagraphAnswer)
-      ) {
-        setPermission(true);
-      } else {
-        setPermission(false);
-      }
-    }
-  }, [questions]);
-
-  const addParagraph = async () => {
+  const handleChangeInput = (e) => {
+    setParagraphText(e.target.value);
     const body = {
       inquiry: question.id,
-      content: paragraphText
+      content: e.target.value
     };
-    const optionsOfQuestion = [...questions];
-    const objAns = optionsOfQuestion[index].answerObj;
-    if (question.answerObj.length === 0) {
-      createParagraphAnswer(body).then((res) => {
-        if (res) {
-          const { message, answerObj } = res;
-          objAns.push(answerObj);
-          saveQuestion(optionsOfQuestion);
-          dispatch(InquiryActions.setOneInq({}));
-          dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
-        }
-      });
-    } else {
-      const answerId = question.answerObj[0].id;
-      updateParagraphAnswer(answerId, body).then((res) => {
-        if (res) {
-          const { message } = res;
-          objAns[0].content = body.content;
-          saveQuestion(optionsOfQuestion);
-          dispatch(InquiryActions.setOneInq({}));
-          dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
-        }
-      });
-    }
-    dispatch(FormActions.toggleInquiry(false));
+    props.paragrapAnswer(body);
+    props.isDisableSave(false);
   };
+
+  useEffect(() => {
+    allowCreateParagraphAnswer && allowUpdateParagraphAnswer ? setPermission(true) : setPermission(false);
+  }, []);
 
   return (
     <div>
       <div className="flex">
         <TextField
-          placeholder={isPermission ? 'Customer Input' : ''}
+          style={{ border: 'none' }}
+          fullWidth
+          placeholder={isPermission ? 'Typing...' : ''}
           classes={{ root: classes.root }}
           disabled={!isPermission}
           InputProps={{
             style: {
               fontSize: '1.7rem'
             },
-            endAdornment: isPermission && (
-              <InputAdornment position="end">
-                <Button
-                  aria-label="Add"
-                  edge="end"
-                  color="primary"
-                  variant="contained"
-                  onClick={addParagraph}>
-                  Add
-                </Button>
-              </InputAdornment>
-            )
           }}
           InputLabelProps={{
             style: {
@@ -112,12 +67,11 @@ const ParagraphAnswer = (props) => {
             }
           }}
           id="outlined-multiline-flexible"
-          fullWidth
           multiline
           rowsMax={4}
-          variant="outlined"
+
           value={paragraphText}
-          onChange={(e) => setParagraphText(e.target.value)}
+          onChange={handleChangeInput}
         />
       </div>
       {question.selectedChoice && (

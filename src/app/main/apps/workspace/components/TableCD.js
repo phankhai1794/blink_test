@@ -29,6 +29,9 @@ const useStyles = makeStyles((theme) => ({
   colorEmptyInqIcon: {
     color: `${pink} !important`
   },
+  colorNoInqIcon: {
+    color: `white !important`
+  },
   enterTableFile: {
     borderRadius: '8px',
     zIndex: 0,
@@ -64,8 +67,7 @@ const TableCD = (props) => {
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
   const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
-  const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
-  const questions = useSelector(({ workspace }) => workspace.inquiryReducer.question);
+  // const questions = useSelector(({ workspace }) => workspace.inquiryReducer.question);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
 
@@ -80,15 +82,14 @@ const TableCD = (props) => {
     }
     else if (allowAddInquiry) {
       if (
-        questions.length > 1 &&
-        !questions[questions.length - 1].id
+        inquiries.length > 1 &&
+        !inquiries[inquiries.length - 1].id
       ) {
-        if (inquiries.length + questions.length + 1 === metadata.field_options.length) {
+        if ( inquiries.length + 1 === metadata.field_options.length) {
           dispatch(FormActions.toggleAddInquiry(false));
         }
-        if (inquiries.length + questions.length !== metadata.field_options.length) {
-          dispatch(InquiryActions.addQuestion());
-          dispatch(InquiryActions.setEdit(questions.length));
+        if (inquiries.length !== metadata.field_options.length) {
+          dispatch(InquiryActions.addQuestion(id));
         }
       }
       dispatch(FormActions.toggleCreateInquiry(true));
@@ -97,9 +98,9 @@ const TableCD = (props) => {
   }
 
   const checkQuestionIsEmpty = () => {
-    if (originalInquiry.length > 0) {
-      const check = originalInquiry.filter((q) => q.field === id);
-      const checkMedita = originalInquiry.filter((q) => q.field === id && q.mediaFile.length);
+    if (inquiries.length > 0) {
+      const check = inquiries.filter((q) => q.field === id);
+      const checkMedita = inquiries.filter((q) => q.field === id && q.mediaFile.length);
       checkMedita.length && setMediaFileIsEmpty(false);
       return check.length === 0;
     }
@@ -108,7 +109,7 @@ const TableCD = (props) => {
 
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty());
-  }, [originalInquiry, metadata]);
+  }, [inquiries, metadata]);
 
   return (
     <>
@@ -118,7 +119,7 @@ const TableCD = (props) => {
             {!mediaFileIsEmpty && <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />}
             < HelpIcon className={clsx(classes.colorHasInqIcon)} />
           </>
-          : (allowAddInquiry && <AddCircleIcon className={clsx(classes.colorEmptyInqIcon)} />)}
+          : (allowAddInquiry &&<AddCircleIcon className={(showAddIcon ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon))}/> )}
       </div>
       <div className={clsx(!questionIsEmpty ? classes.hasInq : classes.enterTableFile)} onClick={onClick}>
         <Grid container
@@ -147,26 +148,26 @@ const TableCD = (props) => {
             </Grid>
             {containerDetail?.length > 0 ?
               containerDetail.map((cd, index) =>
-              (<Grid container spacing={2} className='px-8 py-2' key={index}>
-                <Grid item xs={2}>
-                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>
-                </Grid>
-                <Grid item xs={2}>
-                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}</BLField>
-                </Grid>
-                <Grid item xs={2}>
-                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}</BLField>
-                </Grid>
-                <Grid item xs={2}>
-                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}</BLField>
-                </Grid>
-                <Grid item xs={2}>
-                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}</BLField>
-                </Grid>
-                <Grid item xs={2}>
-                  <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}</BLField>
-                </Grid>
-              </Grid>))
+                (<Grid container spacing={2} className='px-8 py-2' key={index}>
+                  <Grid item xs={2}>
+                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>
+                  </Grid>
+                  <Grid item xs={2}>
+                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}</BLField>
+                  </Grid>
+                  <Grid item xs={2}>
+                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}</BLField>
+                  </Grid>
+                  <Grid item xs={2}>
+                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}</BLField>
+                  </Grid>
+                  <Grid item xs={2}>
+                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}</BLField>
+                  </Grid>
+                  <Grid item xs={2}>
+                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}</BLField>
+                  </Grid>
+                </Grid>))
               : (<Grid container spacing={2} className='px-8 py-2'>
                 <Grid item xs={2}>
                   <BLField></BLField>

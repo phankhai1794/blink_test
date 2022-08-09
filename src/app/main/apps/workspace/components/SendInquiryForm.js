@@ -14,11 +14,14 @@ import TagsInput from './TagsInput';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
 
+const colorBtnReview = '#1564EE';
+
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
-  const [mybl, openEmail] = useSelector(({ workspace }) => [
+  const [mybl, openEmail, inquiries] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.myBL,
-    workspace.formReducer.openEmail
+    workspace.formReducer.openEmail,
+    workspace.inquiryReducer.inquiries,
   ]);
   const [success, error, suggestMails, validateMail] = useSelector(({ workspace }) => [
     workspace.mailReducer.success,
@@ -83,7 +86,12 @@ const SendInquiryForm = (props) => {
   }, [openEmail]);
 
   const opendPreviewForm = (event) => {
-    dispatch(FormActions.toggleOpenInquiryReview(true));
+    if (inquiries.length) {
+      dispatch(FormActions.toggleOpenInquiryReview(true));
+      dispatch(FormActions.toggleSaveInquiry(true));
+    } else {
+      dispatch(Actions.showMessage({ message: 'Inquiry List is empty!', variant: 'info' }));
+    }
   };
 
   const sendMailClick = (event) => {
@@ -186,7 +194,7 @@ const SendInquiryForm = (props) => {
               value={form.subject}
               onChange={onInputChange}
             />
-         
+
           </div>
           <div style={{ marginTop: 5, display: 'flex' }}>
             <textarea
@@ -221,23 +229,25 @@ const InquiryReview = (props) => {
   return (
     <>
       <Form
-        title={'Sending inquiry preview'}
+        title={'Inquiry Preview'}
         tabs={['Customer', 'Onshore']}
         open={openInqReview}
         toggleForm={(status) => dispatch(FormActions.toggleOpenInquiryReview(status))}
         tabChange={(newValue) => {
           setTabSelected(newValue);
         }}
+        hasAddButton={false}
         field={props.field}
         openFab={false}
         FabTitle="Inquiry Review"
-        customActions={<div></div>}>
+      >
         <>
           <div style={{ height: '800px' }}>
             <AllInquiry
               user="workspace"
               receiver={tabSelected === 0 ? 'customer' : 'onshore'}
               collapse={true}
+              openInquiryReview={true}
             />
           </div>
         </>
@@ -338,22 +348,21 @@ const ActionUI = (props) => {
         justifyContent: 'center',
         alignItems: 'center'
       }}>
-      {/* <Button
+      <Button
         style={{
           textTransform: 'none',
-          fontWeight: 'bold',
           position: 'absolute',
           left: '10px',
-          top: '10px'
+          top: '10px',
+          fontFamily: 'Montserrat'
         }}
         variant="text"
-        // className={clsx('h-64', classes.button)}
         onClick={openPreviewClick}>
-        <Icon style={{ color: '#1564EE' }}>visibility</Icon>
-        <span className="pl-14" style={{ color: '#1564EE' }}>
+        <Icon fontSize='small' style={{ color: colorBtnReview, paddingRight: '0.5rem' }}>visibility</Icon>
+        <span className="pl-14" style={{ color: colorBtnReview, fontSize: '16px' }}>
           Preview Inquiries
         </span>
-      </Button> */}
+      </Button>
       <Button
         variant="text"
         size="medium"
@@ -363,7 +372,8 @@ const ActionUI = (props) => {
           width: 140,
           color: 'white',
           backgroundColor: isLoading ? '#515E6A' : '#bd1874',
-          borderRadius: 20
+          borderRadius: 20,
+          fontFamily: 'Montserrat'
         }}
         disabled={isLoading}
         onClick={sendMailClick}>

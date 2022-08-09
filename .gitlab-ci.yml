@@ -1,27 +1,14 @@
-image: gitlab/dind:latest
 stages:
-  - develop
-  - release
-  
-deploy_development:
-  stage: develop
+  - test
+
+deploy_test:
+  stage: test
   only:
     - "develop"
   when: manual
   environment:
-    name: development
-  script:
-    - echo "Deploy for development"
-    - curl -v -X GET http://si-automation.dounets.com:8804/exec/pipeline/myBL/portal?ci_commit=${CI_COMMIT_SHA:0:7}
-
-
-deploy_release:
-  stage: release
-  only:
-    - "release"
-  when: manual
-  environment:
     name: test
+    url: http://stg-mybl.cyberlogitec.com.vn:8000
   script:
-    - echo "Deploy for release"
-    - curl -v -X GET http://si-automation.dounets.com:8804/exec/pipeline/myBL/portal?ci_commit=${CI_COMMIT_SHA:0:7}
+    - echo "Sending Deployment Trigger"
+    - 'curl -v -d "commit_id=${CI_COMMIT_SHA:0:8}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://stg-mybl.cyberlogitec.com.vn:8000/pipeline/test/portal'

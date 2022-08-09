@@ -24,3 +24,14 @@ export const CM_WEIGHT = 'C/M Weight';
 
 export const CM_MEASUREMENT = 'C/M Measurement';
 
+export const FREIGHT_CHARGES = 'FREIGHT & CHARGES PAYABLE AT / BY'
+
+export const PLACE_OF_BILL = 'PLACE OF BILL(S) ISSUE'
+
+export const FREIGHTED_AS = 'FREIGHTED AS'
+
+export const RATE = 'RATE'
+
+export const DATE_CARGO = 'DATE CARGO RECEIVED'
+
+export const DATE_LADEN = 'DATE LADEN ON BOARD'

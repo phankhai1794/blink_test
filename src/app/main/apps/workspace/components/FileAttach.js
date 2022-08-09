@@ -4,8 +4,11 @@ import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import { IconButton } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
+import { PERMISSION, PermissionProvider } from "@shared/permission";
+import { getFile } from 'app/services/fileService';
 
 import * as InquiryActions from "../store/actions/inquiry";
+import * as FormActions from "../store/actions/form";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -41,33 +44,56 @@ const useStyles = makeStyles((theme) => ({
 
 const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   const classes = useStyles();
-  const [inquiries, questions, attachmentList] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.question,
+  const [valid, currentEditInq, attachmentList] =
+  useSelector(({ workspace }) => [
+    workspace.inquiryReducer.validation,
+    workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.attachmentList,
   ]);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const dispatch = useDispatch();
+  
+  const urlMedia = (fileExt, file) => {
+    if (fileExt.match(/jpeg|jpg|png/g)) {
+      return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
+    } else if (fileExt.match(/pdf/g)) {
+      return URL.createObjectURL(new Blob([file], { type: 'application/pdf' }));
+    } else {
+      return URL.createObjectURL(new Blob([file]));
+    }
+  };
+  
   const downloadFile = () => {
-    const link = document.createElement('a');
-    link.href = file.src;
-    link.setAttribute('download', file.name);
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
+    getFile(file.id).then((f) => {
+      const link = document.createElement('a');
+      link.href = urlMedia(file.ext, f);
+      link.setAttribute(
+        'download',
+        file.name,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    }).catch((error) => {
+      console.error(error);
+    });
   };
 
   const previewPDF = () => {
-    window.open(file.src);
+    getFile(file.id).then((f) => {
+      window.open(urlMedia(file.ext, f));
+    }).catch((error) => {
+      console.error(error);
+    });
   };
   const handleRemoveFile = (id) => {
-    const optionsOfQuestion = [...inquiries];
+    const optionsOfQuestion = {...currentEditInq};
     const optionsAttachmentList = [...attachmentList];
     if (field && file.id) {
-      const indexMedia = optionsOfQuestion[indexInquiry].mediaFile.findIndex(
+      const indexMedia = optionsOfQuestion.mediaFile.findIndex(
         (f) => f.id === file.id
       );
-      optionsOfQuestion[indexInquiry].mediaFile.splice(indexMedia, 1);
+      optionsOfQuestion.mediaFile.splice(indexMedia, 1);
       dispatch(InquiryActions.editInquiry(optionsOfQuestion));
       // update attachment list
       dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
@@ -91,21 +117,22 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
     } else {
       // Remove attachment at local
       if (openInquiryForm) {
-        const optionsOfQuestionLocal = [...questions];
-        const indexMedia = optionsOfQuestionLocal[indexInquiry].mediaFile.findIndex(
+        const optionsOfQuestionLocal = {...currentEditInq};
+        const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
           (f) => f.name === file.name
         );
-        optionsOfQuestionLocal[indexInquiry].mediaFile.splice(indexMedia, 1);
+        optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
         dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
       } else {
-        const optionsOfQuestionLocal = [...inquiries];
-        const indexMedia = optionsOfQuestionLocal[indexInquiry].mediaFile.findIndex(
+        const optionsOfQuestionLocal = {...currentEditInq};
+        const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
           (f) => f.name === file.name
         );
-        optionsOfQuestionLocal[indexInquiry].mediaFile.splice(indexMedia, 1);
+        optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
         dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
       }
     }
+    dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   return (
@@ -130,9 +157,11 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
         </h3>
         {
           !hiddenRemove &&
-          <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
-            <CloseIcon />
-          </IconButton>
+          <PermissionProvider action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
+            <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+              <CloseIcon />
+            </IconButton>
+          </PermissionProvider>
         }
       </div>
     </div>

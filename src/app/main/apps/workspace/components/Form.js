@@ -3,6 +3,7 @@ import { NUMBER_INQ_BOTTOM, toFindDuplicates } from '@shared';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withStyles, makeStyles, createMuiTheme } from '@material-ui/core/styles';
+import clsx from 'clsx';
 import { ThemeProvider } from '@material-ui/styles';
 import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -121,7 +122,6 @@ const DialogActions = withStyles((theme) => ({
 
 const useStyles = makeStyles(() => ({
   dialogPaper: {
-    width: '950px',
     minHeight: 600,
     maxHeight: '80%'
   },
@@ -140,6 +140,31 @@ const useStyles = makeStyles(() => ({
   },
   chip: {
     marginLeft: '0.2rem'
+  },
+  colorSelectedTab: {
+    color: '#BD0F72'
+  },
+  tab: {
+    fontFamily: 'Montserrat',
+    textTransform: 'none',
+    fontSize: '18px',
+    fontWeight: '600'
+  },
+  iconLabelWrapper: {
+    display: 'flex',
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-around'
+  },
+  countBtn: {
+    background: '#E2E6EA',
+    fontSize: '14px',
+    height: '24px',
+    width: '24px',
+    borderRadius: '4px',
+    marginBottom: '0 !important'
+  },
+  colorCountBtn: {
+    background: '#FDF2F2'
   }
 }));
 
@@ -158,23 +183,22 @@ export default function Form(props) {
     popoverfooter
   } = props;
 
-  const index = useSelector(({ workspace }) => workspace.inquiryReducer.currentEdit);
-  const question = useSelector(({ workspace }) => workspace.inquiryReducer.question);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
 
-  const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
   const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
 
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
-  const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
-  const openInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
+  const isShowBackground = useSelector(
+    ({ workspace }) => workspace.inquiryReducer.isShowBackground
+  );
 
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const showSaveInquiry = useSelector(({ workspace }) => workspace.formReducer.showSaveInquiry);
-
+  const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
 
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -193,7 +217,13 @@ export default function Form(props) {
   }, [listInqMinimize]);
 
   const checkValidate = (question) => {
-    if (!question.inqType || !question.field || !question.receiver.length || !question.ansType || !question.content) {
+    if (
+      !question.inqType ||
+      !question.field ||
+      !question.receiver.length ||
+      !question.ansType ||
+      !question.content
+    ) {
       dispatch(
         InquiryActions.validate({
           ...valid,
@@ -223,7 +253,7 @@ export default function Form(props) {
       }
     }
     if (typeChoice === question.ansType && question.answerObj.length) {
-      const dupArray = question.answerObj.map(ans => ans.content)
+      const dupArray = question.answerObj.map((ans) => ans.content);
       if (toFindDuplicates(dupArray).length) {
         dispatch(
           AppActions.showMessage({ message: 'Options must not be duplicated', variant: 'error' })
@@ -257,20 +287,17 @@ export default function Form(props) {
   };
 
   const handleClick = () => {
-    if (Object.keys(openInq).length) {
-      dispatch(FormActions.toggleCreateInquiry(true));
-      dispatch(InquiryActions.setOneInq({}));
-    }
-    else if (openAllInquiry) {
-      toggleForm(false);
-      dispatch(FormActions.toggleSaveInquiry(false));
-      dispatch(FormActions.toggleCreateInquiry(true));
-    } else if (checkValidate(question[index])) {
-      if (inquiries.length + question.length + 1 === metadata.field_options.length) {
-        dispatch(FormActions.toggleAddInquiry(false));
+    if (!currentEditInq) {
+      if (openAllInquiry) {
+        toggleForm(false);
+        dispatch(FormActions.toggleSaveInquiry(false));
+        dispatch(FormActions.toggleCreateInquiry(true));
+      } else {
+        if (inquiries.length + 1 === metadata.field_options.length) {
+          dispatch(FormActions.toggleAddInquiry(false));
+        }
       }
       dispatch(InquiryActions.addQuestion());
-      dispatch(InquiryActions.setEdit(question.length));
     }
   };
 
@@ -279,6 +306,8 @@ export default function Form(props) {
     const tempInq = list.splice(index, 1)[0];
     list.splice(list.length, 0, tempInq);
   };
+
+  const [value, setValue] = useState(0);
   const handleClose = () => {
     toggleForm(false);
     setOpenFab(false);
@@ -293,10 +322,9 @@ export default function Form(props) {
     if (field === 'ATTACHMENT_LIST') {
       dispatch(FormActions.toggleReload());
     } else {
-      dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))));
+      // dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))));
     }
     dispatch(FormActions.toggleSaveInquiry(false));
-    if (tabs) props.tabChange(0);
     dispatch(InquiryActions.setOneInq({}));
     //
     const currentInq = listMinimize.find((q) => q.field === field);
@@ -306,8 +334,8 @@ export default function Form(props) {
     }
     //
     dispatch(InquiryActions.setOpenedInqForm(false));
+    dispatch(FormActions.setEnableSaveInquiriesList(true));
   };
-  const [value, setValue] = React.useState(0);
   const handleChange = (_, newValue) => {
     setValue(newValue);
     props.tabChange(newValue);
@@ -327,6 +355,19 @@ export default function Form(props) {
   const handleSetOpenFab = (status) => {
     setOpenFab(status);
   };
+
+  const countInq = (recevier) => {
+    let count = 0;
+    inquiries.forEach((inq) => inq.receiver.includes(recevier) && count++);
+    return count;
+  };
+
+  useEffect(() => {
+    if (tabs) {
+      props.tabChange(0);
+      setValue(0);
+    }
+  }, [openInqReview]);
 
   return (
     <div>
@@ -357,47 +398,75 @@ export default function Form(props) {
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
         {tabs && (
-          <Box style={{}} sx={{}}>
+          <Box style={{ borderBottom: '1px solid #515F6B' }} sx={{}}>
             <Tabs
-              indicatorColor="secondary"
-              style={{ margin: 0, backgroundColor: '#102536' }}
+              indicatorColor="primary"
+              style={{ margin: 0 }}
               value={value}
               onChange={handleChange}>
-              <Tab style={{ color: 'white' }} label="Customer" />
-              <Tab style={{ color: 'white' }} label="Onshore" />
+              <Tab
+                classes={{ wrapper: classes.iconLabelWrapper }}
+                className={clsx(classes.tab, value === 0 && classes.colorSelectedTab)}
+                label="Customer"
+                icon={
+                  <div className={clsx(classes.countBtn, value === 0 && classes.colorCountBtn)}>
+                    {countInq('customer')}
+                  </div>
+                }
+              />
+              <Tab
+                classes={{ wrapper: classes.iconLabelWrapper }}
+                className={clsx(classes.tab, value === 1 && classes.colorSelectedTab)}
+                label="Onshore"
+                icon={
+                  <div className={clsx(classes.countBtn, value === 1 && classes.colorCountBtn)}>
+                    {countInq('onshore')}
+                  </div>
+                }
+              />
             </Tabs>
           </Box>
         )}
         <MuiDialogContent
-          classes={{ root: field === 'ATTACHMENT_LIST' ? classes.dialogContentAttachment : classes.dialogContent }}
-          style={{ overflow: field === 'ATTACHMENT_LIST' && isShowBackground ? 'hidden' : '' }}
-        >{children}</MuiDialogContent>
+          classes={{
+            root:
+              field === 'ATTACHMENT_LIST' ? classes.dialogContentAttachment : classes.dialogContent
+          }}
+          style={{ overflow: field === 'ATTACHMENT_LIST' && isShowBackground ? 'hidden' : '' }}>
+          {children}
+        </MuiDialogContent>
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
-          <DialogActions style={{ display: 'none !important' }}>
+          <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
-              <div style={{ right: '3rem', bottom: '2.6rem', position: 'absolute' }}>
-                <Link
-                  component="button"
-                  variant="body2"
-                  onClick={handleClick}
-                  style={{ display: 'flex', alignItems: 'center' }}>
-                  <AddCircleOutlineIcon style = {{ left: '8.33%', right: '8.33%', border: '2px' }} />
-                  <span
-                    style={{
-                      color: '#BD0F72',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      fontFamily: 'Montserrat',
-                      width: '98px',
-                      height: '20px',
-                      fontStyle: 'normal'
-                    }}>
-                    Add Inquiry
-                  </span>
-                </Link>
-              </div>
+              <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
+                <div style={{ right: '3rem', padding: '2.6rem', position: 'absolute' }}>
+                  <Link
+                    component="button"
+                    variant="body2"
+                    underline='none'
+                    onClick={handleClick}
+                    style={{ display: 'flex', alignItems: 'center' }}>
+                    <AddCircleOutlineIcon
+                      style={{ color: currentEditInq ? '#d3d3d3' : '#BD0F72', left: '8.33%', right: '8.33%', border: '2px' }}
+                    />
+                    <span
+                      style={{
+                        color: currentEditInq ? '#d3d3d3' : '#BD0F72',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        fontFamily: 'Montserrat',
+                        width: '98px',
+                        height: '20px',
+                        fontStyle: 'normal'
+                      }}>
+                      Add Inquiry
+                    </span>
+                  </Link>
+                </div>
+              </PermissionProvider>
             )}
+
             {!popoverfooter && (
               <div style={{ marginLeft: '2rem' }}>
                 {!showSaveInquiry ? (

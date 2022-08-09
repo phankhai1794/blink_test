@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { makeStyles, Button } from '@material-ui/core';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
+import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 
 const useStyles = makeStyles((theme) => ({
@@ -31,6 +32,7 @@ const BtnAddInquiry = () => {
   const dispatch = useDispatch();
 
   const onClick = (e) => {
+    dispatch(InquiryActions.addQuestion());
     dispatch(FormActions.toggleCreateInquiry(true));
   };
 

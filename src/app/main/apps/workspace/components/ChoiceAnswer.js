@@ -1,4 +1,3 @@
-import { updateInquiryChoice } from 'app/services/inquiryService';
 import React, { useState } from 'react';
 import {
   Radio,
@@ -11,7 +10,7 @@ import {PERMISSION, PermissionProvider} from "@shared/permission";
 
 
 const ChoiceAnswer = (props) => {
-  const { index, questions, question, saveQuestion } = props;
+  const { index, question, selectChoice, isDisableSave } = props;
   let questionIsEmpty = props.question === undefined;
   let prevChoiceArray = question.answerObj.filter((choice) => {
     return choice.confirmed;
@@ -25,49 +24,19 @@ const ChoiceAnswer = (props) => {
     }
   };
   const [selectedChoice, setSelectedChoice] = useState(initSelectedChoice());
-  const [otherChoiceContent, setOtherChoiceContent] = useState(question.otherChoiceContent);
-  const [lastSelectedChoice, setLastSelectedChoice] = useState(
-    selectedChoice === 'other' ? otherChoiceContent : selectedChoice
-  );
-  const [showSaveBtn, setShowSaveBtn] = useState(false);
   const allowUpdateChoiceAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_UPDATE_CHOICE });
 
   const handleChange = async (e) => {
     setSelectedChoice(e.target.value);
-    // setShowSaveBtn(true);
     const selectedObj = {
       inquiry: question.id,
       answer: e.target.value,
       confirmed: true
     };
-    await updateInquiryChoice(selectedObj);
+    selectChoice(selectedObj);
+    isDisableSave(false);
+  };
 
-    const optionsOfQuestion = [...questions];
-    const answersObj = optionsOfQuestion[index].answerObj;
-    answersObj.forEach((item, i) => {
-      answersObj[i].confirmed = false;
-    });
-    const answerIndex = answersObj.findIndex((item) => item.id === selectedObj.answer);
-    const answerUpdate = answersObj[answerIndex];
-    answerUpdate.confirmed = true;
-    saveQuestion(optionsOfQuestion);
-  };
-  const handleSaveSelectedChoice = () => {
-    let savedQuestion = question;
-    savedQuestion = {
-      ...savedQuestion,
-      selectedChoice: selectedChoice === 'other' ? otherChoiceContent : selectedChoice,
-      otherChoice: otherChoiceContent
-    };
-    // props.onSaveSelectedChoice(savedQuestion)
-    setLastSelectedChoice(selectedChoice === 'other' ? otherChoiceContent : selectedChoice);
-    setShowSaveBtn(false);
-  };
-  const handleFocus = (e) => {
-    setSelectedChoice('other');
-    e.target.select();
-    setShowSaveBtn(true);
-  };
   return (
     <>
       <FormControl>

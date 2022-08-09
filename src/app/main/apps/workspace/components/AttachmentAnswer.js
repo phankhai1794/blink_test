@@ -10,6 +10,7 @@ import { createAttachmentAnswer } from 'app/services/inquiryService';
 import * as AppAction from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import {validateExtensionFile} from "@shared";
+import { makeStyles } from '@material-ui/styles';
 
 import * as FormActions from "../store/actions/form";
 import * as InquiryActions from "../store/actions/inquiry";
@@ -23,10 +24,10 @@ const baseStyle = {
   alignItems: 'center',
   padding: '20px',
   borderWidth: 2,
-  borderRadius: 2,
-  borderColor: '#eeeeee',
+  borderRadius: 10,
+  borderColor: '#BAC3CB',
   borderStyle: 'dashed',
-  backgroundColor: '#fafafa',
+  // backgroundColor: '#fafafa',
   color: '#bdbdbd',
   outline: 'none',
   transition: 'border .24s ease-in-out'
@@ -84,6 +85,7 @@ const AttachmentAnswer = (props) => {
       noKeyboard: true,
       onDrop,
     });
+    
   const handleSave = () => {
     const formData = [];
     const mediaRest = [];
@@ -122,7 +124,6 @@ const AttachmentAnswer = (props) => {
           optionsOfQuestion[index].answerObj[0].mediaFiles = answerObjMediaFiles;
           dispatch(saveQuestion(optionsOfQuestion));
           dispatch(FormActions.toggleReload());
-          dispatch(InquiryActions.setOneInq({}));
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
@@ -136,26 +137,53 @@ const AttachmentAnswer = (props) => {
     }),
     [isDragActive, isDragReject, isDragAccept]
   );
-
+  const useStyles = makeStyles((theme) => ({
+    button: {
+      paddingTop: '5px',
+      paddingBottom: '5px',
+      paddingLeft: '20px',
+      paddingRight: '20px',
+      background: 'white',
+      color: '#BD0F72',
+      border: '1px solid #BD0F72',
+      borderRadius: '8px',
+      justifyContent: 'center'
+    },
+    buttonDisable: {
+      paddingTop: '10px',
+      paddingBottom: '5px',
+      paddingLeft: '20px',
+      paddingRight: '20px',
+      background: '#FFFFFF',
+      border: '1px solid #BAC3CB',
+      borderRadius: '8px',
+      justifyContent: 'center'
+    },
+  }));
+  const classes = useStyles();
   return (
     <div>
       {isPermissionAttach && (
         <div className="container">
           <div {...getRootProps({ style })}>
+            <img
+              src="assets/images/icons/attachment.svg"
+              alt="Attachment"
+            />
             <input {...getInputProps()} disabled={!isPermissionAttach} />
-            <p>Drag and drop some files here</p>
+            <p style={{color: isPermissionAttach? 'black':'#BAC3CB' , fontFamily: 'Montserrat'}}>Select a file or drag and drop here</p>
             <Button
-              color="primary"
-              variant="contained"
+              variant="text"
+              size="medium"
+              className={isPermissionAttach?classes.button:classes.buttonDisable}
               disabled={!isPermissionAttach}
               onClick={open}
-            >
-              <PublishIcon />
+            >Select File
             </Button>
           </div>
         </div>
       )}
-      {isPermissionAttach && (
+      {/* {isPermissionAttach && (
         <div className="justify-end flex" style={{ marginTop: '1rem' }}>
           <Button variant="contained" color="primary" onClick={handleSave}>
             {' '}
@@ -163,7 +191,7 @@ const AttachmentAnswer = (props) => {
             Save
           </Button>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

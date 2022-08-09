@@ -5,30 +5,16 @@ export const getKeyByValue = (object, value) => {
 export const toFindDuplicates = arry => arry.filter((item, index) => arry.indexOf(item) !== index)
 
 export const displayTime = (time) => {
-  let current_time = new Date();
-  let time_difference = current_time.getTime() - new Date(time).getTime();
-  let seconds = time_difference / 1000;
-  let minutes = Math.round(seconds / 60);
-  let hours = Math.round(seconds / 3600);
-  let days = Math.round(seconds / 86400);
-  let weeks = Math.round(seconds / 604800);
-  let months = Math.round(seconds / 2592000);
-  let years = Math.round(seconds / 31536000);
-  if (seconds <= 60) {
-    return 'Just Now';
-  } else if (minutes <= 60) {
-    return minutes === 1 ? 'one minute ago' : `${minutes} minutes ago`;
-  } else if (hours <= 24) {
-    return hours === 1 ? 'an hour ago' : `${hours} hrs ago`;
-  } else if (days <= 7) {
-    return days === 1 ? 'yesterday' : `${days} days ago`;
-  } else if (weeks <= 4.3) {
-    return weeks === 1 ? 'a week ago' : `${weeks} weeks ago`;
-  } else if (months <= 12) {
-    return months === 1 ? 'a month ago' : `${months} months ago`;
-  } else {
-    return years === 1 ? 'one year ago' : `${years} years ago`;
-  }
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  let inputTime = new Date(time);
+
+  let month = months[inputTime.getMonth()];
+  let day = inputTime.getDate();
+  let hour = inputTime.getHours()
+  let minute = inputTime.getMinutes()
+  let year = inputTime.getFullYear()
+  minute = minute.toString().length === 1 ? `0${minute}` : minute
+  return `${month} ${day} ${year}   ${hour}:${minute}`
 };
 
 export const filterMetadata = (data) => {

@@ -8,6 +8,7 @@ import { TextField, InputAdornment, makeStyles } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import ReplyIcon from '@material-ui/icons/Reply';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
@@ -26,6 +27,8 @@ const lockGray = '#F5F8FA';
 const pink = '#BD0F72';
 const lightPink = '#FAF1F5';
 const red = '#DC2626';
+const blue = '#EAF2FD';
+const green = '#2F80ED';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -46,6 +49,18 @@ const useStyles = makeStyles((theme) => ({
   hasInquiry: {
     '& fieldset': {
       backgroundColor: lightPink
+    }
+  },
+  hasAnswer: {
+    '& fieldset': {
+      backgroundColor: blue,
+      borderColor: `${green} !important`
+    },
+    '&:hover fieldset': {
+      borderColor: `${green} !important`
+    },
+    '&:focus-within fieldset': {
+      border: `1px solid ${green} !important`
     }
   },
   input: {
@@ -87,6 +102,9 @@ const useStyles = makeStyles((theme) => ({
   colorHasInqIcon: {
     color: `${red} !important`
   },
+  colorHasAnswer: {
+    color: `${green} !important`
+  },
   colorEmptyInqIcon: {
     color: `${pink} !important`
   },
@@ -101,7 +119,7 @@ const useStyles = makeStyles((theme) => ({
   attachIcon: {
     transform: 'rotate(45deg)',
     marginLeft: '-2.5rem'
-  },
+  }
 }));
 
 const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
@@ -111,10 +129,10 @@ const BLField = (props) => {
   const dispatch = useDispatch();
   const { children, width, multiline, rows, selectedChoice, id, lock, readOnly } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
+  const [isHasAnswer, setHasAnswer] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
-  const questions = useSelector(({ workspace }) => workspace.inquiryReducer.question);
-  const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
+  const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
@@ -143,22 +161,20 @@ const BLField = (props) => {
   };
 
   const onClick = (e) => {
-    if (!questionIsEmpty) {
+    if (questionIsEmpty) {
+      dispatch(InquiryActions.addQuestion(id));
+    } else {
       const currentInq = inquiries.find((q) => q.field === id);
       dispatch(InquiryActions.setOneInq(currentInq));
     }
     if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
       if (
-        questions.length > 1 &&
-        !questions[questions.length - 1].id &&
-        checkValidate(questions[questions.length - 1])
+        inquiries.length > 0 &&
+        !currentEditInq &&
+        checkValidate(inquiries[inquiries.length - 1])
       ) {
-        if (inquiries.length + questions.length + 1 === metadata.field_options.length) {
+        if (inquiries.length + 1 === metadata.field_options.length) {
           dispatch(FormActions.toggleAddInquiry(false));
-        }
-        if (inquiries.length + questions.length !== metadata.field_options.length) {
-          dispatch(InquiryActions.addQuestion());
-          dispatch(InquiryActions.setEdit(questions.length));
         }
       }
       dispatch(FormActions.toggleCreateInquiry(true));
@@ -168,10 +184,10 @@ const BLField = (props) => {
   };
 
   const checkQuestionIsEmpty = () => {
-    if (originalInquiry.length > 0) {
-      const check = originalInquiry.filter((q) => q.field === id);
-      const checkMedita = originalInquiry.filter((q) => q.field === id && q.mediaFile.length);
-      checkMedita.length && setMediaFileIsEmpty(false);
+    if (inquiries.length > 0) {
+      const check = inquiries.filter((q) => q.field === id);
+      const checkMedia = inquiries.filter((q) => q.field === id && q.mediaFile.length);
+      checkMedia.length && setMediaFileIsEmpty(false);
       return check.length === 0;
     }
     return true;
@@ -179,7 +195,7 @@ const BLField = (props) => {
 
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty());
-  }, [originalInquiry, metadata]);
+  }, [inquiries, metadata]);
 
   return (
     <>
@@ -199,7 +215,8 @@ const BLField = (props) => {
             className={clsx(
               classes.root,
               !questionIsEmpty ? classes.hasInquiry : '',
-              lock ? classes.locked : ''
+              lock ? classes.locked : '',
+              isHasAnswer ? classes.hasAnswer : ''
             )}
             InputProps={{
               readOnly: readOnly || true,
@@ -211,10 +228,21 @@ const BLField = (props) => {
                     multiline ? classes.adornmentMultiline : '',
                     rows ? classes[`adornmentRow_${rows}`] : ''
                   )}>
-                  {!mediaFileIsEmpty && <AttachFile className={clsx(classes.sizeIcon, classes.colorHasInqIcon, classes.attachIcon)} />}
-                 
-                  {!questionIsEmpty && (
+                  {!mediaFileIsEmpty && (
+                    <AttachFile
+                      className={clsx(
+                        classes.sizeIcon,
+                        !isHasAnswer ? classes.colorHasInqIcon : classes.colorHasAnswer,
+                        classes.attachIcon
+                      )}
+                    />
+                  )}
+
+                  {!questionIsEmpty && !isHasAnswer && (
                     <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
+                  )}
+                  {!questionIsEmpty && isHasAnswer && (
+                    <ReplyIcon className={clsx(classes.sizeIcon, classes.colorHasAnswer)} />
                   )}
                   {lock ? (
                     <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
@@ -236,7 +264,6 @@ const BLField = (props) => {
               }
             }}
           />
-          
         </ThemeProvider>
       </div>
     </>
