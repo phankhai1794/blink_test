@@ -3,14 +3,7 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { stateResquest, displayTime } from '@shared';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Typography,
-  Tooltip,
-  Grid,
-  FormControl,
-  Radio,
-  FormControlLabel
-} from '@material-ui/core';
+import { Typography, Tooltip, Grid, FormControl, Radio, FormControlLabel } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
@@ -112,7 +105,6 @@ const InquiryViewer = (props) => {
       .catch((error) => console.error(error));
   };
 
-
   const changeToEditor = (inq) => {
     const index = inquiries.findIndex((q) => q.id === inq.id);
     if (index >= 0) {
@@ -132,17 +124,29 @@ const InquiryViewer = (props) => {
           />
           {props.user === 'workspace' ? (
             <div className="flex items-center mr-2">
-              <FormControlLabel control={<Radio checked disabled color={'primary'} />} label={question.receiver[0] === "customer" ? "Customer" : "Onshore"} />
+              <FormControlLabel
+                control={<Radio checked disabled color={'primary'} />}
+                label={question.receiver[0] === 'customer' ? 'Customer' : 'Onshore'}
+              />
               <Tooltip title="Edit Inquiry">
                 <div onClick={() => changeToEditor(question)}>
-                  <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                  <img
+                    style={{ width: 20, cursor: 'pointer' }}
+                    src="/assets/images/icons/edit.svg"
+                  />
                 </div>
               </Tooltip>
-              {allowDeleteInq &&
-                <div onClick={() => removeQuestion(index)}>
-                  <img style={{ height: '22px', cursor: 'pointer' }} src="/assets/images/icons/trash-gray.svg" />
-                </div>
-              }
+              {allowDeleteInq && (
+                <Tooltip title="Delete Inquiry">
+                  <div style={{marginLeft: '10px'}} onClick={() => removeQuestion(index)}>
+                    <img
+                      style={{ height: '22px', cursor: 'pointer' }}
+                      src="/assets/images/icons/trash-gray.svg"
+                    />
+                  </div>
+                </Tooltip>
+               
+              )}
             </div>
           ) : (
             <FormControlLabel control={<AttachFile isAnswer={true} />} />
