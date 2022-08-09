@@ -81,7 +81,7 @@ const DialogTitle = withStyles(styles)((props) => {
           <IconButton
             aria-label="close"
             // onClick={handleOpenSnackBar}
-            onClick={() => {}}
+            onClick={() => { }}
             style={{ textAlign: 'center' }}>
             <MinimizeIcon />
           </IconButton>
@@ -122,7 +122,6 @@ const DialogActions = withStyles((theme) => ({
 
 const useStyles = makeStyles(() => ({
   dialogPaper: {
-    width: '950px',
     minHeight: 600,
     maxHeight: '80%'
   },
@@ -288,7 +287,7 @@ export default function Form(props) {
   };
 
   const handleClick = () => {
-    if (!currentEditInq ){
+    if (!currentEditInq) {
       if (openAllInquiry) {
         toggleForm(false);
         dispatch(FormActions.toggleSaveInquiry(false));
@@ -438,22 +437,22 @@ export default function Form(props) {
         </MuiDialogContent>
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
-          <DialogActions style={{ display: 'none !important' }}>
+          <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
               <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
                 <div style={{ right: '3rem', padding: '2.6rem', position: 'absolute' }}>
                   <Link
                     component="button"
                     variant="body2"
-                    underline= 'none'
+                    underline='none'
                     onClick={handleClick}
                     style={{ display: 'flex', alignItems: 'center' }}>
                     <AddCircleOutlineIcon
-                      style={{ color:currentEditInq?'#d3d3d3':'#BD0F72', left: '8.33%', right: '8.33%', border: '2px' }}
+                      style={{ color: currentEditInq ? '#d3d3d3' : '#BD0F72', left: '8.33%', right: '8.33%', border: '2px' }}
                     />
                     <span
                       style={{
-                        color: currentEditInq?'#d3d3d3':'#BD0F72',
+                        color: currentEditInq ? '#d3d3d3' : '#BD0F72',
                         fontSize: '16px',
                         fontWeight: '600',
                         fontFamily: 'Montserrat',
