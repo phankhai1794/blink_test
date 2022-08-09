@@ -84,15 +84,13 @@ const TableCM = (props) => {
       dispatch(InquiryActions.setOneInq(currentInq));
     }
     else if (allowAddInquiry) {
+      dispatch(InquiryActions.addQuestion(id));
       if (
         inquiries.length > 1 &&
         !inquiries[inquiries.length - 1].id
       ) {
         if (inquiries.length + 1 === metadata.field_options.length) {
           dispatch(FormActions.toggleAddInquiry(false));
-        }
-        if (inquiries.length !== metadata.field_options.length) {
-          dispatch(InquiryActions.addQuestion(id));
         }
       }
       dispatch(FormActions.toggleCreateInquiry(true));
@@ -149,36 +147,36 @@ const TableCM = (props) => {
             containerManifest.map((cm, index) =>
               (<Grid container spacing={2} className='px-8 py-2' key={index}>
                 <Grid item xs={2}>
-                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
+                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_PACKAGE]]}</BLField>
+                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_PACKAGE]]}</BLField>
                 </Grid>
                 <Grid item xs={4}>
-                  <BLField multiline={true} rows={6} width='360px'>{cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}</BLField>
+                  <BLField disableClick={true} multiline={true} rows={6} width='360px'>{cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}</BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_WEIGHT]]}</BLField>
+                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_WEIGHT]]}</BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]}</BLField>
+                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]}</BLField>
                 </Grid>
               </Grid>))
             : (<Grid container spacing={2} className='px-8 py-2'>
               <Grid item xs={2}>
-                <BLField></BLField>
+                <BLField disableClick={true}></BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField ></BLField>
+                <BLField disableClick={true}></BLField>
               </Grid>
               <Grid item xs={4}>
-                <BLField width='360px'> </BLField>
+                <BLField disableClick={true} width='360px'> </BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField></BLField>
+                <BLField disableClick={true}></BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField ></BLField>
+                <BLField disableClick={true}></BLField>
               </Grid>
             </Grid>)
           }
