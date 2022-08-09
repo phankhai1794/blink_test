@@ -86,11 +86,7 @@ function InquiringTable(props) {
   const classes = useStyles(props);
 
   const filterState = getFilterStateFromPath(location.pathname);
-  const [myBLs, success, error] = useSelector(({ listBlReducer }) => [
-    listBlReducer.myBLs,
-    listBlReducer.success,
-    listBlReducer.error
-  ]);
+  const myBLs = useSelector(({ listBlReducer }) => listBlReducer.myBLs);
   const dispatch = useDispatch();
 
   const [selected, setSelected] = useState([]);
@@ -171,12 +167,6 @@ function InquiringTable(props) {
   useEffect(() => {
     dispatch(BlActions.loadListMyBL(filterState));
   }, []);
-
-  useEffect(() => {
-    if (error) {
-      dispatch(Actions.showMessage({ message: error, variant: 'error' }));
-    }
-  }, [success, error]);
 
   return (
     <div className="w-full flex flex-col mr-52">

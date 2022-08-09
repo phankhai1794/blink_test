@@ -1,4 +1,5 @@
 import { filterMetadata } from '@shared';
+import { handleError } from '@shared/handleError';
 import { getInquiryById, getMetadata } from 'app/services/inquiryService';
 import { createBL, getBlInfo } from 'app/services/myBLService';
 
@@ -12,7 +13,6 @@ import {
   setListAttachment
 } from './inquiry';
 import * as InquiryActions from './inquiry';
-// export * from './mail.actions'
 
 export const initBL = (bkgNo) => async (dispatch) => {
   createBL(bkgNo)
@@ -28,14 +28,17 @@ export const loadMetadata = () => async (dispatch) => {
       const data = filterMetadata(res);
       dispatch(saveMetadata(data));
     })
-    .catch((err) => console.error(err));
+    .catch((err) => handleError(dispatch, err));
 };
 
 export const loadInquiry = (myBL_Id) => async (dispatch) => {
   getInquiryById(myBL_Id)
     .then((res) => {
-      res.sort((a, b) => a.createdAt < b.createdAt ? 1 : -1);
-      res.forEach(inq => inq.answerObj.length && inq.answerObj.sort((a, b) => a.createdAt > b.createdAt ? 1 : -1));
+      res.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      res.forEach(
+        (inq) =>
+          inq.answerObj.length && inq.answerObj.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
+      );
       const field_list = res.map((e) => e.field);
       dispatch(saveField(field_list));
       dispatch(editInquiry(res));
@@ -50,7 +53,7 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
       const listMinimize = [...res, ...optionTabs];
       dispatch(InquiryActions.setListMinimize(listMinimize));
     })
-    .catch((err) => console.error(err));
+    .catch((err) => handleError(dispatch, err));
 };
 
 export const loadContent = (myBL_Id) => async (dispatch) => {
@@ -58,5 +61,5 @@ export const loadContent = (myBL_Id) => async (dispatch) => {
     .then((res) => {
       dispatch(setContent(res.myBL.content));
     })
-    .catch((err) => console.error(err));
+    .catch((err) => handleError(dispatch, err));
 };
