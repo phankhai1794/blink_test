@@ -12,7 +12,8 @@ import {
   Divider,
   Grid,
   TextField,
-  Tooltip
+  Tooltip,
+  IconButton
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -63,9 +64,7 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiFormGroup-root': {
       flexDirection: 'row'
     },
-    '& .container': {
-      marginBottom: 5
-    }
+    
   },
   button: {
     margin: theme.spacing(1),
@@ -467,17 +466,16 @@ const InquiryEditor = (props) => {
             <FormHelperText>Pick at least one!</FormHelperText>
           ) : null}
 
-          <Tooltip>
-            <AttachFile />
-          </Tooltip>
+          <AttachFile />
           {allowDeleteInq && (
             <Tooltip title="Delete Inquiry">
-              <div style={{ marginLeft: '5px' }} onClick={() => removeQuestion()}>
+              <IconButton style={{ padding: '2px', height: '40px', width: '40px' }} onClick={() => removeQuestion()}>
                 <img
                   style={{ height: '22px', cursor: 'pointer' }}
                   src="/assets/images/icons/trash-gray.svg"
                 />
-              </div>
+              </IconButton>
+            
             </Tooltip>
           )}
         </FormControl>
