@@ -333,7 +333,7 @@ const BLWorkspace = (props) => {
           </div>
         </div>
 
-        {/* <BtnAddInquiry /> */}
+        <BtnAddInquiry />
 
         <Grid container>
           <Grid item xs={6} className={classes.leftPanel}>

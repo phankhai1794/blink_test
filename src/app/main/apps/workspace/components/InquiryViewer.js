@@ -1,28 +1,21 @@
-import { changeStatus } from 'app/services/inquiryService';
+import { deleteInquiry } from 'app/services/inquiryService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { displayTime } from '@shared';
-import React, { useState } from 'react';
+import { stateResquest, displayTime } from '@shared';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Typography,
-  FormControl,
-  FormControlLabel,
-  Radio,
-  Button,
-  IconButton,
   Tooltip,
   Grid,
-  Divider
+  FormControl,
+  Radio,
+  FormControlLabel
 } from '@material-ui/core';
-import clsx from 'clsx';
-import IconAttachFile from '@material-ui/icons/AttachFile';
 import { makeStyles } from '@material-ui/styles';
-import * as AppAction from 'app/store/actions';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 
 import * as InquiryActions from '../store/actions/inquiry';
-import * as FormActions from '../store/actions/form';
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
@@ -30,7 +23,7 @@ import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import UserInfo from './UserInfo';
-import Comment from './Comment';
+import AttachFile from './AttachFile';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -83,9 +76,12 @@ const InquiryViewer = (props) => {
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
-
+  const [myBL] = useSelector(({ workspace }) => [workspace.inquiryReducer.myBL]);
+  const [allowDeleteInq, setAllowDeleteInq] = useState(true);
   const [viewDropDown, setViewDropDown] = useState();
-  const [isDisableSave, setDisableSave] = useState( true);
+  //   const [selectChoice, setSelectChoice] = useState();
+  const [paragraphAnswer, setParagraphAnswer] = useState();
+  const [isDisableSave, setDisableSave] = useState(true);
 
   const allowCreateAttachmentAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
@@ -97,22 +93,60 @@ const InquiryViewer = (props) => {
     inq.selectChoice = e;
     dispatch(InquiryActions.setEditInq(inq));
   };
-
+  useEffect(() => {
+    myBL?.state !== stateResquest && setAllowDeleteInq(false);
+  }, []);
   const paragraphAnswerHandle = (e) => {
     const inq = { ...currentEditInq };
     inq.paragraphAnswer = e;
     dispatch(InquiryActions.setEditInq(inq));
   };
 
+  const removeQuestion = (index) => {
+    const optionsOfQuestion = [...inquiries];
+    const inqDelete = optionsOfQuestion.splice(index, 1)[0];
+    deleteInquiry(inqDelete.id)
+      .then(() => {
+        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+      })
+      .catch((error) => console.error(error));
+  };
+
+
+  const changeToEditor = (inq) => {
+    const index = inquiries.findIndex((q) => q.id === inq.id);
+    if (index >= 0) {
+      const inqEdit = JSON.parse(JSON.stringify(inq));
+      dispatch(InquiryActions.setEditInq(inqEdit));
+      dispatch(InquiryActions.setField(inq.field));
+    }
+  };
   return (
     <>
       <div onClick={toggleEdit}>
-        <div style={{paddingTop: 10}} className="flex justify-between">
+        <div style={{ paddingTop: 10 }} className="flex justify-between">
           <UserInfo
             name={question.creator.userName}
             time={displayTime(question.createdAt)}
             avatar={question.creator.avatar}
           />
+          {props.user === 'workspace' ? (
+            <div className="flex items-center mr-2">
+              <FormControlLabel control={<Radio checked disabled color={'primary'} />} label={question.receiver[0] === "customer" ? "Customer" : "Onshore"} />
+              <Tooltip title="Edit Inquiry">
+                <div onClick={() => changeToEditor(question)}>
+                  <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                </div>
+              </Tooltip>
+              {allowDeleteInq &&
+                <div onClick={() => removeQuestion(index)}>
+                  <img style={{ height: '22px', cursor: 'pointer' }} src="/assets/images/icons/trash-gray.svg" />
+                </div>
+              }
+            </div>
+          ) : (
+            <FormControlLabel control={<AttachFile isAnswer={true} />} />
+          )}
         </div>
         <Typography variant="h5">{question.name}</Typography>
         <Typography
@@ -135,7 +169,6 @@ const InquiryViewer = (props) => {
                 question={question}
                 selectChoice={(e) => selectChoiceHandle(e)}
                 isDisableSave={(e) => setDisableSave(e)}
-                saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
               />
             )}
             {type === metadata.ans_type.paragraph && (
@@ -145,7 +178,6 @@ const InquiryViewer = (props) => {
                 questions={inquiries}
                 paragrapAnswer={(e) => paragraphAnswerHandle(e)}
                 isDisableSave={(e) => setDisableSave(e)}
-                saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
               />
             )}
             {type === metadata.ans_type.attachment && (
@@ -153,7 +185,6 @@ const InquiryViewer = (props) => {
                 question={question}
                 index={index}
                 questions={inquiries}
-                saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
                 isPermissionAttach={allowCreateAttachmentAnswer}
               />
             )}
@@ -192,7 +223,12 @@ const InquiryViewer = (props) => {
                     style={{ margin: '2.5rem' }}
                   />
                 ) : (
-                  <FileAttach hiddenRemove={true} file={file} field={question.field} indexInquiry={index} />
+                  <FileAttach
+                    hiddenRemove={true}
+                    file={file}
+                    field={question.field}
+                    indexInquiry={index}
+                  />
                 )}
               </div>
             ))}
@@ -202,7 +238,12 @@ const InquiryViewer = (props) => {
           {question.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
             <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
               {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                <ImageAttach hiddenRemove={true} file={file} field={question.field} style={{ margin: '2.5rem' }} />
+                <ImageAttach
+                  hiddenRemove={true}
+                  file={file}
+                  field={question.field}
+                  style={{ margin: '2.5rem' }}
+                />
               ) : (
                 <FileAttach hiddenRemove={true} file={file} field={question.field} />
               )}
