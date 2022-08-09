@@ -30,12 +30,12 @@ const useStyles = makeStyles((theme) => ({
 
 const Inquiry = (props) => {
   const dispatch = useDispatch();
-  const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const listInqsField = inquiries.filter((q, index) => q.field === currentField);
   const indexes = inquiries.findIndex((q) => q.field === currentField);
+  const [edit, setEdit] = useState('');
   const [changeQuestion, setChangeQuestion] = useState();
 
   const toggleEdit = (index) => {
@@ -56,7 +56,6 @@ const Inquiry = (props) => {
   return props.user === 'workspace' ? (
     <>
       {listInqsField.map((q, index) => {
-        const user = q.creator;
         const isEdit = currentEditInq && q.id === currentEditInq.id;
         return (
           <div key={q.id}>
@@ -68,19 +67,8 @@ const Inquiry = (props) => {
               <>
                 <div style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
                   <InquiryViewer
-                    // toggleEdit={() => toggleEdit(index)}
-                    // changeQuestion={(e) => {
-                    //   if (e.isCancel) {
-                    //     console.log('cancel')
-                    //     setChangeQuestion({})
-                    //   } else {
-                    //     setChangeQuestion(e)
-                    //   }
-                    // }}
-                    // index={index}
                     currentQuestion={changeQuestion}
                     question={q}
-                    saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
                     user={props.user}
                   />
                 </div>
@@ -100,26 +88,14 @@ const Inquiry = (props) => {
   ) : (
     <>
       {listInqsField.map((q, index) => {
-        const user = q.creator;
         const isEdit = currentEditInq && q.id === currentEditInq.id;
         return (
           <>
             <InquiryViewer
               toggleEdit={() => toggleEdit(index)}
-              // changeQuestion={(e) => {
-              //   if (e.isCancel) {
-              //     console.log('cancel')
-              //     setChangeQuestion({})
-              //   } else {
-              //     setChangeQuestion(e)
-              //   }
-              // }}
-              // index={index}
               currentQuestion={changeQuestion}
-              question={q}
-              saveQuestion={(q) => dispatch(InquiryActions.editInquiry(q))}
-              user={props.user}
-            />
+              question={isEdit?currentEditInq: q}
+              user={props.user}></InquiryViewer>
             {isEdit && <InquiryAnswer onCancel={onCancel} />}
           </>
         );

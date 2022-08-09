@@ -1,37 +1,19 @@
 import { changeStatus, updateInquiryChoice, createParagraphAnswer, updateParagraphAnswer } from 'app/services/inquiryService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { displayTime } from '@shared';
+import { uploadFile, getFile } from 'app/services/fileService';
+import { updateInquiry, saveInquiry } from 'app/services/inquiryService';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Typography,
-  FormControl,
-  FormControlLabel,
-  Radio,
   Button,
-  IconButton,
-  Tooltip,
-  Grid,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
-import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
-import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
-import { updateInquiry, saveInquiry } from 'app/services/inquiryService';
-import { uploadFile, getFile } from 'app/services/fileService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
-
-import ChoiceAnswer from './ChoiceAnswer';
-import ParagraphAnswer from './ParagraphAnswer';
-import AttachmentAnswer from './AttachmentAnswer';
-import ImageAttach from './ImageAttach';
-import FileAttach from './FileAttach';
-import UserInfo from './UserInfo';
-import AttachFile from './AttachFile';
-import Comment from './Comment';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -116,7 +98,15 @@ const InquiryAnswer = (props) => {
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const [isDisableSave, setDisableSave] = useState(true);
-
+  const inq = (inq) => {
+    return {
+      content: inq.content,
+      field: inq.field,
+      inqType: inq.inqType,
+      ansType: inq.ansType,
+      receiver: inq.receiver
+    };
+  };
   const onResolve = () => {
     changeStatus(currentField, 'COMPL')
       .then(() => {
@@ -130,68 +120,68 @@ const InquiryAnswer = (props) => {
   };
 
   const onSave = async () => {
-    const inq = {...currentEditInq};
-    if (inq.selectChoice) {
-      await updateInquiryChoice(inq.selectChoice);
+    if (currentEditInq.selectChoice) {
+      await updateInquiryChoice(currentEditInq.selectChoice);
       //
-      const answersObj = inq.answerObj;
+      const answersObj = currentEditInq.answerObj;
       answersObj.forEach((item, i) => {
         answersObj[i].confirmed = false;
       });
-      const answerIndex = answersObj.findIndex((item) => item.id === inq.selectChoice.answer);
+      const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
       const answerUpdate = answersObj[answerIndex];
       answerUpdate.confirmed = true;
-      dispatch(InquiryActions.setEditInq(inq));
+      dispatch(InquiryActions.setEditInq(currentEditInq));
       dispatch(
         AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
       );
-    } else if (inq.paragraphAnswer) {
-      const objAns = inq.answerObj;
-      if (inq.answerObj.length === 0) {
-        createParagraphAnswer(inq.paragraphAnswer).then((res) => {
+    } else if (currentEditInq.paragraphAnswer) {
+      const objAns = currentEditInq.answerObj;
+      if (currentEditInq.answerObj.length === 0) {
+        createParagraphAnswer(currentEditInq.paragraphAnswer).then((res) => {
           if (res) {
             const { message, answerObj } = res;
             objAns.push(answerObj);
-            dispatch(InquiryActions.setEditInq(inq));
+            dispatch(InquiryActions.setEditInq(currentEditInq));
             dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
           }
         });
       } else {
-        const answerId = inq.answerObj[0].id;
-        updateParagraphAnswer(answerId, inq.paragraphAnswer).then((res) => {
+        const answerId = currentEditInq.answerObj[0].id;
+        updateParagraphAnswer(answerId, currentEditInq.paragraphAnswer).then((res) => {
           if (res) {
             const { message } = res;
-            objAns[0].content = inq.paragraphAnswer.content;
-            dispatch(InquiryActions.setEditInq(inq));
+            objAns[0].content = currentEditInq.paragraphAnswer.content;
+            dispatch(InquiryActions.setEditInq(currentEditInq));
             dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
           }
         });
       }
     }
-    // const inquiry = inquiries.find((q) => q.id === currentEditInq.id);
-    // const mediaCreate = currentEditInq.mediaFile.filter(
-    //   ({ id: id1 }) => !inquiry.mediaFile.some(({ id: id2 }) => id2 === id1)
-    // );
-    // const mediaDelete = inquiry.mediaFile.filter(
-    //   ({ id: id1 }) => !currentEditInq.mediaFile.some(({ id: id2 }) => id2 === id1)
-    // );
+    const inquiry = inquiries.find((q) => q.id === currentEditInq.id);
+    const mediaCreate = currentEditInq.answerObj[0].mediaFiles.filter(
+      ({ id: id1 }) => !inquiry.answerObj[0].mediaFiles.some(({ id: id2 }) => id2 === id1)
+    );
+    const mediaDelete = currentEditInq.answerObj[0].mediaFiles.filter(
+      ({ id: id1 }) => !currentEditInq.answerObj[0].mediaFiles.some(({ id: id2 }) => id2 === id1)
+    );
 
-    // for (const f in mediaCreate) {
-    //   const form_data = mediaCreate[f].data;
-    //   const res = await uploadFile(form_data);
-    //   mediaCreate[f].id = res.response[0].id;
-    // }
-    // if (
-    //   JSON.stringify(inq(currentEditInq)) !== JSON.stringify(inq(inquiry)) ||
-    //   JSON.stringify(currentEditInq.answerObj) !== JSON.stringify(inquiry.answerObj) ||
-    //   mediaCreate.length ||
-    //   mediaDelete.length
-    // ) {
-    //   await updateInquiry(inquiry.id, {
-    //     inq: inq(currentEditInq),
-    //     files: { mediaCreate, mediaDelete }
-    //   });
-    // }
+    for (const f in mediaCreate) {
+      const form_data = mediaCreate[f].data;
+      const res = await uploadFile(form_data);
+      mediaCreate[f].id = res.response[0].id;
+    }
+    if (
+      JSON.stringify(inq(currentEditInq)) !== JSON.stringify(inq(inquiry)) ||
+      JSON.stringify(currentEditInq.answerObj) !== JSON.stringify(inquiry.answerObj) ||
+      mediaCreate.length ||
+      mediaDelete.length
+    ) {
+      await updateInquiry(inquiry.id, {
+        inq: inq(currentEditInq),
+        ans: { ansDelete:[], ansCreate:[], ansUpdate:[] },
+        files: { mediaCreate, mediaDelete }
+      });
+    }
     
     const list = [...inquiries];
     list.forEach((ls, i) => {

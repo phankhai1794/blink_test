@@ -1,8 +1,6 @@
-import { getKeyByValue, stateResquest, displayTime } from '@shared';
-import { getFile } from 'app/services/fileService';
-import { deleteInquiry, loadComment } from 'app/services/inquiryService';
+import { getKeyByValue } from '@shared';
+import { loadComment } from 'app/services/inquiryService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useEffect, useState } from 'react';
 import {
@@ -32,6 +30,7 @@ import * as FormActions from '../store/actions/form';
 import InquiryEditor from './InquiryEditor';
 import AttachFile from './AttachFile';
 import InquiryViewer from './InquiryViewer';
+import InquiryAnswer from './InquiryAnswer';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -105,7 +104,6 @@ const AllInquiry = (props) => {
   const dispatch = useDispatch();
   const { receiver, openInquiryReview } = props;
   const classes = useStyles();
-  const [allowDeleteInq, setAllowDeleteInq] = useState(true);
   const [viewDropDown, setViewDropDown] = useState('');
   const [inqHasComment, setInqHasComment] = useState([]);
   const [inquiries, currentEditInq, metadata, valid, myBL] = useSelector(({ workspace }) => [
@@ -131,16 +129,6 @@ const AllInquiry = (props) => {
     }
   };
 
-  const removeQuestion = (index) => {
-    const optionsOfQuestion = [...inquiries];
-    const inqDelete = optionsOfQuestion.splice(index, 1)[0];
-    deleteInquiry(inqDelete.id)
-      .then(() => {
-        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-      })
-      .catch((error) => console.error(error));
-  };
-
   const handleReceiverChange = (e, index) => {
     const optionsOfQuestion = { ...currentEditInq };
     optionsOfQuestion.receiver = [];
@@ -152,7 +140,7 @@ const AllInquiry = (props) => {
 
 
   useEffect(() => {
-    myBL?.state !== stateResquest && setAllowDeleteInq(false);
+  
     for (let i in inquiries) {
       loadComment(inquiries[i].id)
         .then((res) => {
@@ -166,6 +154,14 @@ const AllInquiry = (props) => {
     }
   }, []);
 
+  const toggleEdit = (index) => {
+    dispatch(FormActions.toggleSaveInquiry(true));
+    if (index >= 0) {
+      const inqEdit = JSON.parse(JSON.stringify(inquiries[index]));
+      dispatch(InquiryActions.setEditInq(inqEdit));
+      dispatch(InquiryActions.setField(inqEdit.field));
+    }
+  };
   const onCancel = () => {
     if (currentEditInq.id) {
       dispatch(InquiryActions.setEditInq());
@@ -182,67 +178,52 @@ const AllInquiry = (props) => {
         }
         const type = q.ansType;
         CURRENT_NUMBER++;
-        return currentEditInq && q.id === currentEditInq.id ? (
-          <>
-            {<InquiryEditor onCancel={onCancel} />}
-            <Divider
-              className="my-32"
-              variant="middle"
-              style={{ height: '2px', color: '#BAC3CB' }}
-            />
-          </>
-        ) : (
-          <Card elevation={0} style={{ padding: '1rem ' }}>
-            <div
-              className={clsx(
-                classes.boxItem,
-                inqHasComment.includes(q.id) && classes.boxHasComment
-              )}>
-              <div style={{ marginBottom: '12px' }}>
-                <div className="flex justify-between">
+        if (props.user === 'workspace'){
+          return currentEditInq && q.id === currentEditInq.id ? (
+            <>
+              {<InquiryEditor onCancel={onCancel} />}
+              <Divider
+                className="my-32"
+                variant="middle"
+                style={{ height: '2px', color: '#BAC3CB' }}
+              />
+            </>
+          ) : (
+            <Card elevation={0} style={{ padding: '1rem ' }}>
+              <div
+                className={clsx(
+                  classes.boxItem,
+                  inqHasComment.includes(q.id) && classes.boxHasComment
+                )}>
+                <div style={{ marginBottom: '12px' }}>
                   <Typography color="primary" variant="h5" className={classes.inqTitle}>
                     {`${CURRENT_NUMBER}. ${getKeyByValue(metadata['field'], q.field)}`}
                   </Typography>
-                  <div className="flex justify-end" style={{ width: '350px' }}>
-                    <div
-                      className="flex justify-end items-center mr-2 "
-                      onClick={() => changeToEditor(q)}>
-                      <img
-                        style={{ width: 20, cursor: 'pointer' }}
-                        src="/assets/images/icons/edit.svg"
-                      />
-                    </div>
-                    <div className="flex justify-end items-center mr-2 ">
-                      {q.mediaFile?.length > 0 && (
-                        <IconAttachFile className={clsx(classes.attachIcon)} />
-                      )}
-                      {/* {allowDeleteInq &&
-                              <IconButton className="p-8" onClick={() => removeQuestion(index)}>
-                                <DeleteIcon />
-                              </IconButton>} */}
-                    </div>
-                    <div
-                      className="flex justify-end items-center"
-                      onClick={() => removeQuestion(index)}>
-                      {allowDeleteInq && (
-                        <img
-                          style={{ height: '22px', cursor: 'pointer' }}
-                          src="/assets/images/icons/trash-gray.svg"
-                        />
-                      )}
-                    </div>
-                  </div>
+                   
+                  <InquiryViewer user={props.user} question={q} index={index} />
                 </div>
-                <InquiryViewer question={q} index={index} />
               </div>
-            </div>
-            <Divider
-              className="my-32"
-              variant="middle"
-              style={{ height: '2px', color: '#BAC3CB' }}
-            />
-          </Card>
-        );
+              <Divider
+                className="my-32"
+                variant="middle"
+                style={{ height: '2px', color: '#BAC3CB' }}
+              />
+            </Card>
+          );
+        }else{
+          const isEdit = currentEditInq && q.id === currentEditInq.id;
+          return (
+            <>
+              <InquiryViewer
+                toggleEdit={() => toggleEdit(index)}
+                question={isEdit?currentEditInq: q}
+                user={props.user}></InquiryViewer>
+              {isEdit && <InquiryAnswer onCancel={onCancel} />}
+            </>
+          );
+        }
+       
+
       })}
     </>
   );

@@ -39,20 +39,19 @@ const AttachFile = (props) => {
             fileUpload: src
           });
         });
-        dispatch(InquiryActions.editInquiry(inq));
+        dispatch(InquiryActions.setEditInq(inq));
         dispatch(FormActions.setEnableSaveInquiriesList(false));
       } else {
-        const optionsOfQuestion = [...inquiries];
         files.forEach((src) => {
           const formData = new FormData();
           formData.append('file', src);
           formData.append('name', src.name);
-          if (optionsOfQuestion[inqIndex].answerObj.length === 0) {
-            optionsOfQuestion[inqIndex].answerObj = [{ mediaFiles: [] }];
+          if (currentEditInq.answerObj.length === 0) {
+            currentEditInq.answerObj = [{ mediaFiles: [] }];
           }
-          optionsOfQuestion[inqIndex].answerObj[0].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+          currentEditInq.answerObj[0].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
         });
-        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+        dispatch(InquiryActions.setEditInq(currentEditInq));
       }
     }
   };
