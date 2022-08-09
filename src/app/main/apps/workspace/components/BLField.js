@@ -127,7 +127,7 @@ const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_I
 const BLField = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const { children, width, multiline, rows, selectedChoice, id, lock, readOnly } = props;
+  const { children, width, multiline, rows, selectedChoice, id, lock, readOnly, disableClick } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
   const [isHasAnswer, setHasAnswer] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -161,26 +161,28 @@ const BLField = (props) => {
   };
 
   const onClick = (e) => {
-    if (questionIsEmpty) {
-      dispatch(InquiryActions.addQuestion(id));
-    } else {
-      const currentInq = inquiries.find((q) => q.field === id);
-      dispatch(InquiryActions.setOneInq(currentInq));
-    }
-    if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
-      if (
-        inquiries.length > 0 &&
-        !currentEditInq &&
-        checkValidate(inquiries[inquiries.length - 1])
-      ) {
-        if (inquiries.length + 1 === metadata.field_options.length) {
-          dispatch(FormActions.toggleAddInquiry(false));
-        }
+    if (!disableClick) {
+      if (questionIsEmpty) {
+        dispatch(InquiryActions.addQuestion(id));
+      } else {
+        const currentInq = inquiries.find((q) => q.field === id);
+        dispatch(InquiryActions.setOneInq(currentInq));
       }
-      dispatch(FormActions.toggleCreateInquiry(true));
+      if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
+        if (
+          inquiries.length > 0 &&
+          !currentEditInq &&
+          checkValidate(inquiries[inquiries.length - 1])
+        ) {
+          if (inquiries.length + 1 === metadata.field_options.length) {
+            dispatch(FormActions.toggleAddInquiry(false));
+          }
+        }
+        dispatch(FormActions.toggleCreateInquiry(true));
+      }
+      dispatch(InquiryActions.setField(e.currentTarget.id));
+      setAnchorEl(e.currentTarget.id);
     }
-    dispatch(InquiryActions.setField(e.currentTarget.id));
-    setAnchorEl(e.currentTarget.id);
   };
 
   const checkQuestionIsEmpty = () => {
