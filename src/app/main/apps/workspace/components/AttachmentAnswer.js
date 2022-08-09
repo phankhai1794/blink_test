@@ -167,7 +167,7 @@ const AttachmentAnswer = (props) => {
         <div className="container">
           <div {...getRootProps({ style })}>
             <img
-              src="assets/images/icons/attachment.svg"
+              src="assets/images/icons/upload.svg"
               alt="Attachment"
             />
             <input {...getInputProps()} disabled={!isPermissionAttach} />
