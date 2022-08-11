@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, question, toggleEdit } = props;
+  const { index, question, toggleEdit, openInquiryReview } = props;
   const type = question.ansType;
   const user = question.creator;
   const dispatch = useDispatch();
@@ -124,10 +124,11 @@ const InquiryViewer = (props) => {
           />
           {props.user === 'workspace' ? (
             <div className="flex items-center mr-2">
-              <FormControlLabel
-                control={<Radio checked disabled color={'primary'} />}
-                label={question.receiver[0] === 'customer' ? 'Customer' : 'Onshore'}
-              />
+              {!openInquiryReview &&
+                <FormControlLabel
+                  control={<Radio checked disabled color={'primary'} />}
+                  label={question.receiver[0] === 'customer' ? 'Customer' : 'Onshore'}
+                />}
               <Tooltip title="Edit Inquiry">
                 <div onClick={() => changeToEditor(question)}>
                   <img
@@ -138,14 +139,13 @@ const InquiryViewer = (props) => {
               </Tooltip>
               {allowDeleteInq && (
                 <Tooltip title="Delete Inquiry">
-                  <div style={{marginLeft: '10px'}} onClick={() => removeQuestion(index)}>
+                  <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion(index)}>
                     <img
                       style={{ height: '22px', cursor: 'pointer' }}
                       src="/assets/images/icons/trash-gray.svg"
                     />
                   </div>
                 </Tooltip>
-               
               )}
             </div>
           ) : (
