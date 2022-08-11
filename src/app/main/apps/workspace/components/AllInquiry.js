@@ -140,7 +140,7 @@ const AllInquiry = (props) => {
 
 
   useEffect(() => {
-  
+
     for (let i in inquiries) {
       loadComment(inquiries[i].id)
         .then((res) => {
@@ -178,18 +178,18 @@ const AllInquiry = (props) => {
         }
         const type = q.ansType;
         CURRENT_NUMBER++;
-        if (props.user === 'workspace'){
+        if (props.user === 'workspace') {
           return currentEditInq && q.id === currentEditInq.id ? (
-            <>
+            <div key={index}>
               {<InquiryEditor onCancel={onCancel} />}
               <Divider
                 className="my-32"
                 variant="middle"
                 style={{ height: '2px', color: '#BAC3CB' }}
               />
-            </>
+            </div>
           ) : (
-            <Card elevation={0} style={{ padding: '1rem ' }}>
+            <Card key={index} elevation={0} style={{ padding: '1rem ' }}>
               <div
                 className={clsx(
                   classes.boxItem,
@@ -199,8 +199,8 @@ const AllInquiry = (props) => {
                   <Typography color="primary" variant="h5" className={classes.inqTitle}>
                     {`${CURRENT_NUMBER}. ${getKeyByValue(metadata['field'], q.field)}`}
                   </Typography>
-                   
-                  <InquiryViewer user={props.user} question={q} index={index} />
+
+                  <InquiryViewer user={props.user} question={q} index={index} openInquiryReview={openInquiryReview} />
                 </div>
               </div>
               <Divider
@@ -210,19 +210,20 @@ const AllInquiry = (props) => {
               />
             </Card>
           );
-        }else{
+        } else {
           const isEdit = currentEditInq && q.id === currentEditInq.id;
           return (
-            <>
+            <div key={index}>
               <InquiryViewer
+                openInquiryReview={openInquiryReview}
                 toggleEdit={() => toggleEdit(index)}
-                question={isEdit?currentEditInq: q}
+                question={isEdit ? currentEditInq : q}
                 user={props.user}></InquiryViewer>
               {isEdit && <InquiryAnswer onCancel={onCancel} />}
-            </>
+            </div>
           );
         }
-       
+
 
       })}
     </>
