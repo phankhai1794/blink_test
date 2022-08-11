@@ -367,7 +367,7 @@ export default function Form(props) {
       props.tabChange(0);
       setValue(0);
     }
-  }, [openInqReview]);
+  }, [openInqReview, inquiries]);
 
   return (
     <div>
@@ -404,7 +404,7 @@ export default function Form(props) {
               style={{ margin: 0 }}
               value={value}
               onChange={handleChange}>
-              <Tab
+              {countInq('customer') && <Tab
                 classes={{ wrapper: classes.iconLabelWrapper }}
                 className={clsx(classes.tab, value === 0 && classes.colorSelectedTab)}
                 label="Customer"
@@ -413,17 +413,17 @@ export default function Form(props) {
                     {countInq('customer')}
                   </div>
                 }
-              />
-              <Tab
+              />}
+              {countInq('onshore') && <Tab
                 classes={{ wrapper: classes.iconLabelWrapper }}
-                className={clsx(classes.tab, value === 1 && classes.colorSelectedTab)}
+                className={clsx(classes.tab, (value === 1 || !countInq('customer')) && classes.colorSelectedTab)}
                 label="Onshore"
                 icon={
-                  <div className={clsx(classes.countBtn, value === 1 && classes.colorCountBtn)}>
+                  <div className={clsx(classes.countBtn, (value === 1 || !countInq('customer')) && classes.colorCountBtn)}>
                     {countInq('onshore')}
                   </div>
                 }
-              />
+              />}
             </Tabs>
           </Box>
         )}

@@ -224,7 +224,22 @@ const SendInquiryForm = (props) => {
 const InquiryReview = (props) => {
   const [tabSelected, setTabSelected] = useState(0);
   const [openInqReview] = useSelector(({ workspace }) => [workspace.formReducer.openInqReview]);
+  const [inquiries] = useSelector(({ workspace }) => [workspace.inquiryReducer.inquiries]);
   const dispatch = useDispatch();
+
+  const countInq = (recevier) => {
+    let count = 0;
+    inquiries.forEach((inq) => inq.receiver.includes(recevier) && count++);
+    return count;
+  };
+
+  const handleTabSelected = () => {
+    if (countInq('customer') === 0) {
+      return 'onshore'
+    } else {
+      return tabSelected === 0 ? 'customer' : 'onshore'
+    }
+  }
 
   return (
     <>
@@ -245,7 +260,7 @@ const InquiryReview = (props) => {
           <div style={{ height: '800px' }}>
             <AllInquiry
               user="workspace"
-              receiver={tabSelected === 0 ? 'customer' : 'onshore'}
+              receiver={handleTabSelected()}
               collapse={true}
               openInquiryReview={true}
             />
