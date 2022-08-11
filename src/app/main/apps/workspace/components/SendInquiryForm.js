@@ -13,6 +13,7 @@ import * as FormActions from '../store/actions/form';
 import TagsInput from './TagsInput';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
+import ReceiverProvider from './ReceiverProvider';
 
 const colorBtnReview = '#1564EE';
 
@@ -143,38 +144,42 @@ const SendInquiryForm = (props) => {
         }
         FabTitle="E-mail">
         <>
-          <InputUI
-            id="toCustomer"
-            title="To Customer"
-            isCc={isCustomerCc}
-            isBcc={isCustomerBcc}
-            onCc={() => {
-              setIsCustomerCc(!isCustomerCc);
-            }}
-            onBcc={() => {
-              setIsCustomerBcc(!isCustomerBcc);
-            }}
-            onChanged={handleFieldChange}
-          />
-          {isCustomerCc && <InputUI id="toCustomerCc" title="Cc" onChanged={handleFieldChange} />}
-          {isCustomerBcc && (
-            <InputUI id="toCustomerBcc" title="Bcc" onChanged={handleFieldChange} />
-          )}
-          <InputUI
-            id="toOnshore"
-            title="To Onshore"
-            isCc={isOnshoreCc}
-            isBcc={isOnshoreBcc}
-            onCc={() => {
-              setIsOnshoreCc(!isOnshoreCc);
-            }}
-            onBcc={() => {
-              setIsOnshoreBcc(!isOnshoreBcc);
-            }}
-            onChanged={handleFieldChange}
-          />
-          {isOnshoreCc && <InputUI id="toOnshoreCc" title="Cc" onChanged={handleFieldChange} />}
-          {isOnshoreBcc && <InputUI id="toOnshoreBcc" title="Bcc" onChanged={handleFieldChange} />}
+          <ReceiverProvider receiver='customer'>
+            <InputUI
+              id="toCustomer"
+              title="To Customer"
+              isCc={isCustomerCc}
+              isBcc={isCustomerBcc}
+              onCc={() => {
+                setIsCustomerCc(!isCustomerCc);
+              }}
+              onBcc={() => {
+                setIsCustomerBcc(!isCustomerBcc);
+              }}
+              onChanged={handleFieldChange}
+            />
+            {isCustomerCc && <InputUI id="toCustomerCc" title="Cc" onChanged={handleFieldChange} />}
+            {isCustomerBcc && (
+              <InputUI id="toCustomerBcc" title="Bcc" onChanged={handleFieldChange} />
+            )}
+          </ReceiverProvider>
+          <ReceiverProvider receiver='onshore'>
+            <InputUI
+              id="toOnshore"
+              title="To Onshore"
+              isCc={isOnshoreCc}
+              isBcc={isOnshoreBcc}
+              onCc={() => {
+                setIsOnshoreCc(!isOnshoreCc);
+              }}
+              onBcc={() => {
+                setIsOnshoreBcc(!isOnshoreBcc);
+              }}
+              onChanged={handleFieldChange}
+            />
+            {isOnshoreCc && <InputUI id="toOnshoreCc" title="Cc" onChanged={handleFieldChange} />}
+            {isOnshoreBcc && <InputUI id="toOnshoreBcc" title="Bcc" onChanged={handleFieldChange} />}
+          </ReceiverProvider>
           <div style={{ display: 'flex', marginTop: 10 }}>
             <label className={clsx(classes.label)}>Subject</label>
           </div>
