@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
+const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false }) => {
   const classes = useStyles();
   const [valid, currentEditInq, attachmentList] =
   useSelector(({ workspace }) => [
@@ -89,51 +89,59 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   const handleRemoveFile = (id) => {
     const optionsOfQuestion = {...currentEditInq};
     const optionsAttachmentList = [...attachmentList];
-    if (field && file.id) {
-      const indexMedia = optionsOfQuestion.mediaFile.findIndex(
-        (f) => f.id === file.id
-      );
-      optionsOfQuestion.mediaFile.splice(indexMedia, 1);
-      dispatch(InquiryActions.editInquiry(optionsOfQuestion));
-      // update attachment list
-      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
-
-    } else if (file.id) {
-      // update attachment list
-      for (var i = 0; i < optionsAttachmentList.length; i++) {
-        const item = optionsAttachmentList[i];
-        if (file.id && item.id == file.id) {
-          optionsAttachmentList.splice(i, 1);
-          break;
-        }
+    if (isAnswer) {
+      optionsOfQuestion.attachmentAnswer = {inquiry: optionsOfQuestion.id};
+      if (optionsOfQuestion.mediaFilesAnswer.length) {
+        optionsOfQuestion.mediaFilesAnswer.splice(indexMedia, 1);
+        dispatch(InquiryActions.setEditInq(optionsOfQuestion));
       }
-      dispatch(
-        InquiryActions.validateAttachment({
-          field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
-          nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
-        })
-      );
-      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
     } else {
-      // Remove attachment at local
-      if (openInquiryForm) {
-        const optionsOfQuestionLocal = {...currentEditInq};
-        const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
-          (f) => f.name === file.name
+      if (field && file.id) {
+        const indexMedia = optionsOfQuestion.mediaFile.findIndex(
+          (f) => f.id === file.id
         );
-        optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
-        dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
+        optionsOfQuestion.mediaFile.splice(indexMedia, 1);
+        dispatch(InquiryActions.editInquiry(optionsOfQuestion));
+        // update attachment list
+        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+
+      } else if (file.id) {
+        // update attachment list
+        for (var i = 0; i < optionsAttachmentList.length; i++) {
+          const item = optionsAttachmentList[i];
+          if (file.id && item.id == file.id) {
+            optionsAttachmentList.splice(i, 1);
+            break;
+          }
+        }
+        dispatch(
+          InquiryActions.validateAttachment({
+            field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
+            nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
+          })
+        );
+        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
       } else {
-        const optionsOfQuestionLocal = {...currentEditInq};
-        const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
-          (f) => f.name === file.name
-        );
-        optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
-        dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
+        // Remove attachment at local
+        if (openInquiryForm) {
+          const optionsOfQuestionLocal = {...currentEditInq};
+          const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
+            (f) => f.name === file.name
+          );
+          optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
+          dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
+        } else {
+          const optionsOfQuestionLocal = {...currentEditInq};
+          const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
+            (f) => f.name === file.name
+          );
+          optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
+          dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
+        }
       }
     }
     dispatch(FormActions.setEnableSaveInquiriesList(false));
-  };
+  }
 
   return (
     <div className={classes.root}>
@@ -155,14 +163,25 @@ const FileAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
         >
           {file.name}
         </h3>
-        {
-          !hiddenRemove &&
-          <PermissionProvider action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
-            <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
-              <CloseIcon />
-            </IconButton>
-          </PermissionProvider>
-        }
+        {isAnswer ? (
+          !hiddenRemove && (
+            <PermissionProvider
+              action={PERMISSION.INQUIRY_ANSWER_ATTACHMENT}>
+              <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                <CloseIcon />
+              </IconButton>
+            </PermissionProvider>
+          )
+        ) : (
+          !hiddenRemove && (
+            <PermissionProvider
+              action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
+              <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                <CloseIcon />
+              </IconButton>
+            </PermissionProvider>
+          )
+        )}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from 'clsx'
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from "../store/actions/form";
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
@@ -76,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, question, toggleEdit, openInquiryReview } = props;
+  const { index, question, toggleEdit, viewGuestDropDown, setViewGuestDropDown, openInquiryReview } = props;
   const type = question.ansType;
   const user = question.creator;
   const dispatch = useDispatch();
@@ -87,14 +88,28 @@ const InquiryViewer = (props) => {
   const [myBL] = useSelector(({ workspace }) => [workspace.inquiryReducer.myBL]);
   const [allowDeleteInq, setAllowDeleteInq] = useState(true);
   const [viewDropDown, setViewDropDown] = useState();
-  //   const [selectChoice, setSelectChoice] = useState();
-  const [paragraphAnswer, setParagraphAnswer] = useState();
   const [isDisableSave, setDisableSave] = useState(true);
 
   const allowCreateAttachmentAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
-  const handleViewMore = (id) => (viewDropDown === id ? setViewDropDown('') : setViewDropDown(id));
+  const handleViewMore = (id) => {
+    if (props.user !== 'workspace') {
+      toggleEdit();
+      setViewGuestDropDown(id);
+    } else {
+      if (viewDropDown === id) {
+        setViewDropDown('');
+      } else {
+        setViewDropDown(id);
+      }
+    }
+  };
+  useEffect(() => {
+    if (viewGuestDropDown === '') {
+      dispatch(InquiryActions.setEditInq({}));
+    }
+  }, [viewGuestDropDown]);
 
   const selectChoiceHandle = (e) => {
     const inq = { ...currentEditInq };
@@ -130,7 +145,7 @@ const InquiryViewer = (props) => {
   };
   return (
     <>
-      <div onClick={toggleEdit}>
+      <div>
         <div style={{ paddingTop: 10 }} className="flex justify-between">
           <UserInfo
             name={question.creator.userName}
@@ -164,12 +179,12 @@ const InquiryViewer = (props) => {
               )}
             </div>
           ) : (
-            <FormControlLabel control={<AttachFile isAnswer={true} />} />
+            <FormControlLabel control={<AttachFile isAnswer={true} question={question} />} />
           )}
         </div>
         <Typography variant="h5">{question.name}</Typography>
         <Typography
-          className={viewDropDown !== question.id ? classes.hideText : ''}
+          className={viewGuestDropDown !== question.id || viewDropDown !== question.id ? classes.hideText : ''}
           variant="h5"
           style={{
             wordBreak: 'break-word',
@@ -179,7 +194,7 @@ const InquiryViewer = (props) => {
           }}>
           {question.content}
         </Typography>
-        {viewDropDown === question.id && (
+        {(viewGuestDropDown === question.id || viewDropDown === question.id) && (
           <div style={{ display: 'block', margin: '1rem 0rem' }}>
             {type === metadata.ans_type.choice && (
               <ChoiceAnswer
@@ -199,14 +214,6 @@ const InquiryViewer = (props) => {
                 isDisableSave={(e) => setDisableSave(e)}
               />
             )}
-            {type === metadata.ans_type.attachment && (
-              <AttachmentAnswer
-                question={question}
-                index={index}
-                questions={inquiries}
-                isPermissionAttach={allowCreateAttachmentAnswer}
-              />
-            )}
           </div>
         )}
         <>
@@ -216,7 +223,7 @@ const InquiryViewer = (props) => {
             </Grid>
             <Grid item xs={6}>
               <div className={classes.viewMoreBtn} onClick={() => handleViewMore(question.id)}>
-                {viewDropDown !== question.id ? (
+                {props.user === 'workspace' && (viewDropDown !== question.id ? (
                   <>
                     View All
                     <ArrowDropDown />
@@ -226,7 +233,18 @@ const InquiryViewer = (props) => {
                     Hide All
                     <ArrowDropUp />
                   </>
-                )}
+                ))}
+                {props.user !== 'workspace' && (viewGuestDropDown !== question.id ? (
+                  <>
+                      View All
+                    <ArrowDropDown />
+                  </>
+                ) : (
+                  <>
+                      Hide All
+                    <ArrowDropUp />
+                  </>
+                ))}
               </div>
             </Grid>
           </Grid>
@@ -253,18 +271,26 @@ const InquiryViewer = (props) => {
             ))}
         </>
         <>
-          {question.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
-          {question.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
+          {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+          {question.mediaFilesAnswer?.map((file, mediaIndex) => (
             <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
               {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                 <ImageAttach
-                  hiddenRemove={true}
+                  hiddenRemove={viewGuestDropDown !== question.id}
                   file={file}
                   field={question.field}
                   style={{ margin: '2.5rem' }}
+                  indexMedia={mediaIndex}
+                  isAnswer={true}
                 />
               ) : (
-                <FileAttach hiddenRemove={true} file={file} field={question.field} />
+                <FileAttach
+                  hiddenRemove={viewGuestDropDown !== question.id}
+                  file={file}
+                  field={question.field}
+                  indexMedia={mediaIndex}
+                  isAnswer={true}
+                />
               )}
             </div>
           ))}

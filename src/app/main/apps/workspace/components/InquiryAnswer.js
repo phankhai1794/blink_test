@@ -1,4 +1,4 @@
-import { updateInquiryChoice, createParagraphAnswer, updateParagraphAnswer, updateInquiry } from 'app/services/inquiryService';
+import { updateInquiryChoice, createParagraphAnswer, updateParagraphAnswer, updateInquiry, createAttachmentAnswer } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -87,11 +87,12 @@ const useStyles = makeStyles((theme) => ({
 ));
 
 const InquiryAnswer = (props) => {
-  const { onCancel } = props;
+  const {onCancel, setSave} = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
+  const metadata = useSelector(({ draftBL }) => draftBL.metadata);
   const [isDisableSave, setDisableSave] = useState(true);
   const inq = (inq) => {
     return {
@@ -107,78 +108,125 @@ const InquiryAnswer = (props) => {
     dispatch(InquiryActions.setReply(true));
   };
 
-  const onSave = async () => {
-    if (currentEditInq.selectChoice) {
-      await updateInquiryChoice(currentEditInq.selectChoice);
-      //
-      const answersObj = currentEditInq.answerObj;
-      answersObj.forEach((item, i) => {
-        answersObj[i].confirmed = false;
-      });
-      const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
-      const answerUpdate = answersObj[answerIndex];
-      answerUpdate.confirmed = true;
-      dispatch(InquiryActions.setEditInq(currentEditInq));
-      dispatch(
-        AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
-      );
-    } else if (currentEditInq.paragraphAnswer) {
-      const objAns = currentEditInq.answerObj;
-      if (currentEditInq.answerObj.length === 0) {
-        createParagraphAnswer(currentEditInq.paragraphAnswer).then((res) => {
-          if (res) {
-            const { message, answerObj } = res;
-            objAns.push(answerObj);
-            dispatch(InquiryActions.setEditInq(currentEditInq));
-            dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
-          }
-        });
+  const saveAttachmentAnswer = async (currentEditInq) => {
+    const question = {
+      inqId: currentEditInq.id,
+      ansType: metadata.ans_type['attachment'],
+    };
+    const mediaRest = [];
+    const mediaList = [];
+    let isHasMedia = false;
+    const optionsInquires = [...inquiries];
+    const editedIndex = optionsInquires.findIndex(inq => currentEditInq.id === inq.id);
+    const formData = new FormData();
+    currentEditInq.mediaFilesAnswer.forEach((mediaFileAns, index) => {
+      if (mediaFileAns.id === null) {
+        formData.append('files', mediaFileAns.data);
+        isHasMedia = true;
       } else {
-        const answerId = currentEditInq.answerObj[0].id;
-        updateParagraphAnswer(answerId, currentEditInq.paragraphAnswer).then((res) => {
-          if (res) {
-            const { message } = res;
-            objAns[0].content = currentEditInq.paragraphAnswer.content;
-            dispatch(InquiryActions.setEditInq(currentEditInq));
-            dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
-          }
-        });
-      }
-    }
-    const inquiry = inquiries.find((q) => q.id === currentEditInq.id);
-    const mediaCreate = currentEditInq.answerObj[0].mediaFiles.filter(
-      ({ id: id1 }) => !inquiry.answerObj[0].mediaFiles.some(({ id: id2 }) => id2 === id1)
-    );
-    const mediaDelete = currentEditInq.answerObj[0].mediaFiles.filter(
-      ({ id: id1 }) => !currentEditInq.answerObj[0].mediaFiles.some(({ id: id2 }) => id2 === id1)
-    );
-
-    for (const f in mediaCreate) {
-      const form_data = mediaCreate[f].data;
-      const res = await uploadFile(form_data);
-      mediaCreate[f].id = res.response[0].id;
-    }
-    if (
-      JSON.stringify(inq(currentEditInq)) !== JSON.stringify(inq(inquiry)) ||
-      JSON.stringify(currentEditInq.answerObj) !== JSON.stringify(inquiry.answerObj) ||
-      mediaCreate.length ||
-      mediaDelete.length
-    ) {
-      await updateInquiry(inquiry.id, {
-        inq: inq(currentEditInq),
-        ans: { ansDelete: [], ansCreate: [], ansUpdate: [] },
-        files: { mediaCreate, mediaDelete }
-      });
-    }
-
-    const list = [...inquiries];
-    list.forEach((ls, i) => {
-      if (ls.id === currentEditInq.id) {
-        list[i] = { ...currentEditInq };
+        mediaRest.push(mediaFileAns.id);
       }
     });
-    dispatch(InquiryActions.setInquiries(list));
-    dispatch(InquiryActions.setEditInq());
+    if (isHasMedia) {
+      uploadFile(formData).then(media => {
+        const {response} = media;
+        response.forEach(file => {
+          mediaList.push(file);
+        });
+        createAttachmentAnswer({question, mediaFile: mediaList, mediaRest}).then((res) => {
+          // update attachment answer
+          const answerObjMediaFiles = currentEditInq?.mediaFilesAnswer.filter((q) => q.id);
+          mediaList.forEach((item) => {
+            answerObjMediaFiles.push({
+              id: item.id,
+              name: item.name,
+              ext: item.ext,
+            })
+          });
+          optionsInquires[editedIndex].mediaFilesAnswer = answerObjMediaFiles;
+          //
+          if (currentEditInq.paragraphAnswer) {
+            // update paragraph answer
+            optionsInquires[editedIndex].answerObj[0].content = currentEditInq.paragraphAnswer.content;
+          } else if (currentEditInq.selectChoice) {
+            // update choice answer
+            const answersObj = currentEditInq.answerObj;
+            answersObj.forEach((item, i) => {
+              answersObj[i].confirmed = false;
+            });
+            const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
+            const answerUpdate = answersObj[answerIndex];
+            answerUpdate.confirmed = true;
+            optionsInquires[editedIndex].answerObj = answersObj;
+          }
+          //
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+        }).catch((error) => {
+          console.log(error)
+        });
+      }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
+    } else {
+      createAttachmentAnswer({question, mediaFile: mediaList, mediaRest}).then((res) => {
+        optionsInquires[editedIndex].mediaFilesAnswer = currentEditInq.mediaFilesAnswer;
+        //
+        if (currentEditInq.paragraphAnswer) {
+          // update paragraph answer
+          optionsInquires[editedIndex].answerObj[0].content = currentEditInq.paragraphAnswer.content;
+        } else if (currentEditInq.selectChoice) {
+          // update choice answer
+          const answersObj = currentEditInq.answerObj;
+          answersObj.forEach((item, i) => {
+            answersObj[i].confirmed = false;
+          });
+          const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
+          const answerUpdate = answersObj[answerIndex];
+          answerUpdate.confirmed = true;
+          optionsInquires[editedIndex].answerObj = answersObj;
+        }
+        //
+        dispatch(InquiryActions.setInquiries(optionsInquires));
+      }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
+    }
+  }
+
+  const onSave = async () => {
+    const optionsInquires = [...inquiries];
+    const editedIndex = optionsInquires.findIndex(inq => currentEditInq.id === inq.id);
+    if (currentEditInq.selectChoice) {
+      await updateInquiryChoice(currentEditInq.selectChoice);
+    } else if (currentEditInq.paragraphAnswer) {
+      if (currentEditInq.answerObj.length === 0) {
+        const response = await createParagraphAnswer(currentEditInq.paragraphAnswer);
+        optionsInquires[editedIndex].answerObj.push(response.answerObj);
+      } else {
+        const answerId = currentEditInq.answerObj[0].id;
+        await updateParagraphAnswer(answerId, currentEditInq.paragraphAnswer);
+      }
+    }
+    if (currentEditInq.attachmentAnswer) {
+      await saveAttachmentAnswer(currentEditInq);
+      dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
+    } else {
+      if (currentEditInq.selectChoice) {
+        const answersObj = currentEditInq.answerObj;
+        answersObj.forEach((item, i) => {
+          answersObj[i].confirmed = false;
+        });
+        const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
+        const answerUpdate = answersObj[answerIndex];
+        answerUpdate.confirmed = true;
+        optionsInquires[editedIndex].answerObj = currentEditInq.answerObj;
+        dispatch(InquiryActions.setInquiries(optionsInquires));
+        dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
+      } else if (currentEditInq.paragraphAnswer) {
+        if (currentEditInq.answerObj.length) {
+          optionsInquires[editedIndex].answerObj[0].content = currentEditInq.paragraphAnswer.content;
+        }
+        dispatch(InquiryActions.setInquiries(optionsInquires));
+        dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
+      }
+    }
+    setSave();
   };
 
 

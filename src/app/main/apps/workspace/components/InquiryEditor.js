@@ -586,17 +586,18 @@ const InquiryEditor = (props) => {
               ))}
           </>
           <>
-            {currentEditInq.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
-            {currentEditInq.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
+            {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+            {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
               <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                 {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                   <ImageAttach
                     file={file}
                     field={currentEditInq.field}
                     style={{ margin: '2.5rem' }}
+                    isAnswer={true}
                   />
                 ) : (
-                  <FileAttach file={file} field={currentEditInq.field} />
+                  <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
                 )}
               </div>
             ))}

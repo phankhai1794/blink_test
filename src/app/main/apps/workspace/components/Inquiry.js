@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  Divider
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {Divider} from '@material-ui/core';
+import {makeStyles} from '@material-ui/styles';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -27,6 +25,8 @@ const Inquiry = (props) => {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const listInqsField = inquiries.filter((q, index) => q.field === currentField);
   const [changeQuestion, setChangeQuestion] = useState();
+  const [isSaved, setSaved] = useState(false);
+  const [viewGuestDropDown, setViewGuestDropDown] = useState();
 
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
@@ -41,6 +41,29 @@ const Inquiry = (props) => {
     if (currentEditInq.id) {
       dispatch(InquiryActions.setEditInq());
     }
+  };
+
+  const handleCancel = () => {
+    setViewGuestDropDown('');
+    // reset media file
+    const optionsInquires = [...inquiries];
+    const editedIndex = optionsInquires.findIndex(inq => currentEditInq.id === inq.id);
+    optionsInquires[editedIndex].mediaFilesAnswer = optionsInquires[editedIndex].mediaFilesAnswer.filter(inq => inq.id);
+    dispatch(InquiryActions.setInquiries(optionsInquires));
+    dispatch(InquiryActions.setEditInq({}));
+  };
+
+  const handleSetViewGuestDropDown = (id) => {
+    if (viewGuestDropDown === id) {
+      setViewGuestDropDown('');
+    } else {
+      setViewGuestDropDown(id);
+    }
+  };
+
+  const handleSetSave = () => {
+    setViewGuestDropDown('');
+    dispatch(InquiryActions.setEditInq({}));
   };
 
   return props.user === 'workspace' ? (
@@ -82,9 +105,15 @@ const Inquiry = (props) => {
             <InquiryViewer
               toggleEdit={() => toggleEdit(index)}
               currentQuestion={changeQuestion}
-              question={isEdit ? currentEditInq : q}
-              user={props.user}></InquiryViewer>
-            {isEdit && <InquiryAnswer onCancel={onCancel} />}
+              question={isEdit?currentEditInq: q}
+              user={props.user}
+              isSaved={isSaved}
+              setSave={() => setSaved(false)}
+              viewGuestDropDown={viewGuestDropDown}
+              setViewGuestDropDown={handleSetViewGuestDropDown}
+            />
+            {isEdit && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
+            {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
           </>
         );
       })}
