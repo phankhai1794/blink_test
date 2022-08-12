@@ -1,8 +1,5 @@
-import { changeStatus, updateInquiryChoice, createParagraphAnswer, updateParagraphAnswer } from 'app/services/inquiryService';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { displayTime } from '@shared';
-import { uploadFile, getFile } from 'app/services/fileService';
-import { updateInquiry, saveInquiry } from 'app/services/inquiryService';
+import { updateInquiryChoice, createParagraphAnswer, updateParagraphAnswer, updateInquiry } from 'app/services/inquiryService';
+import { uploadFile } from 'app/services/fileService';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -13,7 +10,6 @@ import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
 
 import * as InquiryActions from '../store/actions/inquiry';
-import * as FormActions from '../store/actions/form';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -91,11 +87,10 @@ const useStyles = makeStyles((theme) => ({
 ));
 
 const InquiryAnswer = (props) => {
-  const {onCancel} = props;
+  const { onCancel } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
-  const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const [isDisableSave, setDisableSave] = useState(true);
   const inq = (inq) => {
@@ -106,13 +101,6 @@ const InquiryAnswer = (props) => {
       ansType: inq.ansType,
       receiver: inq.receiver
     };
-  };
-  const onResolve = () => {
-    changeStatus(currentField, 'COMPL')
-      .then(() => {
-        dispatch(FormActions.toggleReload());
-      })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   };
 
   const onReply = () => {
@@ -178,11 +166,11 @@ const InquiryAnswer = (props) => {
     ) {
       await updateInquiry(inquiry.id, {
         inq: inq(currentEditInq),
-        ans: { ansDelete:[], ansCreate:[], ansUpdate:[] },
+        ans: { ansDelete: [], ansCreate: [], ansUpdate: [] },
         files: { mediaCreate, mediaDelete }
       });
     }
-    
+
     const list = [...inquiries];
     list.forEach((ls, i) => {
       if (ls.id === currentEditInq.id) {
@@ -199,7 +187,7 @@ const InquiryAnswer = (props) => {
   }, [isDisableSave]);
 
   return (
-    <div className='changeToEditor'>  
+    <div className='changeToEditor'>
       <div className="flex">
         <div className="flex">
           <Button
@@ -208,50 +196,18 @@ const InquiryAnswer = (props) => {
             // disabled={isDisableSave}
             onClick={() => onSave()}
             classes={{ root: classes.button }}>
-                Save
+            Save
           </Button>
           <Button
             variant="contained"
             classes={{ root: clsx(classes.button, 'reply') }}
             color="primary"
             onClick={onCancel}>
-              Cancel
+            Cancel
           </Button>
         </div>
       </div>
 
-      {/* <div className="flex">
-        <Comment q={currentEditInq} inquiries={inquiries} indexes={indexes} userType={props.user} />
-        <PermissionProvider
-          action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
-        // extraCondition={displayCmt}
-        >
-          <Button
-            variant="contained"
-            color="primary"
-            // onClick={onResolve}
-            classes={{ root: classes.button }}>
-            Resolved
-          </Button>
-        </PermissionProvider>
-        <PermissionProvider
-          action={PERMISSION.INQUIRY_CREATE_COMMENT}
-        // extraCondition={displayCmt}
-        >
-          {currentEditInq && props.user !== 'workspace' ? (
-            <></>
-          ) : (
-            <Button
-              variant="contained"
-              classes={{ root: clsx(classes.button, 'reply') }}
-              color="primary"
-              // onClick={onReply}
-            >
-                Reply
-            </Button>
-          )}
-        </PermissionProvider>
-      </div> */}
     </div>
   );
 };

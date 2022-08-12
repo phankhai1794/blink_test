@@ -3,10 +3,11 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { stateResquest, displayTime } from '@shared';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Typography, Tooltip, Grid, FormControl, Radio, FormControlLabel } from '@material-ui/core';
+import { Typography, Tooltip, Grid, Button, Radio, FormControlLabel } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
+import clsx from 'clsx'
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -57,7 +58,21 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 600,
     fontSize: '16px',
     cursor: 'pointer'
-  }
+  },
+  button: {
+    margin: theme.spacing(1),
+    borderRadius: 8,
+    width: 120,
+    boxShadow: 'none',
+    textTransform: 'capitalize',
+    fontFamily: 'Montserrat',
+    fontWeight: 600,
+    '&.reply': {
+      backgroundColor: 'white',
+      color: '#BD0F72',
+      border: '1px solid #BD0F72'
+    }
+  },
 }));
 
 const InquiryViewer = (props) => {
@@ -254,6 +269,34 @@ const InquiryViewer = (props) => {
             </div>
           ))}
         </>
+        <div className="flex">
+          <PermissionProvider
+            action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
+          // extraCondition={displayCmt}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              // onClick={onResolve}
+              classes={{ root: classes.button }}
+            >
+              Resolved
+            </Button>
+          </PermissionProvider>
+          <PermissionProvider
+            action={PERMISSION.INQUIRY_CREATE_COMMENT}
+          // extraCondition={displayCmt}
+          >
+            <Button
+              variant="contained"
+              classes={{ root: clsx(classes.button, 'reply') }}
+              color="primary"
+            // onClick={onReply}
+            >
+              Reply
+            </Button>
+          </PermissionProvider>
+        </div>
       </div>
     </>
   );

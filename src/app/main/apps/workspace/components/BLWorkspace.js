@@ -91,7 +91,7 @@ const BLWorkspace = (props) => {
   );
 
   const getField = (field) => {
-    return metadata.field ? metadata.field[field] : '';
+    return metadata.field?.[field] || '';
   };
 
   const getValueField = (field) => {
