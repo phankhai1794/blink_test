@@ -1,13 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { getKeyByValue, displayTime } from '@shared';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  Button,
-  Radio,
-  RadioGroup,
   Divider
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -18,7 +11,6 @@ import * as FormActions from '../store/actions/form';
 import InquiryEditor from './InquiryEditor';
 import InquiryAnswer from './InquiryAnswer';
 import InquiryViewer from './InquiryViewer';
-import UserInfo from './UserInfo';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,8 +26,6 @@ const Inquiry = (props) => {
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const listInqsField = inquiries.filter((q, index) => q.field === currentField);
-  const indexes = inquiries.findIndex((q) => q.field === currentField);
-  const [edit, setEdit] = useState('');
   const [changeQuestion, setChangeQuestion] = useState();
 
   const toggleEdit = (index) => {
@@ -79,11 +69,9 @@ const Inquiry = (props) => {
         );
       })}
       {currentEditInq &&
-        !currentEditInq.id && ( // Case: Add Inquiry
-        <>
-          <InquiryEditor onCancel={onCancel} />
-        </>
-      )}
+        !currentEditInq.id &&  // Case: Add Inquiry
+        <InquiryEditor onCancel={onCancel} />
+      }
     </>
   ) : (
     <>
@@ -94,7 +82,7 @@ const Inquiry = (props) => {
             <InquiryViewer
               toggleEdit={() => toggleEdit(index)}
               currentQuestion={changeQuestion}
-              question={isEdit?currentEditInq: q}
+              question={isEdit ? currentEditInq : q}
               user={props.user}></InquiryViewer>
             {isEdit && <InquiryAnswer onCancel={onCancel} />}
           </>

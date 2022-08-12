@@ -6,21 +6,8 @@ import React, { useEffect, useState } from 'react';
 import {
   Card,
   Typography,
-  FormControl,
-  FormGroup,
-  Tooltip,
-  FormControlLabel,
-  IconButton,
-  Checkbox,
-  FormHelperText,
   Divider,
-  RadioGroup,
-  Radio,
-  Grid
 } from '@material-ui/core';
-import IconAttachFile from '@material-ui/icons/AttachFile';
-import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
-import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
@@ -113,9 +100,7 @@ const AllInquiry = (props) => {
     workspace.inquiryReducer.validation,
     workspace.inquiryReducer.myBL
   ]);
-  const allowCreateAttachmentAnswer = PermissionProvider({
-    action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
-  });
+  
   let CURRENT_NUMBER = 0;
 
   const changeToEditor = (inq) => {
@@ -129,18 +114,7 @@ const AllInquiry = (props) => {
     }
   };
 
-  const handleReceiverChange = (e, index) => {
-    const optionsOfQuestion = { ...currentEditInq };
-    optionsOfQuestion.receiver = [];
-    dispatch(InquiryActions.validate({ ...valid, receiver: true }));
-    optionsOfQuestion.receiver.push(e.target.value);
-    dispatch(InquiryActions.setEditInq(optionsOfQuestion));
-    dispatch(FormActions.setEnableSaveInquiriesList(false));
-  };
-
-
-  useEffect(() => {
-
+  useEffect(() => {  
     for (let i in inquiries) {
       loadComment(inquiries[i].id)
         .then((res) => {
