@@ -93,6 +93,8 @@ const AllInquiry = (props) => {
   const classes = useStyles();
   const [viewDropDown, setViewDropDown] = useState('');
   const [inqHasComment, setInqHasComment] = useState([]);
+  const [isSaved, setSaved] = useState(false);
+  const [viewGuestDropDown, setViewGuestDropDown] = useState();
   const [inquiries, currentEditInq, metadata, valid, myBL] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentEditInq,
@@ -100,7 +102,7 @@ const AllInquiry = (props) => {
     workspace.inquiryReducer.validation,
     workspace.inquiryReducer.myBL
   ]);
-  
+
   let CURRENT_NUMBER = 0;
 
   const changeToEditor = (inq) => {
@@ -114,7 +116,7 @@ const AllInquiry = (props) => {
     }
   };
 
-  useEffect(() => {  
+  useEffect(() => {
     for (let i in inquiries) {
       loadComment(inquiries[i].id)
         .then((res) => {
@@ -140,6 +142,29 @@ const AllInquiry = (props) => {
     if (currentEditInq.id) {
       dispatch(InquiryActions.setEditInq());
     }
+  };
+
+  const handleCancel = () => {
+    setViewGuestDropDown('');
+    // reset media file
+    const optionsInquires = [...inquiries];
+    const editedIndex = optionsInquires.findIndex(inq => currentEditInq.id === inq.id);
+    optionsInquires[editedIndex].mediaFilesAnswer = optionsInquires[editedIndex].mediaFilesAnswer.filter(inq => inq.id);
+    dispatch(InquiryActions.setInquiries(optionsInquires));
+    dispatch(InquiryActions.setEditInq({}));
+  };
+
+  const handleSetViewGuestDropDown = (id) => {
+    if (viewGuestDropDown === id) {
+      setViewGuestDropDown('');
+    } else {
+      setViewGuestDropDown(id);
+    }
+  };
+
+  const handleSetSave = () => {
+    setViewGuestDropDown('');
+    dispatch(InquiryActions.setEditInq({}));
   };
 
   return (
@@ -184,21 +209,40 @@ const AllInquiry = (props) => {
               />
             </Card>
           );
-        } else {
+        }else{
           const isEdit = currentEditInq && q.id === currentEditInq.id;
           return (
-            <div key={index}>
-              <InquiryViewer
-                openInquiryReview={openInquiryReview}
-                toggleEdit={() => toggleEdit(index)}
-                question={isEdit ? currentEditInq : q}
-                user={props.user}></InquiryViewer>
-              {isEdit && <InquiryAnswer onCancel={onCancel} />}
-            </div>
+            <>
+              <div
+                className={clsx(
+                  classes.boxItem,
+                  inqHasComment.includes(q.id) && classes.boxHasComment
+                )}>
+                <div style={{ marginBottom: '12px' }}>
+                  <Typography color="primary" variant="h5" className={classes.inqTitle}>
+                    {`${CURRENT_NUMBER}. ${getKeyByValue(metadata['field'], q.field)}`}
+                  </Typography>
+
+                  <InquiryViewer
+                    toggleEdit={() => toggleEdit(index)}
+                    question={isEdit?currentEditInq: q}
+                    user={props.user}
+                    isSaved={isSaved}
+                    setSave={() => setSaved(false)}
+                    viewGuestDropDown={viewGuestDropDown}
+                    setViewGuestDropDown={handleSetViewGuestDropDown}
+                  />
+                  {isEdit && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
+                </div>
+              </div>
+              <Divider
+                className="my-32"
+                variant="middle"
+                style={{ height: '2px', color: '#BAC3CB' }}
+              />
+            </>
           );
         }
-
-
       })}
     </>
   );

@@ -11,7 +11,7 @@ import * as InquiryActions from '../store/actions/inquiry';
 
 //   component
 const AttachFile = (props) => {
-  const { index, isQuestion, disabled, isAnswer, inqIndex } = props;
+  const { disabled, isAnswer, question } = props;
   const dispatch = useDispatch();
   const [valid, currentEditInq] =
   useSelector(({ workspace }) => [
@@ -42,16 +42,12 @@ const AttachFile = (props) => {
         dispatch(InquiryActions.setEditInq(inq));
         dispatch(FormActions.setEnableSaveInquiriesList(false));
       } else {
+        const currentInq = {...question};
         files.forEach((src) => {
-          const formData = new FormData();
-          formData.append('file', src);
-          formData.append('name', src.name);
-          if (currentEditInq.answerObj.length === 0) {
-            currentEditInq.answerObj = [{ mediaFiles: [] }];
-          }
-          currentEditInq.answerObj[0].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+          currentInq.mediaFilesAnswer.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: src });
         });
-        dispatch(InquiryActions.setEditInq(currentEditInq));
+        currentInq.attachmentAnswer = {inquiry: currentInq.id};
+        dispatch(InquiryActions.setEditInq(currentInq));
       }
     }
   };
