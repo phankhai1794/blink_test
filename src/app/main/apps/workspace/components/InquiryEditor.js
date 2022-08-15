@@ -374,16 +374,9 @@ const InquiryEditor = (props) => {
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
         );
-        const list = [...inquiries];
-        if (!currentEditInq.id) {
-          list.push(currentEditInq);
-        }
-        list.forEach((ls, i) => {
-          if (ls.id === currentEditInq.id) {
-            list[i] = { ...currentEditInq };
-          }
-        });
-        dispatch(InquiryActions.setInquiries(list));
+       
+        dispatch(InquiryActions.saveInquiry());
+        dispatch(FormActions.toggleReload());
         dispatch(InquiryActions.setEditInq());
       }
     } else {
