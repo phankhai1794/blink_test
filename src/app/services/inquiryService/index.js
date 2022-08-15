@@ -41,8 +41,8 @@ export async function editComment(id, content) {
   return response.data;
 }
 
-export async function changeStatus(id, state) {
-  const response = await axios().patch(`${PATH}/status/${id}`, { state });
+export async function resolveInquiry(body) {
+  const response = await axios().post(`${PATH}/resolve`, body);
   return response.data;
 }
 

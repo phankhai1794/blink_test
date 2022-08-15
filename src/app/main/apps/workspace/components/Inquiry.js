@@ -1,7 +1,8 @@
-import React, {useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {Divider} from '@material-ui/core';
-import {makeStyles} from '@material-ui/styles';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Divider } from '@material-ui/core';
+import { makeStyles } from '@material-ui/styles';
+import clsx from 'clsx';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -11,15 +12,19 @@ import InquiryAnswer from './InquiryAnswer';
 import InquiryViewer from './InquiryViewer';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    '& .MuiButtonBase-root': {
-      backgroundColor: 'silver !important'
+  boxItem: {
+    borderLeft: '2px solid',
+    borderColor: '#DC2626',
+    paddingLeft: '2rem',
+    '&.resolved': {
+      borderColor: '#36B37E'
     }
-  }
+  },
 }));
 
 const Inquiry = (props) => {
   const dispatch = useDispatch();
+  const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
@@ -78,7 +83,8 @@ const Inquiry = (props) => {
               </>
             ) : (
               <>
-                <div style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
+                <div className={clsx(classes.boxItem, q.state === 'COMPL' && 'resolved')}
+                  style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
                   <InquiryViewer
                     currentQuestion={changeQuestion}
                     question={q}
@@ -101,11 +107,11 @@ const Inquiry = (props) => {
       {listInqsField.map((q, index) => {
         const isEdit = currentEditInq && q.id === currentEditInq.id;
         return (
-          <>
+          <div key={index} className={clsx(classes.boxItem, q.state === 'COMPL' && 'resolved')}>
             <InquiryViewer
               toggleEdit={() => toggleEdit(index)}
               currentQuestion={changeQuestion}
-              question={isEdit?currentEditInq: q}
+              question={isEdit ? currentEditInq : q}
               user={props.user}
               isSaved={isSaved}
               setSave={() => setSaved(false)}
@@ -114,7 +120,7 @@ const Inquiry = (props) => {
             />
             {isEdit && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
             {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
-          </>
+          </div>
         );
       })}
     </>

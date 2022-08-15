@@ -1,17 +1,7 @@
-import { saveInquiry, changeStatus } from 'app/services/inquiryService';
-import { uploadFile } from 'app/services/fileService';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { toFindDuplicates } from '@shared'
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { Link, Button, IconButton } from '@material-ui/core';
-import ReplyIcon from '@material-ui/icons/Reply';
-import CheckIcon from '@material-ui/icons/Check';
-import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
-import axios from 'axios';
-import * as AppActions from 'app/store/actions';
+import { Link, IconButton } from '@material-ui/core';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -41,28 +31,21 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = ({ title }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [currentField, question, fields, myBL, displayCmt, valid, inquiries, metadata, lastField, openedInquiresForm] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.currentField,
+  const [question, fields, inquiries, lastField, openedInquiresForm] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.question,
     workspace.inquiryReducer.fields,
-    workspace.inquiryReducer.myBL,
-    workspace.inquiryReducer.displayCmt,
-    workspace.inquiryReducer.validation,
     workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.lastField,
     workspace.inquiryReducer.openedInquiresForm,
   ]);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
-
 
   const toggleInquiriresDialog = () => {
     dispatch(FormActions.toggleAllInquiry(true));
     dispatch(FormActions.toggleInquiry(true));
     dispatch(FormActions.toggleSaveInquiry(true))
   };
-  
-  
+
   const nextQuestion = () => {
     dispatch(setLastField(question[question.length - 1].field));
     // check next if inquiry form opened
@@ -140,7 +123,7 @@ const PopoverFooter = ({ title }) => {
         >
           Open all inquiries
         </Link>
-      </div>  
+      </div>
     </div>
   );
 };

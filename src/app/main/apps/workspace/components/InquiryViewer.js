@@ -1,4 +1,8 @@
-import { deleteInquiry } from 'app/services/inquiryService';
+import { resolveInquiry, deleteInquiry } from 'app/services/inquiryService';
+import {
+  CONTAINER_DETAIL, CONTAINER_MANIFEST, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT,
+  CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT
+} from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { stateResquest, displayTime } from '@shared';
 import React, { useState, useEffect } from 'react';
@@ -7,14 +11,14 @@ import { Typography, Tooltip, Grid, Button, Radio, FormControlLabel } from '@mat
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
-import clsx from 'clsx'
+import clsx from "clsx";
+import * as AppAction from 'app/store/actions';
 
 import * as InquiryActions from '../store/actions/inquiry';
-import * as FormActions from "../store/actions/form";
+import * as FormActions from '../store/actions/form';
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
-import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import UserInfo from './UserInfo';
@@ -74,25 +78,41 @@ const useStyles = makeStyles((theme) => ({
       border: '1px solid #BD0F72'
     }
   },
+  boxItem: {
+    borderLeft: '2px solid',
+    borderColor: '#DC2626',
+    paddingLeft: '2rem'
+  },
+  boxResolve: {
+    borderColor: '#36B37E',
+  },
+  text: {
+    height: 40,
+    width: 170,
+    border: '1px solid #BAC3CB',
+    textAlign: 'center',
+    color: '#132535',
+  }
 }));
 
 const InquiryViewer = (props) => {
   const { index, question, toggleEdit, viewGuestDropDown, setViewGuestDropDown, openInquiryReview } = props;
   const type = question.ansType;
-  const user = question.creator;
   const dispatch = useDispatch();
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
-  const [myBL] = useSelector(({ workspace }) => [workspace.inquiryReducer.myBL]);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const [allowDeleteInq, setAllowDeleteInq] = useState(true);
   const [viewDropDown, setViewDropDown] = useState();
   const [isDisableSave, setDisableSave] = useState(true);
+  const [isResolve, setIsResolve] = useState(false)
+  const [textResolve, setTextResolve] = useState(content[question.field] || '')
+  const containerDetailType = [CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT]
+  const containerManifestType = [CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT]
 
-  const allowCreateAttachmentAnswer = PermissionProvider({
-    action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
-  });
   const handleViewMore = (id) => {
     if (props.user !== 'workspace') {
       toggleEdit();
@@ -110,6 +130,12 @@ const InquiryViewer = (props) => {
       dispatch(InquiryActions.setEditInq({}));
     }
   }, [viewGuestDropDown]);
+
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)]
 
   const selectChoiceHandle = (e) => {
     const inq = { ...currentEditInq };
@@ -143,6 +169,35 @@ const InquiryViewer = (props) => {
       dispatch(InquiryActions.setField(inq.field));
     }
   };
+
+  const onResolve = () => {
+    setIsResolve(true)
+  }
+
+  const onConfirm = () => {
+    const body = {
+      fieldId: question.field,
+      inqId: question.id,
+      fieldContent: textResolve,
+      blId: myBL.id
+    }
+    resolveInquiry(body)
+      .then(() => {
+        dispatch(FormActions.toggleReload());
+        setIsResolve(false)
+      })
+      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+  }
+
+  const cancelResolve = () => {
+    setIsResolve(false)
+  }
+
+  const inputText = (e) => {
+    setTextResolve(e.target.value)
+  }
+
+
   return (
     <>
       <div>
@@ -161,10 +216,7 @@ const InquiryViewer = (props) => {
                 />}
               <Tooltip title="Edit Inquiry">
                 <div onClick={() => changeToEditor(question)}>
-                  <img
-                    style={{ width: 20, cursor: 'pointer' }}
-                    src="/assets/images/icons/edit.svg"
-                  />
+                  <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
                 </div>
               </Tooltip>
               {allowDeleteInq && (
@@ -236,12 +288,12 @@ const InquiryViewer = (props) => {
                 ))}
                 {props.user !== 'workspace' && (viewGuestDropDown !== question.id ? (
                   <>
-                      View All
+                    View All
                     <ArrowDropDown />
                   </>
                 ) : (
                   <>
-                      Hide All
+                    Hide All
                     <ArrowDropUp />
                   </>
                 ))}
@@ -295,37 +347,155 @@ const InquiryViewer = (props) => {
             </div>
           ))}
         </>
-        <div className="flex">
-          <PermissionProvider
-            action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
-          // extraCondition={displayCmt}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              // onClick={onResolve}
-              classes={{ root: classes.button }}
-            >
-              Resolved
-            </Button>
-          </PermissionProvider>
-          <PermissionProvider
-            action={PERMISSION.INQUIRY_CREATE_COMMENT}
-          // extraCondition={displayCmt}
-          >
-            <Button
-              variant="contained"
-              classes={{ root: clsx(classes.button, 'reply') }}
-              color="primary"
-            // onClick={onReply}
-            >
-              Reply
-            </Button>
-          </PermissionProvider>
-        </div>
       </div>
+      {question.state !== 'COMPL' &&
+        <>
+          {isResolve ?
+            <>
+              {containerCheck.includes(question.field) ?
+                <ContainerDetailForm
+                  container={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
+                  question={question}
+                  typeList={question.field === containerCheck[0] ? containerDetailType : containerManifestType}
+                  setTextResolve={setTextResolve}
+                />
+                :
+                <textarea
+                  style={{
+                    width: '100%',
+                    paddingTop: 10,
+                    paddingLeft: 5,
+                    marginTop: 10,
+                    minHeight: 50,
+                    borderWidth: '0.5px',
+                    borderStyle: 'solid',
+                    borderColor: 'lightgray',
+                    borderRadius: 6,
+                    resize: 'none'
+                  }}
+                  multiline={true}
+                  type="text"
+                  value={textResolve}
+                  onChange={inputText} />
+              }
+              <div className="flex">
+                <PermissionProvider
+                  action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
+                // extraCondition={displayCmt}
+                >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={onConfirm}
+                    classes={{ root: classes.button }}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    variant="contained"
+                    classes={{ root: clsx(classes.button, 'reply') }}
+                    color="primary"
+                    onClick={cancelResolve}
+                  >
+                    Cancel
+                  </Button>
+                </PermissionProvider>
+              </div>
+            </>
+            :
+            <div className="flex">
+              <PermissionProvider
+                action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
+              // extraCondition={displayCmt}
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={onResolve}
+                  classes={{ root: classes.button }}
+                >
+                  Resolved
+                </Button>
+              </PermissionProvider>
+              <PermissionProvider
+                action={PERMISSION.INQUIRY_CREATE_COMMENT}
+              // extraCondition={displayCmt}
+              >
+                <Button
+                  variant="contained"
+                  classes={{ root: clsx(classes.button, 'reply') }}
+                  color="primary"
+                // onClick={onReply}
+                >
+                  Reply
+                </Button>
+              </PermissionProvider>
+            </div>
+          }
+        </>
+      }
     </>
   );
 };
+const ContainerDetailForm = ({ container, typeList, question, setTextResolve }) => {
+  const classes = useStyles();
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
 
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+  const getType = (type) => {
+    return metadata.inq_type?.[type] || '';
+  };
+  const getValueField = (field) => {
+    return content[getField(field)] || '';
+  };
+  const [values, setValues] = useState(getValueField(container))
+  const onChange = (e, index, type) => {
+    const temp = JSON.parse(JSON.stringify(values))
+    temp[index][type] = e.target.value
+    setValues(temp)
+    setTextResolve(temp)
+  }
+  return (
+    <>
+      {typeList.map((type, index) => (
+        <div key={index} style={{ display: 'flex', marginTop: 10 }}>
+          <input
+            className={clsx(classes.text)}
+            style={{
+              backgroundColor: '#FDF2F2',
+              fontWeight: 600,
+              borderTopLeftRadius: index === 0 && 8,
+              fontSize: 14,
+              borderBottomLeftRadius: index === typeList.length - 1 && 8
+            }}
+            disabled
+            defaultValue={type}
+          />
+          {values.map((cd, index1) => {
+            const disabled = question.inqType !== getType(type)
+            return (
+              <input
+                className={clsx(classes.text)}
+                key={index1}
+                style={{
+                  marginLeft: 10,
+                  backgroundColor: disabled && '#FDF2F2',
+                  fontSize: 15,
+                  borderTopRightRadius: index === 0 && values.length - 1 === index1 ? 8 : null,
+                  borderBottomRightRadius: index1 === values.length - 1 && index === typeList.length - 1 ? 8 : null
+                }}
+                disabled={disabled}
+                value={cd[getType(type)]}
+                onChange={(e) => onChange(e, index1, getType(type))}
+              />
+            )
+          })}
+        </div>
+      ))}
+    </>
+  )
+}
 export default InquiryViewer;
