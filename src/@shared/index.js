@@ -1,6 +1,7 @@
-export const getKeyByValue = (object, value) => {
-  return Object.keys(object).find((key) => object[key] === value);
-};
+export const getLabelById = (fieldOptions, id) => {
+  const result = fieldOptions.filter(({ value }) => value === id);
+  return result.length ? result[0].label : "";
+}
 
 export const toFindDuplicates = arry => arry.filter((item, index) => arry.indexOf(item) !== index)
 
@@ -20,9 +21,9 @@ export const displayTime = (time) => {
 export const filterMetadata = (data) => {
   const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [] };
   for (const field of data['field']) {
-    if (field.name !== 'OTHER') {
-      dict['field'][field.name] = field.id;
-      dict['field_options'].push({ label: field.name, value: field.id });
+    if (field.keyword.toLowerCase() !== 'other') {
+      dict['field'][field.keyword] = field.id;
+      dict['field_options'].push({ label: field.name, value: field.id, keyword: field.keyword });
     }
   }
   for (const inq of data['inqType']) {

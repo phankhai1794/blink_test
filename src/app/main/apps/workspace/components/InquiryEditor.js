@@ -1,7 +1,7 @@
 import { FuseChipSelect } from '@fuse';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getKeyByValue, displayTime, stateResquest, toFindDuplicates } from '@shared';
+import { getLabelById, stateResquest, toFindDuplicates } from '@shared';
 import {
   FormControl,
   FormControlLabel,
@@ -64,7 +64,7 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiFormGroup-root': {
       flexDirection: 'row'
     },
-    
+
   },
   button: {
     margin: theme.spacing(1),
@@ -374,7 +374,7 @@ const InquiryEditor = (props) => {
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
         );
-        
+
         // TODO
         dispatch(InquiryActions.saveInquiry());
         dispatch(FormActions.toggleReload());
@@ -432,7 +432,7 @@ const InquiryEditor = (props) => {
       <div className="flex justify-between" style={{ padding: '0.5rem', marginRight: '-15px' }}>
         <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
           {currentEditInq.field
-            ? getKeyByValue(metadata['field'], currentEditInq.field)
+            ? getLabelById(metadata['field_options'], currentEditInq.field)
             : 'New Inquiry'}
         </div>
 
@@ -469,7 +469,7 @@ const InquiryEditor = (props) => {
                   src="/assets/images/icons/trash-gray.svg"
                 />
               </IconButton>
-            
+
             </Tooltip>
           )}
         </FormControl>
