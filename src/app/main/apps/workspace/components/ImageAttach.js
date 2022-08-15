@@ -43,7 +43,6 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
   const dispatch = useDispatch();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [srcUrl, setSrcUrl] = useState(file.src || null);
-  const images = [file.src];
   const classes = useStyles();
   const allowUpdateInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_UPDATE_INQUIRY });
   const allowAnswerAttachment = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
@@ -125,7 +124,6 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
     }
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
-
   return (
     <div className={classes.root}>
       <img
@@ -165,7 +163,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
       </div>
       {isViewerOpen && (
         <ImageViewer
-          src={images}
+          src={[srcUrl]}
           currentIndex={0}
           onClose={closeImageViewer}
           disableScroll={false}
