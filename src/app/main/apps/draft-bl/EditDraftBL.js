@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Grid, Divider, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
-import { getLabelById } from '@shared';
+import { getKeyByValue } from '@shared';
 
 import * as Actions from './store/actions';
 import Label from './components/FieldLabel';
@@ -90,7 +90,7 @@ const EditDraftPage = (props) => {
 
   useEffect(() => {
     if (currentBLField) {
-      setTitleField(getLabelById(metadata['field_options'], currentBLField));
+      setTitleField(getKeyByValue(metadata['field'], currentBLField));
       setContentField(contentEdit[currentBLField]);
     }
   }, [currentBLField]);
