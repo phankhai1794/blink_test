@@ -171,6 +171,7 @@ const useStyles = makeStyles(() => ({
 export default function Form(props) {
   const dispatch = useDispatch();
   const {
+    user,
     children,
     title,
     field,
@@ -466,18 +467,11 @@ export default function Form(props) {
                 </div>
               </PermissionProvider>
             )}
-
-            {!popoverfooter && (
+            { 
               <div style={{ marginLeft: '2rem' }}>
-                {!showSaveInquiry ? (
-                  <PopoverFooter title={field} />
-                ) : (
-                  <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>
-                    <PopoverFooterAdmin handleToggleFab={handleSetOpenFab} />
-                  </PermissionProvider>
-                )}
+                <PopoverFooter user={user} title={field} />
               </div>
-            )}
+            }
           </DialogActions>
         )}
         {customActions}

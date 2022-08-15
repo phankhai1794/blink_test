@@ -25,7 +25,9 @@ export const PERMISSION = {
   INQUIRY_REPLACE_MEDIA: 'inquiry_replaceMedia',
   INQUIRY_REMOVE_MEDIA: 'inquiry_removeMedia',
   INQUIRY_INQ_ATT_MEDIA: 'inquiry_changesInqAtt',
-  INQUIRY_ADD_MEDIA: 'inquiry_addMedia'
+  INQUIRY_ADD_MEDIA: 'inquiry_addMedia',
+  INQUIRY_SUBMIT_INQUIRY_ANSWER: 'inquiry_submitInquiryAnswer'
+  
 };
 
 export const PermissionProvider = ({

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 
@@ -28,7 +28,9 @@ const ParagraphAnswer = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
   });
   const { question, index } = props;
-  const [paragraphText, setParagraphText] = useState(question.answerObj[0]?.content || '');
+  const user = useSelector(({ user }) => user);
+  
+  const [paragraphText, setParagraphText] = useState((user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state))? "": question.answerObj[0]?.content );
 
   const classes = useStyles();
   const [isPermission, setPermission] = useState(false);
