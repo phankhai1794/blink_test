@@ -1,4 +1,4 @@
-import { getKeyByValue } from '@shared';
+import { getLabelById } from '@shared';
 import { loadComment } from 'app/services/inquiryService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { useDispatch, useSelector } from 'react-redux';
@@ -175,8 +175,7 @@ const AllInquiry = (props) => {
             <div key={index} style={{ display: 'flex' }} onClick={() => changeToEditor(q)}></div>
           );
         }
-        const type = q.ansType;
-        CURRENT_NUMBER++;
+        CURRENT_NUMBER += 1;
         if (props.user === 'workspace') {
           return currentEditInq && q.id === currentEditInq.id ? (
             <div key={index}>
@@ -196,7 +195,7 @@ const AllInquiry = (props) => {
                 )}>
                 <div style={{ marginBottom: '12px' }}>
                   <Typography color="primary" variant="h5" className={classes.inqTitle}>
-                    {`${CURRENT_NUMBER}. ${getKeyByValue(metadata['field'], q.field)}`}
+                    {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
                   </Typography>
 
                   <InquiryViewer user={props.user} question={q} index={index} openInquiryReview={openInquiryReview} />
@@ -209,7 +208,7 @@ const AllInquiry = (props) => {
               />
             </Card>
           );
-        }else{
+        } else {
           const isEdit = currentEditInq && q.id === currentEditInq.id;
           return (
             <>
@@ -220,12 +219,12 @@ const AllInquiry = (props) => {
                 )}>
                 <div style={{ marginBottom: '12px' }}>
                   <Typography color="primary" variant="h5" className={classes.inqTitle}>
-                    {`${CURRENT_NUMBER}. ${getKeyByValue(metadata['field'], q.field)}`}
+                    {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
                   </Typography>
 
                   <InquiryViewer
                     toggleEdit={() => toggleEdit(index)}
-                    question={isEdit?currentEditInq: q}
+                    question={isEdit ? currentEditInq : q}
                     user={props.user}
                     isSaved={isSaved}
                     setSave={() => setSaved(false)}
