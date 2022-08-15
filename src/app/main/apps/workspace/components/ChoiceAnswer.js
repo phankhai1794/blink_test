@@ -11,11 +11,12 @@ import {PERMISSION, PermissionProvider} from "@shared/permission";
 
 const ChoiceAnswer = (props) => {
   const { index, question, selectChoice, isDisableSave } = props;
+  const user = useSelector(({ user }) => user);
   let questionIsEmpty = props.question === undefined;
-  let prevChoiceArray = question.answerObj.filter((choice) => {
+  let prevChoiceArray = (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state))? []: question.answerObj.filter((choice) => {
     return choice.confirmed;
   });
-  const user = useSelector(({ user }) => user);
+  
   const initSelectedChoice = () => {
     if (!questionIsEmpty && prevChoiceArray.length > 0) {
       return prevChoiceArray[0].id;

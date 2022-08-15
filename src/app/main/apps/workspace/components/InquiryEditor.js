@@ -374,7 +374,8 @@ const InquiryEditor = (props) => {
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
         );
-       
+        
+        // TODO
         dispatch(InquiryActions.saveInquiry());
         dispatch(FormActions.toggleReload());
         dispatch(InquiryActions.setEditInq());

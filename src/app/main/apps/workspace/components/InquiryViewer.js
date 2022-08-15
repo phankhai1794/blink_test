@@ -98,6 +98,7 @@ const useStyles = makeStyles((theme) => ({
 const InquiryViewer = (props) => {
   const { index, question, toggleEdit, viewGuestDropDown, setViewGuestDropDown, openInquiryReview } = props;
   const type = question.ansType;
+  const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -114,7 +115,7 @@ const InquiryViewer = (props) => {
   const containerManifestType = [CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT]
 
   const handleViewMore = (id) => {
-    if (props.user !== 'workspace') {
+    if (user.role !== "Admin") {
       toggleEdit();
       setViewGuestDropDown(id);
     } else {
@@ -197,7 +198,6 @@ const InquiryViewer = (props) => {
     setTextResolve(e.target.value)
   }
 
-
   return (
     <>
       <div>
@@ -207,7 +207,7 @@ const InquiryViewer = (props) => {
             time={displayTime(question.createdAt)}
             avatar={question.creator.avatar}
           />
-          {props.user === 'workspace' ? (
+          {user.role === "Admin" ? ( // TODO
             <div className="flex items-center mr-2">
               {!openInquiryReview &&
                 <FormControlLabel
@@ -275,7 +275,7 @@ const InquiryViewer = (props) => {
             </Grid>
             <Grid item xs={6}>
               <div className={classes.viewMoreBtn} onClick={() => handleViewMore(question.id)}>
-                {props.user === 'workspace' && (viewDropDown !== question.id ? (
+                {user.role === "Admin" && (viewDropDown !== question.id ? ( // TODO
                   <>
                     View All
                     <ArrowDropDown />
@@ -286,7 +286,7 @@ const InquiryViewer = (props) => {
                     <ArrowDropUp />
                   </>
                 ))}
-                {props.user !== 'workspace' && (viewGuestDropDown !== question.id ? (
+                {user.role !== "Admin" && (viewGuestDropDown !== question.id ? (
                   <>
                     View All
                     <ArrowDropDown />
@@ -322,31 +322,36 @@ const InquiryViewer = (props) => {
               </div>
             ))}
         </>
-        <>
-          {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-          {question.mediaFilesAnswer?.map((file, mediaIndex) => (
-            <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-              {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                <ImageAttach
-                  hiddenRemove={viewGuestDropDown !== question.id}
-                  file={file}
-                  field={question.field}
-                  style={{ margin: '2.5rem' }}
-                  indexMedia={mediaIndex}
-                  isAnswer={true}
-                />
-              ) : (
-                <FileAttach
-                  hiddenRemove={viewGuestDropDown !== question.id}
-                  file={file}
-                  field={question.field}
-                  indexMedia={mediaIndex}
-                  isAnswer={true}
-                />
-              )}
-            </div>
-          ))}
-        </>
+        {
+          (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state))?null:
+            <>
+              {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+              {question.mediaFilesAnswer?.map((file, mediaIndex) => (
+
+                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                    <ImageAttach
+                      hiddenRemove={viewGuestDropDown !== question.id}
+                      file={file}
+                      field={question.field}
+                      style={{ margin: '2.5rem' }}
+                      indexMedia={mediaIndex}
+                      isAnswer={true}
+                    />
+                  ) : (
+                    <FileAttach
+                      hiddenRemove={viewGuestDropDown !== question.id}
+                      file={file}
+                      field={question.field}
+                      indexMedia={mediaIndex}
+                      isAnswer={true}
+                    />
+                  )}
+                </div>
+              ))}
+            </>
+        }
+        
       </div>
       {question.state !== 'COMPL' &&
         <>

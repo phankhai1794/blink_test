@@ -129,7 +129,7 @@ const BLField = (props) => {
   const dispatch = useDispatch();
   const { children, width, multiline, rows, selectedChoice, id, lock, readOnly, disableClick } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
-  const [isHasAnswer, setHasAnswer] = useState(false);
+  const [hasAnswer, setHasAnswer] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
@@ -195,8 +195,17 @@ const BLField = (props) => {
     return true;
   };
 
+  const checkAnswerSent = () => {
+    if (inquiries.length > 0) {
+      const lst = inquiries.filter((q) => q.field === id);
+      return lst.some(e => e.state === 'ANS_SENT')
+    }
+    return false;
+  };
+
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty());
+    setHasAnswer(checkAnswerSent())
   }, [inquiries, metadata]);
 
   return (
@@ -218,7 +227,7 @@ const BLField = (props) => {
               classes.root,
               !questionIsEmpty ? classes.hasInquiry : '',
               lock ? classes.locked : '',
-              isHasAnswer ? classes.hasAnswer : ''
+              hasAnswer ? classes.hasAnswer : ''
             )}
             InputProps={{
               readOnly: readOnly || true,
@@ -234,16 +243,16 @@ const BLField = (props) => {
                     <AttachFile
                       className={clsx(
                         classes.sizeIcon,
-                        !isHasAnswer ? classes.colorHasInqIcon : classes.colorHasAnswer,
+                        !hasAnswer ? classes.colorHasInqIcon : classes.colorHasAnswer,
                         classes.attachIcon
                       )}
                     />
                   )}
 
-                  {!questionIsEmpty && !isHasAnswer && (
+                  {!questionIsEmpty && !hasAnswer && (
                     <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
                   )}
-                  {!questionIsEmpty && isHasAnswer && (
+                  {!questionIsEmpty && hasAnswer && (
                     <ReplyIcon className={clsx(classes.sizeIcon, classes.colorHasAnswer)} />
                   )}
                   {lock ? (

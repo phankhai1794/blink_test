@@ -308,6 +308,7 @@ const BLWorkspace = (props) => {
                 const popupObj = popupOpen(inquiry, getField);
                 return (
                   <Form
+                    user={props.user}
                     key={inquiry.id}
                     open={popupObj.status}
                     toggleForm={popupObj.toggleForm}

@@ -90,3 +90,8 @@ export async function deleteInquiry(id) {
   const response = await axios().delete(`${PATH}/${id}`);
   return response.data;
 }
+
+export async function submitInquiryAnswer(state) {
+  const response = await axios().post(`${PATH}/submitAnswer`, state);
+  return response.data;
+}
