@@ -69,3 +69,7 @@ export const COUNTRIES = [
     value: 'ES'
   }
 ];
+
+// state inquiry
+
+export const REP_Q_DRAFT = 'REP_Q_DRF';

@@ -1,4 +1,4 @@
-import { NUMBER_INQ_BOTTOM } from '@shared';
+import { NUMBER_INQ_BOTTOM, REP_Q_DRAFT } from '@shared';
 import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDING, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, COMMODITY_CODE, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
@@ -71,6 +71,7 @@ const BLWorkspace = (props) => {
   const dispatch = useDispatch();
   const [isExpand, setIsExpand] = useState(false);
   const [newFileAttachment, setNewFileAttachment] = useState([]);
+  const [disableSendBtn, setDisableSendBtn] = useState(true);
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -148,6 +149,12 @@ const BLWorkspace = (props) => {
     }
   }, [openAttachment]);
 
+  useEffect(() => {
+    if (inquiries.filter(inq => inq.state === REP_Q_DRAFT).length) {
+      setDisableSendBtn(false)
+    }
+  }, [inquiries]);
+
   const popupOpen = (inquiry, curField) => {
     switch (inquiry.field) {
     case 'INQUIRY_LIST':
@@ -157,6 +164,8 @@ const BLWorkspace = (props) => {
         fabTitle: 'Inquiry List',
         title: 'Inquiry List',
         field: 'INQUIRY_LIST',
+        showBtnSend: true,
+        disableSendBtn: disableSendBtn,
         child: <AllInquiry user={props.user} />
       };
     case 'ATTACHMENT_LIST':
@@ -315,7 +324,9 @@ const BLWorkspace = (props) => {
                     field={popupObj.field}
                     popoverfooter={popupObj.popoverfooter}
                     customActions={popupObj.customActions}
-                    title={popupObj.title}>
+                    title={popupObj.title}
+                    showBtnSend={popupObj.showBtnSend}
+                    disableSendBtn={popupObj.disableSendBtn}>
                     {popupObj.child}
                   </Form>
                 );
