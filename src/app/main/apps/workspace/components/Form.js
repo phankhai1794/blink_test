@@ -13,7 +13,7 @@ import FilterNoneIcon from '@material-ui/icons/FilterNone';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
-import { Box, Tabs, Tab, Divider, Link, Chip } from '@material-ui/core';
+import { Box, Tabs, Tab, Divider, Link, Chip, Button } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import OpenInNew from '@material-ui/icons/OpenInNew';
@@ -181,7 +181,9 @@ export default function Form(props) {
     toggleForm,
     customActions,
     tabs,
-    popoverfooter
+    popoverfooter,
+    showBtnSend,
+    disableSendBtn,
   } = props;
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -363,6 +365,11 @@ export default function Form(props) {
     return count;
   };
 
+  const sendMailClick = () => {
+    toggleForm(false);
+    dispatch(FormActions.toggleOpenEmail(true))
+  };
+
   useEffect(() => {
     if (tabs) {
       props.tabChange(0);
@@ -467,15 +474,36 @@ export default function Form(props) {
                 </div>
               </PermissionProvider>
             )}
-            { 
+            {showBtnSend ?
+              <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
+                <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '2.6rem' }}>
+                  <Button
+                    variant="text"
+                    size="medium"
+                    style={{
+                      textTransform: 'none',
+                      fontWeight: 'bold',
+                      width: 120,
+                      color: 'white',
+                      backgroundColor: disableSendBtn ? '#CCD3D1' : '#bd1874',
+                      borderRadius: '8px',
+                      fontFamily: 'Montserrat'
+                    }}
+                    disabled={disableSendBtn}
+                    onClick={sendMailClick}
+                  >
+                    Send
+                  </Button>
+                </div>
+              </PermissionProvider> :
               <div style={{ marginLeft: '2rem' }}>
                 <PopoverFooter user={user} title={field} />
               </div>
             }
-          </DialogActions>
+          </DialogActions >
         )}
         {customActions}
-      </Dialog>
-    </div>
+      </Dialog >
+    </div >
   );
 }
