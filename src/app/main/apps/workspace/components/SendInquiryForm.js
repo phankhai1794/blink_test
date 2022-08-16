@@ -251,6 +251,7 @@ const InquiryReview = (props) => {
       <Form
         title={'Inquiry Preview'}
         tabs={['Customer', 'Onshore']}
+        nums={[countInq('customer'), countInq('onshore')]}
         open={openInqReview}
         toggleForm={(status) => dispatch(FormActions.toggleOpenInquiryReview(status))}
         tabChange={(newValue) => {

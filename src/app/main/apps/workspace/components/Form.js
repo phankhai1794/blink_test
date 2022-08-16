@@ -186,6 +186,7 @@ export default function Form(props) {
     popoverfooter,
     showBtnSend,
     disableSendBtn,
+    nums
   } = props;
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -363,11 +364,6 @@ export default function Form(props) {
     setOpenFab(status);
   };
 
-  const countInq = (recevier) => {
-    let count = 0;
-    inquiries.forEach((inq) => inq.receiver.includes(recevier) && count++);
-    return count;
-  };
 
   const sendMailClick = () => {
     toggleForm(false);
@@ -380,7 +376,6 @@ export default function Form(props) {
       setValue(0);
     }
   }, [openInqReview, inquiries]);
-
   return (
     <div>
       {openFab && (
@@ -409,30 +404,30 @@ export default function Form(props) {
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
-        {tabs && (
-          <Box style={{ borderBottom: '1px solid #515F6B' }} sx={{}}>
+        {tabs&&nums&&nums.some(num => num > 0)&& (
+          <Box style={{ marginLeft: 20, marginRight:20, borderBottom: '1px solid #515F6B' }} sx={{}}>
             <Tabs
               indicatorColor="primary"
-              style={{ margin: 0 }}
+              style={{display: 'flex', margin: 0, height: '50px', }}
               value={value}
               onChange={handleChange}>
-              {countInq('customer') && <Tab
+              {nums[0] && <Tab
                 classes={{ wrapper: classes.iconLabelWrapper }}
                 className={clsx(classes.tab, value === 0 && classes.colorSelectedTab)}
                 label="Customer"
                 icon={
                   <div className={clsx(classes.countBtn, value === 0 && classes.colorCountBtn)}>
-                    {countInq('customer')}
+                    {nums[0]}
                   </div>
                 }
               />}
-              {countInq('onshore') && <Tab
+              {nums[1] && <Tab
                 classes={{ wrapper: classes.iconLabelWrapper }}
-                className={clsx(classes.tab, (value === 1 || !countInq('customer')) && classes.colorSelectedTab)}
+                className={clsx(classes.tab, (value === 1 || !nums[1]) && classes.colorSelectedTab)}
                 label="Onshore"
                 icon={
-                  <div className={clsx(classes.countBtn, (value === 1 || !countInq('customer')) && classes.colorCountBtn)}>
-                    {countInq('onshore')}
+                  <div className={clsx(classes.countBtn, (value === 1 || !nums[1]) && classes.colorCountBtn)}>
+                    {nums[1]}
                   </div>
                 }
               />}

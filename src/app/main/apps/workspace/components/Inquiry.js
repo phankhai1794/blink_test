@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Inquiry = (props) => {
+  const { receiver } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -42,7 +43,6 @@ const Inquiry = (props) => {
       dispatch(InquiryActions.setField(inqEdit.field));
     }
   };
-
   const onCancel = () => {
     if (currentEditInq.id) {
       dispatch(InquiryActions.setEditInq());
@@ -76,6 +76,11 @@ const Inquiry = (props) => {
     <>
       {listInqsField.map((q, index) => {
         const isEdit = currentEditInq && q.id === currentEditInq.id;
+        if (receiver && !q.receiver.includes(receiver)) {
+          return (
+            <div key={index} style={{ display: 'flex' }}></div>
+          );
+        }
         return (
           <div key={q.id}>
             {isEdit ? (
