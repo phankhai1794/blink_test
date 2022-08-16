@@ -1,16 +1,12 @@
-import { saveInquiry, changeStatus, submitInquiryAnswer } from 'app/services/inquiryService';
-import { uploadFile } from 'app/services/fileService';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { toFindDuplicates } from '@shared';
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/core/styles';
-import { Link, Button, IconButton } from '@material-ui/core';
-import * as AppActions from 'app/store/actions';
+import {PERMISSION, PermissionProvider} from '@shared/permission';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {makeStyles} from '@material-ui/core/styles';
+import {Button, IconButton, Link} from '@material-ui/core';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
-import { setLastField } from '../store/actions/inquiry';
+import {setLastField} from '../store/actions/inquiry';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,24 +28,43 @@ const useStyles = makeStyles((theme) => ({
     }
   }
 }));
-const PopoverFooter = ({ title, user }) => {
+const PopoverFooter = ({ title, user, checkSubmit }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [question, fields, inquiries, lastField, openedInquiresForm] = useSelector(
+  const [question, fields, inquiries, lastField, openedInquiresForm, currentField] = useSelector(
     ({ workspace }) => [
       workspace.inquiryReducer.question,
       workspace.inquiryReducer.fields,
       workspace.inquiryReducer.inquiries,
       workspace.inquiryReducer.lastField,
-      workspace.inquiryReducer.openedInquiresForm
+      workspace.inquiryReducer.openedInquiresForm,
+      workspace.inquiryReducer.currentField,
     ]
   );
 
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
-  const [canSubmit, setCanSubmit] = useState(false);
+  const isShowBackground = useSelector(
+    ({ workspace }) => workspace.inquiryReducer.isShowBackground
+  );
+  const [isSubmit, setIsSubmit] = useState(true);
+
   useEffect(() => {
-    setCanSubmit(inquiries.some((item) => (title === "INQUIRY_LIST" || title === item.field )&& item.answerObj && item.state === "ANS_DRF" ));
-  }, [inquiries]);
+    let currentFields = [];
+    // inquiry list
+    if (title === 'INQUIRY_LIST') {
+      currentFields = inquiries;
+    } // inquiry detail
+    else if (title === currentField) {
+      currentFields = inquiries.filter(inq => inq.field === currentField);
+    }
+    currentFields.forEach((item) => {
+      if (item.answerObj && (item.state === "ANS_DRF" ||
+          item.state === 'REP_A_DRF'
+      )) {
+        setIsSubmit(false);
+      }
+    });
+  }, [inquiries, checkSubmit]);
 
   const toggleInquiriresDialog = () => {
     dispatch(FormActions.toggleAllInquiry(true));
@@ -109,21 +124,8 @@ const PopoverFooter = ({ title, user }) => {
   };
 
   const onSubmit = () => {
-    const inqs = [... inquiries];
-    const lstIdInq = inqs.map((item) => {
-      if ((title === "INQUIRY_LIST" || title === item.field ) && item.answerObj && item.state === "ANS_DRF") {
-        item.state = 'ANS_SENT';
-        return item.id;
-      }
-      return null;
-    });
-    submitInquiryAnswer({
-      listIdInq: lstIdInq.filter(x => x !== null)
-    });
-    dispatch(InquiryActions.setInquiries(inqs));
-    dispatch(
-      AppActions.showMessage({ message: 'Submit Answer inquiry successfully', variant: 'success' })
-    );
+    setIsSubmit(true);
+    dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
   };
 
   return (
@@ -143,10 +145,10 @@ const PopoverFooter = ({ title, user }) => {
         }}>
         {inquiries.length > 0 && (
           <>
-            <IconButton onClick={prevQuestion}>
+            <IconButton onClick={isShowBackground ? '' : prevQuestion}>
               <img alt={'nextIcon'} src={`/assets/images/icons/prev.svg`} />
             </IconButton>
-            <IconButton onClick={nextQuestion}>
+            <IconButton onClick={isShowBackground ? '' : nextQuestion}>
               <img alt={'prevIcon'} src={`/assets/images/icons/next.svg`} />
             </IconButton>
           </>
@@ -156,17 +158,17 @@ const PopoverFooter = ({ title, user }) => {
           style={{
             fontFamily: 'Montserrat',
             fontSize: '16px',
-            color: '#1564EE',
+            color: isShowBackground ? 'rgb(21 100 238 / 58%)' : '#1564EE',
+            cursor: isShowBackground ? 'inherit' : 'pointer',
             height: '20px',
             weight: '145px',
-            fontWeight: '600'
+            fontWeight: '600',
           }}
           component="button"
-          onClick={toggleInquiriresDialog}>
+          onClick={isShowBackground ? '' : toggleInquiriresDialog}>
           Open all inquiries
         </Link>
       </div>
-
       {
         <PermissionProvider
           action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}>
@@ -183,13 +185,11 @@ const PopoverFooter = ({ title, user }) => {
                 fontStyle: 'normal',
                 fontWeight: '600',
                 fontSize: '16px',
-                lineHegiht: '20px',
                 textAlign: 'center',
-                backgroundColor: canSubmit ? '#bd1874' : ''
               }}
               className={classes.root}
               color="primary"
-              disabled={!canSubmit}
+              disabled={isSubmit}
               onClick={onSubmit}>
           Submit
             </Button>

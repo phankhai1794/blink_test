@@ -29,6 +29,7 @@ import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
 import TableCD from './TableCD';
 import TableCM from './TableCM';
 import AttachmentListNotification from './AttachmentListNotification';
+import SubmitAnswerNotification from "./SubmitAnswerNotification";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -275,6 +276,7 @@ const BLWorkspace = (props) => {
     <>
       <BLProcessNotification />
       <AttachmentListNotification />
+      <SubmitAnswerNotification />
       <div className={clsx('max-w-5xl', classes.root)}>
         <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
           {isExpand && (

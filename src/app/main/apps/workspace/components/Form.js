@@ -23,7 +23,7 @@ import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 import PopoverFooter from './PopoverFooter';
-import PopoverFooterAdmin from './PopoverFooter1';
+import PopupConfirm from "./PopupConfirm";
 
 const theme = createMuiTheme({
   typography: {
@@ -129,11 +129,13 @@ const useStyles = makeStyles(() => ({
     margin: 'auto',
     marginTop: '2rem',
     backgroundColor: 'white',
+    position: 'relative',
     width: (props) => (props.isFullScreen ? '1200px' : '900px')
   },
   dialogContentAttachment: {
     padding: '0',
-    position: 'relative'
+    position: 'relative',
+    width: (props) => (props.isFullScreen ? '1200px' : '950px')
   },
   divider: {
     backgroundColor: '#8A97A3'
@@ -208,6 +210,7 @@ export default function Form(props) {
   const classes = useStyles({ isFullScreen });
   const classesHover = useStyles();
   const [idBtn, setIdBtn] = useState('');
+  const [checkSubmit, setCheckSubmit] = useState(true);
 
   useEffect(() => {
     const temp = listMinimize.find((e) => e.field === field);
@@ -338,6 +341,7 @@ export default function Form(props) {
     //
     dispatch(InquiryActions.setOpenedInqForm(false));
     dispatch(FormActions.setEnableSaveInquiriesList(true));
+    dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
   };
   const handleChange = (_, newValue) => {
     setValue(newValue);
@@ -438,11 +442,22 @@ export default function Form(props) {
         <MuiDialogContent
           classes={{
             root:
-              field === 'ATTACHMENT_LIST' ? classes.dialogContentAttachment : classes.dialogContent
+              (field === 'ATTACHMENT_LIST' ||
+              ((field === 'INQUIRY_LIST' || field === currentField) && isShowBackground))
+                ? classes.dialogContentAttachment : classes.dialogContent
           }}
-          style={{ overflow: field === 'ATTACHMENT_LIST' && isShowBackground ? 'hidden' : '' }}>
+          style={{
+            overflow: isShowBackground && 'hidden',
+          }}>
           {children}
         </MuiDialogContent>
+
+        {field !== 'ATTACHMENT_LIST' &&
+        (<PopupConfirm field={field} handleCheckSubmit={() => {
+          setCheckSubmit(!checkSubmit)
+        }} />
+        )}
+
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
           <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>
@@ -497,7 +512,7 @@ export default function Form(props) {
                 </div>
               </PermissionProvider> :
               <div style={{ marginLeft: '2rem' }}>
-                <PopoverFooter user={user} title={field} />
+                <PopoverFooter user={user} title={field} checkSubmit={checkSubmit} />
               </div>
             }
           </DialogActions >
