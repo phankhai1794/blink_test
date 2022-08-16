@@ -12,6 +12,7 @@ const initialState = {
   openEmail: false,
   openInqReview: false,
   openNotificationAttachmentList: false,
+  openNotificationSubmitAnswer: false,
   enableSaveInquiriesList: true,
 };
 
@@ -49,6 +50,9 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.OPEN_NOTIFICATION_ATTACHMENT_LIST: {
     return { ...state, openNotificationAttachmentList: action.state };
+  }
+  case Actions.OPEN_NOTIFICATION_SUBMIT_ANSWER: {
+    return { ...state, openNotificationSubmitAnswer: action.state };
   }
   case Actions.ENABLE_SAVE_INQUIRIES: {
     return { ...state, enableSaveInquiriesList: action.state };

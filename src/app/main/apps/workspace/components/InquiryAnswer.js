@@ -159,6 +159,7 @@ const InquiryAnswer = (props) => {
             answerUpdate.confirmed = true;
             optionsInquires[editedIndex].answerObj = answersObj;
           }
+          optionsInquires[editedIndex].state = 'ANS_DRF';
           //
           dispatch(InquiryActions.setInquiries(optionsInquires));
         }).catch((error) => {
@@ -183,6 +184,7 @@ const InquiryAnswer = (props) => {
           answerUpdate.confirmed = true;
           optionsInquires[editedIndex].answerObj = answersObj;
         }
+        optionsInquires[editedIndex].state = 'ANS_DRF';
         //
         dispatch(InquiryActions.setInquiries(optionsInquires));
       }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
@@ -216,12 +218,14 @@ const InquiryAnswer = (props) => {
         const answerUpdate = answersObj[answerIndex];
         answerUpdate.confirmed = true;
         optionsInquires[editedIndex].answerObj = currentEditInq.answerObj;
+        optionsInquires[editedIndex].state = 'ANS_DRF';
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
       } else if (currentEditInq.paragraphAnswer) {
         if (currentEditInq.answerObj.length) {
           optionsInquires[editedIndex].answerObj[0].content = currentEditInq.paragraphAnswer.content;
         }
+        optionsInquires[editedIndex].state = 'ANS_DRF';
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
       }

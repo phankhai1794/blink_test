@@ -10,6 +10,7 @@ export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 export const OPEN_EMAIL = 'OPEN_EMAIL';
 export const OPEN_INQUIRY_REVIEW = 'OPEN_INQUIRY_REVIEW';
 export const OPEN_NOTIFICATION_ATTACHMENT_LIST = 'OPEN_NOTIFICATION_ATTACHMENT_LIST';
+export const OPEN_NOTIFICATION_SUBMIT_ANSWER = 'OPEN_NOTIFICATION_SUBMIT_ANSWER';
 export const ENABLE_SAVE_INQUIRIES = 'ENABLE_SAVE_INQUIRIES';
 
 export function setFullscreen(state) {
@@ -91,6 +92,13 @@ export function toggleOpenInquiryReview(state) {
 export function toggleOpenNotificationAttachmentList(state) {
   return {
     type: OPEN_NOTIFICATION_ATTACHMENT_LIST,
+    state: state
+  };
+}
+
+export function toggleOpenNotificationSubmitAnswer(state) {
+  return {
+    type: OPEN_NOTIFICATION_SUBMIT_ANSWER,
     state: state
   };
 }

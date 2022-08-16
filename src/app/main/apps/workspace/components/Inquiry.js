@@ -29,6 +29,7 @@ const Inquiry = (props) => {
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const listInqsField = inquiries.filter((q, index) => q.field === currentField);
+  const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
   const [changeQuestion, setChangeQuestion] = useState();
   const [isSaved, setSaved] = useState(false);
   const [viewGuestDropDown, setViewGuestDropDown] = useState();
@@ -104,25 +105,30 @@ const Inquiry = (props) => {
     </>
   ) : (
     <>
-      {listInqsField.map((q, index) => {
-        const isEdit = currentEditInq && q.id === currentEditInq.id;
-        return (
-          <div key={index} className={clsx(classes.boxItem, q.state === 'COMPL' && 'resolved')}>
-            <InquiryViewer
-              toggleEdit={() => toggleEdit(index)}
-              currentQuestion={changeQuestion}
-              question={isEdit ? currentEditInq : q}
-              user={props.user}
-              isSaved={isSaved}
-              setSave={() => setSaved(false)}
-              viewGuestDropDown={viewGuestDropDown}
-              setViewGuestDropDown={handleSetViewGuestDropDown}
-            />
-            {isEdit && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
-            {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
-          </div>
-        );
-      })}
+      <div className='inquiry' style={{
+        padding: isShowBackground ? '8px 24px' : '',
+        marginTop: isShowBackground ? '2rem' : '',
+      }}>
+        {listInqsField.map((q, index) => {
+          const isEdit = currentEditInq && q.id === currentEditInq.id;
+          return (
+            <div key={index} className={clsx(classes.boxItem, q.state === 'COMPL' && 'resolved')}>
+              <InquiryViewer
+                toggleEdit={() => toggleEdit(index)}
+                currentQuestion={changeQuestion}
+                question={isEdit?currentEditInq: q}
+                user={props.user}
+                isSaved={isSaved}
+                setSave={() => setSaved(false)}
+                viewGuestDropDown={viewGuestDropDown}
+                setViewGuestDropDown={handleSetViewGuestDropDown}
+              />
+              {isEdit && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
+              {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
+            </div>
+          );
+        })}
+      </div>
     </>
   );
 };
