@@ -72,14 +72,17 @@ const BLWorkspace = (props) => {
   const [isExpand, setIsExpand] = useState(false);
   const [newFileAttachment, setNewFileAttachment] = useState([]);
   const [disableSendBtn, setDisableSendBtn] = useState(true);
+  const [tabSelected, setTabSelected] = useState(0);
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
+  
   const transAutoSaveStatus = useSelector(
     ({ workspace }) => workspace.transReducer.transAutoSaveStatus
   );
@@ -155,18 +158,34 @@ const BLWorkspace = (props) => {
     }
   }, [inquiries]);
 
+  const countInq = (inqs, recevier) => {
+    let count = 0;
+    inqs.forEach((inq) => inq.receiver.includes(recevier) && count++);
+    return count;
+  };
+
+  const handleTabSelected = (inqs) => {
+    if (countInq(inqs, 'customer') === 0) {
+      return 'onshore'
+    } else {
+      return tabSelected === 0 ? 'customer' : 'onshore'
+    }
+  }
+
   const popupOpen = (inquiry, curField) => {
     switch (inquiry.field) {
     case 'INQUIRY_LIST':
       return {
         status: openAllInquiry,
+        tabs: ['Customer', 'Onshore'],
+        nums:[countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')],
         toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
         fabTitle: 'Inquiry List',
         title: 'Inquiry List',
         field: 'INQUIRY_LIST',
         showBtnSend: true,
         disableSendBtn: disableSendBtn,
-        child: <AllInquiry user={props.user} />
+        child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries)} />
       };
     case 'ATTACHMENT_LIST':
       return {
@@ -207,20 +226,24 @@ const BLWorkspace = (props) => {
     case 'INQUIRY_FORM':
       return {
         status: openInquiryForm,
+        tabs: ['Customer', 'Onshore'],
+        nums:[countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')],
         toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
         fabTitle: 'Inquiry Form',
         title: 'Inquiry Creation',
         field: 'INQUIRY_FORM',
-        child: <Inquiry user={props.user} />
+        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))}/>
       };
     default:
       return {
         status: inquiry?.id === currentInq?.id,
+        tabs: ['Customer', 'Onshore'],
+        nums:[countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')],
         toggleForm: () => { },
         fabTitle: curField?.label,
         title: curField?.label,
         field: curField?.value,
-        child: <Inquiry user={props.user} />
+        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))}/>
       };
     }
   };
@@ -316,7 +339,12 @@ const BLWorkspace = (props) => {
                 return (
                   <Form
                     user={props.user}
+                    tabs={popupObj.tabs||null}
+                    nums={popupObj.nums||null}
                     key={inquiry.id}
+                    tabChange={(newValue) => {
+                      setTabSelected(newValue);
+                    }}
                     open={popupObj.status}
                     toggleForm={popupObj.toggleForm}
                     FabTitle={popupObj.fabTitle}

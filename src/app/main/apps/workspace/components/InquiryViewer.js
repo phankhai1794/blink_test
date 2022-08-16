@@ -209,11 +209,6 @@ const InquiryViewer = (props) => {
           />
           {user.role === "Admin" ? ( // TODO
             <div className="flex items-center mr-2">
-              {!openInquiryReview &&
-                <FormControlLabel
-                  control={<Radio checked disabled color={'primary'} />}
-                  label={question.receiver[0] === 'customer' ? 'Customer' : 'Onshore'}
-                />}
               <Tooltip title="Edit Inquiry">
                 <div onClick={() => changeToEditor(question)}>
                   <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
