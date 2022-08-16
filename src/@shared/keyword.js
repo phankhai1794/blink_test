@@ -60,7 +60,7 @@ export const RATE = 'rate';
 
 export const DATE_CARGO = 'dateCargoReceived';
 
-export const DATE_LADEN = 'dateCargoReceived';
+export const DATE_LADEN = 'dateLadenOnBoard';
 
 export const SERVICE_CONTRACT_NO = 'contractNo';
 
