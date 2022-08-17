@@ -1,4 +1,4 @@
-import { resolveInquiry, deleteInquiry, uploadOPUS, saveReply } from 'app/services/inquiryService';
+import { resolveInquiry, deleteInquiry, uploadOPUS, saveReply, loadComment } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
 import {
   CONTAINER_DETAIL, CONTAINER_MANIFEST, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT,
@@ -8,7 +8,7 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { stateResquest, displayTime } from '@shared';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Typography, Tooltip, Grid, Button, Radio, FormControlLabel ,FormControl, IconButton} from '@material-ui/core';
+import { Typography, Tooltip, Grid, Button, Radio, FormControlLabel, FormControl, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
@@ -113,6 +113,7 @@ const InquiryViewer = (props) => {
   const [allowDeleteInq, setAllowDeleteInq] = useState(true);
   const [viewDropDown, setViewDropDown] = useState();
   const [isDisableSave, setDisableSave] = useState(true);
+  const [inqHasComment, setInqHasComment] = useState(false);
   const [isResolve, setIsResolve] = useState(false)
   const [isReply, setIsReply] = useState(false)
   const [textResolve, setTextResolve] = useState(content[question.field] || '')
@@ -137,6 +138,16 @@ const InquiryViewer = (props) => {
       dispatch(InquiryActions.setEditInq({}));
     }
   }, [viewGuestDropDown]);
+
+  useEffect(() => {
+    loadComment(question.id)
+      .then((res) => {
+        if (res.length) {
+          setInqHasComment(true);
+        }
+      })
+      .catch((error) => console.error(error));
+  }, []);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -209,7 +220,7 @@ const InquiryViewer = (props) => {
     setIsResolve(false)
   }
 
-  const cancelReply = () =>{
+  const cancelReply = () => {
     setIsReply(false)
   }
 
@@ -230,7 +241,7 @@ const InquiryViewer = (props) => {
         type: metadata.ans_type['paragraph']
       }
     };
-    setTempReply({...tempReply, ...reqReply });
+    setTempReply({ ...tempReply, ...reqReply });
   };
 
   const handleSetAttachmentReply = (val) => {
@@ -241,7 +252,7 @@ const InquiryViewer = (props) => {
       })
     } else {
       const mediaFiles = [...tempReply.mediaFiles, ...val];
-      setTempReply({...tempReply, mediaFiles});
+      setTempReply({ ...tempReply, mediaFiles });
     }
   };
 
@@ -253,9 +264,9 @@ const InquiryViewer = (props) => {
         formData.append('files', mediaFileAns.data);
       });
       uploadFile(formData).then(media => {
-        const {response} = media;
+        const { response } = media;
         response.forEach(file => {
-          const media = {id: file.id};
+          const media = { id: file.id };
           mediaListId.push(media);
         });
         const reqReply = {
@@ -263,19 +274,19 @@ const InquiryViewer = (props) => {
           answer: tempReply.answer,
           mediaFiles: mediaListId
         }
-        saveReply({...reqReply}).then((res) => {
-          dispatch(AppAction.showMessage({message: 'Save Reply SuccessFully', variant: 'success'}));
-        }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
-      }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
+        saveReply({ ...reqReply }).then((res) => {
+          dispatch(AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' }));
+        }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
     } else {
       const reqReply = {
         inqAns: tempReply.inqAns,
         answer: tempReply.answer,
         mediaFiles: mediaListId
       };
-      saveReply({...reqReply}).then((res) => {
-        dispatch(AppAction.showMessage({message: 'Save Reply SuccessFully', variant: 'success'}));
-      }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
+      saveReply({ ...reqReply }).then((res) => {
+        dispatch(AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' }));
+      }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
     }
     setIsReply(false)
   }
@@ -468,15 +479,16 @@ const InquiryViewer = (props) => {
                     borderRadius: 6,
                     resize: 'none'
                   }}
-                  multiline={true}
+                  multiline="true"
                   type="text"
                   value={textResolve}
                   onChange={inputText} />
               }
               <div className="flex">
-              <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
+                <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
                   <Button
                     variant="contained"
+                    disabled={typeof textResolve === 'string' ? !textResolve : textResolve.some(cont => Object.values(cont).includes(''))}
                     color="primary"
                     onClick={onConfirm}
                     classes={{ root: clsx(classes.button, 'w120') }}
@@ -498,7 +510,7 @@ const InquiryViewer = (props) => {
             <>
               {isReply ?
                 <>
-                  <div style={{display: 'flex', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
                     <textarea
                       style={{
                         width: '100%',
@@ -554,7 +566,7 @@ const InquiryViewer = (props) => {
                       onClick={onSaveReply}
                       classes={{ root: classes.button }}
                     >
-                    Save
+                      Save
                     </Button>
                     <Button
                       variant="contained"
@@ -562,14 +574,14 @@ const InquiryViewer = (props) => {
                       color="primary"
                       onClick={cancelReply}
                     >
-                    Cancel
+                      Cancel
                     </Button>
                   </div>
                 </>
                 : <div className="flex">
                   <PermissionProvider
                     action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
-                    extraCondition={question.state === 'ANS_SENT' || question.state === 'REP_A_SENT'}
+                    extraCondition={question.state === 'ANS_SENT' || inqHasComment}
                   >
                     <Button
                       variant="contained"
@@ -577,12 +589,12 @@ const InquiryViewer = (props) => {
                       onClick={onResolve}
                       classes={{ root: clsx(classes.button, 'w120') }}
                     >
-                  Resolved
+                      Resolved
                     </Button>
                   </PermissionProvider>
                   <PermissionProvider
                     action={PERMISSION.INQUIRY_CREATE_REPLY}
-                    // extraCondition={displayCmt}
+                    extraCondition={user.role === "Admin" ? (question.state === 'ANS_SENT' || inqHasComment) : inqHasComment}
                   >
                     <Button
                       variant="contained"
@@ -590,7 +602,7 @@ const InquiryViewer = (props) => {
                       color="primary"
                       onClick={onReply}
                     >
-                  Reply
+                      Reply
                     </Button>
                   </PermissionProvider>
                 </div>
