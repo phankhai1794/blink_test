@@ -11,6 +11,11 @@ export async function saveComment(data) {
   return response.data;
 }
 
+export async function saveReply(data) {
+  const response = await axios().post(`${PATH}/reply`, data);
+  return response.data;
+}
+
 export async function getInquiryById(id) {
   const response = await axios().get(`${PATH}/${id}`);
   return response.data;

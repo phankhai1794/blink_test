@@ -11,20 +11,35 @@ import * as InquiryActions from '../store/actions/inquiry';
 
 //   component
 const AttachFile = (props) => {
-  const { disabled, isAnswer, question } = props;
+  const { disabled, isAnswer,isReply, question, setAttachmentReply } = props;
   const dispatch = useDispatch();
-  const [valid, currentEditInq] =
+  const [valid, currentEditInq, reply] =
   useSelector(({ workspace }) => [
     workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.currentEditInq
+    workspace.inquiryReducer.currentEditInq,
+    workspace.inquiryReducer.reply
   ]);
-  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const handleUploadImageAttach = (files) => {
     const inValidFile = files.find((elem) => !validateExtensionFile(elem));
     if (inValidFile) {
       dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
     } else {
-      if (!isAnswer) {
+      if (isReply){
+        const attachmentReplies = [];
+        files.forEach((src) => {
+          attachmentReplies.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: src });
+        });
+        setAttachmentReply(attachmentReplies);
+      }
+      else if (isAnswer) {
+        const currentInq = {...question};
+        files.forEach((src) => {
+          currentInq.mediaFilesAnswer.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: src });
+        });
+        currentInq.attachmentAnswer = {inquiry: currentInq.id};
+        dispatch(InquiryActions.setEditInq(currentInq));
+       
+      } else {
         const inq = {...currentEditInq};
         files.forEach((src) => {
           const formData = new FormData();
@@ -41,13 +56,6 @@ const AttachFile = (props) => {
         });
         dispatch(InquiryActions.setEditInq(inq));
         dispatch(FormActions.setEnableSaveInquiriesList(false));
-      } else {
-        const currentInq = {...question};
-        files.forEach((src) => {
-          currentInq.mediaFilesAnswer.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: src });
-        });
-        currentInq.attachmentAnswer = {inquiry: currentInq.id};
-        dispatch(InquiryActions.setEditInq(currentInq));
       }
     }
   };
