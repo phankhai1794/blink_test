@@ -1,4 +1,4 @@
-import { resolveInquiry, deleteInquiry } from 'app/services/inquiryService';
+import { resolveInquiry, deleteInquiry, uploadOPUS } from 'app/services/inquiryService';
 import {
   CONTAINER_DETAIL, CONTAINER_MANIFEST, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT,
   CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT
@@ -67,7 +67,6 @@ const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(1),
     borderRadius: 8,
-    width: 120,
     boxShadow: 'none',
     textTransform: 'capitalize',
     fontFamily: 'Montserrat',
@@ -76,6 +75,9 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: 'white',
       color: '#BD0F72',
       border: '1px solid #BD0F72'
+    },
+    '&.w120': {
+      width: 120
     }
   },
   boxItem: {
@@ -190,6 +192,11 @@ const InquiryViewer = (props) => {
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   }
 
+  const onUpload = () => {
+    uploadOPUS(question.id).then(() => {
+      dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
+    }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+  }
   const cancelResolve = () => {
     setIsResolve(false)
   }
@@ -209,6 +216,19 @@ const InquiryViewer = (props) => {
           />
           {user.role === "Admin" ? ( // TODO
             <div className="flex items-center mr-2">
+              <PermissionProvider
+                action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
+                extraCondition={question.state === 'COMPL'}
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={onUpload}
+                  classes={{ root: classes.button }}
+                >
+                  Upload to OPUS
+                </Button>
+              </PermissionProvider>
               <Tooltip title="Edit Inquiry">
                 <div onClick={() => changeToEditor(question)}>
                   <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
@@ -318,7 +338,7 @@ const InquiryViewer = (props) => {
             ))}
         </>
         {
-          (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state))?null:
+          (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state)) ? null :
             <>
               {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
               {question.mediaFilesAnswer?.map((file, mediaIndex) => (
@@ -346,9 +366,9 @@ const InquiryViewer = (props) => {
               ))}
             </>
         }
-        
+
       </div>
-      {question.state !== 'COMPL' &&
+      {question.state !== 'COMPL' && question.state !== 'UPLOADED' &&
         <>
           {isResolve ?
             <>
@@ -379,21 +399,18 @@ const InquiryViewer = (props) => {
                   onChange={inputText} />
               }
               <div className="flex">
-                <PermissionProvider
-                  action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
-                // extraCondition={displayCmt}
-                >
+                <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
                   <Button
                     variant="contained"
                     color="primary"
                     onClick={onConfirm}
-                    classes={{ root: classes.button }}
+                    classes={{ root: clsx(classes.button, 'w120') }}
                   >
                     Save
                   </Button>
                   <Button
                     variant="contained"
-                    classes={{ root: clsx(classes.button, 'reply') }}
+                    classes={{ root: clsx(classes.button, 'w120', 'reply') }}
                     color="primary"
                     onClick={cancelResolve}
                   >
@@ -405,14 +422,14 @@ const InquiryViewer = (props) => {
             :
             <div className="flex">
               <PermissionProvider
-                action={PERMISSION.INQUIRY_UPDATE_INQUIRY_STATUS}
-              // extraCondition={displayCmt}
+                action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
+                extraCondition={question.state === 'ANS_SENT' || question.state === 'REP_A_SENT'}
               >
                 <Button
                   variant="contained"
                   color="primary"
                   onClick={onResolve}
-                  classes={{ root: classes.button }}
+                  classes={{ root: clsx(classes.button, 'w120') }}
                 >
                   Resolved
                 </Button>
@@ -423,7 +440,7 @@ const InquiryViewer = (props) => {
               >
                 <Button
                   variant="contained"
-                  classes={{ root: clsx(classes.button, 'reply') }}
+                  classes={{ root: clsx(classes.button, 'w120', 'reply') }}
                   color="primary"
                 // onClick={onReply}
                 >

@@ -89,7 +89,7 @@ const Inquiry = (props) => {
               </>
             ) : (
               <>
-                <div className={clsx(classes.boxItem, q.state === 'COMPL' && 'resolved')}
+                <div className={clsx(classes.boxItem, (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved')}
                   style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
                   <InquiryViewer
                     currentQuestion={changeQuestion}
@@ -117,11 +117,11 @@ const Inquiry = (props) => {
         {listInqsField.map((q, index) => {
           const isEdit = currentEditInq && q.id === currentEditInq.id;
           return (
-            <div key={index} className={clsx(classes.boxItem, q.state === 'COMPL' && 'resolved')}>
+            <div key={index} className={clsx(classes.boxItem, (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved')}>
               <InquiryViewer
                 toggleEdit={() => toggleEdit(index)}
                 currentQuestion={changeQuestion}
-                question={isEdit?currentEditInq: q}
+                question={isEdit ? currentEditInq : q}
                 user={props.user}
                 isSaved={isSaved}
                 setSave={() => setSaved(false)}

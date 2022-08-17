@@ -46,6 +46,11 @@ export async function resolveInquiry(body) {
   return response.data;
 }
 
+export async function uploadOPUS(id) {
+  const response = await axios().post(`${PATH}/uploadOPUS/${id}`);
+  return response.data;
+}
+
 export async function updateInquiryChoice(state) {
   const response = await axios().patch(`${PATH}/choice`, { state });
   return response.data;
