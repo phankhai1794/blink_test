@@ -104,10 +104,7 @@ const InquiryAnswer = (props) => {
     };
   };
 
-  const onReply = () => {
-    dispatch(InquiryActions.setReply(true));
-  };
-
+ 
   const saveAttachmentAnswer = async (currentEditInq) => {
     const question = {
       inqId: currentEditInq.id,
@@ -241,6 +238,7 @@ const InquiryAnswer = (props) => {
   return (
     <div className='changeToEditor'>
       <div className="flex">
+        
         <div className="flex">
           <Button
             variant="contained"

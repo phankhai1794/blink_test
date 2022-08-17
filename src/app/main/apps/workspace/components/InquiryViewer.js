@@ -1,4 +1,5 @@
-import { resolveInquiry, deleteInquiry, uploadOPUS } from 'app/services/inquiryService';
+import { resolveInquiry, deleteInquiry, uploadOPUS, saveReply } from 'app/services/inquiryService';
+import { uploadFile } from 'app/services/fileService';
 import {
   CONTAINER_DETAIL, CONTAINER_MANIFEST, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT,
   CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT
@@ -7,7 +8,7 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { stateResquest, displayTime } from '@shared';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Typography, Tooltip, Grid, Button, Radio, FormControlLabel } from '@material-ui/core';
+import { Typography, Tooltip, Grid, Button, Radio, FormControlLabel ,FormControl, IconButton} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
@@ -106,13 +107,16 @@ const InquiryViewer = (props) => {
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
+  const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const [allowDeleteInq, setAllowDeleteInq] = useState(true);
   const [viewDropDown, setViewDropDown] = useState();
   const [isDisableSave, setDisableSave] = useState(true);
   const [isResolve, setIsResolve] = useState(false)
+  const [isReply, setIsReply] = useState(false)
   const [textResolve, setTextResolve] = useState(content[question.field] || '')
+  const [tempReply, setTempReply] = useState({});
   const containerDetailType = [CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT]
   const containerManifestType = [CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT]
 
@@ -173,6 +177,10 @@ const InquiryViewer = (props) => {
     }
   };
 
+  const onReply = () => {
+    setIsReply(true)
+  }
+
   const onResolve = () => {
     setIsResolve(true)
   }
@@ -201,8 +209,75 @@ const InquiryViewer = (props) => {
     setIsResolve(false)
   }
 
+  const cancelReply = () =>{
+    setIsReply(false)
+  }
+
   const inputText = (e) => {
     setTextResolve(e.target.value)
+  }
+
+  const handleChangeContentReply = (e) => {
+    const value = e.target.value;
+    const reqReply = {
+      inqAns: {
+        inquiry: question.id,
+        confirm: false,
+        type: 'REP'
+      },
+      answer: {
+        content: value,
+        type: metadata.ans_type['paragraph']
+      }
+    };
+    setTempReply({...tempReply, ...reqReply });
+  };
+
+  const handleSetAttachmentReply = (val) => {
+    if (!tempReply.mediaFiles?.length) {
+      setTempReply({
+        ...tempReply,
+        mediaFiles: val
+      })
+    } else {
+      const mediaFiles = [...tempReply.mediaFiles, ...val];
+      setTempReply({...tempReply, mediaFiles});
+    }
+  };
+
+  const onSaveReply = () => {
+    const mediaListId = [];
+    if (tempReply.mediaFiles?.length) {
+      const formData = new FormData();
+      tempReply.mediaFiles.forEach((mediaFileAns, index) => {
+        formData.append('files', mediaFileAns.data);
+      });
+      uploadFile(formData).then(media => {
+        const {response} = media;
+        response.forEach(file => {
+          const media = {id: file.id};
+          mediaListId.push(media);
+        });
+        const reqReply = {
+          inqAns: tempReply.inqAns,
+          answer: tempReply.answer,
+          mediaFiles: mediaListId
+        }
+        saveReply({...reqReply}).then((res) => {
+          dispatch(AppAction.showMessage({message: 'Save Reply SuccessFully', variant: 'success'}));
+        }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
+      }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
+    } else {
+      const reqReply = {
+        inqAns: tempReply.inqAns,
+        answer: tempReply.answer,
+        mediaFiles: mediaListId
+      };
+      saveReply({...reqReply}).then((res) => {
+        dispatch(AppAction.showMessage({message: 'Save Reply SuccessFully', variant: 'success'}));
+      }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
+    }
+    setIsReply(false)
   }
 
   return (
@@ -399,7 +474,7 @@ const InquiryViewer = (props) => {
                   onChange={inputText} />
               }
               <div className="flex">
-                <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
+              <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
                   <Button
                     variant="contained"
                     color="primary"
@@ -420,34 +495,107 @@ const InquiryViewer = (props) => {
               </div>
             </>
             :
-            <div className="flex">
-              <PermissionProvider
-                action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
-                extraCondition={question.state === 'ANS_SENT' || question.state === 'REP_A_SENT'}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={onResolve}
-                  classes={{ root: clsx(classes.button, 'w120') }}
-                >
+            <>
+              {isReply ?
+                <>
+                  <div style={{display: 'flex', alignItems: 'center' }}>
+                    <textarea
+                      style={{
+                        width: '100%',
+                        paddingTop: 10,
+                        paddingLeft: 5,
+                        marginTop: 10,
+                        minHeight: 50,
+                        border: '1px solid #BAC3CB',
+                        borderRadius: 8,
+                        resize: 'none'
+                      }}
+                      multiline={true}
+                      type="text"
+                      placeholder="Reply..."
+                      value={tempReply?.answer?.content}
+                      onChange={handleChangeContentReply}
+                    />
+                    <AttachFile
+                      isReply={true}
+                      question={question}
+                      setAttachmentReply={handleSetAttachmentReply}
+                    />
+                  </div>
+
+                  {tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}
+                  {tempReply?.mediaFiles?.map((file, mediaIndex) => (
+
+                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                        <ImageAttach
+                          hiddenRemove={viewGuestDropDown !== question.id}
+                          file={file}
+                          field={question.field}
+                          style={{ margin: '2.5rem' }}
+                          indexMedia={mediaIndex}
+                          isAnswer={true}
+                        />
+                      ) : (
+                        <FileAttach
+                          hiddenRemove={viewGuestDropDown !== question.id}
+                          file={file}
+                          field={question.field}
+                          indexMedia={mediaIndex}
+                          isAnswer={true}
+                        />
+                      )}
+                    </div>
+                  ))}
+                  <div className="flex">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={onSaveReply}
+                      classes={{ root: classes.button }}
+                    >
+                    Save
+                    </Button>
+                    <Button
+                      variant="contained"
+                      classes={{ root: clsx(classes.button, 'reply') }}
+                      color="primary"
+                      onClick={cancelReply}
+                    >
+                    Cancel
+                    </Button>
+                  </div>
+                </>
+                : <div className="flex">
+                  <PermissionProvider
+                    action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
+                    extraCondition={question.state === 'ANS_SENT' || question.state === 'REP_A_SENT'}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={onResolve}
+                      classes={{ root: clsx(classes.button, 'w120') }}
+                    >
                   Resolved
-                </Button>
-              </PermissionProvider>
-              <PermissionProvider
-                action={PERMISSION.INQUIRY_CREATE_COMMENT}
-              // extraCondition={displayCmt}
-              >
-                <Button
-                  variant="contained"
-                  classes={{ root: clsx(classes.button, 'w120', 'reply') }}
-                  color="primary"
-                // onClick={onReply}
-                >
+                    </Button>
+                  </PermissionProvider>
+                  <PermissionProvider
+                    action={PERMISSION.INQUIRY_CREATE_REPLY}
+                    // extraCondition={displayCmt}
+                  >
+                    <Button
+                      variant="contained"
+                      classes={{ root: clsx(classes.button, 'w120', 'reply') }}
+                      color="primary"
+                      onClick={onReply}
+                    >
                   Reply
-                </Button>
-              </PermissionProvider>
-            </div>
+                    </Button>
+                  </PermissionProvider>
+                </div>
+              }
+            </>
           }
         </>
       }
