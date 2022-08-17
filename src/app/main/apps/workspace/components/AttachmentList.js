@@ -13,8 +13,9 @@ import * as AppAction from "app/store/actions";
 import { useDropzone } from "react-dropzone";
 import { uploadFile, getFile } from 'app/services/fileService';
 import { updateInquiryAttachment, removeMultipleMedia, replaceFile, addNewMedia } from 'app/services/inquiryService';
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, withStyles } from "@material-ui/core/styles";
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import { handleDuplicateAttachment } from '@shared/handleError';
 import Checkbox from "@material-ui/core/Checkbox";
 import clsx from "clsx";
 
@@ -77,7 +78,15 @@ const attachmentStyle = makeStyles(() => ({
   },
   selectField: {
     display: 'flex',
-    alignItems: 'center'
+    alignItems: 'center',
+    '& .selectType': {
+      '& .MuiPaper-root .fuse-chip-select__menu-list .MuiMenuItem-root': {
+        whiteSpace: 'normal'
+      }
+    },
+    '& .MuiFormControl-root .MuiInputBase-root p.MuiTypography-root': {
+      fontSize: 15
+    }
   },
   backgroundConfirm: {
     top: 74,
@@ -161,7 +170,7 @@ const AttachmentList = (props) => {
   const { pathname } = window.location;
   const classes = attachmentStyle();
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const [fieldType, setFieldType] = useState(metadata.field_options.filter(meta => inquiries.find(inq => meta.value === inq.field)));
+  const [fieldType, setFieldType] = useState([]);
   const [attachmentFiles, setAttachmentFile] = useState([]);
   const dispatch = useDispatch();
   const [selectedIndexFile, setSelectedIndexFile] = useState([]);
@@ -212,85 +221,132 @@ const AttachmentList = (props) => {
 
   useEffect(() => {
     let getAttachmentFiles = [];
+    let combineFieldType = [];
+
     inquiries.forEach((e) => {
       const mediaFile = e.mediaFile.map((f) => {
         return {
           ...f,
           field: e.field,
-          inquiryId: e.id
+          inquiryId: e.id,
+          inqType: e.inqType
         };
       });
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
+
+      const fieldOptions = metadata.field_options.find(ops => ops.value === e.field);
+      const inqType = metadata.inq_type_options.find(ops => ops.value === e.inqType);
+      combineFieldType = [
+        ...combineFieldType,
+        {
+          label: `${fieldOptions.label} - ${inqType.label}`,
+          value: { fieldId: fieldOptions.value, inqId: e.id, inqType: e.inqType }
+        }
+      ];
     });
-    setIsLoading(false);
-    setAttachmentFile(getAttachmentFiles)
+
+    getAttachmentFiles.sort((a, b) => a.field.localeCompare(b.field));
+    combineFieldType.sort((a, b) => a.label.localeCompare(b.label));
+    setAttachmentFile(getAttachmentFiles);
+    setFieldType(combineFieldType);
+
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+    setIsLoading(false);
   }, []);
 
   const handleFieldChange = (e, index) => {
-    const optionsOfQuestion = [...inquiries];
     let optionsAttachmentList = [...attachmentFiles];
     // add new replace
     if (!optionsAttachmentList[index].field && !optionsAttachmentList[index].id) {
       const file = optionsAttachmentList[index].fileUpload;
-      const indexInquiryOld = optionsOfQuestion.findIndex(op => e.value === op.field);
-      const formData = new FormData();
-      formData.append('file', file);
-      uploadFile(formData).then((media) => {
-        //update inquiries
-        const res = media.response[0];
-        addNewMedia({ inquiryId: optionsOfQuestion[indexInquiryOld].id, mediaId: res.id }).then(rs => {
-          optionsAttachmentList = optionsAttachmentList.map(op => {
-            return { ...op, success: null }
-          });
-          optionsAttachmentList[index] = {
-            ...optionsAttachmentList[index],
-            id: res.id,
-            field: e.value,
-            success: true,
-          };
-          setAttachmentFile(optionsAttachmentList);
+      const isExist = handleDuplicateAttachment(
+        dispatch,
+        metadata,
+        optionsAttachmentList,
+        [...[file]],
+        e.value.fieldId,
+        e.value.inqType
+      );
+      if (!isExist) {
+        const formData = new FormData();
+        formData.append('file', file);
+        uploadFile(formData).then((media) => {
+          // update inquiries
+          const res = media.response[0];
+          addNewMedia({ inquiryId: e.value.inqId, mediaId: res.id }).then(rs => {
+            optionsAttachmentList = optionsAttachmentList.map(op => {
+              return { ...op, success: null }
+            });
+            optionsAttachmentList[index] = {
+              ...optionsAttachmentList[index],
+              id: res.id,
+              field: e.value.fieldId,
+              inquiryId: e.value.inqId,
+              inqType: e.value.inqType,
+              success: true,
+            };
+            setAttachmentFile(optionsAttachmentList);
+          }).catch((error) => {
+            console.error(error);
+            optionsAttachmentList[index] = {
+              ...optionsAttachmentList[index],
+              field: 'false',
+              success: false,
+            };
+            setAttachmentFile(optionsAttachmentList);
+          })
         }).catch((error) => {
-          console.log(error);
+          console.error(error);
           optionsAttachmentList[index] = {
             ...optionsAttachmentList[index],
             field: 'false',
             success: false,
           };
           setAttachmentFile(optionsAttachmentList);
-        })
-      }).catch((error) => {
-        console.log(error);
-        optionsAttachmentList[index] = {
-          ...optionsAttachmentList[index],
-          field: 'false',
-          success: false,
-        };
-        setAttachmentFile(optionsAttachmentList);
-      });
+        });
+      }
     }
     // update
     else {
       // update inquiries
-      const indexInquiryOld = optionsOfQuestion.findIndex(op => optionsAttachmentList[index].field === op.field);
-      const indexInquiryNew = optionsOfQuestion.findIndex(op => e.value === op.field);
-      const data = {
-        newInquiryId: optionsOfQuestion[indexInquiryNew].id,
-        oldInquiryId: optionsOfQuestion[indexInquiryOld].id,
-        mediaId: optionsAttachmentList[index].id,
-      };
-      updateInquiryAttachment(data).then(res => {
-        // update attachment list
-        optionsAttachmentList[index].field = e.value;
-        setAttachmentFile(optionsAttachmentList);
-      }).catch((error) => {
-        console.log(error);
-        optionsAttachmentList[index] = {
-          ...optionsAttachmentList[index],
-          success: false,
-        };
-        setAttachmentFile(optionsAttachmentList);
-      });
+      const media = optionsAttachmentList[index];
+      if (
+        e.value.fieldId !== optionsAttachmentList[index].field
+        || e.value.inqType !== optionsAttachmentList[index].inqType
+      ) {
+        const isExist = handleDuplicateAttachment(
+          dispatch,
+          metadata,
+          optionsAttachmentList,
+          [...[media]],
+          e.value.fieldId,
+          e.value.inqType
+        );
+        if (!isExist) {
+          const data = {
+            newInquiryId: e.value.inqId,
+            oldInquiryId: optionsAttachmentList[index].inquiryId,
+            mediaId: media.id,
+          };
+          updateInquiryAttachment(data).then(res => {
+            // update attachment list
+            optionsAttachmentList[index] = {
+              ...optionsAttachmentList[index],
+              inquiryId: e.value.inqId,
+              field: e.value.fieldId,
+              inqType: e.value.inqType,
+            };
+            setAttachmentFile(optionsAttachmentList);
+          }).catch((error) => {
+            console.error(error);
+            optionsAttachmentList[index] = {
+              ...media,
+              success: false,
+            };
+            setAttachmentFile(optionsAttachmentList);
+          });
+        }
+      }
     }
   };
 
@@ -319,7 +375,7 @@ const AttachmentList = (props) => {
         formData.append('file', file[0]);
         const findInquiry = optionsOfQuestion.find(op => optionsAttachmentList[attachmentIndex].field === op.field);
         uploadFile(formData).then((media) => {
-          //update inquiries
+          // update inquiries
           const res = media.response[0];
           const data = {
             inquiryId: findInquiry.id,
@@ -327,7 +383,7 @@ const AttachmentList = (props) => {
             newMediaId: res.id,
           };
           replaceFile(data).then(rt => {
-            //update attachment list
+            // update attachment list
             optionsAttachmentList[attachmentIndex] = {
               id: res.id,
               src: urlMedia(ext, file[0]),
@@ -338,7 +394,7 @@ const AttachmentList = (props) => {
             };
             setAttachmentFile(optionsAttachmentList);
           }).catch((error) => {
-            console.log(error);
+            console.error(error);
             optionsAttachmentList[attachmentIndex] = {
               ...optionsAttachmentList[attachmentIndex],
               success: false,
@@ -346,7 +402,7 @@ const AttachmentList = (props) => {
             setAttachmentFile(optionsAttachmentList);
           });
         }).catch((error) => {
-          console.log(error);
+          console.error(error);
           optionsAttachmentList[attachmentIndex] = {
             ...optionsAttachmentList[attachmentIndex],
             success: false,
@@ -467,7 +523,7 @@ const AttachmentList = (props) => {
                         uploadImageAttach={onFileReplaceChange}
                         // mediaIndex={index}
                         isAttachmentList={false}
-                        type={'replace'}                        
+                        type={'replace'}
                       >
                         <CachedIcon style={{ height: '22px', width: '22px', color: '#BD0F72' }} />
                         <span style={{ fontSize: '15px', marginLeft: '5px', fontWeight: '500', color: '#BD0F72' }}>Replace</span>
@@ -501,8 +557,8 @@ const AttachmentList = (props) => {
         <div className='attachmentList'>
           {attachmentFiles.map((media, index) => {
             const filter = fieldType.filter(v => {
-              if (media.id && media.field) {
-                return media.field === v.value;
+              if (media.id && media.field && media.inquiryId) {
+                return media.field === v.value.fieldId && media.inquiryId === v.value.inqId;
               }
             });
             return (
@@ -550,7 +606,7 @@ const AttachmentList = (props) => {
                       <FormControl error={!media.field}>
                         <div className={clsx(media.success === false ? classes.selectError : classes.customSelect)} style={{ display: 'flex', alignItems: 'center' }}>
                           <FuseChipSelect
-                            className="m-auto"
+                            className="m-auto selectType"
                             customStyle={styles(media.field, fullscreen ? 320 : 290)}
                             value={filter}
                             onChange={(e) => handleFieldChange(e, index)}
@@ -766,24 +822,13 @@ const FileAttachList = ({ file }) => {
   );
 };
 
-const useStylesLinear = () => ({
+const ColoredLinearProgress = withStyles({
   colorPrimary: {
     backgroundColor: '#e8eaf6'
   },
   barColorPrimary: {
     backgroundColor: '#03a9f4'
   }
-});
-const ColoredLinearProgress = () => {
-  const classes = useStylesLinear();
-  return (
-    <LinearProgress
-      classes={{
-        colorPrimary: classes.colorPrimary,
-        barColorPrimary: classes.barColorPrimary
-      }}
-    />
-  );
-};
+})(LinearProgress);
 
 export { AttachmentList, AttachFileList };
