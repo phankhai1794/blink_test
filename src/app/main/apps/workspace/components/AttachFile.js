@@ -1,29 +1,37 @@
-import React, { useEffect } from 'react';
-import { getFile } from 'app/services/fileService';
+import React from 'react';
 import { useDropzone } from 'react-dropzone';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import * as AppAction from 'app/store/actions';
 import { validateExtensionFile } from '@shared';
+import { handleDuplicateAttachment } from '@shared/handleError';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
-//   component
 const AttachFile = (props) => {
   const { disabled, isAnswer,isReply, question, setAttachmentReply } = props;
   const dispatch = useDispatch();
-  const [valid, currentEditInq, reply] =
-  useSelector(({ workspace }) => [
-    workspace.inquiryReducer.validation,
+  const [currentEditInq, reply, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
+    workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.reply
   ]);
+
   const handleUploadImageAttach = (files) => {
+    if (!currentEditInq.inqType) return dispatch(AppAction.showMessage({ message: 'Type of inquiry is required !', variant: 'error' }));
     const inValidFile = files.find((elem) => !validateExtensionFile(elem));
-    if (inValidFile) {
-      dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
-    } else {
+    if (inValidFile) return dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
+
+    const isExist = handleDuplicateAttachment(
+      dispatch,
+      metadata,
+      currentEditInq.mediaFile,
+      files,
+      currentEditInq.field,
+      currentEditInq.inqType
+    );
+    if (!isExist) {
       if (isReply){
         const attachmentReplies = [];
         files.forEach((src) => {
@@ -40,7 +48,7 @@ const AttachFile = (props) => {
         dispatch(InquiryActions.setEditInq(currentInq));
        
       } else {
-        const inq = {...currentEditInq};
+        const inq = { ...currentEditInq };
         files.forEach((src) => {
           const formData = new FormData();
           formData.append('file', src);
@@ -60,14 +68,11 @@ const AttachFile = (props) => {
     }
   };
 
-  const onDrop = (acceptedFiles) => {
-    handleUploadImageAttach(acceptedFiles);
-  };
   const { getRootProps, getInputProps, open } = useDropzone({
     // Disable click and keydown behavior
     noClick: true,
     noKeyboard: true,
-    onDrop
+    onDrop: handleUploadImageAttach
   });
 
   return (
