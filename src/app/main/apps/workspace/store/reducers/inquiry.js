@@ -67,7 +67,7 @@ const inquiryReducer = function (state = initialState, action) {
           field: action.state,
           answerObj: [],
           addOther: '',
-          receiver: [],
+          receiver: ['customer'],
           mediaFile: []
         }
     };
