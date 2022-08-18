@@ -1,11 +1,11 @@
 import { resolveInquiry, deleteInquiry, uploadOPUS, saveReply, loadComment } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
+import { getLabelById, stateResquest, displayTime } from '@shared';
 import {
   CONTAINER_DETAIL, CONTAINER_MANIFEST, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT,
   CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { stateResquest, displayTime } from '@shared';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Typography, Tooltip, Grid, Button, Radio, FormControlLabel, FormControl, IconButton } from '@material-ui/core';
@@ -142,12 +142,12 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     loadComment(question.id)
       .then((res) => {
-        if(res.length > 0){
+        if (res.length > 0) {
           res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
-          const lastest = {...question}
+          const lastest = { ...question }
           // filter comment
           lastest.mediaFilesAnswer = res[res.length - 1].mediaFilesAnswer;
-          lastest.answerObj = [{content:res[res.length - 1].content}];
+          lastest.answerObj = [{ content: res[res.length - 1].content }];
           lastest.content = res[res.length - 1].content;
           lastest.createdAt = res[res.length - 1].createdAt;
           // customer reply
@@ -224,12 +224,14 @@ const InquiryViewer = (props) => {
       .then(() => {
         dispatch(FormActions.toggleReload());
         setIsResolve(false)
+        setQuestion(q => ({ ...q, state: 'COMPL' }))
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   }
 
   const onUpload = () => {
     uploadOPUS(question.id).then(() => {
+      setQuestion(q => ({ ...q, state: 'UPLOADED' }))
       dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
     }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   }
@@ -276,7 +278,7 @@ const InquiryViewer = (props) => {
 
   const onSaveReply = () => {
     const mediaListId = [];
-    const inqs = [... inquiries];
+    const inqs = [...inquiries];
     const filtersInq = inqs.filter(inq => inq.id === question.id);
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
@@ -324,7 +326,7 @@ const InquiryViewer = (props) => {
   return (
     <>
       {
-        isLoadedComment&& <>
+        isLoadedComment && <>
           <div>
             <div style={{ paddingTop: 10 }} className="flex justify-between">
               <UserInfo
@@ -336,24 +338,28 @@ const InquiryViewer = (props) => {
                 <div className="flex items-center mr-2">
                   <PermissionProvider
                     action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
-                    extraCondition={question.state === 'COMPL'}
+                    extraCondition={question.state === 'COMPL' || question.state === 'UPLOADED'}
                   >
                     <Button
+                      disabled={question.state === 'UPLOADED'}
                       variant="contained"
                       color="primary"
                       onClick={onUpload}
                       classes={{ root: classes.button }}
                     >
-                  Upload to OPUS
+                      Upload to OPUS
                     </Button>
                   </PermissionProvider>
-                  {!inqHasComment&&
-              <Tooltip title="Edit Inquiry">
-                <div onClick={() => changeToEditor(question)}>
-                  <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
-                </div>
-              </Tooltip>
-                  }
+                  <PermissionProvider
+                    action={PERMISSION.VIEW_EDIT_INQUIRY}
+                    extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN'}
+                  >
+                    <Tooltip title="Edit Inquiry">
+                      <div onClick={() => changeToEditor(question)}>
+                        <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                      </div>
+                    </Tooltip>
+                  </PermissionProvider>
                   {allowDeleteInq && (
                     <Tooltip title="Delete Inquiry">
                       <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion(index)}>
@@ -411,13 +417,13 @@ const InquiryViewer = (props) => {
                     <div className={classes.viewMoreBtn} onClick={() => handleViewMore(question.id)}>
                       {(viewDropDown !== question.id ? ( // TODO
                         <>
-                              View All
-                          <ArrowDropDown/>
+                          View All
+                          <ArrowDropDown />
                         </>
                       ) : (
                         <>
-                              Hide All
-                          <ArrowDropUp/>
+                          Hide All
+                          <ArrowDropUp />
                         </>
                       ))}
                     </div>
@@ -426,30 +432,30 @@ const InquiryViewer = (props) => {
               </Grid>
 
               {(viewDropDown === question.id) && (
-                <Comment question={props.question} comment={comment}/>
+                <Comment question={props.question} comment={comment} />
               )}
 
               {question.mediaFile?.length > 0 &&
-            question.mediaFile?.map((file, mediaIndex) => (
-              <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                  <ImageAttach
-                    file={file}
-                    hiddenRemove={true}
-                    field={question.field}
-                    indexInquiry={index}
-                    style={{ margin: '2.5rem' }}
-                  />
-                ) : (
-                  <FileAttach
-                    hiddenRemove={true}
-                    file={file}
-                    field={question.field}
-                    indexInquiry={index}
-                  />
-                )}
-              </div>
-            ))}
+                question.mediaFile?.map((file, mediaIndex) => (
+                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                      <ImageAttach
+                        file={file}
+                        hiddenRemove={true}
+                        field={question.field}
+                        indexInquiry={index}
+                        style={{ margin: '2.5rem' }}
+                      />
+                    ) : (
+                      <FileAttach
+                        hiddenRemove={true}
+                        file={file}
+                        field={question.field}
+                        indexInquiry={index}
+                      />
+                    )}
+                  </div>
+                ))}
             </>
             {
               (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state)) ? null :
@@ -481,62 +487,16 @@ const InquiryViewer = (props) => {
 
           </div>
           {question.state !== 'COMPL' && question.state !== 'UPLOADED' &&
-        <>
-          {isResolve ?
             <>
-              {containerCheck.includes(question.field) ?
-                <ContainerDetailForm
-                  container={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
-                  question={question}
-                  typeList={question.field === containerCheck[0] ? containerDetailType : containerManifestType}
-                  setTextResolve={setTextResolve}
-                />
-                :
-                <textarea
-                  style={{
-                    width: '100%',
-                    paddingTop: 10,
-                    paddingLeft: 5,
-                    marginTop: 10,
-                    minHeight: 50,
-                    borderWidth: '0.5px',
-                    borderStyle: 'solid',
-                    borderColor: 'lightgray',
-                    borderRadius: 6,
-                    resize: 'none'
-                  }}
-                  multiline="true"
-                  type="text"
-                  value={textResolve}
-                  onChange={inputText} />
-              }
-              <div className="flex">
-                <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
-                  <Button
-                    variant="contained"
-                    disabled={typeof textResolve === 'string' ? !textResolve : textResolve.some(cont => Object.values(cont).includes(''))}
-                    color="primary"
-                    onClick={onConfirm}
-                    classes={{ root: clsx(classes.button, 'w120') }}
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    variant="contained"
-                    classes={{ root: clsx(classes.button, 'w120', 'reply') }}
-                    color="primary"
-                    onClick={cancelResolve}
-                  >
-                    Cancel
-                  </Button>
-                </PermissionProvider>
-              </div>
-            </>
-            :
-            <>
-              {isReply ?
+              {isResolve ?
                 <>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {containerCheck.includes(question.field) ?
+                    <ContainerDetailForm
+                      container={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
+                      question={question}
+                      setTextResolve={setTextResolve}
+                    />
+                    :
                     <textarea
                       style={{
                         width: '100%',
@@ -544,105 +504,149 @@ const InquiryViewer = (props) => {
                         paddingLeft: 5,
                         marginTop: 10,
                         minHeight: 50,
-                        border: '1px solid #BAC3CB',
-                        borderRadius: 8,
+                        borderWidth: '0.5px',
+                        borderStyle: 'solid',
+                        borderColor: 'lightgray',
+                        borderRadius: 6,
                         resize: 'none'
                       }}
-                      multiline={true}
+                      multiline="true"
                       type="text"
-                      placeholder="Reply..."
-                      value={tempReply?.answer?.content}
-                      onChange={handleChangeContentReply}
-                    />
-                    <AttachFile
-                      isReply={true}
-                      question={question}
-                      setAttachmentReply={handleSetAttachmentReply}
-                    />
-                  </div>
-
-                  {tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}
-                  {tempReply?.mediaFiles?.map((file, mediaIndex) => (
-
-                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                        <ImageAttach
-                          hiddenRemove={viewGuestDropDown !== question.id}
-                          file={file}
-                          field={question.field}
-                          style={{ margin: '2.5rem' }}
-                          indexMedia={mediaIndex}
-                          isAnswer={true}
-                        />
-                      ) : (
-                        <FileAttach
-                          hiddenRemove={viewGuestDropDown !== question.id}
-                          file={file}
-                          field={question.field}
-                          indexMedia={mediaIndex}
-                          isAnswer={true}
-                        />
-                      )}
-                    </div>
-                  ))}
+                      value={textResolve}
+                      onChange={inputText} />
+                  }
                   <div className="flex">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={onSaveReply}
-                      classes={{ root: classes.button }}
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      variant="contained"
-                      classes={{ root: clsx(classes.button, 'reply') }}
-                      color="primary"
-                      onClick={cancelReply}
-                    >
-                      Cancel
-                    </Button>
+                    <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
+                      <Button
+                        variant="contained"
+                        disabled={typeof textResolve === 'string' ? !textResolve : textResolve.some(cont => Object.values(cont).includes(''))}
+                        color="primary"
+                        onClick={onConfirm}
+                        classes={{ root: clsx(classes.button, 'w120') }}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        variant="contained"
+                        classes={{ root: clsx(classes.button, 'w120', 'reply') }}
+                        color="primary"
+                        onClick={cancelResolve}
+                      >
+                        Cancel
+                      </Button>
+                    </PermissionProvider>
                   </div>
                 </>
-                : <div className="flex">
-                  <PermissionProvider
-                    action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
-                    extraCondition={question.state === 'ANS_SENT' || inqHasComment}
-                  >
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={onResolve}
-                      classes={{ root: clsx(classes.button, 'w120') }}
-                    >
-                      Resolve
-                    </Button>
-                  </PermissionProvider>
-                  <PermissionProvider
-                    action={PERMISSION.INQUIRY_CREATE_REPLY}
-                    extraCondition={user.role === "Admin" ? (question.state === 'ANS_SENT' || inqHasComment) : inqHasComment}
-                  >
-                    <Button
-                      variant="contained"
-                      classes={{ root: clsx(classes.button, 'w120', 'reply') }}
-                      color="primary"
-                      onClick={onReply}
-                    >
-                      Reply
-                    </Button>
-                  </PermissionProvider>
-                </div>
+                :
+                <>
+                  {isReply ?
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <textarea
+                          style={{
+                            width: '100%',
+                            paddingTop: 10,
+                            paddingLeft: 5,
+                            marginTop: 10,
+                            minHeight: 50,
+                            border: '1px solid #BAC3CB',
+                            borderRadius: 8,
+                            resize: 'none'
+                          }}
+                          multiline={true}
+                          type="text"
+                          placeholder="Reply..."
+                          value={tempReply?.answer?.content}
+                          onChange={handleChangeContentReply}
+                        />
+                        <AttachFile
+                          isReply={true}
+                          question={question}
+                          setAttachmentReply={handleSetAttachmentReply}
+                        />
+                      </div>
+
+                      {tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}
+                      {tempReply?.mediaFiles?.map((file, mediaIndex) => (
+
+                        <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                          {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                            <ImageAttach
+                              hiddenRemove={viewGuestDropDown !== question.id}
+                              file={file}
+                              field={question.field}
+                              style={{ margin: '2.5rem' }}
+                              indexMedia={mediaIndex}
+                              isAnswer={true}
+                            />
+                          ) : (
+                            <FileAttach
+                              hiddenRemove={viewGuestDropDown !== question.id}
+                              file={file}
+                              field={question.field}
+                              indexMedia={mediaIndex}
+                              isAnswer={true}
+                            />
+                          )}
+                        </div>
+                      ))}
+                      <div className="flex">
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={onSaveReply}
+                          classes={{ root: classes.button }}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          variant="contained"
+                          classes={{ root: clsx(classes.button, 'reply') }}
+                          color="primary"
+                          onClick={cancelReply}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </>
+                    : <div className="flex">
+                      <PermissionProvider
+                        action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
+                      >
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={onResolve}
+                          classes={{ root: clsx(classes.button, 'w120') }}
+                        >
+                          Resolve
+                        </Button>
+                      </PermissionProvider>
+                      <PermissionProvider
+                        action={PERMISSION.INQUIRY_CREATE_REPLY}
+                        extraCondition={user.role === "Admin" ? (question.state === 'ANS_SENT' || inqHasComment) : inqHasComment}
+                      >
+                        <Button
+                          variant="contained"
+                          classes={{ root: clsx(classes.button, 'w120', 'reply') }}
+                          color="primary"
+                          onClick={onReply}
+                        >
+                          Reply
+                        </Button>
+                      </PermissionProvider>
+                    </div>
+                  }
+                </>
               }
             </>
-          }
-        </>
           }
         </>
       }
     </>
   );
 };
-const ContainerDetailForm = ({ container, typeList, question, setTextResolve }) => {
+const ContainerDetailForm = ({ container, question, setTextResolve }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -656,7 +660,11 @@ const ContainerDetailForm = ({ container, typeList, question, setTextResolve }) 
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
-  const [values, setValues] = useState(getValueField(container)|| [])
+  const [values, setValues] = useState(getValueField(container) || [])
+  const inqType = getLabelById(metadata['inq_type_options'], question.inqType)
+  const cdType = inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CONTAINER_SEAL]
+  const cmType = inqType !== CM_MARK ? [CM_MARK, inqType] : [CM_MARK, CM_PACKAGE]
+  const typeList = container === CONTAINER_DETAIL ? cdType : cmType
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values))
     temp[index][type] = e.target.value
