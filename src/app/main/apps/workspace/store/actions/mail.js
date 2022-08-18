@@ -13,10 +13,10 @@ export const VALIDATE_MAIL = 'VALIDATE_MAIL';
 export const SET_TAGS = 'SET_TAGS'
 
 export const sendMail =
-  ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content }) =>
+  ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs }) =>
     async (dispatch) => {
       dispatch({ type: SENDMAIL_LOADING });
-      sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content)
+      sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs)
         .then((res) => {
           if (res.status === 200) {
             return dispatch({

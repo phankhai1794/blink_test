@@ -14,6 +14,8 @@ import TagsInput from './TagsInput';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
 import ReceiverProvider from './ReceiverProvider';
+import { getMail } from 'app/services/mailService';
+import { loadComment } from 'app/services/inquiryService';
 
 const colorBtnReview = '#1564EE';
 
@@ -48,6 +50,7 @@ const SendInquiryForm = (props) => {
   });
 
   const [form, setForm] = useState(initialState);
+  const [inqHasComment, setInqHasComment] = useState([]);
 
   const isFormValid = () => {
     return form.toCustomer || form.toOnshore;
@@ -56,6 +59,26 @@ const SendInquiryForm = (props) => {
   const isMailVaid = () => Object.values(validateMail).filter(e => e).length
 
   useEffect(() => {
+    getMail(mybl.id).then((res) => {
+      if (res.data.length) {
+        let tags = {}, toCustomer = [], toOnshore = [];
+        // Offshore
+        res.data[0]?.toCustomer?.length && res.data[0].toCustomer.forEach(customer => {
+          toCustomer.push(customer.email)
+        });
+        // Onshore
+        res.data[0]?.toOnshore?.length && res.data[0].toOnshore.forEach(onshore => {
+          toOnshore.push(onshore.email)
+        });
+
+        toCustomer.length && (tags.toCustomer = toCustomer);
+        toOnshore.length && (tags.toOnshore = toOnshore);
+        dispatch(mailActions.setTags(tags));
+        setForm({ ...form, toCustomer: tags.toCustomer.join(','), toOnshore: tags.toOnshore.join(',') })
+      }
+    }).catch((error) => {
+      console.error(error)
+    });
     if (success) {
       dispatch(
         Actions.showMessage({
@@ -79,6 +102,18 @@ const SendInquiryForm = (props) => {
         type: mailActions.SENDMAIL_NONE
       });
     }
+
+    for (let i in inquiries) {
+      loadComment(inquiries[i].id)
+        .then((res) => {
+          if (res.length) {
+            const listInqId = inqHasComment;
+            listInqId.push(inquiries[i].id);
+            setInqHasComment(listInqId);
+          }
+        })
+        .catch((error) => console.error(error));
+    };
   }, [success, error]);
   useEffect(() => {
     if (openEmail && !suggestMails.length) {
@@ -104,7 +139,7 @@ const SendInquiryForm = (props) => {
     }
     else {
       dispatch({ type: mailActions.SENDMAIL_LOADING });
-      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form }));
+      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form, replyInqs: inqHasComment }));
     }
   };
 
