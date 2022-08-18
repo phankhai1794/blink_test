@@ -217,6 +217,7 @@ const InquiryViewer = (props) => {
     }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   }
   const cancelResolve = () => {
+    setTextResolve(content[question.field] || '')
     setIsResolve(false)
   }
 

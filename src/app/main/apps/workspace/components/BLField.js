@@ -9,6 +9,7 @@ import HelpIcon from '@material-ui/icons/Help';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import ReplyIcon from '@material-ui/icons/Reply';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
@@ -29,6 +30,7 @@ const lightPink = '#FAF1F5';
 const red = '#DC2626';
 const blue = '#EAF2FD';
 const green = '#2F80ED';
+const success = '#36B37E'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -49,6 +51,12 @@ const useStyles = makeStyles((theme) => ({
   hasInquiry: {
     '& fieldset': {
       backgroundColor: lightPink
+    }
+  },
+  hasResolved: {
+    '& fieldset': {
+      backgroundColor: '#EBF7F2',
+      borderColor: `${success} !important`
     }
   },
   hasAnswer: {
@@ -108,6 +116,9 @@ const useStyles = makeStyles((theme) => ({
   colorEmptyInqIcon: {
     color: `${pink} !important`
   },
+  colorHasResolved: {
+    color: `${success} !important`
+  },
   locked: {
     '& fieldset': {
       backgroundColor: lockGray
@@ -132,6 +143,7 @@ const BLField = (props) => {
   const [hasAnswer, setHasAnswer] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
+  const [isResolved, setIsResolved] = useState(false)
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -203,9 +215,19 @@ const BLField = (props) => {
     return false;
   };
 
+  const checkQuestionIsResolved = () => {
+    if (inquiries.length > 0) {
+      const lst = inquiries.filter((q) => q.field === id);
+      if (lst.length > 0)
+        return lst.every(e => e.state === 'COMPL' || e.state === 'UPLOADED')
+    }
+    return false;
+  };
+
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty());
     setHasAnswer(checkAnswerSent())
+    setIsResolved(checkQuestionIsResolved())
   }, [inquiries, metadata]);
 
   return (
@@ -227,7 +249,8 @@ const BLField = (props) => {
               classes.root,
               !questionIsEmpty ? classes.hasInquiry : '',
               lock ? classes.locked : '',
-              hasAnswer ? classes.hasAnswer : ''
+              hasAnswer ? classes.hasAnswer : '',
+              isResolved ? classes.hasResolved : ''
             )}
             InputProps={{
               readOnly: readOnly || true,
@@ -244,17 +267,21 @@ const BLField = (props) => {
                       className={clsx(
                         classes.sizeIcon,
                         !hasAnswer ? classes.colorHasInqIcon : classes.colorHasAnswer,
-                        classes.attachIcon
+                        classes.attachIcon,
+                        isResolved ? classes.colorHasResolved : ''
                       )}
                     />
                   )}
-
-                  {!questionIsEmpty && !hasAnswer && (
-                    <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
-                  )}
+                  {isResolved ? (
+                    <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)} />
+                  ) :
+                    !questionIsEmpty && !hasAnswer && (
+                      <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
+                    )}
                   {!questionIsEmpty && hasAnswer && (
                     <ReplyIcon className={clsx(classes.sizeIcon, classes.colorHasAnswer)} />
                   )}
+
                   {lock ? (
                     <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
                   ) : (

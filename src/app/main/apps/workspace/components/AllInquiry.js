@@ -79,7 +79,10 @@ const useStyles = makeStyles((theme) => ({
   boxItem: {
     borderLeft: '2px solid',
     borderColor: '#DC2626',
-    paddingLeft: '2rem'
+    paddingLeft: '2rem',
+    '&.resolved': {
+      borderColor: '#36B37E'
+    }
   },
   boxHasComment: {
     borderColor: '#2F80ED'
@@ -228,6 +231,7 @@ const AllInquiry = (props) => {
                 <div
                   className={clsx(
                     classes.boxItem,
+                    (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
                     inqHasComment.includes(q.id) && classes.boxHasComment
                   )}>
                   <div style={{ marginBottom: '12px' }}>
@@ -245,13 +249,14 @@ const AllInquiry = (props) => {
                 />
               </Card>
             );
-          }else{
+          } else {
             const isEdit = currentEditInq && q.id === currentEditInq.id;
             return (
               <>
                 <div
                   className={clsx(
                     classes.boxItem,
+                    (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
                     inqHasComment.includes(q.id) && classes.boxHasComment
                   )}>
                   <div style={{ marginBottom: '12px' }}>
@@ -261,7 +266,7 @@ const AllInquiry = (props) => {
 
                     <InquiryViewer
                       toggleEdit={() => toggleEdit(index)}
-                      question={isEdit?currentEditInq: q}
+                      question={isEdit ? currentEditInq : q}
                       user={props.user}
                       isSaved={isSaved}
                       setSave={() => setSaved(false)}
