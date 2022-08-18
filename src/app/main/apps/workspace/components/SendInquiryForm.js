@@ -6,6 +6,8 @@ import clsx from 'clsx';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { getMail } from 'app/services/mailService';
+import { loadComment } from 'app/services/inquiryService';
 
 import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
@@ -14,8 +16,6 @@ import TagsInput from './TagsInput';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
 import ReceiverProvider from './ReceiverProvider';
-import { getMail } from 'app/services/mailService';
-import { loadComment } from 'app/services/inquiryService';
 
 const colorBtnReview = '#1564EE';
 
@@ -234,7 +234,6 @@ const SendInquiryForm = (props) => {
               value={form.subject}
               onChange={onInputChange}
             />
-
           </div>
           <div style={{ marginTop: 5, display: 'flex' }}>
             <textarea
@@ -250,7 +249,7 @@ const SendInquiryForm = (props) => {
                 borderRadius: 6,
                 resize: 'none'
               }}
-              multiline={true}
+              multiline="true"
               type="text"
               defaultValue=""
               onChange={handleOnChange}></textarea>
@@ -269,7 +268,7 @@ const InquiryReview = (props) => {
 
   const countInq = (recevier) => {
     let count = 0;
-    inquiries.forEach((inq) => inq.receiver.includes(recevier) && count++);
+    inquiries.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
     return count;
   };
 
@@ -339,9 +338,7 @@ const InputUI = (props) => {
     <Grid
       style={{ marginTop: 8 }}
       container
-      direction="row"
-      justifyContent="flex-start"
-      alignItems="center">
+      direction="row">
       <Grid item xs={1}>
         {title === 'Cc' || title === 'Bcc' ? (
           <div

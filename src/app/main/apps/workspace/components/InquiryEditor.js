@@ -17,7 +17,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { uploadFile, getFile } from 'app/services/fileService';
+import { uploadFile } from 'app/services/fileService';
 import { updateInquiry, saveInquiry, deleteInquiry } from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
@@ -437,7 +437,6 @@ const InquiryEditor = (props) => {
         </div>
 
         <FormControl
-          error={!valid.receiver && !currentEditInq.receiver.length}
           className={classes.checkedIcon}>
           <RadioGroup
             aria-label="receiver"
@@ -455,10 +454,6 @@ const InquiryEditor = (props) => {
               label="Onshore"
             />
           </RadioGroup>
-
-          {!valid.receiver && !currentEditInq.receiver.length ? (
-            <FormHelperText>Pick at least one!</FormHelperText>
-          ) : null}
 
           <AttachFile />
           {allowDeleteInq && (

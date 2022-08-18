@@ -79,12 +79,11 @@ const BLWorkspace = (props) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
-  const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
-  
+
   const transAutoSaveStatus = useSelector(
     ({ workspace }) => workspace.transReducer.transAutoSaveStatus
   );
@@ -162,7 +161,7 @@ const BLWorkspace = (props) => {
 
   const countInq = (inqs, recevier) => {
     let count = 0;
-    inqs.forEach((inq) => inq.receiver.includes(recevier) && count++);
+    inqs.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
     return count;
   };
 
@@ -179,8 +178,8 @@ const BLWorkspace = (props) => {
     case 'INQUIRY_LIST':
       return {
         status: openAllInquiry,
-        tabs:user.role === 'Admin'?['Customer', 'Onshore'] : [],
-        nums:user.role === 'Admin'?[countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
+        tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
+        nums: user.role === 'Admin' ? [countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
         toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
         fabTitle: 'Inquiry List',
         title: 'Inquiry List',
@@ -228,24 +227,22 @@ const BLWorkspace = (props) => {
     case 'INQUIRY_FORM':
       return {
         status: openInquiryForm,
-        tabs: user.role === 'Admin'?['Customer', 'Onshore'] : [],
-        nums:user.role === 'Admin'?[countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
+        nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
         toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
         fabTitle: 'Inquiry Form',
         title: 'Inquiry Creation',
         field: 'INQUIRY_FORM',
-        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))}/>
+        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))} />
       };
     default:
       return {
         status: inquiry?.id === currentInq?.id,
-        tabs:user.role === 'Admin'? ['Customer', 'Onshore'] : [],
-        nums:user.role === 'Admin'? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
+        nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
         toggleForm: () => { },
         fabTitle: curField?.label,
         title: curField?.label,
         field: curField?.value,
-        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))}/>
+        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))} />
       };
     }
   };
@@ -342,8 +339,8 @@ const BLWorkspace = (props) => {
                 return (
                   <Form
                     user={props.user}
-                    tabs={popupObj.tabs||null}
-                    nums={popupObj.nums||null}
+                    tabs={popupObj.tabs || null}
+                    nums={popupObj.nums || null}
                     key={inquiry.id}
                     tabChange={(newValue) => {
                       setTabSelected(newValue);
