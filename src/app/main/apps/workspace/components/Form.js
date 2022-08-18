@@ -404,11 +404,11 @@ export default function Form(props) {
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
-        {tabs&&nums&&nums.some(num => num > 0)&& (
-          <Box style={{ marginLeft: 20, marginRight:20, borderBottom: '1px solid #515F6B' }} sx={{}}>
+        {tabs && nums && nums.some(num => num > 0) && (
+          <Box style={{ marginLeft: 20, marginRight: 20, borderBottom: '1px solid #515F6B' }} sx={{}}>
             <Tabs
               indicatorColor="primary"
-              style={{display: 'flex', margin: 0, height: '50px', }}
+              style={{ display: 'flex', margin: 0, height: '50px', }}
               value={value}
               onChange={handleChange}>
               {nums[0] && <Tab
@@ -438,7 +438,7 @@ export default function Form(props) {
           classes={{
             root:
               (field === 'ATTACHMENT_LIST' ||
-              ((field === 'INQUIRY_LIST' || field === currentField) && isShowBackground))
+                ((field === 'INQUIRY_LIST' || field === currentField) && isShowBackground))
                 ? classes.dialogContentAttachment : classes.dialogContent
           }}
           style={{
@@ -448,10 +448,10 @@ export default function Form(props) {
         </MuiDialogContent>
 
         {field !== 'ATTACHMENT_LIST' &&
-        (<PopupConfirm field={field} handleCheckSubmit={() => {
-          setCheckSubmit(!checkSubmit)
-        }} />
-        )}
+          (<PopupConfirm field={field} handleCheckSubmit={() => {
+            setCheckSubmit(!checkSubmit)
+          }} />
+          )}
 
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
@@ -484,7 +484,7 @@ export default function Form(props) {
                 </div>
               </PermissionProvider>
             )}
-            {showBtnSend ?
+            {(showBtnSend && user === 'workspace') ?
               <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
                 <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '2.6rem' }}>
                   <Button
@@ -507,7 +507,7 @@ export default function Form(props) {
                 </div>
               </PermissionProvider> :
               <div style={{ marginLeft: '2rem' }}>
-                <PopoverFooter user={user} title={field} checkSubmit={checkSubmit} />
+                {field !== 'INQUIRY_REVIEW' && <PopoverFooter user={user} title={field} checkSubmit={checkSubmit} />}
               </div>
             }
           </DialogActions >

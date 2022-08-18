@@ -1,12 +1,12 @@
-import {PERMISSION, PermissionProvider} from '@shared/permission';
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {makeStyles} from '@material-ui/core/styles';
-import {Button, IconButton, Link} from '@material-ui/core';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { makeStyles } from '@material-ui/core/styles';
+import { Button, IconButton, Link } from '@material-ui/core';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
-import {setLastField} from '../store/actions/inquiry';
+import { setLastField } from '../store/actions/inquiry';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -59,7 +59,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
     }
     currentFields.forEach((item) => {
       if (item.answerObj && (item.state === "ANS_DRF" ||
-          item.state === 'REP_A_DRF'
+        item.state === 'REP_A_DRF'
       )) {
         setIsSubmit(false);
       }
@@ -137,38 +137,39 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
         justifyContent: 'center',
         alignItems: 'center'
       }}>
-      <div
-        style={{
-          position: 'absolute',
-          left: '0px',
-          top: '10px'
-        }}>
-        {inquiries.length > 0 && (
-          <>
-            <IconButton onClick={isShowBackground ? '' : prevQuestion}>
-              <img alt={'nextIcon'} src={`/assets/images/icons/prev.svg`} />
-            </IconButton>
-            <IconButton onClick={isShowBackground ? '' : nextQuestion}>
-              <img alt={'prevIcon'} src={`/assets/images/icons/next.svg`} />
-            </IconButton>
-          </>
-        )}
-
-        <Link
+      {title !== 'INQUIRY_LIST' &&
+        <div
           style={{
-            fontFamily: 'Montserrat',
-            fontSize: '16px',
-            color: isShowBackground ? 'rgb(21 100 238 / 58%)' : '#1564EE',
-            cursor: isShowBackground ? 'inherit' : 'pointer',
-            height: '20px',
-            weight: '145px',
-            fontWeight: '600',
-          }}
-          component="button"
-          onClick={isShowBackground ? '' : toggleInquiriresDialog}>
-          Open all inquiries
-        </Link>
-      </div>
+            position: 'absolute',
+            left: '0px',
+            top: '10px'
+          }}>
+          {inquiries.length > 0 && (
+            <>
+              <IconButton onClick={isShowBackground ? '' : prevQuestion}>
+                <img alt={'nextIcon'} src={`/assets/images/icons/prev.svg`} />
+              </IconButton>
+              <IconButton onClick={isShowBackground ? '' : nextQuestion}>
+                <img alt={'prevIcon'} src={`/assets/images/icons/next.svg`} />
+              </IconButton>
+            </>
+          )}
+
+          <Link
+            style={{
+              fontFamily: 'Montserrat',
+              fontSize: '16px',
+              color: isShowBackground ? 'rgb(21 100 238 / 58%)' : '#1564EE',
+              cursor: isShowBackground ? 'inherit' : 'pointer',
+              height: '20px',
+              weight: '145px',
+              fontWeight: '600',
+            }}
+            component="button"
+            onClick={isShowBackground ? '' : toggleInquiriresDialog}>
+            Open all inquiries
+          </Link>
+        </div>}
       {
         <PermissionProvider
           action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}>
@@ -191,12 +192,12 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
               color="primary"
               disabled={isSubmit}
               onClick={onSubmit}>
-          Submit
+              Submit
             </Button>
           </div>
         </PermissionProvider>
       }
-      
+
     </div>
   );
 };
