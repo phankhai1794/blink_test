@@ -316,11 +316,16 @@ const InquiryViewer = (props) => {
                   Upload to OPUS
                 </Button>
               </PermissionProvider>
-              <Tooltip title="Edit Inquiry">
-                <div onClick={() => changeToEditor(question)}>
-                  <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
-                </div>
-              </Tooltip>
+              <PermissionProvider
+                action={PERMISSION.VIEW_EDIT_INQUIRY}
+                extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN'}
+              >
+                <Tooltip title="Edit Inquiry">
+                  <div onClick={() => changeToEditor(question)}>
+                    <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                  </div>
+                </Tooltip>
+              </PermissionProvider>
               {allowDeleteInq && (
                 <Tooltip title="Delete Inquiry">
                   <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion(index)}>
@@ -590,7 +595,7 @@ const InquiryViewer = (props) => {
                       onClick={onResolve}
                       classes={{ root: clsx(classes.button, 'w120') }}
                     >
-                      Resolved
+                      Resolve
                     </Button>
                   </PermissionProvider>
                   <PermissionProvider
@@ -629,7 +634,7 @@ const ContainerDetailForm = ({ container, typeList, question, setTextResolve }) 
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
-  const [values, setValues] = useState(getValueField(container))
+  const [values, setValues] = useState(getValueField(container)|| [])
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values))
     temp[index][type] = e.target.value
