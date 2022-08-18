@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Radio,
   FormControl,
@@ -10,12 +10,13 @@ import {PERMISSION, PermissionProvider} from "@shared/permission";
 
 
 const ChoiceAnswer = (props) => {
-  const { index, question, selectChoice, isDisableSave } = props;
+  const { index, question, selectChoice, isDisableSave, disable = false } = props;
   const user = useSelector(({ user }) => user);
   let questionIsEmpty = props.question === undefined;
   let prevChoiceArray = (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state))? []: question.answerObj.filter((choice) => {
     return choice.confirmed;
   });
+  const [isPermission, setPermission] = useState(false);
   
   const initSelectedChoice = () => {
     if (!questionIsEmpty && prevChoiceArray.length > 0) {
@@ -38,6 +39,14 @@ const ChoiceAnswer = (props) => {
     isDisableSave(false);
   };
 
+  useEffect(() => {
+    if (allowUpdateChoiceAnswer && question.state !== 'ANS_SENT') {
+      setPermission(true);
+    } else {
+      setPermission(false);
+    }
+  }, []);
+
   return (
     <>
       <FormControl>
@@ -49,7 +58,7 @@ const ChoiceAnswer = (props) => {
           {question.answerObj.map((choice, index) => (
             <div key={index} style={{ marginTop: '0.5rem' }}>
               <FormControlLabel
-                disabled={!allowUpdateChoiceAnswer}
+                disabled={!isPermission || disable}
                 checked={selectedChoice === choice.id}
                 value={choice.id}
                 control={<Radio color={'primary'} />}

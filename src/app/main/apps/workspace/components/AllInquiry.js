@@ -130,7 +130,6 @@ const AllInquiry = (props) => {
   const [viewDropDown, setViewDropDown] = useState('');
   const [inqHasComment, setInqHasComment] = useState([]);
   const [isSaved, setSaved] = useState(false);
-  const [viewGuestDropDown, setViewGuestDropDown] = useState();
   const [inquiries, currentEditInq, metadata, isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentEditInq,
@@ -151,20 +150,6 @@ const AllInquiry = (props) => {
     }
   };
 
-  useEffect(() => {
-    for (let i in inquiries) {
-      loadComment(inquiries[i].id)
-        .then((res) => {
-          if (res.length) {
-            const listInqId = inqHasComment;
-            listInqId.push(inquiries[i].id);
-            setInqHasComment(listInqId);
-          }
-        })
-        .catch((error) => console.error(error));
-    }
-  }, []);
-
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
     if (index >= 0) {
@@ -180,7 +165,6 @@ const AllInquiry = (props) => {
   };
 
   const handleCancel = () => {
-    setViewGuestDropDown('');
     // reset media file
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => currentEditInq.id === inq.id);
@@ -189,16 +173,8 @@ const AllInquiry = (props) => {
     dispatch(InquiryActions.setEditInq({}));
   };
 
-  const handleSetViewGuestDropDown = (id) => {
-    if (viewGuestDropDown === id) {
-      setViewGuestDropDown('');
-    } else {
-      setViewGuestDropDown(id);
-    }
-  };
 
   const handleSetSave = () => {
-    setViewGuestDropDown('');
     dispatch(InquiryActions.setEditInq({}));
   };
 
@@ -270,8 +246,6 @@ const AllInquiry = (props) => {
                       user={props.user}
                       isSaved={isSaved}
                       setSave={() => setSaved(false)}
-                      viewGuestDropDown={viewGuestDropDown}
-                      setViewGuestDropDown={handleSetViewGuestDropDown}
                     />
                     {isEdit && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
                   </div>

@@ -21,6 +21,9 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 10,
     marginRight: 10,
     backgroundColor: '#F5F8FA',
+    '&:first-child': {
+      marginLeft: 0
+    },
     '& img': {
       height: 110,
       width: 110

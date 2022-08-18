@@ -75,7 +75,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
   };
   const downloadFile = () => {
     const link = document.createElement('a');
-    link.href = file.src;
+    link.href = srcUrl;
     link.setAttribute('download', file.name);
     document.body.appendChild(link);
     link.click();

@@ -210,7 +210,7 @@ const BLField = (props) => {
   const checkAnswerSent = () => {
     if (inquiries.length > 0) {
       const lst = inquiries.filter((q) => q.field === id);
-      return lst.some(e => e.state === 'ANS_SENT')
+      return lst.some(e => ['ANS_SENT','REP_Q_DRF','REP_Q_SENT','REP_A_DRF','REP_A_SENT'].includes(e.state))
     }
     return false;
   };

@@ -33,7 +33,8 @@ const initialState = {
   attachmentList: [],
   lastField: '',
   openedInquiresForm: false,
-  isShowBackground: false
+  isShowBackground: false,
+  enableSubmit: false,
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -139,6 +140,9 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SET_BACKGROUND_ATTACHMENT_LIST: {
     return { ...state, isShowBackground: action.state };
+  }
+  case Actions.CHECK_SUBMIT: {
+    return { ...state, enableSubmit: action.state };
   }
   default: {
     return state;
