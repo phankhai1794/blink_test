@@ -25,6 +25,6 @@ export async function getSuggestMail(keyword) {
 }
 
 export async function getMail(myblId) {
-  const response = await axios().get(`${PATH}/getMail/${myblId}`);
+  const response = await axios().get(`${PATH}/byBl/${myblId}`);
   return response;
 }
