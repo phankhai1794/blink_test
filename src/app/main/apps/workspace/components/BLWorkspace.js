@@ -70,6 +70,7 @@ const useStyles = makeStyles((theme) => ({
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const user = useSelector(({ user }) => user);
   const [isExpand, setIsExpand] = useState(false);
   const [newFileAttachment, setNewFileAttachment] = useState([]);
   const [disableSendBtn, setDisableSendBtn] = useState(true);
@@ -178,8 +179,8 @@ const BLWorkspace = (props) => {
     case 'INQUIRY_LIST':
       return {
         status: openAllInquiry,
-        tabs: ['Customer', 'Onshore'],
-        nums:[countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')],
+        tabs:user.role === 'Admin'?['Customer', 'Onshore'] : [],
+        nums:user.role === 'Admin'?[countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
         toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
         fabTitle: 'Inquiry List',
         title: 'Inquiry List',
@@ -227,8 +228,8 @@ const BLWorkspace = (props) => {
     case 'INQUIRY_FORM':
       return {
         status: openInquiryForm,
-        tabs: ['Customer', 'Onshore'],
-        nums:[countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')],
+        tabs: user.role === 'Admin'?['Customer', 'Onshore'] : [],
+        nums:user.role === 'Admin'?[countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
         toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
         fabTitle: 'Inquiry Form',
         title: 'Inquiry Creation',
@@ -238,8 +239,8 @@ const BLWorkspace = (props) => {
     default:
       return {
         status: inquiry?.id === currentInq?.id,
-        tabs: ['Customer', 'Onshore'],
-        nums:[countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')],
+        tabs:user.role === 'Admin'? ['Customer', 'Onshore'] : [],
+        nums:user.role === 'Admin'? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
         toggleForm: () => { },
         fabTitle: curField?.label,
         title: curField?.label,
