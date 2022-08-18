@@ -74,7 +74,7 @@ const SendInquiryForm = (props) => {
         toCustomer.length && (tags.toCustomer = toCustomer);
         toOnshore.length && (tags.toOnshore = toOnshore);
         dispatch(mailActions.setTags(tags));
-        setForm({ ...form, toCustomer: tags.toCustomer.join(','), toOnshore: tags.toOnshore.join(',') })
+        setForm({ ...form, toCustomer: tags.toCustomer ? tags.toCustomer.join(',') : '', toOnshore: tags.toOnshore ? tags.toOnshore.join(',') : '' })
       }
     }).catch((error) => {
       console.error(error)

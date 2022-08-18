@@ -24,6 +24,7 @@ import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import UserInfo from './UserInfo';
 import AttachFile from './AttachFile';
+import Comment from "./Comment";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -68,6 +69,7 @@ const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(1),
     borderRadius: 8,
+    width: 120,
     boxShadow: 'none',
     textTransform: 'capitalize',
     fontFamily: 'Montserrat',
@@ -76,9 +78,6 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: 'white',
       color: '#BD0F72',
       border: '1px solid #BD0F72'
-    },
-    '&.w120': {
-      width: 120
     }
   },
   boxItem: {
@@ -99,55 +98,73 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, question, toggleEdit, viewGuestDropDown, setViewGuestDropDown, openInquiryReview } = props;
-  const type = question.ansType;
+  const { index, toggleEdit, viewGuestDropDown, setViewGuestDropDown, openInquiryReview } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
+
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+
+  const [question, setQuestion] = useState(props.question);
+  const [type, setType] = useState(props.question.ansType);
   const [allowDeleteInq, setAllowDeleteInq] = useState(true);
   const [viewDropDown, setViewDropDown] = useState();
   const [isDisableSave, setDisableSave] = useState(true);
   const [inqHasComment, setInqHasComment] = useState(false);
   const [isResolve, setIsResolve] = useState(false)
   const [isReply, setIsReply] = useState(false)
+  const [comment, setComment] = useState([]);
+  const [isLoadedComment, setIsLoadedComment] = useState(false);
   const [textResolve, setTextResolve] = useState(content[question.field] || '')
   const [tempReply, setTempReply] = useState({});
   const containerDetailType = [CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT]
-  const containerManifestType = [CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT]
+  const containerManifestType = [CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT];
+  const [isSaveComment, setSaveComment] = useState(false);
 
   const handleViewMore = (id) => {
     if (user.role !== "Admin") {
       toggleEdit();
-      setViewGuestDropDown(id);
+
+    }
+    if (viewDropDown === id) {
+      setViewDropDown('');
     } else {
-      if (viewDropDown === id) {
-        setViewDropDown('');
-      } else {
-        setViewDropDown(id);
-      }
+      setViewDropDown(id);
     }
+
   };
-  useEffect(() => {
-    if (viewGuestDropDown === '') {
-      dispatch(InquiryActions.setEditInq({}));
-    }
-  }, [viewGuestDropDown]);
 
   useEffect(() => {
     loadComment(question.id)
       .then((res) => {
-        if (res.length) {
+        if(res.length > 0){
+          res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+          const lastest = {...question}
+          // filter comment
+          lastest.mediaFilesAnswer = res[res.length - 1].mediaFilesAnswer;
+          lastest.answerObj = [{content:res[res.length - 1].content}];
+          lastest.content = res[res.length - 1].content;
+          lastest.createdAt = res[res.length - 1].createdAt;
+          // customer reply
+          const filterRepADraft = res.filter(r => r.state === 'REP_A_DRF');
+          filterRepADraft.length ? dispatch(InquiryActions.checkSubmit(true)) : dispatch(InquiryActions.checkSubmit(false));
+          //
+          res.splice(res.length - 1, 1);
+          setComment([...res]);
+          setType(metadata.ans_type.paragraph);
+          setQuestion(lastest);
           setInqHasComment(true);
         }
+        setIsLoadedComment(true);
+
       })
       .catch((error) => console.error(error));
-  }, []);
+  }, [isSaveComment]);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -156,7 +173,7 @@ const InquiryViewer = (props) => {
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)]
 
   const selectChoiceHandle = (e) => {
-    const inq = { ...currentEditInq };
+    const inq = { ...question };
     inq.selectChoice = e;
     dispatch(InquiryActions.setEditInq(inq));
   };
@@ -164,7 +181,7 @@ const InquiryViewer = (props) => {
     myBL?.state !== stateResquest && setAllowDeleteInq(false);
   }, []);
   const paragraphAnswerHandle = (e) => {
-    const inq = { ...currentEditInq };
+    const inq = { ...question };
     inq.paragraphAnswer = e;
     dispatch(InquiryActions.setEditInq(inq));
   };
@@ -259,6 +276,8 @@ const InquiryViewer = (props) => {
 
   const onSaveReply = () => {
     const mediaListId = [];
+    const inqs = [... inquiries];
+    const filtersInq = inqs.filter(inq => inq.id === question.id);
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
@@ -276,6 +295,11 @@ const InquiryViewer = (props) => {
           mediaFiles: mediaListId
         }
         saveReply({ ...reqReply }).then((res) => {
+          //
+          setSaveComment(!isSaveComment);
+          setTempReply({});
+          setViewDropDown('')
+          //
           dispatch(AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' }));
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
@@ -286,6 +310,11 @@ const InquiryViewer = (props) => {
         mediaFiles: mediaListId
       };
       saveReply({ ...reqReply }).then((res) => {
+        //
+        setSaveComment(!isSaveComment);
+        setTempReply({});
+        setViewDropDown('')
+        //
         dispatch(AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' }));
       }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
     }
@@ -294,120 +323,113 @@ const InquiryViewer = (props) => {
 
   return (
     <>
-      <div>
-        <div style={{ paddingTop: 10 }} className="flex justify-between">
-          <UserInfo
-            name={question.creator.userName}
-            time={displayTime(question.createdAt)}
-            avatar={question.creator.avatar}
-          />
-          {user.role === "Admin" ? ( // TODO
-            <div className="flex items-center mr-2">
-              <PermissionProvider
-                action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
-                extraCondition={question.state === 'COMPL'}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={onUpload}
-                  classes={{ root: classes.button }}
-                >
+      {
+        isLoadedComment&& <>
+          <div>
+            <div style={{ paddingTop: 10 }} className="flex justify-between">
+              <UserInfo
+                name={question.creator.userName}
+                time={displayTime(question.createdAt)}
+                avatar={question.creator.avatar}
+              />
+              {user.role === "Admin" ? ( // TODO
+                <div className="flex items-center mr-2">
+                  <PermissionProvider
+                    action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
+                    extraCondition={question.state === 'COMPL'}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={onUpload}
+                      classes={{ root: classes.button }}
+                    >
                   Upload to OPUS
-                </Button>
-              </PermissionProvider>
-              <PermissionProvider
-                action={PERMISSION.VIEW_EDIT_INQUIRY}
-                extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN'}
-              >
-                <Tooltip title="Edit Inquiry">
-                  <div onClick={() => changeToEditor(question)}>
-                    <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
-                  </div>
-                </Tooltip>
-              </PermissionProvider>
-              {allowDeleteInq && (
-                <Tooltip title="Delete Inquiry">
-                  <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion(index)}>
-                    <img
-                      style={{ height: '22px', cursor: 'pointer' }}
-                      src="/assets/images/icons/trash-gray.svg"
-                    />
-                  </div>
-                </Tooltip>
+                    </Button>
+                  </PermissionProvider>
+                  {!inqHasComment&&
+              <Tooltip title="Edit Inquiry">
+                <div onClick={() => changeToEditor(question)}>
+                  <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                </div>
+              </Tooltip>
+                  }
+                  {allowDeleteInq && (
+                    <Tooltip title="Delete Inquiry">
+                      <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion(index)}>
+                        <img
+                          style={{ height: '22px', cursor: 'pointer' }}
+                          src="/assets/images/icons/trash-gray.svg"
+                        />
+                      </div>
+                    </Tooltip>
+                  )}
+                </div>
+              ) : (
+                <FormControlLabel control={<AttachFile isAnswer={true} question={question} />} />
               )}
             </div>
-          ) : (
-            <FormControlLabel control={<AttachFile isAnswer={true} question={question} />} />
-          )}
-        </div>
-        <Typography variant="h5">{question.name}</Typography>
-        <Typography
-          className={viewGuestDropDown !== question.id || viewDropDown !== question.id ? classes.hideText : ''}
-          variant="h5"
-          style={{
-            wordBreak: 'break-word',
-            fontFamily: 'Montserrat',
-            fontSize: 15,
-            color: '#132535'
-          }}>
-          {question.content}
-        </Typography>
-        {(viewGuestDropDown === question.id || viewDropDown === question.id) && (
-          <div style={{ display: 'block', margin: '1rem 0rem' }}>
-            {type === metadata.ans_type.choice && (
-              <ChoiceAnswer
-                index={index}
-                questions={inquiries}
-                question={question}
-                selectChoice={(e) => selectChoiceHandle(e)}
-                isDisableSave={(e) => setDisableSave(e)}
-              />
-            )}
-            {type === metadata.ans_type.paragraph && (
-              <ParagraphAnswer
-                question={question}
-                index={index}
-                questions={inquiries}
-                paragrapAnswer={(e) => paragraphAnswerHandle(e)}
-                isDisableSave={(e) => setDisableSave(e)}
-              />
-            )}
-          </div>
-        )}
-        <>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={6}>
-              {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
-            </Grid>
-            <Grid item xs={6}>
-              <div className={classes.viewMoreBtn} onClick={() => handleViewMore(question.id)}>
-                {user.role === "Admin" && (viewDropDown !== question.id ? ( // TODO
-                  <>
-                    View All
-                    <ArrowDropDown />
-                  </>
-                ) : (
-                  <>
-                    Hide All
-                    <ArrowDropUp />
-                  </>
-                ))}
-                {user.role !== "Admin" && (viewGuestDropDown !== question.id ? (
-                  <>
-                    View All
-                    <ArrowDropDown />
-                  </>
-                ) : (
-                  <>
-                    Hide All
-                    <ArrowDropUp />
-                  </>
-                ))}
-              </div>
-            </Grid>
-          </Grid>
-          {question.mediaFile?.length > 0 &&
+            <Typography variant="h5">{question.name}</Typography>
+            <Typography
+              className={viewDropDown !== question.id ? classes.hideText : ''}
+              variant="h5"
+              style={{
+                wordBreak: 'break-word',
+                fontFamily: 'Montserrat',
+                fontSize: 15,
+                color: '#132535'
+              }}>
+              {question.content}
+            </Typography>
+            <div style={{ display: 'block', margin: '1rem 0rem' }}>
+              {type === metadata.ans_type.choice && (question.state === 'ANS_DRF' || question.state === 'ANS_SENT' || question.state === 'OPEN' || question.state === 'INQ_SENT') && (
+                <ChoiceAnswer
+                  index={index}
+                  questions={inquiries}
+                  question={question}
+                  selectChoice={(e) => selectChoiceHandle(e)}
+                  isDisableSave={(e) => setDisableSave(e)}
+                />
+              )}
+              {type === metadata.ans_type.paragraph && (question.state === 'ANS_DRF' || question.state === 'ANS_SENT' || question.state === 'OPEN' || question.state === 'INQ_SENT') && (
+                <ParagraphAnswer
+                  question={question}
+                  index={index}
+                  questions={inquiries}
+                  paragrapAnswer={(e) => paragraphAnswerHandle(e)}
+                  isDisableSave={(e) => setDisableSave(e)}
+                />
+              )}
+            </div>
+            <>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={6}>
+                  {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+                </Grid>
+                {inqHasComment && (
+                  <Grid item xs={6}>
+                    <div className={classes.viewMoreBtn} onClick={() => handleViewMore(question.id)}>
+                      {(viewDropDown !== question.id ? ( // TODO
+                        <>
+                              View All
+                          <ArrowDropDown/>
+                        </>
+                      ) : (
+                        <>
+                              Hide All
+                          <ArrowDropUp/>
+                        </>
+                      ))}
+                    </div>
+                  </Grid>
+                )}
+              </Grid>
+
+              {(viewDropDown === question.id) && (
+                <Comment question={props.question} comment={comment}/>
+              )}
+
+              {question.mediaFile?.length > 0 &&
             question.mediaFile?.map((file, mediaIndex) => (
               <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                 {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
@@ -428,39 +450,37 @@ const InquiryViewer = (props) => {
                 )}
               </div>
             ))}
-        </>
-        {
-          (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state)) ? null :
-            <>
-              {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-              {question.mediaFilesAnswer?.map((file, mediaIndex) => (
-
-                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                    <ImageAttach
-                      hiddenRemove={viewGuestDropDown !== question.id}
-                      file={file}
-                      field={question.field}
-                      style={{ margin: '2.5rem' }}
-                      indexMedia={mediaIndex}
-                      isAnswer={true}
-                    />
-                  ) : (
-                    <FileAttach
-                      hiddenRemove={viewGuestDropDown !== question.id}
-                      file={file}
-                      field={question.field}
-                      indexMedia={mediaIndex}
-                      isAnswer={true}
-                    />
-                  )}
-                </div>
-              ))}
             </>
-        }
+            {
+              (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state)) ? null :
+                <>
+                  {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+                  {question.mediaFilesAnswer?.map((file, mediaIndex) => (
 
-      </div>
-      {question.state !== 'COMPL' && question.state !== 'UPLOADED' &&
+                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                        <ImageAttach
+                          file={file}
+                          field={question.field}
+                          style={{ margin: '2.5rem' }}
+                          indexMedia={mediaIndex}
+                          isAnswer={true}
+                        />
+                      ) : (
+                        <FileAttach
+                          file={file}
+                          field={question.field}
+                          indexMedia={mediaIndex}
+                          isAnswer={true}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </>
+            }
+
+          </div>
+          {question.state !== 'COMPL' && question.state !== 'UPLOADED' &&
         <>
           {isResolve ?
             <>
@@ -614,6 +634,8 @@ const InquiryViewer = (props) => {
                 </div>
               }
             </>
+          }
+        </>
           }
         </>
       }

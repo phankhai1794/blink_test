@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = ({ title, user, checkSubmit }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [question, fields, inquiries, lastField, openedInquiresForm, currentField] = useSelector(
+  const [question, fields, inquiries, lastField, openedInquiresForm, currentField, enableSubmit] = useSelector(
     ({ workspace }) => [
       workspace.inquiryReducer.question,
       workspace.inquiryReducer.fields,
@@ -39,6 +39,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
       workspace.inquiryReducer.lastField,
       workspace.inquiryReducer.openedInquiresForm,
       workspace.inquiryReducer.currentField,
+      workspace.inquiryReducer.enableSubmit,
     ]
   );
 
@@ -57,14 +58,15 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
     else if (title === currentField) {
       currentFields = inquiries.filter(inq => inq.field === currentField);
     }
+    let isSubmit = true;
     currentFields.forEach((item) => {
-      if (item.answerObj && (item.state === "ANS_DRF" ||
-        item.state === 'REP_A_DRF'
-      )) {
-        setIsSubmit(false);
+      if (item.answerObj && item.state === "ANS_DRF") {
+        isSubmit = false;
       }
     });
-  }, [inquiries, checkSubmit]);
+    if (enableSubmit) isSubmit = false;
+    !isSubmit && setIsSubmit(false);
+  }, [inquiries, checkSubmit, enableSubmit]);
 
   const toggleInquiriresDialog = () => {
     dispatch(FormActions.toggleAllInquiry(true));

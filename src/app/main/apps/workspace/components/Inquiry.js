@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Divider } from '@material-ui/core';
+import { loadComment } from 'app/services/inquiryService';
 import { makeStyles } from '@material-ui/styles';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 
 import * as InquiryActions from '../store/actions/inquiry';
@@ -33,8 +34,7 @@ const Inquiry = (props) => {
   const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
   const [changeQuestion, setChangeQuestion] = useState();
   const [isSaved, setSaved] = useState(false);
-  const [viewGuestDropDown, setViewGuestDropDown] = useState();
-
+ 
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
     if (index >= 0) {
@@ -50,26 +50,17 @@ const Inquiry = (props) => {
   };
 
   const handleCancel = () => {
-    setViewGuestDropDown('');
     // reset media file
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => currentEditInq.id === inq.id);
     optionsInquires[editedIndex].mediaFilesAnswer = optionsInquires[editedIndex].mediaFilesAnswer.filter(inq => inq.id);
     dispatch(InquiryActions.setInquiries(optionsInquires));
-    dispatch(InquiryActions.setEditInq({}));
+    dispatch(InquiryActions.setEditInq());
   };
 
-  const handleSetViewGuestDropDown = (id) => {
-    if (viewGuestDropDown === id) {
-      setViewGuestDropDown('');
-    } else {
-      setViewGuestDropDown(id);
-    }
-  };
 
   const handleSetSave = () => {
-    setViewGuestDropDown('');
-    dispatch(InquiryActions.setEditInq({}));
+    dispatch(InquiryActions.setEditInq());
   };
 
   return props.user === 'workspace' ? (
@@ -125,10 +116,8 @@ const Inquiry = (props) => {
                 user={props.user}
                 isSaved={isSaved}
                 setSave={() => setSaved(false)}
-                viewGuestDropDown={viewGuestDropDown}
-                setViewGuestDropDown={handleSetViewGuestDropDown}
               />
-              {isEdit && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
+              {isEdit && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT') && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
               {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
             </div>
           );
