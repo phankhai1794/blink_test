@@ -152,6 +152,7 @@ const InquiryViewer = (props) => {
           lastest.mediaFilesAnswer = res[res.length - 1].mediaFilesAnswer;
           lastest.answerObj = [{ content: res[res.length - 1].content }];
           lastest.content = res[res.length - 1].content;
+          lastest.creator = res[res.length - 1].creator;
           lastest.createdAt = res[res.length - 1].createdAt;
           // customer reply
           const filterRepADraft = res.filter(r => r.state === 'REP_A_DRF');
@@ -327,7 +328,6 @@ const InquiryViewer = (props) => {
     }
     setIsReply(false)
   }
-
   return (
     <>
       {
