@@ -330,7 +330,7 @@ const Comment = (props) => {
     <Divider className="mt-12" />
     <div style={{paddingTop: '10px'}}>
       { comments.map((k, id) => {
-        {contentUI({userName: k.creator.userName,createdAt: k.createdAt,avatar: k.creator.avatar, content: k.content, media: k.media, id})}
+        return contentUI({userName: k.creator.userName,createdAt: k.createdAt,avatar: k.creator.avatar, content: k.content, media: k.media, id})
       })
       }
     </div>
