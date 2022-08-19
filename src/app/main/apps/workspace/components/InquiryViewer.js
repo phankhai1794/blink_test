@@ -70,7 +70,6 @@ const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(1),
     borderRadius: 8,
-    width: 120,
     boxShadow: 'none',
     textTransform: 'capitalize',
     fontFamily: 'Montserrat',
@@ -79,6 +78,9 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: 'white',
       color: '#BD0F72',
       border: '1px solid #BD0F72'
+    },
+    '&.w120': {
+      width: 120
     }
   },
   boxItem: {
