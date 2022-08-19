@@ -57,9 +57,9 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
   const dispatch = useDispatch();
   
   const urlMedia = (fileExt, file) => {
-    if (fileExt.match(/jpeg|jpg|png/g)) {
+    if (fileExt.toLowerCase().match(/jpeg|jpg|png/g)) {
       return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
-    } else if (fileExt.match(/pdf/g)) {
+    } else if (fileExt.toLowerCase().match(/pdf/g)) {
       return URL.createObjectURL(new Blob([file], { type: 'application/pdf' }));
     } else {
       return URL.createObjectURL(new Blob([file]));
