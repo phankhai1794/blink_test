@@ -10,7 +10,7 @@ import {PERMISSION, PermissionProvider} from "@shared/permission";
 
 
 const ChoiceAnswer = (props) => {
-  const { index, question, selectChoice, isDisableSave, disable = false } = props;
+  const { index, question, selectChoice, disableChecked, isDisableSave, disable = false } = props;
   const user = useSelector(({ user }) => user);
   let questionIsEmpty = props.question === undefined;
   let prevChoiceArray = (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state))? []: question.answerObj.filter((choice) => {
@@ -59,7 +59,7 @@ const ChoiceAnswer = (props) => {
             <div key={index} style={{ marginTop: '0.5rem' }}>
               <FormControlLabel
                 disabled={!isPermission || disable}
-                checked={selectedChoice === choice.id}
+                checked={!disableChecked&&selectedChoice === choice.id}
                 value={choice.id}
                 control={<Radio color={'primary'} />}
                 label={<span style={{ fontSize: '1.7rem' }}>{choice.content}</span>}

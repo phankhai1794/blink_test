@@ -73,6 +73,7 @@ const Comment = (props) => {
   
   const [comments, setComments] = useState(props.comment?.length > 0? props.comment:[]);
   const [value, setValue] = useState('');
+  const [answer, setAnswer] = useState(null);
   const [key, setKey] = useState();
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState('');
@@ -86,6 +87,26 @@ const Comment = (props) => {
   const user = useSelector(({ user }) => user);
   const open = Boolean(anchorEl);
 
+  useEffect(() => {
+    let answerObj = null;
+    if (question.ansType === metadata.ans_type.choice){
+      answerObj= question.answerObj.filter(item => item.confirmed)
+    }
+    else{
+      answerObj = question.answerObj;
+    }
+    if (answerObj){
+      setAnswer({
+        id : answerObj[0].id,
+        content : `The updated information is "${answerObj[0].content}"`,
+        userName : answerObj[0].updater.userName|| "",
+        avatar : answerObj[0].updater.avatar|| "",
+        createdAt: answerObj[0].updatedAt,
+        media : question.mediaFilesAnswer||[]
+      });
+    }
+    
+  }, []);
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -148,6 +169,90 @@ const Comment = (props) => {
     setAnchorEl(null);
   };
 
+  const contentUI = ({userName, createdAt,avatar,content, media, id}) => {
+    return ( <>
+      <div className='comment-detail' key={id}>
+        <div
+          className="flex justify-between">
+          <UserInfo
+            name={userName}
+            time={displayTime(createdAt)}
+            avatar={avatar}
+          />
+          {user.displayName === userName && key === id && (
+            <>
+              <IconButton onClick={handleClick}>
+                <MoreVertIcon />
+              </IconButton>
+              <Menu
+                id="customized-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                keepMounted>
+                <MenuItem onClick={() => onEdit(id)}>
+                  <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
+                    <EditIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary="Edit" />
+                </MenuItem>
+                <MenuItem onClick={() => onDelete(key)}>
+                  <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
+                    <DeleteIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary="Delete" />
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+        </div>
+        <div className={'content-reply'} style={{ wordBreak: 'break-word' }}>
+          {content}        
+        </div>
+        <div className='attachment-reply'>
+          {media?.length > 0 &&
+            media?.map((file, mediaIndex) => (
+              <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                  <ImageAttach
+                    file={file}
+                    hiddenRemove={true}
+                    indexInquiry={id}
+                    style={{ margin: '2.5rem' }}
+                  />
+                ) : (
+                  <FileAttach
+                    hiddenRemove={true}
+                    file={file}
+                    indexInquiry={id}
+                  />
+                )}
+              </div>
+            ))}
+        </div>
+      </div>
+      <Divider
+        variant="fullWidth"
+        style={{ height: 1, color: '#E2E6EA', margin: '14px 0', opacity: 0.6 }}
+      />
+    </>
+    // <div key={id} style={{ marginBottom: '20px' }}>
+    //   {edit === id ? (
+    //     <StyledTextField
+    //       id="outlined-helperText"
+    //       label="Comment here"
+    //       value={k.content}
+    //       variant="outlined"
+    //       onKeyPress={(e) => onEnterComment(e, id)}
+    //       onChange={(e) => changeComment(e, id)}
+    //     />
+    //   ) : (
+    //
+    //   )}
+    // </div>
+    )
+  }
+
   return <div className={classes.root}>
     <div style={{ paddingTop: 10 }} className="flex justify-between">
       <UserInfo
@@ -172,6 +277,7 @@ const Comment = (props) => {
       {question.ansType === metadata.ans_type.choice && (
         <ChoiceAnswer
           disable={true}
+          disableChecked={true}
           question={question}
         />
       )}
@@ -194,91 +300,37 @@ const Comment = (props) => {
         />
       )}
     </div>
+    {question.mediaFile?.length > 0 &&
+                question.mediaFile?.map((file, mediaIndex) => (
+                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                      <ImageAttach
+                        file={file}
+                        hiddenRemove={true}
+                        field={question.field}
+                        indexInquiry={0}
+                        style={{ margin: '2.5rem' }}
+                      />
+                    ) : (
+                      <FileAttach
+                        hiddenRemove={true}
+                        file={file}
+                        field={question.field}
+                        indexInquiry={0}
+                      />
+                    )}
+                  </div>
+                ))}
+    <Divider className="mt-12" />
+    <div style={{paddingTop: '10px'}}>
+      {
+        answer&&contentUI({...answer})
+      }
+    </div>
     <Divider className="mt-12" />
     <div style={{paddingTop: '10px'}}>
       { comments.map((k, id) => {
-        return (
-          <>
-            <div className='comment-detail' key={id}>
-              <div
-                className="flex justify-between">
-                <UserInfo
-                  name={k.creator.userName}
-                  time={displayTime(k.createdAt)}
-                  avatar={k.creator.avatar}
-                />
-                {user.displayName === k.creator.userName && key === id && (
-                  <>
-                    <IconButton onClick={handleClick}>
-                      <MoreVertIcon />
-                    </IconButton>
-                    <Menu
-                      id="customized-menu"
-                      anchorEl={anchorEl}
-                      open={open}
-                      onClose={handleClose}
-                      keepMounted>
-                      <MenuItem onClick={() => onEdit(id)}>
-                        <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-                          <EditIcon fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText primary="Edit" />
-                      </MenuItem>
-                      <MenuItem onClick={() => onDelete(key)}>
-                        <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>
-                          <DeleteIcon fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText primary="Delete" />
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-              </div>
-              <div className={'content-reply'} style={{ wordBreak: 'break-word' }}>
-                {k.content}        
-              </div>
-              <div className='attachment-reply'>
-                {k.answersMedia?.length > 0 &&
-                  k.answersMedia?.map((file, mediaIndex) => (
-                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                        <ImageAttach
-                          file={file}
-                          hiddenRemove={true}
-                          indexInquiry={id}
-                          style={{ margin: '2.5rem' }}
-                        />
-                      ) : (
-                        <FileAttach
-                          hiddenRemove={true}
-                          file={file}
-                          indexInquiry={id}
-                        />
-                      )}
-                    </div>
-                  ))}
-              </div>
-            </div>
-            <Divider
-              variant="fullWidth"
-              style={{ height: 1, color: '#E2E6EA', margin: '14px 0', opacity: 0.6 }}
-            />
-          </>
-        // <div key={id} style={{ marginBottom: '20px' }}>
-        //   {edit === id ? (
-        //     <StyledTextField
-        //       id="outlined-helperText"
-        //       label="Comment here"
-        //       value={k.content}
-        //       variant="outlined"
-        //       onKeyPress={(e) => onEnterComment(e, id)}
-        //       onChange={(e) => changeComment(e, id)}
-        //     />
-        //   ) : (
-        //
-        //   )}
-        // </div>
-        );
+        {contentUI({userName: k.creator.userName,createdAt: k.createdAt,avatar: k.creator.avatar, content: k.content, media: k.media, id})}
       })
       }
     </div>
