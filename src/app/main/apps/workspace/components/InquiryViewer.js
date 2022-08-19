@@ -14,6 +14,7 @@ import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from "clsx";
 import * as AppAction from 'app/store/actions';
+import * as Actions from '../store/actions';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -302,6 +303,7 @@ const InquiryViewer = (props) => {
           setTempReply({});
           setViewDropDown('')
           //
+          dispatch(Actions.loadInquiry(myBL.id));
           dispatch(AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' }));
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
@@ -317,6 +319,7 @@ const InquiryViewer = (props) => {
         setTempReply({});
         setViewDropDown('')
         //
+        dispatch(Actions.loadInquiry(myBL.id));
         dispatch(AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' }));
       }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
     }
