@@ -17,7 +17,7 @@ const ChoiceAnswer = (props) => {
     return choice.confirmed;
   });
   const [isPermission, setPermission] = useState(false);
-  
+
   const initSelectedChoice = () => {
     if (!questionIsEmpty && prevChoiceArray.length > 0) {
       return prevChoiceArray[0].id;
@@ -40,7 +40,7 @@ const ChoiceAnswer = (props) => {
   };
 
   useEffect(() => {
-    if (allowUpdateChoiceAnswer && question.state !== 'ANS_SENT') {
+    if (allowUpdateChoiceAnswer && !['ANS_SENT', 'REP_Q_DRF'].includes(question.state)) {
       setPermission(true);
     } else {
       setPermission(false);

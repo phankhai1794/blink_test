@@ -388,7 +388,7 @@ const InquiryViewer = (props) => {
               {question.content}
             </Typography>
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
-              {type === metadata.ans_type.choice && (question.state === 'ANS_DRF' || question.state === 'ANS_SENT' || question.state === 'OPEN' || question.state === 'INQ_SENT') && (
+              {type === metadata.ans_type.choice && (["ANS_SENT", "ANS_DRF", 'OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(question.state)) && (
                 <ChoiceAnswer
                   index={index}
                   questions={inquiries}
@@ -397,7 +397,7 @@ const InquiryViewer = (props) => {
                   isDisableSave={(e) => setDisableSave(e)}
                 />
               )}
-              {type === metadata.ans_type.paragraph && (question.state === 'ANS_DRF' || question.state === 'ANS_SENT' || question.state === 'OPEN' || question.state === 'INQ_SENT') && (
+              {type === metadata.ans_type.paragraph && (["ANS_SENT", "ANS_DRF", 'OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(question.state)) && (
                 <ParagraphAnswer
                   question={question}
                   index={index}
