@@ -116,6 +116,7 @@ const Inquiry = (props) => {
                 user={props.user}
                 isSaved={isSaved}
                 setSave={() => setSaved(false)}
+                isEdit={isEdit}
               />
               {isEdit && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT') && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
               {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}

@@ -87,7 +87,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
     const optionsAttachmentList = [...attachmentList];
     if (isAnswer) {
       inq.attachmentAnswer = {inquiry: inq.id};
-      if (inq.mediaFilesAnswer.length) {
+      if (inq?.mediaFilesAnswer?.length) {
         inq.mediaFilesAnswer.splice(indexMedia, 1);
         dispatch(InquiryActions.setEditInq(inq));
       }
@@ -124,6 +124,8 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
     }
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
+
+
   return (
     <div className={classes.root}>
       <img
