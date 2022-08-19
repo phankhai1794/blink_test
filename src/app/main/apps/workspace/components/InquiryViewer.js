@@ -473,6 +473,7 @@ const InquiryViewer = (props) => {
                           style={{ margin: '2.5rem' }}
                           indexMedia={mediaIndex}
                           isAnswer={true}
+                          hiddenRemove={!props.isEdit}
                         />
                       ) : (
                         <FileAttach
@@ -480,6 +481,7 @@ const InquiryViewer = (props) => {
                           field={question.field}
                           indexMedia={mediaIndex}
                           isAnswer={true}
+                          hiddenRemove={!props.isEdit}
                         />
                       )}
                     </div>
