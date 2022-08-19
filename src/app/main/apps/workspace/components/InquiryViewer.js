@@ -2,20 +2,19 @@ import { resolveInquiry, deleteInquiry, uploadOPUS, saveReply, loadComment } fro
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, stateResquest, displayTime } from '@shared';
 import {
-  CONTAINER_DETAIL, CONTAINER_MANIFEST, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT,
-  CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT
+  CONTAINER_DETAIL, CONTAINER_MANIFEST, CONTAINER_NUMBER, CONTAINER_SEAL, CM_MARK, CM_PACKAGE
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Typography, Tooltip, Grid, Button, Radio, FormControlLabel, FormControl, IconButton } from '@material-ui/core';
+import { Typography, Tooltip, Grid, Button, FormControlLabel } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from "clsx";
 import * as AppAction from 'app/store/actions';
-import * as Actions from '../store/actions';
 
+import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 
@@ -101,15 +100,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, toggleEdit, viewGuestDropDown, setViewGuestDropDown, openInquiryReview } = props;
+  const { index, toggleEdit, viewGuestDropDown } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
-  const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
-  const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
 
@@ -125,8 +122,7 @@ const InquiryViewer = (props) => {
   const [isLoadedComment, setIsLoadedComment] = useState(false);
   const [textResolve, setTextResolve] = useState(content[question.field] || '')
   const [tempReply, setTempReply] = useState({});
-  const containerDetailType = [CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT]
-  const containerManifestType = [CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT];
+
   const [isSaveComment, setSaveComment] = useState(false);
 
   const handleViewMore = (id) => {
@@ -235,6 +231,7 @@ const InquiryViewer = (props) => {
 
   const onUpload = () => {
     uploadOPUS(question.id).then(() => {
+      dispatch(FormActions.toggleReload());
       setQuestion(q => ({ ...q, state: 'UPLOADED' }))
       dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
     }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
