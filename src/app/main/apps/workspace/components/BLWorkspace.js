@@ -156,6 +156,8 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     if (inquiries.filter(inq => inq.state === REP_Q_DRAFT).length) {
       setDisableSendBtn(false)
+    } else {
+      setDisableSendBtn(true)
     }
   }, [inquiries]);
 
@@ -175,75 +177,75 @@ const BLWorkspace = (props) => {
 
   const popupOpen = (inquiry, curField) => {
     switch (inquiry.field) {
-    case 'INQUIRY_LIST':
-      return {
-        status: openAllInquiry,
-        tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
-        nums: user.role === 'Admin' ? [countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
-        toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
-        fabTitle: 'Inquiry List',
-        title: 'Inquiry List',
-        field: 'INQUIRY_LIST',
-        showBtnSend: true,
-        disableSendBtn: disableSendBtn,
-        child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries)} />
-      };
-    case 'ATTACHMENT_LIST':
-      return {
-        status: openAttachment,
-        toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
-        fabTitle: 'Attachment List',
-        title: 'Attachment List',
-        hasAddButton: false,
-        field: 'ATTACHMENT_LIST',
-        popoverfooter: true,
-        customActions: inquiries.length > 0 && (
-          <>
-            <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
-              <AttachFileList
-                uploadImageAttach={(files) => setNewFileAttachment(files)}
-                isAttachmentList={true}
-                type={'addNew'}>
-                <AddCircleIcon
-                  style={{
-                    color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
-                    width: '50px',
-                    fontSize: '50px',
-                    cursor: isShowBackground ? 'inherit' : 'pointer'
-                  }}
-                />
-              </AttachFileList>
-            </PermissionProvider>
-          </>
-        ),
-        child: (
-          <AttachmentList
-            user={props.user}
-            newFileAttachment={newFileAttachment}
-            setFileAttachment={() => setNewFileAttachment([])}
-          />
-        )
-      };
-    case 'INQUIRY_FORM':
-      return {
-        status: openInquiryForm,
-        nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
-        toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
-        fabTitle: 'Inquiry Form',
-        title: 'Inquiry Creation',
-        field: 'INQUIRY_FORM',
-        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))} />
-      };
-    default:
-      return {
-        status: inquiry?.id === currentInq?.id,
-        nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
-        toggleForm: () => { },
-        fabTitle: curField?.label,
-        title: curField?.label,
-        field: curField?.value,
-        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))} />
-      };
+      case 'INQUIRY_LIST':
+        return {
+          status: openAllInquiry,
+          tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
+          nums: user.role === 'Admin' ? [countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
+          toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
+          fabTitle: 'Inquiry List',
+          title: 'Inquiry List',
+          field: 'INQUIRY_LIST',
+          showBtnSend: true,
+          disableSendBtn: disableSendBtn,
+          child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries)} />
+        };
+      case 'ATTACHMENT_LIST':
+        return {
+          status: openAttachment,
+          toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
+          fabTitle: 'Attachment List',
+          title: 'Attachment List',
+          hasAddButton: false,
+          field: 'ATTACHMENT_LIST',
+          popoverfooter: true,
+          customActions: inquiries.length > 0 && (
+            <>
+              <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
+                <AttachFileList
+                  uploadImageAttach={(files) => setNewFileAttachment(files)}
+                  isAttachmentList={true}
+                  type={'addNew'}>
+                  <AddCircleIcon
+                    style={{
+                      color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
+                      width: '50px',
+                      fontSize: '50px',
+                      cursor: isShowBackground ? 'inherit' : 'pointer'
+                    }}
+                  />
+                </AttachFileList>
+              </PermissionProvider>
+            </>
+          ),
+          child: (
+            <AttachmentList
+              user={props.user}
+              newFileAttachment={newFileAttachment}
+              setFileAttachment={() => setNewFileAttachment([])}
+            />
+          )
+        };
+      case 'INQUIRY_FORM':
+        return {
+          status: openInquiryForm,
+          nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
+          toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
+          fabTitle: 'Inquiry Form',
+          title: 'Inquiry Creation',
+          field: 'INQUIRY_FORM',
+          child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))} />
+        };
+      default:
+        return {
+          status: inquiry?.id === currentInq?.id,
+          nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
+          toggleForm: () => { },
+          fabTitle: curField?.label,
+          title: curField?.label,
+          field: curField?.value,
+          child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))} />
+        };
     }
   };
 
