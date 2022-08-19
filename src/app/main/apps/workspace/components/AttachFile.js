@@ -10,7 +10,7 @@ import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 const AttachFile = (props) => {
-  const { disabled, isAnswer,isReply, question, setAttachmentReply } = props;
+  const { disabled, isAnswer, isReply, question, setAttachmentReply } = props;
   const dispatch = useDispatch();
   const [currentEditInq, reply, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
@@ -19,34 +19,35 @@ const AttachFile = (props) => {
   ]);
 
   const handleUploadImageAttach = (files) => {
-    if (!question?.inqType) return dispatch(AppAction.showMessage({ message: 'Type of inquiry is required !', variant: 'error' }));
     const inValidFile = files.find((elem) => !validateExtensionFile(elem));
     if (inValidFile) return dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
 
-    // const isExist = handleDuplicateAttachment(
-    //   dispatch,
-    //   metadata,
-    //   currentEditInq?.mediaFile,
-    //   files,
-    //   currentEditInq?.field,
-    //   currentEditInq?.inqType
-    // );
-    if (isReply){
+    if (isReply) {
       const attachmentReplies = [];
       files.forEach((src) => {
         attachmentReplies.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: src });
       });
-      setAttachmentReply(attachmentReplies);
+      return setAttachmentReply(attachmentReplies);
     }
     else if (isAnswer) {
-      const currentInq = {...question};
+      const currentInq = { ...question };
       files.forEach((src) => {
         currentInq.mediaFilesAnswer.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: src });
       });
-      currentInq.attachmentAnswer = {inquiry: currentInq.id};
-      dispatch(InquiryActions.setEditInq(currentInq));
+      currentInq.attachmentAnswer = { inquiry: currentInq.id };
+      return dispatch(InquiryActions.setEditInq(currentInq));
+    }
 
-    } else {
+    const isExist = handleDuplicateAttachment(
+      dispatch,
+      metadata,
+      currentEditInq.mediaFile,
+      files,
+      currentEditInq.field,
+      currentEditInq.inqType
+    );
+    if (!isExist) {
+      if (!currentEditInq.inqType) return dispatch(AppAction.showMessage({ message: 'Type of inquiry is required !', variant: 'error' }));
       const inq = { ...currentEditInq };
       files.forEach((src) => {
         const formData = new FormData();
