@@ -336,9 +336,9 @@ const InputUI = (props) => {
   const classes = useStyles(props);
   return (
     <Grid
-      style={{ marginTop: 8 }}
       container
-      direction="row">
+      direction="row"
+      style={{ marginTop: 8, alignItems: 'center', justifyContent: "flex-start" }}>
       <Grid item xs={1}>
         {title === 'Cc' || title === 'Bcc' ? (
           <div
