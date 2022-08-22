@@ -159,12 +159,13 @@ const InquiryViewer = (props) => {
           setType(metadata.ans_type.paragraph);
           setQuestion(lastest);
           setInqHasComment(true);
+        } else {
+          setQuestion(props.question)
         }
         setIsLoadedComment(true);
-
       })
       .catch((error) => console.error(error));
-  }, [isSaveComment]);
+  }, [isSaveComment, props.question]);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
