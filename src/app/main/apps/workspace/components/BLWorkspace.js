@@ -244,7 +244,7 @@ const BLWorkspace = (props) => {
           fabTitle: curField?.label,
           title: curField?.label,
           field: curField?.value,
-          child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))} />
+          child: <Inquiry user={props.user} />
         };
     }
   };

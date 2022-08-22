@@ -86,6 +86,7 @@ const Inquiry = (props) => {
                     currentQuestion={changeQuestion}
                     question={q}
                     user={props.user}
+                    showReceiver={true}
                   />
                 </div>
                 {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}

@@ -7,7 +7,7 @@ import {
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Typography, Tooltip, Grid, Button, FormControlLabel } from '@material-ui/core';
+import { Typography, Tooltip, Grid, Button, FormControlLabel, Radio } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
@@ -100,7 +100,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, toggleEdit, viewGuestDropDown } = props;
+  const { index, toggleEdit, viewGuestDropDown, showReceiver } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -214,10 +214,21 @@ const InquiryViewer = (props) => {
   }
 
   const onConfirm = () => {
+    let content = ''
+    if (typeof textResolve === 'string') {
+      content = textResolve.trim()
+    }
+    else {
+      content = textResolve
+      content.forEach((obj) => {
+        if (obj[question.inqType])
+          obj[question.inqType] = obj[question.inqType]?.trim();
+      })
+    }
     const body = {
       fieldId: question.field,
       inqId: question.id,
-      fieldContent: textResolve,
+      fieldContent: content,
       blId: myBL.id
     }
     resolveInquiry(body)
@@ -352,6 +363,7 @@ const InquiryViewer = (props) => {
                       Upload to OPUS
                     </Button>
                   </PermissionProvider>
+                  {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
                   <PermissionProvider
                     action={PERMISSION.VIEW_EDIT_INQUIRY}
                     extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN'}
@@ -523,7 +535,7 @@ const InquiryViewer = (props) => {
                     <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
                       <Button
                         variant="contained"
-                        disabled={typeof textResolve === 'string' ? !textResolve : textResolve.some(cont => Object.values(cont).includes(''))}
+                        disabled={typeof textResolve === 'string' ? !textResolve.trim() : textResolve.some(cont => !cont[question.inqType]?.trim())}
                         color="primary"
                         onClick={onConfirm}
                         classes={{ root: clsx(classes.button, 'w120') }}
