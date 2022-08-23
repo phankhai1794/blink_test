@@ -82,6 +82,12 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: '2rem',
     '&.resolved': {
       borderColor: '#36B37E'
+    },
+    '&.customerReply': {
+      borderColor: '#2F80ED'
+    },
+    '&.offshoreReply': {
+      borderColor: '#2F80ED'
     }
   },
   boxHasComment: {
@@ -208,7 +214,8 @@ const AllInquiry = (props) => {
                   className={clsx(
                     classes.boxItem,
                     (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-                    inqHasComment.includes(q.id) && classes.boxHasComment
+                    inqHasComment.includes(q.id) && classes.boxHasComment,
+                    !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'ANS_DRF'].includes(q.state) && 'offshoreReply'
                   )}>
                   <div style={{ marginBottom: '12px' }}>
                     <Typography color="primary" variant="h5" className={classes.inqTitle}>
@@ -233,6 +240,7 @@ const AllInquiry = (props) => {
                   className={clsx(
                     classes.boxItem,
                     (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
+                    !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(q.state) && 'customerReply',
                     inqHasComment.includes(q.id) && classes.boxHasComment
                   )}>
                   <div style={{ marginBottom: '12px' }}>
