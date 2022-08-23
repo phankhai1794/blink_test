@@ -305,12 +305,12 @@ const InquiryEditor = (props) => {
 
     const inquiry = inquiries.find((q) => q.id === currentEditInq.id);
     if (inquiry) {
-      if (ansTypeChoice === inquiry.ansType) {
-        if (inquiry.answerObj.length === 1) {
+      if (ansTypeChoice === currentEditInq.ansType) {
+        if (currentEditInq.answerObj.length === 1) {
           dispatch(
             AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
           );
-          error = true;
+          return;
           // break;
         }
         // check empty a field
@@ -382,6 +382,14 @@ const InquiryEditor = (props) => {
       }
     } else {
       // Create INQUIRY
+      if (ansTypeChoice === currentEditInq.ansType) {
+        if (currentEditInq.answerObj.length === 1) {
+          dispatch(
+            AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
+          );
+          return;
+        }
+      }
       const uploads = [];
       if (currentEditInq.mediaFile.length) {
         currentEditInq.mediaFile.forEach((file) => {
