@@ -1,8 +1,19 @@
-import { resolveInquiry, deleteInquiry, uploadOPUS, saveReply, loadComment } from 'app/services/inquiryService';
+import {
+  resolveInquiry,
+  deleteInquiry,
+  uploadOPUS,
+  saveReply,
+  loadComment
+} from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, stateResquest, displayTime } from '@shared';
 import {
-  CONTAINER_DETAIL, CONTAINER_MANIFEST, CONTAINER_NUMBER, CONTAINER_SEAL, CM_MARK, CM_PACKAGE
+  CONTAINER_DETAIL,
+  CONTAINER_MANIFEST,
+  CONTAINER_NUMBER,
+  CONTAINER_SEAL,
+  CM_MARK,
+  CM_PACKAGE
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useState, useEffect } from 'react';
@@ -11,7 +22,7 @@ import { Typography, Tooltip, Grid, Button, FormControlLabel, Radio } from '@mat
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
-import clsx from "clsx";
+import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
 
 import * as Actions from '../store/actions';
@@ -24,7 +35,7 @@ import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import UserInfo from './UserInfo';
 import AttachFile from './AttachFile';
-import Comment from "./Comment";
+import Comment from './Comment';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -96,14 +107,14 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: '2rem'
   },
   boxResolve: {
-    borderColor: '#36B37E',
+    borderColor: '#36B37E'
   },
   text: {
     height: 40,
     width: 170,
     border: '1px solid #BAC3CB',
     textAlign: 'center',
-    color: '#132535',
+    color: '#132535'
   }
 }));
 
@@ -117,34 +128,35 @@ const InquiryViewer = (props) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-
+  const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [question, setQuestion] = useState(props.question);
   const [type, setType] = useState(props.question.ansType);
   const [allowDeleteInq, setAllowDeleteInq] = useState(true);
   const [viewDropDown, setViewDropDown] = useState();
   const [isDisableSave, setDisableSave] = useState(true);
   const [inqHasComment, setInqHasComment] = useState(false);
-  const [isResolve, setIsResolve] = useState(false)
-  const [isReply, setIsReply] = useState(false)
+  const [isResolve, setIsResolve] = useState(false);
+  const [isReply, setIsReply] = useState(false);
   const [comment, setComment] = useState([]);
   const [isLoadedComment, setIsLoadedComment] = useState(false);
-  const [textResolve, setTextResolve] = useState(content[question.field] || '')
+  const [textResolve, setTextResolve] = useState(content[question.field] || '');
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
-
+  const [confirmClick, confirmPopupType] = useSelector(({ workspace }) => [
+    workspace.formReducer.confirmClick,
+    workspace.formReducer.confirmPopupType
+  ]);
   const [isSaveComment, setSaveComment] = useState(false);
 
   const handleViewMore = (id) => {
-    if (user.role !== "Admin") {
+    if (user.role !== 'Admin') {
       toggleEdit();
-
     }
     if (viewDropDown === id) {
       setViewDropDown('');
     } else {
       setViewDropDown(id);
     }
-
   };
 
   useEffect(() => {
@@ -152,7 +164,7 @@ const InquiryViewer = (props) => {
       .then((res) => {
         if (res.length > 0) {
           res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
-          const lastest = { ...question }
+          const lastest = { ...question };
           // filter comment
           lastest.mediaFilesAnswer = res[res.length - 1].mediaFilesAnswer;
           lastest.answerObj = [{ content: res[res.length - 1].content }];
@@ -160,8 +172,10 @@ const InquiryViewer = (props) => {
           lastest.creator = res[res.length - 1].creator;
           lastest.createdAt = res[res.length - 1].createdAt;
           // customer reply
-          const filterRepADraft = res.filter(r => r.state === 'REP_A_DRF');
-          filterRepADraft.length ? dispatch(InquiryActions.checkSubmit(true)) : dispatch(InquiryActions.checkSubmit(false));
+          const filterRepADraft = res.filter((r) => r.state === 'REP_A_DRF');
+          filterRepADraft.length
+            ? dispatch(InquiryActions.checkSubmit(true))
+            : dispatch(InquiryActions.checkSubmit(false));
           //
           const filterOffshoreSent = res[res.length - 1];
           if (Object.keys(filterOffshoreSent).length > 0 && filterOffshoreSent.state === 'REP_Q_SENT') {
@@ -174,7 +188,7 @@ const InquiryViewer = (props) => {
           setQuestion(lastest);
           setInqHasComment(true);
         } else {
-          setQuestion(props.question)
+          setQuestion(props.question);
         }
         setIsLoadedComment(true);
       })
@@ -185,7 +199,7 @@ const InquiryViewer = (props) => {
     return metadata.field?.[field] || '';
   };
 
-  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)]
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
   const selectChoiceHandle = (e) => {
     const inq = { ...question };
@@ -195,20 +209,42 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     myBL?.state !== stateResquest && setAllowDeleteInq(false);
   }, []);
+
+  useEffect(() => {
+    if (confirmClick && confirmPopupType === 'removeInq'&& indexQuestionRemove >= 0) {
+      const optionsOfQuestion = [...inquiries];
+      const inqDelete = optionsOfQuestion.splice(indexQuestionRemove, 1)[0];
+      deleteInquiry(inqDelete.id)
+        .then(() => {
+          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+        })
+        .catch((error) => console.error(error));
+      dispatch(
+        FormActions.openConfirmPopup({
+          openConfirmPopup: false,
+          confirmClick: false,
+          confirmPopupMsg: '',
+          confirmPopupType: ''
+        })
+      );
+    }
+  }, [confirmClick]);
+
   const paragraphAnswerHandle = (e) => {
     const inq = { ...question };
     inq.paragraphAnswer = e;
     dispatch(InquiryActions.setEditInq(inq));
   };
 
-  const removeQuestion = (index) => {
-    const optionsOfQuestion = [...inquiries];
-    const inqDelete = optionsOfQuestion.splice(index, 1)[0];
-    deleteInquiry(inqDelete.id)
-      .then(() => {
-        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+  const removeQuestion = () => {
+    setIndexQuestionRemove(inquiries.findIndex((q) => q.id === question.id));
+    dispatch(
+      FormActions.openConfirmPopup({
+        openConfirmPopup: true,
+        confirmPopupMsg: 'Are you sure delete this inquiry?',
+        confirmPopupType: 'removeInq'
       })
-      .catch((error) => console.error(error));
+    );
   };
 
   const changeToEditor = (inq) => {
@@ -221,60 +257,62 @@ const InquiryViewer = (props) => {
   };
 
   const onReply = () => {
-    setIsReply(true)
-  }
+    setIsReply(true);
+  };
 
   const onResolve = () => {
-    setIsResolve(true)
-  }
+    setIsResolve(true);
+  };
 
   const onConfirm = () => {
-    let content = ''
+    let content = '';
     if (typeof textResolve === 'string') {
-      content = textResolve.trim()
-    }
-    else {
-      content = textResolve
+      content = textResolve.trim();
+    } else {
+      content = textResolve;
       content.forEach((obj) => {
-        if (obj[question.inqType])
-          obj[question.inqType] = obj[question.inqType]?.trim();
-      })
+        if (obj[question.inqType]) obj[question.inqType] = obj[question.inqType]?.trim();
+      });
     }
     const body = {
       fieldId: question.field,
       inqId: question.id,
       fieldContent: content,
       blId: myBL.id
-    }
+    };
     resolveInquiry(body)
       .then(() => {
         dispatch(FormActions.toggleReload());
-        setIsResolve(false)
-        setQuestion(q => ({ ...q, state: 'COMPL' }))
+        setIsResolve(false);
+        setQuestion((q) => ({ ...q, state: 'COMPL' }));
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
-  }
+  };
 
   const onUpload = () => {
-    uploadOPUS(question.id).then(() => {
-      dispatch(FormActions.toggleReload());
-      setQuestion(q => ({ ...q, state: 'UPLOADED' }))
-      dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
-    }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
-  }
+    uploadOPUS(question.id)
+      .then(() => {
+        dispatch(FormActions.toggleReload());
+        setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
+        dispatch(
+          AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' })
+        );
+      })
+      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+  };
   const cancelResolve = () => {
-    setTextResolve(content[question.field] || '')
-    setIsResolve(false)
-  }
+    setTextResolve(content[question.field] || '');
+    setIsResolve(false);
+  };
 
   const cancelReply = () => {
     setTempReply({});
     setIsReply(false)
-  }
+  };
 
   const inputText = (e) => {
-    setTextResolve(e.target.value)
-  }
+    setTextResolve(e.target.value);
+  };
 
   const handleChangeContentReply = (e) => {
     const value = e.target.value;
@@ -297,7 +335,7 @@ const InquiryViewer = (props) => {
       setTempReply({
         ...tempReply,
         mediaFiles: val
-      })
+      });
     } else {
       const mediaFiles = [...tempReply.mediaFiles, ...val];
       setTempReply({ ...tempReply, mediaFiles });
@@ -307,56 +345,68 @@ const InquiryViewer = (props) => {
   const onSaveReply = () => {
     const mediaListId = [];
     const inqs = [...inquiries];
-    const filtersInq = inqs.filter(inq => inq.id === question.id);
+    const filtersInq = inqs.filter((inq) => inq.id === question.id);
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
         formData.append('files', mediaFileAns.data);
       });
-      uploadFile(formData).then(media => {
-        const { response } = media;
-        response.forEach(file => {
-          const media = { id: file.id };
-          mediaListId.push(media);
-        });
-        const reqReply = {
-          inqAns: tempReply.inqAns,
-          answer: tempReply.answer,
-          mediaFiles: mediaListId
-        }
-        saveReply({ ...reqReply }).then((res) => {
-          //
-          setSaveComment(!isSaveComment);
-          setTempReply({});
-          setViewDropDown('')
-          //
-          dispatch(Actions.loadInquiry(myBL.id));
-          dispatch(AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' }));
-        }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
-      }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      uploadFile(formData)
+        .then((media) => {
+          const { response } = media;
+          response.forEach((file) => {
+            const media = { id: file.id };
+            mediaListId.push(media);
+          });
+          const reqReply = {
+            inqAns: tempReply.inqAns,
+            answer: tempReply.answer,
+            mediaFiles: mediaListId
+          };
+          saveReply({ ...reqReply })
+            .then((res) => {
+              //
+              setSaveComment(!isSaveComment);
+              setTempReply({});
+              setViewDropDown('');
+              //
+              dispatch(Actions.loadInquiry(myBL.id));
+              dispatch(
+                AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
+              );
+            })
+            .catch((error) =>
+              dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
+            );
+        })
+        .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
     } else {
       const reqReply = {
         inqAns: tempReply.inqAns,
         answer: tempReply.answer,
         mediaFiles: mediaListId
       };
-      saveReply({ ...reqReply }).then((res) => {
-        //
-        setSaveComment(!isSaveComment);
-        setTempReply({});
-        setViewDropDown('')
-        //
-        dispatch(Actions.loadInquiry(myBL.id));
-        dispatch(AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' }));
-      }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      saveReply({ ...reqReply })
+        .then((res) => {
+          //
+          setSaveComment(!isSaveComment);
+          setTempReply({});
+          setViewDropDown('');
+          //
+          dispatch(Actions.loadInquiry(myBL.id));
+          dispatch(
+            AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
+          );
+        })
+        .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
     }
     setIsReply(false)
   }
 
   return (
     <>
-      {
-        isLoadedComment && <>
+      {isLoadedComment && (
+        <>
           <div>
             <div style={{ paddingTop: 10 }} className="flex justify-between">
               <UserInfo
@@ -364,7 +414,7 @@ const InquiryViewer = (props) => {
                 time={displayTime(question.createdAt)}
                 avatar={question.creator.avatar}
               />
-              {user.role === "Admin" ? ( // TODO
+              {user.role === 'Admin' ? ( // TODO
                 <div className="flex items-center mr-2">
                   <PermissionProvider
                     action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
@@ -393,20 +443,21 @@ const InquiryViewer = (props) => {
                     </div>
                     {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
                   </div>
-
                   <PermissionProvider
                     action={PERMISSION.VIEW_EDIT_INQUIRY}
-                    extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN'}
-                  >
+                    extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN'}>
                     <Tooltip title="Edit Inquiry">
                       <div onClick={() => changeToEditor(question)}>
-                        <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                        <img
+                          style={{ width: 20, cursor: 'pointer' }}
+                          src="/assets/images/icons/edit.svg"
+                        />
                       </div>
                     </Tooltip>
                   </PermissionProvider>
                   {allowDeleteInq && (
                     <Tooltip title="Delete Inquiry">
-                      <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion(index)}>
+                      <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion()}>
                         <img
                           style={{ height: '22px', cursor: 'pointer' }}
                           src="/assets/images/icons/trash-gray.svg"
@@ -441,7 +492,10 @@ const InquiryViewer = (props) => {
               {question.content}
             </Typography>
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
-              {type === metadata.ans_type.choice && (["ANS_SENT", "ANS_DRF", 'OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(question.state)) && (
+              {type === metadata.ans_type.choice &&
+                ['ANS_SENT', 'ANS_DRF', 'OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(
+                  question.state
+                ) && (
                 <ChoiceAnswer
                   index={index}
                   questions={inquiries}
@@ -450,7 +504,10 @@ const InquiryViewer = (props) => {
                   isDisableSave={(e) => setDisableSave(e)}
                 />
               )}
-              {type === metadata.ans_type.paragraph && (["ANS_SENT", "ANS_DRF", 'OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(question.state)) && (
+              {type === metadata.ans_type.paragraph &&
+                ['ANS_SENT', 'ANS_DRF', 'OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(
+                  question.state
+                ) && (
                 <ParagraphAnswer
                   question={question}
                   index={index}
@@ -467,8 +524,10 @@ const InquiryViewer = (props) => {
                 </Grid>
                 {inqHasComment && (
                   <Grid item xs={6}>
-                    <div className={classes.viewMoreBtn} onClick={() => handleViewMore(question.id)}>
-                      {(viewDropDown !== question.id ? ( // TODO
+                    <div
+                      className={classes.viewMoreBtn}
+                      onClick={() => handleViewMore(question.id)}>
+                      {viewDropDown !== question.id ? ( // TODO
                         <>
                           View All
                           <ArrowDropDown />
@@ -478,13 +537,13 @@ const InquiryViewer = (props) => {
                           Hide All
                           <ArrowDropUp />
                         </>
-                      ))}
+                      )}
                     </div>
                   </Grid>
                 )}
               </Grid>
 
-              {(viewDropDown === question.id) && (
+              {viewDropDown === question.id && (
                 <Comment question={props.question} comment={comment} />
               )}
 
@@ -510,12 +569,11 @@ const InquiryViewer = (props) => {
                   </div>
                 ))}
             </>
-            {
-              (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state)) ? null :
+            {user.role === 'Admin' &&
+            !['ANS_SENT', 'REP_A_SENT', 'COMPL'].includes(question.state) ? null : (
                 <>
                   {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
                   {question.mediaFilesAnswer?.map((file, mediaIndex) => (
-
                     <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                       {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                         <ImageAttach
@@ -538,20 +596,21 @@ const InquiryViewer = (props) => {
                     </div>
                   ))}
                 </>
-            }
-
+              )}
           </div>
-          {question.state !== 'COMPL' && question.state !== 'UPLOADED' &&
+          {question.state !== 'COMPL' && question.state !== 'UPLOADED' && (
             <>
-              {isResolve ?
+              {isResolve ? (
                 <>
-                  {containerCheck.includes(question.field) ?
+                  {containerCheck.includes(question.field) ? (
                     <ContainerDetailForm
-                      container={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
+                      container={
+                        question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                      }
                       question={question}
                       setTextResolve={setTextResolve}
                     />
-                    :
+                  ) : (
                     <textarea
                       style={{
                         width: '100%',
@@ -568,33 +627,36 @@ const InquiryViewer = (props) => {
                       multiline="true"
                       type="text"
                       value={textResolve}
-                      onChange={inputText} />
-                  }
+                      onChange={inputText}
+                    />
+                  )}
                   <div className="flex">
                     <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
                       <Button
                         variant="contained"
-                        disabled={typeof textResolve === 'string' ? !textResolve.trim() : textResolve.some(cont => !cont[question.inqType]?.trim())}
+                        disabled={
+                          typeof textResolve === 'string'
+                            ? !textResolve.trim()
+                            : textResolve.some((cont) => !cont[question.inqType]?.trim())
+                        }
                         color="primary"
                         onClick={onConfirm}
-                        classes={{ root: clsx(classes.button, 'w120') }}
-                      >
+                        classes={{ root: clsx(classes.button, 'w120') }}>
                         Save
                       </Button>
                       <Button
                         variant="contained"
                         classes={{ root: clsx(classes.button, 'w120', 'reply') }}
                         color="primary"
-                        onClick={cancelResolve}
-                      >
+                        onClick={cancelResolve}>
                         Cancel
                       </Button>
                     </PermissionProvider>
                   </div>
                 </>
-                :
+              ) : (
                 <>
-                  {isReply ?
+                  {isReply ? (
                     <>
                       <div style={{ display: 'flex', alignItems: 'center' }}>
                         <textarea
@@ -623,8 +685,9 @@ const InquiryViewer = (props) => {
 
                       {tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}
                       {tempReply?.mediaFiles?.map((file, mediaIndex) => (
-
-                        <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                        <div
+                          style={{ position: 'relative', display: 'inline-block' }}
+                          key={mediaIndex}>
                           {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                             <ImageAttach
                               hiddenRemove={viewGuestDropDown !== question.id}
@@ -650,54 +713,52 @@ const InquiryViewer = (props) => {
                           variant="contained"
                           color="primary"
                           onClick={onSaveReply}
-                          classes={{ root: classes.button }}
-                        >
+                          classes={{ root: classes.button }}>
                           Save
                         </Button>
                         <Button
                           variant="contained"
                           classes={{ root: clsx(classes.button, 'reply') }}
                           color="primary"
-                          onClick={cancelReply}
-                        >
+                          onClick={cancelReply}>
                           Cancel
                         </Button>
                       </div>
                     </>
-                    : <div className="flex">
-                      <PermissionProvider
-                        action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
-                      >
+                  ) : (
+                    <div className="flex">
+                      <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
                         <Button
                           variant="contained"
                           color="primary"
                           onClick={onResolve}
-                          classes={{ root: clsx(classes.button, 'w120') }}
-                        >
+                          classes={{ root: clsx(classes.button, 'w120') }}>
                           Resolve
                         </Button>
                       </PermissionProvider>
                       <PermissionProvider
                         action={PERMISSION.INQUIRY_CREATE_REPLY}
-                        extraCondition={user.role === "Admin" ? (question.state === 'ANS_SENT' || inqHasComment) : inqHasComment}
-                      >
+                        extraCondition={
+                          user.role === 'Admin'
+                            ? question.state === 'ANS_SENT' || inqHasComment
+                            : inqHasComment
+                        }>
                         <Button
                           variant="contained"
                           classes={{ root: clsx(classes.button, 'w120', 'reply') }}
                           color="primary"
-                          onClick={onReply}
-                        >
+                          onClick={onReply}>
                           Reply
                         </Button>
                       </PermissionProvider>
                     </div>
-                  }
+                  )}
                 </>
-              }
+              )}
             </>
-          }
+          )}
         </>
-      }
+      )}
     </>
   );
 };
@@ -715,17 +776,18 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
-  const [values, setValues] = useState(getValueField(container) || [])
-  const inqType = getLabelById(metadata['inq_type_options'], question.inqType)
-  const cdType = inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CONTAINER_SEAL]
-  const cmType = inqType !== CM_MARK ? [CM_MARK, inqType] : [CM_MARK, CM_PACKAGE]
-  const typeList = container === CONTAINER_DETAIL ? cdType : cmType
+  const [values, setValues] = useState(getValueField(container) || []);
+  const inqType = getLabelById(metadata['inq_type_options'], question.inqType);
+  const cdType =
+    inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CONTAINER_SEAL];
+  const cmType = inqType !== CM_MARK ? [CM_MARK, inqType] : [CM_MARK, CM_PACKAGE];
+  const typeList = container === CONTAINER_DETAIL ? cdType : cmType;
   const onChange = (e, index, type) => {
-    const temp = JSON.parse(JSON.stringify(values))
-    temp[index][type] = e.target.value
-    setValues(temp)
-    setTextResolve(temp)
-  }
+    const temp = JSON.parse(JSON.stringify(values));
+    temp[index][type] = e.target.value;
+    setValues(temp);
+    setTextResolve(temp);
+  };
   return (
     <>
       {typeList.map((type, index) => (
@@ -743,7 +805,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
             defaultValue={type}
           />
           {values.map((cd, index1) => {
-            const disabled = question.inqType !== getType(type)
+            const disabled = question.inqType !== getType(type);
             return (
               <input
                 className={clsx(classes.text)}
@@ -753,17 +815,18 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
                   backgroundColor: disabled && '#FDF2F2',
                   fontSize: 15,
                   borderTopRightRadius: index === 0 && values.length - 1 === index1 ? 8 : null,
-                  borderBottomRightRadius: index1 === values.length - 1 && index === typeList.length - 1 ? 8 : null
+                  borderBottomRightRadius:
+                    index1 === values.length - 1 && index === typeList.length - 1 ? 8 : null
                 }}
                 disabled={disabled}
                 value={cd[getType(type)]}
                 onChange={(e) => onChange(e, index1, getType(type))}
               />
-            )
+            );
           })}
         </div>
       ))}
     </>
-  )
-}
+  );
+};
 export default InquiryViewer;

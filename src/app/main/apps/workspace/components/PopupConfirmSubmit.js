@@ -52,35 +52,62 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const PopupConfirm = (props) => {
-
-  const [openConfirmPopup, confirmPopupMsg] = useSelector(({ workspace }) => [workspace.formReducer.openConfirmPopup, workspace.formReducer.confirmPopupMsg]);
-  
+const PopupConfirmSubmit = (props) => {
+  const [inquiries, isShowBackground] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.inquiries,
+    workspace.inquiryReducer.isShowBackground,
+  ]);
   const dispatch = useDispatch();
   const classes = useStyles();
 
   const handleConfirm = async () => {
-    dispatch(FormActions.confirmPopupClick(true))
+    const inqs = [... inquiries];
+    const lstInq = inqs.map((item) => {
+      if ((props.field === "INQUIRY_LIST" || props.field === item.field) &&
+          (item.answerObj && (item.state === "ANS_DRF" || item.state === 'REP_A_DRF' || item.state === 'REP_Q_SENT' || item.state === 'REP_Q_DRF'))
+      ) {
+        return {inquiryId: item.id, currentState: item.state};
+      }
+      return null;
+    });
+    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null) });
+    //
+    const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
+    inqs.forEach((item) => {
+      if (listIdInq.includes(item.id)) {
+        if (item.state === 'ANS_DRF') item.state = 'ANS_SENT';
+        if (item.state === 'REP_A_DRF') item.state = 'REP_A_SENT';
+      }
+    });
+    dispatch(InquiryActions.setInquiries(inqs));
+    dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+    if (props.field === 'INQUIRY_LIST') {
+      dispatch(FormActions.toggleAllInquiry(false));
+    } else {
+      dispatch(InquiryActions.setOneInq({}));
+    }
+    dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
   };
 
   const handleCancelConfirm = () => {
-    dispatch(FormActions.openConfirmPopup({openConfirmPopup: false}))
+    props.handleCheckSubmit();
+    dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
   };
 
   return (
     <>
-      {openConfirmPopup && (
+      {isShowBackground && (
         <div className={classes.dialogConfirm}>
-          <p>{confirmPopupMsg}</p>
+          <p>Are you sure you want to submit these inquiries?</p>
           <div className='btnConfirm'>
             <Button variant="outlined" style={{ marginRight: 15 }} onClick={handleConfirm}>Confirm</Button>
             <Button variant="outlined" onClick={handleCancelConfirm}>Cancel</Button>
           </div>
         </div>
       )}
-      {openConfirmPopup && <div className={classes.backgroundConfirm}></div>}
+      {isShowBackground && <div className={classes.backgroundConfirm}></div>}
     </>
   );
 };
 
-export default PopupConfirm;
+export default PopupConfirmSubmit;
