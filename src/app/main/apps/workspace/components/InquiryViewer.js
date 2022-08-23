@@ -46,6 +46,14 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: '#DDE3EE'
     }
   },
+  labelStatus: {
+    backgroundColor: '#EBF7F2',
+    color: '#36B37E',
+    padding: '2px 9px',
+    fontWeight: 600,
+    fontSize: 14,
+    borderRadius: 4
+  },
   hideText: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -122,6 +130,7 @@ const InquiryViewer = (props) => {
   const [isLoadedComment, setIsLoadedComment] = useState(false);
   const [textResolve, setTextResolve] = useState(content[question.field] || '')
   const [tempReply, setTempReply] = useState({});
+  const [showLabelSent, setShowLabelSent] = useState(false);
 
   const [isSaveComment, setSaveComment] = useState(false);
 
@@ -153,6 +162,11 @@ const InquiryViewer = (props) => {
           // customer reply
           const filterRepADraft = res.filter(r => r.state === 'REP_A_DRF');
           filterRepADraft.length ? dispatch(InquiryActions.checkSubmit(true)) : dispatch(InquiryActions.checkSubmit(false));
+          //
+          const filterOffshoreSent = res[res.length - 1];
+          if (Object.keys(filterOffshoreSent).length > 0 && filterOffshoreSent.state === 'REP_Q_SENT') {
+            setShowLabelSent(true)
+          }
           //
           res.splice(res.length - 1, 1);
           setComment([...res]);
@@ -338,6 +352,7 @@ const InquiryViewer = (props) => {
     }
     setIsReply(false)
   }
+
   return (
     <>
       {
@@ -355,17 +370,30 @@ const InquiryViewer = (props) => {
                     action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
                     extraCondition={question.state === 'COMPL' || question.state === 'UPLOADED'}
                   >
-                    <Button
-                      disabled={question.state === 'UPLOADED'}
-                      variant="contained"
-                      color="primary"
-                      onClick={onUpload}
-                      classes={{ root: classes.button }}
-                    >
-                      Upload to OPUS
-                    </Button>
+                    <div className='flex' style={{ alignItems: 'center' }}>
+                      <div style={{ marginRight: 15 }}>
+                        <span className={classes.labelStatus}>Resolved</span>
+                      </div>
+                      <Button
+                        disabled={question.state === 'UPLOADED'}
+                        variant="contained"
+                        color="primary"
+                        onClick={onUpload}
+                        classes={{ root: classes.button }}
+                      >
+                        Upload to OPUS
+                      </Button>
+                    </div>
                   </PermissionProvider>
-                  {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
+                  <div className='flex' style={{ alignItems: 'center' }}>
+                    <div style={{ marginRight: 15 }}>
+                      {showLabelSent && !['COMPL', 'UPLOADED'].includes(question.state) && (
+                        <span className={classes.labelStatus}>Sent</span>
+                      )}
+                    </div>
+                    {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
+                  </div>
+
                   <PermissionProvider
                     action={PERMISSION.VIEW_EDIT_INQUIRY}
                     extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN'}
@@ -388,7 +416,16 @@ const InquiryViewer = (props) => {
                   )}
                 </div>
               ) : (
-                <FormControlLabel control={<AttachFile isAnswer={true} question={question} />} />
+                <div className='flex' style={{ alignItems: 'center' }}>
+                  <div style={{ marginRight: 15 }}>
+                    {['ANS_SENT', 'REP_A_SENT', 'REP_Q_DRF'].includes(question.state) && (
+                      <span className={classes.labelStatus}>Submitted</span>
+                    )}
+                  </div>
+                  <FormControlLabel control={
+                    <AttachFile isAnswer={true} question={question} />
+                  } />
+                </div>
               )}
             </div>
             <Typography variant="h5">{question.name}</Typography>

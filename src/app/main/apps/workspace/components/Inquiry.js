@@ -19,6 +19,12 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: '2rem',
     '&.resolved': {
       borderColor: '#36B37E'
+    },
+    '&.customerReply': {
+      borderColor: '#2F80ED'
+    },
+    '&.offshoreReply': {
+      borderColor: '#2F80ED'
     }
   },
 }));
@@ -80,13 +86,16 @@ const Inquiry = (props) => {
               </>
             ) : (
               <>
-                <div className={clsx(classes.boxItem, (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved')}
-                  style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
+                <div className={clsx(classes.boxItem,
+                  (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
+                  !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'ANS_DRF'].includes(q.state) && 'offshoreReply'
+                )}
+                style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
                   <InquiryViewer
                     currentQuestion={changeQuestion}
                     question={q}
                     user={props.user}
-                    showReceiver={true}
+                    showReceiver={false}
                   />
                 </div>
                 {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
@@ -109,7 +118,10 @@ const Inquiry = (props) => {
         {listInqsField.map((q, index) => {
           const isEdit = currentEditInq && q.id === currentEditInq.id;
           return (
-            <div key={index} className={clsx(classes.boxItem, (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved')}>
+            <div key={index} className={clsx(classes.boxItem,
+              (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
+              !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(q.state) && 'customerReply'
+            )}>
               <InquiryViewer
                 toggleEdit={() => toggleEdit(index)}
                 currentQuestion={changeQuestion}
