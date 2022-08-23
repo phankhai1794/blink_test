@@ -95,7 +95,7 @@ const Inquiry = (props) => {
                     currentQuestion={changeQuestion}
                     question={q}
                     user={props.user}
-                    showReceiver={false}
+                    showReceiver={true}
                   />
                 </div>
                 {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
@@ -130,6 +130,7 @@ const Inquiry = (props) => {
                 isSaved={isSaved}
                 setSave={() => setSaved(false)}
                 isEdit={isEdit}
+                showReceiver={false}
               />
               {isEdit && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT') && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
               {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
