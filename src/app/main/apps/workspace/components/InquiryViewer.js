@@ -254,6 +254,7 @@ const InquiryViewer = (props) => {
   }
 
   const cancelReply = () => {
+    setTempReply({});
     setIsReply(false)
   }
 
@@ -570,7 +571,7 @@ const InquiryViewer = (props) => {
                             borderRadius: 8,
                             resize: 'none'
                           }}
-                          multiline={true}
+                          multiline="true"
                           type="text"
                           placeholder="Reply..."
                           value={tempReply?.answer?.content}
