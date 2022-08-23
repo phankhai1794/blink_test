@@ -95,13 +95,13 @@ const Comment = (props) => {
     else{
       answerObj = question.answerObj;
     }
-    if (answerObj){
+    if (answerObj.length > 0){
       setAnswer({
-        id : answerObj[0].id,
-        content : `The updated information is "${answerObj[0].content}"`,
-        userName : answerObj[0].updater.userName|| "",
-        avatar : answerObj[0].updater.avatar|| "",
-        createdAt: answerObj[0].updatedAt,
+        id : answerObj[0]?.id,
+        content : `The updated information is "${answerObj[0]?.content}"`,
+        userName : answerObj[0]?.updater.userName|| "",
+        avatar : answerObj[0]?.updater.avatar|| "",
+        createdAt: answerObj[0]?.updatedAt,
         media : question.mediaFilesAnswer||[]
       });
     }
@@ -322,12 +322,13 @@ const Comment = (props) => {
                   </div>
                 ))}
     <Divider className="mt-12" />
-    <div style={{paddingTop: '10px'}}>
+    {answer&&<div style={{paddingTop: '10px'}}>
       {
-        answer&&contentUI({...answer})
+        contentUI({...answer})
       }
-    </div>
-    <Divider className="mt-12" />
+      <Divider className="mt-12" />
+    </div>}
+    
     <div style={{paddingTop: '10px'}}>
       { comments.map((k, id) => {
         return contentUI({userName: k.creator.userName,createdAt: k.createdAt,avatar: k.creator.avatar, content: k.content, media: k.media, id})
