@@ -1,12 +1,17 @@
-import {useDispatch} from "react-redux";
-import {Button, Dialog, Divider} from "@material-ui/core";
+import { useDispatch } from "react-redux";
+import clsx from 'clsx';
+import { Button, Dialog, Divider } from "@material-ui/core";
 import React from "react";
-import {makeStyles, withStyles} from "@material-ui/core/styles";
+import { makeStyles, withStyles } from "@material-ui/core/styles";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import MuiDialogContent from "@material-ui/core/DialogContent";
 
+const white = '#FFFFFF';
+const pink = '#BD0F72';
+const greyBg = '#CCD3D1';
+const greyText = '#999999';
 
 const styles = (theme) => ({
   root: {
@@ -21,15 +26,13 @@ const styles = (theme) => ({
   }
 });
 
-const DialogTitle = withStyles(styles)((props) => {
-  const {
-    children,
-    classes,
-    toggleForm,
-    handleClose,
-    ...other
-  } = props;
-  const dispatch = useDispatch();
+const DialogTitle = withStyles(styles)(({
+  children,
+  classes,
+  toggleForm,
+  handleClose,
+  ...other
+}) => {
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -48,13 +51,13 @@ const DialogTitle = withStyles(styles)((props) => {
 
 const useStyles = makeStyles(() => ({
   dialogPaper: {
-    width: '600px',
-    minHeight: '244px'
+    width: 1000,
+    minHeight: 165,
+    margin: 0
   },
   dialogContent: {
-    backgroundColor: 'white',
-    paddingLeft: '40px',
-    paddingRight: '70px'
+    backgroundColor: white,
+    padding: '20.26px 41.2px 20px 39px'
   },
   divider: {
     backgroundColor: '#8A97A3'
@@ -62,14 +65,26 @@ const useStyles = makeStyles(() => ({
   chip: {
     marginLeft: '0.2rem'
   },
-  buttonSave: {
-    borderRadius: '8px',
-    width: '130px'
+  btn: {
+    width: 120,
+    height: 40,
+    borderRadius: 8,
+    boxShadow: 'none'
+  },
+  btnSave: {
+    color: white,
+    background: pink,
+    marginRight: 5
+  },
+  btnCancel: {
+    color: greyText,
+    background: white,
+    border: `1px solid ${greyText}`
   }
 }));
 
 export default function Form(props) {
-  const {open, toggleForm, title, children} = props;
+  const { open, toggleForm, title, children } = props;
   const classes = useStyles();
 
   const handleClose = () => {
@@ -87,10 +102,14 @@ export default function Form(props) {
         aria-labelledby="customized-dialog-title"
         open={open}
         maxWidth="md"
-        classes={{paperScrollPaper: classes.dialogPaper}}
+        classes={{ paperScrollPaper: classes.dialogPaper }}
       >
         <DialogTitle
           id="customized-dialog-title"
+          style={{
+            fontSize: 22,
+            fontWeight: 600,
+          }}
           toggleForm={toggleForm}
           handleClose={handleClose}
         >
@@ -98,9 +117,12 @@ export default function Form(props) {
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
         <MuiDialogContent classes={{ root: classes.dialogContent }}>{children}</MuiDialogContent>
-        <div className="text-center p-5">
-          <Button variant="contained" className={classes.buttonSave} color="primary" onClick={(onSave)}>
+        <div style={{ padding: '0 39px 30px' }}>
+          <Button className={clsx(classes.btn, classes.btnSave)} onClick={onSave}>
             Save
+          </Button>
+          <Button className={clsx(classes.btn, classes.btnCancel)} onClick={handleClose}>
+            Cancel
           </Button>
         </div>
       </Dialog>

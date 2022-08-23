@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
       borderColor: `${pinkThemeInput} !important`
     },
     '&:focus-within fieldset': {
-      border: `1px solid ${themeInput}`,
+      border: `1px solid ${pinkThemeInput} !important`,
     },
   },
   locked: {
@@ -106,12 +106,8 @@ const useStyles = makeStyles((theme) => ({
 const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, readOnly }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [contentChanged, openDraftBL] = useSelector(({ draftBL }) => [
-    draftBL.contentChanged,
-    draftBL.openDraftBL,
-  ]);
+  const contentChanged = useSelector(({ draftBL }) => draftBL.contentChanged);
   const [fieldIsChanged, setFieldIsChanged] = useState(false);
-  const [fieldIsClicked, setFiledIsClicked] = useState(false);
 
   const checkFieldEdited = () => {
     if (contentChanged) {
@@ -123,19 +119,12 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
 
   useEffect(() => {
     setFieldIsChanged(checkFieldEdited());
-    setFiledIsClicked(false);
   }, [contentChanged]);
-
-  useEffect(() => {
-    if (!openDraftBL) {
-      setFiledIsClicked(false);
-    }
-  },[openDraftBL]);
 
   const onClick = (e) => {
     dispatch(BLDraftActions.toggleDraftBLEdit(true));
     dispatch(BLDraftActions.setCurrentBLField(e.currentTarget.id));
-    setFiledIsClicked(true);
+    // setFiledIsClicked(true);
   };
   
   const handleReply = () => {
@@ -143,7 +132,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   }
 
   return (
-    <div id={id} onClick={onClick} className={clsx(fieldIsChanged ? classes.colorFieldEdited : '', fieldIsClicked ? classes.colorFieldClicked : '')}>
+    <div id={id} onClick={onClick} className={clsx(fieldIsChanged ? classes.colorFieldEdited : '')}>
       <ThemeProvider theme={theme}>
         <TextField
           value={selectedChoice || children}

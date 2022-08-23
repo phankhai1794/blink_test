@@ -61,15 +61,15 @@ function ToolbarLayout1(props) {
     header.validToken
   ]);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
-  const myblState = useSelector(({ draftBL }) => draftBL.myblState);
+  const myBL = useSelector(({ draftBL }) => draftBL.myBL);
   const [open, setOpen] = useState(false);
   const [disableConfirm, setDisableConfirm] = useState(false);
   const inquiryLength = inquiries.length;
   const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
 
   useEffect(() => {
-    myblState === draftConfirm && setDisableConfirm(true);
-  }, [myblState]);
+    myBL.state === draftConfirm && setDisableConfirm(true);
+  }, [myBL.state]);
   const openAllInquiry = () => {
     if (inquiryLength) {
       dispatch(FormActions.toggleAllInquiry(true));
@@ -148,10 +148,10 @@ function ToolbarLayout1(props) {
                 src="assets/images/logos/one_ocean_network-logo.png"
                 className={clsx(classes.logo, classes.fitAvatar)}
                 alt="one-logo"
-                // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
-                //   component: Link,
-                //   to: '/'
-                // })}
+              // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+              //   component: Link,
+              //   to: '/'
+              // })}
               />
             </div>
 
