@@ -102,19 +102,23 @@ const SendInquiryForm = (props) => {
         type: mailActions.SENDMAIL_NONE
       });
     }
-
-    for (let i in inquiries) {
-      loadComment(inquiries[i].id)
-        .then((res) => {
-          if (res.length) {
-            const listInqId = inqHasComment;
-            listInqId.push(inquiries[i].id);
-            setInqHasComment(listInqId);
-          }
-        })
-        .catch((error) => console.error(error));
-    };
   }, [success, error]);
+
+  useEffect(() => {
+    const listInqId = [];
+    for (let i in inquiries) {
+      if (!['COMPL', 'UPLOADED'].includes(inquiries[i].state)) {
+        loadComment(inquiries[i].id)
+          .then((res) => {
+            if (res.length) {
+              listInqId.push(inquiries[i].id);
+            }
+          })
+          .catch((error) => console.error(error));
+      }
+    };
+    setInqHasComment(listInqId);
+  }, [inquiries])
   useEffect(() => {
     if (openEmail && !suggestMails.length) {
       dispatch(mailActions.suggestMail(''));
