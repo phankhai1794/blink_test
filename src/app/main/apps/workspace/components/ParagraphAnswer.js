@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 
@@ -21,6 +21,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ParagraphAnswer = (props) => {
+  const { disable = false } = props;
   const allowCreateParagraphAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_CREATE_PARAGRAPH
   });
@@ -28,7 +29,9 @@ const ParagraphAnswer = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
   });
   const { question, index } = props;
-  const [paragraphText, setParagraphText] = useState(question.answerObj[0]?.content || '');
+  const user = useSelector(({ user }) => user);
+  
+  const [paragraphText, setParagraphText] = useState((user.role === 'Admin' && !["ANS_SENT", "REP_Q_DRF", "REP_A_SENT", "COMPL"].includes(question.state))? "": question.answerObj[0]?.content );
 
   const classes = useStyles();
   const [isPermission, setPermission] = useState(false);
@@ -44,18 +47,22 @@ const ParagraphAnswer = (props) => {
   };
 
   useEffect(() => {
-    allowCreateParagraphAnswer && allowUpdateParagraphAnswer ? setPermission(true) : setPermission(false);
+    if (allowUpdateParagraphAnswer && allowUpdateParagraphAnswer && !['ANS_SENT', 'REP_Q_DRF', 'REP_A_SENT', 'COMPL'].includes(question.state) ) {
+      setPermission(true);
+    } else {
+      setPermission(false);
+    }
   }, []);
 
   return (
     <div>
       <div className="flex">
         <TextField
-          style={{ border: 'none' }}
+          style={{ border: 'none', display: !isPermission ? (!paragraphText ? 'none' : '') : '' }}
           fullWidth
           placeholder={isPermission ? 'Typing...' : ''}
           classes={{ root: classes.root }}
-          disabled={!isPermission}
+          disabled={!isPermission || disable}
           InputProps={{
             style: {
               fontSize: '1.7rem'

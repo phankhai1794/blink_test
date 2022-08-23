@@ -1,4 +1,5 @@
 import { sendmail, getSuggestMail } from 'app/services/mailService';
+import { loadInquiry } from '../actions';
 
 export const SENDMAIL_NONE = 'SENDMAIL_NONE';
 export const SENDMAIL_LOADING = 'SENDMAIL_LOADING';
@@ -13,12 +14,13 @@ export const VALIDATE_MAIL = 'VALIDATE_MAIL';
 export const SET_TAGS = 'SET_TAGS'
 
 export const sendMail =
-  ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content }) =>
+  ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs }) =>
     async (dispatch) => {
       dispatch({ type: SENDMAIL_LOADING });
-      sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content)
+      sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs)
         .then((res) => {
           if (res.status === 200) {
+            dispatch(loadInquiry(myblId));
             return dispatch({
               type: SENDMAIL_SUCCESS
             });

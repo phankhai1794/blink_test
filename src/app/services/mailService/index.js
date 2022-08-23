@@ -1,7 +1,7 @@
 import axios from '@shared/axios';
 const PATH = '/mail';
 
-export async function sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content) {
+export async function sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs) {
   const response = await axios().post(`${PATH}/sendMail`, {
     myblId,
     from,
@@ -12,7 +12,8 @@ export async function sendmail(myblId, from, toCustomer, toCustomerCc, toCustome
     toOnshoreCc,
     toOnshoreBcc,
     subject,
-    body: content
+    body: content,
+    replyInqs
   });
   return response;
 }
@@ -20,5 +21,10 @@ export async function sendmail(myblId, from, toCustomer, toCustomerCc, toCustome
 
 export async function getSuggestMail(keyword) {
   const response = await axios().get(`${PATH}/suggestMail?keyword=${keyword}`);
+  return response;
+}
+
+export async function getMail(myblId) {
+  const response = await axios().get(`${PATH}/byBl/${myblId}`);
   return response;
 }

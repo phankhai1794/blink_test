@@ -14,9 +14,9 @@ export const PERMISSION = {
 
   // UI + API
   INQUIRY_CREATE_INQUIRY: 'inquiry_createInquiry',
-  INQUIRY_CREATE_COMMENT: 'inquiry_createComment',
+  INQUIRY_CREATE_REPLY: 'inquiry_createReply',
   INQUIRY_UPDATE_INQUIRY: 'inquiry_updateInquiry',
-  INQUIRY_UPDATE_INQUIRY_STATUS: 'inquiry_updateInquiryStatus',
+  INQUIRY_RESOLVE_INQUIRY: 'inquiry_resolveInquiry',
   MAIL_SEND_MAIL: 'mail_sendMail',
   INQUIRY_ANSWER_ATTACHMENT: 'inquiry_createAttachmentAnswer',
   INQUIRY_ANSWER_CREATE_PARAGRAPH: 'inquiry_createParagraphAnswer',
@@ -25,7 +25,9 @@ export const PERMISSION = {
   INQUIRY_REPLACE_MEDIA: 'inquiry_replaceMedia',
   INQUIRY_REMOVE_MEDIA: 'inquiry_removeMedia',
   INQUIRY_INQ_ATT_MEDIA: 'inquiry_changesInqAtt',
-  INQUIRY_ADD_MEDIA: 'inquiry_addMedia'
+  INQUIRY_ADD_MEDIA: 'inquiry_addMedia',
+  INQUIRY_SUBMIT_INQUIRY_ANSWER: 'inquiry_submitInquiryAnswer'
+  
 };
 
 export const PermissionProvider = ({

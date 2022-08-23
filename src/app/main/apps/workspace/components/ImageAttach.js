@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ImageAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
+const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false }) => {
   const [valid, currentEditInq, attachmentList] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.validation,
     workspace.inquiryReducer.currentEditInq,
@@ -43,13 +43,14 @@ const ImageAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   const dispatch = useDispatch();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [srcUrl, setSrcUrl] = useState(file.src || null);
-  const images = [file.src];
   const classes = useStyles();
+  const allowUpdateInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_UPDATE_INQUIRY });
+  const allowAnswerAttachment = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
 
   const urlMedia = (fileExt, file) => {
-    if (fileExt.match(/jpeg|jpg|png/g)) {
+    if (fileExt.toLowerCase().match(/jpeg|jpg|png/g)) {
       return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
-    } else if (fileExt.match(/pdf/g)) {
+    } else if (fileExt.toLowerCase().match(/pdf/g)) {
       return URL.createObjectURL(new Blob([file], { type: 'application/pdf' }));
     } else {
       return URL.createObjectURL(new Blob([file]));
@@ -74,7 +75,7 @@ const ImageAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   };
   const downloadFile = () => {
     const link = document.createElement('a');
-    link.href = file.src;
+    link.href = srcUrl;
     link.setAttribute('download', file.name);
     document.body.appendChild(link);
     link.click();
@@ -84,36 +85,37 @@ const ImageAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
   const handleRemoveFile = (file) => {
     const inq = { ...currentEditInq };
     const optionsAttachmentList = [...attachmentList];
-    if (field && file.id) {
-      const indexMedia = inq.mediaFile.findIndex((f) => f.id === file.id);
-      inq.mediaFile.splice(indexMedia, 1);
-      dispatch(InquiryActions.editInquiry(inq));
-      // update attachment list
-      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
-    } else if (file.id) {
-      // update attachment list
-      for (var i = 0; i < optionsAttachmentList.length; i++) {
-        const item = optionsAttachmentList[i];
-        if (file.id && item.id == file.id) {
-          optionsAttachmentList.splice(i, 1);
-          break;
-        }
+    if (isAnswer) {
+      inq.attachmentAnswer = {inquiry: inq.id};
+      if (inq?.mediaFilesAnswer?.length) {
+        inq.mediaFilesAnswer.splice(indexMedia, 1);
+        dispatch(InquiryActions.setEditInq(inq));
       }
-      dispatch(
-        InquiryActions.validateAttachment({
-          field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
-          nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
-        })
-      );
-      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
     } else {
-      // Remove attachment at local
-      if (openInquiryForm) {
-        const inqLocal = { ...currentEditInq };
-        const indexMedia = inqLocal.mediaFile.findIndex((f) => f.name === file.name);
-        inqLocal.mediaFile.splice(indexMedia, 1);
-        dispatch(InquiryActions.editInquiry(inqLocal));
+      if (field && file.id) {
+        const indexMedia = inq.mediaFile.findIndex((f) => f.id === file.id);
+        inq.mediaFile.splice(indexMedia, 1);
+        dispatch(InquiryActions.editInquiry(inq));
+        // update attachment list
+        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+      } else if (file.id) {
+        // update attachment list
+        for (var i = 0; i < optionsAttachmentList.length; i++) {
+          const item = optionsAttachmentList[i];
+          if (file.id && item.id == file.id) {
+            optionsAttachmentList.splice(i, 1);
+            break;
+          }
+        }
+        dispatch(
+          InquiryActions.validateAttachment({
+            field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
+            nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
+          })
+        );
+        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
       } else {
+        // Remove attachment at local
         const inqLocal = { ...currentEditInq };
         const indexMedia = inqLocal.mediaFile.findIndex((f) => f.name === file.name);
         inqLocal.mediaFile.splice(indexMedia, 1);
@@ -122,6 +124,7 @@ const ImageAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
     }
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
+
 
   return (
     <div className={classes.root}>
@@ -140,17 +143,29 @@ const ImageAttach = ({ indexInquiry, file, field, hiddenRemove = false }) => {
           onClick={downloadFile}>
           {file.name}
         </h3>
-        {!hiddenRemove && (
-          <PermissionProvider action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
-            <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: '2px' }}>
-              <CloseIcon />
-            </IconButton>
-          </PermissionProvider>
+        {isAnswer ? (
+          !hiddenRemove && (
+            <PermissionProvider
+              action={PERMISSION.INQUIRY_ANSWER_ATTACHMENT}>
+              <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                <CloseIcon />
+              </IconButton>
+            </PermissionProvider>
+          )
+        ) : (
+          !hiddenRemove && (
+            <PermissionProvider
+              action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
+              <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                <CloseIcon />
+              </IconButton>
+            </PermissionProvider>
+          )
         )}
       </div>
       {isViewerOpen && (
         <ImageViewer
-          src={images}
+          src={[srcUrl]}
           currentIndex={0}
           onClose={closeImageViewer}
           disableScroll={false}

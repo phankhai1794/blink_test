@@ -13,7 +13,7 @@ import FilterNoneIcon from '@material-ui/icons/FilterNone';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
-import { Box, Tabs, Tab, Divider, Link, Chip } from '@material-ui/core';
+import { Box, Tabs, Tab, Divider, Link, Chip, Button } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import OpenInNew from '@material-ui/icons/OpenInNew';
@@ -23,7 +23,7 @@ import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 import PopoverFooter from './PopoverFooter';
-import PopoverFooterAdmin from './PopoverFooter1';
+import PopupConfirm from "./PopupConfirm";
 
 const theme = createMuiTheme({
   typography: {
@@ -129,11 +129,13 @@ const useStyles = makeStyles(() => ({
     margin: 'auto',
     marginTop: '2rem',
     backgroundColor: 'white',
+    position: 'relative',
     width: (props) => (props.isFullScreen ? '1200px' : '900px')
   },
   dialogContentAttachment: {
     padding: '0',
-    position: 'relative'
+    position: 'relative',
+    width: (props) => (props.isFullScreen ? '1200px' : '950px')
   },
   divider: {
     backgroundColor: '#8A97A3'
@@ -171,6 +173,7 @@ const useStyles = makeStyles(() => ({
 export default function Form(props) {
   const dispatch = useDispatch();
   const {
+    user,
     children,
     title,
     field,
@@ -180,7 +183,10 @@ export default function Form(props) {
     toggleForm,
     customActions,
     tabs,
-    popoverfooter
+    popoverfooter,
+    showBtnSend,
+    disableSendBtn,
+    nums
   } = props;
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -205,6 +211,7 @@ export default function Form(props) {
   const classes = useStyles({ isFullScreen });
   const classesHover = useStyles();
   const [idBtn, setIdBtn] = useState('');
+  const [checkSubmit, setCheckSubmit] = useState(true);
 
   useEffect(() => {
     const temp = listMinimize.find((e) => e.field === field);
@@ -335,6 +342,7 @@ export default function Form(props) {
     //
     dispatch(InquiryActions.setOpenedInqForm(false));
     dispatch(FormActions.setEnableSaveInquiriesList(true));
+    dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
   };
   const handleChange = (_, newValue) => {
     setValue(newValue);
@@ -356,10 +364,10 @@ export default function Form(props) {
     setOpenFab(status);
   };
 
-  const countInq = (recevier) => {
-    let count = 0;
-    inquiries.forEach((inq) => inq.receiver.includes(recevier) && count++);
-    return count;
+
+  const sendMailClick = () => {
+    toggleForm(false);
+    dispatch(FormActions.toggleOpenEmail(true))
   };
 
   useEffect(() => {
@@ -367,8 +375,7 @@ export default function Form(props) {
       props.tabChange(0);
       setValue(0);
     }
-  }, [openInqReview]);
-
+  }, [openInqReview, inquiries]);
   return (
     <div>
       {openFab && (
@@ -397,44 +404,55 @@ export default function Form(props) {
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
-        {tabs && (
-          <Box style={{ borderBottom: '1px solid #515F6B' }} sx={{}}>
+        {tabs && nums && nums.some(num => num > 0) && (
+          <Box style={{ marginLeft: 20, marginRight: 20, borderBottom: '1px solid #515F6B' }} sx={{}}>
             <Tabs
               indicatorColor="primary"
-              style={{ margin: 0 }}
+              style={{ display: 'flex', margin: 0, height: '50px', }}
               value={value}
               onChange={handleChange}>
-              <Tab
+              {nums[0] && <Tab
                 classes={{ wrapper: classes.iconLabelWrapper }}
                 className={clsx(classes.tab, value === 0 && classes.colorSelectedTab)}
                 label="Customer"
                 icon={
                   <div className={clsx(classes.countBtn, value === 0 && classes.colorCountBtn)}>
-                    {countInq('customer')}
+                    {nums[0]}
                   </div>
                 }
-              />
-              <Tab
+              />}
+              {nums[1] && <Tab
                 classes={{ wrapper: classes.iconLabelWrapper }}
-                className={clsx(classes.tab, value === 1 && classes.colorSelectedTab)}
+                className={clsx(classes.tab, (value === 1 || !nums[1]) && classes.colorSelectedTab)}
                 label="Onshore"
                 icon={
-                  <div className={clsx(classes.countBtn, value === 1 && classes.colorCountBtn)}>
-                    {countInq('onshore')}
+                  <div className={clsx(classes.countBtn, (value === 1 || !nums[1]) && classes.colorCountBtn)}>
+                    {nums[1]}
                   </div>
                 }
-              />
+              />}
             </Tabs>
           </Box>
         )}
         <MuiDialogContent
           classes={{
             root:
-              field === 'ATTACHMENT_LIST' ? classes.dialogContentAttachment : classes.dialogContent
+              (field === 'ATTACHMENT_LIST' ||
+                ((field === 'INQUIRY_LIST' || field === currentField) && isShowBackground))
+                ? classes.dialogContentAttachment : classes.dialogContent
           }}
-          style={{ overflow: field === 'ATTACHMENT_LIST' && isShowBackground ? 'hidden' : '' }}>
+          style={{
+            overflow: isShowBackground && 'hidden',
+          }}>
           {children}
         </MuiDialogContent>
+
+        {field !== 'ATTACHMENT_LIST' &&
+          (<PopupConfirm field={field} handleCheckSubmit={() => {
+            setCheckSubmit(!checkSubmit)
+          }} />
+          )}
+
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
           <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>
@@ -466,22 +484,36 @@ export default function Form(props) {
                 </div>
               </PermissionProvider>
             )}
-
-            {!popoverfooter && (
+            {(showBtnSend && user === 'workspace') ?
+              <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
+                <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '2.6rem' }}>
+                  <Button
+                    variant="text"
+                    size="medium"
+                    style={{
+                      textTransform: 'none',
+                      fontWeight: 'bold',
+                      width: 120,
+                      color: 'white',
+                      backgroundColor: disableSendBtn ? '#CCD3D1' : '#bd1874',
+                      borderRadius: '8px',
+                      fontFamily: 'Montserrat'
+                    }}
+                    disabled={disableSendBtn}
+                    onClick={sendMailClick}
+                  >
+                    Send
+                  </Button>
+                </div>
+              </PermissionProvider> :
               <div style={{ marginLeft: '2rem' }}>
-                {!showSaveInquiry ? (
-                  <PopoverFooter title={field} />
-                ) : (
-                  <PermissionProvider action={PERMISSION.VIEW_SAVE_INQUIRY}>
-                    <PopoverFooterAdmin handleToggleFab={handleSetOpenFab} />
-                  </PermissionProvider>
-                )}
+                {field !== 'INQUIRY_REVIEW' && <PopoverFooter user={user} title={field} checkSubmit={checkSubmit} />}
               </div>
-            )}
-          </DialogActions>
+            }
+          </DialogActions >
         )}
         {customActions}
-      </Dialog>
-    </div>
+      </Dialog >
+    </div >
   );
 }

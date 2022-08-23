@@ -1,7 +1,7 @@
 import { FuseChipSelect } from '@fuse';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getKeyByValue, displayTime } from '@shared';
+import { getLabelById, stateResquest, toFindDuplicates } from '@shared';
 import {
   FormControl,
   FormControlLabel,
@@ -10,14 +10,16 @@ import {
   Radio,
   RadioGroup,
   Divider,
-  Grid, TextField,
+  Grid,
+  TextField,
+  Tooltip,
+  IconButton
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { uploadFile, getFile } from 'app/services/fileService';
-import { updateInquiry, saveInquiry } from 'app/services/inquiryService';
+import { uploadFile } from 'app/services/fileService';
+import { updateInquiry, saveInquiry, deleteInquiry } from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
-import { toFindDuplicates } from '@shared';
 import clsx from 'clsx';
 import axios from 'axios';
 
@@ -62,9 +64,7 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiFormGroup-root': {
       flexDirection: 'row'
     },
-    '& .container': {
-      marginBottom: 5
-    }
+
   },
   button: {
     margin: theme.spacing(1),
@@ -132,6 +132,11 @@ const InquiryEditor = (props) => {
     metadata.field_options.filter((v) => currentEditInq.field === v.value)[0]
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
+  const [allowDeleteInq, setAllowDeleteInq] = useState(true);
+
+  useEffect(() => {
+    myBL?.state !== stateResquest && setAllowDeleteInq(false);
+  }, []);
 
   const styles = (valid, width) => {
     return {
@@ -141,18 +146,19 @@ const InquiryEditor = (props) => {
       }
     };
   };
+
   useEffect(() => {
     if (fieldValue) {
-      const list = [currentEditInq]
-      const filter = metadata.inq_type_options.filter(data => {
-        return data.field?.includes(fieldValue.value) && list.filter(q =>
-          q.inqType === data.value && q.field === fieldValue.value
-        ).length === 0
-      })
+      const list = [currentEditInq];
+      const filter = metadata.inq_type_options.filter((data) => {
+        return (
+          data.field?.includes(fieldValue.value) &&
+          list.filter((q) => q.inqType === data.value && q.field === fieldValue.value).length === 0
+        );
+      });
       setInqTypeOption(filter);
     }
   }, [fieldValue]);
-
 
   const handleTypeChange = (e) => {
     const inq = { ...currentEditInq };
@@ -211,6 +217,21 @@ const InquiryEditor = (props) => {
     dispatch(InquiryActions.validate({ ...valid, receiver: true }));
     optionsOfQuestion.receiver.push(e.target.value);
     dispatch(InquiryActions.setEditInq(optionsOfQuestion));
+  };
+
+  const removeQuestion = () => {
+    if (currentEditInq.id) {
+      const optionsOfQuestion = [...inquiries];
+      const index = optionsOfQuestion.findIndex((q) => q.id === currentEditInq.id);
+      const inqDelete = optionsOfQuestion.splice(index, 1)[0];
+      deleteInquiry(inqDelete.id)
+        .then(() => {
+          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+        })
+        .catch((error) => console.error(error));
+    } else {
+      dispatch(InquiryActions.setEditInq());
+    }
   };
 
   const onSave = async () => {
@@ -353,16 +374,10 @@ const InquiryEditor = (props) => {
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
         );
-        const list = [...inquiries];
-        if (!currentEditInq.id) {
-          list.push(currentEditInq);
-        }
-        list.forEach((ls, i) => {
-          if (ls.id === currentEditInq.id) {
-            list[i] = { ...currentEditInq };
-          }
-        });
-        dispatch(InquiryActions.setInquiries(list));
+
+        // TODO
+        dispatch(InquiryActions.saveInquiry());
+        dispatch(FormActions.toggleReload());
         dispatch(InquiryActions.setEditInq());
       }
     } else {
@@ -414,15 +429,14 @@ const InquiryEditor = (props) => {
 
   return (
     <>
-      <div className="flex justify-between" style={{ padding: '0.5rem' }}>
+      <div className="flex justify-between" style={{ padding: '0.5rem', marginRight: '-15px' }}>
         <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
           {currentEditInq.field
-            ? getKeyByValue(metadata['field'], currentEditInq.field)
+            ? getLabelById(metadata['field_options'], currentEditInq.field)
             : 'New Inquiry'}
         </div>
 
         <FormControl
-          error={!valid.receiver && !currentEditInq.receiver.length}
           className={classes.checkedIcon}>
           <RadioGroup
             aria-label="receiver"
@@ -440,10 +454,19 @@ const InquiryEditor = (props) => {
               label="Onshore"
             />
           </RadioGroup>
-          <FormControlLabel control={<AttachFile/>} />
-          {!valid.receiver && !currentEditInq.receiver.length ? (
-            <FormHelperText>Pick at least one!</FormHelperText>
-          ) : null}
+
+          <AttachFile />
+          {allowDeleteInq && (
+            <Tooltip title="Delete Inquiry">
+              <IconButton style={{ padding: '2px', height: '40px', width: '40px' }} onClick={() => removeQuestion()}>
+                <img
+                  style={{ height: '22px', cursor: 'pointer' }}
+                  src="/assets/images/icons/trash-gray.svg"
+                />
+              </IconButton>
+
+            </Tooltip>
+          )}
         </FormControl>
       </div>
       {currentEditInq && (
@@ -552,17 +575,18 @@ const InquiryEditor = (props) => {
               ))}
           </>
           <>
-            {currentEditInq.answerObj[0]?.mediaFiles?.length > 0 && <h3>Attachment Answer:</h3>}
-            {currentEditInq.answerObj[0]?.mediaFiles?.map((file, mediaIndex) => (
+            {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+            {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
               <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                 {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                   <ImageAttach
                     file={file}
                     field={currentEditInq.field}
                     style={{ margin: '2.5rem' }}
+                    isAnswer={true}
                   />
                 ) : (
-                  <FileAttach file={file} field={currentEditInq.field} />
+                  <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
                 )}
               </div>
             ))}

@@ -6,6 +6,8 @@ import clsx from 'clsx';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { getMail } from 'app/services/mailService';
+import { loadComment } from 'app/services/inquiryService';
 
 import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
@@ -13,6 +15,7 @@ import * as FormActions from '../store/actions/form';
 import TagsInput from './TagsInput';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
+import ReceiverProvider from './ReceiverProvider';
 
 const colorBtnReview = '#1564EE';
 
@@ -47,6 +50,7 @@ const SendInquiryForm = (props) => {
   });
 
   const [form, setForm] = useState(initialState);
+  const [inqHasComment, setInqHasComment] = useState([]);
 
   const isFormValid = () => {
     return form.toCustomer || form.toOnshore;
@@ -55,6 +59,26 @@ const SendInquiryForm = (props) => {
   const isMailVaid = () => Object.values(validateMail).filter(e => e).length
 
   useEffect(() => {
+    getMail(mybl.id).then((res) => {
+      if (res.data.length) {
+        let tags = {}, toCustomer = [], toOnshore = [];
+        // Offshore
+        res.data[0]?.toCustomer?.length && res.data[0].toCustomer.forEach(customer => {
+          toCustomer.push(customer.email)
+        });
+        // Onshore
+        res.data[0]?.toOnshore?.length && res.data[0].toOnshore.forEach(onshore => {
+          toOnshore.push(onshore.email)
+        });
+
+        toCustomer.length && (tags.toCustomer = toCustomer);
+        toOnshore.length && (tags.toOnshore = toOnshore);
+        dispatch(mailActions.setTags(tags));
+        setForm({ ...form, toCustomer: tags.toCustomer ? tags.toCustomer.join(',') : '', toOnshore: tags.toOnshore ? tags.toOnshore.join(',') : '' })
+      }
+    }).catch((error) => {
+      console.error(error)
+    });
     if (success) {
       dispatch(
         Actions.showMessage({
@@ -78,6 +102,18 @@ const SendInquiryForm = (props) => {
         type: mailActions.SENDMAIL_NONE
       });
     }
+
+    for (let i in inquiries) {
+      loadComment(inquiries[i].id)
+        .then((res) => {
+          if (res.length) {
+            const listInqId = inqHasComment;
+            listInqId.push(inquiries[i].id);
+            setInqHasComment(listInqId);
+          }
+        })
+        .catch((error) => console.error(error));
+    };
   }, [success, error]);
   useEffect(() => {
     if (openEmail && !suggestMails.length) {
@@ -103,7 +139,7 @@ const SendInquiryForm = (props) => {
     }
     else {
       dispatch({ type: mailActions.SENDMAIL_LOADING });
-      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form }));
+      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form, replyInqs: inqHasComment }));
     }
   };
 
@@ -143,38 +179,42 @@ const SendInquiryForm = (props) => {
         }
         FabTitle="E-mail">
         <>
-          <InputUI
-            id="toCustomer"
-            title="To Customer"
-            isCc={isCustomerCc}
-            isBcc={isCustomerBcc}
-            onCc={() => {
-              setIsCustomerCc(!isCustomerCc);
-            }}
-            onBcc={() => {
-              setIsCustomerBcc(!isCustomerBcc);
-            }}
-            onChanged={handleFieldChange}
-          />
-          {isCustomerCc && <InputUI id="toCustomerCc" title="Cc" onChanged={handleFieldChange} />}
-          {isCustomerBcc && (
-            <InputUI id="toCustomerBcc" title="Bcc" onChanged={handleFieldChange} />
-          )}
-          <InputUI
-            id="toOnshore"
-            title="To Onshore"
-            isCc={isOnshoreCc}
-            isBcc={isOnshoreBcc}
-            onCc={() => {
-              setIsOnshoreCc(!isOnshoreCc);
-            }}
-            onBcc={() => {
-              setIsOnshoreBcc(!isOnshoreBcc);
-            }}
-            onChanged={handleFieldChange}
-          />
-          {isOnshoreCc && <InputUI id="toOnshoreCc" title="Cc" onChanged={handleFieldChange} />}
-          {isOnshoreBcc && <InputUI id="toOnshoreBcc" title="Bcc" onChanged={handleFieldChange} />}
+          <ReceiverProvider receiver='customer'>
+            <InputUI
+              id="toCustomer"
+              title="To Customer"
+              isCc={isCustomerCc}
+              isBcc={isCustomerBcc}
+              onCc={() => {
+                setIsCustomerCc(!isCustomerCc);
+              }}
+              onBcc={() => {
+                setIsCustomerBcc(!isCustomerBcc);
+              }}
+              onChanged={handleFieldChange}
+            />
+            {isCustomerCc && <InputUI id="toCustomerCc" title="Cc" onChanged={handleFieldChange} />}
+            {isCustomerBcc && (
+              <InputUI id="toCustomerBcc" title="Bcc" onChanged={handleFieldChange} />
+            )}
+          </ReceiverProvider>
+          <ReceiverProvider receiver='onshore'>
+            <InputUI
+              id="toOnshore"
+              title="To Onshore"
+              isCc={isOnshoreCc}
+              isBcc={isOnshoreBcc}
+              onCc={() => {
+                setIsOnshoreCc(!isOnshoreCc);
+              }}
+              onBcc={() => {
+                setIsOnshoreBcc(!isOnshoreBcc);
+              }}
+              onChanged={handleFieldChange}
+            />
+            {isOnshoreCc && <InputUI id="toOnshoreCc" title="Cc" onChanged={handleFieldChange} />}
+            {isOnshoreBcc && <InputUI id="toOnshoreBcc" title="Bcc" onChanged={handleFieldChange} />}
+          </ReceiverProvider>
           <div style={{ display: 'flex', marginTop: 10 }}>
             <label className={clsx(classes.label)}>Subject</label>
           </div>
@@ -194,7 +234,6 @@ const SendInquiryForm = (props) => {
               value={form.subject}
               onChange={onInputChange}
             />
-
           </div>
           <div style={{ marginTop: 5, display: 'flex' }}>
             <textarea
@@ -210,7 +249,7 @@ const SendInquiryForm = (props) => {
                 borderRadius: 6,
                 resize: 'none'
               }}
-              multiline={true}
+              multiline="true"
               type="text"
               defaultValue=""
               onChange={handleOnChange}></textarea>
@@ -224,13 +263,29 @@ const SendInquiryForm = (props) => {
 const InquiryReview = (props) => {
   const [tabSelected, setTabSelected] = useState(0);
   const [openInqReview] = useSelector(({ workspace }) => [workspace.formReducer.openInqReview]);
+  const [inquiries] = useSelector(({ workspace }) => [workspace.inquiryReducer.inquiries]);
   const dispatch = useDispatch();
+
+  const countInq = (recevier) => {
+    let count = 0;
+    inquiries.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
+    return count;
+  };
+
+  const handleTabSelected = () => {
+    if (countInq('customer') === 0) {
+      return 'onshore'
+    } else {
+      return tabSelected === 0 ? 'customer' : 'onshore'
+    }
+  }
 
   return (
     <>
       <Form
         title={'Inquiry Preview'}
         tabs={['Customer', 'Onshore']}
+        nums={[countInq('customer'), countInq('onshore')]}
         open={openInqReview}
         toggleForm={(status) => dispatch(FormActions.toggleOpenInquiryReview(status))}
         tabChange={(newValue) => {
@@ -245,7 +300,7 @@ const InquiryReview = (props) => {
           <div style={{ height: '800px' }}>
             <AllInquiry
               user="workspace"
-              receiver={tabSelected === 0 ? 'customer' : 'onshore'}
+              receiver={handleTabSelected()}
               collapse={true}
               openInquiryReview={true}
             />
@@ -281,11 +336,9 @@ const InputUI = (props) => {
   const classes = useStyles(props);
   return (
     <Grid
-      style={{ marginTop: 8 }}
       container
       direction="row"
-      justifyContent="flex-start"
-      alignItems="center">
+      style={{ marginTop: 8, alignItems: 'center', justifyContent: "flex-start" }}>
       <Grid item xs={1}>
         {title === 'Cc' || title === 'Bcc' ? (
           <div

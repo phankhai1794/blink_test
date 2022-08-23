@@ -9,6 +9,7 @@ import HelpIcon from '@material-ui/icons/Help';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import ReplyIcon from '@material-ui/icons/Reply';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
@@ -29,6 +30,7 @@ const lightPink = '#FAF1F5';
 const red = '#DC2626';
 const blue = '#EAF2FD';
 const green = '#2F80ED';
+const success = '#36B37E'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -49,6 +51,12 @@ const useStyles = makeStyles((theme) => ({
   hasInquiry: {
     '& fieldset': {
       backgroundColor: lightPink
+    }
+  },
+  hasResolved: {
+    '& fieldset': {
+      backgroundColor: '#EBF7F2',
+      borderColor: `${success} !important`
     }
   },
   hasAnswer: {
@@ -108,6 +116,9 @@ const useStyles = makeStyles((theme) => ({
   colorEmptyInqIcon: {
     color: `${pink} !important`
   },
+  colorHasResolved: {
+    color: `${success} !important`
+  },
   locked: {
     '& fieldset': {
       backgroundColor: lockGray
@@ -127,11 +138,12 @@ const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_I
 const BLField = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const { children, width, multiline, rows, selectedChoice, id, lock, readOnly } = props;
+  const { children, width, multiline, rows, selectedChoice, id, lock, readOnly, disableClick } = props;
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
-  const [isHasAnswer, setHasAnswer] = useState(false);
+  const [hasAnswer, setHasAnswer] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
+  const [isResolved, setIsResolved] = useState(false)
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -161,26 +173,28 @@ const BLField = (props) => {
   };
 
   const onClick = (e) => {
-    if (questionIsEmpty) {
-      dispatch(InquiryActions.addQuestion(id));
-    } else {
-      const currentInq = inquiries.find((q) => q.field === id);
-      dispatch(InquiryActions.setOneInq(currentInq));
-    }
-    if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
-      if (
-        inquiries.length > 0 &&
-        !currentEditInq &&
-        checkValidate(inquiries[inquiries.length - 1])
-      ) {
-        if (inquiries.length + 1 === metadata.field_options.length) {
-          dispatch(FormActions.toggleAddInquiry(false));
-        }
+    if (!disableClick) {
+      if (questionIsEmpty) {
+        dispatch(InquiryActions.addQuestion(id));
+      } else {
+        const currentInq = inquiries.find((q) => q.field === id);
+        dispatch(InquiryActions.setOneInq(currentInq));
       }
-      dispatch(FormActions.toggleCreateInquiry(true));
+      if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
+        if (
+          inquiries.length > 0 &&
+          !currentEditInq &&
+          checkValidate(inquiries[inquiries.length - 1])
+        ) {
+          if (inquiries.length + 1 === metadata.field_options.length) {
+            dispatch(FormActions.toggleAddInquiry(false));
+          }
+        }
+        dispatch(FormActions.toggleCreateInquiry(true));
+      }
+      dispatch(InquiryActions.setField(e.currentTarget.id));
+      setAnchorEl(e.currentTarget.id);
     }
-    dispatch(InquiryActions.setField(e.currentTarget.id));
-    setAnchorEl(e.currentTarget.id);
   };
 
   const checkQuestionIsEmpty = () => {
@@ -193,8 +207,27 @@ const BLField = (props) => {
     return true;
   };
 
+  const checkAnswerSent = () => {
+    if (inquiries.length > 0) {
+      const lst = inquiries.filter((q) => q.field === id);
+      return lst.some(e => ['ANS_SENT','REP_Q_DRF','REP_Q_SENT','REP_A_DRF','REP_A_SENT'].includes(e.state))
+    }
+    return false;
+  };
+
+  const checkQuestionIsResolved = () => {
+    if (inquiries.length > 0) {
+      const lst = inquiries.filter((q) => q.field === id);
+      if (lst.length > 0)
+        return lst.every(e => e.state === 'COMPL' || e.state === 'UPLOADED')
+    }
+    return false;
+  };
+
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty());
+    setHasAnswer(checkAnswerSent())
+    setIsResolved(checkQuestionIsResolved())
   }, [inquiries, metadata]);
 
   return (
@@ -216,7 +249,8 @@ const BLField = (props) => {
               classes.root,
               !questionIsEmpty ? classes.hasInquiry : '',
               lock ? classes.locked : '',
-              isHasAnswer ? classes.hasAnswer : ''
+              hasAnswer ? classes.hasAnswer : '',
+              isResolved ? classes.hasResolved : ''
             )}
             InputProps={{
               readOnly: readOnly || true,
@@ -232,18 +266,22 @@ const BLField = (props) => {
                     <AttachFile
                       className={clsx(
                         classes.sizeIcon,
-                        !isHasAnswer ? classes.colorHasInqIcon : classes.colorHasAnswer,
-                        classes.attachIcon
+                        !hasAnswer ? classes.colorHasInqIcon : classes.colorHasAnswer,
+                        classes.attachIcon,
+                        isResolved ? classes.colorHasResolved : ''
                       )}
                     />
                   )}
-
-                  {!questionIsEmpty && !isHasAnswer && (
-                    <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
-                  )}
-                  {!questionIsEmpty && isHasAnswer && (
+                  {isResolved ? (
+                    <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)} />
+                  ) :
+                    !questionIsEmpty && !hasAnswer && (
+                      <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
+                    )}
+                  {!questionIsEmpty && hasAnswer && (
                     <ReplyIcon className={clsx(classes.sizeIcon, classes.colorHasAnswer)} />
                   )}
+
                   {lock ? (
                     <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
                   ) : (

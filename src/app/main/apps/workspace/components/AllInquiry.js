@@ -1,26 +1,12 @@
-import { getKeyByValue } from '@shared';
+import { getLabelById } from '@shared';
 import { loadComment } from 'app/services/inquiryService';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useEffect, useState } from 'react';
 import {
   Card,
   Typography,
-  FormControl,
-  FormGroup,
-  Tooltip,
-  FormControlLabel,
-  IconButton,
-  Checkbox,
-  FormHelperText,
   Divider,
-  RadioGroup,
-  Radio,
-  Grid
 } from '@material-ui/core';
-import IconAttachFile from '@material-ui/icons/AttachFile';
-import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
-import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 
@@ -28,7 +14,6 @@ import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 
 import InquiryEditor from './InquiryEditor';
-import AttachFile from './AttachFile';
 import InquiryViewer from './InquiryViewer';
 import InquiryAnswer from './InquiryAnswer';
 
@@ -94,10 +79,48 @@ const useStyles = makeStyles((theme) => ({
   boxItem: {
     borderLeft: '2px solid',
     borderColor: '#DC2626',
-    paddingLeft: '2rem'
+    paddingLeft: '2rem',
+    '&.resolved': {
+      borderColor: '#36B37E'
+    }
   },
   boxHasComment: {
     borderColor: '#2F80ED'
+  },
+  backgroundConfirm: {
+    top: 74,
+    left: 0,
+    position: 'absolute',
+    width: '950px',
+    minHeight: '100%',
+    background: '#ffffff85'
+  },
+  dialogConfirm: {
+    position: 'absolute',
+    top: 0,
+    width: '100%',
+    height: 74,
+    background: '#BD0F72',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    '& p': {
+      marginLeft: '27px',
+      fontSize: 16,
+      fontWeight: 600,
+      color: '#FFFFFF',
+      letterSpacing: 1
+    },
+    '& .btnConfirm': {
+      marginRight: '24px',
+      '& .MuiButton-label': {
+        color: '#BD0F72'
+      },
+      '& .MuiButtonBase-root': {
+        background: '#FFFFFF',
+        borderRadius: 6
+      }
+    },
   }
 }));
 const AllInquiry = (props) => {
@@ -106,16 +129,14 @@ const AllInquiry = (props) => {
   const classes = useStyles();
   const [viewDropDown, setViewDropDown] = useState('');
   const [inqHasComment, setInqHasComment] = useState([]);
-  const [inquiries, currentEditInq, metadata, valid, myBL] = useSelector(({ workspace }) => [
+  const [isSaved, setSaved] = useState(false);
+  const [inquiries, currentEditInq, metadata, isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.metadata,
-    workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.myBL
+    workspace.inquiryReducer.isShowBackground,
   ]);
-  const allowCreateAttachmentAnswer = PermissionProvider({
-    action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
-  });
+
   let CURRENT_NUMBER = 0;
 
   const changeToEditor = (inq) => {
@@ -128,31 +149,6 @@ const AllInquiry = (props) => {
       setViewDropDown('');
     }
   };
-
-  const handleReceiverChange = (e, index) => {
-    const optionsOfQuestion = { ...currentEditInq };
-    optionsOfQuestion.receiver = [];
-    dispatch(InquiryActions.validate({ ...valid, receiver: true }));
-    optionsOfQuestion.receiver.push(e.target.value);
-    dispatch(InquiryActions.setEditInq(optionsOfQuestion));
-    dispatch(FormActions.setEnableSaveInquiriesList(false));
-  };
-
-
-  useEffect(() => {
-  
-    for (let i in inquiries) {
-      loadComment(inquiries[i].id)
-        .then((res) => {
-          if (res.length) {
-            const listInqId = inqHasComment;
-            listInqId.push(inquiries[i].id);
-            setInqHasComment(listInqId);
-          }
-        })
-        .catch((error) => console.error(error));
-    }
-  }, []);
 
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
@@ -168,63 +164,102 @@ const AllInquiry = (props) => {
     }
   };
 
+  const handleCancel = () => {
+    // reset media file
+    const optionsInquires = [...inquiries];
+    const editedIndex = optionsInquires.findIndex(inq => currentEditInq.id === inq.id);
+    optionsInquires[editedIndex].mediaFilesAnswer = optionsInquires[editedIndex].mediaFilesAnswer.filter(inq => inq.id);
+    dispatch(InquiryActions.setInquiries(optionsInquires));
+    dispatch(InquiryActions.setEditInq({}));
+  };
+
+
+  const handleSetSave = () => {
+    dispatch(InquiryActions.setEditInq({}));
+  };
+
   return (
     <>
-      {inquiries.map((q, index) => {
-        if (receiver && !q.receiver.includes(receiver)) {
-          return (
-            <div key={index} style={{ display: 'flex' }} onClick={() => changeToEditor(q)}></div>
-          );
-        }
-        const type = q.ansType;
-        CURRENT_NUMBER++;
-        if (props.user === 'workspace'){
-          return currentEditInq && q.id === currentEditInq.id ? (
-            <>
-              {<InquiryEditor onCancel={onCancel} />}
-              <Divider
-                className="my-32"
-                variant="middle"
-                style={{ height: '2px', color: '#BAC3CB' }}
-              />
-            </>
-          ) : (
-            <Card elevation={0} style={{ padding: '1rem ' }}>
-              <div
-                className={clsx(
-                  classes.boxItem,
-                  inqHasComment.includes(q.id) && classes.boxHasComment
-                )}>
-                <div style={{ marginBottom: '12px' }}>
-                  <Typography color="primary" variant="h5" className={classes.inqTitle}>
-                    {`${CURRENT_NUMBER}. ${getKeyByValue(metadata['field'], q.field)}`}
-                  </Typography>
-                   
-                  <InquiryViewer user={props.user} question={q} index={index} />
-                </div>
+      <div className='inquiryList' style={{
+        padding: isShowBackground && '8px 24px',
+        marginTop: isShowBackground && '2rem'
+      }}>
+        {inquiries.map((q, index) => {
+          if (receiver && !q.receiver.includes(receiver)) {
+            return (
+              <div key={index} style={{ display: 'flex' }} onClick={() => changeToEditor(q)}></div>
+            );
+          }
+          const type = q.ansType;
+          CURRENT_NUMBER += 1;
+          if (props.user === 'workspace') {
+            return currentEditInq && q.id === currentEditInq.id ? (
+              <div key={index}>
+                {<InquiryEditor onCancel={onCancel} />}
+                <Divider
+                  className="my-32"
+                  variant="middle"
+                  style={{ height: '2px', color: '#BAC3CB' }}
+                />
               </div>
-              <Divider
-                className="my-32"
-                variant="middle"
-                style={{ height: '2px', color: '#BAC3CB' }}
-              />
-            </Card>
-          );
-        }else{
-          const isEdit = currentEditInq && q.id === currentEditInq.id;
-          return (
-            <>
-              <InquiryViewer
-                toggleEdit={() => toggleEdit(index)}
-                question={isEdit?currentEditInq: q}
-                user={props.user}></InquiryViewer>
-              {isEdit && <InquiryAnswer onCancel={onCancel} />}
-            </>
-          );
-        }
-       
+            ) : (
+              <Card key={index} elevation={0} style={{ padding: '1rem ' }}>
+                <div
+                  className={clsx(
+                    classes.boxItem,
+                    (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
+                    inqHasComment.includes(q.id) && classes.boxHasComment
+                  )}>
+                  <div style={{ marginBottom: '12px' }}>
+                    <Typography color="primary" variant="h5" className={classes.inqTitle}>
+                      {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
+                    </Typography>
 
-      })}
+                    <InquiryViewer user={props.user} question={q} index={index} openInquiryReview={openInquiryReview} />
+                  </div>
+                </div>
+                <Divider
+                  className="my-32"
+                  variant="middle"
+                  style={{ height: '2px', color: '#BAC3CB' }}
+                />
+              </Card>
+            );
+          } else {
+            const isEdit = currentEditInq && q.id === currentEditInq.id;
+            return (
+              <>
+                <div
+                  className={clsx(
+                    classes.boxItem,
+                    (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
+                    inqHasComment.includes(q.id) && classes.boxHasComment
+                  )}>
+                  <div style={{ marginBottom: '12px' }}>
+                    <Typography color="primary" variant="h5" className={classes.inqTitle}>
+                      {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
+                    </Typography>
+
+                    <InquiryViewer
+                      toggleEdit={() => toggleEdit(index)}
+                      question={isEdit ? currentEditInq : q}
+                      user={props.user}
+                      isSaved={isSaved}
+                      setSave={() => setSaved(false)}
+                    />
+                    {isEdit && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
+                  </div>
+                </div>
+                <Divider
+                  className="my-32"
+                  variant="middle"
+                  style={{ height: '2px', color: '#BAC3CB' }}
+                />
+              </>
+            );
+          }
+        })}
+      </div>
     </>
   );
 };

@@ -81,15 +81,13 @@ const TableCD = (props) => {
       dispatch(InquiryActions.setOneInq(currentInq));
     }
     else if (allowAddInquiry) {
+      dispatch(InquiryActions.addQuestion(id));
       if (
         inquiries.length > 1 &&
         !inquiries[inquiries.length - 1].id
       ) {
         if ( inquiries.length + 1 === metadata.field_options.length) {
           dispatch(FormActions.toggleAddInquiry(false));
-        }
-        if (inquiries.length !== metadata.field_options.length) {
-          dispatch(InquiryActions.addQuestion(id));
         }
       }
       dispatch(FormActions.toggleCreateInquiry(true));
@@ -150,42 +148,42 @@ const TableCD = (props) => {
               containerDetail.map((cd, index) =>
                 (<Grid container spacing={2} className='px-8 py-2' key={index}>
                   <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>
+                    <BLField disableClick={true}>{cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}</BLField>
+                    <BLField disableClick={true}>{cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}</BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}</BLField>
+                    <BLField disableClick={true}>{cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}</BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}</BLField>
+                    <BLField disableClick={true}>{cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}</BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}</BLField>
+                    <BLField disableClick={true}>{cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}</BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField>{cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}</BLField>
+                    <BLField disableClick={true}>{cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}</BLField>
                   </Grid>
                 </Grid>))
               : (<Grid container spacing={2} className='px-8 py-2'>
                 <Grid item xs={2}>
-                  <BLField></BLField>
+                  <BLField disableClick={true}></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField></BLField>
+                  <BLField disableClick={true}></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField></BLField>
+                  <BLField disableClick={true}></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField></BLField>
+                  <BLField disableClick={true}></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField></BLField>
+                  <BLField disableClick={true}></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField></BLField>
+                  <BLField disableClick={true}></BLField>
                 </Grid>
               </Grid>)
             }

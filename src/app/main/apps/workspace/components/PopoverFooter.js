@@ -1,68 +1,79 @@
-import { saveInquiry, changeStatus } from 'app/services/inquiryService';
-import { uploadFile } from 'app/services/fileService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { toFindDuplicates } from '@shared'
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { Link, Button, IconButton } from '@material-ui/core';
-import ReplyIcon from '@material-ui/icons/Reply';
-import CheckIcon from '@material-ui/icons/Check';
-import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
-import axios from 'axios';
-import * as AppActions from 'app/store/actions';
+import { Button, IconButton, Link } from '@material-ui/core';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
-import { setLastField } from "../store/actions/inquiry";
-
+import { setLastField } from '../store/actions/inquiry';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     borderRadius: '8px',
     width: '130px',
-    textTransform: 'none',
+    textTransform: 'none'
   },
   nextPrev: {
     '& .MuiButtonBase-root': {
       marginRight: 18,
       paddingLeft: 0,
-      paddingRight: 0,
+      paddingRight: 0
     },
     '& .MuiIconButton-root:hover': {
       backgroundColor: 'transparent'
     },
     '& .MuiIconButton-root:focus': {
       backgroundColor: 'transparent'
-    },
+    }
   }
 }));
-const PopoverFooter = ({ title }) => {
+const PopoverFooter = ({ title, user, checkSubmit }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [currentField, question, fields, myBL, displayCmt, valid, inquiries, metadata, lastField, openedInquiresForm] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.currentField,
-    workspace.inquiryReducer.question,
-    workspace.inquiryReducer.fields,
-    workspace.inquiryReducer.myBL,
-    workspace.inquiryReducer.displayCmt,
-    workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.metadata,
-    workspace.inquiryReducer.lastField,
-    workspace.inquiryReducer.openedInquiresForm,
-  ]);
-  const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
+  const [question, fields, inquiries, lastField, openedInquiresForm, currentField, enableSubmit] = useSelector(
+    ({ workspace }) => [
+      workspace.inquiryReducer.question,
+      workspace.inquiryReducer.fields,
+      workspace.inquiryReducer.inquiries,
+      workspace.inquiryReducer.lastField,
+      workspace.inquiryReducer.openedInquiresForm,
+      workspace.inquiryReducer.currentField,
+      workspace.inquiryReducer.enableSubmit,
+    ]
+  );
 
+  const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
+  const isShowBackground = useSelector(
+    ({ workspace }) => workspace.inquiryReducer.isShowBackground
+  );
+  const [isSubmit, setIsSubmit] = useState(true);
+
+  useEffect(() => {
+    let currentFields = [];
+    // inquiry list
+    if (title === 'INQUIRY_LIST') {
+      currentFields = inquiries;
+    } // inquiry detail
+    else if (title === currentField) {
+      currentFields = inquiries.filter(inq => inq.field === currentField);
+    }
+    let isSubmit = true;
+    currentFields.forEach((item) => {
+      if (item.answerObj && item.state === "ANS_DRF") {
+        isSubmit = false;
+      }
+    });
+    if (enableSubmit) isSubmit = false;
+    !isSubmit && setIsSubmit(false);
+  }, [inquiries, checkSubmit, enableSubmit]);
 
   const toggleInquiriresDialog = () => {
     dispatch(FormActions.toggleAllInquiry(true));
     dispatch(FormActions.toggleInquiry(true));
-    dispatch(FormActions.toggleSaveInquiry(true))
+    dispatch(FormActions.toggleSaveInquiry(true));
   };
-  
-  
+
   const nextQuestion = () => {
     dispatch(setLastField(question[question.length - 1].field));
     // check next if inquiry form opened
@@ -113,34 +124,82 @@ const PopoverFooter = ({ title }) => {
       dispatch(InquiryActions.setField(fields[temp]));
     }
   };
-  return (
-    <div className="flex justify-between" style={{ margin: '1.6rem auto', alignItems: "center" }}>
-      <div className={classes.nextPrev}>
-        {inquiries.length > 0 && (
-          <>
-            <IconButton onClick={prevQuestion}>
-              <img alt={'nextIcon'} src={`/assets/images/icons/prev.svg`} />
-            </IconButton>
-            <IconButton onClick={nextQuestion}>
-              <img alt={'prevIcon'} src={`/assets/images/icons/next.svg`} />
-            </IconButton>
-          </>
-        )}
 
-        <Link
+  const onSubmit = () => {
+    setIsSubmit(true);
+    dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
+  };
+
+  return (
+    <div
+      style={{
+        padding: 10,
+        position: 'relative',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+      {title !== 'INQUIRY_LIST' &&
+        <div
           style={{
-            fontFamily: 'Montserrat',
-            fontSize: '16px',
-            color: '#1564EE',
-            height: '20px',
-            weight: '145px',
-            fontWeight: '600',
-          }}
-          component="button" onClick={toggleInquiriresDialog}
-        >
-          Open all inquiries
-        </Link>
-      </div>  
+            position: 'absolute',
+            left: '0px',
+            top: '10px'
+          }}>
+          {inquiries.length > 0 && (
+            <>
+              <IconButton onClick={isShowBackground ? '' : prevQuestion}>
+                <img alt={'nextIcon'} src={`/assets/images/icons/prev.svg`} />
+              </IconButton>
+              <IconButton onClick={isShowBackground ? '' : nextQuestion}>
+                <img alt={'prevIcon'} src={`/assets/images/icons/next.svg`} />
+              </IconButton>
+            </>
+          )}
+
+          <Link
+            style={{
+              fontFamily: 'Montserrat',
+              fontSize: '16px',
+              color: isShowBackground ? 'rgb(21 100 238 / 58%)' : '#1564EE',
+              cursor: isShowBackground ? 'inherit' : 'pointer',
+              height: '20px',
+              weight: '145px',
+              fontWeight: '600',
+            }}
+            component="button"
+            onClick={isShowBackground ? '' : toggleInquiriresDialog}>
+            Open all inquiries
+          </Link>
+        </div>}
+      {
+        <PermissionProvider
+          action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}>
+          <div>
+            <Button
+              variant="contained"
+              style={{
+                textTransform: 'capitalize',
+                left: '13.45%',
+                right: '13.45%',
+                top: '25%',
+                bottom: '25%',
+                fontFamily: 'Montserrat',
+                fontStyle: 'normal',
+                fontWeight: '600',
+                fontSize: '16px',
+                textAlign: 'center',
+              }}
+              className={classes.root}
+              color="primary"
+              disabled={isSubmit}
+              onClick={onSubmit}>
+              Submit
+            </Button>
+          </div>
+        </PermissionProvider>
+      }
+
     </div>
   );
 };

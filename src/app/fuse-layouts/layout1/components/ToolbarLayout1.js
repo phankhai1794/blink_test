@@ -56,15 +56,16 @@ function ToolbarLayout1(props) {
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
   const user = useSelector(({ user }) => user);
-  const [allowAccess, inquiries] = useSelector((state) => [
-    state.header.allowAccess,
-    state.workspace.inquiryReducer.inquiries
+  const [allowAccess, validToken] = useSelector(({ header }) => [
+    header.allowAccess,
+    header.validToken
   ]);
+  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const myblState = useSelector(({ draftBL }) => draftBL.myblState);
   const [open, setOpen] = useState(false);
   const [disableConfirm, setDisableConfirm] = useState(false);
-  const inquiryLength = inquiries.length
-  const attachmentLength = inquiries.map(i => i.mediaFile.length).reduce((a, b) => a + b, 0)
+  const inquiryLength = inquiries.length;
+  const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
 
   useEffect(() => {
     myblState === draftConfirm && setDisableConfirm(true);
@@ -78,8 +79,8 @@ function ToolbarLayout1(props) {
 
   const openAttachment = () => {
     let isExistMedia = false;
-    inquiries.forEach(inq => {
-      if(inq.mediaFile.length > 0) {
+    inquiries.forEach((inq) => {
+      if (inq.mediaFile.length > 0) {
         isExistMedia = true;
         return;
       }
@@ -87,7 +88,7 @@ function ToolbarLayout1(props) {
     if (inquiries.length === 0 || !isExistMedia) {
       dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
     } else {
-      dispatch(FormActions.toggleAttachment(true))
+      dispatch(FormActions.toggleAttachment(true));
     }
   };
 
@@ -106,8 +107,9 @@ function ToolbarLayout1(props) {
   };
 
   useEffect(() => {
-    if (!user.displayName) {
+    if (!user.displayName || !validToken) {
       if (!allowAccess) {
+        localStorage.clear();
         history.push({
           pathname: '/login',
           ...(!logout && { cachePath: pathname, cacheSearch: search })
@@ -146,10 +148,10 @@ function ToolbarLayout1(props) {
                 src="assets/images/logos/one_ocean_network-logo.png"
                 className={clsx(classes.logo, classes.fitAvatar)}
                 alt="one-logo"
-              // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
-              //   component: Link,
-              //   to: '/'
-              // })}
+                // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+                //   component: Link,
+                //   to: '/'
+                // })}
               />
             </div>
 

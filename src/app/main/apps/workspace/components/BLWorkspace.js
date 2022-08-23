@@ -1,5 +1,5 @@
-import { getKeyByValue, NUMBER_INQ_BOTTOM } from '@shared';
-import { CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
+import { NUMBER_INQ_BOTTOM, REP_Q_DRAFT } from '@shared';
+import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDING, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, COMMODITY_CODE, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
 import React, { useEffect, useRef, useState } from 'react';
@@ -29,6 +29,7 @@ import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
 import TableCD from './TableCD';
 import TableCM from './TableCM';
 import AttachmentListNotification from './AttachmentListNotification';
+import SubmitAnswerNotification from "./SubmitAnswerNotification";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -69,8 +70,11 @@ const useStyles = makeStyles((theme) => ({
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const user = useSelector(({ user }) => user);
   const [isExpand, setIsExpand] = useState(false);
   const [newFileAttachment, setNewFileAttachment] = useState([]);
+  const [disableSendBtn, setDisableSendBtn] = useState(true);
+  const [tabSelected, setTabSelected] = useState(0);
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -79,6 +83,7 @@ const BLWorkspace = (props) => {
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
+
   const transAutoSaveStatus = useSelector(
     ({ workspace }) => workspace.transReducer.transAutoSaveStatus
   );
@@ -90,12 +95,12 @@ const BLWorkspace = (props) => {
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
   );
 
-  const getField = (field) => {
-    return metadata.field ? metadata.field[field] : '';
+  const getField = (keyword) => {
+    return metadata.field?.[keyword] || '';
   };
 
-  const getValueField = (field) => {
-    return content[getField(field)] || '';
+  const getValueField = (keyword) => {
+    return content[getField(keyword)] || '';
   };
 
   useEffect(() => {
@@ -148,71 +153,99 @@ const BLWorkspace = (props) => {
     }
   }, [openAttachment]);
 
-  const popupOpen = (inquiry, getField) => {
+  useEffect(() => {
+    if (inquiries.filter(inq => inq.state === REP_Q_DRAFT).length) {
+      setDisableSendBtn(false)
+    } else {
+      setDisableSendBtn(true)
+    }
+  }, [inquiries]);
+
+  const countInq = (inqs, recevier) => {
+    let count = 0;
+    inqs.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
+    return count;
+  };
+
+  const handleTabSelected = (inqs) => {
+    if (countInq(inqs, 'customer') === 0) {
+      return 'onshore'
+    } else {
+      return tabSelected === 0 ? 'customer' : 'onshore'
+    }
+  }
+
+  const popupOpen = (inquiry, curField) => {
     switch (inquiry.field) {
-    case 'INQUIRY_LIST':
-      return {
-        status: openAllInquiry,
-        toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
-        fabTitle: 'Inquiry List',
-        title: 'Inquiry List',
-        field: 'INQUIRY_LIST',
-        child: <AllInquiry user={props.user} />
-      };
-    case 'ATTACHMENT_LIST':
-      return {
-        status: openAttachment,
-        toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
-        fabTitle: 'Attachment List',
-        title: 'Attachment List',
-        hasAddButton: false,
-        field: 'ATTACHMENT_LIST',
-        popoverfooter: true,
-        customActions: inquiries.length > 0 && (
-          <>
-            <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
-              <AttachFileList
-                uploadImageAttach={(files) => setNewFileAttachment(files)}
-                isAttachmentList={true}
-                type={'addNew'}>
-                <AddCircleIcon
-                  style={{
-                    color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
-                    width: '50px',
-                    fontSize: '50px',
-                    cursor: isShowBackground ? 'inherit' : 'pointer'
-                  }}
-                />
-              </AttachFileList>
-            </PermissionProvider>
-          </>
-        ),
-        child: (
-          <AttachmentList
-            user={props.user}
-            newFileAttachment={newFileAttachment}
-            setFileAttachment={() => setNewFileAttachment([])}
-          />
-        )
-      };
-    case 'INQUIRY_FORM':
-      return {
-        status: openInquiryForm,
-        toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
-        fabTitle: 'Inquiry Form',
-        title: 'Inquiry Creation',
-        field: 'INQUIRY_FORM',
-        child: <Inquiry user={props.user} />
-      };
-    default:
-      return {
-        status: inquiry?.id === currentInq?.id,
-        toggleForm: () => { },
-        fabTitle: getField?.label,
-        title: getField?.value ? getKeyByValue(metadata['field'], getField?.value) : '',
-        field: getField?.value,
-        child: <Inquiry user={props.user} />
-      };
+      case 'INQUIRY_LIST':
+        return {
+          status: openAllInquiry,
+          tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
+          nums: user.role === 'Admin' ? [countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
+          toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
+          fabTitle: 'Inquiry List',
+          title: 'Inquiry List',
+          field: 'INQUIRY_LIST',
+          showBtnSend: true,
+          disableSendBtn: disableSendBtn,
+          child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries)} />
+        };
+      case 'ATTACHMENT_LIST':
+        return {
+          status: openAttachment,
+          toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
+          fabTitle: 'Attachment List',
+          title: 'Attachment List',
+          hasAddButton: false,
+          field: 'ATTACHMENT_LIST',
+          popoverfooter: true,
+          customActions: inquiries.length > 0 && (
+            <>
+              <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
+                <AttachFileList
+                  uploadImageAttach={(files) => setNewFileAttachment(files)}
+                  isAttachmentList={true}
+                  type={'addNew'}>
+                  <AddCircleIcon
+                    style={{
+                      color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
+                      width: '50px',
+                      fontSize: '50px',
+                      cursor: isShowBackground ? 'inherit' : 'pointer'
+                    }}
+                  />
+                </AttachFileList>
+              </PermissionProvider>
+            </>
+          ),
+          child: (
+            <AttachmentList
+              user={props.user}
+              newFileAttachment={newFileAttachment}
+              setFileAttachment={() => setNewFileAttachment([])}
+            />
+          )
+        };
+      case 'INQUIRY_FORM':
+        return {
+          status: openInquiryForm,
+          nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
+          toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
+          fabTitle: 'Inquiry Form',
+          title: 'Inquiry Creation',
+          field: 'INQUIRY_FORM',
+          child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))} />
+        };
+      default:
+        return {
+          status: inquiry?.id === currentInq?.id,
+          nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
+          toggleForm: () => { },
+          fabTitle: curField?.label,
+          title: curField?.label,
+          field: curField?.value,
+          child: <Inquiry user={props.user} />
+        };
     }
   };
 
@@ -230,8 +263,8 @@ const BLWorkspace = (props) => {
       return listTitle[inqId];
     } else {
       const fieldId = listMinimize.find((inq) => inq.id === inqId).field;
-      const getField = metadata.field_options.find((field) => fieldId === field.value);
-      return getField && getField.label;
+      const field = metadata.field_options.find((f) => fieldId === f.value);
+      return field && field.label;
     }
   };
 
@@ -247,11 +280,11 @@ const BLWorkspace = (props) => {
       inquiryReview: (status) => dispatch(FormActions.toggleOpenInquiryReview(status))
     };
     const currentInq = listMinimize.find((q) => q.id === inqId);
-    const getField = metadata.field_options.find((field) => currentInq.field === field.value);
+    const field = metadata.field_options.find((f) => currentInq.field === f.value);
     dispatch(InquiryActions.setField(currentInq.field));
     const popupObj = Object.keys(toggleFormType).includes(inqId)
       ? { toggleForm: toggleFormType[inqId] }
-      : popupOpen(currentInq, getField);
+      : popupOpen(currentInq, field);
     if (currentInq) {
       dispatch(InquiryActions.setOneInq(currentInq));
       popupObj.toggleForm(true);
@@ -266,6 +299,7 @@ const BLWorkspace = (props) => {
     <>
       <BLProcessNotification />
       <AttachmentListNotification />
+      <SubmitAnswerNotification />
       <div className={clsx('max-w-5xl', classes.root)}>
         <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
           {isExpand && (
@@ -297,18 +331,22 @@ const BLWorkspace = (props) => {
               zIndex: 999
             }}>
             {listMinimize.map((inquiry) => {
-              const getField = metadata.field_options.find(
-                (field) => inquiry.field === field.value
-              );
+              const field = metadata.field_options.find(f => inquiry.field === f.value);
               if (inquiry.field === 'EMAIL') {
                 return <SendInquiryForm field={'EMAIL'} key={inquiry.id} />;
               } else if (inquiry.field === 'INQUIRY_REVIEW') {
                 return <InquiryReview field={'INQUIRY_REVIEW'} key={inquiry.id} />;
               } else {
-                const popupObj = popupOpen(inquiry, getField);
+                const popupObj = popupOpen(inquiry, field);
                 return (
                   <Form
+                    user={props.user}
+                    tabs={popupObj.tabs || null}
+                    nums={popupObj.nums || null}
                     key={inquiry.id}
+                    tabChange={(newValue) => {
+                      setTabSelected(newValue);
+                    }}
                     open={popupObj.status}
                     toggleForm={popupObj.toggleForm}
                     FabTitle={popupObj.fabTitle}
@@ -316,7 +354,9 @@ const BLWorkspace = (props) => {
                     field={popupObj.field}
                     popoverfooter={popupObj.popoverfooter}
                     customActions={popupObj.customActions}
-                    title={popupObj.title}>
+                    title={popupObj.title}
+                    showBtnSend={popupObj.showBtnSend}
+                    disableSendBtn={popupObj.disableSendBtn}>
                     {popupObj.child}
                   </Form>
                 );
@@ -339,14 +379,14 @@ const BLWorkspace = (props) => {
           <Grid item xs={6} className={classes.leftPanel}>
             <Grid item>
               <Label>Shipper/Exporter</Label>
-              <BLField id={getField('SHIPPER/EXPORTER')} multiline={true} rows={5}>
-                {getValueField('SHIPPER/EXPORTER')}
+              <BLField id={getField(SHIPPER)} multiline={true} rows={5}>
+                {getValueField(SHIPPER)}
               </BLField>
             </Grid>
             <Grid item>
               <Label>Consignee</Label>
-              <BLField id={getField('CONSIGNEE')} multiline={true} rows={5}>
-                {getValueField('CONSIGNEE')}
+              <BLField id={getField(CONSIGNEE)} multiline={true} rows={5}>
+                {getValueField(CONSIGNEE)}
               </BLField>
             </Grid>
             <Grid item>
@@ -355,36 +395,36 @@ const BLWorkspace = (props) => {
                 <br></br>
                 {`Carrier or its Agents for failure to notify`}
               </Label>
-              <BLField id={getField('NOTIFY PARTY')} multiline={true} rows={5}>
-                {getValueField('NOTIFY PARTY')}
+              <BLField id={getField(NOTIFY)} multiline={true} rows={5}>
+                {getValueField(NOTIFY)}
               </BLField>
             </Grid>
             <Grid container style={{ marginTop: '53px' }}>
               <Grid item xs={6} className={classes.leftPanel}>
                 <Grid item>
                   <Label>PRE-CARRIAGE BY</Label>
-                  <BLField id={getField('PRE-CARRIAGE BY')}>
-                    {getValueField('PRE-CARRIAGE BY')}
+                  <BLField id={getField(PRE_CARRIAGE)}>
+                    {getValueField(PRE_CARRIAGE)}
                   </BLField>
                 </Grid>
                 <Grid item>
                   <Label>PORT OF LOADING</Label>
-                  <BLField id={getField('PORT OF LOADING')}>
-                    {getValueField('PORT OF LOADING')}
+                  <BLField id={getField(PORT_OF_LOADING)}>
+                    {getValueField(PORT_OF_LOADING)}
                   </BLField>
                 </Grid>
               </Grid>
               <Grid item xs={6} className={classes.rightPanel}>
                 <Grid item>
                   <Label>PLACE OF RECEIPT</Label>
-                  <BLField id={getField('PLACE OF RECEIPT')}>
-                    {getValueField('PLACE OF RECEIPT')}
+                  <BLField id={getField(PLACE_OF_RECEIPT)}>
+                    {getValueField(PLACE_OF_RECEIPT)}
                   </BLField>
                 </Grid>
                 <Grid item>
                   <Label>PORT OF DISCHARGE</Label>
-                  <BLField id={getField('PORT OF DISCHARGE')}>
-                    {getValueField('PORT OF DISCHARGE')}
+                  <BLField id={getField(PORT_OF_DISCHARGE)}>
+                    {getValueField(PORT_OF_DISCHARGE)}
                   </BLField>
                 </Grid>
               </Grid>
@@ -394,13 +434,11 @@ const BLWorkspace = (props) => {
             <Grid container>
               <Grid item xs={6} className={classes.leftPanel}>
                 <Label>BOOKING NO.</Label>
-                <BLField id="booking_no" lock={true}>
-                  {myBL.bkgNo}
-                </BLField>
+                <BLField lock={true}>{myBL.bkgNo || ""}</BLField>
               </Grid>
               <Grid item xs={6} className={classes.rightPanel}>
                 <Label>SEA WAYBILL NO.</Label>
-                <BLField lock={true}>{myBL.bkgNo && `ONYE${myBL.bkgNo}`}</BLField>
+                <BLField lock={true}>{(myBL.bkgNo && `ONYE${myBL.bkgNo}`) || ""}</BLField>
               </Grid>
             </Grid>
             <Grid item>
@@ -408,18 +446,20 @@ const BLWorkspace = (props) => {
                 {`EXPORT REFERENCES (for the Merchant's and/or Carrier's reference only.`} <br></br>
                 {`See back clause 8. (4.)`}
               </Label>
-              <BLField id={getField('EXPORT REFERENCES')} multiline={true} rows={2}></BLField>
+              <BLField id={getField(EXPORT_REF)} multiline={true} rows={2}>
+                {getValueField(EXPORT_REF)}
+              </BLField>
             </Grid>
             <Grid item>
               <Label>FORWARDING AGENT-REFERENCES FMC NO.</Label>
-              <BLField id={getField('FORWARDING AGENT-REFERENCES')} multiline={true} rows={5}>
-                {getValueField('FORWARDING AGENT-REFERENCES')}
+              <BLField id={getField(FORWARDING)} multiline={true} rows={5}>
+                {getValueField(FORWARDING)}
               </BLField>
             </Grid>
             <Grid item>
               <Label>{`FINAL DESTINATION (for line merchant's reference only)`}</Label>
-              <BLField id={getField('FINAL DESTINATION')}>
-                {getValueField('FINAL DESTINATION')}
+              <BLField id={getField(FINAL_DESTINATION)}>
+                {getValueField(FINAL_DESTINATION)}
               </BLField>
             </Grid>
             <Grid item>
@@ -427,22 +467,22 @@ const BLWorkspace = (props) => {
                 {`TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF PACKAGES AND`} <br></br>
                 {`GOODS FIELD)`}
               </Label>
-              <BLField id={getField('TYPE OF MOVEMENT')}>
-                {getValueField('TYPE OF MOVEMENT')}
+              <BLField id={getField(TYPE_OF_MOVEMENT)}>
+                {getValueField(TYPE_OF_MOVEMENT)}
               </BLField>
             </Grid>
             <Grid item>
               <Grid item>
                 <Label>OCEAN VESSEL VOYAGE NO. FlAG</Label>
-                <BLField id={getField('OCEAN VESSEL VOYAGE NO. FLAG')} width={`calc(50% - 15px)`}>
-                  {getValueField('OCEAN VESSEL VOYAGE NO. FLAG')}
+                <BLField id={getField(VESSEL_VOYAGE)} width={`calc(50% - 15px)`}>
+                  {getValueField(VESSEL_VOYAGE)}
                 </BLField>
               </Grid>
             </Grid>
             <Grid item xs={6} className={classes.leftPanel}>
               <Label>PLACE OF DELIVERY</Label>
-              <BLField id={getField('PLACE OF DELIVERY')}>
-                {getValueField('PLACE OF DELIVERY')}
+              <BLField id={getField(PLACE_OF_DELIVERY)}>
+                {getValueField(PLACE_OF_DELIVERY)}
               </BLField>
             </Grid>
           </Grid>
@@ -456,7 +496,6 @@ const BLWorkspace = (props) => {
               PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
             </h2>
           </Grid>
-          {/* Table CD */}
           <TableCD
             containerDetail={getValueField(CONTAINER_DETAIL)}
             id={getField(CONTAINER_DETAIL)}
@@ -466,7 +505,6 @@ const BLWorkspace = (props) => {
         <hr style={{ borderTop: '2px dashed #515E6A', marginTop: '2rem', marginBottom: '3rem' }} />
 
         <Grid container spacing={2}>
-          {/* Table CM */}
           <TableCM
             containerManifest={getValueField(CONTAINER_MANIFEST)}
             id={getField(CONTAINER_MANIFEST)}
@@ -490,84 +528,112 @@ const BLWorkspace = (props) => {
         </Grid>
 
 
-        <Divider className="my-32" />
+        <Divider style={{ marginTop: 30, marginBottom: 0 }} />
 
-        <Grid container spacing={6}>
-          <Grid item xs={6}>
+        <Grid container>
+          <Grid item xs={6} className={classes.leftPanel}>
             <Grid item>
               <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
               <BLField id={getField(FREIGHT_CHARGES)}>
                 {getValueField(FREIGHT_CHARGES)}
               </BLField>
             </Grid>
-            <Grid container spacing={6}>
-              <Grid item xs={6} className={classes.pbGridItem}>
-                <Label>COMMODITY CODE</Label>
-                <BLField></BLField>
+            <Grid container>
+              <Grid item xs={6} className={classes.leftPanel}>
+                <Grid item>
+                  <Label>COMMODITY CODE</Label>
+                  <BLField id={getField(COMMODITY_CODE)}>
+                    {getValueField(COMMODITY_CODE)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>FREIGHTED AS</Label>
+                  <BLField id={getField(FREIGHTED_AS)}>
+                    {getValueField(FREIGHTED_AS)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>DATE CARGO RECEIVED</Label>
+                  <BLField id={getField(DATE_CARGO)}>
+                    {getValueField(DATE_CARGO)}
+                  </BLField>
+                </Grid>
               </Grid>
-              <Grid item xs={6} className={classes.pbGridItem}>
-                <Label>EXCHANGE RATE</Label>
-                <BLField></BLField>
-              </Grid>
-              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-                <Label>FREIGHTED AS</Label>
-                <BLField id={getField(FREIGHTED_AS)}>
-                  {getValueField(FREIGHTED_AS)}
-                </BLField>
-              </Grid>
-              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-                <Label>RATE</Label>
-                <BLField id={getField(RATE)}>
-                  {getValueField(RATE)}
-                </BLField>
-              </Grid>
-              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-                <Label>DATE CARGO RECEIVED</Label>
-                <BLField id={getField(DATE_CARGO)}>
-                  {getValueField(DATE_CARGO)}
-                </BLField>
-              </Grid>
-              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-                <Label>DATE LADEN ON BOARD</Label>
-                <BLField id={getField(DATE_LADEN)}>
-                  {getValueField(DATE_LADEN)}
-                </BLField>
+              <Grid item xs={6} className={classes.rightPanel}>
+                <Grid item>
+                  <Label>EXCHANGE RATE</Label>
+                  <BLField id={getField(EXCHANGE_RATE)}>
+                    {getValueField(EXCHANGE_RATE)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>RATE</Label>
+                  <BLField id={getField(RATE)}>
+                    {getValueField(RATE)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>DATE LADEN ON BOARD</Label>
+                  <BLField id={getField(DATE_LADEN)}>
+                    {getValueField(DATE_LADEN)}
+                  </BLField>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={6}>
-            <Grid container spacing={6}>
-              <Grid item xs={6} className={classes.pbGridItem}>
-                <Label>SERVICE CONTRACT NO.</Label>
-                <BLField></BLField>
+          <Grid item xs={6} className={classes.rightPanel}>
+            <Grid container>
+              <Grid item xs={6} className={classes.leftPanel}>
+                <Grid item>
+                  <Label>SERVICE CONTRACT NO.</Label>
+                  <BLField id={getField(SERVICE_CONTRACT_NO)}>
+                    {getValueField(SERVICE_CONTRACT_NO)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>CODE</Label>
+                  <BLField id={getField(CODE)}>
+                    {getValueField(CODE)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>PREPAID</Label>
+                  <BLField id={getField(PREPAID)}>
+                    {getValueField(PREPAID)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>PLACE OF BILL(S) ISSUE</Label>
+                  <BLField id={getField(PLACE_OF_BILL)}>
+                    {getValueField(PLACE_OF_BILL)}
+                  </BLField>
+                </Grid>
               </Grid>
-              <Grid item xs={6} className={classes.pbGridItem}>
-                <Label>DOC FORM NO.</Label>
-                <BLField></BLField>
-              </Grid>
-              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-                <Label>CODE</Label>
-                <BLField></BLField>
-              </Grid>
-              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-                <Label>TARIFF ITEM</Label>
-                <BLField></BLField>
-              </Grid>
-              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-                <Label>PREPAID</Label>
-                <BLField></BLField>
-              </Grid>
-              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-                <Label>COLLECT</Label>
-                <BLField></BLField>
-              </Grid>
-              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-                <Label>PLACE OF BILL(S) ISSUE</Label>
-                <BLField id={getField(PLACE_OF_BILL)}></BLField>
-              </Grid>
-              <Grid item xs={6} className={clsx(classes.ptGridItem, classes.pbGridItem)}>
-                <Label>DATED</Label>
-                <BLField></BLField>
+              <Grid item xs={6} className={classes.rightPanel}>
+                <Grid item>
+                  <Label>DOC FORM NO.</Label>
+                  <BLField id={getField(DOC_FORM_NO)}>
+                    {getValueField(DOC_FORM_NO)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>TARIFF ITEM</Label>
+                  <BLField id={getField(TARIFF_ITEM)}>
+                    {getValueField(TARIFF_ITEM)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>COLLECT</Label>
+                  <BLField id={getField(COLLECT)}>
+                    {getValueField(COLLECT)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>DATED</Label>
+                  <BLField id={getField(DATED)}>
+                    {getValueField(DATED)}
+                  </BLField>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
