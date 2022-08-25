@@ -4,7 +4,6 @@ const initialState = {
   metadata: {},
   myBL: {},
   content: {},
-  myblState: '',
   contentEdit: {},
   contentChanged: {},
   openDraftBL: false,
@@ -17,13 +16,10 @@ const draftBL = function (state = initialState, action) {
     return { ...state, metadata: action.state };
   }
   case Actions.SET_BL: {
-    return { ...state, myBL: action.state };
+    return { ...state, myBL: { ...state.myBL, ...action.state } };
   }
   case Actions.SET_CONTENT: {
     return { ...state, content: action.state };
-  }
-  case Actions.SET_MY_BL_STATE: {
-    return { ...state, myblState: action.state };
   }
   case Actions.OPEN_EDIT_DRAFT_BL: {
     return { ...state, openDraftBL: action.state };
