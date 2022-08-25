@@ -100,8 +100,8 @@ const PopupConfirmSubmit = (props) => {
         <div className={classes.dialogConfirm}>
           <p>Are you sure you want to submit these inquiries?</p>
           <div className='btnConfirm'>
-            <Button variant="outlined" style={{ marginRight: 15 }} onClick={handleConfirm}>Confirm</Button>
-            <Button variant="outlined" onClick={handleCancelConfirm}>Cancel</Button>
+            <Button variant="outlined" style={{ marginRight: 15, textTransform: 'none', fontSize: 16 }} onClick={handleConfirm}>Confirm</Button>
+            <Button variant="outlined" style={{ textTransform: 'none', fontSize: 16 }} onClick={handleCancelConfirm}>Cancel</Button>
           </div>
         </div>
       )}

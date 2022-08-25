@@ -547,8 +547,8 @@ const AttachmentList = (props) => {
               <div className='dialogConfirm'>
                 <p>Are you sure you want to remove these files?</p>
                 <div className='btnConfirm'>
-                  <Button variant="outlined" style={{ marginRight: 15 }} onClick={handleConfirm}>Confirm</Button>
-                  <Button variant="outlined" onClick={handleCancel}>Cancel</Button>
+                  <Button variant="outlined" style={{ marginRight: 15, textTransform: 'none', fontSize: 16 }} onClick={handleConfirm}>Confirm</Button>
+                  <Button variant="outlined" onClick={handleCancel} style={{ textTransform: 'none', fontSize: 16 }}>Cancel</Button>
                 </div>
               </div>
             )}
