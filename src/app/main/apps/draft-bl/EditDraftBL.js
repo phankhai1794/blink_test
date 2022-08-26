@@ -16,6 +16,7 @@ import Label from './components/FieldLabel';
 import BLField from './components/BLField';
 import BLFieldForm from './components/BLFieldForm';
 import Form from './components/Form';
+import Inquiry from './components/Inquiry';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,25 +57,39 @@ const useStyles = makeStyles((theme) => ({
 const EditDraftPage = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [metadata, myBL, openDraftBL, currentBLField, contentEdit, contentChanged] = useSelector(
-    ({ draftBL }) => [
-      draftBL.metadata,
-      draftBL.myBL,
-      draftBL.openDraftBL,
-      draftBL.currentBLField,
-      draftBL.contentEdit,
-      draftBL.contentChanged
-    ]
-  );
+  const metadata = useSelector(({ draftBL }) => draftBL.metadata);
+  const myBL = useSelector(({ draftBL }) => draftBL.myBL);
+  const openDraftBL = useSelector(({ draftBL }) => draftBL.openDraftBL);
+  const currentBLField = useSelector(({ draftBL }) => draftBL.currentBLField);
+  const contentEdit = useSelector(({ draftBL }) => draftBL.contentEdit);
+  const contentChanged = useSelector(({ draftBL }) => draftBL.contentChanged);
+  const draftContent = useSelector(({ draftBL }) => draftBL.draftContent);
+  const reload = useSelector(({ draftBL }) => draftBL.reload);
+
+  const role = useSelector(({ user }) => user.displayName);
   const [titleField, setTitleField] = useState();
   const [contentField, setContentField] = useState();
   const [attachments, setAttachments] = useState([])
-
+  const [data, setData] = useState()
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
   };
 
+  const checkIsEdited = (state) => {
+    if (role === 'guest' && state === 'AME_DRF' || state === 'AME_SENT') {
+      return true
+    }
+    return false
+  }
+
   const getValueField = (field) => {
+    const temp = draftContent.find((c) => c.field === getField(field))
+
+    if (temp) {
+      if (checkIsEdited(temp.state)) {
+        return temp.content.content
+      }
+    }
     return contentEdit[getField(field)] || '';
   };
 
@@ -85,11 +100,16 @@ const EditDraftPage = (props) => {
   }, []);
 
   useEffect(() => {
+    dispatch(Actions.loadDraftContent(window.location.pathname.split('/')[4]));
+  }, [reload])
+
+  useEffect(() => {
     if (currentBLField) {
       setTitleField(getLabelById(metadata['field_options'], currentBLField));
       setContentField(contentEdit[currentBLField]);
+      setData(draftContent.find((c) => c.field === currentBLField))
     }
-  }, [currentBLField]);
+  }, [currentBLField, draftContent]);
 
   const handleGetValue = (value) => {
     setContentField(value);
@@ -128,9 +148,10 @@ const EditDraftPage = (props) => {
           dispatch(
             AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' })
           );
+          dispatch(Actions.toggleReload());
         }).catch((err) => console.error(err))
       })
-    
+
   };
 
   return (
@@ -140,7 +161,10 @@ const EditDraftPage = (props) => {
         toggleForm={(status) => dispatch(Actions.toggleDraftBLEdit(status))}
         title={titleField}
         handleSave={handleSave}>
-        <BLFieldForm getValueFieldChange={handleGetValue} files={attachments} saveAttachment={setAttachments} />
+        {data && checkIsEdited(data.state) ?
+          <Inquiry question={data} /> :
+          <BLFieldForm getValueFieldChange={handleGetValue} files={attachments} saveAttachment={setAttachments} />
+        }
       </Form>
 
       <Grid container>
