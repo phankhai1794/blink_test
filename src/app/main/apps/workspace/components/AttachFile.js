@@ -10,7 +10,7 @@ import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 const AttachFile = (props) => {
-  const { disabled, isAnswer, isReply, question, setAttachmentReply } = props;
+  const { disabled, isAnswer, isReply, question, questions, setAttachmentReply } = props;
   const dispatch = useDispatch();
   const [currentEditInq, reply, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
@@ -30,12 +30,13 @@ const AttachFile = (props) => {
       return setAttachmentReply(attachmentReplies);
     }
     else if (isAnswer) {
-      const currentInq = { ...question };
+      const optionsInquires = [...questions];
+      const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
       files.forEach((src) => {
-        currentInq.mediaFilesAnswer.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: src });
+        optionsInquires[editedIndex].mediaFilesAnswer.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: src });
       });
-      currentInq.attachmentAnswer = { inquiry: currentInq.id };
-      return dispatch(InquiryActions.setEditInq(currentInq));
+      optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
+      return dispatch(InquiryActions.setInquiries(optionsInquires));
     }
 
     const isExist = handleDuplicateAttachment(

@@ -1,8 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { Divider } from '@material-ui/core';
-import { loadComment } from 'app/services/inquiryService';
 import { makeStyles } from '@material-ui/styles';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
 
 import * as InquiryActions from '../store/actions/inquiry';
@@ -40,7 +39,8 @@ const Inquiry = (props) => {
   const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
   const [changeQuestion, setChangeQuestion] = useState();
   const [isSaved, setSaved] = useState(false);
- 
+  const [getStateReplyDraft, setStateReplyDraft] = useState(false);
+
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
     if (index >= 0) {
@@ -55,18 +55,22 @@ const Inquiry = (props) => {
     }
   };
 
-  const handleCancel = () => {
-    // reset media file
+  const resetActionInquiry = (q) => {
     const optionsInquires = [...inquiries];
-    const editedIndex = optionsInquires.findIndex(inq => currentEditInq.id === inq.id);
-    optionsInquires[editedIndex].mediaFilesAnswer = optionsInquires[editedIndex].mediaFilesAnswer.filter(inq => inq.id);
+    const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
+    optionsInquires[editedIndex].showIconReply = true;
+    optionsInquires[editedIndex].showIconEdit = true;
+    optionsInquires[editedIndex].showIconAttachAnswerFile = false;
+    optionsInquires[editedIndex].showIconAttachReplyFile = false;
     dispatch(InquiryActions.setInquiries(optionsInquires));
-    dispatch(InquiryActions.setEditInq());
   };
 
+  const handleCancel = (q) => {
+    resetActionInquiry(q);
+  };
 
-  const handleSetSave = () => {
-    dispatch(InquiryActions.setEditInq());
+  const handleSetSave = (q) => {
+    resetActionInquiry(q);
   };
 
   return props.user === 'workspace' ? (
@@ -117,6 +121,7 @@ const Inquiry = (props) => {
       }}>
         {listInqsField.map((q, index) => {
           const isEdit = currentEditInq && q.id === currentEditInq.id;
+
           return (
             <div key={index} className={clsx(classes.boxItem,
               (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
@@ -124,15 +129,20 @@ const Inquiry = (props) => {
             )}>
               <InquiryViewer
                 toggleEdit={() => toggleEdit(index)}
-                currentQuestion={changeQuestion}
+                currentQuestion={q}
                 question={isEdit ? currentEditInq : q}
                 user={props.user}
                 isSaved={isSaved}
-                setSave={() => setSaved(false)}
-                isEdit={isEdit}
+                isEdit={q.id === currentEditInq?.id ? q : {}}
                 showReceiver={false}
+                getStateReplyDraft={(val) => setStateReplyDraft(val)}
               />
-              {isEdit && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT') && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
+              {(q.showIconAttachReplyFile || q.showIconAttachAnswerFile) && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT' || getStateReplyDraft) && 
+              <InquiryAnswer 
+                onCancel={() => handleCancel(q)} 
+                setSave={() => handleSetSave(q)}
+                question={q}
+              />}
               {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
             </div>
           );

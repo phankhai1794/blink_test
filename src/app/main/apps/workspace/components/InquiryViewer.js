@@ -87,6 +87,7 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     margin: theme.spacing(1),
+    marginLeft: 0,
     borderRadius: 8,
     boxShadow: 'none',
     textTransform: 'capitalize',
@@ -119,7 +120,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, toggleEdit, viewGuestDropDown, showReceiver } = props;
+  const { index, toggleEdit, viewGuestDropDown, showReceiver, isEdit, isSaved } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -147,11 +148,10 @@ const InquiryViewer = (props) => {
     workspace.formReducer.confirmPopupType
   ]);
   const [isSaveComment, setSaveComment] = useState(false);
+  const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
+  const [showIconReply, setShowIconReply] = useState(true);
 
   const handleViewMore = (id) => {
-    if (user.role !== 'Admin') {
-      toggleEdit();
-    }
     if (viewDropDown === id) {
       setViewDropDown('');
     } else {
@@ -178,8 +178,21 @@ const InquiryViewer = (props) => {
             : dispatch(InquiryActions.checkSubmit(false));
           //
           const filterOffshoreSent = res[res.length - 1];
-          if (Object.keys(filterOffshoreSent).length > 0 && filterOffshoreSent.state === 'REP_Q_SENT') {
-            setShowLabelSent(true)
+          if (user.role === 'Admin') {
+            if (Object.keys(filterOffshoreSent).length > 0 && filterOffshoreSent.state === 'REP_Q_SENT') {
+              setShowLabelSent(true)
+            }
+          } else {
+            if (Object.keys(filterOffshoreSent).length > 0) {
+              if (filterOffshoreSent.state === 'REP_A_DRF') {
+                setStateReplyDraft(true);
+                lastest.showIconAttachReplyFile = false;
+                lastest.showIconAttachAnswerFile = false;
+                props.getStateReplyDraft(true);
+              } else if (filterOffshoreSent.state === 'REP_Q_SENT') {
+                lastest.showIconReply = true;
+              }
+            }
           }
           //
           res.splice(res.length - 1, 1);
@@ -193,7 +206,7 @@ const InquiryViewer = (props) => {
         setIsLoadedComment(true);
       })
       .catch((error) => console.error(error));
-  }, [isSaveComment, props.question]);
+  }, [isSaveComment]);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -201,13 +214,25 @@ const InquiryViewer = (props) => {
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
-  const selectChoiceHandle = (e) => {
-    const inq = { ...question };
-    inq.selectChoice = e;
-    dispatch(InquiryActions.setEditInq(inq));
-  };
+  const resetInquiry = () => {
+    const optionsInquires = [...inquiries];
+    optionsInquires.forEach(op => op.showIconAttachFile = false);
+    optionsInquires.forEach(op => op.showIconReply = false);
+    optionsInquires.forEach(op => op.showIconAttachAnswerFile = false);
+    optionsInquires.forEach(op => {
+      if (['OPEN', 'INQ_SENT'].includes(op.state)) {
+        op.showIconReply = true;
+      } else if (['ANS_DRF'].includes(op.state)) {
+        op.showIconEdit = true;
+      }
+    });
+    dispatch(InquiryActions.setInquiries(optionsInquires));
+    //
+  }
+
   useEffect(() => {
     myBL?.state !== stateResquest && setAllowDeleteInq(false);
+    resetInquiry();
   }, []);
 
   useEffect(() => {
@@ -230,12 +255,6 @@ const InquiryViewer = (props) => {
     }
   }, [confirmClick]);
 
-  const paragraphAnswerHandle = (e) => {
-    const inq = { ...question };
-    inq.paragraphAnswer = e;
-    dispatch(InquiryActions.setEditInq(inq));
-  };
-
   const removeQuestion = () => {
     setIndexQuestionRemove(inquiries.findIndex((q) => q.id === question.id));
     dispatch(
@@ -254,10 +273,6 @@ const InquiryViewer = (props) => {
       dispatch(InquiryActions.setEditInq(inqEdit));
       dispatch(InquiryActions.setField(inq.field));
     }
-  };
-
-  const onReply = () => {
-    setIsReply(true);
   };
 
   const onResolve = () => {
@@ -300,14 +315,10 @@ const InquiryViewer = (props) => {
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   };
+
   const cancelResolve = () => {
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
-  };
-
-  const cancelReply = () => {
-    setTempReply({});
-    setIsReply(false)
   };
 
   const inputText = (e) => {
@@ -370,7 +381,7 @@ const InquiryViewer = (props) => {
               setTempReply({});
               setViewDropDown('');
               //
-              dispatch(Actions.loadInquiry(myBL.id));
+              // dispatch(Actions.loadInquiry(myBL.id));
               dispatch(
                 AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
               );
@@ -393,7 +404,7 @@ const InquiryViewer = (props) => {
           setTempReply({});
           setViewDropDown('');
           //
-          dispatch(Actions.loadInquiry(myBL.id));
+          // dispatch(Actions.loadInquiry(myBL.id));
           dispatch(
             AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
           );
@@ -401,6 +412,47 @@ const InquiryViewer = (props) => {
         .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
     }
     setIsReply(false)
+  }
+
+  const cancelReply = () => {
+    setTempReply({});
+    setIsReply(false);
+    if (inqHasComment) setQuestion(q => ({...q, showIconReply: true, showIconAttachAnswerFile: false}))
+  };
+
+  const onReply = (q) => {
+    // case: Reply Answer
+    const optionsInquires = [...inquiries];
+    if (['OPEN', 'INQ_SENT'].includes(q.state)) {
+      const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
+      //
+      optionsInquires[editedIndex].showIconReply = false;
+      optionsInquires[editedIndex].showIconAttachReplyFile = false;
+      optionsInquires[editedIndex].showIconAttachAnswerFile = true;
+      optionsInquires[editedIndex].showIconEdit = true;
+      dispatch(InquiryActions.setInquiries(optionsInquires));
+      setIsReply(false);
+    } else {
+      // case: Reply Comment
+      setIsReply(true);
+      if (inqHasComment) setQuestion(q => ({...q, showIconReply: false, showIconAttachAnswerFile: false, showIconAttachReplyFile: true}))
+    }
+  };
+
+  // TODO
+  const handleEdit = (q) => {
+    // case: Edit Answer
+    if (['ANS_DRF', 'ANS_SENT'].includes(question.state)) {
+      const optionsInquires = [...inquiries];
+      const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
+      optionsInquires[editedIndex].showIconEdit = false;
+      optionsInquires[editedIndex].showIconReply = false;
+      optionsInquires[editedIndex].showIconAttachReplyFile = false;
+      optionsInquires[editedIndex].showIconAttachAnswerFile = true;
+      dispatch(InquiryActions.setInquiries(optionsInquires));
+    }
+    // Edit Reply
+    // TODO EDIT REPLY
   }
 
   return (
@@ -445,7 +497,7 @@ const InquiryViewer = (props) => {
                   </div>
                   <PermissionProvider
                     action={PERMISSION.VIEW_EDIT_INQUIRY}
-                    extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN'}>
+                    extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN' || question.state === 'ANS_DRF'}>
                     <Tooltip title="Edit Inquiry">
                       <div onClick={() => changeToEditor(question)}>
                         <img
@@ -473,9 +525,37 @@ const InquiryViewer = (props) => {
                       <span className={classes.labelStatus}>Submitted</span>
                     )}
                   </div>
-                  <FormControlLabel control={
-                    <AttachFile isAnswer={true} question={question} />
-                  } />
+                  {(((['ANS_DRF'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
+                    <Tooltip title={checkStateReplyDraft ? 'Edit Reply' : "Edit Answer"}>
+                      <div onClick={() => handleEdit(question)}>
+                        <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                      </div>
+                    </Tooltip>
+                  )}
+                  {question.showIconReply ? (
+                    <PermissionProvider
+                      action={PERMISSION.INQUIRY_CREATE_REPLY}
+                      extraCondition={user.role !== "Admin" && !checkStateReplyDraft && !['ANS_DRF', 'COMPL', 'UPLOADED'].includes(question.state)}
+                    >
+                      <Tooltip title="Reply Inquiry">
+                        <div onClick={() => onReply(question)} style={{ marginRight: 8 }}>
+                          <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/reply.svg" />
+                        </div>
+                      </Tooltip>
+                    </PermissionProvider>
+                  ) : (
+                    <>
+                      {question.showIconAttachAnswerFile && (
+                        <FormControlLabel control={<AttachFile isAnswer={true} question={question} questions={inquiries} />} />)}
+                      {question.showIconAttachReplyFile && (
+                        <AttachFile
+                          isReply={true}
+                          question={question}
+                          setAttachmentReply={handleSetAttachmentReply}
+                        />
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -492,27 +572,21 @@ const InquiryViewer = (props) => {
               {question.content}
             </Typography>
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
-              {type === metadata.ans_type.choice &&
-                ['ANS_SENT', 'ANS_DRF', 'OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(
-                  question.state
-                ) && (
+              {type === metadata.ans_type.choice && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && (
                 <ChoiceAnswer
                   index={index}
                   questions={inquiries}
                   question={question}
-                  selectChoice={(e) => selectChoiceHandle(e)}
+                  disable={!question.showIconAttachAnswerFile}
                   isDisableSave={(e) => setDisableSave(e)}
                 />
               )}
-              {type === metadata.ans_type.paragraph &&
-                ['ANS_SENT', 'ANS_DRF', 'OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(
-                  question.state
-                ) && (
+              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && (
                 <ParagraphAnswer
                   question={question}
                   index={index}
                   questions={inquiries}
-                  paragrapAnswer={(e) => paragraphAnswerHandle(e)}
+                  disable={!question.showIconAttachAnswerFile}
                   isDisableSave={(e) => setDisableSave(e)}
                 />
               )}
@@ -582,7 +656,9 @@ const InquiryViewer = (props) => {
                           style={{ margin: '2.5rem' }}
                           indexMedia={mediaIndex}
                           isAnswer={true}
-                          hiddenRemove={!props.isEdit}
+                          question={question}
+                          questions={inquiries}
+                          hiddenRemove={!question.showIconAttachAnswerFile}
                         />
                       ) : (
                         <FileAttach
@@ -590,7 +666,10 @@ const InquiryViewer = (props) => {
                           field={question.field}
                           indexMedia={mediaIndex}
                           isAnswer={true}
-                          hiddenRemove={!props.isEdit}
+                          question={question}
+                          index={index}
+                          questions={inquiries}
+                          hiddenRemove={!question.showIconAttachAnswerFile}
                         />
                       )}
                     </div>
@@ -676,11 +755,6 @@ const InquiryViewer = (props) => {
                           value={tempReply?.answer?.content}
                           onChange={handleChangeContentReply}
                         />
-                        <AttachFile
-                          isReply={true}
-                          question={question}
-                          setAttachmentReply={handleSetAttachmentReply}
-                        />
                       </div>
 
                       {tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}
@@ -738,11 +812,8 @@ const InquiryViewer = (props) => {
                       </PermissionProvider>
                       <PermissionProvider
                         action={PERMISSION.INQUIRY_CREATE_REPLY}
-                        extraCondition={
-                          user.role === 'Admin'
-                            ? question.state === 'ANS_SENT' || inqHasComment
-                            : inqHasComment
-                        }>
+                        extraCondition={user.role === "Admin" && (inqHasComment || question.state === 'ANS_SENT')}
+                      >
                         <Button
                           variant="contained"
                           classes={{ root: clsx(classes.button, 'w120', 'reply') }}
