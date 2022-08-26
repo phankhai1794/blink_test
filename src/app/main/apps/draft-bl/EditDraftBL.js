@@ -6,7 +6,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
+import { saveEditedField } from 'app/services/draftblService';
+import { uploadFile } from 'app/services/fileService';
 import { getLabelById } from '@shared';
+import axios from 'axios';
 
 import * as Actions from './store/actions';
 import Label from './components/FieldLabel';
@@ -65,6 +68,7 @@ const EditDraftPage = (props) => {
   );
   const [titleField, setTitleField] = useState();
   const [contentField, setContentField] = useState();
+  const [attachments, setAttachments] = useState([])
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -92,6 +96,7 @@ const EditDraftPage = (props) => {
   };
 
   const handleSave = () => {
+    // debugger
     const newTxt = { ...contentEdit };
     if (newTxt[currentBLField] === contentField) {
       dispatch(Actions.toggleDraftBLEdit(false));
@@ -103,6 +108,29 @@ const EditDraftPage = (props) => {
     const newTxtChanged = { ...contentChanged, [currentBLField]: contentField };
     dispatch(Actions.setNewContentChanged(newTxtChanged));
     dispatch(Actions.toggleDraftBLEdit(false));
+    const uploads = [];
+    if (attachments.length) {
+      attachments.forEach((file) => {
+        const formData = new FormData();
+        formData.append('files', file.data);
+        uploads.push(formData);
+      });
+    }
+    axios
+      .all(uploads.map((endpoint) => uploadFile(endpoint)))
+      .then((media) => {
+        let mediaList = [];
+        media.forEach((file) => {
+          const mediaFileList = file.response.map((item) => item.id);
+          mediaList.push(mediaFileList[0]);
+        })
+        saveEditedField({ field: currentBLField, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id }).then(() => {
+          dispatch(
+            AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' })
+          );
+        }).catch((err) => console.error(err))
+      })
+    
   };
 
   return (
@@ -112,7 +140,7 @@ const EditDraftPage = (props) => {
         toggleForm={(status) => dispatch(Actions.toggleDraftBLEdit(status))}
         title={titleField}
         handleSave={handleSave}>
-        <BLFieldForm getValueFieldChange={handleGetValue} />
+        <BLFieldForm getValueFieldChange={handleGetValue} files={attachments} saveAttachment={setAttachments} />
       </Form>
 
       <Grid container>
