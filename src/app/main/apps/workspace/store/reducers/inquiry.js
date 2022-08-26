@@ -35,6 +35,7 @@ const initialState = {
   openedInquiresForm: false,
   isShowBackground: false,
   enableSubmit: false,
+  enableSend: false,
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -143,6 +144,9 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.CHECK_SUBMIT: {
     return { ...state, enableSubmit: action.state };
+  }
+  case Actions.CHECK_SEND: {
+    return { ...state, enableSend: action.state };
   }
   default: {
     return state;

@@ -64,7 +64,7 @@ const PopupConfirmSubmit = (props) => {
     const inqs = [... inquiries];
     const lstInq = inqs.map((item) => {
       if ((props.field === "INQUIRY_LIST" || props.field === item.field) &&
-          (item.answerObj && (item.state === "ANS_DRF" || item.state === 'REP_A_DRF' || item.state === 'REP_Q_SENT' || item.state === 'REP_Q_DRF'))
+          (item.answerObj && (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(item.state)))
       ) {
         return {inquiryId: item.id, currentState: item.state};
       }
