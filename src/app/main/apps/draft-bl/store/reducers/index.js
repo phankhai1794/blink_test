@@ -4,10 +4,12 @@ const initialState = {
   metadata: {},
   myBL: {},
   content: {},
+  draftContent: [],
   contentEdit: {},
   contentChanged: {},
   openDraftBL: false,
-  currentBLField: ''
+  currentBLField: '',
+  reload: false,
 };
 
 const draftBL = function (state = initialState, action) {
@@ -21,6 +23,9 @@ const draftBL = function (state = initialState, action) {
   case Actions.SET_CONTENT: {
     return { ...state, content: action.state };
   }
+  case Actions.SET_DRAFT_CONTENT: {
+    return { ...state, draftContent: action.state };
+  }
   case Actions.OPEN_EDIT_DRAFT_BL: {
     return { ...state, openDraftBL: action.state };
   }
@@ -32,6 +37,9 @@ const draftBL = function (state = initialState, action) {
   }
   case Actions.SET_NEW_CONTENT_CHANGED: {
     return { ...state, contentChanged: action.state };
+  }
+  case Actions.RELOAD: {
+    return { ...state, reload: !state.reload };
   }
   default: {
     return state;
