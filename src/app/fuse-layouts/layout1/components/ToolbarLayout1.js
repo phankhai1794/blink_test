@@ -15,6 +15,10 @@ import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
+import { submitInquiryAnswer, loadComment } from 'app/services/inquiryService';
+import axios from 'axios';
+
+import * as InquiryActions from "../../../main/apps/workspace/store/actions/inquiry";
 
 import PreviewDraftBL from './PreviewDraftBL';
 
@@ -61,11 +65,13 @@ function ToolbarLayout1(props) {
     header.validToken
   ]);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const myBL = useSelector(({ draftBL }) => draftBL.myBL);
   const [open, setOpen] = useState(false);
   const [disableConfirm, setDisableConfirm] = useState(false);
   const inquiryLength = inquiries.length;
   const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
+  const [isSubmit, setIsSubmit] = useState(true);
 
   useEffect(() => {
     myBL.state === draftConfirm && setDisableConfirm(true);
@@ -76,6 +82,36 @@ function ToolbarLayout1(props) {
       dispatch(FormActions.toggleSaveInquiry(true));
     }
   };
+
+  useEffect(() => {
+    let optionInquiries = [...inquiries];
+    let isSubmit = true;
+    optionInquiries.forEach((item) => {
+      if (item.answerObj && item.state === "ANS_DRF") {
+        isSubmit = false;
+      }
+    });
+    if (enableSubmit) {
+      isSubmit = false;
+    }
+    if (pathname.includes('/guest')) {
+      axios.all(optionInquiries.map(q => loadComment(q.id)))
+        .then(res => {
+          if (res) {
+            let commentList = [];
+            res.map(r => {
+              commentList = [...commentList, ...r];
+            });
+            const filterRepADraft = commentList.some((r) => r.state === 'REP_A_DRF');
+            dispatch(InquiryActions.checkSubmit(filterRepADraft));
+            if (filterRepADraft) isSubmit = false;
+            setIsSubmit(isSubmit)
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+    }
+  }, [enableSubmit, inquiries]);
 
   const openAttachment = () => {
     let isExistMedia = false;
@@ -130,6 +166,27 @@ function ToolbarLayout1(props) {
       }
     }
   }, [user, allowAccess]);
+
+  const onSubmit = async () => {
+    const inqs = [... inquiries];
+    const lstInq = inqs.map((item) => {
+      if (item.answerObj && (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(item.state))
+      ) {
+        return {inquiryId: item.id, currentState: item.state};
+      }
+      return null;
+    });
+    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null) });
+    //
+    const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
+    inqs.forEach((item) => {
+      if (listIdInq.includes(item.id)) {
+        if (item.state === 'ANS_DRF') item.state = 'ANS_SENT';
+      }
+    });
+    dispatch(InquiryActions.setInquiries(inqs));
+    dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
+  }
 
   return (
     <ThemeProvider theme={toolbarTheme}>
@@ -239,6 +296,32 @@ function ToolbarLayout1(props) {
             </PermissionProvider> 
              */}
             <PreviewDraftBL />
+            <PermissionProvider
+              action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}>
+              <Button
+                variant="contained"
+                style={{
+                  textTransform: 'capitalize',
+                  left: '13.45%',
+                  right: '13.45%',
+                  top: '25%',
+                  bottom: '25%',
+                  borderRadius: 6,
+                  fontFamily: 'Montserrat',
+                  fontStyle: 'normal',
+                  fontWeight: '600',
+                  fontSize: '16px',
+                  textAlign: 'center',
+                  height: 40,
+                  marginTop: 11
+                }}
+                className={classes.root}
+                color="primary"
+                disabled={isSubmit}
+                onClick={onSubmit}>
+                Submit
+              </Button>
+            </PermissionProvider>
             <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>
               <UserProfile classes={classes} history={history} />
             </PermissionProvider>

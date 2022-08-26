@@ -94,6 +94,7 @@ const BLWorkspace = (props) => {
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
   );
+  const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
 
   const getField = (keyword) => {
     return metadata.field?.[keyword] || '';
@@ -154,12 +155,8 @@ const BLWorkspace = (props) => {
   }, [openAttachment]);
 
   useEffect(() => {
-    if (inquiries.filter(inq => inq.state === REP_Q_DRAFT).length) {
-      setDisableSendBtn(false)
-    } else {
-      setDisableSendBtn(true)
-    }
-  }, [inquiries]);
+    setDisableSendBtn(!enableSend)
+  }, [enableSend]);
 
   const countInq = (inqs, recevier) => {
     let count = 0;

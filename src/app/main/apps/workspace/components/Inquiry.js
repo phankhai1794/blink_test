@@ -137,9 +137,9 @@ const Inquiry = (props) => {
                 showReceiver={false}
                 getStateReplyDraft={(val) => setStateReplyDraft(val)}
               />
-              {(q.showIconAttachReplyFile || q.showIconAttachAnswerFile) && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT' || getStateReplyDraft) && 
-              <InquiryAnswer 
-                onCancel={() => handleCancel(q)} 
+              {(q.showIconAttachReplyFile || q.showIconAttachAnswerFile) && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT' || getStateReplyDraft) &&
+              <InquiryAnswer
+                onCancel={() => handleCancel(q)}
                 setSave={() => handleSetSave(q)}
                 question={q}
               />}

@@ -149,7 +149,7 @@ const InquiryViewer = (props) => {
   ]);
   const [isSaveComment, setSaveComment] = useState(false);
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
-  const [showIconReply, setShowIconReply] = useState(true);
+  const [submitLabel, setSubmitLabel] = useState(false);
 
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
@@ -179,8 +179,12 @@ const InquiryViewer = (props) => {
           //
           const filterOffshoreSent = res[res.length - 1];
           if (user.role === 'Admin') {
-            if (Object.keys(filterOffshoreSent).length > 0 && filterOffshoreSent.state === 'REP_Q_SENT') {
-              setShowLabelSent(true)
+            if (Object.keys(filterOffshoreSent).length > 0) {
+              if (filterOffshoreSent.state === 'REP_Q_SENT') {
+                setShowLabelSent(true)
+              } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
+                setStateReplyDraft(true)
+              }
             }
           } else {
             if (Object.keys(filterOffshoreSent).length > 0) {
@@ -191,6 +195,9 @@ const InquiryViewer = (props) => {
                 props.getStateReplyDraft(true);
               } else if (filterOffshoreSent.state === 'REP_Q_SENT') {
                 lastest.showIconReply = true;
+              }
+              if (['REP_A_SENT'].includes(filterOffshoreSent.state)) {
+                setSubmitLabel(true);
               }
             }
           }
@@ -382,6 +389,7 @@ const InquiryViewer = (props) => {
               setViewDropDown('');
               //
               // dispatch(Actions.loadInquiry(myBL.id));
+              dispatch(InquiryActions.checkSend(true));
               dispatch(
                 AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
               );
@@ -405,6 +413,7 @@ const InquiryViewer = (props) => {
           setViewDropDown('');
           //
           // dispatch(Actions.loadInquiry(myBL.id));
+          dispatch(InquiryActions.checkSend(true));
           dispatch(
             AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
           );
@@ -521,7 +530,7 @@ const InquiryViewer = (props) => {
               ) : (
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <div style={{ marginRight: 15 }}>
-                    {['ANS_SENT', 'REP_A_SENT', 'REP_Q_DRF'].includes(question.state) && (
+                    {(['ANS_SENT'].includes(question.state) || submitLabel) && (
                       <span className={classes.labelStatus}>Submitted</span>
                     )}
                   </div>
@@ -787,6 +796,7 @@ const InquiryViewer = (props) => {
                           variant="contained"
                           color="primary"
                           onClick={onSaveReply}
+                          disabled={!tempReply?.answer?.content}
                           classes={{ root: classes.button }}>
                           Save
                         </Button>

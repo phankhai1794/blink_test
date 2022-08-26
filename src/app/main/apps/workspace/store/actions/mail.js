@@ -1,5 +1,7 @@
 import { sendmail, getSuggestMail } from 'app/services/mailService';
+
 import { loadInquiry } from '../actions';
+import * as InquiryActions from '../actions/inquiry';
 
 export const SENDMAIL_NONE = 'SENDMAIL_NONE';
 export const SENDMAIL_LOADING = 'SENDMAIL_LOADING';
@@ -20,7 +22,8 @@ export const sendMail =
       sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs)
         .then((res) => {
           if (res.status === 200) {
-            dispatch(loadInquiry(myblId));
+            dispatch(InquiryActions.checkSend(false));
+            // dispatch(loadInquiry(myblId));
             return dispatch({
               type: SENDMAIL_SUCCESS
             });

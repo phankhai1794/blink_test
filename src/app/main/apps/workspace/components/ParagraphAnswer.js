@@ -32,7 +32,7 @@ const ParagraphAnswer = (props) => {
   const { question, index } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
-  
+
   const [paragraphText, setParagraphText] = useState((user.role === 'Admin' && !["ANS_SENT", "REP_Q_DRF", "REP_A_SENT", "COMPL"].includes(question.state))? "": question.answerObj[0]?.content );
 
   const classes = useStyles();

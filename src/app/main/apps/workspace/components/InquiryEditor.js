@@ -371,6 +371,10 @@ const InquiryEditor = (props) => {
           ans: { ansDelete, ansCreate, ansUpdate },
           files: { mediaCreate, mediaDelete }
         });
+        const editedIndex = inquiries.findIndex(inq => inq.id === inquiry.id);
+        inquiries[editedIndex] = currentEditInq;
+        dispatch(InquiryActions.setInquiries(inquiries));
+
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
         );

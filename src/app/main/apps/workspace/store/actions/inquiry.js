@@ -23,7 +23,7 @@ export const SET_LAST_FIELD = 'SET_LAST_FIELD';
 export const SET_OPENED_INQ_FORM = 'SET_OPENED_INQ_FORM';
 export const SET_BACKGROUND_ATTACHMENT_LIST = 'SET_BACKGROUND_ATTACHMENT_LIST';
 export const CHECK_SUBMIT = 'CHECK_SUBMIT';
-
+export const CHECK_SEND = 'CHECK_SEND';
 // export const SET_INQUIRY_EDIT = 'SET_INQUIRY_EDIT';
 
 export function saveInquiry() {
@@ -196,6 +196,13 @@ export function setShowBackgroundAttachmentList(state) {
 export function checkSubmit(state) {
   return {
     type: CHECK_SUBMIT,
+    state: state
+  };
+}
+
+export function checkSend(state) {
+  return {
+    type: CHECK_SEND,
     state: state
   };
 }
