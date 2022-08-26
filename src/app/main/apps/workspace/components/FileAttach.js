@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false }) => {
+const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, questions, question }) => {
   const classes = useStyles();
   const [valid, currentEditInq, attachmentList] =
   useSelector(({ workspace }) => [
@@ -93,11 +93,11 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
     const optionsOfQuestion = {...currentEditInq};
     const optionsAttachmentList = [...attachmentList];
     if (isAnswer) {
-      optionsOfQuestion.attachmentAnswer = {inquiry: optionsOfQuestion.id};
-      if (optionsOfQuestion.mediaFilesAnswer.length) {
-        optionsOfQuestion.mediaFilesAnswer.splice(indexMedia, 1);
-        dispatch(InquiryActions.setEditInq(optionsOfQuestion));
-      }
+      const optionsInquires = [...questions];
+      const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+      optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
+      optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMedia, 1);
+      dispatch(InquiryActions.setInquiries(optionsInquires));
     } else {
       if (field && file.id) {
         const indexMedia = optionsOfQuestion.mediaFile.findIndex(

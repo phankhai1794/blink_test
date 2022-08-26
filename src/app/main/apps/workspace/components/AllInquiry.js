@@ -142,6 +142,7 @@ const AllInquiry = (props) => {
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.isShowBackground,
   ]);
+  const [getStateReplyDraft, setStateReplyDraft] = useState(false);
 
   let CURRENT_NUMBER = 0;
 
@@ -170,18 +171,22 @@ const AllInquiry = (props) => {
     }
   };
 
-  const handleCancel = () => {
-    // reset media file
+  const resetActionInquiry = (q) => {
     const optionsInquires = [...inquiries];
-    const editedIndex = optionsInquires.findIndex(inq => currentEditInq.id === inq.id);
-    optionsInquires[editedIndex].mediaFilesAnswer = optionsInquires[editedIndex].mediaFilesAnswer.filter(inq => inq.id);
+    const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
+    optionsInquires[editedIndex].showIconReply = true;
+    optionsInquires[editedIndex].showIconEdit = true;
+    optionsInquires[editedIndex].showIconAttachAnswerFile = false;
+    optionsInquires[editedIndex].showIconAttachReplyFile = false;
     dispatch(InquiryActions.setInquiries(optionsInquires));
-    dispatch(InquiryActions.setEditInq({}));
   };
 
+  const handleCancel = (q) => {
+    resetActionInquiry(q);
+  };
 
-  const handleSetSave = () => {
-    dispatch(InquiryActions.setEditInq({}));
+  const handleSetSave = (q) => {
+    resetActionInquiry(q);
   };
 
   return (
@@ -254,8 +259,14 @@ const AllInquiry = (props) => {
                       user={props.user}
                       isSaved={isSaved}
                       setSave={() => setSaved(false)}
+                      getStateReplyDraft={(val) => setStateReplyDraft(val)}
                     />
-                    {isEdit && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
+                    {(q.showIconAttachReplyFile || q.showIconAttachAnswerFile) && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT' || getStateReplyDraft) &&
+                    <InquiryAnswer
+                      onCancel={() => handleCancel(q)}
+                      setSave={() => handleSetSave(q)}
+                      question={q}
+                    />}
                   </div>
                 </div>
                 <Divider

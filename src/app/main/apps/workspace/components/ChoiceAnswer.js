@@ -5,18 +5,20 @@ import {
   RadioGroup,
   FormControlLabel
 } from '@material-ui/core';
-import { useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {PERMISSION, PermissionProvider} from "@shared/permission";
 
+import * as InquiryActions from '../store/actions/inquiry';
 
 const ChoiceAnswer = (props) => {
-  const { index, question, selectChoice, disableChecked, isDisableSave, disable = false } = props;
+  const { index, question, questions, disableChecked, isDisableSave, disable = false } = props;
   const user = useSelector(({ user }) => user);
   let questionIsEmpty = props.question === undefined;
   let prevChoiceArray = (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state))? []: question.answerObj.filter((choice) => {
     return choice.confirmed;
   });
   const [isPermission, setPermission] = useState(false);
+  const dispatch = useDispatch();
 
   const initSelectedChoice = () => {
     if (!questionIsEmpty && prevChoiceArray.length > 0) {
@@ -35,7 +37,10 @@ const ChoiceAnswer = (props) => {
       answer: e.target.value,
       confirmed: true
     };
-    selectChoice(selectedObj);
+    const optionsInquires = [...questions];
+    const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    optionsInquires[editedIndex].selectChoice = selectedObj;
+    dispatch(InquiryActions.setInquiries(optionsInquires));
     isDisableSave(false);
   };
 
