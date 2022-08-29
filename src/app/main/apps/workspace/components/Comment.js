@@ -105,7 +105,7 @@ const Comment = (props) => {
         media : question.mediaFilesAnswer||[]
       });
     }
-    
+
   }, []);
 
   const handleClose = () => {
@@ -331,7 +331,7 @@ const Comment = (props) => {
     
     <div style={{paddingTop: '10px'}}>
       { comments.map((k, id) => {
-        return contentUI({userName: k.creator.userName,createdAt: k.createdAt,avatar: k.creator.avatar, content: k.content, media: k.media, id})
+        return contentUI({userName: k.creator.userName,createdAt: k.createdAt,avatar: k.creator.avatar, content: k.content, media: k.answersMedia, id})
       })
       }
     </div>

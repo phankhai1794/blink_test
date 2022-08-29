@@ -166,7 +166,7 @@ const InquiryViewer = (props) => {
           res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
           const lastest = { ...question };
           // filter comment
-          lastest.mediaFilesAnswer = res[res.length - 1].mediaFilesAnswer;
+          lastest.mediaFile = res[res.length - 1].answersMedia;
           lastest.answerObj = [{ content: res[res.length - 1].content }];
           lastest.content = res[res.length - 1].content;
           lastest.creator = res[res.length - 1].creator;
@@ -607,7 +607,7 @@ const InquiryViewer = (props) => {
             <>
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={6}>
-                  {question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+                  {/*{question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}*/}
                 </Grid>
                 {inqHasComment && (
                   <Grid item xs={6}>
@@ -656,39 +656,38 @@ const InquiryViewer = (props) => {
                   </div>
                 ))}
             </>
-            {user.role === 'Admin' &&
-            !['ANS_SENT', 'REP_A_SENT', 'COMPL'].includes(question.state) ? null : (
-                <>
-                  {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-                  {question.mediaFilesAnswer?.map((file, mediaIndex) => (
-                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                        <ImageAttach
-                          file={file}
-                          field={question.field}
-                          style={{ margin: '2.5rem' }}
-                          indexMedia={mediaIndex}
-                          isAnswer={true}
-                          question={question}
-                          questions={inquiries}
-                          hiddenRemove={!question.showIconAttachAnswerFile}
-                        />
-                      ) : (
-                        <FileAttach
-                          file={file}
-                          field={question.field}
-                          indexMedia={mediaIndex}
-                          isAnswer={true}
-                          question={question}
-                          index={index}
-                          questions={inquiries}
-                          hiddenRemove={!question.showIconAttachAnswerFile}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </>
-              )}
+            {(inqHasComment || checkStateReplyDraft) ? null : (
+              <>
+                {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+                {question.mediaFilesAnswer?.map((file, mediaIndex) => (
+                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                      <ImageAttach
+                        file={file}
+                        field={question.field}
+                        style={{ margin: '2.5rem' }}
+                        indexMedia={mediaIndex}
+                        isAnswer={true}
+                        question={question}
+                        questions={inquiries}
+                        hiddenRemove={!question.showIconAttachAnswerFile}
+                      />
+                    ) : (
+                      <FileAttach
+                        file={file}
+                        field={question.field}
+                        indexMedia={mediaIndex}
+                        isAnswer={true}
+                        question={question}
+                        index={index}
+                        questions={inquiries}
+                        hiddenRemove={!question.showIconAttachAnswerFile}
+                      />
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
           </div>
           {question.state !== 'COMPL' && question.state !== 'UPLOADED' && (
             <>
@@ -750,7 +749,7 @@ const InquiryViewer = (props) => {
                 <>
                   {isReply ? (
                     <>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
                         <textarea
                           style={{
                             width: '100%',
@@ -768,9 +767,14 @@ const InquiryViewer = (props) => {
                           value={tempReply?.answer?.content}
                           onChange={handleChangeContentReply}
                         />
+                        {user.role === 'Admin' && <AttachFile
+                          isReply={true}
+                          question={question}
+                          setAttachmentReply={handleSetAttachmentReply}
+                        />}
                       </div>
 
-                      {tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}
+                      {/*{tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}*/}
                       {tempReply?.mediaFiles?.map((file, mediaIndex) => (
                         <div
                           style={{ position: 'relative', display: 'inline-block' }}
