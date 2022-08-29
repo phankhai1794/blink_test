@@ -50,6 +50,22 @@ const useStyles = makeStyles((theme) => ({
   button: {
     textTransform: 'none',
     fontWeight: 'bold'
+  },
+  buttonComfirm: {
+    boxSizing: 'border-box',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '10px',
+    gap: '10px',
+    position: 'absolute',
+    left:'82.01%',
+    right: '11.04%%',
+    top: ' 28.24%',
+    bottom: '24.71%',
+    background: '#BD0F72',
+    borderRadius: '8px',
   }
 }));
 
@@ -240,14 +256,14 @@ function ToolbarLayout1(props) {
             <PermissionProvider
               action={PERMISSION.VIEW_EDIT_DRAFT_BL}
               extraCondition={pathname.includes('/apps/draft-bl')}>
-              <Button
+                {/*<Button
                 variant="text"
                 size="medium"
                 className={classes.button}
                 onClick={redirectEditDraftBL}>
                 <EditIcon />
                 <span className="px-2">Edit</span>
-              </Button>
+          </Button>*/}
 
               <Button
                 style={{
@@ -256,15 +272,18 @@ function ToolbarLayout1(props) {
                   borderRadius: '8px',
                   fontWeight: '600',
                   fontFamily: 'Montserrat',
-                  right: '6rem'
+                  fontStyle: 'normal',
+                  lineHeight: '20px',
+                  fontSize: '16px',
+                  textTransform: 'capitalize',
+                  panding: '10px'
                 }}
                 variant="text"
-                size="medium"
-                className={clsx('normal-case absolute flex my-8 mr-10')}
+                className={clsx(classes.buttonComfirm)}
                 onClick={confirmBlDraft}
                 disabled={disableConfirm}>
                 <span className="pl-4">Confirm</span>
-              </Button>
+              </Button>       
               <DialogConfirm open={open} handleClose={handleClose} />
             </PermissionProvider>
           </div>
@@ -297,7 +316,8 @@ function ToolbarLayout1(props) {
              */}
             <PreviewDraftBL />
             <PermissionProvider
-              action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}>
+              action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
+              extraCondition={!pathname.includes('/apps/draft-bl')}>
               <Button
                 variant="contained"
                 style={{

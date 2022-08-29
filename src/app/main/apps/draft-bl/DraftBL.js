@@ -175,7 +175,7 @@ const DraftPage = () => {
     draftBL.myBL,
     draftBL.content
   ]);
-
+  
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
   };
@@ -196,6 +196,7 @@ const DraftPage = () => {
 
   useEffect(() => {
     const { pathname, search } = window.location;
+    if (pathname.includes('draft-bl/') && !pathname.includes('preview')) dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     if (pathname.includes('/draft-bl/preview')) {
       const isAllow = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL });
       if (!isAllow) history.push({ pathname: '/login', cachePath: pathname, cacheSearch: search });
