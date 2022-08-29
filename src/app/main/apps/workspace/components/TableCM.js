@@ -7,6 +7,7 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import HelpIcon from '@material-ui/icons/Help';
 import AttachFile from '@material-ui/icons/AttachFile';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -16,6 +17,9 @@ import Label from './FieldLabel';
 
 const red = '#DC2626';
 const pink = '#BD0F72';
+const blue = '#EAF2FD';
+const green = '#2F80ED';
+const success = '#36B37E'
 
 const useStyles = makeStyles((theme) => ({
   hoverIcon: {
@@ -50,6 +54,36 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: '1rem',
     backgroundColor: '#FDF2F2',
   },
+  colorHasAnswer: {
+    color: `${green} !important`
+  },
+
+  colorHasResolved: {
+    color: `${success} !important`
+  },
+  hasResolved: {
+    backgroundColor: '#EBF7F2',
+    '& fieldset': {
+      backgroundColor: '#EBF7F2',
+      borderColor: `${success} !important`
+    },
+    '&:hover': {
+      backgroundColor: '#EBF7F2'
+    }
+  },
+  hasAnswer: {
+    backgroundColor: blue,
+    '& fieldset': {
+      backgroundColor: blue,
+      borderColor: `${green} !important`
+    },
+    '&:hover fieldset': {
+      borderColor: `${green} !important`
+    },
+    '&:focus-within fieldset': {
+      border: `1px solid ${green} !important`
+    }
+  },
   labelMargin: {
     marginTop: '0.6rem !important',
     padding: '4px',
@@ -69,10 +103,31 @@ const TableCM = (props) => {
   const [showIcons, setShowIcons] = useState(false);
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
   const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
+  const [hasAnswer, setHasAnswer] = useState(false);
+  const [isResolved, setIsResolved] = useState(false)
+
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   // const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
   const questions = useSelector(({ workspace }) => workspace.inquiryReducer.question);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+
+  const checkAnswerSent = () => {
+    if (inquiries.length > 0) {
+      const lst = inquiries.filter((q) => q.field === id);
+      return lst.some(e => ['ANS_SENT','REP_Q_DRF','REP_Q_SENT','REP_A_DRF','REP_A_SENT'].includes(e.state))
+    }
+    return false;
+  };
+
+  const checkQuestionIsResolved = () => {
+    if (inquiries.length > 0) {
+      const lst = inquiries.filter((q) => q.field === id);
+      console.log(lst);
+      if (lst.length > 0)
+        return lst.every(e => e.state === 'COMPL' || e.state === 'UPLOADED')
+    }
+    return false;
+  };
 
   const onMouseEnter = (e) => setShowIcons(true);
 
@@ -110,20 +165,25 @@ const TableCM = (props) => {
 
   useEffect(() => {
     setQuestionIsEmpty(checkQuestionIsEmpty());
+    setHasAnswer(checkAnswerSent())
+    setIsResolved(checkQuestionIsResolved())
   }, [inquiries, metadata]);
 
 
   return (
     <>
       <div className={clsx(classes.hoverIcon, `justify-self-end opacity-${(showIcons || !questionIsEmpty) ? '100' : '0'}`)}>
-        {!questionIsEmpty ?
-          <>
-            {!mediaFileIsEmpty && <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />}
-            < HelpIcon className={clsx(classes.colorHasInqIcon)} />
-          </>
-          : (allowAddInquiry &&<AddCircleIcon className={(showIcons ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon))}/> )}
+        {!isResolved ?(
+          !questionIsEmpty ?
+            <>
+              {!mediaFileIsEmpty && <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />}
+              < HelpIcon className={clsx(classes.colorHasInqIcon)} />
+            </>
+            : (allowAddInquiry &&<AddCircleIcon className={(showIcons ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon))}/> )):<></>
+        }
       </div>
-      <div className={clsx(!questionIsEmpty ? classes.hasInq : classes.enterTableFile)} onClick={onClick}>
+      <div className={clsx(!questionIsEmpty ? classes.hasInq : classes.enterTableFile, hasAnswer ? classes.hasAnswer : '',
+        isResolved ? classes.hasResolved : '')} onClick={onClick}>
         <Grid container
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
@@ -143,6 +203,7 @@ const TableCM = (props) => {
           <Grid container item xs={2} spacing={1}>
             <Label className={clsx(classes.labelMargin)}>GROSS MEASUREMENT</Label>
           </Grid>
+          {isResolved&&<CheckCircleIcon style={{paddingTop: 15, paddingLeft: 15}} className={clsx(classes.sizeIcon, classes.colorHasResolved)} />}
           {containerManifest?.length > 0 ?
             containerManifest.map((cm, index) =>
               (<Grid container spacing={2} className='px-8 py-2' key={index}>
