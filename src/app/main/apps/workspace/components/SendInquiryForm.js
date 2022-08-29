@@ -11,6 +11,7 @@ import { loadComment } from 'app/services/inquiryService';
 
 import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
+import * as InquiryActions from "../store/actions/inquiry";
 
 import TagsInput from './TagsInput';
 import AllInquiry from './AllInquiry';
@@ -142,6 +143,9 @@ const SendInquiryForm = (props) => {
       dispatch(Actions.showMessage({ message: 'Please fill to Customer or Onshore fields', variant: 'error' }));
     }
     else {
+      inquiries.forEach(q => {if (q.state === 'OPEN') q.state = 'INQ_SENT' });
+      dispatch(InquiryActions.setInquiries(inquiries));
+      //
       dispatch({ type: mailActions.SENDMAIL_LOADING });
       dispatch(mailActions.sendMail({ myblId: mybl.id, ...form, replyInqs: inqHasComment }));
     }

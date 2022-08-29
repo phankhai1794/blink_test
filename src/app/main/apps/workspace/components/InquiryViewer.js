@@ -240,6 +240,7 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     myBL?.state !== stateResquest && setAllowDeleteInq(false);
     resetInquiry();
+    question?.state === 'INQ_SENT' ? setShowLabelSent(true) : setShowLabelSent(false);
   }, []);
 
   useEffect(() => {
@@ -544,7 +545,7 @@ const InquiryViewer = (props) => {
                   {question.showIconReply ? (
                     <PermissionProvider
                       action={PERMISSION.INQUIRY_CREATE_REPLY}
-                      extraCondition={user.role !== "Admin" && !checkStateReplyDraft && !['ANS_DRF', 'COMPL', 'UPLOADED'].includes(question.state)}
+                      extraCondition={!checkStateReplyDraft && !['ANS_DRF', 'COMPL', 'UPLOADED'].includes(question.state)}
                     >
                       <Tooltip title="Reply Inquiry">
                         <div onClick={() => onReply(question)} style={{ marginRight: 8 }}>
@@ -581,7 +582,9 @@ const InquiryViewer = (props) => {
               {question.content}
             </Typography>
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
-              {type === metadata.ans_type.choice && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && (
+              {type === metadata.ans_type.choice &&
+              ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !inqHasComment &&
+              (
                 <ChoiceAnswer
                   index={index}
                   questions={inquiries}
@@ -590,7 +593,8 @@ const InquiryViewer = (props) => {
                   isDisableSave={(e) => setDisableSave(e)}
                 />
               )}
-              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && (
+              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !inqHasComment &&
+              (
                 <ParagraphAnswer
                   question={question}
                   index={index}
