@@ -1,17 +1,15 @@
-import { useDispatch } from "react-redux";
-import clsx from 'clsx';
-import { Button, Dialog, Divider } from "@material-ui/core";
 import React from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { Dialog, Divider } from "@material-ui/core";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import MuiDialogContent from "@material-ui/core/DialogContent";
 
+import * as Actions from '../store/actions';
+
 const white = '#FFFFFF';
-const pink = '#BD0F72';
-const greyBg = '#CCD3D1';
-const greyText = '#999999';
 
 const styles = (theme) => ({
   root: {
@@ -27,10 +25,9 @@ const styles = (theme) => ({
 });
 
 const DialogTitle = withStyles(styles)(({
-  children,
   classes,
-  toggleForm,
   handleClose,
+  children,
   ...other
 }) => {
   return (
@@ -64,43 +61,23 @@ const useStyles = makeStyles(() => ({
   },
   chip: {
     marginLeft: '0.2rem'
-  },
-  btn: {
-    width: 120,
-    height: 40,
-    borderRadius: 8,
-    boxShadow: 'none'
-  },
-  btnSave: {
-    color: white,
-    background: pink,
-    marginRight: 5
-  },
-  btnCancel: {
-    color: greyText,
-    background: white,
-    border: `1px solid ${greyText}`
   }
 }));
 
-export default function Form(props) {
-  const { open, toggleForm, title, children } = props;
+export default function Form({ title, children }) {
   const classes = useStyles();
+  const dispatch = useDispatch();
 
-  const handleClose = () => {
-    toggleForm(false);
-  }
+  const openDraftBL = useSelector(({ draftBL }) => draftBL.openDraftBL);
 
-  const onSave = () => {
-    props.handleSave();
-  }
+  const handleClose = () => dispatch(Actions.toggleDraftBLEdit(false))
 
   return (
     <div>
       <Dialog
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
-        open={open}
+        open={openDraftBL}
         maxWidth="md"
         classes={{ paperScrollPaper: classes.dialogPaper }}
       >
@@ -110,21 +87,12 @@ export default function Form(props) {
             fontSize: 22,
             fontWeight: 600,
           }}
-          toggleForm={toggleForm}
           handleClose={handleClose}
         >
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
         <MuiDialogContent classes={{ root: classes.dialogContent }}>{children}</MuiDialogContent>
-        <div style={{ padding: '0 39px 30px' }}>
-          <Button className={clsx(classes.btn, classes.btnSave)} onClick={onSave}>
-            Save
-          </Button>
-          <Button className={clsx(classes.btn, classes.btnCancel)} onClick={handleClose}>
-            Cancel
-          </Button>
-        </div>
       </Dialog>
     </div>
   )

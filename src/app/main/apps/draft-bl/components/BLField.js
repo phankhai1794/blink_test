@@ -106,25 +106,17 @@ const useStyles = makeStyles((theme) => ({
 const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, readOnly }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const contentChanged = useSelector(({ draftBL }) => draftBL.contentChanged);
+  const draftContent = useSelector(({ draftBL }) => draftBL.draftContent);
   const [fieldIsChanged, setFieldIsChanged] = useState(false);
 
-  const checkFieldEdited = () => {
-    if (contentChanged) {
-      const getsKey = Object.keys(contentChanged).map(key => key);
-      const check = getsKey.find(key => key === id);
-      return !!check;
-    }
-  };
-
   useEffect(() => {
-    setFieldIsChanged(checkFieldEdited());
-  }, [contentChanged]);
+    if (draftContent && id) setFieldIsChanged(draftContent.filter(t => t.field === id).length);
+  }, [draftContent, id]);
 
   const onClick = (e) => {
     if (!lock) {
       dispatch(BLDraftActions.toggleDraftBLEdit(true));
-      dispatch(BLDraftActions.setCurrentBLField(e.currentTarget.id));
+      dispatch(BLDraftActions.setCurrentField(e.currentTarget.id));
     }
   };
 

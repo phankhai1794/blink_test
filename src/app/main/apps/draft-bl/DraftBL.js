@@ -193,10 +193,10 @@ const DraftPage = (props) => {
   const dispatch = useDispatch();
   const [containersDetail, setContainersDetail] = useState([]);
   const [containersManifest, setContainersManifest] = useState([]);
-  const [metadata, myBL, content] = useSelector(({ draftBL }) => [
+  const [metadata, myBL, orgContent] = useSelector(({ draftBL }) => [
     draftBL.metadata,
     draftBL.myBL,
-    draftBL.content
+    draftBL.orgContent
   ]);
 
   const getField = (field) => {
@@ -204,7 +204,7 @@ const DraftPage = (props) => {
   };
 
   const getValueField = (field) => {
-    return content[getField(field)] || '';
+    return orgContent[getField(field)] || '';
   };
 
   const getInqType = (field) => {
@@ -240,11 +240,11 @@ const DraftPage = (props) => {
 
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-    if (Object.keys(content).length && Object.keys(metadata).length) {
+    if (Object.keys(orgContent).length && Object.keys(metadata).length) {
       setContainersDetail(getValueField(CONTAINER_DETAIL));
       setContainersManifest(getValueField(CONTAINER_MANIFEST));
     }
-  }, [metadata, content]);
+  }, [metadata, orgContent]);
 
   return (
     <div className={classes.wrapper}>
@@ -508,9 +508,9 @@ const DraftPage = (props) => {
                     containersDetail.map((cd, idx) => (
                       <span key={idx} style={{ whiteSpace: 'pre' }}>
                         {`${cd[getInqType('Container Number')]}    / ${cd[getInqType('Container Seal')]
-                          }    /  ${cd[getInqType('Container Package')]}  /  ${cd[getInqType('Container Type')]
-                          }  /  ${cd[getInqType('Container Weight')]}  /  ${cd[getInqType('Container Measurement')]
-                          }`}
+                        }    /  ${cd[getInqType('Container Package')]}  /  ${cd[getInqType('Container Type')]
+                        }  /  ${cd[getInqType('Container Weight')]}  /  ${cd[getInqType('Container Measurement')]
+                        }`}
                         <br />
                       </span>
                     ))}
