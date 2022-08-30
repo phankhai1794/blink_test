@@ -176,7 +176,7 @@ const InquiryViewer = (props) => {
           const filterRepADraft = res.filter((r) => r.state === 'REP_A_DRF');
           filterRepADraft.length
             ? dispatch(InquiryActions.checkSubmit(true))
-            : dispatch(InquiryActions.checkSubmit(true));
+            : dispatch(InquiryActions.checkSubmit(false));
           //
           const filterOffshoreSent = res[res.length - 1];
           if (user.role === 'Admin') {
@@ -202,7 +202,6 @@ const InquiryViewer = (props) => {
               }
             }
           }
-
           //
           res.splice(res.length - 1, 1);
           
@@ -859,7 +858,7 @@ const InquiryViewer = (props) => {
                       </PermissionProvider>
                       <PermissionProvider
                         action={PERMISSION.INQUIRY_CREATE_REPLY}
-                        extraCondition={user.role === "Admin" && (inqHasComment || question.state === 'ANS_SENT')}
+                        extraCondition={user.role === "Admin" && (inqHasComment || ['ANS_SENT', 'OPEN'].includes(question.state))}
                       >
                         <Button
                           variant="contained"
