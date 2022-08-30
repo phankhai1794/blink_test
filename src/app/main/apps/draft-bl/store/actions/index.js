@@ -8,6 +8,8 @@ export const SET_BL = 'SET_BL';
 export const SET_CONTENT = 'SET_CONTENT';
 export const SET_DRAFT_CONTENT = 'SET_DRAFT_CONTENT';
 export const OPEN_EDIT_DRAFT_BL = 'OPEN_EDIT_DRAFT_BL';
+export const SET_SEND_DRAFT_BL = 'SET_SEND_DRAFT_BL';
+export const OPEN_SEND_NOTIFICATION = 'OPEN_SEND_NOTIFICATION';
 export const SET_CURRENT_BL_FIELD = 'SET_CURRENT_BL_FIELD';
 export const SET_NEW_CONTENT = 'SET_NEW_CONTENT';
 export const SET_NEW_CONTENT_CHANGED = 'SET_NEW_CONTENT_CHANGED';
@@ -108,5 +110,18 @@ export function setNewContentChanged(state) {
 export function toggleReload() {
   return {
     type: RELOAD
+  };
+}
+
+export function toggleSendDraftBl() {
+  return {
+    type: SET_SEND_DRAFT_BL
+  };
+}
+
+export function toggleSendNotification(state) {
+  return {
+    type: OPEN_SEND_NOTIFICATION,
+    state: state
   };
 }

@@ -6,6 +6,11 @@ export async function saveEditedField(body) {
   return response.data;
 }
 
+export async function sendEditedField(blId) {
+  const response = await axios().patch(`${PATH}/send/${blId}`);
+  return response.data;
+}
+
 export async function getFieldContent(blId) {
   const response = await axios().get(`${PATH}/${blId}`);
   return response.data;

@@ -10,6 +10,8 @@ const initialState = {
   openDraftBL: false,
   currentBLField: '',
   reload: false,
+  enableSendDraftBl: false,
+  openSendNotification: false,
 };
 
 const draftBL = function (state = initialState, action) {
@@ -40,6 +42,12 @@ const draftBL = function (state = initialState, action) {
   }
   case Actions.RELOAD: {
     return { ...state, reload: !state.reload };
+  }
+  case Actions.SET_SEND_DRAFT_BL: {
+    return { ...state, enableSendDraftBl: action.state };
+  }
+  case Actions.OPEN_SEND_NOTIFICATION: {
+    return { ...state, openSendNotification: action.state };
   }
   default: {
     return state;

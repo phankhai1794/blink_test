@@ -68,6 +68,11 @@ const ImageAttach = (props) => {
         src={srcUrl}
         onClick={openImageViewer}
       />
+      <h3
+        style={{ color: '#515F6B' }}
+      >
+        {file.name}
+      </h3>
       {isViewerOpen &&
         <ImageViewer
           src={[srcUrl]}
