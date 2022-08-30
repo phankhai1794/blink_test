@@ -10,7 +10,7 @@ export const DraftAppConfig = {
     {
       path: '/apps/draft-bl/:id',
       exact: true,
-      component: React.lazy(() => import('./DraftBL'))
+      component: React.lazy(() => import('./DraftBLWorkspace'))
     },
     {
       path: '/apps/draft-bl/edit/:id',
@@ -20,7 +20,7 @@ export const DraftAppConfig = {
     {
       path: '/apps/draft-bl/preview/:id',
       exact: true,
-      component: React.lazy(() => import('./DraftBL'))
+      component: React.lazy(() => import('./DraftBLWorkspace'))
     }
   ]
 };

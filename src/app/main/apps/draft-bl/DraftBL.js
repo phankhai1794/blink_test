@@ -164,8 +164,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const DraftPage = () => {
-  const { pathname } = window.location;
+const DraftPage = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [containersDetail, setContainersDetail] = useState([]);
@@ -206,7 +205,7 @@ const DraftPage = () => {
       );
 
     dispatch(Actions.loadMetadata());
-    dispatch(Actions.loadContent(pathname.split('/')[pathname.includes('preview') ? 4 : 3]));
+    dispatch(Actions.loadContent(props.myBL?.id));
   }, []);
 
   useEffect(() => {

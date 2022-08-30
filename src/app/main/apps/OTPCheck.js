@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { Box, Card, CardContent, Typography, TextField, Button } from '@material-ui/core';
-import { FusePageSimple, FuseAnimate } from '@fuse';
+import { FuseAnimate } from '@fuse';
 import Formsy from 'formsy-react';
 import { useDispatch } from 'react-redux';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
@@ -10,8 +10,6 @@ import OtpInput from 'react-otp-input';
 import { isEmail } from 'validator';
 import { verifyEmail, verifyGuest, isVerified } from 'app/services/authService';
 import * as Actions from 'app/store/actions';
-
-import BLWorkspace from './components/BLWorkspace';
 
 const otpLength = 6;
 const mainColor = '#BD0F72';
@@ -148,10 +146,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const OtpCheck = ({ status }) => {
+const OtpCheck = ({ isDraftBL, children }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const pageLayout = useRef(null);
   const [myBL, setMyBL] = useState({ id: '' });
   const [mail, setMail] = useState({ value: '', isValid: false });
   const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true });
@@ -166,7 +163,7 @@ const OtpCheck = ({ status }) => {
   };
 
   const handleCheckMail = () => {
-    verifyEmail({ bl: myBL.id, email: mail.value })
+    verifyEmail({ isDraftBL, email: mail.value, bl: myBL.id })
       .then((res) => {
         if (res) setStep(1);
       })
@@ -181,7 +178,7 @@ const OtpCheck = ({ status }) => {
     setOtpCode({ ...otpCode, value: code, isValid: Boolean(/^\d+$/.test(code)) });
 
   const handleSendCode = () => {
-    verifyGuest({ email: mail.value, bl: myBL.id, otpCode: otpCode.value })
+    verifyGuest({ isDraftBL, email: mail.value, bl: myBL.id, otpCode: otpCode.value })
       .then((res) => {
         if (res) {
           const { role, userName, avatar, email, permissions } = res.userData;
@@ -209,7 +206,8 @@ const OtpCheck = ({ status }) => {
   };
 
   useEffect(() => {
-    const bl = new URLSearchParams(window.location.search).get('bl');
+    const { pathname, search } = window.location;
+    const bl = new URLSearchParams(search).get('bl') || pathname.split('/')[3];
     if (bl) setMyBL({ ...myBL, id: bl });
 
     let userInfo = localStorage.getItem('USER');
@@ -222,10 +220,14 @@ const OtpCheck = ({ status }) => {
           isValid: isEmail(email)
         });
 
-        isVerified({ email, bl })
+        isVerified({ isDraftBL, email, bl })
           .then(() => setStep(2))
           .catch((error) => {
             console.error(error);
+            if (error.response?.data?.error.status === 403) {
+              const { message } = error.response.data.error || error.message;
+              dispatch(Actions.showMessage({ message, variant: 'error' }));
+            }
           });
       }
     }
@@ -240,21 +242,7 @@ const OtpCheck = ({ status }) => {
 
   return (
     <>
-      {step === 2 ? (
-        <div className="flex flex-col flex-1 w-full">
-          <FusePageSimple
-            classes={{
-              contentWrapper: 'p-0 h-full',
-              content: 'flex flex-col h-full',
-              leftSidebar: 'w-256 border-0'
-            }}
-            content={<BLWorkspace myBL={myBL} user="guest" />}
-            sidebarInner
-            ref={pageLayout}
-            innerScroll
-          />
-        </div>
-      ) : (
+      {step === 2 ? <>{children}</> : (
         <div
           className={clsx(
             classes.root,
