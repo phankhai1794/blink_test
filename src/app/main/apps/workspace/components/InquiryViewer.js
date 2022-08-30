@@ -158,24 +158,25 @@ const InquiryViewer = (props) => {
       setViewDropDown(id);
     }
   };
-
   useEffect(() => {
     loadComment(question.id)
       .then((res) => {
+        const lastest = { ...question };
         if (res.length > 0) {
           res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
-          const lastest = { ...question };
+          
           // filter comment
           lastest.mediaFile = res[res.length - 1].answersMedia;
           lastest.answerObj = [{ content: res[res.length - 1].content }];
           lastest.content = res[res.length - 1].content;
+          lastest.name="";
           lastest.creator = res[res.length - 1].creator;
           lastest.createdAt = res[res.length - 1].createdAt;
           // customer reply
           const filterRepADraft = res.filter((r) => r.state === 'REP_A_DRF');
           filterRepADraft.length
             ? dispatch(InquiryActions.checkSubmit(true))
-            : dispatch(InquiryActions.checkSubmit(false));
+            : dispatch(InquiryActions.checkSubmit(true));
           //
           const filterOffshoreSent = res[res.length - 1];
           if (user.role === 'Admin') {
@@ -201,14 +202,37 @@ const InquiryViewer = (props) => {
               }
             }
           }
+
           //
           res.splice(res.length - 1, 1);
+          
           setComment([...res]);
           setType(metadata.ans_type.paragraph);
           setQuestion(lastest);
           setInqHasComment(true);
         } else {
-          setQuestion(props.question);
+          if (user.role === 'Admin' &&question.state === "ANS_SENT"){
+            let answerObj = null;
+            if (question.ansType === metadata.ans_type.choice) {
+              answerObj = question.answerObj.filter((item) => item.confirmed);
+            } else {
+              answerObj = question.answerObj;
+            }
+            if (answerObj.length > 0) {
+              lastest.answerObj = [];
+              lastest.content = `The updated information is "${answerObj[0]?.content}"`;
+              lastest.name="";
+              lastest.creator = answerObj[0]?.updater;
+              lastest.createdAt = answerObj[0]?.updatedAt;
+              setQuestion(lastest);
+              setType(metadata.ans_type.paragraph);
+            }
+            setInqHasComment(true);
+          }
+          else{
+            setQuestion(props.question);
+          }
+          
         }
         setIsLoadedComment(true);
       })
@@ -636,7 +660,7 @@ const InquiryViewer = (props) => {
               </Grid>
 
               {viewDropDown === question.id && (
-                <Comment question={props.question} comment={comment} />
+                <Comment question={props.question} hasComment ={inqHasComment} comment={comment} />
               )}
 
               {question.mediaFile?.length > 0 &&
