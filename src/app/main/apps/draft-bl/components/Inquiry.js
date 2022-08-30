@@ -3,9 +3,8 @@ import { displayTime } from '@shared'
 import { makeStyles } from '@material-ui/styles';
 
 import UserInfo from '../../workspace/components/UserInfo';
-
-import ImageAttach from "./ImageAttach";
-import FileAttach from './FileAttach';
+import ImageAttach from '../../workspace/components/ImageAttach';
+import FileAttach from '../../workspace/components/FileAttach';
 
 const useStyles = makeStyles((theme) => ({
   labelStatus: {

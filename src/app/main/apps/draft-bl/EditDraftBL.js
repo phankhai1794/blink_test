@@ -5,11 +5,8 @@ import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { Grid, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import * as AppActions from 'app/store/actions';
-import { saveEditedField } from 'app/services/draftblService';
-import { uploadFile } from 'app/services/fileService';
 import { getLabelById } from '@shared';
-import axios from 'axios';
+import * as AppActions from 'app/store/actions';
 
 import * as Actions from './store/actions';
 import Label from './components/FieldLabel';
@@ -60,38 +57,27 @@ const EditDraftPage = (props) => {
   const dispatch = useDispatch();
   const metadata = useSelector(({ draftBL }) => draftBL.metadata);
   const myBL = useSelector(({ draftBL }) => draftBL.myBL);
-  const openDraftBL = useSelector(({ draftBL }) => draftBL.openDraftBL);
-  const currentBLField = useSelector(({ draftBL }) => draftBL.currentBLField);
-  const contentEdit = useSelector(({ draftBL }) => draftBL.contentEdit);
-  const contentChanged = useSelector(({ draftBL }) => draftBL.contentChanged);
+  const currentField = useSelector(({ draftBL }) => draftBL.currentField);
+  const content = useSelector(({ draftBL }) => draftBL.content);
   const draftContent = useSelector(({ draftBL }) => draftBL.draftContent);
   const reload = useSelector(({ draftBL }) => draftBL.reload);
 
   const role = useSelector(({ user }) => user.role);
   const [titleField, setTitleField] = useState();
-  const [contentField, setContentField] = useState();
-  const [attachments, setAttachments] = useState([])
-  const [data, setData] = useState()
+  const [data, setData] = useState();
+
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
   };
 
   const checkIsEdited = (state) => {
-    if (role !== 'Admin' && state === 'AME_DRF' || state === 'AME_SENT') {
-      return true
-    }
-    return false
+    return ((role !== 'Admin' && state === 'AME_DRF') || state === 'AME_SENT');
   }
 
   const getValueField = (field) => {
     const temp = draftContent.find((c) => c.field === getField(field))
-
-    if (temp) {
-      if (checkIsEdited(temp.state)) {
-        return temp.content.content
-      }
-    }
-    return contentEdit[getField(field)] || '';
+    if (temp && checkIsEdited(temp.state)) return temp.content.content;
+    return content[getField(field)] || '';
   };
 
   useEffect(() => {
@@ -109,68 +95,20 @@ const EditDraftPage = (props) => {
   }, [reload])
 
   useEffect(() => {
-    if (currentBLField) {
-      setTitleField(getLabelById(metadata['field_options'], currentBLField));
-      setContentField(contentEdit[currentBLField]);
-      setData(draftContent.find((c) => c.field === currentBLField))
+    if (currentField) {
+      setTitleField(getLabelById(metadata['field_options'], currentField));
+      setData(draftContent.find((c) => c.field === currentField))
     }
-  }, [currentBLField, draftContent]);
-
-  const handleGetValue = (value) => {
-    setContentField(value);
-  };
-
-  const handleSave = () => {
-    // debugger
-    const newTxt = { ...contentEdit };
-    if (newTxt[currentBLField] === contentField) {
-      dispatch(Actions.toggleDraftBLEdit(false));
-      return;
-    }
-    newTxt[currentBLField] = contentField;
-    dispatch(Actions.setNewContent(newTxt));
-    //
-    const newTxtChanged = { ...contentChanged, [currentBLField]: contentField };
-    dispatch(Actions.setNewContentChanged(newTxtChanged));
-    dispatch(Actions.toggleDraftBLEdit(false));
-    const uploads = [];
-    if (attachments.length) {
-      attachments.forEach((file) => {
-        const formData = new FormData();
-        formData.append('files', file.data);
-        uploads.push(formData);
-      });
-    }
-    axios
-      .all(uploads.map((endpoint) => uploadFile(endpoint)))
-      .then((media) => {
-        let mediaList = [];
-        media.forEach((file) => {
-          const mediaFileList = file.response.map((item) => { return { id: item.id, ext: item.ext, name: item.name } });
-          mediaList.push(mediaFileList[0]);
-        })
-        saveEditedField({ field: currentBLField, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id }).then(() => {
-          dispatch(
-            AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' })
-          );
-          dispatch(Actions.toggleReload());
-        }).catch((err) => console.error(err))
-      })
-
-  };
+  }, [currentField, draftContent]);
 
   return (
     <>
       <SendNotification />
       <div className={clsx('max-w-5xl', classes.root)}>
-        <Form
-          open={openDraftBL}
-          toggleForm={(status) => dispatch(Actions.toggleDraftBLEdit(status))}
-          title={titleField}
-          handleSave={handleSave}>
+        <Form title={titleField}>
           {data && checkIsEdited(data.state) ?
             <Inquiry question={data} /> :
-            <BLFieldForm getValueFieldChange={handleGetValue} files={attachments} saveAttachment={setAttachments} />
+            <BLFieldForm />
           }
         </Form>
 
