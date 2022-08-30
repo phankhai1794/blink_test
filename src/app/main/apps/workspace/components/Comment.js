@@ -65,9 +65,9 @@ const useStyles = makeStyles(() => ({
 
 const Comment = (props) => {
   const dispatch = useDispatch();
-  const { question, userType, hasComment } = props;
+  const { question, comment, userType, hasComment } = props;
 
-  const [comments, setComments] = useState(props.comment?.length > 0 ? props.comment : []);
+  const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length -1) : []);
   const [value, setValue] = useState('');
   const [answer, setAnswer] = useState(null);
   const [key, setKey] = useState();
@@ -90,7 +90,7 @@ const Comment = (props) => {
     } else {
       answerObj = question.answerObj;
     }
-    if (answerObj.length > 0 &&hasComment) {
+    if (answerObj.length > 0 &&comment.length >0 ) {
       setAnswer({
         id: answerObj[0]?.id,
         content: `The updated information is "${answerObj[0]?.content}"`,
@@ -247,7 +247,7 @@ const Comment = (props) => {
       </Typography>
       <div style={{ display: 'block', margin: '1rem 0rem' }}>
         {question.ansType === metadata.ans_type.choice && (
-          <ChoiceAnswer disable={true} disableChecked={true} question={question} />
+          <ChoiceAnswer disable={true} question={question} />
         )}
         {question.ansType === metadata.ans_type.paragraph && (
           <ParagraphAnswer disable={true} question={question} />
@@ -296,7 +296,7 @@ const Comment = (props) => {
             createdAt: k.createdAt,
             avatar: k.creator.avatar,
             content: k.content,
-            media: k.answersMedia,
+            media: k.media,
             id
           });
         })}
