@@ -531,6 +531,11 @@ const InquiryViewer = (props) => {
               ) : (
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <div style={{ marginRight: 15 }}>
+                    {(['COMPL', 'UPLOADED'].includes(question.state)) && (
+                      <span className={classes.labelStatus}>Resolved</span>
+                    )}
+                  </div>
+                  <div style={{ marginRight: 15 }}>
                     {(['ANS_SENT'].includes(question.state) || submitLabel) && (
                       <span className={classes.labelStatus}>Submitted</span>
                     )}
