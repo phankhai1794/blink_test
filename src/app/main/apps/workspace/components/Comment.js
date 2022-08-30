@@ -296,7 +296,7 @@ const Comment = (props) => {
             createdAt: k.createdAt,
             avatar: k.creator.avatar,
             content: k.content,
-            media: k.media,
+            media: k.answersMedia,
             id
           });
         })}
