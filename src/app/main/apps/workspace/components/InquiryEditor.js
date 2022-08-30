@@ -104,6 +104,7 @@ const InquiryEditor = (props) => {
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.myBL
   ]);
+  const user = useSelector(({ user }) => user);
 
   const optionsAnsType = [
     {
@@ -586,22 +587,25 @@ const InquiryEditor = (props) => {
                 </div>
               ))}
           </>
-          <>
-            {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-            {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
-              <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                  <ImageAttach
-                    file={file}
-                    field={currentEditInq.field}
-                    style={{ margin: '2.5rem' }}
-                    isAnswer={true}
-                  />
-                ) : (
-                  <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
-                )}
-              </div>
-            ))}
+          <>{user.role !== 'Admin' &&
+              <>
+                {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+                {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
+                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                      <ImageAttach
+                        file={file}
+                        field={currentEditInq.field}
+                        style={{ margin: '2.5rem' }}
+                        isAnswer={true}
+                      />
+                    ) : (
+                      <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
+                    )}
+                  </div>
+                ))}
+              </>
+          }
           </>
           <div className="flex">
             <div className="flex">

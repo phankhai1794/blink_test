@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Button} from "@material-ui/core";
 import {useDispatch, useSelector} from "react-redux";
 import {makeStyles} from "@material-ui/core/styles";
@@ -73,8 +73,8 @@ const PopupConfirm = (props) => {
         <div className={classes.dialogConfirm}>
           <p>{confirmPopupMsg}</p>
           <div className='btnConfirm'>
-            <Button variant="outlined" style={{ marginRight: 15 }} onClick={handleConfirm}>Confirm</Button>
-            <Button variant="outlined" onClick={handleCancelConfirm}>Cancel</Button>
+            <Button variant="outlined" style={{ marginRight: 15, textTransform: 'none', fontSize: 16 }} onClick={handleConfirm}>Confirm</Button>
+            <Button variant="outlined" style={{ textTransform: 'none', fontSize: 16 }} onClick={handleCancelConfirm}>Cancel</Button>
           </div>
         </div>
       )}
