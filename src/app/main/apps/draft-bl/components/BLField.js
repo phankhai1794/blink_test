@@ -1,10 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 import { TextField, InputAdornment, makeStyles } from '@material-ui/core';
 import LockIcon from '@material-ui/icons/Lock';
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ReplyIcon from "@material-ui/icons/Reply";
 
 import * as BLDraftActions from '../store/actions';
@@ -122,11 +122,12 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   }, [contentChanged]);
 
   const onClick = (e) => {
-    dispatch(BLDraftActions.toggleDraftBLEdit(true));
-    dispatch(BLDraftActions.setCurrentBLField(e.currentTarget.id));
-    // setFiledIsClicked(true);
+    if (!lock) {
+      dispatch(BLDraftActions.toggleDraftBLEdit(true));
+      dispatch(BLDraftActions.setCurrentBLField(e.currentTarget.id));
+    }
   };
-  
+
   const handleReply = () => {
     dispatch(BLDraftActions.toggleDraftBLEdit(false))
   }

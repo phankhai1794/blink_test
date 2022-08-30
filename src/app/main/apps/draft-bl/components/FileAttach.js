@@ -53,6 +53,9 @@ const FileAttach = (props) => {
           <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} fontSize='large' />
         )}
       </div>
+      <h3 >
+        {file.name}
+      </h3>
     </div>
   )
 }

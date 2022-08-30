@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
     padding: '10px',
     gap: '10px',
     position: 'absolute',
-    left:'82.01%',
+    left: '82.01%',
     right: '11.04%%',
     top: ' 28.24%',
     bottom: '24.71%',
@@ -81,10 +81,12 @@ function ToolbarLayout1(props) {
     header.validToken
   ]);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const draftContent = useSelector(({ draftBL }) => draftBL.draftContent);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const myBL = useSelector(({ draftBL }) => draftBL.myBL);
   const [open, setOpen] = useState(false);
   const [disableConfirm, setDisableConfirm] = useState(false);
+  const [disableSendDraft, setDisableSendDraft] = useState(false);
   const inquiryLength = inquiries.length;
   const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
   const [isSubmit, setIsSubmit] = useState(true);
@@ -129,6 +131,10 @@ function ToolbarLayout1(props) {
     }
   }, [enableSubmit, inquiries]);
 
+  useEffect(() => {
+    setDisableSendDraft(draftContent.some((c) => c.state === 'AME_DRF'))
+  }, [draftContent])
+
   const openAttachment = () => {
     let isExistMedia = false;
     inquiries.forEach((inq) => {
@@ -152,7 +158,9 @@ function ToolbarLayout1(props) {
     setOpen(true);
     dispatch(DraftBLActions.setConfirmDraftBL());
   };
-
+  const onSendDraftBl = () => {
+    dispatch(DraftBLActions.toggleSendNotification(true));
+  }
   const redirectEditDraftBL = () => {
     const bl = window.location.pathname.split('/')[3];
     if (bl) history.push(`/apps/draft-bl/edit/${bl}`);
@@ -184,11 +192,11 @@ function ToolbarLayout1(props) {
   }, [user, allowAccess]);
 
   const onSubmit = async () => {
-    const inqs = [... inquiries];
+    const inqs = [...inquiries];
     const lstInq = inqs.map((item) => {
       if (item.answerObj && (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(item.state))
       ) {
-        return {inquiryId: item.id, currentState: item.state};
+        return { inquiryId: item.id, currentState: item.state };
       }
       return null;
     });
@@ -256,7 +264,7 @@ function ToolbarLayout1(props) {
             <PermissionProvider
               action={PERMISSION.VIEW_EDIT_DRAFT_BL}
               extraCondition={pathname.includes('/apps/draft-bl')}>
-                {/*<Button
+              {/*<Button
                 variant="text"
                 size="medium"
                 className={classes.button}
@@ -264,11 +272,26 @@ function ToolbarLayout1(props) {
                 <EditIcon />
                 <span className="px-2">Edit</span>
           </Button>*/}
-
+              <PermissionProvider action={PERMISSION.DRAFTBL_SEND_DRAFT_AMENDMENT}>
+                <Button
+                  style={{
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    fontFamily: 'Montserrat',
+                    right: '1rem'
+                  }}
+                  variant="contained"
+                  color="primary"
+                  size="medium"
+                  className={clsx('normal-case absolute flex my-8 mr-10')}
+                  onClick={onSendDraftBl}
+                  disabled={!disableSendDraft}>
+                  <span className="pl-4">Send</span>
+                </Button>
+              </PermissionProvider>
               <Button
                 style={{
-                  backgroundColor: disableConfirm ? '#CCD3D1' : '#BD0F72',
-                  color: 'white',
+                  backgroundColor: disableConfirm && '#CCD3D1',
                   borderRadius: '8px',
                   fontWeight: '600',
                   fontFamily: 'Montserrat',
@@ -278,12 +301,13 @@ function ToolbarLayout1(props) {
                   textTransform: 'capitalize',
                   panding: '10px'
                 }}
-                variant="text"
+                variant="contained"
+                color="primary"
                 className={clsx(classes.buttonComfirm)}
                 onClick={confirmBlDraft}
                 disabled={disableConfirm}>
                 <span className="pl-4">Confirm</span>
-              </Button>       
+              </Button>
               <DialogConfirm open={open} handleClose={handleClose} />
             </PermissionProvider>
           </div>
