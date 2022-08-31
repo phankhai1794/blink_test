@@ -18,17 +18,13 @@ const white = '#FFFFFF';
 const pink = '#BD0F72';
 const greyText = '#999999';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   btn: {
     width: 120,
     height: 40,
     borderRadius: 8,
-    boxShadow: 'none'
-  },
-  btnSave: {
-    color: white,
-    background: pink,
-    marginRight: 5
+    boxShadow: 'none',
+    margin: theme.spacing(1),
   },
   btnCancel: {
     color: greyText,
@@ -112,7 +108,13 @@ const BLFieldForm = (props) => {
       ))}
 
       <div style={{ marginTop: 20 }}>
-        <Button className={clsx(classes.btn, classes.btnSave)} onClick={handleSave}>
+        <Button
+          className={classes.btn}
+          disabled={content[currentField] === fieldValue}
+          onClick={handleSave}
+          color="primary"
+          variant="contained"
+        >
           Save
         </Button>
         <Button className={clsx(classes.btn, classes.btnCancel)} onClick={handleClose}>
