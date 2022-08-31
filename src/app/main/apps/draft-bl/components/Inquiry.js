@@ -1,10 +1,13 @@
 import React from 'react';
 import { displayTime } from '@shared'
 import { makeStyles } from '@material-ui/styles';
+import { useDispatch } from 'react-redux';
+import { Tooltip } from '@material-ui/core';
 
 import UserInfo from '../../workspace/components/UserInfo';
 import ImageAttach from '../../workspace/components/ImageAttach';
 import FileAttach from '../../workspace/components/FileAttach';
+import * as Actions from '../store/actions';
 
 const colorInq = '#DC2626';
 
@@ -21,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Inquiry = (props) => {
   const { question } = props
+  const dispatch = useDispatch();
   const classes = useStyles();
 
   return (
@@ -31,6 +35,16 @@ const Inquiry = (props) => {
           time={displayTime(question.createdAt)}
           avatar={question.creator.avatar}
         />
+        {question.state === 'AME_DRF' &&
+          <Tooltip title="Edit Inquiry">
+            <div onClick={() => dispatch(Actions.toggleEditInquiry(true))}>
+              <img
+                style={{ width: 20, cursor: 'pointer' }}
+                src="/assets/images/icons/edit.svg"
+              />
+            </div>
+          </Tooltip>
+        }
         {question.state === 'AME_SENT' &&
           <div style={{ marginRight: 15 }}>
             <span className={classes.labelStatus}>Sent</span>

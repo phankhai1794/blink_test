@@ -70,7 +70,10 @@ export default function Form({ title, children }) {
 
   const openDraftBL = useSelector(({ draftBL }) => draftBL.openDraftBL);
 
-  const handleClose = () => dispatch(Actions.toggleDraftBLEdit(false))
+  const handleClose = () => {
+    dispatch(Actions.toggleDraftBLEdit(false))
+    dispatch(Actions.toggleEditInquiry(false))
+  }
 
   return (
     <div>

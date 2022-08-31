@@ -61,6 +61,7 @@ const EditDraftPage = (props) => {
   const content = useSelector(({ draftBL }) => draftBL.content);
   const draftContent = useSelector(({ draftBL }) => draftBL.draftContent);
   const reload = useSelector(({ draftBL }) => draftBL.reload);
+  const edit = useSelector(({ draftBL }) => draftBL.edit);
 
   const role = useSelector(({ user }) => user.role);
   const [titleField, setTitleField] = useState();
@@ -101,15 +102,23 @@ const EditDraftPage = (props) => {
     }
   }, [currentField, draftContent]);
 
+  const getFieldForm = () => {
+    if (edit) {
+      return <BLFieldForm question={data} />
+    }
+    else if (data && checkIsEdited(data.state)) {
+      return <Inquiry question={data} />
+    }
+    else {
+      return <BLFieldForm />
+    }
+  }
   return (
     <>
       <SendNotification />
       <div className={clsx('max-w-5xl', classes.root)}>
         <Form title={titleField}>
-          {data && checkIsEdited(data.state) ?
-            <Inquiry question={data} /> :
-            <BLFieldForm />
-          }
+          {getFieldForm()}
         </Form>
 
         <Grid container>

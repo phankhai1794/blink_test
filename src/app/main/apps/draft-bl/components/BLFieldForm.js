@@ -7,10 +7,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import { saveEditedField } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import * as AppActions from 'app/store/actions';
+import { displayTime } from '@shared'
 
 import * as Actions from '../store/actions';
 import ImageAttach from '../../workspace/components/ImageAttach';
 import FileAttach from '../../workspace/components/FileAttach';
+import UserInfo from '../../workspace/components/UserInfo';
 
 import AttachFile from "./AttachFile";
 
@@ -34,6 +36,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BLFieldForm = (props) => {
+  const { question } = props
   const classes = useStyles();
   const dispatch = useDispatch();
   const [myBL, currentField, content] = useSelector(({ draftBL }) => [
@@ -41,33 +44,37 @@ const BLFieldForm = (props) => {
     draftBL.currentField,
     draftBL.content,
   ]);
-  const [fieldValue, setFieldValue] = useState(content[currentField]);
-  const [attachments, setAttachments] = useState([]);
+  const [fieldValue, setFieldValue] = useState(question?.content?.content || content[currentField]);
+  const [attachments, setAttachments] = useState(question?.content?.mediaFile || []);
 
-  const getAttachment = (value) => setAttachments(value);
+  const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
+  const removeAttachment = (index) => {
+    const optionsAttachmentList = [...attachments];
+    optionsAttachmentList.splice(index, 1);
+    setAttachments(optionsAttachmentList)
+  }
   const handleChange = (e) => setFieldValue(e.target.value);
 
   const handleSave = () => {
-    // If data doesn't change
-    // if (content[currentField] === fieldValue) return dispatch(Actions.toggleDraftBLEdit(false));
-
     dispatch(Actions.setContent({ ...content, [currentField]: fieldValue }));
     dispatch(Actions.toggleDraftBLEdit(false));
 
     const uploads = [];
     if (attachments.length) {
       attachments.forEach((file) => {
-        const formData = new FormData();
-        formData.append('files', file.data);
-        uploads.push(formData);
+        if (!file.id) {
+          const formData = new FormData();
+          formData.append('files', file.data);
+          uploads.push(formData);
+        }
       });
     }
 
     axios
       .all(uploads.map((endpoint) => uploadFile(endpoint)))
       .then((files) => {
-        let mediaList = [];
+        const mediaList = attachments.filter((file) => file.id);
         files.forEach((file) => {
           const mediaFileList = file.response.map((item) => { return { id: item.id, ext: item.ext, name: item.name } });
           mediaList.push(mediaFileList[0]);
@@ -81,10 +88,23 @@ const BLFieldForm = (props) => {
       })
   };
 
-  const handleClose = () => dispatch(Actions.toggleDraftBLEdit(false));
+  const handleClose = () => {
+    dispatch(Actions.toggleDraftBLEdit(false));
+    dispatch(Actions.toggleEditInquiry(false))
+  }
 
   return (
     <>
+      {question &&
+        <div className='flex justify-between'>
+          <UserInfo
+            name={question.creator.userName}
+            time={displayTime(question.createdAt)}
+            avatar={question.creator.avatar}
+          />
+          <AttachFile setAttachment={getAttachment} />
+        </div>
+      }
       <div className="flex" style={{ alignItems: 'flex-end' }}>
         <TextField
           fullWidth
@@ -94,15 +114,15 @@ const BLFieldForm = (props) => {
           value={fieldValue}
           onChange={handleChange}
         />
-        <AttachFile setAttachment={getAttachment} />
+        {!question && <AttachFile setAttachment={getAttachment} />}
       </div>
 
       {attachments?.map((file, mediaIndex) => (
         <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
           {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-            <ImageAttach file={file} />)
+            <ImageAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />)
             : (
-              <FileAttach file={file} />
+              <FileAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />
             )}
         </div>
       ))}
