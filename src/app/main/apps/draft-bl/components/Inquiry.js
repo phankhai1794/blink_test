@@ -6,6 +6,8 @@ import UserInfo from '../../workspace/components/UserInfo';
 import ImageAttach from '../../workspace/components/ImageAttach';
 import FileAttach from '../../workspace/components/FileAttach';
 
+const colorInq = '#DC2626';
+
 const useStyles = makeStyles((theme) => ({
   labelStatus: {
     backgroundColor: '#EBF7F2',
@@ -22,7 +24,7 @@ const Inquiry = (props) => {
   const classes = useStyles();
 
   return (
-    <>
+    <div style={{ paddingLeft: 18, borderLeft: `2px solid ${colorInq}` }}>
       <div className='flex justify-between'>
         <UserInfo
           name={question.creator.userName}
@@ -35,11 +37,9 @@ const Inquiry = (props) => {
           </div>
         }
       </div>
-      <div>
-        The update information is &quot;{question.content.content}&quot;
-      </div>
+      <div>{`The update information is "${question.content.content}"`}</div>
       {question.content?.mediaFile?.map((file, mediaIndex) => (
-        <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+        <div style={{ position: 'relative', display: 'inline-block', marginTop: 20 }} key={mediaIndex}>
           {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
             <ImageAttach file={file} />)
             : (
@@ -47,7 +47,7 @@ const Inquiry = (props) => {
             )}
         </div>
       ))}
-    </>
+    </div>
   )
 }
 export default Inquiry;

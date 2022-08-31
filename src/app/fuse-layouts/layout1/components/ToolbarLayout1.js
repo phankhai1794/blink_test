@@ -22,6 +22,9 @@ import * as InquiryActions from "../../../main/apps/workspace/store/actions/inqu
 
 import PreviewDraftBL from './PreviewDraftBL';
 
+const themeColor = '#BD0F72';
+const whiteColor = '#FFFFFF';
+
 const useStyles = makeStyles((theme) => ({
   separator: {
     width: 1,
@@ -49,23 +52,38 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     textTransform: 'none',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+    marginLeft: 10
+  },
+  buttonSend: {
+    padding: '10px 28.5px',
+    color: whiteColor,
+    fontSize: 16,
+    borderRadius: 8,
+    lineHeight: '20px',
+    backgroundColor: themeColor,
+    '&:hover': {
+      backgroundColor: themeColor,
+    }
+  },
+  buttonEditDraftBL: {
+    color: whiteColor,
+    borderRadius: 8,
+    backgroundColor: themeColor,
+    '&:hover': {
+      backgroundColor: themeColor,
+    }
   },
   buttonComfirm: {
-    boxSizing: 'border-box',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: '10px',
-    gap: '10px',
-    position: 'absolute',
-    left: '82.01%',
-    right: '11.04%%',
-    top: ' 28.24%',
-    bottom: '24.71%',
-    background: '#BD0F72',
-    borderRadius: '8px',
+    fontSize: 16,
+    padding: '5px 16px',
+    color: whiteColor,
+    background: themeColor,
+    borderRadius: 8,
+    '&:hover': {
+      backgroundColor: themeColor,
+    }
   }
 }));
 
@@ -222,7 +240,7 @@ function ToolbarLayout1(props) {
             </Hidden>
           )}
 
-          <div className="flex flex-1" style={{ paddingLeft: '53px' }}>
+          <div className="flex flex-1" style={{ marginLeft: 35 }}>
             <div style={{ paddingRight: '32px' }} className={classes.iconWrapper}>
               <Avatar
                 src="assets/images/logos/one_ocean_network-logo.png"
@@ -259,68 +277,41 @@ function ToolbarLayout1(props) {
                 <span className="pl-12">Attachment List</span>
               </Button>
             </PermissionProvider>
-            {/* {openTrans && transId && <RestoreVersion />} */}
+          </div>
+          <div className="flex" style={{ marginRight: 35 }}>
+            <PreviewDraftBL />
+
             <PermissionProvider
               action={PERMISSION.VIEW_EDIT_DRAFT_BL}
-              extraCondition={pathname.includes('/apps/draft-bl')}>
-              {/*<Button
-                variant="text"
-                size="medium"
-                className={classes.button}
+              extraCondition={pathname.includes('/apps/draft-bl') && !pathname.includes('/edit')}>
+              <Button
+                className={clsx(classes.button, classes.buttonEditDraftBL)}
                 onClick={redirectEditDraftBL}>
                 <EditIcon />
-                <span className="px-2">Edit</span>
-          </Button>*/}
-              <PermissionProvider
-                action={PERMISSION.DRAFTBL_SEND_DRAFT_AMENDMENT}
-                extraCondition={['/draft-bl/edit'].some((el) => pathname.includes(el))}>
-                <Button
-                  style={{
-                    borderRadius: '8px',
-                    fontWeight: '600',
-                    fontFamily: 'Montserrat',
-                    right: '12rem',
-                    width: '100px',
-                    height: '40px'
-                  }}
-                  variant="contained"
-                  color="primary"
-                  size="medium"
-                  className={clsx('normal-case absolute flex my-8 mr-10')}
-                  onClick={onSendDraftBl}
-                  disabled={!disableSendDraft}>
-                  <span className="pl-4">Send</span>
-                </Button>
-              </PermissionProvider>
-              <PermissionProvider
-                action={PERMISSION.DRAFTBL_CONFIRM_DRAFT_BL}
-                extraCondition={!['/draft-bl/edit'].some((el) => pathname.includes(el))}
-              >
-                <Button
-                  style={{
-                    backgroundColor: disableConfirm && '#CCD3D1',
-                    borderRadius: '8px',
-                    fontWeight: '600',
-                    fontFamily: 'Montserrat',
-                    fontStyle: 'normal',
-                    lineHeight: '20px',
-                    fontSize: '16px',
-                    textTransform: 'capitalize',
-                    padding: '10px',
-                    height: '40px'
-                  }}
-                  variant="contained"
-                  color="primary"
-                  className={clsx(classes.buttonComfirm)}
-                  onClick={confirmBlDraft}
-                  disabled={disableConfirm}>
-                  <span className="pl-4">Confirm</span>
-                </Button>
-                <DialogConfirm open={open} handleClose={handleClose} />
-              </PermissionProvider>
+              </Button>
+
+              <Button
+                variant="contained"
+                className={clsx(classes.button, classes.buttonComfirm)}
+                onClick={confirmBlDraft}
+                disabled={disableConfirm}>
+                Confirm
+              </Button>
+              <DialogConfirm open={open} handleClose={handleClose} />
             </PermissionProvider>
-          </div>
-          <div className="flex" style={{ marginRight: '27px' }}>
+
+            <PermissionProvider
+              action={PERMISSION.DRAFTBL_SEND_DRAFT_AMENDMENT}
+              extraCondition={pathname.includes('/apps/draft-bl/edit')}>
+              <Button
+                variant="contained"
+                className={clsx(classes.button, classes.buttonSend)}
+                onClick={onSendDraftBl}
+                disabled={!disableSendDraft}>
+                Send
+              </Button>
+            </PermissionProvider>
+
             <PermissionProvider
               action={PERMISSION.MAIL_SEND_MAIL}
               extraCondition={pathname.includes('/workspace')}>
@@ -341,13 +332,14 @@ function ToolbarLayout1(props) {
                 </Button>
               </div>
             </PermissionProvider>
+
             {/* <PermissionProvider
               action={PERMISSION.VIEW_SHOW_BL_HISTORY}
               extraCondition={pathname.includes('/workspace')}>
               <History />
-            </PermissionProvider> 
-             */}
-            <PreviewDraftBL />
+              {openTrans && transId && <RestoreVersion />}
+            </PermissionProvider>  */}
+
             <PermissionProvider
               action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
               extraCondition={!pathname.includes('/apps/draft-bl')}>
@@ -375,6 +367,7 @@ function ToolbarLayout1(props) {
                 Submit
               </Button>
             </PermissionProvider>
+
             <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>
               <UserProfile classes={classes} history={history} />
             </PermissionProvider>

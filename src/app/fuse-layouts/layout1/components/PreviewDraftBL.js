@@ -8,7 +8,7 @@ const useStyles = makeStyles((theme) => ({
   iconDraftBL: {
     width: 40,
     height: 40,
-    padding: '12px 8px',
+    margin: '0 5px',
     cursor: 'pointer'
   }
 }));
@@ -18,8 +18,9 @@ const PreviewDraftBL = () => {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   const previewDraftBL = () => {
-    if (myBL.id) {
-      const newWindow = window.open(`/apps/draft-bl/preview/${myBL.id}`, '_blank');
+    const bl = myBL.id || window.location.pathname.split('/')[4];
+    if (bl) { 
+      const newWindow = window.open(`/apps/draft-bl/preview/${bl}`, '_blank');
       if (newWindow) newWindow.opener = null;
     }
   };
@@ -27,7 +28,7 @@ const PreviewDraftBL = () => {
   return (
     <PermissionProvider
       action={PERMISSION.VIEW_PREVIEW_DRAFT_BL}
-      extraCondition={['/workspace', '/guest'].some((el) => window.location.pathname.includes(el))}>
+      extraCondition={['/workspace', '/guest', '/apps/draft-bl/edit'].some((el) => window.location.pathname.includes(el))}>
       <Tooltip title="Preview Draft B/L">
         <img
           src="assets/images/icons/preview-draft.svg"
