@@ -376,7 +376,7 @@ export default function Form(props) {
       props.tabChange(0);
       setValue(0);
     }
-  }, [openInqReview, inquiries]);
+  }, [openInqReview]);
   
   return (
     <div>
