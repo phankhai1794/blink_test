@@ -225,7 +225,7 @@ const DraftPage = (props) => {
 
   useEffect(() => {
     const { pathname, search } = window.location;
-    if (pathname.includes('draft-bl/') && !pathname.includes('preview')) dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+    if (pathname.includes('/draft-bl') && !pathname.includes('/preview')) dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     if (pathname.includes('/draft-bl/preview')) {
       const isAllow = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL });
       if (!isAllow) history.push({ pathname: '/login', cachePath: pathname, cacheSearch: search });
@@ -239,7 +239,6 @@ const DraftPage = (props) => {
   }, []);
 
   useEffect(() => {
-    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     if (Object.keys(orgContent).length && Object.keys(metadata).length) {
       setContainersDetail(getValueField(CONTAINER_DETAIL));
       setContainersManifest(getValueField(CONTAINER_MANIFEST));

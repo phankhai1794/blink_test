@@ -5,7 +5,8 @@ import { ThemeProvider } from '@material-ui/styles';
 import { TextField, InputAdornment, makeStyles } from '@material-ui/core';
 import LockIcon from '@material-ui/icons/Lock';
 import { useDispatch, useSelector } from "react-redux";
-import ReplyIcon from "@material-ui/icons/Reply";
+import HelpIcon from '@material-ui/icons/Help';
+import AttachFile from '@material-ui/icons/AttachFile';
 
 import * as BLDraftActions from '../store/actions';
 
@@ -21,7 +22,7 @@ const bgThemeInput = '#FFFFFF';
 const blockThemeInput = '#F5F8FA';
 const darkThemeInput = '#515E6A';
 const pinkThemeInput = '#BD0F72';
-const themeField = '#2F80ED';
+const themeField = '#DC2626';
 const lightThemeInq = '#FAF1F5';
 
 const useStyles = makeStyles((theme) => ({
@@ -85,10 +86,13 @@ const useStyles = makeStyles((theme) => ({
   sizeIcon: {
     fontSize: '18px'
   },
+  colorHasInqIcon: {
+    color: `${themeField} !important`
+  },
   colorFieldEdited: {
     '& fieldset': {
       border: `1px solid ${themeField}!important`,
-      background: '#EAF2FD',
+      background: '#FDF2F2',
       borderRadius: '8px'
     }
   },
@@ -100,6 +104,9 @@ const useStyles = makeStyles((theme) => ({
   },
   colorLockIcon: {
     color: darkThemeInput
+  },
+  attachIcon: {
+    transform: 'rotate(45deg)',
   }
 }));
 
@@ -107,10 +114,15 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   const classes = useStyles();
   const dispatch = useDispatch();
   const draftContent = useSelector(({ draftBL }) => draftBL.draftContent);
-  const [fieldIsChanged, setFieldIsChanged] = useState(false);
+  const [hasDiscussion, setHasDiscussion] = useState(false);
+  const [hasAttachment, setHasAttachment] = useState(false);
 
   useEffect(() => {
-    if (draftContent && id) setFieldIsChanged(draftContent.filter(t => t.field === id).length);
+    if (draftContent && id) {
+      const filter = draftContent.filter(t => t.field === id);
+      setHasDiscussion(filter.length);
+      setHasAttachment(filter[0]?.content.mediaFile.length > 0);
+    }
   }, [draftContent, id]);
 
   const onClick = (e) => {
@@ -120,12 +132,8 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
     }
   };
 
-  const handleReply = () => {
-    dispatch(BLDraftActions.toggleDraftBLEdit(false))
-  }
-
   return (
-    <div id={id} onClick={onClick} className={clsx(fieldIsChanged ? classes.colorFieldEdited : '')}>
+    <div id={id} onClick={onClick} className={clsx(hasDiscussion ? classes.colorFieldEdited : '')}>
       <ThemeProvider theme={theme}>
         <TextField
           value={selectedChoice || children}
@@ -144,16 +152,9 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
                   multiline ? classes.adornmentMultiline : '',
                   rows ? classes[`adornmentRow_${rows}`] : ''
                 )}>
-                {lock ? (
-                  <LockIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
-                ) : (
-                  <></>
-                )}
-                {fieldIsChanged ? (
-                  <>
-                    <ReplyIcon fontSize={'large'} style={{ color: '#2F80ED', cursor: 'pointer' }} onClick={handleReply} />
-                  </>
-                ) : <></>}
+                {lock ? <LockIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} /> : <></>}
+                {hasAttachment ? <AttachFile className={clsx(classes.sizeIcon, classes.attachIcon, classes.colorHasInqIcon)} style={{ marginRight: 5 }} /> : <></>}
+                {hasDiscussion ? <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} /> : <></>}
               </InputAdornment>
             ),
             classes: {
