@@ -156,7 +156,6 @@ function ToolbarLayout1(props) {
 
   const confirmBlDraft = () => {
     setOpen(true);
-    dispatch(DraftBLActions.setConfirmDraftBL());
   };
   const onSendDraftBl = () => {
     dispatch(DraftBLActions.toggleSendNotification(true));
@@ -272,13 +271,17 @@ function ToolbarLayout1(props) {
                 <EditIcon />
                 <span className="px-2">Edit</span>
           </Button>*/}
-              <PermissionProvider action={PERMISSION.DRAFTBL_SEND_DRAFT_AMENDMENT}>
+              <PermissionProvider
+                action={PERMISSION.DRAFTBL_SEND_DRAFT_AMENDMENT}
+                extraCondition={['/draft-bl/edit'].some((el) => pathname.includes(el))}>
                 <Button
                   style={{
                     borderRadius: '8px',
                     fontWeight: '600',
                     fontFamily: 'Montserrat',
-                    right: '1rem'
+                    right: '12rem',
+                    width: '100px',
+                    height: '40px'
                   }}
                   variant="contained"
                   color="primary"
@@ -289,26 +292,32 @@ function ToolbarLayout1(props) {
                   <span className="pl-4">Send</span>
                 </Button>
               </PermissionProvider>
-              <Button
-                style={{
-                  backgroundColor: disableConfirm && '#CCD3D1',
-                  borderRadius: '8px',
-                  fontWeight: '600',
-                  fontFamily: 'Montserrat',
-                  fontStyle: 'normal',
-                  lineHeight: '20px',
-                  fontSize: '16px',
-                  textTransform: 'capitalize',
-                  panding: '10px'
-                }}
-                variant="contained"
-                color="primary"
-                className={clsx(classes.buttonComfirm)}
-                onClick={confirmBlDraft}
-                disabled={disableConfirm}>
-                <span className="pl-4">Confirm</span>
-              </Button>
-              <DialogConfirm open={open} handleClose={handleClose} />
+              <PermissionProvider
+                action={PERMISSION.DRAFTBL_CONFIRM_DRAFT_BL}
+                extraCondition={!['/draft-bl/edit'].some((el) => pathname.includes(el))}
+              >
+                <Button
+                  style={{
+                    backgroundColor: disableConfirm && '#CCD3D1',
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    fontFamily: 'Montserrat',
+                    fontStyle: 'normal',
+                    lineHeight: '20px',
+                    fontSize: '16px',
+                    textTransform: 'capitalize',
+                    padding: '10px',
+                    height: '40px'
+                  }}
+                  variant="contained"
+                  color="primary"
+                  className={clsx(classes.buttonComfirm)}
+                  onClick={confirmBlDraft}
+                  disabled={disableConfirm}>
+                  <span className="pl-4">Confirm</span>
+                </Button>
+                <DialogConfirm open={open} handleClose={handleClose} />
+              </PermissionProvider>
             </PermissionProvider>
           </div>
           <div className="flex" style={{ marginRight: '27px' }}>

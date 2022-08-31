@@ -15,3 +15,8 @@ export async function getFieldContent(blId) {
   const response = await axios().get(`${PATH}/${blId}`);
   return response.data;
 }
+
+export async function confirmDraftBl(id) {
+  const response = await axios().patch(`${PATH}/confirm/${id}`);
+  return response.data;
+}

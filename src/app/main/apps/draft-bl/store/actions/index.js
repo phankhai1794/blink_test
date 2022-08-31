@@ -1,6 +1,6 @@
 import { getMetadata } from 'app/services/inquiryService';
-import { getFieldContent } from 'app/services/draftblService';
-import { getBlInfo, updateBL } from 'app/services/myBLService';
+import { getFieldContent, confirmDraftBl } from 'app/services/draftblService';
+import { getBlInfo } from 'app/services/myBLService';
 import { filterMetadata, draftConfirm } from '@shared';
 
 export const SET_METADATA = 'SAVE_METADATA';
@@ -88,7 +88,7 @@ export function toggleDraftBLEdit(state) {
 
 export const setConfirmDraftBL = () => (dispatch) => {
   const bl = window.location.pathname.split('/')[3];
-  updateBL(bl, { state: draftConfirm })
+  confirmDraftBl(bl)
     .then(() => dispatch(setBL({ state: draftConfirm })))
     .catch((err) => console.error(err));
 };
