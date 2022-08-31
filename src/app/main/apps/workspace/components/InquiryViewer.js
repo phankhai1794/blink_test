@@ -202,15 +202,14 @@ const InquiryViewer = (props) => {
               }
             }
           }
-          //
-          res.splice(res.length - 1, 1);
-          
+          //  
           setComment([...res]);
           setType(metadata.ans_type.paragraph);
           setQuestion(lastest);
           setInqHasComment(true);
+
         } else {
-          if (user.role === 'Admin' &&question.state === "ANS_SENT"){
+          if ((user.role==='Admin'?["ANS_SENT"]:["ANS_SENT", "ANS_DRF"]).includes(question.state)){
             let answerObj = null;
             if (question.ansType === metadata.ans_type.choice) {
               answerObj = question.answerObj.filter((item) => item.confirmed);
@@ -223,6 +222,8 @@ const InquiryViewer = (props) => {
               lastest.name="";
               lastest.creator = answerObj[0]?.updater;
               lastest.createdAt = answerObj[0]?.updatedAt;
+              lastest.mediaFile = []
+
               setQuestion(lastest);
               setType(metadata.ans_type.paragraph);
             }
