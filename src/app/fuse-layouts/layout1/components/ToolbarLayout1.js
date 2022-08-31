@@ -278,7 +278,7 @@ function ToolbarLayout1(props) {
               </Button>
             </PermissionProvider>
           </div>
-          <div className="flex" style={{ marginRight: 35 }}>
+          <div className="flex" style={{ marginRight: 35, alignItems: 'center' }}>
             <PreviewDraftBL />
 
             <PermissionProvider
@@ -315,7 +315,7 @@ function ToolbarLayout1(props) {
             <PermissionProvider
               action={PERMISSION.MAIL_SEND_MAIL}
               extraCondition={pathname.includes('/workspace')}>
-              <div style={{ paddingLeft: '15px', paddingRight: '5px', paddingTop: '17px' }}>
+              <div style={{ paddingRight: 5 }}>
                 <Button
                   style={{
                     width: '120px',
@@ -345,23 +345,7 @@ function ToolbarLayout1(props) {
               extraCondition={!pathname.includes('/apps/draft-bl')}>
               <Button
                 variant="contained"
-                style={{
-                  textTransform: 'capitalize',
-                  left: '13.45%',
-                  right: '13.45%',
-                  top: '25%',
-                  bottom: '25%',
-                  borderRadius: 6,
-                  fontFamily: 'Montserrat',
-                  fontStyle: 'normal',
-                  fontWeight: '600',
-                  fontSize: '16px',
-                  textAlign: 'center',
-                  height: 40,
-                  marginTop: 11
-                }}
-                className={classes.root}
-                color="primary"
+                className={clsx(classes.button, classes.buttonSend)}
                 disabled={isSubmit}
                 onClick={onSubmit}>
                 Submit
