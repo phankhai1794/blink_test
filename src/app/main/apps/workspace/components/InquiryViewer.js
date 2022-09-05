@@ -606,7 +606,8 @@ const InquiryViewer = (props) => {
                 wordBreak: 'break-word',
                 fontFamily: 'Montserrat',
                 fontSize: 15,
-                color: '#132535'
+                color: '#132535',
+                whiteSpace: 'pre-wrap'
               }}>
               {question.content}
             </Typography>
