@@ -25,11 +25,11 @@ function DialogConfirm(props) {
 
   return (
     <Dialog onClose={handleClose} onClick={handleClose} aria-labelledby="customized-dialog-title" open={open} maxWidth="md" style={{ fontSize: '16px', fontFamily: 'Montserrat' }}>
-      <DialogContent style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-        <DialogContent id="alert-dialog-title" className='text-center font-bold'>
-          <p style={{ color: '#bd1874' }}>Do you want to confirm the draft?</p>
+      <DialogContent style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '485px', height: '141px' }}>
+        <DialogContent id="alert-dialog-title" className='text-center font-bold' style={{ marginTop: '30px' }}>
+          <span style={{ color: '#bd1874' }}>Do you want to confirm the draft?</span>
         </DialogContent>
-        <DialogActions>
+        <DialogActions style={{ marginBottom: '30px', padding: 0 }}>
           <Button
             style={{
               color: 'white',
@@ -52,20 +52,22 @@ function DialogConfirm(props) {
                         alignItems: 'center',
                         flexDirection: 'column',
                         fontSize: '16px',
+                        fontWeight: '600',
                         fontFamily: 'Montserrat',
                         width: '406px',
-                        height: '180px',
+                        height: '216px',
                         left: '517px',
                         top: '336px',
                         borderRadius: '8px',
                       }}
                     >
-                      <img src="assets/images/icons/confirmed-icon.svg" />
+                      <img src="assets/images/icons/confirmed-icon.svg" style={{ paddingTop: '34.4px' }} />
                       <DialogContent id="alert-dialog-title_completed" className='text-center font-bol' style={{ overflow: "hidden" }}>
-                        <p style={{ color: '#BD0F72' }}>Your B/L is confirmed!</p>
-                        <p style={{ fontSize: '15px', fontWeight: '500' }}> Thank you!</p>
+                        <span style={{ color: '#BD0F72' }}>Your B/L is confirmed!</span>
+                        <br />
+                        <span style={{ fontSize: '15px', fontWeight: '500' }}> Thank you!</span>
                       </DialogContent>
-                      <DialogActions style={{ alignItems: 'center' }}>
+                      <DialogActions style={{ alignItems: 'center', paddingBottom: '30px' }}>
                         <Button
                           onClick={() => dispatch(Actions.closeDialog())}
                           style={{
