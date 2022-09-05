@@ -33,19 +33,15 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, question, questions }) => {
-  const [valid, currentEditInq, attachmentList] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.validation,
+const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, question, questions, draftBL = false, removeAttachmentDraftBL }) => {
+  const [currentEditInq, attachmentList] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.attachmentList
   ]);
-  const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const dispatch = useDispatch();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [srcUrl, setSrcUrl] = useState(file.src || null);
   const classes = useStyles();
-  const allowUpdateInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_UPDATE_INQUIRY });
-  const allowAnswerAttachment = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
 
   const urlMedia = (fileExt, file) => {
     if (fileExt.toLowerCase().match(/jpeg|jpg|png/g)) {
@@ -162,6 +158,11 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
             </PermissionProvider>
           )
         )}
+        {draftBL &&
+          <IconButton onClick={removeAttachmentDraftBL} style={{ padding: 2 }}>
+            <CloseIcon />
+          </IconButton>
+        }
       </div>
       {isViewerOpen && (
         <ImageViewer

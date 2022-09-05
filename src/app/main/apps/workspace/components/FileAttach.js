@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import DescriptionIcon from '@material-ui/icons/Description';
 import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
@@ -45,17 +45,16 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, questions, question }) => {
+const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, questions, question, draftBL = false, removeAttachmentDraftBL }) => {
   const classes = useStyles();
-  const [valid, currentEditInq, attachmentList] =
-  useSelector(({ workspace }) => [
-    workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.currentEditInq,
-    workspace.inquiryReducer.attachmentList,
-  ]);
+  const [currentEditInq, attachmentList] =
+    useSelector(({ workspace }) => [
+      workspace.inquiryReducer.currentEditInq,
+      workspace.inquiryReducer.attachmentList,
+    ]);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const dispatch = useDispatch();
-  
+
   const urlMedia = (fileExt, file) => {
     if (fileExt.toLowerCase().match(/jpeg|jpg|png/g)) {
       return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
@@ -65,7 +64,7 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
       return URL.createObjectURL(new Blob([file]));
     }
   };
-  
+
   const downloadFile = () => {
     getFile(file.id).then((f) => {
       const link = document.createElement('a');
@@ -90,7 +89,7 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
     });
   };
   const handleRemoveFile = (id) => {
-    const optionsOfQuestion = {...currentEditInq};
+    const optionsOfQuestion = { ...currentEditInq };
     const optionsAttachmentList = [...attachmentList];
     if (isAnswer) {
       const optionsInquires = [...questions];
@@ -127,14 +126,14 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
       } else {
         // Remove attachment at local
         if (openInquiryForm) {
-          const optionsOfQuestionLocal = {...currentEditInq};
+          const optionsOfQuestionLocal = { ...currentEditInq };
           const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
             (f) => f.name === file.name
           );
           optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
           dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
         } else {
-          const optionsOfQuestionLocal = {...currentEditInq};
+          const optionsOfQuestionLocal = { ...currentEditInq };
           const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
             (f) => f.name === file.name
           );
@@ -185,6 +184,11 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
             </PermissionProvider>
           )
         )}
+        {draftBL &&
+          <IconButton onClick={removeAttachmentDraftBL} style={{ padding: 2 }}>
+            <CloseIcon />
+          </IconButton>
+        }
       </div>
     </div>
   );

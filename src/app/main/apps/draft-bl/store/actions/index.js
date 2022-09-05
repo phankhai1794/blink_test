@@ -13,6 +13,7 @@ export const SET_CONTENT = 'SET_CONTENT';
 export const SET_SEND_DRAFT_BL = 'SET_SEND_DRAFT_BL';
 export const OPEN_SEND_NOTIFICATION = 'OPEN_SEND_NOTIFICATION';
 export const RELOAD = 'RELOAD';
+export const SET_EDIT_INQUIRY = 'SET_EDIT_INQUIRY'
 
 export const loadMetadata = () => (dispatch) => {
   getMetadata()
@@ -123,5 +124,12 @@ export function toggleSendNotification(state) {
   return {
     type: OPEN_SEND_NOTIFICATION,
     state: state
+  };
+}
+
+export function toggleEditInquiry(state) {
+  return {
+    type: SET_EDIT_INQUIRY,
+    state
   };
 }

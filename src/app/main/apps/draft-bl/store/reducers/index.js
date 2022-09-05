@@ -11,6 +11,7 @@ const initialState = {
   reload: false,
   enableSendDraftBl: false,
   openSendNotification: false,
+  edit: false
 };
 
 const draftBL = function (state = initialState, action) {
@@ -37,13 +38,16 @@ const draftBL = function (state = initialState, action) {
     return { ...state, currentField: action.state };
   }
   case Actions.RELOAD: {
-    return { ...state, reload: !state.reload };
+    return { ...state, reload: !state.reload, edit: false };
   }
   case Actions.SET_SEND_DRAFT_BL: {
     return { ...state, enableSendDraftBl: action.state };
   }
   case Actions.OPEN_SEND_NOTIFICATION: {
     return { ...state, openSendNotification: action.state };
+  }
+  case Actions.SET_EDIT_INQUIRY: {
+    return { ...state, edit: action.state };
   }
   default: {
     return state;
