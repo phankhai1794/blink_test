@@ -122,7 +122,6 @@ const TableCM = (props) => {
   const checkQuestionIsResolved = () => {
     if (inquiries.length > 0) {
       const lst = inquiries.filter((q) => q.field === id);
-      console.log(lst);
       if (lst.length > 0)
         return lst.every(e => e.state === 'COMPL' || e.state === 'UPLOADED')
     }

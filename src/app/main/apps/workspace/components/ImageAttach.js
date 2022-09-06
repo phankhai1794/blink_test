@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, question, questions, draftBL = false, removeAttachmentDraftBL }) => {
+const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, isReply = false, question, questions, templateReply, setAttachmentReply, draftBL = false, removeAttachmentDraftBL }) => {
   const [currentEditInq, attachmentList] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.attachmentList
@@ -87,6 +87,8 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
       optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
       optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMedia, 1);
       dispatch(InquiryActions.setInquiries(optionsInquires));
+    } else if (isReply) {
+      templateReply.mediaFiles.splice(indexMedia, 1);
     } else {
       if (field && file.id) {
         const indexMedia = inq.mediaFile.findIndex((f) => f.id === file.id);
@@ -139,7 +141,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
           onClick={downloadFile}>
           {file.name}
         </h3>
-        {isAnswer ? (
+        {isAnswer && (
           !hiddenRemove && (
             <PermissionProvider
               action={PERMISSION.INQUIRY_ANSWER_ATTACHMENT}>
@@ -148,7 +150,18 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
               </IconButton>
             </PermissionProvider>
           )
-        ) : (
+        )}
+        {isReply && (
+          !hiddenRemove && (
+            <PermissionProvider
+              action={PERMISSION.INQUIRY_UPDATE_REPLY}>
+              <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                <CloseIcon />
+              </IconButton>
+            </PermissionProvider>
+          )
+        )}
+        {!isAnswer && !isReply && (
           !hiddenRemove && (
             <PermissionProvider
               action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
