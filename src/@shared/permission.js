@@ -15,6 +15,7 @@ export const PERMISSION = {
   // UI + API
   INQUIRY_CREATE_INQUIRY: 'inquiry_createInquiry',
   INQUIRY_CREATE_REPLY: 'inquiry_createReply',
+  INQUIRY_UPDATE_REPLY: 'inquiry_updateReply',
   INQUIRY_UPDATE_INQUIRY: 'inquiry_updateInquiry',
   INQUIRY_RESOLVE_INQUIRY: 'inquiry_resolveInquiry',
   MAIL_SEND_MAIL: 'mail_sendMail',

@@ -16,6 +16,11 @@ export async function saveReply(data) {
   return response.data;
 }
 
+export async function updateReply(id, data) {
+  const response = await axios().patch(`${PATH}/reply/${id}`, data);
+  return response.data;
+}
+
 export async function getInquiryById(id) {
   const response = await axios().get(`${PATH}/${id}`);
   return response.data;

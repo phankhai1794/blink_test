@@ -159,6 +159,7 @@ const InquiryAnswer = (props) => {
           optionsInquires[editedIndex].state = 'ANS_DRF';
           //
           dispatch(InquiryActions.setInquiries(optionsInquires));
+          setSave();
         }).catch((error) => {
           console.log(error)
         });
@@ -184,6 +185,7 @@ const InquiryAnswer = (props) => {
         optionsInquires[editedIndex].state = 'ANS_DRF';
         //
         dispatch(InquiryActions.setInquiries(optionsInquires));
+        setSave();
       }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
     }
   }
@@ -216,7 +218,9 @@ const InquiryAnswer = (props) => {
         answerUpdate.confirmed = true;
         optionsInquires[editedIndex].answerObj = question.answerObj;
         optionsInquires[editedIndex].state = 'ANS_DRF';
+        //
         dispatch(InquiryActions.setInquiries(optionsInquires));
+        setSave();
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
       } else if (question.paragraphAnswer) {
         if (question.answerObj.length) {
@@ -224,10 +228,11 @@ const InquiryAnswer = (props) => {
         }
         optionsInquires[editedIndex].state = 'ANS_DRF';
         dispatch(InquiryActions.setInquiries(optionsInquires));
+        setSave();
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
       }
     }
-    setSave();
+    dispatch(InquiryActions.setEditInq(null));
   };
 
 

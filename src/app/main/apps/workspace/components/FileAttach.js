@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, questions, question, draftBL = false, removeAttachmentDraftBL }) => {
+const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, isReply = false, questions, question, templateReply, setAttachmentReply, draftBL = false, removeAttachmentDraftBL }) => {
   const classes = useStyles();
   const [currentEditInq, attachmentList] =
     useSelector(({ workspace }) => [
@@ -97,6 +97,8 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
       optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
       optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMedia, 1);
       dispatch(InquiryActions.setInquiries(optionsInquires));
+    } else if (isReply) {
+      templateReply.mediaFiles.splice(indexMedia, 1);
     } else {
       if (field && file.id) {
         const indexMedia = optionsOfQuestion.mediaFile.findIndex(
@@ -165,7 +167,7 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
         >
           {file.name}
         </h3>
-        {isAnswer ? (
+        {isAnswer && (
           !hiddenRemove && (
             <PermissionProvider
               action={PERMISSION.INQUIRY_ANSWER_ATTACHMENT}>
@@ -174,7 +176,18 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
               </IconButton>
             </PermissionProvider>
           )
-        ) : (
+        )}
+        {isReply && (
+          !hiddenRemove && (
+            <PermissionProvider
+              action={PERMISSION.INQUIRY_UPDATE_REPLY}>
+              <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                <CloseIcon />
+              </IconButton>
+            </PermissionProvider>
+          )
+        )}
+        {!isAnswer && !isReply && (
           !hiddenRemove && (
             <PermissionProvider
               action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>

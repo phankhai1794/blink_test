@@ -65,7 +65,7 @@ const useStyles = makeStyles(() => ({
 
 const Comment = (props) => {
   const dispatch = useDispatch();
-  const { question, comment, userType, hasComment } = props;
+  const { question, comment, userType } = props;
 
   const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length -1) : []);
   const [value, setValue] = useState('');
@@ -297,7 +297,7 @@ const Comment = (props) => {
             createdAt: k.createdAt,
             avatar: k.creator.avatar,
             content: k.content,
-            media: k.media,
+            media: k.answersMedia,
             id
           });
         })}
