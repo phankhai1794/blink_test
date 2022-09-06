@@ -11,6 +11,7 @@ export const PERMISSION = {
   VIEW_EDIT_DRAFT_BL: 'view_editDraftBL',
   VIEW_EDIT_INQUIRY: 'view_editInquiry',
   VIEW_SAVE_INQUIRY: 'view_saveInquiry',
+  VIEW_REDIRECT_DRAFT_BL: 'view_redirectDraftBL ',
 
   // UI + API
   INQUIRY_CREATE_INQUIRY: 'inquiry_createInquiry',

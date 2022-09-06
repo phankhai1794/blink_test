@@ -170,7 +170,10 @@ function ToolbarLayout1(props) {
 
   const openEmail = () => dispatch(FormActions.toggleOpenEmail(true));
 
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    history.push(`/apps/draft-bl/edit/${myBL.id}`);
+  }
 
   const confirmBlDraft = () => {
     setOpen(true);
