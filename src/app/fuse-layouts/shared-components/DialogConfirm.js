@@ -65,7 +65,7 @@ function DialogConfirm(props) {
                       <DialogContent id="alert-dialog-title_completed" className='text-center font-bol' style={{ overflow: "hidden" }}>
                         <span style={{ color: '#BD0F72' }}>Your B/L is confirmed!</span>
                         <br />
-                        <span style={{ fontSize: '15px', fontWeight: '500' }}> Thank you!</span>
+                        <span style={{ fontSize: '15px', fontWeight: '500', color: '#132535' }}> Thank you!</span>
                       </DialogContent>
                       <DialogActions style={{ alignItems: 'center', paddingBottom: '30px' }}>
                         <Button
