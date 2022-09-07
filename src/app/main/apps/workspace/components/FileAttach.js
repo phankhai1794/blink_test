@@ -154,7 +154,7 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
           <img src={`/assets/images/logos/pdf_icon.png`} />
         ) : file.ext.toLowerCase().match(/csv|xls|xlsx|excel|sheet/g) ? (
           <img src={`/assets/images/logos/excel_icon.png`} />
-        ) : file.ext.toLowerCase().match(/doc/g) ? (
+        ) : file.ext.toLowerCase().match(/doc|msword/g) ? (
           <img src={`/assets/images/logos/word_icon.png`} />
         ) : (
           <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} fontSize='large' />
