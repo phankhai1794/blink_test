@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { Dialog, Divider } from "@material-ui/core";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
@@ -6,6 +6,9 @@ import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import MuiDialogContent from "@material-ui/core/DialogContent";
+import MinimizeIcon from '@material-ui/icons/Minimize';
+import FilterNoneIcon from '@material-ui/icons/FilterNone';
+import CropDinIcon from '@material-ui/icons/CropDin';
 
 import * as Actions from '../store/actions';
 
@@ -28,6 +31,8 @@ const DialogTitle = withStyles(styles)(({
   classes,
   handleClose,
   children,
+  isFullScreen,
+  toggleFullScreen,
   ...other
 }) => {
   return (
@@ -37,6 +42,27 @@ const DialogTitle = withStyles(styles)(({
           <div style={{ color: '#515F6B', fontSize: '22px', fontWeight: '600' }}>{children}</div>
         </div>
         <div style={{ width: '30%', textAlign: 'right' }}>
+          <IconButton
+            aria-label="close"
+            onClick={() => { }}
+            style={{ textAlign: 'center' }}>
+            <MinimizeIcon />
+          </IconButton>
+          {isFullScreen ? (
+            <IconButton
+              aria-label="close"
+              onClick={() => toggleFullScreen(false)}
+              style={{ textAlign: 'center' }}>
+              <FilterNoneIcon style={{ width: '20px' }} />
+            </IconButton>
+          ) : (
+            <IconButton
+              aria-label="close"
+              onClick={() => toggleFullScreen(true)}
+              style={{ textAlign: 'center' }}>
+              <CropDinIcon />
+            </IconButton>
+          )}
           <IconButton aria-label="close" onClick={handleClose}>
             <CloseIcon />
           </IconButton>
@@ -48,13 +74,14 @@ const DialogTitle = withStyles(styles)(({
 
 const useStyles = makeStyles(() => ({
   dialogPaper: {
-    width: 1000,
     minHeight: 165,
     margin: 0
   },
   dialogContent: {
     backgroundColor: white,
-    padding: '20.26px 41.2px 20px 39px'
+    padding: '20.26px 41.2px 20px 39px',
+    width: 880,
+    margin: 'auto'
   },
   divider: {
     backgroundColor: '#8A97A3'
@@ -74,10 +101,14 @@ export default function Form({ title, children }) {
     dispatch(Actions.toggleDraftBLEdit(false))
     dispatch(Actions.toggleEditInquiry(false))
   }
-
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const openFullScreen = (state) => {
+    setIsFullScreen(state);
+  };
   return (
     <div>
       <Dialog
+        fullScreen={isFullScreen}
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
         open={openDraftBL}
@@ -89,8 +120,11 @@ export default function Form({ title, children }) {
           style={{
             fontSize: 22,
             fontWeight: 600,
+            height: 41
           }}
           handleClose={handleClose}
+          toggleFullScreen={openFullScreen}
+          isFullScreen={isFullScreen}
         >
           {title || null}
         </DialogTitle>

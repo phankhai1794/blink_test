@@ -26,6 +26,7 @@ const useStyles = makeStyles((theme) => ({
     height: 40,
     borderRadius: 8,
     boxShadow: 'none',
+    textTransform: 'capitalize',
     margin: theme.spacing(1),
   },
   btnCancel: {
@@ -105,7 +106,7 @@ const BLFieldForm = (props) => {
           <AttachFile setAttachment={getAttachment} />
         </div>
       }
-      <div className="flex" style={{ alignItems: 'flex-end' }}>
+      <div className="flex" style={{ alignItems: 'flex-end', marginBottom: 10 }}>
         <TextField
           fullWidth
           multiline
