@@ -172,7 +172,6 @@ function ToolbarLayout1(props) {
 
   const handleClose = () => {
     setOpen(false);
-    history.push(`/apps/draft-bl/edit/${myBL.id}`);
   }
 
   const confirmBlDraft = () => {
