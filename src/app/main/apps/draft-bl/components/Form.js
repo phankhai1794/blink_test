@@ -1,12 +1,18 @@
-import {useDispatch} from "react-redux";
-import {Button, Dialog, Divider} from "@material-ui/core";
-import React from "react";
-import {makeStyles, withStyles} from "@material-ui/core/styles";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { Dialog, Divider } from "@material-ui/core";
+import { makeStyles, withStyles } from "@material-ui/core/styles";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import MuiDialogContent from "@material-ui/core/DialogContent";
+import MinimizeIcon from '@material-ui/icons/Minimize';
+import FilterNoneIcon from '@material-ui/icons/FilterNone';
+import CropDinIcon from '@material-ui/icons/CropDin';
 
+import * as Actions from '../store/actions';
+
+const white = '#FFFFFF';
 
 const styles = (theme) => ({
   root: {
@@ -21,15 +27,14 @@ const styles = (theme) => ({
   }
 });
 
-const DialogTitle = withStyles(styles)((props) => {
-  const {
-    children,
-    classes,
-    toggleForm,
-    handleClose,
-    ...other
-  } = props;
-  const dispatch = useDispatch();
+const DialogTitle = withStyles(styles)(({
+  classes,
+  handleClose,
+  children,
+  isFullScreen,
+  toggleFullScreen,
+  ...other
+}) => {
   return (
     <MuiDialogTitle disableTypography className={classes.root} {...other}>
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -37,6 +42,27 @@ const DialogTitle = withStyles(styles)((props) => {
           <div style={{ color: '#515F6B', fontSize: '22px', fontWeight: '600' }}>{children}</div>
         </div>
         <div style={{ width: '30%', textAlign: 'right' }}>
+          <IconButton
+            aria-label="close"
+            onClick={() => { }}
+            style={{ textAlign: 'center' }}>
+            <MinimizeIcon />
+          </IconButton>
+          {isFullScreen ? (
+            <IconButton
+              aria-label="close"
+              onClick={() => toggleFullScreen(false)}
+              style={{ textAlign: 'center' }}>
+              <FilterNoneIcon style={{ width: '20px' }} />
+            </IconButton>
+          ) : (
+            <IconButton
+              aria-label="close"
+              onClick={() => toggleFullScreen(true)}
+              style={{ textAlign: 'center' }}>
+              <CropDinIcon />
+            </IconButton>
+          )}
           <IconButton aria-label="close" onClick={handleClose}>
             <CloseIcon />
           </IconButton>
@@ -48,61 +74,62 @@ const DialogTitle = withStyles(styles)((props) => {
 
 const useStyles = makeStyles(() => ({
   dialogPaper: {
-    width: '600px',
-    minHeight: '244px'
+    minHeight: 165,
+    margin: 0
   },
   dialogContent: {
-    backgroundColor: 'white',
-    paddingLeft: '40px',
-    paddingRight: '70px'
+    backgroundColor: white,
+    padding: '20.26px 41.2px 20px 39px',
+    width: 880,
+    margin: 'auto'
   },
   divider: {
     backgroundColor: '#8A97A3'
   },
   chip: {
     marginLeft: '0.2rem'
-  },
-  buttonSave: {
-    borderRadius: '8px',
-    width: '130px'
   }
 }));
 
-export default function Form(props) {
-  const {open, toggleForm, title, children} = props;
+export default function Form({ title, children }) {
   const classes = useStyles();
+  const dispatch = useDispatch();
+
+  const openDraftBL = useSelector(({ draftBL }) => draftBL.openDraftBL);
 
   const handleClose = () => {
-    toggleForm(false);
+    dispatch(Actions.toggleDraftBLEdit(false))
+    dispatch(Actions.toggleEditInquiry(false))
   }
-
-  const onSave = () => {
-    props.handleSave();
-  }
-
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const openFullScreen = (state) => {
+    setIsFullScreen(state);
+  };
   return (
     <div>
       <Dialog
+        fullScreen={isFullScreen}
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
-        open={open}
+        open={openDraftBL}
         maxWidth="md"
-        classes={{paperScrollPaper: classes.dialogPaper}}
+        classes={{ paperScrollPaper: classes.dialogPaper }}
       >
         <DialogTitle
           id="customized-dialog-title"
-          toggleForm={toggleForm}
+          style={{
+            fontSize: 22,
+            fontWeight: 600,
+            height: 41
+          }}
           handleClose={handleClose}
+          toggleFullScreen={openFullScreen}
+          isFullScreen={isFullScreen}
         >
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
         <MuiDialogContent classes={{ root: classes.dialogContent }}>{children}</MuiDialogContent>
-        <div className="text-center p-5">
-          <Button variant="contained" className={classes.buttonSave} color="primary" onClick={(onSave)}>
-            Save
-          </Button>
-        </div>
       </Dialog>
     </div>
   )

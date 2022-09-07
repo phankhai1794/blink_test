@@ -11,6 +11,7 @@ import { loadComment } from 'app/services/inquiryService';
 
 import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
+import * as InquiryActions from "../store/actions/inquiry";
 
 import TagsInput from './TagsInput';
 import AllInquiry from './AllInquiry';
@@ -50,7 +51,6 @@ const SendInquiryForm = (props) => {
   });
 
   const [form, setForm] = useState(initialState);
-  const [inqHasComment, setInqHasComment] = useState([]);
 
   const isFormValid = () => {
     return form.toCustomer || form.toOnshore;
@@ -102,19 +102,8 @@ const SendInquiryForm = (props) => {
         type: mailActions.SENDMAIL_NONE
       });
     }
-
-    for (let i in inquiries) {
-      loadComment(inquiries[i].id)
-        .then((res) => {
-          if (res.length) {
-            const listInqId = inqHasComment;
-            listInqId.push(inquiries[i].id);
-            setInqHasComment(listInqId);
-          }
-        })
-        .catch((error) => console.error(error));
-    };
   }, [success, error]);
+
   useEffect(() => {
     if (openEmail && !suggestMails.length) {
       dispatch(mailActions.suggestMail(''));
@@ -138,8 +127,11 @@ const SendInquiryForm = (props) => {
       dispatch(Actions.showMessage({ message: 'Please fill to Customer or Onshore fields', variant: 'error' }));
     }
     else {
+      inquiries.forEach(q => { if (q.state === 'OPEN') q.state = 'INQ_SENT' });
+      dispatch(InquiryActions.setInquiries(inquiries));
+      //
       dispatch({ type: mailActions.SENDMAIL_LOADING });
-      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form, replyInqs: inqHasComment }));
+      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form, inquiries }));
     }
   };
 

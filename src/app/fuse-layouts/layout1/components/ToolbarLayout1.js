@@ -15,8 +15,15 @@ import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
+import { submitInquiryAnswer, loadComment } from 'app/services/inquiryService';
+import axios from 'axios';
+
+import * as InquiryActions from "../../../main/apps/workspace/store/actions/inquiry";
 
 import PreviewDraftBL from './PreviewDraftBL';
+
+const themeColor = '#BD0F72';
+const whiteColor = '#FFFFFF';
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -45,7 +52,38 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     textTransform: 'none',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+    marginLeft: 10
+  },
+  buttonSend: {
+    padding: '10px 28.5px',
+    color: whiteColor,
+    fontSize: 16,
+    borderRadius: 8,
+    lineHeight: '20px',
+    backgroundColor: themeColor,
+    '&:hover': {
+      backgroundColor: themeColor,
+    }
+  },
+  buttonEditDraftBL: {
+    color: whiteColor,
+    borderRadius: 8,
+    backgroundColor: themeColor,
+    '&:hover': {
+      backgroundColor: themeColor,
+    }
+  },
+  buttonComfirm: {
+    fontSize: 16,
+    padding: '5px 16px',
+    color: whiteColor,
+    background: themeColor,
+    borderRadius: 8,
+    '&:hover': {
+      backgroundColor: themeColor,
+    }
   }
 }));
 
@@ -61,21 +99,59 @@ function ToolbarLayout1(props) {
     header.validToken
   ]);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
-  const myblState = useSelector(({ draftBL }) => draftBL.myblState);
+  const draftContent = useSelector(({ draftBL }) => draftBL.draftContent);
+  const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
+  const myBL = useSelector(({ draftBL }) => draftBL.myBL);
   const [open, setOpen] = useState(false);
   const [disableConfirm, setDisableConfirm] = useState(false);
+  const [disableSendDraft, setDisableSendDraft] = useState(false);
   const inquiryLength = inquiries.length;
   const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
+  const [isSubmit, setIsSubmit] = useState(true);
 
   useEffect(() => {
-    myblState === draftConfirm && setDisableConfirm(true);
-  }, [myblState]);
+    myBL.state === draftConfirm && setDisableConfirm(true);
+  }, [myBL.state]);
   const openAllInquiry = () => {
     if (inquiryLength) {
       dispatch(FormActions.toggleAllInquiry(true));
       dispatch(FormActions.toggleSaveInquiry(true));
     }
   };
+
+  useEffect(() => {
+    let optionInquiries = [...inquiries];
+    let isSubmit = true;
+    optionInquiries.forEach((item) => {
+      if (item.answerObj && item.state === "ANS_DRF") {
+        isSubmit = false;
+      }
+    });
+    if (enableSubmit) {
+      isSubmit = false;
+    }
+    if (pathname.includes('/guest')) {
+      axios.all(optionInquiries.map(q => loadComment(q.id)))
+        .then(res => {
+          if (res) {
+            let commentList = [];
+            res.map(r => {
+              commentList = [...commentList, ...r];
+            });
+            const filterRepADraft = commentList.some((r) => r.state === 'REP_A_DRF');
+            // dispatch(InquiryActions.checkSubmit(filterRepADraft));
+            if (filterRepADraft) isSubmit = false;
+            setIsSubmit(isSubmit)
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+    }
+  }, [enableSubmit, inquiries]);
+
+  useEffect(() => {
+    setDisableSendDraft(draftContent.some((c) => c.state === 'AME_DRF'))
+  }, [draftContent])
 
   const openAttachment = () => {
     let isExistMedia = false;
@@ -94,13 +170,17 @@ function ToolbarLayout1(props) {
 
   const openEmail = () => dispatch(FormActions.toggleOpenEmail(true));
 
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    history.push(`/apps/draft-bl/edit/${myBL.id}`);
+  }
 
   const confirmBlDraft = () => {
     setOpen(true);
-    dispatch(DraftBLActions.setConfirmDraftBL());
   };
-
+  const onSendDraftBl = () => {
+    dispatch(DraftBLActions.toggleSendNotification(true));
+  }
   const redirectEditDraftBL = () => {
     const bl = window.location.pathname.split('/')[3];
     if (bl) history.push(`/apps/draft-bl/edit/${bl}`);
@@ -131,6 +211,27 @@ function ToolbarLayout1(props) {
     }
   }, [user, allowAccess]);
 
+  const onSubmit = async () => {
+    const inqs = [...inquiries];
+    const lstInq = inqs.map((item) => {
+      if (item.answerObj && (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(item.state))
+      ) {
+        return { inquiryId: item.id, currentState: item.state };
+      }
+      return null;
+    });
+    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null) });
+    //
+    const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
+    inqs.forEach((item) => {
+      if (listIdInq.includes(item.id)) {
+        if (item.state === 'ANS_DRF') item.state = 'ANS_SENT';
+      }
+    });
+    dispatch(InquiryActions.setInquiries(inqs));
+    dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
+  }
+
   return (
     <ThemeProvider theme={toolbarTheme}>
       <AppBar id="fuse-toolbar" className="flex relative z-10" color="inherit">
@@ -142,16 +243,16 @@ function ToolbarLayout1(props) {
             </Hidden>
           )}
 
-          <div className="flex flex-1" style={{ paddingLeft: '53px' }}>
+          <div className="flex flex-1" style={{ marginLeft: 35 }}>
             <div style={{ paddingRight: '32px' }} className={classes.iconWrapper}>
               <Avatar
                 src="assets/images/logos/one_ocean_network-logo.png"
                 className={clsx(classes.logo, classes.fitAvatar)}
                 alt="one-logo"
-                // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
-                //   component: Link,
-                //   to: '/'
-                // })}
+              // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+              //   component: Link,
+              //   to: '/'
+              // })}
               />
             </div>
 
@@ -179,43 +280,45 @@ function ToolbarLayout1(props) {
                 <span className="pl-12">Attachment List</span>
               </Button>
             </PermissionProvider>
-            {/* {openTrans && transId && <RestoreVersion />} */}
+          </div>
+          <div className="flex" style={{ marginRight: 35, alignItems: 'center' }}>
+            <PreviewDraftBL />
+
             <PermissionProvider
               action={PERMISSION.VIEW_EDIT_DRAFT_BL}
-              extraCondition={pathname.includes('/apps/draft-bl')}>
+              extraCondition={pathname.includes('/apps/draft-bl') && !pathname.includes('/edit')}>
               <Button
-                variant="text"
-                size="medium"
-                className={classes.button}
+                className={clsx(classes.button, classes.buttonEditDraftBL)}
                 onClick={redirectEditDraftBL}>
                 <EditIcon />
-                <span className="px-2">Edit</span>
               </Button>
 
               <Button
-                style={{
-                  backgroundColor: disableConfirm ? '#CCD3D1' : '#BD0F72',
-                  color: 'white',
-                  borderRadius: '8px',
-                  fontWeight: '600',
-                  fontFamily: 'Montserrat',
-                  right: '6rem'
-                }}
-                variant="text"
-                size="medium"
-                className={clsx('normal-case absolute flex my-8 mr-10')}
+                variant="contained"
+                className={clsx(classes.button, classes.buttonComfirm)}
                 onClick={confirmBlDraft}
                 disabled={disableConfirm}>
-                <span className="pl-4">Confirm</span>
+                Confirm
               </Button>
               <DialogConfirm open={open} handleClose={handleClose} />
             </PermissionProvider>
-          </div>
-          <div className="flex" style={{ marginRight: '27px' }}>
+
+            <PermissionProvider
+              action={PERMISSION.DRAFTBL_SEND_DRAFT_AMENDMENT}
+              extraCondition={pathname.includes('/apps/draft-bl/edit')}>
+              <Button
+                variant="contained"
+                className={clsx(classes.button, classes.buttonSend)}
+                onClick={onSendDraftBl}
+                disabled={!disableSendDraft}>
+                Send
+              </Button>
+            </PermissionProvider>
+
             <PermissionProvider
               action={PERMISSION.MAIL_SEND_MAIL}
               extraCondition={pathname.includes('/workspace')}>
-              <div style={{ paddingLeft: '15px', paddingRight: '5px', paddingTop: '17px' }}>
+              <div style={{ paddingRight: 5 }}>
                 <Button
                   style={{
                     width: '120px',
@@ -232,13 +335,26 @@ function ToolbarLayout1(props) {
                 </Button>
               </div>
             </PermissionProvider>
+
             {/* <PermissionProvider
               action={PERMISSION.VIEW_SHOW_BL_HISTORY}
               extraCondition={pathname.includes('/workspace')}>
               <History />
-            </PermissionProvider> 
-             */}
-            <PreviewDraftBL />
+              {openTrans && transId && <RestoreVersion />}
+            </PermissionProvider>  */}
+
+            <PermissionProvider
+              action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
+              extraCondition={!pathname.includes('/apps/draft-bl')}>
+              <Button
+                variant="contained"
+                className={clsx(classes.button, classes.buttonSend)}
+                disabled={isSubmit}
+                onClick={onSubmit}>
+                Submit
+              </Button>
+            </PermissionProvider>
+
             <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>
               <UserProfile classes={classes} history={history} />
             </PermissionProvider>

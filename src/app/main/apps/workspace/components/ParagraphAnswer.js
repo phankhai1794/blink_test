@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
+import * as InquiryActions from '../store/actions/inquiry';
 
 import UserInfo from './UserInfo';
 
@@ -21,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ParagraphAnswer = (props) => {
-  const { disable = false } = props;
+  const { disable = false, questions } = props;
   const allowCreateParagraphAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_CREATE_PARAGRAPH
   });
@@ -30,7 +31,8 @@ const ParagraphAnswer = (props) => {
   });
   const { question, index } = props;
   const user = useSelector(({ user }) => user);
-  
+  const dispatch = useDispatch();
+
   const [paragraphText, setParagraphText] = useState((user.role === 'Admin' && !["ANS_SENT", "REP_Q_DRF", "REP_A_SENT", "COMPL"].includes(question.state))? "": question.answerObj[0]?.content );
 
   const classes = useStyles();
@@ -42,7 +44,10 @@ const ParagraphAnswer = (props) => {
       inquiry: question.id,
       content: e.target.value
     };
-    props.paragrapAnswer(body);
+    const optionsInquires = [...questions];
+    const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    optionsInquires[editedIndex].paragraphAnswer = body;
+    dispatch(InquiryActions.setInquiries(optionsInquires));
     props.isDisableSave(false);
   };
 

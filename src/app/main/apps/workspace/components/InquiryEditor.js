@@ -104,6 +104,7 @@ const InquiryEditor = (props) => {
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.myBL
   ]);
+  const user = useSelector(({ user }) => user);
 
   const optionsAnsType = [
     {
@@ -305,12 +306,12 @@ const InquiryEditor = (props) => {
 
     const inquiry = inquiries.find((q) => q.id === currentEditInq.id);
     if (inquiry) {
-      if (ansTypeChoice === inquiry.ansType) {
-        if (inquiry.answerObj.length === 1) {
+      if (ansTypeChoice === currentEditInq.ansType) {
+        if (currentEditInq.answerObj.length === 1) {
           dispatch(
             AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
           );
-          error = true;
+          return;
           // break;
         }
         // check empty a field
@@ -371,6 +372,10 @@ const InquiryEditor = (props) => {
           ans: { ansDelete, ansCreate, ansUpdate },
           files: { mediaCreate, mediaDelete }
         });
+        const editedIndex = inquiries.findIndex(inq => inq.id === inquiry.id);
+        inquiries[editedIndex] = currentEditInq;
+        dispatch(InquiryActions.setInquiries(inquiries));
+
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
         );
@@ -382,6 +387,14 @@ const InquiryEditor = (props) => {
       }
     } else {
       // Create INQUIRY
+      if (ansTypeChoice === currentEditInq.ansType) {
+        if (currentEditInq.answerObj.length === 1) {
+          dispatch(
+            AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
+          );
+          return;
+        }
+      }
       const uploads = [];
       if (currentEditInq.mediaFile.length) {
         currentEditInq.mediaFile.forEach((file) => {
@@ -574,22 +587,25 @@ const InquiryEditor = (props) => {
                 </div>
               ))}
           </>
-          <>
-            {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-            {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
-              <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                  <ImageAttach
-                    file={file}
-                    field={currentEditInq.field}
-                    style={{ margin: '2.5rem' }}
-                    isAnswer={true}
-                  />
-                ) : (
-                  <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
-                )}
-              </div>
-            ))}
+          <>{user.role !== 'Admin' &&
+              <>
+                {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+                {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
+                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                      <ImageAttach
+                        file={file}
+                        field={currentEditInq.field}
+                        style={{ margin: '2.5rem' }}
+                        isAnswer={true}
+                      />
+                    ) : (
+                      <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
+                    )}
+                  </div>
+                ))}
+              </>
+          }
           </>
           <div className="flex">
             <div className="flex">

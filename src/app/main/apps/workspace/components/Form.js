@@ -23,6 +23,7 @@ import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 import PopoverFooter from './PopoverFooter';
+import PopupConfirmSubmit from "./PopupConfirmSubmit";
 import PopupConfirm from "./PopupConfirm";
 
 const theme = createMuiTheme({
@@ -205,7 +206,7 @@ export default function Form(props) {
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const showSaveInquiry = useSelector(({ workspace }) => workspace.formReducer.showSaveInquiry);
   const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
-
+  
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const classes = useStyles({ isFullScreen });
@@ -375,7 +376,8 @@ export default function Form(props) {
       props.tabChange(0);
       setValue(0);
     }
-  }, [openInqReview, inquiries]);
+  }, [openInqReview]);
+  
   return (
     <div>
       {openFab && (
@@ -448,11 +450,12 @@ export default function Form(props) {
         </MuiDialogContent>
 
         {field !== 'ATTACHMENT_LIST' &&
-          (<PopupConfirm field={field} handleCheckSubmit={() => {
+          (<PopupConfirmSubmit field={field} handleCheckSubmit={() => {
             setCheckSubmit(!checkSubmit)
           }} />
           )}
 
+        <PopupConfirm/>
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
           <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>

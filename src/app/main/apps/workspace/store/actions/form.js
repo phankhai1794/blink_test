@@ -12,6 +12,8 @@ export const OPEN_INQUIRY_REVIEW = 'OPEN_INQUIRY_REVIEW';
 export const OPEN_NOTIFICATION_ATTACHMENT_LIST = 'OPEN_NOTIFICATION_ATTACHMENT_LIST';
 export const OPEN_NOTIFICATION_SUBMIT_ANSWER = 'OPEN_NOTIFICATION_SUBMIT_ANSWER';
 export const ENABLE_SAVE_INQUIRIES = 'ENABLE_SAVE_INQUIRIES';
+export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
+export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
 
 export function setFullscreen(state) {
   return {
@@ -106,6 +108,20 @@ export function toggleOpenNotificationSubmitAnswer(state) {
 export function setEnableSaveInquiriesList(state) {
   return {
     type: ENABLE_SAVE_INQUIRIES,
+    state: state
+  };
+}
+
+export function openConfirmPopup(state) {
+  return {
+    type: OPEN_CONFIRM_POPUP,
+    state: state
+  };
+}
+
+export function confirmPopupClick(state) {
+  return {
+    type: CONFIRM_POPUP_CLICK,
     state: state
   };
 }

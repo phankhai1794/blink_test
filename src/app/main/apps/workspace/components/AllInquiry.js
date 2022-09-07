@@ -82,6 +82,12 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: '2rem',
     '&.resolved': {
       borderColor: '#36B37E'
+    },
+    '&.customerReply': {
+      borderColor: '#2F80ED'
+    },
+    '&.offshoreReply': {
+      borderColor: '#2F80ED'
     }
   },
   boxHasComment: {
@@ -136,6 +142,7 @@ const AllInquiry = (props) => {
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.isShowBackground,
   ]);
+  const [getStateReplyDraft, setStateReplyDraft] = useState(false);
 
   let CURRENT_NUMBER = 0;
 
@@ -164,18 +171,24 @@ const AllInquiry = (props) => {
     }
   };
 
-  const handleCancel = () => {
-    // reset media file
+  const resetActionInquiry = (q) => {
     const optionsInquires = [...inquiries];
-    const editedIndex = optionsInquires.findIndex(inq => currentEditInq.id === inq.id);
-    optionsInquires[editedIndex].mediaFilesAnswer = optionsInquires[editedIndex].mediaFilesAnswer.filter(inq => inq.id);
+    const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
+    optionsInquires[editedIndex].showIconReply = true;
+    optionsInquires[editedIndex].showIconEdit = true;
+    optionsInquires[editedIndex].showIconAttachAnswerFile = false;
+    optionsInquires[editedIndex].showIconAttachReplyFile = false;
     dispatch(InquiryActions.setInquiries(optionsInquires));
-    dispatch(InquiryActions.setEditInq({}));
   };
 
+  const handleCancel = (q) => {
+    setSaved(!isSaved);
+    resetActionInquiry(q);
+  };
 
-  const handleSetSave = () => {
-    dispatch(InquiryActions.setEditInq({}));
+  const handleSetSave = (q) => {
+    setSaved(!isSaved);
+    resetActionInquiry(q);
   };
 
   return (
@@ -208,7 +221,8 @@ const AllInquiry = (props) => {
                   className={clsx(
                     classes.boxItem,
                     (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-                    inqHasComment.includes(q.id) && classes.boxHasComment
+                    inqHasComment.includes(q.id) && classes.boxHasComment,
+                    !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'ANS_DRF'].includes(q.state) && 'offshoreReply'
                   )}>
                   <div style={{ marginBottom: '12px' }}>
                     <Typography color="primary" variant="h5" className={classes.inqTitle}>
@@ -233,6 +247,7 @@ const AllInquiry = (props) => {
                   className={clsx(
                     classes.boxItem,
                     (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
+                    !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(q.state) && 'customerReply',
                     inqHasComment.includes(q.id) && classes.boxHasComment
                   )}>
                   <div style={{ marginBottom: '12px' }}>
@@ -242,12 +257,20 @@ const AllInquiry = (props) => {
 
                     <InquiryViewer
                       toggleEdit={() => toggleEdit(index)}
+                      currentQuestion={q}
                       question={isEdit ? currentEditInq : q}
                       user={props.user}
                       isSaved={isSaved}
-                      setSave={() => setSaved(false)}
+                      isEdit={q.id === currentEditInq?.id ? q : {}}
+                      showReceiver={false}
+                      getStateReplyDraft={(val) => setStateReplyDraft(val)}
                     />
-                    {isEdit && <InquiryAnswer onCancel={handleCancel} setSave={handleSetSave} />}
+                    {(q.showIconAttachAnswerFile) && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT' || getStateReplyDraft) &&
+                    <InquiryAnswer
+                      onCancel={() => handleCancel(q)}
+                      setSave={() => handleSetSave(q)}
+                      question={q}
+                    />}
                   </div>
                 </div>
                 <Divider

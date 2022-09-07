@@ -1,11 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 import { TextField, InputAdornment, makeStyles } from '@material-ui/core';
 import LockIcon from '@material-ui/icons/Lock';
-import {useDispatch, useSelector} from "react-redux";
-import ReplyIcon from "@material-ui/icons/Reply";
+import { useDispatch, useSelector } from "react-redux";
+import HelpIcon from '@material-ui/icons/Help';
+import AttachFile from '@material-ui/icons/AttachFile';
 
 import * as BLDraftActions from '../store/actions';
 
@@ -21,7 +22,7 @@ const bgThemeInput = '#FFFFFF';
 const blockThemeInput = '#F5F8FA';
 const darkThemeInput = '#515E6A';
 const pinkThemeInput = '#BD0F72';
-const themeField = '#2F80ED';
+const themeField = '#DC2626';
 const lightThemeInq = '#FAF1F5';
 
 const useStyles = makeStyles((theme) => ({
@@ -37,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
       borderColor: `${pinkThemeInput} !important`
     },
     '&:focus-within fieldset': {
-      border: `1px solid ${themeInput}`,
+      border: `1px solid ${pinkThemeInput} !important`,
     },
   },
   locked: {
@@ -85,10 +86,13 @@ const useStyles = makeStyles((theme) => ({
   sizeIcon: {
     fontSize: '18px'
   },
+  colorHasInqIcon: {
+    color: `${themeField} !important`
+  },
   colorFieldEdited: {
     '& fieldset': {
       border: `1px solid ${themeField}!important`,
-      background: '#EAF2FD',
+      background: '#FDF2F2',
       borderRadius: '8px'
     }
   },
@@ -100,50 +104,36 @@ const useStyles = makeStyles((theme) => ({
   },
   colorLockIcon: {
     color: darkThemeInput
+  },
+  attachIcon: {
+    transform: 'rotate(45deg)',
   }
 }));
 
 const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, readOnly }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [contentChanged, openDraftBL] = useSelector(({ draftBL }) => [
-    draftBL.contentChanged,
-    draftBL.openDraftBL,
-  ]);
-  const [fieldIsChanged, setFieldIsChanged] = useState(false);
-  const [fieldIsClicked, setFiledIsClicked] = useState(false);
-
-  const checkFieldEdited = () => {
-    if (contentChanged) {
-      const getsKey = Object.keys(contentChanged).map(key => key);
-      const check = getsKey.find(key => key === id);
-      return !!check;
-    }
-  };
+  const draftContent = useSelector(({ draftBL }) => draftBL.draftContent);
+  const [hasDiscussion, setHasDiscussion] = useState(false);
+  const [hasAttachment, setHasAttachment] = useState(false);
 
   useEffect(() => {
-    setFieldIsChanged(checkFieldEdited());
-    setFiledIsClicked(false);
-  }, [contentChanged]);
-
-  useEffect(() => {
-    if (!openDraftBL) {
-      setFiledIsClicked(false);
+    if (draftContent && id) {
+      const filter = draftContent.filter(t => t.field === id);
+      setHasDiscussion(filter.length);
+      setHasAttachment(filter[0]?.content.mediaFile.length > 0);
     }
-  },[openDraftBL]);
+  }, [draftContent, id]);
 
   const onClick = (e) => {
-    dispatch(BLDraftActions.toggleDraftBLEdit(true));
-    dispatch(BLDraftActions.setCurrentBLField(e.currentTarget.id));
-    setFiledIsClicked(true);
+    if (!lock) {
+      dispatch(BLDraftActions.toggleDraftBLEdit(true));
+      dispatch(BLDraftActions.setCurrentField(e.currentTarget.id));
+    }
   };
-  
-  const handleReply = () => {
-    dispatch(BLDraftActions.toggleDraftBLEdit(false))
-  }
 
   return (
-    <div id={id} onClick={onClick} className={clsx(fieldIsChanged ? classes.colorFieldEdited : '', fieldIsClicked ? classes.colorFieldClicked : '')}>
+    <div id={id} onClick={onClick} className={clsx(hasDiscussion ? classes.colorFieldEdited : '')}>
       <ThemeProvider theme={theme}>
         <TextField
           value={selectedChoice || children}
@@ -162,16 +152,9 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
                   multiline ? classes.adornmentMultiline : '',
                   rows ? classes[`adornmentRow_${rows}`] : ''
                 )}>
-                {lock ? (
-                  <LockIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
-                ) : (
-                  <></>
-                )}
-                {fieldIsChanged ? (
-                  <>
-                    <ReplyIcon fontSize={'large'} style={{ color: '#2F80ED', cursor: 'pointer' }} onClick={handleReply} />
-                  </>
-                ) : <></>}
+                {lock ? <LockIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} /> : <></>}
+                {hasAttachment ? <AttachFile className={clsx(classes.sizeIcon, classes.attachIcon, classes.colorHasInqIcon)} style={{ marginRight: 5 }} /> : <></>}
+                {hasDiscussion ? <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} /> : <></>}
               </InputAdornment>
             ),
             classes: {

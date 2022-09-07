@@ -87,7 +87,7 @@ const useStyles = makeStyles((theme) => ({
 ));
 
 const InquiryAnswer = (props) => {
-  const {onCancel, setSave} = props;
+  const {onCancel, setSave, question} = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -159,6 +159,7 @@ const InquiryAnswer = (props) => {
           optionsInquires[editedIndex].state = 'ANS_DRF';
           //
           dispatch(InquiryActions.setInquiries(optionsInquires));
+          setSave();
         }).catch((error) => {
           console.log(error)
         });
@@ -184,50 +185,54 @@ const InquiryAnswer = (props) => {
         optionsInquires[editedIndex].state = 'ANS_DRF';
         //
         dispatch(InquiryActions.setInquiries(optionsInquires));
+        setSave();
       }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
     }
   }
 
   const onSave = async () => {
     const optionsInquires = [...inquiries];
-    const editedIndex = optionsInquires.findIndex(inq => currentEditInq.id === inq.id);
-    if (currentEditInq.selectChoice) {
-      await updateInquiryChoice(currentEditInq.selectChoice);
-    } else if (currentEditInq.paragraphAnswer) {
-      if (currentEditInq.answerObj.length === 0) {
-        const response = await createParagraphAnswer(currentEditInq.paragraphAnswer);
+    const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    if (question.selectChoice) {
+      await updateInquiryChoice(question.selectChoice);
+    } else if (question.paragraphAnswer) {
+      if (question.answerObj.length === 0) {
+        const response = await createParagraphAnswer(question.paragraphAnswer);
         optionsInquires[editedIndex].answerObj.push(response.answerObj);
       } else {
-        const answerId = currentEditInq.answerObj[0].id;
-        await updateParagraphAnswer(answerId, currentEditInq.paragraphAnswer);
+        const answerId = question.answerObj[0].id;
+        await updateParagraphAnswer(answerId, question.paragraphAnswer);
       }
     }
-    if (currentEditInq.attachmentAnswer) {
-      await saveAttachmentAnswer(currentEditInq);
+    if (question.attachmentAnswer) {
+      await saveAttachmentAnswer(question);
       dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
     } else {
-      if (currentEditInq.selectChoice) {
-        const answersObj = currentEditInq.answerObj;
+      if (question.selectChoice) {
+        const answersObj = question.answerObj;
         answersObj.forEach((item, i) => {
           answersObj[i].confirmed = false;
         });
-        const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
+        const answerIndex = answersObj.findIndex((item) => item.id === question.selectChoice.answer);
         const answerUpdate = answersObj[answerIndex];
         answerUpdate.confirmed = true;
-        optionsInquires[editedIndex].answerObj = currentEditInq.answerObj;
+        optionsInquires[editedIndex].answerObj = question.answerObj;
         optionsInquires[editedIndex].state = 'ANS_DRF';
+        //
         dispatch(InquiryActions.setInquiries(optionsInquires));
+        setSave();
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
-      } else if (currentEditInq.paragraphAnswer) {
-        if (currentEditInq.answerObj.length) {
-          optionsInquires[editedIndex].answerObj[0].content = currentEditInq.paragraphAnswer.content;
+      } else if (question.paragraphAnswer) {
+        if (question.answerObj.length) {
+          optionsInquires[editedIndex].answerObj[0].content = question.paragraphAnswer.content;
         }
         optionsInquires[editedIndex].state = 'ANS_DRF';
         dispatch(InquiryActions.setInquiries(optionsInquires));
+        setSave();
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
       }
     }
-    setSave();
+    dispatch(InquiryActions.setEditInq(null));
   };
 
 

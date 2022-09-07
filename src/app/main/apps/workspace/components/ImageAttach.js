@@ -33,19 +33,15 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false }) => {
-  const [valid, currentEditInq, attachmentList] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.validation,
+const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, isReply = false, question, questions, templateReply, setAttachmentReply, draftBL = false, removeAttachmentDraftBL }) => {
+  const [currentEditInq, attachmentList] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.attachmentList
   ]);
-  const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const dispatch = useDispatch();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [srcUrl, setSrcUrl] = useState(file.src || null);
   const classes = useStyles();
-  const allowUpdateInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_UPDATE_INQUIRY });
-  const allowAnswerAttachment = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT });
 
   const urlMedia = (fileExt, file) => {
     if (fileExt.toLowerCase().match(/jpeg|jpg|png/g)) {
@@ -86,11 +82,13 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
     const inq = { ...currentEditInq };
     const optionsAttachmentList = [...attachmentList];
     if (isAnswer) {
-      inq.attachmentAnswer = {inquiry: inq.id};
-      if (inq?.mediaFilesAnswer?.length) {
-        inq.mediaFilesAnswer.splice(indexMedia, 1);
-        dispatch(InquiryActions.setEditInq(inq));
-      }
+      const optionsInquires = [...questions];
+      const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+      optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
+      optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMedia, 1);
+      dispatch(InquiryActions.setInquiries(optionsInquires));
+    } else if (isReply) {
+      templateReply.mediaFiles.splice(indexMedia, 1);
     } else {
       if (field && file.id) {
         const indexMedia = inq.mediaFile.findIndex((f) => f.id === file.id);
@@ -143,7 +141,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
           onClick={downloadFile}>
           {file.name}
         </h3>
-        {isAnswer ? (
+        {isAnswer && (
           !hiddenRemove && (
             <PermissionProvider
               action={PERMISSION.INQUIRY_ANSWER_ATTACHMENT}>
@@ -152,7 +150,18 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
               </IconButton>
             </PermissionProvider>
           )
-        ) : (
+        )}
+        {isReply && (
+          !hiddenRemove && (
+            <PermissionProvider
+              action={PERMISSION.INQUIRY_UPDATE_REPLY}>
+              <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                <CloseIcon />
+              </IconButton>
+            </PermissionProvider>
+          )
+        )}
+        {!isAnswer && !isReply && (
           !hiddenRemove && (
             <PermissionProvider
               action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
@@ -162,6 +171,11 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
             </PermissionProvider>
           )
         )}
+        {draftBL &&
+          <IconButton onClick={removeAttachmentDraftBL} style={{ padding: 2 }}>
+            <CloseIcon />
+          </IconButton>
+        }
       </div>
       {isViewerOpen && (
         <ImageViewer
