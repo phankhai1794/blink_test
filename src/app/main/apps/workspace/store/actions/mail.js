@@ -2,6 +2,8 @@ import { sendmail, getSuggestMail } from 'app/services/mailService';
 
 import { loadInquiry } from '../actions';
 import * as InquiryActions from '../actions/inquiry';
+import { loadComment } from 'app/services/inquiryService';
+import axios from 'axios';
 
 export const SENDMAIL_NONE = 'SENDMAIL_NONE';
 export const SENDMAIL_LOADING = 'SENDMAIL_LOADING';
@@ -16,8 +18,11 @@ export const VALIDATE_MAIL = 'VALIDATE_MAIL';
 export const SET_TAGS = 'SET_TAGS'
 
 export const sendMail =
-  ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs }) =>
+  ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, inquiries }) =>
     async (dispatch) => {
+      const replyInqs = [];
+      const listComment = await axios.all(inquiries.map(q => loadComment(q.id)));
+      listComment.map((comment, index) => comment.length && replyInqs.push(inquiries[index].id));
       dispatch({ type: SENDMAIL_LOADING });
       sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs)
         .then((res) => {

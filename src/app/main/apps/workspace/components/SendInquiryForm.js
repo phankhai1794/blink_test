@@ -51,7 +51,6 @@ const SendInquiryForm = (props) => {
   });
 
   const [form, setForm] = useState(initialState);
-  const [inqHasComment, setInqHasComment] = useState([]);
 
   const isFormValid = () => {
     return form.toCustomer || form.toOnshore;
@@ -106,21 +105,6 @@ const SendInquiryForm = (props) => {
   }, [success, error]);
 
   useEffect(() => {
-    const listInqId = [];
-    for (let i in inquiries) {
-      if (!['COMPL', 'UPLOADED'].includes(inquiries[i].state)) {
-        loadComment(inquiries[i].id)
-          .then((res) => {
-            if (res.length) {
-              listInqId.push(inquiries[i].id);
-            }
-          })
-          .catch((error) => console.error(error));
-      }
-    };
-    setInqHasComment(listInqId);
-  }, [inquiries])
-  useEffect(() => {
     if (openEmail && !suggestMails.length) {
       dispatch(mailActions.suggestMail(''));
     }
@@ -143,11 +127,11 @@ const SendInquiryForm = (props) => {
       dispatch(Actions.showMessage({ message: 'Please fill to Customer or Onshore fields', variant: 'error' }));
     }
     else {
-      inquiries.forEach(q => {if (q.state === 'OPEN') q.state = 'INQ_SENT' });
+      inquiries.forEach(q => { if (q.state === 'OPEN') q.state = 'INQ_SENT' });
       dispatch(InquiryActions.setInquiries(inquiries));
       //
       dispatch({ type: mailActions.SENDMAIL_LOADING });
-      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form, replyInqs: inqHasComment }));
+      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form, inquiries }));
     }
   };
 
