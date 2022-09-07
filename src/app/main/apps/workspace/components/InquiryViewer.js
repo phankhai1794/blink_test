@@ -982,11 +982,11 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
-  const [values, setValues] = useState(getValueField(container) || []);
+  const [values, setValues] = useState(getValueField(container) || [{}]);
   const inqType = getLabelById(metadata['inq_type_options'], question.inqType);
   const cdType =
     inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CONTAINER_SEAL];
-  const cmType = inqType !== CM_MARK ? [CM_MARK, inqType] : [CM_MARK, CM_PACKAGE];
+  const cmType = inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CM_PACKAGE];
   const typeList = container === CONTAINER_DETAIL ? cdType : cmType;
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values));
