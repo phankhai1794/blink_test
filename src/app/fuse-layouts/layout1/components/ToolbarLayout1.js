@@ -139,7 +139,7 @@ function ToolbarLayout1(props) {
               commentList = [...commentList, ...r];
             });
             const filterRepADraft = commentList.some((r) => r.state === 'REP_A_DRF');
-            dispatch(InquiryActions.checkSubmit(filterRepADraft));
+            // dispatch(InquiryActions.checkSubmit(filterRepADraft));
             if (filterRepADraft) isSubmit = false;
             setIsSubmit(isSubmit)
           }
