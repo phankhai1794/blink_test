@@ -65,7 +65,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
       }
     });
     if (enableSubmit) isSubmit = false;
-    !isSubmit && setIsSubmit(false);
+    setIsSubmit(isSubmit)
   }, [inquiries, checkSubmit, enableSubmit]);
 
   const toggleInquiriresDialog = () => {

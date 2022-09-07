@@ -183,35 +183,39 @@ const InquiryViewer = (props) => {
             : dispatch(InquiryActions.checkSubmit(false));
           //
           const filterOffshoreSent = res[res.length - 1];
-          if (user.role === 'Admin') {
-            if (Object.keys(filterOffshoreSent).length > 0) {
+          if (Object.keys(filterOffshoreSent).length > 0) {
+            //
+            if (['REP_Q_DRF', 'REP_A_DRF'].includes(filterOffshoreSent.state)) {
+              const reqReply = {
+                inqAns: {
+                  inquiry: null,
+                  confirm: false,
+                  type: 'REP'
+                },
+                answer: {
+                  id: filterOffshoreSent.answer,
+                  content: filterOffshoreSent.content,
+                  type: metadata.ans_type['paragraph']
+                }
+              };
+              setTempReply({...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia});
+            }
+            //
+            if (user.role === 'Admin') {
               if (filterOffshoreSent.state === 'REP_Q_SENT') {
                 setShowLabelSent(true)
               } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                 setStateReplyDraft(true)
               }
-            }
-          } else {
-            if (Object.keys(filterOffshoreSent).length > 0) {
+              if (filterOffshoreSent.state === 'REP_A_SENT') {
+                lastest.showIconReply = true;
+              }
+            } else {
               if (filterOffshoreSent.state === 'REP_A_DRF') {
                 setStateReplyDraft(true);
                 lastest.showIconAttachReplyFile = false;
                 lastest.showIconAttachAnswerFile = false;
                 props.getStateReplyDraft(true);
-                // edit reply
-                const reqReply = {
-                  inqAns: {
-                    inquiry: null,
-                    confirm: false,
-                    type: 'REP'
-                  },
-                  answer: {
-                    id: filterOffshoreSent.answer,
-                    content: filterOffshoreSent.content,
-                    type: metadata.ans_type['paragraph']
-                  }
-                };
-                setTempReply({...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia});
                 //
               } else if (filterOffshoreSent.state === 'REP_Q_SENT') {
                 lastest.showIconReply = true;
@@ -227,7 +231,7 @@ const InquiryViewer = (props) => {
           setQuestion(lastest);
           setInqHasComment(true);
         } else {
-          if ((user.role === 'Admin' ? ["ANS_SENT"] : ["ANS_SENT", "ANS_DRF"]).includes(question.state)) {
+          if ((user.role === 'Admin' ? ["ANS_SENT"] : ["ANS_SENT", "ANS_DRF", "REP_Q_DRF"]).includes(question.state)) {
             let answerObj = null;
             if (question.ansType === metadata.ans_type.choice) {
               answerObj = question.answerObj.filter((item) => item.confirmed);
@@ -240,17 +244,17 @@ const InquiryViewer = (props) => {
               lastest.name = "";
               lastest.creator = answerObj[0]?.updater;
               lastest.createdAt = answerObj[0]?.updatedAt;
-              lastest.mediaFile = []
-
-              setQuestion(lastest);
               setType(lastest.ansType);
             }
+            if (user.role === 'Admin') {
+              lastest.showIconReply = true;
+              if (lastest.mediaFilesAnswer.length) lastest.mediaFile = lastest.mediaFilesAnswer;
+            } else {
+              if (lastest.state === 'REP_Q_DRF') setSubmitLabel(true)
+            }
+            setQuestion(lastest);
             setInqHasComment(true);
-          } else {
-            if (question.state === 'REP_Q_DRF') setSubmitLabel(true)
-            setQuestion(props.question);
           }
-
         }
         setIsLoadedComment(true);
       })
@@ -416,6 +420,8 @@ const InquiryViewer = (props) => {
     const mediaListId = [];
     const mediaRest = [];
     let mediaFilesResp;
+    const optionsInquires = [...inquiries];
+    const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
@@ -444,9 +450,17 @@ const InquiryViewer = (props) => {
       saveReply({ ...reqReply })
         .then((res) => {
           //
+          let stateUpdate;
+          if (user.role === 'Admin') {
+            optionsInquires[editedIndex].state = 'REP_Q_DRF';
+            stateUpdate = 'REP_Q_DRF';
+          } else {
+            optionsInquires[editedIndex].state = 'REP_A_DRF';
+            stateUpdate = 'REP_A_DRF';
+          }
+          setQuestion((q) => ({ ...q, state: stateUpdate }));
+          dispatch(InquiryActions.setInquiries(optionsInquires));
           setSaveComment(!isSaveComment);
-          setTempReply({});
-          setViewDropDown('');
           //
           dispatch(InquiryActions.checkSend(true));
           dispatch(
@@ -465,9 +479,17 @@ const InquiryViewer = (props) => {
       updateReply(tempReply.answer.id, { ...reqReply })
         .then((res) => {
           //
+          let stateUpdate;
+          if (user.role === 'Admin') {
+            optionsInquires[editedIndex].state = 'REP_Q_DRF';
+            stateUpdate = 'REP_Q_DRF';
+          } else {
+            optionsInquires[editedIndex].state = 'REP_A_DRF';
+            stateUpdate = 'REP_A_DRF';
+          }
+          setQuestion((q) => ({ ...q, state: stateUpdate }));
+          dispatch(InquiryActions.setInquiries(optionsInquires));
           setSaveComment(!isSaveComment);
-          setTempReply({});
-          setViewDropDown('');
           //
           dispatch(InquiryActions.checkSend(true));
           dispatch(
@@ -520,6 +542,7 @@ const InquiryViewer = (props) => {
     } else {
       // Edit Reply
       setIsReply(true);
+      setIsResolve(false);
       setStateReplyDraft(false);
       const reply = { ...question };
       reply.content = '';
@@ -574,6 +597,29 @@ const InquiryViewer = (props) => {
                       )}
                     </div>
                     {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
+
+                    {/*Admin Reply*/}
+                    {!['COMPL', 'UPLOADED'].includes(question.state) && (
+                      isReply ? (
+                        <>
+                          {<AttachFile
+                            isReply={true}
+                            question={question}
+                            setAttachmentReply={handleSetAttachmentReply}
+                          />}
+                        </>
+                      ) : <>
+                        {checkStateReplyDraft && (
+                          <Tooltip title={'Edit Reply'}>
+                            <div onClick={() => handleEdit(question)}>
+                              <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                            </div>
+                          </Tooltip>
+                        )}
+                      </>
+                    )}
+                    {/*Admin Reply*/}
+
                   </div>
                   <PermissionProvider
                     action={PERMISSION.VIEW_EDIT_INQUIRY}
@@ -601,12 +647,9 @@ const InquiryViewer = (props) => {
               ) : (
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <div style={{ marginRight: 15 }}>
-                    {(['COMPL', 'UPLOADED'].includes(question.state)) && (
+                    {(['COMPL', 'UPLOADED'].includes(question.state)) ? (
                       <span className={classes.labelStatus}>Resolved</span>
-                    )}
-                  </div>
-                  <div style={{ marginRight: 15 }}>
-                    {(['ANS_SENT'].includes(question.state) || submitLabel) && (
+                    ) : (['ANS_SENT'].includes(question.state) || submitLabel) && (
                       <span className={classes.labelStatus}>Submitted</span>
                     )}
                   </div>
@@ -659,7 +702,7 @@ const InquiryViewer = (props) => {
             </Typography>
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
-              ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) &&
+              ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
               (
                 <ChoiceAnswer
                   index={index}
@@ -669,7 +712,7 @@ const InquiryViewer = (props) => {
                   isDisableSave={(e) => setDisableSave(e)}
                 />
               )}
-              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) &&
+              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
               (
                 <ParagraphAnswer
                   question={question}
@@ -844,11 +887,6 @@ const InquiryViewer = (props) => {
                           value={tempReply?.answer?.content}
                           onChange={handleChangeContentReply}
                         />
-                        {user.role === 'Admin' && <AttachFile
-                          isReply={true}
-                          question={question}
-                          setAttachmentReply={handleSetAttachmentReply}
-                        />}
                       </div>
 
                       {/*{tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}*/}
@@ -909,7 +947,7 @@ const InquiryViewer = (props) => {
                       </PermissionProvider>
                       <PermissionProvider
                         action={PERMISSION.INQUIRY_CREATE_REPLY}
-                        extraCondition={user.role === "Admin" && (inqHasComment || ['ANS_SENT', 'OPEN'].includes(question.state))}
+                        extraCondition={user.role === "Admin" && (inqHasComment) && question.showIconReply}
                       >
                         <Button
                           variant="contained"
