@@ -5,14 +5,11 @@ import {
   DialogContent,
   DialogActions,
 } from '@material-ui/core';
-import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
-import CloseOutlined from '@material-ui/icons/CloseOutlined';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { draftConfirm } from '@shared';
-
-import { useDispatch } from 'react-redux';
 import * as Actions from 'app/store/actions';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
+import history from '@history';
 
 function DialogConfirm(props) {
   const { handleClose, open } = props;
@@ -105,7 +102,11 @@ function DialogConfirm(props) {
               fontFamily: 'Montserrat'
             }}
             variant="contained"
-            onClick={handleClose}
+            onClick={() => {
+              handleClose();
+              history.push(`/apps/draft-bl/edit/${myBL.id}`);
+            }
+            }
             className='normal-case'>
             <span>No</span>
           </Button>
