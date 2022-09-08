@@ -243,7 +243,7 @@ const SendInquiryForm = (props) => {
               }}
               multiline="true"
               type="text"
-              defaultValue=""
+              defaultValue= {form.content}
               onChange={handleOnChange}></textarea>
           </div>
         </>
