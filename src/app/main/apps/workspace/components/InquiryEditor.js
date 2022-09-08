@@ -469,17 +469,6 @@ const InquiryEditor = (props) => {
           </RadioGroup>
 
           <AttachFile />
-          {allowDeleteInq && (
-            <Tooltip title="Delete Inquiry">
-              <IconButton style={{ padding: '2px', height: '40px', width: '40px' }} onClick={() => removeQuestion()}>
-                <img
-                  style={{ height: '22px', cursor: 'pointer' }}
-                  src="/assets/images/icons/trash-gray.svg"
-                />
-              </IconButton>
-
-            </Tooltip>
-          )}
         </FormControl>
       </div>
       {currentEditInq && (
