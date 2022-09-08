@@ -1,11 +1,9 @@
 #!/bin/bash
-# @author DangTran
-# @description:
-#npm i
-yarn install
-npm run build
-BASEDIR=$(dirname "$0")
-echo "Build deployed to dist folder"
-rm -rf dist
-mv build dist
+# @description: Start the node server or build in the first time
+
+if [ ! -d "dist" ]; then
+    echo Build Portal static distribution
+    ./scripts/build.sh
+fi
+
 node index.js

@@ -4,8 +4,9 @@ const express = require('express');
 const favicon = require('express-favicon');
 const port = 8080;
 const app = express();
-app.use(favicon(__dirname + '/dist/favicon.ico'));
+
 // the __dirname is the current directory from where the script is running
+app.use(favicon(__dirname + '/dist/favicon.ico'));
 app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'dist')));
 app.get('/ping', function (req, res) {
