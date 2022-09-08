@@ -594,6 +594,20 @@ const InquiryViewer = (props) => {
     setInqHasComment(false);
   }
 
+  const isExceedMaxRow = (q) => {
+    const el = document.getElementById(q.id);
+   
+    if (el) {
+      const oldClassName = el.className
+      el.className = el.className.replace('-hideText','')
+      if (el.getBoundingClientRect().height >110) {
+        el.className = oldClassName
+        return true
+      }
+    }
+    return false
+  }
+
   return (
     <>
       {isLoadedComment && (
@@ -727,6 +741,7 @@ const InquiryViewer = (props) => {
             <Typography
               className={viewDropDown !== question.id ? classes.hideText : ''}
               variant="h5"
+              id ={question.id}
               style={{
                 wordBreak: 'break-word',
                 fontFamily: 'Montserrat',
@@ -764,7 +779,7 @@ const InquiryViewer = (props) => {
                 <Grid item xs={6}>
                   {/*{question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}*/}
                 </Grid>
-                {inqHasComment && (
+                {(isExceedMaxRow(question) || inqHasComment) && (
                   <Grid item xs={6}>
                     <div
                       className={classes.viewMoreBtn}
@@ -785,7 +800,7 @@ const InquiryViewer = (props) => {
                 )}
               </Grid>
 
-              {viewDropDown === question.id && (
+              {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} />
               )}
 
