@@ -192,7 +192,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
               }}
               className={classes.root}
               color="primary"
-              disabled={isSubmit}
+              disabled={isShowBackground ? true : isSubmit}
               onClick={onSubmit}>
               Submit
             </Button>

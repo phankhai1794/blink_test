@@ -242,7 +242,7 @@ const AllInquiry = (props) => {
           } else {
             const isEdit = currentEditInq && q.id === currentEditInq.id;
             return (
-              <>
+              <div key={index}>
                 <div
                   className={clsx(
                     classes.boxItem,
@@ -266,11 +266,11 @@ const AllInquiry = (props) => {
                       getStateReplyDraft={(val) => setStateReplyDraft(val)}
                     />
                     {(q.showIconAttachAnswerFile) && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT' || getStateReplyDraft) &&
-                    <InquiryAnswer
-                      onCancel={() => handleCancel(q)}
-                      setSave={() => handleSetSave(q)}
-                      question={q}
-                    />}
+                      <InquiryAnswer
+                        onCancel={() => handleCancel(q)}
+                        setSave={() => handleSetSave(q)}
+                        question={q}
+                      />}
                   </div>
                 </div>
                 <Divider
@@ -278,7 +278,7 @@ const AllInquiry = (props) => {
                   variant="middle"
                   style={{ height: '2px', color: '#BAC3CB' }}
                 />
-              </>
+              </div>
             );
           }
         })}

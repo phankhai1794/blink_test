@@ -86,6 +86,7 @@ const PopupConfirmSubmit = (props) => {
     } else {
       dispatch(InquiryActions.setOneInq({}));
     }
+    dispatch(InquiryActions.checkSubmit(false));
     dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
   };
 
