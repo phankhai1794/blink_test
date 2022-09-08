@@ -40,6 +40,7 @@ const Inquiry = (props) => {
   const [changeQuestion, setChangeQuestion] = useState();
   const [isSaved, setSaved] = useState(false);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
+  const [questionIdSaved, setQuestionIdSaved] = useState();
 
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
@@ -63,15 +64,15 @@ const Inquiry = (props) => {
     optionsInquires[editedIndex].showIconAttachAnswerFile = false;
     optionsInquires[editedIndex].showIconAttachReplyFile = false;
     dispatch(InquiryActions.setInquiries(optionsInquires));
+    setQuestionIdSaved(optionsInquires[editedIndex]);
+    setSaved(!isSaved);
   };
 
   const handleCancel = (q) => {
-    setSaved(!isSaved);
     resetActionInquiry(q);
   };
 
   const handleSetSave = (q) => {
-    setSaved(!isSaved);
     resetActionInquiry(q);
   };
 
@@ -131,8 +132,8 @@ const Inquiry = (props) => {
             )}>
               <InquiryViewer
                 toggleEdit={() => toggleEdit(index)}
-                currentQuestion={q}
-                question={isEdit ? currentEditInq : q}
+                currentQuestion={questionIdSaved}
+                question={q}
                 user={props.user}
                 isSaved={isSaved}
                 isEdit={q.id === currentEditInq?.id ? q : {}}

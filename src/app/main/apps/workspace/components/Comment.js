@@ -17,12 +17,10 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import EditIcon from '@material-ui/icons/Edit';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 
-import * as InquiryActions from '../store/actions/inquiry';
 
 import UserInfo from './UserInfo';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
-import ParagraphAnswer from './ParagraphAnswer';
 import ChoiceAnswer from './ChoiceAnswer';
 
 const StyledTextField = withStyles({
@@ -250,9 +248,9 @@ const Comment = (props) => {
         {question.ansType === metadata.ans_type.choice && (
           <ChoiceAnswer disable={true} question={question} />
         )}
-        {question.ansType === metadata.ans_type.paragraph && (
-          <ParagraphAnswer disable={true} question={question} />
-        )}
+        {/*{question.ansType === metadata.ans_type.paragraph && (*/}
+        {/*  <ParagraphAnswer disable={true} question={question} />*/}
+        {/*)}*/}
       </div>
       <div className="comment">
         {reply && (

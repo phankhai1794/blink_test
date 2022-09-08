@@ -143,6 +143,7 @@ const AllInquiry = (props) => {
     workspace.inquiryReducer.isShowBackground,
   ]);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
+  const [questionIdSaved, setQuestionIdSaved] = useState();
 
   let CURRENT_NUMBER = 0;
 
@@ -179,15 +180,15 @@ const AllInquiry = (props) => {
     optionsInquires[editedIndex].showIconAttachAnswerFile = false;
     optionsInquires[editedIndex].showIconAttachReplyFile = false;
     dispatch(InquiryActions.setInquiries(optionsInquires));
+    setQuestionIdSaved(optionsInquires[editedIndex]);
+    setSaved(!isSaved);
   };
 
   const handleCancel = (q) => {
-    setSaved(!isSaved);
     resetActionInquiry(q);
   };
 
   const handleSetSave = (q) => {
-    setSaved(!isSaved);
     resetActionInquiry(q);
   };
 
@@ -257,8 +258,8 @@ const AllInquiry = (props) => {
 
                     <InquiryViewer
                       toggleEdit={() => toggleEdit(index)}
-                      currentQuestion={q}
-                      question={isEdit ? currentEditInq : q}
+                      currentQuestion={questionIdSaved}
+                      question={q}
                       user={props.user}
                       isSaved={isSaved}
                       isEdit={q.id === currentEditInq?.id ? q : {}}
