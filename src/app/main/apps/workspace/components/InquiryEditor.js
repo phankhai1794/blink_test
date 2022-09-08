@@ -164,6 +164,7 @@ const InquiryEditor = (props) => {
   const handleTypeChange = (e) => {
     const inq = { ...currentEditInq };
     inq.inqType = e.value;
+    if (e.__isNew__) inq.isNew = e.__isNew__
     dispatch(InquiryActions.validate({ ...valid, inqType: true }));
     const temp = valueType ? `\\b${valueType.label}\\b` : '{{INQ_TYPE}}';
     let re = new RegExp(`${temp}`, 'g');

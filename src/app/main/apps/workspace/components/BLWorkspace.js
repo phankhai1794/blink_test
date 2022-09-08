@@ -83,6 +83,7 @@ const BLWorkspace = (props) => {
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
+  const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
 
   const transAutoSaveStatus = useSelector(
     ({ workspace }) => workspace.transReducer.transAutoSaveStatus
@@ -126,7 +127,6 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-    dispatch(Actions.loadMetadata());
 
     const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) dispatch(Actions.initBL(bkgNo));
@@ -136,6 +136,10 @@ const BLWorkspace = (props) => {
       dispatch(FormActions.toggleReload());
     };
   }, []);
+
+  useEffect(() => {
+    dispatch(Actions.loadMetadata());
+  },[reload])
 
   const expandRef = useRef();
   useEffect(() => {
