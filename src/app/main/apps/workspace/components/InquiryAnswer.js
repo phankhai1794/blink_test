@@ -105,7 +105,7 @@ const InquiryAnswer = (props) => {
   };
 
  
-  const saveAttachmentAnswer = async (currentEditInq) => {
+  const saveAttachmentAnswer = async (currentEditInq, responseSelectChoice) => {
     const question = {
       inqId: currentEditInq.id,
       ansType: metadata.ans_type['attachment'],
@@ -150,6 +150,8 @@ const InquiryAnswer = (props) => {
             const answersObj = currentEditInq.answerObj;
             answersObj.forEach((item, i) => {
               answersObj[i].confirmed = false;
+              answersObj[i].updatedAt = responseSelectChoice.userAnswer.updatedAt;
+              answersObj[i].updater = responseSelectChoice.userAnswer.updater;
             });
             const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
             const answerUpdate = answersObj[answerIndex];
@@ -176,6 +178,8 @@ const InquiryAnswer = (props) => {
           const answersObj = currentEditInq.answerObj;
           answersObj.forEach((item, i) => {
             answersObj[i].confirmed = false;
+            answersObj[i].updatedAt = responseSelectChoice.userAnswer.updatedAt;
+            answersObj[i].updater = responseSelectChoice.userAnswer.updater;
           });
           const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
           const answerUpdate = answersObj[answerIndex];
@@ -193,8 +197,9 @@ const InquiryAnswer = (props) => {
   const onSave = async () => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    let responseSelectChoice;
     if (question.selectChoice) {
-      await updateInquiryChoice(question.selectChoice);
+      responseSelectChoice = await updateInquiryChoice(question.selectChoice);
     } else if (question.paragraphAnswer) {
       if (question.answerObj.length === 0) {
         const response = await createParagraphAnswer(question.paragraphAnswer);
@@ -205,13 +210,15 @@ const InquiryAnswer = (props) => {
       }
     }
     if (question.attachmentAnswer) {
-      await saveAttachmentAnswer(question);
+      await saveAttachmentAnswer(question, responseSelectChoice);
       dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
     } else {
       if (question.selectChoice) {
         const answersObj = question.answerObj;
         answersObj.forEach((item, i) => {
           answersObj[i].confirmed = false;
+          answersObj[i].updatedAt = responseSelectChoice.userAnswer.updatedAt;
+          answersObj[i].updater = responseSelectChoice.userAnswer.updater;
         });
         const answerIndex = answersObj.findIndex((item) => item.id === question.selectChoice.answer);
         const answerUpdate = answersObj[answerIndex];
