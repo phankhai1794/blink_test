@@ -24,15 +24,16 @@ services:
 
   portal-service:
     container_name: blink-portal-${ENV}
-    restart: "always"
-    working_dir: /shine/portal
+    image: blink-portal:1.1
+    restart: always
+    working_dir: /blink/portal
+    command: "./scripts/start.sh"
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file:
       - .env
     # environment:
     #   - PORT=${PORTAL_PORT}
-    image: "advanced-shine:1.0"
-    build:
-      context: .
-    command: ./scripts/start.sh # bash -c "npm i && npm run build && mv build dist && node index.js"
     volumes:
-      - ./:/shine/portal
+      - ./:/blink/portal
