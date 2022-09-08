@@ -131,7 +131,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
-  const { receiver, openInquiryReview } = props;
+  const { receiver, openInquiryReview, field } = props;
   const classes = useStyles();
   const [viewDropDown, setViewDropDown] = useState('');
   const [inqHasComment, setInqHasComment] = useState([]);
@@ -230,7 +230,7 @@ const AllInquiry = (props) => {
                       {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
                     </Typography>
 
-                    <InquiryViewer user={props.user} question={q} index={index} openInquiryReview={openInquiryReview} />
+                    <InquiryViewer user={props.user} question={q} index={index} openInquiryReview={openInquiryReview} field={field} />
                   </div>
                 </div>
                 <Divider

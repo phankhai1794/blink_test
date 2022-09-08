@@ -185,7 +185,7 @@ const BLWorkspace = (props) => {
           field: 'INQUIRY_LIST',
           showBtnSend: true,
           disableSendBtn: disableSendBtn,
-          child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries)} />
+          child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries)} field={'INQUIRY_LIST'} />
         };
       case 'ATTACHMENT_LIST':
         return {

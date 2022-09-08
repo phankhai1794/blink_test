@@ -53,6 +53,9 @@ const Inquiry = (props) => {
   const onCancel = () => {
     if (currentEditInq.id) {
       dispatch(InquiryActions.setEditInq());
+    } else {
+      dispatch(InquiryActions.setEditInq(null));
+      dispatch(FormActions.toggleCreateInquiry(false))
     }
   };
 
