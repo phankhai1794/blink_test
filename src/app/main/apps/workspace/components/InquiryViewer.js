@@ -122,7 +122,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, toggleEdit, viewGuestDropDown, showReceiver, isEdit, isSaved } = props;
+  const { index, toggleEdit, viewGuestDropDown, showReceiver, isEdit, isSaved, currentQuestion } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -176,11 +176,6 @@ const InquiryViewer = (props) => {
           lastest.creator = res[res.length - 1].creator;
           lastest.createdAt = res[res.length - 1].createdAt;
           lastest.mediaFilesAnswer = [];
-          // customer reply
-          const filterRepADraft = res.filter((r) => r.state === 'REP_A_DRF');
-          filterRepADraft.length
-            ? dispatch(InquiryActions.checkSubmit(true))
-            : dispatch(InquiryActions.checkSubmit(false));
           //
           const filterOffshoreSent = res[res.length - 1];
           if (Object.keys(filterOffshoreSent).length > 0) {
@@ -231,7 +226,7 @@ const InquiryViewer = (props) => {
           setQuestion(lastest);
           setInqHasComment(true);
         } else {
-          if ((user.role === 'Admin' ? ["ANS_SENT"] : ["ANS_SENT", "ANS_DRF", "REP_Q_DRF"]).includes(question.state)) {
+          if ((user.role === 'Admin' ? ["ANS_SENT", "COMPL", "UPLOADED"] : ["ANS_SENT", "ANS_DRF", "REP_Q_DRF", "COMPL", "UPLOADED"]).includes(question.state)) {
             let answerObj = null;
             if (question.ansType === metadata.ans_type.choice) {
               answerObj = question.answerObj.filter((item) => item.confirmed);
@@ -250,7 +245,9 @@ const InquiryViewer = (props) => {
               lastest.showIconReply = true;
               if (lastest.mediaFilesAnswer.length) lastest.mediaFile = lastest.mediaFilesAnswer;
             } else {
-              if (lastest.state === 'REP_Q_DRF') setSubmitLabel(true)
+              if (lastest.state === 'REP_Q_DRF') setSubmitLabel(true);
+              lastest.mediaFile = lastest.mediaFilesAnswer;
+              lastest.mediaFilesAnswer = [];
             }
             setQuestion(lastest);
             setInqHasComment(true);
@@ -261,11 +258,42 @@ const InquiryViewer = (props) => {
       .catch((error) => console.error(error));
   }, [isSaveComment]);
 
-  useEffect(() => {
-    if (!isReply) {
-      setSaveComment(!isSaveComment);
+  const resetAnswerActionSave = () => {
+    const quest = { ...question };
+    if (currentQuestion && currentQuestion.id === quest.id) {
+      quest.showIconReply = false;
+      quest.showIconEdit = true;
+      quest.showIconAttachAnswerFile = false;
+      quest.showIconAttachReplyFile = false;
+      let answerObj = null;
+      if (question.ansType === metadata.ans_type.choice) {
+        answerObj = quest.answerObj.filter((item) => item.confirmed);
+      } else {
+        answerObj = quest.answerObj;
+      }
+      if (answerObj.length > 0) {
+        quest.creator = answerObj[0]?.updater;
+        quest.createdAt = answerObj[0]?.updatedAt;
+        quest.content = `The updated information is "${answerObj[0]?.content}"`;
+        quest.name = "";
+        quest.answerObj = [];
+      }
+      quest.state = currentQuestion.state;
+      setType(quest.ansType);
+      if (currentQuestion.state !== 'INQ_SENT') {
+        quest.mediaFile = currentQuestion.mediaFilesAnswer;
+        quest.mediaFilesAnswer = [];
+        setInqHasComment(true);
+      } else {
+        quest.showIconReply = true;
+      }
+      setQuestion(quest);
     }
-  }, [isSaved]);
+  }
+  //
+  useEffect(() => {
+    resetAnswerActionSave()
+  }, [currentQuestion, isSaved]);
 
 
   const getField = (field) => {
@@ -291,11 +319,11 @@ const InquiryViewer = (props) => {
   }
   useEffect(() => {
     resetInquiry();
-  }, [])
+    ['INQ_SENT', 'ANS_DRF'].includes(question.state) ? setShowLabelSent(true) : setShowLabelSent(false);
+  }, []);
 
   useEffect(() => {
     question?.state !== 'OPEN' && setAllowDeleteInq(false);
-    ['INQ_SENT', 'ANS_DRF'].includes(question.state) ? setShowLabelSent(true) : setShowLabelSent(false);
   }, [question]);
 
   useEffect(() => {
@@ -520,6 +548,7 @@ const InquiryViewer = (props) => {
       optionsInquires[editedIndex].showIconAttachAnswerFile = true;
       optionsInquires[editedIndex].showIconEdit = true;
       dispatch(InquiryActions.setInquiries(optionsInquires));
+      setQuestion(q => ({ ...q, showIconReply: false, showIconAttachAnswerFile: true, showIconAttachReplyFile: false }))
       setIsReply(false);
     } else {
       // case: Reply Comment
@@ -533,29 +562,34 @@ const InquiryViewer = (props) => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
     // case: Edit Answer
+    const reply = { ...question };
+    reply.showIconEdit = false;
+    reply.showIconReply = false;
     if (['ANS_DRF', 'ANS_SENT'].includes(question.state)) {
       optionsInquires[editedIndex].showIconEdit = false;
       optionsInquires[editedIndex].showIconReply = false;
       optionsInquires[editedIndex].showIconAttachReplyFile = false;
       optionsInquires[editedIndex].showIconAttachAnswerFile = true;
       dispatch(InquiryActions.setInquiries(optionsInquires));
-      setQuestion(props.question);
+      reply.showIconAttachReplyFile = false;
+      reply.showIconAttachAnswerFile = true;
+      if (props.question.answerObj.length) reply.answerObj = props.question.answerObj;
+      reply.mediaFilesAnswer = reply.mediaFile;
+      reply.mediaFile = [];
 
     } else {
       // Edit Reply
       setIsReply(true);
       setIsResolve(false);
       setStateReplyDraft(false);
-      const reply = { ...question };
       reply.content = '';
       reply.mediaFilesAnswer = [];
       reply.mediaFile = [];
-      reply.showIconEdit = false;
-      reply.showIconReply = false;
       reply.showIconAttachReplyFile = true;
       reply.showIconAttachAnswerFile = false;
-      setQuestion(reply);
     }
+    setQuestion(reply);
+    setStateReplyDraft(false);
     setViewDropDown('');
     setInqHasComment(false);
   }
@@ -704,26 +738,26 @@ const InquiryViewer = (props) => {
             </Typography>
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
-                ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
-                (
-                  <ChoiceAnswer
-                    index={index}
-                    questions={inquiries}
-                    question={question}
-                    disable={!question.showIconAttachAnswerFile}
-                    isDisableSave={(e) => setDisableSave(e)}
-                  />
-                )}
+              ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
+              (
+                <ChoiceAnswer
+                  index={index}
+                  questions={inquiries}
+                  question={question}
+                  disable={!question.showIconAttachAnswerFile}
+                  isDisableSave={(e) => setDisableSave(e)}
+                />
+              )}
               {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
-                (
-                  <ParagraphAnswer
-                    question={question}
-                    index={index}
-                    questions={inquiries}
-                    disable={!question.showIconAttachAnswerFile}
-                    isDisableSave={(e) => setDisableSave(e)}
-                  />
-                )}
+              (
+                <ParagraphAnswer
+                  question={question}
+                  index={index}
+                  questions={inquiries}
+                  disable={!question.showIconAttachAnswerFile}
+                  isDisableSave={(e) => setDisableSave(e)}
+                />
+              )}
             </div>
             <>
               <Grid container spacing={2} alignItems="center">
@@ -779,36 +813,36 @@ const InquiryViewer = (props) => {
             </>
             {
               user.role !== 'Admin' && question.mediaFilesAnswer?.length > 0 &&
-              <>
-                {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-                {question.mediaFilesAnswer?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach
-                        file={file}
-                        field={question.field}
-                        style={{ margin: '2.5rem' }}
-                        indexMedia={mediaIndex}
-                        isAnswer={true}
-                        question={question}
-                        questions={inquiries}
-                        hiddenRemove={!question.showIconAttachAnswerFile}
-                      />
-                    ) : (
-                      <FileAttach
-                        file={file}
-                        field={question.field}
-                        indexMedia={mediaIndex}
-                        isAnswer={true}
-                        question={question}
-                        index={index}
-                        questions={inquiries}
-                        hiddenRemove={!question.showIconAttachAnswerFile}
-                      />
-                    )}
-                  </div>
-                ))}
-              </>
+                <>
+                  {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+                  {question.mediaFilesAnswer?.map((file, mediaIndex) => (
+                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                        <ImageAttach
+                          file={file}
+                          field={question.field}
+                          style={{ margin: '2.5rem' }}
+                          indexMedia={mediaIndex}
+                          isAnswer={true}
+                          question={question}
+                          questions={inquiries}
+                          hiddenRemove={!question.showIconAttachAnswerFile}
+                        />
+                      ) : (
+                        <FileAttach
+                          file={file}
+                          field={question.field}
+                          indexMedia={mediaIndex}
+                          isAnswer={true}
+                          question={question}
+                          index={index}
+                          questions={inquiries}
+                          hiddenRemove={!question.showIconAttachAnswerFile}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </>
             }
           </div>
           {question.state !== 'COMPL' && question.state !== 'UPLOADED' && (
