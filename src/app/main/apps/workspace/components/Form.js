@@ -344,6 +344,7 @@ export default function Form(props) {
     dispatch(InquiryActions.setOpenedInqForm(false));
     dispatch(FormActions.setEnableSaveInquiriesList(true));
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+    dispatch(FormActions.openConfirmPopup({openConfirmPopup: false}))
   };
   const handleChange = (_, newValue) => {
     setValue(newValue);
