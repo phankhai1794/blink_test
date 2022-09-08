@@ -15,7 +15,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
-import { submitInquiryAnswer, loadComment } from 'app/services/inquiryService';
+import { loadComment } from 'app/services/inquiryService';
 import axios from 'axios';
 
 import * as InquiryActions from "../../../main/apps/workspace/store/actions/inquiry";
@@ -211,24 +211,8 @@ function ToolbarLayout1(props) {
   }, [user, allowAccess]);
 
   const onSubmit = async () => {
-    const inqs = [...inquiries];
-    const lstInq = inqs.map((item) => {
-      if (item.answerObj && (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(item.state))
-      ) {
-        return { inquiryId: item.id, currentState: item.state };
-      }
-      return null;
-    });
-    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null) });
-    //
-    const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
-    inqs.forEach((item) => {
-      if (listIdInq.includes(item.id)) {
-        if (item.state === 'ANS_DRF') item.state = 'ANS_SENT';
-      }
-    });
-    dispatch(InquiryActions.setInquiries(inqs));
-    dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
+    dispatch(FormActions.toggleAllInquiry(true));
+    dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
   }
 
   return (
