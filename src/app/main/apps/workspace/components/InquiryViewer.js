@@ -220,6 +220,7 @@ const InquiryViewer = (props) => {
               }
             }
           }
+          
           //
           setComment([...res]);
           setType(metadata.ans_type.paragraph);
@@ -1057,9 +1058,12 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
     setValues(temp);
     setTextResolve(temp);
   };
-  return (
-    <>
-      {typeList.map((type, index) => (
+
+  const renderTB = () => {
+    let td = [];
+    while(values.length) {
+      let rowValues = values.splice(0,4);
+      td.push(typeList.map((type, index) => (
         <div key={index} style={{ display: 'flex', marginTop: 10 }}>
           <input
             className={clsx(classes.text)}
@@ -1073,19 +1077,19 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
             disabled
             defaultValue={type}
           />
-          {values.map((cd, index1) => {
+          {rowValues.map((cd, index1) => {
             const disabled = question.inqType !== getType(type);
             return (
               <input
                 className={clsx(classes.text)}
                 key={index1}
                 style={{
-                  marginLeft: 10,
+                  marginLeft: 5,
                   backgroundColor: disabled && '#FDF2F2',
                   fontSize: 15,
-                  borderTopRightRadius: index === 0 && values.length - 1 === index1 ? 8 : null,
+                  borderTopRightRadius: index === 0 && rowValues.length - 1 === index1 ? 8 : null,
                   borderBottomRightRadius:
-                    index1 === values.length - 1 && index === typeList.length - 1 ? 8 : null
+                  index1 === rowValues.length - 1 && index === typeList.length - 1 ? 8 : null
                 }}
                 disabled={disabled}
                 value={cd[getType(type)]}
@@ -1094,7 +1098,16 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
             );
           })}
         </div>
-      ))}
+      )))
+    }
+    return td;
+  };
+  
+  return (
+    <>
+      {
+        renderTB()
+      }
     </>
   );
 };
