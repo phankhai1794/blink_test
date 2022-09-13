@@ -210,7 +210,12 @@ const BLField = (props) => {
   const checkAnswerSent = () => {
     if (inquiries.length > 0) {
       const lst = inquiries.filter((q) => q.field === id);
-      return lst.some(e => ['ANS_SENT','REP_Q_DRF','REP_Q_SENT','REP_A_DRF','REP_A_SENT'].includes(e.state))
+      if (lst.length) {
+        return lst.every(e => [
+          ...['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT'], // inquiry status
+          ...['AME_SENT', 'REP_DEF', 'REP_SENT'] // draft status
+        ].includes(e.state));
+      }
     }
     return false;
   };

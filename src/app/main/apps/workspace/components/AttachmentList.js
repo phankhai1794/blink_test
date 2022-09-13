@@ -239,7 +239,7 @@ const AttachmentList = (props) => {
       combineFieldType = [
         ...combineFieldType,
         {
-          label: `${fieldOptions.label} - ${inqType.label}`,
+          label: inqType?.label ? `${fieldOptions.label} - ${inqType.label}` : `${fieldOptions.label} - AMENDMENT`,
           value: { fieldId: fieldOptions.value, inqId: e.id, inqType: e.inqType }
         }
       ];

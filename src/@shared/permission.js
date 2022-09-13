@@ -4,6 +4,7 @@ export const PERMISSION = {
   VIEW_ACCESS_BLLIST: 'view_accessBLList',
   VIEW_ACCESS_WORKSPACE: 'view_accessWorkspace',
   VIEW_ACCESS_DRAFT_BL: 'view_accessDraftBL',
+  VIEW_ACCESS_EDIT_DRAFT_BL: 'view_accessEditDraftBL',
   VIEW_SHOW_ALL_INQUIRIES: 'view_showAllInquiries',
   VIEW_SHOW_BL_HISTORY: 'view_showBLHistory',
   VIEW_SHOW_USER_MENU: 'view_showUserMenu',

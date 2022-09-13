@@ -104,7 +104,7 @@ function DialogConfirm(props) {
             variant="contained"
             onClick={() => {
               handleClose();
-              history.push(`/apps/draft-bl/edit/${myBL.id}`);
+              history.push(`/draft-bl/edit/${myBL.id}`);
             }
             }
             className='normal-case'>

@@ -98,14 +98,17 @@ const Inquiry = (props) => {
               <>
                 <div className={clsx(classes.boxItem,
                   (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-                  !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'ANS_DRF'].includes(q.state) && 'offshoreReply'
+                  [
+                    ...['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT'],
+                    ...['REP_DRF', 'REP_SENT']
+                  ].includes(q.state) && 'offshoreReply'
                 )}
                 style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
                   <InquiryViewer
                     currentQuestion={changeQuestion}
                     question={q}
                     user={props.user}
-                    showReceiver={true}
+                    showReceiver={q.process === 'pending'}
                   />
                 </div>
                 {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}

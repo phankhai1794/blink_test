@@ -1,4 +1,4 @@
-import { saveComment, loadComment, editComment, deleteComment } from 'app/services/inquiryService';
+import { saveComment, editComment, deleteComment } from 'app/services/inquiryService';
 import {
   Menu,
   MenuItem,
@@ -10,7 +10,7 @@ import {
   Divider
 } from '@material-ui/core';
 import { displayTime } from '@shared';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MoreVertIcon from '@material-ui/icons/MoreVert';

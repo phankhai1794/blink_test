@@ -24,18 +24,10 @@ export const SET_OPENED_INQ_FORM = 'SET_OPENED_INQ_FORM';
 export const SET_BACKGROUND_ATTACHMENT_LIST = 'SET_BACKGROUND_ATTACHMENT_LIST';
 export const CHECK_SUBMIT = 'CHECK_SUBMIT';
 export const CHECK_SEND = 'CHECK_SEND';
-// export const SET_INQUIRY_EDIT = 'SET_INQUIRY_EDIT';
 
 export function saveInquiry() {
   return {
     type: SAVE_INQUIRY
-  };
-}
-
-export function editInquiry(question) {
-  return {
-    type: EDIT_INQUIRY,
-    state: question
   };
 }
 
@@ -59,13 +51,6 @@ export function setInquiries(state) {
     state: state
   };
 }
-
-// export function setInquiryEdit(state) {
-//   return {
-//     type: SET_INQUIRY_EDIT,
-//     state: state
-//   };
-// }
 
 export function removeSelectedOption(state) {
   return {

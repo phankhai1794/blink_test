@@ -206,8 +206,8 @@ const OtpCheck = ({ isDraftBL, children }) => {
   };
 
   useEffect(() => {
-    const { pathname, search } = window.location;
-    const bl = new URLSearchParams(search).get('bl') || pathname.split('/')[3];
+    const { search } = window.location;
+    const bl = new URLSearchParams(search).get('bl');
     if (bl) setMyBL({ ...myBL, id: bl });
 
     let userInfo = localStorage.getItem('USER');
