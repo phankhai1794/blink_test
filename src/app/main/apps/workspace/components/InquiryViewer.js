@@ -148,7 +148,7 @@ const InquiryViewer = (props) => {
   const [isSaveComment, setSaveComment] = useState(false);
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
   const [submitLabel, setSubmitLabel] = useState(false);
-
+  const [isShowViewAll, setShowViewAll] = useState(false);
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
       setViewDropDown('');
@@ -601,20 +601,20 @@ const InquiryViewer = (props) => {
     setViewDropDown('');
     setInqHasComment(false);
   }
-
-  const isExceedMaxRow = (q) => {
-    const el = document.getElementById(q.id);
-   
+  
+  useEffect(() => {
+    const el = document.getElementById(question.id)
+    const countLine = question.content.split("\n").length
+    setShowViewAll(false);  
     if (el) {
       const oldClassName = el.className
       el.className = el.className.replace('-hideText','')
       if (el.getBoundingClientRect().height >110) {
         el.className = oldClassName
-        return true
+        setShowViewAll(true);
       }
-    }
-    return false
-  }
+    }                                                                                   
+  }, [isLoadedComment]);
 
   return (
     <>
@@ -759,7 +759,7 @@ const InquiryViewer = (props) => {
               }}>
               {question.content}
             </Typography>
-            <div style={{ display: 'block', margin: '1rem 0rem' }}>
+           <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
@@ -784,7 +784,8 @@ const InquiryViewer = (props) => {
                 <Grid item xs={6}>
                   {/*{question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}*/}
                 </Grid>
-                {(isExceedMaxRow(question) || inqHasComment) && (
+                
+                {(isShowViewAll || inqHasComment) && (
                   <Grid item xs={6}>
                     <div
                       className={classes.viewMoreBtn}
