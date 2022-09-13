@@ -1,7 +1,7 @@
-import React, {useEffect} from 'react';
-import {Button} from "@material-ui/core";
-import {useDispatch, useSelector} from "react-redux";
-import {makeStyles} from "@material-ui/core/styles";
+import React, { useEffect , useState } from 'react';
+import { Button } from "@material-ui/core";
+import { useDispatch, useSelector } from "react-redux";
+import { makeStyles } from "@material-ui/core/styles";
 import { submitInquiryAnswer } from 'app/services/inquiryService';
 
 import * as InquiryActions from "../store/actions/inquiry";
@@ -54,28 +54,51 @@ const useStyles = makeStyles((theme) => ({
 
 const PopupConfirm = (props) => {
 
-  const [openConfirmPopup, confirmPopupMsg] = useSelector(({ workspace }) => [workspace.formReducer.openConfirmPopup, workspace.formReducer.confirmPopupMsg]);
-  
+  const [openConfirmPopup, confirmPopupMsg, confirmPopupType] = useSelector(({ workspace }) => [
+    workspace.formReducer.openConfirmPopup,
+    workspace.formReducer.confirmPopupMsg,
+    workspace.formReducer.confirmPopupType
+  ]);
   const dispatch = useDispatch();
   const classes = useStyles();
+  const [popupType, setPopupType] = useState(confirmPopupType);
 
   const handleConfirm = async () => {
     dispatch(FormActions.confirmPopupClick(true))
   };
 
   const handleCancelConfirm = () => {
-    dispatch(FormActions.openConfirmPopup({openConfirmPopup: false}))
+    dispatch(FormActions.openConfirmPopup({
+      openConfirmPopup: false,
+      confirmClick: false,
+      confirmPopupMsg: '',
+      confirmPopupType: ''
+    }))
   };
+
+  const renderContent = (popupType) => {
+    return (
+      (popupType === 'warningInq') ?
+        <div className='btnConfirm'>
+          <Button variant="outlined" style={{ textTransform: 'none', fontSize: 16 }} onClick={handleCancelConfirm}>Close</Button>
+        </div> :
+        <div className='btnConfirm'>
+          <Button variant="outlined" style={{ marginRight: 15, textTransform: 'none', fontSize: 16 }} onClick={handleConfirm}>Confirm</Button>
+          <Button variant="outlined" style={{ textTransform: 'none', fontSize: 16 }} onClick={handleCancelConfirm}>Cancel</Button>
+        </div>
+    )
+  }
+
+  useEffect(() => {
+    setPopupType(confirmPopupType);
+  }, [confirmPopupType])
 
   return (
     <>
       {openConfirmPopup && (
         <div className={classes.dialogConfirm}>
           <p>{confirmPopupMsg}</p>
-          <div className='btnConfirm'>
-            <Button variant="outlined" style={{ marginRight: 15, textTransform: 'none', fontSize: 16 }} onClick={handleConfirm}>Confirm</Button>
-            <Button variant="outlined" style={{ textTransform: 'none', fontSize: 16 }} onClick={handleCancelConfirm}>Cancel</Button>
-          </div>
+          {renderContent(popupType)}
         </div>
       )}
       {openConfirmPopup && <div className={classes.backgroundConfirm}></div>}
