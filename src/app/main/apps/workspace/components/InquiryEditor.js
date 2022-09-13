@@ -236,6 +236,23 @@ const InquiryEditor = (props) => {
     }
   };
 
+  const checkDuplicateInq = () => {
+    const listInqOfField = inquiries.filter(inq => inq.field === currentEditInq.field);
+    if (listInqOfField.length) {
+      const checkDuplicate = Boolean(listInqOfField.filter(inq => (inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0])).length);
+      if (checkDuplicate) {
+        dispatch(FormActions.openConfirmPopup({
+          openConfirmPopup: true,
+          confirmPopupMsg: 'The inquiry already has sent to Customer/Onshore!',
+          confirmPopupType: 'warningInq'
+        })
+        );
+        return true;
+      }
+    }
+    return false
+  }
+
   const onSave = async () => {
     let check = true;
     const ansTypeChoice = metadata.ans_type['choice'];
@@ -307,6 +324,7 @@ const InquiryEditor = (props) => {
 
     const inquiry = inquiries.find((q) => q.id === currentEditInq.id);
     if (inquiry) {
+      if (checkDuplicateInq()) return;
       if (ansTypeChoice === currentEditInq.ansType) {
         if (currentEditInq.answerObj.length === 1) {
           dispatch(
@@ -388,6 +406,7 @@ const InquiryEditor = (props) => {
       }
     } else {
       // Create INQUIRY
+      if (checkDuplicateInq()) return;
       if (ansTypeChoice === currentEditInq.ansType) {
         if (currentEditInq.answerObj.length === 1) {
           dispatch(
