@@ -206,22 +206,22 @@ const TableCD = (props) => {
           onMouseLeave={onMouseLeave}
           className="px-8 justify-between">
           <Grid container spacing={2}>
-            <Grid container item xs={2} spacing={1}>
+            <Grid container item xs={2}>
               <Label className={clsx(classes.labelMargin)}>CONTAINER NUMBER</Label>
             </Grid>
-            <Grid container item xs={2} spacing={1}>
+            <Grid container item xs={2}>
               <Label className={clsx(classes.labelMargin)}>SEAL</Label>
             </Grid>
-            <Grid container item xs={2} spacing={1}>
+            <Grid container item xs={2}>
               <Label className={clsx(classes.labelMargin)}>TYPE</Label>
             </Grid>
-            <Grid container item xs={2} spacing={1}>
+            <Grid container item xs={2}>
               <Label className={clsx(classes.labelMargin)}>PACKAGE</Label>
             </Grid>
-            <Grid container item xs={2} spacing={1}>
+            <Grid container item xs={2}>
               <Label className={clsx(classes.labelMargin)}>WEIGHT</Label>
             </Grid>
-            <Grid container item xs={2} spacing={1}>
+            <Grid container item xs={2}>
               <Label className={clsx(classes.labelMargin)}>MEASUREMENT</Label>
             </Grid>
             {isResolved&&<CheckCircleIcon style={{paddingTop: 15, paddingLeft: 15}} className={clsx(classes.sizeIcon, classes.colorHasResolved)} />}
