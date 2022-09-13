@@ -69,6 +69,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
   const closeImageViewer = () => {
     setIsViewerOpen(false);
   };
+
   const downloadFile = () => {
     const link = document.createElement('a');
     link.href = srcUrl;
@@ -79,6 +80,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
   };
 
   const handleRemoveFile = (file) => {
+    const optionsOfQuestion = { ...currentEditInq };
     const optionsAttachmentList = [...attachmentList];
 
     if (isAnswer) {
@@ -89,7 +91,13 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
       dispatch(InquiryActions.setInquiries(optionsInquires));
     }
     else if (isReply) templateReply.mediaFiles.splice(indexMedia, 1);
-    else if (field && file.id) dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+    else if (field && file.id) {
+      const indexMedia = optionsOfQuestion.mediaFile.findIndex(
+        (f) => f.id === file.id
+      );
+      optionsOfQuestion.mediaFile.splice(indexMedia, 1);
+      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+    }
     else if (file.id) {
       // update attachment list
       for (var i = 0; i < optionsAttachmentList.length; i++) {
@@ -106,6 +114,12 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
         })
       );
       dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+    }
+    else {
+      const indexMedia = optionsOfQuestion.mediaFile.findIndex(
+        (f) => f.name === file.name
+      );
+      optionsOfQuestion.mediaFile.splice(indexMedia, 1);
     }
 
     dispatch(FormActions.setEnableSaveInquiriesList(false));
