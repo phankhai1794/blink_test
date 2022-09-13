@@ -47,12 +47,7 @@ const useStyles = makeStyles((theme) => ({
 
 const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, isReply = false, questions, question, templateReply, setAttachmentReply, draftBL = false, removeAttachmentDraftBL }) => {
   const classes = useStyles();
-  const [currentEditInq, attachmentList] =
-    useSelector(({ workspace }) => [
-      workspace.inquiryReducer.currentEditInq,
-      workspace.inquiryReducer.attachmentList,
-    ]);
-  const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
+  const attachmentList = useSelector(({ workspace }) => workspace.inquiryReducer.attachmentList);
   const dispatch = useDispatch();
 
   const urlMedia = (fileExt, file) => {
@@ -89,61 +84,35 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
     });
   };
   const handleRemoveFile = (id) => {
-    const optionsOfQuestion = { ...currentEditInq };
     const optionsAttachmentList = [...attachmentList];
+
     if (isAnswer) {
       const optionsInquires = [...questions];
       const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
       optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
       optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMedia, 1);
       dispatch(InquiryActions.setInquiries(optionsInquires));
-    } else if (isReply) {
-      templateReply.mediaFiles.splice(indexMedia, 1);
-    } else {
-      if (field && file.id) {
-        const indexMedia = optionsOfQuestion.mediaFile.findIndex(
-          (f) => f.id === file.id
-        );
-        optionsOfQuestion.mediaFile.splice(indexMedia, 1);
-        dispatch(InquiryActions.editInquiry(optionsOfQuestion));
-        // update attachment list
-        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
-
-      } else if (file.id) {
-        // update attachment list
-        for (var i = 0; i < optionsAttachmentList.length; i++) {
-          const item = optionsAttachmentList[i];
-          if (file.id && item.id == file.id) {
-            optionsAttachmentList.splice(i, 1);
-            break;
-          }
-        }
-        dispatch(
-          InquiryActions.validateAttachment({
-            field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
-            nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
-          })
-        );
-        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
-      } else {
-        // Remove attachment at local
-        if (openInquiryForm) {
-          const optionsOfQuestionLocal = { ...currentEditInq };
-          const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
-            (f) => f.name === file.name
-          );
-          optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
-          dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
-        } else {
-          const optionsOfQuestionLocal = { ...currentEditInq };
-          const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
-            (f) => f.name === file.name
-          );
-          optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
-          dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
+    }
+    else if (isReply) templateReply.mediaFiles.splice(indexMedia, 1);
+    else if (field && file.id) dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+    else if (file.id) {
+      // update attachment list
+      for (var i = 0; i < optionsAttachmentList.length; i++) {
+        const item = optionsAttachmentList[i];
+        if (file.id && item.id == file.id) {
+          optionsAttachmentList.splice(i, 1);
+          break;
         }
       }
+      dispatch(
+        InquiryActions.validateAttachment({
+          field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
+          nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
+        })
+      );
+      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
     }
+
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   }
 

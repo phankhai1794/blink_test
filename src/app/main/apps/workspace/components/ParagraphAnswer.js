@@ -22,14 +22,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ParagraphAnswer = (props) => {
-  const { disable = false, questions } = props;
-  const allowCreateParagraphAnswer = PermissionProvider({
-    action: PERMISSION.INQUIRY_ANSWER_CREATE_PARAGRAPH
-  });
+  const { questions, question, disable = false } = props;
   const allowUpdateParagraphAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
   });
-  const { question, index } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
 
@@ -48,7 +44,6 @@ const ParagraphAnswer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     optionsInquires[editedIndex].paragraphAnswer = body;
     dispatch(InquiryActions.setInquiries(optionsInquires));
-    props.isDisableSave(false);
   };
 
   useEffect(() => {

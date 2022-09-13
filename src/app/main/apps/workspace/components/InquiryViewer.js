@@ -7,13 +7,12 @@ import {
   loadComment
 } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, stateResquest, displayTime } from '@shared';
+import { getLabelById, displayTime } from '@shared';
 import {
   CONTAINER_DETAIL,
   CONTAINER_MANIFEST,
   CONTAINER_NUMBER,
   CONTAINER_SEAL,
-  CM_MARK,
   CM_PACKAGE
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -26,10 +25,8 @@ import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
 
-import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
-import { saveComment } from "../../../../services/inquiryService";
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
@@ -131,13 +128,11 @@ const InquiryViewer = (props) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-  const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [question, setQuestion] = useState(props.question);
   const [type, setType] = useState(props.question.ansType);
   const [allowDeleteInq, setAllowDeleteInq] = useState(true);
   const [viewDropDown, setViewDropDown] = useState();
-  const [isDisableSave, setDisableSave] = useState(true);
   const [inqHasComment, setInqHasComment] = useState(false);
   const [isResolve, setIsResolve] = useState(false);
   const [isReply, setIsReply] = useState(false);
@@ -334,7 +329,7 @@ const InquiryViewer = (props) => {
     if (confirmClick && confirmPopupType === 'removeInq' && indexQuestionRemove >= 0) {
       const optionsOfQuestion = [...inquiries];
       const inqDelete = optionsOfQuestion.splice(indexQuestionRemove, 1)[0];
-      const hidePopupEmpty = !Boolean(optionsOfQuestion.filter(inq => inq.field === inqDelete.field).length);
+      const hidePopupEmpty = !optionsOfQuestion.filter(inq => inq.field === inqDelete.field).length;
       deleteInquiry(inqDelete.id)
         .then(() => {
           dispatch(InquiryActions.setInquiries(optionsOfQuestion));
@@ -769,11 +764,9 @@ const InquiryViewer = (props) => {
                 ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
                   <ChoiceAnswer
-                    index={index}
                     questions={inquiries}
                     question={question}
                     disable={!question.showIconAttachAnswerFile}
-                    isDisableSave={(e) => setDisableSave(e)}
                   />
                 )}
               {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
@@ -783,7 +776,6 @@ const InquiryViewer = (props) => {
                     index={index}
                     questions={inquiries}
                     disable={!question.showIconAttachAnswerFile}
-                    isDisableSave={(e) => setDisableSave(e)}
                   />
                 )}
             </div>

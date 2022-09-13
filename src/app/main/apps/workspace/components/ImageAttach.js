@@ -79,47 +79,35 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
   };
 
   const handleRemoveFile = (file) => {
-    const inq = { ...currentEditInq };
     const optionsAttachmentList = [...attachmentList];
+
     if (isAnswer) {
       const optionsInquires = [...questions];
       const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
       optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
       optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMedia, 1);
       dispatch(InquiryActions.setInquiries(optionsInquires));
-    } else if (isReply) {
-      templateReply.mediaFiles.splice(indexMedia, 1);
-    } else {
-      if (field && file.id) {
-        const indexMedia = inq.mediaFile.findIndex((f) => f.id === file.id);
-        inq.mediaFile.splice(indexMedia, 1);
-        dispatch(InquiryActions.editInquiry(inq));
-        // update attachment list
-        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
-      } else if (file.id) {
-        // update attachment list
-        for (var i = 0; i < optionsAttachmentList.length; i++) {
-          const item = optionsAttachmentList[i];
-          if (file.id && item.id == file.id) {
-            optionsAttachmentList.splice(i, 1);
-            break;
-          }
-        }
-        dispatch(
-          InquiryActions.validateAttachment({
-            field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
-            nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
-          })
-        );
-        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
-      } else {
-        // Remove attachment at local
-        const inqLocal = { ...currentEditInq };
-        const indexMedia = inqLocal.mediaFile.findIndex((f) => f.name === file.name);
-        inqLocal.mediaFile.splice(indexMedia, 1);
-        dispatch(InquiryActions.editInquiry(inqLocal));
-      }
     }
+    else if (isReply) templateReply.mediaFiles.splice(indexMedia, 1);
+    else if (field && file.id) dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+    else if (file.id) {
+      // update attachment list
+      for (var i = 0; i < optionsAttachmentList.length; i++) {
+        const item = optionsAttachmentList[i];
+        if (file.id && item.id == file.id) {
+          optionsAttachmentList.splice(i, 1);
+          break;
+        }
+      }
+      dispatch(
+        InquiryActions.validateAttachment({
+          field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
+          nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
+        })
+      );
+      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+    }
+
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 

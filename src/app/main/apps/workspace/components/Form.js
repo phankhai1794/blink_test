@@ -196,7 +196,6 @@ export default function Form(props) {
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
 
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
-  const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
 
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const isShowBackground = useSelector(
@@ -204,73 +203,16 @@ export default function Form(props) {
   );
 
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
-  const showSaveInquiry = useSelector(({ workspace }) => workspace.formReducer.showSaveInquiry);
   const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
-  
+
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const classes = useStyles({ isFullScreen });
   const classesHover = useStyles();
   const [idBtn, setIdBtn] = useState('');
   const [checkSubmit, setCheckSubmit] = useState(true);
+  const [value, setValue] = useState(0);
 
-  useEffect(() => {
-    const temp = listMinimize.find((e) => e.field === field);
-    for (let index = 0; index < listInqMinimize.length; index++) {
-      if (index < NUMBER_INQ_BOTTOM && listInqMinimize[index] === temp.id) {
-        setOpenFab(true);
-        break;
-      }
-    }
-  }, [listInqMinimize]);
-
-  const checkValidate = (question) => {
-    if (
-      !question.inqType ||
-      !question.field ||
-      !question.receiver.length ||
-      !question.ansType ||
-      !question.content
-    ) {
-      dispatch(
-        InquiryActions.validate({
-          ...valid,
-          field: Boolean(question.field),
-          inqType: Boolean(question.inqType),
-          ansType: Boolean(question.ansType),
-          receiver: Boolean(question.receiver.length),
-          content: Boolean(question.content)
-        })
-      );
-      return false;
-    }
-    //check empty type choice
-    const typeChoice = metadata.ans_type['choice'];
-    if (typeChoice === question.ansType) {
-      if (question.answerObj.length > 0) {
-        const checkOptionEmpty = question.answerObj.filter((item) => !item.content);
-        if (checkOptionEmpty.length > 0) {
-          dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
-          return false;
-        } else {
-          dispatch(InquiryActions.validate({ ...valid, answerContent: true }));
-        }
-      } else {
-        dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
-        return false;
-      }
-    }
-    if (typeChoice === question.ansType && question.answerObj.length) {
-      const dupArray = question.answerObj.map((ans) => ans.content);
-      if (toFindDuplicates(dupArray).length) {
-        dispatch(
-          AppActions.showMessage({ message: 'Options must not be duplicated', variant: 'error' })
-        );
-        return false;
-      }
-    }
-    return true;
-  };
   const handleOpenFab = () => {
     setIdBtn(currentField);
     setOpenFab(true);
@@ -290,6 +232,7 @@ export default function Form(props) {
       setOpenFab(false);
     }
   };
+
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
   };
@@ -315,41 +258,42 @@ export default function Form(props) {
     list.splice(list.length, 0, tempInq);
   };
 
-  const [value, setValue] = useState(0);
   const handleClose = () => {
     toggleForm(false);
     setOpenFab(false);
+
     if (openAllInquiry) {
       setTimeout(() => {
         dispatch(FormActions.toggleAllInquiry(false));
       }, 400);
     }
+
     sortListClose(listMinimize, field);
     dispatch(InquiryActions.setReply(false));
     dispatch(InquiryActions.setEditInq(null));
-    if (field === 'ATTACHMENT_LIST') {
-      dispatch(FormActions.toggleReload());
-    } else {
-      // dispatch(InquiryActions.editInquiry(JSON.parse(JSON.stringify(originalInquiry))));
-    }
+
+    if (field === 'ATTACHMENT_LIST') dispatch(FormActions.toggleReload());
+
     dispatch(FormActions.toggleSaveInquiry(false));
     dispatch(InquiryActions.setOneInq({}));
-    //
+
     const currentInq = listMinimize.find((q) => q.field === field);
     if (currentInq?.id && listInqMinimize.includes(currentInq.id)) {
       const filterInq = listInqMinimize.filter((id) => id !== currentInq.id);
       dispatch(InquiryActions.setListInqMinimize(filterInq));
     }
-    //
+
     dispatch(InquiryActions.setOpenedInqForm(false));
     dispatch(FormActions.setEnableSaveInquiriesList(true));
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
     dispatch(FormActions.openConfirmPopup({openConfirmPopup: false}))
   };
+
   const handleChange = (_, newValue) => {
     setValue(newValue);
     props.tabChange(newValue);
   };
+
   const openMinimize = () => {
     dispatch(InquiryActions.setField(idBtn));
     const currentInq = listMinimize.find((q) => q.field === field);
@@ -366,7 +310,6 @@ export default function Form(props) {
     setOpenFab(status);
   };
 
-
   const sendMailClick = () => {
     toggleForm(false);
     dispatch(FormActions.toggleOpenEmail(true))
@@ -378,7 +321,17 @@ export default function Form(props) {
       setValue(0);
     }
   }, [openInqReview]);
-  
+
+  useEffect(() => {
+    const temp = listMinimize.find((e) => e.field === field);
+    for (let index = 0; index < listInqMinimize.length; index++) {
+      if (index < NUMBER_INQ_BOTTOM && listInqMinimize[index] === temp.id) {
+        setOpenFab(true);
+        break;
+      }
+    }
+  }, [listInqMinimize]);
+
   return (
     <div>
       {openFab && (
@@ -456,7 +409,7 @@ export default function Form(props) {
           }} />
           )}
 
-        <PopupConfirm/>
+        <PopupConfirm />
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
         {customActions == null && (
           <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>

@@ -144,7 +144,7 @@ function ToolbarLayout1(props) {
             setIsSubmit(isSubmit)
           }
         }).catch(err => {
-          console.log(err)
+          console.error(err)
         })
     }
   }, [enableSubmit, inquiries]);
@@ -181,8 +181,8 @@ function ToolbarLayout1(props) {
     dispatch(DraftBLActions.toggleSendNotification(true));
   }
   const redirectEditDraftBL = () => {
-    const bl = window.location.pathname.split('/')[3];
-    if (bl) history.push(`/apps/draft-bl/edit/${bl}`);
+    const bl = new URLSearchParams(search).get('bl');
+    if (bl) history.push(`/draft-bl/edit/${bl}`);
   };
 
   useEffect(() => {
@@ -269,7 +269,7 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.VIEW_EDIT_DRAFT_BL}
-              extraCondition={pathname.includes('/apps/draft-bl') && !pathname.includes('/edit')}>
+              extraCondition={pathname.includes('/draft-bl') && !pathname.includes('/edit')}>
               <Button
                 className={clsx(classes.button, classes.buttonEditDraftBL)}
                 onClick={redirectEditDraftBL}>
@@ -288,7 +288,7 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.DRAFTBL_SEND_DRAFT_AMENDMENT}
-              extraCondition={pathname.includes('/apps/draft-bl/edit')}>
+              extraCondition={pathname.includes('/draft-bl/edit')}>
               <Button
                 variant="contained"
                 className={clsx(classes.button, classes.buttonSend)}
@@ -328,7 +328,7 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
-              extraCondition={!pathname.includes('/apps/draft-bl')}>
+              extraCondition={!pathname.includes('/draft-bl')}>
               <Button
                 variant="contained"
                 className={clsx(classes.button, classes.buttonSend)}

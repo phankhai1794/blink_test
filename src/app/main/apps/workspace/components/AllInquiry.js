@@ -1,5 +1,4 @@
 import { getLabelById } from '@shared';
-import { loadComment } from 'app/services/inquiryService';
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useEffect, useState } from 'react';
 import {
@@ -223,7 +222,10 @@ const AllInquiry = (props) => {
                     classes.boxItem,
                     (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
                     inqHasComment.includes(q.id) && classes.boxHasComment,
-                    !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'ANS_DRF'].includes(q.state) && 'offshoreReply'
+                    [
+                      ...['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT'],
+                      ...['REP_DRF', 'REP_SENT']
+                    ].includes(q.state) && 'offshoreReply'
                   )}>
                   <div style={{ marginBottom: '12px' }}>
                     <Typography color="primary" variant="h5" className={classes.inqTitle}>
