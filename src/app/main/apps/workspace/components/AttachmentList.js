@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Divider, FormControl, FormHelperText, Button, LinearProgress } from '@material-ui/core';
+import { Divider, FormControl, FormHelperText, Button, LinearProgress, Tooltip } from '@material-ui/core';
 import CachedIcon from '@material-ui/icons/Cached';
 import DescriptionIcon from '@material-ui/icons/Description';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
@@ -740,9 +740,11 @@ const ImageAttachList = ({ file }) => {
   return (
     <div className={classes.root}>
       <img style={{ height: '20px', width: '20px' }} src={`/assets/images/logos/image_icon.png`} />
-      <span className={classes.fileName} onClick={downloadFile}>
-        {file.name}
-      </span>
+      <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
+        <span className={classes.fileName} onClick={downloadFile}>
+          {file.name}
+        </span>
+      </Tooltip>
       {isViewerOpen && (
         <ImageViewer
           src={images}
@@ -826,7 +828,15 @@ const FileAttachList = ({ file }) => {
             :
             <DescriptionIcon />))
       }
-      {file.ext.toLowerCase().includes("pdf") ? <span className={classes.fileName} onClick={previewPDF}>{file.name}</span> : <span className={classes.fileName} onClick={downloadFile}>{file.name}</span>}
+      {file.ext.toLowerCase().includes("pdf") ?
+        <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
+          <span className={classes.fileName} onClick={previewPDF}>{file.name}</span>
+        </Tooltip>
+        :
+        <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
+          <span className={classes.fileName} onClick={downloadFile}>{file.name}</span>
+        </Tooltip>
+      }
     </div>
   );
 };
