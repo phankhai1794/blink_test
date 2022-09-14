@@ -6,6 +6,7 @@ import {
   updateReply,
   loadComment
 } from 'app/services/inquiryService';
+import { saveEditedField, updateDraftBLReply, getCommentDraftBl } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime } from '@shared';
 import {
@@ -157,25 +158,120 @@ const InquiryViewer = (props) => {
     }
   };
   useEffect(() => {
-    loadComment(question.id)
-      .then((res) => {
-        const lastest = { ...question };
-        if (res.length > 0) {
-          res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+    setTempReply({});
+    if (question && question.process === 'pending') {
+      loadComment(question.id)
+        .then((res) => {
+          const lastest = { ...question };
+          if (res.length > 0) {
+            res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
 
-          // filter comment
-          lastest.mediaFile = res[res.length - 1].answersMedia;
-          lastest.answerObj = [{ content: res[res.length - 1].content }];
-          lastest.content = res[res.length - 1].content;
-          lastest.name = "";
-          lastest.creator = res[res.length - 1].creator;
-          lastest.createdAt = res[res.length - 1].createdAt;
-          lastest.mediaFilesAnswer = [];
-          //
-          const filterOffshoreSent = res[res.length - 1];
-          if (Object.keys(filterOffshoreSent).length > 0) {
+            // filter comment
+            lastest.mediaFile = res[res.length - 1].answersMedia;
+            lastest.answerObj = [{ content: res[res.length - 1].content }];
+            lastest.content = res[res.length - 1].content;
+            lastest.name = "";
+            lastest.creator = res[res.length - 1].creator;
+            lastest.createdAt = res[res.length - 1].createdAt;
+            lastest.mediaFilesAnswer = [];
             //
-            if (['REP_Q_DRF', 'REP_A_DRF'].includes(filterOffshoreSent.state)) {
+            const filterOffshoreSent = res[res.length - 1];
+            if (Object.keys(filterOffshoreSent).length > 0) {
+              //
+              if (['REP_Q_DRF', 'REP_A_DRF'].includes(filterOffshoreSent.state)) {
+                const reqReply = {
+                  inqAns: {
+                    inquiry: null,
+                    confirm: false,
+                    type: 'REP'
+                  },
+                  answer: {
+                    id: filterOffshoreSent.answer,
+                    content: filterOffshoreSent.content,
+                    type: metadata.ans_type['paragraph']
+                  }
+                };
+                setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
+              }
+              //
+              if (user.role === 'Admin') {
+                if (filterOffshoreSent.state === 'REP_Q_SENT') {
+                  setShowLabelSent(true)
+                } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
+                  setStateReplyDraft(true)
+                }
+                if (filterOffshoreSent.state === 'REP_A_SENT') {
+                  lastest.showIconReply = true;
+                }
+              } else {
+                if (filterOffshoreSent.state === 'REP_A_DRF') {
+                  setStateReplyDraft(true);
+                  lastest.showIconAttachReplyFile = false;
+                  lastest.showIconAttachAnswerFile = false;
+                  props.getStateReplyDraft(true);
+                  //
+                } else if (filterOffshoreSent.state === 'REP_Q_SENT') {
+                  lastest.showIconReply = true;
+                }
+                if (['REP_A_SENT'].includes(filterOffshoreSent.state)) {
+                  setSubmitLabel(true);
+                }
+              }
+            }
+            //
+            setComment([...res]);
+            setType(metadata.ans_type.paragraph);
+            setQuestion(lastest);
+            setInqHasComment(true);
+          } else {
+            if ((user.role === 'Admin' ? ["ANS_SENT", "COMPL", "UPLOADED"] : ["ANS_SENT", "ANS_DRF", "REP_Q_DRF", "COMPL", "UPLOADED"]).includes(question.state)) {
+              let answerObj = null;
+              if (question.ansType === metadata.ans_type.choice) {
+                answerObj = question.answerObj.filter((item) => item.confirmed);
+              } else {
+                answerObj = question.answerObj;
+              }
+              if (answerObj.length > 0) {
+                lastest.answerObj = [];
+                lastest.content = `The updated information is "${answerObj[0]?.content}"`;
+                lastest.name = "";
+                lastest.creator = answerObj[0]?.updater;
+                lastest.createdAt = answerObj[0]?.updatedAt;
+                setType(lastest.ansType);
+              }
+              if (user.role === 'Admin') {
+                lastest.showIconReply = true;
+                if (lastest.mediaFilesAnswer.length) lastest.mediaFile = lastest.mediaFilesAnswer;
+              } else {
+                if (lastest.state === 'REP_Q_DRF') setSubmitLabel(true);
+                lastest.mediaFile = lastest.mediaFilesAnswer;
+                lastest.mediaFilesAnswer = [];
+              }
+              setQuestion(lastest);
+              setInqHasComment(true);
+            }
+          }
+          setIsLoadedComment(true);
+        })
+        .catch((error) => console.error(error));
+    } else {
+      getCommentDraftBl(myBL.id, question.field)
+        .then((res) => {
+          const lastest = { ...question };
+          if (res.length > 0) {
+            const { content, mediaFile } = res[res.length - 1].content;
+            // filter comment
+            lastest.mediaFile = mediaFile;
+            lastest.answerObj = [{ content: content }];
+            lastest.content = content;
+            lastest.name = "";
+            lastest.mediaFilesAnswer = [];
+            lastest.id = res[res.length - 1].id;
+            lastest.state = res[res.length - 1].state;
+            lastest.process = 'draft';
+            setQuestion(lastest);
+            if (['REP_DRF'].includes(lastest.state)) {
+              setStateReplyDraft(true);
               const reqReply = {
                 inqAns: {
                   inquiry: null,
@@ -183,75 +279,39 @@ const InquiryViewer = (props) => {
                   type: 'REP'
                 },
                 answer: {
-                  id: filterOffshoreSent.answer,
-                  content: filterOffshoreSent.content,
+                  id: lastest.id,
+                  content,
                   type: metadata.ans_type['paragraph']
                 }
               };
-              setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
+              setTempReply({ ...tempReply, ...reqReply, mediaFiles: lastest.mediaFile });
             }
             //
             if (user.role === 'Admin') {
-              if (filterOffshoreSent.state === 'REP_Q_SENT') {
-                setShowLabelSent(true)
-              } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
-                setStateReplyDraft(true)
-              }
-              if (filterOffshoreSent.state === 'REP_A_SENT') {
+              if (['AME_SENT'].includes(lastest.state)) {
                 lastest.showIconReply = true;
               }
-            } else {
-              if (filterOffshoreSent.state === 'REP_A_DRF') {
-                setStateReplyDraft(true);
-                lastest.showIconAttachReplyFile = false;
-                lastest.showIconAttachAnswerFile = false;
-                props.getStateReplyDraft(true);
-                //
-              } else if (filterOffshoreSent.state === 'REP_Q_SENT') {
-                lastest.showIconReply = true;
-              }
-              if (['REP_A_SENT'].includes(filterOffshoreSent.state)) {
-                setSubmitLabel(true);
-              }
+            }
+            //
+            const comments = [];
+            res.map(r => {
+              const { content, mediaFile } = r.content;
+              comments.push({
+                creator: r.creator,
+                createdAt: r.createdAt,
+                answersMedia: mediaFile,
+                content,
+              });
+            });
+            setComment(comments)
+            if (comments.length > 1) {
+              setInqHasComment(true);
             }
           }
-          
-          //
-          setComment([...res]);
-          setType(metadata.ans_type.paragraph);
-          setQuestion(lastest);
-          setInqHasComment(true);
-        } else {
-          if ((user.role === 'Admin' ? ["ANS_SENT", "COMPL", "UPLOADED"] : ["ANS_SENT", "ANS_DRF", "REP_Q_DRF", "COMPL", "UPLOADED"]).includes(question.state)) {
-            let answerObj = null;
-            if (question.ansType === metadata.ans_type.choice) {
-              answerObj = question.answerObj.filter((item) => item.confirmed);
-            } else {
-              answerObj = question.answerObj;
-            }
-            if (answerObj.length > 0) {
-              lastest.answerObj = [];
-              lastest.content = `The updated information is "${answerObj[0]?.content}"`;
-              lastest.name = "";
-              lastest.creator = answerObj[0]?.updater;
-              lastest.createdAt = answerObj[0]?.updatedAt;
-              setType(lastest.ansType);
-            }
-            if (user.role === 'Admin') {
-              lastest.showIconReply = true;
-              if (lastest.mediaFilesAnswer.length) lastest.mediaFile = lastest.mediaFilesAnswer;
-            } else {
-              if (lastest.state === 'REP_Q_DRF') setSubmitLabel(true);
-              lastest.mediaFile = lastest.mediaFilesAnswer;
-              lastest.mediaFilesAnswer = [];
-            }
-            setQuestion(lastest);
-            setInqHasComment(true);
-          }
-        }
-        setIsLoadedComment(true);
-      })
-      .catch((error) => console.error(error));
+          setIsLoadedComment(true);
+        })
+        .catch((error) => console.error(error));
+    }
   }, [isSaveComment]);
 
   const resetAnswerActionSave = () => {
@@ -307,7 +367,7 @@ const InquiryViewer = (props) => {
     optionsInquires.forEach(op => op.showIconReply = false);
     optionsInquires.forEach(op => op.showIconAttachAnswerFile = false);
     optionsInquires.forEach(op => {
-      if (['OPEN', 'INQ_SENT'].includes(op.state)) {
+      if (['OPEN', 'INQ_SENT', 'AME_SENT'].includes(op.state)) {
         op.showIconReply = true;
       } else if (['ANS_DRF'].includes(op.state)) {
         op.showIconEdit = true;
@@ -456,6 +516,7 @@ const InquiryViewer = (props) => {
 
   const onSaveReply = async () => {
     const mediaListId = [];
+    let mediaListAmendment = [];
     const mediaRest = [];
     let mediaFilesResp;
     const optionsInquires = [...inquiries];
@@ -467,6 +528,7 @@ const InquiryViewer = (props) => {
           formData.append('files', mediaFileAns.data);
         } else {
           mediaRest.push(mediaFileAns.id);
+          mediaListAmendment.push({ id: mediaFileAns.id, ext: mediaFileAns.ext, name: mediaFileAns.name })
         }
       });
       if (formData.get('files')) mediaFilesResp = await uploadFile(formData);
@@ -475,67 +537,103 @@ const InquiryViewer = (props) => {
         response.forEach((file) => {
           const media = { id: file.id };
           mediaListId.push(media);
+          //
+          mediaListAmendment.push({ id: file.id, ext: file.ext, name: file.name });
         });
       }
     }
-    // Add
-    if (!tempReply.answer?.id) {
-      const reqReply = {
-        inqAns: tempReply.inqAns,
-        answer: tempReply.answer,
-        mediaFiles: mediaListId
-      };
-      saveReply({ ...reqReply })
-        .then((res) => {
-          //
-          let stateUpdate;
-          if (user.role === 'Admin') {
-            optionsInquires[editedIndex].state = 'REP_Q_DRF';
-            stateUpdate = 'REP_Q_DRF';
-          } else {
-            optionsInquires[editedIndex].state = 'REP_A_DRF';
-            stateUpdate = 'REP_A_DRF';
-          }
-          setQuestion((q) => ({ ...q, state: stateUpdate }));
-          dispatch(InquiryActions.setInquiries(optionsInquires));
-          setSaveComment(!isSaveComment);
-          //
-          dispatch(InquiryActions.checkSend(true));
-          dispatch(
-            AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
+    if (question.process === 'pending') {
+      // Add
+      if (!tempReply.answer?.id) {
+        const reqReply = {
+          inqAns: tempReply.inqAns,
+          answer: tempReply.answer,
+          mediaFiles: mediaListId
+        };
+        saveReply({ ...reqReply })
+          .then((res) => {
+            //
+            let stateUpdate;
+            if (user.role === 'Admin') {
+              optionsInquires[editedIndex].state = 'REP_Q_DRF';
+              stateUpdate = 'REP_Q_DRF';
+            } else {
+              optionsInquires[editedIndex].state = 'REP_A_DRF';
+              stateUpdate = 'REP_A_DRF';
+            }
+            optionsInquires[editedIndex].process = 'pending';
+            setQuestion((q) => ({ ...q, state: stateUpdate, process: 'pending' }));
+            dispatch(InquiryActions.setInquiries(optionsInquires));
+            setSaveComment(!isSaveComment);
+            //
+            dispatch(InquiryActions.checkSend(true));
+            dispatch(
+              AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
+            );
+          }).catch((error) =>
+            dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
           );
-        }).catch((error) =>
-          dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-        );
+      } else {
+        // Edit
+        const reqReply = {
+          content: tempReply.answer.content,
+          mediaFiles: mediaListId.map(media => media.id),
+          mediaRest
+        };
+        updateReply(tempReply.answer.id, { ...reqReply })
+          .then((res) => {
+            //
+            let stateUpdate;
+            if (user.role === 'Admin') {
+              optionsInquires[editedIndex].state = 'REP_Q_DRF';
+              stateUpdate = 'REP_Q_DRF';
+            } else {
+              optionsInquires[editedIndex].state = 'REP_A_DRF';
+              stateUpdate = 'REP_A_DRF';
+            }
+            optionsInquires[editedIndex].process = 'pending';
+            setQuestion((q) => ({ ...q, state: stateUpdate, process: 'pending' }));
+            dispatch(InquiryActions.setInquiries(optionsInquires));
+            setSaveComment(!isSaveComment);
+            //
+            dispatch(InquiryActions.checkSend(true));
+            dispatch(
+              AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
+            );
+          }).catch((error) =>
+            dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
+          );
+      }
     } else {
-      // Edit
-      const reqReply = {
-        content: tempReply.answer.content,
-        mediaFiles: mediaListId.map(media => media.id),
-        mediaRest
-      };
-      updateReply(tempReply.answer.id, { ...reqReply })
-        .then((res) => {
+      // Add
+      if (!tempReply.answer?.id) {
+        const reqReply = {
+          field: question.field,
+          content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
+          mybl: myBL.id
+        };
+        saveEditedField({...reqReply}).then(() => {
           //
-          let stateUpdate;
           if (user.role === 'Admin') {
-            optionsInquires[editedIndex].state = 'REP_Q_DRF';
-            stateUpdate = 'REP_Q_DRF';
+            optionsInquires[editedIndex].state = 'REP_DRF';
           } else {
-            optionsInquires[editedIndex].state = 'REP_A_DRF';
-            stateUpdate = 'REP_A_DRF';
+            optionsInquires[editedIndex].state = 'AME_DRF';
           }
-          setQuestion((q) => ({ ...q, state: stateUpdate }));
+          optionsInquires[editedIndex].process = 'draft';
           dispatch(InquiryActions.setInquiries(optionsInquires));
           setSaveComment(!isSaveComment);
-          //
-          dispatch(InquiryActions.checkSend(true));
-          dispatch(
-            AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
-          );
-        }).catch((error) =>
-          dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
+          dispatch(AppAction.showMessage({ message: 'Edit field successfully', variant: 'success' }));
+        }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
         );
+      } else {
+        const reqReply = {
+          content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
+        };
+        updateDraftBLReply({...reqReply}, tempReply.answer?.id).then(() => {
+          setSaveComment(!isSaveComment);
+          dispatch(AppAction.showMessage({ message: 'Edit field successfully', variant: 'success' }));
+        }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })))
+      }
     }
     setIsReply(false)
   }
@@ -561,7 +659,7 @@ const InquiryViewer = (props) => {
     } else {
       // case: Reply Comment
       setIsReply(true);
-      if (inqHasComment) setQuestion(q => ({ ...q, showIconReply: false, showIconAttachAnswerFile: false, showIconAttachReplyFile: true }))
+      setQuestion(q => ({ ...q, showIconReply: false, showIconAttachAnswerFile: false, showIconAttachReplyFile: true }));
     }
   };
 
@@ -601,11 +699,11 @@ const InquiryViewer = (props) => {
     setViewDropDown('');
     setInqHasComment(false);
   }
-  
+
   useEffect(() => {
     const el = document.getElementById(question.id)
     const countLine = question.content.split("\n").length
-    setShowViewAll(false);  
+    setShowViewAll(false);
     if (el) {
       const oldClassName = el.className
       el.className = el.className.replace('-hideText','')
@@ -613,8 +711,42 @@ const InquiryViewer = (props) => {
         el.className = oldClassName
         setShowViewAll(true);
       }
-    }                                                                                   
+    }
   }, [isLoadedComment]);
+
+  const renderBtnReply = () => {
+    if (question.process === 'pending') {
+      return (
+        <PermissionProvider
+          action={PERMISSION.INQUIRY_CREATE_REPLY}
+          extraCondition={user.role === "Admin" && (inqHasComment) && question.showIconReply}
+        >
+          <Button
+            variant="contained"
+            classes={{ root: clsx(classes.button, 'w120', 'reply') }}
+            color="primary"
+            onClick={onReply}>
+          Reply
+          </Button>
+        </PermissionProvider>
+      )
+    } else {
+      return (
+        <PermissionProvider
+          action={PERMISSION.DRAFTBL_CREATE_REPLY}
+          extraCondition={user.role === "Admin" && question.showIconReply}
+        >
+          <Button
+            variant="contained"
+            classes={{ root: clsx(classes.button, 'w120', 'reply') }}
+            color="primary"
+            onClick={onReply}>
+              Reply
+          </Button>
+        </PermissionProvider>
+      )
+    }
+  }
 
   return (
     <>
@@ -784,7 +916,7 @@ const InquiryViewer = (props) => {
                 <Grid item xs={6}>
                   {/*{question.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}*/}
                 </Grid>
-                
+
                 {(isShowViewAll || inqHasComment) && (
                   <Grid item xs={6}>
                     <div
@@ -1002,18 +1134,9 @@ const InquiryViewer = (props) => {
                           Resolve
                         </Button>
                       </PermissionProvider>
-                      <PermissionProvider
-                        action={PERMISSION.INQUIRY_CREATE_REPLY}
-                        extraCondition={user.role === "Admin" && (inqHasComment) && question.showIconReply}
-                      >
-                        <Button
-                          variant="contained"
-                          classes={{ root: clsx(classes.button, 'w120', 'reply') }}
-                          color="primary"
-                          onClick={onReply}>
-                          Reply
-                        </Button>
-                      </PermissionProvider>
+                      {/*//*/}
+                      {renderBtnReply()}
+                      {/*//*/}
                     </div>
                   )}
                 </>
