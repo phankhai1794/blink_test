@@ -1,7 +1,7 @@
 import { FuseChipSelect } from '@fuse';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getLabelById, stateResquest, toFindDuplicates } from '@shared';
+import { getLabelById, toFindDuplicates } from '@shared';
 import {
   FormControl,
   FormControlLabel,
@@ -11,9 +11,7 @@ import {
   RadioGroup,
   Divider,
   Grid,
-  TextField,
-  Tooltip,
-  IconButton
+  TextField
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -133,13 +131,8 @@ const InquiryEditor = (props) => {
     metadata.field_options.filter((v) => currentEditInq.field === v.value)[0]
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
-  const [allowDeleteInq, setAllowDeleteInq] = useState(true);
 
-  useEffect(() => {
-    myBL?.state !== stateResquest && setAllowDeleteInq(false);
-  }, []);
-
-  const styles = (valid, width) => {
+  const styles = (width) => {
     return {
       control: {
         width: `${width}px`,
@@ -177,6 +170,7 @@ const InquiryEditor = (props) => {
   const handleFieldChange = (e) => {
     const inq = { ...currentEditInq };
     inq.field = e.value;
+    inq.inqType = '';
     dispatch(InquiryActions.validate({ ...valid, field: true }));
     setFieldValue(e);
     setValueType(null);
@@ -219,21 +213,6 @@ const InquiryEditor = (props) => {
     dispatch(InquiryActions.validate({ ...valid, receiver: true }));
     optionsOfQuestion.receiver.push(e.target.value);
     dispatch(InquiryActions.setEditInq(optionsOfQuestion));
-  };
-
-  const removeQuestion = () => {
-    if (currentEditInq.id) {
-      const optionsOfQuestion = [...inquiries];
-      const index = optionsOfQuestion.findIndex((q) => q.id === currentEditInq.id);
-      const inqDelete = optionsOfQuestion.splice(index, 1)[0];
-      deleteInquiry(inqDelete.id)
-        .then(() => {
-          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-        })
-        .catch((error) => console.error(error));
-    } else {
-      dispatch(InquiryActions.setEditInq());
-    }
   };
 
   const checkDuplicateInq = () => {
@@ -500,7 +479,7 @@ const InquiryEditor = (props) => {
             <Grid item xs={4}>
               <FormControl error={!valid.field}>
                 <FuseChipSelect
-                  customStyle={styles(valid.field, fullscreen ? 320 : 295)}
+                  customStyle={styles(fullscreen ? 320 : 295)}
                   value={fieldValue}
                   onChange={handleFieldChange}
                   placeholder="Select Field Type"
@@ -521,7 +500,7 @@ const InquiryEditor = (props) => {
               <FormControl error={!valid.inqType}>
                 <FuseChipSelect
                   value={valueType}
-                  customStyle={styles(valid.inqType, fullscreen ? 330 : 295)}
+                  customStyle={styles(fullscreen ? 330 : 295)}
                   onChange={handleTypeChange}
                   placeholder="Type of Inquiry"
                   textFieldProps={{
@@ -541,7 +520,7 @@ const InquiryEditor = (props) => {
               <FormControl error={!valid.ansType}>
                 <FuseChipSelect
                   value={valueAnsType}
-                  customStyle={styles(valid.ansType, fullscreen ? 330 : 295)}
+                  customStyle={styles(fullscreen ? 330 : 295)}
                   onChange={handleAnswerTypeChange}
                   placeholder="Type of Question"
                   textFieldProps={{
