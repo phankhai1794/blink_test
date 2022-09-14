@@ -21,6 +21,8 @@ import clsx from "clsx";
 
 import * as InquiryActions from "../store/actions/inquiry";
 
+import PDFViewer from './PDFViewer';
+
 const attachmentStyle = makeStyles(() => ({
   root: {
     position: 'relative',
@@ -781,6 +783,8 @@ const useStylesFile = makeStyles((theme) => ({
 }));
 const FileAttachList = ({ file }) => {
   const classes = useStylesFile();
+  const [view, setView] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState(null)
 
   const downloadFile = () => {
     getFile(file.id).then((f) => {
@@ -797,10 +801,14 @@ const FileAttachList = ({ file }) => {
       console.error(error);
     });
   }
+  const handleClose = () => {
+    setView(false)
+  }
 
   const previewPDF = () => {
     getFile(file.id).then((f) => {
-      window.open(urlMedia(file.ext, f));
+      setPdfUrl(urlMedia(file.ext, f));
+      setView(true)
     }).catch((error) => {
       console.error(error);
     });
@@ -808,6 +816,7 @@ const FileAttachList = ({ file }) => {
 
   return (
     <div className={classes.root}>
+      <PDFViewer view={view} handleClose={handleClose} pdfUrl={pdfUrl} name={file.name} />
       {file.ext.toLowerCase().includes("pdf") ?
         <img style={{ height: '25px', width: '25px' }} src={`/assets/images/logos/pdf_icon.png`} />
         :
