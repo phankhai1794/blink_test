@@ -31,7 +31,8 @@ export const PERMISSION = {
   INQUIRY_ADD_MEDIA: 'inquiry_addMedia',
   INQUIRY_SUBMIT_INQUIRY_ANSWER: 'inquiry_submitInquiryAnswer',
   DRAFTBL_SEND_DRAFT_AMENDMENT: 'draftbl_sendDraftAmendment',
-  DRAFTBL_CONFIRM_DRAFT_BL: 'draftbl_confirmDraftBl'
+  DRAFTBL_CONFIRM_DRAFT_BL: 'draftbl_confirmDraftBl',
+  DRAFTBL_CREATE_REPLY: 'draftbl_saveEditedField'
 };
 
 export const PermissionProvider = ({

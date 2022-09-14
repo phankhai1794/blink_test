@@ -6,6 +6,11 @@ export async function saveEditedField(body) {
   return response.data;
 }
 
+export async function updateDraftBLReply(body, id) {
+  const response = await axios().patch(`${PATH}/reply/${id}`, body);
+  return response.data;
+}
+
 export async function sendEditedField(blId) {
   const response = await axios().patch(`${PATH}/send/${blId}`);
   return response.data;
@@ -18,5 +23,10 @@ export async function getFieldContent(blId) {
 
 export async function confirmDraftBl(id) {
   const response = await axios().patch(`${PATH}/confirm/${id}`);
+  return response.data;
+}
+
+export async function getCommentDraftBl(blId, field) {
+  const response = await axios().get(`${PATH}/getComment/${blId}/${field}`);
   return response.data;
 }

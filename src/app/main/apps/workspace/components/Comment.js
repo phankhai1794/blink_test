@@ -225,67 +225,71 @@ const Comment = (props) => {
 
   return (
     <div className={classes.root}>
-      <div style={{ paddingTop: 10 }} className="flex justify-between">
-        <UserInfo
-          name={question.creator.userName}
-          time={displayTime(question.createdAt)}
-          avatar={question.creator.avatar}
-        />
-      </div>
-      <Typography variant="h5">{question.name}</Typography>
-      <Typography
-        variant="h5"
-        style={{
-          wordBreak: 'break-word',
-          fontFamily: 'Montserrat',
-          fontSize: 15,
-          color: '#132535',
-          whiteSpace: 'pre-wrap'
-        }}>
-        {question.content}
-      </Typography>
-      <div style={{ display: 'block', margin: '1rem 0rem' }}>
-        {question.ansType === metadata.ans_type.choice && (
-          <ChoiceAnswer disable={true} question={question} />
-        )}
-        {/*{question.ansType === metadata.ans_type.paragraph && (*/}
-        {/*  <ParagraphAnswer disable={true} question={question} />*/}
-        {/*)}*/}
-      </div>
-      <div className="comment">
-        {reply && (
-          <StyledTextField
-            id="outlined-helperText"
-            label="Comment here"
-            value={value}
-            variant="outlined"
-            onKeyPress={addComment}
-            onChange={changeValue}
-          />
-        )}
-      </div>
-      {question.mediaFile?.length > 0 &&
-        question.mediaFile?.map((file, mediaIndex) => (
-          <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-            {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-              <ImageAttach
-                file={file}
-                hiddenRemove={true}
-                field={question.field}
-                indexInquiry={0}
-                style={{ margin: '2.5rem' }}
+      {question.process === 'pending' && (
+        <>
+          <div style={{ paddingTop: 10 }} className="flex justify-between">
+            <UserInfo
+              name={question.creator.userName}
+              time={displayTime(question.createdAt)}
+              avatar={question.creator.avatar}
+            />
+          </div>
+          <Typography variant="h5">{question.name}</Typography>
+          <Typography
+            variant="h5"
+            style={{
+              wordBreak: 'break-word',
+              fontFamily: 'Montserrat',
+              fontSize: 15,
+              color: '#132535',
+              whiteSpace: 'pre-wrap'
+            }}>
+            {question.content}
+          </Typography>
+          <div style={{ display: 'block', margin: '1rem 0rem' }}>
+            {question.ansType === metadata.ans_type.choice && (
+              <ChoiceAnswer disable={true} question={question} />
+            )}
+            {/*{question.ansType === metadata.ans_type.paragraph && (*/}
+            {/*  <ParagraphAnswer disable={true} question={question} />*/}
+            {/*)}*/}
+          </div>
+          <div className="comment">
+            {reply && (
+              <StyledTextField
+                id="outlined-helperText"
+                label="Comment here"
+                value={value}
+                variant="outlined"
+                onKeyPress={addComment}
+                onChange={changeValue}
               />
-            ) : (
-              <FileAttach hiddenRemove={true} file={file} field={question.field} indexInquiry={0} />
             )}
           </div>
-        ))}
-      <Divider className="mt-12" />
-      {answer && (
-        <div style={{ paddingTop: '10px' }}>
-          {contentUI({ ...answer })}
+          {question.mediaFile?.length > 0 &&
+          question.mediaFile?.map((file, mediaIndex) => (
+            <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+              {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                <ImageAttach
+                  file={file}
+                  hiddenRemove={true}
+                  field={question.field}
+                  indexInquiry={0}
+                  style={{ margin: '2.5rem' }}
+                />
+              ) : (
+                <FileAttach hiddenRemove={true} file={file} field={question.field} indexInquiry={0} />
+              )}
+            </div>
+          ))}
           <Divider className="mt-12" />
-        </div>
+          {answer && (
+            <div style={{ paddingTop: '10px' }}>
+              {contentUI({ ...answer })}
+              <Divider className="mt-12" />
+            </div>
+          )}
+        </>
       )}
 
       <div style={{ paddingTop: '10px' }}>

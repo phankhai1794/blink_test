@@ -32,9 +32,10 @@ export const loadMetadata = () => async (dispatch) => {
 
 export const loadInquiry = (myBL_Id) => async (dispatch) => {
   try {
-    const resInq = await getInquiryById(myBL_Id);
-    let resDraft = await getFieldContent(myBL_Id);
-    resDraft = resDraft.filter(res => res.state !== 'AME_DRF');
+    const [resInq, resDraft] = [
+      await getInquiryById(myBL_Id),
+      await getFieldContent(myBL_Id)
+    ];
 
     resInq.forEach(res => res.process = 'pending');
     resDraft.forEach(res => res.process = 'draft');
@@ -46,7 +47,21 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
           inq.answerObj?.length && inq.answerObj?.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
       );
     });
-    dispatch(setInquiries(JSON.parse(JSON.stringify([...resInq, ...resDraft]))));
+    //
+    const lastestCommentDraft = [];
+    const merge = [...new Set(resDraft.map(d => d.field))];
+    merge.forEach(m => {
+      const filterLastestComment = [];
+      filterLastestComment.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      resDraft.forEach(r => {
+        if (m === r.field) {
+          filterLastestComment.push(r);
+        }
+      });
+      lastestCommentDraft.push(filterLastestComment[0]);
+    });
+
+    dispatch(setInquiries(JSON.parse(JSON.stringify([...resInq, ...lastestCommentDraft]))));
 
     const field_list = [...resInq.map((e) => e.field), ...resDraft.map((e) => e.field)];
     dispatch(saveField(field_list));
