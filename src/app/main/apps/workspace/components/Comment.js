@@ -64,10 +64,8 @@ const useStyles = makeStyles(() => ({
 const Comment = (props) => {
   const dispatch = useDispatch();
   const { question, comment, userType } = props;
-
   const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length -1) : []);
   const [value, setValue] = useState('');
-  const [answer, setAnswer] = useState(null);
   const [key, setKey] = useState();
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState('');
@@ -81,24 +79,6 @@ const Comment = (props) => {
   const user = useSelector(({ user }) => user);
   const open = Boolean(anchorEl);
 
-  useEffect(() => {
-    let answerObj = null;
-    if (question.ansType === metadata.ans_type.choice) {
-      answerObj = question.answerObj.filter((item) => item.confirmed);
-    } else {
-      answerObj = question.answerObj;
-    }
-    if (answerObj.length > 0 &&comment.length >0 ) {
-      setAnswer({
-        id: answerObj[0]?.id,
-        content: `The updated information is "${answerObj[0]?.content}"`,
-        userName: answerObj[0]?.updater.userName || '',
-        avatar: answerObj[0]?.updater.avatar || '',
-        createdAt: answerObj[0]?.updatedAt,
-        media: question.mediaFilesAnswer || []
-      });
-    }
-  }, []);
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -283,12 +263,6 @@ const Comment = (props) => {
             </div>
           ))}
           <Divider className="mt-12" />
-          {answer && (
-            <div style={{ paddingTop: '10px' }}>
-              {contentUI({ ...answer })}
-              <Divider className="mt-12" />
-            </div>
-          )}
         </>
       )}
 
