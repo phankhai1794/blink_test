@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DescriptionIcon from '@material-ui/icons/Description';
 import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
@@ -9,6 +9,8 @@ import { getFile } from 'app/services/fileService';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
+
+import PDFViewer from './PDFViewer';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -53,6 +55,8 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
   ]);
   
   const dispatch = useDispatch();
+  const [view, setView] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState(null)
 
   const urlMedia = (fileExt, file) => {
     if (fileExt.toLowerCase().match(/jpeg|jpg|png/g)) {
@@ -82,11 +86,16 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
 
   const previewPDF = () => {
     getFile(file.id).then((f) => {
-      window.open(urlMedia(file.ext, f));
+      setPdfUrl(urlMedia(file.ext, f));
+      setView(true)
     }).catch((error) => {
       console.error(error);
     });
   };
+
+  const handleClose = () => {
+    setView(false)
+  }
 
   const handleRemoveFile = (id) => {
     const optionsOfQuestion = { ...currentEditInq };
@@ -138,7 +147,7 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
     <div className={classes.root}>
       <div style={{ height: 126, textAlign: 'center' }}>
         {file.ext.toLowerCase().includes('pdf') ? (
-          <img src={`/assets/images/logos/pdf_icon.png`} />
+          <img src={`/assets/images/logos/pdf_icon.png`} onClick={previewPDF}/>
         ) : file.ext.toLowerCase().match(/csv|xls|xlsx|excel|sheet/g) ? (
           <img src={`/assets/images/logos/excel_icon.png`} />
         ) : file.ext.toLowerCase().match(/doc|msword/g) ? (
@@ -147,6 +156,8 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
           <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} fontSize='large' />
         )}
       </div>
+      <PDFViewer view={view} handleClose={handleClose} pdfUrl={pdfUrl} name={file.name} />
+
       <div style={{ display: 'flex', flexDirection: 'row', height: 30 }}>
         <h3
           style={{ width: hiddenRemove ? 180 : 160 }}
