@@ -28,7 +28,7 @@ const PreviewDraftBL = () => {
   };
 
   const redirectDraftBL = () => {
-    const bl = myBL.id;
+    const bl = myBL.id || window.location.pathname.split('/')[3];
     if (bl) history.push(`/draft-bl?bl=${bl}`);
   };
 
