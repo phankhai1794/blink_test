@@ -291,6 +291,9 @@ const InquiryViewer = (props) => {
               if (['AME_SENT'].includes(lastest.state)) {
                 lastest.showIconReply = true;
               }
+              if (['REP_SENT'].includes(lastest.state)) {
+                setShowLabelSent(true);
+              }
             }
             //
             const comments = [];

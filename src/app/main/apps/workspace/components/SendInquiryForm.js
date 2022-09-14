@@ -7,7 +7,6 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { getMail } from 'app/services/mailService';
-import { loadComment } from 'app/services/inquiryService';
 
 import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
@@ -32,7 +31,6 @@ const SendInquiryForm = (props) => {
     workspace.mailReducer.error,
     workspace.mailReducer.suggestMails,
     workspace.mailReducer.validateMail,
-
   ]);
   const [isCustomerCc, setIsCustomerCc] = useState(false);
   const [isCustomerBcc, setIsCustomerBcc] = useState(false);
@@ -127,11 +125,14 @@ const SendInquiryForm = (props) => {
       dispatch(Actions.showMessage({ message: 'Please fill to Customer or Onshore fields', variant: 'error' }));
     }
     else {
-      inquiries.forEach(q => { if (q.state === 'OPEN') q.state = 'INQ_SENT' });
-      dispatch(InquiryActions.setInquiries(inquiries));
-      //
+      const cloneInquiries = [...inquiries];
+      cloneInquiries.forEach(q => {
+        if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
+        else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
+      });
       dispatch({ type: mailActions.SENDMAIL_LOADING });
-      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form, inquiries }));
+      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form, inquiries: cloneInquiries }));
+      dispatch(InquiryActions.setInquiries(cloneInquiries));
     }
   };
 
@@ -243,7 +244,7 @@ const SendInquiryForm = (props) => {
               }}
               multiline="true"
               type="text"
-              defaultValue= {form.content}
+              defaultValue={form.content}
               onChange={handleOnChange}></textarea>
           </div>
         </>
