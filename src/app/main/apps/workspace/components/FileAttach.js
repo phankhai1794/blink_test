@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import DescriptionIcon from '@material-ui/icons/Description';
 import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
-import { IconButton } from '@material-ui/core';
+import { IconButton, Tooltip } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from "@shared/permission";
 import { getFile } from 'app/services/fileService';
@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
       cursor: 'pointer',
       whiteSpace: 'nowrap',
       overflow: 'hidden',
-
+      textOverflow: 'ellipsis',
     },
     '& h3:hover': {
       color: '#0000ee'
@@ -53,7 +53,7 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
     workspace.inquiryReducer.attachmentList,
     workspace.inquiryReducer.currentEditInq,
   ]);
-  
+
   const dispatch = useDispatch();
   const [view, setView] = useState(false)
   const [pdfUrl, setPdfUrl] = useState(null)
@@ -147,7 +147,7 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
     <div className={classes.root}>
       <div style={{ height: 126, textAlign: 'center' }}>
         {file.ext.toLowerCase().includes('pdf') ? (
-          <img src={`/assets/images/logos/pdf_icon.png`} onClick={previewPDF}/>
+          <img src={`/assets/images/logos/pdf_icon.png`} onClick={previewPDF} />
         ) : file.ext.toLowerCase().match(/csv|xls|xlsx|excel|sheet/g) ? (
           <img src={`/assets/images/logos/excel_icon.png`} />
         ) : file.ext.toLowerCase().match(/doc|msword/g) ? (
@@ -159,12 +159,14 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
       <PDFViewer view={view} handleClose={handleClose} pdfUrl={pdfUrl} name={file.name} />
 
       <div style={{ display: 'flex', flexDirection: 'row', height: 30 }}>
-        <h3
-          style={{ width: hiddenRemove ? 180 : 160 }}
-          onClick={file.ext.toLowerCase().includes('pdf') ? previewPDF : downloadFile}
-        >
-          {file.name}
-        </h3>
+        <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
+          <h3
+            style={{ width: hiddenRemove ? 180 : 160 }}
+            onClick={file.ext.toLowerCase().includes('pdf') ? previewPDF : downloadFile}
+          >
+            {file.name}
+          </h3>
+        </Tooltip>
         {isAnswer && (
           !hiddenRemove && (
             <PermissionProvider
