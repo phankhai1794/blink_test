@@ -237,7 +237,10 @@ const InquiryEditor = (props) => {
   };
 
   const checkDuplicateInq = () => {
-    const listInqOfField = inquiries.filter(inq => inq.field === currentEditInq.field);
+    const listInqOfField = [...inquiries.filter(inq => inq.field === currentEditInq.field)];
+    if (currentEditInq.id) {
+      listInqOfField.splice(listInqOfField.findIndex(inq => inq.id === currentEditInq.id), 1);
+    }
     if (listInqOfField.length) {
       const checkDuplicate = Boolean(listInqOfField.filter(inq => (inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0])).length);
       if (checkDuplicate) {
