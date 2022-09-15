@@ -39,8 +39,9 @@ export const loadContent = (bl) => (dispatch) => {
 export const loadDraftContent = (bl) => (dispatch) => {
   getFieldContent(bl)
     .then((res) => {
-      const data = res.map(({ state, content, field, createdAt, creator, mediaFile }) => {
+      const data = res.map(({ id, state, content, field, createdAt, creator, mediaFile }) => {
         return {
+          id,
           state,
           field,
           createdAt,
