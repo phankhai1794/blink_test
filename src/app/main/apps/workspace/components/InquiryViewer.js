@@ -260,14 +260,17 @@ const InquiryViewer = (props) => {
           const lastest = { ...question };
           if (res.length > 0) {
             const { content, mediaFile } = res[res.length - 1].content;
+            const lastestComment = res[res.length - 1];
             // filter comment
             lastest.mediaFile = mediaFile;
             lastest.answerObj = [{ content: content }];
             lastest.content = content;
             lastest.name = "";
             lastest.mediaFilesAnswer = [];
-            lastest.id = res[res.length - 1].id;
-            lastest.state = res[res.length - 1].state;
+            lastest.id = lastestComment.id;
+            lastest.state = lastestComment.state;
+            lastest.createdAt = lastestComment.createdAt;
+            lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
             setQuestion(lastest);
             if (['REP_DRF'].includes(lastest.state)) {
@@ -894,7 +897,7 @@ const InquiryViewer = (props) => {
               }}>
               {question.content}
             </Typography>
-           <div style={{ display: 'block', margin: '1rem 0rem' }}>
+            <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
