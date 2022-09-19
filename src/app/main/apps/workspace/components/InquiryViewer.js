@@ -150,6 +150,7 @@ const InquiryViewer = (props) => {
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
   const [submitLabel, setSubmitLabel] = useState(false);
   const [isShowViewAll, setShowViewAll] = useState(false);
+
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
       setViewDropDown('');
@@ -157,6 +158,7 @@ const InquiryViewer = (props) => {
       setViewDropDown(id);
     }
   };
+
   useEffect(() => {
     setTempReply({});
     if (question && question.process === 'pending') {
@@ -259,12 +261,12 @@ const InquiryViewer = (props) => {
         .then((res) => {
           const lastest = { ...question };
           if (res.length > 0) {
-            const { content, mediaFile } = res[res.length - 1].content;
+            const { content: contentField, mediaFile } = res[res.length - 1].content;
             const lastestComment = res[res.length - 1];
             // filter comment
             lastest.mediaFile = mediaFile;
-            lastest.answerObj = [{ content: content }];
-            lastest.content = content;
+            lastest.answerObj = [{ content: contentField }];
+            lastest.content = ["AME_DRF", "AME_SENT"].includes(lastestComment.state) ? `The update information is "${contentField}"` : contentField;
             lastest.name = "";
             lastest.mediaFilesAnswer = [];
             lastest.id = lastestComment.id;
@@ -283,7 +285,7 @@ const InquiryViewer = (props) => {
                 },
                 answer: {
                   id: lastest.id,
-                  content,
+                  content: contentField,
                   type: metadata.ans_type['paragraph']
                 }
               };
@@ -299,20 +301,23 @@ const InquiryViewer = (props) => {
               }
             }
             //
-            const comments = [];
+            const comments = [{
+              creator: { userName: user.displayName, avatar: null },
+              createdAt: res[0].createdAt,
+              answersMedia: [],
+              content: `The information is "${content[lastest.field]}"`
+            }];
             res.map(r => {
               const { content, mediaFile } = r.content;
               comments.push({
                 creator: r.creator,
                 createdAt: r.createdAt,
                 answersMedia: mediaFile,
-                content,
+                content: ["AME_DRF", "AME_SENT"].includes(r.state) ? `The update information is "${content}"` : content,
               });
             });
-            setComment(comments)
-            if (comments.length > 1) {
-              setInqHasComment(true);
-            }
+            setComment(comments);
+            setInqHasComment(true);
           }
           setIsLoadedComment(true);
         })
@@ -618,7 +623,7 @@ const InquiryViewer = (props) => {
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
           mybl: myBL.id
         };
-        saveEditedField({...reqReply}).then(() => {
+        saveEditedField({ ...reqReply }).then(() => {
           //
           if (user.role === 'Admin') {
             optionsInquires[editedIndex].state = 'REP_DRF';
@@ -635,7 +640,7 @@ const InquiryViewer = (props) => {
         const reqReply = {
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
         };
-        updateDraftBLReply({...reqReply}, tempReply.answer?.id).then(() => {
+        updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
           dispatch(AppAction.showMessage({ message: 'Edit field successfully', variant: 'success' }));
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })))
@@ -707,14 +712,13 @@ const InquiryViewer = (props) => {
   }
 
   useEffect(() => {
-    const el = document.getElementById(question.id)
-    const countLine = question.content.split("\n").length
+    const el = document.getElementById(question.id);
     setShowViewAll(false);
     if (el) {
-      const oldClassName = el.className
-      el.className = el.className.replace('-hideText','')
-      if (el.getBoundingClientRect().height >110) {
-        el.className = oldClassName
+      const oldClassName = el.className;
+      el.className = el.className.replace('-hideText', '')
+      if (el.getBoundingClientRect().height > 110) {
+        el.className = oldClassName;
         setShowViewAll(true);
       }
     }
@@ -732,7 +736,7 @@ const InquiryViewer = (props) => {
             classes={{ root: clsx(classes.button, 'w120', 'reply') }}
             color="primary"
             onClick={onReply}>
-          Reply
+            Reply
           </Button>
         </PermissionProvider>
       )
@@ -747,7 +751,7 @@ const InquiryViewer = (props) => {
             classes={{ root: clsx(classes.button, 'w120', 'reply') }}
             color="primary"
             onClick={onReply}>
-              Reply
+            Reply
           </Button>
         </PermissionProvider>
       )
@@ -887,7 +891,7 @@ const InquiryViewer = (props) => {
             <Typography
               className={viewDropDown !== question.id ? classes.hideText : ''}
               variant="h5"
-              id ={question.id}
+              id={question.id}
               style={{
                 wordBreak: 'break-word',
                 fontFamily: 'Montserrat',
@@ -1183,8 +1187,8 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
 
   const renderTB = () => {
     let td = [];
-    while(values.length) {
-      let rowValues = values.splice(0,4);
+    while (values.length) {
+      let rowValues = values.splice(0, 4);
       td.push(typeList.map((type, index) => (
         <div key={index} style={{ display: 'flex', marginTop: 10 }}>
           <input
@@ -1211,7 +1215,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
                   fontSize: 15,
                   borderTopRightRadius: index === 0 && rowValues.length - 1 === index1 ? 8 : null,
                   borderBottomRightRadius:
-                  index1 === rowValues.length - 1 && index === typeList.length - 1 ? 8 : null
+                    index1 === rowValues.length - 1 && index === typeList.length - 1 ? 8 : null
                 }}
                 disabled={disabled}
                 value={cd[getType(type)]}
@@ -1224,7 +1228,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
     }
     return td;
   };
-  
+
   return (
     <>
       {
