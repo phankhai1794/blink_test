@@ -178,7 +178,8 @@ const TableCM = (props) => {
               {!mediaFileIsEmpty && <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />}
               < HelpIcon className={clsx(classes.colorHasInqIcon)} />
             </>
-            : (allowAddInquiry &&<AddCircleIcon className={(showIcons ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon))}/> )):<></>
+            : (allowAddInquiry &&<AddCircleIcon className={(showIcons ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon))}/> )
+          ):<><CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)}/></>
         }
       </div>
       <div className={clsx(!questionIsEmpty ? classes.hasInq : classes.enterTableFile, hasAnswer ? classes.hasAnswer : '',
@@ -197,12 +198,11 @@ const TableCM = (props) => {
             <Label className={clsx(classes.labelMargin)}>DESCRIPTION OF GOODS</Label>
           </Grid>
           <Grid container item xs={2} spacing={1}>
-            <Label className={clsx(classes.labelMargin)}>GROSS WEIGHT</Label>
+            <Label className={clsx(classes.labelMargin)} style={{paddingLeft:'20%'}}>GROSS WEIGHT</Label>
           </Grid>
           <Grid container item xs={2} spacing={1}>
             <Label className={clsx(classes.labelMargin)}>GROSS MEASUREMENT</Label>
           </Grid>
-          {isResolved&&<CheckCircleIcon style={{paddingTop: 15, paddingLeft: 15}} className={clsx(classes.sizeIcon, classes.colorHasResolved)} />}
           {containerManifest?.length > 0 ?
             containerManifest.map((cm, index) =>
               (<Grid container spacing={2} className='px-8 py-2' key={index}>
