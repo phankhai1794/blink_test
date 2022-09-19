@@ -142,10 +142,8 @@ const InquiryViewer = (props) => {
   const [textResolve, setTextResolve] = useState(content[question.field] || '');
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
-  const [confirmClick, confirmPopupType] = useSelector(({ workspace }) => [
-    workspace.formReducer.confirmClick,
-    workspace.formReducer.confirmPopupType
-  ]);
+  const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
+  const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const [isSaveComment, setSaveComment] = useState(false);
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
   const [submitLabel, setSubmitLabel] = useState(false);
@@ -1187,8 +1185,9 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
 
   const renderTB = () => {
     let td = [];
-    while (values.length) {
-      let rowValues = values.splice(0, 4);
+    const valueCopy = JSON.parse(JSON.stringify(values));
+    while (valueCopy.length) {
+      let rowValues = valueCopy.splice(0, 4);
       td.push(typeList.map((type, index) => (
         <div key={index} style={{ display: 'flex', marginTop: 10 }}>
           <input
