@@ -88,9 +88,19 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: '1rem',
     backgroundColor: '#FDF2F2'
   },
-  labelMargin: {
+  labelMarginFirstContainer: {
     marginTop: '0.6rem !important',
-    padding: '4px'
+    paddingLeft: '10%',
+    display: 'flex',
+    textAlign: 'center',
+    alignItems: 'center'
+  },
+  labelMarginOtherContainer: {
+    marginTop: '0.6rem !important',
+    paddingLeft: '30%',
+    display: 'flex',
+    textAlign: 'center',
+    alignItems: 'center'
   },
   attachIcon: {
     transform: 'rotate(45deg)',
@@ -191,7 +201,7 @@ const TableCD = (props) => {
                 }
               />
             )
-          )): <></>}
+          )): <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)}/>}
       </div>
       <div
         className={clsx(
@@ -207,24 +217,23 @@ const TableCD = (props) => {
           className="px-8 justify-between">
           <Grid container spacing={2}>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)}>CONTAINER NUMBER</Label>
+              <Label className={clsx(classes.labelMarginFirstContainer)}>CONTAINER NUMBER</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)}>SEAL</Label>
+              <Label className={clsx(classes.labelMarginOtherContainer)}>SEAL</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)}>TYPE</Label>
+              <Label className={clsx(classes.labelMarginOtherContainer)}>TYPE</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)}>PACKAGE</Label>
+              <Label className={clsx(classes.labelMarginOtherContainer)}>PACKAGE</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)}>WEIGHT</Label>
+              <Label className={clsx(classes.labelMarginOtherContainer)}>WEIGHT</Label>
             </Grid>
-            <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)}>MEASUREMENT</Label>
+            <Grid container item xs={1}>
+              <Label className={clsx(classes.labelMarginOtherContainer)}>MEASUREMENT</Label>
             </Grid>
-            {isResolved&&<CheckCircleIcon style={{paddingTop: 15, paddingLeft: 15}} className={clsx(classes.sizeIcon, classes.colorHasResolved)} />}
             {containerDetail?.length > 0 ? (
               containerDetail.map((cd, index) => (
                 <Grid container spacing={2} className="px-8 py-2" key={index}>
