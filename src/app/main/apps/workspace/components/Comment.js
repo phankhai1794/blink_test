@@ -141,7 +141,7 @@ const Comment = (props) => {
     setAnchorEl(null);
   };
 
-  const contentUI = ({ userName, createdAt, avatar, content, media, id }) => {
+  const contentUI = ({ userName, createdAt, avatar, content,title, media, id }) => {
     return (
       <>
         <div className="comment-detail" key={id}>
@@ -175,7 +175,7 @@ const Comment = (props) => {
             )}
           </div>
           <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-            {content}
+            {title?`${title} "${content}"`: content }
           </div>
           <div className="attachment-reply">
             {media?.length > 0 &&
@@ -272,6 +272,7 @@ const Comment = (props) => {
             userName: k.creator.userName,
             createdAt: k.createdAt,
             avatar: k.creator.avatar,
+            title:  k.title||'',
             content: k.content,
             media: k.answersMedia,
             id
