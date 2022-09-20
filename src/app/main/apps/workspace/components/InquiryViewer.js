@@ -163,7 +163,7 @@ const InquiryViewer = (props) => {
       loadComment(question.id)
         .then((res) => {
           const lastest = { ...question };
-          if (res.length > 0) {
+          if (res.length > 1) {
             res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
 
             // filter comment
