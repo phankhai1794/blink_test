@@ -88,19 +88,11 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: '1rem',
     backgroundColor: '#FDF2F2'
   },
-  labelMarginFirstContainer: {
+  labelMargin: {
     marginTop: '0.6rem !important',
-    paddingLeft: '10%',
     display: 'flex',
-    textAlign: 'center',
-    alignItems: 'center'
-  },
-  labelMarginOtherContainer: {
-    marginTop: '0.6rem !important',
-    paddingLeft: '30%',
-    display: 'flex',
-    textAlign: 'center',
-    alignItems: 'center'
+    textAlign: 'left',
+    alignItems: 'left'
   },
   attachIcon: {
     transform: 'rotate(45deg)',
@@ -217,22 +209,22 @@ const TableCD = (props) => {
           className="px-8 justify-between">
           <Grid container spacing={2}>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMarginFirstContainer)}>CONTAINER NUMBER</Label>
+              <Label className={clsx(classes.labelMargin)}>CONTAINER NUMBER</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMarginOtherContainer)}>SEAL</Label>
+              <Label className={clsx(classes.labelMargin)}>SEAL</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMarginOtherContainer)}>TYPE</Label>
+              <Label className={clsx(classes.labelMargin)}>TYPE</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMarginOtherContainer)}>PACKAGE</Label>
+              <Label className={clsx(classes.labelMargin)}>PACKAGE</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMarginOtherContainer)}>WEIGHT</Label>
+              <Label className={clsx(classes.labelMargin)}>WEIGHT</Label>
             </Grid>
             <Grid container item xs={1}>
-              <Label className={clsx(classes.labelMarginOtherContainer)}>MEASUREMENT</Label>
+              <Label className={clsx(classes.labelMargin)}>MEASUREMENT</Label>
             </Grid>
             {containerDetail?.length > 0 ? (
               containerDetail.map((cd, index) => (
