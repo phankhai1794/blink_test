@@ -1,7 +1,7 @@
 import * as Actions from 'app/store/actions';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Icon, Button, Grid } from '@material-ui/core';
+import { Icon, Button, Grid, Tabs, Tab } from '@material-ui/core';
 import clsx from 'clsx';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles } from '@material-ui/styles';
@@ -15,9 +15,31 @@ import * as InquiryActions from "../store/actions/inquiry";
 import TagsInput from './TagsInput';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
-import ReceiverProvider from './ReceiverProvider';
 
 const colorBtnReview = '#1564EE';
+const useStyles = makeStyles(() => ({
+  tab: {
+    fontFamily: 'Montserrat',
+    textTransform: 'none',
+    fontSize: '18px',
+    minWidth: 120
+  },
+  label: {
+    whiteSpace: 'nowrap',
+    color: '#132535',
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Montserrat'
+  },
+  buttonProgress: {
+    color: 'red',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12
+  }
+}))
 
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
@@ -49,6 +71,9 @@ const SendInquiryForm = (props) => {
   });
 
   const [form, setForm] = useState(initialState);
+  const [tabValue, setTabValue] = useState('customer')
+  const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
+  const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
 
   const isFormValid = () => {
     return form.toCustomer || form.toOnshore;
@@ -130,8 +155,19 @@ const SendInquiryForm = (props) => {
         if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
         else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
       });
+      const formClone = JSON.parse(JSON.stringify(form));
+      if (tabValue === 'onshore' || (tabValue === 'customer' && !hasCustomer)) {
+        formClone.toCustomer = ''
+        formClone.toCustomerCc = ''
+        formClone.toCustomerBcc = ''
+      }
+      else if (tabValue === 'customer') {
+        formClone.toOnshore = ''
+        formClone.toOnshoreCc = ''
+        formClone.toOnshoreBcc = ''
+      }
       dispatch({ type: mailActions.SENDMAIL_LOADING });
-      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form, inquiries: cloneInquiries }));
+      dispatch(mailActions.sendMail({ myblId: mybl.id, ...formClone, inquiries: cloneInquiries }));
       dispatch(InquiryActions.setInquiries(cloneInquiries));
     }
   };
@@ -148,17 +184,66 @@ const SendInquiryForm = (props) => {
     setForm({ ...form, subject: event.target.value })
   };
 
-  const useStyles = makeStyles(() => ({
-    label: {
-      whiteSpace: 'nowrap',
-      color: '#132535',
-      fontSize: 14,
-      fontWeight: '600',
-      fontFamily: 'Montserrat'
-    }
-  }));
+  const handleTabChange = (_, newValue) => {
+    setTabValue(newValue)
+  }
 
-  const classes = useStyles(props);
+  const classes = useStyles();
+  const ToCustomer = () =>
+    <>
+      <InputUI
+        id="toCustomer"
+        title="To Customer"
+        isCc={isCustomerCc}
+        isBcc={isCustomerBcc}
+        onCc={() => {
+          setIsCustomerCc(!isCustomerCc);
+        }}
+        onBcc={() => {
+          setIsCustomerBcc(!isCustomerBcc);
+        }}
+        onChanged={handleFieldChange}
+      />
+      {isCustomerCc && <InputUI id="toCustomerCc" title="Cc" onChanged={handleFieldChange} />}
+      {isCustomerBcc && (
+        <InputUI id="toCustomerBcc" title="Bcc" onChanged={handleFieldChange} />
+      )}
+    </>
+
+  const ToOnshore = () =>
+    <>
+      <InputUI
+        id="toOnshore"
+        title="To Onshore"
+        isCc={isOnshoreCc}
+        isBcc={isOnshoreBcc}
+        onCc={() => {
+          setIsOnshoreCc(!isOnshoreCc);
+        }}
+        onBcc={() => {
+          setIsOnshoreBcc(!isOnshoreBcc);
+        }}
+        onChanged={handleFieldChange}
+      />
+      {isOnshoreCc && <InputUI id="toOnshoreCc" title="Cc" onChanged={handleFieldChange} />}
+      {isOnshoreBcc && <InputUI id="toOnshoreBcc" title="Bcc" onChanged={handleFieldChange} />}
+    </>
+
+
+  const ToReceiver = () => {
+    if (hasCustomer && hasOnshore) {
+      return tabValue === 'customer' ? ToCustomer() : ToOnshore()
+    }
+    else if (hasCustomer) {
+      return ToCustomer()
+    }
+    else if (hasOnshore) {
+      return ToOnshore()
+    }
+    else {
+      return null
+    }
+  }
   return (
     <>
       <Form
@@ -172,43 +257,29 @@ const SendInquiryForm = (props) => {
         }
         FabTitle="E-mail">
         <>
-          <ReceiverProvider receiver='customer'>
-            <InputUI
-              id="toCustomer"
-              title="To Customer"
-              isCc={isCustomerCc}
-              isBcc={isCustomerBcc}
-              onCc={() => {
-                setIsCustomerCc(!isCustomerCc);
-              }}
-              onBcc={() => {
-                setIsCustomerBcc(!isCustomerBcc);
-              }}
-              onChanged={handleFieldChange}
-            />
-            {isCustomerCc && <InputUI id="toCustomerCc" title="Cc" onChanged={handleFieldChange} />}
-            {isCustomerBcc && (
-              <InputUI id="toCustomerBcc" title="Bcc" onChanged={handleFieldChange} />
-            )}
-          </ReceiverProvider>
-          <ReceiverProvider receiver='onshore'>
-            <InputUI
-              id="toOnshore"
-              title="To Onshore"
-              isCc={isOnshoreCc}
-              isBcc={isOnshoreBcc}
-              onCc={() => {
-                setIsOnshoreCc(!isOnshoreCc);
-              }}
-              onBcc={() => {
-                setIsOnshoreBcc(!isOnshoreBcc);
-              }}
-              onChanged={handleFieldChange}
-            />
-            {isOnshoreCc && <InputUI id="toOnshoreCc" title="Cc" onChanged={handleFieldChange} />}
-            {isOnshoreBcc && <InputUI id="toOnshoreBcc" title="Bcc" onChanged={handleFieldChange} />}
-          </ReceiverProvider>
-          <div style={{ display: 'flex', marginTop: 10 }}>
+          {ToReceiver()}
+          {hasCustomer && hasOnshore &&
+            <div style={{ borderBottom: '2px solid #515F6B', marginBottom: 20 }}>
+              <Tabs
+                indicatorColor="primary"
+                value={tabValue}
+                onChange={handleTabChange}
+                textColor='primary'
+              >
+                <Tab
+                  className={classes.tab}
+                  value='customer'
+                  label="Customer"
+                />
+                <Tab
+                  className={classes.tab}
+                  value='onshore'
+                  label="Onshore"
+                />
+              </Tabs>
+            </div>
+          }
+          <div style={{ marginTop: 10 }}>
             <label className={clsx(classes.label)}>Subject</label>
           </div>
           <div style={{ marginTop: 5, display: 'flex' }}>
@@ -228,14 +299,16 @@ const SendInquiryForm = (props) => {
               onChange={onInputChange}
             />
           </div>
-          <div style={{ marginTop: 5, display: 'flex' }}>
+          <div style={{ marginTop: 10 }}>
+            <label className={clsx(classes.label)}>Body</label>
+          </div>
+          <div style={{ display: 'flex' }}>
             <textarea
               style={{
                 width: '100%',
-                paddingTop: 10,
-                paddingLeft: 5,
+                padding: 10,
                 marginTop: 10,
-                minHeight: 250,
+                minHeight: 200,
                 borderWidth: '0.5px',
                 borderStyle: 'solid',
                 borderColor: 'lightgray',
@@ -304,34 +377,14 @@ const InquiryReview = (props) => {
   );
 };
 
-const useStyles = makeStyles((theme) => ({
-  buttonProgress: {
-    color: 'red',
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginTop: -12,
-    marginLeft: -12
-  }
-}));
-
 const InputUI = (props) => {
   const { id, title, type, onChanged, isCc, isBcc, onCc, onBcc } = props;
-  const useStyles = makeStyles(() => ({
-    label: {
-      whiteSpace: 'nowrap',
-      color: '#132535',
-      fontSize: 14,
-      fontWeight: '600',
-      fontFamily: 'Montserrat'
-    }
-  }));
-  const classes = useStyles(props);
+  const classes = useStyles();
   return (
     <Grid
       container
       direction="row"
-      style={{ marginTop: 8, alignItems: 'center', justifyContent: "flex-start" }}>
+      style={{ alignItems: 'center', justifyContent: "flex-start" }}>
       <Grid item xs={1}>
         {title === 'Cc' || title === 'Bcc' ? (
           <div
