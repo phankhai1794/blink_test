@@ -24,7 +24,7 @@ services:
 
   portal-service:
     container_name: blink-portal-${ENV}
-    image: blink-portal:1.1
+    image: blink-portal:1.2
     restart: always
     working_dir: /blink/portal
     command: "./scripts/start.sh"
