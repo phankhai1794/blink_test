@@ -1100,6 +1100,9 @@ const InquiryViewer = (props) => {
                               indexMedia={mediaIndex}
                               isReply={true}
                               templateReply={tempReply}
+                              setTemplateReply={(val) => {
+                                setTempReply(val)
+                              }}
                             />
                           ) : (
                             <FileAttach
@@ -1109,6 +1112,9 @@ const InquiryViewer = (props) => {
                               indexMedia={mediaIndex}
                               isReply={true}
                               templateReply={tempReply}
+                              setTemplateReply={(val) => {
+                                setTempReply(val)
+                              }}
                             />
                           )}
                         </div>
