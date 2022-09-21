@@ -110,3 +110,8 @@ export async function submitInquiryAnswer(state) {
   const response = await axios().post(`${PATH}/submitAnswer`, state);
   return response.data;
 }
+
+export async function reOpenInquiry(id) {
+  const response = await axios().patch(`${PATH}/${id}/reOpen`);
+  return response.data;
+}
