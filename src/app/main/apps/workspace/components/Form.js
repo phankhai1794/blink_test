@@ -128,7 +128,7 @@ const useStyles = makeStyles(() => ({
   },
   dialogContent: {
     margin: 'auto',
-    marginTop: '2rem',
+    marginTop: '1rem',
     backgroundColor: 'white',
     position: 'relative',
     width: (props) => (props.isFullScreen ? '1200px' : '900px')
