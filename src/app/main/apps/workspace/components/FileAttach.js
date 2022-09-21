@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import DescriptionIcon from '@material-ui/icons/Description';
 import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
-import { IconButton } from '@material-ui/core';
+import { IconButton, Tooltip } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from "@shared/permission";
 import { getFile } from 'app/services/fileService';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
+
+import PDFViewer from './PDFViewer';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
       cursor: 'pointer',
       whiteSpace: 'nowrap',
       overflow: 'hidden',
-
+      textOverflow: 'ellipsis',
     },
     '& h3:hover': {
       color: '#0000ee'
@@ -47,13 +49,14 @@ const useStyles = makeStyles((theme) => ({
 
 const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, isReply = false, questions, question, templateReply, setAttachmentReply, draftBL = false, removeAttachmentDraftBL }) => {
   const classes = useStyles();
-  const [currentEditInq, attachmentList] =
-    useSelector(({ workspace }) => [
-      workspace.inquiryReducer.currentEditInq,
-      workspace.inquiryReducer.attachmentList,
-    ]);
-  const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
+  const [attachmentList, currentEditInq] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.attachmentList,
+    workspace.inquiryReducer.currentEditInq,
+  ]);
+
   const dispatch = useDispatch();
+  const [view, setView] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState(null)
 
   const urlMedia = (fileExt, file) => {
     if (fileExt.toLowerCase().match(/jpeg|jpg|png/g)) {
@@ -83,67 +86,60 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
 
   const previewPDF = () => {
     getFile(file.id).then((f) => {
-      window.open(urlMedia(file.ext, f));
+      setPdfUrl(urlMedia(file.ext, f));
+      setView(true)
     }).catch((error) => {
       console.error(error);
     });
   };
+
+  const handleClose = () => {
+    setView(false)
+  }
+
   const handleRemoveFile = (id) => {
     const optionsOfQuestion = { ...currentEditInq };
     const optionsAttachmentList = [...attachmentList];
+
     if (isAnswer) {
       const optionsInquires = [...questions];
       const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
       optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
       optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMedia, 1);
       dispatch(InquiryActions.setInquiries(optionsInquires));
-    } else if (isReply) {
-      templateReply.mediaFiles.splice(indexMedia, 1);
-    } else {
-      if (field && file.id) {
-        const indexMedia = optionsOfQuestion.mediaFile.findIndex(
-          (f) => f.id === file.id
-        );
-        optionsOfQuestion.mediaFile.splice(indexMedia, 1);
-        dispatch(InquiryActions.editInquiry(optionsOfQuestion));
-        // update attachment list
-        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
-
-      } else if (file.id) {
-        // update attachment list
-        for (var i = 0; i < optionsAttachmentList.length; i++) {
-          const item = optionsAttachmentList[i];
-          if (file.id && item.id == file.id) {
-            optionsAttachmentList.splice(i, 1);
-            break;
-          }
-        }
-        dispatch(
-          InquiryActions.validateAttachment({
-            field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
-            nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
-          })
-        );
-        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
-      } else {
-        // Remove attachment at local
-        if (openInquiryForm) {
-          const optionsOfQuestionLocal = { ...currentEditInq };
-          const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
-            (f) => f.name === file.name
-          );
-          optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
-          dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
-        } else {
-          const optionsOfQuestionLocal = { ...currentEditInq };
-          const indexMedia = optionsOfQuestionLocal.mediaFile.findIndex(
-            (f) => f.name === file.name
-          );
-          optionsOfQuestionLocal.mediaFile.splice(indexMedia, 1);
-          dispatch(InquiryActions.editInquiry(optionsOfQuestionLocal));
+    }
+    else if (isReply) templateReply.mediaFiles.splice(indexMedia, 1);
+    else if (field && file.id) {
+      const indexMedia = optionsOfQuestion.mediaFile.findIndex(
+        (f) => f.id === file.id
+      );
+      optionsOfQuestion.mediaFile.splice(indexMedia, 1);
+      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+    }
+    else if (file.id) {
+      // update attachment list
+      for (var i = 0; i < optionsAttachmentList.length; i++) {
+        const item = optionsAttachmentList[i];
+        if (file.id && item.id == file.id) {
+          optionsAttachmentList.splice(i, 1);
+          break;
         }
       }
+      dispatch(
+        InquiryActions.validateAttachment({
+          field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
+          nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
+        })
+      );
+      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
     }
+    else {
+      const indexMedia = optionsOfQuestion.mediaFile.findIndex(
+        (f) => f.name === file.name
+      );
+      optionsOfQuestion.mediaFile.splice(indexMedia, 1);
+    }
+
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   }
 
@@ -151,22 +147,26 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
     <div className={classes.root}>
       <div style={{ height: 126, textAlign: 'center' }}>
         {file.ext.toLowerCase().includes('pdf') ? (
-          <img src={`/assets/images/logos/pdf_icon.png`} />
+          <img src={`/assets/images/logos/pdf_icon.png`} onClick={previewPDF} />
         ) : file.ext.toLowerCase().match(/csv|xls|xlsx|excel|sheet/g) ? (
           <img src={`/assets/images/logos/excel_icon.png`} />
-        ) : file.ext.toLowerCase().match(/doc/g) ? (
+        ) : file.ext.toLowerCase().match(/doc|msword/g) ? (
           <img src={`/assets/images/logos/word_icon.png`} />
         ) : (
           <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} fontSize='large' />
         )}
       </div>
+      <PDFViewer view={view} handleClose={handleClose} pdfUrl={pdfUrl} name={file.name} />
+
       <div style={{ display: 'flex', flexDirection: 'row', height: 30 }}>
-        <h3
-          style={{ width: hiddenRemove ? 180 : 160 }}
-          onClick={file.ext.toLowerCase().includes('pdf') ? previewPDF : downloadFile}
-        >
-          {file.name}
-        </h3>
+        <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
+          <h3
+            style={{ width: hiddenRemove ? 180 : 160 }}
+            onClick={file.ext.toLowerCase().includes('pdf') ? previewPDF : downloadFile}
+          >
+            {file.name}
+          </h3>
+        </Tooltip>
         {isAnswer && (
           !hiddenRemove && (
             <PermissionProvider

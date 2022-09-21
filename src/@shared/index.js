@@ -70,6 +70,7 @@ export const COUNTRIES = [
   }
 ];
 
-// state inquiry
-
-export const REP_Q_DRAFT = 'REP_Q_DRF';
+export const sentStatus = [
+  ...['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT'], // inquiry status
+  ...['REP_SENT'] // draft status
+];

@@ -1,7 +1,6 @@
-import { getLabelById } from '@shared';
-import { loadComment } from 'app/services/inquiryService';
+import { getLabelById, sentStatus } from '@shared';
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   Typography,
@@ -131,7 +130,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
-  const { receiver, openInquiryReview } = props;
+  const { receiver, openInquiryReview, field } = props;
   const classes = useStyles();
   const [viewDropDown, setViewDropDown] = useState('');
   const [inqHasComment, setInqHasComment] = useState([]);
@@ -143,6 +142,7 @@ const AllInquiry = (props) => {
     workspace.inquiryReducer.isShowBackground,
   ]);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
+  const [questionIdSaved, setQuestionIdSaved] = useState();
 
   let CURRENT_NUMBER = 0;
 
@@ -179,15 +179,15 @@ const AllInquiry = (props) => {
     optionsInquires[editedIndex].showIconAttachAnswerFile = false;
     optionsInquires[editedIndex].showIconAttachReplyFile = false;
     dispatch(InquiryActions.setInquiries(optionsInquires));
+    setQuestionIdSaved(optionsInquires[editedIndex]);
+    setSaved(!isSaved);
   };
 
   const handleCancel = (q) => {
-    setSaved(!isSaved);
     resetActionInquiry(q);
   };
 
   const handleSetSave = (q) => {
-    setSaved(!isSaved);
     resetActionInquiry(q);
   };
 
@@ -222,14 +222,14 @@ const AllInquiry = (props) => {
                     classes.boxItem,
                     (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
                     inqHasComment.includes(q.id) && classes.boxHasComment,
-                    !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'ANS_DRF'].includes(q.state) && 'offshoreReply'
+                    sentStatus.includes(q.state) && 'offshoreReply'
                   )}>
                   <div style={{ marginBottom: '12px' }}>
                     <Typography color="primary" variant="h5" className={classes.inqTitle}>
                       {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
                     </Typography>
 
-                    <InquiryViewer user={props.user} question={q} index={index} openInquiryReview={openInquiryReview} />
+                    <InquiryViewer user={props.user} question={q} index={index} openInquiryReview={openInquiryReview} field={field} />
                   </div>
                 </div>
                 <Divider
@@ -242,7 +242,7 @@ const AllInquiry = (props) => {
           } else {
             const isEdit = currentEditInq && q.id === currentEditInq.id;
             return (
-              <>
+              <div key={index}>
                 <div
                   className={clsx(
                     classes.boxItem,
@@ -257,8 +257,8 @@ const AllInquiry = (props) => {
 
                     <InquiryViewer
                       toggleEdit={() => toggleEdit(index)}
-                      currentQuestion={q}
-                      question={isEdit ? currentEditInq : q}
+                      currentQuestion={questionIdSaved}
+                      question={q}
                       user={props.user}
                       isSaved={isSaved}
                       isEdit={q.id === currentEditInq?.id ? q : {}}
@@ -266,11 +266,11 @@ const AllInquiry = (props) => {
                       getStateReplyDraft={(val) => setStateReplyDraft(val)}
                     />
                     {(q.showIconAttachAnswerFile) && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT' || getStateReplyDraft) &&
-                    <InquiryAnswer
-                      onCancel={() => handleCancel(q)}
-                      setSave={() => handleSetSave(q)}
-                      question={q}
-                    />}
+                      <InquiryAnswer
+                        onCancel={() => handleCancel(q)}
+                        setSave={() => handleSetSave(q)}
+                        question={q}
+                      />}
                   </div>
                 </div>
                 <Divider
@@ -278,7 +278,7 @@ const AllInquiry = (props) => {
                   variant="middle"
                   style={{ height: '2px', color: '#BAC3CB' }}
                 />
-              </>
+              </div>
             );
           }
         })}

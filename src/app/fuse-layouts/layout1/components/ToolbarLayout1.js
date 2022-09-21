@@ -15,7 +15,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
-import { submitInquiryAnswer, loadComment } from 'app/services/inquiryService';
+import { loadComment } from 'app/services/inquiryService';
 import axios from 'axios';
 
 import * as InquiryActions from "../../../main/apps/workspace/store/actions/inquiry";
@@ -144,7 +144,7 @@ function ToolbarLayout1(props) {
             setIsSubmit(isSubmit)
           }
         }).catch(err => {
-          console.log(err)
+          console.error(err)
         })
     }
   }, [enableSubmit, inquiries]);
@@ -172,7 +172,6 @@ function ToolbarLayout1(props) {
 
   const handleClose = () => {
     setOpen(false);
-    history.push(`/apps/draft-bl/edit/${myBL.id}`);
   }
 
   const confirmBlDraft = () => {
@@ -182,8 +181,8 @@ function ToolbarLayout1(props) {
     dispatch(DraftBLActions.toggleSendNotification(true));
   }
   const redirectEditDraftBL = () => {
-    const bl = window.location.pathname.split('/')[3];
-    if (bl) history.push(`/apps/draft-bl/edit/${bl}`);
+    const bl = new URLSearchParams(search).get('bl');
+    if (bl) history.push(`/draft-bl/edit/${bl}`);
   };
 
   useEffect(() => {
@@ -212,24 +211,8 @@ function ToolbarLayout1(props) {
   }, [user, allowAccess]);
 
   const onSubmit = async () => {
-    const inqs = [...inquiries];
-    const lstInq = inqs.map((item) => {
-      if (item.answerObj && (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(item.state))
-      ) {
-        return { inquiryId: item.id, currentState: item.state };
-      }
-      return null;
-    });
-    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null) });
-    //
-    const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
-    inqs.forEach((item) => {
-      if (listIdInq.includes(item.id)) {
-        if (item.state === 'ANS_DRF') item.state = 'ANS_SENT';
-      }
-    });
-    dispatch(InquiryActions.setInquiries(inqs));
-    dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
+    dispatch(FormActions.toggleAllInquiry(true));
+    dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
   }
 
   return (
@@ -286,7 +269,7 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.VIEW_EDIT_DRAFT_BL}
-              extraCondition={pathname.includes('/apps/draft-bl') && !pathname.includes('/edit')}>
+              extraCondition={pathname.includes('/draft-bl') && !pathname.includes('/edit')}>
               <Button
                 className={clsx(classes.button, classes.buttonEditDraftBL)}
                 onClick={redirectEditDraftBL}>
@@ -305,7 +288,7 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.DRAFTBL_SEND_DRAFT_AMENDMENT}
-              extraCondition={pathname.includes('/apps/draft-bl/edit')}>
+              extraCondition={pathname.includes('/draft-bl/edit')}>
               <Button
                 variant="contained"
                 className={clsx(classes.button, classes.buttonSend)}
@@ -345,7 +328,7 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
-              extraCondition={!pathname.includes('/apps/draft-bl')}>
+              extraCondition={!pathname.includes('/draft-bl')}>
               <Button
                 variant="contained"
                 className={clsx(classes.button, classes.buttonSend)}

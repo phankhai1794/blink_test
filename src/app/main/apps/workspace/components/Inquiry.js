@@ -3,6 +3,7 @@ import { Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import React, { useState } from 'react';
 import clsx from 'clsx';
+import { sentStatus } from '@shared';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -40,6 +41,7 @@ const Inquiry = (props) => {
   const [changeQuestion, setChangeQuestion] = useState();
   const [isSaved, setSaved] = useState(false);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
+  const [questionIdSaved, setQuestionIdSaved] = useState();
 
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
@@ -52,6 +54,9 @@ const Inquiry = (props) => {
   const onCancel = () => {
     if (currentEditInq.id) {
       dispatch(InquiryActions.setEditInq());
+    } else {
+      dispatch(InquiryActions.setEditInq(null));
+      dispatch(FormActions.toggleCreateInquiry(false))
     }
   };
 
@@ -63,15 +68,15 @@ const Inquiry = (props) => {
     optionsInquires[editedIndex].showIconAttachAnswerFile = false;
     optionsInquires[editedIndex].showIconAttachReplyFile = false;
     dispatch(InquiryActions.setInquiries(optionsInquires));
+    setQuestionIdSaved(optionsInquires[editedIndex]);
+    setSaved(!isSaved);
   };
 
   const handleCancel = (q) => {
-    setSaved(!isSaved);
     resetActionInquiry(q);
   };
 
   const handleSetSave = (q) => {
-    setSaved(!isSaved);
     resetActionInquiry(q);
   };
 
@@ -94,14 +99,14 @@ const Inquiry = (props) => {
               <>
                 <div className={clsx(classes.boxItem,
                   (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-                  !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'ANS_DRF'].includes(q.state) && 'offshoreReply'
+                  sentStatus.includes(q.state) && 'offshoreReply'
                 )}
                 style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
                   <InquiryViewer
                     currentQuestion={changeQuestion}
                     question={q}
                     user={props.user}
-                    showReceiver={true}
+                    showReceiver={q.process === 'pending'}
                   />
                 </div>
                 {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
@@ -131,8 +136,8 @@ const Inquiry = (props) => {
             )}>
               <InquiryViewer
                 toggleEdit={() => toggleEdit(index)}
-                currentQuestion={q}
-                question={isEdit ? currentEditInq : q}
+                currentQuestion={questionIdSaved}
+                question={q}
                 user={props.user}
                 isSaved={isSaved}
                 isEdit={q.id === currentEditInq?.id ? q : {}}

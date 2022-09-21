@@ -5,14 +5,11 @@ import {
   DialogContent,
   DialogActions,
 } from '@material-ui/core';
-import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
-import CloseOutlined from '@material-ui/icons/CloseOutlined';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { draftConfirm } from '@shared';
-
-import { useDispatch } from 'react-redux';
 import * as Actions from 'app/store/actions';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
+import history from '@history';
 
 function DialogConfirm(props) {
   const { handleClose, open } = props;
@@ -65,7 +62,7 @@ function DialogConfirm(props) {
                       <DialogContent id="alert-dialog-title_completed" className='text-center font-bol' style={{ overflow: "hidden" }}>
                         <span style={{ color: '#BD0F72' }}>Your B/L is confirmed!</span>
                         <br />
-                        <span style={{ fontSize: '15px', fontWeight: '500' }}> Thank you!</span>
+                        <span style={{ fontSize: '15px', fontWeight: '500', color: '#132535' }}> Thank you!</span>
                       </DialogContent>
                       <DialogActions style={{ alignItems: 'center', paddingBottom: '30px' }}>
                         <Button
@@ -105,7 +102,11 @@ function DialogConfirm(props) {
               fontFamily: 'Montserrat'
             }}
             variant="contained"
-            onClick={handleClose}
+            onClick={() => {
+              handleClose();
+              history.push(`/draft-bl/edit/${myBL.id}`);
+            }
+            }
             className='normal-case'>
             <span>No</span>
           </Button>

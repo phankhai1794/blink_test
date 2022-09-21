@@ -25,7 +25,8 @@ const useStyles = makeStyles((theme) => ({
       margin: '5px',
       cursor: 'pointer',
       whiteSpace: 'nowrap',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
     },
     '& h3:hover': {
       color: '#0000ee'
@@ -69,6 +70,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
   const closeImageViewer = () => {
     setIsViewerOpen(false);
   };
+
   const downloadFile = () => {
     const link = document.createElement('a');
     link.href = srcUrl;
@@ -79,47 +81,48 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
   };
 
   const handleRemoveFile = (file) => {
-    const inq = { ...currentEditInq };
+    const optionsOfQuestion = { ...currentEditInq };
     const optionsAttachmentList = [...attachmentList];
+
     if (isAnswer) {
       const optionsInquires = [...questions];
       const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
       optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
       optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMedia, 1);
       dispatch(InquiryActions.setInquiries(optionsInquires));
-    } else if (isReply) {
-      templateReply.mediaFiles.splice(indexMedia, 1);
-    } else {
-      if (field && file.id) {
-        const indexMedia = inq.mediaFile.findIndex((f) => f.id === file.id);
-        inq.mediaFile.splice(indexMedia, 1);
-        dispatch(InquiryActions.editInquiry(inq));
-        // update attachment list
-        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
-      } else if (file.id) {
-        // update attachment list
-        for (var i = 0; i < optionsAttachmentList.length; i++) {
-          const item = optionsAttachmentList[i];
-          if (file.id && item.id == file.id) {
-            optionsAttachmentList.splice(i, 1);
-            break;
-          }
-        }
-        dispatch(
-          InquiryActions.validateAttachment({
-            field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
-            nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
-          })
-        );
-        dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
-      } else {
-        // Remove attachment at local
-        const inqLocal = { ...currentEditInq };
-        const indexMedia = inqLocal.mediaFile.findIndex((f) => f.name === file.name);
-        inqLocal.mediaFile.splice(indexMedia, 1);
-        dispatch(InquiryActions.editInquiry(inqLocal));
-      }
     }
+    else if (isReply) templateReply.mediaFiles.splice(indexMedia, 1);
+    else if (field && file.id) {
+      const indexMedia = optionsOfQuestion.mediaFile.findIndex(
+        (f) => f.id === file.id
+      );
+      optionsOfQuestion.mediaFile.splice(indexMedia, 1);
+      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+    }
+    else if (file.id) {
+      // update attachment list
+      for (var i = 0; i < optionsAttachmentList.length; i++) {
+        const item = optionsAttachmentList[i];
+        if (file.id && item.id == file.id) {
+          optionsAttachmentList.splice(i, 1);
+          break;
+        }
+      }
+      dispatch(
+        InquiryActions.validateAttachment({
+          field: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].field),
+          nameFile: Boolean(optionsAttachmentList[optionsAttachmentList.length - 1].name)
+        })
+      );
+      dispatch(InquiryActions.setListAttachment(optionsAttachmentList));
+    }
+    else {
+      const indexMedia = optionsOfQuestion.mediaFile.findIndex(
+        (f) => f.name === file.name
+      );
+      optionsOfQuestion.mediaFile.splice(indexMedia, 1);
+    }
+
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
@@ -136,11 +139,13 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
         onClick={openImageViewer}
       />
       <div style={{ display: 'flex', height: '30px', flexDirection: 'row' }}>
-        <h3
-          style={{ color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }}
-          onClick={downloadFile}>
-          {file.name}
-        </h3>
+        <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
+          <h3
+            style={{ color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }}
+            onClick={downloadFile}>
+            {file.name}
+          </h3>
+        </Tooltip>
         {isAnswer && (
           !hiddenRemove && (
             <PermissionProvider

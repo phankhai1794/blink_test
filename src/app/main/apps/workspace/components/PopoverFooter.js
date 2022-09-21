@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, IconButton, Link } from '@material-ui/core';
+import axios from "axios";
+import { loadComment } from 'app/services/inquiryService';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -42,7 +44,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
       workspace.inquiryReducer.enableSubmit,
     ]
   );
-
+  const userInfo = useSelector(({ user }) => user);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -50,22 +52,37 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
   const [isSubmit, setIsSubmit] = useState(true);
 
   useEffect(() => {
-    let currentFields = [];
-    // inquiry list
-    if (title === 'INQUIRY_LIST') {
-      currentFields = inquiries;
-    } // inquiry detail
-    else if (title === currentField) {
-      currentFields = inquiries.filter(inq => inq.field === currentField);
-    }
-    let isSubmit = true;
-    currentFields.forEach((item) => {
-      if (item.answerObj && item.state === "ANS_DRF") {
-        isSubmit = false;
+    if (userInfo.role !== 'Admin') {
+      let currentFields = [];
+      // inquiry list
+      if (title === 'INQUIRY_LIST') {
+        currentFields = inquiries;
+      } // inquiry detail
+      else if (title === currentField) {
+        currentFields = inquiries.filter(inq => inq.field === currentField);
       }
-    });
-    if (enableSubmit) isSubmit = false;
-    setIsSubmit(isSubmit)
+      let isSubmit = true;
+      currentFields.forEach((item) => {
+        if (item.answerObj && item.state === "ANS_DRF") {
+          isSubmit = false;
+        }
+      });
+      //
+      axios.all(currentFields.map(q => loadComment(q.id)))
+        .then(res => {
+          if (res) {
+            let commentList = [];
+            res.map(r => {
+              commentList = [...commentList, ...r];
+            });
+            const filterRepADraft = commentList.some((r) => r.state === 'REP_A_DRF');
+            if (filterRepADraft) isSubmit = false;
+            setIsSubmit(isSubmit)
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+    }
   }, [inquiries, checkSubmit, enableSubmit]);
 
   const toggleInquiriresDialog = () => {
@@ -192,7 +209,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
               }}
               className={classes.root}
               color="primary"
-              disabled={isSubmit}
+              disabled={isShowBackground ? true : isSubmit}
               onClick={onSubmit}>
               Submit
             </Button>

@@ -15,8 +15,7 @@ function DraftBLWorkspace() {
 
   const { pathname, search } = window.location;
   const isPreviewing = pathname.includes('/draft-bl/preview');
-  const bl = pathname.split('/')[isPreviewing ? 4 : 3];
-
+  const bl = pathname.split('/')[3] || new URLSearchParams(window.location.search).get('bl');
 
   useEffect(() => {
     const isAllow = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL });

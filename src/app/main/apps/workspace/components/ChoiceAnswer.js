@@ -11,7 +11,7 @@ import {PERMISSION, PermissionProvider} from "@shared/permission";
 import * as InquiryActions from '../store/actions/inquiry';
 
 const ChoiceAnswer = (props) => {
-  const { index, question, questions, disableChecked, isDisableSave, disable = false } = props;
+  const { question, questions, disableChecked, disable = false } = props;
   const user = useSelector(({ user }) => user);
   let questionIsEmpty = props.question === undefined;
   let prevChoiceArray = (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state))? []: question.answerObj.filter((choice) => {
@@ -41,7 +41,6 @@ const ChoiceAnswer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     optionsInquires[editedIndex].selectChoice = selectedObj;
     dispatch(InquiryActions.setInquiries(optionsInquires));
-    isDisableSave(false);
   };
 
   useEffect(() => {

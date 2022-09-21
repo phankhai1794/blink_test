@@ -10,6 +10,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import ReplyIcon from '@material-ui/icons/Reply';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import { sentStatus } from '@shared';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
@@ -210,7 +211,8 @@ const BLField = (props) => {
   const checkAnswerSent = () => {
     if (inquiries.length > 0) {
       const lst = inquiries.filter((q) => q.field === id);
-      return lst.some(e => ['ANS_SENT','REP_Q_DRF','REP_Q_SENT','REP_A_DRF','REP_A_SENT'].includes(e.state))
+      if (lst.length === 1) return lst.some(e => sentStatus.includes(e.state));
+      else if (lst.length > 1) return lst.every(e => sentStatus.includes(e.state));
     }
     return false;
   };

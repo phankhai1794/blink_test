@@ -78,7 +78,7 @@ const AttachmentListNotification = () => {
   };
 
   const handleAddAttachment = () => {
-    dispatch(FormActions.toggleAttachment(true))
+    dispatch(FormActions.toggleAllInquiry(true));
     handleClose();
   };
 

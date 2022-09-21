@@ -53,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const EditDraftPage = (props) => {
+  const { pathname } = window.location;
   const classes = useStyles();
   const dispatch = useDispatch();
   const metadata = useSelector(({ draftBL }) => draftBL.metadata);
@@ -84,7 +85,7 @@ const EditDraftPage = (props) => {
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(Actions.loadMetadata());
-    dispatch(Actions.loadContent(window.location.pathname.split('/')[4]));
+    dispatch(Actions.loadContent(pathname.split('/')[3]));
     dispatch(Actions.toggleSendDraftBl(true));
     return () => {
       dispatch(Actions.toggleSendDraftBl(false));
@@ -92,7 +93,7 @@ const EditDraftPage = (props) => {
   }, []);
 
   useEffect(() => {
-    dispatch(Actions.loadDraftContent(window.location.pathname.split('/')[4]));
+    dispatch(Actions.loadDraftContent(pathname.split('/')[3]));
   }, [reload])
 
   useEffect(() => {

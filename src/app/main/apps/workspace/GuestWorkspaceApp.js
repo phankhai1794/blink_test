@@ -18,7 +18,7 @@ function GuestWorkspaceApp() {
             content: 'flex flex-col h-full',
             leftSidebar: 'w-256 border-0'
           }}
-          content={<BLWorkspace myBL={{ id: bl }} user="guest" />}
+          content={<BLWorkspace myBL={{ id: bl }} user="guest" process="pending" />}
           sidebarInner
           ref={pageLayout}
           innerScroll

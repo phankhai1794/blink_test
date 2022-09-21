@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Divider, FormControl, FormHelperText, Button, LinearProgress } from '@material-ui/core';
+import { Divider, FormControl, FormHelperText, Button, LinearProgress, Tooltip } from '@material-ui/core';
 import CachedIcon from '@material-ui/icons/Cached';
 import DescriptionIcon from '@material-ui/icons/Description';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
@@ -20,6 +20,8 @@ import Checkbox from "@material-ui/core/Checkbox";
 import clsx from "clsx";
 
 import * as InquiryActions from "../store/actions/inquiry";
+
+import PDFViewer from './PDFViewer';
 
 const attachmentStyle = makeStyles(() => ({
   root: {
@@ -239,7 +241,7 @@ const AttachmentList = (props) => {
       combineFieldType = [
         ...combineFieldType,
         {
-          label: `${fieldOptions.label} - ${inqType.label}`,
+          label: inqType?.label ? `${fieldOptions.label} - ${inqType.label}` : `${fieldOptions.label} - AMENDMENT`,
           value: { fieldId: fieldOptions.value, inqId: e.id, inqType: e.inqType }
         }
       ];
@@ -738,9 +740,11 @@ const ImageAttachList = ({ file }) => {
   return (
     <div className={classes.root}>
       <img style={{ height: '20px', width: '20px' }} src={`/assets/images/logos/image_icon.png`} />
-      <span className={classes.fileName} onClick={downloadFile}>
-        {file.name}
-      </span>
+      <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
+        <span className={classes.fileName} onClick={downloadFile}>
+          {file.name}
+        </span>
+      </Tooltip>
       {isViewerOpen && (
         <ImageViewer
           src={images}
@@ -781,6 +785,8 @@ const useStylesFile = makeStyles((theme) => ({
 }));
 const FileAttachList = ({ file }) => {
   const classes = useStylesFile();
+  const [view, setView] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState(null)
 
   const downloadFile = () => {
     getFile(file.id).then((f) => {
@@ -797,10 +803,14 @@ const FileAttachList = ({ file }) => {
       console.error(error);
     });
   }
+  const handleClose = () => {
+    setView(false)
+  }
 
   const previewPDF = () => {
     getFile(file.id).then((f) => {
-      window.open(urlMedia(file.ext, f));
+      setPdfUrl(urlMedia(file.ext, f));
+      setView(true)
     }).catch((error) => {
       console.error(error);
     });
@@ -808,6 +818,7 @@ const FileAttachList = ({ file }) => {
 
   return (
     <div className={classes.root}>
+      <PDFViewer view={view} handleClose={handleClose} pdfUrl={pdfUrl} name={file.name} />
       {file.ext.toLowerCase().includes("pdf") ?
         <img style={{ height: '25px', width: '25px' }} src={`/assets/images/logos/pdf_icon.png`} />
         :
@@ -817,7 +828,15 @@ const FileAttachList = ({ file }) => {
             :
             <DescriptionIcon />))
       }
-      {file.ext.toLowerCase().includes("pdf") ? <span className={classes.fileName} onClick={previewPDF}>{file.name}</span> : <span className={classes.fileName} onClick={downloadFile}>{file.name}</span>}
+      {file.ext.toLowerCase().includes("pdf") ?
+        <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
+          <span className={classes.fileName} onClick={previewPDF}>{file.name}</span>
+        </Tooltip>
+        :
+        <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
+          <span className={classes.fileName} onClick={downloadFile}>{file.name}</span>
+        </Tooltip>
+      }
     </div>
   );
 };

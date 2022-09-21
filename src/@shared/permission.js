@@ -4,6 +4,7 @@ export const PERMISSION = {
   VIEW_ACCESS_BLLIST: 'view_accessBLList',
   VIEW_ACCESS_WORKSPACE: 'view_accessWorkspace',
   VIEW_ACCESS_DRAFT_BL: 'view_accessDraftBL',
+  VIEW_ACCESS_EDIT_DRAFT_BL: 'view_accessEditDraftBL',
   VIEW_SHOW_ALL_INQUIRIES: 'view_showAllInquiries',
   VIEW_SHOW_BL_HISTORY: 'view_showBLHistory',
   VIEW_SHOW_USER_MENU: 'view_showUserMenu',
@@ -30,7 +31,8 @@ export const PERMISSION = {
   INQUIRY_ADD_MEDIA: 'inquiry_addMedia',
   INQUIRY_SUBMIT_INQUIRY_ANSWER: 'inquiry_submitInquiryAnswer',
   DRAFTBL_SEND_DRAFT_AMENDMENT: 'draftbl_sendDraftAmendment',
-  DRAFTBL_CONFIRM_DRAFT_BL: 'draftbl_confirmDraftBl'
+  DRAFTBL_CONFIRM_DRAFT_BL: 'draftbl_confirmDraftBl',
+  DRAFTBL_CREATE_REPLY: 'draftbl_saveEditedField'
 };
 
 export const PermissionProvider = ({

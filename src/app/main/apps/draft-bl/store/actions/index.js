@@ -39,15 +39,17 @@ export const loadContent = (bl) => (dispatch) => {
 export const loadDraftContent = (bl) => (dispatch) => {
   getFieldContent(bl)
     .then((res) => {
-      let { data } = res;
-      const arr = [];
-      while (data.length) {
-        const first = data[0];
-        const filter = data.filter(d => d.field === first.field).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        data = data.filter(d => d.field !== first.field);
-        arr.push(filter[0]);
-      }
-      dispatch(setDraftContent(arr));
+      const data = res.map(({ id, state, content, field, createdAt, creator, mediaFile }) => {
+        return {
+          id,
+          state,
+          field,
+          createdAt,
+          creator,
+          content: { content, mediaFile }
+        }
+      });
+      dispatch(setDraftContent(data));
     })
     .catch((err) => console.error(err));
 };
@@ -88,7 +90,7 @@ export function toggleDraftBLEdit(state) {
 }
 
 export const setConfirmDraftBL = () => (dispatch) => {
-  const bl = window.location.pathname.split('/')[3];
+  const bl = new URLSearchParams(window.location.search).get('bl');
   confirmDraftBl(bl)
     .then(() => dispatch(setBL({ state: draftConfirm })))
     .catch((err) => console.error(err));

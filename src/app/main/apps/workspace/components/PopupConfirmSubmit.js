@@ -80,12 +80,14 @@ const PopupConfirmSubmit = (props) => {
       }
     });
     dispatch(InquiryActions.setInquiries(inqs));
+    props.handleCheckSubmit();
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
     if (props.field === 'INQUIRY_LIST') {
       dispatch(FormActions.toggleAllInquiry(false));
     } else {
       dispatch(InquiryActions.setOneInq({}));
     }
+    dispatch(InquiryActions.checkSubmit(false));
     dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
   };
 

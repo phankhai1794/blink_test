@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { TextField, Button } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { saveEditedField } from 'app/services/draftblService';
+import { saveEditedField, updateDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import * as AppActions from 'app/store/actions';
 import { displayTime } from '@shared'
@@ -36,14 +36,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const BLFieldForm = (props) => {
-  const { question } = props
+const BLFieldForm = ({ question }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [myBL, currentField, content] = useSelector(({ draftBL }) => [
+  const [myBL, currentField, content, edit] = useSelector(({ draftBL }) => [
     draftBL.myBL,
     draftBL.currentField,
     draftBL.content,
+    draftBL.edit
   ]);
   const [fieldValue, setFieldValue] = useState(question?.content?.content || content[currentField]);
   const [attachments, setAttachments] = useState(question?.content?.mediaFile || []);
@@ -75,17 +75,21 @@ const BLFieldForm = (props) => {
     axios
       .all(uploads.map((endpoint) => uploadFile(endpoint)))
       .then((files) => {
+        let service;
         const mediaList = attachments.filter((file) => file.id);
         files.forEach((file) => {
           const mediaFileList = file.response.map((item) => { return { id: item.id, ext: item.ext, name: item.name } });
           mediaList.push(mediaFileList[0]);
-        })
-        saveEditedField({ field: currentField, content: { content: fieldValue, mediaFile: mediaList }, mybl: myBL.id }).then(() => {
+        });
+
+        if (edit) service = updateDraftBLReply({ content: { content: fieldValue, mediaFile: mediaList } }, question.id);
+        else service = saveEditedField({ field: currentField, content: { content: fieldValue, mediaFile: mediaList }, mybl: myBL.id });
+        service.then(() => {
           dispatch(
             AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' })
           );
           dispatch(Actions.toggleReload());
-        }).catch((err) => console.error(err))
+        }).catch((err) => console.error(err));
       })
   };
 

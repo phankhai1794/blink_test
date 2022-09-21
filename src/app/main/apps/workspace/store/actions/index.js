@@ -2,15 +2,14 @@ import { filterMetadata } from '@shared';
 import { handleError } from '@shared/handleError';
 import { getInquiryById, getMetadata } from 'app/services/inquiryService';
 import { createBL, getBlInfo } from 'app/services/myBLService';
+import { getFieldContent } from 'app/services/draftblService';
 
 import {
   setMyBL,
   setContent,
   saveField,
-  editInquiry,
   setInquiries,
   saveMetadata,
-  setListAttachment
 } from './inquiry';
 import * as InquiryActions from './inquiry';
 
@@ -32,28 +31,54 @@ export const loadMetadata = () => async (dispatch) => {
 };
 
 export const loadInquiry = (myBL_Id) => async (dispatch) => {
-  getInquiryById(myBL_Id)
-    .then((res) => {
+  try {
+    const [resInq, resDraft] = [
+      await getInquiryById(myBL_Id),
+      await getFieldContent(myBL_Id)
+    ];
+
+    resInq.forEach(res => res.process = 'pending');
+    resDraft.forEach(res => res.process = 'draft');
+
+    [resInq, resDraft].map(res => {
       res.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
       res.forEach(
         (inq) =>
-          inq.answerObj.length && inq.answerObj.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
+          inq.answerObj?.length && inq.answerObj?.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
       );
-      const field_list = res.map((e) => e.field);
-      dispatch(saveField(field_list));
-      dispatch(editInquiry(res));
-      dispatch(setInquiries(JSON.parse(JSON.stringify(res))));
-      const optionTabs = [
-        { id: 'inquiryList', field: 'INQUIRY_LIST' },
-        { id: 'attachmentList', field: 'ATTACHMENT_LIST' },
-        { id: 'email', field: 'EMAIL' },
-        { id: 'inquiryForm', field: 'INQUIRY_FORM' },
-        { id: 'inquiryReview', field: 'INQUIRY_REVIEW' }
-      ];
-      const listMinimize = [...res, ...optionTabs];
-      dispatch(InquiryActions.setListMinimize(listMinimize));
-    })
-    .catch((err) => handleError(dispatch, err));
+    });
+    //
+    const lastestCommentDraft = [];
+    const merge = [...new Set(resDraft.map(d => d.field))];
+    merge.forEach(m => {
+      const filterLastestComment = [];
+      filterLastestComment.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      resDraft.forEach(r => {
+        if (m === r.field) {
+          filterLastestComment.push(r);
+        }
+      });
+      lastestCommentDraft.push(filterLastestComment[0]);
+    });
+
+    dispatch(setInquiries(JSON.parse(JSON.stringify([...resInq, ...lastestCommentDraft]))));
+
+    const field_list = [...resInq.map((e) => e.field), ...resDraft.map((e) => e.field)];
+    dispatch(saveField(field_list));
+
+    const optionTabs = [
+      { id: 'inquiryList', field: 'INQUIRY_LIST' },
+      { id: 'attachmentList', field: 'ATTACHMENT_LIST' },
+      { id: 'email', field: 'EMAIL' },
+      { id: 'inquiryForm', field: 'INQUIRY_FORM' },
+      { id: 'inquiryReview', field: 'INQUIRY_REVIEW' }
+    ];
+    const listMinimize = [...resInq, ...resDraft, ...optionTabs];
+    dispatch(InquiryActions.setListMinimize(listMinimize));
+  }
+  catch (err) {
+    handleError(dispatch, err);
+  }
 };
 
 export const loadContent = (myBL_Id) => async (dispatch) => {

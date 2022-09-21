@@ -1,6 +1,9 @@
-FROM node:12.22.0
+FROM node:12
 
-WORKDIR /shine
+ENV HOME /blink
+
+WORKDIR ${HOME}
 
 RUN apt-get update && apt-get install rsync -y
-RUN npm i nodemon -g
+
+RUN npm install nodemon -g
