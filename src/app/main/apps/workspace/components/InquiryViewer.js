@@ -239,13 +239,12 @@ const InquiryViewer = (props) => {
                 lastest.createdAt = answerObj[0]?.updatedAt;
                 setType(lastest.ansType);
               }
+              lastest.mediaFile = lastest.mediaFilesAnswer;
+              lastest.mediaFilesAnswer = [];
               if (user.role === 'Admin') {
                 lastest.showIconReply = true;
-                if (lastest.mediaFilesAnswer.length) lastest.mediaFile = lastest.mediaFilesAnswer;
               } else {
                 if (lastest.state === 'REP_Q_DRF') setSubmitLabel(true);
-                lastest.mediaFile = lastest.mediaFilesAnswer;
-                lastest.mediaFilesAnswer = [];
               }
               setQuestion(lastest);
               setInqHasComment(true);
@@ -322,6 +321,7 @@ const InquiryViewer = (props) => {
         .catch((error) => console.error(error));
     }
   }, [isSaveComment]);
+  // console.log(question)
 
   const resetAnswerActionSave = () => {
     const quest = { ...question };
