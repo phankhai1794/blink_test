@@ -91,8 +91,6 @@ const useStyles = makeStyles((theme) => ({
   labelMargin: {
     marginTop: '0.6rem !important',
     display: 'flex',
-    textAlign: 'left',
-    alignItems: 'left'
   },
   attachIcon: {
     transform: 'rotate(45deg)',
@@ -209,22 +207,22 @@ const TableCD = (props) => {
           className="px-8 justify-between">
           <Grid container spacing={2}>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)}>CONTAINER NUMBER</Label>
+              <Label className={clsx(classes.labelMargin)} style={{marginLeft:'15px'}}>CONTAINER NUMBER</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)}>SEAL</Label>
+              <Label className={clsx(classes.labelMargin)} style ={{marginLeft: '75px'}}>SEAL</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)}>TYPE</Label>
+              <Label className={clsx(classes.labelMargin)} style ={{marginLeft: '75px'}}>TYPE</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)}>PACKAGE</Label>
+              <Label className={clsx(classes.labelMargin)} style ={{marginLeft: '55px'}}>PACKAGE</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)}>WEIGHT</Label>
+              <Label className={clsx(classes.labelMargin)} style ={{marginLeft: '60px'}}>WEIGHT</Label>
             </Grid>
             <Grid container item xs={1}>
-              <Label className={clsx(classes.labelMargin)}>MEASUREMENT</Label>
+              <Label className={clsx(classes.labelMargin)} style ={{marginLeft: '30px'}}>MEASUREMENT</Label>
             </Grid>
             {containerDetail?.length > 0 ? (
               containerDetail.map((cd, index) => (
