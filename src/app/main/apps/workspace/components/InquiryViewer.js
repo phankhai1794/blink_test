@@ -4,7 +4,8 @@ import {
   uploadOPUS,
   saveReply,
   updateReply,
-  loadComment
+  loadComment,
+  reOpenInquiry
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
@@ -116,7 +117,7 @@ const useStyles = makeStyles((theme) => ({
     border: '1px solid #BAC3CB',
     textAlign: 'center',
     color: '#132535'
-  }
+  },
 }));
 
 const InquiryViewer = (props) => {
@@ -709,6 +710,17 @@ const InquiryViewer = (props) => {
     setInqHasComment(false);
   }
 
+  const reOpen = (id) => {
+    reOpenInquiry(id)
+      .then(() => {
+        dispatch(FormActions.toggleReload());
+        dispatch(
+          AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
+        );
+      })
+      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+  };
+
   useEffect(() => {
     const el = document.getElementById(question.id);
     setShowViewAll(false);
@@ -945,6 +957,22 @@ const InquiryViewer = (props) => {
                   </Grid>
                 )}
               </Grid>
+              <PermissionProvider
+                action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
+                extraCondition={question.state === 'COMPL'}
+              >
+                <div className='flex' style={{ alignItems: 'center' }}>
+                  <Button
+                    disabled={question.state === 'UPLOADED'}
+                    variant="contained"
+                    color="primary"
+                    onClick={() => reOpen(question?.id)}
+                    classes={{ root: classes.button }}
+                  >
+                    ReOpen
+                  </Button>
+                </div>
+              </PermissionProvider>
 
               {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} />
