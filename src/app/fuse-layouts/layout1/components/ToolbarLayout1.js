@@ -130,8 +130,9 @@ function ToolbarLayout1(props) {
     if (enableSubmit) {
       isSubmit = false;
     }
+    const inquiriesPendingProcess = optionInquiries.filter(op => op.process === 'pending');
     if (pathname.includes('/guest')) {
-      axios.all(optionInquiries.map(q => loadComment(q.id)))
+      axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)))
         .then(res => {
           if (res) {
             let commentList = [];
