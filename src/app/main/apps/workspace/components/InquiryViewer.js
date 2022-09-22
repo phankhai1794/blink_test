@@ -7,7 +7,7 @@ import {
   loadComment,
   reOpenInquiry
 } from 'app/services/inquiryService';
-import { saveEditedField, updateDraftBLReply, getCommentDraftBl } from 'app/services/draftblService';
+import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime } from '@shared';
 import {
@@ -131,6 +131,7 @@ const InquiryViewer = (props) => {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
+  const [replyRemove, setReplyRemove] = useState();
   const [question, setQuestion] = useState(props.question);
   const [type, setType] = useState(props.question.ansType);
   const [allowDeleteInq, setAllowDeleteInq] = useState(true);
@@ -272,8 +273,7 @@ const InquiryViewer = (props) => {
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
-            setQuestion(lastest);
-            if (['REP_DRF'].includes(lastest.state)) {
+            if (['REP_DRF', 'AME_DRF'].includes(lastest.state)) {
               setStateReplyDraft(true);
               const reqReply = {
                 inqAns: {
@@ -297,7 +297,22 @@ const InquiryViewer = (props) => {
               if (['REP_SENT'].includes(lastest.state)) {
                 setShowLabelSent(true);
               }
+            } else {
+              if (['REP_SENT'].includes(lastest.state)) {
+                lastest.showIconReply = true;
+                setStateReplyDraft(false);
+              }
+              if (['AME_DRF'].includes(lastest.state)) {
+                setStateReplyDraft(true);
+                lastest.showIconAttachReplyFile = false;
+                lastest.showIconAttachAnswerFile = false;
+              } else if (['AME_SENT'].includes(lastest.state)) {
+                setStateReplyDraft(false);
+                lastest.showIconReply = false;
+                setSubmitLabel(true);
+              }
             }
+            setQuestion(lastest);
             //
             const comments = [{
               creator: { userName: user.displayName, avatar: null },
@@ -308,6 +323,7 @@ const InquiryViewer = (props) => {
             res.map(r => {
               const { content, mediaFile } = r.content;
               comments.push({
+                id: r.id,
                 creator: r.creator,
                 createdAt: r.createdAt,
                 answersMedia: mediaFile,
@@ -322,7 +338,6 @@ const InquiryViewer = (props) => {
         .catch((error) => console.error(error));
     }
   }, [isSaveComment]);
-  // console.log(question)
 
   const resetAnswerActionSave = () => {
     const quest = { ...question };
@@ -413,15 +428,22 @@ const InquiryViewer = (props) => {
           }
         })
         .catch((error) => console.error(error));
-      dispatch(
-        FormActions.openConfirmPopup({
-          openConfirmPopup: false,
-          confirmClick: false,
-          confirmPopupMsg: '',
-          confirmPopupType: ''
-        })
-      );
+    } else if (confirmPopupType === 'removeReply') {
+      if (replyRemove) {
+        deleteDraftBLReply(replyRemove.id)
+          .then(() => {
+            setSaveComment(!isSaveComment);
+          }).catch((error) => console.error(error));
+      }
     }
+    dispatch(
+      FormActions.openConfirmPopup({
+        openConfirmPopup: false,
+        confirmClick: false,
+        confirmPopupMsg: '',
+        confirmPopupType: ''
+      })
+    );
   }, [confirmClick]);
 
   const removeQuestion = () => {
@@ -434,6 +456,17 @@ const InquiryViewer = (props) => {
       })
     );
   };
+
+  const removeReply = (question) => {
+    setReplyRemove(question);
+    dispatch(
+      FormActions.openConfirmPopup({
+        openConfirmPopup: true,
+        confirmPopupMsg: 'Are you sure you want to remove this reply?',
+        confirmPopupType: 'removeReply'
+      })
+    );
+  }
 
   const changeToEditor = (inq) => {
     const index = inquiries.findIndex((q) => q.id === inq.id);
@@ -625,15 +658,8 @@ const InquiryViewer = (props) => {
         };
         saveEditedField({ ...reqReply }).then(() => {
           //
-          if (user.role === 'Admin') {
-            optionsInquires[editedIndex].state = 'REP_DRF';
-          } else {
-            optionsInquires[editedIndex].state = 'AME_DRF';
-          }
-          optionsInquires[editedIndex].process = 'draft';
-          dispatch(InquiryActions.setInquiries(optionsInquires));
           setSaveComment(!isSaveComment);
-          dispatch(AppAction.showMessage({ message: 'Edit field successfully', variant: 'success' }));
+          dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
         );
       } else {
@@ -642,7 +668,7 @@ const InquiryViewer = (props) => {
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
-          dispatch(AppAction.showMessage({ message: 'Edit field successfully', variant: 'success' }));
+          dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })))
       }
     }
@@ -865,15 +891,27 @@ const InquiryViewer = (props) => {
                     )}
                   </div>
                   {(((['ANS_DRF'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
-                    <Tooltip title={checkStateReplyDraft ? 'Edit Reply' : "Edit Answer"}>
-                      <div onClick={() => handleEdit(question)}>
-                        <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
-                      </div>
-                    </Tooltip>
+                    <>
+                      <Tooltip title={checkStateReplyDraft ? 'Edit Reply' : "Edit Answer"}>
+                        <div onClick={() => handleEdit(question)}>
+                          <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                        </div>
+                      </Tooltip>
+                      {question.process === 'draft' && (
+                        <Tooltip title="Delete Reply">
+                          <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
+                            <img
+                              style={{ height: '22px', cursor: 'pointer' }}
+                              src="/assets/images/icons/trash-gray.svg"
+                            />
+                          </div>
+                        </Tooltip>
+                      )}
+                    </>
                   )}
                   {question.showIconReply ? (
                     <PermissionProvider
-                      action={PERMISSION.INQUIRY_CREATE_REPLY}
+                      action={PERMISSION.INQUIRY_CREATE_REPLY || PERMISSION.DRAFTBL_CREATE_REPLY}
                       extraCondition={!checkStateReplyDraft && !['ANS_DRF', 'COMPL', 'UPLOADED'].includes(question.state)}
                     >
                       <Tooltip title="Reply Inquiry">
