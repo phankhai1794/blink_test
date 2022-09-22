@@ -5,6 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Button, IconButton, Link } from '@material-ui/core';
 import axios from "axios";
 import { loadComment } from 'app/services/inquiryService';
+import {getCommentDraftBl} from "app/services/draftblService";
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -33,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 const PopoverFooter = ({ title, user, checkSubmit }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [question, fields, inquiries, lastField, openedInquiresForm, currentField, enableSubmit] = useSelector(
+  const [question, fields, inquiries, lastField, openedInquiresForm, currentField, enableSubmit, myBL] = useSelector(
     ({ workspace }) => [
       workspace.inquiryReducer.question,
       workspace.inquiryReducer.fields,
@@ -42,6 +43,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
       workspace.inquiryReducer.openedInquiresForm,
       workspace.inquiryReducer.currentField,
       workspace.inquiryReducer.enableSubmit,
+      workspace.inquiryReducer.myBL,
     ]
   );
   const userInfo = useSelector(({ user }) => user);
@@ -68,7 +70,9 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
         }
       });
       //
-      axios.all(currentFields.map(q => loadComment(q.id)))
+      const inquiriesPendingProcess = currentFields.filter(op => op.process === 'pending');
+      const amendment = currentFields.filter(op => op.process === 'draft');
+      axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)))
         .then(res => {
           if (res) {
             let commentList = [];
@@ -82,6 +86,14 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
         }).catch(err => {
           console.log(err)
         })
+      if (amendment.length) {
+        getCommentDraftBl(myBL.id, amendment[0].field)
+          .then((res) => {
+            const filterRepADraft = res.some((r) => r.state === 'AME_DRF');
+            if (filterRepADraft) isSubmit = false;
+            setIsSubmit(isSubmit)
+          }).catch(err => {console.log(err)})
+      }
     }
   }, [inquiries, checkSubmit, enableSubmit]);
 
