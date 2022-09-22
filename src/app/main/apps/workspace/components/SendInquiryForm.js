@@ -38,27 +38,36 @@ const useStyles = makeStyles(() => ({
     left: '50%',
     marginTop: -12,
     marginLeft: -12
+  },
+  input: {
+    borderWidth: '0.5px',
+    borderRadius: '6px',
+    borderStyle: 'solid',
+    borderColor: 'lightgray',
+    fontSize: 15,
+    fontFamily: 'Montserrat',
+    width: '100%'
   }
 }))
 
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
-  const [mybl, openEmail, inquiries] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.myBL,
-    workspace.formReducer.openEmail,
-    workspace.inquiryReducer.inquiries,
-  ]);
-  const [success, error, suggestMails, validateMail] = useSelector(({ workspace }) => [
-    workspace.mailReducer.success,
-    workspace.mailReducer.error,
-    workspace.mailReducer.suggestMails,
-    workspace.mailReducer.validateMail,
-  ]);
+  const mybl = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+
+  const success = useSelector(({ workspace }) => workspace.mailReducer.success);
+  const error = useSelector(({ workspace }) => workspace.mailReducer.error);
+  const suggestMails = useSelector(({ workspace }) => workspace.mailReducer.suggestMails);
+  const validateMail = useSelector(({ workspace }) => workspace.mailReducer.validateMail);
+
   const [isCustomerCc, setIsCustomerCc] = useState(false);
   const [isCustomerBcc, setIsCustomerBcc] = useState(false);
   const [isOnshoreCc, setIsOnshoreCc] = useState(false);
   const [isOnshoreBcc, setIsOnshoreBcc] = useState(false);
-  const initialState = useState({
+  const initialState = {
     toCustomer: '',
     toCustomerCc: '',
     toCustomerBcc: '',
@@ -68,12 +77,58 @@ const SendInquiryForm = (props) => {
     from: '',
     subject: '',
     content: ''
-  });
-
+  };
   const [form, setForm] = useState(initialState);
-  const [tabValue, setTabValue] = useState('customer')
+  const [tabValue, setTabValue] = useState('')
   const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
   const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
+  const [inqCustomer, setInqCustomer] = useState([])
+  const [inqOnshore, setInqOnshore] = useState([])
+
+  //temporary
+  const vvd = content['vvd'] || '123'
+  const pod = content['pod'] || '123'
+  const del = content['del'] || '123'
+  const bkgNo = mybl.bkgNo
+
+  const checkNewInquiry = (type) => {
+    const list = []
+    const temp = inquiries.filter(inq => inq.receiver[0] === type && (inq.state === 'OPEN' || inq.state === 'REP_DRF'))
+    if (temp.length) {
+      temp.forEach(inq => {
+        const find = metadata.field_options.find(field => field.value === inq.field)
+        list.push(find.label)
+      })
+    }
+    return list
+  }
+
+  useEffect(() => {
+    if (hasCustomer) {
+      setTabValue('customer')
+      setInqCustomer(checkNewInquiry('customer'))
+    }
+    else if (hasOnshore) {
+      setTabValue('onshore')
+    }
+    if (hasOnshore) {
+      setInqOnshore(checkNewInquiry('onshore'))
+    }
+  }, [openEmail])
+
+  useEffect(() => {
+    let subject = ''
+    let content = ''
+    if (tabValue === 'onshore') {
+      subject = `[Alert Onshore - BL Query]_[${inqOnshore}] ${bkgNo}: ${vvd} + ${pod} + ${del}`
+      content = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore}]`
+    }
+    else {
+      subject = `[Customer BL Query]_[${inqCustomer}] ${bkgNo}: ${vvd} + ${pod} + ${del}`
+      content = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer}]`
+    }
+    setForm({ ...form, subject, content })
+  }, [tabValue, openEmail])
 
   const isFormValid = () => {
     return form.toCustomer || form.toOnshore;
@@ -156,7 +211,7 @@ const SendInquiryForm = (props) => {
         else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
       });
       const formClone = JSON.parse(JSON.stringify(form));
-      if (tabValue === 'onshore' || (tabValue === 'customer' && !hasCustomer)) {
+      if (tabValue === 'onshore') {
         formClone.toCustomer = ''
         formClone.toCustomerCc = ''
         formClone.toCustomerBcc = ''
@@ -285,16 +340,10 @@ const SendInquiryForm = (props) => {
           <div style={{ marginTop: 5, display: 'flex' }}>
             <input
               style={{
-                paddingTop: '5px',
-                paddingLeft: '5px',
-                paddingBottom: '5px',
-                width: '100%',
-                borderWidth: '0.5px',
-                borderRadius: '6px',
+                padding: 5,
                 height: '25px',
-                borderStyle: 'solid',
-                borderColor: 'lightgray'
               }}
+              className={classes.input}
               value={form.subject}
               onChange={onInputChange}
             />
@@ -305,19 +354,15 @@ const SendInquiryForm = (props) => {
           <div style={{ display: 'flex' }}>
             <textarea
               style={{
-                width: '100%',
                 padding: 10,
                 marginTop: 10,
                 minHeight: 200,
-                borderWidth: '0.5px',
-                borderStyle: 'solid',
-                borderColor: 'lightgray',
-                borderRadius: 6,
                 resize: 'none'
               }}
+              className={classes.input}
               multiline="true"
               type="text"
-              defaultValue={form.content}
+              value={form.content}
               onChange={handleOnChange}></textarea>
           </div>
         </>
