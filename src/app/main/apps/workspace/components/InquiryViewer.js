@@ -580,6 +580,7 @@ const InquiryViewer = (props) => {
             dispatch(
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
             );
+            setViewDropDown('');
           }).catch((error) =>
             dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
           );
@@ -1190,6 +1191,7 @@ const InquiryViewer = (props) => {
     </>
   );
 };
+
 const ContainerDetailForm = ({ container, question, setTextResolve }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
