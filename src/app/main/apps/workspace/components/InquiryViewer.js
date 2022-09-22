@@ -724,15 +724,8 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     const el = document.getElementById(question.id);
-    setShowViewAll(false);
-    if (el) {
-      const oldClassName = el.className;
-      el.className = el.className.replace('-hideText', '')
-      if (el.getBoundingClientRect().height > 110) {
-        el.className = oldClassName;
-        setShowViewAll(true);
-      }
-    }
+    setShowViewAll(false); 
+    if (el && el.scrollHeight > el.clientHeight) setShowViewAll(true);
   }, [isLoadedComment]);
 
   const renderBtnReply = () => {
