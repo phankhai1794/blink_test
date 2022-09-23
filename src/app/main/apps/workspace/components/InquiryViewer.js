@@ -830,8 +830,6 @@ const InquiryViewer = (props) => {
                       )}
                     </div>
                     {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
-
-                    {/*Admin Reply*/}
                     {!['COMPL', 'UPLOADED'].includes(question.state) && (
                       isReply ? (
                         <>
@@ -1253,47 +1251,105 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
     setTextResolve(temp);
   };
 
+  /**
+ * @description
+ * Takes an Array<V>, and a grouping function,
+ * and returns a Map of the array grouped by the grouping function.
+ *
+ * @param list An array of type V.
+ * @param keyGetter A Function that takes the the Array type V as an input, and returns a value of type K.
+ *                  K is generally intended to be a property key of V.
+ *
+ * @returns Map of the array grouped by the grouping function.
+ */
+  // export function groupBy<K, V>(list: Array<V>, keyGetter: (input: V) => K): Map<K, Array<V>> {
+  //    const map = new Map<K, Array<V>>();
+  function groupBy(list, keyGetter) {
+    const map = new Map();
+    list.forEach(item => {
+      const key = keyGetter(item);
+      const collection = map.get(key);
+      if (!collection) {
+        map.set(key, [item]);
+      } else {
+        collection.push(item);
+      }
+    });
+    return map;
+  }
+
   const renderTB = () => {
     let td = [];
     const valueCopy = JSON.parse(JSON.stringify(values));
-    while (valueCopy.length) {
-      let rowValues = valueCopy.splice(0, 4);
-      td.push(typeList.map((type, index) => (
-        <div key={index} style={{ display: 'flex', marginTop: 10 }}>
+    let index = 0;
+    valueCopy.map((item) => {
+      item.index = index;
+      index += 1;
+    })
+    const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
+    const groupsValues = [...groups].map(([name, value]) => ({ name, value }));
+    while (groupsValues.length) {
+      let rowValues = groupsValues.splice(0, 4);
+      let rowIndex = 0;
+      let isRunning = true;
+     
+      while(isRunning){
+        let type;
+        if(rowIndex == 0){
+          type = typeList[rowIndex];
+        }
+        else{
+          type = typeList[typeList.length - 1];
+        }
+        let hasData = false;
+        td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: 1 }}>
           <input
             className={clsx(classes.text)}
             style={{
               backgroundColor: '#FDF2F2',
               fontWeight: 600,
-              borderTopLeftRadius: index === 0 && 8,
+              borderTopLeftRadius: rowIndex === 0 && 8,
               fontSize: 14,
-              borderBottomLeftRadius: index === typeList.length - 1 && 8
+              // borderBottomLeftRadius: rowIndex === typeList.length - 1 && 8
             }}
             disabled
             defaultValue={type}
           />
-          {rowValues.map((cd, index1) => {
-            const disabled = question.inqType !== getType(type);
-            return (
-              <input
-                className={clsx(classes.text)}
-                key={index1}
-                style={{
-                  marginLeft: 5,
-                  backgroundColor: disabled && '#FDF2F2',
-                  fontSize: 15,
-                  borderTopRightRadius: index === 0 && rowValues.length - 1 === index1 ? 8 : null,
-                  borderBottomRightRadius:
-                    index1 === rowValues.length - 1 && index === typeList.length - 1 ? 8 : null
-                }}
-                disabled={disabled}
-                value={cd[getType(type)]}
-                onChange={(e) => onChange(e, index1, getType(type))}
-              />
-            );
-          })}
-        </div>
-      )))
+          {
+            rowValues.map((item, index1) => {
+              if (item.value.length > rowIndex ){
+                hasData = true;
+              }
+              let nodeValue = null;
+              if (rowIndex - 1 < item.value.length){
+                nodeValue = item.value[rowIndex > 0?rowIndex-1:0];
+              }
+              const disabled =rowIndex >0 && nodeValue?false:true;
+              return (
+                <input
+                  className={clsx(classes.text)}
+                  key={index1}
+                  style={{
+                    marginLeft: 5,
+                    backgroundColor: disabled && '#FDF2F2',
+                    fontSize: 15,
+                    borderTopRightRadius: rowIndex === 0 && rowValues.length - 1 === index1 ? 8 : null,
+                    // borderBottomRightRadius:
+                    //     index1 === rowValues.length - 1 && rowIndex === typeList.length - 1 ? 8 : null
+                  }}
+                  disabled={disabled}
+                  value={nodeValue?nodeValue[getType(type)]:''}
+                  onChange={(e) => onChange(e, nodeValue.index, getType(type))}
+                />
+              );
+            })
+          }
+        </div>);
+        if (!hasData){
+          isRunning = false;   
+        }
+        rowIndex += 1;
+      }
     }
     return td;
   };
