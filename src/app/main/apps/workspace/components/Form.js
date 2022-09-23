@@ -17,7 +17,6 @@ import { Box, Tabs, Tab, Divider, Link, Chip, Button } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import OpenInNew from '@material-ui/icons/OpenInNew';
-import * as AppActions from 'app/store/actions';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -286,7 +285,8 @@ export default function Form(props) {
     dispatch(InquiryActions.setOpenedInqForm(false));
     dispatch(FormActions.setEnableSaveInquiriesList(true));
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-    dispatch(FormActions.openConfirmPopup({openConfirmPopup: false}))
+    dispatch(FormActions.openConfirmPopup({ openConfirmPopup: false }));
+    dispatch(InquiryActions.addAmendment());
   };
 
   const handleChange = (_, newValue) => {
@@ -304,10 +304,6 @@ export default function Form(props) {
         dispatch(FormActions.toggleSaveInquiry(true));
       }
     }
-  };
-
-  const handleSetOpenFab = (status) => {
-    setOpenFab(status);
   };
 
   const sendMailClick = () => {
@@ -403,14 +399,12 @@ export default function Form(props) {
           {children}
         </MuiDialogContent>
 
-        {field !== 'ATTACHMENT_LIST' &&
-          (<PopupConfirmSubmit field={field} handleCheckSubmit={() => {
-            setCheckSubmit(!checkSubmit)
-          }} />
-          )}
+        {field !== 'ATTACHMENT_LIST' && <PopupConfirmSubmit field={field} handleCheckSubmit={() => setCheckSubmit(!checkSubmit)} />}
 
         <PopupConfirm />
+
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
+
         {customActions == null && (
           <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
@@ -441,6 +435,7 @@ export default function Form(props) {
                 </div>
               </PermissionProvider>
             )}
+
             {(showBtnSend && user === 'workspace') ?
               <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
                 <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '2.6rem' }}>

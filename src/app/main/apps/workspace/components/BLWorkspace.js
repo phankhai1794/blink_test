@@ -20,6 +20,7 @@ import * as DraftActions from '../store/actions/draft-bl';
 
 import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
+import AmendmentEditor from './AmendmentEditor';
 import Form from './Form';
 import Label from './FieldLabel';
 import BtnAddInquiry from './BtnAddInquiry';
@@ -84,6 +85,7 @@ const BLWorkspace = (props) => {
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
+  const openAmendmentForm = useSelector(({ workspace }) => workspace.formReducer.openAmendmentForm);
   const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
 
   const transAutoSaveStatus = useSelector(
@@ -141,7 +143,7 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     dispatch(Actions.loadMetadata());
-  },[reload])
+  }, [reload])
 
   const expandRef = useRef();
   useEffect(() => {
@@ -238,6 +240,16 @@ const BLWorkspace = (props) => {
         title: 'Inquiry Creation',
         field: 'INQUIRY_FORM',
         child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))} />
+      };
+    case 'AMENDMENT_FORM':
+      return {
+        status: openAmendmentForm,
+        nums: [],
+        toggleForm: (status) => dispatch(FormActions.toggleCreateAmendment(status)),
+        fabTitle: 'Amendment Form',
+        title: 'Amendment Creation',
+        field: 'AMENDMENT_FORM',
+        child: <AmendmentEditor />
       };
     default:
       return {

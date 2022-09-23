@@ -14,56 +14,56 @@ export const OPEN_NOTIFICATION_SUBMIT_ANSWER = 'OPEN_NOTIFICATION_SUBMIT_ANSWER'
 export const ENABLE_SAVE_INQUIRIES = 'ENABLE_SAVE_INQUIRIES';
 export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
 export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
+export const OPEN_CREATE_AMENDMENT = 'OPEN_CREATE_AMENDMENT';
 
 export function setFullscreen(state) {
   return {
     type: SET_FULLSCREEN,
-    state: state
+    state
   };
 }
 
 export function toggleCreateInquiry(state) {
   return {
     type: OPEN_CREATE_INQUIRY,
-    state: state
+    state
   };
 }
 
 export function toggleAllInquiry(state) {
   return {
     type: OPEN_ALL_INQUIRY,
-    state: state
+    state
   };
 }
 
 export function toggleInquiry(state) {
   return {
     type: OPEN_INQUIRY,
-    state: state
+    state
   };
 }
 
 export function toggleSaveInquiry(state) {
   return {
     type: TOGGLE_SAVE_INQUIRY,
-    state: state
+    state
   };
 }
 
 export function toggleAddInquiry(state) {
   return {
     type: TOGGLE_ADD_INQUIRY,
-    state: state
+    state
   };
 }
 
 export function toggleAttachment(state) {
   return {
     type: OPEN_ATTACHMENT,
-    state: state
+    state
   };
 }
-
 
 export function toggleReload() {
   return {
@@ -80,48 +80,55 @@ export function openTrans() {
 export function toggleOpenEmail(state) {
   return {
     type: OPEN_EMAIL,
-    state: state
+    state
   };
 }
 
 export function toggleOpenInquiryReview(state) {
   return {
     type: OPEN_INQUIRY_REVIEW,
-    state: state
+    state
   };
 }
 
 export function toggleOpenNotificationAttachmentList(state) {
   return {
     type: OPEN_NOTIFICATION_ATTACHMENT_LIST,
-    state: state
+    state
   };
 }
 
 export function toggleOpenNotificationSubmitAnswer(state) {
   return {
     type: OPEN_NOTIFICATION_SUBMIT_ANSWER,
-    state: state
+    state
   };
 }
 
 export function setEnableSaveInquiriesList(state) {
   return {
     type: ENABLE_SAVE_INQUIRIES,
-    state: state
+    state
   };
 }
 
 export function openConfirmPopup(state) {
   return {
     type: OPEN_CONFIRM_POPUP,
-    state: state
+    state
   };
 }
 
 export function confirmPopupClick(state) {
   return {
     type: CONFIRM_POPUP_CLICK,
-    state: state
+    state
+  };
+}
+
+export function toggleCreateAmendment(state) {
+  return {
+    type: OPEN_CREATE_AMENDMENT,
+    state
   };
 }

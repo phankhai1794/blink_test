@@ -41,14 +41,19 @@ const UserInfo = (props) => {
           {name.charAt(0).toUpperCase()}
         </Avatar>
       }
-      <div>
-        <p className={classes.name}>{name}</p>
-        <div className="flex" style={{ marginLeft: '1rem' }}>
-          <p className={classes.time}>
-            {time}
-          </p>
+      {time ?
+        <div>
+          <p className={classes.name}>{name}</p>
+          <div className="flex" style={{ marginLeft: '1rem' }}>
+            <p className={classes.time}>
+              {time}
+            </p>
+          </div>
+        </div> :
+        <div className='flex' style={{ alignItems: 'center' }}>
+          <p className={classes.name}>{name}</p>
         </div>
-      </div>
+      }
     </div>
   );
 };

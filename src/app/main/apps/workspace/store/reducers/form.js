@@ -18,6 +18,7 @@ const initialState = {
   confirmPopupMsg: '',
   confirmPopupType: '',
   confirmClick: false,
+  openAmendmentForm: false,
 };
 
 const formReducer = function (state = initialState, action) {
@@ -61,12 +62,14 @@ const formReducer = function (state = initialState, action) {
   case Actions.ENABLE_SAVE_INQUIRIES: {
     return { ...state, enableSaveInquiriesList: action.state };
   }
-  case Actions.OPEN_CONFIRM_POPUP:{
-    return { ...state, ... action.state}
+  case Actions.OPEN_CONFIRM_POPUP: {
+    return { ...state, ...action.state }
   }
-  
-  case Actions.CONFIRM_POPUP_CLICK:{
-    return { ...state, openConfirmPopup:false, confirmClick: action.state}
+  case Actions.CONFIRM_POPUP_CLICK: {
+    return { ...state, openConfirmPopup: false, confirmClick: action.state }
+  }
+  case Actions.OPEN_CREATE_AMENDMENT: {
+    return { ...state, openAmendmentForm: action.state }
   }
   default: {
     return state;

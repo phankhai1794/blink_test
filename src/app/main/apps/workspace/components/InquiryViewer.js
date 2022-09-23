@@ -37,6 +37,7 @@ import FileAttach from './FileAttach';
 import UserInfo from './UserInfo';
 import AttachFile from './AttachFile';
 import Comment from './Comment';
+import TagsComponent from './TagsComponent';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -129,6 +130,7 @@ const InquiryViewer = (props) => {
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
@@ -266,7 +268,7 @@ const InquiryViewer = (props) => {
             // filter comment
             lastest.mediaFile = mediaFile;
             lastest.answerObj = [{ content: contentField }];
-            lastest.content = ["AME_DRF", "AME_SENT"].includes(lastestComment.state) ? `The update information is "${contentField}"` : contentField;
+            lastest.content = `"${contentField}"`;
             lastest.name = "";
             lastest.mediaFilesAnswer = [];
             lastest.id = lastestComment.id;
@@ -319,7 +321,7 @@ const InquiryViewer = (props) => {
               creator: { userName: user.displayName, avatar: null },
               createdAt: res[0].createdAt,
               answersMedia: [],
-              content: `The information is "${content[lastest.field]}"`
+              content: `Resolved data is "${orgContent[lastest.field] ? orgContent[lastest.field] : ''}"`
             }];
             res.map(r => {
               const { content, mediaFile } = r.content;
@@ -328,7 +330,7 @@ const InquiryViewer = (props) => {
                 creator: r.creator,
                 createdAt: r.createdAt,
                 answersMedia: mediaFile,
-                content: ["AME_DRF", "AME_SENT"].includes(r.state) ? `The update information is "${content}"` : content,
+                content: `"${content}"`,
               });
             });
             setComment(comments);
@@ -753,7 +755,7 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     const el = document.getElementById(question.id);
-    setShowViewAll(false); 
+    setShowViewAll(false);
     if (el && el.scrollHeight > el.clientHeight) setShowViewAll(true);
   }, [isLoadedComment]);
 
@@ -796,6 +798,9 @@ const InquiryViewer = (props) => {
       {isLoadedComment && (
         <>
           <div>
+            {['AME_DRF', 'AME_SENT', 'REP_DRF', 'REP_SENT', 'RESOVLED', 'UPLOADED'].includes(question?.state) &&
+              <TagsComponent tagName='AMENDMENT' tagColor='primary' />
+            }
             <div style={{ paddingTop: 10 }} className="flex justify-between">
               <UserInfo
                 name={question.creator?.userName}

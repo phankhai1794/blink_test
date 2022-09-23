@@ -146,7 +146,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const OtpCheck = ({ isDraftBL, children }) => {
+const OtpCheck = ({ children }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [myBL, setMyBL] = useState({ id: '' });
@@ -163,7 +163,7 @@ const OtpCheck = ({ isDraftBL, children }) => {
   };
 
   const handleCheckMail = () => {
-    verifyEmail({ isDraftBL, email: mail.value, bl: myBL.id })
+    verifyEmail({ email: mail.value, bl: myBL.id })
       .then((res) => {
         if (res) setStep(1);
       })
@@ -178,7 +178,7 @@ const OtpCheck = ({ isDraftBL, children }) => {
     setOtpCode({ ...otpCode, value: code, isValid: Boolean(/^\d+$/.test(code)) });
 
   const handleSendCode = () => {
-    verifyGuest({ isDraftBL, email: mail.value, bl: myBL.id, otpCode: otpCode.value })
+    verifyGuest({ email: mail.value, bl: myBL.id, otpCode: otpCode.value })
       .then((res) => {
         if (res) {
           const { role, userName, avatar, email, permissions } = res.userData;
@@ -220,7 +220,7 @@ const OtpCheck = ({ isDraftBL, children }) => {
           isValid: isEmail(email)
         });
 
-        isVerified({ isDraftBL, email, bl })
+        isVerified({ email, bl })
           .then(() => setStep(2))
           .catch((error) => {
             console.error(error);

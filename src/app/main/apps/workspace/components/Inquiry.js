@@ -3,7 +3,6 @@ import { Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import React, { useState } from 'react';
 import clsx from 'clsx';
-import { sentStatus } from '@shared';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -11,6 +10,7 @@ import * as FormActions from '../store/actions/form';
 import InquiryEditor from './InquiryEditor';
 import InquiryAnswer from './InquiryAnswer';
 import InquiryViewer from './InquiryViewer';
+import AmendmentEditor from './AmendmentEditor';
 
 const useStyles = makeStyles((theme) => ({
   boxItem: {
@@ -36,12 +36,14 @@ const Inquiry = (props) => {
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
+  const currentAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.currentAmendment);
   const listInqsField = inquiries.filter((q, index) => q.field === currentField);
   const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
   const [changeQuestion, setChangeQuestion] = useState();
   const [isSaved, setSaved] = useState(false);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
+  const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
 
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
@@ -80,6 +82,17 @@ const Inquiry = (props) => {
     resetActionInquiry(q);
   };
 
+  const checkCommentDraft = (amendment) => {
+    if (amendment?.process === 'draft') {
+      const lst = listCommentDraft.filter(comment => comment.field === amendment.field);
+      if (lst.length === 1) {
+        return false;
+      }
+      return Boolean(lst.filter(comment => comment.state === 'REP_SENT'));
+    }
+    return true;
+  }
+
   return props.user === 'workspace' ? (
     <>
       {listInqsField.map((q, index) => {
@@ -99,7 +112,7 @@ const Inquiry = (props) => {
               <>
                 <div className={clsx(classes.boxItem,
                   (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-                  sentStatus.includes(q.state) && 'offshoreReply'
+                  (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'RESOVLED'].includes(q.state) && checkCommentDraft(q)) && 'offshoreReply'
                 )}
                 style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
                   <InquiryViewer
@@ -127,12 +140,10 @@ const Inquiry = (props) => {
         marginTop: isShowBackground ? '2rem' : '',
       }}>
         {listInqsField.map((q, index) => {
-          const isEdit = currentEditInq && q.id === currentEditInq.id;
-
           return (
             <div key={index} className={clsx(classes.boxItem,
               (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-              !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(q.state) && 'customerReply'
+              (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'RESOVLED'].includes(q.state) && checkCommentDraft(q)) && 'customerReply'
             )}>
               <InquiryViewer
                 toggleEdit={() => toggleEdit(index)}
@@ -145,16 +156,21 @@ const Inquiry = (props) => {
                 getStateReplyDraft={(val) => setStateReplyDraft(val)}
               />
               {(q.showIconAttachAnswerFile) && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT' || getStateReplyDraft) &&
-              <InquiryAnswer
-                onCancel={() => handleCancel(q)}
-                setSave={() => handleSetSave(q)}
-                question={q}
-              />}
+                <InquiryAnswer
+                  onCancel={() => handleCancel(q)}
+                  setSave={() => handleSetSave(q)}
+                  question={q}
+                />}
               {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
             </div>
           );
         })}
       </div>
+      {currentAmendment || currentAmendment === null &&
+        <div style={{ marginTop: 15 }}>
+          <AmendmentEditor />
+        </div>
+      }
     </>
   );
 };
