@@ -16,6 +16,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 import { loadComment } from 'app/services/inquiryService';
+import {getCommentDraftBl} from "app/services/draftblService";
 import axios from 'axios';
 
 import * as InquiryActions from "../../../main/apps/workspace/store/actions/inquiry";
@@ -108,6 +109,7 @@ function ToolbarLayout1(props) {
   const inquiryLength = inquiries.length;
   const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
   const [isSubmit, setIsSubmit] = useState(true);
+  const getMybl = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   useEffect(() => {
     myBL.state === draftConfirm && setDisableConfirm(true);
@@ -131,6 +133,7 @@ function ToolbarLayout1(props) {
       isSubmit = false;
     }
     const inquiriesPendingProcess = optionInquiries.filter(op => op.process === 'pending');
+    const amendment = optionInquiries.filter(op => op.process === 'draft');
     if (pathname.includes('/guest')) {
       axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)))
         .then(res => {
@@ -139,14 +142,27 @@ function ToolbarLayout1(props) {
             res.map(r => {
               commentList = [...commentList, ...r];
             });
-            const filterRepADraft = commentList.some((r) => r.state === 'REP_A_DRF');
-            // dispatch(InquiryActions.checkSubmit(filterRepADraft));
+            const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'REP_A_DRF');
             if (filterRepADraft) isSubmit = false;
             setIsSubmit(isSubmit)
           }
         }).catch(err => {
           console.error(err)
         })
+      if (amendment.length) {
+        axios.all(amendment.map(q => getCommentDraftBl(getMybl.id, q.field)))
+          .then((res) => {
+            if (res) {
+              let commentList = [];
+              res.map(r => {
+                commentList = [...commentList, ...r];
+              });
+              const filterRepADraft = commentList.some((r) => r.state === 'AME_DRF');
+              if (filterRepADraft) isSubmit = false;
+              setIsSubmit(isSubmit)
+            }
+          }).catch(err => {console.log(err)})
+      }
     }
   }, [enableSubmit, inquiries]);
 
