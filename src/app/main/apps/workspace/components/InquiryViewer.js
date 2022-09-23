@@ -130,6 +130,7 @@ const InquiryViewer = (props) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+  const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
   const [question, setQuestion] = useState(props.question);
@@ -462,7 +463,7 @@ const InquiryViewer = (props) => {
     dispatch(
       FormActions.openConfirmPopup({
         openConfirmPopup: true,
-        confirmPopupMsg: 'Are you sure you want to remove this reply?',
+        confirmPopupMsg: 'Are you sure you want to delete this reply?',
         confirmPopupType: 'removeReply'
       })
     );
@@ -659,6 +660,7 @@ const InquiryViewer = (props) => {
         saveEditedField({ ...reqReply }).then(() => {
           //
           setSaveComment(!isSaveComment);
+          dispatch(InquiryActions.checkSubmit(!enableSubmit));
           dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
         );
@@ -668,6 +670,7 @@ const InquiryViewer = (props) => {
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
+          dispatch(InquiryActions.checkSubmit(!enableSubmit));
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })))
       }

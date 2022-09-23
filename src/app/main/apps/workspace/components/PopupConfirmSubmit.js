@@ -62,15 +62,21 @@ const PopupConfirmSubmit = (props) => {
 
   const handleConfirm = async () => {
     const inqs = [... inquiries];
+    const fields = [];
     const lstInq = inqs.map((item) => {
       if ((props.field === "INQUIRY_LIST" || props.field === item.field) &&
           (item.answerObj && (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(item.state)))
       ) {
-        return {inquiryId: item.id, currentState: item.state};
+        return {inquiryId: item.id, currentState: item.state, field: item.field};
       }
       return null;
     });
-    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null) });
+    lstInq.filter(x => x !== null).forEach(item => {
+      if (!fields.includes(item.field)) {
+        fields.push(item.field);
+      }
+    });
+    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields });
     //
     const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
     inqs.forEach((item) => {
