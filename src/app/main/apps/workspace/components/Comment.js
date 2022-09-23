@@ -45,12 +45,11 @@ const StyledTextField = withStyles({
 
 const useStyles = makeStyles(() => ({
   root: {
-    border: '2px solid #bac3cb9e',
+    border: '1px solid #BAC3CB',
     borderRadius: 8,
     margin: '20px 0',
     maxHeight: 350,
-    padding: '23px 32px',
-    overflow: 'scroll',
+    overflow: 'overlay',
     '& .content-reply': {
       fontSize: 15,
       fontWeight: 500
@@ -58,13 +57,14 @@ const useStyles = makeStyles(() => ({
     '& .attachment-reply': {
       marginTop: 15
     }
-  }
+  },
+  backgroundSystem: '#FDF2F2'
 }));
 
 const Comment = (props) => {
   const dispatch = useDispatch();
   const { question, comment, userType } = props;
-  const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length -1) : []);
+  const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length - 1) : []);
   const [value, setValue] = useState('');
   const [key, setKey] = useState();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -141,12 +141,16 @@ const Comment = (props) => {
     setAnchorEl(null);
   };
 
-  const contentUI = ({ userName, createdAt, avatar, content,title, media, id }) => {
+  const checkSystemResolved = (process, key) => {
+    return (process === 'draft' && key === 0) ? true : false;
+  }
+
+  const contentUI = ({ userName, createdAt, avatar, content, title, media, id }) => {
     return (
-      <>
-        <div className="comment-detail" key={id}>
+      <div key={id}>
+        <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
           <div className="flex justify-between">
-            <UserInfo name={userName} time={displayTime(createdAt)} avatar={avatar} />
+            <UserInfo name={checkSystemResolved(question?.process, id) ? 'System' : userName} time={displayTime(createdAt)} avatar={avatar} />
             {user.displayName === userName && key === id && (
               <>
                 <IconButton onClick={handleClick}>
@@ -175,7 +179,7 @@ const Comment = (props) => {
             )}
           </div>
           <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-            {title?`${title} "${content}"`: content }
+            {title ? `${title} "${content}"` : content}
           </div>
           <div className="attachment-reply">
             {media?.length > 0 &&
@@ -197,9 +201,9 @@ const Comment = (props) => {
         </div>
         <Divider
           variant="fullWidth"
-          style={{ height: 1, color: '#E2E6EA', margin: '14px 0', opacity: 0.6 }}
+          style={{ height: 1, color: '#E2E6EA', opacity: 0.6 }}
         />
-      </>
+      </div>
     );
   };
 
@@ -207,78 +211,78 @@ const Comment = (props) => {
     <div className={classes.root}>
       {question.process === 'pending' && (
         <>
-          <div style={{ paddingTop: 10 }} className="flex justify-between">
-            <UserInfo
-              name={question.creator.userName}
-              time={displayTime(question.createdAt)}
-              avatar={question.creator.avatar}
-            />
-          </div>
-          <Typography variant="h5">{question.name}</Typography>
-          <Typography
-            variant="h5"
-            style={{
-              wordBreak: 'break-word',
-              fontFamily: 'Montserrat',
-              fontSize: 15,
-              color: '#132535',
-              whiteSpace: 'pre-wrap'
-            }}>
-            {question.content}
-          </Typography>
-          <div style={{ display: 'block', margin: '1rem 0rem' }}>
-            {question.ansType === metadata.ans_type.choice && (
-              <ChoiceAnswer disable={true} question={question} />
-            )}
-            {/*{question.ansType === metadata.ans_type.paragraph && (*/}
-            {/*  <ParagraphAnswer disable={true} question={question} />*/}
-            {/*)}*/}
-          </div>
-          <div className="comment">
-            {reply && (
-              <StyledTextField
-                id="outlined-helperText"
-                label="Comment here"
-                value={value}
-                variant="outlined"
-                onKeyPress={addComment}
-                onChange={changeValue}
+          <div style={{ padding: '20px' }}>
+            <div className="flex justify-between">
+              <UserInfo
+                name={question.creator.userName}
+                time={displayTime(question.createdAt)}
+                avatar={question.creator.avatar}
               />
-            )}
-          </div>
-          {question.mediaFile?.length > 0 &&
-          question.mediaFile?.map((file, mediaIndex) => (
-            <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-              {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                <ImageAttach
-                  file={file}
-                  hiddenRemove={true}
-                  field={question.field}
-                  indexInquiry={0}
-                  style={{ margin: '2.5rem' }}
+            </div>
+            <Typography variant="h5">{question.name}</Typography>
+            <Typography
+              variant="h5"
+              style={{
+                wordBreak: 'break-word',
+                fontFamily: 'Montserrat',
+                fontSize: 15,
+                color: '#132535',
+                whiteSpace: 'pre-wrap'
+              }}>
+              {question.content}
+            </Typography>
+            <div style={{ display: 'block', margin: '1rem 0rem' }}>
+              {question.ansType === metadata.ans_type.choice && (
+                <ChoiceAnswer disable={true} question={question} />
+              )}
+              {/*{question.ansType === metadata.ans_type.paragraph && (*/}
+              {/*  <ParagraphAnswer disable={true} question={question} />*/}
+              {/*)}*/}
+            </div>
+            <div className="comment">
+              {reply && (
+                <StyledTextField
+                  id="outlined-helperText"
+                  label="Comment here"
+                  value={value}
+                  variant="outlined"
+                  onKeyPress={addComment}
+                  onChange={changeValue}
                 />
-              ) : (
-                <FileAttach hiddenRemove={true} file={file} field={question.field} indexInquiry={0} />
               )}
             </div>
-          ))}
+            {question.mediaFile?.length > 0 &&
+              question.mediaFile?.map((file, mediaIndex) => (
+                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                    <ImageAttach
+                      file={file}
+                      hiddenRemove={true}
+                      field={question.field}
+                      indexInquiry={0}
+                      style={{ margin: '2.5rem' }}
+                    />
+                  ) : (
+                    <FileAttach hiddenRemove={true} file={file} field={question.field} indexInquiry={0} />
+                  )}
+                </div>
+              ))}
+          </div>
           <Divider className="mt-12" />
         </>
       )}
 
-      <div style={{ paddingTop: '10px' }}>
-        {comments.map((k, id) => {
-          return contentUI({
-            userName: k.creator.userName,
-            createdAt: k.createdAt,
-            avatar: k.creator.avatar,
-            title:  k.title||'',
-            content: k.content,
-            media: k.answersMedia,
-            id
-          });
-        })}
-      </div>
+      {comments.map((k, id) => {
+        return contentUI({
+          userName: k.creator.userName,
+          createdAt: k.createdAt,
+          avatar: k.creator.avatar,
+          title: k.title || '',
+          content: k.content,
+          media: k.answersMedia,
+          id
+        });
+      })}
     </div>
   );
 };

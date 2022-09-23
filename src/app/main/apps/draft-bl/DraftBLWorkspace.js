@@ -27,7 +27,7 @@ function DraftBLWorkspace() {
   return (
     <>
       {
-        isPreviewing ? <DraftBL myBL={{ id: bl }} user="guest" /> : <OtpCheck isDraftBL={true}>
+        isPreviewing ? <DraftBL myBL={{ id: bl }} user="guest" /> : <OtpCheck>
           <div className="flex flex-col flex-1 w-full">
             <FusePageSimple
               classes={{

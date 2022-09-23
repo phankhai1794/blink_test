@@ -10,7 +10,7 @@ function GuestWorkspaceApp() {
   const pageLayout = useRef(null);
 
   return (
-    <OtpCheck isDraftBL={false}>
+    <OtpCheck>
       <div className="flex flex-col flex-1 w-full">
         <FusePageSimple
           classes={{

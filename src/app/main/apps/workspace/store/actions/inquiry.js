@@ -2,11 +2,13 @@ export const SAVE_INQUIRY = 'SAVE_INQUIRY';
 export const EDIT_INQUIRY = 'EDIT_INQUIRY';
 export const SAVE_FIELD = 'SAVE_FIELD';
 export const ADD_QUESTION = 'ADD_QUESTION';
+export const ADD_AMENDMENT = 'ADD_AMENDMENT';
 export const SET_INQUIRY = 'SET_INQUIRY';
 export const REMOVE_SELECTED_OPTION = 'REMOVE_SELECTED_OPTION';
 export const DISPLAY_COMMENT = 'DISPLAY_COMMENT';
 export const SET_MYBL = 'SET_MYBL';
 export const SAVE_METADATA = 'SAVE_METADATA';
+export const SET_ORG_CONTENT = 'SET_ORG_CONTENT';
 export const SET_CONTENT = 'SET_CONTENT';
 export const VALIDATE = 'VALIDATE';
 export const SET_CURRENT_FIELD = 'SET_CURRENT_FIELD';
@@ -24,6 +26,7 @@ export const SET_OPENED_INQ_FORM = 'SET_OPENED_INQ_FORM';
 export const SET_BACKGROUND_ATTACHMENT_LIST = 'SET_BACKGROUND_ATTACHMENT_LIST';
 export const CHECK_SUBMIT = 'CHECK_SUBMIT';
 export const CHECK_SEND = 'CHECK_SEND';
+export const SET_LIST_COMMENT_DRAFT = 'SET_LIST_COMMENT_DRAFT';
 
 export function saveInquiry() {
   return {
@@ -34,84 +37,98 @@ export function saveInquiry() {
 export function saveField(state) {
   return {
     type: SAVE_FIELD,
-    state: state
+    state
   };
 }
 
 export function addQuestion(state) {
   return {
     type: ADD_QUESTION,
-    state: state
+    state
+  };
+}
+
+export function addAmendment(state = undefined) {
+  return {
+    type: ADD_AMENDMENT,
+    state
   };
 }
 
 export function setInquiries(state) {
   return {
     type: SET_INQUIRY,
-    state: state
+    state
   };
 }
 
 export function removeSelectedOption(state) {
   return {
     type: REMOVE_SELECTED_OPTION,
-    state: state
+    state
   };
 }
 
 export function setDisplayComment(state) {
   return {
     type: DISPLAY_COMMENT,
-    state: state
+    state
   };
 }
 
 export function setMyBL(state) {
   return {
     type: SET_MYBL,
-    state: state
+    state
   };
 }
 
 export function saveMetadata(state) {
   return {
     type: SAVE_METADATA,
-    state: state
+    state
+  };
+}
+
+export function setOrgContent(state) {
+  return {
+    type: SET_ORG_CONTENT,
+    state
   };
 }
 
 export function setContent(state) {
   return {
     type: SET_CONTENT,
-    state: state
+    state
   };
 }
 
 export function validate(state) {
   return {
     type: VALIDATE,
-    state: state
+    state
   };
 }
 
 export function setField(state) {
   return {
     type: SET_CURRENT_FIELD,
-    state: state
+    state
   };
 }
 
-export function setQuestion(question) {
+export function setQuestion(state) {
   return {
     type: SET_QUESTION,
-    state: question
+    state
   };
 }
 
-export function setReply(question) {
+export function setReply(state) {
   return {
     type: SET_REPLY,
-    state: question
+    state
   };
 }
 
@@ -188,6 +205,13 @@ export function checkSubmit(state) {
 export function checkSend(state) {
   return {
     type: CHECK_SEND,
+    state: state
+  };
+}
+
+export function setListCommentDraft(state) {
+  return {
+    type: SET_LIST_COMMENT_DRAFT,
     state: state
   };
 }

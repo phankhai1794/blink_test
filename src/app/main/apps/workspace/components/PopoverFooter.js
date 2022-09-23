@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Button, IconButton, Link } from '@material-ui/core';
 import axios from "axios";
 import { loadComment } from 'app/services/inquiryService';
-import {getCommentDraftBl} from "app/services/draftblService";
+import { getCommentDraftBl } from "app/services/draftblService";
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -84,7 +84,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
             setIsSubmit(isSubmit)
           }
         }).catch(err => {
-          console.log(err)
+          console.error(err)
         })
       if (amendment.length) {
         getCommentDraftBl(myBL.id, amendment[0].field)
@@ -92,7 +92,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
             const filterRepADraft = res.some((r) => r.state === 'AME_DRF');
             if (filterRepADraft) isSubmit = false;
             setIsSubmit(isSubmit)
-          }).catch(err => {console.log(err)})
+          }).catch(err => { console.error(err) });
       }
     }
   }, [inquiries, checkSubmit, enableSubmit]);
@@ -159,6 +159,12 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
     dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
   };
 
+  const checkEnableBtnAddAmendment = () => {
+    const filter = inquiries.filter(inq => inq.field === currentField);
+    if (!filter.length) return false;
+    return !filter.some(inq => inq.process === 'draft');
+  }
+
   return (
     <div
       style={{
@@ -200,35 +206,40 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
             onClick={isShowBackground ? '' : toggleInquiriresDialog}>
             Open all inquiries
           </Link>
-        </div>}
-      {
-        <PermissionProvider
-          action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}>
-          <div>
-            <Button
-              variant="contained"
-              style={{
-                textTransform: 'capitalize',
-                left: '13.45%',
-                right: '13.45%',
-                top: '25%',
-                bottom: '25%',
-                fontFamily: 'Montserrat',
-                fontStyle: 'normal',
-                fontWeight: '600',
-                fontSize: '16px',
-                textAlign: 'center',
-              }}
-              className={classes.root}
-              color="primary"
-              disabled={isShowBackground ? true : isSubmit}
-              onClick={onSubmit}>
-              Submit
-            </Button>
-          </div>
-        </PermissionProvider>
+        </div>
       }
 
+      <PermissionProvider
+        action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}>
+        <div>
+          <Button
+            variant="contained"
+            style={{
+              textTransform: 'capitalize',
+              left: '13.45%',
+              right: '13.45%',
+              top: '25%',
+              bottom: '25%',
+              fontFamily: 'Montserrat',
+              fontStyle: 'normal',
+              fontWeight: '600',
+              fontSize: '16px',
+              textAlign: 'center',
+            }}
+            className={classes.root}
+            color="primary"
+            disabled={isShowBackground ? true : isSubmit}
+            onClick={onSubmit}>
+            Submit
+          </Button>
+        </div>
+      </PermissionProvider>
+
+      {checkEnableBtnAddAmendment() &&
+        <div>
+          <button onClick={() => dispatch(InquiryActions.addAmendment(null))}>Create Amendment</button>
+        </div>
+      }
     </div>
   );
 };
