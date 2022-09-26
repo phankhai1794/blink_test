@@ -21,7 +21,7 @@ const PreviewDraftBL = () => {
 
   const previewDraftBL = () => {
     const bl = myBL.id;
-    if (bl) { 
+    if (bl) {
       const newWindow = window.open(`/draft-bl/preview/${bl}`, '_blank');
       if (newWindow) newWindow.opener = null;
     }
@@ -36,7 +36,7 @@ const PreviewDraftBL = () => {
     <>
       <PermissionProvider
         action={PERMISSION.VIEW_PREVIEW_DRAFT_BL}
-        extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
+        extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el)) && !myBL?.state?.includes('DRF_')}>
         <Tooltip title="Preview Draft B/L">
           <img
             src="assets/images/icons/preview-draft.svg"
@@ -49,7 +49,7 @@ const PreviewDraftBL = () => {
 
       <PermissionProvider
         action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
-        extraCondition={pathname.includes('/draft-bl/edit')}>
+        extraCondition={pathname.includes('/guest') && myBL?.state?.includes('DRF_')}>
         <Tooltip title="Redirect to Draft B/L">
           <img
             src="assets/images/icons/preview-draft.svg"

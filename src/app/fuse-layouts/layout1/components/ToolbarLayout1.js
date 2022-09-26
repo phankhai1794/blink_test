@@ -18,7 +18,6 @@ import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 import { loadComment } from 'app/services/inquiryService';
 import { getCommentDraftBl } from "app/services/draftblService";
 import axios from 'axios';
-import SendNotification from 'app/main/apps/workspace/components/SendNotification';
 
 import * as InquiryActions from "../../../main/apps/workspace/store/actions/inquiry";
 
@@ -105,8 +104,6 @@ function ToolbarLayout1(props) {
   const myBL = useSelector(({ draftBL }) => draftBL.myBL);
   const [open, setOpen] = useState(false);
   const [disableConfirm, setDisableConfirm] = useState(false);
-  const [disableSendDraft, setDisableSendDraft] = useState(false);
-  const inquiryLength = inquiries.length;
   const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
   const [isSubmit, setIsSubmit] = useState(true);
   const getMybl = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
@@ -161,10 +158,6 @@ function ToolbarLayout1(props) {
   }, [enableSubmit, inquiries]);
 
   useEffect(() => {
-    setDisableSendDraft(inquiries.some((c) => c.state === 'AME_DRF'));
-  }, [inquiries]);
-
-  useEffect(() => {
     if (!user.displayName || !validToken) {
       if (!allowAccess) {
         localStorage.clear();
@@ -190,7 +183,7 @@ function ToolbarLayout1(props) {
   }, [user, allowAccess]);
 
   const openAllInquiry = () => {
-    if (inquiryLength) {
+    if (inquiries.length) {
       dispatch(FormActions.toggleAllInquiry(true));
       dispatch(FormActions.toggleSaveInquiry(true));
     }
@@ -220,10 +213,6 @@ function ToolbarLayout1(props) {
   const confirmBlDraft = () => {
     setOpen(true);
   };
-
-  const onSendDraftBl = () => {
-    dispatch(DraftBLActions.toggleSendNotification(true));
-  }
 
   const redirectEditDraftBL = () => {
     const bl = new URLSearchParams(search).get('bl');
@@ -267,7 +256,7 @@ function ToolbarLayout1(props) {
                 size="medium"
                 className={clsx('h-64', classes.button)}
                 onClick={openAllInquiry}>
-                <Badge color="primary" badgeContent={inquiryLength}>
+                <Badge color="primary" badgeContent={inquiries.length}>
                   <NotificationsIcon />
                 </Badge>
                 <span className="pl-12">Inquiry List</span>
@@ -304,19 +293,6 @@ function ToolbarLayout1(props) {
                 Confirm
               </Button>
               <DialogConfirm open={open} handleClose={handleClose} />
-            </PermissionProvider>
-
-            <PermissionProvider
-              action={PERMISSION.DRAFTBL_SEND_DRAFT_AMENDMENT}
-              extraCondition={pathname.includes('/guest')}>
-              <Button
-                variant="contained"
-                className={clsx(classes.button, classes.buttonSend)}
-                onClick={onSendDraftBl}
-                disabled={!disableSendDraft}>
-                Send
-              </Button>
-              <SendNotification />
             </PermissionProvider>
 
             <PermissionProvider

@@ -431,13 +431,12 @@ const InquiryViewer = (props) => {
           }
         })
         .catch((error) => console.error(error));
-    } else if (confirmPopupType === 'removeReply') {
-      if (replyRemove) {
-        deleteDraftBLReply(replyRemove.id)
-          .then(() => {
-            setSaveComment(!isSaveComment);
-          }).catch((error) => console.error(error));
-      }
+    } else if (confirmPopupType === 'removeReply' && replyRemove) {
+      deleteDraftBLReply(replyRemove.id)
+        .then(() => {
+          setSaveComment(!isSaveComment);
+          dispatch(FormActions.toggleReload());
+        }).catch((error) => console.error(error));
     }
     dispatch(
       FormActions.openConfirmPopup({
@@ -652,8 +651,7 @@ const InquiryViewer = (props) => {
           );
       }
     } else {
-      // Add
-      if (!tempReply.answer?.id) {
+      if (!tempReply.answer?.id) { // Add Amendment
         const reqReply = {
           field: question.field,
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
@@ -666,15 +664,18 @@ const InquiryViewer = (props) => {
           dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
         );
-      } else {
+      }
+      else { // Edit Amendment
         const reqReply = {
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
+          dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
-        }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })))
+          dispatch(FormActions.toggleReload());
+        }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
     }
     setIsReply(false)
@@ -1297,13 +1298,13 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
       let rowValues = groupsValues.splice(0, 4);
       let rowIndex = 0;
       let isRunning = true;
-     
-      while(isRunning){
+
+      while (isRunning) {
         let type;
-        if(rowIndex == 0){
+        if (rowIndex == 0) {
           type = typeList[rowIndex];
         }
-        else{
+        else {
           type = typeList[typeList.length - 1];
         }
         let hasData = false;
@@ -1322,14 +1323,14 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
           />
           {
             rowValues.map((item, index1) => {
-              if (item.value.length > rowIndex ){
+              if (item.value.length > rowIndex) {
                 hasData = true;
               }
               let nodeValue = null;
-              if (rowIndex - 1 < item.value.length){
-                nodeValue = item.value[rowIndex > 0?rowIndex-1:0];
+              if (rowIndex - 1 < item.value.length) {
+                nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
               }
-              const disabled =rowIndex >0 && nodeValue?false:true;
+              const disabled = rowIndex > 0 && nodeValue ? false : true;
               return (
                 <input
                   className={clsx(classes.text)}
@@ -1343,15 +1344,15 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
                     //     index1 === rowValues.length - 1 && rowIndex === typeList.length - 1 ? 8 : null
                   }}
                   disabled={disabled}
-                  value={nodeValue?nodeValue[getType(type)]:''}
+                  value={nodeValue ? nodeValue[getType(type)] : ''}
                   onChange={(e) => onChange(e, nodeValue.index, getType(type))}
                 />
               );
             })
           }
         </div>);
-        if (!hasData){
-          isRunning = false;   
+        if (!hasData) {
+          isRunning = false;
         }
         rowIndex += 1;
       }

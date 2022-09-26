@@ -2,7 +2,6 @@ import React from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Dialog, makeStyles } from "@material-ui/core";
 import MuiDialogContent from "@material-ui/core/DialogContent";
-import { sendEditedField } from 'app/services/draftblService';
 import clsx from 'clsx';
 import * as AppActions from 'app/store/actions';
 
@@ -76,12 +75,6 @@ const SendNotification = () => {
 
   const onConfirm = () => {
     handleClose();
-    sendEditedField(myBL.id).then(() => {
-      dispatch(
-        AppActions.showMessage({ message: 'Send successfully', variant: 'success' })
-      );
-      dispatch(Actions.toggleReload());
-    }).catch((err) => console.error(err))
   };
 
   return (
