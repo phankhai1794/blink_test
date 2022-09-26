@@ -127,8 +127,7 @@ const useStyles = makeStyles(() => ({
   },
   dialogContent: {
     margin: 'auto',
-    marginTop: '1rem',
-    backgroundColor: 'white',
+    backgroundColor: (props) => (props.style?.backgroundColor || 'white'), //email preview
     position: 'relative',
     width: (props) => (props.isFullScreen ? '1200px' : '900px')
   },
@@ -206,7 +205,7 @@ export default function Form(props) {
 
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const classes = useStyles({ isFullScreen });
+  const classes = useStyles({ isFullScreen, style: props.style });
   const classesHover = useStyles();
   const [idBtn, setIdBtn] = useState('');
   const [checkSubmit, setCheckSubmit] = useState(true);

@@ -424,10 +424,6 @@ const InquiryViewer = (props) => {
           hidePopupEmpty && dispatch(InquiryActions.setOneInq({}));
           if (!optionsOfQuestion.length) {
             (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
-            if (openInquiryReview) {
-              dispatch(FormActions.toggleOpenInquiryReview(false));
-              dispatch(FormActions.toggleOpenEmail(false))
-            };
           }
         })
         .catch((error) => console.error(error));
