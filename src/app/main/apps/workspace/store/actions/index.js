@@ -19,7 +19,10 @@ import * as InquiryActions from './inquiry';
 export const initBL = (bkgNo) => async (dispatch) => {
   createBL(bkgNo)
     .then((res) => {
-      if (res) dispatch(setMyBL(res.myBL));
+      if (res) {
+        const { id, state, bkgNo } = res.myBL;
+        dispatch(setMyBL({ id, state, bkgNo }));
+      }
     })
     .catch((err) => console.error(err));
 };
@@ -37,6 +40,8 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
   const amendments = inquiries.filter(i => i.process === 'draft');
   getBlInfo(myBL_Id)
     .then((res) => {
+      // const { id, state, bkgNo, content } = res.myBL;
+      // dispatch(setMyBL({ id, state, bkgNo }));
       const { content } = res.myBL;
       dispatch(setOrgContent(res.myBL.content));
 

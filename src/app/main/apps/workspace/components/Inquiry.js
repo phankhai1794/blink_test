@@ -167,7 +167,7 @@ const Inquiry = (props) => {
         })}
       </div>
       {currentAmendment || currentAmendment === null &&
-        <div style={{ marginTop: 15 }}>
+        <div style={{ marginTop: 30 }}>
           <AmendmentEditor />
         </div>
       }

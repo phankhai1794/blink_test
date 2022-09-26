@@ -12,11 +12,6 @@ import * as InquiryActions from '../store/actions/inquiry';
 import { setLastField } from '../store/actions/inquiry';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    borderRadius: '8px',
-    width: '130px',
-    textTransform: 'none'
-  },
   nextPrev: {
     '& .MuiButtonBase-root': {
       marginRight: 18,
@@ -28,6 +23,35 @@ const useStyles = makeStyles((theme) => ({
     },
     '& .MuiIconButton-root:focus': {
       backgroundColor: 'transparent'
+    }
+  },
+  button: {
+    borderRadius: '8px',
+    textTransform: 'none',
+    fontFamily: 'Montserrat',
+    fontStyle: 'normal',
+    fontWeight: 600,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  textCreateAmendment: {
+    position: 'relative',
+    left: 17,
+    fontWeight: 600,
+    fontFamily: 'Montserrat',
+    lineHeight: '20px',
+    padding: 5,
+    paddingLeft: 7,
+    paddingRight: 13,
+    '&:before': {
+      position: 'absolute',
+      top: 5,
+      left: -21,
+      width: 21,
+      height: 21,
+      content: '""',
+      backgroundImage: 'url("assets/images/icons/plus.svg")',
+      backgroundSize: 'cover'
     }
   }
 }));
@@ -210,23 +234,13 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
       }
 
       <PermissionProvider
-        action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}>
+        action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
+        extraCondition={!checkEnableBtnAddAmendment()}>
         <div>
           <Button
             variant="contained"
-            style={{
-              textTransform: 'capitalize',
-              left: '13.45%',
-              right: '13.45%',
-              top: '25%',
-              bottom: '25%',
-              fontFamily: 'Montserrat',
-              fontStyle: 'normal',
-              fontWeight: '600',
-              fontSize: '16px',
-              textAlign: 'center',
-            }}
-            className={classes.root}
+            className={classes.button}
+            style={{ width: 130 }}
             color="primary"
             disabled={isShowBackground ? true : isSubmit}
             onClick={onSubmit}>
@@ -235,11 +249,19 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
         </div>
       </PermissionProvider>
 
-      {checkEnableBtnAddAmendment() &&
+      <PermissionProvider
+        action={PERMISSION.VIEW_CREATE_AMENDMENT}
+        extraCondition={checkEnableBtnAddAmendment()}>
         <div>
-          <button onClick={() => dispatch(InquiryActions.addAmendment(null))}>Create Amendment</button>
+          <Button
+            variant="contained"
+            className={classes.button}
+            color="primary"
+            onClick={() => dispatch(InquiryActions.addAmendment(null))}>
+            <span className={classes.textCreateAmendment}>Create Amendment</span>
+          </Button>
         </div>
-      }
+      </PermissionProvider>
     </div>
   );
 };

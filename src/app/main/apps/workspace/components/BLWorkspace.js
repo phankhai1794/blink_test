@@ -11,6 +11,7 @@ import { makeStyles } from '@material-ui/styles';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import { getBlInfo } from 'app/services/myBLService';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -32,6 +33,7 @@ import TableCD from './TableCD';
 import TableCM from './TableCM';
 import AttachmentListNotification from './AttachmentListNotification';
 import SubmitAnswerNotification from "./SubmitAnswerNotification";
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -134,7 +136,12 @@ const BLWorkspace = (props) => {
 
     const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) dispatch(Actions.initBL(bkgNo));
-    else if (props.myBL) dispatch(InquiryActions.setMyBL(props.myBL));
+    else if (props.myBL) {
+      getBlInfo(props.myBL?.id).then(res => {
+        const { id, state, bkgNo } = res.myBL;
+        dispatch(InquiryActions.setMyBL({ id, state, bkgNo }));
+      });
+    }
 
     return () => {
       dispatch(FormActions.toggleReload());

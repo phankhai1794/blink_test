@@ -135,6 +135,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
+const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
 const BLField = (props) => {
   const classes = useStyles();
@@ -195,7 +196,7 @@ const BLField = (props) => {
           }
           dispatch(FormActions.toggleCreateInquiry(true));
         }
-        else dispatch(FormActions.toggleCreateAmendment(true));
+        else if (allowCreateAmendment) dispatch(FormActions.toggleCreateAmendment(true));
       }
       dispatch(InquiryActions.setField(e.currentTarget.id));
       setAnchorEl(e.currentTarget.id);
