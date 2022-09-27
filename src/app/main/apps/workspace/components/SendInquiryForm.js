@@ -1,10 +1,10 @@
 import * as Actions from 'app/store/actions';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Icon, Button, Grid, Tabs, Tab } from '@material-ui/core';
+import { Icon, Button, Tabs, Tab, Select, MenuItem } from '@material-ui/core';
 import clsx from 'clsx';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles, withStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { getMail } from 'app/services/mailService';
 
@@ -12,7 +12,7 @@ import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from "../store/actions/inquiry";
 
-import TagsInput from './TagsInput';
+import InputUI from './MailInputUI';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
 
@@ -47,8 +47,31 @@ const useStyles = makeStyles(() => ({
     fontSize: 15,
     fontFamily: 'Montserrat',
     width: '100%'
+  },
+  menuItem: {
+    '&:hover': {
+      background: `#FDF2F2 !important`,
+      color: '#BD0F72',
+      fontWeight: '600 !important'
+    }
+  },
+  paper: {
+    borderRadius: 8
   }
 }))
+
+const StyledMenuItem = withStyles(theme => ({
+  root: {
+    "&:focus": {
+      backgroundColor: '#FDF2F2' ,
+      color: '#BD0F72',
+      fontWeight: 600,
+      "& .MuiListItemIcon-root, & .MuiListItemText-primary": {
+        color: theme.palette.common.white
+      }
+    },
+  }
+}))(MenuItem);
 
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
@@ -80,10 +103,17 @@ const SendInquiryForm = (props) => {
   };
   const [form, setForm] = useState(initialState);
   const [tabValue, setTabValue] = useState('')
+  const [previewValue, setPreviewValue] = useState('default')
+  const handleChange = (event) => {
+    setPreviewValue(event.target?.value || event);
+  };
   const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
   const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
   const [inqCustomer, setInqCustomer] = useState([])
   const [inqOnshore, setInqOnshore] = useState([])
+  const [tabSelected, setTabSelected] = useState(0);
+  const [customerValue, setCustomerValue] = useState({ subject: '', content: '' })
+  const [onshoreValue, setOnshoreValue] = useState({ subject: '', content: '' })
 
   //temporary
   const vvd = content['vvd'] || '123'
@@ -114,21 +144,33 @@ const SendInquiryForm = (props) => {
     if (hasOnshore) {
       setInqOnshore(checkNewInquiry('onshore'))
     }
-  }, [openEmail])
+  }, [openEmail, inquiries])
 
   useEffect(() => {
     let subject = ''
     let content = ''
-    if (tabValue === 'onshore') {
-      subject = `[Alert Onshore - BL Query]_[${inqOnshore}] ${bkgNo}: ${vvd} + ${pod} + ${del}`
+    if (hasOnshore) {
+      subject = `[Alert Onshore - BL Query]_[${inqOnshore}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
       content = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore}]`
+      setOnshoreValue({ subject, content })
+      setForm({ ...form, subject, content })
+    }
+    if (hasCustomer) {
+      subject = `[Customer BL Query]_[${inqCustomer}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
+      content = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer}]`
+      setCustomerValue({ subject, content })
+      setForm({ ...form, subject, content })
+    }
+  }, [openEmail])
+
+  useEffect(() => {
+    if (tabValue === 'onshore') {
+      setForm({ ...form, subject: onshoreValue.subject, content: onshoreValue.content })
     }
     else {
-      subject = `[Customer BL Query]_[${inqCustomer}] ${bkgNo}: ${vvd} + ${pod} + ${del}`
-      content = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer}]`
+      setForm({ ...form, subject: customerValue.subject, content: customerValue.content })
     }
-    setForm({ ...form, subject, content })
-  }, [tabValue, openEmail])
+  }, [tabValue, inquiries])
 
   const isFormValid = () => {
     return form.toCustomer || form.toOnshore;
@@ -207,8 +249,10 @@ const SendInquiryForm = (props) => {
     else {
       const cloneInquiries = [...inquiries];
       cloneInquiries.forEach(q => {
-        if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
-        else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
+        if (q.receiver[0] === tabValue) {
+          if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
+          else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
+        }
       });
       const formClone = JSON.parse(JSON.stringify(form));
       if (tabValue === 'onshore') {
@@ -231,11 +275,23 @@ const SendInquiryForm = (props) => {
     setForm({ ...form, [key]: tags.join(',') })
   };
 
-  const handleOnChange = (event) => {
+  const handleBodyChange = (event) => {
+    if (tabValue === 'customer') {
+      setCustomerValue({ ...customerValue, content: event.target.value })
+    }
+    else {
+      setOnshoreValue({ ...onshoreValue, content: event.target.value })
+    }
     setForm({ ...form, content: event.target.value })
   };
 
-  const onInputChange = (event) => {
+  const handleSubjectChange = (event) => {
+    if (tabValue === 'customer') {
+      setCustomerValue({ ...customerValue, subject: event.target.value })
+    }
+    else {
+      setOnshoreValue({ ...onshoreValue, subject: event.target.value })
+    }
     setForm({ ...form, subject: event.target.value })
   };
 
@@ -299,6 +355,19 @@ const SendInquiryForm = (props) => {
       return null
     }
   }
+  const countInq = (recevier) => {
+    let count = 0;
+    inquiries.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
+    return count;
+  };
+  console.log("form: ", form.content)
+  const handleTabSelected = () => {
+    if (countInq('customer') === 0) {
+      return 'onshore'
+    } else {
+      return tabSelected === 0 ? 'customer' : 'onshore'
+    }
+  }
   return (
     <>
       <Form
@@ -307,65 +376,105 @@ const SendInquiryForm = (props) => {
         toggleForm={(status) => dispatch(FormActions.toggleOpenEmail(status))}
         openFab={false}
         field={props.field}
+        style={previewValue === 'email' && { backgroundColor: '#fdf2f2' }}
         customActions={
-          <ActionUI openPreviewClick={opendPreviewForm} sendMailClick={sendMailClick}></ActionUI>
+          <ActionUI
+            openPreviewClick={opendPreviewForm}
+            sendMailClick={sendMailClick}
+            previewValue={previewValue}
+            handleChange={handleChange}
+          ></ActionUI>
         }
-        FabTitle="E-mail">
-        <>
-          {ToReceiver()}
-          {hasCustomer && hasOnshore &&
-            <div style={{ borderBottom: '2px solid #515F6B', marginBottom: 20 }}>
-              <Tabs
-                indicatorColor="primary"
-                value={tabValue}
-                onChange={handleTabChange}
-                textColor='primary'
-              >
-                <Tab
-                  className={classes.tab}
-                  value='customer'
-                  label="Customer"
-                />
-                <Tab
-                  className={classes.tab}
-                  value='onshore'
-                  label="Onshore"
-                />
-              </Tabs>
+        FabTitle="E-mail"
+        tabs={previewValue === 'inquiry' && ['Customer', 'Onshore']}
+        nums={previewValue === 'inquiry' && [countInq('customer'), countInq('onshore')]}
+        tabChange={(newValue) => {
+          setTabSelected(newValue);
+        }}
+      >
+        {previewValue === 'default' &&
+          <>
+            {ToReceiver()}
+            {hasCustomer && hasOnshore &&
+              <div style={{ borderBottom: '2px solid #515F6B', marginBottom: 20 }}>
+                <Tabs
+                  indicatorColor="primary"
+                  value={tabValue}
+                  onChange={handleTabChange}
+                  textColor='primary'
+                >
+                  <Tab
+                    className={classes.tab}
+                    value='customer'
+                    label="Customer"
+                  />
+                  <Tab
+                    className={classes.tab}
+                    value='onshore'
+                    label="Onshore"
+                  />
+                </Tabs>
+              </div>
+            }
+            <div style={{ marginTop: 10 }}>
+              <label className={clsx(classes.label)}>Subject</label>
             </div>
-          }
-          <div style={{ marginTop: 10 }}>
-            <label className={clsx(classes.label)}>Subject</label>
+            <div style={{ marginTop: 5, display: 'flex' }}>
+              <input
+                style={{
+                  padding: 5,
+                  height: '25px',
+                }}
+                className={classes.input}
+                value={form.subject}
+                onChange={handleSubjectChange}
+              />
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <label className={clsx(classes.label)}>Body</label>
+            </div>
+            <div style={{ display: 'flex' }}>
+              <textarea
+                style={{
+                  padding: 10,
+                  marginTop: 10,
+                  minHeight: 200,
+                  resize: 'none'
+                }}
+                className={classes.input}
+                multiline="true"
+                type="text"
+                value={form.content}
+                onChange={handleBodyChange}></textarea>
+            </div>
+          </>
+        }
+        {previewValue === 'email' &&
+          <div style={{ margin: 'auto', maxWidth: 580, }}>
+            <img style={{ margin: 15 }} src="assets/images/logos/one_ocean_network-logo.png" width="100px" alt="ONE" />
+            <div style={{ backgroundColor: 'white', padding: 20, fontFamily: 'Montserrat', fontSize: 15, fontWeight: 500 }}>
+              <p style={{ whiteSpace: 'pre-line' }}>
+                {form.content}
+              </p>
+              <p >Please visit the link below and help us answer our inquiry. <br />
+                BLink Workspace: <br />
+                Access Code: </p>
+              <p>
+                Thank you <br />
+                ONE Offshore Center</p>
+            </div>
           </div>
-          <div style={{ marginTop: 5, display: 'flex' }}>
-            <input
-              style={{
-                padding: 5,
-                height: '25px',
-              }}
-              className={classes.input}
-              value={form.subject}
-              onChange={onInputChange}
+        }
+        {previewValue === 'inquiry' &&
+          <div style={{ height: '800px' }}>
+            <AllInquiry
+              user="workspace"
+              receiver={handleTabSelected()}
+              collapse={true}
+              openInquiryReview={true}
             />
           </div>
-          <div style={{ marginTop: 10 }}>
-            <label className={clsx(classes.label)}>Body</label>
-          </div>
-          <div style={{ display: 'flex' }}>
-            <textarea
-              style={{
-                padding: 10,
-                marginTop: 10,
-                minHeight: 200,
-                resize: 'none'
-              }}
-              className={classes.input}
-              multiline="true"
-              type="text"
-              value={form.content}
-              onChange={handleOnChange}></textarea>
-          </div>
-        </>
+        }
       </Form>
     </>
   );
@@ -422,66 +531,10 @@ const InquiryReview = (props) => {
   );
 };
 
-const InputUI = (props) => {
-  const { id, title, type, onChanged, isCc, isBcc, onCc, onBcc } = props;
-  const classes = useStyles();
-  return (
-    <Grid
-      container
-      direction="row"
-      style={{ alignItems: 'center', justifyContent: "flex-start" }}>
-      <Grid item xs={1}>
-        {title === 'Cc' || title === 'Bcc' ? (
-          <div
-            style={{
-              paddingLeft: '7px',
-              paddingRight: '7px',
-              width: 'fit-content',
-              background: '#FFFFFF',
-              border: '1px solid #BD0F72',
-              borderRadius: '4px',
-              justifyContent: 'center'
-            }}>
-            <label
-              style={{
-                fontStyle: 'normal',
-                fontWeight: '500',
-                fontSize: '14px',
-                lineHeight: '17px',
-                width: '100%',
-                fontFamily: 'Montserrat',
-                color: '#BD0F72'
-              }}
-              className={clsx(classes.label)}>
-              {title}
-            </label>
-          </div>
-        ) : (
-          <label style={{ fontSize: 14 }} className={clsx(classes.label)}>
-            {title}
-          </label>
-        )}
-      </Grid>
-      <Grid style={{ paddingLeft: 20 }} item xs={11}>
-        <TagsInput
-          id={id}
-          tagLimit={10}
-          type={title}
-          isCc={isCc}
-          isBcc={isBcc}
-          onCc={onCc}
-          onBcc={onBcc}
-          onChanged={onChanged}
-        />
-      </Grid>
-    </Grid>
-  );
-};
-
 const ActionUI = (props) => {
   const classes = useStyles();
-  const { openPreviewClick, sendMailClick } = props;
-  const [isLoading] = useSelector(({ workspace }) => [workspace.mailReducer.isLoading]);
+  const { openPreviewClick, sendMailClick, previewValue, handleChange } = props;
+  const isLoading = useSelector(({ workspace }) => workspace.mailReducer.isLoading);
 
   return (
     <div
@@ -492,37 +545,70 @@ const ActionUI = (props) => {
         justifyContent: 'center',
         alignItems: 'center'
       }}>
-      <Button
-        style={{
-          textTransform: 'none',
-          position: 'absolute',
-          left: '10px',
-          top: '10px',
-          fontFamily: 'Montserrat'
-        }}
-        variant="text"
-        onClick={openPreviewClick}>
-        <Icon fontSize='small' style={{ color: colorBtnReview, paddingRight: '0.5rem' }}>visibility</Icon>
-        <span className="pl-14" style={{ color: colorBtnReview, fontSize: '16px' }}>
-          Preview Inquiries
-        </span>
-      </Button>
-      <Button
-        variant="text"
-        size="medium"
-        style={{
-          textTransform: 'none',
-          fontWeight: 'bold',
-          width: 140,
-          color: 'white',
-          backgroundColor: isLoading ? '#515E6A' : '#bd1874',
-          borderRadius: 20,
-          fontFamily: 'Montserrat'
-        }}
-        disabled={isLoading}
-        onClick={sendMailClick}>
-        Send
-      </Button>
+      <div style={{
+        position: 'absolute',
+        left: '2.5rem',
+        top: '1rem',
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+        <Icon style={{ color: colorBtnReview, paddingRight: '1.2rem' }}>visibility</Icon>
+        <Icon fontSize='small' style={{
+          color: colorBtnReview, paddingRight: '0.5rem', position: 'absolute', left: 17, top: 10
+        }}>arrow_drop_down</Icon>
+        <Select
+          style={{
+            color: '#2F80ED',
+            textTransform: 'none',
+            fontFamily: 'Montserrat',
+            fontWeight: 600
+          }}
+          value={previewValue}
+          onChange={handleChange}
+          IconComponent={() => null}
+          MenuProps={{ classes: { paper: classes.paper }}}
+          disableUnderline
+        >
+          <StyledMenuItem value='default'>Preview</StyledMenuItem>
+          <StyledMenuItem value='inquiry'> Preview Inquiries</StyledMenuItem>
+          <StyledMenuItem value='email'> Preview Email Layout</StyledMenuItem>
+        </Select>
+      </div>
+      {previewValue === 'default' ?
+        <Button
+          variant="text"
+          size="medium"
+          style={{
+            textTransform: 'none',
+            fontWeight: 'bold',
+            width: 120,
+            height: 40,
+            color: 'white',
+            backgroundColor: isLoading ? '#515E6A' : '#bd1874',
+            borderRadius: 9,
+            fontFamily: 'Montserrat'
+          }}
+          disabled={isLoading}
+          onClick={sendMailClick}>
+          Send
+        </Button> :
+        <Button
+          variant="contained"
+          size="medium"
+          color='primary'
+          style={{
+            textTransform: 'none',
+            fontWeight: 'bold',
+            width: 120,
+            height: 40,
+            borderRadius: 9,
+            fontFamily: 'Montserrat'
+          }}
+          onClick={() => handleChange('default')}>
+          <Icon fontSize='small' style={{ paddingRight: '0.5rem' }}>keyboard_backspace</Icon>
+          Back
+        </Button>
+      }
       {isLoading && <CircularProgress size={24} className={classes.buttonProgress} />}
     </div>
   );
