@@ -145,7 +145,8 @@ const BLField = (props) => {
   const [hasAnswer, setHasAnswer] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
-  const [isResolved, setIsResolved] = useState(false)
+  const [isResolved, setIsResolved] = useState(false);
+  const user = useSelector(({ user }) => user);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -222,7 +223,8 @@ const BLField = (props) => {
       // Check Inquiry
       if (lstInq.length) {
         if (lstInq.some(e => ['OPEN', 'INQ_SENT'].includes(e.state))) return false;
-        checkInqAns = lstInq.every(e => sentStatus.includes(e.state));
+        const listStatus = user?.role === 'Admin' ? [...sentStatus] : [...sentStatus, ...['ANS_DRF']];
+        checkInqAns = lstInq.every(e => listStatus.includes(e.state));
       }
       // Check Amendment
       if (lstReplyAme.length === 1) return false;

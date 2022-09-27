@@ -203,7 +203,6 @@ const AllInquiry = (props) => {
               <div key={index} style={{ display: 'flex' }} onClick={() => changeToEditor(q)}></div>
             );
           }
-          const type = q.ansType;
           CURRENT_NUMBER += 1;
           if (props.user === 'workspace') {
             return currentEditInq && q.id === currentEditInq.id ? (
@@ -240,7 +239,6 @@ const AllInquiry = (props) => {
               </Card>
             );
           } else {
-            const isEdit = currentEditInq && q.id === currentEditInq.id;
             return (
               <div key={index}>
                 <div
