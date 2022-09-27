@@ -208,6 +208,9 @@ const InquiryViewer = (props) => {
                 if (filterOffshoreSent.state === 'REP_A_SENT') {
                   lastest.showIconReply = true;
                 }
+                if (lastest.state !== 'UPLOADED' && filterOffshoreSent.state === 'COMPL') {
+                  lastest.state = filterOffshoreSent.state
+                }
               } else {
                 if (filterOffshoreSent.state === 'REP_A_DRF') {
                   setStateReplyDraft(true);
@@ -480,35 +483,46 @@ const InquiryViewer = (props) => {
   };
 
   const onConfirm = () => {
-    let content = '';
+    let contentField = '';
     if (typeof textResolve === 'string') {
-      content = textResolve.trim();
+      contentField = textResolve.trim();
     } else {
-      content = textResolve;
-      content.forEach((obj) => {
+      contentField = textResolve;
+      contentField.forEach((obj) => {
         if (obj[question.inqType]) obj[question.inqType] = obj[question.inqType]?.trim();
       });
     }
     const body = {
       fieldId: question.field,
       inqId: question.id,
-      fieldContent: content,
+      fieldContent: contentField,
       blId: myBL.id
     };
+    const optionsInquires = [...inquiries];
+    const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     resolveInquiry(body)
       .then(() => {
-        dispatch(FormActions.toggleReload());
+        // dispatch(FormActions.toggleReload());
         setIsResolve(false);
+        //
         setQuestion((q) => ({ ...q, state: 'COMPL' }));
+        optionsInquires[editedIndex].state = 'COMPL';
+        dispatch(InquiryActions.setInquiries(optionsInquires));
+        dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
+        setSaveComment(!isSaveComment);
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   };
 
   const onUpload = () => {
+    const optionsInquires = [...inquiries];
+    const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     uploadOPUS(question.id)
       .then(() => {
-        dispatch(FormActions.toggleReload());
+        // dispatch(FormActions.toggleReload());
         setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
+        optionsInquires[editedIndex].state = 'UPLOADED';
+        dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(
           AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' })
         );
