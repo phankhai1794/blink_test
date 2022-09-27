@@ -50,8 +50,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const PopupConfirm = (props) => {
-
+const PopupConfirm = () => {
   const [openConfirmPopup, confirmPopupMsg, confirmPopupType] = useSelector(({ workspace }) => [
     workspace.formReducer.openConfirmPopup,
     workspace.formReducer.confirmPopupMsg,
