@@ -15,7 +15,7 @@ const useStyles = makeStyles(() => ({
     fontWeight: '600',
     fontFamily: 'Montserrat'
   },
- 
+
 }))
 const InputUI = (props) => {
   const { id, title, type, onChanged, isCc, isBcc, onCc, onBcc } = props;
@@ -88,6 +88,24 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return regexp.test(email);
   };
+
+  const validateListEmail = (e) => {
+    e.preventDefault()
+    const result = []
+    let temp = ''
+    e.clipboardData.getData('text').split(',').forEach(v => {
+      if (validateEmail(v.trim())) {
+        result.push(v)
+      }
+      else if (v.trim()) {
+        temp += v.trim() + ','
+      }
+    })
+    if (result.length) {
+      dispatch(MailActions.setTags({ ..._tags, [id]: [...tags, ...result] }))
+      dispatch(MailActions.validateMail({ ...validateMail, [id]: temp.slice(0, -1) }))
+    }
+  }
 
   const handleChange = (value) => {
     dispatch(MailActions.validateMail({ ...validateMail, [id]: value.trim() === 'undefined' ? '' : value }))
@@ -224,6 +242,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
           onKeyUp={handleKeyUp}
           onBlur={handleBlur}
           onFocus={() => setIsFocus(true)}
+          onPaste={validateListEmail}
           defaultValue=""
           onChange={handleChange}
           value={input}
@@ -241,4 +260,4 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
     </div>
   );
 };
-export default InputUI ;
+export default InputUI;

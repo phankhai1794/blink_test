@@ -360,7 +360,7 @@ const SendInquiryForm = (props) => {
     inquiries.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
     return count;
   };
-  console.log("form: ", form.content)
+
   const handleTabSelected = () => {
     if (countInq('customer') === 0) {
       return 'onshore'
