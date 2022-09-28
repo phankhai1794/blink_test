@@ -112,7 +112,7 @@ const Inquiry = (props) => {
               <>
                 <div className={clsx(classes.boxItem,
                   (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-                  (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'RESOVLED'].includes(q.state) && checkCommentDraft(q)) && 'offshoreReply'
+                  (!['OPEN', 'INQ_SENT', 'ANS_DRF', 'COMPL', 'UPLOADED', 'RESOVLED'].includes(q.state) && checkCommentDraft(q)) && 'offshoreReply'
                 )}
                 style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
                   <InquiryViewer
