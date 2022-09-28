@@ -5,7 +5,6 @@ deploy_test:
   stage: test
   only:
     - "develop"
-    - "test"
   when: manual
   environment:
     name: test
