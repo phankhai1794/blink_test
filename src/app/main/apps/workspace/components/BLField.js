@@ -151,6 +151,7 @@ const BLField = (props) => {
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   const onMouseEnter = (e) => {
     if (questionIsEmpty) setAnchorEl(e.currentTarget);
@@ -196,7 +197,7 @@ const BLField = (props) => {
           }
           dispatch(FormActions.toggleCreateInquiry(true));
         }
-        else if (allowCreateAmendment) dispatch(FormActions.toggleCreateAmendment(true));
+        else if (allowCreateAmendment && myBL?.state?.includes('DRF_')) dispatch(FormActions.toggleCreateAmendment(true));
       }
       dispatch(InquiryActions.setField(e.currentTarget.id));
       setAnchorEl(e.currentTarget.id);

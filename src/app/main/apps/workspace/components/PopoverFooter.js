@@ -33,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 600,
     fontSize: 16,
     textAlign: 'center',
+    margin: '0 5px'
   },
   textCreateAmendment: {
     position: 'relative',
@@ -40,9 +41,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 600,
     fontFamily: 'Montserrat',
     lineHeight: '20px',
-    padding: 5,
-    paddingLeft: 7,
-    paddingRight: 13,
+    padding: '4px 13px 4px 7px',
     '&:before': {
       position: 'absolute',
       top: 5,
@@ -234,8 +233,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
       }
 
       <PermissionProvider
-        action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
-        extraCondition={!checkEnableBtnAddAmendment()}>
+        action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}>
         <div>
           <Button
             variant="contained"
@@ -251,7 +249,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
 
       <PermissionProvider
         action={PERMISSION.VIEW_CREATE_AMENDMENT}
-        extraCondition={checkEnableBtnAddAmendment()}>
+        extraCondition={checkEnableBtnAddAmendment() && myBL?.state?.includes('DRF_')}>
         <div>
           <Button
             variant="contained"
