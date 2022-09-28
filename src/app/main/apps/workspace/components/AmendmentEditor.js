@@ -40,10 +40,10 @@ const useStyles = makeStyles((theme) => ({
 const Amendment = ({ question }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [content, currentField, inquiries, myBL] = useSelector(({ workspace }) => [
+  const user = useSelector(({ user }) => user);
+  const [content, currentField, myBL] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.content,
     workspace.inquiryReducer.currentField,
-    workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.myBL
   ]);
 
@@ -124,7 +124,7 @@ const Amendment = ({ question }) => {
       </p>
       <div className='flex justify-between'>
         <UserInfo
-          name="Customer"
+          name={user?.displayName}
           time=""
           avatar=""
         />
