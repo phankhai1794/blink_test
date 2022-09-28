@@ -153,6 +153,7 @@ const InquiryViewer = (props) => {
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
   const [submitLabel, setSubmitLabel] = useState(false);
   const [isShowViewAll, setShowViewAll] = useState(false);
+  const [isUploadFile, setIsUploadFile] = useState(false);
 
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
@@ -247,8 +248,10 @@ const InquiryViewer = (props) => {
                 lastest.createdAt = answerObj[0]?.updatedAt;
                 setType(lastest.ansType);
               }
-              lastest.mediaFile = lastest.mediaFilesAnswer;
-              lastest.mediaFilesAnswer = [];
+              if (lastest.mediaFilesAnswer.length) {
+                lastest.mediaFile = lastest.mediaFilesAnswer;
+                lastest.mediaFilesAnswer = [];
+              }
               if (user.role === 'Admin') {
                 lastest.showIconReply = true;
               } else {
@@ -347,11 +350,11 @@ const InquiryViewer = (props) => {
 
   const resetAnswerActionSave = () => {
     const quest = { ...question };
-    if (currentQuestion && currentQuestion.id === quest.id) {
+    quest.showIconAttachAnswerFile = false;
+    quest.showIconAttachReplyFile = false;
+    if (currentQuestion && currentQuestion.currentInq.id === quest.id) {
       quest.showIconReply = false;
       quest.showIconEdit = true;
-      quest.showIconAttachAnswerFile = false;
-      quest.showIconAttachReplyFile = false;
       let answerObj = null;
       if (question.ansType === metadata.ans_type.choice) {
         answerObj = quest.answerObj.filter((item) => item.confirmed);
@@ -365,15 +368,16 @@ const InquiryViewer = (props) => {
         quest.name = "";
         quest.answerObj = [];
       }
-      quest.state = currentQuestion.state;
+      quest.state = currentQuestion.currentInq.state;
       setType(quest.ansType);
-      if (currentQuestion.state !== 'INQ_SENT') {
-        quest.mediaFile = currentQuestion.mediaFilesAnswer;
+      if (currentQuestion.currentInq.state !== 'INQ_SENT') {
+        quest.mediaFile = currentQuestion.currentInq.mediaFilesAnswer;
         quest.mediaFilesAnswer = [];
         setInqHasComment(true);
       } else {
         quest.showIconReply = true;
       }
+      quest.mediaFilesAnswer = [];
       setQuestion(quest);
     }
   }
@@ -381,6 +385,15 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     resetAnswerActionSave()
   }, [currentQuestion, isSaved]);
+
+  useEffect(() => {
+    const optionsInquires = [...inquiries];
+    const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    const quest = { ...question };
+    if (optionsInquires[editedIndex].mediaFilesAnswer.length) {
+      setQuestion({...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer});
+    }
+  }, [isUploadFile]);
 
   useEffect(() => {
     setQuestion(props.question);
@@ -933,7 +946,15 @@ const InquiryViewer = (props) => {
                   ) : (
                     <>
                       {question.showIconAttachAnswerFile && (
-                        <FormControlLabel control={<AttachFile isAnswer={true} question={question} questions={inquiries} />} />)}
+                        <FormControlLabel control={
+                          <AttachFile isAnswer={true} 
+                            question={question} 
+                            questions={inquiries}
+                            setIsUploadFile={(val) => {
+                              setIsUploadFile(val)
+                            }}
+                            isUploadFile={isUploadFile} />}
+                        />)}
                       {question.showIconAttachReplyFile && (
                         <AttachFile
                           isReply={true}
@@ -968,6 +989,8 @@ const InquiryViewer = (props) => {
                     questions={inquiries}
                     question={question}
                     disable={!question.showIconAttachAnswerFile}
+                    saveStatus={isSaved}
+                    currentQuestion={currentQuestion}
                   />
                 )}
               {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
@@ -977,6 +1000,8 @@ const InquiryViewer = (props) => {
                     index={index}
                     questions={inquiries}
                     disable={!question.showIconAttachAnswerFile}
+                    saveStatus={isSaved}
+                    currentQuestion={currentQuestion}
                   />
                 )}
             </div>

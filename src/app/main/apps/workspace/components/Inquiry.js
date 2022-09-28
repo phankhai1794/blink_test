@@ -3,6 +3,7 @@ import { Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import React, { useState } from 'react';
 import clsx from 'clsx';
+import { getInquiryById } from 'app/services/inquiryService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -37,6 +38,7 @@ const Inquiry = (props) => {
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const currentAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.currentAmendment);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const listInqsField = inquiries.filter((q, index) => q.field === currentField);
   const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
   const [changeQuestion, setChangeQuestion] = useState();
@@ -44,6 +46,7 @@ const Inquiry = (props) => {
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
@@ -62,24 +65,61 @@ const Inquiry = (props) => {
     }
   };
 
-  const resetActionInquiry = (q) => {
+  const resetActionInquiry = async (q, isCancel) => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
     optionsInquires[editedIndex].showIconReply = true;
     optionsInquires[editedIndex].showIconEdit = true;
     optionsInquires[editedIndex].showIconAttachAnswerFile = false;
     optionsInquires[editedIndex].showIconAttachReplyFile = false;
+    //
+    let isAnswered = false;
+    let choiceAnswer = false;
+    if (metadata.ans_type['paragraph'] === optionsInquires[editedIndex].ansType) {
+      if (optionsInquires[editedIndex].answerObj) {
+        isAnswered = true;
+      }
+    } else if (metadata.ans_type['choice'] === optionsInquires[editedIndex].ansType) {
+      if (optionsInquires[editedIndex].answerObj) {
+        const answered = optionsInquires[editedIndex].answerObj.filter(ans => ans.confirmed);
+        if (answered.length) isAnswered = true;
+        choiceAnswer = true;
+      }
+    }
+    if (isCancel && !isAnswered) {
+      optionsInquires[editedIndex].mediaFilesAnswer = [];
+    } else if (isCancel && isAnswered) {
+      const [resInq] = [await getInquiryById(myBL.id)];
+      resInq.forEach(ans => {
+        //reset data click cancel
+        if (optionsInquires[editedIndex].id === ans.id) {
+          if (optionsInquires[editedIndex].answerObj.length) {
+            if (!choiceAnswer) {
+              optionsInquires[editedIndex].paragraphAnswer.content = optionsInquires[editedIndex].answerObj[0].content
+            } else {
+              const answerIndex = optionsInquires[editedIndex].answerObj.find((item) => item.confirmed);
+              optionsInquires[editedIndex].selectChoice.answer = answerIndex.id;
+            }
+          }
+          optionsInquires[editedIndex].mediaFilesAnswer = ans.mediaFilesAnswer;
+        }
+      });
+    }
+    //
     dispatch(InquiryActions.setInquiries(optionsInquires));
-    setQuestionIdSaved(optionsInquires[editedIndex]);
+    setQuestionIdSaved({
+      currentInq: optionsInquires[editedIndex],
+      isCancel
+    });
     setSaved(!isSaved);
   };
 
   const handleCancel = (q) => {
-    resetActionInquiry(q);
+    resetActionInquiry(q, true);
   };
 
   const handleSetSave = (q) => {
-    resetActionInquiry(q);
+    resetActionInquiry(q, false);
   };
 
   const checkCommentDraft = (amendment) => {

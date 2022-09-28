@@ -10,7 +10,7 @@ import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 const AttachFile = (props) => {
-  const { disabled, isAnswer, isReply, question, questions, setAttachmentReply } = props;
+  const { disabled, isAnswer, isReply, question, questions, setAttachmentReply, isUploadFile } = props;
   const dispatch = useDispatch();
   const [currentEditInq, reply, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
@@ -36,6 +36,7 @@ const AttachFile = (props) => {
         optionsInquires[editedIndex].mediaFilesAnswer.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: src });
       });
       optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
+      props.setIsUploadFile(!isUploadFile);
       return dispatch(InquiryActions.setInquiries(optionsInquires));
     }
 
