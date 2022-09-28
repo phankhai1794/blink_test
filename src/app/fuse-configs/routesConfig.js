@@ -3,17 +3,14 @@ import { Redirect } from 'react-router-dom';
 import { FuseUtils } from '@fuse/index';
 import { appsConfigs } from 'app/main/apps/appsConfigs';
 import { pagesConfigs } from 'app/main/pages/pagesConfigs';
-import { authRoleExamplesConfigs } from 'app/main/example/auth/authRoleExamplesConfigs';
-import { DocumentationConfig } from 'app/main/documentation/DocumentationConfig';
 import { LoginConfig } from 'app/main/login/LoginConfig';
 import { RegisterConfig } from 'app/main/register/RegisterConfig';
 import { LogoutConfig } from 'app/main/logout/LogoutConfig';
 import { CallbackConfig } from 'app/main/callback/CallbackConfig';
+
 const routeConfigs = [
   ...appsConfigs,
   ...pagesConfigs,
-  ...authRoleExamplesConfigs,
-  DocumentationConfig,
   LoginConfig,
   RegisterConfig,
   LogoutConfig,
