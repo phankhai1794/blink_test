@@ -154,7 +154,7 @@ const Amendment = ({ question }) => {
       <div style={{ marginTop: 20 }}>
         <Button
           className={classes.btn}
-          // disabled={content[currentField] === fieldValue}
+          disabled={fieldValue.length === 0}
           onClick={handleSave}
           color="primary"
           variant="contained"
