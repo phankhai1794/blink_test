@@ -93,7 +93,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
     e.preventDefault()
     const result = []
     let temp = ''
-    e.clipboardData.getData('text').split(',').forEach(v => {
+    e.clipboardData.getData('text').split(/,|;/).forEach(v => {
       if (validateEmail(v.trim())) {
         result.push(v)
       }
@@ -133,11 +133,13 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
   };
 
   const handleKeyUp = (e) => {
+    e.preventDefault();
     if (!['Enter', 'Tab'].includes(e.key)) return dispatch(MailActions.validateMail({ ...validateMail, [id]: e.target.value }));
     onChanged(id, tags);
   };
 
   const handleBlur = (e) => {
+    e.preventDefault();
     if (input && validateEmail(input.trim())) {
       const newTags = [...tags, input.trim()]
       onChanged(id, newTags);
@@ -197,7 +199,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
   };
 
   return (
-    <div className="tags-input-container" style={{ paddingRight: (type == 'Cc' || type == 'Bcc') ? '0px' : '90px', }} onFocus={() => setIsFocus(true)}>
+    <div className="tags-input-container" style={{ height: 35, paddingRight: (type == 'Cc' || type == 'Bcc') ? '0px' : '90px' }} onFocus={() => setIsFocus(true)}>
       {type !== 'Cc' && type !== 'Bcc' && <div style={{
         position: 'absolute',
         paddingLeft: '7px',
@@ -243,7 +245,6 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
           onBlur={handleBlur}
           onFocus={() => setIsFocus(true)}
           onPaste={validateListEmail}
-          defaultValue=""
           onChange={handleChange}
           value={input}
           type="text"

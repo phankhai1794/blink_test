@@ -97,6 +97,8 @@ const BLWorkspace = (props) => {
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
+  const openNotification = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitAnswer);
+
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
   );
@@ -321,7 +323,11 @@ const BLWorkspace = (props) => {
     <>
       <BLProcessNotification />
       <AttachmentListNotification />
-      <SubmitAnswerNotification />
+      <SubmitAnswerNotification
+        open={openNotification}
+        msg='Your answer has been submitted successfully.'
+        handleClose={() => dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false))} 
+      />
       <div className={clsx('max-w-5xl', classes.root)}>
         <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
           {isExpand && (

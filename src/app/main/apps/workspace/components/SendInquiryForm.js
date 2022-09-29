@@ -1,4 +1,5 @@
 import * as Actions from 'app/store/actions';
+import { VESSEL_VOYAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY } from '@shared/keyword';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Icon, Button, Tabs, Tab, Select, MenuItem } from '@material-ui/core';
@@ -8,10 +9,12 @@ import { makeStyles, withStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { getMail } from 'app/services/mailService';
 
+
 import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from "../store/actions/inquiry";
 
+import SubmitAnswerNotification from "./SubmitAnswerNotification";
 import InputUI from './MailInputUI';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
@@ -63,7 +66,7 @@ const useStyles = makeStyles(() => ({
 const StyledMenuItem = withStyles(theme => ({
   root: {
     "&:focus": {
-      backgroundColor: '#FDF2F2' ,
+      backgroundColor: '#FDF2F2',
       color: '#BD0F72',
       fontWeight: 600,
       "& .MuiListItemIcon-root, & .MuiListItemText-primary": {
@@ -85,6 +88,8 @@ const SendInquiryForm = (props) => {
   const error = useSelector(({ workspace }) => workspace.mailReducer.error);
   const suggestMails = useSelector(({ workspace }) => workspace.mailReducer.suggestMails);
   const validateMail = useSelector(({ workspace }) => workspace.mailReducer.validateMail);
+  const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
+  const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
 
   const [isCustomerCc, setIsCustomerCc] = useState(false);
   const [isCustomerBcc, setIsCustomerBcc] = useState(false);
@@ -114,20 +119,28 @@ const SendInquiryForm = (props) => {
   const [tabSelected, setTabSelected] = useState(0);
   const [customerValue, setCustomerValue] = useState({ subject: '', content: '' })
   const [onshoreValue, setOnshoreValue] = useState({ subject: '', content: '' })
+  const [openNotification, setOpenNotification] = useState(false)
 
-  //temporary
-  const vvd = content['vvd'] || '123'
-  const pod = content['pod'] || '123'
-  const del = content['del'] || '123'
+  const getField = (keyword) => {
+    return metadata.field?.[keyword] || '';
+  };
+  const getValueField = (keyword) => {
+    return content[getField(keyword)] || ''
+  };
+
+  const vvd = getValueField(VESSEL_VOYAGE)
+  const pod = getValueField(PORT_OF_DISCHARGE)
+  const del = getValueField(PLACE_OF_DELIVERY)
   const bkgNo = mybl.bkgNo
 
   const checkNewInquiry = (type) => {
     const list = []
     const temp = inquiries.filter(inq => inq.receiver[0] === type && (inq.state === 'OPEN' || inq.state === 'REP_DRF'))
     if (temp.length) {
-      temp.forEach(inq => {
+      const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      sortDateList.forEach(inq => {
         const find = metadata.field_options.find(field => field.value === inq.field)
-        list.push(find.label)
+        if (!list.includes(find.label)) list.push(find.label)
       })
     }
     return list
@@ -136,28 +149,33 @@ const SendInquiryForm = (props) => {
   useEffect(() => {
     if (hasCustomer) {
       setTabValue('customer')
-      setInqCustomer(checkNewInquiry('customer'))
     }
     else if (hasOnshore) {
       setTabValue('onshore')
     }
+  }, [openEmail])
+
+  useEffect(() => {
+    if (hasCustomer) {
+      setInqCustomer(checkNewInquiry('customer'))
+    }
     if (hasOnshore) {
       setInqOnshore(checkNewInquiry('onshore'))
     }
-  }, [openEmail, inquiries])
+  }, [inquiries])
 
   useEffect(() => {
     let subject = ''
     let content = ''
     if (hasOnshore) {
-      subject = `[Alert Onshore - BL Query]_[${inqOnshore}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
-      content = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore}]`
+      subject = `[Alert Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
+      content = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`
       setOnshoreValue({ subject, content })
       setForm({ ...form, subject, content })
     }
     if (hasCustomer) {
-      subject = `[Customer BL Query]_[${inqCustomer}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
-      content = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer}]`
+      subject = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
+      content = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer.join(', ')}]`
       setCustomerValue({ subject, content })
       setForm({ ...form, subject, content })
     }
@@ -200,12 +218,7 @@ const SendInquiryForm = (props) => {
       console.error(error)
     });
     if (success) {
-      dispatch(
-        Actions.showMessage({
-          message: 'Mail sent successfully',
-          variant: 'success'
-        })
-      );
+      setOpenNotification(true)
       dispatch({
         type: mailActions.SENDMAIL_NONE
       });
@@ -225,28 +238,7 @@ const SendInquiryForm = (props) => {
   }, [success, error]);
 
   useEffect(() => {
-    if (openEmail && !suggestMails.length) {
-      dispatch(mailActions.suggestMail(''));
-    }
-  }, [openEmail]);
-
-  const opendPreviewForm = (event) => {
-    if (inquiries.length) {
-      dispatch(FormActions.toggleOpenInquiryReview(true));
-      dispatch(FormActions.toggleSaveInquiry(true));
-    } else {
-      dispatch(Actions.showMessage({ message: 'Inquiry List is empty!', variant: 'info' }));
-    }
-  };
-
-  const sendMailClick = (event) => {
-    if (isMailVaid()) {
-      dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
-    }
-    else if (!isFormValid()) {
-      dispatch(Actions.showMessage({ message: 'Please fill to Customer or Onshore fields', variant: 'error' }));
-    }
-    else {
+    if (confirmClick && confirmPopupType === 'sendMail') {
       const cloneInquiries = [...inquiries];
       cloneInquiries.forEach(q => {
         if (q.receiver[0] === tabValue) {
@@ -268,6 +260,38 @@ const SendInquiryForm = (props) => {
       dispatch({ type: mailActions.SENDMAIL_LOADING });
       dispatch(mailActions.sendMail({ myblId: mybl.id, ...formClone, inquiries: cloneInquiries }));
       dispatch(InquiryActions.setInquiries(cloneInquiries));
+      dispatch(
+        FormActions.openConfirmPopup({
+          openConfirmPopup: false,
+          confirmClick: false,
+          confirmPopupMsg: '',
+          confirmPopupType: ''
+        })
+      );
+    }
+  }, [confirmClick])
+
+  useEffect(() => {
+    if (openEmail && !suggestMails.length) {
+      dispatch(mailActions.suggestMail(''));
+    }
+  }, [openEmail]);
+
+  const sendMailClick = () => {
+    if (isMailVaid()) {
+      dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
+    }
+    else if (!isFormValid()) {
+      dispatch(Actions.showMessage({ message: 'Please fill to Customer or Onshore fields', variant: 'error' }));
+    }
+    else {
+      dispatch(
+        FormActions.openConfirmPopup({
+          openConfirmPopup: true,
+          confirmPopupMsg: 'Are you sure you want to send this email?',
+          confirmPopupType: 'sendMail'
+        })
+      );
     }
   };
 
@@ -370,6 +394,11 @@ const SendInquiryForm = (props) => {
   }
   return (
     <>
+      <SubmitAnswerNotification
+        open={openNotification}
+        msg='Your answer has been sent.'
+        handleClose={() => setOpenNotification(false)}
+      />
       <Form
         title={'New Mail'}
         open={openEmail}
@@ -379,7 +408,6 @@ const SendInquiryForm = (props) => {
         style={previewValue === 'email' && { backgroundColor: '#fdf2f2' }}
         customActions={
           <ActionUI
-            openPreviewClick={opendPreviewForm}
             sendMailClick={sendMailClick}
             previewValue={previewValue}
             handleChange={handleChange}
@@ -396,25 +424,24 @@ const SendInquiryForm = (props) => {
           <>
             {ToReceiver()}
             {hasCustomer && hasOnshore &&
-              <div style={{ borderBottom: '2px solid #515F6B', marginBottom: 20 }}>
-                <Tabs
-                  indicatorColor="primary"
-                  value={tabValue}
-                  onChange={handleTabChange}
-                  textColor='primary'
-                >
-                  <Tab
-                    className={classes.tab}
-                    value='customer'
-                    label="Customer"
-                  />
-                  <Tab
-                    className={classes.tab}
-                    value='onshore'
-                    label="Onshore"
-                  />
-                </Tabs>
-              </div>
+              <Tabs
+                indicatorColor="primary"
+                value={tabValue}
+                onChange={handleTabChange}
+                textColor='primary'
+                style={{ borderBottom: '3px solid #515F6B', marginBottom: 20, marginTop: 10 }}
+              >
+                <Tab
+                  className={classes.tab}
+                  value='customer'
+                  label="Customer"
+                />
+                <Tab
+                  className={classes.tab}
+                  value='onshore'
+                  label="Onshore"
+                />
+              </Tabs>
             }
             <div style={{ marginTop: 10 }}>
               <label className={clsx(classes.label)}>Subject</label>
@@ -533,8 +560,9 @@ const InquiryReview = (props) => {
 
 const ActionUI = (props) => {
   const classes = useStyles();
-  const { openPreviewClick, sendMailClick, previewValue, handleChange } = props;
+  const { sendMailClick, previewValue, handleChange } = props;
   const isLoading = useSelector(({ workspace }) => workspace.mailReducer.isLoading);
+  const openConfirmPopup = useSelector(({ workspace }) => workspace.formReducer.openConfirmPopup);
 
   return (
     <div
@@ -566,7 +594,8 @@ const ActionUI = (props) => {
           value={previewValue}
           onChange={handleChange}
           IconComponent={() => null}
-          MenuProps={{ classes: { paper: classes.paper }}}
+          disabled={openConfirmPopup}
+          MenuProps={{ classes: { paper: classes.paper } }}
           disableUnderline
         >
           <StyledMenuItem value='default'>Preview</StyledMenuItem>
@@ -576,19 +605,19 @@ const ActionUI = (props) => {
       </div>
       {previewValue === 'default' ?
         <Button
-          variant="text"
+          variant="contained"
           size="medium"
+          color='primary'
           style={{
             textTransform: 'none',
             fontWeight: 'bold',
             width: 120,
             height: 40,
-            color: 'white',
-            backgroundColor: isLoading ? '#515E6A' : '#bd1874',
+            backgroundColor: isLoading && '#515E6A',
             borderRadius: 9,
             fontFamily: 'Montserrat'
           }}
-          disabled={isLoading}
+          disabled={isLoading || openConfirmPopup}
           onClick={sendMailClick}>
           Send
         </Button> :
