@@ -14,11 +14,7 @@ import history from '@history';
 function DialogConfirm(props) {
   const { handleClose, open } = props;
   const myBL = useSelector(({ draftBL }) => draftBL.myBL);
-  const [checkUpdate, setCheckUpdate] = useState(false);
   const dispatch = useDispatch();
-  useEffect(() => {
-    myBL.state === draftConfirm && setCheckUpdate(true)
-  }, [myBL.state])
 
   return (
     <Dialog onClose={handleClose} onClick={handleClose} aria-labelledby="customized-dialog-title" open={open} maxWidth="md" style={{ fontSize: '16px', fontFamily: 'Montserrat' }}>
@@ -104,7 +100,7 @@ function DialogConfirm(props) {
             variant="contained"
             onClick={() => {
               handleClose();
-              history.push(`/draft-bl/edit/${myBL.id}`);
+              history.push(`/guest?bl=${myBL.id}`);
             }
             }
             className='normal-case'>
