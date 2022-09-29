@@ -1,42 +1,101 @@
 import * as Actions from 'app/store/actions';
+import { VESSEL_VOYAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY } from '@shared/keyword';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Icon, Button, Grid } from '@material-ui/core';
+import { Icon, Button, Tabs, Tab, Select, MenuItem } from '@material-ui/core';
 import clsx from 'clsx';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles, withStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { getMail } from 'app/services/mailService';
+
 
 import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from "../store/actions/inquiry";
 
-import TagsInput from './TagsInput';
+import SubmitAnswerNotification from "./SubmitAnswerNotification";
+import InputUI from './MailInputUI';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
-import ReceiverProvider from './ReceiverProvider';
 
 const colorBtnReview = '#1564EE';
+const useStyles = makeStyles(() => ({
+  tab: {
+    fontFamily: 'Montserrat',
+    textTransform: 'none',
+    fontSize: '18px',
+    minWidth: 120
+  },
+  label: {
+    whiteSpace: 'nowrap',
+    color: '#132535',
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Montserrat'
+  },
+  buttonProgress: {
+    color: 'red',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12
+  },
+  input: {
+    borderWidth: '0.5px',
+    borderRadius: '6px',
+    borderStyle: 'solid',
+    borderColor: 'lightgray',
+    fontSize: 15,
+    fontFamily: 'Montserrat',
+    width: '100%'
+  },
+  menuItem: {
+    '&:hover': {
+      background: `#FDF2F2 !important`,
+      color: '#BD0F72',
+      fontWeight: '600 !important'
+    }
+  },
+  paper: {
+    borderRadius: 8
+  }
+}))
+
+const StyledMenuItem = withStyles(theme => ({
+  root: {
+    "&:focus": {
+      backgroundColor: '#FDF2F2',
+      color: '#BD0F72',
+      fontWeight: 600,
+      "& .MuiListItemIcon-root, & .MuiListItemText-primary": {
+        color: theme.palette.common.white
+      }
+    },
+  }
+}))(MenuItem);
 
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
-  const [mybl, openEmail, inquiries] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.myBL,
-    workspace.formReducer.openEmail,
-    workspace.inquiryReducer.inquiries,
-  ]);
-  const [success, error, suggestMails, validateMail] = useSelector(({ workspace }) => [
-    workspace.mailReducer.success,
-    workspace.mailReducer.error,
-    workspace.mailReducer.suggestMails,
-    workspace.mailReducer.validateMail,
-  ]);
+  const mybl = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+
+  const success = useSelector(({ workspace }) => workspace.mailReducer.success);
+  const error = useSelector(({ workspace }) => workspace.mailReducer.error);
+  const suggestMails = useSelector(({ workspace }) => workspace.mailReducer.suggestMails);
+  const validateMail = useSelector(({ workspace }) => workspace.mailReducer.validateMail);
+  const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
+  const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
+
   const [isCustomerCc, setIsCustomerCc] = useState(false);
   const [isCustomerBcc, setIsCustomerBcc] = useState(false);
   const [isOnshoreCc, setIsOnshoreCc] = useState(false);
   const [isOnshoreBcc, setIsOnshoreBcc] = useState(false);
-  const initialState = useState({
+  const initialState = {
     toCustomer: '',
     toCustomerCc: '',
     toCustomerBcc: '',
@@ -46,9 +105,90 @@ const SendInquiryForm = (props) => {
     from: '',
     subject: '',
     content: ''
-  });
-
+  };
   const [form, setForm] = useState(initialState);
+  const [tabValue, setTabValue] = useState('')
+  const [previewValue, setPreviewValue] = useState('default')
+  const handleChange = (event) => {
+    setPreviewValue(event.target?.value || event);
+  };
+  const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
+  const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
+  const [inqCustomer, setInqCustomer] = useState([])
+  const [inqOnshore, setInqOnshore] = useState([])
+  const [tabSelected, setTabSelected] = useState(0);
+  const [customerValue, setCustomerValue] = useState({ subject: '', content: '' })
+  const [onshoreValue, setOnshoreValue] = useState({ subject: '', content: '' })
+  const [openNotification, setOpenNotification] = useState(false)
+
+  const getField = (keyword) => {
+    return metadata.field?.[keyword] || '';
+  };
+  const getValueField = (keyword) => {
+    return content[getField(keyword)] || ''
+  };
+
+  const vvd = getValueField(VESSEL_VOYAGE)
+  const pod = getValueField(PORT_OF_DISCHARGE)
+  const del = getValueField(PLACE_OF_DELIVERY)
+  const bkgNo = mybl.bkgNo
+
+  const checkNewInquiry = (type) => {
+    const list = []
+    const temp = inquiries.filter(inq => inq.receiver[0] === type && (inq.state === 'OPEN' || inq.state === 'REP_DRF'))
+    if (temp.length) {
+      const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      sortDateList.forEach(inq => {
+        const find = metadata.field_options.find(field => field.value === inq.field)
+        if (!list.includes(find.label)) list.push(find.label)
+      })
+    }
+    return list
+  }
+
+  useEffect(() => {
+    if (hasCustomer) {
+      setTabValue('customer')
+    }
+    else if (hasOnshore) {
+      setTabValue('onshore')
+    }
+  }, [openEmail])
+
+  useEffect(() => {
+    if (hasCustomer) {
+      setInqCustomer(checkNewInquiry('customer'))
+    }
+    if (hasOnshore) {
+      setInqOnshore(checkNewInquiry('onshore'))
+    }
+  }, [inquiries])
+
+  useEffect(() => {
+    let subject = ''
+    let content = ''
+    if (hasOnshore) {
+      subject = `[Alert Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
+      content = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`
+      setOnshoreValue({ subject, content })
+      setForm({ ...form, subject, content })
+    }
+    if (hasCustomer) {
+      subject = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
+      content = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer.join(', ')}]`
+      setCustomerValue({ subject, content })
+      setForm({ ...form, subject, content })
+    }
+  }, [openEmail])
+
+  useEffect(() => {
+    if (tabValue === 'onshore') {
+      setForm({ ...form, subject: onshoreValue.subject, content: onshoreValue.content })
+    }
+    else {
+      setForm({ ...form, subject: customerValue.subject, content: customerValue.content })
+    }
+  }, [tabValue, inquiries])
 
   const isFormValid = () => {
     return form.toCustomer || form.toOnshore;
@@ -78,12 +218,7 @@ const SendInquiryForm = (props) => {
       console.error(error)
     });
     if (success) {
-      dispatch(
-        Actions.showMessage({
-          message: 'Mail sent successfully',
-          variant: 'success'
-        })
-      );
+      setOpenNotification(true)
       dispatch({
         type: mailActions.SENDMAIL_NONE
       });
@@ -103,21 +238,46 @@ const SendInquiryForm = (props) => {
   }, [success, error]);
 
   useEffect(() => {
+    if (confirmClick && confirmPopupType === 'sendMail') {
+      const cloneInquiries = [...inquiries];
+      cloneInquiries.forEach(q => {
+        if (q.receiver[0] === tabValue) {
+          if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
+          else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
+        }
+      });
+      const formClone = JSON.parse(JSON.stringify(form));
+      if (tabValue === 'onshore') {
+        formClone.toCustomer = ''
+        formClone.toCustomerCc = ''
+        formClone.toCustomerBcc = ''
+      }
+      else if (tabValue === 'customer') {
+        formClone.toOnshore = ''
+        formClone.toOnshoreCc = ''
+        formClone.toOnshoreBcc = ''
+      }
+      dispatch({ type: mailActions.SENDMAIL_LOADING });
+      dispatch(mailActions.sendMail({ myblId: mybl.id, ...formClone, inquiries: cloneInquiries }));
+      dispatch(InquiryActions.setInquiries(cloneInquiries));
+      dispatch(
+        FormActions.openConfirmPopup({
+          openConfirmPopup: false,
+          confirmClick: false,
+          confirmPopupMsg: '',
+          confirmPopupType: ''
+        })
+      );
+    }
+  }, [confirmClick])
+
+  useEffect(() => {
     if (openEmail && !suggestMails.length) {
       dispatch(mailActions.suggestMail(''));
     }
   }, [openEmail]);
 
-  const opendPreviewForm = (event) => {
-    if (inquiries.length) {
-      dispatch(FormActions.toggleOpenInquiryReview(true));
-      dispatch(FormActions.toggleSaveInquiry(true));
-    } else {
-      dispatch(Actions.showMessage({ message: 'Inquiry List is empty!', variant: 'info' }));
-    }
-  };
-
-  const sendMailClick = (event) => {
+  const sendMailClick = () => {
     if (isMailVaid()) {
       dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
     }
@@ -125,14 +285,13 @@ const SendInquiryForm = (props) => {
       dispatch(Actions.showMessage({ message: 'Please fill to Customer or Onshore fields', variant: 'error' }));
     }
     else {
-      const cloneInquiries = [...inquiries];
-      cloneInquiries.forEach(q => {
-        if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
-        else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
-      });
-      dispatch({ type: mailActions.SENDMAIL_LOADING });
-      dispatch(mailActions.sendMail({ myblId: mybl.id, ...form, inquiries: cloneInquiries }));
-      dispatch(InquiryActions.setInquiries(cloneInquiries));
+      dispatch(
+        FormActions.openConfirmPopup({
+          openConfirmPopup: true,
+          confirmPopupMsg: 'Are you sure you want to send this email?',
+          confirmPopupType: 'sendMail'
+        })
+      );
     }
   };
 
@@ -140,114 +299,209 @@ const SendInquiryForm = (props) => {
     setForm({ ...form, [key]: tags.join(',') })
   };
 
-  const handleOnChange = (event) => {
+  const handleBodyChange = (event) => {
+    if (tabValue === 'customer') {
+      setCustomerValue({ ...customerValue, content: event.target.value })
+    }
+    else {
+      setOnshoreValue({ ...onshoreValue, content: event.target.value })
+    }
     setForm({ ...form, content: event.target.value })
   };
 
-  const onInputChange = (event) => {
+  const handleSubjectChange = (event) => {
+    if (tabValue === 'customer') {
+      setCustomerValue({ ...customerValue, subject: event.target.value })
+    }
+    else {
+      setOnshoreValue({ ...onshoreValue, subject: event.target.value })
+    }
     setForm({ ...form, subject: event.target.value })
   };
 
-  const useStyles = makeStyles(() => ({
-    label: {
-      whiteSpace: 'nowrap',
-      color: '#132535',
-      fontSize: 14,
-      fontWeight: '600',
-      fontFamily: 'Montserrat'
-    }
-  }));
+  const handleTabChange = (_, newValue) => {
+    setTabValue(newValue)
+  }
 
-  const classes = useStyles(props);
+  const classes = useStyles();
+  const ToCustomer = () =>
+    <>
+      <InputUI
+        id="toCustomer"
+        title="To Customer"
+        isCc={isCustomerCc}
+        isBcc={isCustomerBcc}
+        onCc={() => {
+          setIsCustomerCc(!isCustomerCc);
+        }}
+        onBcc={() => {
+          setIsCustomerBcc(!isCustomerBcc);
+        }}
+        onChanged={handleFieldChange}
+      />
+      {isCustomerCc && <InputUI id="toCustomerCc" title="Cc" onChanged={handleFieldChange} />}
+      {isCustomerBcc && (
+        <InputUI id="toCustomerBcc" title="Bcc" onChanged={handleFieldChange} />
+      )}
+    </>
+
+  const ToOnshore = () =>
+    <>
+      <InputUI
+        id="toOnshore"
+        title="To Onshore"
+        isCc={isOnshoreCc}
+        isBcc={isOnshoreBcc}
+        onCc={() => {
+          setIsOnshoreCc(!isOnshoreCc);
+        }}
+        onBcc={() => {
+          setIsOnshoreBcc(!isOnshoreBcc);
+        }}
+        onChanged={handleFieldChange}
+      />
+      {isOnshoreCc && <InputUI id="toOnshoreCc" title="Cc" onChanged={handleFieldChange} />}
+      {isOnshoreBcc && <InputUI id="toOnshoreBcc" title="Bcc" onChanged={handleFieldChange} />}
+    </>
+
+
+  const ToReceiver = () => {
+    if (hasCustomer && hasOnshore) {
+      return tabValue === 'customer' ? ToCustomer() : ToOnshore()
+    }
+    else if (hasCustomer) {
+      return ToCustomer()
+    }
+    else if (hasOnshore) {
+      return ToOnshore()
+    }
+    else {
+      return null
+    }
+  }
+  const countInq = (recevier) => {
+    let count = 0;
+    inquiries.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
+    return count;
+  };
+
+  const handleTabSelected = () => {
+    if (countInq('customer') === 0) {
+      return 'onshore'
+    } else {
+      return tabSelected === 0 ? 'customer' : 'onshore'
+    }
+  }
   return (
     <>
+      <SubmitAnswerNotification
+        open={openNotification}
+        msg='Your answer has been sent.'
+        handleClose={() => setOpenNotification(false)}
+      />
       <Form
         title={'New Mail'}
         open={openEmail}
         toggleForm={(status) => dispatch(FormActions.toggleOpenEmail(status))}
         openFab={false}
         field={props.field}
+        style={previewValue === 'email' && { backgroundColor: '#fdf2f2' }}
         customActions={
-          <ActionUI openPreviewClick={opendPreviewForm} sendMailClick={sendMailClick}></ActionUI>
+          <ActionUI
+            sendMailClick={sendMailClick}
+            previewValue={previewValue}
+            handleChange={handleChange}
+          ></ActionUI>
         }
-        FabTitle="E-mail">
-        <>
-          <ReceiverProvider receiver='customer'>
-            <InputUI
-              id="toCustomer"
-              title="To Customer"
-              isCc={isCustomerCc}
-              isBcc={isCustomerBcc}
-              onCc={() => {
-                setIsCustomerCc(!isCustomerCc);
-              }}
-              onBcc={() => {
-                setIsCustomerBcc(!isCustomerBcc);
-              }}
-              onChanged={handleFieldChange}
-            />
-            {isCustomerCc && <InputUI id="toCustomerCc" title="Cc" onChanged={handleFieldChange} />}
-            {isCustomerBcc && (
-              <InputUI id="toCustomerBcc" title="Bcc" onChanged={handleFieldChange} />
-            )}
-          </ReceiverProvider>
-          <ReceiverProvider receiver='onshore'>
-            <InputUI
-              id="toOnshore"
-              title="To Onshore"
-              isCc={isOnshoreCc}
-              isBcc={isOnshoreBcc}
-              onCc={() => {
-                setIsOnshoreCc(!isOnshoreCc);
-              }}
-              onBcc={() => {
-                setIsOnshoreBcc(!isOnshoreBcc);
-              }}
-              onChanged={handleFieldChange}
-            />
-            {isOnshoreCc && <InputUI id="toOnshoreCc" title="Cc" onChanged={handleFieldChange} />}
-            {isOnshoreBcc && <InputUI id="toOnshoreBcc" title="Bcc" onChanged={handleFieldChange} />}
-          </ReceiverProvider>
-          <div style={{ display: 'flex', marginTop: 10 }}>
-            <label className={clsx(classes.label)}>Subject</label>
+        FabTitle="E-mail"
+        tabs={previewValue === 'inquiry' && ['Customer', 'Onshore']}
+        nums={previewValue === 'inquiry' && [countInq('customer'), countInq('onshore')]}
+        tabChange={(newValue) => {
+          setTabSelected(newValue);
+        }}
+      >
+        {previewValue === 'default' &&
+          <>
+            {ToReceiver()}
+            {hasCustomer && hasOnshore &&
+              <Tabs
+                indicatorColor="primary"
+                value={tabValue}
+                onChange={handleTabChange}
+                textColor='primary'
+                style={{ borderBottom: '3px solid #515F6B', marginBottom: 20, marginTop: 10 }}
+              >
+                <Tab
+                  className={classes.tab}
+                  value='customer'
+                  label="Customer"
+                />
+                <Tab
+                  className={classes.tab}
+                  value='onshore'
+                  label="Onshore"
+                />
+              </Tabs>
+            }
+            <div style={{ marginTop: 10 }}>
+              <label className={clsx(classes.label)}>Subject</label>
+            </div>
+            <div style={{ marginTop: 5, display: 'flex' }}>
+              <input
+                style={{
+                  padding: 5,
+                  height: '25px',
+                }}
+                className={classes.input}
+                value={form.subject}
+                onChange={handleSubjectChange}
+              />
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <label className={clsx(classes.label)}>Body</label>
+            </div>
+            <div style={{ display: 'flex' }}>
+              <textarea
+                style={{
+                  padding: 10,
+                  marginTop: 10,
+                  minHeight: 200,
+                  resize: 'none'
+                }}
+                className={classes.input}
+                multiline="true"
+                type="text"
+                value={form.content}
+                onChange={handleBodyChange}></textarea>
+            </div>
+          </>
+        }
+        {previewValue === 'email' &&
+          <div style={{ margin: 'auto', maxWidth: 580, }}>
+            <img style={{ margin: 15 }} src="assets/images/logos/one_ocean_network-logo.png" width="100px" alt="ONE" />
+            <div style={{ backgroundColor: 'white', padding: 20, fontFamily: 'Montserrat', fontSize: 15, fontWeight: 500 }}>
+              <p style={{ whiteSpace: 'pre-line' }}>
+                {form.content}
+              </p>
+              <p >Please visit the link below and help us answer our inquiry. <br />
+                BLink Workspace: <br />
+                Access Code: </p>
+              <p>
+                Thank you <br />
+                ONE Offshore Center</p>
+            </div>
           </div>
-          <div style={{ marginTop: 5, display: 'flex' }}>
-            <input
-              style={{
-                paddingTop: '5px',
-                paddingLeft: '5px',
-                paddingBottom: '5px',
-                width: '100%',
-                borderWidth: '0.5px',
-                borderRadius: '6px',
-                height: '25px',
-                borderStyle: 'solid',
-                borderColor: 'lightgray'
-              }}
-              value={form.subject}
-              onChange={onInputChange}
+        }
+        {previewValue === 'inquiry' &&
+          <div style={{ height: '800px' }}>
+            <AllInquiry
+              user="workspace"
+              receiver={handleTabSelected()}
+              collapse={true}
+              openInquiryReview={true}
             />
           </div>
-          <div style={{ marginTop: 5, display: 'flex' }}>
-            <textarea
-              style={{
-                width: '100%',
-                paddingTop: 10,
-                paddingLeft: 5,
-                marginTop: 10,
-                minHeight: 250,
-                borderWidth: '0.5px',
-                borderStyle: 'solid',
-                borderColor: 'lightgray',
-                borderRadius: 6,
-                resize: 'none'
-              }}
-              multiline="true"
-              type="text"
-              defaultValue={form.content}
-              onChange={handleOnChange}></textarea>
-          </div>
-        </>
+        }
       </Form>
     </>
   );
@@ -304,86 +558,11 @@ const InquiryReview = (props) => {
   );
 };
 
-const useStyles = makeStyles((theme) => ({
-  buttonProgress: {
-    color: 'red',
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginTop: -12,
-    marginLeft: -12
-  }
-}));
-
-const InputUI = (props) => {
-  const { id, title, type, onChanged, isCc, isBcc, onCc, onBcc } = props;
-  const useStyles = makeStyles(() => ({
-    label: {
-      whiteSpace: 'nowrap',
-      color: '#132535',
-      fontSize: 14,
-      fontWeight: '600',
-      fontFamily: 'Montserrat'
-    }
-  }));
-  const classes = useStyles(props);
-  return (
-    <Grid
-      container
-      direction="row"
-      style={{ marginTop: 8, alignItems: 'center', justifyContent: "flex-start" }}>
-      <Grid item xs={1}>
-        {title === 'Cc' || title === 'Bcc' ? (
-          <div
-            style={{
-              paddingLeft: '7px',
-              paddingRight: '7px',
-              width: 'fit-content',
-              background: '#FFFFFF',
-              border: '1px solid #BD0F72',
-              borderRadius: '4px',
-              justifyContent: 'center'
-            }}>
-            <label
-              style={{
-                fontStyle: 'normal',
-                fontWeight: '500',
-                fontSize: '14px',
-                lineHeight: '17px',
-                width: '100%',
-                fontFamily: 'Montserrat',
-                color: '#BD0F72'
-              }}
-              className={clsx(classes.label)}>
-              {title}
-            </label>
-          </div>
-        ) : (
-          <label style={{ fontSize: 14 }} className={clsx(classes.label)}>
-            {title}
-          </label>
-        )}
-      </Grid>
-      <Grid style={{ paddingLeft: 20 }} item xs={11}>
-        <TagsInput
-          id={id}
-          tagLimit={10}
-          type={title}
-          isCc={isCc}
-          isBcc={isBcc}
-          onCc={onCc}
-          onBcc={onBcc}
-          onChanged={onChanged}
-        />
-      </Grid>
-    </Grid>
-  );
-};
-
 const ActionUI = (props) => {
   const classes = useStyles();
-  const { openPreviewClick, sendMailClick } = props;
-  const [isLoading] = useSelector(({ workspace }) => [workspace.mailReducer.isLoading]);
+  const { sendMailClick, previewValue, handleChange } = props;
+  const isLoading = useSelector(({ workspace }) => workspace.mailReducer.isLoading);
+  const openConfirmPopup = useSelector(({ workspace }) => workspace.formReducer.openConfirmPopup);
 
   return (
     <div
@@ -394,37 +573,71 @@ const ActionUI = (props) => {
         justifyContent: 'center',
         alignItems: 'center'
       }}>
-      <Button
-        style={{
-          textTransform: 'none',
-          position: 'absolute',
-          left: '10px',
-          top: '10px',
-          fontFamily: 'Montserrat'
-        }}
-        variant="text"
-        onClick={openPreviewClick}>
-        <Icon fontSize='small' style={{ color: colorBtnReview, paddingRight: '0.5rem' }}>visibility</Icon>
-        <span className="pl-14" style={{ color: colorBtnReview, fontSize: '16px' }}>
-          Preview Inquiries
-        </span>
-      </Button>
-      <Button
-        variant="text"
-        size="medium"
-        style={{
-          textTransform: 'none',
-          fontWeight: 'bold',
-          width: 140,
-          color: 'white',
-          backgroundColor: isLoading ? '#515E6A' : '#bd1874',
-          borderRadius: 20,
-          fontFamily: 'Montserrat'
-        }}
-        disabled={isLoading}
-        onClick={sendMailClick}>
-        Send
-      </Button>
+      <div style={{
+        position: 'absolute',
+        left: '2.5rem',
+        top: '1rem',
+        display: 'flex',
+        alignItems: 'center'
+      }}>
+        <Icon style={{ color: colorBtnReview, paddingRight: '1.2rem' }}>visibility</Icon>
+        <Icon fontSize='small' style={{
+          color: colorBtnReview, paddingRight: '0.5rem', position: 'absolute', left: 17, top: 10
+        }}>arrow_drop_down</Icon>
+        <Select
+          style={{
+            color: '#2F80ED',
+            textTransform: 'none',
+            fontFamily: 'Montserrat',
+            fontWeight: 600
+          }}
+          value={previewValue}
+          onChange={handleChange}
+          IconComponent={() => null}
+          disabled={openConfirmPopup}
+          MenuProps={{ classes: { paper: classes.paper } }}
+          disableUnderline
+        >
+          <StyledMenuItem value='default'>Preview</StyledMenuItem>
+          <StyledMenuItem value='inquiry'> Preview Inquiries</StyledMenuItem>
+          <StyledMenuItem value='email'> Preview Email Layout</StyledMenuItem>
+        </Select>
+      </div>
+      {previewValue === 'default' ?
+        <Button
+          variant="contained"
+          size="medium"
+          color='primary'
+          style={{
+            textTransform: 'none',
+            fontWeight: 'bold',
+            width: 120,
+            height: 40,
+            backgroundColor: isLoading && '#515E6A',
+            borderRadius: 9,
+            fontFamily: 'Montserrat'
+          }}
+          disabled={isLoading || openConfirmPopup}
+          onClick={sendMailClick}>
+          Send
+        </Button> :
+        <Button
+          variant="contained"
+          size="medium"
+          color='primary'
+          style={{
+            textTransform: 'none',
+            fontWeight: 'bold',
+            width: 120,
+            height: 40,
+            borderRadius: 9,
+            fontFamily: 'Montserrat'
+          }}
+          onClick={() => handleChange('default')}>
+          <Icon fontSize='small' style={{ paddingRight: '0.5rem' }}>keyboard_backspace</Icon>
+          Back
+        </Button>
+      }
       {isLoading && <CircularProgress size={24} className={classes.buttonProgress} />}
     </div>
   );

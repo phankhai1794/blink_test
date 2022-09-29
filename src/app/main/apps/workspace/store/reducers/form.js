@@ -13,11 +13,13 @@ const initialState = {
   openInqReview: false,
   openNotificationAttachmentList: false,
   openNotificationSubmitAnswer: false,
+  openNotificationDeleteReply: false,
   enableSaveInquiriesList: true,
   openConfirmPopup: false,
   confirmPopupMsg: '',
   confirmPopupType: '',
   confirmClick: false,
+  openAmendmentForm: false,
 };
 
 const formReducer = function (state = initialState, action) {
@@ -58,15 +60,20 @@ const formReducer = function (state = initialState, action) {
   case Actions.OPEN_NOTIFICATION_SUBMIT_ANSWER: {
     return { ...state, openNotificationSubmitAnswer: action.state };
   }
+  case Actions.OPEN_NOTIFICATION_DELETE_REPLY: {
+    return { ...state, openNotificationDeleteReply: action.state };
+  }
   case Actions.ENABLE_SAVE_INQUIRIES: {
     return { ...state, enableSaveInquiriesList: action.state };
   }
-  case Actions.OPEN_CONFIRM_POPUP:{
-    return { ...state, ... action.state}
+  case Actions.OPEN_CONFIRM_POPUP: {
+    return { ...state, ...action.state }
   }
-  
-  case Actions.CONFIRM_POPUP_CLICK:{
-    return { ...state, openConfirmPopup:false, confirmClick: action.state}
+  case Actions.CONFIRM_POPUP_CLICK: {
+    return { ...state, openConfirmPopup: false, confirmClick: action.state }
+  }
+  case Actions.OPEN_CREATE_AMENDMENT: {
+    return { ...state, openAmendmentForm: action.state }
   }
   default: {
     return state;

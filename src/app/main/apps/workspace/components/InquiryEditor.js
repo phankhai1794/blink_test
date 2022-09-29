@@ -225,7 +225,7 @@ const InquiryEditor = (props) => {
       if (checkDuplicate) {
         dispatch(FormActions.openConfirmPopup({
           openConfirmPopup: true,
-          confirmPopupMsg: 'The inquiry already has sent to Customer/Onshore!',
+          confirmPopupMsg: 'The inquiry already existed!',
           confirmPopupType: 'warningInq'
         })
         );

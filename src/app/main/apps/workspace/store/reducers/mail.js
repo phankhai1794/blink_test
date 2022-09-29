@@ -5,7 +5,7 @@ const initialState = {
   success: false,
   error: '',
   suggestMails: [],
-  validateMail: {},
+  validateMail: { toCustomer: '', toOnshore: '' },
   tags: {},
 };
 

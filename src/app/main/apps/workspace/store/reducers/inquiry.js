@@ -3,8 +3,10 @@ import * as Actions from '../actions/inquiry';
 const initialState = {
   myBL: {},
   metadata: {},
+  orgContent: {},
   content: {},
   currentEditInq: null,
+  currentAmendment: undefined,
   displayCmt: false,
   currentField: '',
   reply: false,
@@ -36,6 +38,7 @@ const initialState = {
   isShowBackground: false,
   enableSubmit: false,
   enableSend: false,
+  listCommentDraft: [],
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -59,10 +62,10 @@ const inquiryReducer = function (state = initialState, action) {
   case Actions.ADD_QUESTION: {
     return {
       ...state,
-      currentEditInq: 
+      currentEditInq:
         {
           content:
-              'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
+            'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
           inqType: '',
           ansType: '',
           field: action.state,
@@ -73,10 +76,9 @@ const inquiryReducer = function (state = initialState, action) {
         }
     };
   }
-  
-  // case Actions.EDIT_INQUIRY: {
-  //   return { ...state, inquiries: action.state };
-  // }
+  case Actions.ADD_AMENDMENT: {
+    return { ...state, currentAmendment: action.state };
+  }
   case Actions.SAVE_INQUIRY: {
     return {
       ...state,
@@ -105,6 +107,9 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SAVE_METADATA: {
     return { ...state, metadata: action.state };
+  }
+  case Actions.SET_ORG_CONTENT: {
+    return { ...state, orgContent: action.state };
   }
   case Actions.SET_CONTENT: {
     return { ...state, content: action.state };
@@ -147,6 +152,9 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.CHECK_SEND: {
     return { ...state, enableSend: action.state };
+  }
+  case Actions.SET_LIST_COMMENT_DRAFT: {
+    return { ...state, listCommentDraft: action.state };
   }
   default: {
     return state;

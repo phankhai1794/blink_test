@@ -11,6 +11,7 @@ import { makeStyles } from '@material-ui/styles';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import { getBlInfo } from 'app/services/myBLService';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -20,6 +21,7 @@ import * as DraftActions from '../store/actions/draft-bl';
 
 import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
+import AmendmentEditor from './AmendmentEditor';
 import Form from './Form';
 import Label from './FieldLabel';
 import BtnAddInquiry from './BtnAddInquiry';
@@ -31,6 +33,7 @@ import TableCD from './TableCD';
 import TableCM from './TableCM';
 import AttachmentListNotification from './AttachmentListNotification';
 import SubmitAnswerNotification from "./SubmitAnswerNotification";
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -84,6 +87,7 @@ const BLWorkspace = (props) => {
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
+  const openAmendmentForm = useSelector(({ workspace }) => workspace.formReducer.openAmendmentForm);
   const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
 
   const transAutoSaveStatus = useSelector(
@@ -93,10 +97,14 @@ const BLWorkspace = (props) => {
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
+  const openNotification = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitAnswer);
+  const openNotificationReply = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteReply);
+
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
   );
   const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
+  const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
 
   const getField = (keyword) => {
     return metadata.field?.[keyword] || '';
@@ -132,7 +140,12 @@ const BLWorkspace = (props) => {
 
     const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) dispatch(Actions.initBL(bkgNo));
-    else if (props.myBL) dispatch(InquiryActions.setMyBL(props.myBL));
+    else if (props.myBL) {
+      getBlInfo(props.myBL?.id).then(res => {
+        const { id, state, bkgNo } = res.myBL;
+        dispatch(InquiryActions.setMyBL({ id, state, bkgNo }));
+      });
+    }
 
     return () => {
       dispatch(FormActions.toggleReload());
@@ -141,7 +154,7 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     dispatch(Actions.loadMetadata());
-  },[reload])
+  }, [reload])
 
   const expandRef = useRef();
   useEffect(() => {
@@ -237,7 +250,17 @@ const BLWorkspace = (props) => {
         fabTitle: 'Inquiry Form',
         title: 'Inquiry Creation',
         field: 'INQUIRY_FORM',
-        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))} />
+        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter(q => q.field === inquiry.field))} />
+      };
+    case 'AMENDMENT_FORM':
+      return {
+        status: openAmendmentForm,
+        nums: [],
+        toggleForm: (status) => dispatch(FormActions.toggleCreateAmendment(status)),
+        fabTitle: 'Amendment Form',
+        title: metadata?.field_options.find((f) => f.value === currentField)?.label,
+        field: 'AMENDMENT_FORM',
+        child: <AmendmentEditor />
       };
     default:
       return {
@@ -298,11 +321,26 @@ const BLWorkspace = (props) => {
     setIsExpand(false);
   };
 
+  const renderMsgNoti = () => {
+    if (openNotification) {
+      return 'Your answer has been submitted successfully.'
+    } else if (openNotificationReply) {
+      return 'Your reply has been deleted'
+    }
+  }
+
   return (
     <>
       <BLProcessNotification />
       <AttachmentListNotification />
-      <SubmitAnswerNotification />
+      <SubmitAnswerNotification
+        open={openNotification || openNotificationReply}
+        msg={renderMsgNoti()}
+        handleClose={() => {
+          dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false));
+          dispatch(FormActions.toggleOpenNotificationDeleteReply(false));
+        }}
+      />
       <div className={clsx('max-w-5xl', classes.root)}>
         <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
           {isExpand && (

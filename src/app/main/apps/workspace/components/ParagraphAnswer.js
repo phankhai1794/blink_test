@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ParagraphAnswer = (props) => {
-  const { questions, question, disable = false } = props;
+  const { questions, question, disable = false, saveStatus, currentQuestion } = props;
   const allowUpdateParagraphAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
   });
@@ -53,6 +53,14 @@ const ParagraphAnswer = (props) => {
       setPermission(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (currentQuestion && currentQuestion.id === question.id) {
+      if (!currentQuestion.answerObj.length) {
+        setParagraphText('');
+      }
+    }
+  }, [saveStatus]);
 
   return (
     <div>

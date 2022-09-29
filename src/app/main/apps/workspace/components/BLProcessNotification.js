@@ -66,7 +66,6 @@ const BLProcessNotification = () => {
   const startBLProcess = () => {
     dispatch(TransActions.setStatusTransaction('start'));
     dispatch(Actions.loadInquiry(myBL.id));
-    dispatch(Actions.loadContent(myBL.id));
   };
 
   const checkBLProcess = async () => {

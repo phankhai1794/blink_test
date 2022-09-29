@@ -11,8 +11,8 @@ export async function updateDraftBLReply(body, id) {
   return response.data;
 }
 
-export async function sendEditedField(blId) {
-  const response = await axios().patch(`${PATH}/send/${blId}`);
+export async function deleteDraftBLReply(id) {
+  const response = await axios().delete(`${PATH}/reply/${id}`);
   return response.data;
 }
 

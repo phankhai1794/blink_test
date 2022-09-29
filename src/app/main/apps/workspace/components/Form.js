@@ -17,7 +17,6 @@ import { Box, Tabs, Tab, Divider, Link, Chip, Button } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import OpenInNew from '@material-ui/icons/OpenInNew';
-import * as AppActions from 'app/store/actions';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -51,7 +50,7 @@ const styles = (theme) => ({
     right: theme.spacing(1),
     top: theme.spacing(1),
     color: theme.palette.grey[500]
-  }
+  },
 });
 
 const DialogTitle = withStyles(styles)((props) => {
@@ -128,8 +127,7 @@ const useStyles = makeStyles(() => ({
   },
   dialogContent: {
     margin: 'auto',
-    marginTop: '2rem',
-    backgroundColor: 'white',
+    backgroundColor: (props) => (props.style?.backgroundColor || 'white'), //email preview
     position: 'relative',
     width: (props) => (props.isFullScreen ? '1200px' : '900px')
   },
@@ -168,8 +166,37 @@ const useStyles = makeStyles(() => ({
   },
   colorCountBtn: {
     background: '#FDF2F2'
-  }
+  },
 }));
+
+const LinkButton = ({ text, disable, handleClick }) => {
+  return (
+    <div style={{ position: 'absolute', right: '1rem', zIndex: 10, padding: 21 }}>
+      <Link
+        component="button"
+        variant="body2"
+        underline='none'
+        style={{ display: 'flex', alignItems: 'center' }}
+        onClick={handleClick}>
+        <AddCircleOutlineIcon
+          style={{ color: disable ? '#d3d3d3' : '#BD0F72', left: '8.33%', right: '8.33%', border: '2px', width: 25 }}
+        />
+        <span
+          style={{
+            color: disable ? '#d3d3d3' : '#BD0F72',
+            fontSize: 16,
+            fontWeight: '600',
+            fontFamily: 'Montserrat',
+            paddingLeft: 5,
+            height: 20,
+            fontStyle: 'normal'
+          }}>
+          {text}
+        </span>
+      </Link>
+    </div>
+  )
+}
 
 export default function Form(props) {
   const dispatch = useDispatch();
@@ -191,6 +218,7 @@ export default function Form(props) {
   } = props;
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
@@ -204,10 +232,11 @@ export default function Form(props) {
 
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
+  const currentAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.currentAmendment);
 
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const classes = useStyles({ isFullScreen });
+  const classes = useStyles({ isFullScreen, style: props.style });
   const classesHover = useStyles();
   const [idBtn, setIdBtn] = useState('');
   const [checkSubmit, setCheckSubmit] = useState(true);
@@ -286,7 +315,8 @@ export default function Form(props) {
     dispatch(InquiryActions.setOpenedInqForm(false));
     dispatch(FormActions.setEnableSaveInquiriesList(true));
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-    dispatch(FormActions.openConfirmPopup({openConfirmPopup: false}))
+    dispatch(FormActions.openConfirmPopup({ openConfirmPopup: false }));
+    dispatch(InquiryActions.addAmendment());
   };
 
   const handleChange = (_, newValue) => {
@@ -306,14 +336,16 @@ export default function Form(props) {
     }
   };
 
-  const handleSetOpenFab = (status) => {
-    setOpenFab(status);
-  };
-
   const sendMailClick = () => {
     toggleForm(false);
     dispatch(FormActions.toggleOpenEmail(true))
   };
+
+  const checkEnableBtnAddAmendment = () => {
+    const filter = inquiries.filter(inq => inq.field === currentField);
+    if (!filter.length) return false;
+    return !filter.some(inq => inq.process === 'draft');
+  }
 
   useEffect(() => {
     if (tabs) {
@@ -403,44 +435,34 @@ export default function Form(props) {
           {children}
         </MuiDialogContent>
 
-        {field !== 'ATTACHMENT_LIST' &&
-          (<PopupConfirmSubmit field={field} handleCheckSubmit={() => {
-            setCheckSubmit(!checkSubmit)
-          }} />
-          )}
+        {field !== 'ATTACHMENT_LIST' && <PopupConfirmSubmit field={field} handleCheckSubmit={() => setCheckSubmit(!checkSubmit)} />}
 
         <PopupConfirm />
+
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
+
         {customActions == null && (
           <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
               <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
-                <div style={{ right: '3rem', padding: '2.6rem', position: 'absolute' }}>
-                  <Link
-                    component="button"
-                    variant="body2"
-                    underline='none'
-                    onClick={handleClick}
-                    style={{ display: 'flex', alignItems: 'center' }}>
-                    <AddCircleOutlineIcon
-                      style={{ color: currentEditInq ? '#d3d3d3' : '#BD0F72', left: '8.33%', right: '8.33%', border: '2px' }}
-                    />
-                    <span
-                      style={{
-                        color: currentEditInq ? '#d3d3d3' : '#BD0F72',
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        fontFamily: 'Montserrat',
-                        width: '98px',
-                        height: '20px',
-                        fontStyle: 'normal'
-                      }}>
-                      Add Inquiry
-                    </span>
-                  </Link>
-                </div>
+                <LinkButton
+                  text="Add Inquiry"
+                  disable={currentEditInq}
+                  handleClick={handleClick}
+                />
               </PermissionProvider>
             )}
+
+            <PermissionProvider
+              action={PERMISSION.VIEW_CREATE_AMENDMENT}
+              extraCondition={checkEnableBtnAddAmendment() && myBL?.state?.includes('DRF_')}>
+              <LinkButton
+                text="Add Amendment"
+                disable={currentAmendment !== undefined}
+                handleClick={() => dispatch(InquiryActions.addAmendment(null))}
+              />
+            </PermissionProvider>
+
             {(showBtnSend && user === 'workspace') ?
               <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
                 <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '2.6rem' }}>

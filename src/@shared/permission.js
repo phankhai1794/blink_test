@@ -13,6 +13,7 @@ export const PERMISSION = {
   VIEW_EDIT_INQUIRY: 'view_editInquiry',
   VIEW_SAVE_INQUIRY: 'view_saveInquiry',
   VIEW_REDIRECT_DRAFT_BL: 'view_redirectDraftBL ',
+  VIEW_CREATE_AMENDMENT: 'view_createAmendment',
 
   // UI + API
   INQUIRY_CREATE_INQUIRY: 'inquiry_createInquiry',
@@ -30,9 +31,9 @@ export const PERMISSION = {
   INQUIRY_INQ_ATT_MEDIA: 'inquiry_changesInqAtt',
   INQUIRY_ADD_MEDIA: 'inquiry_addMedia',
   INQUIRY_SUBMIT_INQUIRY_ANSWER: 'inquiry_submitInquiryAnswer',
-  DRAFTBL_SEND_DRAFT_AMENDMENT: 'draftbl_sendDraftAmendment',
   DRAFTBL_CONFIRM_DRAFT_BL: 'draftbl_confirmDraftBl',
-  DRAFTBL_CREATE_REPLY: 'draftbl_saveEditedField'
+  DRAFTBL_CREATE_REPLY: 'draftbl_saveEditedField',
+  INQUIRY_REOPEN_INQUIRY: 'inquiry_reOpenInquiry',
 };
 
 export const PermissionProvider = ({

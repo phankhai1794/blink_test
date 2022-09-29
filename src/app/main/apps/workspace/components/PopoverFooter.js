@@ -5,18 +5,13 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Button, IconButton, Link } from '@material-ui/core';
 import axios from "axios";
 import { loadComment } from 'app/services/inquiryService';
-import {getCommentDraftBl} from "app/services/draftblService";
+import { getCommentDraftBl } from "app/services/draftblService";
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 import { setLastField } from '../store/actions/inquiry';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    borderRadius: '8px',
-    width: '130px',
-    textTransform: 'none'
-  },
   nextPrev: {
     '& .MuiButtonBase-root': {
       marginRight: 18,
@@ -29,7 +24,17 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiIconButton-root:focus': {
       backgroundColor: 'transparent'
     }
-  }
+  },
+  button: {
+    borderRadius: '8px',
+    textTransform: 'none',
+    fontFamily: 'Montserrat',
+    fontStyle: 'normal',
+    fontWeight: 600,
+    fontSize: 16,
+    textAlign: 'center',
+    margin: '0 5px'
+  },
 }));
 const PopoverFooter = ({ title, user, checkSubmit }) => {
   const classes = useStyles();
@@ -84,7 +89,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
             setIsSubmit(isSubmit)
           }
         }).catch(err => {
-          console.log(err)
+          console.error(err)
         })
       if (amendment.length) {
         getCommentDraftBl(myBL.id, amendment[0].field)
@@ -92,7 +97,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
             const filterRepADraft = res.some((r) => r.state === 'AME_DRF');
             if (filterRepADraft) isSubmit = false;
             setIsSubmit(isSubmit)
-          }).catch(err => {console.log(err)})
+          }).catch(err => { console.error(err) });
       }
     }
   }, [inquiries, checkSubmit, enableSubmit]);
@@ -200,35 +205,23 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
             onClick={isShowBackground ? '' : toggleInquiriresDialog}>
             Open all inquiries
           </Link>
-        </div>}
-      {
-        <PermissionProvider
-          action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}>
-          <div>
-            <Button
-              variant="contained"
-              style={{
-                textTransform: 'capitalize',
-                left: '13.45%',
-                right: '13.45%',
-                top: '25%',
-                bottom: '25%',
-                fontFamily: 'Montserrat',
-                fontStyle: 'normal',
-                fontWeight: '600',
-                fontSize: '16px',
-                textAlign: 'center',
-              }}
-              className={classes.root}
-              color="primary"
-              disabled={isShowBackground ? true : isSubmit}
-              onClick={onSubmit}>
-              Submit
-            </Button>
-          </div>
-        </PermissionProvider>
+        </div>
       }
 
+      <PermissionProvider
+        action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}>
+        <div>
+          <Button
+            variant="contained"
+            className={classes.button}
+            style={{ width: 130 }}
+            color="primary"
+            disabled={isShowBackground ? true : isSubmit}
+            onClick={onSubmit}>
+            Submit
+          </Button>
+        </div>
+      </PermissionProvider>
     </div>
   );
 };

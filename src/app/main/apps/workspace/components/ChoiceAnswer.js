@@ -11,7 +11,7 @@ import {PERMISSION, PermissionProvider} from "@shared/permission";
 import * as InquiryActions from '../store/actions/inquiry';
 
 const ChoiceAnswer = (props) => {
-  const { question, questions, disableChecked, disable = false } = props;
+  const { question, questions, disableChecked, disable = false, saveStatus, currentQuestion } = props;
   const user = useSelector(({ user }) => user);
   let questionIsEmpty = props.question === undefined;
   let prevChoiceArray = (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state))? []: question.answerObj.filter((choice) => {
@@ -30,13 +30,23 @@ const ChoiceAnswer = (props) => {
   const [selectedChoice, setSelectedChoice] = useState(initSelectedChoice());
   const allowUpdateChoiceAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_UPDATE_CHOICE });
 
-  const handleChange = async (e) => {
+  useEffect(() => {
+    if (currentQuestion && currentQuestion.id === question.id) {
+      const inqConfirmed = currentQuestion.answerObj.filter(ans => ans.confirmed);
+      if (!inqConfirmed.length) {
+        setSelectedChoice('');
+      }
+    }
+  }, [saveStatus]);
+
+  const handleChange = (e) => {
     setSelectedChoice(e.target.value);
     const selectedObj = {
       inquiry: question.id,
       answer: e.target.value,
       confirmed: true
     };
+    //
     const optionsInquires = [...questions];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     optionsInquires[editedIndex].selectChoice = selectedObj;

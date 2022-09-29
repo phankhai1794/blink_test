@@ -10,7 +10,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import ReplyIcon from '@material-ui/icons/Reply';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import { sentStatus } from '@shared';
+import { sentStatus, statusCommentDrf } from '@shared';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
@@ -135,6 +135,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
+const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
 const BLField = (props) => {
   const classes = useStyles();
@@ -144,11 +145,14 @@ const BLField = (props) => {
   const [hasAnswer, setHasAnswer] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
-  const [isResolved, setIsResolved] = useState(false)
+  const [isResolved, setIsResolved] = useState(false);
+  const user = useSelector(({ user }) => user);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
+  const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   const onMouseEnter = (e) => {
     if (questionIsEmpty) setAnchorEl(e.currentTarget);
@@ -181,17 +185,20 @@ const BLField = (props) => {
         const currentInq = inquiries.find((q) => q.field === id);
         dispatch(InquiryActions.setOneInq(currentInq));
       }
-      if (anchorEl && anchorEl.id === id && allowAddInquiry && !lock) {
-        if (
-          inquiries.length > 0 &&
-          !currentEditInq &&
-          checkValidate(inquiries[inquiries.length - 1])
-        ) {
-          if (inquiries.length + 1 === metadata.field_options.length) {
-            dispatch(FormActions.toggleAddInquiry(false));
+      if (anchorEl && anchorEl.id === id && !lock) {
+        if (allowAddInquiry) {
+          if (
+            inquiries.length > 0 &&
+            !currentEditInq &&
+            checkValidate(inquiries[inquiries.length - 1])
+          ) {
+            if (inquiries.length + 1 === metadata.field_options.length) {
+              dispatch(FormActions.toggleAddInquiry(false));
+            }
           }
+          dispatch(FormActions.toggleCreateInquiry(true));
         }
-        dispatch(FormActions.toggleCreateInquiry(true));
+        else if (allowCreateAmendment && myBL?.state?.includes('DRF_')) dispatch(FormActions.toggleCreateAmendment(true));
       }
       dispatch(InquiryActions.setField(e.currentTarget.id));
       setAnchorEl(e.currentTarget.id);
@@ -209,10 +216,23 @@ const BLField = (props) => {
   };
 
   const checkAnswerSent = () => {
+    let checkInqAns = false;
+    let checkDrafComment = false;
     if (inquiries.length > 0) {
-      const lst = inquiries.filter((q) => q.field === id);
-      if (lst.length === 1) return lst.some(e => sentStatus.includes(e.state));
-      else if (lst.length > 1) return lst.every(e => sentStatus.includes(e.state));
+      const lstInq = inquiries.filter((q) => (q.field === id && !statusCommentDrf.includes(q.state)));
+      const lstReplyAme = listCommentDraft.filter(q => q.field === id);
+      // Check Inquiry
+      if (lstInq.length) {
+        if (lstInq.some(e => ['OPEN', 'INQ_SENT'].includes(e.state))) return false;
+        const listStatus = user?.role === 'Admin' ? [...sentStatus] : [...sentStatus, ...['ANS_DRF']];
+        checkInqAns = lstInq.every(e => listStatus.includes(e.state));
+      }
+      // Check Amendment
+      if (lstReplyAme.length === 1) return false;
+      if (lstReplyAme.length > 1) {
+        checkDrafComment = Boolean(lstReplyAme.filter(comment => ['REP_DRF', 'REP_SENT'].includes(comment.state).length));
+      }
+      return (lstReplyAme.length === 0 ? checkInqAns : (checkInqAns || checkDrafComment));
     }
     return false;
   };
@@ -230,7 +250,7 @@ const BLField = (props) => {
     setQuestionIsEmpty(checkQuestionIsEmpty());
     setHasAnswer(checkAnswerSent())
     setIsResolved(checkQuestionIsResolved())
-  }, [inquiries, metadata]);
+  }, [inquiries, metadata, listCommentDraft]);
 
   return (
     <>

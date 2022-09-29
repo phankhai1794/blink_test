@@ -3,7 +3,7 @@ import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarM
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
-import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
+import * as DraftBLActions from 'app/main/apps/workspace/store/actions/draft-bl';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { draftConfirm } from '@shared';
 import React, { useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 import { loadComment } from 'app/services/inquiryService';
+import { getCommentDraftBl } from "app/services/draftblService";
 import axios from 'axios';
 
 import * as InquiryActions from "../../../main/apps/workspace/store/actions/inquiry";
@@ -99,25 +100,11 @@ function ToolbarLayout1(props) {
     header.validToken
   ]);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
-  const draftContent = useSelector(({ draftBL }) => draftBL.draftContent);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
-  const myBL = useSelector(({ draftBL }) => draftBL.myBL);
   const [open, setOpen] = useState(false);
-  const [disableConfirm, setDisableConfirm] = useState(false);
-  const [disableSendDraft, setDisableSendDraft] = useState(false);
-  const inquiryLength = inquiries.length;
   const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
   const [isSubmit, setIsSubmit] = useState(true);
-
-  useEffect(() => {
-    myBL.state === draftConfirm && setDisableConfirm(true);
-  }, [myBL.state]);
-  const openAllInquiry = () => {
-    if (inquiryLength) {
-      dispatch(FormActions.toggleAllInquiry(true));
-      dispatch(FormActions.toggleSaveInquiry(true));
-    }
-  };
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   useEffect(() => {
     let optionInquiries = [...inquiries];
@@ -131,6 +118,7 @@ function ToolbarLayout1(props) {
       isSubmit = false;
     }
     const inquiriesPendingProcess = optionInquiries.filter(op => op.process === 'pending');
+    const amendment = optionInquiries.filter(op => op.process === 'draft');
     if (pathname.includes('/guest')) {
       axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)))
         .then(res => {
@@ -139,52 +127,29 @@ function ToolbarLayout1(props) {
             res.map(r => {
               commentList = [...commentList, ...r];
             });
-            const filterRepADraft = commentList.some((r) => r.state === 'REP_A_DRF');
-            // dispatch(InquiryActions.checkSubmit(filterRepADraft));
+            const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'REP_A_DRF');
             if (filterRepADraft) isSubmit = false;
             setIsSubmit(isSubmit)
           }
         }).catch(err => {
           console.error(err)
         })
+      if (amendment.length) {
+        axios.all(amendment.map(q => getCommentDraftBl(myBL.id, q.field)))
+          .then((res) => {
+            if (res) {
+              let commentList = [];
+              res.map(r => {
+                commentList = [...commentList, ...r];
+              });
+              const filterRepADraft = commentList.some((r) => r.state === 'AME_DRF');
+              if (filterRepADraft) isSubmit = false;
+              setIsSubmit(isSubmit)
+            }
+          }).catch(err => { console.error(err) });
+      }
     }
   }, [enableSubmit, inquiries]);
-
-  useEffect(() => {
-    setDisableSendDraft(draftContent.some((c) => c.state === 'AME_DRF'))
-  }, [draftContent])
-
-  const openAttachment = () => {
-    let isExistMedia = false;
-    inquiries.forEach((inq) => {
-      if (inq.mediaFile.length > 0) {
-        isExistMedia = true;
-        return;
-      }
-    });
-    if (inquiries.length === 0 || !isExistMedia) {
-      dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
-    } else {
-      dispatch(FormActions.toggleAttachment(true));
-    }
-  };
-
-  const openEmail = () => dispatch(FormActions.toggleOpenEmail(true));
-
-  const handleClose = () => {
-    setOpen(false);
-  }
-
-  const confirmBlDraft = () => {
-    setOpen(true);
-  };
-  const onSendDraftBl = () => {
-    dispatch(DraftBLActions.toggleSendNotification(true));
-  }
-  const redirectEditDraftBL = () => {
-    const bl = new URLSearchParams(search).get('bl');
-    if (bl) history.push(`/draft-bl/edit/${bl}`);
-  };
 
   useEffect(() => {
     if (!user.displayName || !validToken) {
@@ -210,6 +175,43 @@ function ToolbarLayout1(props) {
       }
     }
   }, [user, allowAccess]);
+
+  const openAllInquiry = () => {
+    if (inquiries.length) {
+      dispatch(FormActions.toggleAllInquiry(true));
+      dispatch(FormActions.toggleSaveInquiry(true));
+    }
+  };
+
+  const openAttachment = () => {
+    let isExistMedia = false;
+    inquiries.forEach((inq) => {
+      if (inq.mediaFile.length > 0) {
+        isExistMedia = true;
+        return;
+      }
+    });
+    if (inquiries.length === 0 || !isExistMedia) {
+      dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
+    } else {
+      dispatch(FormActions.toggleAttachment(true));
+    }
+  };
+
+  const openEmail = () => dispatch(FormActions.toggleOpenEmail(true));
+
+  const handleClose = () => {
+    setOpen(false);
+  }
+
+  const confirmBlDraft = () => {
+    setOpen(true);
+  };
+
+  const redirectEditDraftBL = () => {
+    const bl = new URLSearchParams(search).get('bl');
+    if (bl) history.push(`/guest?bl=${bl}`);
+  };
 
   const onSubmit = async () => {
     dispatch(FormActions.toggleAllInquiry(true));
@@ -248,7 +250,7 @@ function ToolbarLayout1(props) {
                 size="medium"
                 className={clsx('h-64', classes.button)}
                 onClick={openAllInquiry}>
-                <Badge color="primary" badgeContent={inquiryLength}>
+                <Badge color="primary" badgeContent={inquiries.length}>
                   <NotificationsIcon />
                 </Badge>
                 <span className="pl-12">Inquiry List</span>
@@ -280,23 +282,10 @@ function ToolbarLayout1(props) {
               <Button
                 variant="contained"
                 className={clsx(classes.button, classes.buttonComfirm)}
-                onClick={confirmBlDraft}
-                disabled={disableConfirm}>
+                onClick={confirmBlDraft}>
                 Confirm
               </Button>
               <DialogConfirm open={open} handleClose={handleClose} />
-            </PermissionProvider>
-
-            <PermissionProvider
-              action={PERMISSION.DRAFTBL_SEND_DRAFT_AMENDMENT}
-              extraCondition={pathname.includes('/draft-bl/edit')}>
-              <Button
-                variant="contained"
-                className={clsx(classes.button, classes.buttonSend)}
-                onClick={onSendDraftBl}
-                disabled={!disableSendDraft}>
-                Send
-              </Button>
             </PermissionProvider>
 
             <PermissionProvider

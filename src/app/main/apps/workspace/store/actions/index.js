@@ -2,21 +2,27 @@ import { filterMetadata } from '@shared';
 import { handleError } from '@shared/handleError';
 import { getInquiryById, getMetadata } from 'app/services/inquiryService';
 import { createBL, getBlInfo } from 'app/services/myBLService';
-import { getFieldContent } from 'app/services/draftblService';
+import { getFieldContent, getCommentDraftBl } from 'app/services/draftblService';
+import axios from 'axios';
 
 import {
   setMyBL,
+  setOrgContent,
   setContent,
   saveField,
   setInquiries,
   saveMetadata,
+  setListCommentDraft,
 } from './inquiry';
 import * as InquiryActions from './inquiry';
 
 export const initBL = (bkgNo) => async (dispatch) => {
   createBL(bkgNo)
     .then((res) => {
-      if (res) dispatch(setMyBL(res.myBL));
+      if (res) {
+        const { id, state, bkgNo } = res.myBL;
+        dispatch(setMyBL({ id, state, bkgNo }));
+      }
     })
     .catch((err) => console.error(err));
 };
@@ -26,6 +32,22 @@ export const loadMetadata = () => async (dispatch) => {
     .then((res) => {
       const data = filterMetadata(res);
       dispatch(saveMetadata(data));
+    })
+    .catch((err) => handleError(dispatch, err));
+};
+
+export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
+  const amendments = inquiries.filter(i => i.process === 'draft');
+  getBlInfo(myBL_Id)
+    .then((res) => {
+      // const { id, state, bkgNo, content } = res.myBL;
+      // dispatch(setMyBL({ id, state, bkgNo }));
+      const { content } = res.myBL;
+      dispatch(setOrgContent(res.myBL.content));
+
+      const cloneContent = { ...content };
+      amendments && amendments.map(a => cloneContent[a.field] = a.content);
+      dispatch(setContent(cloneContent));
     })
     .catch((err) => handleError(dispatch, err));
 };
@@ -61,7 +83,13 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
       lastestCommentDraft.push(filterLastestComment[0]);
     });
 
-    dispatch(setInquiries(JSON.parse(JSON.stringify([...resInq, ...lastestCommentDraft]))));
+    const inquiries = JSON.parse(JSON.stringify([...resInq, ...lastestCommentDraft]))
+    dispatch(setInquiries(inquiries));
+
+    dispatch(loadContent(myBL_Id, inquiries));
+
+    const responseCommentDraft = await axios.all(lastestCommentDraft.map(q => getCommentDraftBl(myBL_Id, q.field)));
+    dispatch(setListCommentDraft(responseCommentDraft.flat()));
 
     const field_list = [...resInq.map((e) => e.field), ...resDraft.map((e) => e.field)];
     dispatch(saveField(field_list));
@@ -71,7 +99,8 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
       { id: 'attachmentList', field: 'ATTACHMENT_LIST' },
       { id: 'email', field: 'EMAIL' },
       { id: 'inquiryForm', field: 'INQUIRY_FORM' },
-      { id: 'inquiryReview', field: 'INQUIRY_REVIEW' }
+      { id: 'inquiryReview', field: 'INQUIRY_REVIEW' },
+      { id: 'amendmentForm', field: 'AMENDMENT_FORM' },
     ];
     const listMinimize = [...resInq, ...resDraft, ...optionTabs];
     dispatch(InquiryActions.setListMinimize(listMinimize));
@@ -79,12 +108,4 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
   catch (err) {
     handleError(dispatch, err);
   }
-};
-
-export const loadContent = (myBL_Id) => async (dispatch) => {
-  getBlInfo(myBL_Id)
-    .then((res) => {
-      dispatch(setContent(res.myBL.content));
-    })
-    .catch((err) => handleError(dispatch, err));
 };

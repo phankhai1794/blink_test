@@ -1,10 +1,8 @@
-import React, { useEffect , useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@material-ui/core";
 import { useDispatch, useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
-import { submitInquiryAnswer } from 'app/services/inquiryService';
 
-import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
 
 
@@ -52,8 +50,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const PopupConfirm = (props) => {
-
+const PopupConfirm = () => {
   const [openConfirmPopup, confirmPopupMsg, confirmPopupType] = useSelector(({ workspace }) => [
     workspace.formReducer.openConfirmPopup,
     workspace.formReducer.confirmPopupMsg,
