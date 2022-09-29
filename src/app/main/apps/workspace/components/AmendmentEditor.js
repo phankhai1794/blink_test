@@ -103,7 +103,7 @@ const Amendment = ({ question }) => {
   }
 
   useEffect(() => {
-    setFieldValue(content[currentField]);
+    setFieldValue(content[currentField] || "");
   }, [content, currentField])
 
   return (
