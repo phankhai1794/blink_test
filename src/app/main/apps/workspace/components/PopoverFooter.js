@@ -35,24 +35,6 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     margin: '0 5px'
   },
-  textCreateAmendment: {
-    position: 'relative',
-    left: 17,
-    fontWeight: 600,
-    fontFamily: 'Montserrat',
-    lineHeight: '20px',
-    padding: '4px 13px 4px 7px',
-    '&:before': {
-      position: 'absolute',
-      top: 5,
-      left: -21,
-      width: 21,
-      height: 21,
-      content: '""',
-      backgroundImage: 'url("assets/images/icons/plus.svg")',
-      backgroundSize: 'cover'
-    }
-  }
 }));
 const PopoverFooter = ({ title, user, checkSubmit }) => {
   const classes = useStyles();
@@ -182,12 +164,6 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
     dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
   };
 
-  const checkEnableBtnAddAmendment = () => {
-    const filter = inquiries.filter(inq => inq.field === currentField);
-    if (!filter.length) return false;
-    return !filter.some(inq => inq.process === 'draft');
-  }
-
   return (
     <div
       style={{
@@ -243,20 +219,6 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
             disabled={isShowBackground ? true : isSubmit}
             onClick={onSubmit}>
             Submit
-          </Button>
-        </div>
-      </PermissionProvider>
-
-      <PermissionProvider
-        action={PERMISSION.VIEW_CREATE_AMENDMENT}
-        extraCondition={checkEnableBtnAddAmendment() && myBL?.state?.includes('DRF_')}>
-        <div>
-          <Button
-            variant="contained"
-            className={classes.button}
-            color="primary"
-            onClick={() => dispatch(InquiryActions.addAmendment(null))}>
-            <span className={classes.textCreateAmendment}>Create Amendment</span>
           </Button>
         </div>
       </PermissionProvider>
