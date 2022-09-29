@@ -93,11 +93,11 @@ const Inquiry = (props) => {
       resInq.forEach(ans => {
         //reset data click cancel
         if (optionsInquires[editedIndex].id === ans.id) {
-          if (optionsInquires[editedIndex].answerObj.length) {
-            if (!choiceAnswer) {
-              optionsInquires[editedIndex].paragraphAnswer.content = optionsInquires[editedIndex].answerObj[0].content
-            } else {
-              const answerIndex = optionsInquires[editedIndex].answerObj.find((item) => item.confirmed);
+          if (ans.answerObj.length) {
+            if (!choiceAnswer && optionsInquires[editedIndex].paragraphAnswer) {
+              optionsInquires[editedIndex].paragraphAnswer.content = ans.answerObj[0].content
+            } else if (choiceAnswer && optionsInquires[editedIndex].selectChoice) {
+              const answerIndex = ans.answerObj.find((item) => item.confirmed);
               optionsInquires[editedIndex].selectChoice.answer = answerIndex.id;
             }
           }
@@ -107,10 +107,7 @@ const Inquiry = (props) => {
     }
     //
     dispatch(InquiryActions.setInquiries(optionsInquires));
-    setQuestionIdSaved({
-      currentInq: optionsInquires[editedIndex],
-      isCancel
-    });
+    setQuestionIdSaved(optionsInquires[editedIndex]);
     setSaved(!isSaved);
   };
 

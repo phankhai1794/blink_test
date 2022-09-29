@@ -11,6 +11,7 @@ export const OPEN_EMAIL = 'OPEN_EMAIL';
 export const OPEN_INQUIRY_REVIEW = 'OPEN_INQUIRY_REVIEW';
 export const OPEN_NOTIFICATION_ATTACHMENT_LIST = 'OPEN_NOTIFICATION_ATTACHMENT_LIST';
 export const OPEN_NOTIFICATION_SUBMIT_ANSWER = 'OPEN_NOTIFICATION_SUBMIT_ANSWER';
+export const OPEN_NOTIFICATION_DELETE_REPLY = 'OPEN_NOTIFICATION_DELETE_REPLY';
 export const ENABLE_SAVE_INQUIRIES = 'ENABLE_SAVE_INQUIRIES';
 export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
 export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
@@ -101,6 +102,13 @@ export function toggleOpenNotificationAttachmentList(state) {
 export function toggleOpenNotificationSubmitAnswer(state) {
   return {
     type: OPEN_NOTIFICATION_SUBMIT_ANSWER,
+    state
+  };
+}
+
+export function toggleOpenNotificationDeleteReply(state) {
+  return {
+    type: OPEN_NOTIFICATION_DELETE_REPLY,
     state
   };
 }

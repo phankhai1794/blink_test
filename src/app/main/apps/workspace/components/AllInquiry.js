@@ -8,6 +8,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
+import { getInquiryById } from 'app/services/inquiryService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -143,6 +144,7 @@ const AllInquiry = (props) => {
   ]);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   let CURRENT_NUMBER = 0;
 
@@ -171,24 +173,58 @@ const AllInquiry = (props) => {
     }
   };
 
-  const resetActionInquiry = (q) => {
+  const resetActionAllInquiry = async (q, isCancel) => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
     optionsInquires[editedIndex].showIconReply = true;
     optionsInquires[editedIndex].showIconEdit = true;
     optionsInquires[editedIndex].showIconAttachAnswerFile = false;
     optionsInquires[editedIndex].showIconAttachReplyFile = false;
+    //
+    let isAnswered = false;
+    let choiceAnswer = false;
+    if (metadata.ans_type['paragraph'] === optionsInquires[editedIndex].ansType) {
+      if (optionsInquires[editedIndex].answerObj) {
+        isAnswered = true;
+      }
+    } else if (metadata.ans_type['choice'] === optionsInquires[editedIndex].ansType) {
+      if (optionsInquires[editedIndex].answerObj) {
+        const answered = optionsInquires[editedIndex].answerObj.filter(ans => ans.confirmed);
+        if (answered.length) isAnswered = true;
+        choiceAnswer = true;
+      }
+    }
+    if (isCancel && !isAnswered) {
+      optionsInquires[editedIndex].mediaFilesAnswer = [];
+    } else if (isCancel && isAnswered) {
+      const [resInq] = [await getInquiryById(myBL.id)];
+      resInq.forEach(ans => {
+        //reset data click cancel
+        if (optionsInquires[editedIndex].id === ans.id) {
+          if (ans.answerObj.length) {
+            if (!choiceAnswer && optionsInquires[editedIndex].paragraphAnswer) {
+              optionsInquires[editedIndex].paragraphAnswer.content = ans.answerObj[0].content
+            } else if (choiceAnswer && optionsInquires[editedIndex].selectChoice) {
+              const answerIndex = ans.answerObj.find((item) => item.confirmed);
+              optionsInquires[editedIndex].selectChoice.answer = answerIndex.id;
+            }
+          }
+          optionsInquires[editedIndex].mediaFilesAnswer = ans.mediaFilesAnswer;
+        }
+      });
+    }
+    //
     dispatch(InquiryActions.setInquiries(optionsInquires));
     setQuestionIdSaved(optionsInquires[editedIndex]);
     setSaved(!isSaved);
   };
 
   const handleCancel = (q) => {
-    resetActionInquiry(q);
+    resetActionAllInquiry(q, true);
   };
 
   const handleSetSave = (q) => {
-    resetActionInquiry(q);
+    resetActionAllInquiry(q, false);
   };
 
   return (

@@ -31,8 +31,8 @@ const ChoiceAnswer = (props) => {
   const allowUpdateChoiceAnswer = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_UPDATE_CHOICE });
 
   useEffect(() => {
-    if (currentQuestion && currentQuestion.currentInq.id === question.id) {
-      const inqConfirmed = currentQuestion.currentInq.answerObj.filter(ans => ans.confirmed);
+    if (currentQuestion && currentQuestion.id === question.id) {
+      const inqConfirmed = currentQuestion.answerObj.filter(ans => ans.confirmed);
       if (!inqConfirmed.length) {
         setSelectedChoice('');
       }
