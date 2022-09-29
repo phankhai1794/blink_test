@@ -167,35 +167,36 @@ const useStyles = makeStyles(() => ({
   colorCountBtn: {
     background: '#FDF2F2'
   },
-  button: {
-    borderRadius: '8px',
-    textTransform: 'none',
-    fontFamily: 'Montserrat',
-    fontStyle: 'normal',
-    fontWeight: 600,
-    fontSize: 16,
-    textAlign: 'center',
-    margin: '0 5px'
-  },
-  textAddInq: {
-    position: 'relative',
-    left: 17,
-    fontWeight: 600,
-    fontFamily: 'Montserrat',
-    lineHeight: '20px',
-    padding: '4px 13px 4px 9px',
-    '&:before': {
-      position: 'absolute',
-      top: 3,
-      left: -21,
-      width: 21,
-      height: 21,
-      content: '""',
-      backgroundImage: 'url("assets/images/icons/plus.svg")',
-      backgroundSize: 'cover'
-    }
-  }
 }));
+
+const LinkButton = ({ text, disable, handleClick }) => {
+  return (
+    <div style={{ position: 'absolute', right: '1rem', zIndex: 10, padding: 21 }}>
+      <Link
+        component="button"
+        variant="body2"
+        underline='none'
+        style={{ display: 'flex', alignItems: 'center' }}
+        onClick={handleClick}>
+        <AddCircleOutlineIcon
+          style={{ color: disable ? '#d3d3d3' : '#BD0F72', left: '8.33%', right: '8.33%', border: '2px', width: 25 }}
+        />
+        <span
+          style={{
+            color: disable ? '#d3d3d3' : '#BD0F72',
+            fontSize: 16,
+            fontWeight: '600',
+            fontFamily: 'Montserrat',
+            paddingLeft: 5,
+            height: 20,
+            fontStyle: 'normal'
+          }}>
+          {text}
+        </span>
+      </Link>
+    </div>
+  )
+}
 
 export default function Form(props) {
   const dispatch = useDispatch();
@@ -217,6 +218,7 @@ export default function Form(props) {
   } = props;
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
@@ -230,7 +232,7 @@ export default function Form(props) {
 
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
-  const openConfirmPopup = useSelector(({ workspace }) => workspace.formReducer.openConfirmPopup);
+  const currentAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.currentAmendment);
 
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -339,6 +341,12 @@ export default function Form(props) {
     dispatch(FormActions.toggleOpenEmail(true))
   };
 
+  const checkEnableBtnAddAmendment = () => {
+    const filter = inquiries.filter(inq => inq.field === currentField);
+    if (!filter.length) return false;
+    return !filter.some(inq => inq.process === 'draft');
+  }
+
   useEffect(() => {
     if (tabs) {
       props.tabChange(0);
@@ -437,18 +445,23 @@ export default function Form(props) {
           <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
               <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
-                <div style={{ position: 'absolute', bottom: '5px', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                  <Button
-                    variant="contained"
-                    className={classes.button}
-                    color="primary"
-                    onClick={handleClick}
-                    disabled={currentEditInq || openConfirmPopup}>
-                    <span className={classes.textAddInq}>Add Inquiry</span>
-                  </Button>
-                </div>
+                <LinkButton
+                  text="Add Inquiry"
+                  disable={currentEditInq}
+                  handleClick={handleClick}
+                />
               </PermissionProvider>
             )}
+
+            <PermissionProvider
+              action={PERMISSION.VIEW_CREATE_AMENDMENT}
+              extraCondition={checkEnableBtnAddAmendment() && myBL?.state?.includes('DRF_')}>
+              <LinkButton
+                text="Add Amendment"
+                disable={currentAmendment !== undefined}
+                handleClick={() => dispatch(InquiryActions.addAmendment(null))}
+              />
+            </PermissionProvider>
 
             {(showBtnSend && user === 'workspace') ?
               <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>

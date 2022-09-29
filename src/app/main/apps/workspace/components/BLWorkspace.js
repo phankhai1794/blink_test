@@ -103,6 +103,7 @@ const BLWorkspace = (props) => {
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
   );
   const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
+  const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
 
   const getField = (keyword) => {
     return metadata.field?.[keyword] || '';
@@ -248,7 +249,7 @@ const BLWorkspace = (props) => {
         fabTitle: 'Inquiry Form',
         title: 'Inquiry Creation',
         field: 'INQUIRY_FORM',
-        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter((q, index) => q.field === inquiry.field))} />
+        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter(q => q.field === inquiry.field))} />
       };
     case 'AMENDMENT_FORM':
       return {
@@ -256,7 +257,7 @@ const BLWorkspace = (props) => {
         nums: [],
         toggleForm: (status) => dispatch(FormActions.toggleCreateAmendment(status)),
         fabTitle: 'Amendment Form',
-        title: 'Amendment Creation',
+        title: metadata?.field_options.find((f) => f.value === currentField)?.label,
         field: 'AMENDMENT_FORM',
         child: <AmendmentEditor />
       };
