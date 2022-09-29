@@ -101,16 +101,10 @@ function ToolbarLayout1(props) {
   ]);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
-  const myBL = useSelector(({ draftBL }) => draftBL.myBL);
   const [open, setOpen] = useState(false);
-  const [disableConfirm, setDisableConfirm] = useState(false);
   const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
   const [isSubmit, setIsSubmit] = useState(true);
-  const getMybl = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
-
-  useEffect(() => {
-    myBL.state === draftConfirm && setDisableConfirm(true);
-  }, [myBL.state]);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   useEffect(() => {
     let optionInquiries = [...inquiries];
@@ -141,7 +135,7 @@ function ToolbarLayout1(props) {
           console.error(err)
         })
       if (amendment.length) {
-        axios.all(amendment.map(q => getCommentDraftBl(getMybl.id, q.field)))
+        axios.all(amendment.map(q => getCommentDraftBl(myBL.id, q.field)))
           .then((res) => {
             if (res) {
               let commentList = [];
@@ -288,8 +282,7 @@ function ToolbarLayout1(props) {
               <Button
                 variant="contained"
                 className={clsx(classes.button, classes.buttonComfirm)}
-                onClick={confirmBlDraft}
-                disabled={disableConfirm}>
+                onClick={confirmBlDraft}>
                 Confirm
               </Button>
               <DialogConfirm open={open} handleClose={handleClose} />
