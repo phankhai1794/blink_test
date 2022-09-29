@@ -98,6 +98,7 @@ const BLWorkspace = (props) => {
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
   const openNotification = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitAnswer);
+  const openNotificationReply = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteReply);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -320,14 +321,25 @@ const BLWorkspace = (props) => {
     setIsExpand(false);
   };
 
+  const renderMsgNoti = () => {
+    if (openNotification) {
+      return 'Your answer has been submitted successfully.'
+    } else if (openNotificationReply) {
+      return 'Your reply has been deleted'
+    }
+  }
+
   return (
     <>
       <BLProcessNotification />
       <AttachmentListNotification />
       <SubmitAnswerNotification
-        open={openNotification}
-        msg='Your answer has been submitted successfully.'
-        handleClose={() => dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false))} 
+        open={openNotification || openNotificationReply}
+        msg={renderMsgNoti()}
+        handleClose={() => {
+          dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false));
+          dispatch(FormActions.toggleOpenNotificationDeleteReply(false));
+        }}
       />
       <div className={clsx('max-w-5xl', classes.root)}>
         <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>

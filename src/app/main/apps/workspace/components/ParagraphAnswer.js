@@ -55,8 +55,8 @@ const ParagraphAnswer = (props) => {
   }, []);
 
   useEffect(() => {
-    if (currentQuestion && currentQuestion.currentInq.id === question.id) {
-      if (!currentQuestion.currentInq.answerObj.length) {
+    if (currentQuestion && currentQuestion.id === question.id) {
+      if (!currentQuestion.answerObj.length) {
         setParagraphText('');
       }
     }

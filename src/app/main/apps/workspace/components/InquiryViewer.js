@@ -297,25 +297,24 @@ const InquiryViewer = (props) => {
                 }
               };
               setTempReply({ ...tempReply, ...reqReply, mediaFiles: lastest.mediaFile });
+              lastest.showIconAttachReplyFile = false;
+              lastest.showIconAttachAnswerFile = false;
             }
-            //
             if (user.role === 'Admin') {
               if (['AME_SENT'].includes(lastest.state)) {
                 lastest.showIconReply = true;
+                setStateReplyDraft(false);
               }
               if (['REP_SENT'].includes(lastest.state)) {
                 setShowLabelSent(true);
+                lastest.showIconReply = false;
               }
             } else {
               if (['REP_SENT'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 setStateReplyDraft(false);
               }
-              if (['AME_DRF'].includes(lastest.state)) {
-                setStateReplyDraft(true);
-                lastest.showIconAttachReplyFile = false;
-                lastest.showIconAttachAnswerFile = false;
-              } else if (['AME_SENT'].includes(lastest.state)) {
+              if (['AME_SENT'].includes(lastest.state)) {
                 setStateReplyDraft(false);
                 lastest.showIconReply = false;
                 setSubmitLabel(true);
@@ -352,7 +351,7 @@ const InquiryViewer = (props) => {
     const quest = { ...question };
     quest.showIconAttachAnswerFile = false;
     quest.showIconAttachReplyFile = false;
-    if (currentQuestion && currentQuestion.currentInq.id === quest.id) {
+    if (currentQuestion && currentQuestion.id === quest.id) {
       quest.showIconReply = false;
       quest.showIconEdit = true;
       let answerObj = null;
@@ -368,10 +367,10 @@ const InquiryViewer = (props) => {
         quest.name = "";
         quest.answerObj = [];
       }
-      quest.state = currentQuestion.currentInq.state;
+      quest.state = currentQuestion.state;
       setType(quest.ansType);
-      if (currentQuestion.currentInq.state !== 'INQ_SENT') {
-        quest.mediaFile = currentQuestion.currentInq.mediaFilesAnswer;
+      if (currentQuestion.state !== 'INQ_SENT') {
+        quest.mediaFile = currentQuestion.mediaFilesAnswer;
         quest.mediaFilesAnswer = [];
         setInqHasComment(true);
       } else {
@@ -446,8 +445,11 @@ const InquiryViewer = (props) => {
     } else if (confirmPopupType === 'removeReply' && replyRemove) {
       deleteDraftBLReply(replyRemove.id)
         .then(() => {
+          dispatch(FormActions.toggleAllInquiry(false));
+          dispatch(InquiryActions.setOneInq({}));
+          dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+          dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
           setSaveComment(!isSaveComment);
-          dispatch(FormActions.toggleReload());
         }).catch((error) => console.error(error));
     }
     dispatch(
@@ -577,8 +579,23 @@ const InquiryViewer = (props) => {
         mediaFiles: val
       });
     } else {
-      const mediaFiles = [...tempReply.mediaFiles, ...val];
-      setTempReply({ ...tempReply, mediaFiles });
+      setTempReply((prev) => {
+        const attachmentsName = val.map(att => att.name);
+        let isExist = false;
+        if (prev && prev.mediaFiles.length) {
+          isExist = prev.mediaFiles.some(media => attachmentsName.includes(media.name));
+        }
+        if (isExist) {
+          dispatch(AppAction.showMessage({
+            message: `Duplicate file(s)`,
+            variant: 'error'
+          }));
+          return { ...tempReply };
+        } else {
+          const mediaFiles = [...prev.mediaFiles, ...val];
+          return { ...tempReply, mediaFiles };
+        }
+      });
     }
   };
 
@@ -697,7 +714,7 @@ const InquiryViewer = (props) => {
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
-          dispatch(FormActions.toggleReload());
+          // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
     }
@@ -870,11 +887,23 @@ const InquiryViewer = (props) => {
                         </>
                       ) : <>
                         {checkStateReplyDraft && (
-                          <Tooltip title={'Edit Reply'}>
-                            <div onClick={() => handleEdit(question)}>
-                              <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
-                            </div>
-                          </Tooltip>
+                          <>
+                            <Tooltip title={'Edit Reply'}>
+                              <div onClick={() => handleEdit(question)}>
+                                <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                              </div>
+                            </Tooltip>
+                            {question.process === 'draft' && (
+                              <Tooltip title="Delete Reply">
+                                <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
+                                  <img
+                                    style={{ height: '22px', cursor: 'pointer' }}
+                                    src="/assets/images/icons/trash-gray.svg"
+                                  />
+                                </div>
+                              </Tooltip>
+                            )}
+                          </>
                         )}
                       </>
                     )}
