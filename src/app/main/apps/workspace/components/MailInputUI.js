@@ -199,7 +199,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
   };
 
   return (
-    <div className="tags-input-container" style={{ height: 35, paddingRight: (type == 'Cc' || type == 'Bcc') ? '0px' : '90px' }} onFocus={() => setIsFocus(true)}>
+    <div className="tags-input-container" style={{ paddingRight: (type == 'Cc' || type == 'Bcc') ? '0px' : '90px' }} onFocus={() => setIsFocus(true)}>
       {type !== 'Cc' && type !== 'Bcc' && <div style={{
         position: 'absolute',
         paddingLeft: '7px',
