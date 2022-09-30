@@ -198,7 +198,11 @@ const BLField = (props) => {
           }
           dispatch(FormActions.toggleCreateInquiry(true));
         }
-        else if (allowCreateAmendment && myBL?.state?.includes('DRF_')) dispatch(FormActions.toggleCreateAmendment(true));
+        else if (
+          allowCreateAmendment
+          && myBL?.state?.includes('DRF_')
+          && user.userType === 'CUSTOMER' // Allow only customer to create amendment
+        ) dispatch(FormActions.toggleCreateAmendment(true));
       }
       dispatch(InquiryActions.setField(e.currentTarget.id));
       setAnchorEl(e.currentTarget.id);

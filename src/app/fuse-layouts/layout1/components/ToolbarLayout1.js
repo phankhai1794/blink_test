@@ -165,6 +165,7 @@ function ToolbarLayout1(props) {
       if (userInfo) {
         let payload = {
           ...user,
+          userType: userInfo.userType,
           role: userInfo.role,
           displayName: userInfo.displayName,
           photoURL: userInfo.photoURL,
