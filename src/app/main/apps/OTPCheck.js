@@ -181,10 +181,11 @@ const OtpCheck = ({ children }) => {
     verifyGuest({ email: mail.value, bl: myBL.id, otpCode: otpCode.value })
       .then((res) => {
         if (res) {
-          const { role, userName, avatar, email, permissions } = res.userData;
+          const { userType, role, userName, avatar, email, permissions } = res.userData;
           let userInfo = {
             displayName: userName,
             photoURL: avatar,
+            userType,
             role,
             email,
             permissions
