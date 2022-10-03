@@ -10,6 +10,7 @@ import {
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime } from '@shared';
+import { getBlInfo } from 'app/services/myBLService';
 import {
   CONTAINER_DETAIL,
   CONTAINER_MANIFEST,
@@ -308,6 +309,8 @@ const InquiryViewer = (props) => {
               if (['REP_SENT'].includes(lastest.state)) {
                 setShowLabelSent(true);
                 lastest.showIconReply = false;
+              } else if (['REP_DRF'].includes(lastest.state)) {
+                lastest.showIconReply = false;
               }
             } else {
               if (['REP_SENT'].includes(lastest.state)) {
@@ -445,11 +448,22 @@ const InquiryViewer = (props) => {
     } else if (confirmPopupType === 'removeReply' && replyRemove) {
       deleteDraftBLReply(replyRemove.id)
         .then(() => {
+          //
           dispatch(FormActions.toggleAllInquiry(false));
           dispatch(InquiryActions.setOneInq({}));
           dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-          dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
-          setSaveComment(!isSaveComment);
+          if (comment.length > 2) {
+            dispatch(FormActions.toggleOpenNotificationDeleteReply(true))
+          } else {
+            getBlInfo(myBL.id).then(res => {
+              dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
+              const optionsOfQuestion = [...inquiries];
+              const inqIndexDelete = optionsOfQuestion.findIndex(op => op.id === replyRemove.id);
+              optionsOfQuestion.splice(inqIndexDelete, 1);
+              dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+              dispatch(FormActions.toggleOpenNotificationDeleteAmendment(true));
+            }).catch((error) => console.error(error));;
+          }
         }).catch((error) => console.error(error));
     }
     dispatch(
@@ -475,10 +489,14 @@ const InquiryViewer = (props) => {
 
   const removeReply = (question) => {
     setReplyRemove(question);
+    let confirmPopupMsg = 'Are you sure you want to remove this amendment?';
+    if (comment.length > 2) {
+      confirmPopupMsg = 'Are you sure you want to delete this reply?';
+    }
     dispatch(
       FormActions.openConfirmPopup({
         openConfirmPopup: true,
-        confirmPopupMsg: 'Are you sure you want to delete this reply?',
+        confirmPopupMsg,
         confirmPopupType: 'removeReply'
       })
     );
@@ -712,7 +730,7 @@ const InquiryViewer = (props) => {
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
-          dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
+          // dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
@@ -1208,7 +1226,8 @@ const InquiryViewer = (props) => {
                             minHeight: 50,
                             border: '1px solid #BAC3CB',
                             borderRadius: 8,
-                            resize: 'none'
+                            resize: 'none',
+                            fontFamily: 'Montserrat'
                           }}
                           multiline="true"
                           type="text"
@@ -1257,12 +1276,12 @@ const InquiryViewer = (props) => {
                           color="primary"
                           onClick={onSaveReply}
                           disabled={!tempReply?.answer?.content}
-                          classes={{ root: classes.button }}>
+                          classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
                         </Button>
                         <Button
                           variant="contained"
-                          classes={{ root: clsx(classes.button, 'reply') }}
+                          classes={{ root: clsx(classes.button, 'w120', 'reply') }}
                           color="primary"
                           onClick={() => cancelReply(question)}>
                           Cancel
