@@ -134,6 +134,7 @@ const InquiryViewer = (props) => {
   const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
+  const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
   const [question, setQuestion] = useState(props.question);
@@ -324,7 +325,10 @@ const InquiryViewer = (props) => {
               }
             }
             setQuestion(lastest);
-            //
+
+            // push new lastestComment if not already exist
+            !listCommentDraft.find(ele => ele.id === lastestComment.id) && dispatch(InquiryActions.setListCommentDraft([...listCommentDraft, ...[lastestComment]]));
+
             const comments = [{
               creator: { userName: user.displayName, avatar: null },
               createdAt: res[0].createdAt,
@@ -393,7 +397,7 @@ const InquiryViewer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     const quest = { ...question };
     if (optionsInquires[editedIndex].mediaFilesAnswer.length) {
-      setQuestion({...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer});
+      setQuestion({ ...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer });
     }
   }, [isUploadFile]);
 
@@ -448,12 +452,20 @@ const InquiryViewer = (props) => {
     } else if (confirmPopupType === 'removeReply' && replyRemove) {
       deleteDraftBLReply(replyRemove.id)
         .then(() => {
-          //
           dispatch(FormActions.toggleAllInquiry(false));
           dispatch(InquiryActions.setOneInq({}));
           dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+
+          // Update state of listDraftComments for re-rendering UI
+          let cloneListCommentDraft = listCommentDraft.filter(({ id }) => id !== replyRemove.id);
+          dispatch(InquiryActions.setListCommentDraft(cloneListCommentDraft));
+
           if (comment.length > 2) {
-            dispatch(FormActions.toggleOpenNotificationDeleteReply(true))
+            dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
+
+            // Display the previous content
+            cloneListCommentDraft = cloneListCommentDraft.filter(({ field }) => field === question.field);
+            dispatch(InquiryActions.setContent({ ...content, [question.field]: cloneListCommentDraft[cloneListCommentDraft.length - 1]?.content.content }));
           } else {
             getBlInfo(myBL.id).then(res => {
               dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
@@ -462,7 +474,7 @@ const InquiryViewer = (props) => {
               optionsOfQuestion.splice(inqIndexDelete, 1);
               dispatch(InquiryActions.setInquiries(optionsOfQuestion));
               dispatch(FormActions.toggleOpenNotificationDeleteAmendment(true));
-            }).catch((error) => console.error(error));;
+            }).catch((error) => console.error(error));
           }
         }).catch((error) => console.error(error));
     }
@@ -709,21 +721,21 @@ const InquiryViewer = (props) => {
           );
       }
     } else {
-      if (!tempReply.answer?.id) { // Add Amendment
+      if (!tempReply.answer?.id) { // Create amendment / reply
         const reqReply = {
           field: question.field,
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
           mybl: myBL.id
         };
-        saveEditedField({ ...reqReply }).then(() => {
-          //
-          setSaveComment(!isSaveComment);
-          dispatch(InquiryActions.checkSubmit(!enableSubmit));
-          dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
-        }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-        );
+        saveEditedField({ ...reqReply })
+          .then(() => {
+            setSaveComment(!isSaveComment);
+            dispatch(InquiryActions.checkSubmit(!enableSubmit));
+            dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
+          })
+          .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }
-      else { // Edit Amendment
+      else { // Edit amendment / reply
         const reqReply = {
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
         };
@@ -994,8 +1006,8 @@ const InquiryViewer = (props) => {
                     <>
                       {question.showIconAttachAnswerFile && (
                         <FormControlLabel control={
-                          <AttachFile isAnswer={true} 
-                            question={question} 
+                          <AttachFile isAnswer={true}
+                            question={question}
                             questions={inquiries}
                             setIsUploadFile={(val) => {
                               setIsUploadFile(val)
