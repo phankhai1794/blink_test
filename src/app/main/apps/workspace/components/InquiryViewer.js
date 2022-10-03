@@ -1060,7 +1060,8 @@ const InquiryViewer = (props) => {
                   </Grid>
                 )}
               </Grid>
-              <PermissionProvider
+              {/* TODO: */}
+              {/* <PermissionProvider
                 action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
                 extraCondition={question.state === 'COMPL'}
               >
@@ -1075,7 +1076,7 @@ const InquiryViewer = (props) => {
                     ReOpen
                   </Button>
                 </div>
-              </PermissionProvider>
+              </PermissionProvider> */}
 
               {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} />
