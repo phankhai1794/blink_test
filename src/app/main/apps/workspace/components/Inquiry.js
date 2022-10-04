@@ -119,15 +119,14 @@ const Inquiry = (props) => {
     resetActionInquiry(q, false);
   };
 
-  const checkCommentDraft = (amendment) => {
+  const checkCommentDraft = (amendment, conditionStates) => {
+    let result = true;
     if (amendment?.process === 'draft') {
       const lst = listCommentDraft.filter(comment => comment.field === amendment.field);
-      if (lst.length === 1) {
-        return false;
-      }
-      return Boolean(lst.filter(comment => comment.state === 'REP_SENT'));
+      if (lst.length === 1) result = false; // has only 1 customer's amendment
+      else result = Boolean(lst.filter(comment => conditionStates.includes(comment.state)).length);
     }
-    return true;
+    return result;
   }
 
   return props.user === 'workspace' ? (
@@ -147,11 +146,13 @@ const Inquiry = (props) => {
               </>
             ) : (
               <>
-                <div className={clsx(classes.boxItem,
-                  (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-                  (!['OPEN', 'INQ_SENT', 'ANS_DRF', 'COMPL', 'UPLOADED', 'RESOVLED'].includes(q.state) && checkCommentDraft(q)) && 'offshoreReply'
-                )}
-                style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
+                <div
+                  className={clsx(
+                    classes.boxItem,
+                    (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
+                    (!['OPEN', 'INQ_SENT', 'ANS_DRF', 'COMPL', 'UPLOADED', 'RESOVLED'].includes(q.state) && checkCommentDraft(q, ['REP_DRF', 'REP_SENT'])) && 'offshoreReply'
+                  )}
+                  style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
                   <InquiryViewer
                     currentQuestion={changeQuestion}
                     question={q}
@@ -180,7 +181,7 @@ const Inquiry = (props) => {
           return (
             <div key={index} className={clsx(classes.boxItem,
               (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-              (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'RESOVLED'].includes(q.state) && checkCommentDraft(q)) && 'customerReply'
+              (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'RESOVLED'].includes(q.state) && checkCommentDraft(q, ['REP_SENT'])) && 'customerReply'
             )}>
               <InquiryViewer
                 toggleEdit={() => toggleEdit(index)}
