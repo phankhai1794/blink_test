@@ -875,7 +875,7 @@ const InquiryViewer = (props) => {
       {isLoadedComment && (
         <>
           <div>
-            {['AME_DRF', 'AME_SENT', 'REP_DRF', 'REP_SENT', 'RESOVLED', 'UPLOADED'].includes(question?.state) &&
+            {(['AME_DRF', 'AME_SENT', 'REP_DRF', 'REP_SENT', 'RESOLVED', 'UPLOADED'].includes(question?.state) && (question?.process === 'draft')) &&
               <TagsComponent tagName='AMENDMENT' tagColor='primary' />
             }
             <div style={{ paddingTop: 10 }} className="flex justify-between">
@@ -888,7 +888,7 @@ const InquiryViewer = (props) => {
                 <div className="flex items-center mr-2">
                   <PermissionProvider
                     action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
-                    extraCondition={question.state === 'COMPL' || question.state === 'UPLOADED'}
+                    extraCondition={question.state === 'COMPL' || question.state === 'UPLOADED' || question.state === 'RESOLVED'}
                   >
                     <div className='flex' style={{ alignItems: 'center' }}>
                       <div style={{ marginRight: 15 }}>
@@ -972,7 +972,7 @@ const InquiryViewer = (props) => {
               ) : (
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <div style={{ marginRight: 15 }}>
-                    {(['COMPL', 'UPLOADED'].includes(question.state)) ? (
+                    {(['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state)) ? (
                       <span className={classes.labelStatus}>Resolved</span>
                     ) : (['ANS_SENT'].includes(question.state) || submitLabel) && (
                       <span className={classes.labelStatus}>Submitted</span>
@@ -1099,7 +1099,7 @@ const InquiryViewer = (props) => {
               {/* TODO: */}
               {/* <PermissionProvider
                 action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
-                extraCondition={question.state === 'COMPL'}
+                extraCondition={question.state === 'COMPL' || question.state === 'RESOLVED'}
               >
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <Button
@@ -1174,7 +1174,7 @@ const InquiryViewer = (props) => {
               </>
             }
           </div>
-          {question.state !== 'COMPL' && question.state !== 'UPLOADED' && (
+          {!['COMPL', 'RESOLVED'].includes(question.state) && question.state !== 'UPLOADED' && (
             <>
               {isResolve ? (
                 <>
