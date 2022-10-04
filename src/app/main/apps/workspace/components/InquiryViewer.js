@@ -744,7 +744,7 @@ const InquiryViewer = (props) => {
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
-          // dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
+          dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
@@ -755,6 +755,10 @@ const InquiryViewer = (props) => {
 
   const cancelReply = (q) => {
     setIsReply(false);
+    const reply = { ...question };
+    reply.mediaFilesAnswer = reply.mediaFile;
+    reply.mediaFile = [];
+    setQuestion(reply);
     setSaveComment(!isSaveComment);
   };
 
@@ -1241,7 +1245,8 @@ const InquiryViewer = (props) => {
                             border: '1px solid #BAC3CB',
                             borderRadius: 8,
                             resize: 'none',
-                            fontFamily: 'Montserrat'
+                            fontFamily: 'Montserrat',
+                            fontSize: 15
                           }}
                           multiline="true"
                           type="text"
