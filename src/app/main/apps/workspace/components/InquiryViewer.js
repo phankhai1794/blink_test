@@ -250,14 +250,16 @@ const InquiryViewer = (props) => {
                 lastest.createdAt = answerObj[0]?.updatedAt;
                 setType(lastest.ansType);
               }
-              if (lastest.mediaFilesAnswer.length) {
+              if (lastest.mediaFilesAnswer.length || ['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(lastest.state)) {
                 lastest.mediaFile = lastest.mediaFilesAnswer;
                 lastest.mediaFilesAnswer = [];
               }
               if (user.role === 'Admin') {
                 lastest.showIconReply = true;
               } else {
-                if (lastest.state === 'REP_Q_DRF') setSubmitLabel(true);
+                if (lastest.state === 'REP_Q_DRF') {
+                  setSubmitLabel(true)
+                }
               }
               setQuestion(lastest);
               setInqHasComment(true);
