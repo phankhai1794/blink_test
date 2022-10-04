@@ -149,8 +149,8 @@ const Inquiry = (props) => {
                 <div
                   className={clsx(
                     classes.boxItem,
-                    (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-                    (!['OPEN', 'INQ_SENT', 'ANS_DRF', 'COMPL', 'UPLOADED', 'RESOVLED'].includes(q.state) && checkCommentDraft(q, ['REP_DRF', 'REP_SENT'])) && 'offshoreReply'
+                    (q.state === 'COMPL' || q.state === 'UPLOADED' || q.state === 'RESOLVED') && 'resolved',
+                    (!['OPEN', 'INQ_SENT', 'ANS_DRF', 'COMPL', 'UPLOADED', 'RESOLVED'].includes(q.state) && checkCommentDraft(q, ['REP_DRF', 'REP_SENT'])) && 'offshoreReply'
                   )}
                   style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
                   <InquiryViewer
@@ -180,8 +180,8 @@ const Inquiry = (props) => {
         {listInqsField.map((q, index) => {
           return (
             <div key={index} className={clsx(classes.boxItem,
-              (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-              (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'RESOVLED'].includes(q.state) && checkCommentDraft(q, ['REP_SENT'])) && 'customerReply'
+              (q.state === 'COMPL' || q.state === 'UPLOADED' || q.state === 'RESOLVED') && 'resolved',
+              (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'RESOLVED'].includes(q.state) && checkCommentDraft(q, ['REP_SENT'])) && 'customerReply'
             )}>
               <InquiryViewer
                 toggleEdit={() => toggleEdit(index)}
