@@ -331,6 +331,7 @@ const InquiryViewer = (props) => {
 
             const comments = [{
               creator: { userName: user.displayName, avatar: null },
+              updater: { userName: user.displayName, avatar: null },
               createdAt: res[0].createdAt,
               answersMedia: [],
               content: `Resolved data is "${orgContent[lastest.field] ? orgContent[lastest.field] : ''}"`
@@ -340,6 +341,7 @@ const InquiryViewer = (props) => {
               comments.push({
                 id: r.id,
                 creator: r.creator,
+                updater: r.creator,
                 createdAt: r.createdAt,
                 answersMedia: mediaFile,
                 content: `"${content}"`,
