@@ -156,6 +156,7 @@ const InquiryViewer = (props) => {
   const [submitLabel, setSubmitLabel] = useState(false);
   const [isShowViewAll, setShowViewAll] = useState(false);
   const [isUploadFile, setIsUploadFile] = useState(false);
+  const [disableSaveReply, setDisableSaveReply] = useState(false);
 
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
@@ -638,6 +639,7 @@ const InquiryViewer = (props) => {
     let mediaFilesResp;
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    setDisableSaveReply(true);
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
@@ -688,6 +690,7 @@ const InquiryViewer = (props) => {
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
             );
             setViewDropDown('');
+            setDisableSaveReply(false);
           }).catch((error) =>
             dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
           );
@@ -715,6 +718,7 @@ const InquiryViewer = (props) => {
             setSaveComment(!isSaveComment);
             //
             dispatch(InquiryActions.checkSend(true));
+            setDisableSaveReply(false);
             dispatch(
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
             );
@@ -733,6 +737,7 @@ const InquiryViewer = (props) => {
           .then(() => {
             setSaveComment(!isSaveComment);
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
+            setDisableSaveReply(false);
             dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
           })
           .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
@@ -745,6 +750,7 @@ const InquiryViewer = (props) => {
           setSaveComment(!isSaveComment);
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
+          setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
@@ -1294,7 +1300,7 @@ const InquiryViewer = (props) => {
                           variant="contained"
                           color="primary"
                           onClick={onSaveReply}
-                          disabled={!tempReply?.answer?.content}
+                          disabled={!tempReply?.answer?.content || disableSaveReply}
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
                         </Button>

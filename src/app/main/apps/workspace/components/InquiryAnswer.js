@@ -93,7 +93,7 @@ const InquiryAnswer = (props) => {
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ draftBL }) => draftBL.metadata);
-  const [isDisableSave, setDisableSave] = useState(true);
+  const [isDisableSave, setDisableSave] = useState(false);
   const inq = (inq) => {
     return {
       content: inq.content,
@@ -197,6 +197,7 @@ const InquiryAnswer = (props) => {
   const onSave = async () => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    setDisableSave(true)
     let responseSelectChoice;
     if (question.selectChoice) {
       responseSelectChoice = await updateInquiryChoice(question.selectChoice);
@@ -242,10 +243,9 @@ const InquiryAnswer = (props) => {
     dispatch(InquiryActions.setEditInq(null));
   };
 
-
   useEffect(() => {
-    if (!isDisableSave) setDisableSave(false);
-  }, [isDisableSave]);
+    if (isDisableSave) setDisableSave(false);
+  }, []);
 
   return (
     <div className='changeToEditor'>
@@ -255,7 +255,7 @@ const InquiryAnswer = (props) => {
           <Button
             variant="contained"
             color="primary"
-            // disabled={isDisableSave}
+            disabled={isDisableSave}
             onClick={() => onSave()}
             classes={{ root: classes.button }}>
             Save
