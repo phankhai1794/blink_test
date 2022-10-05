@@ -12,6 +12,7 @@ export const OPEN_INQUIRY_REVIEW = 'OPEN_INQUIRY_REVIEW';
 export const OPEN_NOTIFICATION_ATTACHMENT_LIST = 'OPEN_NOTIFICATION_ATTACHMENT_LIST';
 export const OPEN_NOTIFICATION_SUBMIT_ANSWER = 'OPEN_NOTIFICATION_SUBMIT_ANSWER';
 export const OPEN_NOTIFICATION_DELETE_REPLY = 'OPEN_NOTIFICATION_DELETE_REPLY';
+export const OPEN_NOTIFICATION_DELETE_AMENDMENT = 'OPEN_NOTIFICATION_DELETE_AMENDMENT';
 export const ENABLE_SAVE_INQUIRIES = 'ENABLE_SAVE_INQUIRIES';
 export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
 export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
@@ -109,6 +110,13 @@ export function toggleOpenNotificationSubmitAnswer(state) {
 export function toggleOpenNotificationDeleteReply(state) {
   return {
     type: OPEN_NOTIFICATION_DELETE_REPLY,
+    state
+  };
+}
+
+export function toggleOpenNotificationDeleteAmendment(state) {
+  return {
+    type: OPEN_NOTIFICATION_DELETE_AMENDMENT,
     state
   };
 }

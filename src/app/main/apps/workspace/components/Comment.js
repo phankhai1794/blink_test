@@ -233,7 +233,7 @@ const Comment = (props) => {
             </Typography>
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {question.ansType === metadata.ans_type.choice && (
-                <ChoiceAnswer disable={true} question={question} />
+                <ChoiceAnswer disable={true} question={question} disableChecked={true} />
               )}
               {/*{question.ansType === metadata.ans_type.paragraph && (*/}
               {/*  <ParagraphAnswer disable={true} question={question} />*/}
@@ -274,9 +274,9 @@ const Comment = (props) => {
 
       {comments.map((k, id) => {
         return contentUI({
-          userName: k.creator.userName,
+          userName: k.updater?.userName,
           createdAt: k.createdAt,
-          avatar: k.creator.avatar,
+          avatar: k.updater.avatar,
           title: k.title || '',
           content: k.content,
           media: k.answersMedia,

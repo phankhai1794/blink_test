@@ -380,9 +380,7 @@ const SendInquiryForm = (props) => {
     }
   }
   const countInq = (recevier) => {
-    let count = 0;
-    inquiries.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
-    return count;
+    return inquiries.filter(inq => inq.receiver.includes(recevier) && (inq.state === 'OPEN' || inq.state === 'REP_DRF')).length;
   };
 
   const handleTabSelected = () => {

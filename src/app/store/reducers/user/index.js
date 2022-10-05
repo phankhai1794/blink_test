@@ -2,6 +2,7 @@ import * as Actions from '../../actions';
 
 const initialState = {
   role: '',
+  userType: '',
   displayName: '',
   photoURL: '',
   email: '',

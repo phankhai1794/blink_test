@@ -72,10 +72,11 @@ function Login(props) {
       .then((res) => {
         if (res) {
           const { userData, token, message } = res;
-          const { role, userName, avatar, email, permissions } = userData;
+          const { userType, role, userName, avatar, email, permissions } = userData;
           const userInfo = {
             displayName: userName,
             photoURL: avatar,
+            userType,
             role,
             email,
             permissions

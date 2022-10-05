@@ -107,11 +107,14 @@ function ToolbarLayout1(props) {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   useEffect(() => {
+    dispatch(InquiryActions.checkSend(false));
     let optionInquiries = [...inquiries];
     let isSubmit = true;
     optionInquiries.forEach((item) => {
-      if (item.answerObj && item.state === "ANS_DRF") {
-        isSubmit = false;
+      if (user.role !== 'Admin') {
+        isSubmit = false
+      } else {
+        if (item.state === 'OPEN') dispatch(InquiryActions.checkSend(true));
       }
     });
     if (enableSubmit) {
@@ -119,7 +122,7 @@ function ToolbarLayout1(props) {
     }
     const inquiriesPendingProcess = optionInquiries.filter(op => op.process === 'pending');
     const amendment = optionInquiries.filter(op => op.process === 'draft');
-    if (pathname.includes('/guest')) {
+    if (pathname.includes('/guest') || pathname.includes('/workspace')) {
       axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)))
         .then(res => {
           if (res) {
@@ -127,9 +130,14 @@ function ToolbarLayout1(props) {
             res.map(r => {
               commentList = [...commentList, ...r];
             });
-            const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'REP_A_DRF');
-            if (filterRepADraft) isSubmit = false;
-            setIsSubmit(isSubmit)
+            if (user.role !== 'Admin') {
+              const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'REP_A_DRF');
+              if (filterRepADraft) isSubmit = false;
+              setIsSubmit(isSubmit)
+            } else {
+              const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'REP_Q_DRF');
+              if (filterRepADraft) dispatch(InquiryActions.checkSend(true));
+            }
           }
         }).catch(err => {
           console.error(err)
@@ -142,9 +150,14 @@ function ToolbarLayout1(props) {
               res.map(r => {
                 commentList = [...commentList, ...r];
               });
-              const filterRepADraft = commentList.some((r) => r.state === 'AME_DRF');
-              if (filterRepADraft) isSubmit = false;
-              setIsSubmit(isSubmit)
+              if (user.role !== 'Admin') {
+                const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'AME_DRF');
+                if (filterRepADraft) isSubmit = false;
+                setIsSubmit(isSubmit)
+              } else {
+                const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'REP_DRF');
+                if (filterRepADraft) dispatch(InquiryActions.checkSend(true));
+              }
             }
           }).catch(err => { console.error(err) });
       }
@@ -165,6 +178,7 @@ function ToolbarLayout1(props) {
       if (userInfo) {
         let payload = {
           ...user,
+          userType: userInfo.userType,
           role: userInfo.role,
           displayName: userInfo.displayName,
           photoURL: userInfo.photoURL,

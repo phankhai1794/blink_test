@@ -103,7 +103,7 @@ const Amendment = ({ question }) => {
   }
 
   useEffect(() => {
-    setFieldValue(content[currentField]);
+    setFieldValue(content[currentField] || "");
   }, [content, currentField])
 
   return (
@@ -131,11 +131,21 @@ const Amendment = ({ question }) => {
         <AttachFileAmendment setAttachment={getAttachment} />
       </div>
       <div className="flex" style={{ alignItems: 'flex-end', margin: '15px 0' }}>
-        <TextField
-          fullWidth
-          multiline
-          rowsMax={4}
-          variant="outlined"
+        <textarea
+          style={{
+            width: '100%',
+            paddingTop: 10,
+            paddingLeft: 5,
+            marginTop: 10,
+            minHeight: 50,
+            border: '1px solid #BAC3CB',
+            borderRadius: 8,
+            resize: 'none',
+            fontFamily: 'Montserrat',
+            fontSize: 15
+          }}
+          multiline="true"
+          type="text"
           value={fieldValue}
           onChange={handleChange}
         />

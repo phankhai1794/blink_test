@@ -10,6 +10,7 @@ import {
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime } from '@shared';
+import { getBlInfo } from 'app/services/myBLService';
 import {
   CONTAINER_DETAIL,
   CONTAINER_MANIFEST,
@@ -133,6 +134,7 @@ const InquiryViewer = (props) => {
   const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
+  const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
   const [question, setQuestion] = useState(props.question);
@@ -154,6 +156,7 @@ const InquiryViewer = (props) => {
   const [submitLabel, setSubmitLabel] = useState(false);
   const [isShowViewAll, setShowViewAll] = useState(false);
   const [isUploadFile, setIsUploadFile] = useState(false);
+  const [disableSaveReply, setDisableSaveReply] = useState(false);
 
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
@@ -248,14 +251,16 @@ const InquiryViewer = (props) => {
                 lastest.createdAt = answerObj[0]?.updatedAt;
                 setType(lastest.ansType);
               }
-              if (lastest.mediaFilesAnswer.length) {
+              if (lastest.mediaFilesAnswer.length || ['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(lastest.state)) {
                 lastest.mediaFile = lastest.mediaFilesAnswer;
                 lastest.mediaFilesAnswer = [];
               }
               if (user.role === 'Admin') {
                 lastest.showIconReply = true;
               } else {
-                if (lastest.state === 'REP_Q_DRF') setSubmitLabel(true);
+                if (lastest.state === 'REP_Q_DRF') {
+                  setSubmitLabel(true)
+                }
               }
               setQuestion(lastest);
               setInqHasComment(true);
@@ -308,6 +313,8 @@ const InquiryViewer = (props) => {
               if (['REP_SENT'].includes(lastest.state)) {
                 setShowLabelSent(true);
                 lastest.showIconReply = false;
+              } else if (['REP_DRF'].includes(lastest.state)) {
+                lastest.showIconReply = false;
               }
             } else {
               if (['REP_SENT'].includes(lastest.state)) {
@@ -321,9 +328,13 @@ const InquiryViewer = (props) => {
               }
             }
             setQuestion(lastest);
-            //
+
+            // push new lastestComment if not already exist
+            !listCommentDraft.find(ele => ele.id === lastestComment.id) && dispatch(InquiryActions.setListCommentDraft([...listCommentDraft, ...[lastestComment]]));
+
             const comments = [{
               creator: { userName: user.displayName, avatar: null },
+              updater: { userName: user.displayName, avatar: null },
               createdAt: res[0].createdAt,
               answersMedia: [],
               content: `Resolved data is "${orgContent[lastest.field] ? orgContent[lastest.field] : ''}"`
@@ -333,6 +344,7 @@ const InquiryViewer = (props) => {
               comments.push({
                 id: r.id,
                 creator: r.creator,
+                updater: r.creator,
                 createdAt: r.createdAt,
                 answersMedia: mediaFile,
                 content: `"${content}"`,
@@ -390,7 +402,7 @@ const InquiryViewer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     const quest = { ...question };
     if (optionsInquires[editedIndex].mediaFilesAnswer.length) {
-      setQuestion({...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer});
+      setQuestion({ ...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer });
     }
   }, [isUploadFile]);
 
@@ -448,8 +460,27 @@ const InquiryViewer = (props) => {
           dispatch(FormActions.toggleAllInquiry(false));
           dispatch(InquiryActions.setOneInq({}));
           dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-          dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
-          setSaveComment(!isSaveComment);
+
+          // Update state of listDraftComments for re-rendering UI
+          let cloneListCommentDraft = listCommentDraft.filter(({ id }) => id !== replyRemove.id);
+          dispatch(InquiryActions.setListCommentDraft(cloneListCommentDraft));
+
+          if (comment.length > 2) {
+            dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
+
+            // Display the previous content
+            cloneListCommentDraft = cloneListCommentDraft.filter(({ field }) => field === question.field);
+            dispatch(InquiryActions.setContent({ ...content, [question.field]: cloneListCommentDraft[cloneListCommentDraft.length - 1]?.content.content }));
+          } else {
+            getBlInfo(myBL.id).then(res => {
+              dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
+              const optionsOfQuestion = [...inquiries];
+              const inqIndexDelete = optionsOfQuestion.findIndex(op => op.id === replyRemove.id);
+              optionsOfQuestion.splice(inqIndexDelete, 1);
+              dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+              dispatch(FormActions.toggleOpenNotificationDeleteAmendment(true));
+            }).catch((error) => console.error(error));
+          }
         }).catch((error) => console.error(error));
     }
     dispatch(
@@ -475,10 +506,14 @@ const InquiryViewer = (props) => {
 
   const removeReply = (question) => {
     setReplyRemove(question);
+    let confirmPopupMsg = 'Are you sure you want to remove this amendment?';
+    if (comment.length > 2) {
+      confirmPopupMsg = 'Are you sure you want to delete this reply?';
+    }
     dispatch(
       FormActions.openConfirmPopup({
         openConfirmPopup: true,
-        confirmPopupMsg: 'Are you sure you want to delete this reply?',
+        confirmPopupMsg,
         confirmPopupType: 'removeReply'
       })
     );
@@ -606,6 +641,7 @@ const InquiryViewer = (props) => {
     let mediaFilesResp;
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    setDisableSaveReply(true);
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
@@ -656,6 +692,7 @@ const InquiryViewer = (props) => {
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
             );
             setViewDropDown('');
+            setDisableSaveReply(false);
           }).catch((error) =>
             dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
           );
@@ -683,6 +720,7 @@ const InquiryViewer = (props) => {
             setSaveComment(!isSaveComment);
             //
             dispatch(InquiryActions.checkSend(true));
+            setDisableSaveReply(false);
             dispatch(
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
             );
@@ -691,28 +729,40 @@ const InquiryViewer = (props) => {
           );
       }
     } else {
-      if (!tempReply.answer?.id) { // Add Amendment
+      if (!tempReply.answer?.id) { // Create amendment / reply
         const reqReply = {
           field: question.field,
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
           mybl: myBL.id
         };
-        saveEditedField({ ...reqReply }).then(() => {
-          //
-          setSaveComment(!isSaveComment);
-          dispatch(InquiryActions.checkSubmit(!enableSubmit));
-          dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
-        }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-        );
+        saveEditedField({ ...reqReply })
+          .then(() => {
+            if(user.role !== 'Admin'){
+              const cloneContent = { ...content };
+              cloneContent[question.field] = tempReply?.answer?.content;
+              dispatch(InquiryActions.setContent(cloneContent));
+            };
+            setSaveComment(!isSaveComment);
+            dispatch(InquiryActions.checkSubmit(!enableSubmit));
+            setDisableSaveReply(false);
+            dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
+          })
+          .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }
-      else { // Edit Amendment
+      else { // Edit amendment / reply
         const reqReply = {
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
+          if(user.role !== 'Admin'){
+            const cloneContent = { ...content };
+            cloneContent[question.field] = tempReply?.answer?.content;
+            dispatch(InquiryActions.setContent(cloneContent));
+          };
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
+          setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
@@ -723,6 +773,10 @@ const InquiryViewer = (props) => {
 
   const cancelReply = (q) => {
     setIsReply(false);
+    const reply = { ...question };
+    reply.mediaFilesAnswer = reply.mediaFile;
+    reply.mediaFile = [];
+    setQuestion(reply);
     setSaveComment(!isSaveComment);
   };
 
@@ -839,7 +893,7 @@ const InquiryViewer = (props) => {
       {isLoadedComment && (
         <>
           <div>
-            {['AME_DRF', 'AME_SENT', 'REP_DRF', 'REP_SENT', 'RESOVLED', 'UPLOADED'].includes(question?.state) &&
+            {(['AME_DRF', 'AME_SENT', 'REP_DRF', 'REP_SENT', 'RESOLVED', 'UPLOADED'].includes(question?.state) && (question?.process === 'draft')) &&
               <TagsComponent tagName='AMENDMENT' tagColor='primary' />
             }
             <div style={{ paddingTop: 10 }} className="flex justify-between">
@@ -852,7 +906,7 @@ const InquiryViewer = (props) => {
                 <div className="flex items-center mr-2">
                   <PermissionProvider
                     action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
-                    extraCondition={question.state === 'COMPL' || question.state === 'UPLOADED'}
+                    extraCondition={question.state === 'COMPL' || question.state === 'UPLOADED' || question.state === 'RESOLVED'}
                   >
                     <div className='flex' style={{ alignItems: 'center' }}>
                       <div style={{ marginRight: 15 }}>
@@ -936,7 +990,7 @@ const InquiryViewer = (props) => {
               ) : (
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <div style={{ marginRight: 15 }}>
-                    {(['COMPL', 'UPLOADED'].includes(question.state)) ? (
+                    {(['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state)) ? (
                       <span className={classes.labelStatus}>Resolved</span>
                     ) : (['ANS_SENT'].includes(question.state) || submitLabel) && (
                       <span className={classes.labelStatus}>Submitted</span>
@@ -976,8 +1030,8 @@ const InquiryViewer = (props) => {
                     <>
                       {question.showIconAttachAnswerFile && (
                         <FormControlLabel control={
-                          <AttachFile isAnswer={true} 
-                            question={question} 
+                          <AttachFile isAnswer={true}
+                            question={question}
                             questions={inquiries}
                             setIsUploadFile={(val) => {
                               setIsUploadFile(val)
@@ -1060,9 +1114,10 @@ const InquiryViewer = (props) => {
                   </Grid>
                 )}
               </Grid>
-              <PermissionProvider
+              {/* TODO: */}
+              {/* <PermissionProvider
                 action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
-                extraCondition={question.state === 'COMPL'}
+                extraCondition={question.state === 'COMPL' || question.state === 'RESOLVED'}
               >
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <Button
@@ -1075,7 +1130,7 @@ const InquiryViewer = (props) => {
                     ReOpen
                   </Button>
                 </div>
-              </PermissionProvider>
+              </PermissionProvider> */}
 
               {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} />
@@ -1137,7 +1192,7 @@ const InquiryViewer = (props) => {
               </>
             }
           </div>
-          {question.state !== 'COMPL' && question.state !== 'UPLOADED' && (
+          {!['COMPL', 'RESOLVED'].includes(question.state) && question.state !== 'UPLOADED' && (
             <>
               {isResolve ? (
                 <>
@@ -1207,7 +1262,9 @@ const InquiryViewer = (props) => {
                             minHeight: 50,
                             border: '1px solid #BAC3CB',
                             borderRadius: 8,
-                            resize: 'none'
+                            resize: 'none',
+                            fontFamily: 'Montserrat',
+                            fontSize: 15
                           }}
                           multiline="true"
                           type="text"
@@ -1255,13 +1312,13 @@ const InquiryViewer = (props) => {
                           variant="contained"
                           color="primary"
                           onClick={onSaveReply}
-                          disabled={!tempReply?.answer?.content}
-                          classes={{ root: classes.button }}>
+                          disabled={!tempReply?.answer?.content || disableSaveReply}
+                          classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
                         </Button>
                         <Button
                           variant="contained"
-                          classes={{ root: clsx(classes.button, 'reply') }}
+                          classes={{ root: clsx(classes.button, 'w120', 'reply') }}
                           color="primary"
                           onClick={() => cancelReply(question)}>
                           Cancel

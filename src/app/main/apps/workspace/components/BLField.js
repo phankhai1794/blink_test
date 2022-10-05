@@ -198,7 +198,11 @@ const BLField = (props) => {
           }
           dispatch(FormActions.toggleCreateInquiry(true));
         }
-        else if (allowCreateAmendment && myBL?.state?.includes('DRF_')) dispatch(FormActions.toggleCreateAmendment(true));
+        else if (
+          allowCreateAmendment
+          && myBL?.state?.includes('DRF_')
+          && user.userType === 'CUSTOMER' // Allow only customer to create amendment
+        ) dispatch(FormActions.toggleCreateAmendment(true));
       }
       dispatch(InquiryActions.setField(e.currentTarget.id));
       setAnchorEl(e.currentTarget.id);
@@ -214,7 +218,6 @@ const BLField = (props) => {
     }
     return true;
   };
-
   const checkAnswerSent = () => {
     let checkInqAns = false;
     let checkDrafComment = false;
@@ -225,7 +228,7 @@ const BLField = (props) => {
       if (lstInq.length) {
         if (lstInq.some(e => ['OPEN', 'INQ_SENT'].includes(e.state))) return false;
         const listStatus = user?.role === 'Admin' ? [...sentStatus] : [...sentStatus, ...['ANS_DRF']];
-        checkInqAns = lstInq.every(e => listStatus.includes(e.state));
+        checkInqAns = lstInq.some(e => listStatus.includes(e.state));
       }
       // Check Amendment
       if (lstReplyAme.length === 1) return false;
@@ -241,7 +244,7 @@ const BLField = (props) => {
     if (inquiries.length > 0) {
       const lst = inquiries.filter((q) => q.field === id);
       if (lst.length > 0)
-        return lst.every(e => e.state === 'COMPL' || e.state === 'UPLOADED')
+        return lst.every(e => e.state === 'COMPL' || e.state === 'UPLOADED' || e.state === 'RESOLVED')
     }
     return false;
   };
@@ -271,7 +274,7 @@ const BLField = (props) => {
               classes.root,
               !questionIsEmpty ? classes.hasInquiry : '',
               lock ? classes.locked : '',
-              hasAnswer ? classes.hasAnswer : '',
+              (hasAnswer && !isResolved) ? classes.hasAnswer : '',
               isResolved ? classes.hasResolved : ''
             )}
             InputProps={{

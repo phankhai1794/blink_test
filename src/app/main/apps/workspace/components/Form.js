@@ -1,5 +1,6 @@
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { NUMBER_INQ_BOTTOM, toFindDuplicates } from '@shared';
+import { NUMBER_INQ_BOTTOM } from '@shared';
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withStyles, makeStyles, createMuiTheme } from '@material-ui/core/styles';
@@ -347,6 +348,10 @@ export default function Form(props) {
     return !filter.some(inq => inq.process === 'draft');
   }
 
+  const getField = (keyword) => {
+    return metadata.field?.[keyword] || '';
+  };
+
   useEffect(() => {
     if (tabs) {
       props.tabChange(0);
@@ -455,7 +460,11 @@ export default function Form(props) {
 
             <PermissionProvider
               action={PERMISSION.VIEW_CREATE_AMENDMENT}
-              extraCondition={checkEnableBtnAddAmendment() && myBL?.state?.includes('DRF_')}>
+              extraCondition={
+                checkEnableBtnAddAmendment()
+                && myBL?.state?.includes('DRF_')
+                && ![getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)].includes(currentField)
+              }>
               <LinkButton
                 text="Add Amendment"
                 disable={currentAmendment !== undefined}

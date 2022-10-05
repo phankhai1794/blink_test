@@ -99,6 +99,7 @@ const BLWorkspace = (props) => {
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
   const openNotification = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitAnswer);
   const openNotificationReply = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteReply);
+  const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -270,6 +271,8 @@ const BLWorkspace = (props) => {
         fabTitle: curField?.label,
         title: curField?.label,
         field: curField?.value,
+        showBtnSend: true,
+        disableSendBtn: disableSendBtn,
         child: <Inquiry user={props.user} />
       };
     }
@@ -325,7 +328,9 @@ const BLWorkspace = (props) => {
     if (openNotification) {
       return 'Your answer has been submitted successfully.'
     } else if (openNotificationReply) {
-      return 'Your reply has been deleted'
+      return 'Your reply has been deleted.'
+    } else if (openNotificationAmendment) {
+      return 'Your amendment has been deleted.'
     }
   }
 
@@ -334,11 +339,12 @@ const BLWorkspace = (props) => {
       <BLProcessNotification />
       <AttachmentListNotification />
       <SubmitAnswerNotification
-        open={openNotification || openNotificationReply}
+        open={openNotification || openNotificationReply || openNotificationAmendment}
         msg={renderMsgNoti()}
         handleClose={() => {
           dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false));
           dispatch(FormActions.toggleOpenNotificationDeleteReply(false));
+          dispatch(FormActions.toggleOpenNotificationDeleteAmendment(false));
         }}
       />
       <div className={clsx('max-w-5xl', classes.root)}>

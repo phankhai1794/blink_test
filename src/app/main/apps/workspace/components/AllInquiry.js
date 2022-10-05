@@ -136,12 +136,13 @@ const AllInquiry = (props) => {
   const [viewDropDown, setViewDropDown] = useState('');
   const [inqHasComment, setInqHasComment] = useState([]);
   const [isSaved, setSaved] = useState(false);
-  const [inquiries, currentEditInq, metadata, isShowBackground] = useSelector(({ workspace }) => [
+  const [inquiryCopy, currentEditInq, metadata, isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.isShowBackground,
   ]);
+  const inquiries = openInquiryReview ? inquiryCopy.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_DRF') : inquiryCopy 
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);

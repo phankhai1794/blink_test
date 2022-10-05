@@ -18,6 +18,15 @@ const AttachFile = (props) => {
     workspace.inquiryReducer.reply
   ]);
 
+  const checkDuplicate = (mediaFiles, newMediaFiles) => {
+    const attachmentsName = newMediaFiles.map(att => att.name);
+    let isExist = false;
+    if (mediaFiles.length) {
+      isExist = mediaFiles.some(media => attachmentsName.includes(media.name));
+    }
+    return isExist;
+  }
+
   const handleUploadImageAttach = (files) => {
     const inValidFile = files.find((elem) => !validateExtensionFile(elem));
     if (inValidFile) return dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
@@ -32,6 +41,13 @@ const AttachFile = (props) => {
     else if (isAnswer) {
       const optionsInquires = [...questions];
       const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+      if (checkDuplicate(optionsInquires[editedIndex].mediaFilesAnswer, files)) {
+        dispatch(AppAction.showMessage({
+          message: `Duplicate file(s)`,
+          variant: 'error'
+        }));
+        return;
+      }
       files.forEach((src) => {
         optionsInquires[editedIndex].mediaFilesAnswer.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: src });
       });

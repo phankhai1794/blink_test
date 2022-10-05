@@ -14,6 +14,7 @@ const initialState = {
   openNotificationAttachmentList: false,
   openNotificationSubmitAnswer: false,
   openNotificationDeleteReply: false,
+  openNotificationDeleteAmendment: false,
   enableSaveInquiriesList: true,
   openConfirmPopup: false,
   confirmPopupMsg: '',
@@ -62,6 +63,9 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.OPEN_NOTIFICATION_DELETE_REPLY: {
     return { ...state, openNotificationDeleteReply: action.state };
+  }
+  case Actions.OPEN_NOTIFICATION_DELETE_AMENDMENT: {
+    return { ...state, openNotificationDeleteAmendment: action.state };
   }
   case Actions.ENABLE_SAVE_INQUIRIES: {
     return { ...state, enableSaveInquiriesList: action.state };
