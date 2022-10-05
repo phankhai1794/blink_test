@@ -1,7 +1,7 @@
 import { filterMetadata } from '@shared';
 import { handleError } from '@shared/handleError';
 import { getInquiryById, getMetadata } from 'app/services/inquiryService';
-import { createBL, getBlInfo } from 'app/services/myBLService';
+import { createBL, getBlInfo, getCustomerAmendment } from 'app/services/myBLService';
 import { getFieldContent, getCommentDraftBl } from 'app/services/draftblService';
 import axios from 'axios';
 
@@ -37,19 +37,20 @@ export const loadMetadata = () => async (dispatch) => {
 };
 
 export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
-  const amendments = inquiries.filter(i => i.process === 'draft');
-  getBlInfo(myBL_Id)
-    .then((res) => {
-      // const { id, state, bkgNo, content } = res.myBL;
-      // dispatch(setMyBL({ id, state, bkgNo }));
-      const { content } = res.myBL;
-      dispatch(setOrgContent(res.myBL.content));
-
-      const cloneContent = { ...content };
-      amendments && amendments.map(a => cloneContent[a.field] = a.content);
-      dispatch(setContent(cloneContent));
-    })
-    .catch((err) => handleError(dispatch, err));
+  try {
+    const [blResponse, contentRespone] = [
+      await getBlInfo(myBL_Id),
+      await getCustomerAmendment(myBL_Id)
+    ];
+    const { content } = blResponse?.myBL;
+    const { contentAmendmentRs } = contentRespone;
+    dispatch(setOrgContent(blResponse?.myBL.content));
+    const cloneContent = { ...content };
+    contentAmendmentRs?.length && contentAmendmentRs.forEach(a => cloneContent[a.field] = a.content);
+    dispatch(setContent(cloneContent));
+  } catch (err) {
+    handleError(dispatch, err);
+  }
 };
 
 export const loadInquiry = (myBL_Id) => async (dispatch) => {

@@ -731,6 +731,11 @@ const InquiryViewer = (props) => {
         };
         saveEditedField({ ...reqReply })
           .then(() => {
+            if(user.role !== 'Admin'){
+              const cloneContent = { ...content };
+              cloneContent[question.field] = tempReply?.answer?.content;
+              dispatch(InquiryActions.setContent(cloneContent));
+            };
             setSaveComment(!isSaveComment);
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
@@ -743,6 +748,11 @@ const InquiryViewer = (props) => {
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
+          if(user.role !== 'Admin'){
+            const cloneContent = { ...content };
+            cloneContent[question.field] = tempReply?.answer?.content;
+            dispatch(InquiryActions.setContent(cloneContent));
+          };
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           // dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
