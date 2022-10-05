@@ -337,7 +337,7 @@ const InquiryViewer = (props) => {
               updater: { userName: user.displayName, avatar: null },
               createdAt: res[0].createdAt,
               answersMedia: [],
-              content: `Resolved data is "${orgContent[lastest.field] ? orgContent[lastest.field] : ''}"`
+              content: orgContent[lastest.field] || ''
             }];
             res.map(r => {
               const { content, mediaFile } = r.content;
