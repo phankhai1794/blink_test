@@ -20,6 +20,7 @@ import Checkbox from "@material-ui/core/Checkbox";
 import clsx from "clsx";
 
 import * as InquiryActions from "../store/actions/inquiry";
+import {loadComment} from 'app/services/inquiryService';
 
 import PDFViewer from './PDFViewer';
 
@@ -235,25 +236,54 @@ const AttachmentList = (props) => {
         };
       });
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
+      loadComment(e.id).then((res) => {
+        if (res.length > 0){
+          res.forEach((r) => {
+            if (r.answersMedia.length > 0) {
+              const attachmentTemp = r.answersMedia.map ((f) => {
+                return {
+                  ...f,
+                    field: e.field,
+                    inquiryId: e.id,
+                    inqType: e.inqType,
+                }
+              })
+              // if reply file in attachment of inquiry -> not add file to att list
+              attachmentTemp.forEach(att => {
+                const fileNameList = getAttachmentFiles.map((item) => {
+                  if (item.inqType === e.inqType) return item.name
+                })
+                if (att && !fileNameList.includes(att.name)) getAttachmentFiles.push(att)
 
+              })
+              
+            }
+          })
+        }
+      })
+     
       const fieldOptions = metadata.field_options.find(ops => ops.value === e.field);
       const inqType = metadata.inq_type_options.find(ops => ops.value === e.inqType);
       combineFieldType = [
         ...combineFieldType,
         {
-          label: inqType?.label ? `${fieldOptions.label} - ${inqType.label}` : `${fieldOptions.label} - AMENDMENT`,
-          value: { fieldId: fieldOptions.value, inqId: e.id, inqType: e.inqType }
+          label: inqType?.label ? `${fieldOptions?.label} - ${inqType?.label}` : `${fieldOptions?.label} - AMENDMENT`,
+          value: { fieldId: fieldOptions?.value, inqId: e.id, inqType: e.inqType }
         }
       ];
     });
-
-    getAttachmentFiles.sort((a, b) => a.field.localeCompare(b.field));
-    combineFieldType.sort((a, b) => a.label.localeCompare(b.label));
-    setAttachmentFile(getAttachmentFiles);
-    setFieldType(combineFieldType);
-
-    dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-    setIsLoading(false);
+    const wait = setTimeout( () => {
+      getAttachmentFiles.sort((a, b) => a.field.localeCompare(b.field));
+      combineFieldType.sort((a, b) => a.label.localeCompare(b.label));
+      setAttachmentFile(getAttachmentFiles);
+      
+      setFieldType(combineFieldType);
+      // update number of files show in icon attachment list
+      document.querySelectorAll('#no-att span')[0].textContent = document.getElementsByClassName('attachmentList')[0].childElementCount;
+      //
+      dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+      setIsLoading(false);
+    },600)
   }, []);
 
   const handleFieldChange = (e, index) => {
