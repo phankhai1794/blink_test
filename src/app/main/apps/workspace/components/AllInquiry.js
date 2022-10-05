@@ -127,7 +127,34 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: 6
       }
     },
-  }
+  },
+  firstSentence: {
+    position: 'relative',
+    color: '#BD0F72',
+    fontSize: 16,
+    fontWeight: 600,
+    lineHeight: '20px',
+    paddingLeft: 11.67,
+    '&:before': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      transform: 'translateX(-50%)',
+      width: 16.67,
+      height: 16.67,
+      content: '""',
+      backgroundImage: 'url("assets/images/icons/warning.svg")',
+      backgroundSize: 'cover'
+    }
+  },
+  secondSentence: {
+    color: '#132535',
+    fontSize: 15,
+    lineHeight: '18px',
+    marginTop: 10,
+    display: 'block',
+    fontWeight: 500,
+  },
 }));
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
@@ -142,7 +169,7 @@ const AllInquiry = (props) => {
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.isShowBackground,
   ]);
-  const inquiries = openInquiryReview ? inquiryCopy.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_DRF') : inquiryCopy 
+  const inquiries = openInquiryReview ? inquiryCopy.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_DRF') : inquiryCopy
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
@@ -230,6 +257,14 @@ const AllInquiry = (props) => {
 
   return (
     <>
+      {openInquiryReview && !inquiries.length &&
+        <div style={{ textAlign: 'center', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+          <span className={classes.firstSentence}>
+            No Inquiries Right Now!
+          </span>
+          <span className={classes.secondSentence}>Please add inquiry for missing information.</span>
+        </div>
+      }
       <div className='inquiryList' style={{
         padding: isShowBackground && '8px 24px',
         marginTop: isShowBackground && '2rem'
