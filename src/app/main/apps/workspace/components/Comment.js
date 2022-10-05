@@ -274,9 +274,9 @@ const Comment = (props) => {
 
       {comments.map((k, id) => {
         return contentUI({
-          userName: k.creator.userName,
+          userName: k.updater?.userName,
           createdAt: k.createdAt,
-          avatar: k.creator.avatar,
+          avatar: k.updater.avatar,
           title: k.title || '',
           content: k.content,
           media: k.answersMedia,
