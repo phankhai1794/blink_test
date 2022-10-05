@@ -105,7 +105,7 @@ function ToolbarLayout1(props) {
   const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
   const [isSubmit, setIsSubmit] = useState(true);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
-
+  
   useEffect(() => {
     dispatch(InquiryActions.checkSend(false));
     let optionInquiries = [...inquiries];
@@ -120,7 +120,48 @@ function ToolbarLayout1(props) {
     if (enableSubmit) {
       isSubmit = false;
     }
+    let getAttachmentFiles =[];
     const inquiriesPendingProcess = optionInquiries.filter(op => op.process === 'pending');
+    inquiries.forEach((e) => {
+      const mediaFile = e.mediaFile.map((f) => {
+        return {
+          ...f,
+          field: e.field,
+          inquiryId: e.id,
+          inqType: e.inqType
+        };
+      });
+      getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
+      loadComment(e.id).then((res) => {
+        if (res.length > 0){
+          res.forEach((r) => {
+            if (r.answersMedia.length > 0) {
+              const attachmentTemp = r.answersMedia.map ((f) => {
+                return {
+                  ...f,
+                    field: e.field,
+                    inquiryId: e.id,
+                    inqType: e.inqType,
+                }
+              })
+              // if reply file in attachment of inquiry -> not add file to att list
+              attachmentTemp.forEach(att => {
+                const fileNameList = getAttachmentFiles.map((item) => {
+                  if (item.inqType === e.inqType) return item.name
+                })
+                if (att && !fileNameList.includes(att.name)) {
+                  getAttachmentFiles.push(att)
+                  if (document.querySelectorAll('#no-att span')[0].textContent < getAttachmentFiles.length ){
+                    document.querySelectorAll('#no-att span')[0].textContent =getAttachmentFiles.length
+                  }
+                }
+              })
+            }
+          })
+        }
+      })
+    });
+   
     const amendment = optionInquiries.filter(op => op.process === 'draft');
     if (pathname.includes('/guest') || pathname.includes('/workspace')) {
       axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)))
@@ -274,7 +315,7 @@ function ToolbarLayout1(props) {
                 size="medium"
                 className={clsx('h-64', classes.button)}
                 onClick={openAttachment}>
-                <Badge color="primary" badgeContent={attachmentLength}>
+                <Badge color="primary" badgeContent={attachmentLength} id='no-att'>
                   <DescriptionIcon />
                 </Badge>
                 <span className="pl-12">Attachment List</span>
