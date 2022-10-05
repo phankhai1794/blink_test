@@ -223,6 +223,7 @@ export default function Form(props) {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
+  const userType = useSelector(({ user }) => user.userType);
 
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
 
@@ -463,6 +464,7 @@ export default function Form(props) {
               extraCondition={
                 checkEnableBtnAddAmendment()
                 && myBL?.state?.includes('DRF_')
+                && userType === 'CUSTOMER' // Allow only customer to create amendment
                 && ![getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)].includes(currentField)
               }>
               <LinkButton
