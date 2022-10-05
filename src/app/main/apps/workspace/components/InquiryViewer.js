@@ -1051,19 +1051,32 @@ const InquiryViewer = (props) => {
               )}
             </div>
             <Typography variant="h5">{question.name}</Typography>
-            <Typography
-              className={viewDropDown !== question.id ? classes.hideText : ''}
-              variant="h5"
-              id={question.id}
-              style={{
-                wordBreak: 'break-word',
-                fontFamily: 'Montserrat',
-                fontSize: 15,
-                color: '#132535',
-                whiteSpace: 'pre-wrap'
-              }}>
-              {question.content}
-            </Typography>
+            {
+              ['COMPL', 'UPLOADED'].includes(question.state) &&containerCheck.includes(question.field)? (
+                <ContainerDetailForm
+                  container={
+                    question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                  }
+                  question={question}
+                  setTextResolve={setTextResolve}
+                  disableInuput={true}
+                />
+              ):
+                <Typography
+                  className={viewDropDown !== question.id ? classes.hideText : ''}
+                  variant="h5"
+                  id={question.id}
+                  style={{
+                    wordBreak: 'break-word',
+                    fontFamily: 'Montserrat',
+                    fontSize: 15,
+                    color: '#132535',
+                    whiteSpace: 'pre-wrap'
+                  }}>
+                  {question.content}
+                </Typography>
+            }
+            
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
@@ -1351,7 +1364,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-const ContainerDetailForm = ({ container, question, setTextResolve }) => {
+const ContainerDetailForm = ({ container, question, setTextResolve, disableInuput = false }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -1451,7 +1464,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
               if (rowIndex - 1 < item.value.length) {
                 nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
               }
-              const disabled = rowIndex > 0 && nodeValue ? false : true;
+              const disabled = !(rowIndex > 0 && nodeValue && !disableInuput);
               return (
                 <input
                   className={clsx(classes.text)}
