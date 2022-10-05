@@ -491,14 +491,12 @@ const SendInquiryForm = (props) => {
           </div>
         }
         {previewValue === 'inquiry' &&
-          <div style={{ height: '800px' }}>
-            <AllInquiry
-              user="workspace"
-              receiver={handleTabSelected()}
-              collapse={true}
-              openInquiryReview={true}
-            />
-          </div>
+          <AllInquiry
+            user="workspace"
+            receiver={handleTabSelected()}
+            collapse={true}
+            openInquiryReview={true}
+          />
         }
       </Form>
     </>
@@ -542,14 +540,12 @@ const InquiryReview = (props) => {
         FabTitle="Inquiry Review"
       >
         <>
-          <div style={{ height: '800px' }}>
-            <AllInquiry
-              user="workspace"
-              receiver={handleTabSelected()}
-              collapse={true}
-              openInquiryReview={true}
-            />
-          </div>
+          <AllInquiry
+            user="workspace"
+            receiver={handleTabSelected()}
+            collapse={true}
+            openInquiryReview={true}
+          />
         </>
       </Form>
     </>
