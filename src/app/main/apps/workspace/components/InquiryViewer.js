@@ -156,6 +156,7 @@ const InquiryViewer = (props) => {
   const [submitLabel, setSubmitLabel] = useState(false);
   const [isShowViewAll, setShowViewAll] = useState(false);
   const [isUploadFile, setIsUploadFile] = useState(false);
+  const [disableSaveReply, setDisableSaveReply] = useState(false);
 
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
@@ -250,14 +251,16 @@ const InquiryViewer = (props) => {
                 lastest.createdAt = answerObj[0]?.updatedAt;
                 setType(lastest.ansType);
               }
-              if (lastest.mediaFilesAnswer.length) {
+              if (lastest.mediaFilesAnswer.length || ['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(lastest.state)) {
                 lastest.mediaFile = lastest.mediaFilesAnswer;
                 lastest.mediaFilesAnswer = [];
               }
               if (user.role === 'Admin') {
                 lastest.showIconReply = true;
               } else {
-                if (lastest.state === 'REP_Q_DRF') setSubmitLabel(true);
+                if (lastest.state === 'REP_Q_DRF') {
+                  setSubmitLabel(true)
+                }
               }
               setQuestion(lastest);
               setInqHasComment(true);
@@ -638,6 +641,7 @@ const InquiryViewer = (props) => {
     let mediaFilesResp;
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    setDisableSaveReply(true);
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
@@ -688,6 +692,7 @@ const InquiryViewer = (props) => {
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
             );
             setViewDropDown('');
+            setDisableSaveReply(false);
           }).catch((error) =>
             dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
           );
@@ -715,6 +720,7 @@ const InquiryViewer = (props) => {
             setSaveComment(!isSaveComment);
             //
             dispatch(InquiryActions.checkSend(true));
+            setDisableSaveReply(false);
             dispatch(
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
             );
@@ -733,6 +739,7 @@ const InquiryViewer = (props) => {
           .then(() => {
             setSaveComment(!isSaveComment);
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
+            setDisableSaveReply(false);
             dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
           })
           .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
@@ -744,7 +751,8 @@ const InquiryViewer = (props) => {
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
-          // dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
+          dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
+          setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
@@ -755,6 +763,10 @@ const InquiryViewer = (props) => {
 
   const cancelReply = (q) => {
     setIsReply(false);
+    const reply = { ...question };
+    reply.mediaFilesAnswer = reply.mediaFile;
+    reply.mediaFile = [];
+    setQuestion(reply);
     setSaveComment(!isSaveComment);
   };
 
@@ -1241,7 +1253,8 @@ const InquiryViewer = (props) => {
                             border: '1px solid #BAC3CB',
                             borderRadius: 8,
                             resize: 'none',
-                            fontFamily: 'Montserrat'
+                            fontFamily: 'Montserrat',
+                            fontSize: 15
                           }}
                           multiline="true"
                           type="text"
@@ -1289,7 +1302,7 @@ const InquiryViewer = (props) => {
                           variant="contained"
                           color="primary"
                           onClick={onSaveReply}
-                          disabled={!tempReply?.answer?.content}
+                          disabled={!tempReply?.answer?.content || disableSaveReply}
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
                         </Button>

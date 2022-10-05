@@ -271,6 +271,8 @@ const BLWorkspace = (props) => {
         fabTitle: curField?.label,
         title: curField?.label,
         field: curField?.value,
+        showBtnSend: true,
+        disableSendBtn: disableSendBtn,
         child: <Inquiry user={props.user} />
       };
     }

@@ -42,6 +42,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
   const dispatch = useDispatch();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [srcUrl, setSrcUrl] = useState(file.src || null);
+  const [isDeletedFile, setDeletedFile] = useState(false);
   const classes = useStyles();
 
   const urlMedia = (fileExt, file) => {
@@ -61,8 +62,11 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
           setSrcUrl(urlMedia(file.ext, f));
         })
         .catch((error) => console.error(error));
+    } else if (!file.id && file.src) {
+      setSrcUrl(file.src)
     }
-  }, []);
+  }, [file]);
+
   const openImageViewer = () => {
     setIsViewerOpen(true);
   };
@@ -94,7 +98,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
     else if (isReply) {
       const temp = {...templateReply};
       temp.mediaFiles.splice(indexMedia, 1);
-      setTemplateReply(temp)
+      setTemplateReply(temp);
     }
     else if (field && file.id) {
       const indexMedia = optionsOfQuestion.mediaFile.findIndex(
@@ -126,7 +130,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
       );
       optionsOfQuestion.mediaFile.splice(indexMedia, 1);
     }
-
+    // setDeletedFile(!isDeletedFile);
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
