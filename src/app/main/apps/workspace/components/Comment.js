@@ -233,7 +233,7 @@ const Comment = (props) => {
             </Typography>
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {question.ansType === metadata.ans_type.choice && (
-                <ChoiceAnswer disable={true} question={question} />
+                <ChoiceAnswer disable={true} question={question} disableChecked={true} />
               )}
               {/*{question.ansType === metadata.ans_type.paragraph && (*/}
               {/*  <ParagraphAnswer disable={true} question={question} />*/}
