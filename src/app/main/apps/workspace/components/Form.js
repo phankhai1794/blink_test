@@ -340,7 +340,8 @@ export default function Form(props) {
 
   const sendMailClick = () => {
     toggleForm(false);
-    dispatch(FormActions.toggleOpenEmail(true))
+    dispatch(FormActions.toggleOpenEmail(true));
+    dispatch(InquiryActions.setOneInq({}));
   };
 
   const checkEnableBtnAddAmendment = () => {
