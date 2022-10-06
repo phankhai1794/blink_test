@@ -761,7 +761,6 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setContent(cloneContent));
           };
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
-          dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           // dispatch(FormActions.toggleReload());
