@@ -103,6 +103,9 @@ const InquiryAnswer = (props) => {
       receiver: inq.receiver
     };
   };
+  const optionsInquires = [...inquiries];
+  const editedIndex = optionsInquires.findIndex(inq1 => question.id === inq1.id);
+  let currentAnswer = optionsInquires[editedIndex]
 
  
   const saveAttachmentAnswer = async (currentEditInq, responseSelectChoice) => {
@@ -255,7 +258,7 @@ const InquiryAnswer = (props) => {
           <Button
             variant="contained"
             color="primary"
-            disabled={isDisableSave}
+            disabled={(!currentAnswer?.paragraphAnswer?.content && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length ==0))||isDisableSave}
             onClick={() => onSave()}
             classes={{ root: classes.button }}>
             Save
