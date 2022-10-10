@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import _ from 'lodash';
+import { useDispatch } from 'react-redux';
 import { Typography } from '@material-ui/core';
 import { FuseAnimate } from '@fuse';
 import { Link } from 'react-router-dom';
+import * as AppActions from 'app/store/actions';
 
 function Error404Page() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', false)));
+  }, []);
+
   return (
     <div className="flex flex-col flex-1 items-center justify-center p-16">
       <div className="max-w-512 text-center">

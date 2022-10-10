@@ -126,13 +126,15 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-function JWTLoginTab({ onLogged }) {
+function JWTLoginTab({ onLogged, country }) {
+  const defaultCountry = country && COUNTRIES.filter(c => c.value === country).length ? country : COUNTRIES[0].value;
+
   const classes = useStyles();
   const [isFormValid, setIsFormValid] = useState(false);
   const [account, setAccount] = useState({
     email: { value: '', isValid: false },
     password: { value: '', isValid: false, visible: false },
-    country: { value: COUNTRIES[0].value, selected: true }
+    country: { value: defaultCountry, selected: true }
   });
 
   const handleChange = (e) => {
@@ -181,7 +183,7 @@ function JWTLoginTab({ onLogged }) {
 
   useEffect(() => {
     if (!localStorage.getItem('country')) {
-      localStorage.setItem('country', COUNTRIES[0].value);
+      localStorage.setItem('country', defaultCountry);
     }
   }, []);
 
