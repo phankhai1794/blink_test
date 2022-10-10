@@ -258,7 +258,7 @@ const InquiryAnswer = (props) => {
           <Button
             variant="contained"
             color="primary"
-            disabled={(!currentAnswer?.paragraphAnswer?.content && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length ==0))||isDisableSave}
+            disabled={(!currentAnswer?.paragraphAnswer?.content && !currentAnswer.selectChoice && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)) || isDisableSave}
             onClick={() => onSave()}
             classes={{ root: classes.button }}>
             Save
