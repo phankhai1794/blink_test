@@ -308,7 +308,7 @@ function ToolbarLayout1(props) {
                 <Badge color="primary" badgeContent={inquiries.length}>
                   <NotificationsIcon />
                 </Badge>
-                <span className="pl-12">Inquiry List</span>
+                <span className="pl-12">Inquiries List</span>
               </Button>
               <Button
                 variant="text"
@@ -318,7 +318,7 @@ function ToolbarLayout1(props) {
                 <Badge color="primary" badgeContent={attachmentLength} id='no-att'>
                   <DescriptionIcon />
                 </Badge>
-                <span className="pl-12">Attachment List</span>
+                <span className="pl-12">Attachments List</span>
               </Button>
             </PermissionProvider>
           </div>
