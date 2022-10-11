@@ -105,7 +105,7 @@ function ToolbarLayout1(props) {
   const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
   const [isSubmit, setIsSubmit] = useState(true);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
-  
+
   useEffect(() => {
     dispatch(InquiryActions.checkSend(false));
     let optionInquiries = [...inquiries];
@@ -120,7 +120,7 @@ function ToolbarLayout1(props) {
     if (enableSubmit) {
       isSubmit = false;
     }
-    let getAttachmentFiles =[];
+    let getAttachmentFiles = [];
     const inquiriesPendingProcess = optionInquiries.filter(op => op.process === 'pending');
     inquiries.forEach((e) => {
       const mediaFile = e.mediaFile.map((f) => {
@@ -133,15 +133,15 @@ function ToolbarLayout1(props) {
       });
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
       loadComment(e.id).then((res) => {
-        if (res.length > 0){
+        if (res.length > 0) {
           res.forEach((r) => {
             if (r.answersMedia.length > 0) {
-              const attachmentTemp = r.answersMedia.map ((f) => {
+              const attachmentTemp = r.answersMedia.map((f) => {
                 return {
                   ...f,
-                    field: e.field,
-                    inquiryId: e.id,
-                    inqType: e.inqType,
+                  field: e.field,
+                  inquiryId: e.id,
+                  inqType: e.inqType,
                 }
               })
               // if reply file in attachment of inquiry -> not add file to att list
@@ -151,8 +151,10 @@ function ToolbarLayout1(props) {
                 })
                 if (att && !fileNameList.includes(att.name)) {
                   getAttachmentFiles.push(att)
-                  if (document.querySelectorAll('#no-att span')[0].textContent < getAttachmentFiles.length ){
-                    document.querySelectorAll('#no-att span')[0].textContent =getAttachmentFiles.length
+                  if (document.querySelectorAll('#no-att span').length) {
+                    if (document.querySelectorAll('#no-att span')[0].textContent < getAttachmentFiles.length) {
+                      document.querySelectorAll('#no-att span')[0].textContent = getAttachmentFiles.length
+                    }
                   }
                 }
               })
@@ -161,7 +163,7 @@ function ToolbarLayout1(props) {
         }
       })
     });
-   
+
     const amendment = optionInquiries.filter(op => op.process === 'draft');
     if (pathname.includes('/guest') || pathname.includes('/workspace')) {
       axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)))
@@ -383,7 +385,10 @@ function ToolbarLayout1(props) {
               </Button>
             </PermissionProvider>
 
-            <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>
+            <PermissionProvider
+              action={PERMISSION.VIEW_SHOW_USER_MENU}
+              extraCondition={pathname.includes('/workspace')}
+            >
               <UserProfile classes={classes} history={history} />
             </PermissionProvider>
           </div>

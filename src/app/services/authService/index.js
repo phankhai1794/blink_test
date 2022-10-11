@@ -26,7 +26,12 @@ export async function forgotPassword(data) {
   return response.data;
 }
 
-export async function putUserPassword(header,payload) {
+export async function putUserPassword(header, payload) {
   const response = await axios(header).put(`${PATH}/update-password`, payload);
   return response;
+}
+
+export async function getPermissionByRole(data) {
+  const response = await axios().get(`${PATH}/permissions/${data}`);
+  return response.data;
 }
