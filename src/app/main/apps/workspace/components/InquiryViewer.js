@@ -115,7 +115,6 @@ const useStyles = makeStyles((theme) => ({
   },
   text: {
     height: 40,
-    width: 170,
     border: '1px solid #BAC3CB',
     textAlign: 'center',
     color: '#132535'
@@ -1440,7 +1439,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
           type = typeList[typeList.length - 1];
         }
         let hasData = false;
-        td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: 1 }}>
+        td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: type===typeList[0]? 10: 5 }}>
           <input
             className={clsx(classes.text)}
             style={{
