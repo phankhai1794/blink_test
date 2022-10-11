@@ -12,6 +12,8 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { getBlInfo } from 'app/services/myBLService';
+import { disconnectSocket, initiateSocketConnection } from "app/services/socketService";
+import { getPermissionByRole } from 'app/services/authService';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -99,6 +101,7 @@ const BLWorkspace = (props) => {
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
   const openNotification = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitAnswer);
   const openNotificationReply = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteReply);
+  const openNotificationBLWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning);
   const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
 
   const isShowBackground = useSelector(
@@ -106,6 +109,7 @@ const BLWorkspace = (props) => {
   );
   const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
+  let userInfo = JSON.parse(localStorage.getItem('USER'));
 
   const getField = (keyword) => {
     return metadata.field?.[keyword] || '';
@@ -135,22 +139,88 @@ const BLWorkspace = (props) => {
     }, 60000);
   }, [transAutoSaveStatus, myBL]);
 
+  const checkBLSameRequest = async (socket, bl) => {
+    if (bl && userInfo) {
+      socket.emit('user_processing_in', {
+        mybl: bl,
+        type: 'warning_duplicate',
+        email: userInfo.email,
+        role: userInfo.role,
+      });
+      let permissionAssign = userInfo.role === 'Admin' ? await getPermissionByRole('Admin') : await getPermissionByRole('Guest');
+      let permissionViewer = await getPermissionByRole('Viewer');
+      socket.on('msg_processing', (data) => {
+        let assignPermissionViewer = userInfo;
+        let excludeFirstUser = false;
+        if (data.processingBy.length > 1) {
+          data.processingBy.forEach((p) => {
+            if (userInfo.email === data.processingBy[0]) {
+              excludeFirstUser = true;
+            }
+          });
+          if (!excludeFirstUser && assignPermissionViewer) {
+            // assign permission
+            assignPermissionViewer = {
+              ...assignPermissionViewer,
+              permissions: permissionViewer
+            };
+            // show popup for lastest user
+            if (userInfo.email === data.processingBy[data.processingBy.length - 1]) {
+              dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
+            }
+          } else {
+            // assign permission
+            assignPermissionViewer = {
+              ...assignPermissionViewer,
+              permissions: permissionAssign
+            };
+          }
+        } else if (data.processingBy.length === 1) {
+          // assign permission
+          assignPermissionViewer = {
+            ...assignPermissionViewer,
+            permissions: permissionAssign
+          };
+        }
+        localStorage.setItem('USER', JSON.stringify(assignPermissionViewer));
+      });
+    }
+  };
+
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(DraftActions.setProcess(props.process));
 
+    const socket = initiateSocketConnection();
     const bkgNo = window.location.pathname.split('/')[3];
-    if (bkgNo) dispatch(Actions.initBL(bkgNo));
+    if (bkgNo) {
+      dispatch(Actions.initBL(bkgNo));
+      checkBLSameRequest(socket, bkgNo);
+    }
     else if (props.myBL) {
       getBlInfo(props.myBL?.id).then(res => {
         const { id, state, bkgNo } = res.myBL;
         dispatch(InquiryActions.setMyBL({ id, state, bkgNo }));
+        checkBLSameRequest(socket, bkgNo);
       });
     }
 
     return () => {
       dispatch(FormActions.toggleReload());
-    };
+      disconnectSocket(socket);
+
+      if (userInfo && userInfo.role === 'Admin') {
+        getPermissionByRole('Admin').then(data => {
+          const assignPermissionViewer = {
+            ...userInfo,
+            permissions: data
+          };
+          localStorage.setItem('USER', JSON.stringify(assignPermissionViewer));
+        }).catch(err => {
+          console.log(err)
+        })
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -331,6 +401,16 @@ const BLWorkspace = (props) => {
       return 'Your reply has been deleted.'
     } else if (openNotificationAmendment) {
       return 'Your amendment has been deleted.'
+    } else if (openNotificationBLWarning.status) {
+      return `The BL is opening by ${openNotificationBLWarning.userName} .Please wait for ${openNotificationBLWarning.userName} complete his/her work`
+    }
+  };
+
+  const renderIconType = () => {
+    if (openNotificationBLWarning.status) {
+      return <img src={`/assets/images/icons/warning.svg`} />;
+    } else if (openNotification || openNotificationReply || openNotificationAmendment) {
+      return <img src={`/assets/images/icons/vector.svg`} />;
     }
   }
 
@@ -339,12 +419,14 @@ const BLWorkspace = (props) => {
       <BLProcessNotification />
       <AttachmentListNotification />
       <SubmitAnswerNotification
-        open={openNotification || openNotificationReply || openNotificationAmendment}
+        open={openNotification || openNotificationReply || openNotificationAmendment || openNotificationBLWarning.status}
         msg={renderMsgNoti()}
+        iconType={renderIconType()}
         handleClose={() => {
           dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false));
           dispatch(FormActions.toggleOpenNotificationDeleteReply(false));
           dispatch(FormActions.toggleOpenNotificationDeleteAmendment(false));
+          dispatch(FormActions.toggleOpenBLWarning(false));
         }}
       />
       <div className={clsx('max-w-5xl', classes.root)}>

@@ -41,14 +41,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const SubmitAnswerNotification = ({ msg, open, handleClose }) => {
+const SubmitAnswerNotification = ({ msg, iconType, open, handleClose }) => {
   const classes = useStyles();
 
   return (
     <Dialog open={open} onClose={handleClose} classes={{ root: classes.dialog }}>
       <MuiDialogContent classes={{ root: classes.dialogContent }}>
         <div className='icon-successful'>
-          <img src={`/assets/images/icons/vector.svg`} />
+          {iconType}
         </div>
         <span className={classes.firstSentence}>
           {msg}

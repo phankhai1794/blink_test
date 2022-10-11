@@ -67,7 +67,9 @@ function WorkspaceApp() {
   }, []);
 
   return (
-    <>{validUrl && validToken && <MainWorkSpace />}</>
+    <>
+      {validUrl && validToken && <MainWorkSpace />}
+    </>
   );
 }
 

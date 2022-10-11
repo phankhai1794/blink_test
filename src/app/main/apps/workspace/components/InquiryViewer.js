@@ -736,7 +736,7 @@ const InquiryViewer = (props) => {
         };
         saveEditedField({ ...reqReply })
           .then(() => {
-            if(user.role !== 'Admin'){
+            if (user.role !== 'Admin') {
               const cloneContent = { ...content };
               cloneContent[question.field] = tempReply?.answer?.content;
               dispatch(InquiryActions.setContent(cloneContent));
@@ -754,7 +754,7 @@ const InquiryViewer = (props) => {
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
-          if(user.role !== 'Admin'){
+          if (user.role !== 'Admin') {
             const cloneContent = { ...content };
             cloneContent[question.field] = tempReply?.answer?.content;
             dispatch(InquiryActions.setContent(cloneContent));
@@ -940,11 +940,13 @@ const InquiryViewer = (props) => {
                       ) : <>
                         {checkStateReplyDraft && (
                           <>
-                            <Tooltip title={'Edit Reply'}>
-                              <div onClick={() => handleEdit(question)}>
-                                <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
-                              </div>
-                            </Tooltip>
+                            <PermissionProvider action={PERMISSION.INQUIRY_UPDATE_REPLY}>
+                              <Tooltip title={'Edit Reply'}>
+                                <div onClick={() => handleEdit(question)}>
+                                  <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                                </div>
+                              </Tooltip>
+                            </PermissionProvider>
                             {question.process === 'draft' && (
                               <Tooltip title="Delete Reply">
                                 <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
@@ -974,7 +976,10 @@ const InquiryViewer = (props) => {
                       </div>
                     </Tooltip>
                   </PermissionProvider>
-                  {allowDeleteInq && (
+                  <PermissionProvider
+                    action={PERMISSION.INQUIRY_DELETE_INQUIRY}
+                    extraCondition={allowDeleteInq}
+                  >
                     <Tooltip title="Delete Inquiry">
                       <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion()}>
                         <img
@@ -983,7 +988,7 @@ const InquiryViewer = (props) => {
                         />
                       </div>
                     </Tooltip>
-                  )}
+                  </PermissionProvider>
                 </div>
               ) : (
                 <div className='flex' style={{ alignItems: 'center' }}>
@@ -1050,7 +1055,7 @@ const InquiryViewer = (props) => {
             </div>
             <Typography variant="h5">{question.name}</Typography>
             {
-              ['COMPL', 'UPLOADED'].includes(question.state) &&containerCheck.includes(question.field)? (
+              ['COMPL', 'UPLOADED'].includes(question.state) && containerCheck.includes(question.field) ? (
                 <ContainerDetailForm
                   container={
                     question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
@@ -1059,7 +1064,7 @@ const InquiryViewer = (props) => {
                   setTextResolve={setTextResolve}
                   disableInuput={true}
                 />
-              ):
+              ) :
                 <Typography
                   className={viewDropDown !== question.id ? classes.hideText : ''}
                   variant="h5"
@@ -1074,7 +1079,7 @@ const InquiryViewer = (props) => {
                   {question.content}
                 </Typography>
             }
-            
+
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
@@ -1439,7 +1444,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
           type = typeList[typeList.length - 1];
         }
         let hasData = false;
-        td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: type===typeList[0]? 10: 5 }}>
+        td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: type === typeList[0] ? 10 : 5 }}>
           <input
             className={clsx(classes.text)}
             style={{
