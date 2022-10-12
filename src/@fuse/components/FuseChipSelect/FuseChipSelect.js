@@ -256,7 +256,7 @@ function FuseChipSelect(props) {
   return props.variant === 'fixed' ? (
     <Select classNamePrefix="fuse-chip-select" {...props} components={components} />
   ) : (
-    <CreatableSelect classNamePrefix="fuse-chip-select" {...props} components={components} />
+    <CreatableSelect isValidNewOption={() => false} classNamePrefix="fuse-chip-select" {...props} components={components} />
   );
 }
 
