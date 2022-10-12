@@ -5,6 +5,7 @@ import {
   Card,
   Typography,
   Divider,
+  Link
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
@@ -260,9 +261,15 @@ const AllInquiry = (props) => {
       {openInquiryReview && !inquiries.length &&
         <div style={{ textAlign: 'center', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
           <span className={classes.firstSentence}>
-            No Inquiries Right Now!
+            All Inquiries were sent.
           </span>
-          <span className={classes.secondSentence}>Please add inquiry for missing information.</span>
+          <span className={classes.secondSentence}>Go to&nbsp;
+            <Link
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                dispatch(FormActions.toggleAllInquiry(true))
+                dispatch(FormActions.toggleOpenEmail(false))
+              }}>Inquiries List</Link>  to view detail</span>
         </div>
       }
       <div className='inquiryList' style={{
