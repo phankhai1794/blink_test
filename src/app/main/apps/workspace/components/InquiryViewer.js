@@ -736,7 +736,7 @@ const InquiryViewer = (props) => {
         };
         saveEditedField({ ...reqReply })
           .then(() => {
-            if(user.role !== 'Admin'){
+            if (user.role !== 'Admin') {
               const cloneContent = { ...content };
               cloneContent[question.field] = tempReply?.answer?.content;
               dispatch(InquiryActions.setContent(cloneContent));
@@ -754,7 +754,7 @@ const InquiryViewer = (props) => {
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
-          if(user.role !== 'Admin'){
+          if (user.role !== 'Admin') {
             const cloneContent = { ...content };
             cloneContent[question.field] = tempReply?.answer?.content;
             dispatch(InquiryActions.setContent(cloneContent));
@@ -964,7 +964,7 @@ const InquiryViewer = (props) => {
                   </div>
                   <PermissionProvider
                     action={PERMISSION.VIEW_EDIT_INQUIRY}
-                    extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN' || question.state === 'ANS_DRF'}>
+                    extraCondition={question.state === 'OPEN'}>
                     <Tooltip title="Edit Inquiry">
                       <div onClick={() => changeToEditor(question)}>
                         <img
@@ -1050,7 +1050,7 @@ const InquiryViewer = (props) => {
             </div>
             <Typography variant="h5">{question.name}</Typography>
             {
-              ['COMPL', 'UPLOADED'].includes(question.state) &&containerCheck.includes(question.field)? (
+              ['COMPL', 'UPLOADED'].includes(question.state) && containerCheck.includes(question.field) ? (
                 <ContainerDetailForm
                   container={
                     question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
@@ -1059,7 +1059,7 @@ const InquiryViewer = (props) => {
                   setTextResolve={setTextResolve}
                   disableInuput={true}
                 />
-              ):
+              ) :
                 <Typography
                   className={viewDropDown !== question.id ? classes.hideText : ''}
                   variant="h5"
@@ -1074,7 +1074,7 @@ const InquiryViewer = (props) => {
                   {question.content}
                 </Typography>
             }
-            
+
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
