@@ -270,7 +270,7 @@ const BLWorkspace = (props) => {
         tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
         nums: user.role === 'Admin' ? [countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
         toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
-        fabTitle: 'Inquiry List',
+        fabTitle: 'Inquiries List',
         title: 'Inquiry List',
         field: 'INQUIRY_LIST',
         showBtnSend: true,
@@ -281,7 +281,7 @@ const BLWorkspace = (props) => {
       return {
         status: openAttachment,
         toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
-        fabTitle: 'Attachment List',
+        fabTitle: 'Attachments List',
         title: 'Attachment List',
         hasAddButton: false,
         field: 'ATTACHMENT_LIST',
