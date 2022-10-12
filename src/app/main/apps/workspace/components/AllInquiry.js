@@ -169,7 +169,7 @@ const AllInquiry = (props) => {
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.isShowBackground,
   ]);
-  const inquiries = openInquiryReview ? inquiryCopy.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_DRF') : inquiryCopy
+  const inquiries = openInquiryReview ? inquiryCopy.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF') : inquiryCopy
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);

@@ -966,7 +966,7 @@ const InquiryViewer = (props) => {
                   </div>
                   <PermissionProvider
                     action={PERMISSION.VIEW_EDIT_INQUIRY}
-                    extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN' || question.state === 'ANS_DRF'}>
+                    extraCondition={question.state === 'OPEN'}>
                     <Tooltip title="Edit Inquiry">
                       <div onClick={() => changeToEditor(question)}>
                         <img
