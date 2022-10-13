@@ -150,6 +150,7 @@ const BLWorkspace = (props) => {
       let permissionAssign = userInfo.role === 'Admin' ? await getPermissionByRole('Admin') : await getPermissionByRole('Guest');
       let permissionViewer = await getPermissionByRole('Viewer');
       socket.on('msg_processing', (data) => {
+        console.log(`message processing:`, data);
         let assignPermissionViewer = userInfo;
         let excludeFirstUser = false;
         if (data.processingBy.length > 1) {
@@ -192,6 +193,7 @@ const BLWorkspace = (props) => {
     dispatch(DraftActions.setProcess(props.process));
 
     const socket = initiateSocketConnection();
+    console.log('init socket', socket);
     const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) {
       dispatch(Actions.initBL(bkgNo));
