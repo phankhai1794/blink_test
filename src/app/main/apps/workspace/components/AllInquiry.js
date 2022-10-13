@@ -253,16 +253,24 @@ const AllInquiry = (props) => {
     <>
       {openInquiryReview && !inquiries.length &&
         <div style={{ textAlign: 'center', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-          <span className={classes.firstSentence}>
-            All Inquiries were sent.
-          </span>
-          <span className={classes.secondSentence}>Go to&nbsp;
-            <Link
-              style={{ cursor: 'pointer' }}
-              onClick={() => {
-                dispatch(FormActions.toggleAllInquiry(true))
-                dispatch(FormActions.toggleOpenEmail(false))
-              }}>Inquiries List</Link>  to view detail</span>
+          {inquiryCopy.length ?
+            <>
+              <span className={classes.firstSentence}>
+                All Inquiries were sent.
+              </span>
+              <span className={classes.secondSentence}>Go to&nbsp;
+                <Link
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    dispatch(FormActions.toggleAllInquiry(true))
+                    dispatch(FormActions.toggleOpenEmail(false))
+                  }}>Inquiries List</Link>  to view detail</span>
+            </> :
+            <>
+              <span className={classes.firstSentence}>No Inquiries Right Now!</span>
+              <span className={classes.secondSentence}>Please add an inquiry for missing information.</span>
+            </>
+          }
         </div>
       }
       <div className='inquiryList' style={{

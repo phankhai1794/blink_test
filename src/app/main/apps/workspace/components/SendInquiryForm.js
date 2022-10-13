@@ -135,7 +135,7 @@ const SendInquiryForm = (props) => {
 
   const checkNewInquiry = (type) => {
     const list = []
-    const temp = inquiries.filter(inq => inq.receiver[0] === type && (inq.state === 'OPEN' || inq.state === 'REP_DRF'))
+    const temp = inquiries.filter(inq => inq.receiver[0] === type && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF'))
     if (temp.length) {
       const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
       sortDateList.forEach(inq => {
@@ -243,6 +243,7 @@ const SendInquiryForm = (props) => {
       cloneInquiries.forEach(q => {
         if (q.receiver[0] === tabValue) {
           if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
+          else if (q.state === 'REP_Q_DRF') q.state = 'REP_Q_SENT'; // inquiry
           else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
         }
       });
@@ -380,7 +381,7 @@ const SendInquiryForm = (props) => {
     }
   }
   const countInq = (recevier) => {
-    return inquiries.filter(inq => inq.receiver.includes(recevier) && (inq.state === 'OPEN' || inq.state === 'REP_DRF')).length;
+    return inquiries.filter(inq => inq.receiver.includes(recevier) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')).length;
   };
 
   const handleTabSelected = () => {
@@ -543,7 +544,6 @@ const InquiryReview = (props) => {
           <AllInquiry
             user="workspace"
             receiver={handleTabSelected()}
-            collapse={true}
             openInquiryReview={true}
           />
         </>
