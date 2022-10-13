@@ -91,9 +91,6 @@ const useStyles = makeStyles((theme) => ({
       borderColor: '#2F80ED'
     }
   },
-  boxHasComment: {
-    borderColor: '#2F80ED'
-  },
   backgroundConfirm: {
     top: 74,
     left: 0,
@@ -161,8 +158,6 @@ const AllInquiry = (props) => {
   const dispatch = useDispatch();
   const { receiver, openInquiryReview, field } = props;
   const classes = useStyles();
-  const [viewDropDown, setViewDropDown] = useState('');
-  const [inqHasComment, setInqHasComment] = useState([]);
   const [isSaved, setSaved] = useState(false);
   const [inquiryCopy, currentEditInq, metadata, isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
@@ -182,9 +177,7 @@ const AllInquiry = (props) => {
     if (index >= 0) {
       const inqEdit = JSON.parse(JSON.stringify(inq));
       dispatch(InquiryActions.setEditInq(inqEdit));
-
       dispatch(InquiryActions.setField(inq.field));
-      setViewDropDown('');
     }
   };
 
@@ -299,8 +292,7 @@ const AllInquiry = (props) => {
                   className={clsx(
                     classes.boxItem,
                     (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-                    inqHasComment.includes(q.id) && classes.boxHasComment,
-                    sentStatus.includes(q.state) && 'offshoreReply'
+                    [...sentStatus, ...['REP_DRF']].includes(q.state) && 'offshoreReply'
                   )}>
                   <div style={{ marginBottom: '12px' }}>
                     <Typography color="primary" variant="h5" className={classes.inqTitle}>
@@ -325,7 +317,6 @@ const AllInquiry = (props) => {
                     classes.boxItem,
                     (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
                     !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(q.state) && 'customerReply',
-                    inqHasComment.includes(q.id) && classes.boxHasComment
                   )}>
                   <div style={{ marginBottom: '12px' }}>
                     <Typography color="primary" variant="h5" className={classes.inqTitle}>

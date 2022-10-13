@@ -331,6 +331,11 @@ const InquiryViewer = (props) => {
             // push new lastestComment if not already exist
             !listCommentDraft.find(ele => ele.id === lastestComment.id) && dispatch(InquiryActions.setListCommentDraft([...listCommentDraft, ...[lastestComment]]));
 
+            // push to inquiries to update the Inquiries List
+            const optionsInquires = [...inquiries].filter(inq => inq.id !== question.id);
+            optionsInquires.push(lastest);
+            dispatch(InquiryActions.setInquiries(optionsInquires));
+
             const comments = [{
               creator: { userName: user.displayName, avatar: null },
               updater: { userName: user.displayName, avatar: null },
