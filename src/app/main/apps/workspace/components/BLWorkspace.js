@@ -147,6 +147,8 @@ const BLWorkspace = (props) => {
         email: userInfo.email,
         role: userInfo.role,
       });
+      console.log(`socket.emit('user_processing_in'):`)
+      console.log(`${bl}, warning_duplicate, ${userInfo.email}`)
       let permissionAssign = userInfo.role === 'Admin' ? await getPermissionByRole('Admin') : await getPermissionByRole('Guest');
       let permissionViewer = await getPermissionByRole('Viewer');
       socket.on('msg_processing', (data) => {
