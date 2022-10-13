@@ -121,7 +121,7 @@ function InquiringTable(props) {
 
   function handleClick(bkgNo) {
     history.push({
-      pathname: '/apps/workspace/' + bkgNo,
+      pathname: `/apps/workspace/${bkgNo}?usrId=admin&cntr=VN`,
       state: 'inquiry'
     });
   }
