@@ -1,8 +1,8 @@
 import io from "socket.io-client";
 
 export const initiateSocketConnection = () => {
-  console.log(`Connecting socket at: ${process.env.REACT_APP_SOCKET_URI}`);
-  return io(process.env.REACT_APP_SOCKET_URI);
+  console.log(`Connecting socket at: ${window.location.origin}`);
+  return io(window.location.origin);
 };
 
 export const disconnectSocket = (socket) => {
