@@ -896,7 +896,7 @@ const InquiryViewer = (props) => {
       {isLoadedComment && (
         <>
           <div>
-            {(['AME_DRF', 'AME_SENT', 'REP_DRF', 'REP_SENT', 'RESOLVED', 'UPLOADED'].includes(question?.state) && (question?.process === 'draft')) &&
+            {(question?.process === 'draft') &&
               <TagsComponent tagName='AMENDMENT' tagColor='primary' />
             }
             <div style={{ paddingTop: 10 }} className="flex justify-between">
@@ -1135,22 +1135,26 @@ const InquiryViewer = (props) => {
                   </Grid>
                 )}
               </Grid>
-              <PermissionProvider
-                action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
-                extraCondition={question.state === 'COMPL' || question.state === 'RESOLVED'}
-              >
-                <div className='flex' style={{ alignItems: 'center' }}>
-                  <Button
-                    disabled={question.state === 'UPLOADED'}
-                    variant="contained"
-                    color="primary"
-                    onClick={() => reOpen(question?.id)}
-                    classes={{ root: classes.button }}
-                  >
-                    ReOpen
-                  </Button>
-                </div>
-              </PermissionProvider>
+              {/* TODO: Show Button ReOpen after UAT */}
+              {(question?.process === 'pending') &&
+                <PermissionProvider
+                  action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
+                  extraCondition={question.state === 'COMPL' || question.state === 'RESOLVED'}
+                >
+                  <div className='flex' style={{ alignItems: 'center' }}>
+                    <Button
+                      disabled={question.state === 'UPLOADED'}
+                      variant="contained"
+                      color="primary"
+                      onClick={() => reOpen(question?.id)}
+                      classes={{ root: classes.button }}
+                    >
+                      ReOpen
+                    </Button>
+                  </div>
+                </PermissionProvider>
+              }
+
 
               {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} />
