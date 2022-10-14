@@ -132,6 +132,32 @@ function ToolbarLayout1(props) {
         };
       });
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
+
+      getCommentDraftBl(myBL.id, e.field).then((res) => {
+        if (res.length > 0) {
+          res.forEach((r) => {
+            const attachmentAmendment = r.content.mediaFile.map ((f) => {
+              return {
+                ...f,
+                field: e.field,
+                inquiryId: e.id,
+                inqType: e.inqType,
+              }
+            })
+            // if reply file in attachment of inquiry -> not add file to att list
+            attachmentAmendment.forEach(att => {
+              const fileNameList = getAttachmentFiles.map((item) => {
+                if (item.inqType === e.inqType) return item.name
+              })
+              if (att && !e.inqType && !fileNameList.includes(att.name)) {
+                getAttachmentFiles.push(att);
+                document.querySelectorAll('#no-att span')[0].textContent =getAttachmentFiles.length;
+              }
+            })
+          })
+        }
+      })
+
       loadComment(e.id).then((res) => {
         if (res.length > 0) {
           res.forEach((r) => {
@@ -150,12 +176,8 @@ function ToolbarLayout1(props) {
                   if (item.inqType === e.inqType) return item.name
                 })
                 if (att && !fileNameList.includes(att.name)) {
-                  getAttachmentFiles.push(att)
-                  if (document.querySelectorAll('#no-att span').length) {
-                    if (document.querySelectorAll('#no-att span')[0].textContent < getAttachmentFiles.length) {
-                      document.querySelectorAll('#no-att span')[0].textContent = getAttachmentFiles.length
-                    }
-                  }
+                  getAttachmentFiles.push(att)                
+                  document.querySelectorAll('#no-att span')[0].textContent =getAttachmentFiles.length;
                 }
               })
             }
