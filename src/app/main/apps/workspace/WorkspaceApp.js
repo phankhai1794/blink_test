@@ -1,12 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import history from '@history';
 import { FusePageSimple } from '@fuse';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import { validateBkgNo } from 'app/services/opusService';
 
 import BLWorkspace from './components/BLWorkspace';
 
-function WorkspaceApp(props) {
+const MainWorkSpace = () => {
   const pageLayout = useRef(null);
   const dispatch = useDispatch();
 
@@ -30,6 +32,44 @@ function WorkspaceApp(props) {
         innerScroll
       />
     </div>
+  )
+}
+
+function WorkspaceApp() {
+  const [validUrl, setValidUrl] = useState(false);
+  const validToken = useSelector(({ header }) => header.validToken);
+
+  const OPUSValidation = async () => {
+    let redirect404 = true;
+    const { pathname, search } = window.location;
+    const bkgNo = pathname.split('/')[3];
+    const urlSearchParams = new URLSearchParams(search);
+    const usrId = urlSearchParams.get('usrId');
+    const cntr = urlSearchParams.get('cntr');
+
+    if (bkgNo && usrId && cntr) {
+      try {
+        const result = await validateBkgNo(bkgNo);
+        if (result) {
+          redirect404 = false;
+          setValidUrl(true);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    if (redirect404) history.push('/pages/errors/error-404');
+  }
+
+  useEffect(() => {
+    OPUSValidation();
+  }, []);
+
+  return (
+    <>
+      {validUrl && validToken && <MainWorkSpace />}
+    </>
   );
 }
 

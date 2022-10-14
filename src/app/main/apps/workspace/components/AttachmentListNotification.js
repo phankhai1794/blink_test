@@ -88,7 +88,7 @@ const AttachmentListNotification = () => {
         <div style={{ display: 'flex' }}>
           <div style={{ width: '70%' }}>
             <div style={{ color: '#515F6B', fontSize: '22px', fontWeight: '600' }}>
-                Attachment List
+                Attachments List
             </div>
           </div>
           <div style={{ width: '30%', textAlign: 'right' }}>

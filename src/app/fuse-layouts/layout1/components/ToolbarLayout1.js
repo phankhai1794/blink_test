@@ -120,7 +120,50 @@ function ToolbarLayout1(props) {
     if (enableSubmit) {
       isSubmit = false;
     }
+    let getAttachmentFiles = [];
     const inquiriesPendingProcess = optionInquiries.filter(op => op.process === 'pending');
+    inquiries.forEach((e) => {
+      const mediaFile = e.mediaFile.map((f) => {
+        return {
+          ...f,
+          field: e.field,
+          inquiryId: e.id,
+          inqType: e.inqType
+        };
+      });
+      getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
+      loadComment(e.id).then((res) => {
+        if (res.length > 0) {
+          res.forEach((r) => {
+            if (r.answersMedia.length > 0) {
+              const attachmentTemp = r.answersMedia.map((f) => {
+                return {
+                  ...f,
+                  field: e.field,
+                  inquiryId: e.id,
+                  inqType: e.inqType,
+                }
+              })
+              // if reply file in attachment of inquiry -> not add file to att list
+              attachmentTemp.forEach(att => {
+                const fileNameList = getAttachmentFiles.map((item) => {
+                  if (item.inqType === e.inqType) return item.name
+                })
+                if (att && !fileNameList.includes(att.name)) {
+                  getAttachmentFiles.push(att)
+                  if (document.querySelectorAll('#no-att span').length) {
+                    if (document.querySelectorAll('#no-att span')[0].textContent < getAttachmentFiles.length) {
+                      document.querySelectorAll('#no-att span')[0].textContent = getAttachmentFiles.length
+                    }
+                  }
+                }
+              })
+            }
+          })
+        }
+      })
+    });
+
     const amendment = optionInquiries.filter(op => op.process === 'draft');
     if (pathname.includes('/guest') || pathname.includes('/workspace')) {
       axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)))
@@ -267,17 +310,17 @@ function ToolbarLayout1(props) {
                 <Badge color="primary" badgeContent={inquiries.length}>
                   <NotificationsIcon />
                 </Badge>
-                <span className="pl-12">Inquiry List</span>
+                <span className="pl-12">Inquiries List</span>
               </Button>
               <Button
                 variant="text"
                 size="medium"
                 className={clsx('h-64', classes.button)}
                 onClick={openAttachment}>
-                <Badge color="primary" badgeContent={attachmentLength}>
+                <Badge color="primary" badgeContent={attachmentLength} id='no-att'>
                   <DescriptionIcon />
                 </Badge>
-                <span className="pl-12">Attachment List</span>
+                <span className="pl-12">Attachments List</span>
               </Button>
             </PermissionProvider>
           </div>
@@ -342,7 +385,10 @@ function ToolbarLayout1(props) {
               </Button>
             </PermissionProvider>
 
-            <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>
+            <PermissionProvider
+              action={PERMISSION.VIEW_SHOW_USER_MENU}
+              extraCondition={pathname.includes('/workspace')}
+            >
               <UserProfile classes={classes} history={history} />
             </PermissionProvider>
           </div>

@@ -21,6 +21,7 @@ const initialState = {
   confirmPopupType: '',
   confirmClick: false,
   openAmendmentForm: false,
+  openNotificationBLWarning: { status: false, userName: '' },
 };
 
 const formReducer = function (state = initialState, action) {
@@ -66,6 +67,9 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.OPEN_NOTIFICATION_DELETE_AMENDMENT: {
     return { ...state, openNotificationDeleteAmendment: action.state };
+  }
+  case Actions.TOGGLE_OPEN_BL_WARNING: {
+    return { ...state, openNotificationBLWarning: action.state };
   }
   case Actions.ENABLE_SAVE_INQUIRIES: {
     return { ...state, enableSaveInquiriesList: action.state };

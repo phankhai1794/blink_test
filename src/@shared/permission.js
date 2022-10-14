@@ -20,6 +20,7 @@ export const PERMISSION = {
   INQUIRY_CREATE_REPLY: 'inquiry_createReply',
   INQUIRY_UPDATE_REPLY: 'inquiry_updateReply',
   INQUIRY_UPDATE_INQUIRY: 'inquiry_updateInquiry',
+  INQUIRY_DELETE_INQUIRY: 'inquiry_deleteInquiry',
   INQUIRY_RESOLVE_INQUIRY: 'inquiry_resolveInquiry',
   MAIL_SEND_MAIL: 'mail_sendMail',
   INQUIRY_ANSWER_ATTACHMENT: 'inquiry_createAttachmentAnswer',

@@ -88,6 +88,7 @@ const Inquiry = (props) => {
     }
     if (isCancel && !isAnswered) {
       optionsInquires[editedIndex].mediaFilesAnswer = [];
+      optionsInquires[editedIndex].selectChoice = '';
     } else if (isCancel && isAnswered) {
       const [resInq] = [await getInquiryById(myBL.id)];
       resInq.forEach(ans => {

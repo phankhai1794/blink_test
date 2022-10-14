@@ -1,5 +1,6 @@
 stages:
   - test
+  - UAT
 
 deploy_test:
   stage: test
@@ -10,5 +11,17 @@ deploy_test:
     name: test
     url: http://stg-mybl.cyberlogitec.com.vn:8000
   script:
-    - echo "Sending Deployment Trigger"
-    - 'curl -v -d "commit_id=${CI_COMMIT_SHA:0:8}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://stg-mybl.cyberlogitec.com.vn:8000/pipeline/test/portal'
+    - echo "${GITLAB_USER_LOGIN} sending Deployment trigger to Test site"
+    - 'curl -f -d "commit_id=${CI_COMMIT_SHA:0:8}&triggerer=${GITLAB_USER_LOGIN}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://stg-mybl.cyberlogitec.com.vn:8000/pipeline/test/portal'
+
+deploy_staging:
+  stage: UAT
+  only:
+    - "test"
+  when: manual
+  environment:
+    name: staging
+    url: http://blink-stg.one-line.com
+  script:
+    - echo "${GITLAB_USER_LOGIN} sending Deployment trigger to Staging site"
+    - 'curl -f -d "commit_id=${CI_COMMIT_SHA:0:8}&triggerer=${GITLAB_USER_LOGIN}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://blink-stg.one-line.com/pipeline/test/portal'

@@ -115,7 +115,6 @@ const useStyles = makeStyles((theme) => ({
   },
   text: {
     height: 40,
-    width: 170,
     border: '1px solid #BAC3CB',
     textAlign: 'center',
     color: '#132535'
@@ -332,12 +331,17 @@ const InquiryViewer = (props) => {
             // push new lastestComment if not already exist
             !listCommentDraft.find(ele => ele.id === lastestComment.id) && dispatch(InquiryActions.setListCommentDraft([...listCommentDraft, ...[lastestComment]]));
 
+            // push to inquiries to update the Inquiries List
+            const optionsInquires = [...inquiries].filter(inq => inq.id !== question.id);
+            optionsInquires.push(lastest);
+            dispatch(InquiryActions.setInquiries(optionsInquires));
+
             const comments = [{
               creator: { userName: user.displayName, avatar: null },
               updater: { userName: user.displayName, avatar: null },
               createdAt: res[0].createdAt,
               answersMedia: [],
-              content: `Resolved data is "${orgContent[lastest.field] ? orgContent[lastest.field] : ''}"`
+              content: orgContent[lastest.field] || ''
             }];
             res.map(r => {
               const { content, mediaFile } = r.content;
@@ -737,7 +741,7 @@ const InquiryViewer = (props) => {
         };
         saveEditedField({ ...reqReply })
           .then(() => {
-            if(user.role !== 'Admin'){
+            if (user.role !== 'Admin') {
               const cloneContent = { ...content };
               cloneContent[question.field] = tempReply?.answer?.content;
               dispatch(InquiryActions.setContent(cloneContent));
@@ -755,13 +759,12 @@ const InquiryViewer = (props) => {
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
           setSaveComment(!isSaveComment);
-          if(user.role !== 'Admin'){
+          if (user.role !== 'Admin') {
             const cloneContent = { ...content };
             cloneContent[question.field] = tempReply?.answer?.content;
             dispatch(InquiryActions.setContent(cloneContent));
           };
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
-          dispatch(InquiryActions.setContent({ ...content, [question.field]: tempReply.answer.content }));
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           // dispatch(FormActions.toggleReload());
@@ -942,11 +945,13 @@ const InquiryViewer = (props) => {
                       ) : <>
                         {checkStateReplyDraft && (
                           <>
-                            <Tooltip title={'Edit Reply'}>
-                              <div onClick={() => handleEdit(question)}>
-                                <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
-                              </div>
-                            </Tooltip>
+                            <PermissionProvider action={PERMISSION.INQUIRY_UPDATE_REPLY}>
+                              <Tooltip title={'Edit Reply'}>
+                                <div onClick={() => handleEdit(question)}>
+                                  <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                                </div>
+                              </Tooltip>
+                            </PermissionProvider>
                             {question.process === 'draft' && (
                               <Tooltip title="Delete Reply">
                                 <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
@@ -966,7 +971,7 @@ const InquiryViewer = (props) => {
                   </div>
                   <PermissionProvider
                     action={PERMISSION.VIEW_EDIT_INQUIRY}
-                    extraCondition={question.state === 'INQ_SENT' || question.state === 'OPEN' || question.state === 'ANS_DRF'}>
+                    extraCondition={question.state === 'OPEN'}>
                     <Tooltip title="Edit Inquiry">
                       <div onClick={() => changeToEditor(question)}>
                         <img
@@ -976,7 +981,10 @@ const InquiryViewer = (props) => {
                       </div>
                     </Tooltip>
                   </PermissionProvider>
-                  {allowDeleteInq && (
+                  <PermissionProvider
+                    action={PERMISSION.INQUIRY_DELETE_INQUIRY}
+                    extraCondition={allowDeleteInq}
+                  >
                     <Tooltip title="Delete Inquiry">
                       <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion()}>
                         <img
@@ -985,7 +993,7 @@ const InquiryViewer = (props) => {
                         />
                       </div>
                     </Tooltip>
-                  )}
+                  </PermissionProvider>
                 </div>
               ) : (
                 <div className='flex' style={{ alignItems: 'center' }}>
@@ -1051,19 +1059,32 @@ const InquiryViewer = (props) => {
               )}
             </div>
             <Typography variant="h5">{question.name}</Typography>
-            <Typography
-              className={viewDropDown !== question.id ? classes.hideText : ''}
-              variant="h5"
-              id={question.id}
-              style={{
-                wordBreak: 'break-word',
-                fontFamily: 'Montserrat',
-                fontSize: 15,
-                color: '#132535',
-                whiteSpace: 'pre-wrap'
-              }}>
-              {question.content}
-            </Typography>
+            {
+              ['COMPL', 'UPLOADED'].includes(question.state) && containerCheck.includes(question.field) ? (
+                <ContainerDetailForm
+                  container={
+                    question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                  }
+                  question={question}
+                  setTextResolve={setTextResolve}
+                  disableInuput={true}
+                />
+              ) :
+                <Typography
+                  className={viewDropDown !== question.id ? classes.hideText : ''}
+                  variant="h5"
+                  id={question.id}
+                  style={{
+                    wordBreak: 'break-word',
+                    fontFamily: 'Montserrat',
+                    fontSize: 15,
+                    color: '#132535',
+                    whiteSpace: 'pre-wrap'
+                  }}>
+                  {question.content}
+                </Typography>
+            }
+
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
@@ -1114,8 +1135,7 @@ const InquiryViewer = (props) => {
                   </Grid>
                 )}
               </Grid>
-              {/* TODO: */}
-              {/* <PermissionProvider
+              <PermissionProvider
                 action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
                 extraCondition={question.state === 'COMPL' || question.state === 'RESOLVED'}
               >
@@ -1130,7 +1150,7 @@ const InquiryViewer = (props) => {
                     ReOpen
                   </Button>
                 </div>
-              </PermissionProvider> */}
+              </PermissionProvider>
 
               {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} />
@@ -1312,7 +1332,7 @@ const InquiryViewer = (props) => {
                           variant="contained"
                           color="primary"
                           onClick={onSaveReply}
-                          disabled={!tempReply?.answer?.content || disableSaveReply}
+                          disabled={(!tempReply?.answer?.content && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0)) || disableSaveReply}
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
                         </Button>
@@ -1351,7 +1371,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-const ContainerDetailForm = ({ container, question, setTextResolve }) => {
+const ContainerDetailForm = ({ container, question, setTextResolve, disableInuput = false }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -1429,7 +1449,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
           type = typeList[typeList.length - 1];
         }
         let hasData = false;
-        td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: 1 }}>
+        td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: type === typeList[0] ? 10 : 5 }}>
           <input
             className={clsx(classes.text)}
             style={{
@@ -1451,7 +1471,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve }) => {
               if (rowIndex - 1 < item.value.length) {
                 nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
               }
-              const disabled = rowIndex > 0 && nodeValue ? false : true;
+              const disabled = !(rowIndex > 0 && nodeValue && !disableInuput);
               return (
                 <input
                   className={clsx(classes.text)}

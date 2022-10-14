@@ -303,7 +303,7 @@ const BLField = (props) => {
                     !questionIsEmpty && !hasAnswer && (
                       <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
                     )}
-                  {!questionIsEmpty && hasAnswer && (
+                  {!questionIsEmpty && hasAnswer && !isResolved && (
                     <ReplyIcon className={clsx(classes.sizeIcon, classes.colorHasAnswer)} />
                   )}
 

@@ -5,6 +5,7 @@ import {
   Card,
   Typography,
   Divider,
+  Link
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
@@ -90,9 +91,6 @@ const useStyles = makeStyles((theme) => ({
       borderColor: '#2F80ED'
     }
   },
-  boxHasComment: {
-    borderColor: '#2F80ED'
-  },
   backgroundConfirm: {
     top: 74,
     left: 0,
@@ -127,14 +125,39 @@ const useStyles = makeStyles((theme) => ({
         borderRadius: 6
       }
     },
-  }
+  },
+  firstSentence: {
+    position: 'relative',
+    color: '#BD0F72',
+    fontSize: 16,
+    fontWeight: 600,
+    lineHeight: '20px',
+    paddingLeft: 11.67,
+    '&:before': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      transform: 'translateX(-50%)',
+      width: 16.67,
+      height: 16.67,
+      content: '""',
+      backgroundImage: 'url("assets/images/icons/warning.svg")',
+      backgroundSize: 'cover'
+    }
+  },
+  secondSentence: {
+    color: '#132535',
+    fontSize: 15,
+    lineHeight: '18px',
+    marginTop: 10,
+    display: 'block',
+    fontWeight: 500,
+  },
 }));
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
   const { receiver, openInquiryReview, field } = props;
   const classes = useStyles();
-  const [viewDropDown, setViewDropDown] = useState('');
-  const [inqHasComment, setInqHasComment] = useState([]);
   const [isSaved, setSaved] = useState(false);
   const [inquiryCopy, currentEditInq, metadata, isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
@@ -142,7 +165,7 @@ const AllInquiry = (props) => {
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.isShowBackground,
   ]);
-  const inquiries = openInquiryReview ? inquiryCopy.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_DRF') : inquiryCopy 
+  const inquiries = openInquiryReview ? inquiryCopy.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF') : inquiryCopy
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
@@ -154,9 +177,7 @@ const AllInquiry = (props) => {
     if (index >= 0) {
       const inqEdit = JSON.parse(JSON.stringify(inq));
       dispatch(InquiryActions.setEditInq(inqEdit));
-
       dispatch(InquiryActions.setField(inq.field));
-      setViewDropDown('');
     }
   };
 
@@ -230,6 +251,28 @@ const AllInquiry = (props) => {
 
   return (
     <>
+      {openInquiryReview && !inquiries.length &&
+        <div style={{ textAlign: 'center', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+          {inquiryCopy.length ?
+            <>
+              <span className={classes.firstSentence}>
+                All Inquiries were sent.
+              </span>
+              <span className={classes.secondSentence}>Go to&nbsp;
+                <Link
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    dispatch(FormActions.toggleAllInquiry(true))
+                    dispatch(FormActions.toggleOpenEmail(false))
+                  }}>Inquiries List</Link>  to view detail</span>
+            </> :
+            <>
+              <span className={classes.firstSentence}>No Inquiries Right Now!</span>
+              <span className={classes.secondSentence}>Please add an inquiry for missing information.</span>
+            </>
+          }
+        </div>
+      }
       <div className='inquiryList' style={{
         padding: isShowBackground && '8px 24px',
         marginTop: isShowBackground && '2rem'
@@ -257,8 +300,7 @@ const AllInquiry = (props) => {
                   className={clsx(
                     classes.boxItem,
                     (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
-                    inqHasComment.includes(q.id) && classes.boxHasComment,
-                    sentStatus.includes(q.state) && 'offshoreReply'
+                    [...sentStatus, ...['REP_DRF']].includes(q.state) && 'offshoreReply'
                   )}>
                   <div style={{ marginBottom: '12px' }}>
                     <Typography color="primary" variant="h5" className={classes.inqTitle}>
@@ -283,7 +325,6 @@ const AllInquiry = (props) => {
                     classes.boxItem,
                     (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
                     !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(q.state) && 'customerReply',
-                    inqHasComment.includes(q.id) && classes.boxHasComment
                   )}>
                   <div style={{ marginBottom: '12px' }}>
                     <Typography color="primary" variant="h5" className={classes.inqTitle}>

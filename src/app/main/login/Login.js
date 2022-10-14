@@ -62,6 +62,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Login(props) {
   const { history, location } = props;
+  const { cachePath, cacheSearch } = location;
   const dispatch = useDispatch();
   const classes = useStyles();
   const user = useSelector(({ user }) => user);
@@ -87,9 +88,9 @@ function Login(props) {
           localStorage.setItem('USER', JSON.stringify(userInfo));
 
           dispatch(Actions.setUser(payload));
+          dispatch(Actions.checkAuthToken(true));
           dispatch(Actions.showMessage({ message: message, variant: 'success' }));
 
-          const { cachePath, cacheSearch } = location;
           history.push(cachePath ? `${cachePath + cacheSearch}` : '/');
         }
       })
@@ -129,7 +130,7 @@ function Login(props) {
                 </Typography>
                 {isLoginTabViewed ? (
                   <>
-                    <JWTLoginTab onLogged={handleLogin} />
+                    <JWTLoginTab onLogged={handleLogin} country={new URLSearchParams(cacheSearch).get('cntr')} />
                     {/* <div className="flex flex-col items-center justify-center pt-32">
                       <a
                         className="font-medium text-primary"
