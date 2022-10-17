@@ -195,7 +195,6 @@ const BLWorkspace = (props) => {
     dispatch(DraftActions.setProcess(props.process));
 
     const socket = initiateSocketConnection();
-    console.log('init socket', socket);
     const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) {
       dispatch(Actions.initBL(bkgNo));

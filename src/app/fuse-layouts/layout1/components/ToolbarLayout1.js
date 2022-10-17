@@ -409,7 +409,7 @@ function ToolbarLayout1(props) {
 
             <PermissionProvider
               action={PERMISSION.VIEW_SHOW_USER_MENU}
-              extraCondition={pathname.includes('/workspace')}
+              extraCondition={!pathname.includes('/guest')}
             >
               <UserProfile classes={classes} history={history} />
             </PermissionProvider>
