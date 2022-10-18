@@ -1445,7 +1445,10 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
     setValues(temp);
     setTextResolve(temp);
   };
-
+  
+  useEffect(() => {
+    setValues(getValueField(container) || [{}]);
+  }, [content]);
   /**
  * @description
  * Takes an Array<V>, and a grouping function,
