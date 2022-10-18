@@ -791,7 +791,7 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) { // Create amendment / reply
         const reqReply = {
           field: question.field,
-          content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
+          content: { content: tempReply.answer?.content || '', mediaFile: mediaListAmendment },
           mybl: myBL.id
         };
         saveEditedField({ ...reqReply })
