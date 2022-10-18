@@ -135,8 +135,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BLField = (props) => {
-  const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
-  const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
   const classes = useStyles();
   const dispatch = useDispatch();
   const { children, width, multiline, rows, selectedChoice, id, lock, readOnly, disableClick } = props;
@@ -152,6 +150,9 @@ const BLField = (props) => {
   const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+
+  const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
+  const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
   const onMouseEnter = (e) => {
     if (questionIsEmpty) setAnchorEl(e.currentTarget);
