@@ -134,10 +134,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
-const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
-
 const BLField = (props) => {
+  const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
+  const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
   const classes = useStyles();
   const dispatch = useDispatch();
   const { children, width, multiline, rows, selectedChoice, id, lock, readOnly, disableClick } = props;
@@ -179,9 +178,9 @@ const BLField = (props) => {
 
   const onClick = (e) => {
     if (!disableClick) {
-      if (questionIsEmpty) {
+      if (questionIsEmpty && allowAddInquiry) {
         dispatch(InquiryActions.addQuestion(id));
-      } else {
+      } else if (!questionIsEmpty) {
         const currentInq = inquiries.find((q) => q.field === id);
         dispatch(InquiryActions.setOneInq(currentInq));
       }
