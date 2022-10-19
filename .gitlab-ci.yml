@@ -7,6 +7,7 @@ deploy_test:
   only:
     - "develop"
   when: manual
+  allow_failure: false
   environment:
     name: test
     url: http://stg-mybl.cyberlogitec.com.vn:8000
@@ -19,6 +20,7 @@ deploy_staging:
   only:
     - "test"
   when: manual
+  allow_failure: false
   environment:
     name: staging
     url: http://blink-stg.one-line.com

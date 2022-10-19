@@ -134,9 +134,6 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
-const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
-
 const BLField = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -153,6 +150,9 @@ const BLField = (props) => {
   const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+
+  const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
+  const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
   const onMouseEnter = (e) => {
     if (questionIsEmpty) setAnchorEl(e.currentTarget);
@@ -179,9 +179,9 @@ const BLField = (props) => {
 
   const onClick = (e) => {
     if (!disableClick) {
-      if (questionIsEmpty) {
+      if (questionIsEmpty && allowAddInquiry) {
         dispatch(InquiryActions.addQuestion(id));
-      } else {
+      } else if (!questionIsEmpty) {
         const currentInq = inquiries.find((q) => q.field === id);
         dispatch(InquiryActions.setOneInq(currentInq));
       }

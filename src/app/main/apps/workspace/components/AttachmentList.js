@@ -16,6 +16,7 @@ import { updateInquiryAttachment, removeMultipleMedia, replaceFile, addNewMedia 
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { handleDuplicateAttachment } from '@shared/handleError';
+import { getCommentDraftBl } from "app/services/draftblService";
 import Checkbox from "@material-ui/core/Checkbox";
 import clsx from "clsx";
 
@@ -182,6 +183,7 @@ const AttachmentList = (props) => {
   const [isShowConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const isAllSelected = attachmentFiles.length > 0 && selectedIndexFile.length === attachmentFiles.length;
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   const styles = (validationAttachment, width) => {
     return {
@@ -225,8 +227,8 @@ const AttachmentList = (props) => {
   useEffect(() => {
     let getAttachmentFiles = [];
     let combineFieldType = [];
-
     inquiries.forEach((e) => {
+      
       const mediaFile = e.mediaFile.map((f) => {
         return {
           ...f,
@@ -236,6 +238,29 @@ const AttachmentList = (props) => {
         };
       });
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
+      
+      getCommentDraftBl(myBL.id, e.field).then((res) => {
+        if (res.length > 0) {
+          res.forEach((r) => {
+            const attachmentAmendment = r.content.mediaFile.map ((f) => {
+              return {
+                ...f,
+                field: e.field,
+                inquiryId: e.id,
+                inqType: e.inqType,
+              }
+            })
+            // if reply file in attachment of inquiry -> not add file to att list
+            attachmentAmendment.forEach(att => {
+              const fileNameList = getAttachmentFiles.map((item) => {
+                if (item.inqType === e.inqType) return item.name
+              })
+              if (att && !e.inqType && !fileNameList.includes(att.name)) getAttachmentFiles.push(att)
+            })
+          })
+        }
+      })
+
       loadComment(e.id).then((res) => {
         if (res.length > 0){
           res.forEach((r) => {
