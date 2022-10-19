@@ -131,20 +131,13 @@ const BLWorkspace = (props) => {
     return () => window.removeEventListener('beforeunload', unloadCallback);
   }, [isLoading]);
 
-  useEffect(() => {
-    setInterval(() => {
-      if (myBL.id && transAutoSaveStatus === 'start') {
-        dispatch(TransActions.BlTrans(myBL.id, content));
-      }
-    }, 60000);
-  }, [transAutoSaveStatus, myBL]);
 
   const checkBLSameRequest = async (socket, bl) => {
     if (bl && userInfo) {
       socket.emit('user_processing_in', {
         mybl: bl,
         type: 'warning_duplicate',
-        email: userInfo.email,
+        userName: userInfo.displayName,
         role: userInfo.role,
       });
       console.log(`socket.emit('user_processing_in'):`)
@@ -157,7 +150,7 @@ const BLWorkspace = (props) => {
         let excludeFirstUser = false;
         if (data.processingBy.length > 1) {
           data.processingBy.forEach((p) => {
-            if (userInfo.email === data.processingBy[0]) {
+            if (userInfo.displayName === data.processingBy[0]) {
               excludeFirstUser = true;
             }
           });
@@ -168,7 +161,7 @@ const BLWorkspace = (props) => {
               permissions: permissionViewer
             };
             // show popup for lastest user
-            if (userInfo.email === data.processingBy[data.processingBy.length - 1]) {
+            if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
               dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
             }
           } else {
@@ -405,13 +398,13 @@ const BLWorkspace = (props) => {
     } else if (openNotificationAmendment) {
       return 'Your amendment has been deleted.'
     } else if (openNotificationBLWarning.status) {
-      return `The BL is opening by ${openNotificationBLWarning.userName} .Please wait for ${openNotificationBLWarning.userName} complete his/her work`
+      return `The BL is opening by ${openNotificationBLWarning.userName}.`
     }
   };
 
   const renderIconType = () => {
     if (openNotificationBLWarning.status) {
-      return <img src={`/assets/images/icons/warning.svg`} />;
+      return <img style={{ verticalAlign: 'middle' }} src={`/assets/images/icons/warning.svg`} />;
     } else if (openNotification || openNotificationReply || openNotificationAmendment) {
       return <img src={`/assets/images/icons/vector.svg`} />;
     }
@@ -424,6 +417,7 @@ const BLWorkspace = (props) => {
       <SubmitAnswerNotification
         open={openNotification || openNotificationReply || openNotificationAmendment || openNotificationBLWarning.status}
         msg={renderMsgNoti()}
+        msg2={`Please wait for ${openNotificationBLWarning.userName} complete his/her work!`}
         iconType={renderIconType()}
         handleClose={() => {
           dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false));
