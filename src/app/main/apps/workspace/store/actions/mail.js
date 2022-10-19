@@ -1,6 +1,7 @@
-import { sendmail, getSuggestMail } from 'app/services/mailService';
+import { sendmail, getSuggestMail , getMail } from 'app/services/mailService';
 import { loadComment } from 'app/services/inquiryService';
 import axios from 'axios';
+import { VESSEL_VOYAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY } from '@shared/keyword';
 
 import { loadInquiry } from '../actions';
 import * as InquiryActions from '../actions/inquiry';
@@ -16,6 +17,9 @@ export const SUGGEST_MAIL_SUCCESS = 'SUGGEST_MAIL_SUCCESS';
 
 export const VALIDATE_MAIL = 'VALIDATE_MAIL';
 export const SET_TAGS = 'SET_TAGS'
+
+export const SENDMAIL_SET_FORM = 'SENDMAIL_SET_FORM'
+
 
 export const sendMail =
   ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, inquiries }) =>
@@ -80,3 +84,55 @@ export function setTags(state) {
     state: state
   };
 }
+
+export const autoSendMail = (mybl, inquiries, metadata, content, form) => async (dispatch) => {
+  const checkNewInquiry = (type) => {
+    const list = []
+    const temp = inquiries.filter(inq => inq.receiver[0] === type && (inq.state === 'OPEN' || inq.state === 'REP_DRF'))
+    if (temp.length) {
+      const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      sortDateList.forEach(inq => {
+        const find = metadata.field_options.find(field => field.value === inq.field)
+        if (!list.includes(find.label)) list.push(find.label)
+      })
+    }
+    return list
+  }
+  const getField = (keyword) => {
+    return metadata.field?.[keyword] || '';
+  };
+ 
+  const getValueField = (content, keyword) => {
+    return content[getField(keyword)] || ''
+  };
+  const cloneInquiries = [...inquiries];
+  cloneInquiries.forEach(q => {
+    if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
+    else if (q.state === 'REP_Q_DRF') q.state = 'REP_Q_SENT'; // inquiry
+    else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
+  });
+
+  const inqCustomer = checkNewInquiry('customer');
+  const inqOnshore = checkNewInquiry('onshore');
+  let subjectOns = ''
+  let contentOns = ''
+  let subjectCus = ''
+  let contentCus = ''
+  const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
+  const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
+  const vvd = getValueField(content, VESSEL_VOYAGE)
+  const pod = getValueField(content, PORT_OF_DISCHARGE)
+  const del = getValueField(content, PLACE_OF_DELIVERY)
+  const bkgNo = mybl.bkgNo
+  dispatch(InquiryActions.setInquiries(cloneInquiries));
+  if (hasOnshore) {
+    subjectOns = `[Alert Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
+    contentOns = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`
+    dispatch(sendMail({ myblId: mybl.id, ...form, subject: subjectOns, content: contentOns, inquiries: inquiries }));
+  }
+  if (hasCustomer) {
+    subjectCus = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
+    contentCus = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer.join(', ')}]`
+    dispatch(sendMail({ myblId: mybl.id, ...form, subject: subjectCus, content: contentCus, inquiries: inquiries }));
+  }
+};
