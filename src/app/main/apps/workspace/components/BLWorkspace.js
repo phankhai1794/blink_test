@@ -20,6 +20,7 @@ import * as FormActions from '../store/actions/form';
 import * as TransActions from '../store/actions/transaction';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as DraftActions from '../store/actions/draft-bl';
+import * as mailActions from '../store/actions/mail';
 
 import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
@@ -91,6 +92,8 @@ const BLWorkspace = (props) => {
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const openAmendmentForm = useSelector(({ workspace }) => workspace.formReducer.openAmendmentForm);
   const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
+  const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
+  const [confirmClick, form] = useSelector(({ workspace }) => [workspace.formReducer.confirmClick, workspace.formReducer.form]);
 
   const transAutoSaveStatus = useSelector(
     ({ workspace }) => workspace.transReducer.transAutoSaveStatus
@@ -118,6 +121,21 @@ const BLWorkspace = (props) => {
   const getValueField = (keyword) => {
     return content[getField(keyword)] || '';
   };
+
+  useEffect(() => {
+    if (confirmClick && confirmPopupType === 'autoSendMail') {
+      dispatch(
+        FormActions.openConfirmPopup({
+          openConfirmPopup: false,
+          confirmClick: false,
+          confirmPopupMsg: '',
+          form: {},
+          confirmPopupType: ''
+        })
+      );
+      dispatch(mailActions.autoSendMail(myBL,inquiries, metadata, content, form ));
+    }
+  }, [confirmClick, form])
 
   useEffect(() => {
     const unloadCallback = (event) => {
