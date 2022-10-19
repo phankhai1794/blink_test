@@ -115,6 +115,7 @@ const useStyles = makeStyles((theme) => ({
   },
   text: {
     height: 40,
+    width: 158,
     border: '1px solid #BAC3CB',
     textAlign: 'center',
     color: '#132535'
