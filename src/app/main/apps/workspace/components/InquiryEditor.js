@@ -119,8 +119,7 @@ const InquiryEditor = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-
-  const [fieldType, setFieldType] = useState(metadata.field_options);
+  const [fieldType, setFieldType] = useState(metadata.field_options.filter(data => !['vvdCode', 'podCode', 'delCode'].includes(data.keyword)));
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
   );
@@ -579,23 +578,23 @@ const InquiryEditor = (props) => {
               ))}
           </>
           <>{user.role !== 'Admin' &&
-              <>
-                {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-                {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach
-                        file={file}
-                        field={currentEditInq.field}
-                        style={{ margin: '2.5rem' }}
-                        isAnswer={true}
-                      />
-                    ) : (
-                      <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
-                    )}
-                  </div>
-                ))}
-              </>
+            <>
+              {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+              {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
+                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                    <ImageAttach
+                      file={file}
+                      field={currentEditInq.field}
+                      style={{ margin: '2.5rem' }}
+                      isAnswer={true}
+                    />
+                  ) : (
+                    <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
+                  )}
+                </div>
+              ))}
+            </>
           }
           </>
           <div className="flex">

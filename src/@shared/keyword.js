@@ -79,3 +79,9 @@ export const PREPAID = 'prepaid';
 export const COLLECT = 'collect';
 
 export const DATED = 'dated';
+
+export const VVD_CODE = 'vvdCode';
+
+export const POD_CODE = 'podCode';
+
+export const DEL_CODE = 'delCode';
