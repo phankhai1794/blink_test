@@ -1,9 +1,8 @@
 import { sendmail, getSuggestMail , getMail } from 'app/services/mailService';
 import { loadComment } from 'app/services/inquiryService';
 import axios from 'axios';
-import { VESSEL_VOYAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY } from '@shared/keyword';
+import { VVD_CODE, POD_CODE, DEL_CODE } from '@shared/keyword';
 
-import { loadInquiry } from '../actions';
 import * as InquiryActions from '../actions/inquiry';
 
 export const SENDMAIL_NONE = 'SENDMAIL_NONE';
@@ -120,9 +119,9 @@ export const autoSendMail = (mybl, inquiries, metadata, content, form) => async 
   let contentCus = ''
   const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
   const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
-  const vvd = getValueField(content, VESSEL_VOYAGE)
-  const pod = getValueField(content, PORT_OF_DISCHARGE)
-  const del = getValueField(content, PLACE_OF_DELIVERY)
+  const vvd = getValueField(content, VVD_CODE)
+  const pod = getValueField(content, POD_CODE)
+  const del = getValueField(content, DEL_CODE)
   const bkgNo = mybl.bkgNo
   dispatch(InquiryActions.setInquiries(cloneInquiries));
   if (hasOnshore) {
