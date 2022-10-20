@@ -947,7 +947,7 @@ const InquiryViewer = (props) => {
             <div style={{ paddingTop: 10 }} className="flex justify-between">
               <UserInfo
                 name={question.creator?.userName}
-                time={displayTime(question.createdAt)}
+                time={displayTime(question.updatedAt || question.createdAt)}
                 avatar={question.creator.avatar}
               />
               {user.role === 'Admin' ? ( // TODO
