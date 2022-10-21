@@ -267,7 +267,8 @@ const InquiryViewer = (props) => {
                 lastest.showIconReply = true;
               } else {
                 if (lastest.state === 'REP_Q_DRF') {
-                  setSubmitLabel(true)
+                  setSubmitLabel(true);
+                  lastest.showIconEdit = true;
                 }
               }
               setQuestion(lastest);
@@ -437,7 +438,8 @@ const InquiryViewer = (props) => {
     optionsInquires.forEach(op => {
       if (['OPEN', 'INQ_SENT', 'AME_SENT'].includes(op.state)) {
         op.showIconReply = true;
-      } else if (['ANS_DRF'].includes(op.state)) {
+        op.showIconEditInq = true;
+      } else if (['ANS_DRF', 'ANS_SENT'].includes(op.state)) {
         op.showIconEdit = true;
       }
     });
@@ -455,12 +457,18 @@ const InquiryViewer = (props) => {
     if (currentDate.getTime() <= addMinutes.getTime()) {
       delayTiming = Math.abs(addMinutes-currentDate);
       if (user.role === 'Admin') {
-        setStateReplyDraft(true);
+        if (['REP_Q_SENT'].includes(question.state)) {
+          setStateReplyDraft(true);
+        } else if (['ANS_DRF', 'INQ_SENT'].includes(question.state)) {
+          question.showIconEditInq = true
+        }
       }
       // const testMinutes = Math.round(delayTiming / (60 * 1000));
     } else if (addMinutes.getTime() <= currentDate.getTime()) {
       if (user.role === 'Guest') {
         question.showIconEdit = false;
+      } else if (user.role === 'Admin') {
+        question.showIconEditInq = false;
       }
       setStateReplyDraft(false);
       setTempReply({})
@@ -472,27 +480,36 @@ const InquiryViewer = (props) => {
     question?.state !== 'OPEN' && setAllowDeleteInq(false);
     //
     const delayMin = process.env.REACT_APP_EDIT_REPLY_DELAY_TIME;
+    // const delayMin = 80;
+    // console.log(question)
     // current date
     let currentDate = new Date();
-    // add 15min
-    let updatedDate = new Date(question.updatedAt);
-    let addMinutes = new Date(updatedDate.getTime() + delayMin * 60 * 1000);
     //
     let delayTiming = 0;
-    if (user.role === 'Admin' && ['REP_Q_SENT'].includes(question.state)) {
+    if (user.role === 'Admin' && ['REP_Q_SENT', 'INQ_SENT', 'ANS_DRF'].includes(question.state)) {
+      // add 15min
+      let updatedDate = new Date(question.lastEmail);
+      let addMinutes = new Date(updatedDate.getTime() + delayMin * 60 * 1000);
       delayTiming = delayTime(currentDate, addMinutes);
       // console.log(delayTiming);
-    } else if (user.role === 'Guest' && ['REP_A_SENT'].includes(question.state)) {
+    } else if (user.role === 'Guest' && ['REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) {
+      // add 15min
+      let updatedDate = new Date(question.updatedAt);
+      let addMinutes = new Date(updatedDate.getTime() + delayMin * 60 * 1000);
       delayTiming = delayTime(currentDate, addMinutes);
       // console.log(delayTiming);
     }
     let myInterval;
     if (delayTiming !== 0) {
       myInterval = setInterval(() => {
+        const opQuestion = {...question};
         if (user.role === 'Guest') {
-          question.showIconEdit = false;
+          opQuestion.showIconEdit = false;
+        } else if (user.role === 'Admin') {
+          opQuestion.showIconEditInq = false;
         }
         setStateReplyDraft(false);
+        setQuestion(opQuestion);
       }, delayTiming);
     }
     return () => {
@@ -857,7 +874,7 @@ const InquiryViewer = (props) => {
     const reply = { ...question };
     reply.showIconEdit = false;
     reply.showIconReply = false;
-    if (['ANS_DRF', 'ANS_SENT'].includes(question.state)) {
+    if (['ANS_DRF', 'ANS_SENT'].includes(question.state) || (user.role === 'Guest' && ['REP_Q_DRF'].includes(question.state))) {
       optionsInquires[editedIndex].showIconEdit = false;
       optionsInquires[editedIndex].showIconReply = false;
       optionsInquires[editedIndex].showIconAttachReplyFile = false;
@@ -1016,7 +1033,7 @@ const InquiryViewer = (props) => {
                   </div>
                   <PermissionProvider
                     action={PERMISSION.VIEW_EDIT_INQUIRY}
-                    extraCondition={question.state === 'OPEN'}>
+                    extraCondition={['OPEN', 'INQ_SENT', 'ANS_DRF'].includes(question.state) && question.showIconEditInq}>
                     <Tooltip title="Edit Inquiry">
                       <div onClick={() => changeToEditor(question)}>
                         <img
@@ -1049,7 +1066,7 @@ const InquiryViewer = (props) => {
                       <span className={classes.labelStatus}>Submitted</span>
                     )}
                   </div>
-                  {(((['ANS_DRF', 'REP_A_SENT'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
+                  {(((['ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
                     <>
                       <Tooltip title={'Edit'}>
                         <div onClick={() => handleEdit(question)}>
@@ -1132,7 +1149,7 @@ const InquiryViewer = (props) => {
 
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
-                ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
+                ((['OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
                   <ChoiceAnswer
                     questions={inquiries}
@@ -1142,7 +1159,7 @@ const InquiryViewer = (props) => {
                     currentQuestion={currentQuestion}
                   />
                 )}
-              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
+              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
                   <ParagraphAnswer
                     question={question}

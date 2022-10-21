@@ -480,6 +480,7 @@ const InquiryEditor = (props) => {
                 <FuseChipSelect
                   customStyle={styles(fullscreen ? 320 : 295)}
                   value={fieldValue}
+                  isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleFieldChange}
                   placeholder="Select Field Type"
                   textFieldProps={{
@@ -500,6 +501,7 @@ const InquiryEditor = (props) => {
                 <FuseChipSelect
                   value={valueType}
                   customStyle={styles(fullscreen ? 330 : 295)}
+                  isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleTypeChange}
                   placeholder="Type of Inquiry"
                   textFieldProps={{
@@ -520,6 +522,7 @@ const InquiryEditor = (props) => {
                 <FuseChipSelect
                   value={valueAnsType}
                   customStyle={styles(fullscreen ? 330 : 295)}
+                  isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleAnswerTypeChange}
                   placeholder="Type of Question"
                   textFieldProps={{

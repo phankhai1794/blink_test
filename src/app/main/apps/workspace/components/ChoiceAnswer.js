@@ -14,7 +14,7 @@ const ChoiceAnswer = (props) => {
   const { question, questions, disableChecked, disable = false, saveStatus, currentQuestion } = props;
   const user = useSelector(({ user }) => user);
   let questionIsEmpty = props.question === undefined;
-  let prevChoiceArray = (user.role === 'Admin' && !["ANS_SENT", "REP_A_SENT", "COMPL"].includes(question.state))? []: question.answerObj.filter((choice) => {
+  let prevChoiceArray = (user.role === 'Admin' && !["REP_A_SENT", "COMPL"].includes(question.state))? []: question.answerObj.filter((choice) => {
     return choice.confirmed;
   });
   const [isPermission, setPermission] = useState(false);
@@ -51,15 +51,22 @@ const ChoiceAnswer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     optionsInquires[editedIndex].selectChoice = selectedObj;
     dispatch(InquiryActions.setInquiries(optionsInquires));
+    //
   };
 
   useEffect(() => {
-    if (allowUpdateChoiceAnswer && !['ANS_SENT', 'REP_Q_DRF'].includes(question.state)) {
+    if (allowUpdateChoiceAnswer) {
       setPermission(true);
     } else {
       setPermission(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!questionIsEmpty && prevChoiceArray.length > 0) {
+      setSelectedChoice(prevChoiceArray[0].id);
+    }
+  }, [question]);
 
   return (
     <>
