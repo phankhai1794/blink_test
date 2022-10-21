@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, {useRef, useState} from 'react';
 import { FusePageSimple } from '@fuse';
 
 import OtpCheck from '../OTPCheck';
@@ -8,6 +8,14 @@ import BLWorkspace from './components/BLWorkspace';
 function GuestWorkspaceApp() {
   const bl = new URLSearchParams(window.location.search).get('bl');
   const pageLayout = useRef(null);
+
+  (() => {
+    window.onpageshow = function(event) {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    };
+  })();
 
   return (
     <OtpCheck>

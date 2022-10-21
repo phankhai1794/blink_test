@@ -212,16 +212,16 @@ const BLWorkspace = (props) => {
       checkBLSameRequest(socket, bkgNo);
     }
     else if (props.myBL) {
+      checkBLSameRequest(socket, props.myBL?.id);
       getBlInfo(props.myBL?.id).then(res => {
         const { id, state, bkgNo } = res.myBL;
         dispatch(InquiryActions.setMyBL({ id, state, bkgNo }));
-        checkBLSameRequest(socket, bkgNo);
       });
     }
 
     return () => {
-      dispatch(FormActions.toggleReload());
       disconnectSocket(socket);
+      dispatch(FormActions.toggleReload());
 
       if (userInfo && userInfo.role === 'Admin') {
         getPermissionByRole('Admin').then(data => {
