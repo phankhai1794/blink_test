@@ -41,6 +41,14 @@ const AttachFile = (props) => {
     else if (isAnswer) {
       const optionsInquires = [...questions];
       const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+      if (optionsInquires[editedIndex].selectChoice) {
+        optionsInquires[editedIndex].answerObj.forEach((item, i) => {
+          optionsInquires[editedIndex].answerObj[i].confirmed = false;
+        });
+        const answerIndex = optionsInquires[editedIndex].answerObj.findIndex(item => item.id === optionsInquires[editedIndex].selectChoice.answer);
+        const answerUpdate = optionsInquires[editedIndex].answerObj[answerIndex];
+        answerUpdate.confirmed = true;
+      }
       if (checkDuplicate(optionsInquires[editedIndex].mediaFilesAnswer, files)) {
         dispatch(AppAction.showMessage({
           message: `Duplicate file(s)`,

@@ -95,6 +95,7 @@ const PopupConfirmSubmit = (props) => {
     }
     dispatch(InquiryActions.checkSubmit(false));
     dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
+    dispatch(FormActions.toggleReload());
   };
 
   const handleCancelConfirm = () => {

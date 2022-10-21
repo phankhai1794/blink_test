@@ -4,6 +4,7 @@ import axios from 'axios';
 import { VVD_CODE, POD_CODE, DEL_CODE } from '@shared/keyword';
 
 import * as InquiryActions from '../actions/inquiry';
+import * as Actions from "../../../draft-bl/store/actions";
 
 export const SENDMAIL_NONE = 'SENDMAIL_NONE';
 export const SENDMAIL_LOADING = 'SENDMAIL_LOADING';
@@ -32,6 +33,7 @@ export const sendMail =
         .then((res) => {
           if (res.status === 200) {
             dispatch(InquiryActions.checkSend(false));
+            dispatch(Actions.toggleReload());
             // dispatch(loadInquiry(myblId));
             return dispatch({
               type: SENDMAIL_SUCCESS
