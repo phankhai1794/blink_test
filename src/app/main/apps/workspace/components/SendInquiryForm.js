@@ -395,7 +395,8 @@ const SendInquiryForm = (props) => {
     <>
       <SubmitAnswerNotification
         open={openNotification}
-        msg='Your answer has been sent.'
+        iconType={<img src={`/assets/images/icons/vector.svg`} />}
+        msg='Your inquires have been sent successfully.'
         handleClose={() => setOpenNotification(false)}
       />
       <Form
