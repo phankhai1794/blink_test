@@ -81,6 +81,9 @@ const useStyles = makeStyles((theme) => ({
     borderLeft: '2px solid',
     borderColor: '#DC2626',
     paddingLeft: '2rem',
+    '&.uploaded': {
+      borderColor: '#00506D'
+    },
     '&.resolved': {
       borderColor: '#36B37E'
     },
@@ -299,7 +302,8 @@ const AllInquiry = (props) => {
                 <div
                   className={clsx(
                     classes.boxItem,
-                    (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
+                    (q.state === 'UPLOADED') && 'uploaded',
+                    ['COMPL', 'RESOLVED'].includes(q.state) && 'resolved',
                     [...sentStatus, ...['REP_DRF']].includes(q.state) && 'offshoreReply'
                   )}>
                   <div style={{ marginBottom: '12px' }}>
@@ -323,7 +327,8 @@ const AllInquiry = (props) => {
                 <div
                   className={clsx(
                     classes.boxItem,
-                    (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
+                    (q.state === 'UPLOADED') && 'uploaded',
+                    (q.state === 'COMPL') && 'resolved',
                     !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(q.state) && 'customerReply',
                   )}>
                   <div style={{ marginBottom: '12px' }}>

@@ -204,22 +204,17 @@ const InquiryViewer = (props) => {
               if (['REP_Q_DRF', 'REP_A_DRF'].includes(filterOffshoreSent.state)) {
                 setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
               }
-              //
               lastest.state = filterOffshoreSent.state;
               lastest.updatedAt = filterOffshoreSent.updatedAt;
               if (user.role === 'Admin') {
                 if (filterOffshoreSent.state === 'REP_Q_SENT') {
                   setShowLabelSent(true);
-                  //
                   setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                   setStateReplyDraft(true)
                 }
                 if (filterOffshoreSent.state === 'REP_A_SENT') {
                   lastest.showIconReply = true;
-                }
-                if (lastest.state !== 'UPLOADED' && filterOffshoreSent.state === 'COMPL') {
-                  lastest.state = filterOffshoreSent.state
                 }
               } else {
                 if (filterOffshoreSent.state === 'REP_A_DRF') {
@@ -646,13 +641,23 @@ const InquiryViewer = (props) => {
 
   const onUpload = () => {
     const optionsInquires = [...inquiries];
-    const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     uploadOPUS(question.id)
       .then(() => {
-        // dispatch(FormActions.toggleReload());
         setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
+
+        // Update list inquiry
+        let editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
         optionsInquires[editedIndex].state = 'UPLOADED';
         dispatch(InquiryActions.setInquiries(optionsInquires));
+
+        // Update list amendment
+        if (optionsInquires[editedIndex].process === 'draft') {
+          const optionAmendment = [...listCommentDraft];
+          editedIndex = optionAmendment.findIndex(ame => question.id === ame.id);
+          optionAmendment[editedIndex].state = 'UPLOADED';
+          dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+        }
+
         dispatch(
           AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' })
         );
@@ -978,7 +983,7 @@ const InquiryViewer = (props) => {
                   >
                     <div className='flex' style={{ alignItems: 'center' }}>
                       <div style={{ marginRight: 15 }}>
-                        <span className={classes.labelStatus}>Resolved</span>
+                        <span className={classes.labelStatus}>{question.state === 'UPLOADED' ? 'Uploaded' : 'Resolved'}</span>
                       </div>
                       <Button
                         disabled={question.state === 'UPLOADED'}
@@ -1063,11 +1068,12 @@ const InquiryViewer = (props) => {
               ) : (
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <div style={{ marginRight: 15 }}>
-                    {(['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state)) ? (
-                      <span className={classes.labelStatus}>Resolved</span>
-                    ) : (['ANS_SENT'].includes(question.state) || submitLabel) && (
-                      <span className={classes.labelStatus}>Submitted</span>
-                    )}
+                    {question.state === 'UPLOADED' ?
+                      <span className={classes.labelStatus}>Uploaded</span> :
+                      ['COMPL', 'RESOLVED'].includes(question.state) ?
+                        <span className={classes.labelStatus}>Resolved</span> :
+                        (['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>
+                    }
                   </div>
                   {(((['ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
                     <>
