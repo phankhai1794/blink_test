@@ -93,7 +93,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center'
   }
 }));
-const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
 
 const TableCM = (props) => {
   const { id, containerManifest } = props;
@@ -107,14 +106,17 @@ const TableCM = (props) => {
   const [isResolved, setIsResolved] = useState(false)
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
-  // const originalInquiry = useSelector(({ workspace }) => workspace.inquiryReducer.originalInquiry);
-  const questions = useSelector(({ workspace }) => workspace.inquiryReducer.question);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const user = useSelector(({ user }) => user);
+
+  const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
+  const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
   const checkAnswerSent = () => {
     if (inquiries.length > 0) {
       const lst = inquiries.filter((q) => q.field === id);
-      return lst.some(e => ['ANS_SENT','REP_Q_DRF','REP_Q_SENT','REP_A_DRF','REP_A_SENT'].includes(e.state))
+      return lst.some(e => ['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT'].includes(e.state))
     }
     return false;
   };
@@ -149,6 +151,12 @@ const TableCM = (props) => {
       }
       dispatch(FormActions.toggleCreateInquiry(true));
     }
+    else if (
+      allowCreateAmendment
+      && myBL?.state?.includes('DRF_')
+      && user.userType === 'CUSTOMER' // Allow only customer to create amendment
+    ) dispatch(FormActions.toggleCreateAmendment(true));
+
     dispatch(InquiryActions.setField(id));
   };
 
@@ -172,14 +180,16 @@ const TableCM = (props) => {
   return (
     <>
       <div className={clsx(classes.hoverIcon, `justify-self-end opacity-${(showIcons || !questionIsEmpty) ? '100' : '0'}`)}>
-        {!isResolved ?(
+        {!isResolved ? (
           !questionIsEmpty ?
             <>
               {!mediaFileIsEmpty && <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />}
               < HelpIcon className={clsx(classes.colorHasInqIcon)} />
             </>
-            : (allowAddInquiry &&<AddCircleIcon className={(showIcons ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon))}/> )
-          ):<><CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)}/></>
+            : (allowAddInquiry && <AddCircleIcon className={(showIcons ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon))} />)
+        ) : <>
+          <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)} />
+        </>
         }
       </div>
       <div className={clsx(!questionIsEmpty ? classes.hasInq : classes.enterTableFile, hasAnswer ? classes.hasAnswer : '',
@@ -198,7 +208,7 @@ const TableCM = (props) => {
             <Label className={clsx(classes.labelMargin)}>DESCRIPTION OF GOODS</Label>
           </Grid>
           <Grid container item xs={2} spacing={1}>
-            <Label className={clsx(classes.labelMargin)} style={{paddingLeft:'20%'}}>GROSS WEIGHT</Label>
+            <Label className={clsx(classes.labelMargin)} style={{ paddingLeft: '20%' }}>GROSS WEIGHT</Label>
           </Grid>
           <Grid container item xs={2} spacing={1}>
             <Label className={clsx(classes.labelMargin)}>GROSS MEASUREMENT</Label>
@@ -207,36 +217,36 @@ const TableCM = (props) => {
             containerManifest.map((cm, index) =>
               (<Grid container spacing={2} className='px-8 py-2' key={index}>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
+                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_PACKAGE]]}</BLField>
+                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_PACKAGE]]}</BLField>
                 </Grid>
                 <Grid item xs={4}>
-                  <BLField disableClick={true} multiline={true} rows={6} width='360px'>{cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}</BLField>
+                  <BLField multiline={true} rows={6} width='360px'>{cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}</BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_WEIGHT]]}</BLField>
+                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_WEIGHT]]}</BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]}</BLField>
+                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]}</BLField>
                 </Grid>
               </Grid>))
             : (<Grid container spacing={2} className='px-8 py-2'>
               <Grid item xs={2}>
-                <BLField disableClick={true}></BLField>
+                <BLField ></BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true}></BLField>
+                <BLField ></BLField>
               </Grid>
               <Grid item xs={4}>
-                <BLField disableClick={true} width='360px'> </BLField>
+                <BLField width='360px'> </BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true}></BLField>
+                <BLField ></BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true}></BLField>
+                <BLField ></BLField>
               </Grid>
             </Grid>)
           }

@@ -27,6 +27,9 @@ import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
+import ReactTable from "react-table";
+import "react-table/react-table.css";
+import $ from "jquery";
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -455,7 +458,7 @@ const InquiryViewer = (props) => {
   const delayTime = (currentDate, addMinutes) => {
     let delayTiming = 0;
     if (currentDate.getTime() <= addMinutes.getTime()) {
-      delayTiming = Math.abs(addMinutes-currentDate);
+      delayTiming = Math.abs(addMinutes - currentDate);
       if (user.role === 'Admin') {
         if (['REP_Q_SENT'].includes(question.state)) {
           setStateReplyDraft(true);
@@ -502,7 +505,7 @@ const InquiryViewer = (props) => {
     let myInterval;
     if (delayTiming !== 0) {
       myInterval = setInterval(() => {
-        const opQuestion = {...question};
+        const opQuestion = { ...question };
         if (user.role === 'Guest') {
           opQuestion.showIconEdit = false;
         } else if (user.role === 'Admin') {
@@ -1445,12 +1448,20 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
   const getField = (field) => {
     return metadata.field?.[field] || '';
   };
+
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
   };
+
+  const getTypeName = (type) => {
+    return Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === type);
+  };
+
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
+
+  const [tableScrollTop, setTableScrollTop] = useState(0);
   const [values, setValues] = useState(getValueField(container) || [{}]);
   const inqType = getLabelById(metadata['inq_type_options'], question.inqType);
   const cdType =
@@ -1463,10 +1474,11 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
     setValues(temp);
     setTextResolve(temp);
   };
-  
+
   useEffect(() => {
     setValues(getValueField(container) || [{}]);
   }, [content]);
+
   /**
  * @description
  * Takes an Array<V>, and a grouping function,
@@ -1480,6 +1492,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
  */
   // export function groupBy<K, V>(list: Array<V>, keyGetter: (input: V) => K): Map<K, Array<V>> {
   //    const map = new Map<K, Array<V>>();
+
   function groupBy(list, keyGetter) {
     const map = new Map();
     list.forEach(item => {
@@ -1494,6 +1507,53 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
     return map;
   }
 
+  function makeData(len = 5553) {
+    return values;
+  }
+
+  const renderNewTB = () => {
+    const columns = [];
+    for (var key in values[0]) {
+      if (columns.length == 0) {
+        columns.push({
+          Header: getTypeName(key),
+          accessor: key,
+          width: 200,
+          className: "cell_frozen",
+          headerClassName: "frozen"
+        });
+      } else {
+        columns.push({
+          Header: getTypeName(key),
+          accessor: key,
+          width: 200,
+          headerClassName: "header_layout"
+        });
+      }
+    }
+    columns.push(columns.shift());
+
+    return <ReactTable
+      data={makeData()}
+      defaultPageSize={values.length}
+      columns={columns}
+      showPagination={false}
+      // className="-striped -highlight"
+      getTableProps={() => {
+        return {
+          onScroll: e => {
+            if (tableScrollTop === e.target.scrollTop) {
+              let left = e.target.scrollLeft > 0 ? e.target.scrollLeft : 0;
+              $(".ReactTable .rt-tr .frozen").css({ left: left });
+              $(".ReactTable .rt-tr .cell_frozen").css({ left: left });
+            } else {
+              setTableScrollTop(e.target.scrollTop);
+            }
+          }
+        };
+      }}
+    />
+  }
   const renderTB = () => {
     let td = [];
     const valueCopy = JSON.parse(JSON.stringify(values));
@@ -1572,9 +1632,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
 
   return (
     <>
-      {
-        renderTB()
-      }
+      {renderNewTB()}
     </>
   );
 };

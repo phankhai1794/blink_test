@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField, updateDraftBLReply } from 'app/services/draftblService';
 import * as AppActions from 'app/store/actions';
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from '@shared/keyword';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -15,6 +16,7 @@ import UserInfo from './UserInfo';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import AttachFileAmendment from './AttachFileAmendment';
+import ContainerDetailForm from './ContainerDetailForm';
 
 const colorInq = '#DC2626';
 const white = '#FFFFFF';
@@ -46,6 +48,7 @@ const Amendment = ({ question }) => {
     workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.myBL
   ]);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
 
   const [attachments, setAttachments] = useState(question?.content?.mediaFile || []);
   const [fieldValue, setFieldValue] = useState("");
@@ -80,7 +83,7 @@ const Amendment = ({ question }) => {
           const mediaFileList = file.response.map((item) => { return { id: item.id, ext: item.ext, name: item.name } });
           mediaList.push(mediaFileList[0]);
         });
-        
+
         let service;
         // if (edit) service = updateDraftBLReply({ content: { content: fieldValue, mediaFile: mediaList } }, question.id);
         service = saveEditedField({ field: currentField, content: { content: fieldValue, mediaFile: mediaList }, mybl: myBL.id });
@@ -101,6 +104,12 @@ const Amendment = ({ question }) => {
     dispatch(InquiryActions.addAmendment());
     dispatch(FormActions.toggleCreateAmendment(false));
   }
+
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
   useEffect(() => {
     setFieldValue(content[currentField] || "");
@@ -130,7 +139,20 @@ const Amendment = ({ question }) => {
         />
         <AttachFileAmendment setAttachment={getAttachment} />
       </div>
-      <div className="flex" style={{ alignItems: 'flex-end', margin: '15px 0' }}>
+
+      {containerCheck.includes(currentField) ? (
+        <div style={{ margin: '15px 0' }}>
+          <ContainerDetailForm
+            container={
+              currentField === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+            }
+            fieldType={currentField === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
+            // question={question}
+            // setTextResolve={setTextResolve}
+            disableInuput={true}
+          />
+        </div>
+      ) : <div className="flex" style={{ alignItems: 'flex-end', margin: '15px 0' }}>
         <textarea
           style={{
             width: '100%',
@@ -150,6 +172,7 @@ const Amendment = ({ question }) => {
           onChange={handleChange}
         />
       </div>
+      }
 
       {attachments?.map((file, mediaIndex) => (
         <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>

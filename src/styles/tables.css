@@ -55,3 +55,53 @@ table.simple.clickable tbody tr {
 table.simple.clickable tbody tr:hover {
   background: rgba(0, 0, 0, 0.03);
 }
+
+.rt-tbody,
+.rt-thead {
+  overflow-x: hidden !important;
+ 
+}
+.ReactTable {
+  border-radius: 6px;
+}
+
+/* frozen column magic */
+
+.frozen {
+  order: -1;
+  position: relative;
+  left: 0;
+  background: hsl(0, 73%, 97%);
+  transition: left 0.2s;
+  margin-right: 1px;
+  font-weight: bold;
+  border-bottom: 1px solid #f8f8f8;
+  
+}
+.header_layout {
+  background: #FDF2F2;
+  font-weight: bold;
+  
+  
+}
+
+.cell_frozen {
+  order: -1;
+  position: relative;
+  left: 0;
+  background: #ffffff;
+  transition: left 0.2s;
+  margin-right: 1px;
+  border-bottom: 1px solid #f8f8f8;
+  box-shadow: rgba(100, 100, 111, 0.2) 5px 0 5px -1px;
+  
+}
+
+.rt-th.frozen {
+  border-bottom: 1px solid #f8f8f8;
+}
+
+
+.rt-th.cell_frozen {
+  border-bottom: 1px solid #f8f8f8;
+}
