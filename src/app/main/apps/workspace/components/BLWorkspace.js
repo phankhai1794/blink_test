@@ -188,6 +188,7 @@ const BLWorkspace = (props) => {
               ...assignPermissionViewer,
               permissions: permissionAssign
             };
+            dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
           }
         } else if (data.processingBy.length === 1) {
           // assign permission
@@ -195,6 +196,7 @@ const BLWorkspace = (props) => {
             ...assignPermissionViewer,
             permissions: permissionAssign
           };
+          dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
         }
         localStorage.setItem('USER', JSON.stringify(assignPermissionViewer));
       });
