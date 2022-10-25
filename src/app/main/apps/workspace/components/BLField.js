@@ -10,7 +10,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import ReplyIcon from '@material-ui/icons/Reply';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import { sentStatus, statusCommentDrf } from '@shared';
+import { sentStatus } from '@shared';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
@@ -30,8 +30,9 @@ const pink = '#BD0F72';
 const lightPink = '#FAF1F5';
 const red = '#DC2626';
 const blue = '#EAF2FD';
+const darkBlue = '#00506D';
 const green = '#2F80ED';
-const success = '#36B37E'
+const success = '#36B37E';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,36 +41,42 @@ const useStyles = makeStyles((theme) => ({
       borderColor: gray,
       backgroundColor: white,
       borderRadius: '8px',
-      zIndex: '-1'
+      zIndex: '-1',
     },
     '&:hover fieldset': {
-      borderColor: `${pink} !important`
+      borderColor: `${pink} !important`,
     },
     '&:focus-within fieldset': {
-      border: `1px solid ${pink} !important`
+      border: `1px solid ${pink} !important`,
     }
   },
   hasInquiry: {
     '& fieldset': {
-      backgroundColor: lightPink
-    }
-  },
-  hasResolved: {
-    '& fieldset': {
-      backgroundColor: '#EBF7F2',
-      borderColor: `${success} !important`
+      backgroundColor: lightPink,
     }
   },
   hasAnswer: {
     '& fieldset': {
       backgroundColor: blue,
-      borderColor: `${green} !important`
+      borderColor: `${green} !important`,
     },
     '&:hover fieldset': {
-      borderColor: `${green} !important`
+      borderColor: `${green} !important`,
     },
     '&:focus-within fieldset': {
-      border: `1px solid ${green} !important`
+      border: `1px solid ${green} !important`,
+    }
+  },
+  hasResolved: {
+    '& fieldset': {
+      backgroundColor: '#EBF7F2',
+      borderColor: `${success} !important`,
+    }
+  },
+  hasUploaded: {
+    '& fieldset': {
+      backgroundColor: '#E6EDF0',
+      borderColor: `${darkBlue} !important`,
     }
   },
   input: {
@@ -77,85 +84,97 @@ const useStyles = makeStyles((theme) => ({
     color: darkGray,
     padding: '9px 0 9px 16px',
     lineHeight: '22px',
-    fontWeight: '500'
+    fontWeight: '500',
   },
   notchedOutlineNotChecked: {
-    borderColor: `${red} !important`
+    borderColor: `${red} !important`,
   },
   adornment: {
     padding: '10px 10px 10px 0',
-    margin: 0
+    margin: 0,
   },
   adornmentMultiline: {
-    alignItems: 'flex-end'
+    alignItems: 'flex-end',
   },
   adornmentRow_2: {
     height: '4em',
-    maxHeight: '4em'
+    maxHeight: '4em',
   },
   adornmentRow_3: {
     height: '6em',
-    maxHeight: '6em'
+    maxHeight: '6em',
   },
   adornmentRow_4: {
     height: '8em',
-    maxHeight: '8em'
+    maxHeight: '8em',
   },
   adornmentRow_5: {
     height: '10.7em',
-    maxHeight: '10.7em'
+    maxHeight: '10.7em',
   },
   sizeIcon: {
-    fontSize: '20px'
+    fontSize: '20px',
   },
   colorHasInqIcon: {
-    color: `${red} !important`
+    color: `${red} !important`,
   },
   colorHasAnswer: {
-    color: `${green} !important`
+    color: `${green} !important`,
   },
   colorEmptyInqIcon: {
-    color: `${pink} !important`
+    color: `${pink} !important`,
   },
   colorHasResolved: {
-    color: `${success} !important`
+    color: `${success} !important`,
+  },
+  colorHasUploaded: {
+    color: `${darkBlue} !important`,
   },
   locked: {
     '& fieldset': {
-      backgroundColor: lockGray
+      backgroundColor: lockGray,
     }
   },
   colorLockIcon: {
-    color: darkGray
+    color: darkGray,
   },
   attachIcon: {
     transform: 'rotate(45deg)',
-    marginLeft: '-2.5rem'
-  }
+    marginLeft: '-2.5rem',
+  },
+  iconSvg: {
+    width: 17,
+    marginBottom: 1.5,
+    paddingLeft: 3,
+  },
 }));
 
-const BLField = (props) => {
+const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, readOnly, disableClick }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const { children, width, multiline, rows, selectedChoice, id, lock, readOnly, disableClick } = props;
-  const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
-  const [hasAnswer, setHasAnswer] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
-  const [isResolved, setIsResolved] = useState(false);
-  const user = useSelector(({ user }) => user);
-  const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
-  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
-  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
-  const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
-  const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const user = useSelector(({ user }) => user);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
+  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+  const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [isEmpty, setIsEmpty] = useState(true);
+  const [hasInquiry, setHasInquiry] = useState(false);
+  const [hasAmendment, setHasAmendment] = useState(false);
+  const [hasAttachment, setHasAttachment] = useState(false);
+  const [hasAnswer, setHasAnswer] = useState(false);
+  const [isResolved, setIsResolved] = useState(false);
+  const [isUploaded, setIsUploaded] = useState(false);
 
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
   const onMouseEnter = (e) => {
-    if (questionIsEmpty) setAnchorEl(e.currentTarget);
+    if (isEmpty) setAnchorEl(e.currentTarget);
   };
 
   const onMouseLeave = (e) => {
@@ -179,9 +198,9 @@ const BLField = (props) => {
 
   const onClick = (e) => {
     if (!disableClick) {
-      if (questionIsEmpty && allowAddInquiry) {
+      if (isEmpty && allowAddInquiry) {
         dispatch(InquiryActions.addQuestion(id));
-      } else if (!questionIsEmpty) {
+      } else if (!isEmpty) {
         const currentInq = inquiries.find((q) => q.field === id);
         dispatch(InquiryActions.setOneInq(currentInq));
       }
@@ -209,50 +228,131 @@ const BLField = (props) => {
     }
   };
 
-  const checkQuestionIsEmpty = () => {
-    if (inquiries.length > 0) {
-      const check = inquiries.filter((q) => q.field === id);
-      const checkMedia = inquiries.filter((q) => q.field === id && q.mediaFile.length);
-      checkMedia.length && setMediaFileIsEmpty(false);
-      return check.length === 0;
-    }
-    return true;
-  };
-  const checkAnswerSent = () => {
-    let checkInqAns = false;
-    let checkDrafComment = false;
-    if (inquiries.length > 0) {
-      const lstInq = inquiries.filter((q) => (q.field === id && !statusCommentDrf.includes(q.state)));
-      const lstReplyAme = listCommentDraft.filter(q => q.field === id);
-      // Check Inquiry
-      if (lstInq.length) {
-        if (lstInq.some(e => ['OPEN', 'INQ_SENT'].includes(e.state))) return false;
-        const listStatus = user?.role === 'Admin' ? [...sentStatus] : [...sentStatus, ...['ANS_DRF']];
-        checkInqAns = lstInq.some(e => listStatus.includes(e.state));
-      }
-      // Check Amendment
-      if (lstReplyAme.length === 1) return false;
-      if (lstReplyAme.length > 1) {
-        checkDrafComment = Boolean(lstReplyAme.filter(comment => ['REP_DRF', 'REP_SENT'].includes(comment.state).length));
-      }
-      return (lstReplyAme.length === 0 ? checkInqAns : (checkInqAns || checkDrafComment));
-    }
-    return false;
-  };
+  const checkClassName = () => {
+    let response = { className: '', iconColor: '' };
+    if (hasInquiry || hasAmendment) response = { className: classes.hasInquiry, iconColor: classes.colorHasInqIcon };
+    else if (hasAnswer) response = { className: classes.hasAnswer, iconColor: classes.colorHasAnswer };
+    else if (isResolved) response = { className: classes.hasResolved, iconColor: classes.colorHasResolved };
+    else if (isUploaded) response = { className: classes.hasUploaded, iconColor: classes.colorHasUploaded };
+    return response;
+  }
 
-  const checkQuestionIsResolved = () => {
-    if (inquiries.length > 0) {
-      const lst = inquiries.filter((q) => q.field === id);
-      if (lst.length > 0)
-        return lst.every(e => e.state === 'COMPL' || e.state === 'UPLOADED' || e.state === 'RESOLVED')
+  const checkDisplayIcon = () => {
+    const { iconColor } = checkClassName();
+    const attachIcon = <>
+      {hasAttachment && (
+        <AttachFile
+          className={clsx(
+            classes.sizeIcon,
+            classes.attachIcon,
+            iconColor
+          )}
+        />
+      )}
+    </>
+
+    if (lock) {
+      return <>
+        <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
+      </>
     }
-    return false;
-  };
+    else if (hasInquiry || hasAmendment) {
+      return <>
+        {attachIcon}
+        {hasInquiry && <HelpIcon className={clsx(classes.sizeIcon, iconColor)} />}
+        {hasAmendment && <img src='/assets/images/icons/icon-amendment.svg' className={classes.iconSvg} />}
+      </>
+    }
+    else if (hasAnswer) {
+      return <>
+        {attachIcon}
+        <ReplyIcon className={clsx(classes.sizeIcon, iconColor)} />
+      </>
+    }
+    else if (isResolved) {
+      return <>
+        {attachIcon}
+        <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)} />
+      </>
+    }
+    else if (isUploaded) {
+      return <>
+        {attachIcon}
+        <img src='/assets/images/icons/icon-uploaded.svg' className={classes.iconSvg} />
+      </>
+    }
+  }
+
+  const checkColorStatus = () => {
+    const colorStatusObj = {
+      isEmpty: true,
+      hasInquiry: false,
+      hasAmendment: false,
+      hasAttachment: false,
+      hasAnswer: false,
+      isResolved: false,
+      isUploaded: false
+    };
+
+    /** Check Inquiry */
+    const lstInq = inquiries.filter((q) => q.field === id && q.process === 'pending');
+    if (lstInq.length) {
+      colorStatusObj.isEmpty = false;
+      const statusReply = user?.role === 'Admin' ? sentStatus : [...sentStatus, ...['ANS_DRF']];
+
+      lstInq.forEach(inq => {
+        // check has attachment
+        if (!colorStatusObj.hasAttachment && inq.mediaFile?.length) colorStatusObj.hasAttachment = true;
+
+        // check has inquiry
+        if (!colorStatusObj.hasInquiry && ['OPEN', 'INQ_SENT', 'ANS_DRF'].includes(inq.state)) colorStatusObj.hasInquiry = true;
+
+        // check has reply/answer
+        else if (!colorStatusObj.hasAnswer, statusReply.includes(inq.state)) colorStatusObj.hasAnswer = true;
+
+        // check is resolved
+        else if (!colorStatusObj.isResolved && inq.state === 'COMPL') colorStatusObj.isResolved = true;
+
+        // check is resolved
+        else if (!colorStatusObj.isUploaded && inq.state === 'UPLOADED') colorStatusObj.isUploaded = true;
+      });
+    }
+
+    /** Check Amendment */
+    const listCommentFilter = listCommentDraft.filter(q => q.field === id);
+    if (listCommentFilter.length) {
+      colorStatusObj.isEmpty = false;
+      const statusReply = user?.role === 'Admin' ? [...sentStatus, ...['REP_DRF']] : [...sentStatus, ...['AME_DRF']];
+      const amendment = listCommentFilter[0] || {};
+      const lastComment = listCommentFilter[listCommentFilter.length - 1] || {};
+
+      // check has attachment
+      if (!colorStatusObj.hasAttachment && amendment.content?.mediaFile?.length) colorStatusObj.hasAttachment = true;
+
+      // check has amendment
+      if (!colorStatusObj.hasAmendment && listCommentFilter.length === 1) colorStatusObj.hasAmendment = true;
+
+      // check has reply/answer
+      else if (!colorStatusObj.hasAnswer && statusReply.includes(lastComment.state)) colorStatusObj.hasAnswer = true;
+
+      // check is resolved
+      else if (!colorStatusObj.isResolved && ['RESOLVED'].includes(lastComment.state)) colorStatusObj.isResolved = true;
+
+      // check is resolved
+      else if (!colorStatusObj.isUploaded && ['UPLOADED'].includes(lastComment.state)) colorStatusObj.isUploaded = true;
+    }
+
+    setIsEmpty(colorStatusObj.isEmpty);
+    setHasInquiry(colorStatusObj.hasInquiry);
+    setHasAmendment(colorStatusObj.hasAmendment);
+    setHasAttachment(colorStatusObj.hasAttachment);
+    setHasAnswer(colorStatusObj.hasAnswer);
+    setIsResolved(colorStatusObj.isResolved);
+    setIsUploaded(colorStatusObj.isUploaded);
+  }
 
   useEffect(() => {
-    setQuestionIsEmpty(checkQuestionIsEmpty());
-    setHasAnswer(checkAnswerSent())
-    setIsResolved(checkQuestionIsResolved())
+    checkColorStatus();
   }, [inquiries, metadata, listCommentDraft]);
 
   return (
@@ -272,10 +372,7 @@ const BLField = (props) => {
             rows={rows}
             className={clsx(
               classes.root,
-              !questionIsEmpty ? classes.hasInquiry : '',
-              lock ? classes.locked : '',
-              (hasAnswer && !isResolved) ? classes.hasAnswer : '',
-              isResolved ? classes.hasResolved : ''
+              lock ? classes.locked : checkClassName().className
             )}
             InputProps={{
               readOnly: readOnly || true,
@@ -287,43 +384,16 @@ const BLField = (props) => {
                     multiline ? classes.adornmentMultiline : '',
                     rows ? classes[`adornmentRow_${rows}`] : ''
                   )}>
-                  {!mediaFileIsEmpty && (
-                    <AttachFile
-                      className={clsx(
-                        classes.sizeIcon,
-                        !hasAnswer ? classes.colorHasInqIcon : classes.colorHasAnswer,
-                        classes.attachIcon,
-                        isResolved ? classes.colorHasResolved : ''
-                      )}
-                    />
-                  )}
-                  {isResolved ? (
-                    <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)} />
-                  ) :
-                    !questionIsEmpty && !hasAnswer && (
-                      <HelpIcon className={clsx(classes.sizeIcon, classes.colorHasInqIcon)} />
-                    )}
-                  {!questionIsEmpty && hasAnswer && !isResolved && (
-                    <ReplyIcon className={clsx(classes.sizeIcon, classes.colorHasAnswer)} />
-                  )}
-
-                  {lock ? (
-                    <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
-                  ) : (
-                    anchorEl &&
-                    anchorEl.id === id &&
-                    allowAddInquiry && (
-                      <AddCircleIcon
-                        className={clsx(classes.sizeIcon, classes.colorEmptyInqIcon)}
-                      />
-                    )
+                  {checkDisplayIcon()}
+                  {anchorEl && anchorEl.id === id && allowAddInquiry && (
+                    <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorEmptyInqIcon)} />
                   )}
                 </InputAdornment>
               ),
               classes: {
                 root: classes.root,
                 input: classes.input,
-                notchedOutline: questionIsEmpty ? '' : classes.notchedOutlineNotChecked
+                notchedOutline: isEmpty ? '' : classes.notchedOutlineNotChecked
               }
             }}
           />
