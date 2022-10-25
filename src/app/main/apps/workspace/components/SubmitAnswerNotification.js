@@ -21,7 +21,9 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 16,
     fontWeight: 600,
     lineHeight: '20px',
-    paddingLeft: 11.67
+    paddingLeft: 11.67,
+    display: 'flex',
+    flexDirection: 'column',
   },
   secondSentence: {
     color: darkColor,
@@ -55,9 +57,14 @@ const SubmitAnswerNotification = ({ msg, msg2 = 'Thank you!', iconType, open, ha
         </div>
       </div>
       <MuiDialogContent classes={{ root: classes.dialogContent }}>
-        <span className={classes.firstSentence}>
-          {iconType} {msg}
-        </span>
+        <div className={classes.firstSentence}>
+          <span>
+            {iconType}
+          </span>
+          <span>
+            {msg}
+          </span>
+        </div>
         <span className={classes.secondSentence}>{msg2}</span>
       </MuiDialogContent>
       <div className={classes.container}>
