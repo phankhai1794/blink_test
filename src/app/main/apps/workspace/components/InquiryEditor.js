@@ -86,6 +86,19 @@ const useStyles = makeStyles((theme) => ({
   positionBtnNotImg: {
     left: '0',
     top: '4rem'
+  },
+  form: {
+    '& .fuse-chip-select--is-disabled': {
+      '& fieldset': {
+        borderColor: 'rgba(0, 0, 0, 0.38)'
+      },
+      '& .MuiInputBase-input p': {
+        color: 'rgba(0, 0, 0, 0.38)'
+      },
+      '& .MuiSvgIcon-root': {
+        color: 'rgba(0, 0, 0, 0.38)'
+      }
+    }
   }
 }));
 
@@ -461,11 +474,13 @@ const InquiryEditor = (props) => {
               value="customer"
               control={<Radio color={'primary'} />}
               label="Customer"
+              disabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
             />
             <FormControlLabel
               value="onshore"
               control={<Radio color={'primary'} />}
               label="Onshore"
+              disabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
             />
           </RadioGroup>
 
@@ -473,7 +488,7 @@ const InquiryEditor = (props) => {
         </FormControl>
       </div>
       {currentEditInq && (
-        <>
+        <div className={classes.form}>
           <Grid container spacing={4}>
             <Grid item xs={4}>
               <FormControl error={!valid.field}>
@@ -618,7 +633,7 @@ const InquiryEditor = (props) => {
               </Button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </>
   );
