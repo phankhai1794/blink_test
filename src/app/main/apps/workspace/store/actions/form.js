@@ -18,6 +18,7 @@ export const ENABLE_SAVE_INQUIRIES = 'ENABLE_SAVE_INQUIRIES';
 export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
 export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
 export const OPEN_CREATE_AMENDMENT = 'OPEN_CREATE_AMENDMENT';
+export const OPEN_NOTIFICATION_INQUIRY_LIST = 'OPEN_NOTIFICATION_INQUIRY_LIST'
 
 export function setFullscreen(state) {
   return {
@@ -97,6 +98,13 @@ export function toggleOpenInquiryReview(state) {
 export function toggleOpenNotificationAttachmentList(state) {
   return {
     type: OPEN_NOTIFICATION_ATTACHMENT_LIST,
+    state
+  };
+}
+
+export function toggleOpenNotificationInquiryList(state) {
+  return {
+    type: OPEN_NOTIFICATION_INQUIRY_LIST,
     state
   };
 }

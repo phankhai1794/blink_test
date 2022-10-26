@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
-import {Button, Dialog, Divider, makeStyles} from "@material-ui/core";
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { Button, Dialog, Divider, makeStyles } from "@material-ui/core";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
@@ -53,17 +53,18 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const AttachmentListNotification = () => {
+const ListNotification = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const openNotification = useSelector(({ workspace }) => workspace.formReducer.openNotificationAttachmentList);
+  const openNotificationAttachmentList = useSelector(({ workspace }) => workspace.formReducer.openNotificationAttachmentList);
+  const openNotificationInquiryList = useSelector(({ workspace }) => workspace.formReducer.openNotificationInquiryList);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const [isExistingMedia, setExistingMedia] = useState(false);
 
   useEffect(() => {
     let isExistMedia = false;
     inquiries.forEach(inq => {
-      if(inq.mediaFile.length > 0) {
+      if (inq.mediaFile.length > 0) {
         isExistMedia = true;
         return;
       }
@@ -74,21 +75,23 @@ const AttachmentListNotification = () => {
   }, []);
 
   const handleClose = () => {
-    dispatch(FormActions.toggleOpenNotificationAttachmentList(false))
+    dispatch(FormActions.toggleOpenNotificationAttachmentList(false));
+    dispatch(FormActions.toggleOpenNotificationInquiryList(false));
   };
 
   const handleAddAttachment = () => {
     dispatch(FormActions.toggleAllInquiry(true));
     handleClose();
   };
+  const [label, pluralLabel] = openNotificationInquiryList ? ["Inquiry", "Inquiries"] : ["Attachment", "Attachments"];
 
   return (
-    <Dialog open={openNotification} onClose={handleClose} maxWidth="md">
+    <Dialog open={openNotificationAttachmentList || openNotificationInquiryList} onClose={handleClose} maxWidth="md">
       <MuiDialogTitle disableTypography className={classes.root}>
         <div style={{ display: 'flex' }}>
           <div style={{ width: '70%' }}>
             <div style={{ color: '#515F6B', fontSize: '22px', fontWeight: '600' }}>
-                Attachments List
+              {pluralLabel} List
             </div>
           </div>
           <div style={{ width: '30%', textAlign: 'right' }}>
@@ -101,11 +104,11 @@ const AttachmentListNotification = () => {
       <Divider classes={{ root: classes.divider }} />
       <MuiDialogContent classes={{ root: classes.dialogContent }}>
         <span className={classes.firstSentence}>
-          No Attachments Right Now!
+          No {pluralLabel} Right Now!
         </span>
-        <span className={classes.secondSentence}>Please add attachment for missing information.</span>
+        <span className={classes.secondSentence}>Please add {label} for missing information.</span>
       </MuiDialogContent>
-      {inquiries.length > 0 && isExistingMedia && (
+      {((inquiries.length == 0 && openNotificationInquiryList) || (inquiries.length > 0 && isExistingMedia)) && (
         <div className={classes.container}>
           <Button
             style={{
@@ -121,7 +124,7 @@ const AttachmentListNotification = () => {
               fontWeight: 600
             }}
             onClick={handleAddAttachment}>
-              Add Attachment
+            Add {label}
           </Button>
         </div>
       )}
@@ -129,4 +132,4 @@ const AttachmentListNotification = () => {
   );
 };
 
-export default AttachmentListNotification;
+export default ListNotification;

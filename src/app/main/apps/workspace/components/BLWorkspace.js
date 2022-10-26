@@ -34,7 +34,7 @@ import BLProcessNotification from './BLProcessNotification';
 import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
 import TableCD from './TableCD';
 import TableCM from './TableCM';
-import AttachmentListNotification from './AttachmentListNotification';
+import ListNotification from './ListNotification';
 import SubmitAnswerNotification from "./SubmitAnswerNotification";
 
 
@@ -444,7 +444,7 @@ const BLWorkspace = (props) => {
   return (
     <>
       <BLProcessNotification />
-      <AttachmentListNotification />
+      <ListNotification />
       <SubmitAnswerNotification
         open={openNotification || openNotificationReply || openNotificationAmendment || openNotificationBLWarning.status}
         msg={renderMsgNoti()}

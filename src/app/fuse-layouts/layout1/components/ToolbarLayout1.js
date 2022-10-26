@@ -136,7 +136,7 @@ function ToolbarLayout1(props) {
       getCommentDraftBl(myBL.id, e.field).then((res) => {
         if (res.length > 0) {
           res.forEach((r) => {
-            const attachmentAmendment = r.content.mediaFile.map ((f) => {
+            const attachmentAmendment = r.content.mediaFile.map((f) => {
               return {
                 ...f,
                 field: e.field,
@@ -151,7 +151,7 @@ function ToolbarLayout1(props) {
               })
               if (att && !e.inqType && !fileNameList.includes(att.name)) {
                 getAttachmentFiles.push(att);
-                document.querySelectorAll('#no-att span')[0].textContent =getAttachmentFiles.length;
+                document.querySelectorAll('#no-att span')[0].textContent = getAttachmentFiles.length;
               }
             })
           })
@@ -176,8 +176,8 @@ function ToolbarLayout1(props) {
                   if (item.inqType === e.inqType) return item.name
                 })
                 if (att && !fileNameList.includes(att.name)) {
-                  getAttachmentFiles.push(att)                
-                  document.querySelectorAll('#no-att span')[0].textContent =getAttachmentFiles.length;
+                  getAttachmentFiles.push(att)
+                  document.querySelectorAll('#no-att span')[0].textContent = getAttachmentFiles.length;
                 }
               })
             }
@@ -259,7 +259,7 @@ function ToolbarLayout1(props) {
     if (inquiries.length) {
       dispatch(FormActions.toggleAllInquiry(true));
       dispatch(FormActions.toggleSaveInquiry(true));
-    }
+    } else dispatch(FormActions.toggleOpenNotificationInquiryList(true));
   };
 
   const openAttachment = () => {
