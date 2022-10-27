@@ -1220,26 +1220,23 @@ const InquiryViewer = (props) => {
                   </Grid>
                 )}
               </Grid>
-              {/* TODO: Show Button ReOpen after UAT */}
-              {(question?.process === 'pending') &&
-                <PermissionProvider
-                  action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
-                  extraCondition={question.state === 'COMPL' || question.state === 'RESOLVED'}
-                >
-                  <div className='flex' style={{ alignItems: 'center' }}>
-                    <Button
-                      disabled={question.state === 'UPLOADED'}
-                      variant="contained"
-                      color="primary"
-                      onClick={() => reOpen(question?.id)}
-                      classes={{ root: classes.button }}
-                    >
-                      ReOpen
-                    </Button>
-                  </div>
-                </PermissionProvider>
-              }
 
+              <PermissionProvider
+                action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
+                extraCondition={question.state === 'COMPL' || question.state === 'RESOLVED'}
+              >
+                <div className='flex' style={{ alignItems: 'center' }}>
+                  <Button
+                    disabled={question.state === 'UPLOADED'}
+                    variant="contained"
+                    color="primary"
+                    onClick={() => reOpen(question?.id)}
+                    classes={{ root: classes.button }}
+                  >
+                      ReOpen
+                  </Button>
+                </div>
+              </PermissionProvider>
 
               {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} />
