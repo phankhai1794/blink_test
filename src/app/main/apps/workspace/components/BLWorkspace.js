@@ -89,6 +89,7 @@ const BLWorkspace = (props) => {
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
+  const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const openAmendmentForm = useSelector(({ workspace }) => workspace.formReducer.openAmendmentForm);
   const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
@@ -282,12 +283,15 @@ const BLWorkspace = (props) => {
     switch (inquiry.field) {
     case 'INQUIRY_LIST':
       return {
-        status: openAllInquiry,
+        status: openAllInquiry || openAmendmentList,
         tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
         nums: user.role === 'Admin' ? [countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
-        toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
-        fabTitle: 'Inquiries List',
-        title: 'Inquiries List',
+        toggleForm: (status) => {
+          dispatch(FormActions.toggleAllInquiry(status));
+          dispatch(FormActions.toggleAmendmentsList(status))
+        },
+        fabTitle: openAllInquiry ? 'Inquiries List' : 'Amendments List',
+        title: openAllInquiry ? 'Inquiries List' : 'Amendments List',
         field: 'INQUIRY_LIST',
         showBtnSend: true,
         disableSendBtn: disableSendBtn,

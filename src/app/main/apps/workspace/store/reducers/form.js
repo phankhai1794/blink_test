@@ -17,6 +17,7 @@ const initialState = {
   openNotificationDeleteReply: false,
   openNotificationDeleteAmendment: false,
   enableSaveInquiriesList: true,
+  openAmendmentList: false,
   openConfirmPopup: false,
   confirmPopupMsg: '',
   confirmPopupType: '',
@@ -38,6 +39,9 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.TOGGLE_SAVE_INQUIRY: {
     return { ...state, showSaveInquiry: action.state };
+  }
+  case Actions.TOGGLE_AMENDMENTS_LIST: {
+    return { ...state, openAmendmentList: action.state };
   }
   case Actions.TOGGLE_ADD_INQUIRY: {
     return { ...state, showAddInquiry: action.state };

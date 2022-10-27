@@ -339,11 +339,6 @@ const InquiryViewer = (props) => {
             // push new lastestComment if not already exist
             !listCommentDraft.find(ele => ele.id === lastestComment.id) && dispatch(InquiryActions.setListCommentDraft([...listCommentDraft, ...[lastestComment]]));
 
-            // push to inquiries to update the Inquiries List
-            const optionsInquires = [...inquiries].filter(inq => inq.id !== question.id);
-            optionsInquires.push(lastest);
-            dispatch(InquiryActions.setInquiries(optionsInquires));
-
             const comments = [{
               creator: { userName: user.displayName, avatar: null },
               updater: { userName: user.displayName, avatar: null },
@@ -535,6 +530,7 @@ const InquiryViewer = (props) => {
           dispatch(FormActions.toggleAllInquiry(false));
           dispatch(InquiryActions.setOneInq({}));
           dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+          dispatch(FormActions.toggleAmendmentsList(false));
 
           // Update state of listDraftComments for re-rendering UI
           let cloneListCommentDraft = listCommentDraft.filter(({ id }) => id !== replyRemove.id);
