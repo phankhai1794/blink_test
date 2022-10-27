@@ -107,6 +107,7 @@ const BLWorkspace = (props) => {
   const openNotificationReply = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteReply);
   const openNotificationBLWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning);
   const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
+  const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -122,6 +123,21 @@ const BLWorkspace = (props) => {
   const getValueField = (keyword) => {
     return content[getField(keyword)] || '';
   };
+
+  // TODO: TBU Logic after create new reply amendment
+  useEffect(()=>{
+    const checkByField = (amendmentField, inq) => {
+      return (inq.process === 'draft' && inq.field === amendmentField)
+    };
+    const optionsInquires = [...inquiries];
+    const oldAmendmentIndex = optionsInquires.findIndex(inq=>(inq.id === objectNewAmendment.oldAmendmentId || checkByField(objectNewAmendment.newAmendment.field, inq)));
+    if(oldAmendmentIndex !== -1) {
+      const tempID = optionsInquires[oldAmendmentIndex]?.id
+      optionsInquires[oldAmendmentIndex] = {...optionsInquires[oldAmendmentIndex], ...objectNewAmendment.newAmendment}
+      optionsInquires[oldAmendmentIndex].id = tempID;
+      dispatch(InquiryActions.setInquiries(optionsInquires));
+    }
+  },[objectNewAmendment])
 
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'autoSendMail') {
