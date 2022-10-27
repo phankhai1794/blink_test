@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
-import { TextField, Button } from "@material-ui/core";
+import {TextField, Button, Typography, FormHelperText, FormControl} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField, updateDraftBLReply } from 'app/services/draftblService';
 import * as AppActions from 'app/store/actions';
 import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from '@shared/keyword';
+import { FuseChipSelect } from '@fuse';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -36,22 +37,37 @@ const useStyles = makeStyles((theme) => ({
     color: greyText,
     background: white,
     border: `1px solid ${greyText}`
-  }
+  },
+  inqTitle: {
+    fontFamily: 'Montserrat',
+    color: '#BD0F72',
+    fontSize: 22,
+    fontWeight: 600,
+    wordBreak: 'break-word'
+  },
 }));
 
 const Amendment = ({ question }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector(({ user }) => user);
-  const [content, currentField, myBL] = useSelector(({ workspace }) => [
+  const [metadata, content, currentField, myBL, valid, inquiries] = useSelector(({ workspace }) => [
+    workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.content,
     workspace.inquiryReducer.currentField,
-    workspace.inquiryReducer.myBL
+    workspace.inquiryReducer.myBL,
+    workspace.inquiryReducer.validation,
+    workspace.inquiryReducer.inquiries,
   ]);
-  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const filterInqDrf = inquiries.filter(inq => inq.process === 'draft').map(val => val.field);
+  const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
+  const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
+  const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
 
   const [attachments, setAttachments] = useState(question?.content?.mediaFile || []);
   const [fieldValue, setFieldValue] = useState("");
+  const [fieldValueSelect, setFieldValueSelect] = useState();
+  const [fieldType, setFieldType] = useState(metadata.field_options.filter(data => !['vvdCode', 'podCode', 'delCode'].includes(data.keyword)).filter(filDrf => !filterInqDrf.includes(filDrf.value)));
 
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
@@ -61,10 +77,18 @@ const Amendment = ({ question }) => {
     setAttachments(optionsAttachmentList)
   }
 
+  const handleChangeField = (e) => {
+    setFieldValueSelect(e);
+    setFieldValue(content[e.value] || "");
+  };
+
   const handleChange = (e) => setFieldValue(e.target.value);
 
   const handleSave = () => {
     const uploads = [];
+    const fieldReq = openAmendmentList ? fieldValueSelect?.value : currentField;
+    const optionsInquires = [...inquiries];
+    const optionsMinimize = [...listMinimize];
     if (attachments.length) {
       attachments.forEach((file) => {
         if (!file.id) {
@@ -73,6 +97,9 @@ const Amendment = ({ question }) => {
           uploads.push(formData);
         }
       });
+    }
+    if (openAmendmentList && !fieldReq) {
+      return;
     }
 
     axios
@@ -86,17 +113,28 @@ const Amendment = ({ question }) => {
 
         let service;
         // if (edit) service = updateDraftBLReply({ content: { content: fieldValue, mediaFile: mediaList } }, question.id);
-        service = saveEditedField({ field: currentField, content: { content: fieldValue, mediaFile: mediaList }, mybl: myBL.id });
-        service.then(() => {
+        service = saveEditedField({ field: fieldReq, content: { content: fieldValue, mediaFile: mediaList }, mybl: myBL.id });
+        service.then((res) => {
           dispatch(
             AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' })
           );
           dispatch(InquiryActions.addAmendment());
-          dispatch(FormActions.toggleReload());
+          if (!openAmendmentList) {
+            dispatch(FormActions.toggleReload());
+          } else {
+            const response = {
+              ...res?.newAmendment,
+              showIconEditInq: true,
+            };
+            optionsInquires.push(response);
+            optionsMinimize.push(response);
+            dispatch(InquiryActions.setInquiries(optionsInquires));
+            dispatch(InquiryActions.setListMinimize(optionsMinimize));
+          }
         }).catch((err) => console.error(err));
       })
 
-    dispatch(InquiryActions.setContent({ ...content, [currentField]: fieldValue }));
+    dispatch(InquiryActions.setContent({ ...content, [fieldReq]: fieldValue }));
     dispatch(FormActions.toggleCreateAmendment(false));
   }
 
@@ -112,33 +150,75 @@ const Amendment = ({ question }) => {
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
   useEffect(() => {
-    setFieldValue(content[currentField] || "");
+    !openAmendmentList ? setFieldValue(content[currentField] || "") : setFieldValue('');
   }, [content, currentField])
+
+  const styles = (width) => {
+    return {
+      control: {
+        width: `${width}px`,
+        borderRadius: 11
+      }
+    };
+  };
 
   return (
     <div style={{ paddingLeft: 18, borderLeft: `2px solid ${colorInq}` }}>
-      <p style={{
-        color: pink,
-        fontSize: 14,
-        fontWeight: 600,
-        lineHeight: '17px',
-        padding: '3.5px 10px',
-        background: '#FDF2F2',
-        borderRadius: 4,
-        display: 'inline-block',
-        marginTop: 0,
-        marginBottom: 15,
-      }}>
-        AMENDMENT
-      </p>
+      {!openAmendmentList && (
+        <p style={{
+          color: pink,
+          fontSize: 14,
+          fontWeight: 600,
+          lineHeight: '17px',
+          padding: '3.5px 10px',
+          background: '#FDF2F2',
+          borderRadius: 4,
+          display: 'inline-block',
+          marginTop: 0,
+          marginBottom: 15,
+        }}>
+                AMENDMENT
+        </p>
+      )}
+
       <div className='flex justify-between'>
-        <UserInfo
-          name={user?.displayName}
-          time=""
-          avatar=""
-        />
-        <AttachFileAmendment setAttachment={getAttachment} />
+        {!openAmendmentList ? (
+          <UserInfo
+            name={user?.displayName}
+            time=""
+            avatar=""
+          />
+        ) : <Typography color="primary" variant="h5" className={classes.inqTitle}>New Amendment</Typography>}
+        <div className={'flex'} style={{ alignItems: 'center' }}>
+          <AttachFileAmendment setAttachment={getAttachment} />
+          {openAmendmentList && <div style={{ padding: 2, height: 24 }} onClick={handleCancle}>
+            <img
+              style={{ height: '22px', cursor: 'pointer' }}
+              src="/assets/images/icons/trash-gray.svg"
+            />
+          </div>}
+        </div>
       </div>
+
+      {openAmendmentList && (
+        <FormControl error={!fieldValueSelect}>
+          <FuseChipSelect
+            customStyle={styles(fullscreen ? 320 : 295)}
+            value={fieldValueSelect}
+            onChange={handleChangeField}
+            placeholder="Select Field Type"
+            textFieldProps={{
+              variant: 'outlined'
+            }}
+            options={fieldType}
+            errorStyle={fieldValueSelect}
+          />
+          <div style={{ height: '20px' }}>
+            {!fieldValueSelect && (<FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+            )}
+          </div>
+        </FormControl>
+      )}
 
       {containerCheck.includes(currentField) ? (
         <div style={{ margin: '15px 0' }}>

@@ -244,6 +244,7 @@ export default function Form(props) {
   const currentAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.currentAmendment);
   const isLoading = useSelector(({ workspace }) => workspace.mailReducer.isLoading);
   const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
+  const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
 
   const [openFab, setOpenFab] = useState(false);
   const [disableSend, setDisableSend] = useState(!enableSend);
@@ -390,8 +391,11 @@ export default function Form(props) {
 
   const checkEnableBtnAddAmendment = () => {
     const filter = inquiries.filter(inq => inq.field === currentField);
-    if (!filter.length) return false;
-    return !filter.some(inq => inq.process === 'draft');
+    if (!openAmendmentList) {
+      if (!filter.length) return false;
+      return !filter.some(inq => inq.process === 'draft');
+    }
+    return true;
   }
 
   const getField = (keyword) => {
@@ -443,7 +447,7 @@ export default function Form(props) {
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
-        {tabs && nums && nums.some(num => num > 0) && (
+        {tabs && nums && nums.some(num => num > 0) && !openAmendmentList && (
           <Box style={{ marginLeft: 20, marginRight: 20, borderBottom: '1px solid #515F6B' }} sx={{}}>
             <Tabs
               indicatorColor="primary"
@@ -495,7 +499,10 @@ export default function Form(props) {
         {customActions == null && (
           <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
-              <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
+              <PermissionProvider
+                action={PERMISSION.INQUIRY_CREATE_INQUIRY}
+                extraCondition={!openAmendmentList}
+              >
                 <LinkButton
                   text="Add Inquiry"
                   disable={currentEditInq}
