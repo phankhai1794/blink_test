@@ -39,6 +39,7 @@ const initialState = {
   enableSubmit: false,
   enableSend: false,
   listCommentDraft: [],
+  objectNewAmendment: { oldAmendmentId:null, newAmendment:null },
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -155,6 +156,9 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SET_LIST_COMMENT_DRAFT: {
     return { ...state, listCommentDraft: action.state };
+  }
+  case Actions.SET_NEW_AMENDMENT: {
+    return { ...state, objectNewAmendment: { ...state.objectNewAmendment, ...action.state }};
   }
   default: {
     return state;

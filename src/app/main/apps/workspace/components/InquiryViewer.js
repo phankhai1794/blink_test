@@ -339,11 +339,6 @@ const InquiryViewer = (props) => {
             // push new lastestComment if not already exist
             !listCommentDraft.find(ele => ele.id === lastestComment.id) && dispatch(InquiryActions.setListCommentDraft([...listCommentDraft, ...[lastestComment]]));
 
-            // push to inquiries to update the Inquiries List
-            const optionsInquires = [...inquiries].filter(inq => inq.id !== question.id);
-            optionsInquires.push(lastest);
-            dispatch(InquiryActions.setInquiries(optionsInquires));
-
             const comments = [{
               creator: { userName: user.displayName, avatar: null },
               updater: { userName: user.displayName, avatar: null },
@@ -360,6 +355,7 @@ const InquiryViewer = (props) => {
                 createdAt: r.createdAt,
                 answersMedia: mediaFile,
                 content: `"${content}"`,
+                state: r.state,
               });
             });
             setComment(comments);
@@ -532,6 +528,21 @@ const InquiryViewer = (props) => {
     } else if (confirmPopupType === 'removeReply' && replyRemove) {
       deleteDraftBLReply(replyRemove.id)
         .then(() => {
+          // Case: Offshore reply customer's amendment first time => delete
+          if(comment.length === 3){
+            const prevAmendment = {
+              field: replyRemove.field,
+              state: comment[comment.length-2].state, 
+              creator: comment[comment.length-2].creator, 
+              updater: comment[comment.length-2].updater, 
+              createdAt: comment[comment.length-2].createdAt, 
+              content: comment[comment.length-2].content,
+              mediaFile: comment[comment.length-2].answersMedia,
+              answerObj: []
+            };
+            dispatch(InquiryActions.setNewAmendment({ newAmendment: prevAmendment }));
+          }
+          //
           dispatch(FormActions.toggleAllInquiry(false));
           dispatch(InquiryActions.setOneInq({}));
           dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
@@ -821,11 +832,12 @@ const InquiryViewer = (props) => {
           mybl: myBL.id
         };
         saveEditedField({ ...reqReply })
-          .then(() => {
+          .then((res) => {
             setSaveComment(!isSaveComment);
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             setDisableSaveReply(false);
             dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
+            dispatch(InquiryActions.setNewAmendment({ oldAmendmentId: question.id, newAmendment: res.newAmendment }));
           })
           .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }
@@ -833,11 +845,12 @@ const InquiryViewer = (props) => {
         const reqReply = {
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
         };
-        updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
+        updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
           setSaveComment(!isSaveComment);
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
+          dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
