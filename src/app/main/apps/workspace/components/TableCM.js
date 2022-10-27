@@ -14,6 +14,7 @@ import * as InquiryActions from '../store/actions/inquiry';
 
 import BLField from './BLField';
 import Label from './FieldLabel';
+import ReplyIcon from "@material-ui/icons/Reply";
 
 const red = '#DC2626';
 const pink = '#BD0F72';
@@ -26,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
     position: 'relative',
     left: '98%',
     fontSize: '20px',
+    top: '3%'
   },
   attachIcon: {
     transform: 'rotate(45deg)',
@@ -103,7 +105,7 @@ const TableCM = (props) => {
   const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
   const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
   const [hasAnswer, setHasAnswer] = useState(false);
-  const [isResolved, setIsResolved] = useState(false)
+  const [isResolved, setIsResolved] = useState(false);
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -179,21 +181,21 @@ const TableCM = (props) => {
 
   return (
     <>
-      <div className={clsx(classes.hoverIcon, `justify-self-end opacity-${(showIcons || !questionIsEmpty) ? '100' : '0'}`)}>
-        {!isResolved ? (
-          !questionIsEmpty ?
-            <>
-              {!mediaFileIsEmpty && <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />}
-              < HelpIcon className={clsx(classes.colorHasInqIcon)} />
-            </>
-            : (allowAddInquiry && <AddCircleIcon className={(showIcons ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon))} />)
-        ) : <>
-          <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)} />
-        </>
-        }
-      </div>
       <div className={clsx(!questionIsEmpty ? classes.hasInq : classes.enterTableFile, hasAnswer ? classes.hasAnswer : '',
         isResolved ? classes.hasResolved : '')} onClick={onClick}>
+        <div className={clsx(classes.hoverIcon, `justify-self-end opacity-${(showIcons || !questionIsEmpty) ? '100' : '0'}`)}>
+          {!isResolved ? (
+            !questionIsEmpty ?
+              <>
+                {!mediaFileIsEmpty && <AttachFile className={clsx(hasAnswer ? classes.colorHasAnswer : classes.colorHasInqIcon, classes.attachIcon)} />}
+                {hasAnswer ? <ReplyIcon className={clsx(classes.sizeIcon, hasAnswer ? classes.colorHasAnswer : classes.colorHasInqIcon)} /> : <HelpIcon className={clsx(classes.colorHasInqIcon)} />}
+              </> :
+              (allowAddInquiry && <AddCircleIcon className={(showIcons ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon))} />)
+          ) : <>
+            <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)} />
+          </>
+          }
+        </div>
         <Grid container
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}

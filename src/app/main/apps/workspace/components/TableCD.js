@@ -21,6 +21,7 @@ import * as InquiryActions from '../store/actions/inquiry';
 
 import BLField from './BLField';
 import Label from './FieldLabel';
+import ReplyIcon from "@material-ui/icons/Reply";
 
 const red = '#DC2626';
 const pink = '#BD0F72';
@@ -32,7 +33,8 @@ const useStyles = makeStyles((theme) => ({
   addIcon: {
     position: 'relative',
     left: '98%',
-    fontSize: '20px'
+    fontSize: '20px',
+    top: '3%'
   },
   colorHasInqIcon: {
     color: `${red} !important`
@@ -182,34 +184,32 @@ const TableCD = (props) => {
     <>
       <div
         className={clsx(
-          classes.addIcon,
-          `justify-self-end opacity-${showAddIcon || !questionIsEmpty ? '100' : '0'}`
-        )}>
-        {!isResolved ?
-          (!questionIsEmpty ? (
-            <>
-              {!mediaFileIsEmpty && (
-                <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />
-              )}
-              <HelpIcon className={clsx(classes.colorHasInqIcon)} />
-            </>
-          ) : (
-            allowAddInquiry && (
-              <AddCircleIcon
-                className={
-                  showAddIcon ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon)
-                }
-              />
-            )
-          )) : <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)} />}
-      </div>
-      <div
-        className={clsx(
           !questionIsEmpty & !hasAnswer & !isResolved ? classes.hasInq : classes.enterTableFile,
           hasAnswer ? classes.hasAnswer : '',
           isResolved ? classes.hasResolved : ''
         )}
         onClick={onClick}>
+        <div
+          className={clsx(
+            classes.addIcon,
+            `justify-self-end opacity-${showAddIcon || !questionIsEmpty ? '100' : '0'}`
+          )}>
+          {!isResolved ?
+            (!questionIsEmpty ? (
+              <>
+                {!mediaFileIsEmpty && <AttachFile className={clsx(hasAnswer ? classes.colorHasAnswer : classes.colorHasInqIcon, classes.attachIcon)} />}
+                {hasAnswer ? <ReplyIcon className={clsx(classes.sizeIcon, hasAnswer ? classes.colorHasAnswer : classes.colorHasInqIcon)} /> : <HelpIcon className={clsx(classes.colorHasInqIcon)} />}
+              </>
+            ) : (
+              allowAddInquiry && (
+                <AddCircleIcon
+                  className={
+                    showAddIcon ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon)
+                  }
+                />
+              )
+            )) : <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)} />}
+        </div>
         <Grid
           container
           onMouseEnter={onMouseEnter}
