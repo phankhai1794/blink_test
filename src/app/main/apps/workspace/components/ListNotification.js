@@ -7,6 +7,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import MuiDialogContent from "@material-ui/core/DialogContent";
 
 import * as FormActions from '../store/actions/form';
+import * as InquiryActions from "../store/actions/inquiry";
 
 const mainColor = '#BD0F72';
 const darkColor = '#132535';
@@ -58,7 +59,9 @@ const ListNotification = () => {
   const dispatch = useDispatch();
   const openNotificationAttachmentList = useSelector(({ workspace }) => workspace.formReducer.openNotificationAttachmentList);
   const openNotificationInquiryList = useSelector(({ workspace }) => workspace.formReducer.openNotificationInquiryList);
+  const openNotificationAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openNotificationAmendmentList);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const user = useSelector(({ user }) => user);
   const [isExistingMedia, setExistingMedia] = useState(false);
 
   useEffect(() => {
@@ -77,16 +80,30 @@ const ListNotification = () => {
   const handleClose = () => {
     dispatch(FormActions.toggleOpenNotificationAttachmentList(false));
     dispatch(FormActions.toggleOpenNotificationInquiryList(false));
+    dispatch(FormActions.toggleOpenNotificationAmendmentList(false));
   };
 
   const handleAddAttachment = () => {
-    dispatch(FormActions.toggleAllInquiry(true));
+    if (openNotificationAmendmentList) {
+      dispatch(InquiryActions.addAmendment(null));
+      dispatch(FormActions.toggleAmendmentsList(true));
+    } else {
+      dispatch(FormActions.toggleAllInquiry(true));
+    }
     handleClose();
   };
-  const [label, pluralLabel] = openNotificationInquiryList ? ["Inquiry", "Inquiries"] : ["Attachment", "Attachments"];
+
+  let [label, pluralLabel] = ['', ''];
+  if (openNotificationInquiryList) {
+    [label, pluralLabel] = ["Inquiry", "Inquiries"];
+  } else if (openNotificationAttachmentList) {
+    [label, pluralLabel] = ["Attachment", "Attachments"];
+  } else if (openNotificationAmendmentList) {
+    [label, pluralLabel] = ["Amendment", "Amendments"];
+  }
 
   return (
-    <Dialog open={openNotificationAttachmentList || openNotificationInquiryList} onClose={handleClose} maxWidth="md">
+    <Dialog open={openNotificationAttachmentList || openNotificationInquiryList || openNotificationAmendmentList} onClose={handleClose} maxWidth="md">
       <MuiDialogTitle disableTypography className={classes.root}>
         <div style={{ display: 'flex' }}>
           <div style={{ width: '70%' }}>
@@ -108,26 +125,35 @@ const ListNotification = () => {
         </span>
         <span className={classes.secondSentence}>Please add {label} for missing information.</span>
       </MuiDialogContent>
-      {((inquiries.length == 0 && openNotificationInquiryList) || (inquiries.length > 0 && isExistingMedia)) && (
-        <div className={classes.container}>
-          <Button
-            style={{
-              width: 171,
-              height: 40,
-              color: '#FFFFFF',
-              backgroundColor: mainColor,
-              borderRadius: 8,
-              padding: '10px 13px',
-              textTransform: 'none',
-              fontFamily: 'Montserrat',
-              fontSize: 16,
-              fontWeight: 600
-            }}
-            onClick={handleAddAttachment}>
-            Add {label}
-          </Button>
-        </div>
-      )}
+
+      {
+        (
+          (openNotificationInquiryList && inquiries.length === 0)
+          ||
+          (openNotificationAttachmentList && inquiries.length > 0 && isExistingMedia)
+          ||
+          (openNotificationAmendmentList && user.userType === 'CUSTOMER')
+        ) && (
+          <div className={classes.container}>
+            <Button
+              style={{
+                width: 171,
+                height: 40,
+                color: '#FFFFFF',
+                backgroundColor: mainColor,
+                borderRadius: 8,
+                padding: '10px 13px',
+                textTransform: 'none',
+                fontFamily: 'Montserrat',
+                fontSize: 16,
+                fontWeight: 600
+              }}
+              onClick={handleAddAttachment}>
+              Add {label}
+            </Button>
+          </div>
+        )
+      }
     </Dialog>
   );
 };

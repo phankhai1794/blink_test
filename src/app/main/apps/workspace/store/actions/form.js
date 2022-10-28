@@ -6,6 +6,7 @@ export const OPEN_ALL_INQUIRY = 'OPEN_ALL_INQUIRY';
 export const TOGGLE_SAVE_INQUIRY = 'TOGGLE_SAVE_INQUIRY';
 export const TOGGLE_ADD_INQUIRY = 'TOGGLE_ADD_INQUIRY';
 export const TOGGLE_AMENDMENTS_LIST = 'TOGGLE_AMENDMENTS_LIST';
+export const OPEN_NOTIFICATION_AMENDMENT_LIST = 'OPEN_NOTIFICATION_AMENDMENT_LIST';
 export const RELOAD = 'RELOAD';
 export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 export const OPEN_EMAIL = 'OPEN_EMAIL';
@@ -113,6 +114,13 @@ export function toggleOpenNotificationAttachmentList(state) {
 export function toggleOpenNotificationInquiryList(state) {
   return {
     type: OPEN_NOTIFICATION_INQUIRY_LIST,
+    state
+  };
+}
+
+export function toggleOpenNotificationAmendmentList(state) {
+  return {
+    type: OPEN_NOTIFICATION_AMENDMENT_LIST,
     state
   };
 }

@@ -125,19 +125,19 @@ const BLWorkspace = (props) => {
   };
 
   // TODO: TBU Logic after create new reply amendment
-  useEffect(()=>{
+  useEffect(() => {
     const checkByField = (amendmentField, inq) => {
       return (inq.process === 'draft' && inq.field === amendmentField)
     };
     const optionsInquires = [...inquiries];
-    const oldAmendmentIndex = optionsInquires.findIndex(inq=>(inq.id === objectNewAmendment.oldAmendmentId || checkByField(objectNewAmendment.newAmendment.field, inq)));
-    if(oldAmendmentIndex !== -1) {
+    const oldAmendmentIndex = optionsInquires.findIndex(inq => (inq.id === objectNewAmendment.oldAmendmentId || checkByField(objectNewAmendment.newAmendment.field, inq)));
+    if (oldAmendmentIndex !== -1) {
       const tempID = optionsInquires[oldAmendmentIndex]?.id
-      optionsInquires[oldAmendmentIndex] = {...optionsInquires[oldAmendmentIndex], ...objectNewAmendment.newAmendment}
+      optionsInquires[oldAmendmentIndex] = { ...optionsInquires[oldAmendmentIndex], ...objectNewAmendment.newAmendment }
       optionsInquires[oldAmendmentIndex].id = tempID;
       dispatch(InquiryActions.setInquiries(optionsInquires));
     }
-  },[objectNewAmendment])
+  }, [objectNewAmendment])
 
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'autoSendMail') {
@@ -150,7 +150,7 @@ const BLWorkspace = (props) => {
           confirmPopupType: ''
         })
       );
-      dispatch(mailActions.autoSendMail(myBL,inquiries, metadata, content, form ));
+      dispatch(mailActions.autoSendMail(myBL, inquiries, metadata, content, form));
     }
   }, [confirmClick, form])
 
@@ -283,7 +283,7 @@ const BLWorkspace = (props) => {
 
   const countInq = (inqs, recevier) => {
     let count = 0;
-    inqs.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
+    inqs.forEach((inq) => inq.process === 'pending' && inq.receiver.includes(recevier) && (count += 1));
     return count;
   };
 
