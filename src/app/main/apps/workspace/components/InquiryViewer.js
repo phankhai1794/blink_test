@@ -160,6 +160,7 @@ const InquiryViewer = (props) => {
   const [isShowViewAll, setShowViewAll] = useState(false);
   const [isUploadFile, setIsUploadFile] = useState(false);
   const [disableSaveReply, setDisableSaveReply] = useState(false);
+  const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
 
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
@@ -279,6 +280,7 @@ const InquiryViewer = (props) => {
     } else {
       getCommentDraftBl(myBL.id, question.field)
         .then((res) => {
+          setEditOriginalAmendment(res.length === 1);
           const lastest = { ...question };
           if (res.length > 0) {
             const { content: contentField, mediaFile } = res[res.length - 1].content;
@@ -529,15 +531,15 @@ const InquiryViewer = (props) => {
       deleteDraftBLReply(replyRemove.id)
         .then(() => {
           // Case: Offshore reply customer's amendment first time => delete
-          if(comment.length === 3){
+          if (comment.length === 3) {
             const prevAmendment = {
               field: replyRemove.field,
-              state: comment[comment.length-2].state, 
-              creator: comment[comment.length-2].creator, 
-              updater: comment[comment.length-2].updater, 
-              createdAt: comment[comment.length-2].createdAt, 
-              content: comment[comment.length-2].content,
-              mediaFile: comment[comment.length-2].answersMedia,
+              state: comment[comment.length - 2].state,
+              creator: comment[comment.length - 2].creator,
+              updater: comment[comment.length - 2].updater,
+              createdAt: comment[comment.length - 2].createdAt,
+              content: comment[comment.length - 2].content,
+              mediaFile: comment[comment.length - 2].answersMedia,
               answerObj: []
             };
             dispatch(InquiryActions.setNewAmendment({ newAmendment: prevAmendment }));
@@ -852,6 +854,7 @@ const InquiryViewer = (props) => {
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
+          if (isEditOriginalAmendment) dispatch(InquiryActions.setContent({ ...content, [res.newAmendment?.field]: tempReply.answer.content }));
           // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
@@ -1233,7 +1236,7 @@ const InquiryViewer = (props) => {
                     onClick={() => reOpen(question?.id)}
                     classes={{ root: classes.button }}
                   >
-                      ReOpen
+                    ReOpen
                   </Button>
                 </div>
               </PermissionProvider>

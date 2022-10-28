@@ -13,6 +13,7 @@ const initialState = {
   openInqReview: false,
   openNotificationInquiryList: false,
   openNotificationAttachmentList: false,
+  openNotificationAmendmentList: false,
   openNotificationSubmitAnswer: false,
   openNotificationDeleteReply: false,
   openNotificationDeleteAmendment: false,
@@ -66,6 +67,9 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.OPEN_NOTIFICATION_INQUIRY_LIST: {
     return { ...state, openNotificationInquiryList: action.state };
+  }
+  case Actions.OPEN_NOTIFICATION_AMENDMENT_LIST: {
+    return { ...state, openNotificationAmendmentList: action.state };
   }
   case Actions.OPEN_NOTIFICATION_SUBMIT_ANSWER: {
     return { ...state, openNotificationSubmitAnswer: action.state };

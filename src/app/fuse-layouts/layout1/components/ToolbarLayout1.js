@@ -267,7 +267,9 @@ function ToolbarLayout1(props) {
   };
 
   const openAmendmentsList = () => {
-    dispatch(FormActions.toggleAmendmentsList(true));
+    if (amendmentsLength) {
+      dispatch(FormActions.toggleAmendmentsList(true));
+    } else dispatch(FormActions.toggleOpenNotificationAmendmentList(true));
   };
 
   const openAttachment = () => {
@@ -344,7 +346,7 @@ function ToolbarLayout1(props) {
               </Button>
             </PermissionProvider>
 
-            {myBL?.state?.includes('DRF_') && (
+            {myBL?.state?.includes('DRF_') && user?.userType !== 'ONSHORE' && (
               <Button
                 variant="text"
                 size="medium"
