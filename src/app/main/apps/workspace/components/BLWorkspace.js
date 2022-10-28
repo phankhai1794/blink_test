@@ -642,7 +642,7 @@ const BLWorkspace = (props) => {
             </Grid>
             <Grid item>
               <Label>
-                {`TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF PACKAGES AND`} <br></br>
+                {`TYPE OF MOVEMENT (IF MIXED, USE DESCRIPTION OF PACKAGES AND`} <br></br>
                 {`GOODS FIELD)`}
               </Label>
               <BLField id={getField(TYPE_OF_MOVEMENT)}>
