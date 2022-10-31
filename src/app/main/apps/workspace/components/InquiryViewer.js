@@ -1403,7 +1403,11 @@ const InquiryViewer = (props) => {
                           variant="contained"
                           color="primary"
                           onClick={onSaveReply}
-                          disabled={(!tempReply?.answer?.content && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0)) || disableSaveReply}
+                          disabled={
+                            (question.state === "AME_DRF" && !tempReply?.answer?.content)
+                            || (question.state !== "AME_DRF" && !tempReply?.answer?.content && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
+                            || disableSaveReply
+                          }
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
                         </Button>
