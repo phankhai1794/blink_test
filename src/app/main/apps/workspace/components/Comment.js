@@ -216,7 +216,7 @@ const Comment = (props) => {
               <UserInfo
                 name={question.creator.userName}
                 time={displayTime(question.createdAt)}
-                avatar={question.creator.avatar}
+                avatar={question.creator?.avatar}
               />
             </div>
             <Typography variant="h5">{question.name}</Typography>
@@ -276,7 +276,7 @@ const Comment = (props) => {
         return contentUI({
           userName: k.updater?.userName,
           createdAt: k.createdAt,
-          avatar: k.updater.avatar,
+          avatar: k.updater?.avatar,
           title: k.title || '',
           content: k.content,
           media: k.answersMedia,

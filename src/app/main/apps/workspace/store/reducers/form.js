@@ -11,11 +11,13 @@ const initialState = {
   openTrans: false,
   openEmail: false,
   openInqReview: false,
+  openNotificationInquiryList: false,
   openNotificationAttachmentList: false,
   openNotificationSubmitAnswer: false,
   openNotificationDeleteReply: false,
   openNotificationDeleteAmendment: false,
   enableSaveInquiriesList: true,
+  openAmendmentList: false,
   openConfirmPopup: false,
   confirmPopupMsg: '',
   confirmPopupType: '',
@@ -38,6 +40,9 @@ const formReducer = function (state = initialState, action) {
   case Actions.TOGGLE_SAVE_INQUIRY: {
     return { ...state, showSaveInquiry: action.state };
   }
+  case Actions.TOGGLE_AMENDMENTS_LIST: {
+    return { ...state, openAmendmentList: action.state };
+  }
   case Actions.TOGGLE_ADD_INQUIRY: {
     return { ...state, showAddInquiry: action.state };
   }
@@ -58,6 +63,9 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.OPEN_NOTIFICATION_ATTACHMENT_LIST: {
     return { ...state, openNotificationAttachmentList: action.state };
+  }
+  case Actions.OPEN_NOTIFICATION_INQUIRY_LIST: {
+    return { ...state, openNotificationInquiryList: action.state };
   }
   case Actions.OPEN_NOTIFICATION_SUBMIT_ANSWER: {
     return { ...state, openNotificationSubmitAnswer: action.state };

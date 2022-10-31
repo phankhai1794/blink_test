@@ -1,5 +1,5 @@
 import * as Actions from 'app/store/actions';
-import { VESSEL_VOYAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY } from '@shared/keyword';
+import { VVD_CODE, POD_CODE, DEL_CODE } from '@shared/keyword';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Icon, Button, Tabs, Tab, Select, MenuItem } from '@material-ui/core';
@@ -128,9 +128,9 @@ const SendInquiryForm = (props) => {
     return content[getField(keyword)] || ''
   };
 
-  const vvd = getValueField(VESSEL_VOYAGE)
-  const pod = getValueField(PORT_OF_DISCHARGE)
-  const del = getValueField(PLACE_OF_DELIVERY)
+  const vvd = getValueField(VVD_CODE)
+  const pod = getValueField(POD_CODE)
+  const del = getValueField(DEL_CODE)
   const bkgNo = mybl.bkgNo
 
   const checkNewInquiry = (type) => {
@@ -395,7 +395,8 @@ const SendInquiryForm = (props) => {
     <>
       <SubmitAnswerNotification
         open={openNotification}
-        msg='Your answer has been sent.'
+        iconType={<img src={`/assets/images/icons/vector.svg`} />}
+        msg='Your inquires have been sent successfully.'
         handleClose={() => setOpenNotification(false)}
       />
       <Form

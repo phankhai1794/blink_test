@@ -18,6 +18,14 @@ const MainWorkSpace = () => {
     );
   }, []);
 
+  (() => {
+    window.onpageshow = function(event) {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    };
+  })();
+
   return (
     <div className="flex flex-col flex-1 w-full">
       <FusePageSimple

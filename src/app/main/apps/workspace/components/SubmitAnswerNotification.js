@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Dialog, makeStyles } from "@material-ui/core";
+import { Button, Dialog, makeStyles, IconButton, Icon } from "@material-ui/core";
 import MuiDialogContent from "@material-ui/core/DialogContent";
 
 const mainColor = '#BD0F72';
@@ -21,7 +21,9 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 16,
     fontWeight: 600,
     lineHeight: '20px',
-    paddingLeft: 11.67
+    paddingLeft: 11.67,
+    display: 'flex',
+    flexDirection: 'column',
   },
   secondSentence: {
     color: darkColor,
@@ -41,19 +43,29 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const SubmitAnswerNotification = ({ msg, iconType, open, handleClose }) => {
+const SubmitAnswerNotification = ({ msg, msg2 = 'Thank you!', iconType, open, handleClose }) => {
   const classes = useStyles();
 
   return (
     <Dialog open={open} onClose={handleClose} classes={{ root: classes.dialog }}>
-      <MuiDialogContent classes={{ root: classes.dialogContent }}>
-        <div className='icon-successful'>
-          {iconType}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #8A97A3' }}>
+        <div style={{ color: '#515F6B', fontSize: '22px', fontWeight: '600', marginLeft: 20 }}>Notifications</div>
+        <div style={{ paddingRight: '2px', paddingTop: '5px' }}>
+          <IconButton aria-label="close" onClick={handleClose}>
+            <Icon>close</Icon>
+          </IconButton>
         </div>
-        <span className={classes.firstSentence}>
-          {msg}
-        </span>
-        <span className={classes.secondSentence}>Thank you!</span>
+      </div>
+      <MuiDialogContent classes={{ root: classes.dialogContent }}>
+        <div className={classes.firstSentence}>
+          <span>
+            {iconType}
+          </span>
+          <span>
+            {msg}
+          </span>
+        </div>
+        <span className={classes.secondSentence}>{msg2}</span>
       </MuiDialogContent>
       <div className={classes.container}>
         <Button

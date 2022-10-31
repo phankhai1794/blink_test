@@ -27,6 +27,9 @@ import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
+import ReactTable from "react-table";
+import "react-table/react-table.css";
+import $ from "jquery";
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -115,6 +118,7 @@ const useStyles = makeStyles((theme) => ({
   },
   text: {
     height: 40,
+    width: 158,
     border: '1px solid #BAC3CB',
     textAlign: 'center',
     color: '#132535'
@@ -200,22 +204,17 @@ const InquiryViewer = (props) => {
               if (['REP_Q_DRF', 'REP_A_DRF'].includes(filterOffshoreSent.state)) {
                 setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
               }
-              //
               lastest.state = filterOffshoreSent.state;
               lastest.updatedAt = filterOffshoreSent.updatedAt;
               if (user.role === 'Admin') {
                 if (filterOffshoreSent.state === 'REP_Q_SENT') {
                   setShowLabelSent(true);
-                  //
                   setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                   setStateReplyDraft(true)
                 }
                 if (filterOffshoreSent.state === 'REP_A_SENT') {
                   lastest.showIconReply = true;
-                }
-                if (lastest.state !== 'UPLOADED' && filterOffshoreSent.state === 'COMPL') {
-                  lastest.state = filterOffshoreSent.state
                 }
               } else {
                 if (filterOffshoreSent.state === 'REP_A_DRF') {
@@ -266,7 +265,8 @@ const InquiryViewer = (props) => {
                 lastest.showIconReply = true;
               } else {
                 if (lastest.state === 'REP_Q_DRF') {
-                  setSubmitLabel(true)
+                  setSubmitLabel(true);
+                  lastest.showIconEdit = true;
                 }
               }
               setQuestion(lastest);
@@ -339,11 +339,6 @@ const InquiryViewer = (props) => {
             // push new lastestComment if not already exist
             !listCommentDraft.find(ele => ele.id === lastestComment.id) && dispatch(InquiryActions.setListCommentDraft([...listCommentDraft, ...[lastestComment]]));
 
-            // push to inquiries to update the Inquiries List
-            const optionsInquires = [...inquiries].filter(inq => inq.id !== question.id);
-            optionsInquires.push(lastest);
-            dispatch(InquiryActions.setInquiries(optionsInquires));
-
             const comments = [{
               creator: { userName: user.displayName, avatar: null },
               updater: { userName: user.displayName, avatar: null },
@@ -360,6 +355,7 @@ const InquiryViewer = (props) => {
                 createdAt: r.createdAt,
                 answersMedia: mediaFile,
                 content: `"${content}"`,
+                state: r.state,
               });
             });
             setComment(comments);
@@ -436,7 +432,8 @@ const InquiryViewer = (props) => {
     optionsInquires.forEach(op => {
       if (['OPEN', 'INQ_SENT', 'AME_SENT'].includes(op.state)) {
         op.showIconReply = true;
-      } else if (['ANS_DRF'].includes(op.state)) {
+        op.showIconEditInq = true;
+      } else if (['ANS_DRF', 'ANS_SENT'].includes(op.state)) {
         op.showIconEdit = true;
       }
     });
@@ -452,14 +449,20 @@ const InquiryViewer = (props) => {
   const delayTime = (currentDate, addMinutes) => {
     let delayTiming = 0;
     if (currentDate.getTime() <= addMinutes.getTime()) {
-      delayTiming = Math.abs(addMinutes-currentDate);
+      delayTiming = Math.abs(addMinutes - currentDate);
       if (user.role === 'Admin') {
-        setStateReplyDraft(true);
+        if (['REP_Q_SENT'].includes(question.state)) {
+          setStateReplyDraft(true);
+        } else if (['ANS_DRF', 'INQ_SENT'].includes(question.state)) {
+          question.showIconEditInq = true
+        }
       }
       // const testMinutes = Math.round(delayTiming / (60 * 1000));
     } else if (addMinutes.getTime() <= currentDate.getTime()) {
       if (user.role === 'Guest') {
         question.showIconEdit = false;
+      } else if (user.role === 'Admin') {
+        question.showIconEditInq = false;
       }
       setStateReplyDraft(false);
       setTempReply({})
@@ -471,27 +474,36 @@ const InquiryViewer = (props) => {
     question?.state !== 'OPEN' && setAllowDeleteInq(false);
     //
     const delayMin = process.env.REACT_APP_EDIT_REPLY_DELAY_TIME;
+    // const delayMin = 80;
+    // console.log(question)
     // current date
     let currentDate = new Date();
-    // add 15min
-    let updatedDate = new Date(question.updatedAt);
-    let addMinutes = new Date(updatedDate.getTime() + delayMin * 60 * 1000);
     //
     let delayTiming = 0;
-    if (user.role === 'Admin' && ['REP_Q_SENT'].includes(question.state)) {
+    if (user.role === 'Admin' && ['REP_Q_SENT', 'INQ_SENT', 'ANS_DRF'].includes(question.state)) {
+      // add 15min
+      let updatedDate = new Date(question.lastEmail);
+      let addMinutes = new Date(updatedDate.getTime() + delayMin * 60 * 1000);
       delayTiming = delayTime(currentDate, addMinutes);
       // console.log(delayTiming);
-    } else if (user.role === 'Guest' && ['REP_A_SENT'].includes(question.state)) {
+    } else if (user.role === 'Guest' && ['REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) {
+      // add 15min
+      let updatedDate = new Date(question.updatedAt);
+      let addMinutes = new Date(updatedDate.getTime() + delayMin * 60 * 1000);
       delayTiming = delayTime(currentDate, addMinutes);
       // console.log(delayTiming);
     }
     let myInterval;
     if (delayTiming !== 0) {
       myInterval = setInterval(() => {
+        const opQuestion = { ...question };
         if (user.role === 'Guest') {
-          question.showIconEdit = false;
+          opQuestion.showIconEdit = false;
+        } else if (user.role === 'Admin') {
+          opQuestion.showIconEditInq = false;
         }
         setStateReplyDraft(false);
+        setQuestion(opQuestion);
       }, delayTiming);
     }
     return () => {
@@ -516,9 +528,25 @@ const InquiryViewer = (props) => {
     } else if (confirmPopupType === 'removeReply' && replyRemove) {
       deleteDraftBLReply(replyRemove.id)
         .then(() => {
+          // Case: Offshore reply customer's amendment first time => delete
+          if(comment.length === 3){
+            const prevAmendment = {
+              field: replyRemove.field,
+              state: comment[comment.length-2].state, 
+              creator: comment[comment.length-2].creator, 
+              updater: comment[comment.length-2].updater, 
+              createdAt: comment[comment.length-2].createdAt, 
+              content: comment[comment.length-2].content,
+              mediaFile: comment[comment.length-2].answersMedia,
+              answerObj: []
+            };
+            dispatch(InquiryActions.setNewAmendment({ newAmendment: prevAmendment }));
+          }
+          //
           dispatch(FormActions.toggleAllInquiry(false));
           dispatch(InquiryActions.setOneInq({}));
           dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+          dispatch(FormActions.toggleAmendmentsList(false));
 
           // Update state of listDraftComments for re-rendering UI
           let cloneListCommentDraft = listCommentDraft.filter(({ id }) => id !== replyRemove.id);
@@ -625,13 +653,23 @@ const InquiryViewer = (props) => {
 
   const onUpload = () => {
     const optionsInquires = [...inquiries];
-    const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     uploadOPUS(question.id)
       .then(() => {
-        // dispatch(FormActions.toggleReload());
         setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
+
+        // Update list inquiry
+        let editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
         optionsInquires[editedIndex].state = 'UPLOADED';
         dispatch(InquiryActions.setInquiries(optionsInquires));
+
+        // Update list amendment
+        if (optionsInquires[editedIndex].process === 'draft') {
+          const optionAmendment = [...listCommentDraft];
+          editedIndex = optionAmendment.findIndex(ame => question.id === ame.id);
+          optionAmendment[editedIndex].state = 'UPLOADED';
+          dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+        }
+
         dispatch(
           AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' })
         );
@@ -791,15 +829,16 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) { // Create amendment / reply
         const reqReply = {
           field: question.field,
-          content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
+          content: { content: tempReply.answer?.content || '', mediaFile: mediaListAmendment },
           mybl: myBL.id
         };
         saveEditedField({ ...reqReply })
-          .then(() => {
+          .then((res) => {
             setSaveComment(!isSaveComment);
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             setDisableSaveReply(false);
             dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
+            dispatch(InquiryActions.setNewAmendment({ oldAmendmentId: question.id, newAmendment: res.newAmendment }));
           })
           .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }
@@ -807,11 +846,12 @@ const InquiryViewer = (props) => {
         const reqReply = {
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
         };
-        updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(() => {
+        updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
           setSaveComment(!isSaveComment);
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
+          dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
@@ -856,7 +896,7 @@ const InquiryViewer = (props) => {
     const reply = { ...question };
     reply.showIconEdit = false;
     reply.showIconReply = false;
-    if (['ANS_DRF', 'ANS_SENT'].includes(question.state)) {
+    if (['ANS_DRF', 'ANS_SENT'].includes(question.state) || (user.role === 'Guest' && ['REP_Q_DRF'].includes(question.state))) {
       optionsInquires[editedIndex].showIconEdit = false;
       optionsInquires[editedIndex].showIconReply = false;
       optionsInquires[editedIndex].showIconAttachReplyFile = false;
@@ -946,7 +986,7 @@ const InquiryViewer = (props) => {
             <div style={{ paddingTop: 10 }} className="flex justify-between">
               <UserInfo
                 name={question.creator?.userName}
-                time={displayTime(question.createdAt)}
+                time={displayTime(question.updatedAt || question.createdAt)}
                 avatar={question.creator.avatar}
               />
               {user.role === 'Admin' ? ( // TODO
@@ -957,7 +997,7 @@ const InquiryViewer = (props) => {
                   >
                     <div className='flex' style={{ alignItems: 'center' }}>
                       <div style={{ marginRight: 15 }}>
-                        <span className={classes.labelStatus}>Resolved</span>
+                        <span className={classes.labelStatus}>{question.state === 'UPLOADED' ? 'Uploaded' : 'Resolved'}</span>
                       </div>
                       <Button
                         disabled={question.state === 'UPLOADED'}
@@ -1015,7 +1055,7 @@ const InquiryViewer = (props) => {
                   </div>
                   <PermissionProvider
                     action={PERMISSION.VIEW_EDIT_INQUIRY}
-                    extraCondition={question.state === 'OPEN'}>
+                    extraCondition={['OPEN', 'INQ_SENT', 'ANS_DRF'].includes(question.state) && question.showIconEditInq}>
                     <Tooltip title="Edit Inquiry">
                       <div onClick={() => changeToEditor(question)}>
                         <img
@@ -1042,13 +1082,14 @@ const InquiryViewer = (props) => {
               ) : (
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <div style={{ marginRight: 15 }}>
-                    {(['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state)) ? (
-                      <span className={classes.labelStatus}>Resolved</span>
-                    ) : (['ANS_SENT'].includes(question.state) || submitLabel) && (
-                      <span className={classes.labelStatus}>Submitted</span>
-                    )}
+                    {question.state === 'UPLOADED' ?
+                      <span className={classes.labelStatus}>Uploaded</span> :
+                      ['COMPL', 'RESOLVED'].includes(question.state) ?
+                        <span className={classes.labelStatus}>Resolved</span> :
+                        (['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>
+                    }
                   </div>
-                  {(((['ANS_DRF', 'REP_A_SENT'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
+                  {(((['ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
                     <>
                       <Tooltip title={'Edit'}>
                         <div onClick={() => handleEdit(question)}>
@@ -1131,7 +1172,7 @@ const InquiryViewer = (props) => {
 
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
-                ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
+                ((['OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
                   <ChoiceAnswer
                     questions={inquiries}
@@ -1141,7 +1182,7 @@ const InquiryViewer = (props) => {
                     currentQuestion={currentQuestion}
                   />
                 )}
-              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
+              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
                   <ParagraphAnswer
                     question={question}
@@ -1179,26 +1220,23 @@ const InquiryViewer = (props) => {
                   </Grid>
                 )}
               </Grid>
-              {/* TODO: Show Button ReOpen after UAT */}
-              {(question?.process === 'pending') &&
-                <PermissionProvider
-                  action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
-                  extraCondition={question.state === 'COMPL' || question.state === 'RESOLVED'}
-                >
-                  <div className='flex' style={{ alignItems: 'center' }}>
-                    <Button
-                      disabled={question.state === 'UPLOADED'}
-                      variant="contained"
-                      color="primary"
-                      onClick={() => reOpen(question?.id)}
-                      classes={{ root: classes.button }}
-                    >
-                      ReOpen
-                    </Button>
-                  </div>
-                </PermissionProvider>
-              }
 
+              <PermissionProvider
+                action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
+                extraCondition={question.state === 'COMPL' || question.state === 'RESOLVED'}
+              >
+                <div className='flex' style={{ alignItems: 'center' }}>
+                  <Button
+                    disabled={question.state === 'UPLOADED'}
+                    variant="contained"
+                    color="primary"
+                    onClick={() => reOpen(question?.id)}
+                    classes={{ root: classes.button }}
+                  >
+                      ReOpen
+                  </Button>
+                </div>
+              </PermissionProvider>
 
               {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} />
@@ -1427,12 +1465,20 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
   const getField = (field) => {
     return metadata.field?.[field] || '';
   };
+
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
   };
+
+  const getTypeName = (type) => {
+    return Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === type);
+  };
+
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
+
+  const [tableScrollTop, setTableScrollTop] = useState(0);
   const [values, setValues] = useState(getValueField(container) || [{}]);
   const inqType = getLabelById(metadata['inq_type_options'], question.inqType);
   const cdType =
@@ -1445,10 +1491,11 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
     setValues(temp);
     setTextResolve(temp);
   };
-  
+
   useEffect(() => {
     setValues(getValueField(container) || [{}]);
   }, [content]);
+
   /**
  * @description
  * Takes an Array<V>, and a grouping function,
@@ -1462,6 +1509,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
  */
   // export function groupBy<K, V>(list: Array<V>, keyGetter: (input: V) => K): Map<K, Array<V>> {
   //    const map = new Map<K, Array<V>>();
+
   function groupBy(list, keyGetter) {
     const map = new Map();
     list.forEach(item => {
@@ -1476,6 +1524,53 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
     return map;
   }
 
+  function makeData(len = 5553) {
+    return values;
+  }
+
+  const renderNewTB = () => {
+    const columns = [];
+    for (var key in values[0]) {
+      if (columns.length == 0) {
+        columns.push({
+          Header: getTypeName(key),
+          accessor: key,
+          width: 200,
+          className: "cell_frozen",
+          headerClassName: "frozen"
+        });
+      } else {
+        columns.push({
+          Header: getTypeName(key),
+          accessor: key,
+          width: 200,
+          headerClassName: "header_layout"
+        });
+      }
+    }
+    columns.push(columns.shift());
+
+    return <ReactTable
+      data={makeData()}
+      defaultPageSize={values.length}
+      columns={columns}
+      showPagination={false}
+      // className="-striped -highlight"
+      getTableProps={() => {
+        return {
+          onScroll: e => {
+            if (tableScrollTop === e.target.scrollTop) {
+              let left = e.target.scrollLeft > 0 ? e.target.scrollLeft : 0;
+              $(".ReactTable .rt-tr .frozen").css({ left: left });
+              $(".ReactTable .rt-tr .cell_frozen").css({ left: left });
+            } else {
+              setTableScrollTop(e.target.scrollTop);
+            }
+          }
+        };
+      }}
+    />
+  }
   const renderTB = () => {
     let td = [];
     const valueCopy = JSON.parse(JSON.stringify(values));
@@ -1554,9 +1649,7 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
 
   return (
     <>
-      {
-        renderTB()
-      }
+      {renderNewTB()}
     </>
   );
 };

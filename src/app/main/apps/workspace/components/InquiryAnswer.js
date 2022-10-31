@@ -161,7 +161,9 @@ const InquiryAnswer = (props) => {
             answerUpdate.confirmed = true;
             optionsInquires[editedIndex].answerObj = answersObj;
           }
-          optionsInquires[editedIndex].state = 'ANS_DRF';
+          if (optionsInquires[editedIndex].state === 'INQ_SENT') {
+            optionsInquires[editedIndex].state = 'ANS_DRF';
+          }
           //
           dispatch(InquiryActions.setInquiries(optionsInquires));
           setSave();
@@ -189,7 +191,9 @@ const InquiryAnswer = (props) => {
           answerUpdate.confirmed = true;
           optionsInquires[editedIndex].answerObj = answersObj;
         }
-        optionsInquires[editedIndex].state = 'ANS_DRF';
+        if (optionsInquires[editedIndex].state === 'INQ_SENT') {
+          optionsInquires[editedIndex].state = 'ANS_DRF';
+        }
         //
         dispatch(InquiryActions.setInquiries(optionsInquires));
         setSave();
@@ -228,7 +232,9 @@ const InquiryAnswer = (props) => {
         const answerUpdate = answersObj[answerIndex];
         answerUpdate.confirmed = true;
         optionsInquires[editedIndex].answerObj = question.answerObj;
-        optionsInquires[editedIndex].state = 'ANS_DRF';
+        if (optionsInquires[editedIndex].state === 'INQ_SENT') {
+          optionsInquires[editedIndex].state = 'ANS_DRF';
+        }
         //
         dispatch(InquiryActions.setInquiries(optionsInquires));
         setSave();
@@ -237,7 +243,9 @@ const InquiryAnswer = (props) => {
         if (question.answerObj.length) {
           optionsInquires[editedIndex].answerObj[0].content = question.paragraphAnswer.content;
         }
-        optionsInquires[editedIndex].state = 'ANS_DRF';
+        if (optionsInquires[editedIndex].state === 'INQ_SENT') {
+          optionsInquires[editedIndex].state = 'ANS_DRF';
+        }
         dispatch(InquiryActions.setInquiries(optionsInquires));
         setSave();
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));

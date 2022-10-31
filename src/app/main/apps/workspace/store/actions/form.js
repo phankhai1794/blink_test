@@ -5,6 +5,7 @@ export const OPEN_ATTACHMENT = 'OPEN_ATTACHMENT';
 export const OPEN_ALL_INQUIRY = 'OPEN_ALL_INQUIRY';
 export const TOGGLE_SAVE_INQUIRY = 'TOGGLE_SAVE_INQUIRY';
 export const TOGGLE_ADD_INQUIRY = 'TOGGLE_ADD_INQUIRY';
+export const TOGGLE_AMENDMENTS_LIST = 'TOGGLE_AMENDMENTS_LIST';
 export const RELOAD = 'RELOAD';
 export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 export const OPEN_EMAIL = 'OPEN_EMAIL';
@@ -18,6 +19,7 @@ export const ENABLE_SAVE_INQUIRIES = 'ENABLE_SAVE_INQUIRIES';
 export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
 export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
 export const OPEN_CREATE_AMENDMENT = 'OPEN_CREATE_AMENDMENT';
+export const OPEN_NOTIFICATION_INQUIRY_LIST = 'OPEN_NOTIFICATION_INQUIRY_LIST'
 
 export function setFullscreen(state) {
   return {
@@ -50,6 +52,13 @@ export function toggleInquiry(state) {
 export function toggleSaveInquiry(state) {
   return {
     type: TOGGLE_SAVE_INQUIRY,
+    state
+  };
+}
+
+export function toggleAmendmentsList(state) {
+  return {
+    type: TOGGLE_AMENDMENTS_LIST,
     state
   };
 }
@@ -97,6 +106,13 @@ export function toggleOpenInquiryReview(state) {
 export function toggleOpenNotificationAttachmentList(state) {
   return {
     type: OPEN_NOTIFICATION_ATTACHMENT_LIST,
+    state
+  };
+}
+
+export function toggleOpenNotificationInquiryList(state) {
+  return {
+    type: OPEN_NOTIFICATION_INQUIRY_LIST,
     state
   };
 }

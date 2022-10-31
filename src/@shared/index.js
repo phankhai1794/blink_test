@@ -72,7 +72,5 @@ export const COUNTRIES = [
 
 export const sentStatus = [
   ...['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT'], // inquiry status
-  ...['REP_SENT'] // draft status
+  ...['AME_SENT', 'REP_SENT'] // draft status
 ];
-
-export const statusCommentDrf = ['AME_DRF', 'AME_SENT', 'REP_DRF', 'REP_SENT'];

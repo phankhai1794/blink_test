@@ -20,6 +20,7 @@ import * as FormActions from '../store/actions/form';
 import * as TransActions from '../store/actions/transaction';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as DraftActions from '../store/actions/draft-bl';
+import * as mailActions from '../store/actions/mail';
 
 import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
@@ -33,7 +34,7 @@ import BLProcessNotification from './BLProcessNotification';
 import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
 import TableCD from './TableCD';
 import TableCM from './TableCM';
-import AttachmentListNotification from './AttachmentListNotification';
+import ListNotification from './ListNotification';
 import SubmitAnswerNotification from "./SubmitAnswerNotification";
 
 
@@ -88,9 +89,12 @@ const BLWorkspace = (props) => {
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
+  const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const openAmendmentForm = useSelector(({ workspace }) => workspace.formReducer.openAmendmentForm);
   const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
+  const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
+  const [confirmClick, form] = useSelector(({ workspace }) => [workspace.formReducer.confirmClick, workspace.formReducer.form]);
 
   const transAutoSaveStatus = useSelector(
     ({ workspace }) => workspace.transReducer.transAutoSaveStatus
@@ -103,6 +107,7 @@ const BLWorkspace = (props) => {
   const openNotificationReply = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteReply);
   const openNotificationBLWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning);
   const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
+  const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -119,6 +124,36 @@ const BLWorkspace = (props) => {
     return content[getField(keyword)] || '';
   };
 
+  // TODO: TBU Logic after create new reply amendment
+  useEffect(()=>{
+    const checkByField = (amendmentField, inq) => {
+      return (inq.process === 'draft' && inq.field === amendmentField)
+    };
+    const optionsInquires = [...inquiries];
+    const oldAmendmentIndex = optionsInquires.findIndex(inq=>(inq.id === objectNewAmendment.oldAmendmentId || checkByField(objectNewAmendment.newAmendment.field, inq)));
+    if(oldAmendmentIndex !== -1) {
+      const tempID = optionsInquires[oldAmendmentIndex]?.id
+      optionsInquires[oldAmendmentIndex] = {...optionsInquires[oldAmendmentIndex], ...objectNewAmendment.newAmendment}
+      optionsInquires[oldAmendmentIndex].id = tempID;
+      dispatch(InquiryActions.setInquiries(optionsInquires));
+    }
+  },[objectNewAmendment])
+
+  useEffect(() => {
+    if (confirmClick && confirmPopupType === 'autoSendMail') {
+      dispatch(
+        FormActions.openConfirmPopup({
+          openConfirmPopup: false,
+          confirmClick: false,
+          confirmPopupMsg: '',
+          form: {},
+          confirmPopupType: ''
+        })
+      );
+      dispatch(mailActions.autoSendMail(myBL,inquiries, metadata, content, form ));
+    }
+  }, [confirmClick, form])
+
   useEffect(() => {
     const unloadCallback = (event) => {
       if (!isLoading) {
@@ -131,20 +166,13 @@ const BLWorkspace = (props) => {
     return () => window.removeEventListener('beforeunload', unloadCallback);
   }, [isLoading]);
 
-  useEffect(() => {
-    setInterval(() => {
-      if (myBL.id && transAutoSaveStatus === 'start') {
-        dispatch(TransActions.BlTrans(myBL.id, content));
-      }
-    }, 60000);
-  }, [transAutoSaveStatus, myBL]);
 
   const checkBLSameRequest = async (socket, bl) => {
     if (bl && userInfo) {
       socket.emit('user_processing_in', {
         mybl: bl,
         type: 'warning_duplicate',
-        email: userInfo.email,
+        userName: userInfo.displayName,
         role: userInfo.role,
       });
       console.log(`socket.emit('user_processing_in'):`)
@@ -157,7 +185,7 @@ const BLWorkspace = (props) => {
         let excludeFirstUser = false;
         if (data.processingBy.length > 1) {
           data.processingBy.forEach((p) => {
-            if (userInfo.email === data.processingBy[0]) {
+            if (userInfo.displayName === data.processingBy[0]) {
               excludeFirstUser = true;
             }
           });
@@ -168,7 +196,7 @@ const BLWorkspace = (props) => {
               permissions: permissionViewer
             };
             // show popup for lastest user
-            if (userInfo.email === data.processingBy[data.processingBy.length - 1]) {
+            if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
               dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
             }
           } else {
@@ -177,6 +205,7 @@ const BLWorkspace = (props) => {
               ...assignPermissionViewer,
               permissions: permissionAssign
             };
+            dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
           }
         } else if (data.processingBy.length === 1) {
           // assign permission
@@ -184,6 +213,7 @@ const BLWorkspace = (props) => {
             ...assignPermissionViewer,
             permissions: permissionAssign
           };
+          dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
         }
         localStorage.setItem('USER', JSON.stringify(assignPermissionViewer));
       });
@@ -201,16 +231,16 @@ const BLWorkspace = (props) => {
       checkBLSameRequest(socket, bkgNo);
     }
     else if (props.myBL) {
+      checkBLSameRequest(socket, props.myBL?.id);
       getBlInfo(props.myBL?.id).then(res => {
         const { id, state, bkgNo } = res.myBL;
         dispatch(InquiryActions.setMyBL({ id, state, bkgNo }));
-        checkBLSameRequest(socket, bkgNo);
       });
     }
 
     return () => {
-      dispatch(FormActions.toggleReload());
       disconnectSocket(socket);
+      dispatch(FormActions.toggleReload());
 
       if (userInfo && userInfo.role === 'Admin') {
         getPermissionByRole('Admin').then(data => {
@@ -269,12 +299,15 @@ const BLWorkspace = (props) => {
     switch (inquiry.field) {
     case 'INQUIRY_LIST':
       return {
-        status: openAllInquiry,
+        status: openAllInquiry || openAmendmentList,
         tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
         nums: user.role === 'Admin' ? [countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
-        toggleForm: (status) => dispatch(FormActions.toggleAllInquiry(status)),
-        fabTitle: 'Inquiries List',
-        title: 'Inquiries List',
+        toggleForm: (status) => {
+          dispatch(FormActions.toggleAllInquiry(status));
+          dispatch(FormActions.toggleAmendmentsList(status))
+        },
+        fabTitle: openAllInquiry ? 'Inquiries List' : 'Amendments List',
+        title: openAllInquiry ? 'Inquiries List' : 'Amendments List',
         field: 'INQUIRY_LIST',
         showBtnSend: true,
         disableSendBtn: disableSendBtn,
@@ -405,25 +438,38 @@ const BLWorkspace = (props) => {
     } else if (openNotificationAmendment) {
       return 'Your amendment has been deleted.'
     } else if (openNotificationBLWarning.status) {
-      return `The BL is opening by ${openNotificationBLWarning.userName} .Please wait for ${openNotificationBLWarning.userName} complete his/her work`
+      return (
+        <>
+          <img style={{ verticalAlign: 'middle' }} src={`/assets/images/icons/warning.svg`} />
+          <span>{`The BL is opening by [${openNotificationBLWarning.userName}].`}</span>
+        </>
+      )
     }
   };
 
-  const renderIconType = () => {
+  const renderMsgNoti2 = () => {
     if (openNotificationBLWarning.status) {
-      return <img src={`/assets/images/icons/warning.svg`} />;
-    } else if (openNotification || openNotificationReply || openNotificationAmendment) {
+      return `Please wait for ${openNotificationBLWarning.userName} complete his/her work!`
+    };
+    return 'Thank you!'
+  };
+
+  const renderIconType = () => {
+    if (openNotification || openNotificationReply || openNotificationAmendment) {
       return <img src={`/assets/images/icons/vector.svg`} />;
     }
+    return null
   }
 
   return (
     <>
       <BLProcessNotification />
-      <AttachmentListNotification />
+      <ListNotification />
       <SubmitAnswerNotification
         open={openNotification || openNotificationReply || openNotificationAmendment || openNotificationBLWarning.status}
         msg={renderMsgNoti()}
+        // msg2={`Please wait for ${openNotificationBLWarning.userName} complete his/her work!`}
+        msg2={renderMsgNoti2()}
         iconType={renderIconType()}
         handleClose={() => {
           dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false));
@@ -596,7 +642,7 @@ const BLWorkspace = (props) => {
             </Grid>
             <Grid item>
               <Label>
-                {`TYPE OF MOMENT (IF MIXED, USE DESCRIPTION OF PACKAGES AND`} <br></br>
+                {`TYPE OF MOVEMENT (IF MIXED, USE DESCRIPTION OF PACKAGES AND`} <br></br>
                 {`GOODS FIELD)`}
               </Label>
               <BLField id={getField(TYPE_OF_MOVEMENT)}>

@@ -1,6 +1,6 @@
 import { getLabelById, sentStatus } from '@shared';
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Card,
   Typography,
@@ -17,6 +17,7 @@ import * as FormActions from '../store/actions/form';
 import InquiryEditor from './InquiryEditor';
 import InquiryViewer from './InquiryViewer';
 import InquiryAnswer from './InquiryAnswer';
+import AmendmentEditor from "./AmendmentEditor";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -81,6 +82,9 @@ const useStyles = makeStyles((theme) => ({
     borderLeft: '2px solid',
     borderColor: '#DC2626',
     paddingLeft: '2rem',
+    '&.uploaded': {
+      borderColor: '#00506D'
+    },
     '&.resolved': {
       borderColor: '#36B37E'
     },
@@ -159,16 +163,28 @@ const AllInquiry = (props) => {
   const { receiver, openInquiryReview, field } = props;
   const classes = useStyles();
   const [isSaved, setSaved] = useState(false);
-  const [inquiryCopy, currentEditInq, metadata, isShowBackground] = useSelector(({ workspace }) => [
+  const [inquiryCopy, currentEditInq, metadata, isShowBackground, currentAmendment] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.isShowBackground,
+    workspace.inquiryReducer.currentAmendment,
   ]);
-  const inquiries = openInquiryReview ? inquiryCopy.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF') : inquiryCopy
+  const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
+  const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
+  let inquiries = inquiryCopy;
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
+  const inputAddAmendmentEndRef = useRef(null);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+
+  if (openAllInquiry) {
+    inquiries = inquiries.filter(inq => inq.process === 'pending');
+  } else if (openAmendmentList) {
+    inquiries = inquiries.filter(inq => inq.process === 'draft');
+  } else if (openInquiryReview) {
+    inquiries = inquiries.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF');
+  }
 
   let CURRENT_NUMBER = 0;
 
@@ -249,6 +265,12 @@ const AllInquiry = (props) => {
     resetActionAllInquiry(q, false);
   };
 
+  useEffect(() => {
+    if (currentAmendment !== undefined && inputAddAmendmentEndRef.current) {
+      inputAddAmendmentEndRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [currentAmendment]);
+
   return (
     <>
       {openInquiryReview && !inquiries.length &&
@@ -299,7 +321,8 @@ const AllInquiry = (props) => {
                 <div
                   className={clsx(
                     classes.boxItem,
-                    (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
+                    (q.state === 'UPLOADED') && 'uploaded',
+                    ['COMPL', 'RESOLVED'].includes(q.state) && 'resolved',
                     [...sentStatus, ...['REP_DRF']].includes(q.state) && 'offshoreReply'
                   )}>
                   <div style={{ marginBottom: '12px' }}>
@@ -323,7 +346,8 @@ const AllInquiry = (props) => {
                 <div
                   className={clsx(
                     classes.boxItem,
-                    (q.state === 'COMPL' || q.state === 'UPLOADED') && 'resolved',
+                    (q.state === 'UPLOADED') && 'uploaded',
+                    (q.state === 'COMPL') && 'resolved',
                     !['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(q.state) && 'customerReply',
                   )}>
                   <div style={{ marginBottom: '12px' }}>
@@ -358,6 +382,13 @@ const AllInquiry = (props) => {
             );
           }
         })}
+        <div ref={inputAddAmendmentEndRef}>
+          {props.user !== 'workspace' && currentAmendment !== undefined && (
+            <div style={{ marginTop: 30 }}>
+              <AmendmentEditor />
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

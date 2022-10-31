@@ -18,9 +18,12 @@ import { Box, Tabs, Tab, Divider, Link, Chip, Button } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import OpenInNew from '@material-ui/icons/OpenInNew';
+import { getMail } from 'app/services/mailService';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
+import * as mailActions from '../store/actions/mail';
 
 import PopoverFooter from './PopoverFooter';
 import PopupConfirmSubmit from "./PopupConfirmSubmit";
@@ -168,6 +171,12 @@ const useStyles = makeStyles(() => ({
   colorCountBtn: {
     background: '#FDF2F2'
   },
+  buttonProgress: {
+    color: 'red',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+  },
 }));
 
 const LinkButton = ({ text, disable, handleClick }) => {
@@ -214,7 +223,6 @@ export default function Form(props) {
     tabs,
     popoverfooter,
     showBtnSend,
-    disableSendBtn,
     nums
   } = props;
 
@@ -224,9 +232,8 @@ export default function Form(props) {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const userType = useSelector(({ user }) => user.userType);
-
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
-
+  
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -235,14 +242,22 @@ export default function Form(props) {
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
   const currentAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.currentAmendment);
+  const isLoading = useSelector(({ workspace }) => workspace.mailReducer.isLoading);
+  const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
+  const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
 
   const [openFab, setOpenFab] = useState(false);
+  const [disableSend, setDisableSend] = useState(!enableSend);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const classes = useStyles({ isFullScreen, style: props.style });
   const classesHover = useStyles();
   const [idBtn, setIdBtn] = useState('');
   const [checkSubmit, setCheckSubmit] = useState(true);
   const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    setDisableSend(!enableSend)
+  }, [enableSend]);
 
   const handleOpenFab = () => {
     setIdBtn(currentField);
@@ -263,7 +278,7 @@ export default function Form(props) {
       setOpenFab(false);
     }
   };
-
+ 
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
   };
@@ -339,15 +354,48 @@ export default function Form(props) {
   };
 
   const sendMailClick = () => {
-    toggleForm(false);
-    dispatch(FormActions.toggleOpenEmail(true));
-    dispatch(InquiryActions.setOneInq({}));
+    setDisableSend(true);
+    getMail(myBL.id).then((res) => {
+      if (res.data.length) {
+        let tags = {}, toCustomer = [], toOnshore = [];
+        // Offshore
+        res.data[0]?.toCustomer?.length && res.data[0].toCustomer.forEach(customer => {
+          toCustomer.push(customer.email)
+        });
+        // Onshore
+        res.data[0]?.toOnshore?.length && res.data[0].toOnshore.forEach(onshore => {
+          toOnshore.push(onshore.email)
+        });
+        toCustomer.length && (tags.toCustomer = toCustomer);
+        toOnshore.length && (tags.toOnshore = toOnshore);
+        setDisableSend(false);
+        dispatch(
+          FormActions.openConfirmPopup({
+            openConfirmPopup: true,
+            form: { toCustomer: tags.toCustomer ? tags.toCustomer.join(',') : '', toOnshore: tags.toOnshore ? tags.toOnshore.join(',') : '' },
+            confirmPopupMsg: 'Are you sure you want to send this email?',
+            confirmPopupType: 'autoSendMail'
+          })
+        );
+      }
+      else{
+        toggleForm(false);
+        dispatch(FormActions.toggleOpenEmail(true));
+        dispatch(InquiryActions.setOneInq({}));
+      }
+    }).catch((error) => {
+      console.error(error)
+    });
+
   };
 
   const checkEnableBtnAddAmendment = () => {
     const filter = inquiries.filter(inq => inq.field === currentField);
-    if (!filter.length) return false;
-    return !filter.some(inq => inq.process === 'draft');
+    if (!openAmendmentList) {
+      if (!filter.length) return false;
+      return !filter.some(inq => inq.process === 'draft');
+    }
+    return true;
   }
 
   const getField = (keyword) => {
@@ -399,7 +447,7 @@ export default function Form(props) {
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
-        {tabs && nums && nums.some(num => num > 0) && (
+        {tabs && nums && nums.some(num => num > 0) && !openAmendmentList && (
           <Box style={{ marginLeft: 20, marginRight: 20, borderBottom: '1px solid #515F6B' }} sx={{}}>
             <Tabs
               indicatorColor="primary"
@@ -451,7 +499,10 @@ export default function Form(props) {
         {customActions == null && (
           <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
-              <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
+              <PermissionProvider
+                action={PERMISSION.INQUIRY_CREATE_INQUIRY}
+                extraCondition={!openAmendmentList}
+              >
                 <LinkButton
                   text="Add Inquiry"
                   disable={currentEditInq}
@@ -486,15 +537,19 @@ export default function Form(props) {
                       fontWeight: 'bold',
                       width: 120,
                       color: 'white',
-                      backgroundColor: disableSendBtn ? '#CCD3D1' : '#bd1874',
+                      backgroundColor: disableSend || isLoading ? '#CCD3D1' : '#bd1874',
                       borderRadius: '8px',
                       fontFamily: 'Montserrat'
                     }}
-                    disabled={disableSendBtn}
+                    disabled={disableSend || isLoading}
                     onClick={sendMailClick}
                   >
                     Send
                   </Button>
+                  {isLoading && <CircularProgress size={24} style={{
+                    color: 'red',
+                    position: 'absolute',
+                  }} />}
                 </div>
               </PermissionProvider> :
               <div style={{ marginLeft: '2rem' }}>

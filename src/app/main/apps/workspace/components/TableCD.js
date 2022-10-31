@@ -21,6 +21,7 @@ import * as InquiryActions from '../store/actions/inquiry';
 
 import BLField from './BLField';
 import Label from './FieldLabel';
+import ReplyIcon from "@material-ui/icons/Reply";
 
 const red = '#DC2626';
 const pink = '#BD0F72';
@@ -32,7 +33,8 @@ const useStyles = makeStyles((theme) => ({
   addIcon: {
     position: 'relative',
     left: '98%',
-    fontSize: '20px'
+    fontSize: '20px',
+    top: '3%'
   },
   colorHasInqIcon: {
     color: `${red} !important`
@@ -98,7 +100,6 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
 
 const TableCD = (props) => {
   const { id, containerDetail } = props;
@@ -110,7 +111,12 @@ const TableCD = (props) => {
   const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
-  const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const user = useSelector(({ user }) => user);
+
+  const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
+  const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
+
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
 
@@ -149,6 +155,12 @@ const TableCD = (props) => {
       }
       dispatch(FormActions.toggleCreateInquiry(true));
     }
+    else if (
+      allowCreateAmendment
+      && myBL?.state?.includes('DRF_')
+      && user.userType === 'CUSTOMER' // Allow only customer to create amendment
+    ) dispatch(FormActions.toggleCreateAmendment(true));
+
     dispatch(InquiryActions.setField(id));
   };
 
@@ -172,34 +184,32 @@ const TableCD = (props) => {
     <>
       <div
         className={clsx(
-          classes.addIcon,
-          `justify-self-end opacity-${showAddIcon || !questionIsEmpty ? '100' : '0'}`
-        )}>
-        {!isResolved ?
-          (!questionIsEmpty ? (
-            <>
-              {!mediaFileIsEmpty && (
-                <AttachFile className={clsx(classes.colorHasInqIcon, classes.attachIcon)} />
-              )}
-              <HelpIcon className={clsx(classes.colorHasInqIcon)} />
-            </>
-          ) : (
-            allowAddInquiry && (
-              <AddCircleIcon
-                className={
-                  showAddIcon ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon)
-                }
-              />
-            )
-          )): <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)}/>}
-      </div>
-      <div
-        className={clsx(
           !questionIsEmpty & !hasAnswer & !isResolved ? classes.hasInq : classes.enterTableFile,
           hasAnswer ? classes.hasAnswer : '',
           isResolved ? classes.hasResolved : ''
         )}
         onClick={onClick}>
+        <div
+          className={clsx(
+            classes.addIcon,
+            `justify-self-end opacity-${showAddIcon || !questionIsEmpty ? '100' : '0'}`
+          )}>
+          {!isResolved ?
+            (!questionIsEmpty ? (
+              <>
+                {!mediaFileIsEmpty && <AttachFile className={clsx(hasAnswer ? classes.colorHasAnswer : classes.colorHasInqIcon, classes.attachIcon)} />}
+                {hasAnswer ? <ReplyIcon className={clsx(classes.sizeIcon, hasAnswer ? classes.colorHasAnswer : classes.colorHasInqIcon)} /> : <HelpIcon className={clsx(classes.colorHasInqIcon)} />}
+              </>
+            ) : (
+              allowAddInquiry && (
+                <AddCircleIcon
+                  className={
+                    showAddIcon ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon)
+                  }
+                />
+              )
+            )) : <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)} />}
+        </div>
         <Grid
           container
           onMouseEnter={onMouseEnter}
@@ -207,53 +217,53 @@ const TableCD = (props) => {
           className="px-8 justify-between">
           <Grid container spacing={2}>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)} style={{marginLeft:'15px'}}>CONTAINER NUMBER</Label>
+              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '15px' }}>CONTAINER NUMBER</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)} style ={{marginLeft: '75px'}}>SEAL</Label>
+              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '75px' }}>SEAL</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)} style ={{marginLeft: '75px'}}>TYPE</Label>
+              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '75px' }}>TYPE</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)} style ={{marginLeft: '55px'}}>PACKAGE</Label>
+              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '55px' }}>PACKAGE</Label>
             </Grid>
             <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)} style ={{marginLeft: '60px'}}>WEIGHT</Label>
+              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '60px' }}>WEIGHT</Label>
             </Grid>
             <Grid container item xs={1}>
-              <Label className={clsx(classes.labelMargin)} style ={{marginLeft: '30px'}}>MEASUREMENT</Label>
+              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '30px' }}>MEASUREMENT</Label>
             </Grid>
             {containerDetail?.length > 0 ? (
               containerDetail.map((cd, index) => (
                 <Grid container spacing={2} className="px-8 py-2" key={index}>
                   <Grid item xs={2}>
-                    <BLField disableClick={true}>
+                    <BLField >
                       {cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}
                     </BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField disableClick={true}>
+                    <BLField >
                       {cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}
                     </BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField disableClick={true}>
+                    <BLField >
                       {cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}
                     </BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField disableClick={true}>
+                    <BLField >
                       {cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}
                     </BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField disableClick={true}>
+                    <BLField >
                       {cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}
                     </BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField disableClick={true}>
+                    <BLField >
                       {cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}
                     </BLField>
                   </Grid>
@@ -262,22 +272,22 @@ const TableCD = (props) => {
             ) : (
               <Grid container spacing={2} className="px-8 py-2">
                 <Grid item xs={2}>
-                  <BLField disableClick={true}></BLField>
+                  <BLField ></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true}></BLField>
+                  <BLField ></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true}></BLField>
+                  <BLField ></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true}></BLField>
+                  <BLField ></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true}></BLField>
+                  <BLField ></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true}></BLField>
+                  <BLField ></BLField>
                 </Grid>
               </Grid>
             )}

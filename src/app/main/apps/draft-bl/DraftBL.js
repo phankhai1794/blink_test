@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import history from '@history';
 import _ from 'lodash';
-import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDING, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, COMMODITY_CODE, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED, CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT } from '@shared/keyword';
+import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDING, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, COMMODITY_CODE, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT } from '@shared/keyword';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
@@ -209,18 +209,6 @@ const DraftPage = (props) => {
 
   const getInqType = (field) => {
     return metadata ? metadata.inq_type[field] : '';
-  };
-
-  const breakCMPackage = (value) => {
-    let [first, ...rest] = value.split(' ');
-    rest = rest.join(' ');
-    return (
-      <Grid item style={{ textAlign: 'end' }}>
-        <span>{first}</span>
-        <br />
-        <span>{rest}</span>
-      </Grid>
-    )
   };
 
   useEffect(() => {
@@ -506,10 +494,7 @@ const DraftPage = (props) => {
                   {containersDetail &&
                     containersDetail.map((cd, idx) => (
                       <span key={idx} style={{ whiteSpace: 'pre' }}>
-                        {`${cd[getInqType('Container Number')]}    / ${cd[getInqType('Container Seal')]
-                        }    /  ${cd[getInqType('Container Package')]}  /  ${cd[getInqType('Container Type')]
-                        }  /  ${cd[getInqType('Container Weight')]}  /  ${cd[getInqType('Container Measurement')]
-                        }`}
+                        {`${cd[getInqType(CONTAINER_NUMBER)] || ''}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${cd[getInqType(CONTAINER_PACKAGE_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_TYPE) || '']}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
                         <br />
                       </span>
                     ))}
@@ -533,7 +518,11 @@ const DraftPage = (props) => {
                       {cm[getInqType(CM_MARK)]}
                     </Grid>
                     <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
-                      {breakCMPackage(cm[getInqType(CM_PACKAGE)])}
+                      <Grid item style={{ textAlign: 'end' }}>
+                        <span>{cm[getInqType(CM_PACKAGE)]}</span>
+                        <br />
+                        <span>{cm[getInqType(CM_PACKAGE_UNIT)]}</span>
+                      </Grid>
                     </Grid>
                     <Grid item xs={1} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
                     </Grid>
@@ -541,10 +530,10 @@ const DraftPage = (props) => {
                       {cm[getInqType(CM_DESCRIPTION)]}
                     </Grid>
                     <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'end', padding: '8px' }}>
-                      {cm[getInqType(CM_WEIGHT)]}
+                      {`${cm[getInqType(CM_WEIGHT)]} ${cm[getInqType(CM_WEIGHT_UNIT)]}`}
                     </Grid>
                     <Grid item xs={2} style={{ textAlign: 'end', padding: '8px' }}>
-                      {cm[getInqType(CM_MEASUREMENT)]}
+                      {`${cm[getInqType(CM_MEASUREMENT)]} ${cm[getInqType(CM_MEASUREMENT_UNIT)]}`}
                     </Grid>
                   </Grid>
                 )) :

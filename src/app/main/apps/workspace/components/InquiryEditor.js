@@ -86,6 +86,19 @@ const useStyles = makeStyles((theme) => ({
   positionBtnNotImg: {
     left: '0',
     top: '4rem'
+  },
+  form: {
+    '& .fuse-chip-select--is-disabled': {
+      '& fieldset': {
+        borderColor: 'rgba(0, 0, 0, 0.38)'
+      },
+      '& .MuiInputBase-input p': {
+        color: 'rgba(0, 0, 0, 0.38)'
+      },
+      '& .MuiSvgIcon-root': {
+        color: 'rgba(0, 0, 0, 0.38)'
+      }
+    }
   }
 }));
 
@@ -119,8 +132,7 @@ const InquiryEditor = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-
-  const [fieldType, setFieldType] = useState(metadata.field_options);
+  const [fieldType, setFieldType] = useState(metadata.field_options.filter(data => !['vvdCode', 'podCode', 'delCode'].includes(data.keyword)));
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
   );
@@ -462,11 +474,13 @@ const InquiryEditor = (props) => {
               value="customer"
               control={<Radio color={'primary'} />}
               label="Customer"
+              disabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
             />
             <FormControlLabel
               value="onshore"
               control={<Radio color={'primary'} />}
               label="Onshore"
+              disabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
             />
           </RadioGroup>
 
@@ -474,13 +488,14 @@ const InquiryEditor = (props) => {
         </FormControl>
       </div>
       {currentEditInq && (
-        <>
+        <div className={classes.form}>
           <Grid container spacing={4}>
             <Grid item xs={4}>
               <FormControl error={!valid.field}>
                 <FuseChipSelect
                   customStyle={styles(fullscreen ? 320 : 295)}
                   value={fieldValue}
+                  isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleFieldChange}
                   placeholder="Select Field Type"
                   textFieldProps={{
@@ -501,6 +516,7 @@ const InquiryEditor = (props) => {
                 <FuseChipSelect
                   value={valueType}
                   customStyle={styles(fullscreen ? 330 : 295)}
+                  isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleTypeChange}
                   placeholder="Type of Inquiry"
                   textFieldProps={{
@@ -521,6 +537,7 @@ const InquiryEditor = (props) => {
                 <FuseChipSelect
                   value={valueAnsType}
                   customStyle={styles(fullscreen ? 330 : 295)}
+                  isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleAnswerTypeChange}
                   placeholder="Type of Question"
                   textFieldProps={{
@@ -579,23 +596,23 @@ const InquiryEditor = (props) => {
               ))}
           </>
           <>{user.role !== 'Admin' &&
-              <>
-                {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-                {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach
-                        file={file}
-                        field={currentEditInq.field}
-                        style={{ margin: '2.5rem' }}
-                        isAnswer={true}
-                      />
-                    ) : (
-                      <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
-                    )}
-                  </div>
-                ))}
-              </>
+            <>
+              {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+              {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
+                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                    <ImageAttach
+                      file={file}
+                      field={currentEditInq.field}
+                      style={{ margin: '2.5rem' }}
+                      isAnswer={true}
+                    />
+                  ) : (
+                    <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
+                  )}
+                </div>
+              ))}
+            </>
           }
           </>
           <div className="flex">
@@ -616,7 +633,7 @@ const InquiryEditor = (props) => {
               </Button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </>
   );

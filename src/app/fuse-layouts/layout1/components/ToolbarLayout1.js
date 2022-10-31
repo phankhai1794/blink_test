@@ -100,6 +100,8 @@ function ToolbarLayout1(props) {
     header.validToken
   ]);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const [amendmentsLength, setAmendmentLength] = useState();
+  const [inquiryLength, setInquiryLength] = useState();
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const [open, setOpen] = useState(false);
   const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
@@ -122,6 +124,7 @@ function ToolbarLayout1(props) {
     }
     let getAttachmentFiles = [];
     const inquiriesPendingProcess = optionInquiries.filter(op => op.process === 'pending');
+    setInquiryLength(inquiriesPendingProcess.length);
     inquiries.forEach((e) => {
       const mediaFile = e.mediaFile.map((f) => {
         return {
@@ -136,7 +139,7 @@ function ToolbarLayout1(props) {
       getCommentDraftBl(myBL.id, e.field).then((res) => {
         if (res.length > 0) {
           res.forEach((r) => {
-            const attachmentAmendment = r.content.mediaFile.map ((f) => {
+            const attachmentAmendment = r.content.mediaFile.map((f) => {
               return {
                 ...f,
                 field: e.field,
@@ -151,7 +154,7 @@ function ToolbarLayout1(props) {
               })
               if (att && !e.inqType && !fileNameList.includes(att.name)) {
                 getAttachmentFiles.push(att);
-                document.querySelectorAll('#no-att span')[0].textContent =getAttachmentFiles.length;
+                document.querySelectorAll('#no-att span')[0].textContent = getAttachmentFiles.length;
               }
             })
           })
@@ -176,8 +179,8 @@ function ToolbarLayout1(props) {
                   if (item.inqType === e.inqType) return item.name
                 })
                 if (att && !fileNameList.includes(att.name)) {
-                  getAttachmentFiles.push(att)                
-                  document.querySelectorAll('#no-att span')[0].textContent =getAttachmentFiles.length;
+                  getAttachmentFiles.push(att)
+                  document.querySelectorAll('#no-att span')[0].textContent = getAttachmentFiles.length;
                 }
               })
             }
@@ -207,6 +210,7 @@ function ToolbarLayout1(props) {
         }).catch(err => {
           console.error(err)
         })
+      setAmendmentLength(amendment.length);
       if (amendment.length) {
         axios.all(amendment.map(q => getCommentDraftBl(myBL.id, q.field)))
           .then((res) => {
@@ -259,7 +263,11 @@ function ToolbarLayout1(props) {
     if (inquiries.length) {
       dispatch(FormActions.toggleAllInquiry(true));
       dispatch(FormActions.toggleSaveInquiry(true));
-    }
+    } else dispatch(FormActions.toggleOpenNotificationInquiryList(true));
+  };
+
+  const openAmendmentsList = () => {
+    dispatch(FormActions.toggleAmendmentsList(true));
   };
 
   const openAttachment = () => {
@@ -329,11 +337,29 @@ function ToolbarLayout1(props) {
                 size="medium"
                 className={clsx('h-64', classes.button)}
                 onClick={openAllInquiry}>
-                <Badge color="primary" badgeContent={inquiries.length}>
+                <Badge color="primary" badgeContent={inquiryLength}>
                   <NotificationsIcon />
                 </Badge>
                 <span className="pl-12">Inquiries List</span>
               </Button>
+            </PermissionProvider>
+
+            {myBL?.state?.includes('DRF_') && (
+              <Button
+                variant="text"
+                size="medium"
+                className={clsx('h-64', classes.button)}
+                onClick={openAmendmentsList}>
+                <Badge color="primary" badgeContent={amendmentsLength}>
+                  <NotificationsIcon />
+                </Badge>
+                <span className="pl-12">Amendments List</span>
+              </Button>
+            )}
+
+            <PermissionProvider
+              action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
+              extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
               <Button
                 variant="text"
                 size="medium"

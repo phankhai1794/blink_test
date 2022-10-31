@@ -18,6 +18,9 @@ const useStyles = makeStyles((theme) => ({
     borderLeft: '2px solid',
     borderColor: '#DC2626',
     paddingLeft: '2rem',
+    '&.uploaded': {
+      borderColor: '#00506D'
+    },
     '&.resolved': {
       borderColor: '#36B37E'
     },
@@ -70,6 +73,7 @@ const Inquiry = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
     optionsInquires[editedIndex].showIconReply = true;
     optionsInquires[editedIndex].showIconEdit = true;
+    optionsInquires[editedIndex].showIconEditInq = true;
     optionsInquires[editedIndex].showIconAttachAnswerFile = false;
     optionsInquires[editedIndex].showIconAttachReplyFile = false;
     //
@@ -150,7 +154,8 @@ const Inquiry = (props) => {
                 <div
                   className={clsx(
                     classes.boxItem,
-                    (q.state === 'COMPL' || q.state === 'UPLOADED' || q.state === 'RESOLVED') && 'resolved',
+                    (q.state === 'UPLOADED') && 'uploaded',
+                    (q.state === 'COMPL' || q.state === 'RESOLVED') && 'resolved',
                     (!['OPEN', 'INQ_SENT', 'ANS_DRF', 'COMPL', 'UPLOADED', 'RESOLVED'].includes(q.state) && checkCommentDraft(q, ['REP_DRF', 'REP_SENT'])) && 'offshoreReply'
                   )}
                   style={{ filter: isEdit && 'opacity(0.4)', pointerEvents: isEdit && 'none' }}>
@@ -194,7 +199,7 @@ const Inquiry = (props) => {
                 showReceiver={false}
                 getStateReplyDraft={(val) => setStateReplyDraft(val)}
               />
-              {(q.showIconAttachAnswerFile) && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT' || getStateReplyDraft) &&
+              {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                 <InquiryAnswer
                   onCancel={() => handleCancel(q)}
                   setSave={() => handleSetSave(q)}
