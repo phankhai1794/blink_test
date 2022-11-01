@@ -21,6 +21,7 @@ export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
 export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
 export const OPEN_CREATE_AMENDMENT = 'OPEN_CREATE_AMENDMENT';
 export const OPEN_NOTIFICATION_INQUIRY_LIST = 'OPEN_NOTIFICATION_INQUIRY_LIST'
+export const RELOAD_INQ = 'RELOAD_INQ';
 
 export function setFullscreen(state) {
   return {
@@ -81,6 +82,12 @@ export function toggleAttachment(state) {
 export function toggleReload() {
   return {
     type: RELOAD
+  };
+}
+
+export function toggleReloadInq() {
+  return {
+    type: RELOAD_INQ
   };
 }
 

@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { getInquiryById } from 'app/services/inquiryService';
 
@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Inquiry = (props) => {
-  const { receiver } = props;
+  const [receiver, setReceiver] = useState(props?.receiver);
   const dispatch = useDispatch();
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -42,7 +42,7 @@ const Inquiry = (props) => {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const currentAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.currentAmendment);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
-  const listInqsField = inquiries.filter((q, index) => q.field === currentField);
+  const [listInqsField, setListInqsField] = useState(inquiries.filter((q, index) => q.field === currentField));
   const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
   const [changeQuestion, setChangeQuestion] = useState();
   const [isSaved, setSaved] = useState(false);
@@ -50,6 +50,11 @@ const Inquiry = (props) => {
   const [questionIdSaved, setQuestionIdSaved] = useState();
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+
+  useEffect(()=>{
+    setListInqsField(inquiries.filter(q => q.field === currentField));
+    setReceiver(null);
+  }, [inquiries]);
 
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
