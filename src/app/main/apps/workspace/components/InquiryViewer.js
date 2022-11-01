@@ -672,10 +672,24 @@ const InquiryViewer = (props) => {
   };
 
   const handleSetAttachmentReply = (val) => {
+    const reqReply = {
+      inqAns: {
+        ...tempReply.inqAns,
+        inquiry: question.id,
+        confirm: false,
+        type: 'REP'
+      },
+      answer: {
+        ...tempReply.answer,
+        content: "",
+        type: metadata.ans_type['attachment']
+      }
+    };
     if (!tempReply.mediaFiles?.length) {
       setTempReply({
         ...tempReply,
-        mediaFiles: val
+        mediaFiles: val,
+       ...reqReply
       });
     } else {
       setTempReply((prev) => {
