@@ -365,7 +365,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         onClick={onClick}>
         <ThemeProvider theme={theme}>
           <TextField
-            value={selectedChoice || children}
+            value={selectedChoice || children || ''}
             variant="outlined"
             fullWidth={true}
             multiline={multiline}

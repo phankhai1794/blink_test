@@ -42,6 +42,7 @@ import UserInfo from './UserInfo';
 import AttachFile from './AttachFile';
 import Comment from './Comment';
 import TagsComponent from './TagsComponent';
+import ContainerDetailForm from './ContainerDetailForm';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -289,7 +290,7 @@ const InquiryViewer = (props) => {
             // filter comment
             lastest.mediaFile = mediaFile;
             lastest.answerObj = [{ content: contentField }];
-            lastest.content = `"${contentField}"`;
+            lastest.content = contentField instanceof String ? `"${contentField}"` : contentField;
             lastest.name = "";
             lastest.mediaFilesAnswer = [];
             lastest.id = lastestComment.id;
@@ -358,8 +359,7 @@ const InquiryViewer = (props) => {
                 updater: r.creator,
                 createdAt: r.createdAt,
                 answersMedia: mediaFile,
-                content: `"${content}"`,
-                state: r.state,
+                content: content instanceof String ? `"${content}"` : content
               });
             });
             setComment(comments);
@@ -593,7 +593,7 @@ const InquiryViewer = (props) => {
     } else {
       contentField = textResolve;
       contentField.forEach((obj) => {
-        if (obj[question.inqType]) obj[question.inqType] = obj[question.inqType]?.trim();
+        if (obj[question.inqType]) obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].trim() : obj[question.inqType];
       });
     }
     const body = {
@@ -606,11 +606,12 @@ const InquiryViewer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     resolveInquiry(body)
       .then(() => {
-        // dispatch(FormActions.toggleReload());
         setIsResolve(false);
-        //
         setQuestion((q) => ({ ...q, state: 'COMPL' }));
-        optionsInquires[editedIndex].state = 'COMPL';
+        if (editedIndex != -1) {
+          optionsInquires[editedIndex].state = 'COMPL';
+        }
+        
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
         setSaveComment(!isSaveComment);
@@ -655,6 +656,23 @@ const InquiryViewer = (props) => {
 
   const handleChangeContentReply = (e) => {
     const value = e.target.value;
+    const reqReply = {
+      inqAns: {
+        ...tempReply.inqAns,
+        inquiry: question.id,
+        confirm: false,
+        type: 'REP'
+      },
+      answer: {
+        ...tempReply.answer,
+        content: value,
+        type: metadata.ans_type['paragraph']
+      }
+    };
+    setTempReply({ ...tempReply, ...reqReply });
+  };
+
+  const handleChangeContainerDetail = (value) => {
     const reqReply = {
       inqAns: {
         ...tempReply.inqAns,
@@ -956,7 +974,6 @@ const InquiryViewer = (props) => {
       )
     }
   }
-
   return (
     <>
       {isLoadedComment && (
@@ -1127,15 +1144,23 @@ const InquiryViewer = (props) => {
             </div>
             <Typography variant="h5">{question.name}</Typography>
             {
-              ['COMPL', 'UPLOADED'].includes(question.state) && containerCheck.includes(question.field) ? (
-                <ContainerDetailForm
-                  container={
-                    question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                  }
-                  question={question}
-                  setTextResolve={setTextResolve}
-                  disableInuput={true}
-                />
+              ['RESOLVED', 'COMPL', 'UPLOADED', 'AME_DRF', 'AME_SENT'].includes(question.state) && containerCheck.includes(question.field) ? (
+                question?.process === 'draft' ?
+                  <ContainerDetailForm
+                    container={
+                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                    }
+                    setEditContent={setTextResolve}
+                    fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
+                    disableInuput={!isResolve && !isReply}
+                  /> : <ContainerDetailFormOldVersion
+                    container={
+                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                    }
+                    question={question}
+                    setTextResolve={setTextResolve}
+                    disableInuput={true}
+                  />
               ) :
                 <Typography
                   className={viewDropDown !== question.id ? classes.hideText : ''}
@@ -1148,7 +1173,7 @@ const InquiryViewer = (props) => {
                     color: '#132535',
                     whiteSpace: 'pre-wrap'
                   }}>
-                  {question.content}
+                  {`${question.content}`}
                 </Typography>
             }
 
@@ -1284,16 +1309,30 @@ const InquiryViewer = (props) => {
             <>
               {isResolve ? (
                 <>
-                  {containerCheck.includes(question.field) ? (
-                    <ContainerDetailForm
-                      container={
-                        question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                      }
-                      question={question}
-                      setTextResolve={setTextResolve}
-                    />
-                  ) : (
-                    <textarea
+                  {containerCheck.includes(question.field) && <>
+                    {question?.process === 'draft' ?
+                      question.state.includes('REP') && <ContainerDetailForm
+                        container={
+                          question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                        }
+                        setEditContent={(value) => {
+                          handleChangeContainerDetail(value);
+                          setTextResolve(value)
+                        }}
+                        fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
+                        setTextResolve={setTextResolve}
+                      /> : <ContainerDetailFormOldVersion
+                        container={
+                          question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                        }
+                        question={question}
+                        setTextResolve={setTextResolve}
+                      />
+                    }
+                  </>
+                  }
+                  {
+                    !containerCheck.includes(question.field) && <textarea
                       style={{
                         width: '100%',
                         paddingTop: 10,
@@ -1311,15 +1350,15 @@ const InquiryViewer = (props) => {
                       value={textResolve}
                       onChange={inputText}
                     />
-                  )}
+                  }
                   <div className="flex">
                     <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
                       <Button
                         variant="contained"
                         disabled={
-                          typeof textResolve === 'string'
+                          question?.process === 'draft' ? false : (typeof textResolve === 'string'
                             ? !textResolve.trim()
-                            : textResolve.some((cont) => !cont[question.inqType]?.trim())
+                            : textResolve.some((cont) => !`${!cont[question.inqType]}`.trim()))
                         }
                         color="primary"
                         onClick={onConfirm}
@@ -1340,7 +1379,7 @@ const InquiryViewer = (props) => {
                 <>
                   {isReply ? (
                     <>
-                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
+                      {(!['AME_DRF'].includes(question.state) || !containerCheck.includes(question.field)) && <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
                         <textarea
                           style={{
                             width: '100%',
@@ -1361,7 +1400,7 @@ const InquiryViewer = (props) => {
                           onChange={handleChangeContentReply}
                         />
                       </div>
-
+                      }
                       {/*{tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}*/}
                       {tempReply?.mediaFiles?.map((file, mediaIndex) => (
                         <div
@@ -1443,11 +1482,10 @@ const InquiryViewer = (props) => {
   );
 };
 
-const ContainerDetailForm = ({ container, question, setTextResolve, disableInuput = false }) => {
+const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, disableInuput = false }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-
   const getField = (field) => {
     return metadata.field?.[field] || '';
   };
@@ -1510,53 +1548,6 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
     return map;
   }
 
-  function makeData(len = 5553) {
-    return values;
-  }
-
-  const renderNewTB = () => {
-    const columns = [];
-    for (var key in values[0]) {
-      if (columns.length == 0) {
-        columns.push({
-          Header: getTypeName(key),
-          accessor: key,
-          width: 200,
-          className: "cell_frozen",
-          headerClassName: "frozen"
-        });
-      } else {
-        columns.push({
-          Header: getTypeName(key),
-          accessor: key,
-          width: 200,
-          headerClassName: "header_layout"
-        });
-      }
-    }
-    columns.push(columns.shift());
-
-    return <ReactTable
-      data={makeData()}
-      defaultPageSize={values.length}
-      columns={columns}
-      showPagination={false}
-      // className="-striped -highlight"
-      getTableProps={() => {
-        return {
-          onScroll: e => {
-            if (tableScrollTop === e.target.scrollTop) {
-              let left = e.target.scrollLeft > 0 ? e.target.scrollLeft : 0;
-              $(".ReactTable .rt-tr .frozen").css({ left: left });
-              $(".ReactTable .rt-tr .cell_frozen").css({ left: left });
-            } else {
-              setTableScrollTop(e.target.scrollTop);
-            }
-          }
-        };
-      }}
-    />
-  }
   const renderTB = () => {
     let td = [];
     const valueCopy = JSON.parse(JSON.stringify(values));
@@ -1635,7 +1626,9 @@ const ContainerDetailForm = ({ container, question, setTextResolve, disableInupu
 
   return (
     <>
-      {renderNewTB()}
+      {
+        renderTB()
+      }
     </>
   );
 };

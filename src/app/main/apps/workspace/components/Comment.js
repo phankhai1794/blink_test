@@ -10,14 +10,15 @@ import {
   Divider
 } from '@material-ui/core';
 import { displayTime } from '@shared';
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import EditIcon from '@material-ui/icons/Edit';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
+import { CONTAINER_MANIFEST, CONTAINER_DETAIL } from '@shared/keyword';
 
-
+import ContainerDetailForm from './ContainerDetailForm';
 import UserInfo from './UserInfo';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
@@ -62,7 +63,6 @@ const useStyles = makeStyles(() => ({
 }));
 
 const Comment = (props) => {
-  const dispatch = useDispatch();
   const { question, comment, userType } = props;
   const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length - 1) : []);
   const [value, setValue] = useState('');
@@ -70,15 +70,17 @@ const Comment = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [edit, setEdit] = useState('');
   const classes = useStyles();
-  const [reply, currentField] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.reply,
-    workspace.inquiryReducer.currentField
-  ]);
+  const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
 
   const user = useSelector(({ user }) => user);
   const open = Boolean(anchorEl);
 
+  const getField = (field) => {
+    return metadata.field ? metadata.field[field] : '';
+  };
+
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -178,9 +180,21 @@ const Comment = (props) => {
               </>
             )}
           </div>
-          <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-            {title ? `${title} "${content}"` : content}
-          </div>
+          {containerCheck.includes(question.field) ?
+            <ContainerDetailForm
+              container={
+                question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+              }
+              setEditContent={() => null}
+              originalValues={content}
+              fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
+              disableInuput={true}
+            />
+            :
+            <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+              {title ? `${title} "${content}"` : content}
+            </div>
+          }
           <div className="attachment-reply">
             {media?.length > 0 &&
               media?.map((file, mediaIndex) => (

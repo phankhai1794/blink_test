@@ -1,21 +1,13 @@
-import { Drawer, Icon, Button, TextField, Link } from '@material-ui/core';
+import { Drawer, Icon, Button, TextField, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import React from 'react'
+import React, { useState } from 'react'
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
 import {
   CONTAINER_DETAIL,
   CONTAINER_NUMBER,
   CONTAINER_SEAL,
-  CONTAINER_TYPE,
-  CONTAINER_PACKAGE,
-  CONTAINER_WEIGHT,
-  CONTAINER_MEASUREMENT,
-  CM_MARK,
-  CM_PACKAGE,
-  CM_DESCRIPTION,
-  CM_WEIGHT,
-  CM_MEASUREMENT
+  CONTAINER_LIST
 } from '@shared/keyword';
 
 const useStyles = makeStyles((theme) => ({
@@ -26,9 +18,27 @@ const useStyles = makeStyles((theme) => ({
   textField: {
     '& fieldset': {
       border: '1px solid #BAC3CB',
-      backgroundColor: '#EFEFEF',
       borderRadius: '8px',
+      backgroundColor: 'white',
       zIndex: '-1'
+    },
+    '& .MuiOutlinedInput-multiline': {
+      padding: 2,
+    },
+    '& .MuiOutlinedInput-input': {
+      padding: 8,
+    }
+  },
+  lock: {
+    '& fieldset': {
+      backgroundColor: '#EFEFEF',
+      color: '#515E6A'
+    },
+    "& .MuiInputBase-root.Mui-disabled": {
+      color: "#515E6A"
+    },
+    '& .MuiOutlinedInput-multiline': {
+      padding: 2,
     },
   },
   button: {
@@ -45,35 +55,61 @@ const useStyles = makeStyles((theme) => ({
       border: '1px solid #BD0F72'
     }
   },
-  scrollbar: {
-    '&::-webkit-scrollbar': {
-      width: 10
-    },
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: '#FCDDEC',
-    }
-  }
 }));
 
 const AmendmentPopup = (props) => {
-  const { open, lock, onClose, inqType, data } = props
-  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const { open, onClose, inqType, isEdit, data, index, updateData, updateEdit, containerDetail } = props;
   const classes = useStyles();
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const user = useSelector(({ user }) => user);
+  const [errors, setErrors] = useState({});
 
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
   };
 
-  const CDTitle = [CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT].map(title => { return { title: title, value: data[getType(title)] } })
-  const CMTitle = [CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT].map(title => { return { title: title, value: data[getType(title)] } })
-  const type = inqType === CONTAINER_DETAIL ? CDTitle : CMTitle
+  const getTypeName = (type) => {
+    return Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === type);
+  };
 
-  const onSave = () => { }
-  console.log("metadata: ", metadata)
+  const CDTitle = CONTAINER_LIST.cd.map(title => {
+    return { title: title, value: data[getType(title)], id: getType(title) }
+  });
 
-  console.log("data: ", data)
+  const CMTitle = [CONTAINER_NUMBER, CONTAINER_SEAL, ...CONTAINER_LIST.cm].map(title => {
+    return {
+      title: title,
+      value: CONTAINER_SEAL === title ? containerDetail.find(c => c[getType(CONTAINER_NUMBER)] === data[getType(CONTAINER_NUMBER)])?.[getType(CONTAINER_SEAL)] : data[getType(title)],
+      id: getType(title)
+    }
+  });
 
-  console.log("CDTitle: ", CDTitle)
+  const type = (inqType === CONTAINER_DETAIL) ? CDTitle : CMTitle;
+
+  const isNumber = (value) => {
+    if (!value) return true
+    else {
+      var pattern = /^[1-9]\d{0,2}(,?\d{3})*(\.\d+)?$/g
+      return pattern.test(value)
+    }
+  }
+
+  const onSave = () => {
+    if (!Object.values(errors).includes(false)) {
+      updateData(old => old.map((row, i) => index === i ? data : row));
+      onClose();
+    }
+  }
+
+  const lock = (title) => ((inqType !== CONTAINER_DETAIL || user.role === 'Guest') && [CONTAINER_NUMBER, CONTAINER_SEAL].includes(title)) || !isEdit;
+
+  const onChange = (id, value) => {
+    if (CONTAINER_LIST.numberList.includes(getTypeName(id))) {
+      setErrors({ ...errors, [id]: isNumber(value) });
+    }
+    updateEdit(old => old.map((row, i) => index === i ? { ...old[index], [id]: value } : row));
+  }
+
   return (
     <Drawer
       classes={{ paper: classes.paper }}
@@ -82,71 +118,106 @@ const AmendmentPopup = (props) => {
       onClose={onClose}
     >
       <div style={{ justifyContent: 'end', alignItems: 'center', display: 'flex', height: 56, borderBottom: '2px solid #8A97A3', overflow: 'hidden' }}>
-        <Icon style={{ color: '#8A97A3', marginRight: '1rem' }}>close</Icon>
+        <IconButton style={{ marginRight: '1rem' }} onClick={onClose}>
+          <Icon style={{ color: '#8A97A3' }}>close</Icon>
+        </IconButton>
       </div>
-      <div className={clsx(classes.scrollbar)} style={{ padding: '20px 30px 0 30px', overflow: 'auto' }}>
+      <div style={{ padding: '20px 30px 0 30px', overflow: 'auto' }}>
         {
-          type.map(data => (
-            <>
-              <p style={{ fontWeight: 600 }}>{data.title}</p>
-              <TextField
-                variant="outlined"
-                fullWidth={true}
-                className={clsx(
-                  classes.textField,
-                )}
-                defaultValue={data.value}
-                InputProps={{
-                  disabled: true,
-                  endAdornment: (
-                    <>
-                      {
-                        <Icon> lock</Icon>
-                      }
-                    </>
-                  )
-                }}
-              />
-            </>
-          ))
+          type.map((field, index) =>
+            <React.Fragment key={index}>
+              {CONTAINER_LIST.numberList.includes(field.title) ?
+                <div className='flex justify-between'>
+                  <div>
+                    <p style={{ fontWeight: 600 }}>{field.title}</p>
+                    <TextField
+                      variant="outlined"
+                      error={!isNumber(field.value)}
+                      helperText={!isNumber(field.value) && "Must be a number"}
+                      className={clsx(
+                        classes.textField,
+                        !isEdit && classes.lock
+                      )}
+                      style={{ width: '90%' }}
+                      value={field.value}
+                      onChange={(e) => onChange(field.id, e.target.value)}
+                      InputProps={{
+                        disabled: !isEdit,
+                        endAdornment: (
+                          <>
+                            {!isEdit && <Icon>lock</Icon>}
+                          </>
+                        )
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <p style={{ fontWeight: 600 }}>{`${field.title} Unit`.replace(/Container|C\/M/g, '')}</p>
+                    <TextField
+                      variant="outlined"
+                      className={clsx(
+                        classes.textField,
+                        !isEdit && classes.lock
+                      )}
+                      value={data[getType(`${field.title} Unit`)]}
+                      onChange={(e) => onChange(getType(`${field.title} Unit`), e.target.value)}
+                      InputProps={{
+                        disabled: !isEdit,
+                        endAdornment: (
+                          <>
+                            {!isEdit && <Icon>lock</Icon>}
+                          </>
+                        )
+                      }}
+                    />
+                  </div>
+                </div>
+                :
+                <>
+                  <p style={{ fontWeight: 600 }}>{field.title}</p>
+                  <TextField
+                    variant="outlined"
+                    fullWidth={true}
+                    multiline={true}
+                    className={clsx(
+                      classes.textField,
+                      lock(field.title) && classes.lock
+                    )}
+                    value={field.value}
+                    onChange={(e) => onChange(field.id, e.target.value)}
+                    InputProps={{
+                      disabled: lock(field.title),
+                      endAdornment: (
+                        <>
+                          {lock(field.title) && <Icon>lock</Icon>}
+                        </>
+                      )
+                    }}
+                  />
+                </>
+              }
+            </React.Fragment>
+          )
         }
       </div>
-      <Link
-        component="button"
-        variant="body2"
-        style={{ display: 'flex', alignItems: 'center', padding: '20px 30px' }}
-        onClick={() => null}>
-        <Icon
-          style={{ border: '2px', width: 25 }}
-        >add_circle_outline </Icon>
-        <span
-          style={{
-            fontSize: 16,
-            fontWeight: '600',
-            fontFamily: 'Montserrat',
-            paddingLeft: 5,
-            height: 20,
-            fontStyle: 'normal'
-          }}>
-          Add Attachment
-        </span>
-      </Link>
-      <div className="text-center mb-8">
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={onSave}
-          classes={{ root: clsx(classes.button) }}>
-          Save
-        </Button>
-        <Button
-          variant="contained"
-          classes={{ root: clsx(classes.button, 'cancel') }}
-          color="primary"
-          onClick={onClose}>
-          Cancel
-        </Button>
-      </div>
+      {isEdit &&
+        <div className="text-center my-16">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onSave}
+            classes={{ root: clsx(classes.button) }}>
+            Save
+          </Button>
+          <Button
+            variant="contained"
+            classes={{ root: clsx(classes.button, 'cancel') }}
+            color="primary"
+            onClick={onClose}>
+            Cancel
+          </Button>
+        </div>
+      }
     </Drawer >
   )
 }

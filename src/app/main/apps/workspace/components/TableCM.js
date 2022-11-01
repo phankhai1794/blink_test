@@ -8,13 +8,13 @@ import HelpIcon from '@material-ui/icons/Help';
 import AttachFile from '@material-ui/icons/AttachFile';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import ReplyIcon from "@material-ui/icons/Reply";
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 import BLField from './BLField';
 import Label from './FieldLabel';
-import ReplyIcon from "@material-ui/icons/Reply";
 
 const red = '#DC2626';
 const pink = '#BD0F72';
@@ -127,7 +127,7 @@ const TableCM = (props) => {
     if (inquiries.length > 0) {
       const lst = inquiries.filter((q) => q.field === id);
       if (lst.length > 0)
-        return lst.every(e => e.state === 'COMPL' || e.state === 'UPLOADED')
+        return lst.every(e => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(e.state))
     }
     return false;
   };
@@ -219,36 +219,37 @@ const TableCM = (props) => {
             containerManifest.map((cm, index) =>
               (<Grid container spacing={2} className='px-8 py-2' key={index}>
                 <Grid item xs={2}>
-                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
+                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_PACKAGE]]}</BLField>
+                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_PACKAGE]]}</BLField>
                 </Grid>
                 <Grid item xs={4}>
-                  <BLField multiline={true} rows={6} width='360px'>{cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}</BLField>
+                  <BLField disableClick={true} multiline={true} rows={6} width='360px'>{cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}</BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_WEIGHT]]}</BLField>
+                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_WEIGHT]]}</BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]}</BLField>
+                  <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]}</BLField>
                 </Grid>
               </Grid>))
             : (<Grid container spacing={2} className='px-8 py-2'>
               <Grid item xs={2}>
-                <BLField ></BLField>
+
+                <BLField disableClick={true} ></BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField ></BLField>
+                <BLField disableClick={true} ></BLField>
               </Grid>
               <Grid item xs={4}>
-                <BLField width='360px'> </BLField>
+                <BLField disableClick={true} width='360px'> </BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField ></BLField>
+                <BLField disableClick={true} ></BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField ></BLField>
+                <BLField disableClick={true} ></BLField>
               </Grid>
             </Grid>)
           }
