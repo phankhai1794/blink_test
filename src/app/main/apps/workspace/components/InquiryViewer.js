@@ -160,6 +160,7 @@ const InquiryViewer = (props) => {
   const [isShowViewAll, setShowViewAll] = useState(false);
   const [isUploadFile, setIsUploadFile] = useState(false);
   const [disableSaveReply, setDisableSaveReply] = useState(false);
+  const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
 
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
@@ -210,6 +211,7 @@ const InquiryViewer = (props) => {
                 if (filterOffshoreSent.state === 'REP_Q_SENT') {
                   setShowLabelSent(true);
                   setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
+                  setStateReplyDraft(true);
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                   setStateReplyDraft(true)
                 }
@@ -279,6 +281,7 @@ const InquiryViewer = (props) => {
     } else {
       getCommentDraftBl(myBL.id, question.field)
         .then((res) => {
+          setEditOriginalAmendment(res.length === 1);
           const lastest = { ...question };
           if (res.length > 0) {
             const { content: contentField, mediaFile } = res[res.length - 1].content;
@@ -294,7 +297,7 @@ const InquiryViewer = (props) => {
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
-            if (['REP_DRF', 'AME_DRF'].includes(lastest.state)) {
+            if (!['RESOLVED', 'UPLOADED'].includes(lastest.state)) {
               setStateReplyDraft(true);
               const reqReply = {
                 inqAns: {
@@ -316,6 +319,7 @@ const InquiryViewer = (props) => {
               if (['AME_SENT'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 setStateReplyDraft(false);
+                setTempReply({});
               }
               if (['REP_SENT'].includes(lastest.state)) {
                 setShowLabelSent(true);
@@ -327,9 +331,9 @@ const InquiryViewer = (props) => {
               if (['REP_SENT'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 setStateReplyDraft(false);
+                setTempReply({});
               }
               if (['AME_SENT'].includes(lastest.state)) {
-                setStateReplyDraft(false);
                 lastest.showIconReply = false;
                 setSubmitLabel(true);
               }
@@ -472,43 +476,6 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     question?.state !== 'OPEN' && setAllowDeleteInq(false);
-    //
-    const delayMin = process.env.REACT_APP_EDIT_REPLY_DELAY_TIME;
-    // const delayMin = 80;
-    // console.log(question)
-    // current date
-    let currentDate = new Date();
-    //
-    let delayTiming = 0;
-    if (user.role === 'Admin' && ['REP_Q_SENT', 'INQ_SENT', 'ANS_DRF'].includes(question.state)) {
-      // add 15min
-      let updatedDate = new Date(question.lastEmail);
-      let addMinutes = new Date(updatedDate.getTime() + delayMin * 60 * 1000);
-      delayTiming = delayTime(currentDate, addMinutes);
-      // console.log(delayTiming);
-    } else if (user.role === 'Guest' && ['REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) {
-      // add 15min
-      let updatedDate = new Date(question.updatedAt);
-      let addMinutes = new Date(updatedDate.getTime() + delayMin * 60 * 1000);
-      delayTiming = delayTime(currentDate, addMinutes);
-      // console.log(delayTiming);
-    }
-    let myInterval;
-    if (delayTiming !== 0) {
-      myInterval = setInterval(() => {
-        const opQuestion = { ...question };
-        if (user.role === 'Guest') {
-          opQuestion.showIconEdit = false;
-        } else if (user.role === 'Admin') {
-          opQuestion.showIconEditInq = false;
-        }
-        setStateReplyDraft(false);
-        setQuestion(opQuestion);
-      }, delayTiming);
-    }
-    return () => {
-      if (delayTiming !== 0) clearInterval(myInterval)
-    }
   }, [question]);
 
   useEffect(() => {
@@ -529,15 +496,15 @@ const InquiryViewer = (props) => {
       deleteDraftBLReply(replyRemove.id)
         .then(() => {
           // Case: Offshore reply customer's amendment first time => delete
-          if(comment.length === 3){
+          if (comment.length === 3) {
             const prevAmendment = {
               field: replyRemove.field,
-              state: comment[comment.length-2].state, 
-              creator: comment[comment.length-2].creator, 
-              updater: comment[comment.length-2].updater, 
-              createdAt: comment[comment.length-2].createdAt, 
-              content: comment[comment.length-2].content,
-              mediaFile: comment[comment.length-2].answersMedia,
+              state: comment[comment.length - 2].state,
+              creator: comment[comment.length - 2].creator,
+              updater: comment[comment.length - 2].updater,
+              createdAt: comment[comment.length - 2].createdAt,
+              content: comment[comment.length - 2].content,
+              mediaFile: comment[comment.length - 2].answersMedia,
               answerObj: []
             };
             dispatch(InquiryActions.setNewAmendment({ newAmendment: prevAmendment }));
@@ -705,10 +672,24 @@ const InquiryViewer = (props) => {
   };
 
   const handleSetAttachmentReply = (val) => {
+    const reqReply = {
+      inqAns: {
+        ...tempReply.inqAns,
+        inquiry: question.id,
+        confirm: false,
+        type: 'REP'
+      },
+      answer: {
+        ...tempReply.answer,
+        content: "",
+        type: metadata.ans_type['attachment']
+      }
+    };
     if (!tempReply.mediaFiles?.length) {
       setTempReply({
         ...tempReply,
-        mediaFiles: val
+        mediaFiles: val,
+       ...reqReply
       });
     } else {
       setTempReply((prev) => {
@@ -852,6 +833,7 @@ const InquiryViewer = (props) => {
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
+          if (isEditOriginalAmendment) dispatch(InquiryActions.setContent({ ...content, [res.newAmendment?.field]: tempReply.answer.content }));
           // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
@@ -1036,7 +1018,7 @@ const InquiryViewer = (props) => {
                                 </div>
                               </Tooltip>
                             </PermissionProvider>
-                            {question.process === 'draft' && (
+                            {question.process === 'draft' && !['REP_SENT', 'AME_SENT'].includes(question.state) && (
                               <Tooltip title="Delete Reply">
                                 <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                                   <img
@@ -1089,14 +1071,14 @@ const InquiryViewer = (props) => {
                         (['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>
                     }
                   </div>
-                  {(((['ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
+                  {(((['ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF', 'REP_SENT', 'AME_SENT'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
                     <>
                       <Tooltip title={'Edit'}>
                         <div onClick={() => handleEdit(question)}>
                           <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
                         </div>
                       </Tooltip>
-                      {question.process === 'draft' && (
+                      {question.process === 'draft' && !['AME_SENT', 'REP_SENT'].includes(question.state) && (
                         <Tooltip title="Delete Reply">
                           <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                             <img
@@ -1233,7 +1215,7 @@ const InquiryViewer = (props) => {
                     onClick={() => reOpen(question?.id)}
                     classes={{ root: classes.button }}
                   >
-                      ReOpen
+                    ReOpen
                   </Button>
                 </div>
               </PermissionProvider>
@@ -1418,7 +1400,11 @@ const InquiryViewer = (props) => {
                           variant="contained"
                           color="primary"
                           onClick={onSaveReply}
-                          disabled={(!tempReply?.answer?.content && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0)) || disableSaveReply}
+                          disabled={
+                            (question.state === "AME_DRF" && !tempReply?.answer?.content)
+                            || (question.state !== "AME_DRF" && !tempReply?.answer?.content && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
+                            || disableSaveReply
+                          }
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
                         </Button>

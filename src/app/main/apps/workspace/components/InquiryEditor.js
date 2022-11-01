@@ -215,7 +215,8 @@ const InquiryEditor = (props) => {
       field: inq.field,
       inqType: inq.inqType,
       ansType: inq.ansType,
-      receiver: inq.receiver
+      receiver: inq.receiver,
+      state: ['ANS_DRF'].includes(inq.state) ? 'INQ_SENT' : inq.state
     };
   };
 
@@ -362,6 +363,7 @@ const InquiryEditor = (props) => {
       const ansUpdate = currentEditInq.answerObj.filter(({ id: id1, content: c1 }) =>
         inquiry.answerObj.some(({ id: id2, content: c2 }) => id2 === id1 && c1 !== c2)
       );
+      const ansCreated = currentEditInq.answerObj.filter(ans => ans.id);
       const mediaCreate = currentEditInq.mediaFile.filter(
         ({ id: id1 }) => !inquiry.mediaFile.some(({ id: id2 }) => id2 === id1)
       );
@@ -382,7 +384,7 @@ const InquiryEditor = (props) => {
       ) {
         await updateInquiry(inquiry.id, {
           inq: inq(currentEditInq),
-          ans: { ansDelete, ansCreate, ansUpdate },
+          ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
           files: { mediaCreate, mediaDelete }
         });
         const editedIndex = inquiries.findIndex(inq => inq.id === inquiry.id);
@@ -395,8 +397,8 @@ const InquiryEditor = (props) => {
 
         // TODO
         dispatch(InquiryActions.saveInquiry());
-        dispatch(FormActions.toggleReload());
         dispatch(InquiryActions.setEditInq());
+        dispatch(FormActions.toggleReloadInq());
       }
     } else {
       // Create INQUIRY
@@ -442,7 +444,7 @@ const InquiryEditor = (props) => {
                 AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
               );
               dispatch(InquiryActions.saveInquiry());
-              dispatch(FormActions.toggleReload());
+              dispatch(FormActions.toggleReloadInq());
               dispatch(InquiryActions.setOpenedInqForm(false));
             })
             .catch((error) =>
@@ -474,13 +476,11 @@ const InquiryEditor = (props) => {
               value="customer"
               control={<Radio color={'primary'} />}
               label="Customer"
-              disabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
             />
             <FormControlLabel
               value="onshore"
               control={<Radio color={'primary'} />}
               label="Onshore"
-              disabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
             />
           </RadioGroup>
 

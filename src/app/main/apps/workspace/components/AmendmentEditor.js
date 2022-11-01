@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Amendment = ({ question }) => {
+const Amendment = ({ question, inquiriesLength }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector(({ user }) => user);
@@ -191,12 +191,6 @@ const Amendment = ({ question }) => {
         ) : <Typography color="primary" variant="h5" className={classes.inqTitle}>New Amendment</Typography>}
         <div className={'flex'} style={{ alignItems: 'center' }}>
           <AttachFileAmendment setAttachment={getAttachment} />
-          {openAmendmentList && <div style={{ padding: 2, height: 24 }} onClick={handleCancle}>
-            <img
-              style={{ height: '22px', cursor: 'pointer' }}
-              src="/assets/images/icons/trash-gray.svg"
-            />
-          </div>}
         </div>
       </div>
 
@@ -274,9 +268,17 @@ const Amendment = ({ question }) => {
         >
           Save
         </Button>
-        <Button className={clsx(classes.btn, classes.btnCancel)} onClick={handleCancle}>
-          Cancel
-        </Button>
+        {
+          (
+            (openAmendmentList && inquiriesLength > 0)
+            ||
+            !openAmendmentList
+          ) && (
+            <Button className={clsx(classes.btn, classes.btnCancel)} onClick={handleCancle}>
+              Cancel
+            </Button>
+          )
+        }
       </div>
     </div>
   );

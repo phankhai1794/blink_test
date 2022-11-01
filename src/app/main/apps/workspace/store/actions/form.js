@@ -6,6 +6,7 @@ export const OPEN_ALL_INQUIRY = 'OPEN_ALL_INQUIRY';
 export const TOGGLE_SAVE_INQUIRY = 'TOGGLE_SAVE_INQUIRY';
 export const TOGGLE_ADD_INQUIRY = 'TOGGLE_ADD_INQUIRY';
 export const TOGGLE_AMENDMENTS_LIST = 'TOGGLE_AMENDMENTS_LIST';
+export const OPEN_NOTIFICATION_AMENDMENT_LIST = 'OPEN_NOTIFICATION_AMENDMENT_LIST';
 export const RELOAD = 'RELOAD';
 export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 export const OPEN_EMAIL = 'OPEN_EMAIL';
@@ -20,6 +21,7 @@ export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
 export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
 export const OPEN_CREATE_AMENDMENT = 'OPEN_CREATE_AMENDMENT';
 export const OPEN_NOTIFICATION_INQUIRY_LIST = 'OPEN_NOTIFICATION_INQUIRY_LIST'
+export const RELOAD_INQ = 'RELOAD_INQ';
 
 export function setFullscreen(state) {
   return {
@@ -83,6 +85,12 @@ export function toggleReload() {
   };
 }
 
+export function toggleReloadInq() {
+  return {
+    type: RELOAD_INQ
+  };
+}
+
 export function openTrans() {
   return {
     type: OPEN_TRANSACTION
@@ -113,6 +121,13 @@ export function toggleOpenNotificationAttachmentList(state) {
 export function toggleOpenNotificationInquiryList(state) {
   return {
     type: OPEN_NOTIFICATION_INQUIRY_LIST,
+    state
+  };
+}
+
+export function toggleOpenNotificationAmendmentList(state) {
+  return {
+    type: OPEN_NOTIFICATION_AMENDMENT_LIST,
     state
   };
 }
