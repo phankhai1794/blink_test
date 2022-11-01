@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
-import {TextField, Button, Typography, FormHelperText, FormControl} from "@material-ui/core";
+import { Button, Typography, FormHelperText, FormControl } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
@@ -177,7 +177,7 @@ const Amendment = ({ question, inquiriesLength }) => {
           marginTop: 0,
           marginBottom: 15,
         }}>
-                AMENDMENT
+          AMENDMENT
         </p>
       )}
 
@@ -214,16 +214,17 @@ const Amendment = ({ question, inquiriesLength }) => {
         </FormControl>
       )}
 
-      {containerCheck.includes(currentField) ? (
+      {fieldValueSelect && containerCheck.includes(fieldValueSelect.value) || containerCheck.includes(currentField) ? (
         <div style={{ margin: '15px 0' }}>
           <ContainerDetailForm
             container={
               currentField === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
             }
+            setEditContent={(value) => {
+              setFieldValue(value);
+            }}
             fieldType={currentField === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
-            // question={question}
-            // setTextResolve={setTextResolve}
-            disableInuput={true}
+            disableInuput={false}
           />
         </div>
       ) : <div className="flex" style={{ alignItems: 'flex-end', margin: '15px 0' }}>

@@ -15,13 +15,13 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import AttachFile from '@material-ui/icons/AttachFile';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import ReplyIcon from "@material-ui/icons/Reply";
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 import BLField from './BLField';
 import Label from './FieldLabel';
-import ReplyIcon from "@material-ui/icons/Reply";
 
 const red = '#DC2626';
 const pink = '#BD0F72';
@@ -133,7 +133,7 @@ const TableCD = (props) => {
   const checkQuestionIsResolved = () => {
     if (inquiries.length > 0) {
       const lst = inquiries.filter((q) => q.field === id);
-      if (lst.length > 0) return lst.every((e) => e.state === 'COMPL' || e.state === 'UPLOADED');
+      if (lst.length > 0) return lst.every((e) => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(e.state));
     }
     return false;
   };
@@ -238,32 +238,32 @@ const TableCD = (props) => {
               containerDetail.map((cd, index) => (
                 <Grid container spacing={2} className="px-8 py-2" key={index}>
                   <Grid item xs={2}>
-                    <BLField >
+                    <BLField disableClick={true} >
                       {cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}
                     </BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField >
+                    <BLField disableClick={true} >
                       {cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}
                     </BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField >
+                    <BLField disableClick={true} >
                       {cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}
                     </BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField >
+                    <BLField disableClick={true} >
                       {cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}
                     </BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField >
+                    <BLField disableClick={true} >
                       {cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}
                     </BLField>
                   </Grid>
                   <Grid item xs={2}>
-                    <BLField >
+                    <BLField disableClick={true} >
                       {cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}
                     </BLField>
                   </Grid>
@@ -272,22 +272,22 @@ const TableCD = (props) => {
             ) : (
               <Grid container spacing={2} className="px-8 py-2">
                 <Grid item xs={2}>
-                  <BLField ></BLField>
+                  <BLField disableClick={true} ></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField ></BLField>
+                  <BLField disableClick={true} ></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField ></BLField>
+                  <BLField disableClick={true} ></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField ></BLField>
+                  <BLField disableClick={true} ></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField ></BLField>
+                  <BLField disableClick={true} ></BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField ></BLField>
+                  <BLField disableClick={true} ></BLField>
                 </Grid>
               </Grid>
             )}
