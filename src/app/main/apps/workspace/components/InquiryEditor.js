@@ -397,8 +397,8 @@ const InquiryEditor = (props) => {
 
         // TODO
         dispatch(InquiryActions.saveInquiry());
-        dispatch(FormActions.toggleReload());
         dispatch(InquiryActions.setEditInq());
+        dispatch(FormActions.toggleReloadInq());
       }
     } else {
       // Create INQUIRY
@@ -444,7 +444,7 @@ const InquiryEditor = (props) => {
                 AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
               );
               dispatch(InquiryActions.saveInquiry());
-              dispatch(FormActions.toggleReload());
+              dispatch(FormActions.toggleReloadInq());
               dispatch(InquiryActions.setOpenedInqForm(false));
             })
             .catch((error) =>

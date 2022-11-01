@@ -53,6 +53,9 @@ const formReducer = function (state = initialState, action) {
   case Actions.RELOAD: {
     return { ...state, reload: !state.reload, openDialog: false, openAllInquiry: false, openAttachment: false };
   }
+  case Actions.RELOAD_INQ: {
+    return { ...state, reload: !state.reload };
+  }
   case Actions.OPEN_TRANSACTION: {
     return { ...state, openTrans: !state.openTrans };
   }
