@@ -716,18 +716,20 @@ const BLWorkspace = (props) => {
                 {getValueField(FREIGHT_CHARGES)}
               </BLField>
             </Grid>
+            <Grid item>
+              <Label>COMMODITY CODE</Label>
+              <BLField id={getField(COMMODITY_CODE)}>
+                {getValueField(COMMODITY_CODE)}
+              </BLField>
+            </Grid>
+          </Grid>
+          <Grid item xs={6} className={classes.rightPanel}>
             <Grid container>
               <Grid item xs={6} className={classes.leftPanel}>
                 <Grid item>
-                  <Label>COMMODITY CODE</Label>
-                  <BLField id={getField(COMMODITY_CODE)}>
-                    {getValueField(COMMODITY_CODE)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>FREIGHTED AS</Label>
-                  <BLField id={getField(FREIGHTED_AS)}>
-                    {getValueField(FREIGHTED_AS)}
+                  <Label>PLACE OF BILL(S) ISSUE</Label>
+                  <BLField id={getField(PLACE_OF_BILL)}>
+                    {getValueField(PLACE_OF_BILL)}
                   </BLField>
                 </Grid>
                 <Grid item>
@@ -739,77 +741,15 @@ const BLWorkspace = (props) => {
               </Grid>
               <Grid item xs={6} className={classes.rightPanel}>
                 <Grid item>
-                  <Label>EXCHANGE RATE</Label>
-                  <BLField id={getField(EXCHANGE_RATE)}>
-                    {getValueField(EXCHANGE_RATE)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>RATE</Label>
-                  <BLField id={getField(RATE)}>
-                    {getValueField(RATE)}
+                  <Label>DATED</Label>
+                  <BLField id={getField(DATED)}>
+                    {getValueField(DATED)}
                   </BLField>
                 </Grid>
                 <Grid item>
                   <Label>DATE LADEN ON BOARD</Label>
                   <BLField id={getField(DATE_LADEN)}>
                     {getValueField(DATE_LADEN)}
-                  </BLField>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={6} className={classes.rightPanel}>
-            <Grid container>
-              <Grid item xs={6} className={classes.leftPanel}>
-                <Grid item>
-                  <Label>SERVICE CONTRACT NO.</Label>
-                  <BLField id={getField(SERVICE_CONTRACT_NO)}>
-                    {getValueField(SERVICE_CONTRACT_NO)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>CODE</Label>
-                  <BLField id={getField(CODE)}>
-                    {getValueField(CODE)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>PREPAID</Label>
-                  <BLField id={getField(PREPAID)}>
-                    {getValueField(PREPAID)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>PLACE OF BILL(S) ISSUE</Label>
-                  <BLField id={getField(PLACE_OF_BILL)}>
-                    {getValueField(PLACE_OF_BILL)}
-                  </BLField>
-                </Grid>
-              </Grid>
-              <Grid item xs={6} className={classes.rightPanel}>
-                <Grid item>
-                  <Label>DOC FORM NO.</Label>
-                  <BLField id={getField(DOC_FORM_NO)}>
-                    {getValueField(DOC_FORM_NO)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>TARIFF ITEM</Label>
-                  <BLField id={getField(TARIFF_ITEM)}>
-                    {getValueField(TARIFF_ITEM)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>COLLECT</Label>
-                  <BLField id={getField(COLLECT)}>
-                    {getValueField(COLLECT)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>DATED</Label>
-                  <BLField id={getField(DATED)}>
-                    {getValueField(DATED)}
                   </BLField>
                 </Grid>
               </Grid>
