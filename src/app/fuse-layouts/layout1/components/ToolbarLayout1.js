@@ -152,7 +152,7 @@ function ToolbarLayout1(props) {
               const fileNameList = getAttachmentFiles.map((item) => {
                 if (item.inqType === e.inqType) return item.name
               })
-              if (att && !e.inqType && !fileNameList.includes(att.name)) {
+              if (att && !fileNameList.includes(att.name) && document.querySelectorAll('#no-att span')[0]?.textContent) {
                 getAttachmentFiles.push(att);
                 document.querySelectorAll('#no-att span')[0].textContent = getAttachmentFiles.length;
               }
@@ -178,7 +178,7 @@ function ToolbarLayout1(props) {
                 const fileNameList = getAttachmentFiles.map((item) => {
                   if (item.inqType === e.inqType) return item.name
                 })
-                if (att && !fileNameList.includes(att.name)) {
+                if (att && !fileNameList.includes(att.name) && document.querySelectorAll('#no-att span')[0]?.textContent) {
                   getAttachmentFiles.push(att)
                   document.querySelectorAll('#no-att span')[0].textContent = getAttachmentFiles.length;
                 }
