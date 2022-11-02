@@ -625,15 +625,20 @@ const InquiryViewer = (props) => {
         setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
 
         // Update list inquiry
-        let editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
-        optionsInquires[editedIndex].state = 'UPLOADED';
-        dispatch(InquiryActions.setInquiries(optionsInquires));
+        let editedInqIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+        if (optionsInquires[editedInqIndex]?.process === 'pending') {
+          optionsInquires[editedInqIndex].state = 'UPLOADED';
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+        }
 
         // Update list amendment
-        if (optionsInquires[editedIndex].process === 'draft') {
+        let editedAmeIndex = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
+        if (editedAmeIndex !== -1) {
+          optionsInquires[editedAmeIndex].state = 'UPLOADED';
+          dispatch(InquiryActions.setInquiries(optionsInquires));
           const optionAmendment = [...listCommentDraft];
-          editedIndex = optionAmendment.findIndex(ame => question.id === ame.id);
-          optionAmendment[editedIndex].state = 'UPLOADED';
+          editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
+          optionAmendment[editedAmeIndex].state = 'UPLOADED';
           dispatch(InquiryActions.setListCommentDraft(optionAmendment));
         }
 
@@ -689,7 +694,7 @@ const InquiryViewer = (props) => {
       setTempReply({
         ...tempReply,
         mediaFiles: val,
-       ...reqReply
+        ...reqReply
       });
     } else {
       setTempReply((prev) => {
