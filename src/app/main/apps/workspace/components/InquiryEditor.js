@@ -156,12 +156,14 @@ const InquiryEditor = (props) => {
   useEffect(() => {
     if (fieldValue) {
       const list = [currentEditInq];
-      const filter = metadata.inq_type_options.filter((data) => {
-        return (
-          data.field?.includes(fieldValue.value) &&
-          list.filter((q) => q.inqType === data.value && q.field === fieldValue.value).length === 0
-        );
-      });
+      const filter = metadata.inq_type_options
+        .filter((data) => {
+          return (
+            data.field?.includes(fieldValue.value) &&
+            list.filter((q) => q.inqType === data.value && q.field === fieldValue.value).length === 0
+          );
+        })
+        .sort((a, b) => a.label.localeCompare(b.label));
       setInqTypeOption(filter);
     }
   }, [fieldValue]);
