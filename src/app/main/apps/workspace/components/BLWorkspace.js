@@ -129,13 +129,15 @@ const BLWorkspace = (props) => {
     const checkByField = (amendmentField, inq) => {
       return (inq.process === 'draft' && inq.field === amendmentField)
     };
-    const optionsInquires = [...inquiries];
-    const oldAmendmentIndex = optionsInquires.findIndex(inq => (inq.id === objectNewAmendment.oldAmendmentId || checkByField(objectNewAmendment.newAmendment.field, inq)));
-    if (oldAmendmentIndex !== -1) {
-      const tempID = optionsInquires[oldAmendmentIndex]?.id
-      optionsInquires[oldAmendmentIndex] = { ...optionsInquires[oldAmendmentIndex], ...objectNewAmendment.newAmendment }
-      optionsInquires[oldAmendmentIndex].id = tempID;
-      dispatch(InquiryActions.setInquiries(optionsInquires));
+    if (objectNewAmendment?.newAmendment?.field) {
+      const optionsInquires = [...inquiries];
+      const oldAmendmentIndex = optionsInquires.findIndex(inq => (inq.id === objectNewAmendment.oldAmendmentId || checkByField(objectNewAmendment.newAmendment.field, inq)));
+      if (oldAmendmentIndex !== -1) {
+        const tempID = optionsInquires[oldAmendmentIndex]?.id
+        optionsInquires[oldAmendmentIndex] = { ...optionsInquires[oldAmendmentIndex], ...objectNewAmendment.newAmendment }
+        optionsInquires[oldAmendmentIndex].id = tempID;
+        dispatch(InquiryActions.setInquiries(optionsInquires));
+      }
     }
   }, [objectNewAmendment])
 
