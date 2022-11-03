@@ -95,6 +95,8 @@ const BLWorkspace = (props) => {
   const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const [confirmClick, form] = useSelector(({ workspace }) => [workspace.formReducer.confirmClick, workspace.formReducer.form]);
+  const [inqCustomer, setInqCustomer] = useState([]);
+  const [inqOnshore, setInqOnshore] = useState([]);
 
   const transAutoSaveStatus = useSelector(
     ({ workspace }) => workspace.transReducer.transAutoSaveStatus
@@ -124,6 +126,24 @@ const BLWorkspace = (props) => {
     return content[getField(keyword)] || '';
   };
 
+  const checkNewInquiry = (type) => {
+    const list = [];
+    const temp = inquiries.filter(inq => inq.receiver[0] === type && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF'));
+    if (temp.length) {
+      const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      sortDateList.forEach(inq => {
+        const find = metadata.field_options.find(field => field.value === inq.field);
+        if (!list.includes(find.label)) list.push(find.label);
+      })
+    }
+    return list;
+  }
+
+  useEffect(() => {
+    setInqCustomer(checkNewInquiry('customer') || []);
+    setInqOnshore(checkNewInquiry('onshore') || []);
+  }, [inquiries]);
+
   // TODO: TBU Logic after create new reply amendment
   useEffect(() => {
     const checkByField = (amendmentField, inq) => {
@@ -152,7 +172,12 @@ const BLWorkspace = (props) => {
           confirmPopupType: ''
         })
       );
-      dispatch(mailActions.autoSendMail(myBL, inquiries, metadata, content, form));
+      if (inqOnshore.length == 0 && inqCustomer.length == 0) {
+        dispatch(AppActions.showMessage({ message: 'No inquiries to Send Mail.', variant: 'error' }));
+      } else {
+        dispatch(mailActions.autoSendMail(myBL, inquiries, inqCustomer, inqOnshore, metadata, content, form));
+      }
+
     }
   }, [confirmClick, form])
 
