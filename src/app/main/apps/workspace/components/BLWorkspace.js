@@ -108,6 +108,7 @@ const BLWorkspace = (props) => {
   const openNotification = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitAnswer);
   const openNotificationReply = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteReply);
   const openNotificationBLWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning);
+  const openNotificationBLReloadWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLReloadWarning);
   const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
 
@@ -209,8 +210,9 @@ const BLWorkspace = (props) => {
       socket.on('msg_processing', (data) => {
         console.log(`message processing:`, data);
         let assignPermissionViewer = userInfo;
+        let permissions = [];
         let excludeFirstUser = false;
-        if (data.processingBy.length > 1) {
+        if (data.processingBy) {
           data.processingBy.forEach((p) => {
             if (userInfo.displayName === data.processingBy[0]) {
               excludeFirstUser = true;
@@ -218,31 +220,22 @@ const BLWorkspace = (props) => {
           });
           if (!excludeFirstUser && assignPermissionViewer) {
             // assign permission
-            assignPermissionViewer = {
-              ...assignPermissionViewer,
-              permissions: permissionViewer
-            };
+            permissions = permissionViewer
             // show popup for lastest user
             if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
               dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
             }
           } else {
             // assign permission
-            assignPermissionViewer = {
-              ...assignPermissionViewer,
-              permissions: permissionAssign
-            };
+            permissions = permissionAssign;
             dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
           }
         } else if (data.processingBy.length === 1) {
           // assign permission
-          assignPermissionViewer = {
-            ...assignPermissionViewer,
-            permissions: permissionAssign
-          };
+          permissions = permissionAssign;
           dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
         }
-        localStorage.setItem('USER', JSON.stringify(assignPermissionViewer));
+        sessionStorage.setItem('permissions', JSON.stringify(permissions));
       });
     }
   };
