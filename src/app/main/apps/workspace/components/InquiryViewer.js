@@ -629,17 +629,17 @@ const InquiryViewer = (props) => {
         if (optionsInquires[editedInqIndex]?.process === 'pending') {
           optionsInquires[editedInqIndex].state = 'UPLOADED';
           dispatch(InquiryActions.setInquiries(optionsInquires));
-        }
-
-        // Update list amendment
-        let editedAmeIndex = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
-        if (editedAmeIndex !== -1) {
-          optionsInquires[editedAmeIndex].state = 'UPLOADED';
-          dispatch(InquiryActions.setInquiries(optionsInquires));
-          const optionAmendment = [...listCommentDraft];
-          editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
-          optionAmendment[editedAmeIndex].state = 'UPLOADED';
-          dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+        } else {
+          // Update list amendment
+          let editedAmeIndex = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
+          if (editedAmeIndex !== -1) {
+            optionsInquires[editedAmeIndex].state = 'UPLOADED';
+            dispatch(InquiryActions.setInquiries(optionsInquires));
+            const optionAmendment = [...listCommentDraft];
+            editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
+            optionAmendment[editedAmeIndex].state = 'UPLOADED';
+            dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+          }
         }
 
         dispatch(
