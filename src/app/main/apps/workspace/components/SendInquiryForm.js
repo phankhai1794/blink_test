@@ -191,7 +191,10 @@ const SendInquiryForm = (props) => {
   }, [tabValue, inquiries])
 
   const isFormValid = () => {
-    return form.toCustomer || form.toOnshore;
+    if (tabValue === 'customer') {
+      return Boolean(form.toCustomer);
+    }
+    return Boolean(form.toOnshore);
   }
 
   const isMailVaid = () => Object.values(validateMail).filter(e => e).length
@@ -283,7 +286,10 @@ const SendInquiryForm = (props) => {
       dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
     }
     else if (!isFormValid()) {
-      dispatch(Actions.showMessage({ message: 'Please fill to Customer or Onshore fields', variant: 'error' }));
+      dispatch(Actions.showMessage({ message: 'Please fill in recipient field', variant: 'error' }));
+    }
+    else if ((tabValue === 'onshore' && inqOnshore.length == 0) || (tabValue === 'customer' && inqCustomer.length == 0)) {
+      dispatch(Actions.showMessage({ message: 'No inquiries to Send Mail', variant: 'error' }));
     }
     else {
       dispatch(
