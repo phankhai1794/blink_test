@@ -5077,11 +5077,6 @@ core-js-pure@^3.19.0:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.19.2.tgz#26b5bfb503178cff6e3e115bc2ba6c6419383680"
   integrity sha512-5LkcgQEy8pFeVnd/zomkUBSwnmIxuF1C8E9KrMAbOc8f34IBT9RGvTYeNDdp1PnvMJrrVhvk1hg/yVV5h/znlg==
 
-core-js@3:
-  version "3.22.8"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.22.8.tgz#23f860b1fe60797cc4f704d76c93fea8a2f60631"
-  integrity sha512-UoGQ/cfzGYIuiq6Z7vWL1HfkE9U9IZ4Ub+0XSiJTCzvbZzgPA69oDF2f+lgJ6dFFLEdjW5O6svvoKzXX23xFkA==
-
 core-js@3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.0.1.tgz#1343182634298f7f38622f95e73f54e48ddf4738"
@@ -7442,11 +7437,6 @@ get-caller-file@^2.0.1:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
   integrity sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==
-
-get-input-selection@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/get-input-selection/-/get-input-selection-1.1.4.tgz#2c622bbd994f8d7f8d6bfb60d634cc73ee775a81"
-  integrity sha512-o3rv95OOpoHznujIEwZljNhUM9efW/gZsIKCQtTrjRU4PkneVpDvxNBmC7kXC4519lZYT95DKcdj0A5f9GZkKg==
 
 get-intrinsic@^1.0.2, get-intrinsic@^1.1.0, get-intrinsic@^1.1.1:
   version "1.1.1"
@@ -12767,16 +12757,6 @@ react-app-polyfill@^1.0.6:
     regenerator-runtime "^0.13.3"
     whatwg-fetch "^3.0.0"
 
-react-autocomplete-input@^1.0.18:
-  version "1.0.18"
-  resolved "https://registry.yarnpkg.com/react-autocomplete-input/-/react-autocomplete-input-1.0.18.tgz#22c3005bb7632d270bc674015690d434dc17151f"
-  integrity sha512-xqGFOzLDDK+p9+HJrLzEeM3lEVm8969v+Zaa9hJIh0SXGUrzAHXfmd6krxD4r60zN6xdB4SP5Y0w813dW55hmQ==
-  dependencies:
-    core-js "3"
-    get-input-selection "^1.1.4"
-    prop-types "^15.7.2"
-    textarea-caret "^3.0.2"
-
 react-autosuggest@9.4.3:
   version "9.4.3"
   resolved "https://registry.yarnpkg.com/react-autosuggest/-/react-autosuggest-9.4.3.tgz#eb46852422a48144ab9f39fb5470319222f26c7c"
@@ -13220,6 +13200,11 @@ react-table@6.10.0:
   integrity sha512-s/mQLI1+mNvlae45MfAZyZ04YIT3jUzWJqx34s0tfwpDdgJkpeK6vyzwMUkKFCpGODBxpjBOekYZzcEmk+2FiQ==
   dependencies:
     classnames "^2.2.5"
+
+react-tag-autocomplete@^6.3.0:
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/react-tag-autocomplete/-/react-tag-autocomplete-6.3.0.tgz#ce064bbab77b4daf7706be1c08413e7d0335ff4d"
+  integrity sha512-MUBVUFh5eOqshUm5NM20qp7zXk8TzSiKO4GoktlFzBLIOLs356npaMKtL02bm0nFV2f1zInUrXn1fq6+i5YX0w==
 
 react-text-mask@5.4.3:
   version "5.4.3"
@@ -15037,11 +15022,6 @@ text-table@0.2.0, text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
-
-textarea-caret@^3.0.2:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/textarea-caret/-/textarea-caret-3.1.0.tgz#5d5a35bb035fd06b2ff0e25d5359e97f2655087f"
-  integrity sha512-cXAvzO9pP5CGa6NKx0WYHl+8CHKZs8byMkt3PCJBCmq2a34YA9pO1NrQET5pzeqnBjBdToF5No4rrmkDUgQC2Q==
 
 throat@^4.0.0:
   version "4.1.0"
