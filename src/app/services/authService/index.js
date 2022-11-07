@@ -21,6 +21,11 @@ export async function isVerified(data) {
   return response.data;
 }
 
+export async function verifyWithToken(auth) {
+  const response = await axios().get(`${PATH}/verify-with-token/${auth}`);
+  return response.data;
+}
+
 export async function forgotPassword(data) {
   const response = await axios().post(`${PATH}/forgot`, data);
   return response.data;

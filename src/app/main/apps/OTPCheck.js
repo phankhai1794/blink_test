@@ -8,7 +8,7 @@ import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core/styles';
 import OtpInput from 'react-otp-input';
 import { isEmail } from 'validator';
-import { verifyEmail, verifyGuest, isVerified } from 'app/services/authService';
+import { verifyEmail, verifyGuest, isVerified, verifyWithToken } from 'app/services/authService';
 import * as Actions from 'app/store/actions';
 
 const otpLength = 6;
@@ -154,6 +154,14 @@ const OtpCheck = ({ children }) => {
   const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true });
   const [step, setStep] = useState(0);
 
+  const catchError = (error, condition = true) => {
+    console.error(error);
+    if (condition) {
+      const { message } = error.response.data.error || error.message;
+      dispatch(Actions.showMessage({ message, variant: 'error' }));
+    }
+  }
+
   const handleChangeMail = (e) => {
     setMail({
       ...mail,
@@ -168,41 +176,39 @@ const OtpCheck = ({ children }) => {
         if (res) setStep(1);
       })
       .catch((error) => {
-        console.error(error);
-        const { message } = error.response.data.error || error.message;
-        dispatch(Actions.showMessage({ message, variant: 'error' }));
+        catchError(error);
       });
   };
 
   const handleChangeCode = (code) =>
     setOtpCode({ ...otpCode, value: code, isValid: Boolean(/^\d+$/.test(code)) });
 
+  const handleSuccess = (res) => {
+    const { userType, role, userName, avatar, email, permissions } = res.userData;
+    let userInfo = {
+      displayName: userName,
+      photoURL: avatar,
+      userType,
+      role,
+      email,
+      permissions
+    };
+
+    localStorage.setItem('AUTH_TOKEN', res.token);
+    localStorage.setItem('USER', JSON.stringify(userInfo));
+    // Auto save user data into redux store at ToolbarLayout1.js
+
+    dispatch(Actions.hideMessage());
+    setStep(2);
+  }
+
   const handleSendCode = () => {
     verifyGuest({ email: mail.value, bl: myBL.id, otpCode: otpCode.value })
       .then((res) => {
-        if (res) {
-          const { userType, role, userName, avatar, email, permissions } = res.userData;
-          let userInfo = {
-            displayName: userName,
-            photoURL: avatar,
-            userType,
-            role,
-            email,
-            permissions
-          };
-
-          localStorage.setItem('AUTH_TOKEN', res.token);
-          localStorage.setItem('USER', JSON.stringify(userInfo));
-          // Auto save user data to redux store at ToolbarLayout1.js
-
-          dispatch(Actions.hideMessage());
-          setStep(2);
-        }
+        if (res) handleSuccess(res);
       })
       .catch((error) => {
-        console.error(error);
-        const { message } = error.response.data.error || error.message;
-        dispatch(Actions.showMessage({ message, variant: 'error' }));
+        catchError(error);
       });
   };
 
@@ -211,25 +217,37 @@ const OtpCheck = ({ children }) => {
     const bl = new URLSearchParams(search).get('bl');
     if (bl) setMyBL({ ...myBL, id: bl });
 
-    let userInfo = localStorage.getItem('USER');
-    if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
-      const { email } = JSON.parse(userInfo);
-      if (email) {
-        setMail({
-          ...mail,
-          value: email,
-          isValid: isEmail(email)
+    const auth = new URLSearchParams(search).get('auth');
+    if (bl && auth) { // verify token on url
+      verifyWithToken(auth)
+        .then((res) => {
+          handleSuccess(res);
+          // Remove token from url
+          const url = new URL(window.location);
+          url.searchParams.set('bl', bl);
+          window.history.pushState({}, '', `/guest?bl=${bl}`);
+        })
+        .catch((error) => {
+          catchError(error, error.response?.data?.error.status === 403);
         });
-
-        isVerified({ email, bl })
-          .then(() => setStep(2))
-          .catch((error) => {
-            console.error(error);
-            if (error.response?.data?.error.status === 403) {
-              const { message } = error.response.data.error || error.message;
-              dispatch(Actions.showMessage({ message, variant: 'error' }));
-            }
+    }
+    else { // verify token in localStorage
+      let userInfo = localStorage.getItem('USER');
+      if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
+        const { email } = JSON.parse(userInfo);
+        if (email) {
+          setMail({
+            ...mail,
+            value: email,
+            isValid: isEmail(email)
           });
+
+          isVerified({ email, bl })
+            .then(() => setStep(2))
+            .catch((error) => {
+              catchError(error, error.response?.data?.error.status === 403);
+            });
+        }
       }
     }
   }, []);
