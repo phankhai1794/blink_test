@@ -31,7 +31,7 @@ import BtnAddInquiry from './BtnAddInquiry';
 import BLField from './BLField';
 import { AttachmentList, AttachFileList } from './AttachmentList';
 import BLProcessNotification from './BLProcessNotification';
-import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
+import { SendInquiryForm } from './SendInquiryForm';
 import TableCD from './TableCD';
 import TableCM from './TableCM';
 import ListNotification from './ListNotification';
@@ -534,8 +534,6 @@ const BLWorkspace = (props) => {
               const field = metadata.field_options.find(f => inquiry.field === f.value);
               if (inquiry.field === 'EMAIL') {
                 return <SendInquiryForm field={'EMAIL'} key={inquiry.id} />;
-              } else if (inquiry.field === 'INQUIRY_REVIEW') {
-                return <InquiryReview field={'INQUIRY_REVIEW'} key={inquiry.id} />;
               } else {
                 const popupObj = popupOpen(inquiry, field);
                 return (
