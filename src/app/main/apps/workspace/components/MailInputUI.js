@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react';
-import TextInput from 'react-autocomplete-input';
-import 'react-autocomplete-input/dist/bundle.css';
+import React, { useState, useRef, useCallback } from 'react';
+import ReactTags from 'react-tag-autocomplete'
 import { Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
@@ -15,8 +14,32 @@ const useStyles = makeStyles(() => ({
     fontWeight: '600',
     fontFamily: 'Montserrat'
   },
-
+  buttonCcBcc: {
+    paddingLeft: '7px',
+    paddingRight: '7px',
+    background: '#FFFFFF',
+    border: '1px solid #BD0F72',
+    borderRadius: '4px',
+    justifyContent: 'center'
+  },
+  buttonCcBccDisable: {
+    paddingLeft: '7px',
+    paddingRight: '7px',
+    background: '#FFFFFF',
+    border: '1px solid #BAC3CB',
+    borderRadius: '4px',
+    justifyContent: 'center'
+  },
+  buttonText: {
+    fontStyle: 'normal',
+    fontWeight: '500',
+    fontSize: '14px',
+    lineHeight: '17px',
+    width: '100%',
+    color: '#BD0F72'
+  }
 }))
+
 const InputUI = (props) => {
   const { id, title, type, onChanged, isCc, isBcc, onCc, onBcc } = props;
   const classes = useStyles();
@@ -24,7 +47,7 @@ const InputUI = (props) => {
     <Grid
       container
       direction="row"
-      style={{ alignItems: 'center', justifyContent: "flex-start" }}>
+      style={{ alignItems: 'center', justifyContent: "flex-start", marginTop: 10 }}>
       <Grid item xs={1}>
         {title === 'Cc' || title === 'Bcc' ? (
           <div
@@ -74,7 +97,9 @@ const InputUI = (props) => {
 };
 const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) => {
   const dispatch = useDispatch();
+  const classes = useStyles();
   const [isFocus, setIsFocus] = useState(false);
+  const [focus, setFocus] = useState(false);
   const textInput = useRef(null);
 
   const suggestMails = useSelector(({ workspace }) => workspace.mailReducer.suggestMails);
@@ -83,11 +108,15 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
   const tags = _tags[id] || []
   const input = validateMail[id]
 
-  const validateEmail = (email) => {
+  const validateEmail = (tag) => {
     const regexp =
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return regexp.test(email);
+    return regexp.test(tag);
   };
+
+  const convertObject = (list) => {
+    return list.map((name, id) => ({ id, name }))
+  }
 
   const validateListEmail = (e) => {
     e.preventDefault()
@@ -107,99 +136,52 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
     }
   }
 
-  const handleChange = (value) => {
-    dispatch(MailActions.validateMail({ ...validateMail, [id]: value.trim() === 'undefined' ? '' : value }))
-  }
-
-  const handleKeyDown = (e) => {
-    if (['Enter', 'Tab'].includes(e.key)) {
-      const { value } = e.target;
-      if (value !== '') {
-        e.preventDefault();
-        if (!validateEmail(value)) return alert('Please enter a valid email address');
-        dispatch(MailActions.validateMail({ ...validateMail, [id]: '' }))
-        dispatch(MailActions.setTags({ ..._tags, [id]: [...tags, value] }))
-        e.target.value = '';
-      }
-    }
-  };
-
-  const changeOnSelect = (trigger, slug) => {
-    const newTags = [...tags, slug]
+  const onDelete = useCallback((tagIndex) => {
+    const newTags = tags.filter((_, i) => i !== tagIndex)
     dispatch(MailActions.setTags({ ..._tags, [id]: newTags }))
     onChanged(id, newTags);
+  }, [tags])
+
+  const onAddition = (newTag) => {
+    const newTags = [...tags, newTag.name]
     dispatch(MailActions.validateMail({ ...validateMail, [id]: '' }))
-    textInput.current.refInput.current.focus();
-  };
+    dispatch(MailActions.setTags({ ..._tags, [id]: newTags }))
+    onChanged(id, newTags);
+  }
 
-  const handleKeyUp = (e) => {
-    e.preventDefault();
-    if (!['Enter', 'Tab'].includes(e.key)) return dispatch(MailActions.validateMail({ ...validateMail, [id]: e.target.value }));
-    onChanged(id, tags);
-  };
+  const onInput = (value) => {
+    dispatch(MailActions.validateMail({ ...validateMail, [id]: value }))
+  }
 
-  const handleBlur = (e) => {
-    e.preventDefault();
+  const handleBlur = () => {
     if (input && validateEmail(input.trim())) {
       const newTags = [...tags, input.trim()]
       onChanged(id, newTags);
       dispatch(MailActions.setTags({ ..._tags, [id]: newTags }))
       dispatch(MailActions.validateMail({ ...validateMail, [id]: '' }))
     }
-    setIsFocus(false);
+    if (!focus) {
+      setIsFocus(false);
+    }
   };
 
-  const removeTag = (index) => {
-    const newTags = tags.filter((el, i) => i !== index)
-    dispatch(MailActions.setTags({ ..._tags, [id]: newTags }))
-    onChanged(id, newTags);
-  };
-
-  const useStyles = makeStyles((theme) => ({
-    buttonCcBcc: {
-      paddingLeft: '7px',
-      paddingRight: '7px',
-      background: '#FFFFFF',
-      border: '1px solid #BD0F72',
-      borderRadius: '4px',
-      justifyContent: 'center'
-    },
-    buttonCcBccDisable: {
-      paddingLeft: '7px',
-      paddingRight: '7px',
-      background: '#FFFFFF',
-      border: '1px solid #BAC3CB',
-      borderRadius: '4px',
-      justifyContent: 'center'
-    },
-    buttonText: {
-      fontStyle: 'normal',
-      fontWeight: '500',
-      fontSize: '14px',
-      lineHeight: '17px',
-      width: '100%',
-      color: '#BD0F72'
+  const limitTags = (tags) => {
+    if (!isFocus && tags.length > 3) {
+      let tagsShow = tags.slice(0, 3);
+      tagsShow.push(`+${tags.length - 3}`)
+      return convertObject(tagsShow);
     }
-  }));
-  const classes = useStyles();
-
-  const getTagsShow = (tags) => {
-    let tagsShow = [];
-    let length = 0;
-    for (const tag of tags) {
-      if (tag.length + length > 66) {
-        break;
-      }
-      tagsShow.push(tag);
-      length += tag.length;
-      length += 10;
-
-    }
-    return tagsShow;
+    return convertObject(tags);
   };
 
   return (
-    <div className="tags-input-container" style={{ paddingRight: (type == 'Cc' || type == 'Bcc') ? '0px' : '90px' }} onFocus={() => setIsFocus(true)}>
+    <div
+      className="tags-input-container"
+      style={{ paddingRight: (type == 'Cc' || type == 'Bcc') ? '0px' : '90px' }}
+      onMouseEnter={() => setFocus(true)}
+      onMouseLeave={() => setFocus(false)}
+      onFocus={() => setIsFocus(true)}
+    >
       {type !== 'Cc' && type !== 'Bcc' && <div style={{
         position: 'absolute',
         paddingLeft: '7px',
@@ -218,44 +200,31 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
         </button>
       </div>
       }
-      {(!isFocus ? getTagsShow(tags) : tags).map((tag, index) => (
-        <div className="tag-item" key={index}>
-          <span className="text">{tag}</span>
-          <span className="close" onClick={() => removeTag(index)}>
-            &times;
-          </span>
-        </div>
-      ))}
-      {
-        !isFocus && tags.length > getTagsShow(tags).length && <div style={{ backgroundColor: '#00000008', padding: '3px', borderRadius: '4px' }}>
-          <span style={{ width: '100%', color: '#515e6a' }}>+{tags.length - getTagsShow(tags).length}</span>
-        </div>
-      }
       <div style={{ flex: 'auto', display: 'inline-block' }}>
-        <TextInput
-          style={{ flex: 'auto' }}
+        <ReactTags
+          allowNew
           ref={textInput}
-          Component="input"
-          options={suggestMails}
-          trigger={['']}
-          disabled={tags.length >= tagLimit}
-          onKeyDown={handleKeyDown}
-          changeOnSelect={changeOnSelect}
-          onKeyUp={handleKeyUp}
+          tags={limitTags(tags)}
+          placeholderText={!tags.length ? "Enter your email" : ""}
+          suggestions={convertObject(suggestMails)}
+          onAddition={onAddition}
+          onDelete={onDelete}
+          onValidate={({ name }) => validateEmail(name)}
+          inputAttributes={{ onPaste: validateListEmail }}
           onBlur={handleBlur}
-          onFocus={() => setIsFocus(true)}
-          onPaste={validateListEmail}
-          onChange={handleChange}
-          value={input}
-          type="text"
-          className="tags-input"
-          placeholder={
-            tags.length > 0
-              ? tags.length < tagLimit
-                ? 'Enter your email'
-                : ''
-              : 'Enter your email'
-          }
+          onInput={onInput}
+          tagComponent={({ tag, _, onDelete }) => {
+            return (
+              <div className="react-tags__selected-tag" >
+                <span className="text">{tag.name}</span>
+                {((!isFocus && Number(tag.id) < 3) || isFocus) &&
+                  <span className="close" onClick={onDelete}>
+                    &times;
+                  </span>
+                }
+              </div>
+            )
+          }}
         />
       </div>
     </div>
