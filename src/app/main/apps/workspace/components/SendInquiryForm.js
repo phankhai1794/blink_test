@@ -4,11 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Icon, Button, Tabs, Tab, Select, MenuItem } from '@material-ui/core';
 import clsx from 'clsx';
+import { EditorState, convertToRaw, ContentState } from 'draft-js';
+import { Editor } from 'react-draft-wysiwyg';
+import draftToHtml from 'draftjs-to-html';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles, withStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { getMail } from 'app/services/mailService';
-
+import parse, { attributesToProps, domToReact } from 'html-react-parser';
 
 import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
@@ -78,6 +81,7 @@ const StyledMenuItem = withStyles(theme => ({
 
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
+  const classes = useStyles();
   const mybl = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
@@ -120,6 +124,7 @@ const SendInquiryForm = (props) => {
   const [customerValue, setCustomerValue] = useState({ subject: '', content: '' })
   const [onshoreValue, setOnshoreValue] = useState({ subject: '', content: '' })
   const [openNotification, setOpenNotification] = useState(false)
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const getField = (keyword) => {
     return metadata.field?.[keyword] || '';
@@ -146,6 +151,14 @@ const SendInquiryForm = (props) => {
     return list
   }
 
+  const initiateContentState = (content) => {
+    return EditorState.createWithContent(ContentState.createFromText(content));
+  }
+
+  const handleEditorState = (content) => {
+    setEditorState(initiateContentState(content));
+  }
+
   useEffect(() => {
     if (hasCustomer) {
       setTabValue('customer')
@@ -165,28 +178,35 @@ const SendInquiryForm = (props) => {
   }, [inquiries])
 
   useEffect(() => {
-    let subject = ''
-    let content = ''
+    let subject = '';
+    let content = '';
+    let bodyHtml = '';
     if (hasOnshore) {
-      subject = `[Alert Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
-      content = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`
-      setOnshoreValue({ subject, content })
-      setForm({ ...form, subject, content })
+      subject = `[Alert Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      content = `Dear Onshore,\n \nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`;
+      bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
+      setOnshoreValue({ subject, content: bodyHtml, html: initiateContentState(content) });
+      setForm({ ...form, subject, content: bodyHtml });
+      handleEditorState(content);
     }
     if (hasCustomer) {
-      subject = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
-      content = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer.join(', ')}]`
-      setCustomerValue({ subject, content })
-      setForm({ ...form, subject, content })
+      subject = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      content = `Dear Customer,\n \nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer.join(', ')}]`;
+      bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
+      setCustomerValue({ subject, content: bodyHtml, html: initiateContentState(content) });
+      setForm({ ...form, subject, content: bodyHtml });
+      handleEditorState(content);
     }
   }, [openEmail])
 
   useEffect(() => {
     if (tabValue === 'onshore') {
       setForm({ ...form, subject: onshoreValue.subject, content: onshoreValue.content })
+      setEditorState(onshoreValue.html);
     }
     else {
       setForm({ ...form, subject: customerValue.subject, content: customerValue.content })
+      setEditorState(customerValue.html);
     }
   }, [tabValue, inquiries])
 
@@ -306,14 +326,14 @@ const SendInquiryForm = (props) => {
     setForm({ ...form, [key]: tags.join(',') })
   };
 
-  const handleBodyChange = (event) => {
+  const handleBodyChange = (content) => {
     if (tabValue === 'customer') {
-      setCustomerValue({ ...customerValue, content: event.target.value })
+      setCustomerValue({ ...customerValue, content });
     }
     else {
-      setOnshoreValue({ ...onshoreValue, content: event.target.value })
+      setOnshoreValue({ ...onshoreValue, content });
     }
-    setForm({ ...form, content: event.target.value })
+    setForm({ ...form, content });
   };
 
   const handleSubjectChange = (event) => {
@@ -329,8 +349,17 @@ const SendInquiryForm = (props) => {
   const handleTabChange = (_, newValue) => {
     setTabValue(newValue)
   }
+  const onEditorStateChange = (evt) => {
+    handleBodyChange(draftToHtml(convertToRaw(evt.getCurrentContent())).replace("<p></p>", "<br>"));
+    setEditorState(evt);
+    if (tabValue === 'customer') {
+      setCustomerValue({ ...customerValue, html: evt });
+    }
+    else {
+      setOnshoreValue({ ...onshoreValue, html: evt });
+    }
+  };
 
-  const classes = useStyles();
   const ToCustomer = () =>
     <>
       <InputUI
@@ -466,29 +495,30 @@ const SendInquiryForm = (props) => {
             <div style={{ marginTop: 10 }}>
               <label className={clsx(classes.label)}>Body</label>
             </div>
-            <div style={{ display: 'flex' }}>
-              <textarea
-                style={{
-                  padding: 10,
-                  marginTop: 10,
-                  minHeight: 200,
-                  resize: 'none'
-                }}
-                className={classes.input}
-                multiline="true"
-                type="text"
-                value={form.content}
-                onChange={handleBodyChange}></textarea>
-            </div>
+            <Editor
+              editorState={editorState}
+              wrapperClassName="demo-wrapper"
+              editorClassName="demo-editor"
+              onEditorStateChange={onEditorStateChange}
+              toolbar={{
+                options: ['inline', 'blockType', 'fontFamily', 'list', 'textAlign', 'colorPicker', 'remove', 'history'],
+                inline: {
+                  options: ['bold', 'italic', 'underline', 'strikethrough', 'monospace'],
+                },
+                list: {
+                  options: ['unordered', 'ordered'],
+                }
+              }}
+            />
           </>
         }
         {previewValue === 'email' &&
           <div style={{ margin: 'auto', maxWidth: 580, }}>
             <img style={{ margin: 15 }} src="assets/images/logos/one_ocean_network-logo.png" width="100px" alt="ONE" />
             <div style={{ backgroundColor: 'white', padding: 20, fontFamily: 'Montserrat', fontSize: 15, fontWeight: 500 }}>
-              <p style={{ whiteSpace: 'pre-line' }}>
-                {form.content}
-              </p>
+              <div className='preview_editor-content'>
+                {parse(form.content)}
+              </div>
               <p >Please visit the link below and help us answer our inquiry. <br />
                 BLink Workspace: <br />
                 Access Code: </p>
@@ -506,54 +536,6 @@ const SendInquiryForm = (props) => {
             openInquiryReview={true}
           />
         }
-      </Form>
-    </>
-  );
-};
-
-const InquiryReview = (props) => {
-  const [tabSelected, setTabSelected] = useState(0);
-  const [openInqReview] = useSelector(({ workspace }) => [workspace.formReducer.openInqReview]);
-  const [inquiries] = useSelector(({ workspace }) => [workspace.inquiryReducer.inquiries]);
-  const dispatch = useDispatch();
-
-  const countInq = (recevier) => {
-    let count = 0;
-    inquiries.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
-    return count;
-  };
-
-  const handleTabSelected = () => {
-    if (countInq('customer') === 0) {
-      return 'onshore'
-    } else {
-      return tabSelected === 0 ? 'customer' : 'onshore'
-    }
-  }
-
-  return (
-    <>
-      <Form
-        title={'Inquiry Preview'}
-        tabs={['Customer', 'Onshore']}
-        nums={[countInq('customer'), countInq('onshore')]}
-        open={openInqReview}
-        toggleForm={(status) => dispatch(FormActions.toggleOpenInquiryReview(status))}
-        tabChange={(newValue) => {
-          setTabSelected(newValue);
-        }}
-        hasAddButton={false}
-        field={props.field}
-        openFab={false}
-        FabTitle="Inquiry Review"
-      >
-        <>
-          <AllInquiry
-            user="workspace"
-            receiver={handleTabSelected()}
-            openInquiryReview={true}
-          />
-        </>
       </Form>
     </>
   );
@@ -644,4 +626,4 @@ const ActionUI = (props) => {
   );
 };
 
-export { SendInquiryForm, InquiryReview };
+export { SendInquiryForm };

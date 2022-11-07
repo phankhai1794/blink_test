@@ -1,0 +1,25 @@
+.rdw-editor-main {
+    border: 1px solid #BAC3CB;
+    border-radius: 6px;
+    min-height: 150px;
+}
+
+.rdw-option-wrapper {
+    margin: 0 !important
+}
+
+.rdw-option-wrapper:hover {
+    background-color: rgba(32, 33, 36, 0.122);
+}
+
+.DraftEditor-editorContainer {
+    padding: 15px
+}
+
+.public-DraftStyleDefault-block {
+    margin: 0 !important;
+}
+
+.preview_editor-content p {
+    margin: 0
+}
