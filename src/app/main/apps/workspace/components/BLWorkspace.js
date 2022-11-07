@@ -74,6 +74,8 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+const socket = initiateSocketConnection();
+
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -97,10 +99,6 @@ const BLWorkspace = (props) => {
   const [confirmClick, form] = useSelector(({ workspace }) => [workspace.formReducer.confirmClick, workspace.formReducer.form]);
   const [inqCustomer, setInqCustomer] = useState([]);
   const [inqOnshore, setInqOnshore] = useState([]);
-
-  const transAutoSaveStatus = useSelector(
-    ({ workspace }) => workspace.transReducer.transAutoSaveStatus
-  );
   const isLoading = useSelector(({ workspace }) => workspace.transReducer.isLoading);
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
@@ -108,7 +106,6 @@ const BLWorkspace = (props) => {
   const openNotification = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitAnswer);
   const openNotificationReply = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteReply);
   const openNotificationBLWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning);
-  const openNotificationBLReloadWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLReloadWarning);
   const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
 
@@ -189,7 +186,6 @@ const BLWorkspace = (props) => {
       }
       return '';
     };
-
     window.addEventListener('beforeunload', unloadCallback);
     return () => window.removeEventListener('beforeunload', unloadCallback);
   }, [isLoading]);
@@ -241,10 +237,16 @@ const BLWorkspace = (props) => {
   };
 
   useEffect(() => {
+    console.log(user);
+    if (!user.displayName) {
+      socket.emit('user_processing_out', {});
+    }
+  }, [user]);
+
+  useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(DraftActions.setProcess(props.process));
 
-    const socket = initiateSocketConnection();
     const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) {
       dispatch(Actions.initBL(bkgNo));
@@ -274,7 +276,7 @@ const BLWorkspace = (props) => {
         })
       }
     }
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     dispatch(Actions.loadMetadata());
