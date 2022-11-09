@@ -26,39 +26,39 @@ export const TYPE_OF_MOVEMENT = 'moveTypeDesc';
 
 export const CONTAINER_DETAIL = 'containerDetail';
 
-export const CONTAINER_NUMBER = 'Container Number';
+export const CONTAINER_NUMBER = 'Container No.';
 
-export const CONTAINER_SEAL = 'Container Seal';
+export const CONTAINER_SEAL = 'Container Seal No.';
 
 export const CONTAINER_TYPE = 'Container Type';
 
-export const CONTAINER_PACKAGE = 'Container Package';
+export const CONTAINER_PACKAGE = 'Number of Packages';
 
-export const CONTAINER_PACKAGE_UNIT = 'Container Package Unit';
+export const CONTAINER_PACKAGE_UNIT = 'Package Type';
 
-export const CONTAINER_WEIGHT = 'Container Weight';
+export const CONTAINER_WEIGHT = 'Gross Weight';
 
 export const CONTAINER_WEIGHT_UNIT = 'Container Weight Unit';
 
-export const CONTAINER_MEASUREMENT = 'Container Measurement';
+export const CONTAINER_MEASUREMENT = 'Gross Measurement';
 
 export const CONTAINER_MEASUREMENT_UNIT = 'Container Measurement Unit';
 
 export const CONTAINER_MANIFEST = 'containerManifest';
 
-export const CM_MARK = 'C/M Mark';
+export const CM_MARK = 'C/M Mark & Number';
 
-export const CM_PACKAGE = 'C/M Package';
+export const CM_PACKAGE = 'C/M Package (Quantity for customs declaration only)';
 
-export const CM_PACKAGE_UNIT = 'C/M Package Unit';
+export const CM_PACKAGE_UNIT = 'C/M Package Type';
 
-export const CM_DESCRIPTION = 'C/M Description';
+export const CM_DESCRIPTION = 'C/M Description of Goods';
 
-export const CM_WEIGHT = 'C/M Weight';
+export const CM_WEIGHT = 'C/M Gross Weight';
 
 export const CM_WEIGHT_UNIT = 'C/M Weight Unit';
 
-export const CM_MEASUREMENT = 'C/M Measurement';
+export const CM_MEASUREMENT = 'C/M Gross Measurement';
 
 export const CM_MEASUREMENT_UNIT = 'C/M Measurement Unit';
 
