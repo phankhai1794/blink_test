@@ -7,7 +7,11 @@ import {
   CONTAINER_PACKAGE,
   CONTAINER_MEASUREMENT,
   CONTAINER_WEIGHT,
-  CONTAINER_LIST
+  SEQ,
+  HS_CODE,
+  HTS_CODE,
+  NCM_CODE,
+  mapUnit
 } from '@shared/keyword';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -20,6 +24,7 @@ import AmendmentPopup from './AmendmentPopup';
 const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInuput = false }) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+  const user = useSelector(({ user }) => user);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -37,12 +42,12 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     return content[getField(field)] || '';
   };
 
-  const unitList = CONTAINER_LIST.numberList.map(title => `${title} Unit`);
   const originalData = originalValues || getValueField(container) || [{}];
   const [values, setValues] = useState(originalValues || getValueField(container) || [{}]);
   const [openEdit, setOpenEdit] = useState(false);
   const [rowIndex, setRowIndex] = useState(0);
   const [valueEdit, setValueEdit] = useState(originalValues || getValueField(container) || [{}]);
+  const showColumn = user.role === 'Guest' ? [...Object.values(mapUnit), SEQ, HS_CODE, HTS_CODE, NCM_CODE] : [...Object.values(mapUnit), SEQ]
 
   const handleEdit = (state) => {
     setOpenEdit(state)
@@ -52,7 +57,12 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const getTotals = (data, key) => {
     let total = 0;
     data.forEach(item => {
-      total += Number((item[key] || '').replace(',', ''));
+      if (typeof (item[key] || '') === "string") {
+        total += Number((item[key] || '').replace(',', ''));
+      }
+      else {
+        total += item[key];
+      }
     });
     return total === 0 ? '' : parseFloat(total.toFixed(6)).toLocaleString();
   };
@@ -111,10 +121,10 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           accessor: key,
           width: 200,
           headerClassName: "header_layout",
-          show: !unitList.includes(getTypeName(key)),
+          show: !showColumn.includes(getTypeName(key)),
           Cell: (props) => {
-            if (CONTAINER_LIST.numberList.includes(getTypeName(props.column.id))) {
-              const id = getType(`${getTypeName(props.column.id)} Unit`)
+            if (Object.keys(mapUnit).includes(getTypeName(props.column.id))) {
+              const id = getType(mapUnit[getTypeName(props.column.id)])
               const unit = props.index === originalData.length ? values[0][id] : props.row[id]
               return (props.value ? (props.value + ' ' + (unit || '')) : '')
             }

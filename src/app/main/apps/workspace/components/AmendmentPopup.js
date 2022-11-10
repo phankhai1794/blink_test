@@ -7,7 +7,11 @@ import {
   CONTAINER_DETAIL,
   CONTAINER_NUMBER,
   CONTAINER_SEAL,
-  CONTAINER_LIST
+  CONTAINER_LIST,
+  HS_CODE,
+  HTS_CODE,
+  NCM_CODE,
+  mapUnit
 } from '@shared/keyword';
 
 const useStyles = makeStyles((theme) => ({
@@ -102,9 +106,9 @@ const AmendmentPopup = (props) => {
   }
 
   const lock = (title) => ((inqType !== CONTAINER_DETAIL || user.role === 'Guest') && [CONTAINER_NUMBER, CONTAINER_SEAL].includes(title)) || !isEdit;
-
+  const show = (title, value) => (user.role === 'Admin' && [HS_CODE, HTS_CODE, NCM_CODE].includes(title) && value) || ![HS_CODE, HTS_CODE, NCM_CODE].includes(title)
   const onChange = (id, value) => {
-    if (CONTAINER_LIST.numberList.includes(getTypeName(id))) {
+    if (Object.keys(mapUnit).includes(getTypeName(id))) {
       setErrors({ ...errors, [id]: isNumber(value) });
     }
     updateEdit(old => old.map((row, i) => index === i ? { ...old[index], [id]: value } : row));
@@ -122,14 +126,14 @@ const AmendmentPopup = (props) => {
           <Icon style={{ color: '#8A97A3' }}>close</Icon>
         </IconButton>
       </div>
-      <div style={{ padding: '20px 30px 0 30px', overflow: 'auto' }}>
+      <div style={{ padding: '20px 30px', overflow: 'auto' }}>
         {
           type.map((field, index) =>
             <React.Fragment key={index}>
-              {CONTAINER_LIST.numberList.includes(field.title) ?
+              {Object.keys(mapUnit).includes(field.title) ?
                 <div className='flex justify-between'>
                   <div>
-                    <p style={{ fontWeight: 600 }}>{field.title}</p>
+                    <p style={{ fontWeight: 600 }}>{field.title.replace(/\(.*\)/g, '')}</p>
                     <TextField
                       variant="outlined"
                       error={!isNumber(field.value)}
@@ -152,15 +156,15 @@ const AmendmentPopup = (props) => {
                     />
                   </div>
                   <div>
-                    <p style={{ fontWeight: 600 }}>{`${field.title} Unit`.replace(/Container|C\/M/g, '')}</p>
+                    <p style={{ fontWeight: 600 }}>{`${field.title} Unit`.replace(/Container|C\/M|\(.*\)/g, '')}</p>
                     <TextField
                       variant="outlined"
                       className={clsx(
                         classes.textField,
                         !isEdit && classes.lock
                       )}
-                      value={data[getType(`${field.title} Unit`)]}
-                      onChange={(e) => onChange(getType(`${field.title} Unit`), e.target.value)}
+                      value={data[getType(mapUnit[field.title])]}
+                      onChange={(e) => onChange(getType(mapUnit[field.title]), e.target.value)}
                       InputProps={{
                         disabled: !isEdit,
                         endAdornment: (
@@ -174,26 +178,30 @@ const AmendmentPopup = (props) => {
                 </div>
                 :
                 <>
-                  <p style={{ fontWeight: 600 }}>{field.title}</p>
-                  <TextField
-                    variant="outlined"
-                    fullWidth={true}
-                    multiline={true}
-                    className={clsx(
-                      classes.textField,
-                      lock(field.title) && classes.lock
-                    )}
-                    value={field.value}
-                    onChange={(e) => onChange(field.id, e.target.value)}
-                    InputProps={{
-                      disabled: lock(field.title),
-                      endAdornment: (
-                        <>
-                          {lock(field.title) && <Icon>lock</Icon>}
-                        </>
-                      )
-                    }}
-                  />
+                  {show(field.title, field.value) &&
+                    <>
+                      <p style={{ fontWeight: 600 }}>{field.title}</p>
+                      <TextField
+                        variant="outlined"
+                        fullWidth={true}
+                        multiline={true}
+                        className={clsx(
+                          classes.textField,
+                          lock(field.title) && classes.lock
+                        )}
+                        value={field.value}
+                        onChange={(e) => onChange(field.id, e.target.value)}
+                        InputProps={{
+                          disabled: lock(field.title),
+                          endAdornment: (
+                            <>
+                              {lock(field.title) && <Icon>lock</Icon>}
+                            </>
+                          )
+                        }}
+                      />
+                    </>
+                  }
                 </>
               }
             </React.Fragment>
