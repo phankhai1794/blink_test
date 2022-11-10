@@ -611,7 +611,7 @@ const InquiryViewer = (props) => {
         if (editedIndex != -1) {
           optionsInquires[editedIndex].state = 'COMPL';
         }
-        
+
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
         setSaveComment(!isSaveComment);
@@ -621,31 +621,37 @@ const InquiryViewer = (props) => {
 
   const onUpload = () => {
     const optionsInquires = [...inquiries];
-    uploadOPUS(question.id)
-      .then(() => {
-        setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
-
-        // Update list inquiry
-        let editedInqIndex = optionsInquires.findIndex(inq => question.id === inq.id);
-        if (optionsInquires[editedInqIndex]?.process === 'pending') {
-          optionsInquires[editedInqIndex].state = 'UPLOADED';
-          dispatch(InquiryActions.setInquiries(optionsInquires));
+    uploadOPUS(myBL.id, question.id, question.field)
+      .then((res) => {
+        if (res && res.status === 'F') {
+          dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
         } else {
-          // Update list amendment
-          let editedAmeIndex = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
-          if (editedAmeIndex !== -1) {
-            optionsInquires[editedAmeIndex].state = 'UPLOADED';
+          setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
+
+          // Update list inquiry
+          let editedInqIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+          if (optionsInquires[editedInqIndex]?.process === 'pending') {
+            optionsInquires[editedInqIndex].state = 'UPLOADED';
             dispatch(InquiryActions.setInquiries(optionsInquires));
-            const optionAmendment = [...listCommentDraft];
-            editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
-            optionAmendment[editedAmeIndex].state = 'UPLOADED';
-            dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+          } else {
+            // Update list amendment
+            let editedAmeIndex = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
+            if (editedAmeIndex !== -1) {
+              optionsInquires[editedAmeIndex].state = 'UPLOADED';
+              dispatch(InquiryActions.setInquiries(optionsInquires));
+              const optionAmendment = [...listCommentDraft];
+              editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
+              optionAmendment[editedAmeIndex].state = 'UPLOADED';
+              dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+            }
+          }
+
+          if (res.warning) {
+            dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
+          } else {
+            dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
           }
         }
-
-        dispatch(
-          AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' })
-        );
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   };
