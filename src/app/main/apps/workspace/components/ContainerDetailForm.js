@@ -1,13 +1,8 @@
 import {
   CONTAINER_DETAIL,
   CONTAINER_NUMBER,
-  CM_PACKAGE,
-  CM_WEIGHT,
-  CM_MEASUREMENT,
-  CONTAINER_PACKAGE,
-  CONTAINER_MEASUREMENT,
-  CONTAINER_WEIGHT,
   SEQ,
+  CONTAINER_LIST,
   HS_CODE,
   HTS_CODE,
   NCM_CODE,
@@ -15,9 +10,7 @@ import {
 } from '@shared/keyword';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Icon, IconButton } from '@material-ui/core';
-import ReactTable from "react-table";
-import "react-table/react-table.css";
+import { Icon, IconButton, Table, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
 
 import AmendmentPopup from './AmendmentPopup';
 
@@ -47,14 +40,19 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const [openEdit, setOpenEdit] = useState(false);
   const [rowIndex, setRowIndex] = useState(0);
   const [valueEdit, setValueEdit] = useState(originalValues || getValueField(container) || [{}]);
-  const showColumn = user.role === 'Guest' ? [...Object.values(mapUnit), SEQ, HS_CODE, HTS_CODE, NCM_CODE] : [...Object.values(mapUnit), SEQ]
+
+  const CDTitle = CONTAINER_LIST.cd
+  const CMTitle = user.role === 'Guest' ? [CONTAINER_NUMBER, ...CONTAINER_LIST.cm].filter(item => ![HS_CODE, HTS_CODE, NCM_CODE].includes(item)) : [CONTAINER_NUMBER, ...CONTAINER_LIST.cm]
+  const type = (container === CONTAINER_DETAIL) ? CDTitle : CMTitle;
 
   const handleEdit = (state) => {
     setOpenEdit(state)
     setEditContent(valueEdit);
   }
 
-  const getTotals = (data, key) => {
+  const getTotals = (data, name) => {
+    if (!Object.keys(mapUnit).includes(name)) return ''
+    const key = getType(name)
     let total = 0;
     data.forEach(item => {
       if (typeof (item[key] || '') === "string") {
@@ -64,112 +62,21 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         total += item[key];
       }
     });
-    return total === 0 ? '' : parseFloat(total.toFixed(6)).toLocaleString();
+    return total === 0 ? '' : parseFloat(total.toFixed(6)).toLocaleString() + ` ${values[0][getType(mapUnit[name])]}`;
   };
 
-  const renderNewTB = () => {
-    const columns = [];
-    for (var key in values[0]) {
-      if (columns.length == 0) {
-        columns.push({
-          accessor: key,
-          width: 200,
-          className: "cell_frozen",
-          headerClassName: "frozen",
-          Header: <div width={60} >
-            <span style={{ fontWeight: 'bold' }} className="pl-12">{getTypeName(key).toUpperCase()}</span>
-          </div>,
-          Cell: props => <div style={{
-            display: 'flex',
-            flex: 1,
-            justifyContent: 'space-between'
-          }} >
-            <span className="pl-12">{props.value}</span>
-            {props.index !== originalData.length && <IconButton onClick={() => {
-              setRowIndex(props.index)
-              handleEdit(true);
-            }} className="w-16 h-16 p-0">
-              <Icon className="text-16 arrow-icon" color="disabled">
-                {disableInuput ? 'visibility' : 'edit_mode'}
-              </Icon>
-            </IconButton>}
-          </div>,
-          getProps: (_, rowInfo, column) => {
-            let originalValue = ''
-            let editValue = ''
-            let index = rowInfo ? rowInfo.index : ''
-            const check = (index !== originalData.length)
-            if (check) {
-              originalValue = originalData[rowInfo.index][column.id]
-              editValue = rowInfo.original[column.id]
-            }
-            return {
-              style: {
-                backgroundColor: originalValue !== editValue && '#FEF4E6',
-                color: !check && '#BD0F72',
-                fontWeight: !check && 600,
-              }
-            }
-          }
-        });
-      }
-      else {
-        columns.push({
-          Header: <div width={60} >
-            <span style={{ fontWeight: 'bold' }} className="pl-12">{getTypeName(key).toUpperCase()}</span>
-          </div>,
-          accessor: key,
-          width: 200,
-          headerClassName: "header_layout",
-          show: !showColumn.includes(getTypeName(key)),
-          Cell: (props) => {
-            if (Object.keys(mapUnit).includes(getTypeName(props.column.id))) {
-              const id = getType(mapUnit[getTypeName(props.column.id)])
-              const unit = props.index === originalData.length ? values[0][id] : props.row[id]
-              return (props.value ? (props.value + ' ' + (unit || '')) : '')
-            }
-            return props.value || ''
-          },
-          getProps: (_, rowInfo, column) => {
-            let originalValue = ''
-            let editValue = ''
-            let index = rowInfo ? rowInfo.index : ''
-            const check = (index !== originalData.length)
-            if (check) {
-              originalValue = originalData[rowInfo.index][column.id]
-              editValue = rowInfo.original[column.id]
-            }
-            return {
-              style: {
-                backgroundColor: originalValue !== editValue && '#FEF4E6',
-                color: !check && '#BD0F72',
-                fontWeight: !check && 600,
-              }
-            }
-          }
-        });
-      }
-    }
-    columns.push(columns.shift());
+  const isValueChange = (key, index, value) => {
+    const originalValue = originalData[index][getType(key)]
+    return originalValue !== value ? '#FEF4E6' : ''
+  }
 
-    return <ReactTable
-      style={{ backgroundColor: 'white' }}
-      data={[...values, container === CONTAINER_DETAIL ? {
-        [getType(CONTAINER_PACKAGE)]: getTotals(values, getType(CONTAINER_PACKAGE)),
-        [getType(CONTAINER_MEASUREMENT)]: getTotals(values, getType(CONTAINER_MEASUREMENT)),
-        [getType(CONTAINER_WEIGHT)]: getTotals(values, getType(CONTAINER_WEIGHT)),
-        [getType(CONTAINER_NUMBER)]: 'TOTAL'
-      } : {
-        [getType(CM_PACKAGE)]: getTotals(values, getType(CM_PACKAGE)),
-        [getType(CM_WEIGHT)]: getTotals(values, getType(CM_WEIGHT)),
-        [getType(CM_MEASUREMENT)]: getTotals(values, getType(CM_MEASUREMENT)),
-        [getType(CONTAINER_NUMBER)]: 'TOTAL'
-      }
-      ]}
-      columns={columns}
-      showPagination={false}
-      defaultPageSize={values.length + 1}
-    />
+  const combineValueUnit = (name, value) => {
+    if (Object.keys(mapUnit).includes(name)) {
+      const id = getType(mapUnit[name])
+      const unit = values[0][id] || ''
+      return value ? `${value} ${unit}` : value
+    }
+    return value
   }
 
   return (
@@ -185,9 +92,55 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         updateEdit={(value) => setValueEdit(value)}
         index={rowIndex}
       />
-      {
-        renderNewTB()
-      }
+      <div style={{ maxWidth: 880, overflowX: 'auto' }}>
+        <Table aria-label="simple table" >
+          <TableHead>
+            <TableRow>
+              {type.map((cell, i) =>
+                <TableCell
+                  className={i === 0 ? 'cell_frozen' : ''}
+                  key={i}
+                  style={{ backgroundColor: '#FDF2F2', fontSize: 14, color: '#132535' }}>
+                  {cell.toUpperCase()}
+                </TableCell>
+              )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {values.map((row, vindex) => (
+              <TableRow key={vindex}>
+                {type.map((cell, i) =>
+                  <TableCell className={i === 0 ? 'cell_frozen' : ''} style={{ backgroundColor: isValueChange(cell, vindex, row[getType(cell)]) }} key={i}>
+                    {i === 0 ?
+                      <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }} >
+                        <span>{row[getType(cell)]}</span>
+                        <IconButton onClick={() => {
+                          setRowIndex(vindex)
+                          handleEdit(true);
+                        }} className="w-16 h-16 p-0">
+                          <Icon className="text-16 arrow-icon" color="disabled">
+                            {disableInuput ? 'visibility' : 'edit_mode'}
+                          </Icon>
+                        </IconButton>
+                      </div> : combineValueUnit(cell, row[getType(cell)])
+                    }
+                  </TableCell>
+                )}
+              </TableRow>
+            ))}
+            <TableRow>
+              {type.map((cell, i) =>
+                <TableCell
+                  style={{ color: '#BD0F72', fontWeight: 600 }}
+                  className={i === 0 ? 'cell_frozen' : ''}
+                  key={i}>
+                  {i === 0 ? 'Total' : getTotals(values, cell)}
+                </TableCell>
+              )}
+            </TableRow>
+          </TableBody>
+        </Table>
+      </div>
     </>
   );
 };
