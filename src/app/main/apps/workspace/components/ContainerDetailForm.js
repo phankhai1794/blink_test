@@ -1,107 +1,30 @@
-import { getLabelById } from '@shared';
 import {
   CONTAINER_DETAIL,
   CONTAINER_NUMBER,
-  CONTAINER_SEAL,
-  CM_PACKAGE
+  CM_PACKAGE,
+  CM_WEIGHT,
+  CM_MEASUREMENT,
+  CONTAINER_PACKAGE,
+  CONTAINER_MEASUREMENT,
+  CONTAINER_WEIGHT,
+  SEQ,
+  HS_CODE,
+  HTS_CODE,
+  NCM_CODE,
+  mapUnit
 } from '@shared/keyword';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Icon, IconButton } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
-import clsx from 'clsx';
 import ReactTable from "react-table";
 import "react-table/react-table.css";
-import $ from "jquery";
 
 import AmendmentPopup from './AmendmentPopup';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    '& .MuiButtonBase-root': {
-      backgroundColor: 'silver !important'
-    }
-  },
-  icon: {
-    border: '1px solid #BAC3CB',
-    borderRadius: 4,
-    position: 'relative',
-    width: 16,
-    height: 16,
-    backgroundColor: '#f5f8fa',
-    '&.borderChecked': {
-      border: '1px solid #BD0F72'
-    },
-    '&.disabledCheck': {
-      backgroundColor: '#DDE3EE'
-    }
-  },
-  labelStatus: {
-    backgroundColor: '#EBF7F2',
-    color: '#36B37E',
-    padding: '2px 9px',
-    fontWeight: 600,
-    fontSize: 14,
-    borderRadius: 4
-  },
-  hideText: {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    display: '-webkit-box',
-    '-webkit-line-clamp': 5,
-    '-webkit-box-orient': 'vertical'
-  },
-  viewMoreBtn: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    width: 'fit-content',
-    position: 'sticky',
-    left: '100%',
-    color: '#BD0F72',
-    fontFamily: 'Montserrat',
-    fontWeight: 600,
-    fontSize: '16px',
-    cursor: 'pointer'
-  },
-  button: {
-    margin: theme.spacing(1),
-    marginLeft: 0,
-    borderRadius: 8,
-    boxShadow: 'none',
-    textTransform: 'capitalize',
-    fontFamily: 'Montserrat',
-    fontWeight: 600,
-    '&.reply': {
-      backgroundColor: 'white',
-      color: '#BD0F72',
-      border: '1px solid #BD0F72'
-    },
-    '&.w120': {
-      width: 120
-    }
-  },
-  boxItem: {
-    borderLeft: '2px solid',
-    borderColor: '#DC2626',
-    paddingLeft: '2rem'
-  },
-  boxResolve: {
-    borderColor: '#36B37E'
-  },
-  text: {
-    height: 40,
-    width: 158,
-    border: '1px solid #BAC3CB',
-    textAlign: 'center',
-    color: '#132535'
-  },
-}));
-
-const ContainerDetailForm = ({ container, fieldType, setTextResolve, disableInuput = false }) => {
-  const classes = useStyles();
+const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInuput = false }) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+  const user = useSelector(({ user }) => user);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -119,206 +42,152 @@ const ContainerDetailForm = ({ container, fieldType, setTextResolve, disableInup
     return content[getField(field)] || '';
   };
 
-  const [tableScrollTop, setTableScrollTop] = useState(0);
-  const [values, setValues] = useState(getValueField(container) || [{}]);
-  const [openEdit, setOpenEdit] = useState(false)
-  const [dataRow, setDataRow] = useState({})
-  const inqType = getLabelById(metadata['inq_type_options'], fieldType);
-  const cdType =
-    inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CONTAINER_SEAL];
-  const cmType = inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CM_PACKAGE];
-  const typeList = container === CONTAINER_DETAIL ? cdType : cmType;
-  const onChange = (e, index, type) => {
-    const temp = JSON.parse(JSON.stringify(values));
-    temp[index][type] = e.target.value;
-    setValues(temp);
-    setTextResolve(temp);
-  };
-
-  useEffect(() => {
-    setValues(getValueField(container) || [{}]);
-  }, [content]);
-  /**
-   * @description
-   * Takes an Array<V>, and a grouping function,
-   * and returns a Map of the array grouped by the grouping function.
-   *
-   * @param list An array of type V.
-   * @param keyGetter A Function that takes the the Array type V as an input, and returns a value of type K.
-   *                  K is generally intended to be a property key of V.
-   *
-   * @returns Map of the array grouped by the grouping function.
-   */
-  // export function groupBy<K, V>(list: Array<V>, keyGetter: (input: V) => K): Map<K, Array<V>> {
-  //    const map = new Map<K, Array<V>>();
-  function groupBy(list, keyGetter) {
-    const map = new Map();
-    list.forEach(item => {
-      const key = keyGetter(item);
-      const collection = map.get(key);
-      if (!collection) {
-        map.set(key, [item]);
-      } else {
-        collection.push(item);
-      }
-    });
-    return map;
-  }
-
-  function makeData(len = 5553) {
-    return values;
-  }
+  const originalData = originalValues || getValueField(container) || [{}];
+  const [values, setValues] = useState(originalValues || getValueField(container) || [{}]);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [rowIndex, setRowIndex] = useState(0);
+  const [valueEdit, setValueEdit] = useState(originalValues || getValueField(container) || [{}]);
+  const showColumn = user.role === 'Guest' ? [...Object.values(mapUnit), SEQ, HS_CODE, HTS_CODE, NCM_CODE] : [...Object.values(mapUnit), SEQ]
 
   const handleEdit = (state) => {
     setOpenEdit(state)
+    setEditContent(valueEdit);
   }
+
+  const getTotals = (data, key) => {
+    let total = 0;
+    data.forEach(item => {
+      if (typeof (item[key] || '') === "string") {
+        total += Number((item[key] || '').replace(',', ''));
+      }
+      else {
+        total += item[key];
+      }
+    });
+    return total === 0 ? '' : parseFloat(total.toFixed(6)).toLocaleString();
+  };
 
   const renderNewTB = () => {
     const columns = [];
     for (var key in values[0]) {
       if (columns.length == 0) {
         columns.push({
-          //   Header: getTypeName(key),
           accessor: key,
           width: 200,
           className: "cell_frozen",
           headerClassName: "frozen",
-          Header: <div width={60} textColor="#fff" text="Image" >
-            <span style={{ fontWeight: 'bold' }} className="pl-12">{getTypeName(key)}</span>
+          Header: <div width={60} >
+            <span style={{ fontWeight: 'bold' }} className="pl-12">{getTypeName(key).toUpperCase()}</span>
           </div>,
           Cell: props => <div style={{
             display: 'flex',
-            flexDirection: 'row',
-            flexWrap: 'wrap',
             flex: 1,
             justifyContent: 'space-between'
-          }} textColor="#fff" text="Image" >
+          }} >
             <span className="pl-12">{props.value}</span>
-            <IconButton onClick={() => {
+            {props.index !== originalData.length && <IconButton onClick={() => {
+              setRowIndex(props.index)
               handleEdit(true);
-              setDataRow(props.row)
             }} className="w-16 h-16 p-0">
-              <Icon className="text-16 arrow-icon" color="inherit">
-                {'expand_more'}
+              <Icon className="text-16 arrow-icon" color="disabled">
+                {disableInuput ? 'visibility' : 'edit_mode'}
               </Icon>
-            </IconButton>
-          </div>
+            </IconButton>}
+          </div>,
+          getProps: (_, rowInfo, column) => {
+            let originalValue = ''
+            let editValue = ''
+            let index = rowInfo ? rowInfo.index : ''
+            const check = (index !== originalData.length)
+            if (check) {
+              originalValue = originalData[rowInfo.index][column.id]
+              editValue = rowInfo.original[column.id]
+            }
+            return {
+              style: {
+                backgroundColor: originalValue !== editValue && '#FEF4E6',
+                color: !check && '#BD0F72',
+                fontWeight: !check && 600,
+              }
+            }
+          }
         });
-      } else {
+      }
+      else {
         columns.push({
-          Header: <div width={60} textColor="#fff" text="Image" >
-            <span style={{ fontWeight: 'bold' }} className="pl-12">{getTypeName(key)}</span>
+          Header: <div width={60} >
+            <span style={{ fontWeight: 'bold' }} className="pl-12">{getTypeName(key).toUpperCase()}</span>
           </div>,
           accessor: key,
           width: 200,
-          headerClassName: "header_layout"
+          headerClassName: "header_layout",
+          show: !showColumn.includes(getTypeName(key)),
+          Cell: (props) => {
+            if (Object.keys(mapUnit).includes(getTypeName(props.column.id))) {
+              const id = getType(mapUnit[getTypeName(props.column.id)])
+              const unit = props.index === originalData.length ? values[0][id] : props.row[id]
+              return (props.value ? (props.value + ' ' + (unit || '')) : '')
+            }
+            return props.value || ''
+          },
+          getProps: (_, rowInfo, column) => {
+            let originalValue = ''
+            let editValue = ''
+            let index = rowInfo ? rowInfo.index : ''
+            const check = (index !== originalData.length)
+            if (check) {
+              originalValue = originalData[rowInfo.index][column.id]
+              editValue = rowInfo.original[column.id]
+            }
+            return {
+              style: {
+                backgroundColor: originalValue !== editValue && '#FEF4E6',
+                color: !check && '#BD0F72',
+                fontWeight: !check && 600,
+              }
+            }
+          }
         });
       }
     }
     columns.push(columns.shift());
 
     return <ReactTable
-      data={makeData()}
-      defaultPageSize={values.length}
+      style={{ backgroundColor: 'white' }}
+      data={[...values, container === CONTAINER_DETAIL ? {
+        [getType(CONTAINER_PACKAGE)]: getTotals(values, getType(CONTAINER_PACKAGE)),
+        [getType(CONTAINER_MEASUREMENT)]: getTotals(values, getType(CONTAINER_MEASUREMENT)),
+        [getType(CONTAINER_WEIGHT)]: getTotals(values, getType(CONTAINER_WEIGHT)),
+        [getType(CONTAINER_NUMBER)]: 'TOTAL'
+      } : {
+        [getType(CM_PACKAGE)]: getTotals(values, getType(CM_PACKAGE)),
+        [getType(CM_WEIGHT)]: getTotals(values, getType(CM_WEIGHT)),
+        [getType(CM_MEASUREMENT)]: getTotals(values, getType(CM_MEASUREMENT)),
+        [getType(CONTAINER_NUMBER)]: 'TOTAL'
+      }
+      ]}
       columns={columns}
       showPagination={false}
-      // className="-striped -highlight"
-      getTableProps={() => {
-        return {
-          onScroll: e => {
-            if (tableScrollTop === e.target.scrollTop) {
-              let left = e.target.scrollLeft > 0 ? e.target.scrollLeft : 0;
-              $(".ReactTable .rt-tr .frozen").css({ left: left });
-              $(".ReactTable .rt-tr .cell_frozen").css({ left: left });
-            } else {
-              setTableScrollTop(e.target.scrollTop);
-            }
-          }
-        };
-      }}
+      defaultPageSize={values.length + 1}
     />
   }
 
-  const renderTB = () => {
-    let td = [];
-    const valueCopy = JSON.parse(JSON.stringify(values));
-    let index = 0;
-    valueCopy.map((item) => {
-      item.index = index;
-      index += 1;
-    })
-    const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
-    const groupsValues = [...groups].map(([name, value]) => ({ name, value }));
-    while (groupsValues.length) {
-      let rowValues = groupsValues.splice(0, 4);
-      let rowIndex = 0;
-      let isRunning = true;
-
-      while (isRunning) {
-        let type;
-        if (rowIndex == 0) {
-          type = typeList[rowIndex];
-        }
-        else {
-          type = typeList[typeList.length - 1];
-        }
-        let hasData = false;
-        td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: type === typeList[0] ? 10 : 5 }}>
-          <input
-            className={clsx(classes.text)}
-            style={{
-              backgroundColor: '#FDF2F2',
-              fontWeight: 600,
-              borderTopLeftRadius: rowIndex === 0 && 8,
-              fontSize: 14,
-              // borderBottomLeftRadius: rowIndex === typeList.length - 1 && 8
-            }}
-            disabled
-            defaultValue={type}
-          />
-          {
-            rowValues.map((item, index1) => {
-              if (item.value.length > rowIndex) {
-                hasData = true;
-              }
-              let nodeValue = null;
-              if (rowIndex - 1 < item.value.length) {
-                nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
-              }
-              const disabled = !(rowIndex > 0 && nodeValue && !disableInuput);
-              return (
-                <input
-                  className={clsx(classes.text)}
-                  key={index1}
-                  style={{
-                    marginLeft: 5,
-                    backgroundColor: disabled && '#FDF2F2',
-                    fontSize: 15,
-                    borderTopRightRadius: rowIndex === 0 && rowValues.length - 1 === index1 ? 8 : null,
-                    // borderBottomRightRadius:
-                    //     index1 === rowValues.length - 1 && rowIndex === typeList.length - 1 ? 8 : null
-                  }}
-                  disabled={disabled}
-                  value={nodeValue ? nodeValue[getType(type)] : ''}
-                  onChange={(e) => onChange(e, nodeValue.index, getType(type))}
-                />
-              );
-            })
-          }
-        </div>);
-        if (!hasData) {
-          isRunning = false;
-        }
-        rowIndex += 1;
-      }
-    }
-    return td;
-  };
-
   return (
     <>
-      <AmendmentPopup open={openEdit} onClose={() => handleEdit(false)} inqType={container} data={dataRow} />
-      {renderNewTB()}
+      <AmendmentPopup
+        open={openEdit}
+        onClose={() => handleEdit(false)}
+        inqType={container}
+        containerDetail={getValueField(CONTAINER_DETAIL)}
+        data={valueEdit[rowIndex]}
+        isEdit={!disableInuput}
+        updateData={(value) => setValues(value)}
+        updateEdit={(value) => setValueEdit(value)}
+        index={rowIndex}
+      />
+      {
+        renderNewTB()
+      }
     </>
   );
 };

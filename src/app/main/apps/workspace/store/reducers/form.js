@@ -25,6 +25,7 @@ const initialState = {
   confirmClick: false,
   openAmendmentForm: false,
   openNotificationBLWarning: { status: false, userName: '' },
+  openNotificationBLReloadWarning: false,
 };
 
 const formReducer = function (state = initialState, action) {
@@ -85,6 +86,9 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.TOGGLE_OPEN_BL_WARNING: {
     return { ...state, openNotificationBLWarning: action.state };
+  }
+  case Actions.TOGGLE_OPEN_RELOAD_WARNING: {
+    return { ...state, openNotificationBLReloadWarning: action.state };
   }
   case Actions.ENABLE_SAVE_INQUIRIES: {
     return { ...state, enableSaveInquiriesList: action.state };

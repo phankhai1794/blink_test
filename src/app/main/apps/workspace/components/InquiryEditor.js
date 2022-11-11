@@ -117,6 +117,7 @@ const InquiryEditor = (props) => {
   ]);
   const user = useSelector(({ user }) => user);
 
+  const skipField = ['vvdCode', 'podCode', 'delCode'];
   const optionsAnsType = [
     {
       label: 'Option Selection',
@@ -132,7 +133,7 @@ const InquiryEditor = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const [fieldType, setFieldType] = useState(metadata.field_options.filter(data => !['vvdCode', 'podCode', 'delCode'].includes(data.keyword)));
+  const [fieldType, setFieldType] = useState(metadata.field_options.filter(data => !skipField.includes(data.keyword)));
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
   );
@@ -156,12 +157,14 @@ const InquiryEditor = (props) => {
   useEffect(() => {
     if (fieldValue) {
       const list = [currentEditInq];
-      const filter = metadata.inq_type_options.filter((data) => {
-        return (
-          data.field?.includes(fieldValue.value) &&
-          list.filter((q) => q.inqType === data.value && q.field === fieldValue.value).length === 0
-        );
-      });
+      const filter = metadata.inq_type_options
+        .filter((data) => {
+          return (
+            data.field?.includes(fieldValue.value) &&
+            list.filter((q) => q.inqType === data.value && q.field === fieldValue.value).length === 0
+          );
+        })
+        .sort((a, b) => a.label.localeCompare(b.label));
       setInqTypeOption(filter);
     }
   }, [fieldValue]);

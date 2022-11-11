@@ -29,6 +29,7 @@ function UserProfile(props) {
 
   const handleLogOut = () => {
     localStorage.clear();
+    sessionStorage.clear();
     window.location.logout = true;
     dispatch(AppActions.removeUser());
     dispatch(AppActions.checkAllow(false));

@@ -31,7 +31,7 @@ import BtnAddInquiry from './BtnAddInquiry';
 import BLField from './BLField';
 import { AttachmentList, AttachFileList } from './AttachmentList';
 import BLProcessNotification from './BLProcessNotification';
-import { InquiryReview, SendInquiryForm } from './SendInquiryForm';
+import { SendInquiryForm } from './SendInquiryForm';
 import TableCD from './TableCD';
 import TableCM from './TableCM';
 import ListNotification from './ListNotification';
@@ -74,6 +74,8 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+const socket = initiateSocketConnection();
+
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -95,10 +97,8 @@ const BLWorkspace = (props) => {
   const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const [confirmClick, form] = useSelector(({ workspace }) => [workspace.formReducer.confirmClick, workspace.formReducer.form]);
-
-  const transAutoSaveStatus = useSelector(
-    ({ workspace }) => workspace.transReducer.transAutoSaveStatus
-  );
+  const [inqCustomer, setInqCustomer] = useState([]);
+  const [inqOnshore, setInqOnshore] = useState([]);
   const isLoading = useSelector(({ workspace }) => workspace.transReducer.isLoading);
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
@@ -123,6 +123,24 @@ const BLWorkspace = (props) => {
   const getValueField = (keyword) => {
     return content[getField(keyword)] || '';
   };
+
+  const checkNewInquiry = (type) => {
+    const list = [];
+    const temp = inquiries.filter(inq => inq.receiver[0] === type && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF'));
+    if (temp.length) {
+      const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      sortDateList.forEach(inq => {
+        const find = metadata.field_options.find(field => field.value === inq.field);
+        if (!list.includes(find.label)) list.push(find.label);
+      })
+    }
+    return list;
+  }
+
+  useEffect(() => {
+    setInqCustomer(checkNewInquiry('customer') || []);
+    setInqOnshore(checkNewInquiry('onshore') || []);
+  }, [inquiries]);
 
   // TODO: TBU Logic after create new reply amendment
   useEffect(() => {
@@ -152,7 +170,12 @@ const BLWorkspace = (props) => {
           confirmPopupType: ''
         })
       );
-      dispatch(mailActions.autoSendMail(myBL, inquiries, metadata, content, form));
+      if (inqOnshore.length == 0 && inqCustomer.length == 0) {
+        dispatch(AppActions.showMessage({ message: 'No inquiries to Send Mail.', variant: 'error' }));
+      } else {
+        dispatch(mailActions.autoSendMail(myBL, inquiries, inqCustomer, inqOnshore, metadata, content, form));
+      }
+
     }
   }, [confirmClick, form])
 
@@ -163,7 +186,6 @@ const BLWorkspace = (props) => {
       }
       return '';
     };
-
     window.addEventListener('beforeunload', unloadCallback);
     return () => window.removeEventListener('beforeunload', unloadCallback);
   }, [isLoading]);
@@ -184,8 +206,9 @@ const BLWorkspace = (props) => {
       socket.on('msg_processing', (data) => {
         console.log(`message processing:`, data);
         let assignPermissionViewer = userInfo;
+        let permissions = [];
         let excludeFirstUser = false;
-        if (data.processingBy.length > 1) {
+        if (data.processingBy) {
           data.processingBy.forEach((p) => {
             if (userInfo.displayName === data.processingBy[0]) {
               excludeFirstUser = true;
@@ -193,40 +216,37 @@ const BLWorkspace = (props) => {
           });
           if (!excludeFirstUser && assignPermissionViewer) {
             // assign permission
-            assignPermissionViewer = {
-              ...assignPermissionViewer,
-              permissions: permissionViewer
-            };
+            permissions = permissionViewer
             // show popup for lastest user
             if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
               dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
             }
           } else {
             // assign permission
-            assignPermissionViewer = {
-              ...assignPermissionViewer,
-              permissions: permissionAssign
-            };
+            permissions = permissionAssign;
             dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
           }
         } else if (data.processingBy.length === 1) {
           // assign permission
-          assignPermissionViewer = {
-            ...assignPermissionViewer,
-            permissions: permissionAssign
-          };
+          permissions = permissionAssign;
           dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
         }
-        localStorage.setItem('USER', JSON.stringify(assignPermissionViewer));
+        sessionStorage.setItem('permissions', JSON.stringify(permissions));
       });
     }
   };
 
   useEffect(() => {
+    console.log(user);
+    if (!user.displayName) {
+      socket.emit('user_processing_out', {});
+    }
+  }, [user]);
+
+  useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(DraftActions.setProcess(props.process));
 
-    const socket = initiateSocketConnection();
     const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) {
       dispatch(Actions.initBL(bkgNo));
@@ -256,7 +276,7 @@ const BLWorkspace = (props) => {
         })
       }
     }
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     dispatch(Actions.loadMetadata());
@@ -514,8 +534,6 @@ const BLWorkspace = (props) => {
               const field = metadata.field_options.find(f => inquiry.field === f.value);
               if (inquiry.field === 'EMAIL') {
                 return <SendInquiryForm field={'EMAIL'} key={inquiry.id} />;
-              } else if (inquiry.field === 'INQUIRY_REVIEW') {
-                return <InquiryReview field={'INQUIRY_REVIEW'} key={inquiry.id} />;
               } else {
                 const popupObj = popupOpen(inquiry, field);
                 return (
@@ -718,18 +736,20 @@ const BLWorkspace = (props) => {
                 {getValueField(FREIGHT_CHARGES)}
               </BLField>
             </Grid>
+            <Grid item>
+              <Label>COMMODITY CODE</Label>
+              <BLField id={getField(COMMODITY_CODE)}>
+                {getValueField(COMMODITY_CODE)}
+              </BLField>
+            </Grid>
+          </Grid>
+          <Grid item xs={6} className={classes.rightPanel}>
             <Grid container>
               <Grid item xs={6} className={classes.leftPanel}>
                 <Grid item>
-                  <Label>COMMODITY CODE</Label>
-                  <BLField id={getField(COMMODITY_CODE)}>
-                    {getValueField(COMMODITY_CODE)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>FREIGHTED AS</Label>
-                  <BLField id={getField(FREIGHTED_AS)}>
-                    {getValueField(FREIGHTED_AS)}
+                  <Label>PLACE OF BILL(S) ISSUE</Label>
+                  <BLField id={getField(PLACE_OF_BILL)}>
+                    {getValueField(PLACE_OF_BILL)}
                   </BLField>
                 </Grid>
                 <Grid item>
@@ -741,77 +761,15 @@ const BLWorkspace = (props) => {
               </Grid>
               <Grid item xs={6} className={classes.rightPanel}>
                 <Grid item>
-                  <Label>EXCHANGE RATE</Label>
-                  <BLField id={getField(EXCHANGE_RATE)}>
-                    {getValueField(EXCHANGE_RATE)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>RATE</Label>
-                  <BLField id={getField(RATE)}>
-                    {getValueField(RATE)}
+                  <Label>DATED</Label>
+                  <BLField id={getField(DATED)}>
+                    {getValueField(DATED)}
                   </BLField>
                 </Grid>
                 <Grid item>
                   <Label>DATE LADEN ON BOARD</Label>
                   <BLField id={getField(DATE_LADEN)}>
                     {getValueField(DATE_LADEN)}
-                  </BLField>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={6} className={classes.rightPanel}>
-            <Grid container>
-              <Grid item xs={6} className={classes.leftPanel}>
-                <Grid item>
-                  <Label>SERVICE CONTRACT NO.</Label>
-                  <BLField id={getField(SERVICE_CONTRACT_NO)}>
-                    {getValueField(SERVICE_CONTRACT_NO)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>CODE</Label>
-                  <BLField id={getField(CODE)}>
-                    {getValueField(CODE)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>PREPAID</Label>
-                  <BLField id={getField(PREPAID)}>
-                    {getValueField(PREPAID)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>PLACE OF BILL(S) ISSUE</Label>
-                  <BLField id={getField(PLACE_OF_BILL)}>
-                    {getValueField(PLACE_OF_BILL)}
-                  </BLField>
-                </Grid>
-              </Grid>
-              <Grid item xs={6} className={classes.rightPanel}>
-                <Grid item>
-                  <Label>DOC FORM NO.</Label>
-                  <BLField id={getField(DOC_FORM_NO)}>
-                    {getValueField(DOC_FORM_NO)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>TARIFF ITEM</Label>
-                  <BLField id={getField(TARIFF_ITEM)}>
-                    {getValueField(TARIFF_ITEM)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>COLLECT</Label>
-                  <BLField id={getField(COLLECT)}>
-                    {getValueField(COLLECT)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>DATED</Label>
-                  <BLField id={getField(DATED)}>
-                    {getValueField(DATED)}
                   </BLField>
                 </Grid>
               </Grid>

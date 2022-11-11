@@ -16,6 +16,7 @@ export const OPEN_NOTIFICATION_SUBMIT_ANSWER = 'OPEN_NOTIFICATION_SUBMIT_ANSWER'
 export const OPEN_NOTIFICATION_DELETE_REPLY = 'OPEN_NOTIFICATION_DELETE_REPLY';
 export const OPEN_NOTIFICATION_DELETE_AMENDMENT = 'OPEN_NOTIFICATION_DELETE_AMENDMENT';
 export const TOGGLE_OPEN_BL_WARNING = 'TOGGLE_OPEN_BL_WARNING';
+export const TOGGLE_OPEN_RELOAD_WARNING = 'TOGGLE_OPEN_RELOAD_WARNING';
 export const ENABLE_SAVE_INQUIRIES = 'ENABLE_SAVE_INQUIRIES';
 export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
 export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
@@ -156,6 +157,13 @@ export function toggleOpenNotificationDeleteAmendment(state) {
 export function toggleOpenBLWarning(state) {
   return {
     type: TOGGLE_OPEN_BL_WARNING,
+    state
+  };
+}
+
+export function toggleOpenReloadWarning(state) {
+  return {
+    type: TOGGLE_OPEN_RELOAD_WARNING,
     state
   };
 }

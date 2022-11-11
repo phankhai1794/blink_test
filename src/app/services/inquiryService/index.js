@@ -56,8 +56,8 @@ export async function resolveInquiry(body) {
   return response.data;
 }
 
-export async function uploadOPUS(id) {
-  const response = await axios().post(`${PATH}/uploadOPUS/${id}`);
+export async function uploadOPUS(myblId, id, fieldId) {
+  const response = await axios().post(`${PATH}/uploadOPUS/${myblId}/${id}/${fieldId}`);
   return response.data;
 }
 
@@ -92,7 +92,7 @@ export async function addNewMedia(state) {
 }
 
 export async function removeMultipleMedia(state) {
-  const response = await axios().delete(`${PATH}/attachments`, {data: state});
+  const response = await axios().delete(`${PATH}/attachments`, { data: state });
   return response.data;
 }
 
