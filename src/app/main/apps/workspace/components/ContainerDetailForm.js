@@ -93,12 +93,12 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         index={rowIndex}
       />
       <div style={{ maxWidth: 880, overflowX: 'auto' }}>
-        <Table aria-label="simple table" >
+        <Table className='amend_table' aria-label="simple table" >
           <TableHead>
             <TableRow>
               {type.map((cell, i) =>
                 <TableCell
-                  className={i === 0 ? 'cell_frozen' : ''}
+                  className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'}
                   key={i}
                   style={{ backgroundColor: '#FDF2F2', fontSize: 14, color: '#132535' }}>
                   {cell.toUpperCase()}
@@ -110,7 +110,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
             {values.map((row, vindex) => (
               <TableRow key={vindex}>
                 {type.map((cell, i) =>
-                  <TableCell className={i === 0 ? 'cell_frozen' : ''} style={{ backgroundColor: isValueChange(cell, vindex, row[getType(cell)]) }} key={i}>
+                  <TableCell className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'} style={{ backgroundColor: isValueChange(cell, vindex, row[getType(cell)]) }} key={i}>
                     {i === 0 ?
                       <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }} >
                         <span>{row[getType(cell)]}</span>
@@ -132,7 +132,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
               {type.map((cell, i) =>
                 <TableCell
                   style={{ color: '#BD0F72', fontWeight: 600 }}
-                  className={i === 0 ? 'cell_frozen' : ''}
+                  className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'}
                   key={i}>
                   {i === 0 ? 'Total' : getTotals(values, cell)}
                 </TableCell>
