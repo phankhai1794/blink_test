@@ -448,6 +448,7 @@ const InquiryEditor = (props) => {
               );
               dispatch(InquiryActions.saveInquiry());
               dispatch(FormActions.toggleReloadInq());
+              dispatch(InquiryActions.setField(inqContentTrim[0].field));
               dispatch(InquiryActions.setOpenedInqForm(false));
             })
             .catch((error) =>

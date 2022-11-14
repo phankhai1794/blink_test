@@ -305,7 +305,7 @@ const BLWorkspace = (props) => {
 
   const countInq = (inqs, recevier) => {
     let count = 0;
-    inqs.forEach((inq) => inq.process === 'pending' && inq.receiver.includes(recevier) && (count += 1));
+    inqs.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
     return count;
   };
 
