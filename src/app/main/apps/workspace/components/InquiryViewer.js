@@ -1161,7 +1161,10 @@ const InquiryViewer = (props) => {
                     container={
                       question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                     }
-                    setEditContent={setTextResolve}
+                    setEditContent={(value) => {
+                      handleChangeContainerDetail(value);
+                      setTextResolve(value);
+                    }}
                     fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
                     disableInuput={!isResolve && !isReply}
                   /> : <ContainerDetailFormOldVersion
@@ -1445,6 +1448,7 @@ const InquiryViewer = (props) => {
                           )}
                         </div>
                       ))}
+                      
                       <div className="flex">
                         <Button
                           variant="contained"
