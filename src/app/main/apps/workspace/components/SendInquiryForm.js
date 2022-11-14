@@ -182,7 +182,7 @@ const SendInquiryForm = (props) => {
     let content = '';
     let bodyHtml = '';
     if (hasOnshore) {
-      subject = `[Alert Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      subject = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
       content = `Dear Onshore,\n \nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setOnshoreValue({ subject, content: bodyHtml, html: initiateContentState(content) });
