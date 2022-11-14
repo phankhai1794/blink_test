@@ -16,7 +16,10 @@ import {
   CONTAINER_MANIFEST,
   CONTAINER_NUMBER,
   CONTAINER_SEAL,
-  CM_PACKAGE
+  CM_PACKAGE,
+  SHIPPER,
+  CONSIGNEE,
+  NOTIFY
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useState, useEffect } from 'react';
@@ -124,6 +127,18 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     color: '#132535'
   },
+  inputResolve: {
+    width: '100%',
+    paddingTop: 10,
+    paddingLeft: 5,
+    marginTop: 10,
+    minHeight: 50,
+    borderWidth: '0.5px',
+    borderStyle: 'solid',
+    borderColor: 'lightgray',
+    borderRadius: 6,
+    resize: 'none'
+  }
 }));
 
 const InquiryViewer = (props) => {
@@ -151,6 +166,8 @@ const InquiryViewer = (props) => {
   const [comment, setComment] = useState([]);
   const [isLoadedComment, setIsLoadedComment] = useState(false);
   const [textResolve, setTextResolve] = useState(content[question.field] || '');
+  const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
+  const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
@@ -547,6 +564,14 @@ const InquiryViewer = (props) => {
     );
   }, [confirmClick]);
 
+  useEffect(() => {
+    if (isSeparate) {
+      const arrayText = textResolve?.split('\n');
+      const separateText = [arrayText.shift(), arrayText.join('\n')];
+      setTextResolveSeparate({ name: separateText[0] || '', address: separateText[1] || '' })
+    }
+  }, [isResolve])
+
   const removeQuestion = () => {
     setIndexQuestionRemove(inquiries.findIndex((q) => q.id === question.id));
     dispatch(
@@ -588,7 +613,9 @@ const InquiryViewer = (props) => {
 
   const onConfirm = () => {
     let contentField = '';
-    if (typeof textResolve === 'string') {
+    if (isSeparate) {
+      contentField = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
+    } else if (typeof textResolve === 'string') {
       contentField = textResolve.trim();
     } else {
       contentField = textResolve;
@@ -663,6 +690,10 @@ const InquiryViewer = (props) => {
 
   const inputText = (e) => {
     setTextResolve(e.target.value);
+  };
+
+  const inputTextSeparate = (e, type) => {
+    setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value }));
   };
 
   const handleChangeContentReply = (e) => {
@@ -985,6 +1016,37 @@ const InquiryViewer = (props) => {
       )
     }
   }
+
+  // Separate Shipper/Consignee/Notify 
+  const renderSeparateField = (field) => {
+    if (isSeparate) {
+      const LABEL_TYEP = ['name', 'address']
+      const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[field]
+
+      return LABEL_TYEP.map((type, index) =>
+        <div key={index} style={{ paddingTop: '15px' }}>
+          <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
+          <textarea
+            className={classes.inputResolve}
+            multiline="true"
+            type="text"
+            value={textResolveSeparate[type]}
+            onChange={(e) => inputTextSeparate(e, type, field)}
+          />
+        </div>)
+    } else {
+      return (
+        <textarea
+          className={classes.inputResolve}
+          multiline="true"
+          type="text"
+          value={textResolve}
+          onChange={inputText}
+        />
+      )
+    }
+  }
+
   return (
     <>
       {isLoadedComment && (
@@ -1346,24 +1408,10 @@ const InquiryViewer = (props) => {
                   </>
                   }
                   {
-                    !containerCheck.includes(question.field) && <textarea
-                      style={{
-                        width: '100%',
-                        paddingTop: 10,
-                        paddingLeft: 5,
-                        marginTop: 10,
-                        minHeight: 50,
-                        borderWidth: '0.5px',
-                        borderStyle: 'solid',
-                        borderColor: 'lightgray',
-                        borderRadius: 6,
-                        resize: 'none'
-                      }}
-                      multiline="true"
-                      type="text"
-                      value={textResolve}
-                      onChange={inputText}
-                    />
+                    !containerCheck.includes(question.field) &&
+                    <div style={{ paddingTop: '5px' }}>
+                      {renderSeparateField(question?.field)}
+                    </div>
                   }
                   <div className="flex">
                     <PermissionProvider action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}>
