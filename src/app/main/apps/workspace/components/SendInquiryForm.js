@@ -245,7 +245,6 @@ const SendInquiryForm = (props) => {
       dispatch({
         type: mailActions.SENDMAIL_NONE
       });
-      dispatch(FormActions.toggleOpenEmail(false));
       setForm(initialState);
     } else if (error) {
       dispatch(
