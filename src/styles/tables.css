@@ -22,13 +22,13 @@ Basic Table Styles
   box-shadow: rgba(100, 100, 111, 0.2) 5px 0 5px -1px;
 }
 
-table {
+.amend_table {
   table-layout: fixed;
   overflow-x: auto;
   border-collapse: separate !important;
 } 
 
-td, th {
+.cell_amend {
   border: 1px solid #BAC3CB;
   height: 50px;
   white-space: nowrap;
@@ -39,6 +39,6 @@ td, th {
   font-family: 'Montserrat' !important
 }
 
-td {
+td.cell_amend {
   background: #ffffff;
 }

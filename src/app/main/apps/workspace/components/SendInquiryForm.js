@@ -464,7 +464,7 @@ const SendInquiryForm = (props) => {
                 value={tabValue}
                 onChange={handleTabChange}
                 textColor='primary'
-                style={{ borderBottom: '3px solid #515F6B', marginBottom: 20, marginTop: 10 }}
+                style={{ borderBottom: '3px solid #515F6B', marginBottom: 15, marginTop: 10 }}
               >
                 <Tab
                   className={classes.tab}

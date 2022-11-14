@@ -1,7 +1,6 @@
 .rdw-editor-main {
     border: 1px solid #BAC3CB;
     border-radius: 6px;
-    min-height: 150px;
 }
 
 .rdw-option-wrapper {
@@ -13,7 +12,9 @@
 }
 
 .DraftEditor-editorContainer {
-    padding: 15px
+    padding: 15px;
+    height: 200px !important;
+    overflow: auto;
 }
 
 .public-DraftStyleDefault-block {
@@ -22,4 +23,9 @@
 
 .preview_editor-content p {
     margin: 0
+}
+
+.rdw-editor-toolbar {
+    border: none !important;
+    padding: 0 !important
 }
