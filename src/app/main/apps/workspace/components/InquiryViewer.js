@@ -642,6 +642,7 @@ const InquiryViewer = (props) => {
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
         setSaveComment(!isSaveComment);
+        setStateReplyDraft(false);
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   };
