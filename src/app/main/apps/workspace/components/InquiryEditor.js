@@ -133,7 +133,7 @@ const InquiryEditor = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const [fieldType, setFieldType] = useState(metadata.field_options.filter(data => !skipField.includes(data.keyword)));
+  const fieldType = metadata.field_options.filter(data => !skipField.includes(data.keyword));
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
   );
@@ -144,7 +144,7 @@ const InquiryEditor = (props) => {
     metadata.field_options.filter((v) => currentEditInq.field === v.value)[0]
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
-
+  const [nameType, setNameType] = useState(valueType?.label);
   const styles = (width) => {
     return {
       control: {
@@ -174,10 +174,9 @@ const InquiryEditor = (props) => {
     inq.inqType = e.value;
     if (e.__isNew__) inq.isNew = e.__isNew__
     dispatch(InquiryActions.validate({ ...valid, inqType: true }));
-    const temp = valueType ? `\\b${valueType.label}\\b` : '{{INQ_TYPE}}';
-    let re = new RegExp(`${temp}`, 'g');
-    inq.content = currentEditInq.content.replace(re, e.label);
+    inq.content = currentEditInq.content.replace(nameType || '{{INQ_TYPE}}', e.label);
     setValueType(e);
+    setNameType(e.label);
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
