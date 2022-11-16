@@ -159,7 +159,9 @@ const InquiryViewer = (props) => {
   const [viewDropDown, setViewDropDown] = useState();
   const [inqHasComment, setInqHasComment] = useState(false);
   const [isResolve, setIsResolve] = useState(false);
+  const [isResolveCDCM, setIsResolveCDCM] = useState(false);
   const [isReply, setIsReply] = useState(false);
+  const [isReplyCDCM, setIsReplyCDCM] = useState(false);
   const [comment, setComment] = useState([]);
   const [isLoadedComment, setIsLoadedComment] = useState(false);
   const [textResolve, setTextResolve] = useState(content[question.field] || '');
@@ -538,8 +540,10 @@ const InquiryViewer = (props) => {
             dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
 
             // Display the previous content
-            cloneListCommentDraft = cloneListCommentDraft.filter(({ field }) => field === question.field);
-            dispatch(InquiryActions.setContent({ ...content, [question.field]: cloneListCommentDraft[cloneListCommentDraft.length - 1]?.content.content }));
+            if (!containerCheck.includes(question.field)){
+              cloneListCommentDraft = cloneListCommentDraft.filter(({ field }) => field === question.field);
+              dispatch(InquiryActions.setContent({ ...content, [question.field]: cloneListCommentDraft[cloneListCommentDraft.length - 1]?.content.content }));
+            }
           } else {
             getBlInfo(myBL.id).then(res => {
               dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
@@ -606,7 +610,11 @@ const InquiryViewer = (props) => {
   };
 
   const onResolve = () => {
-    setIsResolve(true);
+    if (Array.isArray(question.content)) {
+      setIsResolveCDCM(true);
+    } else{
+      setIsResolve(true);
+    }
   };
 
   const onConfirm = () => {
@@ -953,10 +961,12 @@ const InquiryViewer = (props) => {
       if (props.question.answerObj.length) reply.answerObj = props.question.answerObj;
       reply.mediaFilesAnswer = reply.mediaFile;
       reply.mediaFile = [];
-
+    } else if (Array.isArray(reply.content)) {
+      setIsReplyCDCM(true);
     } else {
       // Edit Reply
       setIsReply(true);
+
       setIsResolve(false);
       reply.content = '';
       reply.mediaFilesAnswer = [];
@@ -1247,7 +1257,7 @@ const InquiryViewer = (props) => {
                             handleChangeContainerDetail(value);
                             setTextResolve(value);
                           }}
-                          disableInput={!isResolve && !isReply}
+                          disableInput={!isResolveCDCM && !isReplyCDCM}
                         />
                     }
                   </> : <ContainerDetailFormOldVersion
@@ -1404,11 +1414,11 @@ const InquiryViewer = (props) => {
           </div>
           {!['COMPL', 'RESOLVED'].includes(question.state) && question.state !== 'UPLOADED' && (
             <>
-              {isResolve ? (
+              {isResolve || isResolveCDCM ? (
                 <>
                   {containerCheck.includes(question.field) && <>
                     {question?.process === 'draft' ?
-                      <ContainerDetailForm
+                      !isResolveCDCM && <ContainerDetailForm
                         container={
                           question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                         }
@@ -1460,9 +1470,9 @@ const InquiryViewer = (props) => {
                 </>
               ) : (
                 <>
-                  {isReply ? (
+                  {isReply || isReplyCDCM ? (
                     <>
-                      {typeof question.content === 'string' && <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
+                      {isReply && <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
                         <textarea
                           style={{
                             width: '100%',

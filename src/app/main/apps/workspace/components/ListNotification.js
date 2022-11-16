@@ -128,7 +128,7 @@ const ListNotification = () => {
 
       {
         (
-          (openNotificationInquiryList && inquiries.length === 0)
+          (openNotificationInquiryList && inquiries.filter(inq => inq.process === 'pending').length === 0 && user.userType !== 'CUSTOMER')
           ||
           (openNotificationAttachmentList && inquiries.length > 0 && isExistingMedia)
           ||
