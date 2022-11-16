@@ -1,4 +1,5 @@
 import * as Actions from 'app/store/actions';
+import { checkNewInquiry } from '@shared';
 import { VVD_CODE, POD_CODE, DEL_CODE } from '@shared/keyword';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -138,19 +139,6 @@ const SendInquiryForm = (props) => {
   const del = getValueField(DEL_CODE)
   const bkgNo = mybl.bkgNo
 
-  const checkNewInquiry = (type) => {
-    const list = []
-    const temp = inquiries.filter(inq => inq.receiver[0] === type && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF'))
-    if (temp.length) {
-      const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-      sortDateList.forEach(inq => {
-        const find = metadata.field_options.find(field => field.value === inq.field)
-        if (!list.includes(find.label)) list.push(find.label)
-      })
-    }
-    return list
-  }
-
   const initiateContentState = (content) => {
     return EditorState.createWithContent(ContentState.createFromText(content));
   }
@@ -169,12 +157,8 @@ const SendInquiryForm = (props) => {
   }, [openEmail])
 
   useEffect(() => {
-    if (hasCustomer) {
-      setInqCustomer(checkNewInquiry('customer'))
-    }
-    if (hasOnshore) {
-      setInqOnshore(checkNewInquiry('onshore'))
-    }
+    if (hasCustomer) setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer'));
+    if (hasOnshore) setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore'));
   }, [inquiries])
 
   useEffect(() => {
