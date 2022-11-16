@@ -354,39 +354,39 @@ export default function Form(props) {
   };
 
   const sendMailClick = () => {
-    setDisableSend(true);
-    getMail(myBL.id).then((res) => {
-      if (res.data.length) {
-        let tags = {}, toCustomer = [], toOnshore = [];
-        // Offshore
-        res.data[0]?.toCustomer?.length && res.data[0].toCustomer.forEach(customer => {
-          toCustomer.push(customer.email)
-        });
-        // Onshore
-        res.data[0]?.toOnshore?.length && res.data[0].toOnshore.forEach(onshore => {
-          toOnshore.push(onshore.email)
-        });
-        toCustomer.length && (tags.toCustomer = toCustomer);
-        toOnshore.length && (tags.toOnshore = toOnshore);
-        setDisableSend(false);
-        dispatch(
-          FormActions.openConfirmPopup({
-            openConfirmPopup: true,
-            form: { toCustomer: tags.toCustomer ? tags.toCustomer.join(',') : '', toOnshore: tags.toOnshore ? tags.toOnshore.join(',') : '' },
-            confirmPopupMsg: 'Are you sure you want to send this email?',
-            confirmPopupType: 'autoSendMail'
-          })
-        );
-      }
-      else{
-        toggleForm(false);
-        dispatch(FormActions.toggleOpenEmail(true));
-        dispatch(InquiryActions.setOneInq({}));
-      }
-    }).catch((error) => {
-      console.error(error)
-    });
+    // setDisableSend(true);
+    // getMail(myBL.id).then((res) => {
+    //   if (res.data.length) {
+    //     let tags = {}, toCustomer = [], toOnshore = [];
+    //     // Offshore
+    //     res.data[0]?.toCustomer?.length && res.data[0].toCustomer.forEach(customer => {
+    //       toCustomer.push(customer.email)
+    //     });
+    //     // Onshore
+    //     res.data[0]?.toOnshore?.length && res.data[0].toOnshore.forEach(onshore => {
+    //       toOnshore.push(onshore.email)
+    //     });
+    //     toCustomer.length && (tags.toCustomer = toCustomer);
+    //     toOnshore.length && (tags.toOnshore = toOnshore);
+    //     setDisableSend(false);
+    //     dispatch(
+    //       FormActions.openConfirmPopup({
+    //         openConfirmPopup: true,
+    //         form: { toCustomer: tags.toCustomer ? tags.toCustomer.join(',') : '', toOnshore: tags.toOnshore ? tags.toOnshore.join(',') : '' },
+    //         confirmPopupMsg: 'Are you sure you want to send this email?',
+    //         confirmPopupType: 'autoSendMail'
+    //       })
+    //     );
+    //   }
+    //   else{
+    // }
+    // }).catch((error) => {
+    //   console.error(error)
+    // });
 
+    toggleForm(false);
+    dispatch(FormActions.toggleOpenEmail(true));
+    dispatch(InquiryActions.setOneInq({}));
   };
 
   const checkEnableBtnAddAmendment = () => {
@@ -544,7 +544,7 @@ export default function Form(props) {
                     disabled={disableSend || isLoading}
                     onClick={sendMailClick}
                   >
-                    Send
+                    E-mail
                   </Button>
                   {isLoading && <CircularProgress size={24} style={{
                     color: 'red',
