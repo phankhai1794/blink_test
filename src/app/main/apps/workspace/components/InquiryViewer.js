@@ -30,9 +30,6 @@ import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
-import ReactTable from "react-table";
-import "react-table/react-table.css";
-import $ from "jquery";
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -1243,8 +1240,7 @@ const InquiryViewer = (props) => {
                             handleChangeContainerDetail(value);
                             setTextResolve(value);
                           }}
-                          fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
-                          disableInuput={!isResolve && !isReply}
+                          disableInput={!isResolve && !isReply}
                         />
                     }
                   </> : <ContainerDetailFormOldVersion
@@ -1253,7 +1249,7 @@ const InquiryViewer = (props) => {
                     }
                     question={question}
                     setTextResolve={setTextResolve}
-                    disableInuput={true}
+                    disableInput={true}
                   />
               ) :
                 <Typography
@@ -1413,7 +1409,6 @@ const InquiryViewer = (props) => {
                           handleChangeContainerDetail(value);
                           setTextResolve(value)
                         }}
-                        fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
                         setTextResolve={setTextResolve}
                       />
                       : <ContainerDetailFormOldVersion
@@ -1564,7 +1559,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, disableInuput = false }) => {
+const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, disableInput = false }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -1676,7 +1671,7 @@ const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, di
               if (rowIndex - 1 < item.value.length) {
                 nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
               }
-              const disabled = !(rowIndex > 0 && nodeValue && !disableInuput);
+              const disabled = !(rowIndex > 0 && nodeValue && !disableInput);
               return (
                 <input
                   className={clsx(classes.text)}

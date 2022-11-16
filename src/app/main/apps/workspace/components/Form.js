@@ -19,6 +19,7 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import OpenInNew from '@material-ui/icons/OpenInNew';
 import { getMail } from 'app/services/mailService';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -332,6 +333,7 @@ export default function Form(props) {
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
     dispatch(FormActions.openConfirmPopup({ openConfirmPopup: false }));
     dispatch(InquiryActions.addAmendment());
+    dispatch(DraftBLActions.setCurrentField());
   };
 
   const handleChange = (_, newValue) => {

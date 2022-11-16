@@ -8,13 +8,13 @@ import {
   NCM_CODE,
   mapUnit
 } from '@shared/keyword';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Icon, IconButton, Table, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
 
 import AmendmentPopup from './AmendmentPopup';
 
-const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInuput = false }) => {
+const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false }) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const user = useSelector(({ user }) => user);
@@ -25,10 +25,6 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
-  };
-
-  const getTypeName = (type) => {
-    return Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === type);
   };
 
   const getValueField = (field) => {
@@ -44,6 +40,11 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const CDTitle = CONTAINER_LIST.cd
   const CMTitle = user.role === 'Guest' ? [CONTAINER_NUMBER, ...CONTAINER_LIST.cm].filter(item => ![HS_CODE, HTS_CODE, NCM_CODE].includes(item)) : [CONTAINER_NUMBER, ...CONTAINER_LIST.cm]
   const type = (container === CONTAINER_DETAIL) ? CDTitle : CMTitle;
+
+  useEffect(() => {
+    setValues(originalData)
+    setValueEdit(originalData)
+  }, [container])
 
   const handleEdit = (state) => {
     setOpenEdit(state)
@@ -62,11 +63,11 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         total += item[key];
       }
     });
-    return total === 0 ? '' : parseFloat(total.toFixed(6)).toLocaleString() + ` ${values[0][getType(mapUnit[name])]}`;
+    return total === 0 ? '' : parseFloat(total.toFixed(6)).toLocaleString() + ` ${values[0][getType(mapUnit[name])] || ''}`;
   };
 
   const isValueChange = (key, index, value) => {
-    const originalValue = originalData[index][getType(key)]
+    const originalValue = originalData[index]?.[getType(key)]
     return originalValue !== value ? '#FEF4E6' : ''
   }
 
@@ -87,7 +88,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         inqType={container}
         containerDetail={getValueField(CONTAINER_DETAIL)}
         data={valueEdit[rowIndex]}
-        isEdit={!disableInuput}
+        isEdit={!disableInput}
         updateData={(value) => setValues(value)}
         updateEdit={(value) => setValueEdit(value)}
         index={rowIndex}
@@ -119,7 +120,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                           handleEdit(true);
                         }} className="w-16 h-16 p-0">
                           <Icon className="text-16 arrow-icon" color="disabled">
-                            {disableInuput ? 'visibility' : 'edit_mode'}
+                            {disableInput ? 'visibility' : 'edit_mode'}
                           </Icon>
                         </IconButton>
                       </div> : combineValueUnit(cell, row[getType(cell)])

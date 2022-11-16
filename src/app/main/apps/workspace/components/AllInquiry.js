@@ -172,20 +172,25 @@ const AllInquiry = (props) => {
   ]);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
-  let inquiries = inquiryCopy;
+  const [inquiries, setInquiries] = useState([]);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
   const inputAddAmendmentEndRef = useRef(null);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
-
-  if (openAllInquiry) {
-    inquiries = inquiries.filter(inq => inq.process === 'pending');
-  } else if (openAmendmentList) {
-    inquiries = inquiries.filter(inq => inq.process === 'draft');
-  } else if (openInquiryReview) {
-    inquiries = inquiries.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF');
-  }
+  
+  useEffect(() => {
+    let inquiriesSet = [...inquiryCopy];
+    let inquiriesSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    if (openAllInquiry) {
+      inquiriesSort = inquiriesSet.filter(inq => inq.process === 'pending');
+    } else if (openAmendmentList) {
+      inquiriesSort = inquiriesSet.filter(inq => inq.process === 'draft');
+    } else if (openInquiryReview) {
+      inquiriesSort = inquiriesSet.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF');
+    }
+    setInquiries(inquiriesSort);
+  }, [inquiryCopy]);
 
   let CURRENT_NUMBER = 0;
 
