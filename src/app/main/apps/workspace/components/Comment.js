@@ -180,7 +180,7 @@ const Comment = (props) => {
               </>
             )}
           </div>
-          {question?.process === 'draft' && containerCheck.includes(question.field) ?
+          {question?.process === 'draft' && content instanceof Array && containerCheck.includes(question.field) ?
             <ContainerDetailForm
               container={
                 question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
