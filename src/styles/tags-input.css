@@ -91,15 +91,6 @@
   max-width: 100%;
 }
 
-@media screen and (min-width: 30em) {
-
-  .react-tags__search {
-    /* this will become the offsetParent for suggestions */
-    position: relative;
-  }
-
-}
-
 .react-tags__search-input {
   /* prevent autoresize overflowing the container */
   max-width: 100%;
@@ -125,14 +116,6 @@
   left: 0;
   width: 100%;
   z-index: 2;
-  transform: translateX(-50%);
-}
-
-@media screen and (min-width: 30em) {
-
-  .react-tags__suggestions {
-    width: 240px;
-  }
 
 }
 
