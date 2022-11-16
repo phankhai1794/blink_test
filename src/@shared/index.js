@@ -45,6 +45,19 @@ export const validateExtensionFile = (file) => {
   return fileExt.match(/jpe|jpg|png|pdf|csv|xls|sheet|ppt|doc|txt|gif/g);
 };
 
+export const checkNewInquiry = (metadata, inquiries, type) => {
+  const list = [];
+  const temp = inquiries?.filter(inq => inq.receiver[0] === type && ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
+  if (temp.length) {
+    const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    sortDateList.forEach(inq => {
+      const find = metadata?.field_options.find(field => field.value === inq.field);
+      if (!list.includes(find.label)) list.push(find.label);
+    })
+  }
+  return list;
+}
+
 export const NUMBER_INQ_BOTTOM = 6;
 
 export const draftConfirm = 'DRF_CONF';
