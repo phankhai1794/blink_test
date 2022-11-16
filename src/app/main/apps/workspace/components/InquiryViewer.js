@@ -955,14 +955,12 @@ const InquiryViewer = (props) => {
       if (props.question.answerObj.length) reply.answerObj = props.question.answerObj;
       reply.mediaFilesAnswer = reply.mediaFile;
       reply.mediaFile = [];
-    }
-    if (Array.isArray(reply.content)) {
+    } else if (Array.isArray(reply.content)) {
       setIsReplyCDCM(true);
-    }
-    else {
+    } else {
       // Edit Reply
       setIsReply(true);
-      
+
       setIsResolve(false);
       reply.content = '';
       reply.mediaFilesAnswer = [];
