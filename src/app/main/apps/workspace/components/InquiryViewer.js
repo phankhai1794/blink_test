@@ -1220,17 +1220,34 @@ const InquiryViewer = (props) => {
             {
               ['RESOLVED', 'COMPL', 'UPLOADED', 'AME_DRF', 'AME_SENT'].includes(question.state) && containerCheck.includes(question.field) ? (
                 question?.process === 'draft' ?
-                  <ContainerDetailForm
-                    container={
-                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                  <>
+                    {
+                      typeof question.content === 'string'? <Typography
+                        className={viewDropDown !== question.id ? classes.hideText : ''}
+                        variant="h5"
+                        id={question.id}
+                        style={{
+                          wordBreak: 'break-word',
+                          fontFamily: 'Montserrat',
+                          fontSize: 15,
+                          color: '#132535',
+                          whiteSpace: 'pre-wrap'
+                        }}>
+                        {`${question.content}`}
+                      </Typography>:
+                        <ContainerDetailForm
+                          container={
+                            question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                          }
+                          setEditContent={(value) => {
+                            handleChangeContainerDetail(value);
+                            setTextResolve(value);
+                          }}
+                          fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
+                          disableInuput={!isResolve && !isReply}
+                        />
                     }
-                    setEditContent={(value) => {
-                      handleChangeContainerDetail(value);
-                      setTextResolve(value);
-                    }}
-                    fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
-                    disableInuput={!isResolve && !isReply}
-                  /> : <ContainerDetailFormOldVersion
+                  </> : <ContainerDetailFormOldVersion
                     container={
                       question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                     }
@@ -1388,7 +1405,7 @@ const InquiryViewer = (props) => {
                 <>
                   {containerCheck.includes(question.field) && <>
                     {question?.process === 'draft' ?
-                      question.state.includes('REP') && <ContainerDetailForm
+                      <ContainerDetailForm
                         container={
                           question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                         }
@@ -1398,7 +1415,8 @@ const InquiryViewer = (props) => {
                         }}
                         fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
                         setTextResolve={setTextResolve}
-                      /> : <ContainerDetailFormOldVersion
+                      />
+                      : <ContainerDetailFormOldVersion
                         container={
                           question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                         }
@@ -1442,7 +1460,7 @@ const InquiryViewer = (props) => {
                 <>
                   {isReply ? (
                     <>
-                      {(!['AME_DRF'].includes(question.state) || !containerCheck.includes(question.field)) && <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
+                      {typeof question.content === 'string' && <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
                         <textarea
                           style={{
                             width: '100%',
