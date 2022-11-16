@@ -261,10 +261,12 @@ function ToolbarLayout1(props) {
   }, [user, allowAccess]);
 
   const openAllInquiry = () => {
-    if (inquiries.length) {
+    if (inquiries.filter(inq => inq.process === 'pending').length) {
       dispatch(FormActions.toggleAllInquiry(true));
       dispatch(FormActions.toggleSaveInquiry(true));
-    } else dispatch(FormActions.toggleOpenNotificationInquiryList(true));
+    } else {
+      dispatch(FormActions.toggleOpenNotificationInquiryList(true));
+    }
   };
 
   const openAmendmentsList = () => {
