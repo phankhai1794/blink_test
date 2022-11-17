@@ -687,12 +687,10 @@ const InquiryViewer = (props) => {
             dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
           }
         }
-        setLoading(false);
       })
       .catch((error) => {
-        setLoading(false);
         dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-      });
+      }).finally(() => setLoading(false));
   };
 
   const cancelResolve = () => {
