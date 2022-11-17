@@ -692,6 +692,7 @@ const InquiryViewer = (props) => {
   const cancelResolve = () => {
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
+    setIsResolveCDCM(false);
   };
 
   const inputText = (e) => {
