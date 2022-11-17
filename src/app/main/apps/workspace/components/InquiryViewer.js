@@ -1449,9 +1449,10 @@ const InquiryViewer = (props) => {
                       <Button
                         variant="contained"
                         disabled={
+                          textResolveSeparate?.name || textResolveSeparate?.address ||
                           question?.process === 'draft' ? false : (typeof textResolve === 'string'
-                            ? !textResolve.trim()
-                            : textResolve.some((cont) => !`${!cont[question.inqType]}`.trim()))
+                              ? !textResolve.trim()
+                              : textResolve.some((cont) => !`${!cont[question.inqType]}`.trim()))
                         }
                         color="primary"
                         onClick={onConfirm}
