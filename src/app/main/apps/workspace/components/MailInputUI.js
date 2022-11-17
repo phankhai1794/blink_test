@@ -4,6 +4,7 @@ import { Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import clsx from 'clsx';
+import { matchSorter } from "match-sorter";
 
 import * as MailActions from '../store/actions/mail';
 const useStyles = makeStyles(() => ({
@@ -213,6 +214,10 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
           inputAttributes={{ onPaste: validateListEmail }}
           onBlur={handleBlur}
           onInput={onInput}
+          maxSuggestionsLength={3}
+          suggestionsTransform={(query, suggestions) => {
+            return matchSorter(suggestions, query, { keys: ["name"], threshold: matchSorter.rankings.CONTAINS });
+          }}
           tagComponent={({ tag, _, onDelete }) => {
             return (
               <div className="react-tags__selected-tag" >

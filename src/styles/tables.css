@@ -1,71 +1,6 @@
 /**
 Basic Table Styles
  */
-.table-responsive {
-  display: block;
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  -ms-overflow-style: -ms-autohiding-scrollbar;
-}
-
-table.simple {
-  width: 100%;
-  border: none;
-  border-spacing: 0;
-  text-align: left;
-}
-
-table.simple thead tr th {
-  padding: 16px 8px;
-  font-weight: 500;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-  white-space: nowrap;
-}
-
-table.simple thead tr th:first-child {
-  padding-left: 24px;
-}
-
-table.simple thead tr th:last-child {
-  padding-right: 24px;
-}
-
-table.simple tbody tr td {
-  padding: 16px 8px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-table.simple tbody tr td:first-child {
-  padding-left: 24px;
-}
-
-table.simple tbody tr td:last-child {
-  padding-right: 24px;
-}
-
-table.simple tbody tr:last-child td {
-  border-bottom: none;
-}
-
-table.simple.clickable tbody tr {
-  cursor: pointer;
-}
-
-table.simple.clickable tbody tr:hover {
-  background: rgba(0, 0, 0, 0.03);
-}
-
-.rt-tbody,
-.rt-thead {
-  overflow: visible !important;
-}
-
-.ReactTable {
-  border-radius: 6px;
-}
-
-/* frozen column magic */
 
 .frozen {
   order: -1;
@@ -76,31 +11,34 @@ table.simple.clickable tbody tr:hover {
   margin-right: 1px;
   font-weight: bold;
   border-bottom: 1px solid #f8f8f8;
-
-}
-
-.header_layout {
-  background: #FDF2F2;
-  font-weight: bold;
 }
 
 .cell_frozen {
   order: -1;
   position: sticky;
   left: 0;
-  background: #ffffff;
   transition: left 0.2s;
   margin-right: 1px;
-  border-bottom: 1px solid #f8f8f8;
   box-shadow: rgba(100, 100, 111, 0.2) 5px 0 5px -1px;
-
 }
 
-.rt-th.frozen {
-  border-bottom: 1px solid #f8f8f8;
+.amend_table {
+  table-layout: fixed;
+  overflow-x: auto;
+  border-collapse: separate !important;
+} 
+
+.cell_amend {
+  border: 1px solid #BAC3CB;
+  height: 50px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 200px;
+  padding: 0px 10px !important;
+  font-family: 'Montserrat' !important
 }
 
-
-.rt-th.cell_frozen {
-  border-bottom: 1px solid #f8f8f8;
+td.cell_amend {
+  background: #ffffff;
 }

@@ -116,7 +116,7 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   if (hasOnshore && form.toOnshore && inqOnshore.length > 0) {
     const formOnshore = { ...form };
     formOnshore['toCustomer'] = '';
-    subjectOns = `[Alert Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
+    subjectOns = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
     contentOns = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`
     dispatch(sendMail({ myblId: mybl.id, ...formOnshore, subject: subjectOns, content: contentOns, inquiries: inquiries }));
   }

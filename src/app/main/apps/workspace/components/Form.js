@@ -1,6 +1,5 @@
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { NUMBER_INQ_BOTTOM } from '@shared';
-import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { withStyles, makeStyles, createMuiTheme } from '@material-ui/core/styles';
@@ -23,7 +22,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
-import * as mailActions from '../store/actions/mail';
 
 import PopoverFooter from './PopoverFooter';
 import PopupConfirmSubmit from "./PopupConfirmSubmit";
@@ -354,39 +352,39 @@ export default function Form(props) {
   };
 
   const sendMailClick = () => {
-    setDisableSend(true);
-    getMail(myBL.id).then((res) => {
-      if (res.data.length) {
-        let tags = {}, toCustomer = [], toOnshore = [];
-        // Offshore
-        res.data[0]?.toCustomer?.length && res.data[0].toCustomer.forEach(customer => {
-          toCustomer.push(customer.email)
-        });
-        // Onshore
-        res.data[0]?.toOnshore?.length && res.data[0].toOnshore.forEach(onshore => {
-          toOnshore.push(onshore.email)
-        });
-        toCustomer.length && (tags.toCustomer = toCustomer);
-        toOnshore.length && (tags.toOnshore = toOnshore);
-        setDisableSend(false);
-        dispatch(
-          FormActions.openConfirmPopup({
-            openConfirmPopup: true,
-            form: { toCustomer: tags.toCustomer ? tags.toCustomer.join(',') : '', toOnshore: tags.toOnshore ? tags.toOnshore.join(',') : '' },
-            confirmPopupMsg: 'Are you sure you want to send this email?',
-            confirmPopupType: 'autoSendMail'
-          })
-        );
-      }
-      else{
-        toggleForm(false);
-        dispatch(FormActions.toggleOpenEmail(true));
-        dispatch(InquiryActions.setOneInq({}));
-      }
-    }).catch((error) => {
-      console.error(error)
-    });
+    // setDisableSend(true);
+    // getMail(myBL.id).then((res) => {
+    //   if (res.data.length) {
+    //     let tags = {}, toCustomer = [], toOnshore = [];
+    //     // Offshore
+    //     res.data[0]?.toCustomer?.length && res.data[0].toCustomer.forEach(customer => {
+    //       toCustomer.push(customer.email)
+    //     });
+    //     // Onshore
+    //     res.data[0]?.toOnshore?.length && res.data[0].toOnshore.forEach(onshore => {
+    //       toOnshore.push(onshore.email)
+    //     });
+    //     toCustomer.length && (tags.toCustomer = toCustomer);
+    //     toOnshore.length && (tags.toOnshore = toOnshore);
+    //     setDisableSend(false);
+    //     dispatch(
+    //       FormActions.openConfirmPopup({
+    //         openConfirmPopup: true,
+    //         form: { toCustomer: tags.toCustomer ? tags.toCustomer.join(',') : '', toOnshore: tags.toOnshore ? tags.toOnshore.join(',') : '' },
+    //         confirmPopupMsg: 'Are you sure you want to send this email?',
+    //         confirmPopupType: 'autoSendMail'
+    //       })
+    //     );
+    //   }
+    //   else{
+    // }
+    // }).catch((error) => {
+    //   console.error(error)
+    // });
 
+    toggleForm(false);
+    dispatch(FormActions.toggleOpenEmail(true));
+    dispatch(InquiryActions.setOneInq({}));
   };
 
   const checkEnableBtnAddAmendment = () => {
@@ -397,10 +395,6 @@ export default function Form(props) {
     }
     return true;
   }
-
-  const getField = (keyword) => {
-    return metadata.field?.[keyword] || '';
-  };
 
   useEffect(() => {
     if (tabs) {
@@ -517,7 +511,6 @@ export default function Form(props) {
                 checkEnableBtnAddAmendment()
                 && myBL?.state?.includes('DRF_')
                 && userType === 'CUSTOMER' // Allow only customer to create amendment
-                && ![getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)].includes(currentField)
               }>
               <LinkButton
                 text="Add Amendment"
@@ -544,7 +537,7 @@ export default function Form(props) {
                     disabled={disableSend || isLoading}
                     onClick={sendMailClick}
                   >
-                    Send
+                    E-mail
                   </Button>
                   {isLoading && <CircularProgress size={24} style={{
                     color: 'red',

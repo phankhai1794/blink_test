@@ -93,7 +93,7 @@ const AmendmentPopup = (props) => {
   const isNumber = (value) => {
     if (!value) return true
     else {
-      var pattern = /^[1-9]\d{0,2}(,?\d{3})*(\.\d+)?$/g
+      var pattern = /((^[1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?$/g
       return pattern.test(value)
     }
   }

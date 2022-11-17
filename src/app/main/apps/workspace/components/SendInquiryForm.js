@@ -182,7 +182,7 @@ const SendInquiryForm = (props) => {
     let content = '';
     let bodyHtml = '';
     if (hasOnshore) {
-      subject = `[Alert Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      subject = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
       content = `Dear Onshore,\n \nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setOnshoreValue({ subject, content: bodyHtml, html: initiateContentState(content) });
@@ -245,7 +245,6 @@ const SendInquiryForm = (props) => {
       dispatch({
         type: mailActions.SENDMAIL_NONE
       });
-      dispatch(FormActions.toggleOpenEmail(false));
       setForm(initialState);
     } else if (error) {
       dispatch(
@@ -464,7 +463,7 @@ const SendInquiryForm = (props) => {
                 value={tabValue}
                 onChange={handleTabChange}
                 textColor='primary'
-                style={{ borderBottom: '3px solid #515F6B', marginBottom: 20, marginTop: 10 }}
+                style={{ borderBottom: '3px solid #515F6B', marginBottom: 15, marginTop: 10 }}
               >
                 <Tab
                   className={classes.tab}
