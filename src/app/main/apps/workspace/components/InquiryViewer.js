@@ -1086,7 +1086,7 @@ const InquiryViewer = (props) => {
                         <span className={classes.labelStatus}>{question.state === 'UPLOADED' ? 'Uploaded' : 'Resolved'}</span>
                       </div>
                       <Button
-                        disabled={ loading || question.state === 'UPLOADED' }
+                        disabled={loading || question.state === 'UPLOADED'}
                         variant="contained"
                         color="primary"
                         onClick={onUpload}
