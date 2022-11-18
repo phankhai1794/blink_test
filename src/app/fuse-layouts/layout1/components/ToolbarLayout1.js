@@ -144,19 +144,19 @@ function ToolbarLayout1(props) {
         };
 
       })
-  
+
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
     });
-    
+
     const amendment = optionInquiries.filter(op => op.process === 'draft');
-    
+
     if (pathname.includes('/guest') || pathname.includes('/workspace')) {
       let countLoadComment =0;
        axios.all(inquiriesPendingProcess.map(q => loadComment(q.id))) // TODO: refactor
         .then(res => {
           if (res) {
             let commentList = [];
-            
+
             // get attachments file in comment reply/answer
             res.map(r => {
               commentList = [...commentList, ...r];
@@ -173,14 +173,14 @@ function ToolbarLayout1(props) {
                   })
 
                   attachmentTemp.forEach(att => {
-                      const fileNameList = getAttachmentFiles.map((item) => {
-                        if (item.inqType === curInq.inqType) return item.name
-                      })
-                      if (att && !fileNameList.includes(att.name)) {
-                        getAttachmentFiles.push(att)
-                        setAttachmentLength(getAttachmentFiles.length)
-                      }
+                    const fileNameList = getAttachmentFiles.map((item) => {
+                      if (item.inqType === curInq.inqType) return item.name
                     })
+                    if (att && !fileNameList.includes(att.name)) {
+                      getAttachmentFiles.push(att)
+                      setAttachmentLength(getAttachmentFiles.length)
+                    }
+                  })
                 }
               })
               countLoadComment+=1
@@ -198,7 +198,7 @@ function ToolbarLayout1(props) {
         }).catch(err => {
           console.error(err)
         })
-      
+
       setAmendmentLength(amendment.length);
       if (amendment.length) {
         let countAmendment = 0;

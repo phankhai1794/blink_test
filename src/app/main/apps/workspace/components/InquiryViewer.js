@@ -176,6 +176,7 @@ const InquiryViewer = (props) => {
   const [submitLabel, setSubmitLabel] = useState(false);
   const [isShowViewAll, setShowViewAll] = useState(false);
   const [isUploadFile, setIsUploadFile] = useState(false);
+  const [isRemoveFile, setIsRemoveFile] = useState(false);
   const [disableSaveReply, setDisableSaveReply] = useState(false);
   const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
 
@@ -193,18 +194,20 @@ const InquiryViewer = (props) => {
       loadComment(question.id)
         .then((res) => {
           const lastest = { ...question };
-          if (res.length > 1) {
+          if (res.length > 0) {
             res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
             // filter comment
-            lastest.mediaFile = res[res.length - 1].answersMedia;
-            lastest.answerObj = [{ content: res[res.length - 1].content }];
-            lastest.content = res[res.length - 1].content;
-            lastest.name = "";
-            lastest.creator = res[res.length - 1].creator;
-            lastest.createdAt = res[res.length - 1].createdAt;
-            lastest.mediaFilesAnswer = [];
-            //
+            // console.log(res)
             const filterOffshoreSent = res[res.length - 1];
+            lastest.mediaFile = filterOffshoreSent.mediaFile;
+            lastest.mediaFilesAnswer = filterOffshoreSent.answersMedia;
+            lastest.answerObj = filterOffshoreSent.answerObj;
+            lastest.content = filterOffshoreSent.content;
+            lastest.name = "";
+            lastest.creator = filterOffshoreSent.updater;
+            lastest.createdAt = filterOffshoreSent.createdAt;
+            setType(filterOffshoreSent.ansType);
+            //
             if (Object.keys(filterOffshoreSent).length > 0) {
               //
               const reqReply = {
@@ -214,26 +217,29 @@ const InquiryViewer = (props) => {
                   type: 'REP'
                 },
                 answer: {
-                  id: filterOffshoreSent.answer,
+                  id: filterOffshoreSent.id,
                   content: filterOffshoreSent.content,
                   type: metadata.ans_type['paragraph']
                 }
               };
               if (['REP_Q_DRF', 'REP_A_DRF'].includes(filterOffshoreSent.state)) {
-                setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
+                setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
               }
               lastest.state = filterOffshoreSent.state;
               lastest.updatedAt = filterOffshoreSent.updatedAt;
+              //
               if (user.role === 'Admin') {
                 if (filterOffshoreSent.state === 'REP_Q_SENT') {
                   setShowLabelSent(true);
-                  setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
+                  setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
                   setStateReplyDraft(true);
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                   setStateReplyDraft(true)
                 }
-                if (filterOffshoreSent.state === 'REP_A_SENT') {
+                if (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = true;
+                } else if (['OPEN', 'INQ_SENT'].includes(filterOffshoreSent.state)) {
+                  lastest.showIconReply = false;
                 }
               } else {
                 if (filterOffshoreSent.state === 'REP_A_DRF') {
@@ -244,6 +250,9 @@ const InquiryViewer = (props) => {
                   //
                 } else if (filterOffshoreSent.state === 'REP_Q_SENT') {
                   lastest.showIconReply = true;
+                } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
+                  setSubmitLabel(true);
+                  lastest.showIconEdit = true;
                 }
                 if (['REP_A_SENT'].includes(filterOffshoreSent.state)) {
                   setSubmitLabel(true);
@@ -257,9 +266,11 @@ const InquiryViewer = (props) => {
             }
             //
             setComment([...res]);
-            setType(metadata.ans_type.paragraph);
+            // setType(metadata.ans_type.paragraph);
             setQuestion(lastest);
-            setInqHasComment(true);
+            if (res.length > 1) {
+              setInqHasComment(true);
+            }
           } else {
             if ((user.role === 'Admin' ? ["ANS_SENT", "COMPL", "UPLOADED"] : ["ANS_SENT", "ANS_DRF", "REP_Q_DRF", "COMPL", "UPLOADED"]).includes(question.state)) {
               let answerObj = null;
@@ -298,7 +309,8 @@ const InquiryViewer = (props) => {
     } else {
       getCommentDraftBl(myBL.id, question.field)
         .then((res) => {
-          setEditOriginalAmendment(res.length === 1);
+          // setEditOriginalAmendment(res.length === 1);
+          res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
           const lastest = { ...question };
           if (res.length > 0) {
             const { content: contentField, mediaFile } = res[res.length - 1].content;
@@ -364,8 +376,10 @@ const InquiryViewer = (props) => {
               creator: { userName: user.displayName, avatar: null },
               updater: { userName: user.displayName, avatar: null },
               createdAt: res[0].createdAt,
+              updatedAt: res[0].createdAt,
               answersMedia: [],
-              content: orgContent[lastest.field] || ''
+              content: orgContent[lastest.field] || '',
+              process: 'draft'
             }];
             res.map(r => {
               const { content, mediaFile } = r.content;
@@ -374,8 +388,10 @@ const InquiryViewer = (props) => {
                 creator: r.creator,
                 updater: r.creator,
                 createdAt: r.createdAt,
+                updatedAt: r.createdAt,
                 answersMedia: mediaFile,
-                content: content instanceof String ? `"${content}"` : content
+                content: content instanceof String ? `"${content}"` : content,
+                process: 'draft'
               });
             });
             setComment(comments);
@@ -394,6 +410,7 @@ const InquiryViewer = (props) => {
     if (currentQuestion && currentQuestion.id === quest.id) {
       quest.showIconReply = false;
       quest.showIconEdit = true;
+      quest.mediaFilesAnswer = [];
       let answerObj = null;
       if (question.ansType === metadata.ans_type.choice) {
         answerObj = quest.answerObj.filter((item) => item.confirmed);
@@ -418,6 +435,7 @@ const InquiryViewer = (props) => {
       }
       quest.mediaFilesAnswer = [];
       setQuestion(quest);
+      setSaveComment(!isSaveComment);
     }
   }
   //
@@ -425,18 +443,24 @@ const InquiryViewer = (props) => {
     resetAnswerActionSave()
   }, [currentQuestion, isSaved]);
 
-  useEffect(() => {
+  const updateQuestionFile = () => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     const quest = { ...question };
-    if (optionsInquires[editedIndex].mediaFilesAnswer.length) {
-      setQuestion({ ...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer });
-    }
-  }, [isUploadFile]);
+    setQuestion({ ...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer });
+  }
+
+  useEffect(() => {
+    updateQuestionFile()
+  }, [isUploadFile, isRemoveFile]);
 
   useEffect(() => {
     setQuestion(props.question);
   }, [props.question]);
+
+  useEffect(() => {
+    question?.state !== 'OPEN' && setAllowDeleteInq(false);
+  }, [question]);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -465,34 +489,6 @@ const InquiryViewer = (props) => {
     resetInquiry();
     ['INQ_SENT', 'ANS_DRF'].includes(question.state) ? setShowLabelSent(true) : setShowLabelSent(false);
   }, []);
-
-  const delayTime = (currentDate, addMinutes) => {
-    let delayTiming = 0;
-    if (currentDate.getTime() <= addMinutes.getTime()) {
-      delayTiming = Math.abs(addMinutes - currentDate);
-      if (user.role === 'Admin') {
-        if (['REP_Q_SENT'].includes(question.state)) {
-          setStateReplyDraft(true);
-        } else if (['ANS_DRF', 'INQ_SENT'].includes(question.state)) {
-          question.showIconEditInq = true
-        }
-      }
-      // const testMinutes = Math.round(delayTiming / (60 * 1000));
-    } else if (addMinutes.getTime() <= currentDate.getTime()) {
-      if (user.role === 'Guest') {
-        question.showIconEdit = false;
-      } else if (user.role === 'Admin') {
-        question.showIconEditInq = false;
-      }
-      setStateReplyDraft(false);
-      setTempReply({})
-    }
-    return delayTiming;
-  };
-
-  useEffect(() => {
-    question?.state !== 'OPEN' && setAllowDeleteInq(false);
-  }, [question]);
 
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'removeInq' && indexQuestionRemove >= 0) {
@@ -602,7 +598,9 @@ const InquiryViewer = (props) => {
   const changeToEditor = (inq) => {
     const index = inquiries.findIndex((q) => q.id === inq.id);
     if (index >= 0) {
+      const optionsOfQuestion = [...inquiries];
       const inqEdit = JSON.parse(JSON.stringify(inq));
+      inqEdit.ansType = optionsOfQuestion[index].ansType;
       dispatch(InquiryActions.setEditInq(inqEdit));
       dispatch(InquiryActions.setField(inq.field));
     }
@@ -748,7 +746,6 @@ const InquiryViewer = (props) => {
       },
       answer: {
         ...tempReply.answer,
-        content: "",
         type: metadata.ans_type['attachment']
       }
     };
@@ -954,14 +951,13 @@ const InquiryViewer = (props) => {
       reply.showIconAttachReplyFile = false;
       reply.showIconAttachAnswerFile = true;
       if (props.question.answerObj.length) reply.answerObj = props.question.answerObj;
-      reply.mediaFilesAnswer = reply.mediaFile;
-      reply.mediaFile = [];
+      // reply.mediaFilesAnswer = reply.mediaFile;
+      // reply.mediaFile = [];
     } else if (Array.isArray(reply.content)) {
       setIsReplyCDCM(true);
     } else {
       // Edit Reply
       setIsReply(true);
-
       setIsResolve(false);
       reply.content = '';
       reply.mediaFilesAnswer = [];
@@ -1067,8 +1063,8 @@ const InquiryViewer = (props) => {
             <div style={{ paddingTop: 10 }} className="flex justify-between">
               <UserInfo
                 name={question.creator?.userName}
-                time={displayTime(question.updatedAt || question.createdAt)}
-                avatar={question.creator.avatar}
+                time={displayTime(question.createdAt || question.updatedAt)}
+                avatar={question.creator?.avatar}
               />
               {user.role === 'Admin' ? ( // TODO
                 <div className="flex items-center mr-2">
@@ -1280,7 +1276,7 @@ const InquiryViewer = (props) => {
 
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
-                ((['OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
+                ((['OPEN', 'ANS_DRF', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
                   <ChoiceAnswer
                     questions={inquiries}
@@ -1290,7 +1286,7 @@ const InquiryViewer = (props) => {
                     currentQuestion={currentQuestion}
                   />
                 )}
-              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
+              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'REP_Q_DRF', 'ANS_DRF', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
                   <ParagraphAnswer
                     question={question}
@@ -1373,7 +1369,7 @@ const InquiryViewer = (props) => {
                 ))}
             </>
             {
-              user.role !== 'Admin' && question.mediaFilesAnswer?.length > 0 &&
+              question.mediaFilesAnswer?.length > 0 &&
               <>
                 {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
                 {question.mediaFilesAnswer?.map((file, mediaIndex) => (
@@ -1388,6 +1384,10 @@ const InquiryViewer = (props) => {
                         question={question}
                         questions={inquiries}
                         hiddenRemove={!question.showIconAttachAnswerFile}
+                        isRemoveFile={isRemoveFile}
+                        setIsRemoveFile={(val) => {
+                          setIsRemoveFile(val)
+                        }}
                       />
                     ) : (
                       <FileAttach
@@ -1399,6 +1399,10 @@ const InquiryViewer = (props) => {
                         index={index}
                         questions={inquiries}
                         hiddenRemove={!question.showIconAttachAnswerFile}
+                        isRemoveFile={isRemoveFile}
+                        setIsRemoveFile={(val) => {
+                          setIsRemoveFile(val)
+                        }}
                       />
                     )}
                   </div>

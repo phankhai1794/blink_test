@@ -280,19 +280,19 @@ const TableCM = (props) => {
         {containerManifest?.length > 0 ? containerManifest.map((cm, index) =>
           <Grid container spacing={2} className='px-8 py-2' key={index}>
             <Grid item xs={2}>
-              <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
+              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
             </Grid>
             <Grid item xs={2}>
-              <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_PACKAGE]]}</BLField>
+              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{cm?.[metadata?.inq_type?.[CM_PACKAGE]]}</BLField>
             </Grid>
             <Grid item xs={4}>
-              <BLField disableClick={true} multiline={true} rows={6} width='360px'>{cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}</BLField>
+              <BLField disableClick={true} multiline={true} rows={6} width='360px' disableIcon={true}>{cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}</BLField>
             </Grid>
             <Grid item xs={2}>
-              <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_WEIGHT]]}</BLField>
+              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{cm?.[metadata?.inq_type?.[CM_WEIGHT]]}</BLField>
             </Grid>
             <Grid item xs={2}>
-              <BLField disableClick={true} multiline={true} rows={6}>{cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]}</BLField>
+              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]}</BLField>
             </Grid>
           </Grid>) :
           <Grid container spacing={2} className='px-8 py-2'>

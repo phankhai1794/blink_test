@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, isReply = false, questions, question, templateReply, setTemplateReply, draftBL = false, removeAttachmentDraftBL }) => {
+const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, isReply = false, questions, question, templateReply, setTemplateReply, draftBL = false, removeAttachmentDraftBL, isRemoveFile, setIsRemoveFile }) => {
   const classes = useStyles();
   const [attachmentList, currentEditInq] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.attachmentList,
@@ -106,6 +106,7 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
       const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
       optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
       optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMedia, 1);
+      setIsRemoveFile(!isRemoveFile);
       dispatch(InquiryActions.setInquiries(optionsInquires));
     }
     else if (isReply) {

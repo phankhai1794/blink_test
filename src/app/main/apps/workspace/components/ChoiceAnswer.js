@@ -13,8 +13,8 @@ import * as InquiryActions from '../store/actions/inquiry';
 const ChoiceAnswer = (props) => {
   const { question, questions, disableChecked, disable = false, saveStatus, currentQuestion } = props;
   const user = useSelector(({ user }) => user);
-  let questionIsEmpty = props.question === undefined;
-  let prevChoiceArray = (user.role === 'Admin' && !["REP_A_SENT", "COMPL"].includes(question.state))? []: question.answerObj.filter((choice) => {
+  let questionIsEmpty = question === undefined;
+  let prevChoiceArray = question.answerObj.filter((choice) => {
     return choice.confirmed;
   });
   const [isPermission, setPermission] = useState(false);
