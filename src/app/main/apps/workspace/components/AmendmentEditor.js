@@ -51,14 +51,13 @@ const Amendment = ({ question, inquiriesLength }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector(({ user }) => user);
-  const [metadata, content, currentField, myBL, valid, inquiries] = useSelector(({ workspace }) => [
+  const [metadata, content, myBL, inquiries] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.content,
-    workspace.inquiryReducer.currentField,
     workspace.inquiryReducer.myBL,
-    workspace.inquiryReducer.validation,
     workspace.inquiryReducer.inquiries,
   ]);
+  const currentField = useSelector(({ draftBL }) => draftBL.currentField);
   const filterInqDrf = inquiries.filter(inq => inq.process === 'draft').map(val => val.field);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
@@ -214,17 +213,16 @@ const Amendment = ({ question, inquiriesLength }) => {
         </FormControl>
       )}
 
-      {fieldValueSelect && containerCheck.includes(fieldValueSelect.value) || containerCheck.includes(currentField) ? (
+      {containerCheck.includes(fieldValueSelect?.value || currentField) ? (
         <div style={{ margin: '15px 0' }}>
           <ContainerDetailForm
             container={
-              currentField === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+              (fieldValueSelect?.value || currentField) === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
             }
             setEditContent={(value) => {
               setFieldValue(value);
             }}
-            fieldType={currentField === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
-            disableInuput={false}
+            disableInput={false}
           />
         </div>
       ) : <div className="flex" style={{ alignItems: 'flex-end', margin: '15px 0' }}>

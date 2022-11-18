@@ -187,8 +187,7 @@ const Comment = (props) => {
               }
               setEditContent={() => null}
               originalValues={content}
-              fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
-              disableInuput={true}
+              disableInput={true}
             />
             :
             <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>

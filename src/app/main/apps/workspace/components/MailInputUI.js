@@ -108,7 +108,6 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
   const _tags = useSelector(({ workspace }) => workspace.mailReducer.tags);
   const tags = _tags[id] || []
   const input = validateMail[id]
-
   const validateEmail = (tag) => {
     const regexp =
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -123,17 +122,19 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
     e.preventDefault()
     const result = []
     let temp = ''
-    e.clipboardData.getData('text').split(/,|;/).forEach(v => {
-      if (validateEmail(v.trim())) {
+    const removeDuplicate = [...new Set(e.clipboardData.getData('text').split(/,|;/).map(str => str.trim()))]
+    removeDuplicate.forEach(v => {
+      if (validateEmail(v)) {
         result.push(v)
       }
-      else if (v.trim()) {
-        temp += v.trim() + ','
+      else if (v) {
+        temp += v + ','
       }
     })
     if (result.length) {
-      dispatch(MailActions.setTags({ ..._tags, [id]: [...tags, ...result] }))
+      dispatch(MailActions.setTags({ ..._tags, [id]: [...new Set([...tags, ...result])] }))
       dispatch(MailActions.validateMail({ ...validateMail, [id]: temp.slice(0, -1) }))
+      textInput.current.state.query = temp
     }
   }
 
@@ -144,7 +145,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
   }, [tags])
 
   const onAddition = (newTag) => {
-    const newTags = [...tags, newTag.name]
+    const newTags = [...new Set([...tags, newTag.name])]
     dispatch(MailActions.validateMail({ ...validateMail, [id]: '' }))
     dispatch(MailActions.setTags({ ..._tags, [id]: newTags }))
     onChanged(id, newTags);
@@ -156,10 +157,11 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
 
   const handleBlur = () => {
     if (input && validateEmail(input.trim())) {
-      const newTags = [...tags, input.trim()]
+      const newTags = [...new Set([...tags, input.trim()])]
       onChanged(id, newTags);
       dispatch(MailActions.setTags({ ..._tags, [id]: newTags }))
       dispatch(MailActions.validateMail({ ...validateMail, [id]: '' }))
+      textInput.current.state.query = ''
     }
     if (!focus) {
       setIsFocus(false);

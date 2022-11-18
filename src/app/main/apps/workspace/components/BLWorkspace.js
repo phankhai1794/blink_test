@@ -1,4 +1,4 @@
-import { NUMBER_INQ_BOTTOM } from '@shared';
+import { checkNewInquiry, NUMBER_INQ_BOTTOM } from '@shared';
 import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDING, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, COMMODITY_CODE, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
@@ -124,22 +124,9 @@ const BLWorkspace = (props) => {
     return content[getField(keyword)] || '';
   };
 
-  const checkNewInquiry = (type) => {
-    const list = [];
-    const temp = inquiries.filter(inq => inq.receiver[0] === type && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF'));
-    if (temp.length) {
-      const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-      sortDateList.forEach(inq => {
-        const find = metadata.field_options.find(field => field.value === inq.field);
-        if (!list.includes(find.label)) list.push(find.label);
-      })
-    }
-    return list;
-  }
-
   useEffect(() => {
-    setInqCustomer(checkNewInquiry('customer') || []);
-    setInqOnshore(checkNewInquiry('onshore') || []);
+    setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
+    setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore') || []);
   }, [inquiries]);
 
   // TODO: TBU Logic after create new reply amendment
@@ -305,7 +292,7 @@ const BLWorkspace = (props) => {
 
   const countInq = (inqs, recevier) => {
     let count = 0;
-    inqs.forEach((inq) => inq.receiver.includes(recevier) && (count += 1));
+    inqs.forEach((inq) => inq.process === 'pending' && inq.receiver.includes(recevier) && (count += 1));
     return count;
   };
 

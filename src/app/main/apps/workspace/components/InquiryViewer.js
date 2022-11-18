@@ -30,9 +30,6 @@ import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
-import ReactTable from "react-table";
-import "react-table/react-table.css";
-import $ from "jquery";
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -162,7 +159,9 @@ const InquiryViewer = (props) => {
   const [viewDropDown, setViewDropDown] = useState();
   const [inqHasComment, setInqHasComment] = useState(false);
   const [isResolve, setIsResolve] = useState(false);
+  const [isResolveCDCM, setIsResolveCDCM] = useState(false);
   const [isReply, setIsReply] = useState(false);
+  const [isReplyCDCM, setIsReplyCDCM] = useState(false);
   const [comment, setComment] = useState([]);
   const [isLoadedComment, setIsLoadedComment] = useState(false);
   const [textResolve, setTextResolve] = useState(content[question.field] || '');
@@ -540,8 +539,10 @@ const InquiryViewer = (props) => {
             dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
 
             // Display the previous content
-            cloneListCommentDraft = cloneListCommentDraft.filter(({ field }) => field === question.field);
-            dispatch(InquiryActions.setContent({ ...content, [question.field]: cloneListCommentDraft[cloneListCommentDraft.length - 1]?.content.content }));
+            if (!containerCheck.includes(question.field)){
+              cloneListCommentDraft = cloneListCommentDraft.filter(({ field }) => field === question.field);
+              dispatch(InquiryActions.setContent({ ...content, [question.field]: cloneListCommentDraft[cloneListCommentDraft.length - 1]?.content.content }));
+            }
           } else {
             getBlInfo(myBL.id).then(res => {
               dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
@@ -608,7 +609,11 @@ const InquiryViewer = (props) => {
   };
 
   const onResolve = () => {
-    setIsResolve(true);
+    if (Array.isArray(question.content)) {
+      setIsResolveCDCM(true);
+    } else{
+      setIsResolve(true);
+    }
   };
 
   const onConfirm = () => {
@@ -687,6 +692,7 @@ const InquiryViewer = (props) => {
   const cancelResolve = () => {
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
+    setIsResolveCDCM(false);
   };
 
   const inputText = (e) => {
@@ -950,10 +956,12 @@ const InquiryViewer = (props) => {
       if (props.question.answerObj.length) reply.answerObj = props.question.answerObj;
       reply.mediaFilesAnswer = reply.mediaFile;
       reply.mediaFile = [];
-
+    } else if (Array.isArray(reply.content)) {
+      setIsReplyCDCM(true);
     } else {
       // Edit Reply
       setIsReply(true);
+
       setIsResolve(false);
       reply.content = '';
       reply.mediaFilesAnswer = [];
@@ -1243,8 +1251,7 @@ const InquiryViewer = (props) => {
                             handleChangeContainerDetail(value);
                             setTextResolve(value);
                           }}
-                          fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
-                          disableInuput={!isResolve && !isReply}
+                          disableInput={!isResolveCDCM && !isReplyCDCM}
                         />
                     }
                   </> : <ContainerDetailFormOldVersion
@@ -1253,7 +1260,7 @@ const InquiryViewer = (props) => {
                     }
                     question={question}
                     setTextResolve={setTextResolve}
-                    disableInuput={true}
+                    disableInput={true}
                   />
               ) :
                 <Typography
@@ -1401,11 +1408,11 @@ const InquiryViewer = (props) => {
           </div>
           {!['COMPL', 'RESOLVED'].includes(question.state) && question.state !== 'UPLOADED' && (
             <>
-              {isResolve ? (
+              {isResolve || isResolveCDCM ? (
                 <>
                   {containerCheck.includes(question.field) && <>
                     {question?.process === 'draft' ?
-                      <ContainerDetailForm
+                      !isResolveCDCM && <ContainerDetailForm
                         container={
                           question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                         }
@@ -1413,7 +1420,6 @@ const InquiryViewer = (props) => {
                           handleChangeContainerDetail(value);
                           setTextResolve(value)
                         }}
-                        fieldType={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
                         setTextResolve={setTextResolve}
                       />
                       : <ContainerDetailFormOldVersion
@@ -1458,9 +1464,9 @@ const InquiryViewer = (props) => {
                 </>
               ) : (
                 <>
-                  {isReply ? (
+                  {isReply || isReplyCDCM ? (
                     <>
-                      {typeof question.content === 'string' && <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
+                      {isReply && <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
                         <textarea
                           style={{
                             width: '100%',
@@ -1564,7 +1570,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, disableInuput = false }) => {
+const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, disableInput = false }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -1676,7 +1682,7 @@ const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, di
               if (rowIndex - 1 < item.value.length) {
                 nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
               }
-              const disabled = !(rowIndex > 0 && nodeValue && !disableInuput);
+              const disabled = !(rowIndex > 0 && nodeValue && !disableInput);
               return (
                 <input
                   className={clsx(classes.text)}

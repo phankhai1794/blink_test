@@ -172,20 +172,25 @@ const AllInquiry = (props) => {
   ]);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
-  let inquiries = inquiryCopy;
+  const [inquiries, setInquiries] = useState([]);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
   const inputAddAmendmentEndRef = useRef(null);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
-
-  if (openAllInquiry) {
-    inquiries = inquiries.filter(inq => inq.process === 'pending');
-  } else if (openAmendmentList) {
-    inquiries = inquiries.filter(inq => inq.process === 'draft');
-  } else if (openInquiryReview) {
-    inquiries = inquiries.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF');
-  }
+  
+  useEffect(() => {
+    let inquiriesSet = [...inquiryCopy];
+    let inquiriesSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    if (openAllInquiry) {
+      inquiriesSort = inquiriesSet.filter(inq => inq.process === 'pending');
+    } else if (openAmendmentList) {
+      inquiriesSort = inquiriesSet.filter(inq => inq.process === 'draft');
+    } else if (openInquiryReview) {
+      inquiriesSort = inquiriesSet.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF');
+    }
+    setInquiries(inquiriesSort);
+  }, [inquiryCopy]);
 
   let CURRENT_NUMBER = 0;
 
@@ -310,48 +315,53 @@ const AllInquiry = (props) => {
         padding: isShowBackground && '8px 24px',
         marginTop: isShowBackground && '2rem'
       }}>
-        {inquiries.map((q, index) => {
-          if (receiver && !q.receiver.includes(receiver)) {
+        {props.user === 'workspace' ? (
+          inquiries.map((q, index) => {
+            if (receiver && !q.receiver.includes(receiver)) {
+              return (
+                <div key={index} style={{ display: 'flex' }} onClick={() => changeToEditor(q)}></div>
+              );
+            }
+            CURRENT_NUMBER += 1;
             return (
-              <div key={index} style={{ display: 'flex' }} onClick={() => changeToEditor(q)}></div>
-            );
-          }
-          CURRENT_NUMBER += 1;
-          if (props.user === 'workspace') {
-            return currentEditInq && q.id === currentEditInq.id ? (
-              <div key={index}>
-                {<InquiryEditor onCancel={onCancel} />}
-                <Divider
-                  className="my-32"
-                  variant="middle"
-                  style={{ height: '2px', color: '#BAC3CB' }}
-                />
-              </div>
-            ) : (
-              <Card key={index} elevation={0} style={{ padding: '1rem ' }}>
-                <div
-                  className={clsx(
-                    classes.boxItem,
-                    (q.state === 'UPLOADED') && 'uploaded',
-                    ['COMPL', 'RESOLVED'].includes(q.state) && 'resolved',
-                    [...sentStatus, ...['REP_DRF']].includes(q.state) && checkCommentDraft(q, ['REP_DRF', 'REP_SENT']) && 'offshoreReply'
-                  )}>
-                  <div style={{ marginBottom: '12px' }}>
-                    <Typography color="primary" variant="h5" className={classes.inqTitle}>
-                      {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
-                    </Typography>
-
-                    <InquiryViewer user={props.user} question={q} index={index} openInquiryReview={openInquiryReview} field={field} />
-                  </div>
+              currentEditInq && q.id === currentEditInq.id ? (
+                <div key={index}>
+                  {<InquiryEditor onCancel={onCancel} />}
+                  <Divider
+                    className="my-32"
+                    variant="middle"
+                    style={{ height: '2px', color: '#BAC3CB' }}
+                  />
                 </div>
-                <Divider
-                  className="my-32"
-                  variant="middle"
-                  style={{ height: '2px', color: '#BAC3CB' }}
-                />
-              </Card>
-            );
-          } else {
+              ) : (
+                <Card key={index} elevation={0} style={{ padding: '1rem ' }}>
+                  <div
+                    className={clsx(
+                      classes.boxItem,
+                      (q.state === 'UPLOADED') && 'uploaded',
+                      ['COMPL', 'RESOLVED'].includes(q.state) && 'resolved',
+                      [...sentStatus, ...['REP_DRF']].includes(q.state) && checkCommentDraft(q, ['REP_DRF', 'REP_SENT']) && 'offshoreReply'
+                    )}>
+                    <div style={{ marginBottom: '12px' }}>
+                      <Typography color="primary" variant="h5" className={classes.inqTitle}>
+                        {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
+                      </Typography>
+
+                      <InquiryViewer user={props.user} question={q} index={index} openInquiryReview={openInquiryReview} field={field} />
+                    </div>
+                  </div>
+                  <Divider
+                    className="my-32"
+                    variant="middle"
+                    style={{ height: '2px', color: '#BAC3CB' }}
+                  />
+                </Card>
+              )
+            )
+          })
+        ) : (
+          inquiries.map((q, index) => {
+            CURRENT_NUMBER += 1;
             return (
               <div key={index}>
                 <div
@@ -376,12 +386,12 @@ const AllInquiry = (props) => {
                       showReceiver={false}
                       getStateReplyDraft={(val) => setStateReplyDraft(val)}
                     />
-                    {(q.showIconAttachAnswerFile) && (q.state === 'ANS_DRF' || q.state === 'OPEN' || q.state === 'INQ_SENT' || getStateReplyDraft) &&
-                      <InquiryAnswer
-                        onCancel={() => handleCancel(q)}
-                        setSave={() => handleSetSave(q)}
-                        question={q}
-                      />}
+                    {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
+                          <InquiryAnswer
+                            onCancel={() => handleCancel(q)}
+                            setSave={() => handleSetSave(q)}
+                            question={q}
+                          />}
                   </div>
                 </div>
                 <Divider
@@ -390,9 +400,9 @@ const AllInquiry = (props) => {
                   style={{ height: '2px', color: '#BAC3CB' }}
                 />
               </div>
-            );
-          }
-        })}
+            )
+          })
+        )}
         <div ref={inputAddAmendmentEndRef}>
           {props.user !== 'workspace' && currentAmendment !== undefined && (
             <div style={{ marginTop: 30 }}>
