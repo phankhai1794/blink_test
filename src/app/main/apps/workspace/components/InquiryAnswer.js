@@ -1,4 +1,11 @@
-import { updateInquiryChoice, createParagraphAnswer, updateParagraphAnswer, updateInquiry, createAttachmentAnswer } from 'app/services/inquiryService';
+import {
+  updateInquiryChoice,
+  createParagraphAnswer,
+  updateParagraphAnswer,
+  updateInquiry,
+  createAttachmentAnswer,
+  addTransactionAnswer
+} from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -206,6 +213,9 @@ const InquiryAnswer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     setDisableSave(true)
     let responseSelectChoice;
+    //
+    await addTransactionAnswer({ inquiryId: question.id });
+    //
     if (question.selectChoice) {
       responseSelectChoice = await updateInquiryChoice(question.selectChoice);
     } else if (question.paragraphAnswer) {

@@ -384,23 +384,25 @@ const InquiryEditor = (props) => {
         mediaCreate.length ||
         mediaDelete.length
       ) {
-        await updateInquiry(inquiry.id, {
+        const update = await updateInquiry(inquiry.id, {
           inq: inq(currentEditInq),
           ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
           files: { mediaCreate, mediaDelete }
         });
         const editedIndex = inquiries.findIndex(inq => inq.id === inquiry.id);
         inquiries[editedIndex] = currentEditInq;
+        if (update.data.length) {
+          inquiries[editedIndex].answerObj = update.data;
+        }
         dispatch(InquiryActions.setInquiries(inquiries));
 
+        // TODO
+        dispatch(InquiryActions.setEditInq(currentEditInq));
+        // dispatch(InquiryActions.saveInquiry());
+        // dispatch(FormActions.toggleReloadInq());
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
         );
-
-        // TODO
-        dispatch(InquiryActions.saveInquiry());
-        dispatch(InquiryActions.setEditInq());
-        dispatch(FormActions.toggleReloadInq());
       }
     } else {
       // Create INQUIRY
@@ -446,7 +448,7 @@ const InquiryEditor = (props) => {
                 AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
               );
               dispatch(InquiryActions.saveInquiry());
-              dispatch(FormActions.toggleReloadInq());
+              // dispatch(FormActions.toggleReloadInq());
               dispatch(InquiryActions.setField(inqContentTrim[0].field));
               dispatch(InquiryActions.setOpenedInqForm(false));
             })

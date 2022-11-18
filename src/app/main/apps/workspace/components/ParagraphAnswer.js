@@ -29,7 +29,7 @@ const ParagraphAnswer = (props) => {
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
 
-  const [paragraphText, setParagraphText] = useState((user.role === 'Admin' && !["REP_A_SENT", "COMPL"].includes(question.state))? "": question.answerObj[0]?.content );
+  const [paragraphText, setParagraphText] = useState(question.answerObj[0]?.content);
 
   const classes = useStyles();
   const [isPermission, setPermission] = useState(false);
@@ -47,20 +47,12 @@ const ParagraphAnswer = (props) => {
   };
 
   useEffect(() => {
-    if (allowUpdateParagraphAnswer && allowUpdateParagraphAnswer && !['REP_Q_DRF', 'REP_A_SENT', 'COMPL'].includes(question.state) ) {
+    if (allowUpdateParagraphAnswer && allowUpdateParagraphAnswer && !['REP_A_SENT', 'COMPL'].includes(question.state) ) {
       setPermission(true);
     } else {
       setPermission(false);
     }
   }, []);
-
-  useEffect(() => {
-    if (user.role === 'Admin' && !["REP_A_SENT", "COMPL"].includes(question.state)) {
-      setParagraphText("");
-    } else {
-      setParagraphText(question.answerObj[0]?.content);
-    }
-  }, [question]);
 
   useEffect(() => {
     if (currentQuestion && currentQuestion.id === question.id) {

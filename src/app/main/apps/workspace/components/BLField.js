@@ -150,7 +150,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, readOnly, disableClick }) => {
+const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, readOnly, disableClick, disableIcon }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
 
@@ -230,56 +230,54 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   };
 
   const checkDisplayIcon = () => {
-    const { iconColor } = checkClassName(
-      hasInquiry,
-      hasAmendment,
-      hasAnswer,
-      isResolved,
-      isUploaded,
-      classes
-    );
+    if (!disableIcon) {
+      const {iconColor} = checkClassName(
+        hasInquiry,
+        hasAmendment,
+        hasAnswer,
+        isResolved,
+        isUploaded,
+        classes
+      );
 
-    const attachIcon = <>
-      {hasAttachment && (
-        <AttachFile
-          className={clsx(
-            classes.sizeIcon,
-            classes.attachIcon,
-            iconColor
-          )}
-        />
-      )}
-    </>
+      const attachIcon = <>
+        {hasAttachment && (
+          <AttachFile
+            className={clsx(
+              classes.sizeIcon,
+              classes.attachIcon,
+              iconColor
+            )}
+          />
+        )}
+      </>
 
-    if (lock) {
-      return <>
-        <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
-      </>
-    }
-    else if (hasInquiry || hasAmendment) {
-      return <>
-        {attachIcon}
-        {hasInquiry && <HelpIcon className={clsx(classes.sizeIcon, iconColor)} />}
-        {hasAmendment && <img src='/assets/images/icons/icon-amendment.svg' className={classes.iconSvg} />}
-      </>
-    }
-    else if (hasAnswer) {
-      return <>
-        {attachIcon}
-        <ReplyIcon className={clsx(classes.sizeIcon, iconColor)} />
-      </>
-    }
-    else if (isResolved) {
-      return <>
-        {attachIcon}
-        <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)} />
-      </>
-    }
-    else if (isUploaded) {
-      return <>
-        {attachIcon}
-        <img src='/assets/images/icons/icon-uploaded.svg' className={classes.iconSvg} />
-      </>
+      if (lock) {
+        return <>
+          <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)}/>
+        </>
+      } else if (hasInquiry || hasAmendment) {
+        return <>
+          {attachIcon}
+          {hasInquiry && <HelpIcon className={clsx(classes.sizeIcon, iconColor)}/>}
+          {hasAmendment && <img src='/assets/images/icons/icon-amendment.svg' className={classes.iconSvg}/>}
+        </>
+      } else if (hasAnswer) {
+        return <>
+          {attachIcon}
+          <ReplyIcon className={clsx(classes.sizeIcon, iconColor)}/>
+        </>
+      } else if (isResolved) {
+        return <>
+          {attachIcon}
+          <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)}/>
+        </>
+      } else if (isUploaded) {
+        return <>
+          {attachIcon}
+          <img src='/assets/images/icons/icon-uploaded.svg' className={classes.iconSvg}/>
+        </>
+      }
     }
   }
 

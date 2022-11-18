@@ -264,7 +264,7 @@ const AttachmentList = (props) => {
       loadComment(e.id).then((res) => {
         if (res.length > 0){
           res.forEach((r) => {
-            if (r.answersMedia.length > 0) {
+            if (r.answersMedia?.length > 0) {
               const attachmentTemp = r.answersMedia.map ((f) => {
                 return {
                   ...f,

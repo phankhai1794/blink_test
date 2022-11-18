@@ -283,32 +283,32 @@ const TableCD = (props) => {
             containerDetail.map((cd, index) => (
               <Grid container spacing={2} className="px-8 py-2" key={index}>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} >
+                  <BLField disableClick={true} disableIcon={true}>
                     {cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} >
+                  <BLField disableClick={true} disableIcon={true}>
                     {cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} >
+                  <BLField disableClick={true} disableIcon={true}>
                     {cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} >
+                  <BLField disableClick={true} disableIcon={true}>
                     {cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} >
+                  <BLField disableClick={true} disableIcon={true}>
                     {cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} >
+                  <BLField disableClick={true} disableIcon={true}>
                     {cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}
                   </BLField>
                 </Grid>
