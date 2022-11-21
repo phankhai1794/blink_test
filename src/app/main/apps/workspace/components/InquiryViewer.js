@@ -33,6 +33,7 @@ import * as AppAction from 'app/store/actions';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
+import * as Actions from '../store/actions';
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
@@ -271,6 +272,10 @@ const InquiryViewer = (props) => {
             if (res.length > 1) {
               setInqHasComment(true);
             }
+            if (res.length === 1) {
+              setShowViewAll(false);
+              setInqHasComment(false)
+            };
           } else {
             if ((user.role === 'Admin' ? ["ANS_SENT", "COMPL", "UPLOADED"] : ["ANS_SENT", "ANS_DRF", "REP_Q_DRF", "COMPL", "UPLOADED"]).includes(question.state)) {
               let answerObj = null;
@@ -973,13 +978,32 @@ const InquiryViewer = (props) => {
 
   const reOpen = (id) => {
     reOpenInquiry(id)
-      .then(() => {
-        dispatch(FormActions.toggleReload());
-        dispatch(
-          AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
-        );
+      .then((res) => {
+        const optionsInquires = [...inquiries];
+        if (res?.prevState) {
+          if (question.process === 'draft') {
+            const optionAmendment = [...listCommentDraft.filter(({ id }) => id !== question.id)];
+            dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+
+            const indexAmenment = optionsInquires.findIndex(inq => (inq.field === question.field && inq.process === 'draft'))
+            optionsInquires[indexAmenment].state = res?.prevState;
+          } else {
+            const indexInq = optionsInquires.findIndex(inq => inq.id === id)
+            optionsInquires[indexInq].state = res?.prevState;
+          }
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+          setSaveComment(!isSaveComment);
+          dispatch(
+            AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
+          );
+        }
       })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
+      .finally(() => {
+        // setContent
+        dispatch(Actions.loadContent(myBL?.id));
+      });
+    
   };
 
   useEffect(() => {

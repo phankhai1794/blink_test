@@ -152,7 +152,7 @@ function ToolbarLayout1(props) {
 
     if (pathname.includes('/guest') || pathname.includes('/workspace')) {
       let countLoadComment =0;
-       axios.all(inquiriesPendingProcess.map(q => loadComment(q.id))) // TODO: refactor
+      axios.all(inquiriesPendingProcess.map(q => loadComment(q.id))) // TODO: refactor
         .then(res => {
           if (res) {
             let commentList = [];
@@ -162,7 +162,7 @@ function ToolbarLayout1(props) {
               commentList = [...commentList, ...r];
               const curInq = inquiriesPendingProcess[countLoadComment];
               r.forEach((itemRes) => {
-                if (itemRes.answersMedia.length > 0) {
+                if (itemRes?.answersMedia?.length > 0) {
                   const attachmentTemp = itemRes.answersMedia.map((f) => {
                     return {
                       ...f,
