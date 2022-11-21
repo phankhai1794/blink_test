@@ -537,7 +537,7 @@ const InquiryViewer = (props) => {
             // Display the previous content
             if (!containerCheck.includes(question.field)){
               cloneListCommentDraft = cloneListCommentDraft.filter(({ field }) => field === question.field);
-              dispatch(InquiryActions.setContent({ ...content, [question.field]: cloneListCommentDraft[cloneListCommentDraft.length - 1]?.content.content }));
+              dispatch(InquiryActions.setContent({ ...content, [question.field]: cloneListCommentDraft[0]?.content.content }));
             }
           } else {
             getBlInfo(myBL.id).then(res => {
