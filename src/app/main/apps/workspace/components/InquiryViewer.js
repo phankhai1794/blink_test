@@ -24,7 +24,7 @@ import {
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Typography, Tooltip, Grid, Button, FormControlLabel, Radio } from '@material-ui/core';
+import { Typography, Tooltip, Grid, Button, FormControlLabel, Radio, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
@@ -180,6 +180,7 @@ const InquiryViewer = (props) => {
   const [isRemoveFile, setIsRemoveFile] = useState(false);
   const [disableSaveReply, setDisableSaveReply] = useState(false);
   const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
@@ -656,6 +657,7 @@ const InquiryViewer = (props) => {
   };
 
   const onUpload = () => {
+    setLoading(true);
     const optionsInquires = [...inquiries];
     uploadOPUS(myBL.id, question.id, question.field)
       .then((res) => {
@@ -689,7 +691,9 @@ const InquiryViewer = (props) => {
           }
         }
       })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      .catch((error) => {
+        dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
+      }).finally(() => setLoading(false));
   };
 
   const cancelResolve = () => {
@@ -1101,13 +1105,14 @@ const InquiryViewer = (props) => {
                         <span className={classes.labelStatus}>{question.state === 'UPLOADED' ? 'Uploaded' : 'Resolved'}</span>
                       </div>
                       <Button
-                        disabled={question.state === 'UPLOADED'}
+                        disabled={loading || question.state === 'UPLOADED'}
                         variant="contained"
                         color="primary"
                         onClick={onUpload}
                         classes={{ root: classes.button }}
                       >
                         Upload to OPUS
+                        {loading && <CircularProgress className='absolute' color='primary' size={'25px'} />}
                       </Button>
                     </div>
                   </PermissionProvider>
@@ -1471,9 +1476,10 @@ const InquiryViewer = (props) => {
                       <Button
                         variant="contained"
                         disabled={
+                          textResolveSeparate?.name || textResolveSeparate?.address ||
                           question?.process === 'draft' ? false : (typeof textResolve === 'string'
-                            ? !textResolve.trim()
-                            : textResolve.some((cont) => !`${!cont[question.inqType]}`.trim()))
+                              ? !textResolve.trim()
+                              : textResolve.some((cont) => !`${!cont[question.inqType]}`.trim()))
                         }
                         color="primary"
                         onClick={onConfirm}
