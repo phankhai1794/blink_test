@@ -691,6 +691,7 @@ const InquiryViewer = (props) => {
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
     setIsResolveCDCM(false);
+    setTempReply({});
   };
 
   const inputText = (e) => {
