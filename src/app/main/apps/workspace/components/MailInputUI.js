@@ -122,7 +122,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
     e.preventDefault()
     const result = []
     let temp = ''
-    const removeDuplicate = [...new Set(e.clipboardData.getData('text').split(/,|;/).map(str => str.trim()))]
+    const removeDuplicate = [...new Set(e.clipboardData.getData('text').split(/,|;|\n/).map(str => str.trim()))]
     removeDuplicate.forEach(v => {
       if (validateEmail(v)) {
         result.push(v)

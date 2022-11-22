@@ -1,7 +1,6 @@
 import {
   CONTAINER_DETAIL,
   CONTAINER_NUMBER,
-  SEQ,
   CONTAINER_LIST,
   HS_CODE,
   HTS_CODE,
@@ -10,14 +9,23 @@ import {
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Icon, IconButton, Table, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
+import { Icon, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Drawer } from '@material-ui/core';
+import { makeStyles } from '@material-ui/styles';
 
 import AmendmentPopup from './AmendmentPopup';
+
+const useStyles = makeStyles(() => ({
+  paper: {
+    width: 450,
+    backgroundColor: '#FDF2F2'
+  }
+}))
 
 const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false }) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const user = useSelector(({ user }) => user);
+  const classes = useStyles();
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -71,28 +79,39 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     return originalValue !== value ? '#FEF4E6' : ''
   }
 
-  const combineValueUnit = (name, value) => {
+  const combineValueUnit = (name, row) => {
+    const value = row[getType(name)]
     if (Object.keys(mapUnit).includes(name)) {
       const id = getType(mapUnit[name])
-      const unit = values[0][id] || ''
+      const unit = row[id] || ''
       return value ? `${value} ${unit}` : value
     }
     return value
   }
 
+  const handleClose = () => {
+    handleEdit(false)
+  }
+
   return (
     <>
-      <AmendmentPopup
+      <Drawer
+        classes={{ paper: classes.paper }}
+        anchor='right'
         open={openEdit}
-        onClose={() => handleEdit(false)}
-        inqType={container}
-        containerDetail={getValueField(CONTAINER_DETAIL)}
-        data={valueEdit[rowIndex]}
-        isEdit={!disableInput}
-        updateData={(value) => setValues(value)}
-        updateEdit={(value) => setValueEdit(value)}
-        index={rowIndex}
-      />
+        onClose={handleClose}
+      >
+        <AmendmentPopup
+          onClose={handleClose}
+          inqType={container}
+          containerDetail={getValueField(CONTAINER_DETAIL)}
+          data={valueEdit[rowIndex]}
+          isEdit={!disableInput}
+          updateData={(value) => setValues(value)}
+          updateEdit={(value) => setValueEdit(value)}
+          index={rowIndex}
+        />
+      </Drawer>
       <div style={{ maxWidth: 880, overflowX: 'auto' }}>
         <Table className='amend_table' aria-label="simple table" >
           <TableHead>
@@ -123,7 +142,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                             {disableInput ? 'visibility' : 'edit_mode'}
                           </Icon>
                         </IconButton>
-                      </div> : combineValueUnit(cell, row[getType(cell)])
+                      </div> : combineValueUnit(cell, row)
                     }
                   </TableCell>
                 )}
