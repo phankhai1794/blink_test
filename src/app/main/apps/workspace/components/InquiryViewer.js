@@ -1357,11 +1357,10 @@ const InquiryViewer = (props) => {
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
-                extraCondition={question.state === 'COMPL' || question.state === 'RESOLVED'}
+                extraCondition={['COMPL', 'RESOLVED', 'UPLOADED'].includes(question.state)}
               >
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <Button
-                    disabled={question.state === 'UPLOADED'}
                     variant="contained"
                     color="primary"
                     onClick={() => reOpen(question?.id)}
