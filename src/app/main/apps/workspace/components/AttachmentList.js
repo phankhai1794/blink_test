@@ -196,6 +196,12 @@ const AttachmentList = (props) => {
   };
 
   useEffect(() => {
+    if (document.getElementsByClassName('attachmentList')[0].childElementCount > 0){
+      document.querySelectorAll('#no-att span')[0].textContent = document.getElementsByClassName('attachmentList')[0].childElementCount;
+    }
+  }, [attachmentFiles])
+
+  useEffect(() => {
     if (props.newFileAttachment) {
       const files = props.newFileAttachment;
       const optionsAttachmentList = [...attachmentFiles];
@@ -228,7 +234,6 @@ const AttachmentList = (props) => {
     let getAttachmentFiles = [];
     let combineFieldType = [];
     inquiries.forEach((e) => {
-      
       const mediaFile = e.mediaFile.map((f) => {
         return {
           ...f,
@@ -237,51 +242,69 @@ const AttachmentList = (props) => {
           inqType: e.inqType
         };
       });
-      getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
-      
-      getCommentDraftBl(myBL.id, e.field).then((res) => {
-        if (res.length > 0) {
-          res.forEach((r) => {
-            const attachmentAmendment = r.content.mediaFile.map ((f) => {
-              return {
-                ...f,
-                field: e.field,
-                inquiryId: e.id,
-                inqType: e.inqType,
-              }
-            })
-            // if reply file in attachment of inquiry -> not add file to att list
-            attachmentAmendment.forEach(att => {
-              const fileNameList = getAttachmentFiles.map((item) => {
-                if (item.inqType === e.inqType) return item.name
-              })
-              if (att && !e.inqType && !fileNameList.includes(att.name)) getAttachmentFiles.push(att)
-            })
-          })
-        }
+      const mediaAnswer = e.mediaFilesAnswer.map((f) => {
+        return {
+          ...f,
+          field: e.field,
+          inquiryId: e.id,
+          inqType: e.inqType
+        };
+
       })
 
-      loadComment(e.id).then((res) => {
-        if (res.length > 0){
+      getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
+     
+      getCommentDraftBl(myBL.id, e.field).then((res) => {
+        res.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+        if (res.length > 0) {
+          let commentDraftIdList = [];
           res.forEach((r) => {
-            if (r.answersMedia?.length > 0) {
-              const attachmentTemp = r.answersMedia.map ((f) => {
+            if (!commentDraftIdList.includes(r.id)) {
+              commentDraftIdList.push(r.id);
+              const attachmentAmendment = r.content.mediaFile.map ((f) => {
                 return {
                   ...f,
-                    field: e.field,
-                    inquiryId: e.id,
-                    inqType: e.inqType,
+                  field: e.field,
+                  inquiryId: e.id,
+                  inqType: e.inqType,
                 }
               })
               // if reply file in attachment of inquiry -> not add file to att list
-              attachmentTemp.forEach(att => {
+              attachmentAmendment.forEach(att => {
                 const fileNameList = getAttachmentFiles.map((item) => {
                   if (item.inqType === e.inqType) return item.name
                 })
-                if (att && !fileNameList.includes(att.name)) getAttachmentFiles.push(att)
-
+                if (att && !e.inqType && !fileNameList.includes(att.name)) getAttachmentFiles.push(att)
               })
-              
+            }
+          })
+        }
+      })
+      
+      loadComment(e.id).then((res) => {
+        res.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+        if (res.length > 0){
+          let commentIdlist = []
+          res.forEach((r) => {
+            if (!commentIdlist.includes(r.id)) {
+              commentIdlist.push(r.id);
+              if (r.mediaFile?.length > 0) {
+                const attachmentTemp = r.mediaFile.map ((f) => {
+                  return {
+                    ...f,
+                      field: e.field,
+                      inquiryId: e.id,
+                      inqType: e.inqType,
+                  }
+                })
+                // if reply file in attachment of inquiry -> not add file to att list
+                attachmentTemp.forEach(att => {
+                  const fileNameList = getAttachmentFiles.map((item) => {
+                    if (item.inqType === e.inqType) return item.name
+                  })
+                  if (att && !fileNameList.includes(att.name)) getAttachmentFiles.push(att)
+                })
+              }
             }
           })
         }
@@ -303,9 +326,6 @@ const AttachmentList = (props) => {
       setAttachmentFile(getAttachmentFiles);
       
       setFieldType(combineFieldType);
-      // update number of files show in icon attachment list
-      document.querySelectorAll('#no-att span')[0].textContent = document.getElementsByClassName('attachmentList')[0].childElementCount;
-      //
       dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
       setIsLoading(false);
     },600)

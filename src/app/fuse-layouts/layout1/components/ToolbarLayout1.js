@@ -156,32 +156,37 @@ function ToolbarLayout1(props) {
         .then(res => {
           if (res) {
             let commentList = [];
-
             // get attachments file in comment reply/answer
             res.map(r => {
               commentList = [...commentList, ...r];
+              r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
               const curInq = inquiriesPendingProcess[countLoadComment];
+              let commentIdList = [];
               r.forEach((itemRes) => {
-                if (itemRes?.answersMedia?.length > 0) {
-                  const attachmentTemp = itemRes.answersMedia.map((f) => {
-                    return {
-                      ...f,
-                      field: curInq.field,
-                      inquiryId: curInq.id,
-                      inqType: curInq.inqType,
-                    }
-                  })
-
-                  attachmentTemp.forEach(att => {
-                    const fileNameList = getAttachmentFiles.map((item) => {
-                      if (item.inqType === curInq.inqType) return item.name
-                    })
-                    if (att && !fileNameList.includes(att.name)) {
-                      getAttachmentFiles.push(att)
-                      setAttachmentLength(getAttachmentFiles.length)
-                    }
-                  })
-                }
+                if (!commentIdList.includes(itemRes.id)) {
+                  commentIdList.push(itemRes.id);
+                  if (itemRes.mediaFile.length > 0) {
+                      const attachmentTemp = itemRes.mediaFile.map((f) => {
+                        return {
+                          ...f,
+                          field: curInq.field,
+                          inquiryId: curInq.id,
+                          inqType: curInq.inqType,
+                        }
+                      })
+                      if (attachmentTemp.length > 0) {
+                        attachmentTemp.forEach(att => {
+                          const fileNameList = getAttachmentFiles.map((item) => {
+                            if (item.inqType === curInq.inqType) return item.name
+                          })
+                          if (att && !fileNameList.includes(att.name)) {
+                            getAttachmentFiles.push(att)
+                            setAttachmentLength(getAttachmentFiles.length)
+                          }
+                        })
+                      }
+                  }
+              }
               })
               countLoadComment+=1
             });
@@ -210,24 +215,31 @@ function ToolbarLayout1(props) {
               res.map(r => {
                 commentList = [...commentList, ...r];
                 const curInq = amendment[countAmendment];
+                r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+                let commentDraftIdList = [];
                 r.forEach((itemRes) => {
-                  const attachmentAmendmentTemp = itemRes.content.mediaFile.map((f) => {
-                    return {
-                      ...f,
-                      field: curInq.field,
-                      inquiryId: curInq.id,
-                      inqType: curInq.inqType,
-                    }
-                  })
-                  attachmentAmendmentTemp.forEach(attAmendment => {
-                    const fileNameList = getAttachmentFiles.map((item) => {
-                      if (item.inqType === curInq.inqType) return item.name
+                  if (!commentDraftIdList.includes(itemRes.id)) {
+                    commentDraftIdList.push(itemRes.id);
+                    const attachmentAmendmentTemp = itemRes.content.mediaFile.map((f) => {
+                      return {
+                        ...f,
+                        field: curInq.field,
+                        inquiryId: curInq.id,
+                        inqType: curInq.inqType,
+                      }
                     })
-                    if (attAmendment && !curInq.inqType && !fileNameList.includes(attAmendment.name)) {
-                      getAttachmentFiles.push(attAmendment);
-                      setAttachmentLength(getAttachmentFiles.length)
+                    if (attachmentAmendmentTemp.length > 0) {
+                      attachmentAmendmentTemp.forEach(attAmendment => {
+                        const fileNameList = getAttachmentFiles.map((item) => {
+                          if (item.inqType === curInq.inqType) return item.name
+                        })
+                        if (attAmendment && !curInq.inqType && !fileNameList.includes(attAmendment.name)) {
+                          getAttachmentFiles.push(attAmendment);
+                          setAttachmentLength(getAttachmentFiles.length)
+                        }
+                      })
                     }
-                  })
+                  }
                 })
                 countAmendment += 1;
               });
