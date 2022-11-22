@@ -108,13 +108,15 @@ const InquiryEditor = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles();
   const { onCancel } = props;
-  const [metadata, valid, inquiries, currentEditInq, myBL] = useSelector(({ workspace }) => [
+  const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.validation,
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentEditInq,
-    workspace.inquiryReducer.myBL
+    workspace.inquiryReducer.myBL,
+    workspace.inquiryReducer.listMinimize
   ]);
+
   const user = useSelector(({ user }) => user);
 
   const skipField = ['vvdCode', 'podCode', 'delCode'];
@@ -443,12 +445,25 @@ const InquiryEditor = (props) => {
             mediaList = [...mediaList, ...mediaFileList];
           });
           saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
-            .then(() => {
+            .then((res) => {
+              const mediaFile = [];
+              mediaList.forEach(({id, name, ext}) => mediaFile.push({id, name, ext}))
+              const inqResponse = res.inqResponse || {};
+              inqResponse.creator = { 
+                userName: user.displayName || '', 
+                avatar: user.photoURL || ''
+              }
+              inqResponse.mediaFile = mediaFile;
+              const optionsMinimize = [...listMinimize];
+              const optionsInquires = [...inquiries];
+              optionsInquires.push(inqResponse);
+              optionsMinimize.push(inqResponse);
+              dispatch(InquiryActions.setInquiries(optionsInquires));
+              dispatch(InquiryActions.setListMinimize(optionsMinimize));
               dispatch(
                 AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
               );
               dispatch(InquiryActions.saveInquiry());
-              // dispatch(FormActions.toggleReloadInq());
               dispatch(InquiryActions.setField(inqContentTrim[0].field));
               dispatch(InquiryActions.setOpenedInqForm(false));
             })
