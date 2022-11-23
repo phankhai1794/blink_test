@@ -5,10 +5,11 @@ import { Button, Typography, FormHelperText, FormControl } from "@material-ui/co
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
-import { saveEditedField, updateDraftBLReply } from 'app/services/draftblService';
+import { saveEditedField } from 'app/services/draftblService';
 import * as AppActions from 'app/store/actions';
 import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from '@shared/keyword';
 import { FuseChipSelect } from '@fuse';
+import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -137,9 +138,10 @@ const Amendment = ({ question, inquiriesLength }) => {
     dispatch(FormActions.toggleCreateAmendment(false));
   }
 
-  const handleCancle = () => {
+  const handleCancel = () => {
     dispatch(InquiryActions.addAmendment());
     dispatch(FormActions.toggleCreateAmendment(false));
+    dispatch(DraftBLActions.setCurrentField());
   }
 
   const getField = (field) => {
@@ -273,7 +275,7 @@ const Amendment = ({ question, inquiriesLength }) => {
             ||
             !openAmendmentList
           ) && (
-            <Button className={clsx(classes.btn, classes.btnCancel)} onClick={handleCancle}>
+            <Button className={clsx(classes.btn, classes.btnCancel)} onClick={handleCancel}>
               Cancel
             </Button>
           )
