@@ -2,7 +2,7 @@ import { checkNewInquiry, NUMBER_INQ_BOTTOM } from '@shared';
 import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDING, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, COMMODITY_CODE, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useContext, useState } from 'react';
 import clsx from 'clsx';
 import _ from 'lodash';
 import { Grid, Divider, Chip } from '@material-ui/core';
@@ -12,8 +12,8 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { getBlInfo } from 'app/services/myBLService';
-import { disconnectSocket, initiateSocketConnection } from "app/services/socketService";
 import { getPermissionByRole } from 'app/services/authService';
+import { SocketContext } from 'app/AppContext';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -74,8 +74,6 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const socket = initiateSocketConnection();
-
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -115,6 +113,7 @@ const BLWorkspace = (props) => {
   const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   let userInfo = JSON.parse(localStorage.getItem('USER'));
+  const socket = useContext(SocketContext);
 
   const getField = (keyword) => {
     return metadata.field?.[keyword] || '';
@@ -123,6 +122,41 @@ const BLWorkspace = (props) => {
   const getValueField = (keyword) => {
     return content[getField(keyword)] || '';
   };
+
+  socket.on('msg_processing', async (data) => {
+    if (userInfo) {
+      console.log('processingBy: ', data.processingBy);
+      let permissionAssign = userInfo.role === 'Admin' ? await getPermissionByRole('Admin') : await getPermissionByRole('Guest');
+      let permissionViewer = await getPermissionByRole('Viewer');
+      let assignPermissionViewer = userInfo;
+      let permissions = [];
+      let excludeFirstUser = false;
+      if (data.processingBy) {
+        data.processingBy.forEach((p) => {
+          if (userInfo.displayName === data.processingBy[0]) {
+            excludeFirstUser = true;
+          }
+        });
+        if (!excludeFirstUser && assignPermissionViewer) {
+          // assign permission
+          permissions = permissionViewer
+          // show popup for lastest user
+          if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
+            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
+          }
+        } else {
+          // assign permission
+          permissions = permissionAssign;
+          dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+        }
+      } else if (data.processingBy.length === 1) {
+        // assign permission
+        permissions = permissionAssign;
+        dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+      }
+      sessionStorage.setItem('permissions', JSON.stringify(permissions));
+    }
+  });
 
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
@@ -178,7 +212,7 @@ const BLWorkspace = (props) => {
   }, [isLoading]);
 
 
-  const checkBLSameRequest = async (socket, bl) => {
+  const checkBLSameRequest = async (bl) => {
     if (bl && userInfo) {
       socket.emit('user_processing_in', {
         mybl: bl,
@@ -186,49 +220,8 @@ const BLWorkspace = (props) => {
         userName: userInfo.displayName,
         role: userInfo.role,
       });
-      console.log(`socket.emit('user_processing_in'):`)
-      console.log(`${bl}, warning_duplicate, ${userInfo.email}`)
-      let permissionAssign = userInfo.role === 'Admin' ? await getPermissionByRole('Admin') : await getPermissionByRole('Guest');
-      let permissionViewer = await getPermissionByRole('Viewer');
-      socket.on('msg_processing', (data) => {
-        console.log(`message processing:`, data);
-        let assignPermissionViewer = userInfo;
-        let permissions = [];
-        let excludeFirstUser = false;
-        if (data.processingBy) {
-          data.processingBy.forEach((p) => {
-            if (userInfo.displayName === data.processingBy[0]) {
-              excludeFirstUser = true;
-            }
-          });
-          if (!excludeFirstUser && assignPermissionViewer) {
-            // assign permission
-            permissions = permissionViewer
-            // show popup for lastest user
-            if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
-              dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
-            }
-          } else {
-            // assign permission
-            permissions = permissionAssign;
-            dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-          }
-        } else if (data.processingBy.length === 1) {
-          // assign permission
-          permissions = permissionAssign;
-          dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-        }
-        sessionStorage.setItem('permissions', JSON.stringify(permissions));
-      });
     }
   };
-
-  useEffect(() => {
-    console.log(user);
-    if (!user.displayName) {
-      socket.emit('user_processing_out', {});
-    }
-  }, [user]);
 
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
@@ -237,10 +230,10 @@ const BLWorkspace = (props) => {
     const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) {
       dispatch(Actions.initBL(bkgNo));
-      checkBLSameRequest(socket, bkgNo);
+      checkBLSameRequest(bkgNo);
     }
     else if (props.myBL) {
-      checkBLSameRequest(socket, props.myBL?.id);
+      checkBLSameRequest(props.myBL?.id);
       getBlInfo(props.myBL?.id).then(res => {
         const { id, state, bkgNo } = res.myBL;
         dispatch(InquiryActions.setMyBL({ id, state, bkgNo }));
@@ -248,7 +241,15 @@ const BLWorkspace = (props) => {
     }
 
     return () => {
-      disconnectSocket(socket);
+      // disconnectSocket(socket);
+      if (userInfo) {
+        socket.emit('user_processing_out', {
+          mybl: bkgNo,
+          type: 'warning_duplicate',
+          userName: userInfo.displayName,
+          role: userInfo.role,
+        });
+      }
       dispatch(FormActions.toggleReload());
 
       if (userInfo && userInfo.role === 'Admin') {
@@ -263,7 +264,7 @@ const BLWorkspace = (props) => {
         })
       }
     }
-  }, [socket]);
+  }, []);
 
   useEffect(() => {
     dispatch(Actions.loadMetadata());
