@@ -107,11 +107,11 @@ function ToolbarLayout1(props) {
   const [attachmentLength, setAttachmentLength] = useState(0);
   const [isSubmit, setIsSubmit] = useState(true);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
-  let getAttachmentFiles = [];
 
   useEffect(() => {
     dispatch(InquiryActions.checkSend(false));
     let optionInquiries = [...inquiries];
+    let getAttachmentFiles = [];
     let isSubmit = true;
     optionInquiries.forEach((item) => {
       if (user.role !== 'Admin') {
@@ -147,11 +147,11 @@ function ToolbarLayout1(props) {
 
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
     });
-
+    
     const amendment = optionInquiries.filter(op => op.process === 'draft');
-
     if (pathname.includes('/guest') || pathname.includes('/workspace')) {
-      let countLoadComment =0;
+      let countLoadComment = 0;
+      let countAmendment = 0;
       axios.all(inquiriesPendingProcess.map(q => loadComment(q.id))) // TODO: refactor
         .then(res => {
           if (res) {
@@ -166,7 +166,8 @@ function ToolbarLayout1(props) {
                 if (!commentIdList.includes(itemRes.id)) {
                   commentIdList.push(itemRes.id);
                   if (itemRes.mediaFile.length > 0) {
-                      const attachmentTemp = itemRes.mediaFile.map((f) => {
+                    const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ... itemRes.mediaFile];
+                      const attachmentTemp = mediaTemp.map((f) => {
                         return {
                           ...f,
                           field: curInq.field,
@@ -179,16 +180,17 @@ function ToolbarLayout1(props) {
                           const fileNameList = getAttachmentFiles.map((item) => {
                             if (item.inqType === curInq.inqType) return item.name
                           })
-                          if (att && !fileNameList.includes(att.name)) {
-                            getAttachmentFiles.push(att)
-                            setAttachmentLength(getAttachmentFiles.length)
-                          }
+                          if (att && !fileNameList.includes(att.name)) getAttachmentFiles.push(att);
                         })
-                      }
+                      } 
                   }
               }
               })
+              
               countLoadComment+=1
+              if (inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)){
+                setAttachmentLength(getAttachmentFiles.length);
+              }
             });
 
             if (user.role !== 'Admin') {
@@ -205,8 +207,8 @@ function ToolbarLayout1(props) {
         })
 
       setAmendmentLength(amendment.length);
+
       if (amendment.length) {
-        let countAmendment = 0;
         axios.all(amendment.map(q => getCommentDraftBl(myBL.id, q.field))) // TODO: refactor
           .then((res) => {
             if (res) {
@@ -220,7 +222,8 @@ function ToolbarLayout1(props) {
                 r.forEach((itemRes) => {
                   if (!commentDraftIdList.includes(itemRes.id)) {
                     commentDraftIdList.push(itemRes.id);
-                    const attachmentAmendmentTemp = itemRes.content.mediaFile.map((f) => {
+                    const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ... itemRes.content.mediaFile];
+                    const attachmentAmendmentTemp = mediaTemp.map((f) => {
                       return {
                         ...f,
                         field: curInq.field,
@@ -233,15 +236,15 @@ function ToolbarLayout1(props) {
                         const fileNameList = getAttachmentFiles.map((item) => {
                           if (item.inqType === curInq.inqType) return item.name
                         })
-                        if (attAmendment && !curInq.inqType && !fileNameList.includes(attAmendment.name)) {
-                          getAttachmentFiles.push(attAmendment);
-                          setAttachmentLength(getAttachmentFiles.length)
-                        }
+                        if (attAmendment && !curInq.inqType && !fileNameList.includes(attAmendment.name)) getAttachmentFiles.push(attAmendment);
                       })
                     }
                   }
                 })
                 countAmendment += 1;
+                if ( inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)){
+                  setAttachmentLength(getAttachmentFiles.length);
+                }
               });
               if (user.role !== 'Admin') {
                 const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'AME_DRF');
