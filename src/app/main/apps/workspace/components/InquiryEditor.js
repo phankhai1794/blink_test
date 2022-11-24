@@ -147,6 +147,7 @@ const InquiryEditor = (props) => {
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
   const [nameType, setNameType] = useState(valueType?.label);
+  const [prevField, setPrevField] = useState('');
   const styles = (width) => {
     return {
       control: {
@@ -155,6 +156,10 @@ const InquiryEditor = (props) => {
       }
     };
   };
+
+  useEffect(() => {
+    setPrevField(currentEditInq.field)
+  },[])
 
   useEffect(() => {
     if (fieldValue) {
@@ -396,15 +401,20 @@ const InquiryEditor = (props) => {
         if (update.data.length) {
           inquiries[editedIndex].answerObj = update.data;
         }
+        if (prevField !== currentEditInq.field) {
+          const hasInq = inquiries.filter(inq => inq.field === prevField);
+          if (!hasInq.length) {
+            dispatch(InquiryActions.setOneInq({}));
+            dispatch(FormActions.toggleCreateInquiry(false));
+          }
+        }
+        dispatch(InquiryActions.setEditInq());
         dispatch(InquiryActions.setInquiries(inquiries));
-
-        // TODO
-        dispatch(InquiryActions.setEditInq(currentEditInq));
-        // dispatch(InquiryActions.saveInquiry());
-        // dispatch(FormActions.toggleReloadInq());
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
         );
+      } else {
+        dispatch(InquiryActions.setEditInq());
       }
     } else {
       // Create INQUIRY
@@ -458,14 +468,15 @@ const InquiryEditor = (props) => {
               const optionsInquires = [...inquiries];
               optionsInquires.push(inqResponse);
               optionsMinimize.push(inqResponse);
-              dispatch(InquiryActions.setInquiries(optionsInquires));
-              dispatch(InquiryActions.setListMinimize(optionsMinimize));
               dispatch(
                 AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
               );
               dispatch(InquiryActions.saveInquiry());
               dispatch(InquiryActions.setField(inqContentTrim[0].field));
               dispatch(InquiryActions.setOpenedInqForm(false));
+              dispatch(InquiryActions.setEditInq());
+              dispatch(InquiryActions.setInquiries(optionsInquires));
+              dispatch(InquiryActions.setListMinimize(optionsMinimize));
             })
             .catch((error) =>
               dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
@@ -473,7 +484,6 @@ const InquiryEditor = (props) => {
         })
         .catch((error) => console.log(error));
     }
-    dispatch(InquiryActions.setEditInq());
   };
 
   return (

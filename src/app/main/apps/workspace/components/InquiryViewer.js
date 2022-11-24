@@ -191,10 +191,12 @@ const InquiryViewer = (props) => {
   };
 
   useEffect(() => {
+    let isUnmounted = false;
     setTempReply({});
     if (question && question.process === 'pending') {
       loadComment(question.id)
         .then((res) => {
+          if (isUnmounted) return;
           const lastest = { ...question };
           if (res.length > 0) {
             res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
@@ -315,6 +317,7 @@ const InquiryViewer = (props) => {
     } else {
       getCommentDraftBl(myBL.id, question.field)
         .then((res) => {
+          if (isUnmounted) return;
           // setEditOriginalAmendment(res.length === 1);
           res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
           const lastest = { ...question };
@@ -407,6 +410,8 @@ const InquiryViewer = (props) => {
         })
         .catch((error) => console.error(error));
     }
+    
+    return () => isUnmounted = true;
   }, [isSaveComment]);
 
   const resetAnswerActionSave = () => {
@@ -504,7 +509,10 @@ const InquiryViewer = (props) => {
       deleteInquiry(inqDelete.id)
         .then(() => {
           dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-          hidePopupEmpty && dispatch(InquiryActions.setOneInq({}));
+          if (hidePopupEmpty) {
+            dispatch(InquiryActions.setOneInq({}));
+            dispatch(FormActions.toggleCreateInquiry(false));
+          }
           if (!optionsOfQuestion.length) {
             (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
           }
