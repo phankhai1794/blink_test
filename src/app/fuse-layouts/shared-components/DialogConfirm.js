@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   Button,
   Dialog,
@@ -6,7 +6,6 @@ import {
   DialogActions,
 } from '@material-ui/core';
 import { useSelector, useDispatch } from 'react-redux';
-import { draftConfirm } from '@shared';
 import * as Actions from 'app/store/actions';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import history from '@history';

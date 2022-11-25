@@ -17,8 +17,8 @@ import UserInfo from '../../workspace/components/UserInfo';
 import AttachFile from "./AttachFile";
 
 const white = '#FFFFFF';
-const pink = '#BD0F72';
 const greyText = '#999999';
+// const pink = '#BD0F72';
 
 const useStyles = makeStyles((theme) => ({
   btn: {
@@ -39,26 +39,26 @@ const useStyles = makeStyles((theme) => ({
 const BLFieldForm = ({ question }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [myBL, currentField, content, edit] = useSelector(({ draftBL }) => [
+  const [ myBL, currentField, content, edit ] = useSelector(({ draftBL }) => [
     draftBL.myBL,
     draftBL.currentField,
     draftBL.content,
     draftBL.edit
   ]);
-  const [fieldValue, setFieldValue] = useState(question?.content?.content || content[currentField]);
-  const [attachments, setAttachments] = useState(question?.content?.mediaFile || []);
+  const [ fieldValue, setFieldValue ] = useState(question?.content?.content || content[ currentField ]);
+  const [ attachments, setAttachments ] = useState(question?.content?.mediaFile || []);
 
-  const getAttachment = (value) => setAttachments([...attachments, ...value]);
+  const getAttachment = (value) => setAttachments([ ...attachments, ...value ]);
 
   const removeAttachment = (index) => {
-    const optionsAttachmentList = [...attachments];
+    const optionsAttachmentList = [ ...attachments ];
     optionsAttachmentList.splice(index, 1);
     setAttachments(optionsAttachmentList)
   }
   const handleChange = (e) => setFieldValue(e.target.value);
 
   const handleSave = () => {
-    dispatch(Actions.setContent({ ...content, [currentField]: fieldValue }));
+    dispatch(Actions.setContent({ ...content, [ currentField ]: fieldValue }));
     dispatch(Actions.toggleDraftBLEdit(false));
 
     const uploads = [];
@@ -79,7 +79,7 @@ const BLFieldForm = ({ question }) => {
         const mediaList = attachments.filter((file) => file.id);
         files.forEach((file) => {
           const mediaFileList = file.response.map((item) => { return { id: item.id, ext: item.ext, name: item.name } });
-          mediaList.push(mediaFileList[0]);
+          mediaList.push(mediaFileList[ 0 ]);
         });
 
         if (edit) service = updateDraftBLReply({ content: { content: fieldValue, mediaFile: mediaList } }, question.id);
@@ -135,7 +135,7 @@ const BLFieldForm = ({ question }) => {
       <div style={{ marginTop: 20 }}>
         <Button
           className={classes.btn}
-          disabled={content[currentField] === fieldValue}
+          disabled={content[ currentField ] === fieldValue}
           onClick={handleSave}
           color="primary"
           variant="contained"

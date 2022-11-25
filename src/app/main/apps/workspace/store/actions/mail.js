@@ -1,4 +1,4 @@
-import { sendmail, getSuggestMail, getMail } from 'app/services/mailService';
+import { sendmail, getSuggestMail } from 'app/services/mailService';
 import { loadComment } from 'app/services/inquiryService';
 import axios from 'axios';
 import { VVD_CODE, POD_CODE, DEL_CODE } from '@shared/keyword';
@@ -27,7 +27,7 @@ export const sendMail =
       const replyInqs = [];
       const inquiriesPendingProcess = inquiries.filter(op => op.process === 'pending');
       const listComment = await axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)));
-      listComment.map((comment, index) => comment.length && replyInqs.push(inquiries[index].id));
+      listComment.map((comment, index) => comment.length && replyInqs.push(inquiries[ index ].id));
       dispatch({ type: SENDMAIL_LOADING });
       sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs)
         .then((res) => {
@@ -88,13 +88,13 @@ export function setTags(state) {
 
 export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata, content, form) => async (dispatch) => {
   const getField = (keyword) => {
-    return metadata.field?.[keyword] || '';
+    return metadata.field?.[ keyword ] || '';
   };
 
   const getValueField = (content, keyword) => {
-    return content[getField(keyword)] || ''
+    return content[ getField(keyword) ] || ''
   };
-  const cloneInquiries = [...inquiries];
+  const cloneInquiries = [ ...inquiries ];
   cloneInquiries.forEach(q => {
     if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
     else if (q.state === 'REP_Q_DRF') q.state = 'REP_Q_SENT'; // inquiry
@@ -105,8 +105,8 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   let contentOns = ''
   let subjectCus = ''
   let contentCus = ''
-  const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
-  const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
+  const hasCustomer = inquiries.some(inq => inq.receiver[ 0 ] === 'customer')
+  const hasOnshore = inquiries.some(inq => inq.receiver[ 0 ] === 'onshore')
   const vvd = getValueField(content, VVD_CODE)
   const pod = getValueField(content, POD_CODE)
   const del = getValueField(content, DEL_CODE)
@@ -115,7 +115,7 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
 
   if (hasOnshore && form.toOnshore && inqOnshore.length > 0) {
     const formOnshore = { ...form };
-    formOnshore['toCustomer'] = '';
+    formOnshore[ 'toCustomer' ] = '';
     subjectOns = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
     contentOns = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`
     dispatch(sendMail({ myblId: mybl.id, ...formOnshore, subject: subjectOns, content: contentOns, inquiries: inquiries }));
@@ -123,7 +123,7 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
 
   if (hasCustomer && form.toCustomer && inqCustomer.length > 0) {
     const formCustomer = { ...form };
-    formCustomer['toOnshore'] = '';
+    formCustomer[ 'toOnshore' ] = '';
     subjectCus = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
     contentCus = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer.join(', ')}]`
     dispatch(sendMail({ myblId: mybl.id, ...formCustomer, subject: subjectCus, content: contentCus, inquiries: inquiries }));

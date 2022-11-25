@@ -18,7 +18,7 @@ import { FuseScrollbars } from '@fuse';
 import { withRouter } from 'react-router-dom';
 import _ from '@lodash';
 import { makeStyles } from '@material-ui/styles';
-import * as Actions from 'app/store/actions';
+// import * as Actions from 'app/store/actions';
 
 import * as BlActions from './store/actions';
 
@@ -67,17 +67,17 @@ const blStateStyles = {
 
 function getFilterStateFromPath(pathname) {
   const paths = pathname.split('/');
-  return paths[paths.length - 1].replaceAll('/', '').toUpperCase();
+  return paths[ paths.length - 1 ].replaceAll('/', '').toUpperCase();
 }
 
 const useStyles = makeStyles((theme) => ({
   root: ({ location }) => {
     const state = getFilterStateFromPath(location.pathname);
-    return blStateStyles[state].root;
+    return blStateStyles[ state ].root;
   },
   outlined: ({ location }) => {
     const state = getFilterStateFromPath(location.pathname);
-    return blStateStyles[state].outlined;
+    return blStateStyles[ state ].outlined;
   }
 }));
 
@@ -89,13 +89,13 @@ function InquiringTable(props) {
   const myBLs = useSelector(({ listBlReducer }) => listBlReducer.myBLs);
   const dispatch = useDispatch();
 
-  const [selected, setSelected] = useState([]);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [order, setOrder] = useState({
+  const [ page, setPage ] = useState(0);
+  const [ rowsPerPage, setRowsPerPage ] = useState(10);
+  /*const [ order, setOrder ] = useState({
     direction: 'asc',
     id: null
   });
+  const [ selected, setSelected ] = useState([]);
 
   function handleRequestSort(event, property) {
     const id = property;
@@ -110,7 +110,6 @@ function InquiringTable(props) {
       id
     });
   }
-
   function handleSelectAllClick(event) {
     if (event.target.checked) {
       setSelected(myBLs.map((n) => n.id));
@@ -118,14 +117,6 @@ function InquiringTable(props) {
     }
     setSelected([]);
   }
-
-  function handleClick(bkgNo) {
-    history.push({
-      pathname: `/apps/workspace/${bkgNo}?usrId=admin&cntr=VN`,
-      state: 'inquiry'
-    });
-  }
-
   function handleCheck(event, id) {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
@@ -145,6 +136,15 @@ function InquiringTable(props) {
 
     setSelected(newSelected);
   }
+  */
+
+  function handleClick(bkgNo) {
+    history.push({
+      pathname: `/apps/workspace/${bkgNo}?usrId=admin&cntr=VN`,
+      state: 'inquiry'
+    });
+  }
+
 
   function handleChangePage(event, page) {
     setPage(page);
@@ -180,7 +180,7 @@ function InquiringTable(props) {
             rowCount={myBLs.length}
           /> */}
           <TableBody>
-            {_.orderBy(myBLs, ['id'], ['asc'])
+            {_.orderBy(myBLs, [ 'id' ], [ 'asc' ])
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((record) => {
                 const { id, bkgNo, state, createdBy, updatedBy, updatedAt } = record;

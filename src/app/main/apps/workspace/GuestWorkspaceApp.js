@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, { useRef } from 'react';
 import { FusePageSimple } from '@fuse';
 
 import OtpCheck from '../OTPCheck';
@@ -10,7 +10,7 @@ function GuestWorkspaceApp() {
   const pageLayout = useRef(null);
 
   (() => {
-    window.onpageshow = function(event) {
+    window.onpageshow = function (event) {
       if (event.persisted) {
         window.location.reload();
       }
