@@ -1,5 +1,4 @@
 import mock from '../mock';
-import { FuseUtils } from '@fuse';
 import _ from '@lodash';
 
 const employeeDB = [
@@ -33,9 +32,9 @@ const bookingDB = {
   booking: [
     {
       orderId: 'IS1907013',
-      saleBy: employeeDB[0],
-      cusSer: employeeDB[1],
-      opSer: employeeDB[3],
+      saleBy: employeeDB[ 0 ],
+      cusSer: employeeDB[ 1 ],
+      opSer: employeeDB[ 3 ],
       bkgInfo: {
         preCarrNm: 'Pre-Carriage',
         vslNm: 'Vessel Name',
@@ -83,8 +82,8 @@ const bookingDB = {
           {
             ctnGW: '',
             cntrNo: 'TEMU8836991',
-            cntrSealNo: ['SGAC64653'],
-            cntrTpsz: ['D5'],
+            cntrSealNo: [ 'SGAC64653' ],
+            cntrTpsz: [ 'D5' ],
             pkgTp: 'PALLETS',
             pkgQty: '34',
             cntrMf: [
@@ -98,28 +97,7 @@ const bookingDB = {
         ],
         air: {
           // Don hang AIR
-          '': "Issuing Carrier's Agent Name",
-          '': "Agent's IATA Code",
-          '': 'Account No',
-          '': 'Handling Information',
-          '': 'To',
-          '': 'By First Carrier',
-          '': 'To',
-          '': 'By',
-          '': 'To',
-          '': 'By last carrier',
-          '': 'Currency',
-          '': 'Charges Code',
-          '': 'PPD',
-          '': 'COLL',
-          '': 'PPD',
-          '': 'COLL',
-          '': 'DVC',
-          '': 'DVCS',
-          '': 'Account of insurance',
-          '': 'KG/IBS',
-          '': 'Chargeable weight',
-          '': 'Rate/Charge'
+          'air': "Issuing Carrier's Agent Name",
         },
         manifest: {
           // using for import
@@ -144,10 +122,10 @@ const bookingDB = {
 
 mock.onGet('/api/booking').reply((request) => {
   const response = bookingDB.booking;
-  return [200, response];
+  return [ 200, response ];
 });
 mock.onGet('/api/booking/:bookingId').reply((request) => {
   const { id } = request.params;
   const response = _.find(bookingDB.booking, { id: id });
-  return [200, response];
+  return [ 200, response ];
 });

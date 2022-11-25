@@ -31,14 +31,13 @@ function Logo() {
 
   return (
     <div className={clsx(classes.root, 'flex items-center')}>
-      <Tooltip title={process.env.REACT_APP_VERSION_ID} placement="right">
+      <Tooltip title={process.env.REACT_APP_VERSION_ID} placement="right" leaveDelay={700} interactive={true}>
         <div
           className={clsx(
             classes.reactBadge,
             'react-badge flex items-center ml-12 mr-8 py-4 px-8 rounded'
           )}
         >
-
           <span className="react-text text-14 ml-4">BLINK</span>
         </div>
       </Tooltip>

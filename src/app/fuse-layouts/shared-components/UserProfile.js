@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useContext, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Button,
@@ -13,12 +13,12 @@ import {
 import { cyan } from '@material-ui/core/colors';
 import { Link } from 'react-router-dom';
 import * as AppActions from 'app/store/actions';
-import { SocketContext, socket } from 'app/AppContext';
+import { SocketContext } from 'app/AppContext';
 
 function UserProfile(props) {
   const { classes } = props;
   const dispatch = useDispatch();
-  const [open, setOpen] = useState(null);
+  const [ open, setOpen ] = useState(null);
   const user = useSelector(({ user }) => user);
   const socket = useContext(SocketContext);
 
@@ -44,7 +44,7 @@ function UserProfile(props) {
       <Button className="h-64" onClick={handleClick}>
         <Avatar
           className={classes.fitAvatar}
-          style={{ background: cyan[400] }}
+          style={{ background: cyan[ 400 ] }}
           src={user.photoURL ? user.photoURL : ''}
           alt="User photo">
           {!user.photoURL ? user.displayName.charAt(0).toUpperCase() : ''}

@@ -11,7 +11,7 @@ import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
-  color: grey['500']
+  color: grey[ '500' ]
 });
 
 const inputStyle = makeStyles((theme) => ({
@@ -42,8 +42,8 @@ const inputStyle = makeStyles((theme) => ({
 // Sub Commporent
 const Choice = (props) => {
   const { index, value, handleChangeChoice, handleRemoveChoice, isAddChoice } = props;
-  const [isHover, setIsHover] = useState(false);
-  const [isOnFocus, setIsOnFocus] = useState(false);
+  const [ isHover, setIsHover ] = useState(false);
+  const [ isOnFocus, setIsOnFocus ] = useState(false);
   const handleFocus = (e) => {
     setIsOnFocus(true);
     e.target.select();
@@ -86,15 +86,15 @@ const ChoiceAnswerEditor = (props) => {
   // const { questions, question, index, saveQuestion } = props;
   const classes = inputStyle();
   const dispatch = useDispatch();
-  const [valid, currentEditInq] =
-  useSelector(({ workspace }) => [
-    workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.currentEditInq
-  ]);
-  const [isAddChoice, setAddChoice] = useState(false);
+  const [ valid, currentEditInq ] =
+    useSelector(({ workspace }) => [
+      workspace.inquiryReducer.validation,
+      workspace.inquiryReducer.currentEditInq
+    ]);
+  const [ isAddChoice, setAddChoice ] = useState(false);
 
   const checkOptionsEmpty = () => {
-    const inq = {... currentEditInq};
+    const inq = { ...currentEditInq };
     //check at least has one option
     if (inq.answerObj.length > 0) {
       // check empty option
@@ -110,7 +110,7 @@ const ChoiceAnswerEditor = (props) => {
   };
 
   const handleAddChoice = () => {
-    const inq = {... currentEditInq};
+    const inq = { ...currentEditInq };
     inq.answerObj.push({
       id: null,
       content: 'Option ' + (inq.answerObj.length + 1),
@@ -122,7 +122,7 @@ const ChoiceAnswerEditor = (props) => {
     setAddChoice(true);
   };
   const handleRemoveChoice = (id) => {
-    const inq = {... currentEditInq};
+    const inq = { ...currentEditInq };
     inq.answerObj.splice(id, 1);
     dispatch(InquiryActions.setEditInq(inq));
     checkOptionsEmpty();
@@ -130,8 +130,8 @@ const ChoiceAnswerEditor = (props) => {
   };
 
   const handleChangeChoice = (e, id) => {
-    const inq = {... currentEditInq};
-    inq.answerObj[id].content = e.target.value;
+    const inq = { ...currentEditInq };
+    inq.answerObj[ id ].content = e.target.value;
     dispatch(InquiryActions.setEditInq(inq));
     checkOptionsEmpty();
     dispatch(FormActions.setEnableSaveInquiriesList(false));
