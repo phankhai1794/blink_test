@@ -189,7 +189,6 @@ const InquiryViewer = (props) => {
       setViewDropDown(id);
     }
   };
-
   useEffect(() => {
     let isUnmounted = false;
     setTempReply({});
@@ -751,6 +750,7 @@ const InquiryViewer = (props) => {
         type: metadata.ans_type['paragraph']
       }
     };
+    setDisableSaveReply(false);
     setTempReply({ ...tempReply, ...reqReply });
   };
 
@@ -916,15 +916,16 @@ const InquiryViewer = (props) => {
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           if (isEditOriginalAmendment) dispatch(InquiryActions.setContent({ ...content, [res.newAmendment?.field]: tempReply.answer.content }));
-          // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
     }
     setIsReply(false)
+    setIsReplyCDCM(false);
   }
 
   const cancelReply = (q) => {
     setIsReply(false);
+    setIsReplyCDCM(false);
     const reply = { ...question };
     reply.mediaFilesAnswer = reply.mediaFile;
     reply.mediaFile = [];
@@ -973,6 +974,10 @@ const InquiryViewer = (props) => {
       // reply.mediaFile = [];
     } else if (Array.isArray(reply.content)) {
       setIsReplyCDCM(true);
+      reply.mediaFilesAnswer = [];
+      reply.mediaFile = [];
+      reply.showIconAttachReplyFile = true;
+      reply.showIconAttachAnswerFile = false;
     } else {
       // Edit Reply
       setIsReply(true);
