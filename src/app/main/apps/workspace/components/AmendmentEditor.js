@@ -140,8 +140,8 @@ const Amendment = ({ question, inquiriesLength }) => {
 
   const handleCancel = () => {
     dispatch(InquiryActions.addAmendment());
-    dispatch(FormActions.toggleCreateAmendment(false));
-    dispatch(DraftBLActions.setCurrentField());
+    // dispatch(FormActions.toggleCreateAmendment(false));
+    // dispatch(DraftBLActions.setCurrentField());
   }
 
   const getField = (field) => {

@@ -11,8 +11,8 @@ export async function updateDraftBLReply(body, id) {
   return response.data;
 }
 
-export async function deleteDraftBLReply(id) {
-  const response = await axios().delete(`${PATH}/reply/${id}`);
+export async function deleteDraftBLReply(id, field, myBl) {
+  const response = await axios().delete(`${PATH}/delete/${id}/${field}/${myBl}`);
   return response.data;
 }
 

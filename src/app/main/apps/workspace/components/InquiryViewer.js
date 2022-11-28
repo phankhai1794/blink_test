@@ -375,6 +375,9 @@ const InquiryViewer = (props) => {
                 setSubmitLabel(true);
               }
             }
+            if (isEditOriginalAmendment) {
+              dispatch(InquiryActions.setContent({ ...content, [question.field]: lastest.content }));
+            }
             setQuestion(lastest);
 
             // push new lastestComment if not already exist
@@ -404,12 +407,33 @@ const InquiryViewer = (props) => {
             });
             setComment(comments);
             setInqHasComment(true);
+          } else {
+            // check close popup empty
+            const optionsOfQuestion = [...inquiries];
+            const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
+            //
+            const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
+            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+            optionsOfQuestion.splice(removeIndex, 1);
+            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+            //
+            getBlInfo(myBL.id).then(res => {
+              dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
+              if (!inquiriesByField.length) {
+                if (field === 'INQUIRY_LIST') {
+                  dispatch(FormActions.toggleAllInquiry(false));
+                  dispatch(FormActions.toggleAmendmentsList(false));
+                } else {
+                  dispatch(InquiryActions.setOneInq({}));
+                }
+              }
+            }).catch((error) => console.error(error));
           }
           setIsLoadedComment(true);
         })
         .catch((error) => console.error(error));
     }
-    
+
     return () => isUnmounted = true;
   }, [isSaveComment]);
 
@@ -518,8 +542,8 @@ const InquiryViewer = (props) => {
         })
         .catch((error) => console.error(error));
     } else if (confirmPopupType === 'removeReply' && replyRemove) {
-      deleteDraftBLReply(replyRemove.id)
-        .then(() => {
+      deleteDraftBLReply(replyRemove.id, replyRemove.field, myBL.id)
+        .then((res) => {
           // Case: Offshore reply customer's amendment first time => delete
           if (comment.length === 3) {
             const prevAmendment = {
@@ -535,33 +559,16 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: prevAmendment }));
           }
           //
-          dispatch(FormActions.toggleAllInquiry(false));
-          dispatch(InquiryActions.setOneInq({}));
           dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-          dispatch(FormActions.toggleAmendmentsList(false));
 
           // Update state of listDraftComments for re-rendering UI
           let cloneListCommentDraft = listCommentDraft.filter(({ id }) => id !== replyRemove.id);
           dispatch(InquiryActions.setListCommentDraft(cloneListCommentDraft));
-
-          if (comment.length > 2) {
-            dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
-
-            // Display the previous content
-            if (!containerCheck.includes(question.field)){
-              cloneListCommentDraft = cloneListCommentDraft.filter(({ field }) => field === question.field);
-              dispatch(InquiryActions.setContent({ ...content, [question.field]: cloneListCommentDraft[0]?.content.content }));
-            }
-          } else {
-            getBlInfo(myBL.id).then(res => {
-              dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
-              const optionsOfQuestion = [...inquiries];
-              const inqIndexDelete = optionsOfQuestion.findIndex(op => op.id === replyRemove.id);
-              optionsOfQuestion.splice(inqIndexDelete, 1);
-              dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-              dispatch(FormActions.toggleOpenNotificationDeleteAmendment(true));
-            }).catch((error) => console.error(error));
+          dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
+          if (res) {
+            setEditOriginalAmendment(res.isEditOriginalAmendment);
           }
+          setSaveComment(!isSaveComment);
         }).catch((error) => console.error(error));
     }
     dispatch(
@@ -622,7 +629,7 @@ const InquiryViewer = (props) => {
   const onResolve = () => {
     if (Array.isArray(question.content)) {
       setIsResolveCDCM(true);
-    } else{
+    } else {
       setIsResolve(true);
     }
   };
@@ -910,6 +917,10 @@ const InquiryViewer = (props) => {
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
+          if (res) {
+            dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
+            setEditOriginalAmendment(res.isEditOriginalAmendment);
+          }
           setSaveComment(!isSaveComment);
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           setDisableSaveReply(false);
@@ -919,7 +930,7 @@ const InquiryViewer = (props) => {
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
     }
-    setIsReply(false)
+    setIsReply(false);
     setIsReplyCDCM(false);
   }
 
@@ -1021,7 +1032,7 @@ const InquiryViewer = (props) => {
         // setContent
         dispatch(Actions.loadContent(myBL?.id));
       });
-    
+
   };
 
   useEffect(() => {
@@ -1269,7 +1280,7 @@ const InquiryViewer = (props) => {
                 question?.process === 'draft' ?
                   <>
                     {
-                      typeof question.content === 'string'? <Typography
+                      typeof question.content === 'string' ? <Typography
                         className={viewDropDown !== question.id ? classes.hideText : ''}
                         variant="h5"
                         id={question.id}
@@ -1281,7 +1292,7 @@ const InquiryViewer = (props) => {
                           whiteSpace: 'pre-wrap'
                         }}>
                         {`${question.content}`}
-                      </Typography>:
+                      </Typography> :
                         <ContainerDetailForm
                           container={
                             question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
@@ -1490,7 +1501,7 @@ const InquiryViewer = (props) => {
                         variant="contained"
                         disabled={
                           textResolveSeparate?.name || textResolveSeparate?.address ||
-                          question?.process === 'draft' ? false : (typeof textResolve === 'string'
+                            question?.process === 'draft' ? false : (typeof textResolve === 'string'
                               ? !textResolve.trim()
                               : textResolve.some((cont) => !`${!cont[question.inqType]}`.trim()))
                         }
@@ -1568,7 +1579,7 @@ const InquiryViewer = (props) => {
                           )}
                         </div>
                       ))}
-                      
+
                       <div className="flex">
                         <Button
                           variant="contained"

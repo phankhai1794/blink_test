@@ -231,7 +231,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
 
   const checkDisplayIcon = () => {
     if (!disableIcon) {
-      const {iconColor} = checkClassName(
+      const { iconColor } = checkClassName(
         hasInquiry,
         hasAmendment,
         hasAnswer,
@@ -254,48 +254,50 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
 
       if (lock) {
         return <>
-          <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)}/>
+          <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
         </>
       } else if (hasInquiry || hasAmendment) {
         return <>
           {attachIcon}
-          {hasInquiry && <HelpIcon className={clsx(classes.sizeIcon, iconColor)}/>}
-          {hasAmendment && <img src='/assets/images/icons/icon-amendment.svg' className={classes.iconSvg}/>}
+          {hasInquiry && <HelpIcon className={clsx(classes.sizeIcon, iconColor)} />}
+          {hasAmendment && <img src='/assets/images/icons/icon-amendment.svg' className={classes.iconSvg} />}
         </>
       } else if (hasAnswer) {
         return <>
           {attachIcon}
-          <ReplyIcon className={clsx(classes.sizeIcon, iconColor)}/>
+          <ReplyIcon className={clsx(classes.sizeIcon, iconColor)} />
         </>
       } else if (isResolved) {
         return <>
           {attachIcon}
-          <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)}/>
+          <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)} />
         </>
       } else if (isUploaded) {
         return <>
           {attachIcon}
-          <img src='/assets/images/icons/icon-uploaded.svg' className={classes.iconSvg}/>
+          <img src='/assets/images/icons/icon-uploaded.svg' className={classes.iconSvg} />
         </>
       }
     }
   }
 
   const setColorStatus = () => {
-    const colorStatusObj = checkColorStatus(
-      id,
-      user,
-      inquiries,
-      listCommentDraft
-    );
+    if (!disableIcon) {
+      const colorStatusObj = checkColorStatus(
+        id,
+        user,
+        inquiries,
+        listCommentDraft
+      );
 
-    setIsEmpty(colorStatusObj.isEmpty);
-    setHasInquiry(colorStatusObj.hasInquiry);
-    setHasAmendment(colorStatusObj.hasAmendment);
-    setHasAttachment(colorStatusObj.hasAttachment);
-    setHasAnswer(colorStatusObj.hasAnswer);
-    setIsResolved(colorStatusObj.isResolved);
-    setIsUploaded(colorStatusObj.isUploaded);
+      setIsEmpty(colorStatusObj.isEmpty);
+      setHasInquiry(colorStatusObj.hasInquiry);
+      setHasAmendment(colorStatusObj.hasAmendment);
+      setHasAttachment(colorStatusObj.hasAttachment);
+      setHasAnswer(colorStatusObj.hasAnswer);
+      setIsResolved(colorStatusObj.isResolved);
+      setIsUploaded(colorStatusObj.isUploaded);
+    }
   }
 
   useEffect(() => {
