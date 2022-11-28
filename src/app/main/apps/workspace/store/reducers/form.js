@@ -26,6 +26,7 @@ const initialState = {
   openAmendmentForm: false,
   openNotificationBLWarning: { status: false, userName: '' },
   openNotificationBLReloadWarning: false,
+  inqViewerFocus: null,
 };
 
 const formReducer = function (state = initialState, action) {
@@ -101,6 +102,9 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.OPEN_CREATE_AMENDMENT: {
     return { ...state, openAmendmentForm: action.state }
+  }
+  case Actions.INQUIRY_VIEWER_FOCUS:{
+    return {...state, inqViewerFocus: action.state}
   }
   default: {
     return state;

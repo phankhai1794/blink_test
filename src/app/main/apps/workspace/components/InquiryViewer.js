@@ -140,7 +140,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field } = props;
+  const { index, showReceiver, isSaved, currentQuestion, field } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -180,6 +180,8 @@ const InquiryViewer = (props) => {
   const [isRemoveFile, setIsRemoveFile] = useState(false);
   const [disableSaveReply, setDisableSaveReply] = useState(false);
   const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
+  const inqViewerFocus = useSelector(({ workspace }) => workspace.formReducer.inqViewerFocus);
+  
   const [loading, setLoading] = useState(false);
 
   const handleViewMore = (id) => {
@@ -189,6 +191,18 @@ const InquiryViewer = (props) => {
       setViewDropDown(id);
     }
   };
+  
+  useEffect(() => {
+    if(question.id !== inqViewerFocus){
+      setIsReply(false)
+      setIsReplyCDCM(false)
+      setIsResolve(false)
+      setIsReplyCDCM(false)
+      setShowViewAll(false)
+      setViewDropDown()
+    }
+  },[inqViewerFocus])
+
   useEffect(() => {
     let isUnmounted = false;
     setTempReply({});
@@ -1097,8 +1111,8 @@ const InquiryViewer = (props) => {
   return (
     <>
       {isLoadedComment && (
-        <>
-          <div>
+        <div onClick={() => dispatch(FormActions.inqViewerFocus(question.id))}>
+          <div >
             {(question?.process === 'draft') &&
               <TagsComponent tagName='AMENDMENT' tagColor='primary' />
             }
@@ -1611,7 +1625,7 @@ const InquiryViewer = (props) => {
               )}
             </>
           )}
-        </>
+        </div>
       )}
     </>
   );
