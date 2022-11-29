@@ -118,6 +118,7 @@ const Amendment = ({ question, inquiriesLength }) => {
           dispatch(
             AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' })
           );
+          dispatch(DraftBLActions.setCurrentField());
           dispatch(InquiryActions.addAmendment());
           if (!openAmendmentList) {
             dispatch(FormActions.toggleReload());
