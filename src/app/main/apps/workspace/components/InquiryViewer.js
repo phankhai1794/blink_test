@@ -1157,7 +1157,7 @@ const InquiryViewer = (props) => {
                   </PermissionProvider>
                   <div className='flex' style={{ alignItems: 'center' }}>
                     <div style={{ marginRight: 15 }}>
-                      {showLabelSent && !['COMPL', 'UPLOADED'].includes(question.state) && (
+                      {showLabelSent && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
                         <span className={classes.labelStatus}>Sent</span>
                       )}
                     </div>
