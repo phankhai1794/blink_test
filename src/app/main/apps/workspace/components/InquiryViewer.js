@@ -1593,7 +1593,7 @@ const InquiryViewer = (props) => {
                         color="primary"
                         onClick={onConfirm}
                         classes={{ root: clsx(classes.button, 'w120') }}>
-                        Save
+                        Accept
                       </Button>
                       <Button
                         variant="contained"
