@@ -46,12 +46,12 @@ const PDFViewer = (props) => {
       <DialogContent dividers={true}>
         <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess} >
           {Array.from(new Array(numPages), (el, index) => (
-            <>
+            <div key={index}>
               <Page key={`page_${index + 1}`} pageNumber={index + 1} />
               <p style={{ textAlign: 'center' }}>
                 Page {index + 1} of {numPages}
               </p>
-            </>
+            </div>
           ))}
         </Document>
       </DialogContent>
