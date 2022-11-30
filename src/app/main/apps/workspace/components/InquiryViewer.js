@@ -1336,8 +1336,10 @@ const InquiryViewer = (props) => {
                             question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                           }
                           setEditContent={(value) => {
-                            handleChangeContainerDetail(value);
-                            setTextResolve(value);
+                            if (isReplyCDCM || isResolveCDCM) {
+                              handleChangeContainerDetail(value);
+                              setTextResolve(value);
+                            }
                           }}
                           disableInput={!isResolveCDCM && !isReplyCDCM}
                         />
