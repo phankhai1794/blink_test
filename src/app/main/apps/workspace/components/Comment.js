@@ -31,7 +31,14 @@ const useStyles = makeStyles(() => ({
       marginTop: 15
     }
   },
-  backgroundSystem: '#FDF2F2'
+  backgroundSystem: '#FDF2F2',
+  labelStatus: {
+    color: '#36B37E',
+    padding: '2px 9px',
+    fontWeight: 600,
+    fontSize: 14,
+    borderRadius: 4
+  },
 }));
 
 const Comment = (props) => {
@@ -125,6 +132,9 @@ const Comment = (props) => {
         <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
           <div className="flex justify-between">
             <UserInfo name={checkSystemResolved(question?.process, id) ? 'System' : userName} time={displayTime(createdAt)} avatar={avatar} />
+            {['REOPEN_A', 'REOPEN_Q'].includes(reply.state) && (
+                <span className={classes.labelStatus}>Reopen</span>
+            )}
             {/*{user.displayName === userName && key === id && (*/}
             {/*  <>*/}
             {/*    <IconButton onClick={handleClick}>*/}
