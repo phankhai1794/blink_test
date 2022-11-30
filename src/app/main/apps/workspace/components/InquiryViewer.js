@@ -9,7 +9,7 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime } from '@shared';
+import { getLabelById, displayTime, validatePartiesContent } from '@shared';
 import { getBlInfo } from 'app/services/myBLService';
 import {
   CONTAINER_DETAIL,
@@ -24,7 +24,7 @@ import {
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Typography, Tooltip, Grid, Button, FormControlLabel, Radio, CircularProgress } from '@material-ui/core';
+import { Typography, Tooltip, Grid, Button, FormControlLabel, Radio, CircularProgress, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
@@ -128,14 +128,16 @@ const useStyles = makeStyles((theme) => ({
   inputResolve: {
     width: '100%',
     paddingTop: 10,
-    paddingLeft: 5,
     marginTop: 10,
     minHeight: 50,
-    borderWidth: '0.5px',
-    borderStyle: 'solid',
-    borderColor: 'lightgray',
-    borderRadius: 6,
-    resize: 'none'
+    resize: 'none',
+    '& .MuiOutlinedInput-multiline': {
+      padding: '10.5px'
+    },
+    '& fieldset': {
+      borderWidth: '0.5px',
+      borderRadius: '6px'
+    }
   }
 }));
 
@@ -193,7 +195,7 @@ const InquiryViewer = (props) => {
   };
 
   useEffect(() => {
-    if(question.id !== inqViewerFocus){
+    if (question.id !== inqViewerFocus) {
       setIsReply(false)
       setIsReplyCDCM(false)
       setIsResolve(false)
@@ -201,7 +203,7 @@ const InquiryViewer = (props) => {
       setShowViewAll(false)
       setViewDropDown()
     }
-  },[inqViewerFocus])
+  }, [inqViewerFocus])
 
   useEffect(() => {
     setQuestion(props.question);
@@ -613,9 +615,14 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     if (isSeparate) {
-      const arrayText = textResolve?.split('\n');
-      const separateText = [arrayText.shift(), arrayText.join('\n')];
-      setTextResolveSeparate({ name: separateText[0] || '', address: separateText[1] || '' })
+      const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
+      const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
+      const fieldName = metadata.field?.[`${arrFields[fieldIndex]}Name`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Name`]] : '';
+      const fieldAddress = metadata.field?.[`${arrFields[fieldIndex]}Address`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Address`]] : '';
+      setTextResolveSeparate({
+        name: fieldName || '',
+        address: fieldAddress || ''
+      })
     }
   }, [isResolve])
 
@@ -680,7 +687,9 @@ const InquiryViewer = (props) => {
       fieldId: question.field,
       inqId: question.id,
       fieldContent: contentField,
-      blId: myBL.id
+      blId: myBL.id,
+      fieldNameContent: textResolveSeparate.name.trim() || '',
+      fieldAddressContent: textResolveSeparate.address.trim() || ''
     };
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
@@ -1118,26 +1127,31 @@ const InquiryViewer = (props) => {
     if (isSeparate) {
       const LABEL_TYEP = ['name', 'address']
       const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[field]
-
+      const labelNameCapitalize = labelName.charAt(0).toUpperCase() + labelName.slice(1);
       return LABEL_TYEP.map((type, index) =>
         <div key={index} style={{ paddingTop: '15px' }}>
           <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
-          <textarea
+          <TextField
             className={classes.inputResolve}
-            multiline="true"
-            type="text"
             value={textResolveSeparate[type]}
+            multiline
+            rows={['name'].includes(type) ? 2 : 3}
             onChange={(e) => inputTextSeparate(e, type, field)}
+            error={validatePartiesContent(textResolveSeparate[type], type).isError}
+            helperText={
+              validatePartiesContent(textResolveSeparate[type], type).isError ? validatePartiesContent(textResolveSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''}
+            variant='outlined'
           />
         </div>)
     } else {
       return (
-        <textarea
+        <TextField
           className={classes.inputResolve}
-          multiline="true"
-          type="text"
           value={textResolve}
+          multiline
+          rows={3}
           onChange={inputText}
+          variant='outlined'
         />
       )
     }
@@ -1540,10 +1554,10 @@ const InquiryViewer = (props) => {
                       <Button
                         variant="contained"
                         disabled={
-                          textResolveSeparate?.name || textResolveSeparate?.address ||
-                            question?.process === 'draft' ? false : (typeof textResolve === 'string'
-                              ? !textResolve.trim()
-                              : textResolve.some((cont) => !`${!cont[question.inqType]}`.trim()))
+                          isSeparate ?
+                            (validatePartiesContent(textResolveSeparate.name, 'name')?.isError ||
+                              validatePartiesContent(textResolveSeparate.address, 'address')?.isError)
+                            : false
                         }
                         color="primary"
                         onClick={onConfirm}

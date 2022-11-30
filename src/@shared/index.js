@@ -87,3 +87,21 @@ export const sentStatus = [
   ...['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT'], // inquiry status
   ...['AME_SENT', 'REP_SENT'] // draft status
 ];
+
+export const validatePartiesContent = (partiesContent, type) => {
+  const MAX_LENGTH = 35;
+  const maxLenghtError = 'The maximum length of a row is 35 digits!';
+  const maxRowsError = 'The maximum row of {{fieldName}} Name is 2!'
+  let isError = false, errorType = maxLenghtError;
+  const textInput = partiesContent;
+  const arrTextInput = textInput.split('\n')
+  arrTextInput.forEach(text => {
+    if (text.length > MAX_LENGTH) isError = true;
+  })
+  if (['name'].includes(type) && arrTextInput.length > 2) {
+    isError = true;
+    errorType = maxRowsError;
+  };
+
+  return {isError, errorType}
+}
