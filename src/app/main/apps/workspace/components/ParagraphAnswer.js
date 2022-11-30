@@ -60,7 +60,10 @@ const ParagraphAnswer = (props) => {
         setParagraphText('');
       }
     }
-  }, [saveStatus]);
+    if (question.answerObj.length) {
+      setParagraphText(question.answerObj[0]?.content);
+    }
+  }, [saveStatus, question]);
 
   return (
     <div>

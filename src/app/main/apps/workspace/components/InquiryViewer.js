@@ -140,7 +140,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, showReceiver, isSaved, currentQuestion, field } = props;
+  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -181,7 +181,7 @@ const InquiryViewer = (props) => {
   const [disableSaveReply, setDisableSaveReply] = useState(false);
   const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
   const inqViewerFocus = useSelector(({ workspace }) => workspace.formReducer.inqViewerFocus);
-  
+
   const [loading, setLoading] = useState(false);
 
   const handleViewMore = (id) => {
@@ -191,7 +191,7 @@ const InquiryViewer = (props) => {
       setViewDropDown(id);
     }
   };
-  
+
   useEffect(() => {
     if(question.id !== inqViewerFocus){
       setIsReply(false)
@@ -202,6 +202,10 @@ const InquiryViewer = (props) => {
       setViewDropDown()
     }
   },[inqViewerFocus])
+
+  useEffect(() => {
+    setQuestion(props.question);
+  }, [props.question]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -251,12 +255,25 @@ const InquiryViewer = (props) => {
                   setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
                   setStateReplyDraft(true);
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
-                  setStateReplyDraft(true)
+                  setStateReplyDraft(true);
+                  setShowLabelSent(false);
                 }
                 if (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = true;
+                  lastest.showIconEdit = false;
+                  lastest.showIconAttachReplyFile = false;
+                  lastest.showIconAttachAnswerFile = false;
+                  setStateReplyDraft(false);
                 } else if (['OPEN', 'INQ_SENT'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = false;
+                  lastest.showIconAttachAnswerFile = false;
+                  lastest.showIconAttachAnswerFile = false;
+                  setStateReplyDraft(false);
+                  if (filterOffshoreSent.state === 'OPEN') {
+                    setShowLabelSent(false)
+                  } else {
+                    setShowLabelSent(true);
+                  }
                 }
               } else {
                 if (filterOffshoreSent.state === 'REP_A_DRF') {
@@ -270,6 +287,10 @@ const InquiryViewer = (props) => {
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                   setSubmitLabel(true);
                   lastest.showIconEdit = true;
+                } else if (filterOffshoreSent.state === 'ANS_DRF') {
+                  setStateReplyDraft(false);
+                  lastest.showIconEdit = true;
+                  lastest.showIconAttachAnswerFile = false;
                 }
                 if (['REP_A_SENT'].includes(filterOffshoreSent.state)) {
                   setSubmitLabel(true);
@@ -291,7 +312,7 @@ const InquiryViewer = (props) => {
             if (res.length === 1) {
               setShowViewAll(false);
               setInqHasComment(false)
-            };
+            }
           } else {
             if ((user.role === 'Admin' ? ["ANS_SENT", "COMPL", "UPLOADED"] : ["ANS_SENT", "ANS_DRF", "REP_Q_DRF", "COMPL", "UPLOADED"]).includes(question.state)) {
               let answerObj = null;
@@ -335,6 +356,7 @@ const InquiryViewer = (props) => {
           res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
           const lastest = { ...question };
           if (res.length > 0) {
+            // console.log(res)
             const { content: contentField, mediaFile } = res[res.length - 1].content;
             const lastestComment = res[res.length - 1];
             // filter comment
@@ -377,6 +399,7 @@ const InquiryViewer = (props) => {
                 lastest.showIconReply = false;
               } else if (['REP_DRF'].includes(lastest.state)) {
                 lastest.showIconReply = false;
+                setShowLabelSent(false);
               }
             } else {
               if (['REP_SENT'].includes(lastest.state)) {
@@ -449,7 +472,7 @@ const InquiryViewer = (props) => {
     }
 
     return () => isUnmounted = true;
-  }, [isSaveComment]);
+  }, [isSaveComment, isSaveAnswer]);
 
   const resetAnswerActionSave = () => {
     const quest = { ...question };
@@ -468,9 +491,6 @@ const InquiryViewer = (props) => {
       if (answerObj.length > 0) {
         quest.creator = answerObj[0]?.updater;
         quest.createdAt = answerObj[0]?.updatedAt;
-        quest.content = `The updated information is "${answerObj[0]?.content}"`;
-        quest.name = "";
-        quest.answerObj = [];
       }
       quest.state = currentQuestion.state;
       setType(quest.ansType);
@@ -501,10 +521,6 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     updateQuestionFile()
   }, [isUploadFile, isRemoveFile]);
-
-  useEffect(() => {
-    setQuestion(props.question);
-  }, [props.question]);
 
   useEffect(() => {
     question?.state !== 'OPEN' && setAllowDeleteInq(false);
@@ -669,16 +685,15 @@ const InquiryViewer = (props) => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     resolveInquiry(body)
-      .then(() => {
-        setIsResolve(false);
-        setQuestion((q) => ({ ...q, state: 'COMPL' }));
-        if (editedIndex != -1) {
-          optionsInquires[editedIndex].state = 'COMPL';
-        }
-
+      .then((res) => {
+        // setQuestion((q) => ({ ...q, state: 'COMPL' }));
+        optionsInquires[editedIndex].state = 'COMPL';
+        optionsInquires[editedIndex].createdAt = res.updatedAt;
         dispatch(InquiryActions.setInquiries(optionsInquires));
-        dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
-        setSaveComment(!isSaveComment);
+        props.getUpdatedAt();
+        setIsResolve(false);
+        // dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
+        // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
@@ -864,10 +879,9 @@ const InquiryViewer = (props) => {
               stateUpdate = 'REP_A_DRF';
             }
             optionsInquires[editedIndex].process = 'pending';
-            setQuestion((q) => ({ ...q, state: stateUpdate, process: 'pending' }));
+            optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
-            setSaveComment(!isSaveComment);
-            //
+            props.getUpdatedAt();
             dispatch(InquiryActions.checkSend(true));
             dispatch(
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
@@ -896,9 +910,12 @@ const InquiryViewer = (props) => {
               stateUpdate = 'REP_A_DRF';
             }
             optionsInquires[editedIndex].process = 'pending';
-            setQuestion((q) => ({ ...q, state: stateUpdate, process: 'pending' }));
+            optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
-            setSaveComment(!isSaveComment);
+            props.getUpdatedAt();
+            // if (props.isInquiryDetail) {
+            //   setSaveComment(!isSaveComment);
+            // }
             //
             dispatch(InquiryActions.checkSend(true));
             setDisableSaveReply(false);
@@ -918,7 +935,9 @@ const InquiryViewer = (props) => {
         };
         saveEditedField({ ...reqReply })
           .then((res) => {
-            setSaveComment(!isSaveComment);
+            optionsInquires[editedIndex].createdAt = res.createdAt;
+            dispatch(InquiryActions.setInquiries(optionsInquires));
+            props.getUpdatedAt();
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             setDisableSaveReply(false);
             dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
@@ -935,7 +954,9 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
             setEditOriginalAmendment(res.isEditOriginalAmendment);
           }
-          setSaveComment(!isSaveComment);
+          optionsInquires[editedIndex].createdAt = res.createdAt;
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+          props.getUpdatedAt();
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
@@ -1029,13 +1050,16 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setListCommentDraft(optionAmendment));
 
             const indexAmenment = optionsInquires.findIndex(inq => (inq.field === question.field && inq.process === 'draft'))
-            optionsInquires[indexAmenment].state = res?.prevState;
+            // optionsInquires[indexAmenment].state = res?.prevState;
+            optionsInquires[indexAmenment].createdAt = res.updatedAt;
           } else {
             const indexInq = optionsInquires.findIndex(inq => inq.id === id)
-            optionsInquires[indexInq].state = res?.prevState;
+            // optionsInquires[indexInq].state = res?.prevState;
+            optionsInquires[indexInq].createdAt = res.updatedAt;
           }
           dispatch(InquiryActions.setInquiries(optionsInquires));
-          setSaveComment(!isSaveComment);
+          props.getUpdatedAt();
+          // setSaveComment(!isSaveComment);
           dispatch(
             AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
           );
