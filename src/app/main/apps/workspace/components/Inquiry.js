@@ -3,7 +3,7 @@ import { Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { getInquiryById } from 'app/services/inquiryService';
+import { getInquiryById, getUpdatedAtAnswer } from 'app/services/inquiryService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -42,19 +42,31 @@ const Inquiry = (props) => {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const currentAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.currentAmendment);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
-  const [listInqsField, setListInqsField] = useState(inquiries.filter((q, index) => q.field === currentField));
+  const [listInqsField, setListInqsField] = useState([]);
   const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
   const [changeQuestion, setChangeQuestion] = useState();
   const [isSaved, setSaved] = useState(false);
+  const [isUpdateReply, setUpdateReply] = useState(false);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const [isSaveAnswer, setSaveAnswer] = useState(false);
 
   useEffect(()=>{
-    setListInqsField(inquiries.filter(q => q.field === currentField));
+    let inquiriesSet = [...inquiries];
+    inquiriesSet = inquiriesSet.filter((q, index) => q.field === currentField);
     setReceiver(null);
+    const inqSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    setListInqsField(inqSort);
   }, [inquiries]);
+
+  useEffect(() => {
+    if (isUpdateReply) {
+      setSaveAnswer(!isSaveAnswer)
+      setUpdateReply(false);
+    }
+  }, [isUpdateReply]);
 
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
@@ -114,6 +126,10 @@ const Inquiry = (props) => {
           optionsInquires[editedIndex].mediaFilesAnswer = ans.mediaFilesAnswer;
         }
       });
+    } else if (!isCancel) {
+      const dataDate = await getUpdatedAtAnswer(q.id);
+      optionsInquires[editedIndex].createdAt = dataDate.data;
+      setSaveAnswer(!isSaveAnswer);
     }
     //
     dispatch(InquiryActions.setInquiries(optionsInquires));
@@ -152,7 +168,9 @@ const Inquiry = (props) => {
           <div key={q.id}>
             {isEdit ? (
               <>
-                {currentEditInq && <InquiryEditor onCancel={onCancel} />}
+                {currentEditInq && <InquiryEditor onCancel={onCancel} getUpdatedAt={() => {
+                  setUpdateReply(true)
+                }} />}
               </>
             ) : (
               <>
@@ -169,6 +187,10 @@ const Inquiry = (props) => {
                     question={q}
                     user={props.user}
                     showReceiver={q.process === 'pending'}
+                    isSaveAnswer={isSaveAnswer}
+                    getUpdatedAt={() => {
+                      setUpdateReply(true)
+                    }}
                   />
                 </div>
                 {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
@@ -179,7 +201,9 @@ const Inquiry = (props) => {
       })}
       {currentEditInq &&
         !currentEditInq.id &&  // Case: Add Inquiry
-        <InquiryEditor onCancel={onCancel} />
+        <InquiryEditor onCancel={onCancel} getUpdatedAt={() => {
+          setUpdateReply(true)
+        }}/>
       }
     </>
   ) : (
@@ -203,12 +227,18 @@ const Inquiry = (props) => {
                 isEdit={q.id === currentEditInq?.id ? q : {}}
                 showReceiver={false}
                 getStateReplyDraft={(val) => setStateReplyDraft(val)}
+                isSaveAnswer={isSaveAnswer}
+                getUpdatedAt={() => {
+                  setUpdateReply(true)
+                }}
               />
               {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                 <InquiryAnswer
                   onCancel={() => handleCancel(q)}
-                  setSave={() => handleSetSave(q)}
                   question={q}
+                  getUpdatedAt={() => {
+                    setUpdateReply(true)
+                  }}
                 />}
               {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
             </div>

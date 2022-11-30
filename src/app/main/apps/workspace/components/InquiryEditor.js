@@ -16,7 +16,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { uploadFile } from 'app/services/fileService';
-import { updateInquiry, saveInquiry, deleteInquiry } from 'app/services/inquiryService';
+import {updateInquiry, saveInquiry, deleteInquiry, getUpdatedAtAnswer} from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
@@ -107,7 +107,7 @@ const InquiryEditor = (props) => {
   // custom attribute must be lowercase
   const dispatch = useDispatch();
   const classes = useStyles();
-  const { onCancel } = props;
+  const { onCancel, setSave } = props;
   const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.validation,
@@ -408,8 +408,14 @@ const InquiryEditor = (props) => {
             dispatch(FormActions.toggleCreateInquiry(false));
           }
         }
+        //
+        const dataDate = await getUpdatedAtAnswer(inquiry.id);
+        inquiries[editedIndex].createdAt = dataDate.data;
+        inquiries[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setEditInq());
         dispatch(InquiryActions.setInquiries(inquiries));
+        props.getUpdatedAt();
+        // setSave();
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
         );

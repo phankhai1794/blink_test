@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import { getInquiryById } from 'app/services/inquiryService';
+import {getInquiryById, getUpdatedAtAnswer} from 'app/services/inquiryService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -175,22 +175,31 @@ const AllInquiry = (props) => {
   const [inquiries, setInquiries] = useState([]);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
+  const [isSaveAnswer, setSaveAnswer] = useState(false);
+  const [isUpdateReply, setUpdateReply] = useState(false);
   const inputAddAmendmentEndRef = useRef(null);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   
   useEffect(() => {
     let inquiriesSet = [...inquiryCopy];
-    let inquiriesSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     if (openAllInquiry) {
-      inquiriesSort = inquiriesSet.filter(inq => inq.process === 'pending');
+      inquiriesSet = inquiriesSet.filter(inq => inq.process === 'pending');
     } else if (openAmendmentList) {
-      inquiriesSort = inquiriesSet.filter(inq => inq.process === 'draft');
+      inquiriesSet = inquiriesSet.filter(inq => inq.process === 'draft');
     } else if (openInquiryReview) {
-      inquiriesSort = inquiriesSet.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF');
+      inquiriesSet = inquiriesSet.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF');
     }
+    let inquiriesSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     setInquiries(inquiriesSort);
   }, [inquiryCopy]);
+
+  useEffect(() => {
+    if (isUpdateReply) {
+      setSaveAnswer(!isSaveAnswer)
+      setUpdateReply(false);
+    }
+  }, [isUpdateReply]);
 
   let CURRENT_NUMBER = 0;
 
@@ -218,7 +227,7 @@ const AllInquiry = (props) => {
   };
 
   const resetActionAllInquiry = async (q, isCancel) => {
-    const optionsInquires = [...inquiries];
+    const optionsInquires = [...inquiryCopy];
     const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
     optionsInquires[editedIndex].showIconReply = true;
     optionsInquires[editedIndex].showIconEdit = true;
@@ -317,47 +326,59 @@ const AllInquiry = (props) => {
       }}>
         {props.user === 'workspace' ? (
           inquiries.map((q, index) => {
-            if (receiver && !q.receiver.includes(receiver)) {
-              return (
-                <div key={index} style={{ display: 'flex' }} onClick={() => changeToEditor(q)}></div>
-              );
-            }
             CURRENT_NUMBER += 1;
-            return (
-              currentEditInq && q.id === currentEditInq.id ? (
-                <div key={index}>
-                  {<InquiryEditor onCancel={onCancel} />}
-                  <Divider
-                    className="my-32"
-                    variant="middle"
-                    style={{ height: '2px', color: '#BAC3CB' }}
-                  />
-                </div>
-              ) : (
-                <Card key={index} elevation={0} style={{ padding: '1rem ' }}>
-                  <div
-                    className={clsx(
-                      classes.boxItem,
-                      (q.state === 'UPLOADED') && 'uploaded',
-                      ['COMPL', 'RESOLVED'].includes(q.state) && 'resolved',
-                      [...sentStatus, ...['REP_DRF']].includes(q.state) && checkCommentDraft(q, ['REP_DRF', 'REP_SENT']) && 'offshoreReply'
-                    )}>
-                    <div style={{ marginBottom: '12px' }}>
-                      <Typography color="primary" variant="h5" className={classes.inqTitle}>
-                        {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
-                      </Typography>
-
-                      <InquiryViewer user={props.user} question={q} index={index} openInquiryReview={openInquiryReview} field={field} />
-                    </div>
+            if (receiver && q.receiver.includes(receiver)) {
+              return (
+                currentEditInq && q.id === currentEditInq.id ? (
+                  <div key={index}>
+                    {<InquiryEditor
+                      onCancel={onCancel}
+                      getUpdatedAt={() => {
+                        setUpdateReply(true)
+                      }}
+                    />}
+                    <Divider
+                      className="my-32"
+                      variant="middle"
+                      style={{height: '2px', color: '#BAC3CB'}}
+                    />
                   </div>
-                  <Divider
-                    className="my-32"
-                    variant="middle"
-                    style={{ height: '2px', color: '#BAC3CB' }}
-                  />
-                </Card>
+                ) : (
+                  <Card key={index} elevation={0} style={{padding: '1rem '}}>
+                    <div
+                      className={clsx(
+                        classes.boxItem,
+                        (q.state === 'UPLOADED') && 'uploaded',
+                        ['COMPL', 'RESOLVED'].includes(q.state) && 'resolved',
+                        [...sentStatus, ...['REP_DRF']].includes(q.state) && checkCommentDraft(q, ['REP_DRF', 'REP_SENT']) && 'offshoreReply'
+                      )}>
+                      <div style={{marginBottom: '12px'}}>
+                        <Typography color="primary" variant="h5" className={classes.inqTitle}>
+                          {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
+                        </Typography>
+
+                        <InquiryViewer
+                          user={props.user}
+                          question={q}
+                          index={index}
+                          openInquiryReview={openInquiryReview}
+                          field={field}
+                          isSaveAnswer={isSaveAnswer}
+                          getUpdatedAt={() => {
+                            setUpdateReply(true)
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <Divider
+                      className="my-32"
+                      variant="middle"
+                      style={{height: '2px', color: '#BAC3CB'}}
+                    />
+                  </Card>
+                )
               )
-            )
+            }
           })
         ) : (
           inquiries.map((q, index) => {
@@ -385,12 +406,18 @@ const AllInquiry = (props) => {
                       isEdit={q.id === currentEditInq?.id ? q : {}}
                       showReceiver={false}
                       getStateReplyDraft={(val) => setStateReplyDraft(val)}
+                      isSaveAnswer={isSaveAnswer}
+                      getUpdatedAt={() => {
+                        setUpdateReply(true)
+                      }}
                     />
                     {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                           <InquiryAnswer
                             onCancel={() => handleCancel(q)}
-                            setSave={() => handleSetSave(q)}
                             question={q}
+                            getUpdatedAt={() => {
+                              setUpdateReply(true)
+                            }}
                           />}
                   </div>
                 </div>
