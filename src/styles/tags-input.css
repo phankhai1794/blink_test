@@ -68,6 +68,11 @@
   line-height: inherit;
 }
 
+.ctrlA {
+  background:  rgba(0, 0, 0, 0.1);
+  color: #4e5a65;
+}
+
 .react-tags__selected-tag .close {
   content: '\2715';
   color: #AAA;
