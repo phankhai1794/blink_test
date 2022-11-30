@@ -141,8 +141,7 @@ const Amendment = ({ question, inquiriesLength }) => {
 
   const handleCancel = () => {
     dispatch(InquiryActions.addAmendment());
-    // dispatch(FormActions.toggleCreateAmendment(false));
-    // dispatch(DraftBLActions.setCurrentField());
+    dispatch(FormActions.toggleCreateAmendment(false));
   }
 
   const getField = (field) => {
@@ -216,7 +215,7 @@ const Amendment = ({ question, inquiriesLength }) => {
         </FormControl>
       )}
 
-      {containerCheck.includes(fieldValueSelect?.value || currentField) ? (
+      {containerCheck.includes(fieldValueSelect?.value || (!openAmendmentList && currentField)) ? (
         <div style={{ margin: '15px 0' }}>
           <ContainerDetailForm
             container={
