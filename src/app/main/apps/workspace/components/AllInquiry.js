@@ -433,7 +433,12 @@ const AllInquiry = (props) => {
         <div ref={inputAddAmendmentEndRef}>
           {props.user !== 'workspace' && currentAmendment !== undefined && (
             <div style={{ marginTop: 30 }}>
-              <AmendmentEditor inquiriesLength={inquiries.length} />
+              <AmendmentEditor
+                inquiriesLength={inquiries.length}
+                getUpdatedAt={() => {
+                  setUpdateReply(true);
+                }}
+              />
             </div>
           )}
         </div>

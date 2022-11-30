@@ -175,6 +175,7 @@ const InquiryViewer = (props) => {
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const [isSaveComment, setSaveComment] = useState(false);
+  const [isReopenLabel, setReopenLabel] = useState(false);
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
   const [submitLabel, setSubmitLabel] = useState(false);
   const [isShowViewAll, setShowViewAll] = useState(false);
@@ -251,6 +252,13 @@ const InquiryViewer = (props) => {
               lastest.state = filterOffshoreSent.state;
               lastest.updatedAt = filterOffshoreSent.updatedAt;
               //
+              if (['REOPEN_A', 'REOPEN_Q'].includes(filterOffshoreSent.state)) {
+                setReopenLabel(true);
+                setShowLabelSent(false);
+                setSubmitLabel(false);
+              } else {
+                setReopenLabel(false);
+              }
               if (user.role === 'Admin') {
                 if (filterOffshoreSent.state === 'REP_Q_SENT') {
                   setShowLabelSent(true);
@@ -260,7 +268,7 @@ const InquiryViewer = (props) => {
                   setStateReplyDraft(true);
                   setShowLabelSent(false);
                 }
-                if (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state)) {
+                if (['REP_A_SENT', 'ANS_SENT', 'REOPEN_Q'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = true;
                   lastest.showIconEdit = false;
                   lastest.showIconAttachReplyFile = false;
@@ -284,7 +292,7 @@ const InquiryViewer = (props) => {
                   lastest.showIconAttachAnswerFile = false;
                   props.getStateReplyDraft(true);
                   //
-                } else if (filterOffshoreSent.state === 'REP_Q_SENT') {
+                } else if (['REP_Q_SENT', 'REOPEN_A'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = true;
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                   setSubmitLabel(true);
@@ -300,7 +308,7 @@ const InquiryViewer = (props) => {
                   lastest.showIconAttachAnswerFile = false;
                   lastest.showIconEdit = true;
                   //
-                  setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
+                  setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
                 }
               }
             }
@@ -367,12 +375,12 @@ const InquiryViewer = (props) => {
             lastest.content = contentField instanceof String ? `"${contentField}"` : contentField;
             lastest.name = "";
             lastest.mediaFilesAnswer = [];
-            lastest.id = lastestComment.id;
+            // lastest.id = lastestComment.id;
             lastest.state = lastestComment.state;
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
-            if (!['RESOLVED', 'UPLOADED'].includes(lastest.state)) {
+            if (!['UPLOADED'].includes(lastest.state)) {
               setStateReplyDraft(true);
               const reqReply = {
                 inqAns: {
@@ -381,7 +389,7 @@ const InquiryViewer = (props) => {
                   type: 'REP'
                 },
                 answer: {
-                  id: lastest.id,
+                  id: lastestComment.id,
                   content: contentField,
                   type: metadata.ans_type['paragraph']
                 }
@@ -390,8 +398,13 @@ const InquiryViewer = (props) => {
               lastest.showIconAttachReplyFile = false;
               lastest.showIconAttachAnswerFile = false;
             }
+            if (['REOPEN_A', 'REOPEN_Q'].includes(lastest.state)) {
+              setReopenLabel(true);
+            } else {
+              setReopenLabel(false);
+            }
             if (user.role === 'Admin') {
-              if (['AME_SENT'].includes(lastest.state)) {
+              if (['AME_SENT', 'REOPEN_Q'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 setStateReplyDraft(false);
                 setTempReply({});
@@ -402,16 +415,22 @@ const InquiryViewer = (props) => {
               } else if (['REP_DRF'].includes(lastest.state)) {
                 lastest.showIconReply = false;
                 setShowLabelSent(false);
+              } else if (['REOPEN_A'].includes(lastest.state)) {
+                lastest.showIconReply = false;
+                setStateReplyDraft(false);
               }
             } else {
-              if (['REP_SENT'].includes(lastest.state)) {
+              if (['REP_SENT', 'REOPEN_A'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 setStateReplyDraft(false);
                 setTempReply({});
-              }
-              if (['AME_SENT'].includes(lastest.state)) {
+              } else if (['AME_SENT'].includes(lastest.state)) {
                 lastest.showIconReply = false;
                 setSubmitLabel(true);
+              } else if (['REOPEN_Q'].includes(lastest.state)) {
+                lastest.showIconEdit = false;
+                lastest.showIconReply = false;
+                setStateReplyDraft(false);
               }
             }
             if (isEditOriginalAmendment) {
@@ -429,7 +448,8 @@ const InquiryViewer = (props) => {
               updatedAt: res[0].createdAt,
               answersMedia: [],
               content: orgContent[lastest.field] || '',
-              process: 'draft'
+              process: 'draft',
+              state: res[0]?.state,
             }];
             res.map(r => {
               const { content, mediaFile } = r.content;
@@ -441,7 +461,8 @@ const InquiryViewer = (props) => {
                 updatedAt: r.createdAt,
                 answersMedia: mediaFile,
                 content: content instanceof String ? `"${content}"` : content,
-                process: 'draft'
+                process: 'draft',
+                state: r?.state,
               });
             });
             setComment(comments);
@@ -574,7 +595,7 @@ const InquiryViewer = (props) => {
         })
         .catch((error) => console.error(error));
     } else if (confirmPopupType === 'removeReply' && replyRemove) {
-      deleteDraftBLReply(replyRemove.id, replyRemove.field, myBL.id)
+      deleteDraftBLReply(tempReply?.answer.id, replyRemove.field, myBL.id)
         .then((res) => {
           // Case: Offshore reply customer's amendment first time => delete
           if (comment.length === 3) {
@@ -599,6 +620,8 @@ const InquiryViewer = (props) => {
           dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
           if (res) {
             setEditOriginalAmendment(res.isEditOriginalAmendment);
+            setViewDropDown('');
+            setDisableSaveReply(false);
           }
           setSaveComment(!isSaveComment);
         }).catch((error) => console.error(error));
@@ -1050,21 +1073,23 @@ const InquiryViewer = (props) => {
   }
 
   const reOpen = (id) => {
-    reOpenInquiry(id)
+    reOpenInquiry(tempReply?.answer.id)
       .then((res) => {
         const optionsInquires = [...inquiries];
-        if (res?.prevState) {
+        if (res) {
           if (question.process === 'draft') {
             const optionAmendment = [...listCommentDraft.filter(({ id }) => id !== question.id)];
             dispatch(InquiryActions.setListCommentDraft(optionAmendment));
 
             const indexAmenment = optionsInquires.findIndex(inq => (inq.field === question.field && inq.process === 'draft'))
             // optionsInquires[indexAmenment].state = res?.prevState;
+            optionsInquires[indexAmenment].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
             optionsInquires[indexAmenment].createdAt = res.updatedAt;
           } else {
             const indexInq = optionsInquires.findIndex(inq => inq.id === id)
             // optionsInquires[indexInq].state = res?.prevState;
             optionsInquires[indexInq].createdAt = res.updatedAt;
+            optionsInquires[indexInq].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
           }
           dispatch(InquiryActions.setInquiries(optionsInquires));
           props.getUpdatedAt();
@@ -1198,6 +1223,9 @@ const InquiryViewer = (props) => {
                       {showLabelSent && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
                         <span className={classes.labelStatus}>Sent</span>
                       )}
+                      {isReopenLabel && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
+                        <span className={classes.labelStatus}>Reopen</span>
+                      )}
                     </div>
                     {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
                     {!['COMPL', 'UPLOADED'].includes(question.state) && (
@@ -1269,7 +1297,10 @@ const InquiryViewer = (props) => {
                       <span className={classes.labelStatus}>Uploaded</span> :
                       ['COMPL', 'RESOLVED'].includes(question.state) ?
                         <span className={classes.labelStatus}>Resolved</span> :
-                        (['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>
+                        <>
+                          {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>}
+                          {(['REOPEN_A'].includes(question.state) || isReopenLabel) && <span className={classes.labelStatus}>Reopen</span>}
+                        </>
                     }
                   </div>
                   {(((['ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF', 'REP_SENT', 'AME_SENT'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (

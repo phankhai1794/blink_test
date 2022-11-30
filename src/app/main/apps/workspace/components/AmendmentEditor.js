@@ -115,8 +115,7 @@ const Amendment = ({ question, inquiriesLength }) => {
         // if (edit) service = updateDraftBLReply({ content: { content: fieldValue, mediaFile: mediaList } }, question.id);
         service = saveEditedField({ field: fieldReq, content: { content: fieldValue, mediaFile: mediaList }, mybl: myBL.id });
         service.then((res) => {
-          dispatch(
-            AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' })
+          dispatch(AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' })
           );
           dispatch(DraftBLActions.setCurrentField());
           dispatch(InquiryActions.addAmendment());
