@@ -16,7 +16,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { uploadFile } from 'app/services/fileService';
-import {updateInquiry, saveInquiry, deleteInquiry, getUpdatedAtAnswer} from 'app/services/inquiryService';
+import { updateInquiry, saveInquiry, deleteInquiry, getUpdatedAtAnswer } from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
@@ -159,18 +159,12 @@ const InquiryEditor = (props) => {
 
   useEffect(() => {
     setPrevField(currentEditInq.field)
-  },[])
+  }, [])
 
   useEffect(() => {
     if (fieldValue) {
-      const list = [currentEditInq];
       const filter = metadata.inq_type_options
-        .filter((data) => {
-          return (
-            data.field?.includes(fieldValue.value) &&
-            list.filter((q) => q.inqType === data.value && q.field === fieldValue.value).length === 0
-          );
-        })
+        .filter((data) => data.field?.includes(fieldValue.value))
         .sort((a, b) => a.label.localeCompare(b.label));
       setInqTypeOption(filter);
     }
@@ -463,10 +457,10 @@ const InquiryEditor = (props) => {
           saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
             .then((res) => {
               const mediaFile = [];
-              mediaList.forEach(({id, name, ext}) => mediaFile.push({id, name, ext}))
+              mediaList.forEach(({ id, name, ext }) => mediaFile.push({ id, name, ext }))
               const inqResponse = res.inqResponse || {};
-              inqResponse.creator = { 
-                userName: user.displayName || '', 
+              inqResponse.creator = {
+                userName: user.displayName || '',
                 avatar: user.photoURL || ''
               }
               inqResponse.mediaFile = mediaFile;
