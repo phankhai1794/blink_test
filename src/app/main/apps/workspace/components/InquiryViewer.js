@@ -230,6 +230,7 @@ const InquiryViewer = (props) => {
             lastest.name = "";
             lastest.creator = filterOffshoreSent.updater;
             lastest.createdAt = filterOffshoreSent.createdAt;
+            lastest.process = 'pending';
             setType(filterOffshoreSent.ansType);
             //
             if (Object.keys(filterOffshoreSent).length > 0) {
@@ -398,11 +399,14 @@ const InquiryViewer = (props) => {
               lastest.showIconAttachReplyFile = false;
               lastest.showIconAttachAnswerFile = false;
             }
-            if (['REOPEN_A', 'REOPEN_Q'].includes(lastest.state)) {
+            if (lastest.state === 'RESOLVED') {
+              setStateReplyDraft(false);
+            } else if (['REOPEN_A', 'REOPEN_Q'].includes(lastest.state)) {
               setReopenLabel(true);
             } else {
               setReopenLabel(false);
             }
+
             if (user.role === 'Admin') {
               if (['AME_SENT', 'REOPEN_Q'].includes(lastest.state)) {
                 lastest.showIconReply = true;
@@ -696,6 +700,7 @@ const InquiryViewer = (props) => {
 
   const onConfirm = () => {
     let contentField = '';
+    const getTempReply = {...tempReply};
     if (isSeparate) {
       contentField = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
     } else if (typeof textResolve === 'string') {
@@ -708,7 +713,7 @@ const InquiryViewer = (props) => {
     }
     const body = {
       fieldId: question.field,
-      inqId: question.id,
+      inqId: question?.id || tempReply?.answer.id,
       fieldContent: contentField,
       blId: myBL.id,
       fieldNameContent: textResolveSeparate.name.trim() || '',
@@ -1072,8 +1077,8 @@ const InquiryViewer = (props) => {
     setInqHasComment(false);
   }
 
-  const reOpen = (id) => {
-    reOpenInquiry(tempReply?.answer.id)
+  const reOpen = (idInq) => {
+    reOpenInquiry(idInq)
       .then((res) => {
         const optionsInquires = [...inquiries];
         if (res) {
@@ -1086,7 +1091,7 @@ const InquiryViewer = (props) => {
             optionsInquires[indexAmenment].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
             optionsInquires[indexAmenment].createdAt = res.updatedAt;
           } else {
-            const indexInq = optionsInquires.findIndex(inq => inq.id === id)
+            const indexInq = optionsInquires.findIndex(inq => inq.id === idInq)
             // optionsInquires[indexInq].state = res?.prevState;
             optionsInquires[indexInq].createdAt = res.updatedAt;
             optionsInquires[indexInq].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
@@ -1472,7 +1477,7 @@ const InquiryViewer = (props) => {
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => reOpen(question?.id)}
+                    onClick={() => reOpen(question.process === 'draft' ? tempReply?.answer.id : question.id)}
                     classes={{ root: classes.button }}
                   >
                     ReOpen
