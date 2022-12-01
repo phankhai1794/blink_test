@@ -435,6 +435,8 @@ const InquiryViewer = (props) => {
                 lastest.showIconEdit = false;
                 lastest.showIconReply = false;
                 setStateReplyDraft(false);
+              } else if (['AME_DRF'].includes(lastest.state)) {
+                setSubmitLabel(false);
               }
             }
             if (isEditOriginalAmendment) {
@@ -1155,10 +1157,10 @@ const InquiryViewer = (props) => {
   // Separate Shipper/Consignee/Notify 
   const renderSeparateField = (field) => {
     if (isSeparate) {
-      const LABEL_TYEP = ['name', 'address']
+      const LABEL_TYPE = ['name', 'address']
       const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[field]
-      const labelNameCapitalize = labelName.charAt(0).toUpperCase() + labelName.slice(1);
-      return LABEL_TYEP.map((type, index) =>
+      const labelNameCapitalize = labelName?.charAt(0).toUpperCase() + labelName?.slice(1);
+      return LABEL_TYPE.map((type, index) =>
         <div key={index} style={{ paddingTop: '15px' }}>
           <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
           <TextField
