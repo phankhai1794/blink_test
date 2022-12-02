@@ -119,7 +119,6 @@ const InquiryEditor = (props) => {
 
   const user = useSelector(({ user }) => user);
 
-  const skipField = ['vvdCode', 'podCode', 'delCode'];
   const optionsAnsType = [
     {
       label: 'Option Selection',
@@ -135,7 +134,7 @@ const InquiryEditor = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const fieldType = metadata.field_options.filter(data => !skipField.includes(data.keyword));
+  const fieldType = metadata.field_options;
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
   );
