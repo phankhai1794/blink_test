@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { getInquiryById, getUpdatedAtAnswer } from 'app/services/inquiryService';
 
@@ -52,6 +52,7 @@ const Inquiry = (props) => {
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const [isSaveAnswer, setSaveAnswer] = useState(false);
+  const scrollTopPopup = useRef(null);
 
   useEffect(()=>{
     let inquiriesSet = [...inquiries];
@@ -65,6 +66,9 @@ const Inquiry = (props) => {
     if (isUpdateReply) {
       setSaveAnswer(!isSaveAnswer)
       setUpdateReply(false);
+    }
+    if (scrollTopPopup.current) {
+      scrollTopPopup.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [isUpdateReply]);
 
@@ -156,7 +160,7 @@ const Inquiry = (props) => {
   }
 
   return props.user === 'workspace' ? (
-    <>
+    <div ref={scrollTopPopup}>
       {listInqsField.map((q, index) => {
         const isEdit = currentEditInq && q.id === currentEditInq.id;
         if (receiver && !q.receiver.includes(receiver)) {
@@ -205,9 +209,9 @@ const Inquiry = (props) => {
           setUpdateReply(true)
         }}/>
       }
-    </>
+    </div>
   ) : (
-    <>
+    <div ref={scrollTopPopup}>
       <div className='inquiry' style={{
         padding: isShowBackground ? '8px 24px' : '',
         marginTop: isShowBackground ? '2rem' : '',
@@ -250,7 +254,7 @@ const Inquiry = (props) => {
           <AmendmentEditor />
         </div>
       }
-    </>
+    </div>
   );
 };
 export default Inquiry;

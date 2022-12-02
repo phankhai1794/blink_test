@@ -178,6 +178,7 @@ const AllInquiry = (props) => {
   const [isSaveAnswer, setSaveAnswer] = useState(false);
   const [isUpdateReply, setUpdateReply] = useState(false);
   const inputAddAmendmentEndRef = useRef(null);
+  const scrollTopPopup = useRef(null);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   
@@ -198,6 +199,9 @@ const AllInquiry = (props) => {
     if (isUpdateReply) {
       setSaveAnswer(!isSaveAnswer)
       setUpdateReply(false);
+    }
+    if (scrollTopPopup.current) {
+      scrollTopPopup.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [isUpdateReply]);
 
@@ -323,7 +327,7 @@ const AllInquiry = (props) => {
       <div className='inquiryList' style={{
         padding: isShowBackground && '8px 24px',
         marginTop: isShowBackground && '2rem'
-      }}>
+      }} ref={scrollTopPopup}>
         {props.user === 'workspace' ? (
           inquiries.map((q, index) => {
             CURRENT_NUMBER += 1;
@@ -354,7 +358,7 @@ const AllInquiry = (props) => {
                       )}>
                       <div style={{marginBottom: '12px'}}>
                         <Typography color="primary" variant="h5" className={classes.inqTitle}>
-                          {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
+                          {`${getLabelById(metadata['field_options'], q.field)}`}
                         </Typography>
 
                         <InquiryViewer
@@ -394,7 +398,7 @@ const AllInquiry = (props) => {
                   )}>
                   <div style={{ marginBottom: '12px' }}>
                     <Typography color="primary" variant="h5" className={classes.inqTitle}>
-                      {`${CURRENT_NUMBER}. ${getLabelById(metadata['field_options'], q.field)}`}
+                      {`${getLabelById(metadata['field_options'], q.field)}`}
                     </Typography>
 
                     <InquiryViewer
