@@ -185,6 +185,7 @@ const LinkButton = ({ text, disable, handleClick }) => {
         component="button"
         variant="body2"
         underline='none'
+        disabled={disable}
         style={{ display: 'flex', alignItems: 'center' }}
         onClick={handleClick}>
         <AddCircleOutlineIcon
