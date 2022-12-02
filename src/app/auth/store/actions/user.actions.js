@@ -1,5 +1,5 @@
 import history from '@history';
-import { setDefaultSettings, setInitialSettings } from 'app/store/actions/fuse';
+import { setInitialSettings } from 'app/store/actions/fuse';
 import _ from '@lodash';
 import store from 'app/store';
 import * as Actions from 'app/store/actions';
@@ -17,7 +17,7 @@ export const USER_LOGGED_OUT = '[USER] LOGGED OUT';
  */
 export function setUserDataAuth0(tokenData) {
   const user = {
-    role: ['admin'],
+    role: [ 'admin' ],
     from: 'auth0',
     data: {
       displayName: tokenData.username,
@@ -72,7 +72,7 @@ export function createUserSettingsFirebase(authUser) {
     const user = _.merge({}, guestUser, {
       uid: authUser.uid,
       from: 'firebase',
-      role: ['admin'],
+      role: [ 'admin' ],
       data: {
         displayName: authUser.displayName,
         email: authUser.email,
@@ -158,17 +158,17 @@ export function logoutUser() {
     });
 
     switch (user.from) {
-    case 'firebase': {
-      firebaseService.signOut();
-      break;
-    }
-    case 'auth0': {
-      auth0Service.logout();
-      break;
-    }
-    default: {
-      jwtService.logout();
-    }
+      case 'firebase': {
+        firebaseService.signOut();
+        break;
+      }
+      case 'auth0': {
+        auth0Service.logout();
+        break;
+      }
+      default: {
+        jwtService.logout();
+      }
     }
 
     dispatch(setInitialSettings());
@@ -189,41 +189,41 @@ function updateUserData(user) {
   }
 
   switch (user.from) {
-  case 'firebase': {
-    firebaseService
-      .updateUserData(user)
-      .then(() => {
-        store.dispatch(Actions.showMessage({ message: 'User data saved to firebase' }));
-      })
-      .catch((error) => {
-        store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
-      });
-    break;
-  }
-  case 'auth0': {
-    auth0Service
-      .updateUserData({
-        settings: user.data.settings,
-        shortcuts: user.data.shortcuts
-      })
-      .then(() => {
-        store.dispatch(Actions.showMessage({ message: 'User data saved to auth0' }));
-      })
-      .catch((error) => {
-        store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
-      });
-    break;
-  }
-  default: {
-    jwtService
-      .updateUserData(user)
-      .then(() => {
-        store.dispatch(Actions.showMessage({ message: 'User data saved with api' }));
-      })
-      .catch((error) => {
-        store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
-      });
-    break;
-  }
+    case 'firebase': {
+      firebaseService
+        .updateUserData(user)
+        .then(() => {
+          store.dispatch(Actions.showMessage({ message: 'User data saved to firebase' }));
+        })
+        .catch((error) => {
+          store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
+        });
+      break;
+    }
+    case 'auth0': {
+      auth0Service
+        .updateUserData({
+          settings: user.data.settings,
+          shortcuts: user.data.shortcuts
+        })
+        .then(() => {
+          store.dispatch(Actions.showMessage({ message: 'User data saved to auth0' }));
+        })
+        .catch((error) => {
+          store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
+        });
+      break;
+    }
+    default: {
+      jwtService
+        .updateUserData(user)
+        .then(() => {
+          store.dispatch(Actions.showMessage({ message: 'User data saved with api' }));
+        })
+        .catch((error) => {
+          store.dispatch(Actions.showMessage({ message: error.message, variant: 'error' }));
+        });
+      break;
+    }
   }
 }

@@ -1,8 +1,39 @@
 import { checkNewInquiry, NUMBER_INQ_BOTTOM } from '@shared';
-import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDING, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, COMMODITY_CODE, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED } from '@shared/keyword';
+import {
+  SHIPPER,
+  CONSIGNEE,
+  NOTIFY,
+  EXPORT_REF,
+  FORWARDING,
+  PLACE_OF_RECEIPT,
+  PORT_OF_LOADING,
+  PORT_OF_DISCHARGE,
+  PLACE_OF_DELIVERY,
+  FINAL_DESTINATION,
+  VESSEL_VOYAGE,
+  PRE_CARRIAGE,
+  TYPE_OF_MOVEMENT,
+  CONTAINER_DETAIL,
+  CONTAINER_MANIFEST,
+  FREIGHT_CHARGES,
+  PLACE_OF_BILL,
+  DATE_CARGO,
+  DATE_LADEN,
+  COMMODITY_CODE,
+  DATED,
+  // FREIGHTED_AS,
+  // RATE,
+  // EXCHANGE_RATE,
+  // SERVICE_CONTRACT_NO,
+  // DOC_FORM_NO,
+  // CODE,
+  // TARIFF_ITEM,
+  // PREPAID,
+  // COLLECT,
+} from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useContext, useState } from 'react';
 import clsx from 'clsx';
 import _ from 'lodash';
 import { Grid, Divider, Chip } from '@material-ui/core';
@@ -12,8 +43,8 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { getBlInfo } from 'app/services/myBLService';
-import { disconnectSocket, initiateSocketConnection } from "app/services/socketService";
 import { getPermissionByRole } from 'app/services/authService';
+import { SocketContext } from 'app/AppContext';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -74,16 +105,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const socket = initiateSocketConnection();
-
 const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector(({ user }) => user);
-  const [isExpand, setIsExpand] = useState(false);
-  const [newFileAttachment, setNewFileAttachment] = useState([]);
-  const [disableSendBtn, setDisableSendBtn] = useState(true);
-  const [tabSelected, setTabSelected] = useState(0);
+  const [ isExpand, setIsExpand ] = useState(false);
+  const [ newFileAttachment, setNewFileAttachment ] = useState([]);
+  const [ disableSendBtn, setDisableSendBtn ] = useState(true);
+  const [ tabSelected, setTabSelected ] = useState(0);
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -96,9 +125,9 @@ const BLWorkspace = (props) => {
   const openAmendmentForm = useSelector(({ workspace }) => workspace.formReducer.openAmendmentForm);
   const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
-  const [confirmClick, form] = useSelector(({ workspace }) => [workspace.formReducer.confirmClick, workspace.formReducer.form]);
-  const [inqCustomer, setInqCustomer] = useState([]);
-  const [inqOnshore, setInqOnshore] = useState([]);
+  const [ confirmClick, form ] = useSelector(({ workspace }) => [ workspace.formReducer.confirmClick, workspace.formReducer.form ]);
+  const [ inqCustomer, setInqCustomer ] = useState([]);
+  const [ inqOnshore, setInqOnshore ] = useState([]);
   const isLoading = useSelector(({ workspace }) => workspace.transReducer.isLoading);
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
@@ -115,19 +144,55 @@ const BLWorkspace = (props) => {
   const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   let userInfo = JSON.parse(localStorage.getItem('USER'));
+  const socket = useContext(SocketContext);
 
   const getField = (keyword) => {
-    return metadata.field?.[keyword] || '';
+    return metadata.field?.[ keyword ] || '';
   };
 
   const getValueField = (keyword) => {
-    return content[getField(keyword)] || '';
+    return content[ getField(keyword) ] || '';
   };
+
+  socket.on('msg_processing', async (data) => {
+    if (userInfo) {
+      console.log('processingBy: ', data.processingBy);
+      let permissionAssign = userInfo.role === 'Admin' ? await getPermissionByRole('Admin') : await getPermissionByRole('Guest');
+      let permissionViewer = await getPermissionByRole('Viewer');
+      let assignPermissionViewer = userInfo;
+      let permissions = [];
+      let excludeFirstUser = false;
+      if (data.processingBy) {
+        data.processingBy.forEach((p) => {
+          if (userInfo.displayName === data.processingBy[ 0 ]) {
+            excludeFirstUser = true;
+          }
+        });
+        if (!excludeFirstUser && assignPermissionViewer) {
+          // assign permission
+          permissions = permissionViewer
+          // show popup for lastest user
+          if (userInfo.displayName === data.processingBy[ data.processingBy.length - 1 ]) {
+            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[ 0 ] }));
+          }
+        } else {
+          // assign permission
+          permissions = permissionAssign;
+          dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+        }
+      } else if (data.processingBy.length === 1) {
+        // assign permission
+        permissions = permissionAssign;
+        dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+      }
+      sessionStorage.setItem('permissions', JSON.stringify(permissions));
+    }
+  });
 
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
     setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore') || []);
-  }, [inquiries]);
+  }, [ inquiries ]);
 
   // TODO: TBU Logic after create new reply amendment
   useEffect(() => {
@@ -135,16 +200,16 @@ const BLWorkspace = (props) => {
       return (inq.process === 'draft' && inq.field === amendmentField)
     };
     if (objectNewAmendment?.newAmendment?.field) {
-      const optionsInquires = [...inquiries];
+      const optionsInquires = [ ...inquiries ];
       const oldAmendmentIndex = optionsInquires.findIndex(inq => (inq.id === objectNewAmendment.oldAmendmentId || checkByField(objectNewAmendment.newAmendment.field, inq)));
       if (oldAmendmentIndex !== -1) {
-        const tempID = optionsInquires[oldAmendmentIndex]?.id
-        optionsInquires[oldAmendmentIndex] = { ...optionsInquires[oldAmendmentIndex], ...objectNewAmendment.newAmendment }
-        optionsInquires[oldAmendmentIndex].id = tempID;
+        const tempID = optionsInquires[ oldAmendmentIndex ]?.id
+        optionsInquires[ oldAmendmentIndex ] = { ...optionsInquires[ oldAmendmentIndex ], ...objectNewAmendment.newAmendment }
+        optionsInquires[ oldAmendmentIndex ].id = tempID;
         dispatch(InquiryActions.setInquiries(optionsInquires));
       }
     }
-  }, [objectNewAmendment])
+  }, [ objectNewAmendment ])
 
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'autoSendMail') {
@@ -164,7 +229,7 @@ const BLWorkspace = (props) => {
       }
 
     }
-  }, [confirmClick, form])
+  }, [ confirmClick, form ])
 
   useEffect(() => {
     const unloadCallback = (event) => {
@@ -175,10 +240,10 @@ const BLWorkspace = (props) => {
     };
     window.addEventListener('beforeunload', unloadCallback);
     return () => window.removeEventListener('beforeunload', unloadCallback);
-  }, [isLoading]);
+  }, [ isLoading ]);
 
 
-  const checkBLSameRequest = async (socket, bl) => {
+  const checkBLSameRequest = async (bl) => {
     if (bl && userInfo) {
       socket.emit('user_processing_in', {
         mybl: bl,
@@ -186,61 +251,20 @@ const BLWorkspace = (props) => {
         userName: userInfo.displayName,
         role: userInfo.role,
       });
-      console.log(`socket.emit('user_processing_in'):`)
-      console.log(`${bl}, warning_duplicate, ${userInfo.email}`)
-      let permissionAssign = userInfo.role === 'Admin' ? await getPermissionByRole('Admin') : await getPermissionByRole('Guest');
-      let permissionViewer = await getPermissionByRole('Viewer');
-      socket.on('msg_processing', (data) => {
-        console.log(`message processing:`, data);
-        let assignPermissionViewer = userInfo;
-        let permissions = [];
-        let excludeFirstUser = false;
-        if (data.processingBy) {
-          data.processingBy.forEach((p) => {
-            if (userInfo.displayName === data.processingBy[0]) {
-              excludeFirstUser = true;
-            }
-          });
-          if (!excludeFirstUser && assignPermissionViewer) {
-            // assign permission
-            permissions = permissionViewer
-            // show popup for lastest user
-            if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
-              dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
-            }
-          } else {
-            // assign permission
-            permissions = permissionAssign;
-            dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-          }
-        } else if (data.processingBy.length === 1) {
-          // assign permission
-          permissions = permissionAssign;
-          dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-        }
-        sessionStorage.setItem('permissions', JSON.stringify(permissions));
-      });
     }
   };
-
-  useEffect(() => {
-    console.log(user);
-    if (!user.displayName) {
-      socket.emit('user_processing_out', {});
-    }
-  }, [user]);
 
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(DraftActions.setProcess(props.process));
 
-    const bkgNo = window.location.pathname.split('/')[3];
+    const bkgNo = window.location.pathname.split('/')[ 3 ];
     if (bkgNo) {
       dispatch(Actions.initBL(bkgNo));
-      checkBLSameRequest(socket, bkgNo);
+      checkBLSameRequest(bkgNo);
     }
     else if (props.myBL) {
-      checkBLSameRequest(socket, props.myBL?.id);
+      checkBLSameRequest(props.myBL?.id);
       getBlInfo(props.myBL?.id).then(res => {
         const { id, state, bkgNo } = res.myBL;
         dispatch(InquiryActions.setMyBL({ id, state, bkgNo }));
@@ -248,7 +272,15 @@ const BLWorkspace = (props) => {
     }
 
     return () => {
-      disconnectSocket(socket);
+      // disconnectSocket(socket);
+      if (userInfo) {
+        socket.emit('user_processing_out', {
+          mybl: bkgNo,
+          type: 'warning_duplicate',
+          userName: userInfo.displayName,
+          role: userInfo.role,
+        });
+      }
       dispatch(FormActions.toggleReload());
 
       if (userInfo && userInfo.role === 'Admin') {
@@ -263,11 +295,11 @@ const BLWorkspace = (props) => {
         })
       }
     }
-  }, [socket]);
+  }, []);
 
   useEffect(() => {
     dispatch(Actions.loadMetadata());
-  }, [reload])
+  }, [ reload ])
 
   const expandRef = useRef();
   useEffect(() => {
@@ -284,11 +316,11 @@ const BLWorkspace = (props) => {
     if (openAttachment) {
       setNewFileAttachment([]);
     }
-  }, [openAttachment]);
+  }, [ openAttachment ]);
 
   useEffect(() => {
     setDisableSendBtn(!enableSend)
-  }, [enableSend]);
+  }, [ enableSend ]);
 
   const countInq = (inqs, recevier) => {
     let count = 0;
@@ -306,90 +338,90 @@ const BLWorkspace = (props) => {
 
   const popupOpen = (inquiry, curField) => {
     switch (inquiry.field) {
-    case 'INQUIRY_LIST':
-      return {
-        status: openAllInquiry || openAmendmentList,
-        tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
-        nums: user.role === 'Admin' ? [countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
-        toggleForm: (status) => {
-          dispatch(FormActions.toggleAllInquiry(status));
-          dispatch(FormActions.toggleAmendmentsList(status))
-        },
-        fabTitle: openAllInquiry ? 'Inquiries List' : 'Amendments List',
-        title: openAllInquiry ? 'Inquiries List' : 'Amendments List',
-        field: 'INQUIRY_LIST',
-        showBtnSend: true,
-        disableSendBtn: disableSendBtn,
-        child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries)} field={'INQUIRY_LIST'} />
-      };
-    case 'ATTACHMENT_LIST':
-      return {
-        status: openAttachment,
-        toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
-        fabTitle: 'Attachments List',
-        title: 'Attachments List',
-        hasAddButton: false,
-        field: 'ATTACHMENT_LIST',
-        popoverfooter: true,
-        customActions: inquiries.length > 0 && (
-          <>
-            <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
-              <AttachFileList
-                uploadImageAttach={(files) => setNewFileAttachment(files)}
-                isAttachmentList={true}
-                type={'addNew'}>
-                <AddCircleIcon
-                  style={{
-                    color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
-                    width: '50px',
-                    fontSize: '50px',
-                    cursor: isShowBackground ? 'inherit' : 'pointer'
-                  }}
-                />
-              </AttachFileList>
-            </PermissionProvider>
-          </>
-        ),
-        child: (
-          <AttachmentList
-            user={props.user}
-            newFileAttachment={newFileAttachment}
-            setFileAttachment={() => setNewFileAttachment([])}
-          />
-        )
-      };
-    case 'INQUIRY_FORM':
-      return {
-        status: openInquiryForm,
-        nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
-        toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
-        fabTitle: 'Inquiry Form',
-        title: 'Inquiry Creation',
-        field: 'INQUIRY_FORM',
-        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter(q => q.field === inquiry.field))} />
-      };
-    case 'AMENDMENT_FORM':
-      return {
-        status: openAmendmentForm,
-        nums: [],
-        toggleForm: (status) => dispatch(FormActions.toggleCreateAmendment(status)),
-        fabTitle: 'Amendment Form',
-        title: metadata?.field_options.find((f) => f.value === currentField)?.label,
-        field: 'AMENDMENT_FORM',
-        child: <AmendmentEditor />
-      };
-    default:
-      return {
-        status: inquiry?.id === currentInq?.id,
-        nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
-        toggleForm: () => { },
-        fabTitle: curField?.label,
-        title: curField?.label,
-        field: curField?.value,
-        showBtnSend: true,
-        disableSendBtn: disableSendBtn,
-        child: <Inquiry user={props.user} />
-      };
+      case 'INQUIRY_LIST':
+        return {
+          status: openAllInquiry || openAmendmentList,
+          tabs: user.role === 'Admin' ? [ 'Customer', 'Onshore' ] : [],
+          nums: user.role === 'Admin' ? [ countInq(inquiries, 'customer'), countInq(inquiries, 'onshore') ] : [],
+          toggleForm: (status) => {
+            dispatch(FormActions.toggleAllInquiry(status));
+            dispatch(FormActions.toggleAmendmentsList(status))
+          },
+          fabTitle: openAllInquiry ? 'Inquiries List' : 'Amendments List',
+          title: openAllInquiry ? 'Inquiries List' : 'Amendments List',
+          field: 'INQUIRY_LIST',
+          showBtnSend: true,
+          disableSendBtn: disableSendBtn,
+          child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries)} field={'INQUIRY_LIST'} />
+        };
+      case 'ATTACHMENT_LIST':
+        return {
+          status: openAttachment,
+          toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
+          fabTitle: 'Attachments List',
+          title: 'Attachments List',
+          hasAddButton: false,
+          field: 'ATTACHMENT_LIST',
+          popoverfooter: true,
+          customActions: inquiries.length > 0 && (
+            <>
+              <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
+                <AttachFileList
+                  uploadImageAttach={(files) => setNewFileAttachment(files)}
+                  isAttachmentList={true}
+                  type={'addNew'}>
+                  <AddCircleIcon
+                    style={{
+                      color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
+                      width: '50px',
+                      fontSize: '50px',
+                      cursor: isShowBackground ? 'inherit' : 'pointer'
+                    }}
+                  />
+                </AttachFileList>
+              </PermissionProvider>
+            </>
+          ),
+          child: (
+            <AttachmentList
+              user={props.user}
+              newFileAttachment={newFileAttachment}
+              setFileAttachment={() => setNewFileAttachment([])}
+            />
+          )
+        };
+      case 'INQUIRY_FORM':
+        return {
+          status: openInquiryForm,
+          nums: user.role === 'Admin' ? [ countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore') ] : [],
+          toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
+          fabTitle: 'Inquiry Form',
+          title: 'Inquiry Creation',
+          field: 'INQUIRY_FORM',
+          child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter(q => q.field === inquiry.field))} />
+        };
+      case 'AMENDMENT_FORM':
+        return {
+          status: openAmendmentForm,
+          nums: [],
+          toggleForm: (status) => dispatch(FormActions.toggleCreateAmendment(status)),
+          fabTitle: 'Amendment Form',
+          title: metadata?.field_options.find((f) => f.value === currentField)?.label,
+          field: 'AMENDMENT_FORM',
+          child: <AmendmentEditor />
+        };
+      default:
+        return {
+          status: inquiry?.id === currentInq?.id,
+          nums: user.role === 'Admin' ? [ countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore') ] : [],
+          toggleForm: () => { },
+          fabTitle: curField?.label,
+          title: curField?.label,
+          field: curField?.value,
+          showBtnSend: true,
+          disableSendBtn: disableSendBtn,
+          child: <Inquiry user={props.user} />
+        };
     }
   };
 
@@ -404,7 +436,7 @@ const BLWorkspace = (props) => {
       inquiryReview: 'Inquiry Review'
     };
     if (Object.keys(listTitle).includes(inqId)) {
-      return listTitle[inqId];
+      return listTitle[ inqId ];
     } else {
       const fieldId = listMinimize.find((inq) => inq.id === inqId).field;
       const field = metadata.field_options.find((f) => fieldId === f.value);
@@ -427,7 +459,7 @@ const BLWorkspace = (props) => {
     const field = metadata.field_options.find((f) => currentInq.field === f.value);
     dispatch(InquiryActions.setField(currentInq.field));
     const popupObj = Object.keys(toggleFormType).includes(inqId)
-      ? { toggleForm: toggleFormType[inqId] }
+      ? { toggleForm: toggleFormType[ inqId ] }
       : popupOpen(currentInq, field);
     if (currentInq) {
       dispatch(InquiryActions.setOneInq(currentInq));

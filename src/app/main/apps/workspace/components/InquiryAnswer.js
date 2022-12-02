@@ -1,4 +1,11 @@
-import { updateInquiryChoice, createParagraphAnswer, updateParagraphAnswer, updateInquiry, createAttachmentAnswer } from 'app/services/inquiryService';
+import {
+  updateInquiryChoice,
+  createParagraphAnswer,
+  updateParagraphAnswer,
+  updateInquiry,
+  createAttachmentAnswer,
+  addTransactionAnswer, getUpdatedAtAnswer
+} from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -133,7 +140,7 @@ const InquiryAnswer = (props) => {
         response.forEach(file => {
           mediaList.push(file);
         });
-        createAttachmentAnswer({question, mediaFile: mediaList, mediaRest}).then((res) => {
+        createAttachmentAnswer({question, mediaFile: mediaList, mediaRest}).then(async (res) => {
           // update attachment answer
           const answerObjMediaFiles = currentEditInq?.mediaFilesAnswer.filter((q) => q.id);
           mediaList.forEach((item) => {
@@ -165,14 +172,18 @@ const InquiryAnswer = (props) => {
             optionsInquires[editedIndex].state = 'ANS_DRF';
           }
           //
+          const dataDate = await getUpdatedAtAnswer(question.inqId);
+          optionsInquires[editedIndex].createdAt = dataDate.data;
+          optionsInquires[editedIndex].showIconAttachAnswerFile = false;
           dispatch(InquiryActions.setInquiries(optionsInquires));
-          setSave();
+          props.getUpdatedAt();
+          // setSave();
         }).catch((error) => {
           console.log(error)
         });
       }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
     } else {
-      createAttachmentAnswer({question, mediaFile: mediaList, mediaRest}).then((res) => {
+      createAttachmentAnswer({question, mediaFile: mediaList, mediaRest}).then(async (res) => {
         optionsInquires[editedIndex].mediaFilesAnswer = currentEditInq.mediaFilesAnswer;
         //
         if (currentEditInq.paragraphAnswer) {
@@ -195,8 +206,12 @@ const InquiryAnswer = (props) => {
           optionsInquires[editedIndex].state = 'ANS_DRF';
         }
         //
+        const dataDate = await getUpdatedAtAnswer(question.inqId);
+        optionsInquires[editedIndex].createdAt = dataDate.data;
+        optionsInquires[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setInquiries(optionsInquires));
-        setSave();
+        props.getUpdatedAt();
+        // setSave();
       }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
     }
   }
@@ -206,6 +221,9 @@ const InquiryAnswer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     setDisableSave(true)
     let responseSelectChoice;
+    //
+    await addTransactionAnswer({ inquiryId: question.id });
+    //
     if (question.selectChoice) {
       responseSelectChoice = await updateInquiryChoice(question.selectChoice);
     } else if (question.paragraphAnswer) {
@@ -236,8 +254,12 @@ const InquiryAnswer = (props) => {
           optionsInquires[editedIndex].state = 'ANS_DRF';
         }
         //
+        const dataDate = await getUpdatedAtAnswer(question.id);
+        optionsInquires[editedIndex].createdAt = dataDate.data;
+        optionsInquires[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setInquiries(optionsInquires));
-        setSave();
+        props.getUpdatedAt();
+        // setSave();
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
       } else if (question.paragraphAnswer) {
         if (question.answerObj.length) {
@@ -246,8 +268,12 @@ const InquiryAnswer = (props) => {
         if (optionsInquires[editedIndex].state === 'INQ_SENT') {
           optionsInquires[editedIndex].state = 'ANS_DRF';
         }
+        const dataDate = await getUpdatedAtAnswer(question.id);
+        optionsInquires[editedIndex].createdAt = dataDate.data;
+        optionsInquires[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setInquiries(optionsInquires));
-        setSave();
+        props.getUpdatedAt();
+        // setSave();
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
       }
     }

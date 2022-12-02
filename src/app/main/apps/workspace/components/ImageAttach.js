@@ -20,6 +20,9 @@ const useStyles = makeStyles((theme) => ({
     marginRight: '10px',
     marginBottom: '10px',
     backgroundColor: '#F5F8FA',
+    '&:first-child': {
+      marginLeft: 0
+    },
     '& h3': {
       display: 'block',
       margin: '5px',
@@ -34,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, isReply = false, question, questions, templateReply, setTemplateReply, draftBL = false, removeAttachmentDraftBL }) => {
+const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, isReply = false, question, questions, templateReply, setTemplateReply, draftBL = false, removeAttachmentDraftBL, isRemoveFile, setIsRemoveFile }) => {
   const [currentEditInq, attachmentList] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.attachmentList
@@ -87,12 +90,12 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
   const handleRemoveFile = (file) => {
     const optionsOfQuestion = { ...currentEditInq };
     const optionsAttachmentList = [...attachmentList];
-
     if (isAnswer) {
       const optionsInquires = [...questions];
       const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
       optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
       optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMedia, 1);
+      setIsRemoveFile(!isRemoveFile);
       dispatch(InquiryActions.setInquiries(optionsInquires));
     }
     else if (isReply) {

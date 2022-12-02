@@ -230,9 +230,10 @@ export default function Form(props) {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
+  const currentInquiries = inquiries.filter(q => q.field === currentField);
   const userType = useSelector(({ user }) => user.userType);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
-  
+
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -258,6 +259,11 @@ export default function Form(props) {
     setDisableSend(!enableSend)
   }, [enableSend]);
 
+  useEffect (() => {
+    const currentCompledInq = currentInquiries.filter(item => !['COMPL', 'RESOLVED', 'AME_SENT', 'AME_DRF'].includes(item.state)) || [];
+    setDisableSend(currentCompledInq.length === 0);
+  }, [currentInquiries])
+
   const handleOpenFab = () => {
     setIdBtn(currentField);
     setOpenFab(true);
@@ -277,7 +283,7 @@ export default function Form(props) {
       setOpenFab(false);
     }
   };
- 
+
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
   };
@@ -510,13 +516,12 @@ export default function Form(props) {
             <PermissionProvider
               action={PERMISSION.VIEW_CREATE_AMENDMENT}
               extraCondition={
-                checkEnableBtnAddAmendment()
-                && myBL?.state?.includes('DRF_')
+                myBL?.state?.includes('DRF_')
                 && userType === 'CUSTOMER' // Allow only customer to create amendment
               }>
               <LinkButton
                 text="Add Amendment"
-                disable={currentAmendment !== undefined}
+                disable={!checkEnableBtnAddAmendment() || currentAmendment !== undefined}
                 handleClick={() => dispatch(InquiryActions.addAmendment(null))}
               />
             </PermissionProvider>

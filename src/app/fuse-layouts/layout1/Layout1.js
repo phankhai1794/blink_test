@@ -1,4 +1,4 @@
-import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense, FuseSet } from '@fuse';
+import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense } from '@fuse';
 import AppContext from 'app/AppContext';
 import Transaction from 'app/main/transactions/Transaction';
 import React, { useContext } from 'react';
@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     '&.boxed': {
       maxWidth: 1280,
       margin: '0 auto',
-      boxShadow: theme.shadows[3]
+      boxShadow: theme.shadows[ 3 ]
     },
     '&.scroll-body': {
       '& $wrapper': {

@@ -101,6 +101,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
   const classes = useStyles();
   const [isFocus, setIsFocus] = useState(false);
   const [focus, setFocus] = useState(false);
+  const [ctrlA, setCtrlA] = useState(false)
   const textInput = useRef(null);
 
   const suggestMails = useSelector(({ workspace }) => workspace.mailReducer.suggestMails);
@@ -122,7 +123,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
     e.preventDefault()
     const result = []
     let temp = ''
-    const removeDuplicate = [...new Set(e.clipboardData.getData('text').split(/,|;/).map(str => str.trim()))]
+    const removeDuplicate = [...new Set(e.clipboardData.getData('text').split(/,|;|\n/).map(str => str.trim()))]
     removeDuplicate.forEach(v => {
       if (validateEmail(v)) {
         result.push(v)
@@ -138,11 +139,11 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
     }
   }
 
-  const onDelete = useCallback((tagIndex) => {
-    const newTags = tags.filter((_, i) => i !== tagIndex)
+  const onDelete = (tagIndex) => {
+    const newTags = ctrlA ? [] : tags.filter((_, i) => i !== tagIndex)
     dispatch(MailActions.setTags({ ..._tags, [id]: newTags }))
     onChanged(id, newTags);
-  }, [tags])
+  }
 
   const onAddition = (newTag) => {
     const newTags = [...new Set([...tags, newTag.name])]
@@ -152,7 +153,12 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
   }
 
   const onInput = (value) => {
+    setCtrlA(false)
     dispatch(MailActions.validateMail({ ...validateMail, [id]: value }))
+  }
+
+  const handleKeyDown = (e) => {
+    if (!input && e.key === 'a' && e.ctrlKey) setCtrlA(true)
   }
 
   const handleBlur = () => {
@@ -166,6 +172,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
     if (!focus) {
       setIsFocus(false);
     }
+    setCtrlA(false)
   };
 
   const limitTags = (tags) => {
@@ -203,7 +210,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
         </button>
       </div>
       }
-      <div style={{ flex: 'auto', display: 'inline-block' }}>
+      <div style={{ flex: 'auto', display: 'inline-block' }} onKeyDown={handleKeyDown}>
         <ReactTags
           allowNew
           ref={textInput}
@@ -222,7 +229,7 @@ const TagsInput = ({ id, tagLimit, type, isCc, isBcc, onChanged, onCc, onBcc }) 
           }}
           tagComponent={({ tag, _, onDelete }) => {
             return (
-              <div className="react-tags__selected-tag" >
+              <div className={`react-tags__selected-tag ${ctrlA ? "ctrlA" : ""}`} >
                 <span className="text">{tag.name}</span>
                 {((!isFocus && Number(tag.id) < 3) || isFocus) &&
                   <span className="close" onClick={onDelete}>

@@ -23,7 +23,7 @@ export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
 export const OPEN_CREATE_AMENDMENT = 'OPEN_CREATE_AMENDMENT';
 export const OPEN_NOTIFICATION_INQUIRY_LIST = 'OPEN_NOTIFICATION_INQUIRY_LIST'
 export const RELOAD_INQ = 'RELOAD_INQ';
-
+export const INQUIRY_VIEWER_FOCUS = 'INQUIRY_VIEWER_FOCUS';
 export function setFullscreen(state) {
   return {
     type: SET_FULLSCREEN,
@@ -95,6 +95,13 @@ export function toggleReloadInq() {
 export function openTrans() {
   return {
     type: OPEN_TRANSACTION
+  };
+}
+
+export function inqViewerFocus(state) {
+  return {
+    type: INQUIRY_VIEWER_FOCUS,
+    state
   };
 }
 

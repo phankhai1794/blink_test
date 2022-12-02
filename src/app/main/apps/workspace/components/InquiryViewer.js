@@ -9,7 +9,7 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime } from '@shared';
+import { getLabelById, displayTime, validatePartiesContent } from '@shared';
 import { getBlInfo } from 'app/services/myBLService';
 import {
   CONTAINER_DETAIL,
@@ -24,7 +24,7 @@ import {
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Typography, Tooltip, Grid, Button, FormControlLabel, Radio } from '@material-ui/core';
+import { Typography, Tooltip, Grid, Button, FormControlLabel, Radio, CircularProgress, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
@@ -33,6 +33,7 @@ import * as AppAction from 'app/store/actions';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
+import * as Actions from '../store/actions';
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
@@ -127,19 +128,21 @@ const useStyles = makeStyles((theme) => ({
   inputResolve: {
     width: '100%',
     paddingTop: 10,
-    paddingLeft: 5,
     marginTop: 10,
     minHeight: 50,
-    borderWidth: '0.5px',
-    borderStyle: 'solid',
-    borderColor: 'lightgray',
-    borderRadius: 6,
-    resize: 'none'
+    resize: 'none',
+    '& .MuiOutlinedInput-multiline': {
+      padding: '10.5px'
+    },
+    '& fieldset': {
+      borderWidth: '0.5px',
+      borderRadius: '6px'
+    }
   }
 }));
 
 const InquiryViewer = (props) => {
-  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field } = props;
+  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -172,12 +175,17 @@ const InquiryViewer = (props) => {
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const [isSaveComment, setSaveComment] = useState(false);
+  const [isReopenLabel, setReopenLabel] = useState(false);
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
   const [submitLabel, setSubmitLabel] = useState(false);
   const [isShowViewAll, setShowViewAll] = useState(false);
   const [isUploadFile, setIsUploadFile] = useState(false);
+  const [isRemoveFile, setIsRemoveFile] = useState(false);
   const [disableSaveReply, setDisableSaveReply] = useState(false);
   const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
+  const inqViewerFocus = useSelector(({ workspace }) => workspace.formReducer.inqViewerFocus);
+
+  const [loading, setLoading] = useState(false);
 
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
@@ -188,23 +196,43 @@ const InquiryViewer = (props) => {
   };
 
   useEffect(() => {
+    if (question.id !== inqViewerFocus) {
+      setIsReply(false)
+      setIsReplyCDCM(false)
+      setIsResolve(false)
+      setIsReplyCDCM(false)
+      setShowViewAll(false)
+      setViewDropDown()
+    }
+  }, [inqViewerFocus])
+
+  useEffect(() => {
+    setQuestion(props.question);
+  }, [props.question]);
+
+  useEffect(() => {
+    let isUnmounted = false;
     setTempReply({});
     if (question && question.process === 'pending') {
       loadComment(question.id)
         .then((res) => {
+          if (isUnmounted) return;
           const lastest = { ...question };
-          if (res.length > 1) {
+          if (res.length > 0) {
             res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
             // filter comment
-            lastest.mediaFile = res[res.length - 1].answersMedia;
-            lastest.answerObj = [{ content: res[res.length - 1].content }];
-            lastest.content = res[res.length - 1].content;
-            lastest.name = "";
-            lastest.creator = res[res.length - 1].creator;
-            lastest.createdAt = res[res.length - 1].createdAt;
-            lastest.mediaFilesAnswer = [];
-            //
+            // console.log(res)
             const filterOffshoreSent = res[res.length - 1];
+            lastest.mediaFile = filterOffshoreSent.mediaFile;
+            lastest.mediaFilesAnswer = filterOffshoreSent.answersMedia;
+            lastest.answerObj = filterOffshoreSent.answerObj;
+            lastest.content = filterOffshoreSent.content;
+            lastest.name = "";
+            lastest.creator = filterOffshoreSent.updater;
+            lastest.createdAt = filterOffshoreSent.createdAt;
+            lastest.process = 'pending';
+            setType(filterOffshoreSent.ansType);
+            //
             if (Object.keys(filterOffshoreSent).length > 0) {
               //
               const reqReply = {
@@ -214,26 +242,49 @@ const InquiryViewer = (props) => {
                   type: 'REP'
                 },
                 answer: {
-                  id: filterOffshoreSent.answer,
+                  id: filterOffshoreSent.id,
                   content: filterOffshoreSent.content,
                   type: metadata.ans_type['paragraph']
                 }
               };
               if (['REP_Q_DRF', 'REP_A_DRF'].includes(filterOffshoreSent.state)) {
-                setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
+                setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
               }
               lastest.state = filterOffshoreSent.state;
               lastest.updatedAt = filterOffshoreSent.updatedAt;
+              //
+              if (['REOPEN_A', 'REOPEN_Q'].includes(filterOffshoreSent.state)) {
+                setReopenLabel(true);
+                setShowLabelSent(false);
+                setSubmitLabel(false);
+              } else {
+                setReopenLabel(false);
+              }
               if (user.role === 'Admin') {
                 if (filterOffshoreSent.state === 'REP_Q_SENT') {
                   setShowLabelSent(true);
-                  setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
+                  setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
                   setStateReplyDraft(true);
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
-                  setStateReplyDraft(true)
+                  setStateReplyDraft(true);
+                  setShowLabelSent(false);
                 }
-                if (filterOffshoreSent.state === 'REP_A_SENT') {
+                if (['REP_A_SENT', 'ANS_SENT', 'REOPEN_Q'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = true;
+                  lastest.showIconEdit = false;
+                  lastest.showIconAttachReplyFile = false;
+                  lastest.showIconAttachAnswerFile = false;
+                  setStateReplyDraft(false);
+                } else if (['OPEN', 'INQ_SENT'].includes(filterOffshoreSent.state)) {
+                  lastest.showIconReply = false;
+                  lastest.showIconAttachAnswerFile = false;
+                  lastest.showIconAttachAnswerFile = false;
+                  setStateReplyDraft(false);
+                  if (filterOffshoreSent.state === 'OPEN') {
+                    setShowLabelSent(false)
+                  } else {
+                    setShowLabelSent(true);
+                  }
                 }
               } else {
                 if (filterOffshoreSent.state === 'REP_A_DRF') {
@@ -242,8 +293,15 @@ const InquiryViewer = (props) => {
                   lastest.showIconAttachAnswerFile = false;
                   props.getStateReplyDraft(true);
                   //
-                } else if (filterOffshoreSent.state === 'REP_Q_SENT') {
+                } else if (['REP_Q_SENT', 'REOPEN_A'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = true;
+                } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
+                  setSubmitLabel(true);
+                  lastest.showIconEdit = true;
+                } else if (filterOffshoreSent.state === 'ANS_DRF') {
+                  setStateReplyDraft(false);
+                  lastest.showIconEdit = true;
+                  lastest.showIconAttachAnswerFile = false;
                 }
                 if (['REP_A_SENT'].includes(filterOffshoreSent.state)) {
                   setSubmitLabel(true);
@@ -251,15 +309,21 @@ const InquiryViewer = (props) => {
                   lastest.showIconAttachAnswerFile = false;
                   lastest.showIconEdit = true;
                   //
-                  setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.answersMedia });
+                  setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
                 }
               }
             }
             //
             setComment([...res]);
-            setType(metadata.ans_type.paragraph);
+            // setType(metadata.ans_type.paragraph);
             setQuestion(lastest);
-            setInqHasComment(true);
+            if (res.length > 1) {
+              setInqHasComment(true);
+            }
+            if (res.length === 1) {
+              setShowViewAll(false);
+              setInqHasComment(false)
+            }
           } else {
             if ((user.role === 'Admin' ? ["ANS_SENT", "COMPL", "UPLOADED"] : ["ANS_SENT", "ANS_DRF", "REP_Q_DRF", "COMPL", "UPLOADED"]).includes(question.state)) {
               let answerObj = null;
@@ -298,9 +362,12 @@ const InquiryViewer = (props) => {
     } else {
       getCommentDraftBl(myBL.id, question.field)
         .then((res) => {
-          setEditOriginalAmendment(res.length === 1);
+          if (isUnmounted) return;
+          // setEditOriginalAmendment(res.length === 1);
+          res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
           const lastest = { ...question };
           if (res.length > 0) {
+            // console.log(res)
             const { content: contentField, mediaFile } = res[res.length - 1].content;
             const lastestComment = res[res.length - 1];
             // filter comment
@@ -309,12 +376,12 @@ const InquiryViewer = (props) => {
             lastest.content = contentField instanceof String ? `"${contentField}"` : contentField;
             lastest.name = "";
             lastest.mediaFilesAnswer = [];
-            lastest.id = lastestComment.id;
+            // lastest.id = lastestComment.id;
             lastest.state = lastestComment.state;
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
-            if (!['RESOLVED', 'UPLOADED'].includes(lastest.state)) {
+            if (!['UPLOADED'].includes(lastest.state)) {
               setStateReplyDraft(true);
               const reqReply = {
                 inqAns: {
@@ -323,7 +390,7 @@ const InquiryViewer = (props) => {
                   type: 'REP'
                 },
                 answer: {
-                  id: lastest.id,
+                  id: lastestComment.id,
                   content: contentField,
                   type: metadata.ans_type['paragraph']
                 }
@@ -332,8 +399,16 @@ const InquiryViewer = (props) => {
               lastest.showIconAttachReplyFile = false;
               lastest.showIconAttachAnswerFile = false;
             }
+            if (lastest.state === 'RESOLVED') {
+              setStateReplyDraft(false);
+            } else if (['REOPEN_A', 'REOPEN_Q'].includes(lastest.state)) {
+              setReopenLabel(true);
+            } else {
+              setReopenLabel(false);
+            }
+
             if (user.role === 'Admin') {
-              if (['AME_SENT'].includes(lastest.state)) {
+              if (['AME_SENT', 'REOPEN_Q'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 setStateReplyDraft(false);
                 setTempReply({});
@@ -343,17 +418,29 @@ const InquiryViewer = (props) => {
                 lastest.showIconReply = false;
               } else if (['REP_DRF'].includes(lastest.state)) {
                 lastest.showIconReply = false;
+                setShowLabelSent(false);
+              } else if (['REOPEN_A'].includes(lastest.state)) {
+                lastest.showIconReply = false;
+                setStateReplyDraft(false);
               }
             } else {
-              if (['REP_SENT'].includes(lastest.state)) {
+              if (['REP_SENT', 'REOPEN_A'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 setStateReplyDraft(false);
                 setTempReply({});
-              }
-              if (['AME_SENT'].includes(lastest.state)) {
+              } else if (['AME_SENT'].includes(lastest.state)) {
                 lastest.showIconReply = false;
                 setSubmitLabel(true);
+              } else if (['REOPEN_Q'].includes(lastest.state)) {
+                lastest.showIconEdit = false;
+                lastest.showIconReply = false;
+                setStateReplyDraft(false);
+              } else if (['AME_DRF'].includes(lastest.state)) {
+                setSubmitLabel(false);
               }
+            }
+            if (isEditOriginalAmendment) {
+              dispatch(InquiryActions.setContent({ ...content, [question.field]: lastest.content }));
             }
             setQuestion(lastest);
 
@@ -364,8 +451,11 @@ const InquiryViewer = (props) => {
               creator: { userName: user.displayName, avatar: null },
               updater: { userName: user.displayName, avatar: null },
               createdAt: res[0].createdAt,
+              updatedAt: res[0].createdAt,
               answersMedia: [],
-              content: orgContent[lastest.field] || ''
+              content: orgContent[lastest.field] || '',
+              process: 'draft',
+              state: res[0]?.state,
             }];
             res.map(r => {
               const { content, mediaFile } = r.content;
@@ -374,18 +464,44 @@ const InquiryViewer = (props) => {
                 creator: r.creator,
                 updater: r.creator,
                 createdAt: r.createdAt,
+                updatedAt: r.createdAt,
                 answersMedia: mediaFile,
-                content: content instanceof String ? `"${content}"` : content
+                content: content instanceof String ? `"${content}"` : content,
+                process: 'draft',
+                state: r?.state,
               });
             });
             setComment(comments);
             setInqHasComment(true);
+          } else {
+            // check close popup empty
+            const optionsOfQuestion = [...inquiries];
+            const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
+            //
+            const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
+            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+            optionsOfQuestion.splice(removeIndex, 1);
+            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+            //
+            getBlInfo(myBL.id).then(res => {
+              dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
+              if (!inquiriesByField.length) {
+                if (field === 'INQUIRY_LIST') {
+                  dispatch(FormActions.toggleAllInquiry(false));
+                  dispatch(FormActions.toggleAmendmentsList(false));
+                } else {
+                  dispatch(InquiryActions.setOneInq({}));
+                }
+              }
+            }).catch((error) => console.error(error));
           }
           setIsLoadedComment(true);
         })
         .catch((error) => console.error(error));
     }
-  }, [isSaveComment]);
+
+    return () => isUnmounted = true;
+  }, [isSaveComment, isSaveAnswer]);
 
   const resetAnswerActionSave = () => {
     const quest = { ...question };
@@ -394,6 +510,7 @@ const InquiryViewer = (props) => {
     if (currentQuestion && currentQuestion.id === quest.id) {
       quest.showIconReply = false;
       quest.showIconEdit = true;
+      quest.mediaFilesAnswer = [];
       let answerObj = null;
       if (question.ansType === metadata.ans_type.choice) {
         answerObj = quest.answerObj.filter((item) => item.confirmed);
@@ -403,9 +520,6 @@ const InquiryViewer = (props) => {
       if (answerObj.length > 0) {
         quest.creator = answerObj[0]?.updater;
         quest.createdAt = answerObj[0]?.updatedAt;
-        quest.content = `The updated information is "${answerObj[0]?.content}"`;
-        quest.name = "";
-        quest.answerObj = [];
       }
       quest.state = currentQuestion.state;
       setType(quest.ansType);
@@ -418,6 +532,7 @@ const InquiryViewer = (props) => {
       }
       quest.mediaFilesAnswer = [];
       setQuestion(quest);
+      setSaveComment(!isSaveComment);
     }
   }
   //
@@ -425,18 +540,20 @@ const InquiryViewer = (props) => {
     resetAnswerActionSave()
   }, [currentQuestion, isSaved]);
 
-  useEffect(() => {
+  const updateQuestionFile = () => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     const quest = { ...question };
-    if (optionsInquires[editedIndex].mediaFilesAnswer.length) {
-      setQuestion({ ...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer });
-    }
-  }, [isUploadFile]);
+    setQuestion({ ...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer });
+  }
 
   useEffect(() => {
-    setQuestion(props.question);
-  }, [props.question]);
+    updateQuestionFile()
+  }, [isUploadFile, isRemoveFile]);
+
+  useEffect(() => {
+    question?.state !== 'OPEN' && setAllowDeleteInq(false);
+  }, [question]);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -466,34 +583,6 @@ const InquiryViewer = (props) => {
     ['INQ_SENT', 'ANS_DRF'].includes(question.state) ? setShowLabelSent(true) : setShowLabelSent(false);
   }, []);
 
-  const delayTime = (currentDate, addMinutes) => {
-    let delayTiming = 0;
-    if (currentDate.getTime() <= addMinutes.getTime()) {
-      delayTiming = Math.abs(addMinutes - currentDate);
-      if (user.role === 'Admin') {
-        if (['REP_Q_SENT'].includes(question.state)) {
-          setStateReplyDraft(true);
-        } else if (['ANS_DRF', 'INQ_SENT'].includes(question.state)) {
-          question.showIconEditInq = true
-        }
-      }
-      // const testMinutes = Math.round(delayTiming / (60 * 1000));
-    } else if (addMinutes.getTime() <= currentDate.getTime()) {
-      if (user.role === 'Guest') {
-        question.showIconEdit = false;
-      } else if (user.role === 'Admin') {
-        question.showIconEditInq = false;
-      }
-      setStateReplyDraft(false);
-      setTempReply({})
-    }
-    return delayTiming;
-  };
-
-  useEffect(() => {
-    question?.state !== 'OPEN' && setAllowDeleteInq(false);
-  }, [question]);
-
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'removeInq' && indexQuestionRemove >= 0) {
       const optionsOfQuestion = [...inquiries];
@@ -502,15 +591,18 @@ const InquiryViewer = (props) => {
       deleteInquiry(inqDelete.id)
         .then(() => {
           dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-          hidePopupEmpty && dispatch(InquiryActions.setOneInq({}));
+          if (hidePopupEmpty) {
+            dispatch(InquiryActions.setOneInq({}));
+            dispatch(FormActions.toggleCreateInquiry(false));
+          }
           if (!optionsOfQuestion.length) {
             (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
           }
         })
         .catch((error) => console.error(error));
     } else if (confirmPopupType === 'removeReply' && replyRemove) {
-      deleteDraftBLReply(replyRemove.id)
-        .then(() => {
+      deleteDraftBLReply(tempReply?.answer.id, replyRemove.field, myBL.id)
+        .then((res) => {
           // Case: Offshore reply customer's amendment first time => delete
           if (comment.length === 3) {
             const prevAmendment = {
@@ -526,33 +618,18 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: prevAmendment }));
           }
           //
-          dispatch(FormActions.toggleAllInquiry(false));
-          dispatch(InquiryActions.setOneInq({}));
           dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-          dispatch(FormActions.toggleAmendmentsList(false));
 
           // Update state of listDraftComments for re-rendering UI
           let cloneListCommentDraft = listCommentDraft.filter(({ id }) => id !== replyRemove.id);
           dispatch(InquiryActions.setListCommentDraft(cloneListCommentDraft));
-
-          if (comment.length > 2) {
-            dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
-
-            // Display the previous content
-            if (!containerCheck.includes(question.field)){
-              cloneListCommentDraft = cloneListCommentDraft.filter(({ field }) => field === question.field);
-              dispatch(InquiryActions.setContent({ ...content, [question.field]: cloneListCommentDraft[cloneListCommentDraft.length - 1]?.content.content }));
-            }
-          } else {
-            getBlInfo(myBL.id).then(res => {
-              dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
-              const optionsOfQuestion = [...inquiries];
-              const inqIndexDelete = optionsOfQuestion.findIndex(op => op.id === replyRemove.id);
-              optionsOfQuestion.splice(inqIndexDelete, 1);
-              dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-              dispatch(FormActions.toggleOpenNotificationDeleteAmendment(true));
-            }).catch((error) => console.error(error));
+          dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
+          if (res) {
+            setEditOriginalAmendment(res.isEditOriginalAmendment);
+            setViewDropDown('');
+            setDisableSaveReply(false);
           }
+          setSaveComment(!isSaveComment);
         }).catch((error) => console.error(error));
     }
     dispatch(
@@ -567,9 +644,14 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     if (isSeparate) {
-      const arrayText = textResolve?.split('\n');
-      const separateText = [arrayText.shift(), arrayText.join('\n')];
-      setTextResolveSeparate({ name: separateText[0] || '', address: separateText[1] || '' })
+      const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
+      const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
+      const fieldName = metadata.field?.[`${arrFields[fieldIndex]}Name`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Name`]] : '';
+      const fieldAddress = metadata.field?.[`${arrFields[fieldIndex]}Address`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Address`]] : '';
+      setTextResolveSeparate({
+        name: fieldName || '',
+        address: fieldAddress || ''
+      })
     }
   }, [isResolve])
 
@@ -602,7 +684,9 @@ const InquiryViewer = (props) => {
   const changeToEditor = (inq) => {
     const index = inquiries.findIndex((q) => q.id === inq.id);
     if (index >= 0) {
+      const optionsOfQuestion = [...inquiries];
       const inqEdit = JSON.parse(JSON.stringify(inq));
+      inqEdit.ansType = optionsOfQuestion[index].ansType;
       dispatch(InquiryActions.setEditInq(inqEdit));
       dispatch(InquiryActions.setField(inq.field));
     }
@@ -611,13 +695,14 @@ const InquiryViewer = (props) => {
   const onResolve = () => {
     if (Array.isArray(question.content)) {
       setIsResolveCDCM(true);
-    } else{
+    } else {
       setIsResolve(true);
     }
   };
 
   const onConfirm = () => {
     let contentField = '';
+    const getTempReply = {...tempReply};
     if (isSeparate) {
       contentField = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
     } else if (typeof textResolve === 'string') {
@@ -630,29 +715,31 @@ const InquiryViewer = (props) => {
     }
     const body = {
       fieldId: question.field,
-      inqId: question.id,
+      inqId: question?.id || tempReply?.answer.id,
       fieldContent: contentField,
-      blId: myBL.id
+      blId: myBL.id,
+      fieldNameContent: textResolveSeparate.name.trim() || '',
+      fieldAddressContent: textResolveSeparate.address.trim() || ''
     };
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     resolveInquiry(body)
-      .then(() => {
-        setIsResolve(false);
-        setQuestion((q) => ({ ...q, state: 'COMPL' }));
-        if (editedIndex != -1) {
-          optionsInquires[editedIndex].state = 'COMPL';
-        }
-
+      .then((res) => {
+        // setQuestion((q) => ({ ...q, state: 'COMPL' }));
+        optionsInquires[editedIndex].state = 'COMPL';
+        optionsInquires[editedIndex].createdAt = res.updatedAt;
         dispatch(InquiryActions.setInquiries(optionsInquires));
-        dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
-        setSaveComment(!isSaveComment);
+        props.getUpdatedAt();
+        setIsResolve(false);
+        // dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
+        // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   };
 
   const onUpload = () => {
+    setLoading(true);
     const optionsInquires = [...inquiries];
     uploadOPUS(myBL.id, question.id, question.field)
       .then((res) => {
@@ -686,13 +773,16 @@ const InquiryViewer = (props) => {
           }
         }
       })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      .catch((error) => {
+        dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
+      }).finally(() => setLoading(false));
   };
 
   const cancelResolve = () => {
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
     setIsResolveCDCM(false);
+    setTempReply({});
   };
 
   const inputText = (e) => {
@@ -735,6 +825,7 @@ const InquiryViewer = (props) => {
         type: metadata.ans_type['paragraph']
       }
     };
+    setDisableSaveReply(false);
     setTempReply({ ...tempReply, ...reqReply });
   };
 
@@ -748,7 +839,6 @@ const InquiryViewer = (props) => {
       },
       answer: {
         ...tempReply.answer,
-        content: "",
         type: metadata.ans_type['attachment']
       }
     };
@@ -828,10 +918,9 @@ const InquiryViewer = (props) => {
               stateUpdate = 'REP_A_DRF';
             }
             optionsInquires[editedIndex].process = 'pending';
-            setQuestion((q) => ({ ...q, state: stateUpdate, process: 'pending' }));
+            optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
-            setSaveComment(!isSaveComment);
-            //
+            props.getUpdatedAt();
             dispatch(InquiryActions.checkSend(true));
             dispatch(
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
@@ -860,9 +949,12 @@ const InquiryViewer = (props) => {
               stateUpdate = 'REP_A_DRF';
             }
             optionsInquires[editedIndex].process = 'pending';
-            setQuestion((q) => ({ ...q, state: stateUpdate, process: 'pending' }));
+            optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
-            setSaveComment(!isSaveComment);
+            props.getUpdatedAt();
+            // if (props.isInquiryDetail) {
+            //   setSaveComment(!isSaveComment);
+            // }
             //
             dispatch(InquiryActions.checkSend(true));
             setDisableSaveReply(false);
@@ -882,7 +974,9 @@ const InquiryViewer = (props) => {
         };
         saveEditedField({ ...reqReply })
           .then((res) => {
-            setSaveComment(!isSaveComment);
+            optionsInquires[editedIndex].createdAt = res.createdAt;
+            dispatch(InquiryActions.setInquiries(optionsInquires));
+            props.getUpdatedAt();
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             setDisableSaveReply(false);
             dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
@@ -895,21 +989,28 @@ const InquiryViewer = (props) => {
           content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
-          setSaveComment(!isSaveComment);
+          if (res) {
+            dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
+            setEditOriginalAmendment(res.isEditOriginalAmendment);
+          }
+          optionsInquires[editedIndex].createdAt = res.createdAt;
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+          props.getUpdatedAt();
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           if (isEditOriginalAmendment) dispatch(InquiryActions.setContent({ ...content, [res.newAmendment?.field]: tempReply.answer.content }));
-          // dispatch(FormActions.toggleReload());
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
     }
-    setIsReply(false)
+    setIsReply(false);
+    setIsReplyCDCM(false);
   }
 
   const cancelReply = (q) => {
     setIsReply(false);
+    setIsReplyCDCM(false);
     const reply = { ...question };
     reply.mediaFilesAnswer = reply.mediaFile;
     reply.mediaFile = [];
@@ -954,14 +1055,17 @@ const InquiryViewer = (props) => {
       reply.showIconAttachReplyFile = false;
       reply.showIconAttachAnswerFile = true;
       if (props.question.answerObj.length) reply.answerObj = props.question.answerObj;
-      reply.mediaFilesAnswer = reply.mediaFile;
-      reply.mediaFile = [];
+      // reply.mediaFilesAnswer = reply.mediaFile;
+      // reply.mediaFile = [];
     } else if (Array.isArray(reply.content)) {
       setIsReplyCDCM(true);
+      reply.mediaFilesAnswer = [];
+      reply.mediaFile = [];
+      reply.showIconAttachReplyFile = true;
+      reply.showIconAttachAnswerFile = false;
     } else {
       // Edit Reply
       setIsReply(true);
-
       setIsResolve(false);
       reply.content = '';
       reply.mediaFilesAnswer = [];
@@ -975,15 +1079,39 @@ const InquiryViewer = (props) => {
     setInqHasComment(false);
   }
 
-  const reOpen = (id) => {
-    reOpenInquiry(id)
-      .then(() => {
-        dispatch(FormActions.toggleReload());
-        dispatch(
-          AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
-        );
+  const reOpen = (idInq) => {
+    reOpenInquiry(idInq)
+      .then((res) => {
+        const optionsInquires = [...inquiries];
+        if (res) {
+          if (question.process === 'draft') {
+            const optionAmendment = [...listCommentDraft.filter(({ id }) => id !== question.id)];
+            dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+
+            const indexAmenment = optionsInquires.findIndex(inq => (inq.field === question.field && inq.process === 'draft'))
+            // optionsInquires[indexAmenment].state = res?.prevState;
+            optionsInquires[indexAmenment].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
+            optionsInquires[indexAmenment].createdAt = res.updatedAt;
+          } else {
+            const indexInq = optionsInquires.findIndex(inq => inq.id === idInq)
+            // optionsInquires[indexInq].state = res?.prevState;
+            optionsInquires[indexInq].createdAt = res.updatedAt;
+            optionsInquires[indexInq].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
+          }
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+          props.getUpdatedAt();
+          // setSaveComment(!isSaveComment);
+          dispatch(
+            AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
+          );
+        }
       })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
+      .finally(() => {
+        // setContent
+        dispatch(Actions.loadContent(myBL?.id));
+      });
+
   };
 
   useEffect(() => {
@@ -1029,28 +1157,33 @@ const InquiryViewer = (props) => {
   // Separate Shipper/Consignee/Notify 
   const renderSeparateField = (field) => {
     if (isSeparate) {
-      const LABEL_TYEP = ['name', 'address']
+      const LABEL_TYPE = ['name', 'address']
       const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[field]
-
-      return LABEL_TYEP.map((type, index) =>
+      const labelNameCapitalize = labelName?.charAt(0).toUpperCase() + labelName?.slice(1);
+      return LABEL_TYPE.map((type, index) =>
         <div key={index} style={{ paddingTop: '15px' }}>
           <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
-          <textarea
+          <TextField
             className={classes.inputResolve}
-            multiline="true"
-            type="text"
             value={textResolveSeparate[type]}
+            multiline
+            rows={['name'].includes(type) ? 2 : 3}
             onChange={(e) => inputTextSeparate(e, type, field)}
+            error={validatePartiesContent(textResolveSeparate[type], type).isError}
+            helperText={
+              validatePartiesContent(textResolveSeparate[type], type).isError ? validatePartiesContent(textResolveSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''}
+            variant='outlined'
           />
         </div>)
     } else {
       return (
-        <textarea
+        <TextField
           className={classes.inputResolve}
-          multiline="true"
-          type="text"
           value={textResolve}
+          multiline
+          rows={3}
           onChange={inputText}
+          variant='outlined'
         />
       )
     }
@@ -1059,16 +1192,16 @@ const InquiryViewer = (props) => {
   return (
     <>
       {isLoadedComment && (
-        <>
-          <div>
+        <div onClick={() => dispatch(FormActions.inqViewerFocus(question.id))}>
+          <div >
             {(question?.process === 'draft') &&
               <TagsComponent tagName='AMENDMENT' tagColor='primary' />
             }
             <div style={{ paddingTop: 10 }} className="flex justify-between">
               <UserInfo
                 name={question.creator?.userName}
-                time={displayTime(question.updatedAt || question.createdAt)}
-                avatar={question.creator.avatar}
+                time={displayTime(question.createdAt || question.updatedAt)}
+                avatar={question.creator?.avatar}
               />
               {user.role === 'Admin' ? ( // TODO
                 <div className="flex items-center mr-2">
@@ -1081,20 +1214,24 @@ const InquiryViewer = (props) => {
                         <span className={classes.labelStatus}>{question.state === 'UPLOADED' ? 'Uploaded' : 'Resolved'}</span>
                       </div>
                       <Button
-                        disabled={question.state === 'UPLOADED'}
+                        disabled={loading || question.state === 'UPLOADED'}
                         variant="contained"
                         color="primary"
                         onClick={onUpload}
                         classes={{ root: classes.button }}
                       >
                         Upload to OPUS
+                        {loading && <CircularProgress className='absolute' color='primary' size={'25px'} />}
                       </Button>
                     </div>
                   </PermissionProvider>
                   <div className='flex' style={{ alignItems: 'center' }}>
                     <div style={{ marginRight: 15 }}>
-                      {showLabelSent && !['COMPL', 'UPLOADED'].includes(question.state) && (
+                      {showLabelSent && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
                         <span className={classes.labelStatus}>Sent</span>
+                      )}
+                      {isReopenLabel && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
+                        <span className={classes.labelStatus}>Reopen</span>
                       )}
                     </div>
                     {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
@@ -1167,7 +1304,10 @@ const InquiryViewer = (props) => {
                       <span className={classes.labelStatus}>Uploaded</span> :
                       ['COMPL', 'RESOLVED'].includes(question.state) ?
                         <span className={classes.labelStatus}>Resolved</span> :
-                        (['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>
+                        <>
+                          {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>}
+                          {(['REOPEN_A'].includes(question.state) || isReopenLabel) && <span className={classes.labelStatus}>Reopen</span>}
+                        </>
                     }
                   </div>
                   {(((['ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF', 'REP_SENT', 'AME_SENT'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
@@ -1230,7 +1370,7 @@ const InquiryViewer = (props) => {
                 question?.process === 'draft' ?
                   <>
                     {
-                      typeof question.content === 'string'? <Typography
+                      typeof question.content === 'string' ? <Typography
                         className={viewDropDown !== question.id ? classes.hideText : ''}
                         variant="h5"
                         id={question.id}
@@ -1242,14 +1382,16 @@ const InquiryViewer = (props) => {
                           whiteSpace: 'pre-wrap'
                         }}>
                         {`${question.content}`}
-                      </Typography>:
+                      </Typography> :
                         <ContainerDetailForm
                           container={
                             question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                           }
                           setEditContent={(value) => {
-                            handleChangeContainerDetail(value);
-                            setTextResolve(value);
+                            if (isReplyCDCM || isResolveCDCM) {
+                              handleChangeContainerDetail(value);
+                              setTextResolve(value);
+                            }
                           }}
                           disableInput={!isResolveCDCM && !isReplyCDCM}
                         />
@@ -1280,7 +1422,7 @@ const InquiryViewer = (props) => {
 
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
-                ((['OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
+                ((['OPEN', 'ANS_DRF', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
                   <ChoiceAnswer
                     questions={inquiries}
@@ -1290,7 +1432,7 @@ const InquiryViewer = (props) => {
                     currentQuestion={currentQuestion}
                   />
                 )}
-              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
+              {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'REP_Q_DRF', 'ANS_DRF', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
                   <ParagraphAnswer
                     question={question}
@@ -1331,14 +1473,13 @@ const InquiryViewer = (props) => {
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
-                extraCondition={question.state === 'COMPL' || question.state === 'RESOLVED'}
+                extraCondition={['COMPL', 'RESOLVED', 'UPLOADED'].includes(question.state)}
               >
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <Button
-                    disabled={question.state === 'UPLOADED'}
                     variant="contained"
                     color="primary"
-                    onClick={() => reOpen(question?.id)}
+                    onClick={() => reOpen(question.process === 'draft' ? tempReply?.answer.id : question.id)}
                     classes={{ root: classes.button }}
                   >
                     ReOpen
@@ -1373,7 +1514,7 @@ const InquiryViewer = (props) => {
                 ))}
             </>
             {
-              user.role !== 'Admin' && question.mediaFilesAnswer?.length > 0 &&
+              question.mediaFilesAnswer?.length > 0 &&
               <>
                 {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
                 {question.mediaFilesAnswer?.map((file, mediaIndex) => (
@@ -1388,6 +1529,10 @@ const InquiryViewer = (props) => {
                         question={question}
                         questions={inquiries}
                         hiddenRemove={!question.showIconAttachAnswerFile}
+                        isRemoveFile={isRemoveFile}
+                        setIsRemoveFile={(val) => {
+                          setIsRemoveFile(val)
+                        }}
                       />
                     ) : (
                       <FileAttach
@@ -1399,6 +1544,10 @@ const InquiryViewer = (props) => {
                         index={index}
                         questions={inquiries}
                         hiddenRemove={!question.showIconAttachAnswerFile}
+                        isRemoveFile={isRemoveFile}
+                        setIsRemoveFile={(val) => {
+                          setIsRemoveFile(val)
+                        }}
                       />
                     )}
                   </div>
@@ -1443,14 +1592,15 @@ const InquiryViewer = (props) => {
                       <Button
                         variant="contained"
                         disabled={
-                          question?.process === 'draft' ? false : (typeof textResolve === 'string'
-                            ? !textResolve.trim()
-                            : textResolve.some((cont) => !`${!cont[question.inqType]}`.trim()))
+                          isSeparate ?
+                            (validatePartiesContent(textResolveSeparate.name, 'name')?.isError ||
+                              validatePartiesContent(textResolveSeparate.address, 'address')?.isError)
+                            : false
                         }
                         color="primary"
                         onClick={onConfirm}
                         classes={{ root: clsx(classes.button, 'w120') }}>
-                        Save
+                        Accept
                       </Button>
                       <Button
                         variant="contained"
@@ -1521,7 +1671,7 @@ const InquiryViewer = (props) => {
                           )}
                         </div>
                       ))}
-                      
+
                       <div className="flex">
                         <Button
                           variant="contained"
@@ -1564,7 +1714,7 @@ const InquiryViewer = (props) => {
               )}
             </>
           )}
-        </>
+        </div>
       )}
     </>
   );

@@ -104,13 +104,14 @@ function ToolbarLayout1(props) {
   const [inquiryLength, setInquiryLength] = useState();
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const [open, setOpen] = useState(false);
-  const attachmentLength = inquiries.map((i) => i.mediaFile.length).reduce((a, b) => a + b, 0);
+  const [attachmentLength, setAttachmentLength] = useState(0);
   const [isSubmit, setIsSubmit] = useState(true);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   useEffect(() => {
     dispatch(InquiryActions.checkSend(false));
     let optionInquiries = [...inquiries];
+    let getAttachmentFiles = [];
     let isSubmit = true;
     optionInquiries.forEach((item) => {
       if (user.role !== 'Admin') {
@@ -122,7 +123,7 @@ function ToolbarLayout1(props) {
     if (enableSubmit) {
       isSubmit = false;
     }
-    let getAttachmentFiles = [];
+
     const inquiriesPendingProcess = optionInquiries.filter(op => op.process === 'pending');
     setInquiryLength(inquiriesPendingProcess.length);
     inquiries.forEach((e) => {
@@ -134,70 +135,64 @@ function ToolbarLayout1(props) {
           inqType: e.inqType
         };
       });
-      getAttachmentFiles = [...getAttachmentFiles, ...mediaFile];
+      const mediaAnswer = e.mediaFilesAnswer.map((f) => {
+        return {
+          ...f,
+          field: e.field,
+          inquiryId: e.id,
+          inqType: e.inqType
+        };
 
-      getCommentDraftBl(myBL.id, e.field).then((res) => {
-        if (res.length > 0) {
-          res.forEach((r) => {
-            const attachmentAmendment = r.content.mediaFile.map((f) => {
-              return {
-                ...f,
-                field: e.field,
-                inquiryId: e.id,
-                inqType: e.inqType,
-              }
-            })
-            // if reply file in attachment of inquiry -> not add file to att list
-            attachmentAmendment.forEach(att => {
-              const fileNameList = getAttachmentFiles.map((item) => {
-                if (item.inqType === e.inqType) return item.name
-              })
-              if (att && !fileNameList.includes(att.name) && document.querySelectorAll('#no-att span')[0]?.textContent) {
-                getAttachmentFiles.push(att);
-                document.querySelectorAll('#no-att span')[0].textContent = getAttachmentFiles.length;
-              }
-            })
-          })
-        }
       })
 
-      loadComment(e.id).then((res) => {
-        if (res.length > 0) {
-          res.forEach((r) => {
-            if (r.answersMedia.length > 0) {
-              const attachmentTemp = r.answersMedia.map((f) => {
-                return {
-                  ...f,
-                  field: e.field,
-                  inquiryId: e.id,
-                  inqType: e.inqType,
-                }
-              })
-              // if reply file in attachment of inquiry -> not add file to att list
-              attachmentTemp.forEach(att => {
-                const fileNameList = getAttachmentFiles.map((item) => {
-                  if (item.inqType === e.inqType) return item.name
-                })
-                if (att && !fileNameList.includes(att.name) && document.querySelectorAll('#no-att span')[0]?.textContent) {
-                  getAttachmentFiles.push(att)
-                  document.querySelectorAll('#no-att span')[0].textContent = getAttachmentFiles.length;
-                }
-              })
-            }
-          })
-        }
-      })
+      getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
     });
-
+    
     const amendment = optionInquiries.filter(op => op.process === 'draft');
     if (pathname.includes('/guest') || pathname.includes('/workspace')) {
-      axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)))
+      let countLoadComment = 0;
+      let countAmendment = 0;
+      axios.all(inquiriesPendingProcess.map(q => loadComment(q.id))) // TODO: refactor
         .then(res => {
           if (res) {
             let commentList = [];
+            // get attachments file in comment reply/answer
             res.map(r => {
               commentList = [...commentList, ...r];
+              r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+              const curInq = inquiriesPendingProcess[countLoadComment];
+              let commentIdList = [];
+              r.forEach((itemRes) => {
+                if (!commentIdList.includes(itemRes.id)) {
+                  commentIdList.push(itemRes.id);
+                  if (itemRes.mediaFile.length > 0) {
+                    const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ... itemRes.mediaFile];
+                      const attachmentTemp = mediaTemp.map((f) => {
+                        return {
+                          ...f,
+                          field: curInq.field,
+                          inquiryId: curInq.id,
+                          inqType: curInq.inqType,
+                        }
+                      })
+                      if (attachmentTemp.length > 0) {
+                        attachmentTemp.forEach(att => {
+                          const fileNameList = getAttachmentFiles.map((item) => {
+                            if (item.inqType === curInq.inqType) return item.name
+                          })
+                          if (att && !fileNameList.includes(att.name)) getAttachmentFiles.push(att);
+                        })
+                      } 
+                  }
+              }
+              })
+              
+              countLoadComment+=1
+              if (inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)){
+                setAttachmentLength(getAttachmentFiles.length);
+              }
             });
+
             if (user.role !== 'Admin') {
               const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'REP_A_DRF');
               if (filterRepADraft) isSubmit = false;
@@ -210,14 +205,46 @@ function ToolbarLayout1(props) {
         }).catch(err => {
           console.error(err)
         })
+
       setAmendmentLength(amendment.length);
+
       if (amendment.length) {
-        axios.all(amendment.map(q => getCommentDraftBl(myBL.id, q.field)))
+        axios.all(amendment.map(q => getCommentDraftBl(myBL.id, q.field))) // TODO: refactor
           .then((res) => {
             if (res) {
               let commentList = [];
+              // check and add attachment of amendment/answer to Att List
               res.map(r => {
                 commentList = [...commentList, ...r];
+                const curInq = amendment[countAmendment];
+                r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+                let commentDraftIdList = [];
+                r.forEach((itemRes) => {
+                  if (!commentDraftIdList.includes(itemRes.id)) {
+                    commentDraftIdList.push(itemRes.id);
+                    const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ... itemRes.content.mediaFile];
+                    const attachmentAmendmentTemp = mediaTemp.map((f) => {
+                      return {
+                        ...f,
+                        field: curInq.field,
+                        inquiryId: curInq.id,
+                        inqType: curInq.inqType,
+                      }
+                    })
+                    if (attachmentAmendmentTemp.length > 0) {
+                      attachmentAmendmentTemp.forEach(attAmendment => {
+                        const fileNameList = getAttachmentFiles.map((item) => {
+                          if (item.inqType === curInq.inqType) return item.name
+                        })
+                        if (attAmendment && !curInq.inqType && !fileNameList.includes(attAmendment.name)) getAttachmentFiles.push(attAmendment);
+                      })
+                    }
+                  }
+                })
+                countAmendment += 1;
+                if ( inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)){
+                  setAttachmentLength(getAttachmentFiles.length);
+                }
               });
               if (user.role !== 'Admin') {
                 const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'AME_DRF');

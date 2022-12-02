@@ -1,5 +1,4 @@
-import { MaterialUIComponentsNavigation } from 'app/main/documentation/material-ui-components/MaterialUIComponentsNavigation';
-import { authRoles } from 'app/auth';
+// import { MaterialUIComponentsNavigation } from 'app/main/documentation/material-ui-components/MaterialUIComponentsNavigation';
 
 const navigationConfig = [
   {

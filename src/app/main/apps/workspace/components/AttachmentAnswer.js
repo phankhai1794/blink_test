@@ -1,19 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@material-ui/core';
-import PublishIcon from '@material-ui/icons/Publish';
-import SaveIcon from '@material-ui/icons/Save';
 import { useDispatch } from 'react-redux';
-import axios from 'axios';
-import {getFile, uploadFile} from 'app/services/fileService';
-import { createAttachmentAnswer } from 'app/services/inquiryService';
 import * as AppAction from 'app/store/actions';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
-import {validateExtensionFile} from "@shared";
+import { validateExtensionFile } from "@shared";
 import { makeStyles } from '@material-ui/styles';
 
-import * as FormActions from "../store/actions/form";
-import * as InquiryActions from "../store/actions/inquiry";
+// import axios from 'axios';
+// import { uploadFile } from 'app/services/fileService';
+// import { createAttachmentAnswer } from 'app/services/inquiryService';
+// import * as FormActions from "../store/actions/form";
 
 
 // style
@@ -48,11 +44,11 @@ const rejectStyle = {
 //   component
 const AttachmentAnswer = (props) => {
   const { question, index, questions, saveQuestion, isShowBtn, isPermissionAttach } = props;
-  const [showBtn, setShowBtn] = useState(false);
+  const [ showBtn, setShowBtn ] = useState(false);
   const dispatch = useDispatch();
 
   const uploadImageAttach = (files) => {
-    const optionsOfQuestion = [...questions];
+    const optionsOfQuestion = [ ...questions ];
     const inValidFile = files.find(elem => !validateExtensionFile(elem));
     if (inValidFile) {
       dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
@@ -61,10 +57,10 @@ const AttachmentAnswer = (props) => {
         const formData = new FormData();
         formData.append('file', src);
         formData.append('name', src.name);
-        if (optionsOfQuestion[index].answerObj.length === 0) {
-          optionsOfQuestion[index].answerObj = [{ mediaFiles: [] }];
+        if (optionsOfQuestion[ index ].answerObj.length === 0) {
+          optionsOfQuestion[ index ].answerObj = [ { mediaFiles: [] } ];
         }
-        optionsOfQuestion[index].answerObj[0].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+        optionsOfQuestion[ index ].answerObj[ 0 ].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
       });
       dispatch(saveQuestion(optionsOfQuestion));
       setShowBtn(true);
@@ -72,7 +68,7 @@ const AttachmentAnswer = (props) => {
   }
   useEffect(() => {
     setShowBtn(isShowBtn);
-  }, [isShowBtn]);
+  }, [ isShowBtn ]);
   const onDrop = (acceptedFiles) => {
     if (isPermissionAttach) {
       uploadImageAttach(acceptedFiles);
@@ -85,12 +81,12 @@ const AttachmentAnswer = (props) => {
       noKeyboard: true,
       onDrop,
     });
-    
-  const handleSave = () => {
+
+  /* const handleSave = () => {
     const formData = [];
     const mediaRest = [];
-    const optionsOfQuestion = [...questions];
-    for (const f of optionsOfQuestion[index].answerObj[0]?.mediaFiles) {
+    const optionsOfQuestion = [ ...questions ];
+    for (const f of optionsOfQuestion[ index ].answerObj[ 0 ]?.mediaFiles) {
       if (f.id === null) {
         const form_data = f.data;
         formData.push(form_data);
@@ -113,7 +109,7 @@ const AttachmentAnswer = (props) => {
         });
         createAttachmentAnswer({ question: questionMap, mediaFile: mediaList, mediaRest }).then((res) => {
           const { message } = res;
-          const answerObjMediaFiles = optionsOfQuestion[index].answerObj[0]?.mediaFiles.filter((q, index) => q.id);
+          const answerObjMediaFiles = optionsOfQuestion[ index ].answerObj[ 0 ]?.mediaFiles.filter((q, index) => q.id);
           mediaList.forEach((item, index) => {
             answerObjMediaFiles.push({
               id: item.id,
@@ -121,13 +117,13 @@ const AttachmentAnswer = (props) => {
               ext: item.ext,
             })
           });
-          optionsOfQuestion[index].answerObj[0].mediaFiles = answerObjMediaFiles;
+          optionsOfQuestion[ index ].answerObj[ 0 ].mediaFiles = answerObjMediaFiles;
           dispatch(saveQuestion(optionsOfQuestion));
           dispatch(FormActions.toggleReload());
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
-  };
+  };*/
   const style = useMemo(
     () => ({
       ...baseStyle,
@@ -135,7 +131,7 @@ const AttachmentAnswer = (props) => {
       ...(isDragAccept ? acceptStyle : {}),
       ...(isDragReject ? rejectStyle : {})
     }),
-    [isDragActive, isDragReject, isDragAccept]
+    [ isDragActive, isDragReject, isDragAccept ]
   );
   const useStyles = makeStyles((theme) => ({
     button: {
@@ -171,11 +167,11 @@ const AttachmentAnswer = (props) => {
               alt="Attachment"
             />
             <input {...getInputProps()} disabled={!isPermissionAttach} />
-            <p style={{color: isPermissionAttach? 'black':'#BAC3CB' , fontFamily: 'Montserrat'}}>Select a file or drag and drop here</p>
+            <p style={{ color: isPermissionAttach ? 'black' : '#BAC3CB', fontFamily: 'Montserrat' }}>Select a file or drag and drop here</p>
             <Button
               variant="text"
               size="medium"
-              className={isPermissionAttach?classes.button:classes.buttonDisable}
+              className={isPermissionAttach ? classes.button : classes.buttonDisable}
               disabled={!isPermissionAttach}
               onClick={open}
             >Select File

@@ -16,7 +16,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { uploadFile } from 'app/services/fileService';
-import { updateInquiry, saveInquiry, deleteInquiry } from 'app/services/inquiryService';
+import {updateInquiry, saveInquiry, deleteInquiry, getUpdatedAtAnswer} from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
@@ -107,14 +107,16 @@ const InquiryEditor = (props) => {
   // custom attribute must be lowercase
   const dispatch = useDispatch();
   const classes = useStyles();
-  const { onCancel } = props;
-  const [metadata, valid, inquiries, currentEditInq, myBL] = useSelector(({ workspace }) => [
+  const { onCancel, setSave } = props;
+  const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.validation,
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.currentEditInq,
-    workspace.inquiryReducer.myBL
+    workspace.inquiryReducer.myBL,
+    workspace.inquiryReducer.listMinimize
   ]);
+
   const user = useSelector(({ user }) => user);
 
   const skipField = ['vvdCode', 'podCode', 'delCode'];
@@ -145,6 +147,7 @@ const InquiryEditor = (props) => {
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
   const [nameType, setNameType] = useState(valueType?.label);
+  const [prevField, setPrevField] = useState('');
   const styles = (width) => {
     return {
       control: {
@@ -153,6 +156,10 @@ const InquiryEditor = (props) => {
       }
     };
   };
+
+  useEffect(() => {
+    setPrevField(currentEditInq.field)
+  },[])
 
   useEffect(() => {
     if (fieldValue) {
@@ -384,23 +391,36 @@ const InquiryEditor = (props) => {
         mediaCreate.length ||
         mediaDelete.length
       ) {
-        await updateInquiry(inquiry.id, {
+        const update = await updateInquiry(inquiry.id, {
           inq: inq(currentEditInq),
           ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
           files: { mediaCreate, mediaDelete }
         });
         const editedIndex = inquiries.findIndex(inq => inq.id === inquiry.id);
         inquiries[editedIndex] = currentEditInq;
+        if (update.data.length) {
+          inquiries[editedIndex].answerObj = update.data;
+        }
+        if (prevField !== currentEditInq.field) {
+          const hasInq = inquiries.filter(inq => inq.field === prevField);
+          if (!hasInq.length) {
+            dispatch(InquiryActions.setOneInq({}));
+            dispatch(FormActions.toggleCreateInquiry(false));
+          }
+        }
+        //
+        const dataDate = await getUpdatedAtAnswer(inquiry.id);
+        inquiries[editedIndex].createdAt = dataDate.data;
+        inquiries[editedIndex].showIconAttachAnswerFile = false;
+        dispatch(InquiryActions.setEditInq());
         dispatch(InquiryActions.setInquiries(inquiries));
-
+        props.getUpdatedAt();
+        // setSave();
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
         );
-
-        // TODO
-        dispatch(InquiryActions.saveInquiry());
+      } else {
         dispatch(InquiryActions.setEditInq());
-        dispatch(FormActions.toggleReloadInq());
       }
     } else {
       // Create INQUIRY
@@ -441,14 +461,28 @@ const InquiryEditor = (props) => {
             mediaList = [...mediaList, ...mediaFileList];
           });
           saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
-            .then(() => {
+            .then((res) => {
+              const mediaFile = [];
+              mediaList.forEach(({id, name, ext}) => mediaFile.push({id, name, ext}))
+              const inqResponse = res.inqResponse || {};
+              inqResponse.creator = { 
+                userName: user.displayName || '', 
+                avatar: user.photoURL || ''
+              }
+              inqResponse.mediaFile = mediaFile;
+              const optionsMinimize = [...listMinimize];
+              const optionsInquires = [...inquiries];
+              optionsInquires.push(inqResponse);
+              optionsMinimize.push(inqResponse);
               dispatch(
                 AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
               );
               dispatch(InquiryActions.saveInquiry());
-              dispatch(FormActions.toggleReloadInq());
               dispatch(InquiryActions.setField(inqContentTrim[0].field));
               dispatch(InquiryActions.setOpenedInqForm(false));
+              dispatch(InquiryActions.setEditInq());
+              dispatch(InquiryActions.setInquiries(optionsInquires));
+              dispatch(InquiryActions.setListMinimize(optionsMinimize));
             })
             .catch((error) =>
               dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
@@ -456,7 +490,6 @@ const InquiryEditor = (props) => {
         })
         .catch((error) => console.log(error));
     }
-    dispatch(InquiryActions.setEditInq());
   };
 
   return (

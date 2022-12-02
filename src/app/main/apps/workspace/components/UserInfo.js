@@ -38,7 +38,7 @@ const UserInfo = (props) => {
           style={{ background: cyan[400] }}
           src={''}
           alt="User photo">
-          {name.charAt(0).toUpperCase()}
+          {name?.charAt(0).toUpperCase()}
         </Avatar>
       }
       {time ?

@@ -1,14 +1,11 @@
 import React from 'react';
-import { Paper, Button, Input, Icon, Typography } from '@material-ui/core';
+import { Paper, Button, Input, Icon } from '@material-ui/core';
 import { ThemeProvider } from '@material-ui/styles';
 import { FuseAnimate } from '@fuse';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-// import * as Actions from '../store/actions';
 
 function InquiringHeader(props) {
-  const dispatch = useDispatch();
-  // const searchText = useSelector(({ eCommerceApp }) => eCommerceApp.products.searchText);
   const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
 
   return (
@@ -31,7 +28,7 @@ function InquiringHeader(props) {
                 inputProps={{
                   'aria-label': 'Search'
                 }}
-                // onChange={ev => dispatch(Actions.setProductsSearchText(ev))}
+              // onChange={ev => dispatch(Actions.setProductsSearchText(ev))}
               />
             </Paper>
           </FuseAnimate>

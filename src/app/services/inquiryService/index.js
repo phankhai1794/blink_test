@@ -115,3 +115,14 @@ export async function reOpenInquiry(id) {
   const response = await axios().patch(`${PATH}/${id}/reOpen`);
   return response.data;
 }
+
+export async function addTransactionAnswer(state) {
+  const response = await axios().post(`${PATH}/transaction`, state);
+  return response.data;
+}
+
+export async function getUpdatedAtAnswer(id) {
+  const response = await axios().get(`${PATH}/updatedAtAnswer/${id}`);
+  return response.data;
+}
+

@@ -13,6 +13,7 @@ import { makeStyles, Grid } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import AttachFile from '@material-ui/icons/AttachFile';
+import { checkClassName, checkColorStatus } from '@shared/colorStatus';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import ReplyIcon from "@material-ui/icons/Reply";
@@ -24,126 +25,125 @@ import BLField from './BLField';
 import Label from './FieldLabel';
 
 const red = '#DC2626';
+const lightPink = '#FAF1F5';
 const pink = '#BD0F72';
-const blue = '#EAF2FD';
-const green = '#2F80ED';
-const success = '#36B37E';
+const lightBlue = '#EAF2FD';
+const blue = '#2F80ED';
+const darkBlue = '#00506D';
+const lightGreen = '#EBF7F2';
+const green = '#36B37E';
 
 const useStyles = makeStyles((theme) => ({
-  addIcon: {
-    position: 'relative',
-    left: '98%',
+  root: {
+    zIndex: 0,
+    borderRadius: '8px',
+    paddingBottom: '1rem',
+    '&:hover': {
+      backgroundColor: lightPink,
+    },
+  },
+  sizeIcon: {
     fontSize: '20px',
-    top: '3%'
+  },
+  colorAddIcon: {
+    color: `${pink} !important`,
   },
   colorHasInqIcon: {
-    color: `${red} !important`
-  },
-  colorEmptyInqIcon: {
-    color: `${pink} !important`
-  },
-  colorNoInqIcon: {
-    color: `white !important`
-  },
-  enterTableFile: {
-    borderRadius: '8px',
-    zIndex: 0,
-    paddingBottom: '1rem',
-    '&:hover': {
-      backgroundColor: '#FDF2F2'
-    }
-  },
-  hasResolved: {
-    backgroundColor: '#EBF7F2',
-    '& fieldset': {
-      backgroundColor: '#EBF7F2',
-      borderColor: `${success} !important`
-    },
-    '&:hover': {
-      backgroundColor: '#EBF7F2'
-    }
-  },
-  hasAnswer: {
-    backgroundColor: blue,
-    zIndex: 0,
-    '& fieldset': {
-      backgroundColor: blue,
-      borderColor: `${green} !important`
-    },
-    '&:hover fieldset': {
-      borderColor: `${green} !important`
-    },
-    '&:focus-within fieldset': {
-      border: `1px solid ${green} !important`
-    }
+    color: `${red} !important`,
   },
   colorHasAnswer: {
-    color: `${green} !important`
+    color: `${blue} !important`,
   },
-
   colorHasResolved: {
-    color: `${success} !important`
+    color: `${green} !important`,
   },
-  hasInq: {
-    borderRadius: '8px',
-    zIndex: 0,
-    paddingBottom: '1rem',
-    backgroundColor: '#FDF2F2'
+  colorHasUploaded: {
+    color: `${darkBlue} !important`,
+  },
+  hasInquiry: {
+    backgroundColor: `${lightPink} !important`,
+    '& fieldset': {
+      backgroundColor: lightPink,
+      borderColor: `${pink} !important`,
+    },
+    '&:hover fieldset': {
+      borderColor: `${pink} !important`,
+    },
+  },
+  hasAnswer: {
+    backgroundColor: `${lightBlue} !important`,
+    '& fieldset': {
+      backgroundColor: lightBlue,
+      borderColor: `${blue} !important`,
+    },
+    '&:hover fieldset': {
+      borderColor: `${blue} !important`,
+    },
+  },
+  hasResolved: {
+    backgroundColor: `${lightGreen} !important`,
+    '& fieldset': {
+      backgroundColor: lightGreen,
+      borderColor: `${green} !important`,
+    },
+    '&:hover fieldset': {
+      borderColor: `${green} !important`,
+    },
+  },
+  hasUploaded: {
+    backgroundColor: '#E6EDF0 !important',
+    '& fieldset': {
+      backgroundColor: '#E6EDF0',
+      borderColor: `${darkBlue} !important`,
+    },
+    '&:hover fieldset': {
+      borderColor: `${darkBlue} !important`,
+    },
+  },
+  attachIcon: {
+    transform: 'rotate(45deg)',
+    marginLeft: '-2.5rem',
+  },
+  iconSvg: {
+    width: 17,
+    marginBottom: 1.5,
+    paddingLeft: 3,
   },
   labelMargin: {
     marginTop: '0.6rem !important',
     display: 'flex',
-  },
-  attachIcon: {
-    transform: 'rotate(45deg)',
-    marginLeft: '-2.5rem'
   }
 }));
-
 
 const TableCD = (props) => {
   const { id, containerDetail } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
 
-  const [showAddIcon, setShowAddIcon] = useState(false);
-  const [questionIsEmpty, setQuestionIsEmpty] = useState(true);
-  const [mediaFileIsEmpty, setMediaFileIsEmpty] = useState(true);
-  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
-  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const user = useSelector(({ user }) => user);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+
+  const [isHovering, setIsHovering] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(true);
+  const [hasInquiry, setHasInquiry] = useState(false);
+  const [hasAmendment, setHasAmendment] = useState(false);
+  const [hasAttachment, setHasAttachment] = useState(true);
+  const [hasAnswer, setHasAnswer] = useState(false);
+  const [isResolved, setIsResolved] = useState(false);
+  const [isUploaded, setIsUploaded] = useState(false);
 
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
-  const [hasAnswer, setHasAnswer] = useState(false);
-  const [isResolved, setIsResolved] = useState(false);
+  const onMouseEnter = (e) => setIsHovering(true);
 
-  const checkAnswerSent = () => {
-    if (inquiries.length > 0) {
-      const lst = inquiries.filter((q) => q.field === id);
-      return lst.some((e) =>
-        ['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT'].includes(e.state)
-      );
-    }
-    return false;
-  };
-
-  const checkQuestionIsResolved = () => {
-    if (inquiries.length > 0) {
-      const lst = inquiries.filter((q) => q.field === id);
-      if (lst.length > 0) return lst.every((e) => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(e.state));
-    }
-    return false;
-  };
-
-  const onMouseEnter = (e) => setShowAddIcon(true);
-
-  const onMouseLeave = (e) => setShowAddIcon(false);
+  const onMouseLeave = (e) => setIsHovering(false);
 
   const onClick = (e) => {
-    if (!questionIsEmpty) {
+    if (!isEmpty) {
       const currentInq = inquiries.find((q) => q.field === id);
       dispatch(InquiryActions.setOneInq(currentInq));
     } else if (allowAddInquiry) {
@@ -164,137 +164,181 @@ const TableCD = (props) => {
     dispatch(InquiryActions.setField(id));
   };
 
-  const checkQuestionIsEmpty = () => {
-    if (inquiries.length > 0) {
-      const check = inquiries.filter((q) => q.field === id);
-      const checkMedita = inquiries.filter((q) => q.field === id && q.mediaFile.length);
-      checkMedita.length && setMediaFileIsEmpty(false);
-      return check.length === 0;
+  const checkDisplayIcon = () => {
+    const { iconColor } = checkClassName(
+      hasInquiry,
+      hasAmendment,
+      hasAnswer,
+      isResolved,
+      isUploaded,
+      classes
+    );
+
+    const attachIcon = <>
+      {hasAttachment && (
+        <AttachFile
+          className={clsx(
+            classes.sizeIcon,
+            classes.attachIcon,
+            iconColor
+          )}
+        />
+      )}
+    </>
+
+    if (hasInquiry || hasAmendment) {
+      return <>
+        {attachIcon}
+        {hasInquiry && <HelpIcon className={clsx(classes.sizeIcon, iconColor)} />}
+        {hasAmendment && <img src='/assets/images/icons/icon-amendment.svg' className={classes.iconSvg} />}
+      </>
     }
-    return true;
-  };
+    else if (hasAnswer) {
+      return <>
+        {attachIcon}
+        <ReplyIcon className={clsx(classes.sizeIcon, iconColor)} />
+      </>
+    }
+    else if (isResolved) {
+      return <>
+        {attachIcon}
+        <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)} />
+      </>
+    }
+    else if (isUploaded) {
+      return <>
+        {attachIcon}
+        <img src='/assets/images/icons/icon-uploaded.svg' className={classes.iconSvg} />
+      </>
+    }
+  }
+
+  const setColorStatus = () => {
+    const colorStatusObj = checkColorStatus(
+      id,
+      user,
+      inquiries,
+      listCommentDraft
+    );
+
+    setIsEmpty(colorStatusObj.isEmpty);
+    setHasInquiry(colorStatusObj.hasInquiry);
+    setHasAmendment(colorStatusObj.hasAmendment);
+    setHasAttachment(colorStatusObj.hasAttachment);
+    setHasAnswer(colorStatusObj.hasAnswer);
+    setIsResolved(colorStatusObj.isResolved);
+    setIsUploaded(colorStatusObj.isUploaded);
+  }
 
   useEffect(() => {
-    setQuestionIsEmpty(checkQuestionIsEmpty());
-    setHasAnswer(checkAnswerSent());
-    setIsResolved(checkQuestionIsResolved());
-  }, [inquiries, metadata]);
+    setColorStatus();
+  }, [metadata, inquiries, listCommentDraft]);
 
   return (
-    <>
-      <div
-        className={clsx(
-          !questionIsEmpty & !hasAnswer & !isResolved ? classes.hasInq : classes.enterTableFile,
-          hasAnswer ? classes.hasAnswer : '',
-          isResolved ? classes.hasResolved : ''
-        )}
-        onClick={onClick}>
-        <div
-          className={clsx(
-            classes.addIcon,
-            `justify-self-end opacity-${showAddIcon || !questionIsEmpty ? '100' : '0'}`
-          )}>
-          {!isResolved ?
-            (!questionIsEmpty ? (
-              <>
-                {!mediaFileIsEmpty && <AttachFile className={clsx(hasAnswer ? classes.colorHasAnswer : classes.colorHasInqIcon, classes.attachIcon)} />}
-                {hasAnswer ? <ReplyIcon className={clsx(classes.sizeIcon, hasAnswer ? classes.colorHasAnswer : classes.colorHasInqIcon)} /> : <HelpIcon className={clsx(classes.colorHasInqIcon)} />}
-              </>
-            ) : (
-              allowAddInquiry && (
-                <AddCircleIcon
-                  className={
-                    showAddIcon ? clsx(classes.colorEmptyInqIcon) : clsx(classes.colorNoInqIcon)
-                  }
-                />
-              )
-            )) : <CheckCircleIcon className={clsx(classes.sizeIcon, classes.colorHasResolved)} />}
-        </div>
-        <Grid
-          container
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-          className="px-8 justify-between">
-          <Grid container spacing={2}>
-            <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '15px' }}>CONTAINER NUMBER</Label>
-            </Grid>
-            <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '75px' }}>SEAL</Label>
-            </Grid>
-            <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '75px' }}>TYPE</Label>
-            </Grid>
-            <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '55px' }}>PACKAGE</Label>
-            </Grid>
-            <Grid container item xs={2}>
-              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '60px' }}>WEIGHT</Label>
-            </Grid>
-            <Grid container item xs={1}>
-              <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '30px' }}>MEASUREMENT</Label>
-            </Grid>
-            {containerDetail?.length > 0 ? (
-              containerDetail.map((cd, index) => (
-                <Grid container spacing={2} className="px-8 py-2" key={index}>
-                  <Grid item xs={2}>
-                    <BLField disableClick={true} >
-                      {cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}
-                    </BLField>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <BLField disableClick={true} >
-                      {cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}
-                    </BLField>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <BLField disableClick={true} >
-                      {cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}
-                    </BLField>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <BLField disableClick={true} >
-                      {cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}
-                    </BLField>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <BLField disableClick={true} >
-                      {cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}
-                    </BLField>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <BLField disableClick={true} >
-                      {cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}
-                    </BLField>
-                  </Grid>
-                </Grid>
-              ))
-            ) : (
-              <Grid container spacing={2} className="px-8 py-2">
+    <div
+      className={clsx(
+        classes.root,
+        checkClassName(
+          hasInquiry,
+          hasAmendment,
+          hasAnswer,
+          isResolved,
+          isUploaded,
+          classes
+        ).className
+      )}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onClick={onClick}
+    >
+      <Grid style={{ height: 20, padding: '5px 5px 0 5px', textAlign: 'right' }}>
+        {checkDisplayIcon()}
+        {isHovering && allowAddInquiry && isEmpty &&
+          <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
+        }
+      </Grid>
+      <Grid
+        container
+        className="px-8 justify-between">
+        <Grid container spacing={2}>
+          <Grid container item xs={2}>
+            <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '15px' }}>CONTAINER NUMBER</Label>
+          </Grid>
+          <Grid container item xs={2}>
+            <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '75px' }}>SEAL</Label>
+          </Grid>
+          <Grid container item xs={2}>
+            <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '75px' }}>TYPE</Label>
+          </Grid>
+          <Grid container item xs={2}>
+            <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '55px' }}>PACKAGE</Label>
+          </Grid>
+          <Grid container item xs={2}>
+            <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '60px' }}>WEIGHT</Label>
+          </Grid>
+          <Grid container item xs={1}>
+            <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '30px' }}>MEASUREMENT</Label>
+          </Grid>
+          {containerDetail?.length > 0 ? (
+            containerDetail.map((cd, index) => (
+              <Grid container spacing={2} className="px-8 py-2" key={index}>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} ></BLField>
+                  <BLField disableClick={true} disableIcon={true}>
+                    {cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}
+                  </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} ></BLField>
+                  <BLField disableClick={true} disableIcon={true}>
+                    {cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}
+                  </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} ></BLField>
+                  <BLField disableClick={true} disableIcon={true}>
+                    {cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}
+                  </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} ></BLField>
+                  <BLField disableClick={true} disableIcon={true}>
+                    {cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}
+                  </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} ></BLField>
+                  <BLField disableClick={true} disableIcon={true}>
+                    {cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}
+                  </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} ></BLField>
+                  <BLField disableClick={true} disableIcon={true}>
+                    {cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}
+                  </BLField>
                 </Grid>
               </Grid>
-            )}
-          </Grid>
+            ))
+          ) : (
+            <Grid container spacing={2} className="px-8 py-2">
+              <Grid item xs={2}>
+                <BLField disableClick={true} ></BLField>
+              </Grid>
+              <Grid item xs={2}>
+                <BLField disableClick={true} ></BLField>
+              </Grid>
+              <Grid item xs={2}>
+                <BLField disableClick={true} ></BLField>
+              </Grid>
+              <Grid item xs={2}>
+                <BLField disableClick={true} ></BLField>
+              </Grid>
+              <Grid item xs={2}>
+                <BLField disableClick={true} ></BLField>
+              </Grid>
+              <Grid item xs={2}>
+                <BLField disableClick={true} ></BLField>
+              </Grid>
+            </Grid>
+          )}
         </Grid>
-      </div>
-    </>
+      </Grid>
+    </div>
   );
 };
 

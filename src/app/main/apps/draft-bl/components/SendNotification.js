@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Button, Dialog, makeStyles } from "@material-ui/core";
 import MuiDialogContent from "@material-ui/core/DialogContent";
 import clsx from 'clsx';
-import * as AppActions from 'app/store/actions';
 
 import * as Actions from '../store/actions';
 
@@ -67,7 +66,7 @@ const SendNotification = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const openNotification = useSelector(({ draftBL }) => draftBL.openSendNotification);
-  const myBL = useSelector(({ draftBL }) => draftBL.myBL);
+  // const myBL = useSelector(({ draftBL }) => draftBL.myBL);
 
   const handleClose = () => {
     dispatch(Actions.toggleSendNotification(false))
