@@ -132,9 +132,6 @@ const Comment = (props) => {
         <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
           <div className="flex justify-between">
             <UserInfo name={checkSystemResolved(question?.process, id) ? 'System' : userName} time={displayTime(createdAt)} avatar={avatar} />
-            {['REOPEN_A', 'REOPEN_Q'].includes(reply.state) && (
-                <span className={classes.labelStatus}>Reopen</span>
-            )}
             {/*{user.displayName === userName && key === id && (*/}
             {/*  <>*/}
             {/*    <IconButton onClick={handleClick}>*/}
@@ -173,7 +170,7 @@ const Comment = (props) => {
             />
             :
             <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-              {title ? `${title} "${content}"` : content}
+              {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ? `${title ? `${title} "${content}"` : content}` : (<span>Marked as reopened</span>)}
             </div>
           }
 

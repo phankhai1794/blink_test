@@ -314,6 +314,19 @@ const InquiryViewer = (props) => {
               }
             }
             //
+            if (['REOPEN_A', 'REOPEN_Q'].includes(filterOffshoreSent.state)) {
+              const markReopen = {
+                creator: filterOffshoreSent.creator,
+                updater: filterOffshoreSent.creator,
+                createdAt: filterOffshoreSent.createdAt,
+                updatedAt: filterOffshoreSent.createdAt,
+                answersMedia: filterOffshoreSent.answersMedia,
+                content: 'Marked as reopened',
+                process: 'pending',
+                state: filterOffshoreSent?.state,
+              }
+              res.splice(res.length - 1, 0, markReopen);
+            }
             setComment([...res]);
             // setType(metadata.ans_type.paragraph);
             setQuestion(lastest);
@@ -1230,9 +1243,9 @@ const InquiryViewer = (props) => {
                       {showLabelSent && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
                         <span className={classes.labelStatus}>Sent</span>
                       )}
-                      {isReopenLabel && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
-                        <span className={classes.labelStatus}>Reopen</span>
-                      )}
+                      {/*{isReopenLabel && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (*/}
+                      {/*  <span className={classes.labelStatus}>Reopen</span>*/}
+                      {/*)}*/}
                     </div>
                     {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
                     {!['COMPL', 'UPLOADED'].includes(question.state) && (
@@ -1306,7 +1319,7 @@ const InquiryViewer = (props) => {
                         <span className={classes.labelStatus}>Resolved</span> :
                         <>
                           {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>}
-                          {(['REOPEN_A'].includes(question.state) || isReopenLabel) && <span className={classes.labelStatus}>Reopen</span>}
+                          {/*{(['REOPEN_A'].includes(question.state) || isReopenLabel) && <span className={classes.labelStatus}>Reopen</span>}*/}
                         </>
                     }
                   </div>
