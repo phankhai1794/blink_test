@@ -1,6 +1,6 @@
 import { Icon, Button, TextField, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
 import {
@@ -9,8 +9,11 @@ import {
   CONTAINER_SEAL,
   CONTAINER_LIST,
   CONTAINER_PACKAGE,
+  CONTAINER_WEIGHT,
+  CM_DESCRIPTION,
   CM_PACKAGE,
   CM_PACKAGE_UNIT,
+  CM_WEIGHT,
   HS_CODE,
   HTS_CODE,
   NCM_CODE,
@@ -90,15 +93,19 @@ const AmendmentPopup = (props) => {
   const type = (inqType === CONTAINER_DETAIL) ? CDTitle : CMTitle;
 
   const isValid = (id, value) => {
-    if (!value) return [true, '']
-    else if ([CONTAINER_PACKAGE, CM_PACKAGE].includes(getTypeName(id))) {
-      const pattern = /^\s*\d*\s*$/g
+    const name = getTypeName(id)
+    if (!value && [CONTAINER_PACKAGE, CM_PACKAGE, CONTAINER_WEIGHT, CM_WEIGHT, CM_DESCRIPTION].includes(name)) {
+      return [false, 'This is required']
+    }
+    else if (value && [CONTAINER_PACKAGE, CM_PACKAGE].includes(name)) {
+      const pattern = /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g
       return [pattern.test(value), 'Must be an integer']
     }
-    else {
+    else if (value && Object.keys(mapUnit).includes(name)) {
       const pattern = /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g
       return [pattern.test(value), "Must be a number"]
     }
+    return [true, '']
   }
 
   const isUnitValid = (id, value) => {
@@ -116,15 +123,28 @@ const AmendmentPopup = (props) => {
     }
   }
 
+  useEffect(() => {
+    const temp = {}
+    type.forEach(({ id, value, title }) => {
+      if (CM_PACKAGE_UNIT === title) {
+        temp[title] = !isUnitValid(id, value)
+      }
+      else {
+        temp[title] = isValid(id, value)[0]
+      }
+    })
+    setErrors(temp)
+  }, [])
+
   const lock = (title) => ((inqType !== CONTAINER_DETAIL || user.role === 'Guest') && [CONTAINER_NUMBER, CONTAINER_SEAL].includes(title)) || !isEdit;
   const show = (title, value) => (user.role === 'Admin' && [HS_CODE, HTS_CODE, NCM_CODE].includes(title) && value) || ![HS_CODE, HTS_CODE, NCM_CODE].includes(title)
   const onChange = (id, value) => {
     const name = getTypeName(id)
-    if (Object.keys(mapUnit).includes(name)) {
-      setErrors({ ...errors, [id]: isValid(id, value)[0] });
+    if (CM_PACKAGE_UNIT === name) {
+      setErrors({ ...errors, [name]: !isUnitValid(id, value) });
     }
-    else if (CM_PACKAGE_UNIT === getTypeName(id)) {
-      setErrors({ ...errors, [id]: !isUnitValid(id, value) });
+    else {
+      setErrors({ ...errors, [name]: isValid(id, value)[0] });
     }
     updateEdit(old => old.map((row, i) => index === i ? { ...old[index], [id]: value } : row));
   }
@@ -195,6 +215,8 @@ const AmendmentPopup = (props) => {
                       <p style={{ fontWeight: 600 }}>{field.title}</p>
                       <TextField
                         variant="outlined"
+                        error={!isValid(field.id, field.value)[0]}
+                        helperText={!isValid(field.id, field.value)[0] && isValid(field.id, field.value)[1]}
                         fullWidth={true}
                         multiline={true}
                         className={clsx(
