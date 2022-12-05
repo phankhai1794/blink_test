@@ -412,10 +412,6 @@ const InquiryViewer = (props) => {
             }
             if (lastest.state === 'RESOLVED') {
               setStateReplyDraft(false);
-            } else if (['REOPEN_A', 'REOPEN_Q'].includes(lastest.state)) {
-              setReopenLabel(true);
-            } else {
-              setReopenLabel(false);
             }
 
             if (user.role === 'Admin') {
@@ -425,14 +421,15 @@ const InquiryViewer = (props) => {
                 setTempReply({});
               }
               if (['REP_SENT'].includes(lastest.state)) {
-                setShowLabelSent(true);
                 lastest.showIconReply = false;
+                setShowLabelSent(true);
               } else if (['REP_DRF'].includes(lastest.state)) {
                 lastest.showIconReply = false;
                 setShowLabelSent(false);
               } else if (['REOPEN_A'].includes(lastest.state)) {
-                lastest.showIconReply = false;
+                lastest.showIconReply = true;
                 setStateReplyDraft(false);
+                setTempReply({});
               }
             } else {
               if (['REP_SENT', 'REOPEN_A'].includes(lastest.state)) {
@@ -443,9 +440,10 @@ const InquiryViewer = (props) => {
                 lastest.showIconReply = false;
                 setSubmitLabel(true);
               } else if (['REOPEN_Q'].includes(lastest.state)) {
+                lastest.showIconReply = true;
                 lastest.showIconEdit = false;
-                lastest.showIconReply = false;
                 setStateReplyDraft(false);
+                setTempReply({});
               } else if (['AME_DRF'].includes(lastest.state)) {
                 setSubmitLabel(false);
               }
