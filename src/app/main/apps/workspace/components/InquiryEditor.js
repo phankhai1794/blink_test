@@ -194,6 +194,7 @@ const InquiryEditor = (props) => {
 
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
+    if (e.target.value.trim() === currentEditInq.content.replace('{{INQ_TYPE}}', '')) return;
     inq.content = e.target.value;
     dispatch(InquiryActions.validate({ ...valid, content: inq.content }));
     dispatch(InquiryActions.setEditInq(inq));
