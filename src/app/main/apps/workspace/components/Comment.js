@@ -22,7 +22,11 @@ const useStyles = makeStyles(() => ({
     overflow: 'overlay',
     '& .content-reply': {
       fontSize: 15,
-      fontWeight: 500
+      fontWeight: 500,
+      '& .markReopen': {
+        color: 'gray',
+        fontStyle: 'italic'
+      }
     },
     '& .attachment-reply': {
       marginTop: 15
@@ -170,7 +174,7 @@ const Comment = (props) => {
             />
             :
             <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-              {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ? `${title ? `${title} "${content}"` : content}` : (<span>Marked as reopened</span>)}
+              {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ? `${title ? `${title} "${content}"` : content}` : (<span className={'markReopen'}>Marked as reopened</span>)}
             </div>
           }
 
