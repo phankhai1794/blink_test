@@ -52,7 +52,7 @@ export const checkNewInquiry = (metadata, inquiries, type) => {
     const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
     sortDateList.forEach(inq => {
       const find = metadata?.field_options.find(field => field.value === inq.field);
-      if (!list.includes(find.label)) list.push(find.label);
+      if (find && !list.includes(find.label)) list.push(find.label);
     })
   }
   return list;
