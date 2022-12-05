@@ -67,7 +67,7 @@ const Amendment = ({ question, inquiriesLength }) => {
   const [attachments, setAttachments] = useState(question?.content?.mediaFile || []);
   const [fieldValue, setFieldValue] = useState("");
   const [fieldValueSelect, setFieldValueSelect] = useState();
-  const [fieldType, setFieldType] = useState(metadata.field_options.filter(data => !['vvdCode', 'podCode', 'delCode'].includes(data.keyword)).filter(filDrf => !filterInqDrf.includes(filDrf.value)));
+  const [fieldType, setFieldType] = useState(metadata.field_options.filter(filDrf => !filterInqDrf.includes(filDrf.value)));
 
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
