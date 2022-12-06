@@ -61,12 +61,12 @@ const Comment = (props) => {
   const open = Boolean(anchorEl);
   function isJson(str) {
     try {
-      JSON.parse(str);
+      return (typeof JSON.parse(str) === 'object');
     } catch (e) {
       return false;
     }
-    return true;
   }
+  
   const getField = (field) => {
     return metadata.field ? metadata.field[ field ] : '';
   };
