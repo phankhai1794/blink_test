@@ -396,7 +396,7 @@ const InquiryViewer = (props) => {
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
-            if (!['UPLOADED'].includes(lastest.state)) {
+            if (Object.keys(lastestComment).length > 0) {
               setStateReplyDraft(true);
               const reqReply = {
                 inqAns: {
@@ -450,6 +450,9 @@ const InquiryViewer = (props) => {
                 setTempReply({});
               } else if (['AME_DRF'].includes(lastest.state)) {
                 setSubmitLabel(false);
+              } else if (['UPLOADED'].includes(lastest.state)) {
+                setStateReplyDraft(false);
+                setStateReplyDraft(false);
               }
             }
             if (isEditOriginalAmendment) {
