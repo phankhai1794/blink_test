@@ -11,7 +11,7 @@ services:
       [
         "/bin/bash",
         "-c",
-        "envsubst '$$ENV $$API_HOST $$APP_HOST $$PORTAL_PORT $$DEPLOYER_HOST' < /etc/nginx/conf.d/nginx.template > /etc/nginx/conf.d/nginx.conf && nginx -g 'daemon off;'",
+        "envsubst '$$ENV $$API_HOST $$APP_HOST $$PORTAL_PORT $$DEPLOYER_HOST $$POSTGREST_HOST $$POSTGREST_UI_HOST' < /etc/nginx/conf.d/nginx.template > /etc/nginx/conf.d/nginx.conf && nginx -g 'daemon off;'",
       ]
     ports:
       - ${GATEWAY_PORT}:80
