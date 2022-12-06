@@ -302,6 +302,10 @@ const InquiryViewer = (props) => {
                   setStateReplyDraft(false);
                   lastest.showIconEdit = true;
                   lastest.showIconAttachAnswerFile = false;
+                } else if (filterOffshoreSent.state === 'INQ_SENT') {
+                  lastest.showIconReply = true;
+                  lastest.showIconEdit = false;
+                  setStateReplyDraft(false);
                 }
                 if (['REP_A_SENT'].includes(filterOffshoreSent.state)) {
                   setSubmitLabel(true);
@@ -472,28 +476,13 @@ const InquiryViewer = (props) => {
               });
             });
             setComment(comments);
-            setInqHasComment(true);
-          } else {
-            // check close popup empty
-            const optionsOfQuestion = [...inquiries];
-            const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
-            //
-            const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
-            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
-            optionsOfQuestion.splice(removeIndex, 1);
-            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-            //
-            getBlInfo(myBL.id).then(res => {
-              dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
-              if (!inquiriesByField.length) {
-                if (field === 'INQUIRY_LIST') {
-                  dispatch(FormActions.toggleAllInquiry(false));
-                  dispatch(FormActions.toggleAmendmentsList(false));
-                } else {
-                  dispatch(InquiryActions.setOneInq({}));
-                }
-              }
-            }).catch((error) => console.error(error));
+            if (res.length > 1) {
+              setInqHasComment(true);
+            }
+            if (res.length === 1) {
+              setShowViewAll(false);
+              setInqHasComment(false)
+            }
           }
           setIsLoadedComment(true);
         })
@@ -628,8 +617,28 @@ const InquiryViewer = (props) => {
             setEditOriginalAmendment(res.isEditOriginalAmendment);
             setViewDropDown('');
             setDisableSaveReply(false);
+            if (res.checkEmpty) {
+              const optionsOfQuestion = [...inquiries];
+              const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
+              const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
+              const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+              optionsOfQuestion.splice(removeIndex, 1);
+              dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+              getBlInfo(myBL.id).then(res => {
+                dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
+                if (!inquiriesByField.length) {
+                  if (field === 'INQUIRY_LIST') {
+                    dispatch(FormActions.toggleAllInquiry(false));
+                    dispatch(FormActions.toggleAmendmentsList(false));
+                  } else {
+                    dispatch(InquiryActions.setOneInq({}));
+                  }
+                }
+              }).catch((error) => console.error(error));
+            }
+            props.getUpdatedAt();
           }
-          setSaveComment(!isSaveComment);
+          // setSaveComment(!isSaveComment);
         }).catch((error) => console.error(error));
     }
     dispatch(
