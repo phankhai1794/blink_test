@@ -59,13 +59,20 @@ const Comment = (props) => {
 
   const user = useSelector(({ user }) => user);
   const open = Boolean(anchorEl);
-
+  function isJson(str) {
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }
   const getField = (field) => {
     return metadata.field ? metadata.field[ field ] : '';
   };
 
   const containerCheck = [ getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST) ];
-
+ 
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -164,13 +171,13 @@ const Comment = (props) => {
             {/*  </>*/}
             {/*)}*/}
           </div>
-          {content instanceof Array && containerCheck.includes(question.field) ?
+          {(content instanceof Array|| isJson(content))&& containerCheck.includes(question.field) ?
             question?.process === 'pending' ?<ContainerDetailFormOldVersion
               container={
                 question.field === containerCheck[ 0 ] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
               }
-              setEditContent={() => null}
-              originalValues={content}
+              question={question}
+              originalValues={JSON.parse(content)}
               disableInput={true}
             />:
               <ContainerDetailForm

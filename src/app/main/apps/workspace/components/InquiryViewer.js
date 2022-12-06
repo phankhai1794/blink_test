@@ -466,6 +466,7 @@ const InquiryViewer = (props) => {
               process: 'draft',
               state: res[0]?.state,
             }];
+           
             res.map(r => {
               const { content, mediaFile } = r.content;
               comments.push({
@@ -1745,7 +1746,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-export const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, disableInput = false }) => {
+export const ContainerDetailFormOldVersion = ({ container, originalValues,question, setTextResolve, disableInput = false }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -1764,9 +1765,9 @@ export const ContainerDetailFormOldVersion = ({ container, question, setTextReso
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
-
   const [tableScrollTop, setTableScrollTop] = useState(0);
-  const [values, setValues] = useState(getValueField(container) || [{}]);
+  const [values, setValues] = useState(originalValues || getValueField(container) || [{}]);
+
   const inqType = getLabelById(metadata['inq_type_options'], question.inqType);
   const cdType =
     inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CONTAINER_SEAL];
