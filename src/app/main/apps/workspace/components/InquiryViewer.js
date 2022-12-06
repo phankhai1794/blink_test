@@ -1265,9 +1265,6 @@ const InquiryViewer = (props) => {
                       {showLabelSent && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
                         <span className={classes.labelStatus}>Sent</span>
                       )}
-                      {/*{isReopenLabel && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (*/}
-                      {/*  <span className={classes.labelStatus}>Reopen</span>*/}
-                      {/*)}*/}
                     </div>
                     {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
                     {!['COMPL', 'UPLOADED'].includes(question.state) && (
@@ -1341,7 +1338,6 @@ const InquiryViewer = (props) => {
                         <span className={classes.labelStatus}>Resolved</span> :
                         <>
                           {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>}
-                          {/*{(['REOPEN_A'].includes(question.state) || isReopenLabel) && <span className={classes.labelStatus}>Reopen</span>}*/}
                         </>
                     }
                   </div>
