@@ -1745,7 +1745,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, disableInput = false }) => {
+export const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, disableInput = false }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);

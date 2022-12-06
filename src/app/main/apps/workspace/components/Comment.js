@@ -12,6 +12,7 @@ import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from "./ParagraphAnswer";
+import { ContainerDetailFormOldVersion } from './InquiryViewer';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -163,15 +164,24 @@ const Comment = (props) => {
             {/*  </>*/}
             {/*)}*/}
           </div>
-          {question?.process === 'draft' && content instanceof Array && containerCheck.includes(question.field) ?
-            <ContainerDetailForm
+          {content instanceof Array && containerCheck.includes(question.field) ?
+            question?.process === 'pending' ?<ContainerDetailFormOldVersion
               container={
                 question.field === containerCheck[ 0 ] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
               }
               setEditContent={() => null}
               originalValues={content}
               disableInput={true}
-            />
+            />:
+              <ContainerDetailForm
+                container={
+                  question.field === containerCheck[ 0 ] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                }
+                setEditContent={() => null}
+                originalValues={content}
+                disableInput={true}
+              />
+            
             :
             <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
               {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ? `${title ? `${title} "${content}"` : content}` : (<span className={'markReopen'}>Marked as reopened</span>)}
