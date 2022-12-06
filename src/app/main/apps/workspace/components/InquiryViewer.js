@@ -254,11 +254,9 @@ const InquiryViewer = (props) => {
               lastest.updatedAt = filterOffshoreSent.updatedAt;
               //
               if (['REOPEN_A', 'REOPEN_Q'].includes(filterOffshoreSent.state)) {
-                setReopenLabel(true);
                 setShowLabelSent(false);
                 setSubmitLabel(false);
-              } else {
-                setReopenLabel(false);
+                lastest.showIconReply = true;
               }
               if (user.role === 'Admin') {
                 if (filterOffshoreSent.state === 'REP_Q_SENT') {
@@ -269,7 +267,7 @@ const InquiryViewer = (props) => {
                   setStateReplyDraft(true);
                   setShowLabelSent(false);
                 }
-                if (['REP_A_SENT', 'ANS_SENT', 'REOPEN_Q'].includes(filterOffshoreSent.state)) {
+                if (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = true;
                   lastest.showIconEdit = false;
                   lastest.showIconAttachReplyFile = false;
@@ -293,7 +291,7 @@ const InquiryViewer = (props) => {
                   lastest.showIconAttachAnswerFile = false;
                   props.getStateReplyDraft(true);
                   //
-                } else if (['REP_Q_SENT', 'REOPEN_A'].includes(filterOffshoreSent.state)) {
+                } else if (['REP_Q_SENT'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = true;
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                   setSubmitLabel(true);
@@ -318,6 +316,19 @@ const InquiryViewer = (props) => {
               }
             }
             //
+            if (['REOPEN_A', 'REOPEN_Q'].includes(filterOffshoreSent.state)) {
+              const markReopen = {
+                creator: filterOffshoreSent.creator,
+                updater: filterOffshoreSent.creator,
+                createdAt: filterOffshoreSent.createdAt,
+                updatedAt: filterOffshoreSent.createdAt,
+                answersMedia: filterOffshoreSent.answersMedia,
+                content: `<span class='markReopen'>Marked as reopened</span>`,
+                process: 'pending',
+                state: filterOffshoreSent?.state,
+              }
+              res.splice(res.length - 1, 0, markReopen);
+            }
             setComment([...res]);
             // setType(metadata.ans_type.paragraph);
             setQuestion(lastest);
@@ -385,7 +396,7 @@ const InquiryViewer = (props) => {
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
-            if (!['UPLOADED'].includes(lastest.state)) {
+            if (Object.keys(lastestComment).length > 0) {
               setStateReplyDraft(true);
               const reqReply = {
                 inqAns: {
@@ -405,10 +416,6 @@ const InquiryViewer = (props) => {
             }
             if (lastest.state === 'RESOLVED') {
               setStateReplyDraft(false);
-            } else if (['REOPEN_A', 'REOPEN_Q'].includes(lastest.state)) {
-              setReopenLabel(true);
-            } else {
-              setReopenLabel(false);
             }
 
             if (user.role === 'Admin') {
@@ -418,14 +425,15 @@ const InquiryViewer = (props) => {
                 setTempReply({});
               }
               if (['REP_SENT'].includes(lastest.state)) {
-                setShowLabelSent(true);
                 lastest.showIconReply = false;
+                setShowLabelSent(true);
               } else if (['REP_DRF'].includes(lastest.state)) {
                 lastest.showIconReply = false;
                 setShowLabelSent(false);
               } else if (['REOPEN_A'].includes(lastest.state)) {
-                lastest.showIconReply = false;
+                lastest.showIconReply = true;
                 setStateReplyDraft(false);
+                setTempReply({});
               }
             } else {
               if (['REP_SENT', 'REOPEN_A'].includes(lastest.state)) {
@@ -436,11 +444,15 @@ const InquiryViewer = (props) => {
                 lastest.showIconReply = false;
                 setSubmitLabel(true);
               } else if (['REOPEN_Q'].includes(lastest.state)) {
+                lastest.showIconReply = true;
                 lastest.showIconEdit = false;
-                lastest.showIconReply = false;
                 setStateReplyDraft(false);
+                setTempReply({});
               } else if (['AME_DRF'].includes(lastest.state)) {
                 setSubmitLabel(false);
+              } else if (['UPLOADED'].includes(lastest.state)) {
+                setStateReplyDraft(false);
+                setStateReplyDraft(false);
               }
             }
             if (isEditOriginalAmendment) {
@@ -461,6 +473,7 @@ const InquiryViewer = (props) => {
               process: 'draft',
               state: res[0]?.state,
             }];
+           
             res.map(r => {
               const { content, mediaFile } = r.content;
               comments.push({
@@ -475,6 +488,20 @@ const InquiryViewer = (props) => {
                 state: r?.state,
               });
             });
+            //
+            if (['REOPEN_A', 'REOPEN_Q'].includes(lastestComment.state)) {
+              const markReopen = {
+                creator: lastestComment.creator,
+                updater: lastestComment.creator,
+                createdAt: lastestComment.createdAt,
+                updatedAt: lastestComment.createdAt,
+                answersMedia: lastestComment.answersMedia,
+                content: `<span class='markReopen'>Marked as reopened</span>`,
+                process: 'pending',
+                state: lastestComment?.state,
+              }
+              comments.splice(comments.length - 1, 0, markReopen);
+            }
             setComment(comments);
             if (res.length > 1) {
               setInqHasComment(true);
@@ -740,6 +767,7 @@ const InquiryViewer = (props) => {
         dispatch(InquiryActions.setInquiries(optionsInquires));
         props.getUpdatedAt();
         setIsResolve(false);
+        setViewDropDown('');
         // dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
         // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
@@ -1109,6 +1137,7 @@ const InquiryViewer = (props) => {
           }
           dispatch(InquiryActions.setInquiries(optionsInquires));
           props.getUpdatedAt();
+          setViewDropDown('');
           // setSaveComment(!isSaveComment);
           dispatch(
             AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
@@ -1239,9 +1268,6 @@ const InquiryViewer = (props) => {
                       {showLabelSent && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
                         <span className={classes.labelStatus}>Sent</span>
                       )}
-                      {isReopenLabel && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
-                        <span className={classes.labelStatus}>Reopen</span>
-                      )}
                     </div>
                     {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
                     {!['COMPL', 'UPLOADED'].includes(question.state) && (
@@ -1315,7 +1341,6 @@ const InquiryViewer = (props) => {
                         <span className={classes.labelStatus}>Resolved</span> :
                         <>
                           {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>}
-                          {(['REOPEN_A'].includes(question.state) || isReopenLabel) && <span className={classes.labelStatus}>Reopen</span>}
                         </>
                     }
                   </div>
@@ -1375,7 +1400,7 @@ const InquiryViewer = (props) => {
             </div>
             <Typography variant="h5">{question.name}</Typography>
             {
-              ['RESOLVED', 'COMPL', 'UPLOADED', 'AME_DRF', 'AME_SENT'].includes(question.state) && containerCheck.includes(question.field) ? (
+              ['RESOLVED', 'COMPL', 'UPLOADED', 'AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q'].includes(question.state) && containerCheck.includes(question.field) ? (
                 question?.process === 'draft' ?
                   <>
                     {
@@ -1729,7 +1754,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, disableInput = false }) => {
+export const ContainerDetailFormOldVersion = ({ container, originalValues,question, setTextResolve, disableInput = false }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -1748,9 +1773,9 @@ const ContainerDetailFormOldVersion = ({ container, question, setTextResolve, di
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
-
   const [tableScrollTop, setTableScrollTop] = useState(0);
-  const [values, setValues] = useState(getValueField(container) || [{}]);
+  const [values, setValues] = useState(originalValues || getValueField(container) || [{}]);
+
   const inqType = getLabelById(metadata['inq_type_options'], question.inqType);
   const cdType =
     inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CONTAINER_SEAL];

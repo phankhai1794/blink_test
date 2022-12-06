@@ -12,6 +12,7 @@ import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from "./ParagraphAnswer";
+import { ContainerDetailFormOldVersion } from './InquiryViewer';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -22,7 +23,11 @@ const useStyles = makeStyles(() => ({
     overflow: 'overlay',
     '& .content-reply': {
       fontSize: 15,
-      fontWeight: 500
+      fontWeight: 500,
+      '& .markReopen': {
+        color: 'gray',
+        fontStyle: 'italic'
+      }
     },
     '& .attachment-reply': {
       marginTop: 15
@@ -54,13 +59,20 @@ const Comment = (props) => {
 
   const user = useSelector(({ user }) => user);
   const open = Boolean(anchorEl);
-
+  function isJson(str) {
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }
   const getField = (field) => {
     return metadata.field ? metadata.field[ field ] : '';
   };
 
   const containerCheck = [ getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST) ];
-
+ 
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -132,9 +144,6 @@ const Comment = (props) => {
         <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
           <div className="flex justify-between">
             <UserInfo name={checkSystemResolved(question?.process, id) ? 'System' : userName} time={displayTime(createdAt)} avatar={avatar} />
-            {['REOPEN_A', 'REOPEN_Q'].includes(reply.state) && (
-                <span className={classes.labelStatus}>Reopen</span>
-            )}
             {/*{user.displayName === userName && key === id && (*/}
             {/*  <>*/}
             {/*    <IconButton onClick={handleClick}>*/}
@@ -162,18 +171,29 @@ const Comment = (props) => {
             {/*  </>*/}
             {/*)}*/}
           </div>
-          {question?.process === 'draft' && content instanceof Array && containerCheck.includes(question.field) ?
-            <ContainerDetailForm
+          {(content instanceof Array|| isJson(content))&& containerCheck.includes(question.field) ?
+            question?.process === 'pending' ?<ContainerDetailFormOldVersion
               container={
                 question.field === containerCheck[ 0 ] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
               }
-              setEditContent={() => null}
-              originalValues={content}
+              question={question}
+              originalValues={JSON.parse(content)}
               disableInput={true}
-            />
+            />:
+              <ContainerDetailForm
+                container={
+                  question.field === containerCheck[ 0 ] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                }
+                setEditContent={() => null}
+                originalValues={content}
+                disableInput={true}
+              />
+            
             :
             <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-              {title ? `${title} "${content}"` : content}
+              {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ? `${title ? `${title} "${content}"` : content}` : (
+                  type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>
+              )}
             </div>
           }
 
