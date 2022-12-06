@@ -1401,7 +1401,7 @@ const InquiryViewer = (props) => {
             </div>
             <Typography variant="h5">{question.name}</Typography>
             {
-              ['RESOLVED', 'COMPL', 'UPLOADED', 'AME_DRF', 'AME_SENT'].includes(question.state) && containerCheck.includes(question.field) ? (
+              ['RESOLVED', 'COMPL', 'UPLOADED', 'AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q'].includes(question.state) && containerCheck.includes(question.field) ? (
                 question?.process === 'draft' ?
                   <>
                     {

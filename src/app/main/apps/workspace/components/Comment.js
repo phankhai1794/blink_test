@@ -191,7 +191,9 @@ const Comment = (props) => {
             
             :
             <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-              {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ? `${title ? `${title} "${content}"` : content}` : (<span className={'markReopen'}>Marked as reopened</span>)}
+              {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ? `${title ? `${title} "${content}"` : content}` : (
+                  type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>
+              )}
             </div>
           }
 
