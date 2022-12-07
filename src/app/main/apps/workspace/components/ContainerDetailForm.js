@@ -50,8 +50,10 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const type = (container === CONTAINER_DETAIL) ? CDTitle : CMTitle;
 
   useEffect(() => {
-    setValues(originalData)
-    setValueEdit(originalData)
+    if (!originalValues) {
+      setValues(originalData);
+      setValueEdit(originalData);
+    }
   }, [container])
 
   const handleEdit = (state) => {

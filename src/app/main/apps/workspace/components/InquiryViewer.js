@@ -1800,7 +1800,9 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   };
 
   useEffect(() => {
-    setValues(getValueField(container) || [{}]);
+    if (!originalValues) {
+      setValues(getValueField(container) || [{}]);
+    }
   }, [content]);
 
   /**
