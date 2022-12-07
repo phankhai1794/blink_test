@@ -20,6 +20,7 @@ import { updateInquiry, saveInquiry, deleteInquiry, getUpdatedAtAnswer } from 'a
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
+import { validateTextInput } from 'app/services/myBLService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -194,7 +195,7 @@ const InquiryEditor = (props) => {
 
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
-    
+
     inq.content = e.target.value;
     dispatch(InquiryActions.validate({ ...valid, content: inq.content }));
     dispatch(InquiryActions.setEditInq(inq));
@@ -251,7 +252,18 @@ const InquiryEditor = (props) => {
     return false
   }
 
+  const handleValidateInput = async (confirm = null) => {
+    let textInput = currentEditInq?.content || '';
+    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
+    if (isWarning) {
+      dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
+    } else {
+      confirm && confirm();
+    }
+  }
+
   const onSave = async () => {
+    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     let check = true;
     const ansTypeChoice = metadata.ans_type['choice'];
     let validate = {};
@@ -650,7 +662,7 @@ const InquiryEditor = (props) => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => onSave()}
+                onClick={() => handleValidateInput(onSave)}
                 classes={{ root: classes.button }}>
                 Save
               </Button>

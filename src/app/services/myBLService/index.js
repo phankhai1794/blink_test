@@ -25,3 +25,8 @@ export async function getCustomerAmendment(id) {
   const response = await axios().get(`${PATH}/${id}/customer-amendments-latest`);
   return response.data;
 }
+
+export async function validateTextInput(data) {
+  const response = await axios().post(`${PATH}/validate/check-input`, data);
+  return response.data;
+}
