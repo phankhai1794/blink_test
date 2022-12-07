@@ -741,7 +741,6 @@ const InquiryViewer = (props) => {
   };
 
   const handleValidateInput = async (type, confirm = null) => {
-    let textInput = '';
     let textInput = tempReply?.answer?.content.trim() || '';
     if (isSeparate && !['REPLY'].includes(type)) {
        textInput = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
@@ -789,7 +788,7 @@ const InquiryViewer = (props) => {
         props.getUpdatedAt();
         setIsResolve(false);
         setViewDropDown('');
-        // dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
+        dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
         // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
       })

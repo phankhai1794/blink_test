@@ -404,8 +404,8 @@ const InquiryEditor = (props) => {
         });
         const editedIndex = inquiries.findIndex(inq => inq.id === inquiry.id);
         inquiries[editedIndex] = currentEditInq;
-        if (update.data.length) {
-          inquiries[editedIndex].answerObj = update.data;
+        if (update.data.length && editedIndex) {
+          inquiries[editedIndex].answerObj = [...inquiries[editedIndex].answerObj, ...update.data].filter(inq => inq.id);
         }
         if (prevField !== currentEditInq.field) {
           const hasInq = inquiries.filter(inq => inq.field === prevField);
