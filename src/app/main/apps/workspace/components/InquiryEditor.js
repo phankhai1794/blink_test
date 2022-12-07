@@ -174,7 +174,7 @@ const InquiryEditor = (props) => {
     inq.inqType = e.value;
     if (e.__isNew__) inq.isNew = e.__isNew__
     dispatch(InquiryActions.validate({ ...valid, inqType: true }));
-    inq.content = currentEditInq.content.replace(nameType || '{{INQ_TYPE}}', e.label);
+    inq.content = currentEditInq.content.trim().replace(nameType || '{{INQ_TYPE}}', e.label);
     setValueType(e);
     setNameType(e.label);
     dispatch(InquiryActions.setEditInq(inq));
@@ -194,7 +194,7 @@ const InquiryEditor = (props) => {
 
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
-    if (e.target.value.trim() === currentEditInq.content.replace('{{INQ_TYPE}}', '')) return;
+    
     inq.content = e.target.value;
     dispatch(InquiryActions.validate({ ...valid, content: inq.content }));
     dispatch(InquiryActions.setEditInq(inq));
