@@ -16,7 +16,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { uploadFile } from 'app/services/fileService';
-import {updateInquiry, saveInquiry, deleteInquiry, getUpdatedAtAnswer} from 'app/services/inquiryService';
+import { updateInquiry, saveInquiry, deleteInquiry, getUpdatedAtAnswer } from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
@@ -119,7 +119,6 @@ const InquiryEditor = (props) => {
 
   const user = useSelector(({ user }) => user);
 
-  const skipField = ['vvdCode', 'podCode', 'delCode'];
   const optionsAnsType = [
     {
       label: 'Option Selection',
@@ -135,7 +134,7 @@ const InquiryEditor = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const fieldType = metadata.field_options.filter(data => !skipField.includes(data.keyword));
+  const fieldType = metadata.field_options;
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
   );
@@ -159,18 +158,12 @@ const InquiryEditor = (props) => {
 
   useEffect(() => {
     setPrevField(currentEditInq.field)
-  },[])
+  }, [])
 
   useEffect(() => {
     if (fieldValue) {
-      const list = [currentEditInq];
       const filter = metadata.inq_type_options
-        .filter((data) => {
-          return (
-            data.field?.includes(fieldValue.value) &&
-            list.filter((q) => q.inqType === data.value && q.field === fieldValue.value).length === 0
-          );
-        })
+        .filter((data) => data.field?.includes(fieldValue.value))
         .sort((a, b) => a.label.localeCompare(b.label));
       setInqTypeOption(filter);
     }
@@ -201,6 +194,7 @@ const InquiryEditor = (props) => {
 
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
+    if (e.target.value.trim() === currentEditInq.content.replace('{{INQ_TYPE}}', '')) return;
     inq.content = e.target.value;
     dispatch(InquiryActions.validate({ ...valid, content: inq.content }));
     dispatch(InquiryActions.setEditInq(inq));
@@ -463,10 +457,10 @@ const InquiryEditor = (props) => {
           saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
             .then((res) => {
               const mediaFile = [];
-              mediaList.forEach(({id, name, ext}) => mediaFile.push({id, name, ext}))
+              mediaList.forEach(({ id, name, ext }) => mediaFile.push({ id, name, ext }))
               const inqResponse = res.inqResponse || {};
-              inqResponse.creator = { 
-                userName: user.displayName || '', 
+              inqResponse.creator = {
+                userName: user.displayName || '',
                 avatar: user.photoURL || ''
               }
               inqResponse.mediaFile = mediaFile;
