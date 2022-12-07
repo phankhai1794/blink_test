@@ -741,24 +741,29 @@ const InquiryViewer = (props) => {
   };
 
   const handleValidateInput = async (type, confirm = null) => {
-    let textInput = tempReply?.answer?.content.trim() || '';
-    if (isSeparate && !['REPLY'].includes(type)) {
-       textInput = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
-    } else if (!['REPLY'].includes(type)) {
+    // Check if no CM/CD
+    if (['string'].includes(typeof textResolve)) {
+      let textInput = tempReply?.answer?.content.trim() || '';
+      if (isSeparate && !['REPLY'].includes(type)) {
+        textInput = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
+      } else if (!['REPLY'].includes(type)) {
         textInput = textResolve.trim();
-    }
-    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
-    if (isWarning) {
-      dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }))
+      }
+
+      const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
+      if (isWarning) {
+        dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
+      } else {
+        confirm && confirm();
+      }
     } else {
-      confirm && confirm()
+      confirm && confirm();
     }
   }
 
   const onConfirm = () => {
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     let contentField = '';
-    const getTempReply = { ...tempReply };
     if (isSeparate) {
       contentField = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
     } else if (typeof textResolve === 'string') {
