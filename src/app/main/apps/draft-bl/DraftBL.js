@@ -55,9 +55,9 @@ const useStyles = makeStyles((theme) => ({
   },
   tittle_S: {
     fontFamily: 'Arial, serif',
-    fontSize: 13 /*1vw*/,
+    fontSize: 10 /*1vw*/,
     color: 'rgb(0, 0, 255)',
-    paddingTop: 3.2
+    paddingTop: 1.2
   },
   tittle_M: {
     fontFamily: 'Arial, serif',
@@ -173,7 +173,7 @@ const useStyles = makeStyles((theme) => ({
   },
   description_payment_dash: {
     fontFamily: 'Courier, serif',
-    fontSize: 20,
+    fontSize: 9,
     letterSpacing: 3
   },
   note: {
@@ -384,7 +384,7 @@ const DraftPage = (props) => {
               </Grid>
               <Grid container item xs={5}>
                 <Grid item>
-                  <div className={classes.tittle_S}>{`FINAL DESTINATION(for the Merchant's reference only)`}</div>
+                  <div className={classes.tittle_M}>{`FINAL DESTINATION(for the Merchant's reference only)`}</div>
                   <span className={clsx(classes.content_L, classes.singleLine)}>
                     {getValueField(FINAL_DESTINATION)}
                   </span>
@@ -436,14 +436,14 @@ const DraftPage = (props) => {
 
           <Grid container>
             <Grid container item style={{ borderBottom: BODER_COLOR }}>
-              <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
+              <Grid item xs={2} style={{ borderRight: BODER_COLOR, display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
                 <div className={classes.tittle_S}>
                   <span className={classes.tittle_S}>CNTR. NOS. W/SEAL NOS.</span>
                   <br />
                   <span className={classes.tittle_S}>{`MARKS & NUMBERS`}</span>
                 </div>
               </Grid>
-              <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
+              <Grid item xs={2} style={{ borderRight: BODER_COLOR, display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center'}}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     <span className={classes.tittle_S}>QUANTITY</span>
@@ -454,7 +454,7 @@ const DraftPage = (props) => {
                   </div>
                 </div>
               </Grid>
-              <Grid item xs={1} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
+              <Grid item xs={1} style={{ borderRight: BODER_COLOR,  display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     <span className={classes.tittle_S}>H</span>
@@ -463,21 +463,21 @@ const DraftPage = (props) => {
                   </div>
                 </div>
               </Grid>
-              <Grid item xs={3} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
+              <Grid item xs={3} style={{ borderRight: BODER_COLOR, display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center'}}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     DESCRIPTION OF GOODS
                   </div>
                 </div>
               </Grid>
-              <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
+              <Grid item xs={2} style={{ borderRight: BODER_COLOR, display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     GROSS WEIGHT
                   </div>
                 </div>
               </Grid>
-              <Grid item xs={2} style={{ textAlign: 'center' }}>
+              <Grid item xs={2} style={{ display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     GROSS MEASUREMENT
@@ -490,7 +490,7 @@ const DraftPage = (props) => {
             <Grid container item>
               <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
                 <div className={classes.content_M}
-                  style={{ width: '251px', paddingTop: 30 }}>
+                  style={{ width: '251px', paddingTop: 5 }}>
                   {containersDetail &&
                     containersDetail.map((cd, idx) => (
                       <span key={idx} style={{ whiteSpace: 'pre' }}>
@@ -499,7 +499,7 @@ const DraftPage = (props) => {
                       </span>
                     ))}
                   <span className={classes.description_payment_dash}>
-                    -----------------------------------------------------------------------------
+                    -----------------------------------------------------------------------------------------------------------------------------------------
                   </span>
                 </div>
               </Grid>
@@ -514,7 +514,7 @@ const DraftPage = (props) => {
               {containersManifest?.length ?
                 containersManifest.map((cm, index) => (
                   <Grid container item key={index} className={classes.content_L}>
-                    <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
+                    <Grid item xs={2} style={{ borderRight: BODER_COLOR,textAlign: 'left', paddingTop: '8px', paddingRight:'5px' }}>
                       {cm[getInqType(CM_MARK)]}
                     </Grid>
                     <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
