@@ -6,7 +6,7 @@ const initialState = {
   error: '',
   suggestMails: [],
   validateMail: { toCustomer: '', toOnshore: '' },
-  tags: {},
+  tags: { toCustomer: [], toOnshore: [], toCustomerCc: [], toOnshoreCc: [], toCustomerBcc: [], toOnshoreBcc: [] },
 };
 
 const mailReducer = function (state = initialState, action) {
