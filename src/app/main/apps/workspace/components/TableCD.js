@@ -4,7 +4,10 @@ import {
   CONTAINER_TYPE,
   CONTAINER_PACKAGE,
   CONTAINER_WEIGHT,
-  CONTAINER_MEASUREMENT
+  CONTAINER_MEASUREMENT,
+  CONTAINER_PACKAGE_UNIT,
+  CONTAINER_WEIGHT_UNIT,
+  CONTAINER_MEASUREMENT_UNIT
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
@@ -299,17 +302,17 @@ const TableCD = (props) => {
                 </Grid>
                 <Grid item xs={2}>
                   <BLField disableClick={true} disableIcon={true}>
-                    {cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]}
+                    {`${cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]] || ''}${cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE_UNIT]] || ''}`}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
                   <BLField disableClick={true} disableIcon={true}>
-                    {cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]}
+                    {`${cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]] || ''}${cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT_UNIT]] || ''}`}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
                   <BLField disableClick={true} disableIcon={true}>
-                    {cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]}
+                    {`${cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]] || ''}${cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT_UNIT]] || ''}`}
                   </BLField>
                 </Grid>
               </Grid>

@@ -1,4 +1,4 @@
-import { CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT } from '@shared/keyword';
+import { CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT, CM_PACKAGE_UNIT, CM_WEIGHT_UNIT, CM_MEASUREMENT_UNIT } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useSelector, useDispatch } from 'react-redux';
@@ -283,16 +283,16 @@ const TableCM = (props) => {
               <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
             </Grid>
             <Grid item xs={2}>
-              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{cm?.[metadata?.inq_type?.[CM_PACKAGE]]}</BLField>
+              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${cm?.[metadata?.inq_type?.[CM_PACKAGE]] || ''}${cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]] || ''}`}</BLField>
             </Grid>
             <Grid item xs={4}>
               <BLField disableClick={true} multiline={true} rows={6} width='360px' disableIcon={true}>{cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}</BLField>
             </Grid>
             <Grid item xs={2}>
-              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{cm?.[metadata?.inq_type?.[CM_WEIGHT]]}</BLField>
+              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${cm?.[metadata?.inq_type?.[CM_WEIGHT]] || ''}${cm?.[metadata?.inq_type?.[CM_WEIGHT_UNIT]] || ''}`}</BLField>
             </Grid>
             <Grid item xs={2}>
-              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]}</BLField>
+              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${cm?.[metadata?.inq_type?.[CM_MEASUREMENT]] || ''}${cm?.[metadata?.inq_type?.[CM_MEASUREMENT_UNIT]] || ''}`}</BLField>
             </Grid>
           </Grid>) :
           <Grid container spacing={2} className='px-8 py-2'>
