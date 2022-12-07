@@ -256,28 +256,16 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         return <>
           <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
         </>
-      } else if (hasInquiry || hasAmendment) {
-        return <>
-          {attachIcon}
-          {hasInquiry && <HelpIcon className={clsx(classes.sizeIcon, iconColor)} />}
-          {hasAmendment && <img src='/assets/images/icons/icon-amendment.svg' className={classes.iconSvg} />}
-        </>
-      } else if (hasAnswer) {
-        return <>
-          {attachIcon}
-          <ReplyIcon className={clsx(classes.sizeIcon, iconColor)} />
-        </>
-      } else if (isResolved) {
-        return <>
-          {attachIcon}
-          <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)} />
-        </>
-      } else if (isUploaded) {
-        return <>
-          {attachIcon}
-          <img src='/assets/images/icons/icon-uploaded.svg' className={classes.iconSvg} />
-        </>
       }
+      return <>
+        {attachIcon}
+        {hasInquiry && <HelpIcon className={clsx(classes.sizeIcon, iconColor)} />}
+        {hasAmendment && <img src='/assets/images/icons/icon-amendment.svg' className={classes.iconSvg} />}
+        {hasAnswer && <ReplyIcon className={clsx(classes.sizeIcon, iconColor)} />}
+        {isResolved && <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)} />}
+        {isUploaded && <img src='/assets/images/icons/icon-uploaded.svg' className={classes.iconSvg} />}
+      </>
+     
     }
   }
 
@@ -289,7 +277,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         inquiries,
         listCommentDraft
       );
-
+      
       setIsEmpty(colorStatusObj.isEmpty);
       setHasInquiry(colorStatusObj.hasInquiry);
       setHasAmendment(colorStatusObj.hasAmendment);
