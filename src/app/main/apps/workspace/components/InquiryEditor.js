@@ -280,7 +280,7 @@ const InquiryEditor = (props) => {
           } else {
             validate = { ...validate, answerContent: true };
           }
-          const dupArray = currentEditInq.answerObj.map((ans) => ans.content);
+          const dupArray = currentEditInq.answerObj.map((ans) => ans.content.trim());
           if (toFindDuplicates(dupArray).length) {
             dispatch(
               AppActions.showMessage({
@@ -346,7 +346,7 @@ const InquiryEditor = (props) => {
         }
       }
       if (ansTypeChoice === inquiry.ansType && inquiry.answerObj.length) {
-        const dupArray = inquiry.answerObj.map((ans) => ans.content);
+        const dupArray = inquiry.answerObj.map((ans) => ans.content.trim());
         if (toFindDuplicates(dupArray).length) {
           dispatch(
             AppActions.showMessage({
