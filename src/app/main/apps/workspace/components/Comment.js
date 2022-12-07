@@ -172,24 +172,27 @@ const Comment = (props) => {
             {/*)}*/}
           </div>
           {(content instanceof Array || isJson(content)) && containerCheck.includes(question.field) ?
-            question?.process === 'pending' ? <ContainerDetailFormOldVersion
-              container={
-                question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-              }
-              question={question}
-              originalValues={JSON.parse(content)}
-              disableInput={true}
-            /> :
-              <ContainerDetailForm
-                container={
-                  question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                }
-                setEditContent={() => null}
-                originalValues={content}
-                disableInput={true}
-              />
-
-            :
+            (!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
+              (
+                question?.process === 'pending' ?
+                  <ContainerDetailFormOldVersion
+                    container={
+                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                    }
+                    question={question}
+                    originalValues={JSON.parse(content)}
+                    disableInput={true}
+                  /> :
+                  <ContainerDetailForm
+                    container={
+                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                    }
+                    setEditContent={() => null}
+                    originalValues={content}
+                    disableInput={true}
+                  />
+              ) : <span className={'markReopen'}>Marked as reopened</span>
+            ) :
             <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
               {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ? `${title ? `${title} "${content}"` : content}` : (
                 type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>
