@@ -507,13 +507,7 @@ const InquiryViewer = (props) => {
               comments.splice(comments.length - 1, 0, markReopen);
             }
             setComment(comments);
-            if (res.length > 1) {
-              setInqHasComment(true);
-            }
-            if (res.length === 1) {
-              setShowViewAll(false);
-              setInqHasComment(false)
-            }
+            setInqHasComment(true);
           }
           setIsLoadedComment(true);
         })
