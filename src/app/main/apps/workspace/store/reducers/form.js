@@ -27,88 +27,92 @@ const initialState = {
   openNotificationBLWarning: { status: false, userName: '' },
   openNotificationBLReloadWarning: false,
   inqViewerFocus: null,
+  validateInput: { isValid: true, prohibitedInfo: null, handleConfirm: null },
 };
 
 const formReducer = function (state = initialState, action) {
   switch (action.type) {
-  case Actions.SET_FULLSCREEN: {
-    return { ...state, fullscreen: action.state };
-  }
-  case Actions.OPEN_CREATE_INQUIRY: {
-    return { ...state, openDialog: action.state };
-  }
-  case Actions.OPEN_ALL_INQUIRY: {
-    return { ...state, openAllInquiry: action.state };
-  }
-  case Actions.TOGGLE_SAVE_INQUIRY: {
-    return { ...state, showSaveInquiry: action.state };
-  }
-  case Actions.TOGGLE_AMENDMENTS_LIST: {
-    return { ...state, openAmendmentList: action.state };
-  }
-  case Actions.TOGGLE_ADD_INQUIRY: {
-    return { ...state, showAddInquiry: action.state };
-  }
-  case Actions.OPEN_ATTACHMENT: {
-    return { ...state, openAttachment: action.state };
-  }
-  case Actions.RELOAD: {
-    return { ...state, reload: !state.reload, openDialog: false, openAllInquiry: false, openAttachment: false };
-  }
-  case Actions.RELOAD_INQ: {
-    return { ...state, reload: !state.reload };
-  }
-  case Actions.OPEN_TRANSACTION: {
-    return { ...state, openTrans: !state.openTrans };
-  }
-  case Actions.OPEN_EMAIL: {
-    return { ...state, openEmail: action.state };
-  }
-  case Actions.OPEN_INQUIRY_REVIEW: {
-    return { ...state, openInqReview: action.state };
-  }
-  case Actions.OPEN_NOTIFICATION_ATTACHMENT_LIST: {
-    return { ...state, openNotificationAttachmentList: action.state };
-  }
-  case Actions.OPEN_NOTIFICATION_INQUIRY_LIST: {
-    return { ...state, openNotificationInquiryList: action.state };
-  }
-  case Actions.OPEN_NOTIFICATION_AMENDMENT_LIST: {
-    return { ...state, openNotificationAmendmentList: action.state };
-  }
-  case Actions.OPEN_NOTIFICATION_SUBMIT_ANSWER: {
-    return { ...state, openNotificationSubmitAnswer: action.state };
-  }
-  case Actions.OPEN_NOTIFICATION_DELETE_REPLY: {
-    return { ...state, openNotificationDeleteReply: action.state };
-  }
-  case Actions.OPEN_NOTIFICATION_DELETE_AMENDMENT: {
-    return { ...state, openNotificationDeleteAmendment: action.state };
-  }
-  case Actions.TOGGLE_OPEN_BL_WARNING: {
-    return { ...state, openNotificationBLWarning: action.state };
-  }
-  case Actions.TOGGLE_OPEN_RELOAD_WARNING: {
-    return { ...state, openNotificationBLReloadWarning: action.state };
-  }
-  case Actions.ENABLE_SAVE_INQUIRIES: {
-    return { ...state, enableSaveInquiriesList: action.state };
-  }
-  case Actions.OPEN_CONFIRM_POPUP: {
-    return { ...state, ...action.state }
-  }
-  case Actions.CONFIRM_POPUP_CLICK: {
-    return { ...state, openConfirmPopup: false, confirmClick: action.state }
-  }
-  case Actions.OPEN_CREATE_AMENDMENT: {
-    return { ...state, openAmendmentForm: action.state }
-  }
-  case Actions.INQUIRY_VIEWER_FOCUS:{
-    return {...state, inqViewerFocus: action.state}
-  }
-  default: {
-    return state;
-  }
+    case Actions.SET_FULLSCREEN: {
+      return { ...state, fullscreen: action.state };
+    }
+    case Actions.OPEN_CREATE_INQUIRY: {
+      return { ...state, openDialog: action.state };
+    }
+    case Actions.OPEN_ALL_INQUIRY: {
+      return { ...state, openAllInquiry: action.state };
+    }
+    case Actions.TOGGLE_SAVE_INQUIRY: {
+      return { ...state, showSaveInquiry: action.state };
+    }
+    case Actions.TOGGLE_AMENDMENTS_LIST: {
+      return { ...state, openAmendmentList: action.state };
+    }
+    case Actions.TOGGLE_ADD_INQUIRY: {
+      return { ...state, showAddInquiry: action.state };
+    }
+    case Actions.OPEN_ATTACHMENT: {
+      return { ...state, openAttachment: action.state };
+    }
+    case Actions.RELOAD: {
+      return { ...state, reload: !state.reload, openDialog: false, openAllInquiry: false, openAttachment: false };
+    }
+    case Actions.RELOAD_INQ: {
+      return { ...state, reload: !state.reload };
+    }
+    case Actions.OPEN_TRANSACTION: {
+      return { ...state, openTrans: !state.openTrans };
+    }
+    case Actions.OPEN_EMAIL: {
+      return { ...state, openEmail: action.state };
+    }
+    case Actions.OPEN_INQUIRY_REVIEW: {
+      return { ...state, openInqReview: action.state };
+    }
+    case Actions.OPEN_NOTIFICATION_ATTACHMENT_LIST: {
+      return { ...state, openNotificationAttachmentList: action.state };
+    }
+    case Actions.OPEN_NOTIFICATION_INQUIRY_LIST: {
+      return { ...state, openNotificationInquiryList: action.state };
+    }
+    case Actions.OPEN_NOTIFICATION_AMENDMENT_LIST: {
+      return { ...state, openNotificationAmendmentList: action.state };
+    }
+    case Actions.OPEN_NOTIFICATION_SUBMIT_ANSWER: {
+      return { ...state, openNotificationSubmitAnswer: action.state };
+    }
+    case Actions.OPEN_NOTIFICATION_DELETE_REPLY: {
+      return { ...state, openNotificationDeleteReply: action.state };
+    }
+    case Actions.OPEN_NOTIFICATION_DELETE_AMENDMENT: {
+      return { ...state, openNotificationDeleteAmendment: action.state };
+    }
+    case Actions.TOGGLE_OPEN_BL_WARNING: {
+      return { ...state, openNotificationBLWarning: action.state };
+    }
+    case Actions.TOGGLE_OPEN_RELOAD_WARNING: {
+      return { ...state, openNotificationBLReloadWarning: action.state };
+    }
+    case Actions.ENABLE_SAVE_INQUIRIES: {
+      return { ...state, enableSaveInquiriesList: action.state };
+    }
+    case Actions.OPEN_CONFIRM_POPUP: {
+      return { ...state, ...action.state }
+    }
+    case Actions.CONFIRM_POPUP_CLICK: {
+      return { ...state, openConfirmPopup: false, confirmClick: action.state }
+    }
+    case Actions.OPEN_CREATE_AMENDMENT: {
+      return { ...state, openAmendmentForm: action.state }
+    }
+    case Actions.INQUIRY_VIEWER_FOCUS: {
+      return { ...state, inqViewerFocus: action.state }
+    }
+    case Actions.VALIDATE_INPUT: {
+      return { ...state, validateInput: action.state }
+    }
+    default: {
+      return state;
+    }
   }
 };
 

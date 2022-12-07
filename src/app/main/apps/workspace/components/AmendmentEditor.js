@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
-import { Button, Typography, FormHelperText, FormControl } from "@material-ui/core";
+import { Button, Typography, FormHelperText, FormControl, TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
@@ -10,6 +10,7 @@ import * as AppActions from 'app/store/actions';
 import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from '@shared/keyword';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
+import { validateTextInput } from 'app/services/myBLService';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -46,6 +47,27 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 600,
     wordBreak: 'break-word'
   },
+  inputText: {
+    fontFamily: 'Montserrat',
+    width: '100%',
+    paddingTop: 10,
+    paddingLeft: 5,
+    marginTop: 10,
+    minHeight: 50,
+    resize: 'none',
+    '& .MuiOutlinedInput-multiline': {
+      padding: '10.5px'
+    },
+    '& fieldset': {
+      borderWidth: '0.5px',
+      borderRadius: '8px',
+      border: '1px solid red'
+    },
+    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderWidth: '1px',
+      borderColor: '#BAC3CB'
+    }
+  }
 }));
 
 const Amendment = ({ question, inquiriesLength }) => {
@@ -84,7 +106,18 @@ const Amendment = ({ question, inquiriesLength }) => {
 
   const handleChange = (e) => setFieldValue(e.target.value);
 
+  const handleValidateInput = async (confirm = null) => {
+    let textInput = fieldValue || '';
+    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
+    if (isWarning) {
+      dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
+    } else {
+      confirm && confirm();
+    }
+  }
+
   const handleSave = () => {
+    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     const uploads = [];
     const fieldReq = openAmendmentList ? fieldValueSelect?.value : currentField;
     const optionsInquires = [...inquiries];
@@ -227,23 +260,13 @@ const Amendment = ({ question, inquiriesLength }) => {
           />
         </div>
       ) : <div className="flex" style={{ alignItems: 'flex-end', margin: '15px 0' }}>
-        <textarea
-          style={{
-            width: '100%',
-            paddingTop: 10,
-            paddingLeft: 5,
-            marginTop: 10,
-            minHeight: 50,
-            border: '1px solid #BAC3CB',
-            borderRadius: 8,
-            resize: 'none',
-            fontFamily: 'Montserrat',
-            fontSize: 15
-          }}
-          multiline="true"
-          type="text"
+        <TextField
+          className={classes.inputText}
           value={fieldValue}
+          multiline
+          rows={3}
           onChange={handleChange}
+          variant='outlined'
         />
       </div>
       }
@@ -262,7 +285,7 @@ const Amendment = ({ question, inquiriesLength }) => {
         <Button
           className={classes.btn}
           disabled={fieldValue.length === 0}
-          onClick={handleSave}
+          onClick={() => handleValidateInput(handleSave)}
           color="primary"
           variant="contained"
         >

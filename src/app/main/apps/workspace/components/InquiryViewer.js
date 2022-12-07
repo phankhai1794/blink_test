@@ -10,7 +10,7 @@ import {
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime, validatePartiesContent } from '@shared';
-import { getBlInfo } from 'app/services/myBLService';
+import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import {
   CONTAINER_DETAIL,
   CONTAINER_MANIFEST,
@@ -125,7 +125,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     color: '#132535'
   },
-  inputResolve: {
+  inputText: {
     width: '100%',
     paddingTop: 10,
     marginTop: 10,
@@ -137,6 +137,10 @@ const useStyles = makeStyles((theme) => ({
     '& fieldset': {
       borderWidth: '0.5px',
       borderRadius: '6px'
+    },
+    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderWidth: '1px',
+      borderColor: '#BAC3CB'
     }
   }
 }));
@@ -473,7 +477,7 @@ const InquiryViewer = (props) => {
               process: 'draft',
               state: res[0]?.state,
             }];
-           
+
             res.map(r => {
               const { content, mediaFile } = r.content;
               comments.push({
@@ -736,9 +740,26 @@ const InquiryViewer = (props) => {
     }
   };
 
+  const handleValidateInput = async (type, confirm = null) => {
+    let textInput = '';
+    let textInput = tempReply?.answer?.content.trim() || '';
+    if (isSeparate && !['REPLY'].includes(type)) {
+       textInput = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
+    } else if (!['REPLY'].includes(type)) {
+        textInput = textResolve.trim();
+    }
+    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
+    if (isWarning) {
+      dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }))
+    } else {
+      confirm && confirm()
+    }
+  }
+
   const onConfirm = () => {
+    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     let contentField = '';
-    const getTempReply = {...tempReply};
+    const getTempReply = { ...tempReply };
     if (isSeparate) {
       contentField = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
     } else if (typeof textResolve === 'string') {
@@ -907,6 +928,7 @@ const InquiryViewer = (props) => {
   };
 
   const onSaveReply = async () => {
+    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     const mediaListId = [];
     let mediaListAmendment = [];
     const mediaRest = [];
@@ -1202,21 +1224,22 @@ const InquiryViewer = (props) => {
         <div key={index} style={{ paddingTop: '15px' }}>
           <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
           <TextField
-            className={classes.inputResolve}
+            className={classes.inputText}
             value={textResolveSeparate[type]}
             multiline
             rows={['name'].includes(type) ? 2 : 3}
             onChange={(e) => inputTextSeparate(e, type, field)}
             error={validatePartiesContent(textResolveSeparate[type], type).isError}
             helperText={
-              validatePartiesContent(textResolveSeparate[type], type).isError ? validatePartiesContent(textResolveSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''}
+              validatePartiesContent(textResolveSeparate[type], type).isError ? validatePartiesContent(textResolveSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
+            }
             variant='outlined'
           />
         </div>)
     } else {
       return (
         <TextField
-          className={classes.inputResolve}
+          className={classes.inputText}
           value={textResolve}
           multiline
           rows={3}
@@ -1627,12 +1650,12 @@ const InquiryViewer = (props) => {
                         variant="contained"
                         disabled={
                           isSeparate ?
-                            (validatePartiesContent(textResolveSeparate.name, 'name')?.isError ||
-                              validatePartiesContent(textResolveSeparate.address, 'address')?.isError)
+                            (validatePartiesContent(textResolveSeparate.name, 'name')?.isError
+                              || validatePartiesContent(textResolveSeparate.address, 'address')?.isError)
                             : false
                         }
                         color="primary"
-                        onClick={onConfirm}
+                        onClick={() => handleValidateInput('RESOLVE', onConfirm)}
                         classes={{ root: clsx(classes.button, 'w120') }}>
                         Accept
                       </Button>
@@ -1651,24 +1674,14 @@ const InquiryViewer = (props) => {
                   {isReply || isReplyCDCM ? (
                     <>
                       {isReply && <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
-                        <textarea
-                          style={{
-                            width: '100%',
-                            paddingTop: 10,
-                            paddingLeft: 5,
-                            marginTop: 10,
-                            minHeight: 50,
-                            border: '1px solid #BAC3CB',
-                            borderRadius: 8,
-                            resize: 'none',
-                            fontFamily: 'Montserrat',
-                            fontSize: 15
-                          }}
-                          multiline="true"
-                          type="text"
-                          placeholder="Reply..."
+                        <TextField
+                          className={classes.inputText}
                           value={tempReply?.answer?.content}
+                          multiline
+                          rows={2}
                           onChange={handleChangeContentReply}
+                          variant='outlined'
+                          placeholder='Reply...'
                         />
                       </div>
                       }
@@ -1710,7 +1723,7 @@ const InquiryViewer = (props) => {
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={onSaveReply}
+                          onClick={() => handleValidateInput('REPLY', onSaveReply)}
                           disabled={
                             (question.state === "AME_DRF" && !tempReply?.answer?.content)
                             || (question.state !== "AME_DRF" && !tempReply?.answer?.content && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
@@ -1754,7 +1767,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-export const ContainerDetailFormOldVersion = ({ container, originalValues,question, setTextResolve, disableInput = false }) => {
+export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
