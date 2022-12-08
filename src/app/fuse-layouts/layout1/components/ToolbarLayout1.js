@@ -376,7 +376,7 @@ function ToolbarLayout1(props) {
               </Button>
             </PermissionProvider>
 
-            {myBL?.state?.includes('DRF_') && user?.userType !== 'ONSHORE' && (
+            {myBL?.state?.includes('DRF_') && user?.userType !== 'ONSHORE' && ['/workspace', '/guest'].some((el) => pathname.includes(el)) &&(
               <Button
                 variant="text"
                 size="medium"
