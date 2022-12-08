@@ -48,11 +48,11 @@ const useStyles = makeStyles(() => ({
 
 const Comment = (props) => {
   const { question, comment, userType } = props;
-  const [ comments, setComments ] = useState(comment?.length > 1 ? comment.slice(0, comment.length - 1) : []);
-  const [ value, setValue ] = useState('');
-  const [ key, setKey ] = useState();
-  const [ anchorEl, setAnchorEl ] = useState(null);
-  const [ edit, setEdit ] = useState('');
+  const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length - 1) : []);
+  const [value, setValue] = useState('');
+  const [key, setKey] = useState();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [edit, setEdit] = useState('');
   const classes = useStyles();
   const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
@@ -66,13 +66,13 @@ const Comment = (props) => {
       return false;
     }
   }
-  
+
   const getField = (field) => {
-    return metadata.field ? metadata.field[ field ] : '';
+    return metadata.field ? metadata.field[field] : '';
   };
 
-  const containerCheck = [ getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST) ];
- 
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
+
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -84,8 +84,8 @@ const Comment = (props) => {
     setValue(e.target.value);
   };
   const changeComment = (e, id) => {
-    const temp = [ ...comments ];
-    temp[ id ].content = e.target.value;
+    const temp = [...comments];
+    temp[id].content = e.target.value;
     setComments(temp);
   };
   const addComment = async (e) => {
@@ -118,13 +118,13 @@ const Comment = (props) => {
 
   const onEnterComment = (e, id) => {
     if (e.key === 'Enter') {
-      editComment(comments[ id ].answer, e.target.value);
+      editComment(comments[id].answer, e.target.value);
       setEdit('');
     }
   };
   const onDelete = (id) => {
-    deleteComment(comments[ id ].answer);
-    const temp = [ ...comments ];
+    deleteComment(comments[id].answer);
+    const temp = [...comments];
     temp.splice(id, 1);
     setComments(temp);
     setAnchorEl(null);
@@ -171,28 +171,31 @@ const Comment = (props) => {
             {/*  </>*/}
             {/*)}*/}
           </div>
-          {(content instanceof Array|| isJson(content))&& containerCheck.includes(question.field) ?
-            question?.process === 'pending' ?<ContainerDetailFormOldVersion
-              container={
-                question.field === containerCheck[ 0 ] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-              }
-              question={question}
-              originalValues={JSON.parse(content)}
-              disableInput={true}
-            />:
-              <ContainerDetailForm
-                container={
-                  question.field === containerCheck[ 0 ] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                }
-                setEditContent={() => null}
-                originalValues={content}
-                disableInput={true}
-              />
-            
-            :
+          {(content instanceof Array || isJson(content)) && containerCheck.includes(question.field) ?
+            (!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
+              (
+                question?.process === 'pending' ?
+                  <ContainerDetailFormOldVersion
+                    container={
+                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                    }
+                    question={question}
+                    originalValues={JSON.parse(content)}
+                    disableInput={true}
+                  /> :
+                  <ContainerDetailForm
+                    container={
+                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                    }
+                    setEditContent={() => null}
+                    originalValues={content}
+                    disableInput={true}
+                  />
+              ) : <span className={'markReopen'}>Marked as reopened</span>
+            ) :
             <div className={'content-reply'} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
               {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ? `${title ? `${title} "${content}"` : content}` : (
-                  type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>
+                type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>
               )}
             </div>
           }

@@ -24,6 +24,7 @@ export const OPEN_CREATE_AMENDMENT = 'OPEN_CREATE_AMENDMENT';
 export const OPEN_NOTIFICATION_INQUIRY_LIST = 'OPEN_NOTIFICATION_INQUIRY_LIST'
 export const RELOAD_INQ = 'RELOAD_INQ';
 export const INQUIRY_VIEWER_FOCUS = 'INQUIRY_VIEWER_FOCUS';
+export const VALIDATE_INPUT = 'VALIDATE_INPUT';
 export function setFullscreen(state) {
   return {
     type: SET_FULLSCREEN,
@@ -199,6 +200,13 @@ export function confirmPopupClick(state) {
 export function toggleCreateAmendment(state) {
   return {
     type: OPEN_CREATE_AMENDMENT,
+    state
+  };
+}
+
+export function validateInput(state) {
+  return {
+    type: VALIDATE_INPUT,
     state
   };
 }

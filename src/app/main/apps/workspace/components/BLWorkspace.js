@@ -52,6 +52,7 @@ import * as TransActions from '../store/actions/transaction';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as DraftActions from '../store/actions/draft-bl';
 import * as mailActions from '../store/actions/mail';
+import DialogCommon from '../shared-components/DialogCommon';
 
 import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
@@ -109,10 +110,10 @@ const BLWorkspace = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector(({ user }) => user);
-  const [ isExpand, setIsExpand ] = useState(false);
-  const [ newFileAttachment, setNewFileAttachment ] = useState([]);
-  const [ disableSendBtn, setDisableSendBtn ] = useState(true);
-  const [ tabSelected, setTabSelected ] = useState(0);
+  const [isExpand, setIsExpand] = useState(false);
+  const [newFileAttachment, setNewFileAttachment] = useState([]);
+  const [disableSendBtn, setDisableSendBtn] = useState(true);
+  const [tabSelected, setTabSelected] = useState(0);
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -125,9 +126,9 @@ const BLWorkspace = (props) => {
   const openAmendmentForm = useSelector(({ workspace }) => workspace.formReducer.openAmendmentForm);
   const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
-  const [ confirmClick, form ] = useSelector(({ workspace }) => [ workspace.formReducer.confirmClick, workspace.formReducer.form ]);
-  const [ inqCustomer, setInqCustomer ] = useState([]);
-  const [ inqOnshore, setInqOnshore ] = useState([]);
+  const [confirmClick, form] = useSelector(({ workspace }) => [workspace.formReducer.confirmClick, workspace.formReducer.form]);
+  const [inqCustomer, setInqCustomer] = useState([]);
+  const [inqOnshore, setInqOnshore] = useState([]);
   const isLoading = useSelector(({ workspace }) => workspace.transReducer.isLoading);
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
@@ -137,6 +138,7 @@ const BLWorkspace = (props) => {
   const openNotificationBLWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning);
   const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
+  const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -147,11 +149,11 @@ const BLWorkspace = (props) => {
   const socket = useContext(SocketContext);
 
   const getField = (keyword) => {
-    return metadata.field?.[ keyword ] || '';
+    return metadata.field?.[keyword] || '';
   };
 
   const getValueField = (keyword) => {
-    return content[ getField(keyword) ] || '';
+    return content[getField(keyword)] || '';
   };
 
   socket.on('msg_processing', async (data) => {
@@ -164,7 +166,7 @@ const BLWorkspace = (props) => {
       let excludeFirstUser = false;
       if (data.processingBy) {
         data.processingBy.forEach((p) => {
-          if (userInfo.displayName === data.processingBy[ 0 ]) {
+          if (userInfo.displayName === data.processingBy[0]) {
             excludeFirstUser = true;
           }
         });
@@ -172,8 +174,8 @@ const BLWorkspace = (props) => {
           // assign permission
           permissions = permissionViewer
           // show popup for lastest user
-          if (userInfo.displayName === data.processingBy[ data.processingBy.length - 1 ]) {
-            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[ 0 ] }));
+          if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
+            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
           }
         } else {
           // assign permission
@@ -192,7 +194,7 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
     setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore') || []);
-  }, [ inquiries ]);
+  }, [inquiries]);
 
   // TODO: TBU Logic after create new reply amendment
   useEffect(() => {
@@ -200,16 +202,16 @@ const BLWorkspace = (props) => {
       return (inq.process === 'draft' && inq.field === amendmentField)
     };
     if (objectNewAmendment?.newAmendment?.field) {
-      const optionsInquires = [ ...inquiries ];
+      const optionsInquires = [...inquiries];
       const oldAmendmentIndex = optionsInquires.findIndex(inq => (inq.id === objectNewAmendment.oldAmendmentId || checkByField(objectNewAmendment.newAmendment.field, inq)));
       if (oldAmendmentIndex !== -1) {
-        const tempID = optionsInquires[ oldAmendmentIndex ]?.id
-        optionsInquires[ oldAmendmentIndex ] = { ...optionsInquires[ oldAmendmentIndex ], ...objectNewAmendment.newAmendment }
-        optionsInquires[ oldAmendmentIndex ].id = tempID;
+        const tempID = optionsInquires[oldAmendmentIndex]?.id
+        optionsInquires[oldAmendmentIndex] = { ...optionsInquires[oldAmendmentIndex], ...objectNewAmendment.newAmendment }
+        optionsInquires[oldAmendmentIndex].id = tempID;
         dispatch(InquiryActions.setInquiries(optionsInquires));
       }
     }
-  }, [ objectNewAmendment ])
+  }, [objectNewAmendment])
 
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'autoSendMail') {
@@ -229,7 +231,7 @@ const BLWorkspace = (props) => {
       }
 
     }
-  }, [ confirmClick, form ])
+  }, [confirmClick, form])
 
   useEffect(() => {
     const unloadCallback = (event) => {
@@ -240,7 +242,7 @@ const BLWorkspace = (props) => {
     };
     window.addEventListener('beforeunload', unloadCallback);
     return () => window.removeEventListener('beforeunload', unloadCallback);
-  }, [ isLoading ]);
+  }, [isLoading]);
 
 
   const checkBLSameRequest = async (bl) => {
@@ -258,7 +260,7 @@ const BLWorkspace = (props) => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(DraftActions.setProcess(props.process));
 
-    const bkgNo = window.location.pathname.split('/')[ 3 ];
+    const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) {
       dispatch(Actions.initBL(bkgNo));
       checkBLSameRequest(bkgNo);
@@ -299,7 +301,7 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     dispatch(Actions.loadMetadata());
-  }, [ reload ])
+  }, [reload])
 
   const expandRef = useRef();
   useEffect(() => {
@@ -316,11 +318,11 @@ const BLWorkspace = (props) => {
     if (openAttachment) {
       setNewFileAttachment([]);
     }
-  }, [ openAttachment ]);
+  }, [openAttachment]);
 
   useEffect(() => {
     setDisableSendBtn(!enableSend)
-  }, [ enableSend ]);
+  }, [enableSend]);
 
   const countInq = (inqs, recevier) => {
     let count = 0;
@@ -338,90 +340,90 @@ const BLWorkspace = (props) => {
 
   const popupOpen = (inquiry, curField) => {
     switch (inquiry.field) {
-      case 'INQUIRY_LIST':
-        return {
-          status: openAllInquiry || openAmendmentList,
-          tabs: user.role === 'Admin' ? [ 'Customer', 'Onshore' ] : [],
-          nums: user.role === 'Admin' ? [ countInq(inquiries, 'customer'), countInq(inquiries, 'onshore') ] : [],
-          toggleForm: (status) => {
-            dispatch(FormActions.toggleAllInquiry(status));
-            dispatch(FormActions.toggleAmendmentsList(status))
-          },
-          fabTitle: openAllInquiry ? 'Inquiries List' : 'Amendments List',
-          title: openAllInquiry ? 'Inquiries List' : 'Amendments List',
-          field: 'INQUIRY_LIST',
-          showBtnSend: true,
-          disableSendBtn: disableSendBtn,
-          child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries)} field={'INQUIRY_LIST'} />
-        };
-      case 'ATTACHMENT_LIST':
-        return {
-          status: openAttachment,
-          toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
-          fabTitle: 'Attachments List',
-          title: 'Attachments List',
-          hasAddButton: false,
-          field: 'ATTACHMENT_LIST',
-          popoverfooter: true,
-          customActions: inquiries.length > 0 && (
-            <>
-              <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
-                <AttachFileList
-                  uploadImageAttach={(files) => setNewFileAttachment(files)}
-                  isAttachmentList={true}
-                  type={'addNew'}>
-                  <AddCircleIcon
-                    style={{
-                      color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
-                      width: '50px',
-                      fontSize: '50px',
-                      cursor: isShowBackground ? 'inherit' : 'pointer'
-                    }}
-                  />
-                </AttachFileList>
-              </PermissionProvider>
-            </>
-          ),
-          child: (
-            <AttachmentList
-              user={props.user}
-              newFileAttachment={newFileAttachment}
-              setFileAttachment={() => setNewFileAttachment([])}
-            />
-          )
-        };
-      case 'INQUIRY_FORM':
-        return {
-          status: openInquiryForm,
-          nums: user.role === 'Admin' ? [ countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore') ] : [],
-          toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
-          fabTitle: 'Inquiry Form',
-          title: 'Inquiry Creation',
-          field: 'INQUIRY_FORM',
-          child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter(q => q.field === inquiry.field))} />
-        };
-      case 'AMENDMENT_FORM':
-        return {
-          status: openAmendmentForm,
-          nums: [],
-          toggleForm: (status) => dispatch(FormActions.toggleCreateAmendment(status)),
-          fabTitle: 'Amendment Form',
-          title: metadata?.field_options.find((f) => f.value === currentField)?.label,
-          field: 'AMENDMENT_FORM',
-          child: <AmendmentEditor />
-        };
-      default:
-        return {
-          status: inquiry?.id === currentInq?.id,
-          nums: user.role === 'Admin' ? [ countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore') ] : [],
-          toggleForm: () => { },
-          fabTitle: curField?.label,
-          title: curField?.label,
-          field: curField?.value,
-          showBtnSend: true,
-          disableSendBtn: disableSendBtn,
-          child: <Inquiry user={props.user} />
-        };
+    case 'INQUIRY_LIST':
+      return {
+        status: openAllInquiry || openAmendmentList,
+        tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
+        nums: user.role === 'Admin' ? [countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
+        toggleForm: (status) => {
+          dispatch(FormActions.toggleAllInquiry(status));
+          dispatch(FormActions.toggleAmendmentsList(status))
+        },
+        fabTitle: openAllInquiry ? 'Inquiries List' : 'Amendments List',
+        title: openAllInquiry ? 'Inquiries List' : 'Amendments List',
+        field: 'INQUIRY_LIST',
+        showBtnSend: true,
+        disableSendBtn: disableSendBtn,
+        child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries)} field={'INQUIRY_LIST'} />
+      };
+    case 'ATTACHMENT_LIST':
+      return {
+        status: openAttachment,
+        toggleForm: (status) => dispatch(FormActions.toggleAttachment(status)),
+        fabTitle: 'Attachments List',
+        title: 'Attachments List',
+        hasAddButton: false,
+        field: 'ATTACHMENT_LIST',
+        popoverfooter: true,
+        customActions: inquiries.length > 0 && (
+          <>
+            <PermissionProvider action={PERMISSION.INQUIRY_ADD_MEDIA}>
+              <AttachFileList
+                uploadImageAttach={(files) => setNewFileAttachment(files)}
+                isAttachmentList={true}
+                type={'addNew'}>
+                <AddCircleIcon
+                  style={{
+                    color: isShowBackground ? 'rgb(189 15 114 / 56%)' : '#BD0F72',
+                    width: '50px',
+                    fontSize: '50px',
+                    cursor: isShowBackground ? 'inherit' : 'pointer'
+                  }}
+                />
+              </AttachFileList>
+            </PermissionProvider>
+          </>
+        ),
+        child: (
+          <AttachmentList
+            user={props.user}
+            newFileAttachment={newFileAttachment}
+            setFileAttachment={() => setNewFileAttachment([])}
+          />
+        )
+      };
+    case 'INQUIRY_FORM':
+      return {
+        status: openInquiryForm,
+        nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
+        toggleForm: (status) => dispatch(FormActions.toggleCreateInquiry(status)),
+        fabTitle: 'Inquiry Form',
+        title: 'Inquiry Creation',
+        field: 'INQUIRY_FORM',
+        child: <Inquiry user={props.user} receiver={handleTabSelected(inquiries.filter(q => q.field === inquiry.field))} />
+      };
+    case 'AMENDMENT_FORM':
+      return {
+        status: openAmendmentForm,
+        nums: [],
+        toggleForm: (status) => dispatch(FormActions.toggleCreateAmendment(status)),
+        fabTitle: 'Amendment Form',
+        title: metadata?.field_options.find((f) => f.value === currentField)?.label,
+        field: 'AMENDMENT_FORM',
+        child: <AmendmentEditor />
+      };
+    default:
+      return {
+        status: inquiry?.id === currentInq?.id,
+        nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
+        toggleForm: () => { },
+        fabTitle: curField?.label,
+        title: curField?.label,
+        field: curField?.value,
+        showBtnSend: true,
+        disableSendBtn: disableSendBtn,
+        child: <Inquiry user={props.user} />
+      };
     }
   };
 
@@ -436,7 +438,7 @@ const BLWorkspace = (props) => {
       inquiryReview: 'Inquiry Review'
     };
     if (Object.keys(listTitle).includes(inqId)) {
-      return listTitle[ inqId ];
+      return listTitle[inqId];
     } else {
       const fieldId = listMinimize.find((inq) => inq.id === inqId).field;
       const field = metadata.field_options.find((f) => fieldId === f.value);
@@ -459,7 +461,7 @@ const BLWorkspace = (props) => {
     const field = metadata.field_options.find((f) => currentInq.field === f.value);
     dispatch(InquiryActions.setField(currentInq.field));
     const popupObj = Object.keys(toggleFormType).includes(inqId)
-      ? { toggleForm: toggleFormType[ inqId ] }
+      ? { toggleForm: toggleFormType[inqId] }
       : popupOpen(currentInq, field);
     if (currentInq) {
       dispatch(InquiryActions.setOneInq(currentInq));
@@ -504,6 +506,29 @@ const BLWorkspace = (props) => {
 
   return (
     <>
+      {!validateInput?.isValid &&
+        <DialogCommon
+          iconWaring={<img width={'35px'} src={`/assets/images/icons/warning.svg`} />}
+          cancel={() => dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }))}
+          confirm={() => validateInput?.handleConfirm && validateInput?.handleConfirm()}
+          title={'The prohibited information is found in the Shipping Instruction. Do you want to continue?'}
+          content={
+            <>{(validateInput?.prohibitedInfo?.countries.length || validateInput?.prohibitedInfo?.danger_cargo.length) ?
+              Object.keys(validateInput?.prohibitedInfo).map((key, i) => {
+                if (validateInput?.prohibitedInfo[key].length)
+                  return <div key={i} style={{ paddingLeft: '25px' }}>
+                    <h2 style={{ marginBlock: 'auto' }}>{['countries'].includes(key) ? 'Countries' : 'Danger cargo'}:</h2>
+                    <ul style={{ paddingLeft: '10%' }}>
+                      {validateInput?.prohibitedInfo[key].map((item, index) =>
+                        <li key={index}>{item}</li>
+                      )}
+                    </ul>
+                  </div>
+              }) : ''
+            }</>
+          }
+        />
+      }
       <BLProcessNotification />
       <ListNotification />
       <SubmitAnswerNotification

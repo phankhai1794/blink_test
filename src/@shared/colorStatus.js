@@ -43,7 +43,7 @@ export const checkColorStatus = (
       if (!colorStatusObj.hasAttachment && inq.mediaFile?.length) colorStatusObj.hasAttachment = true;
 
       // check has inquiry
-      if (!colorStatusObj.hasInquiry && ['OPEN', 'INQ_SENT', 'ANS_DRF'].includes(inq.state)) colorStatusObj.hasInquiry = true;
+      if (!colorStatusObj.hasInquiry && ['OPEN', 'INQ_SENT', ...(user?.role === 'Admin' ? ['ANS_DRF'] : [])].includes(inq.state)) colorStatusObj.hasInquiry = true;
 
       // check has reply/answer
       else if (!colorStatusObj.hasAnswer, statusReply.includes(inq.state)) colorStatusObj.hasAnswer = true;

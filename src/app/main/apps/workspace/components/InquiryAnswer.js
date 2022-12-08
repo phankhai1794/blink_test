@@ -7,6 +7,7 @@ import {
   addTransactionAnswer, getUpdatedAtAnswer
 } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
+import { validateTextInput } from 'app/services/myBLService';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -17,6 +18,7 @@ import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -94,13 +96,14 @@ const useStyles = makeStyles((theme) => ({
 ));
 
 const InquiryAnswer = (props) => {
-  const {onCancel, setSave, question} = props;
+  const { onCancel, setSave, question } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ draftBL }) => draftBL.metadata);
   const [isDisableSave, setDisableSave] = useState(false);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const inq = (inq) => {
     return {
       content: inq.content,
@@ -114,7 +117,7 @@ const InquiryAnswer = (props) => {
   const editedIndex = optionsInquires.findIndex(inq1 => question.id === inq1.id);
   let currentAnswer = optionsInquires[editedIndex]
 
- 
+
   const saveAttachmentAnswer = async (currentEditInq, responseSelectChoice) => {
     const question = {
       inqId: currentEditInq.id,
@@ -136,11 +139,11 @@ const InquiryAnswer = (props) => {
     });
     if (isHasMedia) {
       uploadFile(formData).then(media => {
-        const {response} = media;
+        const { response } = media;
         response.forEach(file => {
           mediaList.push(file);
         });
-        createAttachmentAnswer({question, mediaFile: mediaList, mediaRest}).then(async (res) => {
+        createAttachmentAnswer({ question, mediaFile: mediaList, mediaRest }).then(async (res) => {
           // update attachment answer
           const answerObjMediaFiles = currentEditInq?.mediaFilesAnswer.filter((q) => q.id);
           mediaList.forEach((item) => {
@@ -181,9 +184,9 @@ const InquiryAnswer = (props) => {
         }).catch((error) => {
           console.log(error)
         });
-      }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
+      }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
     } else {
-      createAttachmentAnswer({question, mediaFile: mediaList, mediaRest}).then(async (res) => {
+      createAttachmentAnswer({ question, mediaFile: mediaList, mediaRest }).then(async (res) => {
         optionsInquires[editedIndex].mediaFilesAnswer = currentEditInq.mediaFilesAnswer;
         //
         if (currentEditInq.paragraphAnswer) {
@@ -212,11 +215,22 @@ const InquiryAnswer = (props) => {
         dispatch(InquiryActions.setInquiries(optionsInquires));
         props.getUpdatedAt();
         // setSave();
-      }).catch((error) => dispatch(AppAction.showMessage({message: error, variant: 'error'})));
+      }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+    }
+  }
+
+  const handleValidateInput = async (confirm = null) => {
+    let textInput = currentAnswer?.paragraphAnswer?.content.trim() || '';
+    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
+    if (isWarning) {
+      dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
+    } else {
+      confirm && confirm();
     }
   }
 
   const onSave = async () => {
+    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     setDisableSave(true)
@@ -287,13 +301,21 @@ const InquiryAnswer = (props) => {
   return (
     <div className='changeToEditor'>
       <div className="flex">
-        
+
         <div className="flex">
           <Button
             variant="contained"
             color="primary"
-            disabled={(!currentAnswer?.paragraphAnswer?.content && !currentAnswer.selectChoice && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)) || isDisableSave}
-            onClick={() => onSave()}
+            disabled={
+              (
+                !currentAnswer?.paragraphAnswer?.content
+                && !currentAnswer.selectChoice
+                && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)
+              )
+              ||
+              isDisableSave
+            }
+            onClick={() => handleValidateInput(onSave)}
             classes={{ root: classes.button }}>
             Save
           </Button>

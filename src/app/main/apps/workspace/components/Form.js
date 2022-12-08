@@ -517,6 +517,7 @@ export default function Form(props) {
             <PermissionProvider
               action={PERMISSION.VIEW_CREATE_AMENDMENT}
               extraCondition={
+                !openAllInquiry &&
                 myBL?.state?.includes('DRF_')
                 && userType === 'CUSTOMER' // Allow only customer to create amendment
               }>
