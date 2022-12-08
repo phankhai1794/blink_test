@@ -20,6 +20,7 @@ import { updateInquiry, saveInquiry, deleteInquiry, getUpdatedAtAnswer } from 'a
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
+import { validateTextInput } from 'app/services/myBLService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -174,7 +175,7 @@ const InquiryEditor = (props) => {
     inq.inqType = e.value;
     if (e.__isNew__) inq.isNew = e.__isNew__
     dispatch(InquiryActions.validate({ ...valid, inqType: true }));
-    inq.content = currentEditInq.content.replace(nameType || '{{INQ_TYPE}}', e.label);
+    inq.content = currentEditInq.content.trim().replace(nameType || '{{INQ_TYPE}}', e.label);
     setValueType(e);
     setNameType(e.label);
     dispatch(InquiryActions.setEditInq(inq));
@@ -194,7 +195,6 @@ const InquiryEditor = (props) => {
 
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
-    if (e.target.value.trim() === currentEditInq.content.replace('{{INQ_TYPE}}', '')) return;
     inq.content = e.target.value;
     dispatch(InquiryActions.validate({ ...valid, content: inq.content }));
     dispatch(InquiryActions.setEditInq(inq));
@@ -251,7 +251,18 @@ const InquiryEditor = (props) => {
     return false
   }
 
+  const handleValidateInput = async (confirm = null) => {
+    let textInput = currentEditInq?.content || '';
+    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
+    if (isWarning) {
+      dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
+    } else {
+      confirm && confirm();
+    }
+  }
+
   const onSave = async () => {
+    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     let check = true;
     const ansTypeChoice = metadata.ans_type['choice'];
     let validate = {};
@@ -280,7 +291,7 @@ const InquiryEditor = (props) => {
           } else {
             validate = { ...validate, answerContent: true };
           }
-          const dupArray = currentEditInq.answerObj.map((ans) => ans.content);
+          const dupArray = currentEditInq.answerObj.map((ans) => ans.content.trim());
           if (toFindDuplicates(dupArray).length) {
             dispatch(
               AppActions.showMessage({
@@ -346,7 +357,7 @@ const InquiryEditor = (props) => {
         }
       }
       if (ansTypeChoice === inquiry.ansType && inquiry.answerObj.length) {
-        const dupArray = inquiry.answerObj.map((ans) => ans.content);
+        const dupArray = inquiry.answerObj.map((ans) => ans.content.trim());
         if (toFindDuplicates(dupArray).length) {
           dispatch(
             AppActions.showMessage({
@@ -392,8 +403,8 @@ const InquiryEditor = (props) => {
         });
         const editedIndex = inquiries.findIndex(inq => inq.id === inquiry.id);
         inquiries[editedIndex] = currentEditInq;
-        if (update.data.length) {
-          inquiries[editedIndex].answerObj = update.data;
+        if (update.data.length && editedIndex) {
+          inquiries[editedIndex].answerObj = [...inquiries[editedIndex].answerObj, ...update.data].filter(inq => inq.id);
         }
         if (prevField !== currentEditInq.field) {
           const hasInq = inquiries.filter(inq => inq.field === prevField);
@@ -650,7 +661,7 @@ const InquiryEditor = (props) => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => onSave()}
+                onClick={() => handleValidateInput(onSave)}
                 classes={{ root: classes.button }}>
                 Save
               </Button>

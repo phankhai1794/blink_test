@@ -95,11 +95,8 @@ const SendInquiryForm = (props) => {
   const validateMail = useSelector(({ workspace }) => workspace.mailReducer.validateMail);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
+  const tags = useSelector(({ workspace }) => workspace.mailReducer.tags);
 
-  const [isCustomerCc, setIsCustomerCc] = useState(false);
-  const [isCustomerBcc, setIsCustomerBcc] = useState(false);
-  const [isOnshoreCc, setIsOnshoreCc] = useState(false);
-  const [isOnshoreBcc, setIsOnshoreBcc] = useState(false);
   const initialState = {
     toCustomer: '',
     toCustomerCc: '',
@@ -206,7 +203,7 @@ const SendInquiryForm = (props) => {
   useEffect(() => {
     getMail(mybl.id).then((res) => {
       if (res.data.length) {
-        let tags = {}, toCustomer = [], toOnshore = [];
+        let toCustomer = [], toOnshore = [];
         // Offshore
         res.data[0]?.toCustomer?.length && res.data[0].toCustomer.forEach(customer => {
           toCustomer.push(customer.email)
@@ -215,11 +212,8 @@ const SendInquiryForm = (props) => {
         res.data[0]?.toOnshore?.length && res.data[0].toOnshore.forEach(onshore => {
           toOnshore.push(onshore.email)
         });
-
-        toCustomer.length && (tags.toCustomer = toCustomer);
-        toOnshore.length && (tags.toOnshore = toOnshore);
-        dispatch(mailActions.setTags(tags));
-        setForm({ ...form, toCustomer: tags.toCustomer ? tags.toCustomer.join(',') : '', toOnshore: tags.toOnshore ? tags.toOnshore.join(',') : '' })
+        dispatch(mailActions.setTags({ ...tags, toCustomer, toOnshore }));
+        setForm({ ...form, toCustomer: toCustomer.join(','), toOnshore: toOnshore.join(',') })
       }
     }).catch((error) => {
       console.error(error)
@@ -343,61 +337,6 @@ const SendInquiryForm = (props) => {
     }
   };
 
-  const ToCustomer = () =>
-    <>
-      <InputUI
-        id="toCustomer"
-        title="To Customer"
-        isCc={isCustomerCc}
-        isBcc={isCustomerBcc}
-        onCc={() => {
-          setIsCustomerCc(!isCustomerCc);
-        }}
-        onBcc={() => {
-          setIsCustomerBcc(!isCustomerBcc);
-        }}
-        onChanged={handleFieldChange}
-      />
-      {isCustomerCc && <InputUI id="toCustomerCc" title="Cc" onChanged={handleFieldChange} />}
-      {isCustomerBcc && (
-        <InputUI id="toCustomerBcc" title="Bcc" onChanged={handleFieldChange} />
-      )}
-    </>
-
-  const ToOnshore = () =>
-    <>
-      <InputUI
-        id="toOnshore"
-        title="To Onshore"
-        isCc={isOnshoreCc}
-        isBcc={isOnshoreBcc}
-        onCc={() => {
-          setIsOnshoreCc(!isOnshoreCc);
-        }}
-        onBcc={() => {
-          setIsOnshoreBcc(!isOnshoreBcc);
-        }}
-        onChanged={handleFieldChange}
-      />
-      {isOnshoreCc && <InputUI id="toOnshoreCc" title="Cc" onChanged={handleFieldChange} />}
-      {isOnshoreBcc && <InputUI id="toOnshoreBcc" title="Bcc" onChanged={handleFieldChange} />}
-    </>
-
-
-  const ToReceiver = () => {
-    if (hasCustomer && hasOnshore) {
-      return tabValue === 'customer' ? ToCustomer() : ToOnshore()
-    }
-    else if (hasCustomer) {
-      return ToCustomer()
-    }
-    else if (hasOnshore) {
-      return ToOnshore()
-    }
-    else {
-      return null
-    }
-  }
   const countInq = (recevier) => {
     return inquiries.filter(inq => inq.receiver.includes(recevier) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')).length;
   };
@@ -440,7 +379,16 @@ const SendInquiryForm = (props) => {
       >
         {previewValue === 'default' &&
           <>
-            {ToReceiver()}
+            <InputUI
+              id="Customer"
+              tab={tabValue}
+              onChanged={handleFieldChange}
+            />
+            <InputUI
+              id="Onshore"
+              tab={tabValue}
+              onChanged={handleFieldChange}
+            />
             {hasCustomer && hasOnshore &&
               <Tabs
                 indicatorColor="primary"
