@@ -410,6 +410,7 @@ const AllInquiry = (props) => {
                       isEdit={q.id === currentEditInq?.id ? q : {}}
                       showReceiver={false}
                       getStateReplyDraft={(val) => setStateReplyDraft(val)}
+                      field={field}
                       isSaveAnswer={isSaveAnswer}
                       getUpdatedAt={() => {
                         setUpdateReply(true)
