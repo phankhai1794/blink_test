@@ -442,6 +442,8 @@ const InquiryViewer = (props) => {
             } else {
               if (['REP_SENT', 'REOPEN_A'].includes(lastest.state)) {
                 lastest.showIconReply = true;
+                lastest.showIconEdit = false;
+                setSubmitLabel(false);
                 setStateReplyDraft(false);
                 setTempReply({});
               } else if (['AME_SENT'].includes(lastest.state)) {
@@ -454,6 +456,8 @@ const InquiryViewer = (props) => {
                 setTempReply({});
               } else if (['AME_DRF'].includes(lastest.state)) {
                 setSubmitLabel(false);
+                lastest.showIconEdit = true;
+                setStateReplyDraft(true);
               } else if (['UPLOADED'].includes(lastest.state)) {
                 setStateReplyDraft(false);
                 setStateReplyDraft(false);
@@ -615,7 +619,7 @@ const InquiryViewer = (props) => {
         })
         .catch((error) => console.error(error));
     } else if (confirmPopupType === 'removeReply' && replyRemove) {
-      deleteDraftBLReply(tempReply?.answer.id, replyRemove.field, myBL.id)
+      deleteDraftBLReply(replyRemove?.draftId, replyRemove.field, myBL.id)
         .then((res) => {
           // Case: Offshore reply customer's amendment first time => delete
           if (comment.length === 3) {
@@ -651,12 +655,15 @@ const InquiryViewer = (props) => {
               dispatch(InquiryActions.setInquiries(optionsOfQuestion));
               getBlInfo(myBL.id).then(res => {
                 dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
-                if (!inquiriesByField.length) {
-                  if (field === 'INQUIRY_LIST') {
+                if (field !== 'INQUIRY_LIST') {
+                  if (!inquiriesByField.length) {
+                    dispatch(InquiryActions.setOneInq({}));
+                  }
+                } else {
+                  const draftBl = optionsOfQuestion.filter(inq => inq.process === 'draft');
+                  if (!draftBl.length) {
                     dispatch(FormActions.toggleAllInquiry(false));
                     dispatch(FormActions.toggleAmendmentsList(false));
-                  } else {
-                    dispatch(InquiryActions.setOneInq({}));
                   }
                 }
               }).catch((error) => console.error(error));
@@ -701,6 +708,9 @@ const InquiryViewer = (props) => {
   };
 
   const removeReply = (question) => {
+    if (tempReply.answer) {
+      question.draftId = tempReply.answer.id;
+    }
     setReplyRemove(question);
     let confirmPopupMsg = 'Are you sure you want to remove this amendment?';
     if (comment.length > 2) {
