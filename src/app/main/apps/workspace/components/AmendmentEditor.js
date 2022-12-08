@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Amendment = ({ question, inquiriesLength }) => {
+const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector(({ user }) => user);
@@ -163,6 +163,7 @@ const Amendment = ({ question, inquiriesLength }) => {
             optionsMinimize.push(response);
             dispatch(InquiryActions.setInquiries(optionsInquires));
             dispatch(InquiryActions.setListMinimize(optionsMinimize));
+            getUpdatedAt();
           }
         }).catch((err) => console.error(err));
       })
