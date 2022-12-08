@@ -83,7 +83,7 @@ const ChoiceAnswer = (props) => {
                 checked={!disableChecked&&selectedChoice === choice.id}
                 value={choice.id}
                 control={<Radio color={'primary'} />}
-                label={<span style={{ fontSize: '1.7rem' }}>{choice.content}</span>}
+                label={<span style={{ fontSize: '1.7rem', whiteSpace: 'pre' }}>{choice.content}</span>}
               />
             </div>
           ))}
