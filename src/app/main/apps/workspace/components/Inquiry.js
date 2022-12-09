@@ -59,6 +59,9 @@ const Inquiry = (props) => {
     inquiriesSet = inquiriesSet.filter((q, index) => q.field === currentField);
     setReceiver(null);
     const inqSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    inqSort.forEach(inq => {
+      if (inq.answerObj) inq.answerObj = inq.answerObj.filter(item => item.type === metadata.ans_type['choice']);
+    })
     setListInqsField(inqSort);
   }, [inquiries]);
 
