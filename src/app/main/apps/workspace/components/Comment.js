@@ -73,66 +73,6 @@ const Comment = (props) => {
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const changeValue = (e) => {
-    setValue(e.target.value);
-  };
-  const changeComment = (e, id) => {
-    const temp = [...comments];
-    temp[id].content = e.target.value;
-    setComments(temp);
-  };
-  const addComment = async (e) => {
-    const targetValue = e.target.value;
-    if (e.key === 'Enter') {
-      if (targetValue) {
-        const inqAns = {
-          inquiry: question.id,
-          confirm: false,
-          type: 'REP'
-        };
-        const answer = {
-          content: targetValue,
-          type: question.ansType
-        };
-        const res = await saveComment({ inqAns, answer });
-        setComments([
-          ...comments,
-          {
-            answer: res.id,
-            createdAt: new Date(),
-            content: targetValue,
-            creator: { userName: user.displayName, avatar: user.photoURL }
-          }
-        ]);
-      }
-      setValue('');
-    }
-  };
-
-  const onEnterComment = (e, id) => {
-    if (e.key === 'Enter') {
-      editComment(comments[id].answer, e.target.value);
-      setEdit('');
-    }
-  };
-  const onDelete = (id) => {
-    deleteComment(comments[id].answer);
-    const temp = [...comments];
-    temp.splice(id, 1);
-    setComments(temp);
-    setAnchorEl(null);
-  };
-  const onEdit = (id) => {
-    setEdit(id);
-    setAnchorEl(null);
-  };
 
   const checkSystemResolved = (process, key) => {
     return (process === 'draft' && key === 0) ? true : false;
