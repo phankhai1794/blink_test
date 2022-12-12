@@ -23,7 +23,7 @@ export const filterMetadata = (data) => {
   for (const field of data['field']) {
     if (field.keyword.toLowerCase() !== 'other') {
       dict['field'][field.keyword] = field.id;
-      dict['field_options'].push({ label: field.name, value: field.id, keyword: field.keyword });
+      dict['field_options'].push({ label: field.name, value: field.id, keyword: field.keyword, display: field.show });
     }
   }
   for (const inq of data['inqType']) {
