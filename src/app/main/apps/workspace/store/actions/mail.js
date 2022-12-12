@@ -15,7 +15,7 @@ export const SUGGEST_MAIL_NONE = 'SUGGEST_MAIL_NONE';
 export const SUGGEST_MAIL_ERROR = 'SUGGEST_MAIL_ERROR';
 export const SUGGEST_MAIL_SUCCESS = 'SUGGEST_MAIL_SUCCESS';
 
-export const VALIDATE_MAIL = 'VALIDATE_MAIL';
+export const INPUT_MAIL = 'INPUT_MAIL';
 export const SET_TAGS = 'SET_TAGS'
 
 export const SENDMAIL_SET_FORM = 'SENDMAIL_SET_FORM'
@@ -71,9 +71,9 @@ export const suggestMail = (keyword) => async (dispatch) => {
     });
 };
 
-export function validateMail(state) {
+export function inputMail(state) {
   return {
-    type: VALIDATE_MAIL,
+    type: INPUT_MAIL,
     state: state
   };
 }
