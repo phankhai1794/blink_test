@@ -285,7 +285,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
       <div style={{ marginTop: 20 }}>
         <Button
           className={classes.btn}
-          disabled={fieldValue?.trim().length === 0}
+          disabled={fieldValue.length === 0}
           onClick={() => handleValidateInput(handleSave)}
           color="primary"
           variant="contained"
