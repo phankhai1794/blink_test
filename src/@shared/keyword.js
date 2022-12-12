@@ -106,6 +106,8 @@ export const NCM_CODE = 'NCM Code';
 
 export const SEQ = 'Seq';
 
+export const ONLY_ATT = 'Please refer to the attached file for your reference.';
+
 export const CONTAINER_LIST = {
   cd: [CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT],
   cm: [CM_MARK, HS_CODE, HTS_CODE, NCM_CODE, CM_DESCRIPTION, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT],

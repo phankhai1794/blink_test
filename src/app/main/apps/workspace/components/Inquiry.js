@@ -60,7 +60,7 @@ const Inquiry = (props) => {
     setReceiver(null);
     const inqSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     inqSort.forEach(inq => {
-      if (inq.answerObj) inq.answerObj = inq.answerObj.filter(item => item.type === metadata.ans_type['choice']);
+      if (inq.answerObj && inq.answerObj.length > 0) inq.answerObj = inq.answerObj.filter(item => item.type !== metadata.ans_type['attachment']);
     })
     setListInqsField(inqSort);
   }, [inquiries]);
