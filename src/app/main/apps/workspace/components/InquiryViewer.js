@@ -9,7 +9,7 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime, validatePartiesContent } from '@shared';
+import { getLabelById, displayTime, validatePartiesContent, groupBy } from '@shared';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import {
   CONTAINER_DETAIL,
@@ -218,6 +218,7 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     let isUnmounted = false;
     setTempReply({});
+    setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
     if (question && question.process === 'pending') {
       loadComment(question.id)
         .then((res) => {
@@ -263,6 +264,16 @@ const InquiryViewer = (props) => {
                 setSubmitLabel(false);
                 lastest.showIconReply = true;
               }
+
+              const getResolvedLastest = res.filter(r => r.state === 'COMPL');
+              if (getResolvedLastest.length) {
+                getResolvedLastest.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+                const { content: contentResolved } = getResolvedLastest[getResolvedLastest.length - 1];
+                setTextResolve(contentResolved instanceof String ? `"${contentResolved}"` : contentResolved || '');
+              } else {
+                setTextResolve(content[lastest.field] || '');
+              }
+
               if (user.role === 'Admin') {
                 if (filterOffshoreSent.state === 'REP_Q_SENT') {
                   setShowLabelSent(true);
@@ -375,6 +386,7 @@ const InquiryViewer = (props) => {
               setQuestion(lastest);
               setInqHasComment(true);
             }
+            setTextResolve(content[lastest.field] || '');
           }
           setIsLoadedComment(true);
         })
@@ -421,6 +433,15 @@ const InquiryViewer = (props) => {
             }
             if (lastest.state === 'RESOLVED') {
               setStateReplyDraft(false);
+            }
+
+            const getResolvedLastest = res.filter(r => r.state === 'RESOLVED');
+            if (getResolvedLastest.length) {
+              getResolvedLastest.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+              const { content: contentResolved } = getResolvedLastest[getResolvedLastest.length - 1].content;
+              setTextResolve(contentResolved instanceof String ? `"${contentResolved}"` : contentResolved || '');
+            } else {
+              setTextResolve(lastest.content || '')
             }
 
             if (user.role === 'Admin') {
@@ -1817,33 +1838,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     }
   }, [content]);
 
-  /**
- * @description
- * Takes an Array<V>, and a grouping function,
- * and returns a Map of the array grouped by the grouping function.
- *
- * @param list An array of type V.
- * @param keyGetter A Function that takes the the Array type V as an input, and returns a value of type K.
- *                  K is generally intended to be a property key of V.
- *
- * @returns Map of the array grouped by the grouping function.
- */
-  // export function groupBy<K, V>(list: Array<V>, keyGetter: (input: V) => K): Map<K, Array<V>> {
-  //    const map = new Map<K, Array<V>>();
-
-  function groupBy(list, keyGetter) {
-    const map = new Map();
-    list.forEach(item => {
-      const key = keyGetter(item);
-      const collection = map.get(key);
-      if (!collection) {
-        map.set(key, [item]);
-      } else {
-        collection.push(item);
-      }
-    });
-    return map;
-  }
 
   const renderTB = () => {
     let td = [];
