@@ -12,10 +12,9 @@ import * as InquiryActions from '../store/actions/inquiry';
 const AttachFile = (props) => {
   const { disabled, isAnswer, isReply, question, questions, setAttachmentReply, isUploadFile } = props;
   const dispatch = useDispatch();
-  const [currentEditInq, reply, metadata] = useSelector(({ workspace }) => [
+  const [currentEditInq, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.metadata,
-    workspace.inquiryReducer.reply
   ]);
 
   const checkDuplicate = (mediaFiles, newMediaFiles) => {
