@@ -310,7 +310,7 @@ const InquiryViewer = (props) => {
                   lastest.showIconEdit = false;
                   setStateReplyDraft(false);
                 }
-                if (['REP_A_SENT'].includes(filterOffshoreSent.state)) {
+                if (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state)) {
                   setSubmitLabel(true);
                   lastest.showIconAttachReplyFile = false;
                   lastest.showIconAttachAnswerFile = false;

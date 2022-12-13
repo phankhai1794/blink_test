@@ -1,5 +1,5 @@
 import { FuseChipSelect } from '@fuse';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLabelById, toFindDuplicates } from '@shared';
 import {
@@ -157,6 +157,7 @@ const InquiryEditor = (props) => {
   const [fieldEdited, setFieldEdited] = useState();
   const [nameTypeEdited, setNameTypeEdited] = useState();
   const [contentEdited, setContentEdited] = useState(valueType?.label);
+  const [isDisabled, setDisabled] = useState(false);
   const [prevField, setPrevField] = useState('');
   const styles = (width) => {
     return {
@@ -294,6 +295,7 @@ const InquiryEditor = (props) => {
   };
 
   const handleValidateInput = async (confirm = null) => {
+    setDisabled(true);
     let textInput = currentEditInq?.content || '';
     const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
     if (isWarning) {
@@ -306,6 +308,7 @@ const InquiryEditor = (props) => {
   };
 
   const onSave = async () => {
+    const inquiriesOp = [...inquiries];
     dispatch(
       FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null })
     );
@@ -345,6 +348,7 @@ const InquiryEditor = (props) => {
                 variant: 'error'
               })
             );
+            setDisabled(false);
             return;
           }
         } else {
@@ -373,18 +377,23 @@ const InquiryEditor = (props) => {
       );
     }
     if (!check) {
+      setDisabled(false);
       return;
     }
     let error = false;
 
-    const inquiry = inquiries.find((q) => q.id === currentEditInq.id);
+    let inquiry = inquiriesOp.find((q) => q.id === currentEditInq.id);
     if (inquiry) {
-      if (checkDuplicateInq()) return;
+      if (checkDuplicateInq()) {
+        setDisabled(false);
+        return;
+      }
       if (ansTypeChoice === currentEditInq.ansType) {
         if (currentEditInq.answerObj.length === 1) {
           dispatch(
             AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
           );
+          setDisabled(false);
           return;
           // break;
         }
@@ -393,33 +402,26 @@ const InquiryEditor = (props) => {
           const checkOptionEmpty = inquiry.answerObj.filter((item) => !item.content);
           if (checkOptionEmpty.length > 0) {
             dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
+            setDisabled(false);
             error = true;
             // break;
           }
         } else {
           dispatch(AppActions.showMessage({ message: 'Options not empty!', variant: 'error' }));
+          setDisabled(false);
           error = true;
           // break;
         }
       }
-      if (ansTypeChoice === inquiry.ansType && inquiry.answerObj.length) {
-        const dupArray = inquiry.answerObj.map((ans) => ans.content.trim());
-        if (toFindDuplicates(dupArray).length) {
-          dispatch(
-            AppActions.showMessage({
-              message: 'Options value must not be duplicated',
-              variant: 'error'
-            })
-          );
-          return;
-        }
-      }
+
       const ansCreate = currentEditInq.answerObj.filter(
         ({ id: id1 }) => !inquiry.answerObj.some(({ id: id2 }) => id2 === id1)
       );
+
       const ansDelete = inquiry.answerObj.filter(
         ({ id: id1 }) => !currentEditInq.answerObj.some(({ id: id2 }) => id2 === id1)
       );
+      //
       const ansUpdate = currentEditInq.answerObj.filter(({ id: id1, content: c1 }) =>
         inquiry.answerObj.some(({ id: id2, content: c2 }) => id2 === id1 && c1 !== c2)
       );
@@ -447,16 +449,16 @@ const InquiryEditor = (props) => {
           ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
           files: { mediaCreate, mediaDelete }
         });
-        const editedIndex = inquiries.findIndex((inq) => inq.id === inquiry.id);
-        inquiries[editedIndex] = currentEditInq;
-        if (update.data.length && editedIndex) {
-          inquiries[editedIndex].answerObj = [
-            ...inquiries[editedIndex].answerObj,
+        const editedIndex = inquiriesOp.findIndex((inq) => inq.id === inquiry.id);
+        inquiriesOp[editedIndex] = currentEditInq;
+        if (update.data.length && editedIndex !== -1) {
+          inquiriesOp[editedIndex].answerObj = [
+            ...currentEditInq.answerObj,
             ...update.data
           ].filter((inq) => inq.id);
         }
         if (prevField !== currentEditInq.field) {
-          const hasInq = inquiries.filter((inq) => inq.field === prevField);
+          const hasInq = inquiriesOp.filter((inq) => inq.field === prevField);
           if (!hasInq.length) {
             dispatch(InquiryActions.setOneInq({}));
             dispatch(FormActions.toggleCreateInquiry(false));
@@ -464,11 +466,12 @@ const InquiryEditor = (props) => {
         }
         //
         const dataDate = await getUpdatedAtAnswer(inquiry.id);
-        inquiries[editedIndex].createdAt = dataDate.data;
-        inquiries[editedIndex].showIconAttachAnswerFile = false;
+        inquiriesOp[editedIndex].createdAt = dataDate.data;
+        inquiriesOp[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setEditInq());
-        dispatch(InquiryActions.setInquiries(inquiries));
+        dispatch(InquiryActions.setInquiries(inquiriesOp));
         props.getUpdatedAt();
+        setDisabled(false);
         // setSave();
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
@@ -537,6 +540,7 @@ const InquiryEditor = (props) => {
               dispatch(InquiryActions.setEditInq());
               dispatch(InquiryActions.setInquiries(optionsInquires));
               dispatch(InquiryActions.setListMinimize(optionsMinimize));
+              setDisabled(false);
             })
             .catch((error) =>
               dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
@@ -710,6 +714,7 @@ const InquiryEditor = (props) => {
               <Button
                 variant="contained"
                 color="primary"
+                disabled={isDisabled}
                 onClick={() => handleValidateInput(onSave)}
                 classes={{ root: classes.button }}>
                 Save
