@@ -1,5 +1,7 @@
 import * as Actions from '../actions/inquiry';
 
+export const MSG_INQUIRY_CONTENT = 'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details';
+
 const initialState = {
   myBL: {},
   metadata: {},
@@ -16,19 +18,6 @@ const initialState = {
   validationAttachment: { field: true, mediaId: true, nameFile: true },
   inquiries: [],
   inquiryEdit: null,
-  // question: [
-  //   {
-  //     content:
-  //       'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
-  //     inqType: '',
-  //     ansType: '',
-  //     field: '',
-  //     answerObj: [],
-  //     addOther: '',
-  //     receiver: [],
-  //     mediaFile: []
-  //   }
-  // ],
   currentInq: {},
   listInqMinimize: [],
   listMinimize: [],
@@ -66,7 +55,7 @@ const inquiryReducer = function (state = initialState, action) {
       currentEditInq:
         {
           content:
-            'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
+            MSG_INQUIRY_CONTENT,
           inqType: '',
           ansType: '',
           field: action.state,
@@ -87,7 +76,7 @@ const inquiryReducer = function (state = initialState, action) {
       question: [
         {
           content:
-              'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details',
+              MSG_INQUIRY_CONTENT,
           inqType: '',
           ansType: '',
           field: '',
