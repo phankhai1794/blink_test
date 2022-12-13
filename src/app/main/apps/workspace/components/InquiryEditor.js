@@ -29,6 +29,7 @@ import { validateTextInput } from 'app/services/myBLService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
+import { MSG_INQUIRY_CONTENT } from '../store/reducers/inquiry';
 
 import ChoiceAnswerEditor from './ChoiceAnswerEditor';
 import ParagraphAnswerEditor from './ParagraphAnswerEditor';
@@ -188,10 +189,10 @@ const InquiryEditor = (props) => {
       inq.content = contentEdited;
     } else {
       inq.content =
-        'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details'.replace(
-          '{{INQ_TYPE}}',
-          e.label
-        );
+      MSG_INQUIRY_CONTENT.replace(
+        '{{INQ_TYPE}}',
+        e.label
+      );
     }
     setValueType(e);
     setNameType(e.label);
@@ -203,6 +204,16 @@ const InquiryEditor = (props) => {
     const inq = { ...currentEditInq };
     inq.field = e.value;
     inq.inqType = '';
+
+    if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
+      inq.content = contentEdited;
+    } else {
+      inq.content =
+      MSG_INQUIRY_CONTENT.replace(
+        '{{INQ_TYPE}}',
+        ''
+      );
+    }
     dispatch(InquiryActions.validate({ ...valid, field: true }));
     setFieldValue(e);
     setValueType(null);
