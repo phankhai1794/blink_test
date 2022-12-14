@@ -11,6 +11,11 @@ export async function verifyEmail(data) {
   return response.data;
 }
 
+export async function requestCode(data) {
+  const response = await axios().post(`${PATH}/request-access-code`, data);
+  return response.data;
+}
+
 export async function verifyGuest(data) {
   const response = await axios().post(`${PATH}/guest`, data);
   return response.data;
@@ -21,8 +26,8 @@ export async function isVerified(data) {
   return response.data;
 }
 
-export async function verifyWithToken(auth) {
-  const response = await axios().get(`${PATH}/verify-with-token/${auth}`);
+export async function decodeAuthParam(auth) {
+  const response = await axios().get(`${PATH}/decode-auth-param/${auth}`);
   return response.data;
 }
 
