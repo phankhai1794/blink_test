@@ -10,7 +10,6 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import ReplyIcon from '@material-ui/icons/Reply';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import { sentStatus } from '@shared';
 import { checkClassName, checkColorStatus } from '@shared/colorStatus';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
