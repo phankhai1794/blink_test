@@ -43,7 +43,7 @@ const InputUI = ({ id, onChanged }) => {
     id: '',
     input: ''
   });
-  const [ctrlA, setCtrlA] = useState(false);
+  const [ctrlA, setCtrlA] = useState({ state: false, id: '' });
   const [isCc, setIsCc] = useState(false);
   const [isBcc, setIsBcc] = useState(false);
   const refInput = {
@@ -136,13 +136,13 @@ const InputUI = ({ id, onChanged }) => {
     }
   };
   const onDelete = (id, tagIndex) => {
-    const newTags = ctrlA ? [] : tags[id].filter((_, i) => i !== tagIndex);
+    const newTags = ctrlA.state ? [] : tags[id].filter((_, i) => i !== tagIndex);
     dispatch(MailActions.setTags({ ...tags, [id]: newTags }));
     onChanged(id, newTags);
   };
 
   const onChange = (id, value) => {
-    setCtrlA(false);
+    setCtrlA({ state: false });
     // Filter our suggestions that don't contain the user's input
     const strArr = value.split(',');
     const str = inputMail[id].split(',');
@@ -233,7 +233,7 @@ const InputUI = ({ id, onChanged }) => {
         });
       }
     }
-    if (!input && e.key === 'a' && e.ctrlKey) setCtrlA(true);
+    if (!input && e.key === 'a' && e.ctrlKey) setCtrlA({ state: true, id });
   };
 
   const onBlur = (id) => {
@@ -244,7 +244,7 @@ const InputUI = ({ id, onChanged }) => {
       dispatch(MailActions.setTags({ ...tags, [id]: newTags }));
       dispatch(MailActions.inputMail({ ...inputMail, [id]: '' }));
     }
-    setCtrlA(false);
+    setCtrlA({ state: false });
   };
   const totalStringLength = (array) => {
     let total = 0, index = 0
@@ -257,7 +257,7 @@ const InputUI = ({ id, onChanged }) => {
     })
     return index
   }
-  
+
   const toReceiver = (id) => {
     const temp1 = inputMail[`to${id}`]
       ? [...tags[`to${id}`], ...inputMail[`to${id}`].split(',')]
@@ -334,6 +334,7 @@ const InputUI = ({ id, onChanged }) => {
             {
               tags[id].map((tag, i) => (
                 <Chip
+                  className={ctrlA.state && ctrlA.id === id ? 'ctrlA' : ''}
                   classes={{ root: classes.chip }}
                   key={i}
                   label={tag}
