@@ -124,6 +124,7 @@ const InquiryEditor = (props) => {
       workspace.inquiryReducer.listMinimize
     ]
   );
+  const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
 
   const user = useSelector(({ user }) => user);
 
@@ -553,6 +554,10 @@ const InquiryEditor = (props) => {
         .catch((error) => console.log(error));
     }
   };
+
+  useEffect(() => {
+    if (!validateInput?.isValid) setDisabled(false);
+  }, [validateInput])
 
   return (
     <>
