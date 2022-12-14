@@ -481,12 +481,16 @@ const InquiryEditor = (props) => {
       }
     } else {
       // Create INQUIRY
-      if (checkDuplicateInq()) return;
+      if (checkDuplicateInq()) {
+        setDisabled(false);
+        return;
+      }
       if (ansTypeChoice === currentEditInq.ansType) {
         if (currentEditInq.answerObj.length === 1) {
           dispatch(
             AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
           );
+          setDisabled(false);
           return;
         }
       }
