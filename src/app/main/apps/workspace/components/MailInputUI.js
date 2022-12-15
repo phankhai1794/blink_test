@@ -13,7 +13,7 @@ const useStyles = makeStyles(() => ({
     borderRadius: '4px',
     background: 'rgba(0, 0, 0, 0.03)',
     height: 26,
-    marginRight: 5
+    margin: 'auto 3px'
   }
 }));
 
@@ -144,8 +144,8 @@ const InputUI = ({ id, onChanged }) => {
   const onChange = (id, value) => {
     setCtrlA({ state: false });
     // Filter our suggestions that don't contain the user's input
-    const strArr = value.split(',');
-    const str = inputMail[id].split(',');
+    const strArr = value.split(/,|;/);
+    const str = inputMail[id].split(/,|;/);
 
     let index = -1;
     if (strArr.length === str.length) {
@@ -247,26 +247,27 @@ const InputUI = ({ id, onChanged }) => {
     setCtrlA({ state: false });
   };
   const totalStringLength = (array) => {
-    let total = 0, index = 0
+    let total = 0,
+      index = 0;
     array.forEach((e, i) => {
-      total += e.length
+      total += e.length;
       if (total >= 90) {
         return;
       }
-      index = i
-    })
-    return index
-  }
+      index = i;
+    });
+    return index;
+  };
 
   const toReceiver = (id) => {
     const temp1 = inputMail[`to${id}`]
-      ? [...tags[`to${id}`], ...inputMail[`to${id}`].split(',')]
+      ? [...tags[`to${id}`], ...inputMail[`to${id}`].split(/,|;/)]
       : tags[`to${id}`];
     const temp2 = inputMail[`to${id}Cc`]
-      ? [...tags[`to${id}Cc`], ...inputMail[`to${id}Cc`].split(',')]
+      ? [...tags[`to${id}Cc`], ...inputMail[`to${id}Cc`].split(/,|;/)]
       : tags[`to${id}Cc`];
     const temp3 = inputMail[`to${id}Bcc`]
-      ? [...tags[`to${id}Bcc`], ...inputMail[`to${id}Bcc`].split(',')]
+      ? [...tags[`to${id}Bcc`], ...inputMail[`to${id}Bcc`].split(/,|;/)]
       : tags[`to${id}Bcc`];
     const size = temp1.length;
     const ccSize = temp2.length;
@@ -291,7 +292,7 @@ const InputUI = ({ id, onChanged }) => {
           {e}
         </span>
       ));
-      invalidText = [...arr.slice(length), ...temp3].some(e => !isEmailValid(e));
+      invalidText = [...arr.slice(length), ...temp3].some((e) => !isEmailValid(e));
     } else {
       arg = arr.map((e, i) => (
         <span key={i} className={isEmailValid(e) ? '' : 'invalidEmail'}>
@@ -317,9 +318,7 @@ const InputUI = ({ id, onChanged }) => {
         if (arr.length + bccSize > length) {
           text += `${bccSize - length + arr.length} Bcc`;
         }
-        invalidText = temp3
-          .slice(length - arr.length)
-          .some(e => !isEmailValid(e));
+        invalidText = temp3.slice(length - arr.length).some((e) => !isEmailValid(e));
       }
     }
     if (text) text = <span className={invalidText ? 'moreTag_invalid' : 'moreTag'}> {text}</span>;
@@ -329,26 +328,23 @@ const InputUI = ({ id, onChanged }) => {
   const TagsInput = (id, type) => {
     return (
       <>
-        <div className='flex flex-wrap'>
+        <div className="flex flex-wrap flex-grow" >
           <>
-            {
-              tags[id].map((tag, i) => (
-                <Chip
-                  className={ctrlA.state && ctrlA.id === id ? 'ctrlA' : ''}
-                  classes={{ root: classes.chip }}
-                  key={i}
-                  label={tag}
-                  onDelete={() => onDelete(id, i)}
-                  deleteIcon={<ClearIcon />}
-                />
-              ))
-            }
+            {tags[id].map((tag, i) => (
+              <Chip
+                className={ctrlA.state && ctrlA.id === id ? 'ctrlA' : ''}
+                classes={{ root: classes.chip }}
+                key={i}
+                label={tag}
+                onDelete={() => onDelete(id, i)}
+                deleteIcon={<ClearIcon />}
+              />
+            ))}
           </>
           <TextField
-            className='flex-grow'
+            className="flex-grow"
             inputRef={refInput[id]}
             value={inputMail[id]}
-            placeholder={!tags[id].length ? type : ''}
             onKeyDown={(e) => onKeyDown(id, e)}
             onChange={(e) => onChange(id, e.target.value)}
             onPaste={(e) => onPaste(id, e)}
@@ -389,6 +385,7 @@ const InputUI = ({ id, onChanged }) => {
           state.id === id &&
           inputMail[id] &&
           state.filteredSuggestions.length > 0 && (
+     
           <ul className="suggestions">
             {state.filteredSuggestions.map(({ email, firstName, lastName, avatar }, index) => {
               let className = 'suggestion';
@@ -415,6 +412,7 @@ const InputUI = ({ id, onChanged }) => {
               );
             })}
           </ul>
+ 
         )}
       </>
     );
@@ -423,16 +421,37 @@ const InputUI = ({ id, onChanged }) => {
     <>
       {focus ? (
         <div ref={ref} onFocus={() => setFocus(true)} style={{ borderBottom: '1px solid #BAC3CB' }}>
-          {TagsInput(`to${id}`, `To ${id}`)}
-          {isCc && TagsInput(`to${id}Cc`, 'Cc')}
-          {isBcc && TagsInput(`to${id}Bcc`, 'Bcc')}
+          <div className="flex" style={{position: 'relative'}}>
+            <span className='m-auto mr-8'>To</span>
+            {TagsInput(`to${id}`, `To ${id}`)}
+          </div>
+          {isCc &&
+            <div className="flex m-auto" style={{position: 'relative'}}>
+              <span className='m-auto mr-8'>Cc</span>
+              {TagsInput(`to${id}Cc`, 'Cc')}
+            </div>
+          }
+          {isBcc &&
+            <div className="flex m-auto" style={{position: 'relative'}}>
+              <span className='m-auto mr-8'>Bcc</span>
+              {TagsInput(`to${id}Bcc`, 'Bcc')}
+            </div>
+          }
         </div>
       ) : (
         <div
-          style={{ height: 22, borderBottom: '1px solid #BAC3CB', cursor: 'text', padding: '5px 0' }}
+          style={{
+            height: 22,
+            borderBottom: '1px solid #BAC3CB',
+            cursor: 'text',
+            padding: '5px 0'
+          }}
           onClick={() => setFocus(true)}>
-          {toReceiver(id)[0].length ? toReceiver(id)[0].map((e, i, arr) => (i !== arr.length - 1 ? <>{e}, </> : e)) :
-            <input placeholder='Recipients' style={{ border: 'none', fontSize: 16 }} />}
+          {toReceiver(id)[0].length ? (
+            toReceiver(id)[0].map((e, i, arr) => (i !== arr.length - 1 ? <>{e}, </> : e))
+          ) : (
+            <input placeholder="Recipients" style={{ border: 'none', fontSize: 16 }} />
+          )}
           {toReceiver(id)[1]}
         </div>
       )}

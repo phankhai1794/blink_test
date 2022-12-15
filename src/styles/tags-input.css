@@ -94,6 +94,7 @@ ul.suggestions {
   margin: 4px -1px;
   padding: 0;
   z-index: 2;
+  top: 100%;
   list-style: none;
   position: absolute;
   background: white;
