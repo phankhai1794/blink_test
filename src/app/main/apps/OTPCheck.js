@@ -184,6 +184,9 @@ const OtpCheck = ({ children }) => {
 
   const handleRequestCode = () => {
     requestCode({ email: mail.value, bl: myBL.id })
+      .then(({ message }) => {
+        dispatch(Actions.showMessage({ message, variant: 'success' }));
+      })
       .catch((error) => {
         catchError(error);
       });
@@ -332,7 +335,7 @@ const OtpCheck = ({ children }) => {
                         <Typography className={classes.boldLabel}>Access Code</Typography>
                         <Typography style={{ fontSize: 14, fontWeight: 600 }}>
                           {`We just emailed ${mail.value} with a 6-digit code. If you don't see it, please check your spam folder or `}
-                          <a style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={() => requestCode({ email: mail.value, bl: myBL.id })}>
+                          <a style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={() => handleRequestCode()}>
                             resend code
                           </a>
                           {'.'}
