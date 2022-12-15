@@ -170,6 +170,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
     dispatch(InquiryActions.setContent({ ...content, [fieldReq]: fieldValue }));
     dispatch(FormActions.toggleCreateAmendment(false));
+    dispatch(InquiryActions.setOneInq({}));
   }
 
   const handleCancel = () => {
