@@ -22,14 +22,14 @@ export const SENDMAIL_SET_FORM = 'SENDMAIL_SET_FORM'
 
 
 export const sendMail =
-  ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, inquiries }) =>
+  ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, inquiries, user }) =>
     async (dispatch) => {
       const replyInqs = [];
       const inquiriesPendingProcess = inquiries.filter(op => op.process === 'pending');
       const listComment = await axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)));
       listComment.map((comment, index) => comment.length && replyInqs.push(inquiries[ index ].id));
       dispatch({ type: SENDMAIL_LOADING });
-      sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs)
+      sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs, user)
         .then((res) => {
           if (res.status === 200) {
             dispatch(InquiryActions.checkSend(false));
