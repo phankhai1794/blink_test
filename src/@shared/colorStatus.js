@@ -60,7 +60,7 @@ export const checkColorStatus = (
   const listCommentFilter = listCommentDraft.filter(q => q.field === id);
   if (listCommentFilter.length) {
     colorStatusObj.isEmpty = false;
-    const statusReply = user?.role === 'Admin' ? [...sentStatus, ...['REP_DRF']] : [...sentStatus, ...['AME_DRF']];
+    const statusReply = [...sentStatus, ...['REP_DRF']];
     const amendment = listCommentFilter[0] || {};
     const lastComment = listCommentFilter[listCommentFilter.length - 1] || {};
 

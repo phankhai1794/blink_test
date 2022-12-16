@@ -94,8 +94,10 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
       if (amendment.length) {
         getCommentDraftBl(myBL.id, amendment[0].field)
           .then((res) => {
-            const filterRepADraft = res.some((r) => r.state === 'AME_DRF');
-            if (filterRepADraft) isSubmit = false;
+            res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+            const lastestComment = res[res.length - 1];
+            // const filterRepADraft = res.some((r) => ['AME_DRF', 'REP_DRF']);
+            if (['AME_DRF', 'REP_DRF'].includes(lastestComment.state) && lastestComment.role === 'Guest') isSubmit = false;
             setIsSubmit(isSubmit)
           }).catch(err => { console.error(err) });
       }
