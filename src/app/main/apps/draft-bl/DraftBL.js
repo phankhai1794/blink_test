@@ -241,7 +241,7 @@ const DraftPage = (props) => {
           <div
             className={classes.tittle_L}
             style={{ color: 'rgb(0, 0, 255)', textAlign: 'center' }}>
-            ORIGINAL NON NEGOTIABLE
+            DRAFT - NON NEGOTIABLE
           </div>
           <div style={{ width: '30%', paddingTop: 15 }}>
             <span className={classes.billType}>SEAWAY BILL</span>
