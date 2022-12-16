@@ -3,9 +3,11 @@ import {Button} from "@material-ui/core";
 import {useDispatch, useSelector} from "react-redux";
 import {makeStyles} from "@material-ui/core/styles";
 import { submitInquiryAnswer } from 'app/services/inquiryService';
+import * as AppActions from 'app/main/apps/workspace/store/actions';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
+import { getBlInfo } from 'app/services/myBLService';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -53,10 +55,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PopupConfirmSubmit = (props) => {
-  const [inquiries, isShowBackground] = useSelector(({ workspace }) => [
+  const [inquiries, mybl, isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
+    workspace.inquiryReducer.mybl,
     workspace.inquiryReducer.isShowBackground,
   ]);
+  const user = useSelector(({ auth }) => auth.user);
   const dispatch = useDispatch();
   const classes = useStyles();
 
@@ -77,6 +81,19 @@ const PopupConfirmSubmit = (props) => {
       }
     });
     await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields });
+
+    const { search } = window.location;
+    const bl = new URLSearchParams(search).get('bl');
+
+    getBlInfo(bl).then(res => {
+      const { bkgNo } = res.myBL;
+      if (user.role === 'guest') {
+        dispatch(AppActions.updateOpusStatus(bkgNo, "RC", "Return back from Customer via workspace"));
+      } else{
+        dispatch(AppActions.updateOpusStatus(bkgNo, "RO", "Return back from Onshore via workspace"));
+      }
+    });
+    
     //
     const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
     inqs.forEach((item) => {

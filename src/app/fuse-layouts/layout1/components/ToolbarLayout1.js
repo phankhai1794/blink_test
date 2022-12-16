@@ -3,6 +3,7 @@ import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarM
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
+import * as Actions from 'app/main/apps/workspace/store/actions';
 import * as DraftBLActions from 'app/main/apps/workspace/store/actions/draft-bl';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { draftConfirm } from '@shared';
@@ -18,6 +19,7 @@ import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 import { loadComment } from 'app/services/inquiryService';
 import { getCommentDraftBl } from "app/services/draftblService";
 import axios from 'axios';
+import { getBlInfo } from 'app/services/myBLService';
 
 import * as InquiryActions from "../../../main/apps/workspace/store/actions/inquiry";
 
@@ -330,6 +332,11 @@ function ToolbarLayout1(props) {
 
   const redirectEditDraftBL = () => {
     const bl = new URLSearchParams(search).get('bl');
+    getBlInfo(bl).then(res => {
+      const { bkgNo } = res.myBL;
+      dispatch(Actions.updateOpusStatus(bkgNo, "CR", "Customer edited/revised BL"));
+    });
+    
     if (bl) history.push(`/guest?bl=${bl}`);
   };
 

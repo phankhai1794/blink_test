@@ -4,6 +4,7 @@ import { getInquiryById, getMetadata } from 'app/services/inquiryService';
 import { createBL, getBlInfo, getCustomerAmendment } from 'app/services/myBLService';
 import { getFieldContent, getCommentDraftBl } from 'app/services/draftblService';
 import axios from 'axios';
+import { updateBlStatus } from 'app/services/opusService';
 
 import {
   setMyBL,
@@ -48,6 +49,29 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
     const cloneContent = { ...content };
     contentAmendmentRs?.length && contentAmendmentRs.forEach(a => cloneContent[a.field] = a.content);
     dispatch(setContent(cloneContent));
+  } catch (err) {
+    handleError(dispatch, err);
+  }
+};
+
+export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnDesc) => async (dispatch) => {
+  try {
+    const [blResponse] = [
+      await updateBlStatus({
+        shineUrl: "",
+        srKndCd: "",
+        srNo:"",
+        bkgNo: bkgNo,
+        srAmdTpCd: "",
+        srAmdSeq: "",
+        stsCd: "",
+        stsDesc: "",
+        blinkStsCd: blinkStsCd,
+        rtrnDesc: rtrnDesc,
+        shineId: "Blink User"
+      }),
+    ];
+    console.log(blResponse);
   } catch (err) {
     handleError(dispatch, err);
   }

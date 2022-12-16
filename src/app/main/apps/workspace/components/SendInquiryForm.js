@@ -271,7 +271,7 @@ const SendInquiryForm = (props) => {
         formClone.toOnshoreBcc = '';
       }
       dispatch({ type: mailActions.SENDMAIL_LOADING });
-      dispatch(mailActions.sendMail({ myblId: mybl.id, ...formClone, inquiries: cloneInquiries, user: user }));
+      dispatch(mailActions.sendMail({ myblId: mybl.id, bkgNo, ...formClone, inquiries: cloneInquiries, user: user }));
       dispatch(InquiryActions.setInquiries(cloneInquiries));
       dispatch(
         FormActions.openConfirmPopup({

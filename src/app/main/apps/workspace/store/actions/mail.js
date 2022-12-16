@@ -2,6 +2,7 @@ import { sendmail, getSuggestMail } from 'app/services/mailService';
 import { loadComment } from 'app/services/inquiryService';
 import axios from 'axios';
 import { VVD_CODE, POD_CODE, DEL_CODE } from '@shared/keyword';
+import * as AppActions from 'app/main/apps/workspace/store/actions';
 
 import * as InquiryActions from '../actions/inquiry';
 import * as Actions from "../../../draft-bl/store/actions";
@@ -22,19 +23,36 @@ export const SENDMAIL_SET_FORM = 'SENDMAIL_SET_FORM'
 
 
 export const sendMail =
-  ({ myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, inquiries, user }) =>
+  ({ myblId, bkgNo, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, inquiries, user }) =>
     async (dispatch) => {
       const replyInqs = [];
       const inquiriesPendingProcess = inquiries.filter(op => op.process === 'pending');
+      const inquiriesDraftProcess = inquiries.filter(op => op.process === 'draft');
       const listComment = await axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)));
       listComment.map((comment, index) => comment.length && replyInqs.push(inquiries[ index ].id));
       dispatch({ type: SENDMAIL_LOADING });
       sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs, user)
         .then((res) => {
           if (res.status === 200) {
+            let rtrnDesc = '';
+            let blinkStsCd = '';
+            if (inquiriesDraftProcess.length > 0) {
+              blinkStsCd = "AI";
+            }
+            else {
+              blinkStsCd = "IN";
+            }
+            
+            if (toCustomer) {
+              rtrnDesc = "Return to Customer via workspace";
+            }
+            else {
+              rtrnDesc = "Return to Onshore via workspace";
+            }
+            
+            dispatch(AppActions.updateOpusStatus(bkgNo, blinkStsCd, rtrnDesc));
             dispatch(InquiryActions.checkSend(false));
             dispatch(Actions.toggleReload());
-            // dispatch(loadInquiry(myblId));
             return dispatch({
               type: SENDMAIL_SUCCESS
             });
@@ -118,7 +136,7 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
     formOnshore[ 'toCustomer' ] = '';
     subjectOns = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
     contentOns = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`
-    dispatch(sendMail({ myblId: mybl.id, ...formOnshore, subject: subjectOns, content: contentOns, inquiries: inquiries }));
+    dispatch(sendMail({ myblId: mybl.id, bkgNo, ...formOnshore, subject: subjectOns, content: contentOns, inquiries: inquiries }));
   }
 
   if (hasCustomer && form.toCustomer && inqCustomer.length > 0) {
@@ -126,6 +144,6 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
     formCustomer[ 'toOnshore' ] = '';
     subjectCus = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
     contentCus = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer.join(', ')}]`
-    dispatch(sendMail({ myblId: mybl.id, ...formCustomer, subject: subjectCus, content: contentCus, inquiries: inquiries }));
+    dispatch(sendMail({ myblId: mybl.id, bkgNo, ...formCustomer, subject: subjectCus, content: contentCus, inquiries: inquiries }));
   }
 };
