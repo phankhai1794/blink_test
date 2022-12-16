@@ -194,6 +194,18 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
     setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore') || []);
+
+    const inqsToCustomer = inquiries?.filter(inq => inq.receiver[0] === 'customer');
+    if (inqsToCustomer&&inqsToCustomer.every(q => ['COMPL', 'RESOLVED'].includes(q.state))) {
+      dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "Return to Customer via workspace")); 
+    }
+    const inqsToOnshore = inquiries?.filter(inq => inq.receiver[0] === 'customer');
+    if (inqsToOnshore&&inqsToOnshore.every(q => ['COMPL', 'RESOLVED'].includes(q.state))) {
+      dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "Return to Onshore via workspace"));
+    }
+    if (inquiries.every(q => ['UPLOADED'].includes(q.state))) {
+      dispatch(Actions.updateOpusStatus(myBL.bkgNo, "AS", "BL Amendment Success"));
+    }
   }, [inquiries]);
 
   // TODO: TBU Logic after create new reply amendment

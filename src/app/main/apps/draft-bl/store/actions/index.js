@@ -2,6 +2,7 @@ import { getMetadata } from 'app/services/inquiryService';
 import { getFieldContent, confirmDraftBl } from 'app/services/draftblService';
 import { getBlInfo } from 'app/services/myBLService';
 import { filterMetadata, draftConfirm } from '@shared';
+import * as AppActions from 'app/main/apps/workspace/store/actions';
 
 export const SET_METADATA = 'SAVE_METADATA';
 export const SET_BL = 'SET_BL';
@@ -92,7 +93,10 @@ export function toggleDraftBLEdit(state) {
 export const setConfirmDraftBL = () => (dispatch) => {
   const bl = new URLSearchParams(window.location.search).get('bl');
   confirmDraftBl(bl)
-    .then(() => dispatch(setBL({ state: draftConfirm })))
+    .then(() => 
+      dispatch(setBL({ state: draftConfirm }),
+        dispatch(AppActions.updateOpusStatus(bl, "CC", "No more amendments (IRQD will be updated correspondingly)"))
+      ))
     .catch((err) => console.error(err));
 };
 
