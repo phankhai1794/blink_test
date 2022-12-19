@@ -73,7 +73,6 @@ const Comment = (props) => {
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
-
   const checkSystemResolved = (process, key) => {
     return (process === 'draft' && key === 0) ? true : false;
   }

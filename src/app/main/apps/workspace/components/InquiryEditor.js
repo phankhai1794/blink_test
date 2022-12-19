@@ -414,7 +414,6 @@ const InquiryEditor = (props) => {
           // break;
         }
       }
-
       const ansCreate = currentEditInq.answerObj.filter(
         ({ id: id1 }) => !inquiry.answerObj.some(({ id: id2 }) => id2 === id1)
       );
