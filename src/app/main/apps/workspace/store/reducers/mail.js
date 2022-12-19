@@ -5,7 +5,7 @@ const initialState = {
   success: false,
   error: '',
   suggestMails: [],
-  validateMail: { toCustomer: '', toOnshore: '' },
+  inputMail: { toCustomer: '', toOnshore: '', toCustomerCc: '', toOnshoreCc: '', toCustomerBcc: '', toOnshoreBcc: '' },
   tags: { toCustomer: [], toOnshore: [], toCustomerCc: [], toOnshoreCc: [], toCustomerBcc: [], toOnshoreBcc: [] },
 };
 
@@ -46,10 +46,10 @@ const mailReducer = function (state = initialState, action) {
       suggestMails: action.mails
     };
   }
-  case Actions.VALIDATE_MAIL: {
+  case Actions.INPUT_MAIL: {
     return {
       ...state,
-      validateMail: action.state
+      inputMail: action.state
     };
   }
   case Actions.SET_TAGS: {

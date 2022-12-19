@@ -1,343 +1,460 @@
 import React, { useState, useRef, useEffect } from 'react';
-import ReactTags from 'react-tag-autocomplete'
-import { Grid } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import ClearIcon from '@material-ui/icons/Clear';
+import { Chip, Avatar, Link, TextField } from '@material-ui/core';
+import { makeStyles, withStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
-import clsx from 'clsx';
-import { matchSorter } from "match-sorter";
+import { matchSorter } from 'match-sorter';
+import { cyan } from '@material-ui/core/colors';
 
 import * as MailActions from '../store/actions/mail';
-const useStyles = makeStyles(() => ({
-  label: {
-    whiteSpace: 'nowrap',
-    color: '#132535',
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Montserrat'
-  },
-  buttonCcBcc: {
-    paddingLeft: '7px',
-    paddingRight: '7px',
-    background: '#FFFFFF',
-    border: '1px solid #BD0F72',
-    borderRadius: '4px',
-    justifyContent: 'center'
-  },
-  buttonCcBccDisable: {
-    paddingLeft: '7px',
-    paddingRight: '7px',
-    background: '#FFFFFF',
-    border: '1px solid #BAC3CB',
-    borderRadius: '4px',
-    justifyContent: 'center'
-  },
-  buttonText: {
-    fontStyle: 'normal',
-    fontWeight: '500',
-    fontSize: '14px',
-    lineHeight: '17px',
-    width: '100%',
-    color: '#BD0F72'
-  }
-}))
 
-const InputUI = ({ id, onChanged, tab }) => {
+const useStyles = makeStyles(() => ({
+  chip: {
+    borderRadius: '4px',
+    background: 'rgba(0, 0, 0, 0.03)',
+    height: 26,
+    margin: 'auto 3px'
+  }
+}));
+
+const CustomLink = withStyles({
+  root: {
+    fontSize: 15,
+    fontWeight: '500',
+    fontFamily: 'Montserrat',
+    '&[disabled]': {
+      color: 'grey',
+      cursor: 'default',
+      '&:hover': {
+        textDecoration: 'none'
+      }
+    }
+  }
+})(Link);
+
+const InputUI = ({ id, onChanged }) => {
   const dispatch = useDispatch();
   const classes = useStyles();
-  const [inputFocus, setInputFocus] = useState(false);
-  const [checkFocus, setCheckFocus] = useState(false);
-
-  const [ctrlA, setCtrlA] = useState(false)
+  const [focus, setFocus] = useState(false);
+  const [state, setState] = useState({
+    activeSuggestion: -1,
+    filteredSuggestions: [],
+    showSuggestions: false,
+    id: '',
+    input: ''
+  });
+  const [ctrlA, setCtrlA] = useState({ state: false, id: '' });
   const [isCc, setIsCc] = useState(false);
   const [isBcc, setIsBcc] = useState(false);
-  const textInput = useRef(null);
+  const refInput = {
+    [`to${id}Cc`]: useRef(null),
+    [`to${id}Bcc`]: useRef(null),
+    [`to${id}`]: useRef(null)
+  };
   const ref = useRef(null);
-
   const suggestMails = useSelector(({ workspace }) => workspace.mailReducer.suggestMails);
-  const validateMail = useSelector(({ workspace }) => workspace.mailReducer.validateMail);
+  const inputMail = useSelector(({ workspace }) => workspace.mailReducer.inputMail);
   const tags = useSelector(({ workspace }) => workspace.mailReducer.tags);
 
   const onCc = (value) => setIsCc(value);
-
   const onBcc = (value) => setIsBcc(value);
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (ref.current && !ref.current.contains(event.target)) {
-        setInputFocus(false);
-        dispatch(MailActions.validateMail({ ...validateMail, [`to${id}Cc`]: '', [`to${id}Bcc`]: '', [`to${id}`]: '' }));
-
-        if (isCc && !validateMail[`to${id}Cc`] && !tags[`to${id}Cc`].length) {
+        if (isCc && !inputMail[`to${id}Cc`] && !tags[`to${id}Cc`].length) {
           onCc(false);
         }
-        if (isBcc && !validateMail[`to${id}Bcc`] && !tags[`to${id}Bcc`].length) {
+        if (isBcc && !inputMail[`to${id}Bcc`] && !tags[`to${id}Bcc`].length) {
           onBcc(false);
         }
+        setState({
+          activeSuggestion: -1,
+          filteredSuggestions: [],
+          showSuggestions: false
+        });
+        setFocus(false);
       }
     }
-    // Bind the event listener
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      // Unbind the event listener on clean up
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [ref, validateMail, tags]);
-
-  const validateEmail = (tag) => {
+  }, [ref, inputMail, tags, isCc, isBcc]);
+  const isEmailValid = (tag) => {
     const regexp =
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return regexp.test(tag);
   };
 
-  const convertObject = (list) => {
-    return list.map((name, id) => ({ id, name }))
-  }
-
   useEffect(() => {
-    if (isCc) document.getElementById(`to${id}Cc`).focus();
+    if (isCc && refInput[`to${id}Cc`].current) {
+      refInput[`to${id}Cc`].current.focus();
+      setState({
+        activeSuggestion: -1,
+        showSuggestions: false
+      });
+    }
   }, [isCc]);
 
   useEffect(() => {
-    if (isBcc) document.getElementById(`to${id}Bcc`).focus();
+    if (isBcc && refInput[`to${id}Bcc`].current) {
+      refInput[`to${id}Bcc`].current.focus();
+      setState({
+        activeSuggestion: -1,
+        showSuggestions: false
+      });
+    }
   }, [isBcc]);
 
   useEffect(() => {
-    if (checkFocus) document.getElementById(`to${id}`).focus();
-  }, [checkFocus]);
+    if (focus && refInput[`to${id}`].current) refInput[`to${id}`].current.focus();
+  }, [focus]);
 
-  const validateListEmail = (id, e) => {
-    e.preventDefault()
-    const result = []
-    let temp = ''
-    const removeDuplicate = [...new Set(e.clipboardData.getData('text').split(/,|;|\n/).map(str => str.trim()))]
-    removeDuplicate.forEach(v => {
-      if (validateEmail(v)) {
-        result.push(v)
+  const onPaste = (id, e) => {
+    e.preventDefault();
+    const result = [];
+    let temp = '';
+    const removeDuplicate = [
+      ...new Set(
+        e.clipboardData
+          .getData('text')
+          .split(/,|;|\n/)
+          .map((str) => str.trim())
+      )
+    ];
+    removeDuplicate.forEach((v) => {
+      if (isEmailValid(v)) {
+        result.push(v);
+      } else if (v) {
+        temp += v + ',';
       }
-      else if (v) {
-        temp += v + ','
-      }
-    })
+    });
     if (result.length) {
       dispatch(MailActions.setTags({ ...tags, [id]: [...new Set([...tags[id], ...result])] }));
-      dispatch(MailActions.validateMail({ ...validateMail, [id]: temp.slice(0, -1) }))
-      textInput.current.state.query = temp
+      dispatch(MailActions.inputMail({ ...inputMail, [id]: temp.slice(0, -1) }));
     }
-  }
+  };
   const onDelete = (id, tagIndex) => {
-    const newTags = ctrlA ? [] : tags[id].filter((_, i) => i !== tagIndex);
+    const newTags = ctrlA.state ? [] : tags[id].filter((_, i) => i !== tagIndex);
     dispatch(MailActions.setTags({ ...tags, [id]: newTags }));
     onChanged(id, newTags);
-  }
+  };
 
-  const onAddition = (id, newTag) => {
-    const newTags = [...new Set([...tags[id], newTag.name])];
-    dispatch(MailActions.validateMail({ ...validateMail, [id]: '' }));
+  const onChange = (id, value) => {
+    setCtrlA({ state: false });
+    // Filter our suggestions that don't contain the user's input
+    const strArr = value.split(/,|;/);
+    const str = inputMail[id].split(/,|;/);
+
+    let index = -1;
+    if (strArr.length === str.length) {
+      strArr.forEach((s, i) => {
+        if (s !== str[i]) {
+          index = i;
+          return;
+        }
+      });
+    }
+    dispatch(MailActions.inputMail({ ...inputMail, [id]: value }));
+
+    if (index >= 0 && strArr[index].trim().length >= 2) {
+      const filteredSuggestions = matchSorter(suggestMails, strArr[index].trim(), {
+        keys: ['email'],
+        threshold: matchSorter.rankings.CONTAINS
+      }).slice(0, 3);
+      strArr.splice(index, 1);
+      setState({
+        activeSuggestion: -1,
+        filteredSuggestions,
+        showSuggestions: true,
+        id: id,
+        input: strArr.join(', ')
+      });
+    } else {
+      setState({
+        activeSuggestion: -1,
+        showSuggestions: false
+      });
+    }
+  };
+
+  const onAddition = (id, value) => {
+    const newTags = [...new Set([...tags[id], value])];
+    dispatch(MailActions.inputMail({ ...inputMail, [id]: state.input || '' }));
     dispatch(MailActions.setTags({ ...tags, [id]: newTags }));
     onChanged(id, newTags);
-  }
+  };
 
-  const onInput = (id, value) => {
-    setCtrlA(false);
-    dispatch(MailActions.validateMail({ ...validateMail, [id]: value }));
-  }
+  const onClickSuggestion = (id, value) => {
+    setState({
+      activeSuggestion: -1,
+      filteredSuggestions: [],
+      showSuggestions: false
+    });
+    onAddition(id, value);
+  };
 
-  const handleKeyDown = (id, e) => {
-    if (!validateMail[id] && e.key === 'a' && e.ctrlKey) setCtrlA(true);
-  }
+  const onKeyDown = (id, e) => {
+    const input = inputMail[id];
+    if (['Enter', 'Tab'].includes(e.key)) {
+      e.preventDefault();
+      const value = input.trim();
+      if (value && isEmailValid(value)) {
+        onAddition(id, value);
+      }
+    }
+    if (['Backspace', 'Delete'].includes(e.key) && !input) {
+      e.preventDefault();
+      const value = input.trim();
+      if (!value) {
+        onDelete(id, tags[id].length - 1);
+      }
+    }
+    const { showSuggestions, activeSuggestion, filteredSuggestions } = state;
+    if (showSuggestions) {
+      if (e.keyCode === 13 && activeSuggestion !== -1) {
+        setState({
+          activeSuggestion: -1,
+          showSuggestions: false
+        });
+        onAddition(id, filteredSuggestions[activeSuggestion].email);
+      } else if (e.keyCode === 38) {
+        setState({
+          ...state,
+          activeSuggestion:
+            activeSuggestion > 0 ? activeSuggestion - 1 : filteredSuggestions.length - 1
+        });
+      } else if (e.keyCode === 40) {
+        setState({
+          ...state,
+          activeSuggestion:
+            activeSuggestion < filteredSuggestions.length - 1 ? activeSuggestion + 1 : 0
+        });
+      }
+    }
+    if (!input && e.key === 'a' && e.ctrlKey) setCtrlA({ state: true, id });
+  };
 
-
-  const handleBlur = (id) => {
-    const input = validateMail[id]
-    if (input && validateEmail(input.trim())) {
+  const onBlur = (id) => {
+    const input = inputMail[id];
+    if (input && isEmailValid(input.trim())) {
       const newTags = [...new Set([...tags[id], input.trim()])];
       onChanged(id, newTags);
       dispatch(MailActions.setTags({ ...tags, [id]: newTags }));
-      dispatch(MailActions.validateMail({ ...validateMail, [id]: '' }));
-      textInput.current.state.query = '';
+      dispatch(MailActions.inputMail({ ...inputMail, [id]: '' }));
     }
-    setCtrlA(false);
-    setCheckFocus(false);
+    setCtrlA({ state: false });
   };
-
-  const limitTags = (tags) => {
-    if (!inputFocus && tags.length > 3) {
-      let tagsShow = tags.slice(0, 3);
-      tagsShow.push(`+${tags.length - 3}`);
-      return convertObject(tagsShow);
-    }
-    return convertObject(tags);
+  const totalStringLength = (array) => {
+    let total = 0,
+      index = 0;
+    array.forEach((e, i) => {
+      total += e.length;
+      if (total >= 90) {
+        return;
+      }
+      index = i;
+    });
+    return index;
   };
 
   const toReceiver = (id) => {
-    const length = 3;
-    const size = tags[`to${id}`].length;
-    const ccSize = tags[`to${id}Cc`].length;
-    const bccSize = tags[`to${id}Bcc`].length;
-    const arr = [...tags[`to${id}`], ...tags[`to${id}Cc`]];
+    const temp1 = inputMail[`to${id}`]
+      ? [...tags[`to${id}`], ...inputMail[`to${id}`].split(/,|;/)]
+      : tags[`to${id}`];
+    const temp2 = inputMail[`to${id}Cc`]
+      ? [...tags[`to${id}Cc`], ...inputMail[`to${id}Cc`].split(/,|;/)]
+      : tags[`to${id}Cc`];
+    const temp3 = inputMail[`to${id}Bcc`]
+      ? [...tags[`to${id}Bcc`], ...inputMail[`to${id}Bcc`].split(/,|;/)]
+      : tags[`to${id}Bcc`];
+    const size = temp1.length;
+    const ccSize = temp2.length;
+    const bccSize = temp3.length;
+    const arr = [...temp1, ...temp2];
+    const len = totalStringLength([...arr, ...temp3]);
+    const length = len + 1;
+    let text = '';
+    let arg = [];
+    let invalidText = false;
     if (size + ccSize >= length) {
       const total = arr.length + bccSize - length;
-      let text = "";
       if (arr.length - length) {
         text += `${total} more`;
       }
       if (bccSize) {
         text += arr.length - length ? ` (${bccSize} Bcc)` : `${bccSize} Bcc`;
       }
-      return [arr.slice(0, length).join(', '), text];
-    }
-    else {
-      let text = "";
-      let arg = arr.join(', ');
+      arg = arr.slice(0, length).map((e, i) => (
+        <span key={i} className={isEmailValid(e) ? '' : 'invalidEmail'}>
+          {' '}
+          {e}
+        </span>
+      ));
+      invalidText = [...arr.slice(length), ...temp3].some((e) => !isEmailValid(e));
+    } else {
+      arg = arr.map((e, i) => (
+        <span key={i} className={isEmailValid(e) ? '' : 'invalidEmail'}>
+          {' '}
+          {e}
+        </span>
+      ));
       if (bccSize) {
-        if (arg) arg += ', ';
-        arg += `Bcc: ${tags[`to${id}Bcc`].slice(0, length - arr.length)}`;
+        arg.push(
+          <>
+            Bcc:{' '}
+            {temp3.slice(0, length - arr.length).map((e, i, a) => (
+              <>
+                <span key={i} className={isEmailValid(e) ? '' : 'invalidEmail'}>
+                  {' '}
+                  {e}
+                </span>
+                {i !== a.length - 1 && ', '}
+              </>
+            ))}
+          </>
+        );
         if (arr.length + bccSize > length) {
           text += `${bccSize - length + arr.length} Bcc`;
         }
+        invalidText = temp3.slice(length - arr.length).some((e) => !isEmailValid(e));
       }
-      return [arg, text];
     }
-  }
+    if (text) text = <span className={invalidText ? 'moreTag_invalid' : 'moreTag'}> {text}</span>;
+    return [arg, text];
+  };
 
   const TagsInput = (id, type) => {
     return (
-      <Grid
-        container
-        direction="row"
-        style={{ alignItems: 'center', justifyContent: "flex-start", marginTop: 10 }}>
-        <Grid item xs={1}>
-          {type === 'Cc' || type === 'Bcc' ? (
-            <div
-              style={{
-                paddingLeft: '7px',
-                paddingRight: '7px',
-                width: 'fit-content',
-                background: '#FFFFFF',
-                border: '1px solid #BD0F72',
-                borderRadius: '4px',
-                justifyContent: 'center'
-              }}>
-              <label
-                style={{
-                  fontStyle: 'normal',
-                  fontWeight: '500',
-                  fontSize: '14px',
-                  lineHeight: '17px',
-                  width: '100%',
-                  fontFamily: 'Montserrat',
-                  color: '#BD0F72'
-                }}
-                className={clsx(classes.label)}>
-                {type}
-              </label>
-            </div>
-          ) : (
-            <label style={{ fontSize: 14 }} className={clsx(classes.label)}>
-              {type}
-            </label>
-          )}
-        </Grid>
-        <Grid style={{ paddingLeft: 20 }} item xs={11}>
-          <div
-            className="tags-input-container"
-            style={{ paddingRight: (type == 'Cc' || type == 'Bcc') ? '0px' : '90px' }}
-            onFocus={() => setInputFocus(true)}
-          >
-            {type !== 'Cc' && type !== 'Bcc' && <div
-              style={{
-                position: 'absolute',
-                paddingLeft: '7px',
-                paddingRight: '7px',
-                right: '5px',
-                top: '5px',
-                display: 'flex',
-                flexDirection: 'row'
-              }}>
-              <button className={classes.buttonCcBcc} style={{ border: isCc ? '1px solid #BAC3CB' : '1px solid #BD0F72' }} disabled={isCc} onClick={() => onCc(true)}>
-                <span className={classes.buttonText} style={{ color: isCc ? '#BAC3CB' : '#BD0F72' }}>Cc</span>
-              </button>
-              <div style={{ width: '2px' }} />
-              <button className={classes.buttonCcBcc} style={{ border: isBcc ? '1px solid #BAC3CB' : '1px solid #BD0F72' }} disabled={isBcc} onClick={() => onBcc(true)}>
-                <span className={classes.buttonText} style={{ color: isBcc ? '#BAC3CB' : '#BD0F72' }}>Bcc</span>
-              </button>
-            </div>
-            }
-            <div style={{ flex: 'auto', display: 'inline-block' }} onKeyDown={(e) => handleKeyDown(id, e)}>
-              <ReactTags
-                allowNew
-                ref={textInput}
-                tags={limitTags(tags[id])}
-                placeholderText={!tags[id].length ? "Enter your email" : ""}
-                suggestions={convertObject(suggestMails)}
-                onAddition={(newTag) => onAddition(id, newTag)}
-                onDelete={(tagIndex) => onDelete(id, tagIndex)}
-                onValidate={({ name }) => validateEmail(name)}
-                inputAttributes={{
-                  id: id,
-                  onPaste: (e) => validateListEmail(id, e)
-                }}
-                onBlur={() => handleBlur(id)}
-                onInput={(value) => onInput(id, value)}
-                maxSuggestionsLength={3}
-                suggestionsTransform={(query, suggestions) => {
-                  return matchSorter(suggestions, query, { keys: ["name"], threshold: matchSorter.rankings.CONTAINS });
-                }}
-                tagComponent={({ tag, _, onDelete }) => {
-                  return (
-                    <div className={`react-tags__selected-tag ${ctrlA ? "ctrlA" : ""}`} >
-                      <span className="text">{tag.name}</span>
-                      {((!inputFocus && Number(tag.id) < 3) || inputFocus) &&
-                        <span className="close" onClick={onDelete}>
-                          &times;
-                        </span>
-                      }
-                    </div>
-                  )
-                }}
+      <>
+        <div className="flex flex-wrap flex-grow" >
+          <>
+            {tags[id].map((tag, i) => (
+              <Chip
+                className={ctrlA.state && ctrlA.id === id ? 'ctrlA' : ''}
+                classes={{ root: classes.chip }}
+                key={i}
+                label={tag}
+                onDelete={() => onDelete(id, i)}
+                deleteIcon={<ClearIcon />}
               />
-            </div>
-          </div>
-        </Grid>
-      </Grid>
+            ))}
+          </>
+          <TextField
+            className="flex-grow"
+            inputRef={refInput[id]}
+            value={inputMail[id]}
+            onKeyDown={(e) => onKeyDown(id, e)}
+            onChange={(e) => onChange(id, e.target.value)}
+            onPaste={(e) => onPaste(id, e)}
+            onBlur={() => onBlur(id)}
+            InputProps={{
+              disableUnderline: true,
+              endAdornment: (
+                <>
+                  {type !== 'Cc' && type !== 'Bcc' && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between'
+                      }}>
+                      <CustomLink
+                        component="button"
+                        color="primary"
+                        disabled={isCc}
+                        style={{ marginRight: 4 }}
+                        onClick={() => onCc(true)}>
+                        Cc
+                      </CustomLink>
+                      <CustomLink
+                        component="button"
+                        color="primary"
+                        disabled={isBcc}
+                        onClick={() => onBcc(true)}>
+                        Bcc
+                      </CustomLink>
+                    </div>
+                  )}
+                </>
+              )
+            }}
+          />
+        </div>
+        {state.showSuggestions &&
+          state.id === id &&
+          inputMail[id] &&
+          state.filteredSuggestions.length > 0 && (
+     
+          <ul className="suggestions">
+            {state.filteredSuggestions.map(({ email, firstName, lastName, avatar }, index) => {
+              let className = 'suggestion';
+              // Flag the active suggestion with a class
+              if (index === state.activeSuggestion) {
+                className = 'suggestion-active';
+              }
+              return (
+                <div
+                  className={`flex ${className}`}
+                  key={index}
+                  onClick={() => onClickSuggestion(id, email)}>
+                  <Avatar
+                    // className={classes.fitAvatar}
+                    style={{ background: cyan[400] }}
+                    src={avatar ? avatar : 'assets/images/avatars/unnamed.png'}
+                    alt="User photo"
+                  />
+                  <div className="flex flex-col ml-8">
+                    <div>{firstName || lastName ? <>{`${firstName} ${lastName}`}</> : email}</div>
+                    <div style={{ fontSize: 12 }}>{email}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </ul>
+ 
+        )}
+      </>
     );
   };
   return (
     <>
-      {tab === id.toLowerCase() &&
-        (inputFocus ?
-          <div ref={ref}>
+      {focus ? (
+        <div ref={ref} onFocus={() => setFocus(true)} style={{ borderBottom: '1px solid #BAC3CB' }}>
+          <div className="flex" style={{position: 'relative'}}>
+            <span className='m-auto mr-8'>To</span>
             {TagsInput(`to${id}`, `To ${id}`)}
-            {isCc && TagsInput(`to${id}Cc`, 'Cc')}
-            {isBcc && TagsInput(`to${id}Bcc`, 'Bcc')}
           </div>
-          :
-          <Grid
-            container
-            direction="row"
-            style={{ alignItems: 'center', justifyContent: "flex-start", marginTop: 10 }}>
-            <Grid item xs={1}>
-              <label style={{ fontSize: 14 }} className={clsx(classes.label)}>
-                {`To ${id}`}
-              </label>
-
-            </Grid>
-            <Grid style={{ paddingLeft: 23 }} item xs={11}>
-              <div
-                style={{ height: 22, borderBottom: '1px solid #cfcfcf', cursor: 'text' }}
-                onClick={() => {
-                  setInputFocus(true)
-                  setCheckFocus(true)
-                }}>
-                <span>{toReceiver(id)[0]}</span>
-                {toReceiver(id)[1] &&
-                  <span className='ccTag'>{toReceiver(id)[1]}</span>
-                }
-              </div>
-            </Grid>
-          </Grid>
-        )
-      }
+          {isCc &&
+            <div className="flex m-auto" style={{position: 'relative'}}>
+              <span className='m-auto mr-8'>Cc</span>
+              {TagsInput(`to${id}Cc`, 'Cc')}
+            </div>
+          }
+          {isBcc &&
+            <div className="flex m-auto" style={{position: 'relative'}}>
+              <span className='m-auto mr-8'>Bcc</span>
+              {TagsInput(`to${id}Bcc`, 'Bcc')}
+            </div>
+          }
+        </div>
+      ) : (
+        <div
+          style={{
+            height: 22,
+            borderBottom: '1px solid #BAC3CB',
+            cursor: 'text',
+            padding: '5px 0'
+          }}
+          onClick={() => setFocus(true)}>
+          {toReceiver(id)[0].length ? (
+            toReceiver(id)[0].map((e, i, arr) => (i !== arr.length - 1 ? <>{e}, </> : e))
+          ) : (
+            <input placeholder="Recipients" style={{ border: 'none', fontSize: 16 }} />
+          )}
+          {toReceiver(id)[1]}
+        </div>
+      )}
     </>
   );
 };

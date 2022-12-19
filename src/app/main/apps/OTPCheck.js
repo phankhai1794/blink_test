@@ -8,7 +8,7 @@ import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core/styles';
 import OtpInput from 'react-otp-input';
 import { isEmail } from 'validator';
-import { verifyEmail, verifyGuest, isVerified, verifyWithToken } from 'app/services/authService';
+import { verifyEmail, verifyGuest, isVerified, decodeAuthParam, requestCode } from 'app/services/authService';
 import * as Actions from 'app/store/actions';
 
 const otpLength = 6;
@@ -124,7 +124,7 @@ const useStyles = makeStyles((theme) => ({
     color: '#DC2626',
     paddingTop: 4
   },
-  btnLogin: {
+  btnSubmit: {
     width: 150,
     height: 38,
     margin: '8px auto 16px auto',
@@ -150,7 +150,7 @@ const OtpCheck = ({ children }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [myBL, setMyBL] = useState({ id: '' });
-  const [mail, setMail] = useState({ value: '', isValid: false });
+  const [mail, setMail] = useState({ value: '', isValid: false, isSubmitted: false });
   const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true });
   const [step, setStep] = useState(0);
 
@@ -171,14 +171,26 @@ const OtpCheck = ({ children }) => {
   };
 
   const handleCheckMail = () => {
+    setMail({ ...mail, isSubmitted: true });
     verifyEmail({ email: mail.value, bl: myBL.id })
       .then((res) => {
         if (res) setStep(1);
       })
       .catch((error) => {
         catchError(error);
+        setMail({ ...mail, isSubmitted: false });
       });
   };
+
+  const handleRequestCode = () => {
+    requestCode({ email: mail.value, bl: myBL.id })
+      .then(({ message }) => {
+        dispatch(Actions.showMessage({ message, variant: 'success' }));
+      })
+      .catch((error) => {
+        catchError(error);
+      });
+  }
 
   const handleChangeCode = (code) =>
     setOtpCode({ ...otpCode, value: code, isValid: Boolean(/^\d+$/.test(code)) });
@@ -219,9 +231,13 @@ const OtpCheck = ({ children }) => {
 
     const auth = new URLSearchParams(search).get('auth');
     if (bl && auth) { // verify token on url
-      verifyWithToken(auth)
+      decodeAuthParam(auth)
         .then((res) => {
-          handleSuccess(res);
+          setMail({
+            ...mail,
+            value: res.email,
+            isValid: isEmail(res.email)
+          });
           // Remove token from url
           const url = new URL(window.location);
           url.searchParams.set('bl', bl);
@@ -241,7 +257,6 @@ const OtpCheck = ({ children }) => {
             value: email,
             isValid: isEmail(email)
           });
-
           isVerified({ email, bl })
             .then(() => setStep(2))
             .catch((error) => {
@@ -306,9 +321,9 @@ const OtpCheck = ({ children }) => {
                           type="submit"
                           variant="contained"
                           color="primary"
-                          className={classes.btnLogin}
+                          className={classes.btnSubmit}
                           aria-label="Login"
-                          disabled={!mail.isValid}
+                          disabled={!mail.isValid || mail.isSubmitted}
                           value="legacy">
                           Next
                         </Button>
@@ -318,6 +333,13 @@ const OtpCheck = ({ children }) => {
                         onValidSubmit={handleSendCode}
                         className="flex flex-col justify-center w-full">
                         <Typography className={classes.boldLabel}>Access Code</Typography>
+                        <Typography style={{ fontSize: 14, fontWeight: 600 }}>
+                          {`We just emailed ${mail.value} with a 6-digit code. If you don't see it, please check your spam folder or `}
+                          <a style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={() => handleRequestCode()}>
+                            resend code
+                          </a>
+                          {'.'}
+                        </Typography>
                         <Box style={{ marginTop: 11, marginBottom: 24 }}>
                           <OtpInput
                             value={otpCode.value}
@@ -352,7 +374,7 @@ const OtpCheck = ({ children }) => {
                           type="submit"
                           variant="contained"
                           color="primary"
-                          className={classes.btnLogin}
+                          className={classes.btnSubmit}
                           aria-label="Send"
                           disabled={
                             otpCode.value.length != otpLength ||
@@ -364,7 +386,11 @@ const OtpCheck = ({ children }) => {
                         <img
                           className={classes.btnBack}
                           src="/assets/images/icons/left-arrow.svg"
-                          onClick={() => setStep(0)}
+                          onClick={() => {
+                            setMail({ ...mail, isSubmitted: false });
+                            setOtpCode({ value: '', isValid: false, firstTimeInput: true });
+                            setStep(0);
+                          }}
                         />
                       </Formsy>
                     )}

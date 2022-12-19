@@ -3,6 +3,7 @@ import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarM
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
+import * as Actions from 'app/main/apps/workspace/store/actions';
 import * as DraftBLActions from 'app/main/apps/workspace/store/actions/draft-bl';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { draftConfirm } from '@shared';
@@ -18,6 +19,7 @@ import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 import { loadComment } from 'app/services/inquiryService';
 import { getCommentDraftBl } from "app/services/draftblService";
 import axios from 'axios';
+import { getBlInfo } from 'app/services/myBLService';
 
 import * as InquiryActions from "../../../main/apps/workspace/store/actions/inquiry";
 
@@ -107,6 +109,7 @@ function ToolbarLayout1(props) {
   const [attachmentLength, setAttachmentLength] = useState(0);
   const [isSubmit, setIsSubmit] = useState(true);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const enabledMail = inquiries.some((inq) => ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
 
   useEffect(() => {
     dispatch(InquiryActions.checkSend(false));
@@ -147,7 +150,7 @@ function ToolbarLayout1(props) {
 
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
     });
-    
+
     const amendment = optionInquiries.filter(op => op.process === 'draft');
     if (pathname.includes('/guest') || pathname.includes('/workspace')) {
       let countLoadComment = 0;
@@ -166,29 +169,29 @@ function ToolbarLayout1(props) {
                 if (!commentIdList.includes(itemRes.id)) {
                   commentIdList.push(itemRes.id);
                   if (itemRes.mediaFile.length > 0) {
-                    const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ... itemRes.mediaFile];
-                      const attachmentTemp = mediaTemp.map((f) => {
-                        return {
-                          ...f,
-                          field: curInq.field,
-                          inquiryId: curInq.id,
-                          inqType: curInq.inqType,
-                        }
-                      })
-                      if (attachmentTemp.length > 0) {
-                        attachmentTemp.forEach(att => {
-                          const fileNameList = getAttachmentFiles.map((item) => {
-                            if (item.inqType === curInq.inqType) return item.name
-                          })
-                          if (att && !fileNameList.includes(att.name)) getAttachmentFiles.push(att);
+                    const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ...itemRes.mediaFile];
+                    const attachmentTemp = mediaTemp.map((f) => {
+                      return {
+                        ...f,
+                        field: curInq.field,
+                        inquiryId: curInq.id,
+                        inqType: curInq.inqType,
+                      }
+                    })
+                    if (attachmentTemp.length > 0) {
+                      attachmentTemp.forEach(att => {
+                        const fileNameList = getAttachmentFiles.map((item) => {
+                          if (item.inqType === curInq.inqType) return item.name
                         })
-                      } 
+                        if (att && !fileNameList.includes(att.name)) getAttachmentFiles.push(att);
+                      })
+                    }
                   }
-              }
+                }
               })
-              
-              countLoadComment+=1
-              if (inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)){
+
+              countLoadComment += 1
+              if (inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)) {
                 setAttachmentLength(getAttachmentFiles.length);
               }
             });
@@ -222,7 +225,7 @@ function ToolbarLayout1(props) {
                 r.forEach((itemRes) => {
                   if (!commentDraftIdList.includes(itemRes.id)) {
                     commentDraftIdList.push(itemRes.id);
-                    const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ... itemRes.content.mediaFile];
+                    const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ...itemRes.content.mediaFile];
                     const attachmentAmendmentTemp = mediaTemp.map((f) => {
                       return {
                         ...f,
@@ -242,7 +245,7 @@ function ToolbarLayout1(props) {
                   }
                 })
                 countAmendment += 1;
-                if ( inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)){
+                if (inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)) {
                   setAttachmentLength(getAttachmentFiles.length);
                 }
               });
@@ -329,6 +332,11 @@ function ToolbarLayout1(props) {
 
   const redirectEditDraftBL = () => {
     const bl = new URLSearchParams(search).get('bl');
+    getBlInfo(bl).then(res => {
+      const { bkgNo } = res.myBL;
+      dispatch(Actions.updateOpusStatus(bkgNo, "CR", "Customer edited/revised BL"));
+    });
+    
     if (bl) history.push(`/guest?bl=${bl}`);
   };
 
@@ -376,7 +384,7 @@ function ToolbarLayout1(props) {
               </Button>
             </PermissionProvider>
 
-            {myBL?.state?.includes('DRF_') && user?.userType !== 'ONSHORE' && (
+            {myBL?.state?.includes('DRF_') && user?.userType !== 'ONSHORE' && ['/workspace', '/guest'].some((el) => pathname.includes(el)) &&(
               <Button
                 variant="text"
                 size="medium"
@@ -433,11 +441,11 @@ function ToolbarLayout1(props) {
                   style={{
                     width: '120px',
                     height: '30px',
-                    color: 'white',
-                    backgroundColor: '#bd1874',
                     borderRadius: '20px'
                   }}
-                  variant="text"
+                  disabled={!enabledMail}
+                  color='primary'
+                  variant="contained"
                   size="medium"
                   className={clsx('h-64', classes.button)}
                   onClick={openEmail}>

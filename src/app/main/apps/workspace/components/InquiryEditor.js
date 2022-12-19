@@ -1,5 +1,5 @@
 import { FuseChipSelect } from '@fuse';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLabelById, toFindDuplicates } from '@shared';
 import {
@@ -16,7 +16,12 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { uploadFile } from 'app/services/fileService';
-import { updateInquiry, saveInquiry, deleteInquiry, getUpdatedAtAnswer } from 'app/services/inquiryService';
+import {
+  updateInquiry,
+  saveInquiry,
+  deleteInquiry,
+  getUpdatedAtAnswer
+} from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
@@ -24,6 +29,7 @@ import { validateTextInput } from 'app/services/myBLService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
+import { MSG_INQUIRY_CONTENT } from '../store/reducers/inquiry';
 
 import ChoiceAnswerEditor from './ChoiceAnswerEditor';
 import ParagraphAnswerEditor from './ParagraphAnswerEditor';
@@ -62,8 +68,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     '& .MuiFormGroup-root': {
       flexDirection: 'row'
-    },
-
+    }
   },
   button: {
     margin: theme.spacing(1),
@@ -109,14 +114,17 @@ const InquiryEditor = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles();
   const { onCancel, setSave } = props;
-  const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize] = useSelector(({ workspace }) => [
-    workspace.inquiryReducer.metadata,
-    workspace.inquiryReducer.validation,
-    workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.currentEditInq,
-    workspace.inquiryReducer.myBL,
-    workspace.inquiryReducer.listMinimize
-  ]);
+  const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize] = useSelector(
+    ({ workspace }) => [
+      workspace.inquiryReducer.metadata,
+      workspace.inquiryReducer.validation,
+      workspace.inquiryReducer.inquiries,
+      workspace.inquiryReducer.currentEditInq,
+      workspace.inquiryReducer.myBL,
+      workspace.inquiryReducer.listMinimize
+    ]
+  );
+  const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
 
   const user = useSelector(({ user }) => user);
 
@@ -135,7 +143,7 @@ const InquiryEditor = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const fieldType = metadata.field_options;
+  const fieldType = metadata.field_options.filter(field => field.display);
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
   );
@@ -147,6 +155,10 @@ const InquiryEditor = (props) => {
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
   const [nameType, setNameType] = useState(valueType?.label);
+  const [fieldEdited, setFieldEdited] = useState();
+  const [nameTypeEdited, setNameTypeEdited] = useState();
+  const [contentEdited, setContentEdited] = useState(valueType?.label);
+  const [isDisabled, setDisabled] = useState(false);
   const [prevField, setPrevField] = useState('');
   const styles = (width) => {
     return {
@@ -158,8 +170,8 @@ const InquiryEditor = (props) => {
   };
 
   useEffect(() => {
-    setPrevField(currentEditInq.field)
-  }, [])
+    setPrevField(currentEditInq.field);
+  }, []);
 
   useEffect(() => {
     if (fieldValue) {
@@ -173,9 +185,17 @@ const InquiryEditor = (props) => {
   const handleTypeChange = (e) => {
     const inq = { ...currentEditInq };
     inq.inqType = e.value;
-    if (e.__isNew__) inq.isNew = e.__isNew__
+    if (e.__isNew__) inq.isNew = e.__isNew__;
     dispatch(InquiryActions.validate({ ...valid, inqType: true }));
-    inq.content = currentEditInq.content.trim().replace(nameType || '{{INQ_TYPE}}', e.label);
+    if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
+      inq.content = contentEdited;
+    } else {
+      inq.content =
+      MSG_INQUIRY_CONTENT.replace(
+        '{{INQ_TYPE}}',
+        e.label
+      );
+    }
     setValueType(e);
     setNameType(e.label);
     dispatch(InquiryActions.setEditInq(inq));
@@ -186,6 +206,16 @@ const InquiryEditor = (props) => {
     const inq = { ...currentEditInq };
     inq.field = e.value;
     inq.inqType = '';
+
+    if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
+      inq.content = contentEdited;
+    } else {
+      inq.content =
+      MSG_INQUIRY_CONTENT.replace(
+        '{{INQ_TYPE}}',
+        ''
+      );
+    }
     dispatch(InquiryActions.validate({ ...valid, field: true }));
     setFieldValue(e);
     setValueType(null);
@@ -195,7 +225,12 @@ const InquiryEditor = (props) => {
 
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
+
     inq.content = e.target.value;
+    setFieldEdited(inq.field);
+    setNameTypeEdited(inq.inqType);
+    setContentEdited(inq.content);
+
     dispatch(InquiryActions.validate({ ...valid, content: inq.content }));
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
@@ -232,24 +267,46 @@ const InquiryEditor = (props) => {
   };
 
   const checkDuplicateInq = () => {
-    const listInqOfField = [...inquiries.filter(inq => inq.field === currentEditInq.field)];
+    const listInqOfField = [...inquiries.filter((inq) => inq.field === currentEditInq.field)];
     if (currentEditInq.id) {
-      listInqOfField.splice(listInqOfField.findIndex(inq => inq.id === currentEditInq.id), 1);
+      listInqOfField.splice(
+        listInqOfField.findIndex((inq) => inq.id === currentEditInq.id),
+        1
+      );
     }
     if (listInqOfField.length) {
-      const checkDuplicate = Boolean(listInqOfField.filter(inq => (inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0])).length);
+      const checkDuplicate = Boolean(
+        listInqOfField.filter(
+          (inq) =>
+            inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0]
+        ).length
+      );
       if (checkDuplicate) {
-        dispatch(FormActions.openConfirmPopup({
-          openConfirmPopup: true,
-          confirmPopupMsg: 'The inquiry already existed!',
-          confirmPopupType: 'warningInq'
-        })
+        dispatch(
+          FormActions.openConfirmPopup({
+            openConfirmPopup: true,
+            confirmPopupMsg: 'The inquiry already existed!',
+            confirmPopupType: 'warningInq'
+          })
         );
         return true;
       }
     }
-    return false
-  }
+    return false;
+  };
+
+  const handleValidateInput = async (confirm = null) => {
+    setDisabled(true);
+    let textInput = currentEditInq?.content || '';
+    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
+    if (isWarning) {
+      dispatch(
+        FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm })
+      );
+    } else {
+      confirm && confirm();
+    }
+  };
 
   const handleValidateInput = async (confirm = null) => {
     let textInput = currentEditInq?.content || '';
@@ -262,7 +319,10 @@ const InquiryEditor = (props) => {
   }
 
   const onSave = async () => {
-    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
+    const inquiriesOp = [...inquiries];
+    dispatch(
+      FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null })
+    );
     let check = true;
     const ansTypeChoice = metadata.ans_type['choice'];
     let validate = {};
@@ -299,6 +359,7 @@ const InquiryEditor = (props) => {
                 variant: 'error'
               })
             );
+            setDisabled(false);
             return;
           }
         } else {
@@ -327,18 +388,23 @@ const InquiryEditor = (props) => {
       );
     }
     if (!check) {
+      setDisabled(false);
       return;
     }
     let error = false;
 
-    const inquiry = inquiries.find((q) => q.id === currentEditInq.id);
+    let inquiry = inquiriesOp.find((q) => q.id === currentEditInq.id);
     if (inquiry) {
-      if (checkDuplicateInq()) return;
+      if (checkDuplicateInq()) {
+        setDisabled(false);
+        return;
+      }
       if (ansTypeChoice === currentEditInq.ansType) {
         if (currentEditInq.answerObj.length === 1) {
           dispatch(
             AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
           );
+          setDisabled(false);
           return;
           // break;
         }
@@ -347,37 +413,29 @@ const InquiryEditor = (props) => {
           const checkOptionEmpty = inquiry.answerObj.filter((item) => !item.content);
           if (checkOptionEmpty.length > 0) {
             dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
+            setDisabled(false);
             error = true;
             // break;
           }
         } else {
           dispatch(AppActions.showMessage({ message: 'Options not empty!', variant: 'error' }));
+          setDisabled(false);
           error = true;
           // break;
-        }
-      }
-      if (ansTypeChoice === inquiry.ansType && inquiry.answerObj.length) {
-        const dupArray = inquiry.answerObj.map((ans) => ans.content.trim());
-        if (toFindDuplicates(dupArray).length) {
-          dispatch(
-            AppActions.showMessage({
-              message: 'Options value must not be duplicated',
-              variant: 'error'
-            })
-          );
-          return;
         }
       }
       const ansCreate = currentEditInq.answerObj.filter(
         ({ id: id1 }) => !inquiry.answerObj.some(({ id: id2 }) => id2 === id1)
       );
+
       const ansDelete = inquiry.answerObj.filter(
         ({ id: id1 }) => !currentEditInq.answerObj.some(({ id: id2 }) => id2 === id1)
       );
+      //
       const ansUpdate = currentEditInq.answerObj.filter(({ id: id1, content: c1 }) =>
         inquiry.answerObj.some(({ id: id2, content: c2 }) => id2 === id1 && c1 !== c2)
       );
-      const ansCreated = currentEditInq.answerObj.filter(ans => ans.id);
+      const ansCreated = currentEditInq.answerObj.filter((ans) => ans.id);
       const mediaCreate = currentEditInq.mediaFile.filter(
         ({ id: id1 }) => !inquiry.mediaFile.some(({ id: id2 }) => id2 === id1)
       );
@@ -401,13 +459,16 @@ const InquiryEditor = (props) => {
           ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
           files: { mediaCreate, mediaDelete }
         });
-        const editedIndex = inquiries.findIndex(inq => inq.id === inquiry.id);
-        inquiries[editedIndex] = currentEditInq;
-        if (update.data.length && editedIndex) {
-          inquiries[editedIndex].answerObj = [...inquiries[editedIndex].answerObj, ...update.data].filter(inq => inq.id);
+        const editedIndex = inquiriesOp.findIndex((inq) => inq.id === inquiry.id);
+        inquiriesOp[editedIndex] = currentEditInq;
+        if (update.data.length && editedIndex !== -1) {
+          inquiriesOp[editedIndex].answerObj = [
+            ...currentEditInq.answerObj,
+            ...update.data
+          ].filter((inq) => inq.id);
         }
         if (prevField !== currentEditInq.field) {
-          const hasInq = inquiries.filter(inq => inq.field === prevField);
+          const hasInq = inquiriesOp.filter((inq) => inq.field === prevField);
           if (!hasInq.length) {
             dispatch(InquiryActions.setOneInq({}));
             dispatch(FormActions.toggleCreateInquiry(false));
@@ -415,11 +476,12 @@ const InquiryEditor = (props) => {
         }
         //
         const dataDate = await getUpdatedAtAnswer(inquiry.id);
-        inquiries[editedIndex].createdAt = dataDate.data;
-        inquiries[editedIndex].showIconAttachAnswerFile = false;
+        inquiriesOp[editedIndex].createdAt = dataDate.data;
+        inquiriesOp[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setEditInq());
-        dispatch(InquiryActions.setInquiries(inquiries));
+        dispatch(InquiryActions.setInquiries(inquiriesOp));
         props.getUpdatedAt();
+        setDisabled(false);
         // setSave();
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
@@ -429,12 +491,16 @@ const InquiryEditor = (props) => {
       }
     } else {
       // Create INQUIRY
-      if (checkDuplicateInq()) return;
+      if (checkDuplicateInq()) {
+        setDisabled(false);
+        return;
+      }
       if (ansTypeChoice === currentEditInq.ansType) {
         if (currentEditInq.answerObj.length === 1) {
           dispatch(
             AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
           );
+          setDisabled(false);
           return;
         }
       }
@@ -468,12 +534,12 @@ const InquiryEditor = (props) => {
           saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
             .then((res) => {
               const mediaFile = [];
-              mediaList.forEach(({ id, name, ext }) => mediaFile.push({ id, name, ext }))
+              mediaList.forEach(({ id, name, ext }) => mediaFile.push({ id, name, ext }));
               const inqResponse = res.inqResponse || {};
               inqResponse.creator = {
                 userName: user.displayName || '',
                 avatar: user.photoURL || ''
-              }
+              };
               inqResponse.mediaFile = mediaFile;
               const optionsMinimize = [...listMinimize];
               const optionsInquires = [...inquiries];
@@ -488,6 +554,7 @@ const InquiryEditor = (props) => {
               dispatch(InquiryActions.setEditInq());
               dispatch(InquiryActions.setInquiries(optionsInquires));
               dispatch(InquiryActions.setListMinimize(optionsMinimize));
+              setDisabled(false);
             })
             .catch((error) =>
               dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
@@ -496,6 +563,10 @@ const InquiryEditor = (props) => {
         .catch((error) => console.log(error));
     }
   };
+
+  useEffect(() => {
+    if (!validateInput?.isValid) setDisabled(false);
+  }, [validateInput])
 
   return (
     <>
@@ -506,8 +577,7 @@ const InquiryEditor = (props) => {
             : 'New Inquiry'}
         </div>
 
-        <FormControl
-          className={classes.checkedIcon}>
+        <FormControl className={classes.checkedIcon}>
           <RadioGroup
             aria-label="receiver"
             name="receiver"
@@ -636,31 +706,33 @@ const InquiryEditor = (props) => {
                 </div>
               ))}
           </>
-          <>{user.role !== 'Admin' &&
-            <>
-              {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-              {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
-                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                    <ImageAttach
-                      file={file}
-                      field={currentEditInq.field}
-                      style={{ margin: '2.5rem' }}
-                      isAnswer={true}
-                    />
-                  ) : (
-                    <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
-                  )}
-                </div>
-              ))}
-            </>
-          }
+          <>
+            {user.role !== 'Admin' && (
+              <>
+                {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+                {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
+                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                      <ImageAttach
+                        file={file}
+                        field={currentEditInq.field}
+                        style={{ margin: '2.5rem' }}
+                        isAnswer={true}
+                      />
+                    ) : (
+                      <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
           </>
           <div className="flex">
             <div className="flex">
               <Button
                 variant="contained"
                 color="primary"
+                disabled={isDisabled}
                 onClick={() => handleValidateInput(onSave)}
                 classes={{ root: classes.button }}>
                 Save

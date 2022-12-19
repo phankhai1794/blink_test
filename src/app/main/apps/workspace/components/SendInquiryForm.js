@@ -4,7 +4,6 @@ import { VVD_CODE, POD_CODE, DEL_CODE } from '@shared/keyword';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Icon, Button, Tabs, Tab, Select, MenuItem } from '@material-ui/core';
-import clsx from 'clsx';
 import { EditorState, convertToRaw, ContentState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import draftToHtml from 'draftjs-to-html';
@@ -12,13 +11,13 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { makeStyles, withStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { getMail } from 'app/services/mailService';
-import parse, { attributesToProps, domToReact } from 'html-react-parser';
+import parse from 'html-react-parser';
 
 import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
-import * as InquiryActions from "../store/actions/inquiry";
+import * as InquiryActions from '../store/actions/inquiry';
 
-import SubmitAnswerNotification from "./SubmitAnswerNotification";
+import SubmitAnswerNotification from './SubmitAnswerNotification';
 import InputUI from './MailInputUI';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
@@ -46,15 +45,6 @@ const useStyles = makeStyles(() => ({
     marginTop: -12,
     marginLeft: -12
   },
-  input: {
-    borderWidth: '0.5px',
-    borderRadius: '6px',
-    borderStyle: 'solid',
-    borderColor: 'lightgray',
-    fontSize: 15,
-    fontFamily: 'Montserrat',
-    width: '100%'
-  },
   menuItem: {
     '&:hover': {
       background: `#FDF2F2 !important`,
@@ -65,20 +55,24 @@ const useStyles = makeStyles(() => ({
   paper: {
     borderRadius: 8
   }
-}))
+}));
 
-const StyledMenuItem = withStyles(theme => ({
+const StyledMenuItem = withStyles((theme) => ({
   root: {
-    "&:focus": {
+    '&:focus': {
       backgroundColor: '#FDF2F2',
       color: '#BD0F72',
       fontWeight: 600,
-      "& .MuiListItemIcon-root, & .MuiListItemText-primary": {
+      '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
         color: theme.palette.common.white
       }
-    },
+    }
   }
 }))(MenuItem);
+
+const convertToList = (array) => {
+  return array.map(a => `- ${a}`).join('\n')
+}
 
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
@@ -92,10 +86,11 @@ const SendInquiryForm = (props) => {
   const success = useSelector(({ workspace }) => workspace.mailReducer.success);
   const error = useSelector(({ workspace }) => workspace.mailReducer.error);
   const suggestMails = useSelector(({ workspace }) => workspace.mailReducer.suggestMails);
-  const validateMail = useSelector(({ workspace }) => workspace.mailReducer.validateMail);
+  const inputMail = useSelector(({ workspace }) => workspace.mailReducer.inputMail);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
   const tags = useSelector(({ workspace }) => workspace.mailReducer.tags);
+  const user = useSelector(({ user }) => user);
 
   const initialState = {
     toCustomer: '',
@@ -109,120 +104,136 @@ const SendInquiryForm = (props) => {
     content: ''
   };
   const [form, setForm] = useState(initialState);
-  const [tabValue, setTabValue] = useState('')
-  const [previewValue, setPreviewValue] = useState('default')
+  const [tabValue, setTabValue] = useState('');
+  const [previewValue, setPreviewValue] = useState('default');
   const handleChange = (event) => {
     setPreviewValue(event.target?.value || event);
   };
-  const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
-  const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
-  const [inqCustomer, setInqCustomer] = useState([])
-  const [inqOnshore, setInqOnshore] = useState([])
+  const hasCustomer = inquiries.some((inq) => inq.receiver[0] === 'customer' && ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
+  const hasOnshore = inquiries.some((inq) => inq.receiver[0] === 'onshore' && ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
+  const [inqCustomer, setInqCustomer] = useState([]);
+  const [inqOnshore, setInqOnshore] = useState([]);
   const [tabSelected, setTabSelected] = useState(0);
-  const [customerValue, setCustomerValue] = useState({ subject: '', content: '' })
-  const [onshoreValue, setOnshoreValue] = useState({ subject: '', content: '' })
-  const [openNotification, setOpenNotification] = useState(false)
+  const [customerValue, setCustomerValue] = useState({ subject: '', content: '' });
+  const [onshoreValue, setOnshoreValue] = useState({ subject: '', content: '' });
+  const [openNotification, setOpenNotification] = useState(false);
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const getField = (keyword) => {
     return metadata.field?.[keyword] || '';
   };
   const getValueField = (keyword) => {
-    return content[getField(keyword)] || ''
+    return content[getField(keyword)] || '';
   };
 
-  const vvd = getValueField(VVD_CODE)
-  const pod = getValueField(POD_CODE)
-  const del = getValueField(DEL_CODE)
-  const bkgNo = mybl.bkgNo
+  const vvd = getValueField(VVD_CODE);
+  const pod = getValueField(POD_CODE);
+  const del = getValueField(DEL_CODE);
+  const bkgNo = mybl.bkgNo;
 
   const initiateContentState = (content) => {
     return EditorState.createWithContent(ContentState.createFromText(content));
-  }
+  };
 
   const handleEditorState = (content) => {
     setEditorState(initiateContentState(content));
-  }
+  };
 
   useEffect(() => {
     if (hasCustomer) {
-      setTabValue('customer')
+      setTabValue('customer');
+    } else if (hasOnshore) {
+      setTabValue('onshore');
     }
-    else if (hasOnshore) {
-      setTabValue('onshore')
-    }
-  }, [openEmail])
+  }, [openEmail]);
 
   useEffect(() => {
     if (hasCustomer) setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer'));
     if (hasOnshore) setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore'));
-  }, [inquiries])
+  }, [inquiries]);
 
   useEffect(() => {
     let subject = '';
     let content = '';
     let bodyHtml = '';
     if (hasOnshore) {
-      subject = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
-      content = `Dear Onshore,\n \nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`;
+      subject = `[Onshore - BL Query]_[${inqOnshore.join(
+        ', '
+      )}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      content = `Dear Onshore,\n \nWe need your assistance for BL completion. Pending issues:\n ${convertToList(inqOnshore)}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setOnshoreValue({ subject, content: bodyHtml, html: initiateContentState(content) });
       setForm({ ...form, subject, content: bodyHtml });
       handleEditorState(content);
     }
     if (hasCustomer) {
-      subject = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
-      content = `Dear Customer,\n \nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer.join(', ')}]`;
+      subject = `[Customer BL Query]_[${inqCustomer.join(
+        ', '
+      )}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      content = `Dear Customer,\n \nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:\n ${convertToList(inqCustomer)} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({ subject, content: bodyHtml, html: initiateContentState(content) });
       setForm({ ...form, subject, content: bodyHtml });
       handleEditorState(content);
     }
-  }, [openEmail])
+  }, [openEmail]);
 
   useEffect(() => {
     if (tabValue === 'onshore') {
-      setForm({ ...form, subject: onshoreValue.subject, content: onshoreValue.content })
+      setForm({ ...form, subject: onshoreValue.subject, content: onshoreValue.content });
       setEditorState(onshoreValue.html);
-    }
-    else {
-      setForm({ ...form, subject: customerValue.subject, content: customerValue.content })
+    } else {
+      setForm({ ...form, subject: customerValue.subject, content: customerValue.content });
       setEditorState(customerValue.html);
     }
-  }, [tabValue, inquiries])
+  }, [tabValue, inquiries]);
 
   const isFormValid = () => {
     if (tabValue === 'customer') {
       return Boolean(form.toCustomer);
     }
     return Boolean(form.toOnshore);
-  }
+  };
 
-  const isMailVaid = () => Object.values(validateMail).filter(e => e).length
+  const isMailVaid = () => Object.values(inputMail).filter((e) => e).length;
 
   useEffect(() => {
-    getMail(mybl.id).then((res) => {
-      if (res.data.length) {
-        let toCustomer = [], toOnshore = [];
-        // Offshore
-        res.data[0]?.toCustomer?.length && res.data[0].toCustomer.forEach(customer => {
-          toCustomer.push(customer.email)
-        });
-        // Onshore
-        res.data[0]?.toOnshore?.length && res.data[0].toOnshore.forEach(onshore => {
-          toOnshore.push(onshore.email)
-        });
-        dispatch(mailActions.setTags({ ...tags, toCustomer, toOnshore }));
-        setForm({ ...form, toCustomer: toCustomer.join(','), toOnshore: toOnshore.join(',') })
-      }
-    }).catch((error) => {
-      console.error(error)
-    });
+    getMail(mybl.id)
+      .then((res) => {
+        if (res.data.length) {
+          let toCustomer = [],
+            toOnshore = [];
+          // Offshore
+          res.data[0]?.toCustomer?.length &&
+            res.data[0].toCustomer.forEach((customer) => {
+              toCustomer.push(customer.email);
+            });
+          // Onshore
+          res.data[0]?.toOnshore?.length &&
+            res.data[0].toOnshore.forEach((onshore) => {
+              toOnshore.push(onshore.email);
+            });
+          dispatch(mailActions.setTags({ ...tags, toCustomer, toOnshore }));
+          setForm({ ...form, toCustomer: toCustomer.join(','), toOnshore: toOnshore.join(',') });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
     if (success) {
-      setOpenNotification(true)
+      setOpenNotification(true);
       dispatch({
         type: mailActions.SENDMAIL_NONE
       });
+      if (!hasCustomer && !hasOnshore) {
+        dispatch(FormActions.toggleOpenEmail(false))
+      }
+      else if (!hasCustomer) {
+        setTabValue('onshore');
+      }
+      else {
+        setTabValue('customer');
+      }
       setForm(initialState);
     } else if (error) {
       dispatch(
@@ -240,26 +251,27 @@ const SendInquiryForm = (props) => {
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'sendMail') {
       const cloneInquiries = [...inquiries];
-      cloneInquiries.forEach(q => {
+      cloneInquiries.forEach((q) => {
         if (q.receiver[0] === tabValue) {
-          if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
-          else if (q.state === 'REP_Q_DRF') q.state = 'REP_Q_SENT'; // inquiry
+          if (q.state === 'OPEN') q.state = 'INQ_SENT';
+          // inquiry
+          else if (q.state === 'REP_Q_DRF') q.state = 'REP_Q_SENT';
+          // inquiry
           else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
         }
       });
       const formClone = JSON.parse(JSON.stringify(form));
       if (tabValue === 'onshore') {
-        formClone.toCustomer = ''
-        formClone.toCustomerCc = ''
-        formClone.toCustomerBcc = ''
-      }
-      else if (tabValue === 'customer') {
-        formClone.toOnshore = ''
-        formClone.toOnshoreCc = ''
-        formClone.toOnshoreBcc = ''
+        formClone.toCustomer = '';
+        formClone.toCustomerCc = '';
+        formClone.toCustomerBcc = '';
+      } else if (tabValue === 'customer') {
+        formClone.toOnshore = '';
+        formClone.toOnshoreCc = '';
+        formClone.toOnshoreBcc = '';
       }
       dispatch({ type: mailActions.SENDMAIL_LOADING });
-      dispatch(mailActions.sendMail({ myblId: mybl.id, ...formClone, inquiries: cloneInquiries }));
+      dispatch(mailActions.sendMail({ myblId: mybl.id, bkgNo, ...formClone, inquiries: cloneInquiries, user: user }));
       dispatch(InquiryActions.setInquiries(cloneInquiries));
       dispatch(
         FormActions.openConfirmPopup({
@@ -270,7 +282,7 @@ const SendInquiryForm = (props) => {
         })
       );
     }
-  }, [confirmClick])
+  }, [confirmClick]);
 
   useEffect(() => {
     if (openEmail && !suggestMails.length) {
@@ -281,14 +293,16 @@ const SendInquiryForm = (props) => {
   const sendMailClick = () => {
     if (isMailVaid()) {
       dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
-    }
-    else if (!isFormValid()) {
-      dispatch(Actions.showMessage({ message: 'Please fill in recipient field', variant: 'error' }));
-    }
-    else if ((tabValue === 'onshore' && inqOnshore.length == 0) || (tabValue === 'customer' && inqCustomer.length == 0)) {
+    } else if (!isFormValid()) {
+      dispatch(
+        Actions.showMessage({ message: 'Please fill in recipient field', variant: 'error' })
+      );
+    } else if (
+      (tabValue === 'onshore' && inqOnshore.length == 0) ||
+      (tabValue === 'customer' && inqCustomer.length == 0)
+    ) {
       dispatch(Actions.showMessage({ message: 'No inquiries to Send Mail', variant: 'error' }));
-    }
-    else {
+    } else {
       dispatch(
         FormActions.openConfirmPopup({
           openConfirmPopup: true,
@@ -300,14 +314,13 @@ const SendInquiryForm = (props) => {
   };
 
   const handleFieldChange = (key, tags) => {
-    setForm({ ...form, [key]: tags.join(',') })
+    setForm({ ...form, [key]: tags.join(',') });
   };
 
   const handleBodyChange = (content) => {
     if (tabValue === 'customer') {
       setCustomerValue({ ...customerValue, content });
-    }
-    else {
+    } else {
       setOnshoreValue({ ...onshoreValue, content });
     }
     setForm({ ...form, content });
@@ -315,45 +328,46 @@ const SendInquiryForm = (props) => {
 
   const handleSubjectChange = (event) => {
     if (tabValue === 'customer') {
-      setCustomerValue({ ...customerValue, subject: event.target.value })
+      setCustomerValue({ ...customerValue, subject: event.target.value });
+    } else {
+      setOnshoreValue({ ...onshoreValue, subject: event.target.value });
     }
-    else {
-      setOnshoreValue({ ...onshoreValue, subject: event.target.value })
-    }
-    setForm({ ...form, subject: event.target.value })
+    setForm({ ...form, subject: event.target.value });
   };
 
   const handleTabChange = (_, newValue) => {
-    setTabValue(newValue)
-  }
+    setTabValue(newValue);
+  };
   const onEditorStateChange = (evt) => {
-    handleBodyChange(draftToHtml(convertToRaw(evt.getCurrentContent())).replace("<p></p>", "<br>"));
+    handleBodyChange(draftToHtml(convertToRaw(evt.getCurrentContent())).replace('<p></p>', '<br>'));
     setEditorState(evt);
     if (tabValue === 'customer') {
       setCustomerValue({ ...customerValue, html: evt });
-    }
-    else {
+    } else {
       setOnshoreValue({ ...onshoreValue, html: evt });
     }
   };
 
   const countInq = (recevier) => {
-    return inquiries.filter(inq => inq.receiver.includes(recevier) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')).length;
+    return inquiries.filter(
+      (inq) =>
+        inq.receiver.includes(recevier) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')
+    ).length;
   };
 
   const handleTabSelected = () => {
     if (countInq('customer') === 0) {
-      return 'onshore'
+      return 'onshore';
     } else {
-      return tabSelected === 0 ? 'customer' : 'onshore'
+      return tabSelected === 0 ? 'customer' : 'onshore';
     }
-  }
+  };
   return (
     <>
       <SubmitAnswerNotification
         open={openNotification}
         iconType={<img src={`/assets/images/icons/vector.svg`} />}
-        msg='Your inquires have been sent successfully.'
+        msg="Your inquires have been sent successfully."
         handleClose={() => setOpenNotification(false)}
       />
       <Form
@@ -367,106 +381,97 @@ const SendInquiryForm = (props) => {
           <ActionUI
             sendMailClick={sendMailClick}
             previewValue={previewValue}
-            handleChange={handleChange}
-          ></ActionUI>
+            handleChange={handleChange}></ActionUI>
         }
         FabTitle="E-mail"
         tabs={previewValue === 'inquiry' && ['Customer', 'Onshore']}
         nums={previewValue === 'inquiry' && [countInq('customer'), countInq('onshore')]}
         tabChange={(newValue) => {
           setTabSelected(newValue);
-        }}
-      >
-        {previewValue === 'default' &&
+        }}>
+        {previewValue === 'default' && (
           <>
-            <InputUI
-              id="Customer"
-              tab={tabValue}
-              onChanged={handleFieldChange}
-            />
-            <InputUI
-              id="Onshore"
-              tab={tabValue}
-              onChanged={handleFieldChange}
-            />
-            {hasCustomer && hasOnshore &&
+            <InputUI id={tabValue === 'customer' ? "Customer" : "Onshore"} onChanged={handleFieldChange} />
+            {hasCustomer && hasOnshore && (
               <Tabs
                 indicatorColor="primary"
                 value={tabValue}
                 onChange={handleTabChange}
-                textColor='primary'
-                style={{ borderBottom: '3px solid #515F6B', marginBottom: 15, marginTop: 10 }}
-              >
-                <Tab
-                  className={classes.tab}
-                  value='customer'
-                  label="Customer"
-                />
-                <Tab
-                  className={classes.tab}
-                  value='onshore'
-                  label="Onshore"
-                />
+                textColor="primary"
+                style={{ borderBottom: '3px solid #515F6B', marginBottom: 10 }}>
+                <Tab className={classes.tab} value="customer" label="Customer" />
+                <Tab className={classes.tab} value="onshore" label="Onshore" />
               </Tabs>
-            }
-            <div style={{ marginTop: 10 }}>
-              <label className={clsx(classes.label)}>Subject</label>
-            </div>
-            <div style={{ marginTop: 5, display: 'flex' }}>
-              <input
-                style={{
-                  padding: 5,
-                  height: '25px',
-                }}
-                className={classes.input}
-                value={form.subject}
-                onChange={handleSubjectChange}
-              />
-            </div>
-            <div style={{ marginTop: 10 }}>
-              <label className={clsx(classes.label)}>Body</label>
-            </div>
+            )}
+            <input
+              value={form.subject}
+              onChange={handleSubjectChange}
+              placeholder='Subject'
+              style={{ border: 'none', fontSize: 15, fontFamily: 'Montserrat', height: '25px', padding: '5px 0', marginBottom: 10, width: '100%', borderBottom: '1px solid #BAC3CB' }}
+            />
             <Editor
               editorState={editorState}
               wrapperClassName="demo-wrapper"
               editorClassName="demo-editor"
               onEditorStateChange={onEditorStateChange}
               toolbar={{
-                options: ['inline', 'blockType', 'fontFamily', 'list', 'textAlign', 'colorPicker', 'remove', 'history'],
+                options: [
+                  'inline',
+                  'blockType',
+                  'fontFamily',
+                  'list',
+                  'textAlign',
+                  'colorPicker',
+                  'remove',
+                  'history'
+                ],
                 inline: {
-                  options: ['bold', 'italic', 'underline', 'strikethrough', 'monospace'],
+                  options: ['bold', 'italic', 'underline', 'strikethrough', 'monospace']
                 },
                 list: {
-                  options: ['unordered', 'ordered'],
+                  options: ['unordered', 'ordered']
                 }
               }}
             />
           </>
-        }
-        {previewValue === 'email' &&
-          <div style={{ margin: 'auto', maxWidth: 580, }}>
-            <img style={{ margin: 15 }} src="assets/images/logos/one_ocean_network-logo.png" width="100px" alt="ONE" />
-            <div style={{ backgroundColor: 'white', padding: 20, fontFamily: 'Montserrat', fontSize: 15, fontWeight: 500 }}>
-              <div className='preview_editor-content'>
-                {parse(form.content)}
-              </div>
-              <p >Please visit the link below and help us answer our inquiry. <br />
+        )}
+        {previewValue === 'email' && (
+          <div style={{ margin: 'auto', maxWidth: 580 }}>
+            <img
+              style={{ margin: 15 }}
+              src="assets/images/logos/one_ocean_network-logo.png"
+              width="100px"
+              alt="ONE"
+            />
+            <div
+              style={{
+                backgroundColor: 'white',
+                padding: 20,
+                fontFamily: 'Montserrat',
+                fontSize: 15,
+                fontWeight: 500
+              }}>
+              <div className="preview_editor-content">{parse(form.content)}</div>
+              <p>
+                Please visit the link below and help us answer our inquiry. <br />
                 BLink Workspace: <br />
-                Access Code: </p>
+                Access Code:{' '}
+              </p>
               <p>
                 Thank you <br />
-                ONE Offshore Center</p>
+                ONE Offshore Center
+              </p>
             </div>
           </div>
-        }
-        {previewValue === 'inquiry' &&
+        )}
+        {previewValue === 'inquiry' && (
           <AllInquiry
             user="workspace"
             receiver={handleTabSelected()}
             collapse={true}
             openInquiryReview={true}
           />
-        }
+        )}
       </Form>
     </>
   );
@@ -487,17 +492,26 @@ const ActionUI = (props) => {
         justifyContent: 'center',
         alignItems: 'center'
       }}>
-      <div style={{
-        position: 'absolute',
-        left: '2.5rem',
-        top: '1rem',
-        display: 'flex',
-        alignItems: 'center'
-      }}>
+      <div
+        style={{
+          position: 'absolute',
+          left: '2.5rem',
+          top: '1rem',
+          display: 'flex',
+          alignItems: 'center'
+        }}>
         <Icon style={{ color: colorBtnReview, paddingRight: '1.2rem' }}>visibility</Icon>
-        <Icon fontSize='small' style={{
-          color: colorBtnReview, paddingRight: '0.5rem', position: 'absolute', left: 17, top: 10
-        }}>arrow_drop_down</Icon>
+        <Icon
+          fontSize="small"
+          style={{
+            color: colorBtnReview,
+            paddingRight: '0.5rem',
+            position: 'absolute',
+            left: 17,
+            top: 10
+          }}>
+          arrow_drop_down
+        </Icon>
         <Select
           style={{
             color: '#2F80ED',
@@ -510,18 +524,17 @@ const ActionUI = (props) => {
           IconComponent={() => null}
           disabled={openConfirmPopup}
           MenuProps={{ classes: { paper: classes.paper } }}
-          disableUnderline
-        >
-          <StyledMenuItem value='default'>Preview</StyledMenuItem>
-          <StyledMenuItem value='inquiry'> Preview Inquiries</StyledMenuItem>
-          <StyledMenuItem value='email'> Preview Email Layout</StyledMenuItem>
+          disableUnderline>
+          <StyledMenuItem value="default">Preview</StyledMenuItem>
+          <StyledMenuItem value="inquiry"> Preview Inquiries</StyledMenuItem>
+          <StyledMenuItem value="email"> Preview Email Layout</StyledMenuItem>
         </Select>
       </div>
-      {previewValue === 'default' ?
+      {previewValue === 'default' ? (
         <Button
           variant="contained"
           size="medium"
-          color='primary'
+          color="primary"
           style={{
             textTransform: 'none',
             fontWeight: 'bold',
@@ -534,11 +547,12 @@ const ActionUI = (props) => {
           disabled={isLoading || openConfirmPopup}
           onClick={sendMailClick}>
           Send
-        </Button> :
+        </Button>
+      ) : (
         <Button
           variant="contained"
           size="medium"
-          color='primary'
+          color="primary"
           style={{
             textTransform: 'none',
             fontWeight: 'bold',
@@ -548,10 +562,12 @@ const ActionUI = (props) => {
             fontFamily: 'Montserrat'
           }}
           onClick={() => handleChange('default')}>
-          <Icon fontSize='small' style={{ paddingRight: '0.5rem' }}>keyboard_backspace</Icon>
+          <Icon fontSize="small" style={{ paddingRight: '0.5rem' }}>
+            keyboard_backspace
+          </Icon>
           Back
         </Button>
-      }
+      )}
       {isLoading && <CircularProgress size={24} className={classes.buttonProgress} />}
     </div>
   );

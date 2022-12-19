@@ -194,6 +194,19 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
     setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore') || []);
+    const inqsToCustomer = inquiries?.filter(inq => inq.receiver[0] === 'customer');
+    if(myBL.bkgNo){
+      if (inqsToCustomer&&inqsToCustomer.every(q => ['COMPL', 'RESOLVED'].includes(q.state))){
+        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "Return to Customer via workspace"))    
+      }
+      const inqsToOnshore = inquiries?.filter(inq => inq.receiver[0] === 'customer');
+      if (inqsToOnshore&&inqsToOnshore.every(q => ['COMPL', 'RESOLVED'].includes(q.state))){
+        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "Return to Onshore via workspace"))    
+      }
+      if (inquiries.every(q => ['UPLOADED'].includes(q.state))){
+        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "AS", "BL Amendment Success"))
+      }
+    }
   }, [inquiries]);
 
   // TODO: TBU Logic after create new reply amendment
@@ -483,7 +496,7 @@ const BLWorkspace = (props) => {
     } else if (openNotificationBLWarning.status) {
       return (
         <>
-          <img style={{ verticalAlign: 'middle' }} src={`/assets/images/icons/warning.svg`} />
+          <img style={{ verticalAlign: 'middle', paddingBottom: 2, paddingLeft: 5, paddingRight: 5, }} src={`/assets/images/icons/warning.svg`} />
           <span>{`The BL is opening by [${openNotificationBLWarning.userName}].`}</span>
         </>
       )
