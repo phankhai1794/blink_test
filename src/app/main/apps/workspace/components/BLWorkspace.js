@@ -496,7 +496,7 @@ const BLWorkspace = (props) => {
     } else if (openNotificationBLWarning.status) {
       return (
         <>
-          <img style={{ verticalAlign: 'middle', padding: '5px'}} src={`/assets/images/icons/warning.svg`} />
+          <img style={{ verticalAlign: 'middle', paddingBottom: 2, paddingLeft: 5, paddingRight: 5, }} src={`/assets/images/icons/warning.svg`} />
           <span>{`The BL is opening by [${openNotificationBLWarning.userName}].`}</span>
         </>
       )
