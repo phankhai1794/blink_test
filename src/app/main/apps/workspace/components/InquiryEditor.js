@@ -308,16 +308,6 @@ const InquiryEditor = (props) => {
     }
   };
 
-  const handleValidateInput = async (confirm = null) => {
-    let textInput = currentEditInq?.content || '';
-    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
-    if (isWarning) {
-      dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
-    } else {
-      confirm && confirm();
-    }
-  }
-
   const onSave = async () => {
     const inquiriesOp = [...inquiries];
     dispatch(
