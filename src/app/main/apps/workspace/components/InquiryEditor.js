@@ -114,6 +114,7 @@ const InquiryEditor = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles();
   const { onCancel, setSave } = props;
+  const scrollTopPopup = useRef(null);
   const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize] = useSelector(
     ({ workspace }) => [
       workspace.inquiryReducer.metadata,
@@ -179,6 +180,9 @@ const InquiryEditor = (props) => {
         .filter((data) => data.field?.includes(fieldValue.value))
         .sort((a, b) => a.label.localeCompare(b.label));
       setInqTypeOption(filter);
+    }
+    if (scrollTopPopup.current) {
+      scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [fieldValue]);
 
@@ -561,7 +565,7 @@ const InquiryEditor = (props) => {
   return (
     <>
       <div className="flex justify-between" style={{ padding: '0.5rem', marginRight: '-15px' }}>
-        <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
+        <div ref = {scrollTopPopup} style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
           {currentEditInq.field
             ? getLabelById(metadata['field_options'], currentEditInq.field)
             : 'New Inquiry'}
@@ -598,7 +602,7 @@ const InquiryEditor = (props) => {
                   value={fieldValue}
                   isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleFieldChange}
-                  placeholder="Select Field Type"
+                  placeholder="BL Data Field"
                   textFieldProps={{
                     variant: 'outlined'
                   }}
@@ -619,7 +623,7 @@ const InquiryEditor = (props) => {
                   customStyle={styles(fullscreen ? 330 : 295)}
                   isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleTypeChange}
-                  placeholder="Type of Inquiry"
+                  placeholder="Type of Question"
                   textFieldProps={{
                     variant: 'outlined'
                   }}
@@ -640,7 +644,7 @@ const InquiryEditor = (props) => {
                   customStyle={styles(fullscreen ? 330 : 295)}
                   isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleAnswerTypeChange}
-                  placeholder="Type of Question"
+                  placeholder="Type of Answer"
                   textFieldProps={{
                     variant: 'outlined'
                   }}

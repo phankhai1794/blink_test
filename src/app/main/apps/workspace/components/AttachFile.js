@@ -72,7 +72,7 @@ const AttachFile = (props) => {
       currentEditInq.inqType
     );
     if (!isExist) {
-      if (!currentEditInq.inqType) return dispatch(AppAction.showMessage({ message: 'Type of inquiry is required !', variant: 'error' }));
+      if (!currentEditInq.inqType) return dispatch(AppAction.showMessage({ message: 'Type of Question is required !', variant: 'error' }));
       const inq = { ...currentEditInq };
       files.forEach((src) => {
         const formData = new FormData();

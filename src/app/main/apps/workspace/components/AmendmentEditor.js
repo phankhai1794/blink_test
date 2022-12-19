@@ -235,7 +235,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             customStyle={styles(fullscreen ? 320 : 295)}
             value={fieldValueSelect}
             onChange={handleChangeField}
-            placeholder="Select Field Type"
+            placeholder="BL Data Field"
             textFieldProps={{
               variant: 'outlined'
             }}
