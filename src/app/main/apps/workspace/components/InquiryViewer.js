@@ -1008,7 +1008,7 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) {
         const reqReply = {
           inqAns: tempReply.inqAns,
-          answer: {content: tempReply.answer.content.trim() || ONLY_ATT, type: tempReply.answer.type},
+          answer: {content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, type: tempReply.answer.type},
           mediaFiles: mediaListId
         };
         saveReply({ ...reqReply })
@@ -1038,7 +1038,7 @@ const InquiryViewer = (props) => {
       } else {
         // Edit
         const reqReply = {
-          content: tempReply.answer.content.trim() || ONLY_ATT,
+          content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT,
           mediaFiles: mediaListId.map(media => media.id),
           mediaRest
         };
@@ -1074,7 +1074,7 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) { // Create amendment / reply
         const reqReply = {
           field: question.field,
-          content: { content: tempReply.answer.content.trim() || ONLY_ATT, mediaFile: mediaListAmendment },
+          content: { content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
           mybl: myBL.id
         };
         saveEditedField({ ...reqReply })
@@ -1091,7 +1091,7 @@ const InquiryViewer = (props) => {
       }
       else { // Edit amendment / reply
         const reqReply = {
-          content: { content: tempReply.answer.content.trim() || ONLY_ATT, mediaFile: mediaListAmendment },
+          content: { content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
           if (res) {
@@ -1771,8 +1771,8 @@ const InquiryViewer = (props) => {
                           color="primary"
                           onClick={() => handleValidateInput('REPLY', onSaveReply)}
                           disabled={
-                            (question.state === "AME_DRF" && (!Array.isArray(question.content) && tempReply?.answer?.content?.trim()))
-                            || (question.state !== "AME_DRF" && (!Array.isArray(question.content) && !tempReply?.answer?.content?.trim()) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
+                            (question.state === "AME_DRF" && (['string'].includes(typeof question.content) && tempReply?.answer?.content?.trim()))
+                            || (question.state !== "AME_DRF" && (['string'].includes(typeof question.content) && !tempReply?.answer?.content?.trim()) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
                           }
                           classes={{ root: clsx(classes.button, 'w120') }}>
