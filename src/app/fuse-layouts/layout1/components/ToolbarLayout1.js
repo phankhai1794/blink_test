@@ -71,18 +71,19 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   buttonEditDraftBL: {
-    color: whiteColor,
+    fontSize: 16,
+    padding: '5px 16px',
+    color: themeColor,
+    background: whiteColor,
+    border: `1px solid ${themeColor}`,
     borderRadius: 8,
-    backgroundColor: themeColor,
-    '&:hover': {
-      backgroundColor: themeColor,
-    }
   },
   buttonComfirm: {
     fontSize: 16,
     padding: '5px 16px',
     color: whiteColor,
     background: themeColor,
+    border: `1px solid ${themeColor}`,
     borderRadius: 8,
     '&:hover': {
       backgroundColor: themeColor,
@@ -421,7 +422,7 @@ function ToolbarLayout1(props) {
               <Button
                 className={clsx(classes.button, classes.buttonEditDraftBL)}
                 onClick={redirectEditDraftBL}>
-                <EditIcon />
+                Amendment
               </Button>
 
               <Button
