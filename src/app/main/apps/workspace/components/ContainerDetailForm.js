@@ -9,7 +9,7 @@ import {
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Icon, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Drawer } from '@material-ui/core';
+import { Icon, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Drawer, Popover } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 
 import AmendmentPopup from './AmendmentPopup';
@@ -18,8 +18,16 @@ const useStyles = makeStyles(() => ({
   paper: {
     width: 450,
     backgroundColor: '#FDF2F2'
+  },
+  popover: {
+    width: 250,
+    padding: 15,
+    boxShadow: '2px 2px 4px rgba(0, 0, 0, 0.15)'
   }
 }))
+const isArray = (value) => {
+  return Array.isArray(value) ? value.join(', ') : value;
+}
 
 const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false }) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
@@ -44,10 +52,13 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const [openEdit, setOpenEdit] = useState(false);
   const [rowIndex, setRowIndex] = useState(0);
   const [valueEdit, setValueEdit] = useState(originalValues || getValueField(container) || [{}]);
+  const [popover, setPopover] = useState({ open: false, text: '' });
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const CDTitle = CONTAINER_LIST.cd
   const CMTitle = user.role === 'Guest' ? [CONTAINER_NUMBER, ...CONTAINER_LIST.cm].filter(item => ![HS_CODE, HTS_CODE, NCM_CODE].includes(item)) : [CONTAINER_NUMBER, ...CONTAINER_LIST.cm]
   const type = (container === CONTAINER_DETAIL) ? CDTitle : CMTitle;
+  const open = Boolean(anchorEl);
 
   useEffect(() => {
     if (!originalValues) {
@@ -67,7 +78,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     let total = 0;
     data.forEach(item => {
       if (typeof (item[key] || '') === "string") {
-        total += Number((item[key] || '').replace(',', ''));
+        total += Number((item[key] || '').replace(/,/g, ''));
       }
       else {
         total += item[key];
@@ -76,23 +87,36 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     return total === 0 ? '' : parseFloat(total.toFixed(6)).toLocaleString() + ` ${values[0][getType(mapUnit[name])] || ''}`;
   };
 
-  const isValueChange = (key, index, value) => {
-    const originalValue = originalData[index]?.[getType(key)]
-    return originalValue !== value ? '#FEF4E6' : ''
+  const combineValueUnit = (name, row) => {
+    const value = isArray(row[getType(name)]);
+    if (Object.keys(mapUnit).includes(name)) {
+      const id = getType(mapUnit[name]);
+      const unit = row[id] || '';
+      return value ? `${value} ${unit}` : value;
+    }
+    return value;
   }
 
-  const combineValueUnit = (name, row) => {
-    const value = row[getType(name)]
-    if (Object.keys(mapUnit).includes(name)) {
-      const id = getType(mapUnit[name])
-      const unit = row[id] || ''
-      return value ? `${value} ${unit}` : value
-    }
-    return value
+  const isValueChange = (key, index, row) => {
+    const originalValue = combineValueUnit(key, originalData[index]);
+    return originalValue !== combineValueUnit(key, row) ? '#FEF4E6' : '';
   }
 
   const handleClose = () => {
     handleEdit(false)
+  }
+
+  const checkPopover = (e) => {
+    const overflow = e.target.scrollWidth > e.target.clientWidth;
+    if (overflow) {
+      setAnchorEl(e.currentTarget);
+      setPopover({ open: true, text: e.target.innerHTML });
+    }
+  }
+
+  const closePopover = () => {
+    setAnchorEl(null);
+    setPopover({ open: false });
   }
 
   return (
@@ -114,6 +138,25 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           index={rowIndex}
         />
       </Drawer>
+      <Popover
+        classes={{ paper: classes.popover }}
+        style={{ pointerEvents: 'none', width: 300 }}
+        anchorEl={anchorEl}
+        open={open}
+        onClose={closePopover}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transitionDuration={500}
+      >
+        <span style={{ color: '#515E6A' }}>{popover.text}</span>
+      </Popover>
+
       <div style={{ maxWidth: 880, overflowX: 'auto' }}>
         <Table className='amend_table' aria-label="simple table" >
           <TableHead>
@@ -131,22 +174,32 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           <TableBody>
             {values.map((row, vindex) => (
               <TableRow key={vindex}>
-                {type.map((cell, i) =>
-                  <TableCell className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'} style={{ backgroundColor: isValueChange(cell, vindex, row[getType(cell)]) }} key={i}>
-                    {i === 0 ?
-                      <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }} >
-                        <span>{row[getType(cell)]}</span>
-                        <IconButton onClick={() => {
-                          setRowIndex(vindex)
-                          handleEdit(true);
-                        }} className="w-16 h-16 p-0">
-                          <Icon className="text-16 arrow-icon" color="disabled">
-                            {disableInput ? 'visibility' : 'edit_mode'}
-                          </Icon>
-                        </IconButton>
-                      </div> : combineValueUnit(cell, row)
-                    }
-                  </TableCell>
+                {type.map((cell, i) => {
+                  const value = isArray(row[getType(cell)])
+                  return (
+                    <TableCell
+                      key={i}
+                      className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'}
+                      style={{ backgroundColor: isValueChange(cell, vindex, row) }}
+                      onMouseEnter={checkPopover}
+                      onMouseLeave={closePopover}
+                    >
+                      {i === 0 ?
+                        <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }} >
+                          <span>{value}</span>
+                          <IconButton onClick={() => {
+                            setRowIndex(vindex)
+                            handleEdit(true);
+                          }} className="w-16 h-16 p-0">
+                            <Icon className="text-16 arrow-icon" color="disabled">
+                              {disableInput ? 'visibility' : 'edit_mode'}
+                            </Icon>
+                          </IconButton>
+                        </div> : combineValueUnit(cell, row)
+                      }
+                    </TableCell>
+                  )
+                }
                 )}
               </TableRow>
             ))}

@@ -89,7 +89,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const [attachments, setAttachments] = useState(question?.content?.mediaFile || []);
   const [fieldValue, setFieldValue] = useState("");
   const [fieldValueSelect, setFieldValueSelect] = useState();
-  const [fieldType, setFieldType] = useState(metadata.field_options.filter(filDrf => !filterInqDrf.includes(filDrf.value)));
+  const fieldType = metadata.field_options.filter(filDrf => filDrf.display && !filterInqDrf.includes(filDrf.value));
 
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
@@ -170,6 +170,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
     dispatch(InquiryActions.setContent({ ...content, [fieldReq]: fieldValue }));
     dispatch(FormActions.toggleCreateAmendment(false));
+    dispatch(InquiryActions.setOneInq({}));
   }
 
   const handleCancel = () => {

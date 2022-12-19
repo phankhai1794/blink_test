@@ -9,7 +9,7 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime, validatePartiesContent } from '@shared';
+import { getLabelById, displayTime, validatePartiesContent, groupBy } from '@shared';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import {
   CONTAINER_DETAIL,
@@ -19,7 +19,8 @@ import {
   CM_PACKAGE,
   SHIPPER,
   CONSIGNEE,
-  NOTIFY
+  NOTIFY,
+  ONLY_ATT
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useState, useEffect } from 'react';
@@ -217,6 +218,7 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     let isUnmounted = false;
     setTempReply({});
+    setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
     if (question && question.process === 'pending') {
       loadComment(question.id)
         .then((res) => {
@@ -262,6 +264,16 @@ const InquiryViewer = (props) => {
                 setSubmitLabel(false);
                 lastest.showIconReply = true;
               }
+
+              const getResolvedLastest = res.filter(r => r.state === 'COMPL');
+              if (getResolvedLastest.length) {
+                getResolvedLastest.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+                const { content: contentResolved } = getResolvedLastest[getResolvedLastest.length - 1];
+                setTextResolve(contentResolved instanceof String ? `"${contentResolved}"` : contentResolved || '');
+              } else {
+                setTextResolve(content[lastest.field] || '');
+              }
+
               if (user.role === 'Admin') {
                 if (filterOffshoreSent.state === 'REP_Q_SENT') {
                   setShowLabelSent(true);
@@ -309,7 +321,7 @@ const InquiryViewer = (props) => {
                   lastest.showIconEdit = false;
                   setStateReplyDraft(false);
                 }
-                if (['REP_A_SENT'].includes(filterOffshoreSent.state)) {
+                if (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state)) {
                   setSubmitLabel(true);
                   lastest.showIconAttachReplyFile = false;
                   lastest.showIconAttachAnswerFile = false;
@@ -374,6 +386,7 @@ const InquiryViewer = (props) => {
               setQuestion(lastest);
               setInqHasComment(true);
             }
+            setTextResolve(content[lastest.field] || '');
           }
           setIsLoadedComment(true);
         })
@@ -422,45 +435,69 @@ const InquiryViewer = (props) => {
               setStateReplyDraft(false);
             }
 
+            const getResolvedLastest = res.filter(r => r.state === 'RESOLVED');
+            if (getResolvedLastest.length) {
+              getResolvedLastest.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+              const { content: contentResolved } = getResolvedLastest[getResolvedLastest.length - 1].content;
+              setTextResolve(contentResolved instanceof String ? `"${contentResolved}"` : contentResolved || '');
+            } else {
+              setTextResolve(lastest.content || '')
+            }
+
             if (user.role === 'Admin') {
-              if (['AME_SENT', 'REOPEN_Q'].includes(lastest.state)) {
+              if (lastestComment.role === 'Guest') {
+                if (['REP_SENT', 'AME_SENT'].includes(lastest.state)) {
+                  lastest.showIconReply = true;
+                  setStateReplyDraft(false);
+                  setTempReply({});
+                }
+              } else {
+                if (['REP_DRF'].includes(lastest.state)) {
+                  lastest.showIconReply = false;
+                  setShowLabelSent(false);
+                } else if (['REP_SENT'].includes(lastest.state)) {
+                  lastest.showIconReply = false;
+                  setShowLabelSent(true);
+                }
+              }
+              if (['REOPEN_A'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 setStateReplyDraft(false);
                 setTempReply({});
-              }
-              if (['REP_SENT'].includes(lastest.state)) {
-                lastest.showIconReply = false;
-                setShowLabelSent(true);
-              } else if (['REP_DRF'].includes(lastest.state)) {
-                lastest.showIconReply = false;
-                setShowLabelSent(false);
-              } else if (['REOPEN_A'].includes(lastest.state)) {
+              } else if (['REOPEN_Q'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 setStateReplyDraft(false);
                 setTempReply({});
               }
             } else {
-              if (['REP_SENT', 'REOPEN_A'].includes(lastest.state)) {
+              if (lastestComment.role === 'Guest') {
+                if (['REP_SENT', 'AME_SENT'].includes(lastest.state)) {
+                  lastest.showIconReply = false;
+                  setSubmitLabel(true);
+                }
+              } else {
+                if (['REP_SENT'].includes(lastest.state)) {
+                  lastest.showIconReply = true;
+                  lastest.showIconEdit = false;
+                  setSubmitLabel(false);
+                  setStateReplyDraft(false);
+                  setTempReply({});
+                }
+              }
+              if (['UPLOADED'].includes(lastest.state)) {
+                setStateReplyDraft(false);
+                setStateReplyDraft(false);
+              } else if (['REOPEN_A'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 lastest.showIconEdit = false;
                 setSubmitLabel(false);
                 setStateReplyDraft(false);
                 setTempReply({});
-              } else if (['AME_SENT'].includes(lastest.state)) {
-                lastest.showIconReply = false;
-                setSubmitLabel(true);
               } else if (['REOPEN_Q'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 lastest.showIconEdit = false;
                 setStateReplyDraft(false);
                 setTempReply({});
-              } else if (['AME_DRF'].includes(lastest.state)) {
-                setSubmitLabel(false);
-                lastest.showIconEdit = true;
-                setStateReplyDraft(true);
-              } else if (['UPLOADED'].includes(lastest.state)) {
-                setStateReplyDraft(false);
-                setStateReplyDraft(false);
               }
             }
             if (isEditOriginalAmendment) {
@@ -481,6 +518,7 @@ const InquiryViewer = (props) => {
               process: 'draft',
               state: res[0]?.state,
             }];
+
             res.map(r => {
               const { content, mediaFile } = r.content;
               comments.push({
@@ -584,7 +622,7 @@ const InquiryViewer = (props) => {
     optionsInquires.forEach(op => op.showIconReply = false);
     optionsInquires.forEach(op => op.showIconAttachAnswerFile = false);
     optionsInquires.forEach(op => {
-      if (['OPEN', 'INQ_SENT', 'AME_SENT'].includes(op.state)) {
+      if (['OPEN', 'INQ_SENT', 'REP_SENT'].includes(op.state)) {
         op.showIconReply = true;
         op.showIconEditInq = true;
       } else if (['ANS_DRF', 'ANS_SENT'].includes(op.state)) {
@@ -904,6 +942,7 @@ const InquiryViewer = (props) => {
       },
       answer: {
         ...tempReply.answer,
+        content: tempReply?.answer?.content || '',
         type: metadata.ans_type['attachment']
       }
     };
@@ -969,7 +1008,7 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) {
         const reqReply = {
           inqAns: tempReply.inqAns,
-          answer: tempReply.answer,
+          answer: {content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, type: tempReply.answer.type},
           mediaFiles: mediaListId
         };
         saveReply({ ...reqReply })
@@ -999,7 +1038,7 @@ const InquiryViewer = (props) => {
       } else {
         // Edit
         const reqReply = {
-          content: tempReply.answer.content,
+          content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT,
           mediaFiles: mediaListId.map(media => media.id),
           mediaRest
         };
@@ -1035,7 +1074,7 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) { // Create amendment / reply
         const reqReply = {
           field: question.field,
-          content: { content: tempReply.answer?.content || '', mediaFile: mediaListAmendment },
+          content: { content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
           mybl: myBL.id
         };
         saveEditedField({ ...reqReply })
@@ -1052,7 +1091,7 @@ const InquiryViewer = (props) => {
       }
       else { // Edit amendment / reply
         const reqReply = {
-          content: { content: tempReply.answer.content, mediaFile: mediaListAmendment },
+          content: { content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
           if (res) {
@@ -1732,8 +1771,8 @@ const InquiryViewer = (props) => {
                           color="primary"
                           onClick={() => handleValidateInput('REPLY', onSaveReply)}
                           disabled={
-                            (question.state === "AME_DRF" && !tempReply?.answer?.content)
-                            || (question.state !== "AME_DRF" && !tempReply?.answer?.content && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
+                            (question.state === "AME_DRF" && (['string'].includes(typeof question.content) && tempReply?.answer?.content?.trim()))
+                            || (question.state !== "AME_DRF" && (['string'].includes(typeof question.content) && !tempReply?.answer?.content?.trim()) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
                           }
                           classes={{ root: clsx(classes.button, 'w120') }}>
@@ -1814,33 +1853,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     }
   }, [content]);
 
-  /**
- * @description
- * Takes an Array<V>, and a grouping function,
- * and returns a Map of the array grouped by the grouping function.
- *
- * @param list An array of type V.
- * @param keyGetter A Function that takes the the Array type V as an input, and returns a value of type K.
- *                  K is generally intended to be a property key of V.
- *
- * @returns Map of the array grouped by the grouping function.
- */
-  // export function groupBy<K, V>(list: Array<V>, keyGetter: (input: V) => K): Map<K, Array<V>> {
-  //    const map = new Map<K, Array<V>>();
-
-  function groupBy(list, keyGetter) {
-    const map = new Map();
-    list.forEach(item => {
-      const key = keyGetter(item);
-      const collection = map.get(key);
-      if (!collection) {
-        map.set(key, [item]);
-      } else {
-        collection.push(item);
-      }
-    });
-    return map;
-  }
 
   const renderTB = () => {
     let td = [];

@@ -59,6 +59,9 @@ const Inquiry = (props) => {
     inquiriesSet = inquiriesSet.filter((q, index) => q.field === currentField);
     setReceiver(null);
     const inqSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    inqSort.forEach(inq => {
+      if (inq.answerObj && inq.answerObj.length > 0) inq.answerObj = inq.answerObj.filter(item => item.type !== metadata.ans_type['attachment']);
+    })
     setListInqsField(inqSort);
   }, [inquiries]);
 
@@ -107,7 +110,7 @@ const Inquiry = (props) => {
     } else if (metadata.ans_type['choice'] === optionsInquires[editedIndex].ansType) {
       if (optionsInquires[editedIndex].answerObj) {
         const answered = optionsInquires[editedIndex].answerObj.filter(ans => ans.confirmed);
-        if (answered.length) isAnswered = true;
+        isAnswered = true;
         choiceAnswer = true;
       }
     }
@@ -124,7 +127,7 @@ const Inquiry = (props) => {
               optionsInquires[editedIndex].paragraphAnswer.content = ans.answerObj[0].content
             } else if (choiceAnswer && optionsInquires[editedIndex].selectChoice) {
               const answerIndex = ans.answerObj.find((item) => item.confirmed);
-              optionsInquires[editedIndex].selectChoice.answer = answerIndex.id;
+              if (answerIndex) optionsInquires[editedIndex].selectChoice.answer = answerIndex.id;
             }
           }
           optionsInquires[editedIndex].mediaFilesAnswer = ans.mediaFilesAnswer;

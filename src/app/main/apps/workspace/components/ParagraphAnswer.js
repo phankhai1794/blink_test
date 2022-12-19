@@ -60,9 +60,9 @@ const ParagraphAnswer = (props) => {
         setParagraphText('');
       }
     }
-    if (question.answerObj.length) {
-      setParagraphText(question.answerObj[0]?.content);
-    }
+    // if (question.answerObj.length) {
+    //   setParagraphText(question.answerObj[0]?.content);
+    // }
   }, [saveStatus, question]);
 
   return (

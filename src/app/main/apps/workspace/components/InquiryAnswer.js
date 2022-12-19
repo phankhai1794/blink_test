@@ -20,6 +20,7 @@ import clsx from 'clsx';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 
+import { ONLY_ATT } from '@shared/keyword';
 const useStyles = makeStyles((theme) => ({
   root: {
     '& .MuiButtonBase-root': {
@@ -157,7 +158,7 @@ const InquiryAnswer = (props) => {
           //
           if (currentEditInq.paragraphAnswer) {
             // update paragraph answer
-            optionsInquires[editedIndex].answerObj[0].content = currentEditInq.paragraphAnswer.content;
+            optionsInquires[editedIndex].answerObj[0].content = currentEditInq.paragraphAnswer.content.trim();
           } else if (currentEditInq.selectChoice) {
             // update choice answer
             const answersObj = currentEditInq.answerObj;
@@ -235,6 +236,13 @@ const InquiryAnswer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     setDisableSave(true)
     let responseSelectChoice;
+
+    if (!question.paragraphAnswer && question.attachmentAnswer && question.ansType === metadata.ans_type['paragraph']) {
+      question.paragraphAnswer = {
+        inquiry: question.attachmentAnswer.inquiry,
+        content: ONLY_ATT
+      }
+    }
     //
     await addTransactionAnswer({ inquiryId: question.id });
     //
@@ -246,6 +254,9 @@ const InquiryAnswer = (props) => {
         optionsInquires[editedIndex].answerObj.push(response.answerObj);
       } else {
         const answerId = question.answerObj[0].id;
+        if (question.paragraphAnswer.content.trim() === '') {
+          question.paragraphAnswer.content = ONLY_ATT;
+        }
         await updateParagraphAnswer(answerId, question.paragraphAnswer);
       }
     }
@@ -308,7 +319,7 @@ const InquiryAnswer = (props) => {
             color="primary"
             disabled={
               (
-                !currentAnswer?.paragraphAnswer?.content
+                !currentAnswer?.paragraphAnswer?.content?.trim()
                 && !currentAnswer.selectChoice
                 && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)
               )
