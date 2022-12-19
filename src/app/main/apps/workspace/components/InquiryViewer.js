@@ -1771,8 +1771,8 @@ const InquiryViewer = (props) => {
                           color="primary"
                           onClick={() => handleValidateInput('REPLY', onSaveReply)}
                           disabled={
-                            (question.state === "AME_DRF" && !tempReply?.answer?.content?.trim())
-                            || (question.state !== "AME_DRF" && !tempReply?.answer?.content?.trim() && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
+                            (question.state === "AME_DRF" && (!Array.isArray(question.content) && tempReply?.answer?.content?.trim()))
+                            || (question.state !== "AME_DRF" && (!Array.isArray(question.content) && !tempReply?.answer?.content?.trim()) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
                           }
                           classes={{ root: clsx(classes.button, 'w120') }}>
