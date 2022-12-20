@@ -1,7 +1,7 @@
-import { filterMetadata } from '@shared';
+import { filterMetadata, groupBy } from '@shared';
 import { handleError } from '@shared/handleError';
 import { getInquiryById, getMetadata } from 'app/services/inquiryService';
-import { createBL, getBlInfo, getCustomerAmendment } from 'app/services/myBLService';
+import { createBL, getBlInfo } from 'app/services/myBLService';
 import { getFieldContent, getCommentDraftBl } from 'app/services/draftblService';
 import axios from 'axios';
 import { updateBlStatus } from 'app/services/opusService';
@@ -39,15 +39,19 @@ export const loadMetadata = () => async (dispatch) => {
 
 export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
   try {
-    const [blResponse, contentRespone] = [
+    const [blResponse] = [
       await getBlInfo(myBL_Id),
-      await getCustomerAmendment(myBL_Id)
     ];
     const { content } = blResponse?.myBL;
-    const { contentAmendmentRs } = contentRespone;
     dispatch(setOrgContent(blResponse?.myBL.content));
     const cloneContent = { ...content };
-    contentAmendmentRs?.length && contentAmendmentRs.forEach(a => cloneContent[a.field] = a.content);
+    const inqSort = inquiries.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    const groups = groupBy(inqSort, value => value.field);
+    groups.forEach((inq, key) => {
+      if (["REOPEN_Q", "REOPEN_A", "RESOLVED", "COMPL", "UPLOADED"].includes(inq.state)) {
+        cloneContent[key] = inq.content;
+      }
+    });
     dispatch(setContent(cloneContent));
   } catch (err) {
     handleError(dispatch, err);
@@ -60,7 +64,7 @@ export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnDesc) => async (dispatch
       await updateBlStatus({
         shineUrl: "",
         srKndCd: "",
-        srNo:"",
+        srNo: "",
         bkgNo: bkgNo,
         srAmdTpCd: "",
         srAmdSeq: "",

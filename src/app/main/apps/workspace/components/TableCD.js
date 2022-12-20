@@ -221,7 +221,6 @@ const TableCD = (props) => {
       id,
       user,
       inquiries,
-      listCommentDraft
     );
 
     setIsEmpty(colorStatusObj.isEmpty);
