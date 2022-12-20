@@ -85,7 +85,7 @@ export const COUNTRIES = [
 
 export const sentStatus = [
   ...['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'REOPEN_Q', 'REOPEN_A'], // inquiry status
-  ...['AME_SENT', 'REP_SENT'] // draft status
+  ...['REP_SENT'] // draft status
 ];
 
 export const validatePartiesContent = (partiesContent, type) => {

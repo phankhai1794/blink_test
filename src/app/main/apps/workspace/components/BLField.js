@@ -274,7 +274,6 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         id,
         user,
         inquiries,
-        listCommentDraft
       );
       
       setIsEmpty(colorStatusObj.isEmpty);
