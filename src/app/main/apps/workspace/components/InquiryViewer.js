@@ -889,11 +889,11 @@ const InquiryViewer = (props) => {
   };
 
   const inputText = (e) => {
-    setTextResolve(e.target.value);
+    setTextResolve(e.target.value.toUpperCase());
   };
 
   const inputTextSeparate = (e, type) => {
-    setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value }));
+    setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value.toUpperCase() }));
   };
 
   const handleChangeContentReply = (e) => {
