@@ -337,14 +337,15 @@ const BLWorkspace = (props) => {
     setDisableSendBtn(!enableSend)
   }, [enableSend]);
 
-  const countInq = (inqs, recevier) => {
+  const countInq = (inqs, process, recevier) => {
     let count = 0;
-    inqs.forEach((inq) => inq.process === 'pending' && inq.receiver.includes(recevier) && (count += 1));
+    inqs.forEach((inq) => inq.process === process && inq.receiver.includes(recevier) && (count += 1));
+
     return count;
   };
 
-  const handleTabSelected = (inqs) => {
-    if (countInq(inqs, 'customer') === 0) {
+  const handleTabSelected = (inqs, process='pending') => {
+    if (countInq(inqs, process, 'customer') === 0) {
       return 'onshore'
     } else {
       return tabSelected === 0 ? 'customer' : 'onshore'
@@ -357,7 +358,7 @@ const BLWorkspace = (props) => {
       return {
         status: openAllInquiry || openAmendmentList,
         tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
-        nums: user.role === 'Admin' ? [countInq(inquiries, 'customer'), countInq(inquiries, 'onshore')] : [],
+        nums: user.role === 'Admin' ? [countInq(inquiries, openAllInquiry ? 'pending' : 'draft', 'customer'), countInq(inquiries, openAllInquiry ? 'pending' : 'draft', 'onshore')] : [],
         toggleForm: (status) => {
           dispatch(FormActions.toggleAllInquiry(status));
           dispatch(FormActions.toggleAmendmentsList(status))
@@ -367,7 +368,7 @@ const BLWorkspace = (props) => {
         field: 'INQUIRY_LIST',
         showBtnSend: true,
         disableSendBtn: disableSendBtn,
-        child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries)} field={'INQUIRY_LIST'} />
+        child: <AllInquiry user={props.user} receiver={handleTabSelected(inquiries, openAllInquiry ? 'pending' : 'draft')} field={'INQUIRY_LIST'} />
       };
     case 'ATTACHMENT_LIST':
       return {
