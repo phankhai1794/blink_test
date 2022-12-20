@@ -44,8 +44,6 @@ const InputUI = ({ id, onChanged }) => {
     input: ''
   });
   const [ctrlA, setCtrlA] = useState({ state: false, id: '' });
-  const [isCc, setIsCc] = useState(false);
-  const [isBcc, setIsBcc] = useState(false);
   const refInput = {
     [`to${id}Cc`]: useRef(null),
     [`to${id}Bcc`]: useRef(null),
@@ -55,9 +53,12 @@ const InputUI = ({ id, onChanged }) => {
   const suggestMails = useSelector(({ workspace }) => workspace.mailReducer.suggestMails);
   const inputMail = useSelector(({ workspace }) => workspace.mailReducer.inputMail);
   const tags = useSelector(({ workspace }) => workspace.mailReducer.tags);
+  const mode = useSelector(({ workspace }) => workspace.mailReducer.mode);
+  const isCc = mode[`isCc${id}`];
+  const isBcc = mode[`isBcc${id}`];
 
-  const onCc = (value) => setIsCc(value);
-  const onBcc = (value) => setIsBcc(value);
+  const onCc = (value) => dispatch(MailActions.setCc({ ...mode, [`isCc${id}`]: value }));
+  const onBcc = (value) => dispatch(MailActions.setCc({ ...mode, [`isBcc${id}`]: value }));
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -385,7 +386,6 @@ const InputUI = ({ id, onChanged }) => {
           state.id === id &&
           inputMail[id] &&
           state.filteredSuggestions.length > 0 && (
-     
           <ul className="suggestions">
             {state.filteredSuggestions.map(({ email, firstName, lastName, avatar }, index) => {
               let className = 'suggestion';
@@ -412,7 +412,6 @@ const InputUI = ({ id, onChanged }) => {
               );
             })}
           </ul>
- 
         )}
       </>
     );
@@ -421,18 +420,18 @@ const InputUI = ({ id, onChanged }) => {
     <>
       {focus ? (
         <div ref={ref} onFocus={() => setFocus(true)} style={{ borderBottom: '1px solid #BAC3CB' }}>
-          <div className="flex" style={{position: 'relative'}}>
+          <div className="flex" style={{ position: 'relative' }}>
             <span className='m-auto mr-8'>To</span>
             {TagsInput(`to${id}`, `To ${id}`)}
           </div>
           {isCc &&
-            <div className="flex m-auto" style={{position: 'relative'}}>
+            <div className="flex m-auto" style={{ position: 'relative' }}>
               <span className='m-auto mr-8'>Cc</span>
               {TagsInput(`to${id}Cc`, 'Cc')}
             </div>
           }
           {isBcc &&
-            <div className="flex m-auto" style={{position: 'relative'}}>
+            <div className="flex m-auto" style={{ position: 'relative' }}>
               <span className='m-auto mr-8'>Bcc</span>
               {TagsInput(`to${id}Bcc`, 'Bcc')}
             </div>

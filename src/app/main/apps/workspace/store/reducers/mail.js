@@ -7,6 +7,7 @@ const initialState = {
   suggestMails: [],
   inputMail: { toCustomer: '', toOnshore: '', toCustomerCc: '', toOnshoreCc: '', toCustomerBcc: '', toOnshoreBcc: '' },
   tags: { toCustomer: [], toOnshore: [], toCustomerCc: [], toOnshoreCc: [], toCustomerBcc: [], toOnshoreBcc: [] },
+  mode: { isCcCustomer: false, isCcOnshore: false, isBccCustomer: false, isBccOnshore: false }
 };
 
 const mailReducer = function (state = initialState, action) {
@@ -50,6 +51,12 @@ const mailReducer = function (state = initialState, action) {
     return {
       ...state,
       inputMail: action.state
+    };
+  }
+  case Actions.SET_CC: {
+    return {
+      ...state,
+      mode: action.state
     };
   }
   case Actions.SET_TAGS: {
