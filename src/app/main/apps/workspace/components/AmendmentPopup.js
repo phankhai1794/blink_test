@@ -52,7 +52,8 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: 'Montserrat'
   },
   select: {
-    padding: '5px 23px 5px 5px'
+    padding: '5px 23px 5px 5px',
+    minHeight: 23
   },
   selectIcon: { color: '#BD0F72' },
   textField: {
@@ -422,7 +423,7 @@ const AmendmentPopup = (props) => {
             show(value) && (
               <>
                 <p style={{ fontWeight: 600 }}>{title}</p>
-                {CustomTextField({ style: { width: '90%' }, title: title })}
+                {CustomTextField({ fullWidth: true, title: title })}
               </>
             )
           );
