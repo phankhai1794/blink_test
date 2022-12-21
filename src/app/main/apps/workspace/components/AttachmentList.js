@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import clsx from "clsx";
+import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { Divider, FormControl, FormHelperText, Button, LinearProgress, Tooltip } from '@material-ui/core';
 import CachedIcon from '@material-ui/icons/Cached';
@@ -12,16 +14,14 @@ import { validateExtensionFile } from '@shared';
 import * as AppAction from "app/store/actions";
 import { useDropzone } from "react-dropzone";
 import { uploadFile, getFile } from 'app/services/fileService';
-import { updateInquiryAttachment, removeMultipleMedia, replaceFile, addNewMedia } from 'app/services/inquiryService';
+import { updateInquiryAttachment, removeMultipleMedia, replaceFile, addNewMedia, loadComment } from 'app/services/inquiryService';
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { handleDuplicateAttachment } from '@shared/handleError';
 import { getCommentDraftBl } from "app/services/draftblService";
 import Checkbox from "@material-ui/core/Checkbox";
-import clsx from "clsx";
 
 import * as InquiryActions from "../store/actions/inquiry";
-import {loadComment} from 'app/services/inquiryService';
 
 import PDFViewer from './PDFViewer';
 
@@ -175,7 +175,7 @@ const AttachmentList = (props) => {
   const classes = attachmentStyle();
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
   const [fieldType, setFieldType] = useState([]);
-  const [attachmentFiles, setAttachmentFile] = useState([]);
+  const [attachmentFiles, setAttachmentFiles] = useState([]);
   const dispatch = useDispatch();
   const [selectedIndexFile, setSelectedIndexFile] = useState([]);
   const [isShowReplace, setShowReplace] = useState(false);
@@ -196,10 +196,10 @@ const AttachmentList = (props) => {
   };
 
   useEffect(() => {
-    if (document.getElementsByClassName('attachmentList')[0].childElementCount > 0){
+    if (document.getElementsByClassName('attachmentList')[0].childElementCount > 0) {
       document.querySelectorAll('#no-att span')[0].textContent = document.getElementsByClassName('attachmentList')[0].childElementCount;
     }
-  }, [attachmentFiles])
+  }, [attachmentFiles]);
 
   useEffect(() => {
     if (props.newFileAttachment) {
@@ -225,12 +225,13 @@ const AttachmentList = (props) => {
           newFile.push(templateMedia);
         });
         const merFile = [...optionsAttachmentList, ...newFile];
-        setAttachmentFile(merFile);
+        setAttachmentFiles(merFile);
       }
     }
   }, [props.newFileAttachment]);
 
   useEffect(() => {
+    // Need to refactor this logic
     let getAttachmentFiles = [];
     let combineFieldType = [];
     inquiries.forEach((e) => {
@@ -251,65 +252,8 @@ const AttachmentList = (props) => {
         };
 
       })
-
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
-     
-      getCommentDraftBl(myBL.id, e.field).then((res) => {
-        res.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-        if (res.length > 0) {
-          let commentDraftIdList = [];
-          res.forEach((r) => {
-            if (!commentDraftIdList.includes(r.id)) {
-              commentDraftIdList.push(r.id);
-              const attachmentAmendment = r.content.mediaFile.map ((f) => {
-                return {
-                  ...f,
-                  field: e.field,
-                  inquiryId: e.id,
-                  inqType: e.inqType,
-                }
-              })
-              // if reply file in attachment of inquiry -> not add file to att list
-              attachmentAmendment.forEach(att => {
-                const fileNameList = getAttachmentFiles.map((item) => {
-                  if (item.inqType === e.inqType) return item.name
-                })
-                if (att && !e.inqType && !fileNameList.includes(att.name)) getAttachmentFiles.push(att)
-              })
-            }
-          })
-        }
-      })
-      
-      loadComment(e.id).then((res) => {
-        res.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-        if (res.length > 0){
-          let commentIdlist = []
-          res.forEach((r) => {
-            if (!commentIdlist.includes(r.id)) {
-              commentIdlist.push(r.id);
-              if (r.mediaFile?.length > 0) {
-                const attachmentTemp = r.mediaFile.map ((f) => {
-                  return {
-                    ...f,
-                      field: e.field,
-                      inquiryId: e.id,
-                      inqType: e.inqType,
-                  }
-                })
-                // if reply file in attachment of inquiry -> not add file to att list
-                attachmentTemp.forEach(att => {
-                  const fileNameList = getAttachmentFiles.map((item) => {
-                    if (item.inqType === e.inqType) return item.name
-                  })
-                  if (att && !fileNameList.includes(att.name)) getAttachmentFiles.push(att)
-                })
-              }
-            }
-          })
-        }
-      })
-     
+
       const fieldOptions = metadata.field_options.find(ops => ops.value === e.field);
       const inqType = metadata.inq_type_options.find(ops => ops.value === e.inqType);
       combineFieldType = [
@@ -320,15 +264,106 @@ const AttachmentList = (props) => {
         }
       ];
     });
-    const wait = setTimeout( () => {
-      getAttachmentFiles.sort((a, b) => a.field.localeCompare(b.field));
-      combineFieldType.sort((a, b) => a.label.localeCompare(b.label));
-      setAttachmentFile(getAttachmentFiles);
-      
-      setFieldType(combineFieldType);
-      dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-      setIsLoading(false);
-    },600)
+
+    const inquiriesPendingProcess = inquiries.filter(op => op.process === 'pending');
+    const amendment = inquiries.filter(op => op.process === 'draft');
+
+    let countLoadComment = 0;
+    let countAmendment = 0;
+    axios.all(inquiriesPendingProcess.map(q => loadComment(q.id))) // TODO: refactor
+      .then(res => {
+        if (res) {
+          let commentList = [];
+          let commentIdList = [];
+          // get attachments file in comment reply/answer
+          res.map(r => {
+            commentList = [...commentList, ...r];
+            r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+            const curInq = inquiriesPendingProcess[countLoadComment];
+            r.forEach((itemRes) => {
+              if (!commentIdList.includes(itemRes.id)) {
+                commentIdList.push(itemRes.id);
+                if (itemRes.mediaFile.length > 0) {
+                  const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ...itemRes.mediaFile];
+                  const attachmentTemp = mediaTemp.map((f) => {
+                    return {
+                      ...f,
+                      field: curInq.field,
+                      inquiryId: curInq.id,
+                      inqType: curInq.inqType,
+                    }
+                  })
+                  if (attachmentTemp.length > 0) {
+                    attachmentTemp.forEach(att => {
+                      const tempAttList = getAttachmentFiles.filter(attItem =>
+                        (attItem.name === att.name && attItem.field === att.field && attItem.inqType === att.inqType)
+                      );
+                      if (tempAttList.length === 0) getAttachmentFiles.push(att);
+                    })
+                  }
+                }
+              }
+            })
+
+            countLoadComment += 1
+            if (inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)) {
+              getAttachmentFiles.sort((a, b) => a.field.localeCompare(b.field));
+              combineFieldType.sort((a, b) => a.label.localeCompare(b.label));
+              setAttachmentFiles(getAttachmentFiles);
+              setFieldType(combineFieldType);
+              dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+              setIsLoading(false);
+            }
+          });
+        }
+      }).catch(err => {
+        console.error(err)
+      });
+
+    axios.all(amendment.map(q => getCommentDraftBl(myBL.id, q.field))) // TODO: refactor
+      .then((res) => {
+        if (res) {
+          let commentList = [];
+          let commentDraftIdList = [];
+          // check and add attachment of amendment/answer to Att List
+          res.map(r => {
+            commentList = [...commentList, ...r];
+            const curInq = amendment[countAmendment];
+            r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+            r.forEach((itemRes) => {
+              if (!commentDraftIdList.includes(itemRes.id)) {
+                commentDraftIdList.push(itemRes.id);
+                const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ...itemRes.content.mediaFile];
+                const attachmentAmendmentTemp = mediaTemp.map((f) => {
+                  return {
+                    ...f,
+                    field: curInq.field,
+                    inquiryId: curInq.id,
+                    inqType: curInq.inqType,
+                  }
+                })
+                if (attachmentAmendmentTemp.length > 0) {
+                  attachmentAmendmentTemp.forEach(attAmendment => {
+                    const fileNameList = getAttachmentFiles.map((item) => {
+                      if (item.inqType === curInq.inqType) return item.name
+                    })
+                    if (attAmendment && !curInq.inqType && !fileNameList.includes(attAmendment.name)) getAttachmentFiles.push(attAmendment);
+                  })
+                }
+              }
+            })
+            countAmendment += 1;
+            if (inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)) {
+              getAttachmentFiles.sort((a, b) => a.field.localeCompare(b.field));
+              combineFieldType.sort((a, b) => a.label.localeCompare(b.label));
+              setAttachmentFiles(getAttachmentFiles);
+              setFieldType(combineFieldType);
+              dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+              setIsLoading(false);
+            }
+          });
+        }
+      }).catch(err => { console.error(err) });
   }, []);
 
   const handleFieldChange = (e, index) => {
@@ -362,7 +397,7 @@ const AttachmentList = (props) => {
               inqType: e.value.inqType,
               success: true,
             };
-            setAttachmentFile(optionsAttachmentList);
+            setAttachmentFiles(optionsAttachmentList);
           }).catch((error) => {
             console.error(error);
             optionsAttachmentList[index] = {
@@ -370,7 +405,7 @@ const AttachmentList = (props) => {
               field: 'false',
               success: false,
             };
-            setAttachmentFile(optionsAttachmentList);
+            setAttachmentFiles(optionsAttachmentList);
           })
         }).catch((error) => {
           console.error(error);
@@ -379,7 +414,7 @@ const AttachmentList = (props) => {
             field: 'false',
             success: false,
           };
-          setAttachmentFile(optionsAttachmentList);
+          setAttachmentFiles(optionsAttachmentList);
         });
       }
     }
@@ -413,14 +448,14 @@ const AttachmentList = (props) => {
               field: e.value.fieldId,
               inqType: e.value.inqType,
             };
-            setAttachmentFile(optionsAttachmentList);
+            setAttachmentFiles(optionsAttachmentList);
           }).catch((error) => {
             console.error(error);
             optionsAttachmentList[index] = {
               ...media,
               success: false,
             };
-            setAttachmentFile(optionsAttachmentList);
+            setAttachmentFiles(optionsAttachmentList);
           });
         }
       }
@@ -444,7 +479,7 @@ const AttachmentList = (props) => {
           name: file[0].name,
           fileUpload: file[0],
         };
-        setAttachmentFile(optionsAttachmentList);
+        setAttachmentFiles(optionsAttachmentList);
       }
       // update replace
       else {
@@ -469,14 +504,14 @@ const AttachmentList = (props) => {
               field: optionsAttachmentList[attachmentIndex].field,
               inquiryId: optionsAttachmentList[attachmentIndex].inquiryId
             };
-            setAttachmentFile(optionsAttachmentList);
+            setAttachmentFiles(optionsAttachmentList);
           }).catch((error) => {
             console.error(error);
             optionsAttachmentList[attachmentIndex] = {
               ...optionsAttachmentList[attachmentIndex],
               success: false,
             };
-            setAttachmentFile(optionsAttachmentList);
+            setAttachmentFiles(optionsAttachmentList);
           });
         }).catch((error) => {
           console.error(error);
@@ -484,7 +519,7 @@ const AttachmentList = (props) => {
             ...optionsAttachmentList[attachmentIndex],
             success: false,
           };
-          setAttachmentFile(optionsAttachmentList);
+          setAttachmentFiles(optionsAttachmentList);
         });
       }
     }
@@ -508,7 +543,7 @@ const AttachmentList = (props) => {
             mediaR = [...mediaR, op];
           }
         });
-        setAttachmentFile(mediaR);
+        setAttachmentFiles(mediaR);
         setSelectedIndexFile([]);
         setShowConfirm(false);
         dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
@@ -517,7 +552,7 @@ const AttachmentList = (props) => {
     } else {
       // update attachment list
       const restMedia = optionsAttachmentList.filter((op, i) => !selectedIndexFile.includes(i));
-      setAttachmentFile(restMedia);
+      setAttachmentFiles(restMedia);
       setSelectedIndexFile([]);
       setShowConfirm(false);
       dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
