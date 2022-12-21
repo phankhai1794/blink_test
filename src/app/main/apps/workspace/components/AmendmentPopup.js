@@ -3,15 +3,13 @@ import {
   Button,
   TextField,
   IconButton,
-  Select,
   Chip,
-  MenuItem,
-  ListSubheader,
   FormControl,
   FormHelperText
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
 import {
@@ -20,26 +18,22 @@ import {
   CONTAINER_SEAL,
   CONTAINER_LIST,
   CONTAINER_PACKAGE,
-  CONTAINER_PACKAGE_UNIT,
   CONTAINER_WEIGHT,
-  CONTAINER_WEIGHT_UNIT,
   CONTAINER_TYPE,
   CONTAINER_MEASUREMENT,
   CM_MARK,
   CM_DESCRIPTION,
   CM_PACKAGE,
-  CM_PACKAGE_UNIT,
   CM_WEIGHT,
   CM_MEASUREMENT,
-  CM_WEIGHT_UNIT,
   HS_CODE,
   HTS_CODE,
   NCM_CODE,
   mapUnit
 } from '@shared/keyword';
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
-import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
+import WindowedSelect from "react-windowed-select";
 
 const useStyles = makeStyles((theme) => ({
   selectRoot: {
@@ -111,22 +105,18 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const containsText = (text, searchText) =>
-  text.toLowerCase().indexOf(searchText.toLowerCase()) > -1;
-
 const AmendmentPopup = (props) => {
   const { onClose, inqType, isEdit, data, index, updateData, updateEdit, containerDetail } = props;
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const user = useSelector(({ user }) => user);
-  const [errors, setErrors] = useState({});
   const [inputSeal, setInputSeal] = useState('');
+  const { register, control, handleSubmit, formState: { errors } } = useForm();
+  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be an Integer' }
+
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
-  };
-
-  const getTypeName = (type) => {
-    return Object.keys(metadata.inq_type).find((key) => metadata.inq_type[key] === type);
   };
 
   const CDTitle = [...CONTAINER_LIST.cd, mapUnit[CONTAINER_PACKAGE], mapUnit[CONTAINER_WEIGHT], mapUnit[CONTAINER_MEASUREMENT]].map((title) => {
@@ -146,54 +136,14 @@ const AmendmentPopup = (props) => {
     };
   });
 
-  const isValid = (id, value) => {
-    const name = getTypeName(id);
-    if (
-      !value &&
-      [
-        CONTAINER_PACKAGE,
-        CONTAINER_PACKAGE_UNIT,
-        CM_PACKAGE,
-        CM_PACKAGE_UNIT,
-        CONTAINER_WEIGHT,
-        CONTAINER_WEIGHT_UNIT,
-        CM_WEIGHT,
-        CM_WEIGHT_UNIT,
-        CM_DESCRIPTION
-      ].includes(name)
-    ) {
-      return [true, 'This is required'];
-    } else if (value && [CONTAINER_PACKAGE, CM_PACKAGE].includes(name)) {
-      const pattern = /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g;
-      return [!pattern.test(value), 'Must be an integer'];
-    } else if (value && Object.keys(mapUnit).includes(name)) {
-      const pattern = /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g;
-      return [!pattern.test(value), 'Must be a number'];
-    }
-    return [false, ''];
-  };
-
   const onSave = () => {
-    if (!Object.values(errors).includes(true)) {
-      updateData((old) => old.map((row, i) => (index === i ? data : row)));
-      onClose();
-    }
+    updateData((old) => old.map((row, i) => (index === i ? data : row)));
+    onClose();
   };
-
-  useEffect(() => {
-    const temp = {};
-    const type = inqType === CONTAINER_DETAIL ? CDTitle : CMTitle;
-    type.forEach(({ id, value, title }) => {
-      temp[title] = isValid(id, value)[0];
-    });
-    setErrors(temp);
-  }, []);
 
   const show = (value) => user.role === 'Admin' && value;
 
-  const onChange = (id, value) => {
-    const name = getTypeName(id);
-    setErrors({ ...errors, [name]: isValid(id, value)[0] });
+  const handleChange = (id, value) => {
     updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [id]: value } : row)));
   };
 
@@ -235,16 +185,15 @@ const AmendmentPopup = (props) => {
     const { title, ...prop } = props;
     const type = inqType === CONTAINER_DETAIL ? CDTitle : CMTitle;
     const field = type.find((f) => f.title === title);
-    const [invalid, textWarning] = isValid(field.id, field.value);
     return (
       <TextField
         {...prop}
         variant="outlined"
-        error={invalid}
-        helperText={invalid && textWarning}
+        error={Boolean(errors[title])}
+        helperText={errors[title]?.message}
         className={clsx(classes.textField, !isEdit && classes.lock)}
         value={field.value}
-        onChange={(e) => onChange(field.id, e.target.value)}
+        onChange={(e) => handleChange(field.id, e.target.value)}
         InputProps={{
           disabled: !isEdit,
           endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
@@ -309,53 +258,45 @@ const AmendmentPopup = (props) => {
   };
 
   const CustomSelect = (props) => {
-    const { title, options, ...prop } = props;
-    const [searchText, setSearchText] = useState('');
-    const displayedOptions = (options) =>
-      options.filter((option) => containsText(option, searchText));
+    const { title, options, required } = props;
     const type = inqType === CONTAINER_DETAIL ? CDTitle : CMTitle;
     const field = type.find((f) => f.title === title);
     const isError = errors[title];
     return (
       <>
         {isEdit ? (
-          <FormControl error={isError}>
-            <Select
-              MenuProps={{ autoFocus: false }}
-              classes={{
-                root: classes.selectRoot,
-                icon: classes.selectIcon,
-                select: classes.select
-              }}
-              disableUnderline
-              value={field.value}
-              disabled={!isEdit}
-              onChange={(e) => onChange(field.id, e.target.value)}
-              onClose={() => setSearchText('')}>
-              <ListSubheader style={{ background: 'white' }}>
-                <TextField
-                  size="small"
-                  autoFocus
-                  variant="outlined"
-                  placeholder="Type to search..."
-                  fullWidth
-                  InputProps={{
-                    startAdornment: <SearchIcon />
+          <FormControl style={{ width: '100%' }} error={isError}>
+            <Controller
+              control={control}
+              name={title}
+              rules={{ required }}
+              defaultValue={options.find(v => v.value === field.value)}
+              render={({ field: { onChange } }) => (
+                <WindowedSelect
+                  options={options}
+                  onChange={({ value }) => {
+                    onChange(value)
+                    handleChange(field.id, value)
                   }}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key !== 'Escape') {
-                      e.stopPropagation();
-                    }
+                  components={{
+                    IndicatorSeparator: () => null
+                  }}
+                  value={options.find(v => v.value === field.value)}
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      borderRadius: 8,
+                      border: isError ? '1px solid red' : ''
+                    }),
+                    dropdownIndicator: (base) => ({
+                      ...base,
+                      color: '#BD0F72'
+                    }),
                   }}
                 />
-              </ListSubheader>
-              {displayedOptions(options).map((option, i) => (
-                <MenuItem key={i} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </Select>
+              )}
+            />
+
             {isError && <FormHelperText>This is required!</FormHelperText>}
           </FormControl>
         ) : (
@@ -375,9 +316,9 @@ const AmendmentPopup = (props) => {
 
   const CDFields = () => {
     const cdUnit = [
-      { field: CONTAINER_PACKAGE, title: 'PACKAGE', unit: packageUnits },
-      { field: CONTAINER_WEIGHT, title: 'WEIGHT', unit: weightUnits },
-      { field: CONTAINER_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits }
+      { field: CONTAINER_PACKAGE, title: 'PACKAGE', unit: packageUnits, required: 'This is required', pattern: regInteger },
+      { field: CONTAINER_WEIGHT, title: 'WEIGHT', unit: weightUnits, required: 'This is required', pattern: regNumber },
+      { field: CONTAINER_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits, required: false, pattern: regNumber }
     ];
     return (
       <>
@@ -387,15 +328,21 @@ const AmendmentPopup = (props) => {
         {CustomContainerSeal(data[getType(CONTAINER_SEAL)])}
         <p style={{ fontWeight: 600 }}>CONTAINER TYPE</p>
         {CustomTextField({ fullWidth: true, title: CONTAINER_TYPE })}
-        {cdUnit.map(({ field, title, unit }, i) => (
+        {cdUnit.map(({ field, title, unit, required, pattern }, i) => (
           <div key={i} className="flex justify-start">
-            <div>
-              <p style={{ fontWeight: 600 }}>{title}</p>
-              {CustomTextField({ style: { width: '90%' }, title: field })}
+            <div style={{ flex: '0 0 50%' }}>
+              <p style={{ fontWeight: 600 }}>{title}
+                {required && <span style={{ color: 'red' }}> *</span>}
+              </p>
+              {CustomTextField({
+                style: { width: '90%' }, title: field, ...register(field, { required, pattern })
+              })}
             </div>
-            <div>
-              <p style={{ fontWeight: 600 }}>{`${title} UNIT`}</p>
-              {CustomSelect({ options: unit, title: mapUnit[field] })}
+            <div style={{ flexGrow: 1 }}>
+              <p style={{ fontWeight: 600 }}>{`${title} UNIT`}
+                {required && <span style={{ color: 'red' }}> *</span>}
+              </p>
+              {CustomSelect({ options: unit, title: mapUnit[field], required })}
             </div>
           </div>
         ))}
@@ -405,9 +352,9 @@ const AmendmentPopup = (props) => {
 
   const CMFields = () => {
     const cmUnit = [
-      { field: CM_PACKAGE, title: 'PACKAGE', unit: packageUnits },
-      { field: CM_WEIGHT, title: 'WEIGHT', unit: weightUnits },
-      { field: CM_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits }
+      { field: CM_PACKAGE, title: 'PACKAGE', unit: packageUnits, required: 'This is required', pattern: regInteger },
+      { field: CM_WEIGHT, title: 'WEIGHT', unit: weightUnits, required: 'This is required', pattern: regNumber },
+      { field: CM_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits, required: false, pattern: regNumber }
     ];
     return (
       <>
@@ -428,17 +375,23 @@ const AmendmentPopup = (props) => {
             )
           );
         })}
-        <p style={{ fontWeight: 600 }}>C/M DESCRIPTION</p>
-        {CustomTextField({ fullWidth: true, multiline: true, title: CM_DESCRIPTION })}
-        {cmUnit.map(({ field, title, unit }, i) => (
+        <p style={{ fontWeight: 600 }}>C/M DESCRIPTION
+          <span style={{ color: 'red' }}> *</span>
+        </p>
+        {CustomTextField({ fullWidth: true, multiline: true, title: CM_DESCRIPTION, ...register(CM_DESCRIPTION, { required: "This is required" }) })}
+        {cmUnit.map(({ field, title, unit, required, pattern }, i) => (
           <div key={i} className="flex justify-start">
-            <div>
-              <p style={{ fontWeight: 600 }}>{`C/M ${title}`}</p>
-              {CustomTextField({ style: { width: '90%' }, title: field })}
+            <div style={{ flex: '0 0 50%' }}>
+              <p style={{ fontWeight: 600 }}>{`C/M ${title}`}
+                {required && <span style={{ color: 'red' }}> *</span>}
+              </p>
+              {CustomTextField({ style: { width: '90%' }, title: field, ...register(field, { required, pattern }) })}
             </div>
-            <div>
-              <p style={{ fontWeight: 600 }}>{`${title} UNIT`}</p>
-              {CustomSelect({ options: unit, title: mapUnit[field] })}
+            <div style={{ flexGrow: 1 }}>
+              <p style={{ fontWeight: 600 }}>{`${title} UNIT`}
+                {required && <span style={{ color: 'red' }}> *</span>}
+              </p>
+              {CustomSelect({ options: unit, title: mapUnit[field], required })}
             </div>
           </div>
         ))}
@@ -469,7 +422,7 @@ const AmendmentPopup = (props) => {
           <Button
             variant="contained"
             color="primary"
-            onClick={onSave}
+            onClick={handleSubmit(onSave)}
             classes={{ root: clsx(classes.button) }}>
             Save
           </Button>
