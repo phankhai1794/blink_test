@@ -260,11 +260,6 @@ export default function Form(props) {
     setDisableSend(!enableSend)
   }, [enableSend]);
 
-  useEffect (() => {
-    const currentCompledInq = currentInquiries.filter(item => !['COMPL', 'RESOLVED', 'AME_SENT', 'AME_DRF'].includes(item.state)) || [];
-    setDisableSend(currentCompledInq.length === 0);
-  }, [currentInquiries])
-
   const handleOpenFab = () => {
     setIdBtn(currentField);
     setOpenFab(true);
@@ -528,7 +523,7 @@ export default function Form(props) {
               />
             </PermissionProvider>
 
-            {(showBtnSend && user === 'workspace') ?
+            {(showBtnSend && user === 'workspace' && (openAllInquiry || openAmendmentList)) ?
               <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
                 <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '2.6rem' }}>
                   <Button
