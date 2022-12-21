@@ -181,10 +181,12 @@ function ToolbarLayout1(props) {
                     })
                     if (attachmentTemp.length > 0) {
                       attachmentTemp.forEach(att => {
-                        const fileNameList = getAttachmentFiles.map((item) => {
-                          if (item.inqType === curInq.inqType) return item.name
-                        })
-                        if (att && !fileNameList.includes(att.name)) getAttachmentFiles.push(att);
+                        const tempAttList = getAttachmentFiles.filter(attItem => (
+                          attItem.name === att.name
+                          && attItem.field === att.field
+                          && attItem.inqType === att.inqType
+                        ));
+                        if (tempAttList.length === 0) getAttachmentFiles.push(att);
                       })
                     }
                   }
@@ -309,7 +311,7 @@ function ToolbarLayout1(props) {
   const openAttachment = () => {
     let isExistMedia = false;
     inquiries.forEach((inq) => {
-      if (inq.mediaFile.length > 0) {
+      if (inq.mediaFile.length > 0 || inq.mediaFilesAnswer.length > 0) {
         isExistMedia = true;
         return;
       }
@@ -337,7 +339,7 @@ function ToolbarLayout1(props) {
       const { bkgNo } = res.myBL;
       dispatch(Actions.updateOpusStatus(bkgNo, "CR", "Customer edited/revised BL"));
     });
-    
+
     if (bl) history.push(`/guest?bl=${bl}`);
   };
 
@@ -385,7 +387,7 @@ function ToolbarLayout1(props) {
               </Button>
             </PermissionProvider>
 
-            {myBL?.state?.includes('DRF_') && user?.userType !== 'ONSHORE' && ['/workspace', '/guest'].some((el) => pathname.includes(el)) &&(
+            {myBL?.state?.includes('DRF_') && user?.userType !== 'ONSHORE' && ['/workspace', '/guest'].some((el) => pathname.includes(el)) && (
               <Button
                 variant="text"
                 size="medium"
