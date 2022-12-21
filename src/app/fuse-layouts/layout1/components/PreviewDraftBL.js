@@ -36,7 +36,7 @@ const PreviewDraftBL = () => {
     <>
       <PermissionProvider
         action={PERMISSION.VIEW_PREVIEW_DRAFT_BL}
-        extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el)) && !myBL?.state?.includes('DRF_')}>
+        extraCondition={['/guest'].some((el) => pathname.includes(el)) && !myBL?.state?.includes('DRF_')}>
         <Tooltip title="Preview Draft B/L">
           <img
             src="assets/images/icons/preview-draft.svg"
