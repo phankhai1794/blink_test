@@ -9,7 +9,7 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime, validatePartiesContent, groupBy } from '@shared';
+import { getLabelById, displayTime, validatePartiesContent, groupBy, isJsonText } from '@shared';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import {
   CONTAINER_DETAIL,
@@ -896,8 +896,14 @@ const InquiryViewer = (props) => {
     setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value.toUpperCase() }));
   };
 
-  const handleChangeContentReply = (e) => {
-    const value = e.target.value;
+  const handleChangeContentReply = (e, type = '') => {
+    let value = e.target.value;
+    if (['name', 'address'].includes(type)) {
+      let content = tempReply?.answer?.content ? JSON.parse(tempReply?.answer?.content) : { name: '', address: '' };
+      content[type] = e.target.value;
+      value = JSON.stringify(content);
+    }
+
     const reqReply = {
       inqAns: {
         ...tempReply.inqAns,
@@ -1008,7 +1014,7 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) {
         const reqReply = {
           inqAns: tempReply.inqAns,
-          answer: {content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, type: tempReply.answer.type},
+          answer: { content: ['string'].includes(typeof tempReply.answer.content) ? tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, type: tempReply.answer.type },
           mediaFiles: mediaListId
         };
         saveReply({ ...reqReply })
@@ -1038,7 +1044,7 @@ const InquiryViewer = (props) => {
       } else {
         // Edit
         const reqReply = {
-          content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT,
+          content: ['string'].includes(typeof tempReply.answer.content) ? tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT,
           mediaFiles: mediaListId.map(media => media.id),
           mediaRest
         };
@@ -1074,7 +1080,7 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) { // Create amendment / reply
         const reqReply = {
           field: question.field,
-          content: { content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
+          content: { content: ['string'].includes(typeof tempReply.answer.content) ? tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
           mybl: myBL.id
         };
         saveEditedField({ ...reqReply })
@@ -1091,7 +1097,7 @@ const InquiryViewer = (props) => {
       }
       else { // Edit amendment / reply
         const reqReply = {
-          content: { content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
+          content: { content: ['string'].includes(typeof tempReply.answer.content) ? tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
           if (res) {
@@ -1519,7 +1525,10 @@ const InquiryViewer = (props) => {
                     color: '#132535',
                     whiteSpace: 'pre-wrap'
                   }}>
-                  {`${question.content}`}
+                  {/* Check is amendment JSON */}
+                  {((question.content !== null) && isJsonText(question.content)) ?
+                    `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}`
+                    : `${question.content}`}
                 </Typography>
             }
 
@@ -1719,16 +1728,41 @@ const InquiryViewer = (props) => {
                 <>
                   {isReply || isReplyCDCM ? (
                     <>
-                      {isReply && <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
-                        <TextField
-                          className={classes.inputText}
-                          value={tempReply?.answer?.content}
-                          multiline
-                          rows={2}
-                          onChange={handleChangeContentReply}
-                          variant='outlined'
-                          placeholder='Reply...'
-                        />
+                      {isReply && <div style={{ marginBottom: 15 }}>
+                        {/* Edit Amendment by customer */}
+                        {(isSeparate && (['AME_DRF', 'AME_SENT'].includes(question.state) && (user.role === 'Guest'))) ?
+                          ['name', 'address'].map((type, index) => {
+                            const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[question.field]
+                            const labelNameCapitalize = labelName?.charAt(0).toUpperCase() + labelName?.slice(1);
+                            const content = (tempReply?.answer?.content) ? JSON.parse(tempReply?.answer?.content) : { name: '', address: '' };
+                            return (
+                              <div key={index} style={{ paddingTop: '15px' }}>
+                                <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
+                                <TextField
+                                  className={classes.inputText}
+                                  value={content[type] || ''}
+                                  multiline
+                                  rows={['name'].includes(type) ? 2 : 3}
+                                  onChange={(e) => handleChangeContentReply(e, type)}
+                                  error={validatePartiesContent(content[type], type).isError}
+                                  helperText={
+                                    validatePartiesContent(content[type], type).isError ? validatePartiesContent(content[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
+                                  }
+                                  variant='outlined'
+                                />
+                              </div>
+                            )
+                          })
+                          :
+                          <TextField
+                            className={classes.inputText}
+                            value={tempReply?.answer?.content}
+                            multiline
+                            rows={2}
+                            onChange={handleChangeContentReply}
+                            variant='outlined'
+                            placeholder='Reply...'
+                          />}
                       </div>
                       }
                       {/*{tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}*/}
@@ -1774,6 +1808,10 @@ const InquiryViewer = (props) => {
                             (question.state === "AME_DRF" && ['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content)
                             || (question.state !== "AME_DRF" && ['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
+                            || ((isSeparate && (['AME_DRF', 'AME_SENT'].includes(question.state) && (user.role === 'Guest'))) ?
+                              (validatePartiesContent(tempReply?.answer?.content ? JSON.parse(tempReply?.answer?.content).name : '', 'name')?.isError
+                                || validatePartiesContent(tempReply?.answer?.content ? JSON.parse(tempReply?.answer?.content).address : '', 'address')?.isError)
+                              : false)
                           }
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save

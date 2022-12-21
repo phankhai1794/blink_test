@@ -103,7 +103,7 @@ export const validatePartiesContent = (partiesContent, type) => {
     errorType = maxRowsError;
   };
 
-  return {isError, errorType}
+  return { isError, errorType }
 }
 
 
@@ -133,4 +133,13 @@ export function groupBy(list, keyGetter) {
     }
   });
   return map;
+}
+
+export function isJsonText(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
 }
