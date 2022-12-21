@@ -1,6 +1,6 @@
 import { saveComment, editComment, deleteComment } from 'app/services/inquiryService';
 import { Divider } from '@material-ui/core';
-import { displayTime } from '@shared';
+import { displayTime, isJsonText } from '@shared';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
@@ -198,13 +198,17 @@ const Comment = (props) => {
   return (
     <div className={classes.root}>
       {comments.map((k, id) => {
+        let content = k.content;
+        if (k.content && isJsonText(k.content) && !JSON.parse(k.content).length) {
+          content = `${JSON.parse(k.content).name}\n${JSON.parse(k.content).address}`
+        }
         return contentUI({
           id,
           userName: k.updater?.userName,
           createdAt: k.updatedAt,
           avatar: k.updater?.avatar,
           title: k.title || '',
-          content: k.content,
+          content,
           media: k.mediaFile,
           answersMedia: k.answersMedia,
           type: k.type,

@@ -1,4 +1,4 @@
-import { checkNewInquiry, NUMBER_INQ_BOTTOM } from '@shared';
+import { checkNewInquiry, NUMBER_INQ_BOTTOM, isJsonText } from '@shared';
 import {
   SHIPPER,
   CONSIGNEE,
@@ -195,15 +195,15 @@ const BLWorkspace = (props) => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
     setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore') || []);
     const inqsToCustomer = inquiries?.filter(inq => inq.receiver[0] === 'customer');
-    if(myBL.bkgNo){
-      if (inqsToCustomer&&inqsToCustomer.every(q => ['COMPL', 'RESOLVED'].includes(q.state))){
-        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "Return to Customer via workspace"))    
+    if (myBL.bkgNo) {
+      if (inqsToCustomer && inqsToCustomer.every(q => ['COMPL', 'RESOLVED'].includes(q.state))) {
+        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "Return to Customer via workspace"))
       }
       const inqsToOnshore = inquiries?.filter(inq => inq.receiver[0] === 'customer');
-      if (inqsToOnshore&&inqsToOnshore.every(q => ['COMPL', 'RESOLVED'].includes(q.state))){
-        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "Return to Onshore via workspace"))    
+      if (inqsToOnshore && inqsToOnshore.every(q => ['COMPL', 'RESOLVED'].includes(q.state))) {
+        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "Return to Onshore via workspace"))
       }
-      if (inquiries.every(q => ['UPLOADED'].includes(q.state))){
+      if (inquiries.every(q => ['UPLOADED'].includes(q.state))) {
         dispatch(Actions.updateOpusStatus(myBL.bkgNo, "AS", "BL Amendment Success"))
       }
     }
@@ -344,7 +344,7 @@ const BLWorkspace = (props) => {
     return count;
   };
 
-  const handleTabSelected = (inqs, process='pending') => {
+  const handleTabSelected = (inqs, process = 'pending') => {
     if (countInq(inqs, process, 'customer') === 0) {
       return 'onshore'
     } else {
@@ -636,13 +636,17 @@ const BLWorkspace = (props) => {
             <Grid item>
               <Label>Shipper/Exporter</Label>
               <BLField id={getField(SHIPPER)} multiline={true} rows={5}>
-                {getValueField(SHIPPER)}
+                {(getValueField(SHIPPER) && isJsonText(getValueField(SHIPPER))) ?
+                  `${JSON.parse(getValueField(SHIPPER)).name}\n${JSON.parse(getValueField(SHIPPER)).address}`
+                  : getValueField(SHIPPER)}
               </BLField>
             </Grid>
             <Grid item>
               <Label>Consignee</Label>
               <BLField id={getField(CONSIGNEE)} multiline={true} rows={5}>
-                {getValueField(CONSIGNEE)}
+                {(getValueField(CONSIGNEE) && isJsonText(getValueField(CONSIGNEE))) ?
+                  `${JSON.parse(getValueField(CONSIGNEE)).name}\n${JSON.parse(getValueField(CONSIGNEE)).address}`
+                  : getValueField(CONSIGNEE)}
               </BLField>
             </Grid>
             <Grid item>
@@ -652,7 +656,9 @@ const BLWorkspace = (props) => {
                 {`Carrier or its Agents for failure to notify`}
               </Label>
               <BLField id={getField(NOTIFY)} multiline={true} rows={5}>
-                {getValueField(NOTIFY)}
+                {(getValueField(NOTIFY) && isJsonText(getValueField(NOTIFY))) ?
+                  `${JSON.parse(getValueField(NOTIFY)).name}\n${JSON.parse(getValueField(NOTIFY)).address}`
+                  : getValueField(NOTIFY)}
               </BLField>
             </Grid>
             <Grid container style={{ marginTop: '53px' }}>
