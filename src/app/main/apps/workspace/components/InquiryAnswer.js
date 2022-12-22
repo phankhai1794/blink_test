@@ -7,7 +7,6 @@ import {
   addTransactionAnswer, getUpdatedAtAnswer
 } from 'app/services/inquiryService';
 import { uploadFile } from 'app/services/fileService';
-import { validateTextInput } from 'app/services/myBLService';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -16,11 +15,10 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
+import { ONLY_ATT } from '@shared/keyword';
 
 import * as InquiryActions from '../store/actions/inquiry';
-import * as FormActions from '../store/actions/form';
 
-import { ONLY_ATT } from '@shared/keyword';
 const useStyles = makeStyles((theme) => ({
   root: {
     '& .MuiButtonBase-root': {
@@ -104,7 +102,6 @@ const InquiryAnswer = (props) => {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ draftBL }) => draftBL.metadata);
   const [isDisableSave, setDisableSave] = useState(false);
-  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const inq = (inq) => {
     return {
       content: inq.content,
@@ -220,18 +217,7 @@ const InquiryAnswer = (props) => {
     }
   }
 
-  const handleValidateInput = async (confirm = null) => {
-    let textInput = currentAnswer?.paragraphAnswer?.content.trim() || '';
-    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
-    if (isWarning) {
-      dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
-    } else {
-      confirm && confirm();
-    }
-  }
-
   const onSave = async () => {
-    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     setDisableSave(true)
@@ -326,7 +312,7 @@ const InquiryAnswer = (props) => {
               ||
               isDisableSave
             }
-            onClick={() => handleValidateInput(onSave)}
+            onClick={() => onSave()}
             classes={{ root: classes.button }}>
             Save
           </Button>

@@ -138,7 +138,6 @@ const BLWorkspace = (props) => {
   const openNotificationBLWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning);
   const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
-  const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -520,29 +519,6 @@ const BLWorkspace = (props) => {
 
   return (
     <>
-      {!validateInput?.isValid &&
-        <DialogCommon
-          iconWaring={<img width={'35px'} src={`/assets/images/icons/warning.svg`} />}
-          cancel={() => dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }))}
-          confirm={() => validateInput?.handleConfirm && validateInput?.handleConfirm()}
-          title={'The prohibited information is found in the Shipping Instruction. Do you want to continue?'}
-          content={
-            <>{(validateInput?.prohibitedInfo?.countries.length || validateInput?.prohibitedInfo?.danger_cargo.length) ?
-              Object.keys(validateInput?.prohibitedInfo).map((key, i) => {
-                if (validateInput?.prohibitedInfo[key].length)
-                  return <div key={i} style={{ paddingLeft: '25px' }}>
-                    <h2 style={{ marginBlock: 'auto' }}>{['countries'].includes(key) ? 'Countries' : 'Danger cargo'}:</h2>
-                    <ul style={{ paddingLeft: '10%' }}>
-                      {validateInput?.prohibitedInfo[key].map((item, index) =>
-                        <li key={index}>{item}</li>
-                      )}
-                    </ul>
-                  </div>
-              }) : ''
-            }</>
-          }
-        />
-      }
       <BLProcessNotification />
       <ListNotification />
       <SubmitAnswerNotification
