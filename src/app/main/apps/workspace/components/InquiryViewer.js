@@ -31,6 +31,7 @@ import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
+import ErrorOutlineOutlined from '@material-ui/icons/ErrorOutlineOutlined';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -142,6 +143,10 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
       borderWidth: '1px',
       borderColor: '#BAC3CB'
+    },
+    '& .MuiFormHelperText-root': {
+      fontFamily: 'Montserrat',
+      fontSize: '14px'
     }
   }
 }));
@@ -189,6 +194,7 @@ const InquiryViewer = (props) => {
   const [disableSaveReply, setDisableSaveReply] = useState(false);
   const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
   const inqViewerFocus = useSelector(({ workspace }) => workspace.formReducer.inqViewerFocus);
+  const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
 
   const [loading, setLoading] = useState(false);
 
@@ -555,7 +561,10 @@ const InquiryViewer = (props) => {
         .catch((error) => console.error(error));
     }
 
-    return () => isUnmounted = true;
+    return () => {
+      isUnmounted = true;
+      dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
+    }
   }, [isSaveComment, isSaveAnswer]);
 
   const resetAnswerActionSave = () => {
@@ -803,7 +812,6 @@ const InquiryViewer = (props) => {
   }
 
   const onConfirm = () => {
-    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     let contentField = '';
     if (isSeparate) {
       contentField = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
@@ -831,6 +839,7 @@ const InquiryViewer = (props) => {
         optionsInquires[editedIndex].state = 'COMPL';
         optionsInquires[editedIndex].createdAt = res.updatedAt;
         dispatch(InquiryActions.setInquiries(optionsInquires));
+        dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
         props.getUpdatedAt();
         setIsResolve(false);
         setViewDropDown('');
@@ -882,6 +891,7 @@ const InquiryViewer = (props) => {
   };
 
   const cancelResolve = () => {
+    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
     setIsResolveCDCM(false);
@@ -980,7 +990,6 @@ const InquiryViewer = (props) => {
   };
 
   const onSaveReply = async () => {
-    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     const mediaListId = [];
     let mediaListAmendment = [];
     const mediaRest = [];
@@ -1266,6 +1275,46 @@ const InquiryViewer = (props) => {
     }
   }
 
+  // Text Helper for separate fields
+  const renderTextHelper = (type) => {
+    let isErr = false, textHelper = '', prohibitedInfo = { countries: [], danger_cargo: [] };
+    const countries = validateInput?.prohibitedInfo?.countries ? validateInput?.prohibitedInfo?.countries : [];
+    const dangerCargo = validateInput?.prohibitedInfo?.countries ? validateInput?.prohibitedInfo?.danger_cargo : [];
+    countries.forEach(text => {
+      if (textResolveSeparate[type].toUpperCase().includes(text)) {
+        prohibitedInfo.countries.push(text);
+        isErr = true;
+      }
+    });
+    dangerCargo.forEach(text => {
+      if (textResolveSeparate[type].toUpperCase().includes(text)) {
+        prohibitedInfo.danger_cargo.push(text);
+        isErr = true;
+      }
+    });
+    // Check for each case NAME || ADDRESS
+    if (isErr) {
+      textHelper = (<>
+        {(prohibitedInfo?.countries.length > 0) &&
+          <span style={{ display: 'flex', alignItems: 'center' }}>
+            <ErrorOutlineOutlined fontSize='small' />
+            &nbsp;{`Countries: ${prohibitedInfo?.countries.join(', ')}`}
+          </span>
+        }
+        {(prohibitedInfo?.danger_cargo.length > 0) &&
+          <>
+            <span style={{ display: 'flex', alignItems: 'center' }}>
+              <ErrorOutlineOutlined fontSize='small' />
+              &nbsp;{`Danger Cargo: ${prohibitedInfo?.danger_cargo.join(', ')}`}
+            </span>
+          </>
+        }
+      </>)
+    }
+
+    return { isErr, textHelper };
+  }
+
   // Separate Shipper/Consignee/Notify 
   const renderSeparateField = (field) => {
     if (isSeparate) {
@@ -1281,11 +1330,18 @@ const InquiryViewer = (props) => {
             multiline
             rows={['name'].includes(type) ? 2 : 3}
             onChange={(e) => inputTextSeparate(e, type, field)}
-            error={validatePartiesContent(textResolveSeparate[type], type).isError}
+            variant='outlined'
+            // error={validatePartiesContent(textResolveSeparate[type], type).isError}
+            // helperText={
+            //   validatePartiesContent(textResolveSeparate[type], type).isError ? validatePartiesContent(textResolveSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
+            // }
+            error={
+              renderTextHelper(type).isErr
+              || validatePartiesContent(textResolveSeparate[type], type).isError}
             helperText={
               validatePartiesContent(textResolveSeparate[type], type).isError ? validatePartiesContent(textResolveSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
+                || renderTextHelper(type).textHelper
             }
-            variant='outlined'
           />
         </div>)
     } else {
@@ -1297,6 +1353,27 @@ const InquiryViewer = (props) => {
           rows={3}
           onChange={inputText}
           variant='outlined'
+          error={!validateInput?.isValid}
+          helperText={
+            !validateInput?.isValid ?
+              (<>
+                {(validateInput?.prohibitedInfo?.countries.length > 0) &&
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    <ErrorOutlineOutlined fontSize='small' />
+                    &nbsp;{`Countries: ${validateInput?.prohibitedInfo?.countries.join(', ')}`}
+                  </span>
+                }
+                {(validateInput?.prohibitedInfo?.danger_cargo.length > 0) &&
+                  <>
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                      <ErrorOutlineOutlined fontSize='small' />
+                      &nbsp;{`Danger Cargo: ${validateInput?.prohibitedInfo?.danger_cargo.join(', ')}`}
+                    </span>
+                  </>
+                }
+              </>)
+              : ''
+          }
         />
       )
     }
@@ -1710,7 +1787,7 @@ const InquiryViewer = (props) => {
                             : false
                         }
                         color="primary"
-                        onClick={() => handleValidateInput('RESOLVE', onConfirm)}
+                        onClick={() => !validateInput?.isValid ? onConfirm() : handleValidateInput('RESOLVE', onConfirm)}
                         classes={{ root: clsx(classes.button, 'w120') }}>
                         Accept
                       </Button>
@@ -1803,7 +1880,7 @@ const InquiryViewer = (props) => {
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={() => handleValidateInput('REPLY', onSaveReply)}
+                          onClick={() => onSaveReply()}
                           disabled={
                             (question.state === "AME_DRF" && ['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content)
                             || (question.state !== "AME_DRF" && ['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
