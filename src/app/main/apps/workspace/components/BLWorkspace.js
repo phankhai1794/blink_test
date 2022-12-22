@@ -653,7 +653,7 @@ const BLWorkspace = (props) => {
               <Label>
                 {`NOTIFY PARTY (It is agreed that no responsibility shall be attached to the`}{' '}
                 <br></br>
-                {`Carrier or its Agents for failure to notify`}
+                {`Carrier or its Agents for failure to notify)`}
               </Label>
               <BLField id={getField(NOTIFY)} multiline={true} rows={5}>
                 {(getValueField(NOTIFY) && isJsonText(getValueField(NOTIFY))) ?
@@ -719,7 +719,7 @@ const BLWorkspace = (props) => {
               </BLField>
             </Grid>
             <Grid item>
-              <Label>{`FINAL DESTINATION (for line merchant's reference only)`}</Label>
+              <Label>{`FINAL DESTINATION (for the Merchant's reference only)`}</Label>
               <BLField id={getField(FINAL_DESTINATION)}>
                 {getValueField(FINAL_DESTINATION)}
               </BLField>

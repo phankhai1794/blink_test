@@ -526,7 +526,7 @@ const DraftPage = (props) => {
                     </Grid>
                     <Grid item xs={1} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
                     </Grid>
-                    <Grid item xs={3} style={{ borderRight: BODER_COLOR, padding: '8px', whiteSpace: 'pre' }}>
+                    <Grid item xs={3} style={{ borderRight: BODER_COLOR, padding: '8px' }}>
                       {cm[getInqType(CM_DESCRIPTION)]}
                     </Grid>
                     <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'end', padding: '8px' }}>
