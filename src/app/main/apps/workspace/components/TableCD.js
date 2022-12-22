@@ -301,17 +301,17 @@ const TableCD = (props) => {
                 </Grid>
                 <Grid item xs={2}>
                   <BLField disableClick={true} disableIcon={true}>
-                    {`${cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]] || ''}${cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE_UNIT]] || ''}`}
+                    {`${cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]] || ''} ${cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE_UNIT]] || ''}`}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
                   <BLField disableClick={true} disableIcon={true}>
-                    {`${cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]] || ''}${cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT_UNIT]] || ''}`}
+                    {`${cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]] || ''} ${cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT_UNIT]] || ''}`}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
                   <BLField disableClick={true} disableIcon={true}>
-                    {`${cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]] || ''}${cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT_UNIT]] || ''}`}
+                    {`${cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]] || ''} ${cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT_UNIT]] || ''}`}
                   </BLField>
                 </Grid>
               </Grid>
