@@ -193,10 +193,10 @@ const DraftPage = (props) => {
   const dispatch = useDispatch();
   const [containersDetail, setContainersDetail] = useState([]);
   const [containersManifest, setContainersManifest] = useState([]);
-  const [metadata, myBL, orgContent] = useSelector(({ draftBL }) => [
+  const [metadata, myBL, content] = useSelector(({ draftBL }) => [
     draftBL.metadata,
     draftBL.myBL,
-    draftBL.orgContent
+    draftBL.content
   ]);
 
   const getField = (field) => {
@@ -204,7 +204,7 @@ const DraftPage = (props) => {
   };
 
   const getValueField = (field) => {
-    return orgContent[getField(field)] || '';
+    return content[getField(field)] || '';
   };
 
   const getInqType = (field) => {
@@ -227,11 +227,11 @@ const DraftPage = (props) => {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(orgContent).length && Object.keys(metadata).length) {
+    if (Object.keys(content).length && Object.keys(metadata).length) {
       setContainersDetail(getValueField(CONTAINER_DETAIL));
       setContainersManifest(getValueField(CONTAINER_MANIFEST));
     }
-  }, [metadata, orgContent]);
+  }, [metadata, content]);
 
   return (
     <div className={classes.wrapper}>

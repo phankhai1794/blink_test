@@ -1,6 +1,6 @@
 import { getMetadata } from 'app/services/inquiryService';
 import { getFieldContent, confirmDraftBl } from 'app/services/draftblService';
-import { getBlInfo } from 'app/services/myBLService';
+import { createBL, getBlInfo, getCustomerAmendment } from 'app/services/myBLService';
 import { filterMetadata, draftConfirm } from '@shared';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
 
@@ -25,15 +25,18 @@ export const loadMetadata = () => (dispatch) => {
     .catch((err) => console.error(err));
 };
 
-export const loadContent = (bl) => (dispatch) => {
+export const loadContent = (bl) => async (dispatch) => {
   if (bl) {
-    getBlInfo(bl)
-      .then((res) => {
-        dispatch(setBL({ id: bl, bkgNo: res.myBL.bkgNo, state: res.myBL.state }));
-        dispatch(setOrgContent(res.myBL.content));
-        dispatch(setContent(res.myBL.content));
-      })
-      .catch((err) => console.error(err));
+    const [blResponse, contentRespone] = [
+      await getBlInfo(bl),
+      await getCustomerAmendment(bl)
+    ];
+    const { content } = blResponse?.myBL;
+    const { contentAmendmentRs } = contentRespone;
+    dispatch(setOrgContent(blResponse?.myBL.content));
+    const cloneContent = { ...content };
+    contentAmendmentRs?.length && contentAmendmentRs.forEach(a => cloneContent[a.field] = a.content);
+    dispatch(setContent(cloneContent));
   }
 };
 
