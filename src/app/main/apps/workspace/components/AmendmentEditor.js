@@ -325,7 +325,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             isSeparate ?
               (validatePartiesContent(fieldValueSeparate.name, 'name')?.isError
                 || validatePartiesContent(fieldValueSeparate.address, 'address')?.isError)
-              : (fieldValue.length === 0)
+              : (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0))
           }
           onClick={() => handleValidateInput(handleSave)}
           color="primary"

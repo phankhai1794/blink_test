@@ -1023,7 +1023,11 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) {
         const reqReply = {
           inqAns: tempReply.inqAns,
-          answer: { content: ['string'].includes(typeof tempReply.answer.content) ? tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, type: tempReply.answer.type },
+          answer: {
+            content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
+            type: tempReply.answer.type
+          },
+
           mediaFiles: mediaListId
         };
         saveReply({ ...reqReply })
@@ -1053,7 +1057,7 @@ const InquiryViewer = (props) => {
       } else {
         // Edit
         const reqReply = {
-          content: ['string'].includes(typeof tempReply.answer.content) ? tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT,
+          content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
           mediaFiles: mediaListId.map(media => media.id),
           mediaRest
         };
@@ -1089,7 +1093,10 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) { // Create amendment / reply
         const reqReply = {
           field: question.field,
-          content: { content: ['string'].includes(typeof tempReply.answer.content) ? tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
+          content: {
+            content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
+            mediaFile: mediaListAmendment
+          },
           mybl: myBL.id
         };
         saveEditedField({ ...reqReply })
@@ -1106,7 +1113,10 @@ const InquiryViewer = (props) => {
       }
       else { // Edit amendment / reply
         const reqReply = {
-          content: { content: ['string'].includes(typeof tempReply.answer.content) ? tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
+          content: {
+            content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
+            mediaFile: mediaListAmendment
+          },
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
           if (res) {
@@ -1882,8 +1892,12 @@ const InquiryViewer = (props) => {
                           color="primary"
                           onClick={() => onSaveReply()}
                           disabled={
-                            (question.state === "AME_DRF" && ['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content)
-                            || (question.state !== "AME_DRF" && ['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
+                            (question.state === "AME_DRF" && (
+                              (['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content?.trim())
+                              || (!['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content)
+
+                            ))
+                            || (question.state !== "AME_DRF" && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
                             || ((isSeparate && (['AME_DRF', 'AME_SENT'].includes(question.state) && (user.role === 'Guest'))) ?
                               (validatePartiesContent(tempReply?.answer?.content ? JSON.parse(tempReply?.answer?.content).name : '', 'name')?.isError
