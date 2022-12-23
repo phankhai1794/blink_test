@@ -1,4 +1,3 @@
-import { saveComment, editComment, deleteComment } from 'app/services/inquiryService';
 import { Divider } from '@material-ui/core';
 import { displayTime, isJsonText } from '@shared';
 import React, { useState } from 'react';
@@ -38,16 +37,30 @@ const useStyles = makeStyles(() => ({
   },
   backgroundSystem: '#FDF2F2',
   labelStatus: {
+    backgroundColor: '#EBF7F2',
     color: '#36B37E',
-    padding: '2px 9px',
+    padding: '3px 9px',
     fontWeight: 600,
     fontSize: 14,
     borderRadius: 4
   },
+  labelText: {
+    color: '#36B37E',
+    fontWeight: 400,
+    fontSize: 12,
+  },
+  timeSent: {
+    position: 'relative',
+    '& img': {
+      position: 'absolute',
+      left: -19,
+      bottom: 2
+    }
+  },
 }));
 
 const Comment = (props) => {
-  const { question, comment, userType } = props;
+  const { question, comment } = props;
   const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length - 1) : []);
   const [value, setValue] = useState('');
   const [key, setKey] = useState();
@@ -81,8 +94,16 @@ const Comment = (props) => {
     return (
       <div key={id}>
         <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
-          <div className="flex justify-between">
-            <UserInfo name={checkSystemResolved(question?.process, id) ? 'System' : userName} time={displayTime(createdAt)} avatar={avatar} />
+          <div className="flex justify-between" style={{ alignItems: 'self-start' }}>
+            <UserInfo name={checkSystemResolved(question?.process, id) ? 'System' : userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
+
+            {['COMPL', 'RESOLVED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Resolved</span></div>)}
+            {reply.status === 'CREATE' && reply.sentAt && (
+              <div className={classes.timeSent}>
+                <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />
+                <span className={classes.labelText}>{displayTime(reply.sentAt)}</span>
+              </div>
+            )}
             {/*{user.displayName === userName && key === id && (*/}
             {/*  <>*/}
             {/*    <IconButton onClick={handleClick}>*/}

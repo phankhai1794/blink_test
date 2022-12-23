@@ -23,11 +23,14 @@ const useStyles = makeStyles((theme) => ({
   message: {
     marginLeft: '1rem',
     marginTop: '0rem'
+  },
+  styleMark: {
+    color: 'gray',
   }
 }));
 
 const UserInfo = (props) => {
-  const { name, time, avatar } = props;
+  const { name, time, avatar, state, status } = props;
   const classes = useStyles();
 
   return (
@@ -46,7 +49,7 @@ const UserInfo = (props) => {
           <p className={classes.name}>{name}</p>
           <div className="flex" style={{ marginLeft: '1rem' }}>
             <p className={classes.time}>
-              {time}
+              {time} {!['REOPEN_A', 'REOPEN_Q', 'COMPL', 'RESOLVED', 'UPLOADED'].includes(state) && status === 'UPDATE' && (<span className={classes.styleMark}> - Edited</span>)}
             </p>
           </div>
         </div> :
