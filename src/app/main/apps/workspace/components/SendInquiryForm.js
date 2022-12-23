@@ -160,7 +160,7 @@ const SendInquiryForm = (props) => {
       subject = `[Onshore - BL Query]_[${inqOnshore.join(
         ', '
       )}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
-      content = `Dear Onshore,\n \nWe need your assistance for BL completion. Pending issues:\n ${convertToList(inqOnshore)}`;
+      content = `Dear Onshore,\n \nWe need your assistance for BL completion. Pending issues:\n${convertToList(inqOnshore)}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setOnshoreValue({ subject, content: bodyHtml, html: initiateContentState(content) });
       setForm({ ...form, subject, content: bodyHtml });
@@ -170,7 +170,7 @@ const SendInquiryForm = (props) => {
       subject = `[Customer BL Query]_[${inqCustomer.join(
         ', '
       )}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
-      content = `Dear Customer,\n \nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:\n ${convertToList(inqCustomer)} `;
+      content = `Dear Customer,\n \nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:\n${convertToList(inqCustomer)} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({ subject, content: bodyHtml, html: initiateContentState(content) });
       setForm({ ...form, subject, content: bodyHtml });
