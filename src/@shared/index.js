@@ -138,8 +138,9 @@ export function groupBy(list, keyGetter) {
 export function isJsonText(str) {
   try {
     JSON.parse(str);
+    if (['object'].includes(typeof JSON.parse(str))) return true;
   } catch (e) {
     return false;
   }
-  return true;
+  return false;
 }
