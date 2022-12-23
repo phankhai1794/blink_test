@@ -73,7 +73,23 @@ const useStyles = makeStyles((theme) => ({
     padding: '2px 9px',
     fontWeight: 600,
     fontSize: 14,
-    borderRadius: 4
+    borderRadius: 4,
+  },
+  labelMargin: {
+    marginRight: 21
+  },
+  labelText: {
+    color: '#36B37E',
+    fontWeight: 400,
+    fontSize: 12,
+  },
+  timeSent: {
+    position: 'relative',
+    '& img': {
+      position: 'absolute',
+      left: -16,
+      bottom: 6
+    }
   },
   hideText: {
     overflow: 'hidden',
@@ -239,10 +255,12 @@ const InquiryViewer = (props) => {
             lastest.mediaFilesAnswer = filterOffshoreSent.answersMedia;
             lastest.answerObj = filterOffshoreSent.answerObj;
             lastest.content = filterOffshoreSent.content;
+            lastest.status = filterOffshoreSent.status;
+            lastest.sentAt = filterOffshoreSent.sentAt;
             lastest.name = "";
             lastest.creator = filterOffshoreSent.updater;
             lastest.createdAt = filterOffshoreSent.createdAt;
-            lastest.process = 'pending';
+            lastest.createdAt = filterOffshoreSent.createdAt;
             setType(filterOffshoreSent.ansType);
             //
             if (Object.keys(filterOffshoreSent).length > 0) {
@@ -269,15 +287,6 @@ const InquiryViewer = (props) => {
                 setShowLabelSent(false);
                 setSubmitLabel(false);
                 lastest.showIconReply = true;
-              }
-
-              const getResolvedLastest = res.filter(r => r.state === 'COMPL');
-              if (getResolvedLastest.length) {
-                getResolvedLastest.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
-                const { content: contentResolved } = getResolvedLastest[getResolvedLastest.length - 1];
-                setTextResolve(contentResolved instanceof String ? `"${contentResolved}"` : contentResolved || '');
-              } else {
-                setTextResolve(content[lastest.field] || '');
               }
 
               if (user.role === 'Admin') {
@@ -416,6 +425,8 @@ const InquiryViewer = (props) => {
             lastest.mediaFilesAnswer = [];
             // lastest.id = lastestComment.id;
             lastest.state = lastestComment.state;
+            lastest.status = lastestComment.status;
+            lastest.sentAt = lastestComment.sentAt;
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
@@ -439,15 +450,6 @@ const InquiryViewer = (props) => {
             }
             if (lastest.state === 'RESOLVED') {
               setStateReplyDraft(false);
-            }
-
-            const getResolvedLastest = res.filter(r => r.state === 'RESOLVED');
-            if (getResolvedLastest.length) {
-              getResolvedLastest.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
-              const { content: contentResolved } = getResolvedLastest[getResolvedLastest.length - 1].content;
-              setTextResolve(contentResolved instanceof String ? `"${contentResolved}"` : contentResolved || '');
-            } else {
-              setTextResolve(lastest.content || '')
             }
 
             if (user.role === 'Admin') {
@@ -535,6 +537,8 @@ const InquiryViewer = (props) => {
                 updatedAt: r.createdAt,
                 answersMedia: mediaFile,
                 content: content instanceof String ? `"${content}"` : content,
+                status: r.status,
+                sentAt: r.sentAt,
                 process: 'draft',
                 state: r?.state,
               });
@@ -739,6 +743,8 @@ const InquiryViewer = (props) => {
         name: fieldName || '',
         address: fieldAddress || ''
       })
+    } else {
+      setTextResolve(content[question.field] || '');
     }
   }, [isResolve])
 
@@ -843,11 +849,17 @@ const InquiryViewer = (props) => {
         props.getUpdatedAt();
         setIsResolve(false);
         setViewDropDown('');
-        dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
+        if (!isSeparate) {
+          dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
+        } else {
+          const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
+          const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
+          dispatch(InquiryActions.setContent({ ...content, [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: textResolveSeparate.address.trim(), [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: textResolveSeparate.name.trim() }));
+        }
         // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
       })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
   };
 
   const onUpload = () => {
@@ -1402,6 +1414,8 @@ const InquiryViewer = (props) => {
                 name={question.creator?.userName}
                 time={displayTime(question.createdAt || question.updatedAt)}
                 avatar={question.creator?.avatar}
+                state={question.state}
+                status={question.status}
               />
               {user.role === 'Admin' ? ( // TODO
                 <div className="flex items-center mr-2">
@@ -1426,11 +1440,22 @@ const InquiryViewer = (props) => {
                     </div>
                   </PermissionProvider>
                   <div className='flex' style={{ alignItems: 'center' }}>
-                    <div style={{ marginRight: 15 }}>
+                    {/*.display time sent mail and label sent.*/}
+                    <div style={{ marginRight: 15, display: 'flex' }}>
                       {showLabelSent && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
-                        <span className={classes.labelStatus}>Sent</span>
+                      <>
+                        <span className={clsx(classes.labelStatus, question.status === 'CREATE' && question.sentAt && classes.labelMargin) }>Sent</span>
+                      </>
+                      )}
+                      {question.status === 'CREATE' && question.sentAt && (
+                        <div className={classes.timeSent}>
+                          <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />
+                          <span className={classes.labelText}>{displayTime(question.sentAt)}</span>
+                        </div>
                       )}
                     </div>
+                    {/*..*/}
+
                     {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
                     {!['COMPL', 'UPLOADED'].includes(question.state) && (
                       isReply ? (
@@ -1496,13 +1521,19 @@ const InquiryViewer = (props) => {
                 </div>
               ) : (
                 <div className='flex' style={{ alignItems: 'center' }}>
-                  <div style={{ marginRight: 15 }}>
+                  <div style={{ marginRight: 15, display: 'flex' }}>
                     {question.state === 'UPLOADED' ?
                       <span className={classes.labelStatus}>Uploaded</span> :
                       ['COMPL', 'RESOLVED'].includes(question.state) ?
                         <span className={classes.labelStatus}>Resolved</span> :
                         <>
-                          {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>}
+                          {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={clsx(classes.labelStatus, question.status === 'CREATE' && question.sentAt && classes.labelMargin) }>Submitted</span>}
+                          {question.status === 'CREATE' && question.sentAt && (
+                            <div className={classes.timeSent}>
+                              <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />
+                              <span className={classes.labelText}>{displayTime(question.sentAt)}</span>
+                            </div>
+                          )}
                         </>
                     }
                   </div>
