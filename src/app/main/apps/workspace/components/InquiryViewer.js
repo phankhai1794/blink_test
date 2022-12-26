@@ -1447,7 +1447,7 @@ const InquiryViewer = (props) => {
                         <span className={clsx(classes.labelStatus, question.status === 'CREATE' && question.sentAt && classes.labelMargin) }>Sent</span>
                       </>
                       )}
-                      {question.status === 'CREATE' && question.sentAt && (
+                      {question.sentAt && (
                         <div className={classes.timeSent}>
                           <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />
                           <span className={classes.labelText}>{displayTime(question.sentAt)}</span>
@@ -1528,7 +1528,7 @@ const InquiryViewer = (props) => {
                         <span className={classes.labelStatus}>Resolved</span> :
                         <>
                           {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={clsx(classes.labelStatus, question.status === 'CREATE' && question.sentAt && classes.labelMargin) }>Submitted</span>}
-                          {question.status === 'CREATE' && question.sentAt && (
+                          {question.sentAt && (
                             <div className={classes.timeSent}>
                               <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />
                               <span className={classes.labelText}>{displayTime(question.sentAt)}</span>
