@@ -820,13 +820,13 @@ const InquiryViewer = (props) => {
   const onConfirm = () => {
     let contentField = '';
     if (isSeparate) {
-      contentField = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
+      contentField = `${textResolveSeparate.name.toUpperCase()}\n${textResolveSeparate.address.toUpperCase()}`;
     } else if (typeof textResolve === 'string') {
-      contentField = textResolve.trim();
+      contentField = textResolve.toUpperCase().trim();
     } else {
       contentField = textResolve;
       contentField.forEach((obj) => {
-        if (obj[question.inqType]) obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].trim() : obj[question.inqType];
+        if (obj[question.inqType]) obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType].toUpperCase();
       });
     }
     const body = {
@@ -834,8 +834,8 @@ const InquiryViewer = (props) => {
       inqId: question?.id || tempReply?.answer.id,
       fieldContent: contentField,
       blId: myBL.id,
-      fieldNameContent: textResolveSeparate.name.trim() || '',
-      fieldAddressContent: textResolveSeparate.address.trim() || ''
+      fieldNameContent: textResolveSeparate.name.toUpperCase().trim() || '',
+      fieldAddressContent: textResolveSeparate.address.toUpperCase().trim() || ''
     };
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
@@ -911,11 +911,11 @@ const InquiryViewer = (props) => {
   };
 
   const inputText = (e) => {
-    setTextResolve(e.target.value.toUpperCase());
+    setTextResolve(e.target.value);
   };
 
   const inputTextSeparate = (e, type) => {
-    setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value.toUpperCase() }));
+    setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value }));
   };
 
   const handleChangeContentReply = (e, type = '') => {
@@ -1353,10 +1353,7 @@ const InquiryViewer = (props) => {
             rows={['name'].includes(type) ? 2 : 3}
             onChange={(e) => inputTextSeparate(e, type, field)}
             variant='outlined'
-            // error={validatePartiesContent(textResolveSeparate[type], type).isError}
-            // helperText={
-            //   validatePartiesContent(textResolveSeparate[type], type).isError ? validatePartiesContent(textResolveSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
-            // }
+            inputProps={{ style: { textTransform: 'uppercase' } }}
             error={
               renderTextHelper(type).isErr
               || validatePartiesContent(textResolveSeparate[type], type).isError}
@@ -1375,6 +1372,7 @@ const InquiryViewer = (props) => {
           rows={3}
           onChange={inputText}
           variant='outlined'
+          inputProps={{ style: { textTransform: 'uppercase' } }}
           error={!validateInput?.isValid}
           helperText={
             !validateInput?.isValid ?
@@ -1443,9 +1441,9 @@ const InquiryViewer = (props) => {
                     {/*.display time sent mail and label sent.*/}
                     <div style={{ marginRight: 15, display: 'flex' }}>
                       {showLabelSent && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
-                      <>
-                        <span className={clsx(classes.labelStatus, question.status === 'CREATE' && question.sentAt && classes.labelMargin) }>Sent</span>
-                      </>
+                        <>
+                          <span className={clsx(classes.labelStatus, question.status === 'CREATE' && question.sentAt && classes.labelMargin) }>Sent</span>
+                        </>
                       )}
                       {question.status === 'CREATE' && question.sentAt && (
                         <div className={classes.timeSent}>
@@ -2072,6 +2070,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                     borderTopRightRadius: rowIndex === 0 && rowValues.length - 1 === index1 ? 8 : null,
                     // borderBottomRightRadius:
                     //     index1 === rowValues.length - 1 && rowIndex === typeList.length - 1 ? 8 : null
+                    textTransform: 'uppercase'
                   }}
                   disabled={disabled}
                   value={nodeValue ? nodeValue[getType(type)] : ''}
