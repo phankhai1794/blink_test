@@ -139,7 +139,7 @@ const AmendmentPopup = (props) => {
   const onSave = () => {
     Object.keys(data).forEach((key) => {
       if (typeof data[key] === 'string')
-        data[key] = data[key].trim();
+        data[key] = data[key].toUpperCase().trim();
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
     onClose();
@@ -167,7 +167,7 @@ const AmendmentPopup = (props) => {
       updateEdit((old) =>
         old.map((row, i) =>
           index === i
-            ? { ...old[index], [getType(CONTAINER_SEAL)]: [...new Set([...value, inputSeal.trim()])] }
+            ? { ...old[index], [getType(CONTAINER_SEAL)]: [...new Set([...value, inputSeal.toUpperCase().trim()])] }
             : row
         )
       );
@@ -202,6 +202,7 @@ const AmendmentPopup = (props) => {
           disabled: !isEdit,
           endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
         }}
+        inputProps={{ style: { textTransform: 'uppercase' } }}
       />
     );
   };
@@ -236,7 +237,8 @@ const AmendmentPopup = (props) => {
                 flexGrow: 1,
                 border: 'none',
                 fontSize: 15,
-                fontFamily: 'Montserrat'
+                fontFamily: 'Montserrat',
+                textTransform: 'uppercase'
               }}
               value={inputSeal}
               onKeyDown={(e) => onKeyDown(e, value)}
