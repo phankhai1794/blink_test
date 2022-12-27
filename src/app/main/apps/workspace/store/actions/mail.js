@@ -35,23 +35,12 @@ export const sendMail =
       sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs, user)
         .then((res) => {
           if (res.status === 200) {
-            let rtrnDesc = '';
-            let blinkStsCd = '';
-            if (inquiriesDraftProcess.length > 0) {
-              blinkStsCd = "AI";
-            }
-            else {
-              blinkStsCd = "IN";
+            if (inquiries.filter(op => op.process === 'pending' && op.state === 'OPEN')) {
+              let rtrnCd = "RW"; //RO: Return to Customer via BLink
+              if (toCustomer) rtrnCd = "RO";// RW: Return to Onshore via BLink
+              dispatch(AppActions.updateOpusStatus(bkgNo, "IN", rtrnCd)); //BL Inquiried
             }
 
-            if (toCustomer) {
-              rtrnDesc = "Return to Customer via workspace";
-            }
-            else {
-              rtrnDesc = "Return to Onshore via workspace";
-            }
-
-            dispatch(AppActions.updateOpusStatus(bkgNo, blinkStsCd, rtrnDesc));
             dispatch(InquiryActions.checkSend(false));
             dispatch(Actions.toggleReload());
             return dispatch({
