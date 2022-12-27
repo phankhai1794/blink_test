@@ -8,7 +8,7 @@ import {
   FormHelperText
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
@@ -113,7 +113,7 @@ const AmendmentPopup = (props) => {
   const [inputSeal, setInputSeal] = useState('');
   const { register, control, handleSubmit, formState: { errors } } = useForm();
   const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
-  const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be an Integer' }
+  const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
@@ -137,6 +137,10 @@ const AmendmentPopup = (props) => {
   });
 
   const onSave = () => {
+    Object.keys(data).forEach((key) => {
+      if (typeof data[key] === 'string')
+        data[key] = data[key].toUpperCase().trim();
+    });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
     onClose();
   };
@@ -163,7 +167,7 @@ const AmendmentPopup = (props) => {
       updateEdit((old) =>
         old.map((row, i) =>
           index === i
-            ? { ...old[index], [getType(CONTAINER_SEAL)]: [...new Set([...value, inputSeal.trim()])] }
+            ? { ...old[index], [getType(CONTAINER_SEAL)]: [...new Set([...value, inputSeal.toUpperCase().trim()])] }
             : row
         )
       );
@@ -198,6 +202,7 @@ const AmendmentPopup = (props) => {
           disabled: !isEdit,
           endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
         }}
+        inputProps={{ style: { textTransform: 'uppercase' } }}
       />
     );
   };
@@ -232,7 +237,8 @@ const AmendmentPopup = (props) => {
                 flexGrow: 1,
                 border: 'none',
                 fontSize: 15,
-                fontFamily: 'Montserrat'
+                fontFamily: 'Montserrat',
+                textTransform: 'uppercase'
               }}
               value={inputSeal}
               onKeyDown={(e) => onKeyDown(e, value)}
@@ -262,6 +268,13 @@ const AmendmentPopup = (props) => {
     const type = inqType === CONTAINER_DETAIL ? CDTitle : CMTitle;
     const field = type.find((f) => f.title === title);
     const isError = errors[title];
+    const defaultValue = options.length === 1 ? options[0] : options.find(v => v.value === field.value)
+
+    useEffect(() => {
+      if (!field.value && options.length === 1)
+        handleChange(field.id, options[0].value);
+    }, []);
+
     return (
       <>
         {isEdit ? (
@@ -270,7 +283,7 @@ const AmendmentPopup = (props) => {
               control={control}
               name={title}
               rules={{ required }}
-              defaultValue={options.find(v => v.value === field.value)}
+              defaultValue={defaultValue}
               render={({ field: { onChange } }) => (
                 <WindowedSelect
                   options={options}
@@ -281,7 +294,7 @@ const AmendmentPopup = (props) => {
                   components={{
                     IndicatorSeparator: () => null
                   }}
-                  value={options.find(v => v.value === field.value)}
+                  value={defaultValue}
                   styles={{
                     control: (base) => ({
                       ...base,

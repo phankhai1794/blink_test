@@ -299,6 +299,7 @@ const InquiryEditor = (props) => {
   };
 
   const onSave = async () => {
+    setDisabled(true);
     const inquiriesOp = [...inquiries];
     let check = true;
     const ansTypeChoice = metadata.ans_type['choice'];
