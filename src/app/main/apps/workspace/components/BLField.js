@@ -197,6 +197,9 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   };
 
   const onClick = (e) => {
+    dispatch(
+      InquiryActions.validate({ inqType: true, field: true, receiver: true, ansType: true, content: true, answerContent: true })
+    );
     if (!disableClick) {
       if (isEmpty && allowAddInquiry) {
         dispatch(InquiryActions.addQuestion(id));
