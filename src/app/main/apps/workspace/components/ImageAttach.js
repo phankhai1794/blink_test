@@ -1,4 +1,4 @@
-import ImgsViewer from "react-images-viewer";
+import ImageViewer from 'react-simple-image-viewer';
 import React, { useEffect, useState } from 'react';
 import { getFile } from 'app/services/fileService';
 import { makeStyles } from '@material-ui/styles';
@@ -194,19 +194,16 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
         }
       </div>
       {isViewerOpen && (
-        <ImgsViewer
-          imgs={[
-            { src: srcUrl },
-          ]}
+        <ImageViewer
+          src={[srcUrl]}
+          currentIndex={0}
           onClose={closeImageViewer}
-          currImg={0}
-          isOpen={isViewerOpen}
           disableScroll={false}
-          closeOnClickOutside={true}
           backgroundStyle={{
             backgroundColor: 'rgba(0,0,0,0.7)'
           }}
-      />
+          closeOnClickOutside={true}
+        />
       )}
     </div>
   );
