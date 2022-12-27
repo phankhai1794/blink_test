@@ -54,20 +54,20 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
   }
 };
 
-export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnDesc) => async (dispatch) => {
+export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnCd) => async (dispatch) => {
   try {
     const [blResponse] = [
       await updateBlStatus({
-        shineUrl: "",
+        shineUrl: `${window.location.origin}/apps/workspace/${bkgNo}?usrId=admin&cntr=VN`,
         srKndCd: "",
-        srNo:"",
+        srNo: "",
         bkgNo: bkgNo,
         srAmdTpCd: "",
         srAmdSeq: "",
         stsCd: "",
         stsDesc: "",
         blinkStsCd: blinkStsCd,
-        rtrnDesc: rtrnDesc,
+        rtrnCd,
         shineId: "Blink User"
       }),
     ];

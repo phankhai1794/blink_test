@@ -335,11 +335,6 @@ function ToolbarLayout1(props) {
 
   const redirectEditDraftBL = () => {
     const bl = new URLSearchParams(search).get('bl');
-    getBlInfo(bl).then(res => {
-      const { bkgNo } = res.myBL;
-      dispatch(Actions.updateOpusStatus(bkgNo, "CR", "Customer edited/revised BL"));
-    });
-
     if (bl) history.push(`/guest?bl=${bl}`);
   };
 

@@ -193,17 +193,14 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
     setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore') || []);
-    const inqsToCustomer = inquiries?.filter(inq => inq.receiver[0] === 'customer');
+    const inqsPending = inquiries?.filter(inq => inq.process === 'pending');
+    const inqsDraft = inquiries?.filter(inq => inq.process === 'draft');
     if (myBL.bkgNo) {
-      if (inqsToCustomer && inqsToCustomer.every(q => ['COMPL', 'RESOLVED'].includes(q.state))) {
-        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "Return to Customer via workspace"))
+      if (inqsPending && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
+        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "")) //BL Inquired Resolved (IR) , Upload all to Opus
       }
-      const inqsToOnshore = inquiries?.filter(inq => inq.receiver[0] === 'customer');
-      if (inqsToOnshore && inqsToOnshore.every(q => ['COMPL', 'RESOLVED'].includes(q.state))) {
-        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "Return to Onshore via workspace"))
-      }
-      if (inquiries.every(q => ['UPLOADED'].includes(q.state))) {
-        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "AS", "BL Amendment Success"))
+      if (inqsDraft && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
+        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "AS", "")) //BL Amendment Success (AS) , Upload all to Opus
       }
     }
   }, [inquiries]);
