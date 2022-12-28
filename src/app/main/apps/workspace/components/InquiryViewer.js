@@ -515,7 +515,7 @@ const InquiryViewer = (props) => {
                 setTempReply({});
               }
             }
-            if (lastest.state.includes('AME_')) {
+            if (isEditOriginalAmendment) {
               dispatch(InquiryActions.setContent({ ...content, [lastest.field]: lastest.content }));
             }
             setQuestion(lastest);
@@ -1125,6 +1125,12 @@ const InquiryViewer = (props) => {
           .then((res) => {
             optionsInquires[editedIndex].createdAt = res.createdAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
+            if (question.state.includes('AME_')) {
+              dispatch(InquiryActions.setContent({
+                ...content,
+                [question.field]: question.content
+              }));
+            }
             props.getUpdatedAt();
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             setDisableSaveReply(false);
@@ -1151,7 +1157,12 @@ const InquiryViewer = (props) => {
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
-          if (isEditOriginalAmendment) dispatch(InquiryActions.setContent({ ...content, [res.newAmendment?.field]: tempReply.answer.content }));
+          if (question.state.includes('AME_')) {
+            dispatch(InquiryActions.setContent({
+              ...content,
+              [res.newAmendment?.field]: tempReply.answer.content
+            }));
+          }
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
     }
@@ -1450,9 +1461,9 @@ const InquiryViewer = (props) => {
                     {/*.display time sent mail and label sent.*/}
                     <div style={{ marginRight: 15, display: 'flex' }}>
                       {showLabelSent && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
-                      <>
-                        <span className={clsx(classes.labelStatus, question.sentAt && classes.labelMargin) }>Sent</span>
-                      </>
+                        <>
+                          <span className={clsx(classes.labelStatus, question.sentAt && classes.labelMargin)}>Sent</span>
+                        </>
                       )}
                       {question.sentAt && (
                         <div className={classes.timeSent}>
@@ -1534,7 +1545,7 @@ const InquiryViewer = (props) => {
                       ['COMPL', 'RESOLVED'].includes(question.state) ?
                         <span className={classes.labelStatus}>Resolved</span> :
                         <>
-                          {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={clsx(classes.labelStatus, question.sentAt && classes.labelMargin) }>Submitted</span>}
+                          {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={clsx(classes.labelStatus, question.sentAt && classes.labelMargin)}>Submitted</span>}
                           {question.sentAt && (
                             <div className={classes.timeSent}>
                               <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />

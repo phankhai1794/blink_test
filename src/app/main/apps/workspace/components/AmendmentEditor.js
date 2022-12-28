@@ -158,19 +158,12 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           );
           dispatch(DraftBLActions.setCurrentField());
           dispatch(InquiryActions.addAmendment());
-          if (!openAmendmentList) {
-            dispatch(FormActions.toggleReload());
-          } else {
-            const response = {
-              ...res?.newAmendment,
-              showIconEditInq: true,
-            };
-            optionsInquires.push(response);
-            optionsMinimize.push(response);
-            dispatch(InquiryActions.setInquiries(optionsInquires));
-            dispatch(InquiryActions.setListMinimize(optionsMinimize));
-            getUpdatedAt();
-          }
+          const response = { ...res?.newAmendment, showIconEditInq: true };
+          optionsInquires.push(response);
+          optionsMinimize.push(response);
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+          dispatch(InquiryActions.setListMinimize(optionsMinimize));
+          getUpdatedAt();
         }).catch((err) => console.error(err));
       })
 
