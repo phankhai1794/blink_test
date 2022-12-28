@@ -197,10 +197,10 @@ const BLWorkspace = (props) => {
     const inqsPending = inquiries?.filter(inq => inq.process === 'pending');
     const inqsDraft = inquiries?.filter(inq => inq.process === 'draft');
     if (myBL.bkgNo) {
-      if (inqsPending && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
+      if (inqsPending.length > 0 && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
         dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "")) //BL Inquired Resolved (IR) , Upload all to Opus
       }
-      if (inqsDraft && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
+      if (inqsDraft.length > 0 && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
         dispatch(Actions.updateOpusStatus(myBL.bkgNo, "AS", "")) //BL Amendment Success (AS) , Upload all to Opus
       }
     }
@@ -729,7 +729,7 @@ const BLWorkspace = (props) => {
             <Grid container spacing={2}>
               <Grid container alignItems="center" justify="center">
                 <h2 className={classes.grayText}>
-              PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
+                  PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
                 </h2>
               </Grid>
               <TableCD
