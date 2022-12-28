@@ -27,6 +27,7 @@ import clsx from 'clsx';
 import axios from 'axios';
 import { validateTextInput } from 'app/services/myBLService';
 
+import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 import { MSG_INQUIRY_CONTENT } from '../store/reducers/inquiry';
@@ -523,6 +524,10 @@ const InquiryEditor = (props) => {
               const optionsInquires = [...inquiries];
               optionsInquires.push(inqResponse);
               optionsMinimize.push(inqResponse);
+              if (optionsInquires.length === 1) {
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "DC", "")) // Draft of Inquiry Created (DC)
+              }
+
               dispatch(
                 AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
               );
@@ -667,7 +672,7 @@ const InquiryEditor = (props) => {
             />
           )}
           <Divider className="mt-12" />
-          <div style={{width: '80%'}}>
+          <div style={{ width: '80%' }}>
             {currentEditInq.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
             {currentEditInq.mediaFile?.length > 0 &&
               currentEditInq.mediaFile?.map((file, mediaIndex) => (
