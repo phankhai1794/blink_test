@@ -23,7 +23,7 @@ import {
   ONLY_ATT
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Typography, Tooltip, Grid, Button, FormControlLabel, Radio, CircularProgress, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -32,6 +32,7 @@ import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
 import ErrorOutlineOutlined from '@material-ui/icons/ErrorOutlineOutlined';
+import { SocketContext } from 'app/AppContext';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -172,6 +173,7 @@ const InquiryViewer = (props) => {
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
+  const socket = useContext(SocketContext);
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
@@ -201,7 +203,6 @@ const InquiryViewer = (props) => {
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const [isSaveComment, setSaveComment] = useState(false);
-  const [isReopenLabel, setReopenLabel] = useState(false);
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
   const [submitLabel, setSubmitLabel] = useState(false);
   const [isShowViewAll, setShowViewAll] = useState(false);
@@ -236,6 +237,14 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     setQuestion(props.question);
   }, [props.question]);
+
+  useEffect(() => {
+    if (!user.isSyncingInquiry) {
+      socket.on('sync_comment', async (res) => {
+        if (res.id === question.id) setQuestion(res);
+      });
+    }
+  }, [user.isSyncingInquiry]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -408,6 +417,9 @@ const InquiryViewer = (props) => {
             // setTextResolve(content[lastest.field] || '');
           }
           setIsLoadedComment(true);
+
+          dispatch(AppAction.isSyncingComment(true));
+          socket.emit('sync/create_comment', lastest);
         })
         .catch((error) => console.error(error));
     } else {
@@ -668,6 +680,10 @@ const InquiryViewer = (props) => {
       deleteInquiry(inqDelete.id)
         .then(() => {
           dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+
+          dispatch(AppAction.isSyncingInquiry(true));
+          socket.emit('sync/delete_inquiry', optionsOfQuestion);
+
           if (hidePopupEmpty) {
             dispatch(InquiryActions.setOneInq({}));
             dispatch(FormActions.toggleCreateInquiry(false));
@@ -855,6 +871,10 @@ const InquiryViewer = (props) => {
         optionsInquires[editedIndex].createdAt = res.updatedAt;
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
+
+        dispatch(AppAction.isSyncingInquiry(true));
+        socket.emit('sync/resolve_inquiry', optionsInquires);
+
         props.getUpdatedAt();
         setIsResolve(false);
         setViewDropDown('');
@@ -886,6 +906,9 @@ const InquiryViewer = (props) => {
           if (optionsInquires[editedInqIndex]?.process === 'pending') {
             optionsInquires[editedInqIndex].state = 'UPLOADED';
             dispatch(InquiryActions.setInquiries(optionsInquires));
+
+            dispatch(AppAction.isSyncingInquiry(true));
+            socket.emit('sync/upload_inquiry', optionsInquires);
           } else {
             // Update list amendment
             let editedAmeIndex = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
@@ -1068,6 +1091,10 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].process = 'pending';
             optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
+
+            dispatch(AppAction.isSyncingInquiry(true));
+            socket.emit('sync/update_inquiry', optionsInquires);
+
             props.getUpdatedAt();
             dispatch(InquiryActions.checkSend(true));
             dispatch(
@@ -1099,6 +1126,10 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].process = 'pending';
             optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
+
+            dispatch(AppAction.isSyncingInquiry(true));
+            socket.emit('sync/update_inquiry', optionsInquires);
+
             props.getUpdatedAt();
             // if (props.isInquiryDetail) {
             //   setSaveComment(!isSaveComment);
@@ -1263,6 +1294,10 @@ const InquiryViewer = (props) => {
             optionsInquires[indexInq].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
           }
           dispatch(InquiryActions.setInquiries(optionsInquires));
+
+          dispatch(AppAction.isSyncingInquiry(true));
+          socket.emit('sync/reopen_inquiry', optionsInquires);
+
           props.getUpdatedAt();
           setViewDropDown('');
           // setSaveComment(!isSaveComment);

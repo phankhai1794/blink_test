@@ -8,6 +8,8 @@ const initialState = {
   email: '',
   permissions: [],
   userProcessingBy: [],
+  isSyncingInquiry: false,
+  isSyncingComment: false,
 };
 
 const user = function (state = initialState, action) {
@@ -20,6 +22,12 @@ const user = function (state = initialState, action) {
   }
   case Actions.SET_USER_PROCESSING_BY: {
     return { ...state, ...action.state };
+  }
+  case Actions.IS_SYNCING_INQUIRY: {
+    return { ...state, isSyncingInquiry: action.state };
+  }
+  case Actions.IS_SYNCING_COMMENT: {
+    return { ...state, isSyncingComment: action.state };
   }
   default: {
     return state;

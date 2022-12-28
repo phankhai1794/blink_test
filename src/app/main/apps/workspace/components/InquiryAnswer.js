@@ -2,7 +2,6 @@ import {
   updateInquiryChoice,
   createParagraphAnswer,
   updateParagraphAnswer,
-  updateInquiry,
   createAttachmentAnswer,
   addTransactionAnswer, getUpdatedAtAnswer
 } from 'app/services/inquiryService';

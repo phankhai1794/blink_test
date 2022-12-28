@@ -157,39 +157,47 @@ const BLWorkspace = (props) => {
   };
 
   socket.on('msg_processing', async (data) => {
-    if (userInfo) {
-      console.log('processingBy: ', data.processingBy);
-      let permissionAssign = userInfo.role === 'Admin' ? await getPermissionByRole('Admin') : await getPermissionByRole('Guest');
-      let permissionViewer = await getPermissionByRole('Viewer');
-      let assignPermissionViewer = userInfo;
-      let permissions = [];
-      let excludeFirstUser = false;
-      if (data.processingBy) {
-        data.processingBy.forEach((p) => {
-          if (userInfo.displayName === data.processingBy[0]) {
-            excludeFirstUser = true;
-          }
-        });
-        if (!excludeFirstUser && assignPermissionViewer) {
-          // assign permission
-          permissions = permissionViewer
-          // show popup for lastest user
-          if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
-            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
-          }
-        } else {
-          // assign permission
-          permissions = permissionAssign;
-          dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-        }
-      } else if (data.processingBy.length === 1) {
-        // assign permission
-        permissions = permissionAssign;
-        dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-      }
-      sessionStorage.setItem('permissions', JSON.stringify(permissions));
-    }
+    // if (userInfo) {
+    //   console.log('processingBy: ', data.processingBy);
+    //   let permissionAssign = userInfo.role === 'Admin' ? await getPermissionByRole('Admin') : await getPermissionByRole('Guest');
+    //   let permissionViewer = await getPermissionByRole('Viewer');
+    //   let assignPermissionViewer = userInfo;
+    //   let permissions = [];
+    //   let excludeFirstUser = false;
+    //   if (data.processingBy) {
+    //     data.processingBy.forEach((p) => {
+    //       if (userInfo.displayName === data.processingBy[ 0 ]) {
+    //         excludeFirstUser = true;
+    //       }
+    //     });
+    //     if (!excludeFirstUser && assignPermissionViewer) {
+    //       // assign permission
+    //       permissions = permissionViewer
+    //       // show popup for lastest user
+    //       if (userInfo.displayName === data.processingBy[ data.processingBy.length - 1 ]) {
+    //         dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[ 0 ] }));
+    //       }
+    //     } else {
+    //       // assign permission
+    //       permissions = permissionAssign;
+    //       dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+    //     }
+    //   } else if (data.processingBy.length === 1) {
+    //     // assign permission
+    //     permissions = permissionAssign;
+    //     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+    //   }
+    //   sessionStorage.setItem('permissions', JSON.stringify(permissions));
+    // }
   });
+
+  useEffect(() => {
+    if (!user.isSyncingInquiry) {
+      socket.on('sync_inquiry', async (res) => {
+        dispatch(InquiryActions.setInquiries(res));
+      });
+    }
+  }, [user.isSyncingInquiry]);
 
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
@@ -287,7 +295,6 @@ const BLWorkspace = (props) => {
     }
 
     return () => {
-      // disconnectSocket(socket);
       if (userInfo) {
         socket.emit('user_processing_out', {
           mybl: bkgNo,

@@ -1,5 +1,5 @@
 import { FuseChipSelect } from '@fuse';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLabelById, toFindDuplicates } from '@shared';
 import {
@@ -16,16 +16,12 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { uploadFile } from 'app/services/fileService';
-import {
-  updateInquiry,
-  saveInquiry,
-  deleteInquiry,
-  getUpdatedAtAnswer
-} from 'app/services/inquiryService';
+import { updateInquiry, saveInquiry, getUpdatedAtAnswer } from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
 import { validateTextInput } from 'app/services/myBLService';
+import { SocketContext } from 'app/AppContext';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -116,6 +112,7 @@ const InquiryEditor = (props) => {
   const classes = useStyles();
   const { onCancel, setSave } = props;
   const scrollTopPopup = useRef(null);
+  const socket = useContext(SocketContext);
   const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize] = useSelector(
     ({ workspace }) => [
       workspace.inquiryReducer.metadata,
@@ -126,7 +123,6 @@ const InquiryEditor = (props) => {
       workspace.inquiryReducer.listMinimize
     ]
   );
-
   const user = useSelector(({ user }) => user);
 
   const optionsAnsType = [
@@ -385,7 +381,6 @@ const InquiryEditor = (props) => {
           );
           setDisabled(false);
           return;
-          // break;
         }
         // check empty a field
         if (inquiry.answerObj.length > 0) {
@@ -427,6 +422,7 @@ const InquiryEditor = (props) => {
         const res = await uploadFile(form_data);
         mediaCreate[f].id = res.response[0].id;
       }
+
       if (
         JSON.stringify(inq(currentEditInq)) !== JSON.stringify(inq(inquiry)) ||
         JSON.stringify(currentEditInq.answerObj) !== JSON.stringify(inquiry.answerObj) ||
@@ -459,6 +455,10 @@ const InquiryEditor = (props) => {
         inquiriesOp[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setEditInq());
         dispatch(InquiryActions.setInquiries(inquiriesOp));
+
+        dispatch(AppActions.isSyncingInquiry(true));
+        socket.emit('sync/update_inquiry', inquiriesOp);
+
         props.getUpdatedAt();
         setDisabled(false);
         // setSave();
@@ -538,6 +538,9 @@ const InquiryEditor = (props) => {
               dispatch(InquiryActions.setInquiries(optionsInquires));
               dispatch(InquiryActions.setListMinimize(optionsMinimize));
               setDisabled(false);
+
+              dispatch(AppActions.isSyncingInquiry(true));
+              socket.emit('sync/create_inquiry', optionsInquires);
             })
             .catch((error) =>
               dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
