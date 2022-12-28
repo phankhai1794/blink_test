@@ -173,7 +173,8 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
   const onMouseEnter = (e) => {
-    if (isEmpty) setAnchorEl(e.currentTarget);
+    // if (isEmpty) setAnchorEl(e.currentTarget);
+    setAnchorEl(e.currentTarget);
   };
 
   const onMouseLeave = (e) => {
@@ -266,7 +267,6 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         {isResolved && <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)} />}
         {isUploaded && <img src='/assets/images/icons/icon-uploaded.svg' className={classes.iconSvg} />}
       </>
-     
     }
   }
 
@@ -277,7 +277,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         user,
         inquiries,
       );
-      
+
       setIsEmpty(colorStatusObj.isEmpty);
       setHasInquiry(colorStatusObj.hasInquiry);
       setHasAmendment(colorStatusObj.hasAmendment);
@@ -329,7 +329,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
                     rows ? classes[`adornmentRow_${rows}`] : ''
                   )}>
                   {checkDisplayIcon()}
-                  {anchorEl && anchorEl.id === id && allowAddInquiry && (
+                  {anchorEl && anchorEl.id === id && allowAddInquiry && isEmpty && (
                     <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
                   )}
                 </InputAdornment>
