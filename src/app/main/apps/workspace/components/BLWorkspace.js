@@ -1,4 +1,5 @@
 import { checkNewInquiry, NUMBER_INQ_BOTTOM, isJsonText } from '@shared';
+import { FuseLoading } from '@fuse';
 import {
   SHIPPER,
   CONSIGNEE,
@@ -124,12 +125,11 @@ const BLWorkspace = (props) => {
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
   const openInquiryForm = useSelector(({ workspace }) => workspace.formReducer.openDialog);
   const openAmendmentForm = useSelector(({ workspace }) => workspace.formReducer.openAmendmentForm);
-  const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const [confirmClick, form] = useSelector(({ workspace }) => [workspace.formReducer.confirmClick, workspace.formReducer.form]);
   const [inqCustomer, setInqCustomer] = useState([]);
   const [inqOnshore, setInqOnshore] = useState([]);
-  const isLoading = useSelector(({ workspace }) => workspace.transReducer.isLoading);
+  const isLoadingTrans = useSelector(({ workspace }) => workspace.transReducer.isLoading);
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
@@ -138,6 +138,7 @@ const BLWorkspace = (props) => {
   const openNotificationBLWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning);
   const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
+  const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -244,14 +245,14 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     const unloadCallback = (event) => {
-      if (!isLoading) {
+      if (!isLoadingTrans) {
         dispatch(TransActions.BlTrans(myBL.id, content));
       }
       return '';
     };
     window.addEventListener('beforeunload', unloadCallback);
     return () => window.removeEventListener('beforeunload', unloadCallback);
-  }, [isLoading]);
+  }, [isLoadingTrans]);
 
 
   const checkBLSameRequest = async (bl) => {
@@ -268,6 +269,7 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(DraftActions.setProcess(props.process));
+    dispatch(Actions.loadMetadata());
 
     const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) {
@@ -275,10 +277,12 @@ const BLWorkspace = (props) => {
       checkBLSameRequest(bkgNo);
     }
     else if (props.myBL) {
+      dispatch(FormActions.increaseLoading())
       checkBLSameRequest(props.myBL?.id);
       getBlInfo(props.myBL?.id).then(res => {
         const { id, state, bkgNo } = res.myBL;
         dispatch(InquiryActions.setMyBL({ id, state, bkgNo }));
+        dispatch(FormActions.decreaseLoading())
       });
     }
 
@@ -292,7 +296,6 @@ const BLWorkspace = (props) => {
           role: userInfo.role,
         });
       }
-      dispatch(FormActions.toggleReload());
 
       if (userInfo && userInfo.role === 'Admin') {
         getPermissionByRole('Admin').then(data => {
@@ -307,10 +310,6 @@ const BLWorkspace = (props) => {
       }
     }
   }, []);
-
-  useEffect(() => {
-    dispatch(Actions.loadMetadata());
-  }, [reload])
 
   const expandRef = useRef();
   useEffect(() => {
@@ -517,303 +516,307 @@ const BLWorkspace = (props) => {
   return (
     <>
       <BLProcessNotification />
-      <ListNotification />
-      <SubmitAnswerNotification
-        open={openNotification || openNotificationReply || openNotificationAmendment || openNotificationBLWarning.status}
-        msg={renderMsgNoti()}
-        // msg2={`Please wait for ${openNotificationBLWarning.userName} complete his/her work!`}
-        msg2={renderMsgNoti2()}
-        iconType={renderIconType()}
-        handleClose={() => {
-          dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false));
-          dispatch(FormActions.toggleOpenNotificationDeleteReply(false));
-          dispatch(FormActions.toggleOpenNotificationDeleteAmendment(false));
-          dispatch(FormActions.toggleOpenBLWarning(false));
-        }}
-      />
-      <div className={clsx('max-w-5xl', classes.root)}>
-        <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
-          {isExpand && (
-            <div
-              ref={expandRef}
-              className="flex flex-col p-4 rounded-8 shadow"
-              style={{ marginBottom: '-0.5rem' }}>
-              {listInqMinimize.map((inq, index) => {
-                if (index >= NUMBER_INQ_BOTTOM)
-                  return (
-                    <Chip
-                      key={index}
-                      className="flex justify-between mt-4"
-                      label={getFabTitle(inq)}
-                      onClick={() => openMinimize(inq)}
-                      onDelete={() => handleClose(inq)}
-                      color="primary"
-                    />
-                  );
-              })}
-            </div>
-          )}
-          <div
-            style={{
-              display: 'flex',
-              position: 'fixed',
-              right: '2rem',
-              bottom: '1rem',
-              zIndex: 999
-            }}>
-            {listMinimize.map((inquiry) => {
-              const field = metadata.field_options.find(f => inquiry.field === f.value);
-              if (inquiry.field === 'EMAIL') {
-                return <SendInquiryForm field={'EMAIL'} key={inquiry.id} />;
-              } else {
-                const popupObj = popupOpen(inquiry, field);
-                return (
-                  <Form
-                    user={props.user}
-                    tabs={popupObj.tabs || null}
-                    nums={popupObj.nums || null}
-                    key={inquiry.id}
-                    tabChange={(newValue) => {
-                      setTabSelected(newValue);
-                    }}
-                    open={popupObj.status}
-                    toggleForm={popupObj.toggleForm}
-                    FabTitle={popupObj.fabTitle}
-                    hasAddButton={popupObj.hasAddButton}
-                    field={popupObj.field}
-                    popoverfooter={popupObj.popoverfooter}
-                    customActions={popupObj.customActions}
-                    title={popupObj.title}
-                    showBtnSend={popupObj.showBtnSend}
-                    disableSendBtn={popupObj.disableSendBtn}>
-                    {popupObj.child}
-                  </Form>
-                );
-              }
-            })}
-            {listInqMinimize.length > NUMBER_INQ_BOTTOM && (
-              <div className="flex items-center pl-1" onClick={handleExpand}>
-                <span>
-                  <strong>{NUMBER_INQ_BOTTOM}</strong>/{listInqMinimize.length}
-                </span>
-                {isExpand ? <ExpandMore /> : <ExpandLess />}
+      {isLoading > 0 ? <FuseLoading /> :
+        <>
+          <ListNotification />
+          <SubmitAnswerNotification
+            open={openNotification || openNotificationReply || openNotificationAmendment || openNotificationBLWarning.status}
+            msg={renderMsgNoti()}
+            // msg2={`Please wait for ${openNotificationBLWarning.userName} complete his/her work!`}
+            msg2={renderMsgNoti2()}
+            iconType={renderIconType()}
+            handleClose={() => {
+              dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false));
+              dispatch(FormActions.toggleOpenNotificationDeleteReply(false));
+              dispatch(FormActions.toggleOpenNotificationDeleteAmendment(false));
+              dispatch(FormActions.toggleOpenBLWarning(false));
+            }}
+          />
+          <div className={clsx('max-w-5xl', classes.root)}>
+            <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
+              {isExpand && (
+                <div
+                  ref={expandRef}
+                  className="flex flex-col p-4 rounded-8 shadow"
+                  style={{ marginBottom: '-0.5rem' }}>
+                  {listInqMinimize.map((inq, index) => {
+                    if (index >= NUMBER_INQ_BOTTOM)
+                      return (
+                        <Chip
+                          key={index}
+                          className="flex justify-between mt-4"
+                          label={getFabTitle(inq)}
+                          onClick={() => openMinimize(inq)}
+                          onDelete={() => handleClose(inq)}
+                          color="primary"
+                        />
+                      );
+                  })}
+                </div>
+              )}
+              <div
+                style={{
+                  display: 'flex',
+                  position: 'fixed',
+                  right: '2rem',
+                  bottom: '1rem',
+                  zIndex: 999
+                }}>
+                {listMinimize.map((inquiry) => {
+                  const field = metadata.field_options.find(f => inquiry.field === f.value);
+                  if (inquiry.field === 'EMAIL') {
+                    return <SendInquiryForm field={'EMAIL'} key={inquiry.id} />;
+                  } else {
+                    const popupObj = popupOpen(inquiry, field);
+                    return (
+                      <Form
+                        user={props.user}
+                        tabs={popupObj.tabs || null}
+                        nums={popupObj.nums || null}
+                        key={inquiry.id}
+                        tabChange={(newValue) => {
+                          setTabSelected(newValue);
+                        }}
+                        open={popupObj.status}
+                        toggleForm={popupObj.toggleForm}
+                        FabTitle={popupObj.fabTitle}
+                        hasAddButton={popupObj.hasAddButton}
+                        field={popupObj.field}
+                        popoverfooter={popupObj.popoverfooter}
+                        customActions={popupObj.customActions}
+                        title={popupObj.title}
+                        showBtnSend={popupObj.showBtnSend}
+                        disableSendBtn={popupObj.disableSendBtn}>
+                        {popupObj.child}
+                      </Form>
+                    );
+                  }
+                })}
+                {listInqMinimize.length > NUMBER_INQ_BOTTOM && (
+                  <div className="flex items-center pl-1" onClick={handleExpand}>
+                    <span>
+                      <strong>{NUMBER_INQ_BOTTOM}</strong>/{listInqMinimize.length}
+                    </span>
+                    {isExpand ? <ExpandMore /> : <ExpandLess />}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        <BtnAddInquiry />
+            <BtnAddInquiry />
 
-        <Grid container>
-          <Grid item xs={6} className={classes.leftPanel}>
-            <Grid item>
-              <Label>Shipper/Exporter</Label>
-              <BLField id={getField(SHIPPER)} multiline={true} rows={5}>
-                {(getValueField(SHIPPER) && isJsonText(getValueField(SHIPPER))) ?
-                  `${JSON.parse(getValueField(SHIPPER)).name}\n${JSON.parse(getValueField(SHIPPER)).address}`
-                  : getValueField(SHIPPER)}
-              </BLField>
-            </Grid>
-            <Grid item>
-              <Label>Consignee</Label>
-              <BLField id={getField(CONSIGNEE)} multiline={true} rows={5}>
-                {(getValueField(CONSIGNEE) && isJsonText(getValueField(CONSIGNEE))) ?
-                  `${JSON.parse(getValueField(CONSIGNEE)).name}\n${JSON.parse(getValueField(CONSIGNEE)).address}`
-                  : getValueField(CONSIGNEE)}
-              </BLField>
-            </Grid>
-            <Grid item>
-              <Label>
-                {`NOTIFY PARTY (It is agreed that no responsibility shall be attached to the`}{' '}
-                <br></br>
-                {`Carrier or its Agents for failure to notify)`}
-              </Label>
-              <BLField id={getField(NOTIFY)} multiline={true} rows={5}>
-                {(getValueField(NOTIFY) && isJsonText(getValueField(NOTIFY))) ?
-                  `${JSON.parse(getValueField(NOTIFY)).name}\n${JSON.parse(getValueField(NOTIFY)).address}`
-                  : getValueField(NOTIFY)}
-              </BLField>
-            </Grid>
-            <Grid container style={{ marginTop: '53px' }}>
-              <Grid item xs={6} className={classes.leftPanel}>
-                <Grid item>
-                  <Label>PRE-CARRIAGE BY</Label>
-                  <BLField id={getField(PRE_CARRIAGE)}>
-                    {getValueField(PRE_CARRIAGE)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>PORT OF LOADING</Label>
-                  <BLField id={getField(PORT_OF_LOADING)}>
-                    {getValueField(PORT_OF_LOADING)}
-                  </BLField>
-                </Grid>
-              </Grid>
-              <Grid item xs={6} className={classes.rightPanel}>
-                <Grid item>
-                  <Label>PLACE OF RECEIPT</Label>
-                  <BLField id={getField(PLACE_OF_RECEIPT)}>
-                    {getValueField(PLACE_OF_RECEIPT)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>PORT OF DISCHARGE</Label>
-                  <BLField id={getField(PORT_OF_DISCHARGE)}>
-                    {getValueField(PORT_OF_DISCHARGE)}
-                  </BLField>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={6} className={classes.rightPanel}>
             <Grid container>
               <Grid item xs={6} className={classes.leftPanel}>
-                <Label>BOOKING NO.</Label>
-                <BLField lock={true}>{myBL.bkgNo || ""}</BLField>
+                <Grid item>
+                  <Label>Shipper/Exporter</Label>
+                  <BLField id={getField(SHIPPER)} multiline={true} rows={5}>
+                    {(getValueField(SHIPPER) && isJsonText(getValueField(SHIPPER))) ?
+                      `${JSON.parse(getValueField(SHIPPER)).name}\n${JSON.parse(getValueField(SHIPPER)).address}`
+                      : getValueField(SHIPPER)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>Consignee</Label>
+                  <BLField id={getField(CONSIGNEE)} multiline={true} rows={5}>
+                    {(getValueField(CONSIGNEE) && isJsonText(getValueField(CONSIGNEE))) ?
+                      `${JSON.parse(getValueField(CONSIGNEE)).name}\n${JSON.parse(getValueField(CONSIGNEE)).address}`
+                      : getValueField(CONSIGNEE)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>
+                    {`NOTIFY PARTY (It is agreed that no responsibility shall be attached to the`}{' '}
+                    <br></br>
+                    {`Carrier or its Agents for failure to notify)`}
+                  </Label>
+                  <BLField id={getField(NOTIFY)} multiline={true} rows={5}>
+                    {(getValueField(NOTIFY) && isJsonText(getValueField(NOTIFY))) ?
+                      `${JSON.parse(getValueField(NOTIFY)).name}\n${JSON.parse(getValueField(NOTIFY)).address}`
+                      : getValueField(NOTIFY)}
+                  </BLField>
+                </Grid>
+                <Grid container style={{ marginTop: '53px' }}>
+                  <Grid item xs={6} className={classes.leftPanel}>
+                    <Grid item>
+                      <Label>PRE-CARRIAGE BY</Label>
+                      <BLField id={getField(PRE_CARRIAGE)}>
+                        {getValueField(PRE_CARRIAGE)}
+                      </BLField>
+                    </Grid>
+                    <Grid item>
+                      <Label>PORT OF LOADING</Label>
+                      <BLField id={getField(PORT_OF_LOADING)}>
+                        {getValueField(PORT_OF_LOADING)}
+                      </BLField>
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={6} className={classes.rightPanel}>
+                    <Grid item>
+                      <Label>PLACE OF RECEIPT</Label>
+                      <BLField id={getField(PLACE_OF_RECEIPT)}>
+                        {getValueField(PLACE_OF_RECEIPT)}
+                      </BLField>
+                    </Grid>
+                    <Grid item>
+                      <Label>PORT OF DISCHARGE</Label>
+                      <BLField id={getField(PORT_OF_DISCHARGE)}>
+                        {getValueField(PORT_OF_DISCHARGE)}
+                      </BLField>
+                    </Grid>
+                  </Grid>
+                </Grid>
               </Grid>
               <Grid item xs={6} className={classes.rightPanel}>
-                <Label>SEA WAYBILL NO.</Label>
-                <BLField lock={true}>{(myBL.bkgNo && `ONYE${myBL.bkgNo}`) || ""}</BLField>
+                <Grid container>
+                  <Grid item xs={6} className={classes.leftPanel}>
+                    <Label>BOOKING NO.</Label>
+                    <BLField lock={true}>{myBL.bkgNo || ""}</BLField>
+                  </Grid>
+                  <Grid item xs={6} className={classes.rightPanel}>
+                    <Label>SEA WAYBILL NO.</Label>
+                    <BLField lock={true}>{(myBL.bkgNo && `ONYE${myBL.bkgNo}`) || ""}</BLField>
+                  </Grid>
+                </Grid>
+                <Grid item>
+                  <Label>
+                    {`EXPORT REFERENCES (for the Merchant's and/or Carrier's reference only.`} <br></br>
+                    {`See back clause 8. (4.)`}
+                  </Label>
+                  <BLField id={getField(EXPORT_REF)} multiline={true} rows={2}>
+                    {getValueField(EXPORT_REF)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>FORWARDING AGENT-REFERENCES FMC NO.</Label>
+                  <BLField id={getField(FORWARDING)} multiline={true} rows={5}>
+                    {getValueField(FORWARDING)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>{`FINAL DESTINATION (for the Merchant's reference only)`}</Label>
+                  <BLField id={getField(FINAL_DESTINATION)}>
+                    {getValueField(FINAL_DESTINATION)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>
+                    {`TYPE OF MOVEMENT (IF MIXED, USE DESCRIPTION OF PACKAGES AND`} <br></br>
+                    {`GOODS FIELD)`}
+                  </Label>
+                  <BLField id={getField(TYPE_OF_MOVEMENT)}>
+                    {getValueField(TYPE_OF_MOVEMENT)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Grid item>
+                    <Label>OCEAN VESSEL VOYAGE NO. FlAG</Label>
+                    <BLField id={getField(VESSEL_VOYAGE)} width={`calc(50% - 15px)`}>
+                      {getValueField(VESSEL_VOYAGE)}
+                    </BLField>
+                  </Grid>
+                </Grid>
+                <Grid item xs={6} className={classes.leftPanel}>
+                  <Label>PLACE OF DELIVERY</Label>
+                  <BLField id={getField(PLACE_OF_DELIVERY)}>
+                    {getValueField(PLACE_OF_DELIVERY)}
+                  </BLField>
+                </Grid>
               </Grid>
             </Grid>
-            <Grid item>
-              <Label>
-                {`EXPORT REFERENCES (for the Merchant's and/or Carrier's reference only.`} <br></br>
-                {`See back clause 8. (4.)`}
-              </Label>
-              <BLField id={getField(EXPORT_REF)} multiline={true} rows={2}>
-                {getValueField(EXPORT_REF)}
-              </BLField>
-            </Grid>
-            <Grid item>
-              <Label>FORWARDING AGENT-REFERENCES FMC NO.</Label>
-              <BLField id={getField(FORWARDING)} multiline={true} rows={5}>
-                {getValueField(FORWARDING)}
-              </BLField>
-            </Grid>
-            <Grid item>
-              <Label>{`FINAL DESTINATION (for the Merchant's reference only)`}</Label>
-              <BLField id={getField(FINAL_DESTINATION)}>
-                {getValueField(FINAL_DESTINATION)}
-              </BLField>
-            </Grid>
-            <Grid item>
-              <Label>
-                {`TYPE OF MOVEMENT (IF MIXED, USE DESCRIPTION OF PACKAGES AND`} <br></br>
-                {`GOODS FIELD)`}
-              </Label>
-              <BLField id={getField(TYPE_OF_MOVEMENT)}>
-                {getValueField(TYPE_OF_MOVEMENT)}
-              </BLField>
-            </Grid>
-            <Grid item>
-              <Grid item>
-                <Label>OCEAN VESSEL VOYAGE NO. FlAG</Label>
-                <BLField id={getField(VESSEL_VOYAGE)} width={`calc(50% - 15px)`}>
-                  {getValueField(VESSEL_VOYAGE)}
-                </BLField>
-              </Grid>
-            </Grid>
-            <Grid item xs={6} className={classes.leftPanel}>
-              <Label>PLACE OF DELIVERY</Label>
-              <BLField id={getField(PLACE_OF_DELIVERY)}>
-                {getValueField(PLACE_OF_DELIVERY)}
-              </BLField>
-            </Grid>
-          </Grid>
-        </Grid>
 
-        <Divider className={classes.divider} />
+            <Divider className={classes.divider} />
 
-        <Grid container spacing={2}>
-          <Grid container alignItems="center" justify="center">
-            <h2 className={classes.grayText}>
+            <Grid container spacing={2}>
+              <Grid container alignItems="center" justify="center">
+                <h2 className={classes.grayText}>
               PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
-            </h2>
-          </Grid>
-          <TableCD
-            containerDetail={getValueField(CONTAINER_DETAIL)}
-            id={getField(CONTAINER_DETAIL)}
-          />
-        </Grid>
-
-        <hr style={{ borderTop: '2px dashed #515E6A', marginTop: '2rem', marginBottom: '3rem' }} />
-
-        <Grid container spacing={2}>
-          <TableCM
-            containerManifest={getValueField(CONTAINER_MANIFEST)}
-            id={getField(CONTAINER_MANIFEST)}
-          />
-        </Grid>
-
-        <Grid container className="mt-20">
-          <Grid container justify="center">
-            <h2 className={classes.grayText}>** TO BE CONTINUED ON ATTACHED LIST **</h2>
-          </Grid>
-        </Grid>
-        <Grid
-          container
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span className={classes.note}>Declared Cargo Value US $</span>
-          <span className={classes.note}>
-            {
-              "If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged"
-            }
-          </span>
-        </Grid>
-
-
-        <Divider style={{ marginTop: 30, marginBottom: 0 }} />
-
-        <Grid container>
-          <Grid item xs={6} className={classes.leftPanel}>
-            <Grid item>
-              <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
-              <BLField id={getField(FREIGHT_CHARGES)}>
-                {getValueField(FREIGHT_CHARGES)}
-              </BLField>
+                </h2>
+              </Grid>
+              <TableCD
+                containerDetail={getValueField(CONTAINER_DETAIL)}
+                id={getField(CONTAINER_DETAIL)}
+              />
             </Grid>
-            <Grid item>
-              <Label>COMMODITY CODE</Label>
-              <BLField id={getField(COMMODITY_CODE)}>
-                {getValueField(COMMODITY_CODE)}
-              </BLField>
+
+            <hr style={{ borderTop: '2px dashed #515E6A', marginTop: '2rem', marginBottom: '3rem' }} />
+
+            <Grid container spacing={2}>
+              <TableCM
+                containerManifest={getValueField(CONTAINER_MANIFEST)}
+                id={getField(CONTAINER_MANIFEST)}
+              />
             </Grid>
-          </Grid>
-          <Grid item xs={6} className={classes.rightPanel}>
+
+            <Grid container className="mt-20">
+              <Grid container justify="center">
+                <h2 className={classes.grayText}>** TO BE CONTINUED ON ATTACHED LIST **</h2>
+              </Grid>
+            </Grid>
+            <Grid
+              container
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span className={classes.note}>Declared Cargo Value US $</span>
+              <span className={classes.note}>
+                {
+                  "If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged"
+                }
+              </span>
+            </Grid>
+
+
+            <Divider style={{ marginTop: 30, marginBottom: 0 }} />
+
             <Grid container>
               <Grid item xs={6} className={classes.leftPanel}>
                 <Grid item>
-                  <Label>PLACE OF BILL(S) ISSUE</Label>
-                  <BLField id={getField(PLACE_OF_BILL)}>
-                    {getValueField(PLACE_OF_BILL)}
+                  <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
+                  <BLField id={getField(FREIGHT_CHARGES)}>
+                    {getValueField(FREIGHT_CHARGES)}
                   </BLField>
                 </Grid>
                 <Grid item>
-                  <Label>DATE CARGO RECEIVED</Label>
-                  <BLField id={getField(DATE_CARGO)}>
-                    {getValueField(DATE_CARGO)}
+                  <Label>COMMODITY CODE</Label>
+                  <BLField id={getField(COMMODITY_CODE)}>
+                    {getValueField(COMMODITY_CODE)}
                   </BLField>
                 </Grid>
               </Grid>
               <Grid item xs={6} className={classes.rightPanel}>
-                <Grid item>
-                  <Label>DATED</Label>
-                  <BLField id={getField(DATED)}>
-                    {getValueField(DATED)}
-                  </BLField>
-                </Grid>
-                <Grid item>
-                  <Label>DATE LADEN ON BOARD</Label>
-                  <BLField id={getField(DATE_LADEN)}>
-                    {getValueField(DATE_LADEN)}
-                  </BLField>
+                <Grid container>
+                  <Grid item xs={6} className={classes.leftPanel}>
+                    <Grid item>
+                      <Label>PLACE OF BILL(S) ISSUE</Label>
+                      <BLField id={getField(PLACE_OF_BILL)}>
+                        {getValueField(PLACE_OF_BILL)}
+                      </BLField>
+                    </Grid>
+                    <Grid item>
+                      <Label>DATE CARGO RECEIVED</Label>
+                      <BLField id={getField(DATE_CARGO)}>
+                        {getValueField(DATE_CARGO)}
+                      </BLField>
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={6} className={classes.rightPanel}>
+                    <Grid item>
+                      <Label>DATED</Label>
+                      <BLField id={getField(DATED)}>
+                        {getValueField(DATED)}
+                      </BLField>
+                    </Grid>
+                    <Grid item>
+                      <Label>DATE LADEN ON BOARD</Label>
+                      <BLField id={getField(DATE_LADEN)}>
+                        {getValueField(DATE_LADEN)}
+                      </BLField>
+                    </Grid>
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
-          </Grid>
-        </Grid>
-      </div>
+          </div>
+        </>
+      }
     </>
   );
 };
