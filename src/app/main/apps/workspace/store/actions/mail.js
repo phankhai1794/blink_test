@@ -24,20 +24,19 @@ export const SENDMAIL_SET_FORM = 'SENDMAIL_SET_FORM';
 
 
 export const sendMail =
-  ({ myblId, bkgNo, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, inquiries, user }) =>
+  ({ myblId, tab, bkgNo, inquiries, user, header, ...form }) =>
     async (dispatch) => {
       const replyInqs = [];
       const inquiriesPendingProcess = inquiries.filter(op => op.process === 'pending');
-      const inquiriesDraftProcess = inquiries.filter(op => op.process === 'draft');
       const listComment = await axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)));
-      listComment.map((comment, index) => comment.length && replyInqs.push(inquiries[index].id));
+      listComment.forEach((comment, index) => comment.length && inquiries[index].receiver[0] === tab && replyInqs.push(inquiries[index].id));
       dispatch({ type: SENDMAIL_LOADING });
-      sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs, user)
+      sendmail({ myblId, replyInqs, user, header, ...form })
         .then((res) => {
           if (res.status === 200) {
             if (inquiries.filter(op => op.process === 'pending' && op.state === 'OPEN')) {
               let rtrnCd = "RW"; //RO: Return to Customer via BLink
-              if (toCustomer) rtrnCd = "RO";// RW: Return to Onshore via BLink
+              if (form.toCustomer) rtrnCd = "RO";// RW: Return to Onshore via BLink
               dispatch(AppActions.updateOpusStatus(bkgNo, "IN", rtrnCd)); //BL Inquiried
             }
 
