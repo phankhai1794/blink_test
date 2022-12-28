@@ -667,7 +667,7 @@ const InquiryEditor = (props) => {
             />
           )}
           <Divider className="mt-12" />
-          <>
+          <div style={{width: '80%'}}>
             {currentEditInq.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
             {currentEditInq.mediaFile?.length > 0 &&
               currentEditInq.mediaFile?.map((file, mediaIndex) => (
@@ -679,7 +679,7 @@ const InquiryEditor = (props) => {
                   )}
                 </div>
               ))}
-          </>
+          </div>
           <>
             {user.role !== 'Admin' && (
               <>
