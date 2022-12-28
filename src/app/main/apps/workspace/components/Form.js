@@ -25,8 +25,8 @@ import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 import PopoverFooter from './PopoverFooter';
-import PopupConfirmSubmit from "./PopupConfirmSubmit";
-import PopupConfirm from "./PopupConfirm";
+import PopupConfirmSubmit from './PopupConfirmSubmit';
+import PopupConfirm from './PopupConfirm';
 
 const theme = createMuiTheme({
   typography: {
@@ -53,7 +53,7 @@ const styles = (theme) => ({
     right: theme.spacing(1),
     top: theme.spacing(1),
     color: theme.palette.grey[500]
-  },
+  }
 });
 
 const DialogTitle = withStyles(styles)((props) => {
@@ -84,7 +84,7 @@ const DialogTitle = withStyles(styles)((props) => {
           <IconButton
             aria-label="close"
             // onClick={handleOpenSnackBar}
-            onClick={() => { }}
+            onClick={() => {}}
             style={{ textAlign: 'center' }}>
             <MinimizeIcon />
           </IconButton>
@@ -106,7 +106,12 @@ const DialogTitle = withStyles(styles)((props) => {
           <IconButton aria-label="close">
             <OpenInNew />
           </IconButton>
-          <IconButton aria-label="close" onClick={handleClose}>
+          <IconButton
+            aria-label="close"
+            onClick={() => {
+              handleClose();
+              openFullScreen(false);
+            }}>
             <CloseIcon />
           </IconButton>
         </div>
@@ -130,7 +135,7 @@ const useStyles = makeStyles(() => ({
   },
   dialogContent: {
     margin: 'auto',
-    backgroundColor: (props) => (props.style?.backgroundColor || 'white'), //email preview
+    backgroundColor: (props) => props.style?.backgroundColor || 'white', //email preview
     position: 'relative',
     width: (props) => (props.isFullScreen ? '1200px' : '900px')
   },
@@ -174,8 +179,8 @@ const useStyles = makeStyles(() => ({
     color: 'red',
     position: 'absolute',
     top: '50%',
-    left: '50%',
-  },
+    left: '50%'
+  }
 }));
 
 const LinkButton = ({ text, disable, handleClick }) => {
@@ -184,12 +189,18 @@ const LinkButton = ({ text, disable, handleClick }) => {
       <Link
         component="button"
         variant="body2"
-        underline='none'
+        underline="none"
         disabled={disable}
         style={{ display: 'flex', alignItems: 'center' }}
         onClick={handleClick}>
         <AddCircleOutlineIcon
-          style={{ color: disable ? '#d3d3d3' : '#BD0F72', left: '8.33%', right: '8.33%', border: '2px', width: 25 }}
+          style={{
+            color: disable ? '#d3d3d3' : '#BD0F72',
+            left: '8.33%',
+            right: '8.33%',
+            border: '2px',
+            width: 25
+          }}
         />
         <span
           style={{
@@ -205,8 +216,8 @@ const LinkButton = ({ text, disable, handleClick }) => {
         </span>
       </Link>
     </div>
-  )
-}
+  );
+};
 
 export default function Form(props) {
   const dispatch = useDispatch();
@@ -231,7 +242,7 @@ export default function Form(props) {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
-  const currentInquiries = inquiries.filter(q => q.field === currentField);
+  const currentInquiries = inquiries.filter((q) => q.field === currentField);
   const userType = useSelector(({ user }) => user.userType);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
 
@@ -242,7 +253,9 @@ export default function Form(props) {
 
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
-  const currentAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.currentAmendment);
+  const currentAmendment = useSelector(
+    ({ workspace }) => workspace.inquiryReducer.currentAmendment
+  );
   const isLoading = useSelector(({ workspace }) => workspace.mailReducer.isLoading);
   const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
@@ -257,7 +270,7 @@ export default function Form(props) {
   const [value, setValue] = useState(0);
 
   useEffect(() => {
-    setDisableSend(!enableSend)
+    setDisableSend(!enableSend);
   }, [enableSend]);
 
   const handleOpenFab = () => {
@@ -392,13 +405,13 @@ export default function Form(props) {
   };
 
   const checkEnableBtnAddAmendment = () => {
-    const filter = inquiries.filter(inq => inq.field === currentField);
+    const filter = inquiries.filter((inq) => inq.field === currentField);
     if (!openAmendmentList) {
       if (!filter.length) return false;
-      return !filter.some(inq => inq.process === 'draft');
+      return !filter.some((inq) => inq.process === 'draft');
     }
     return true;
-  }
+  };
 
   useEffect(() => {
     if (tabs) {
@@ -445,76 +458,92 @@ export default function Form(props) {
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
-        {tabs && nums && nums.some(num => num > 0) && !openAmendmentList && (
-          <Box style={{ marginLeft: 20, marginRight: 20, borderBottom: '1px solid #515F6B' }} sx={{}}>
+        {tabs && nums && nums.some((num) => num > 0) && !openAmendmentList && (
+          <Box
+            style={{ marginLeft: 20, marginRight: 20, borderBottom: '1px solid #515F6B' }}
+            sx={{}}>
             <Tabs
               indicatorColor="primary"
-              style={{ display: 'flex', margin: 0, height: '50px', }}
+              style={{ display: 'flex', margin: 0, height: '50px' }}
               value={value}
               onChange={handleChange}>
-              {nums[0] && <Tab
-                classes={{ wrapper: classes.iconLabelWrapper }}
-                className={clsx(classes.tab, value === 0 && classes.colorSelectedTab)}
-                label="Customer"
-                icon={
-                  <div className={clsx(classes.countBtn, value === 0 && classes.colorCountBtn)}>
-                    {nums[0]}
-                  </div>
-                }
-              />}
-              {nums[1] && <Tab
-                classes={{ wrapper: classes.iconLabelWrapper }}
-                className={clsx(classes.tab, (value === 1 || !nums[1]) && classes.colorSelectedTab)}
-                label="Onshore"
-                icon={
-                  <div className={clsx(classes.countBtn, (value === 1 || !nums[1]) && classes.colorCountBtn)}>
-                    {nums[1]}
-                  </div>
-                }
-              />}
+              {nums[0] && (
+                <Tab
+                  classes={{ wrapper: classes.iconLabelWrapper }}
+                  className={clsx(classes.tab, value === 0 && classes.colorSelectedTab)}
+                  label="Customer"
+                  icon={
+                    <div className={clsx(classes.countBtn, value === 0 && classes.colorCountBtn)}>
+                      {nums[0]}
+                    </div>
+                  }
+                />
+              )}
+              {nums[1] && (
+                <Tab
+                  classes={{ wrapper: classes.iconLabelWrapper }}
+                  className={clsx(
+                    classes.tab,
+                    (value === 1 || !nums[1]) && classes.colorSelectedTab
+                  )}
+                  label="Onshore"
+                  icon={
+                    <div
+                      className={clsx(
+                        classes.countBtn,
+                        (value === 1 || !nums[1]) && classes.colorCountBtn
+                      )}>
+                      {nums[1]}
+                    </div>
+                  }
+                />
+              )}
             </Tabs>
           </Box>
         )}
         <MuiDialogContent
           classes={{
             root:
-              (field === 'ATTACHMENT_LIST' ||
-                ((field === 'INQUIRY_LIST' || field === currentField) && isShowBackground))
-                ? classes.dialogContentAttachment : classes.dialogContent
+              field === 'ATTACHMENT_LIST' ||
+              ((field === 'INQUIRY_LIST' || field === currentField) && isShowBackground)
+                ? classes.dialogContentAttachment
+                : classes.dialogContent
           }}
           style={{
-            overflow: isShowBackground && 'hidden',
+            overflow: isShowBackground && 'hidden'
           }}>
           {children}
         </MuiDialogContent>
 
-        {field !== 'ATTACHMENT_LIST' && <PopupConfirmSubmit field={field} handleCheckSubmit={() => setCheckSubmit(!checkSubmit)} />}
+        {field !== 'ATTACHMENT_LIST' && (
+          <PopupConfirmSubmit
+            field={field}
+            handleCheckSubmit={() => setCheckSubmit(!checkSubmit)}
+          />
+        )}
 
         <PopupConfirm />
 
         {!popoverfooter && <Divider classes={{ root: classes.divider }} />}
 
         {customActions == null && (
-          <DialogActions style={{ display: 'none !important', height: (hasAddButton === undefined || hasAddButton === true) && 70 }}>
+          <DialogActions
+            style={{
+              display: 'none !important',
+              height: (hasAddButton === undefined || hasAddButton === true) && 70
+            }}>
             {(hasAddButton === undefined || hasAddButton === true) && (
               <PermissionProvider
                 action={PERMISSION.INQUIRY_CREATE_INQUIRY}
-                extraCondition={!openAmendmentList}
-              >
-                <LinkButton
-                  text="Add Inquiry"
-                  disable={currentEditInq}
-                  handleClick={handleClick}
-                />
+                extraCondition={!openAmendmentList}>
+                <LinkButton text="Add Inquiry" disable={currentEditInq} handleClick={handleClick} />
               </PermissionProvider>
             )}
 
             <PermissionProvider
               action={PERMISSION.VIEW_CREATE_AMENDMENT}
               extraCondition={
-                !openAllInquiry &&
-                myBL?.state?.includes('DRF_')
-                && userType === 'CUSTOMER' // Allow only customer to create amendment
+                !openAllInquiry && myBL?.state?.includes('DRF_') && userType === 'CUSTOMER' // Allow only customer to create amendment
               }>
               <LinkButton
                 text="Add Amendment"
@@ -523,7 +552,7 @@ export default function Form(props) {
               />
             </PermissionProvider>
 
-            {(showBtnSend && user === 'workspace' && (openAllInquiry || openAmendmentList)) ?
+            {showBtnSend && user === 'workspace' && (openAllInquiry || openAmendmentList) ? (
               <PermissionProvider action={PERMISSION.INQUIRY_CREATE_INQUIRY}>
                 <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '2.6rem' }}>
                   <Button
@@ -539,24 +568,31 @@ export default function Form(props) {
                       fontFamily: 'Montserrat'
                     }}
                     disabled={disableSend || isLoading}
-                    onClick={sendMailClick}
-                  >
+                    onClick={sendMailClick}>
                     E-mail
                   </Button>
-                  {isLoading && <CircularProgress size={24} style={{
-                    color: 'red',
-                    position: 'absolute',
-                  }} />}
+                  {isLoading && (
+                    <CircularProgress
+                      size={24}
+                      style={{
+                        color: 'red',
+                        position: 'absolute'
+                      }}
+                    />
+                  )}
                 </div>
-              </PermissionProvider> :
+              </PermissionProvider>
+            ) : (
               <div style={{ marginLeft: '2rem' }}>
-                {field !== 'INQUIRY_REVIEW' && <PopoverFooter user={user} title={field} checkSubmit={checkSubmit} />}
+                {field !== 'INQUIRY_REVIEW' && (
+                  <PopoverFooter user={user} title={field} checkSubmit={checkSubmit} />
+                )}
               </div>
-            }
-          </DialogActions >
+            )}
+          </DialogActions>
         )}
         {customActions}
-      </Dialog >
-    </div >
+      </Dialog>
+    </div>
   );
 }
