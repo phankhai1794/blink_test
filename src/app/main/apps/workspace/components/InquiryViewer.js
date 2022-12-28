@@ -489,6 +489,8 @@ const InquiryViewer = (props) => {
                 if (['REP_SENT', 'AME_SENT'].includes(lastest.state)) {
                   lastest.showIconReply = false;
                   setSubmitLabel(true);
+                } else if (['AME_DRF', 'REP_DRF'].includes(lastest.state)) {
+                  setSubmitLabel(false);
                 }
               } else {
                 if (['REP_SENT'].includes(lastest.state)) {
