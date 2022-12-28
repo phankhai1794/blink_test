@@ -17,11 +17,11 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 import { loadComment } from 'app/services/inquiryService';
-import { getCommentDraftBl } from "app/services/draftblService";
+import { getCommentDraftBl } from 'app/services/draftblService';
 import axios from 'axios';
 import { getBlInfo } from 'app/services/myBLService';
 
-import * as InquiryActions from "../../../main/apps/workspace/store/actions/inquiry";
+import * as InquiryActions from '../../../main/apps/workspace/store/actions/inquiry';
 
 import PreviewDraftBL from './PreviewDraftBL';
 
@@ -67,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: '20px',
     backgroundColor: themeColor,
     '&:hover': {
-      backgroundColor: themeColor,
+      backgroundColor: themeColor
     }
   },
   buttonEditDraftBL: {
@@ -76,7 +76,7 @@ const useStyles = makeStyles((theme) => ({
     color: themeColor,
     background: whiteColor,
     border: `1px solid ${themeColor}`,
-    borderRadius: 8,
+    borderRadius: 8
   },
   buttonComfirm: {
     fontSize: 16,
@@ -86,7 +86,7 @@ const useStyles = makeStyles((theme) => ({
     border: `1px solid ${themeColor}`,
     borderRadius: 8,
     '&:hover': {
-      backgroundColor: themeColor,
+      backgroundColor: themeColor
     }
   }
 }));
@@ -110,7 +110,10 @@ function ToolbarLayout1(props) {
   const [attachmentLength, setAttachmentLength] = useState(0);
   const [isSubmit, setIsSubmit] = useState(true);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
-  const enabledMail = inquiries.some((inq) => ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
+  const enabledMail = inquiries.some((inq) =>
+    ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state)
+  );
+  const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
 
   useEffect(() => {
     dispatch(InquiryActions.checkSend(false));
@@ -119,7 +122,7 @@ function ToolbarLayout1(props) {
     let isSubmit = true;
     optionInquiries.forEach((item) => {
       if (user.role !== 'Admin') {
-        isSubmit = false
+        isSubmit = false;
       } else {
         if (item.state === 'OPEN') dispatch(InquiryActions.checkSend(true));
       }
@@ -128,7 +131,7 @@ function ToolbarLayout1(props) {
       isSubmit = false;
     }
 
-    const inquiriesPendingProcess = optionInquiries.filter(op => op.process === 'pending');
+    const inquiriesPendingProcess = optionInquiries.filter((op) => op.process === 'pending');
     setInquiryLength(inquiriesPendingProcess.length);
     inquiries.forEach((e) => {
       const mediaFile = e.mediaFile.map((f) => {
@@ -146,22 +149,22 @@ function ToolbarLayout1(props) {
           inquiryId: e.id,
           inqType: e.inqType
         };
-
-      })
+      });
 
       getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
     });
 
-    const amendment = optionInquiries.filter(op => op.process === 'draft');
+    const amendment = optionInquiries.filter((op) => op.process === 'draft');
     if (pathname.includes('/guest') || pathname.includes('/workspace')) {
       let countLoadComment = 0;
       let countAmendment = 0;
-      axios.all(inquiriesPendingProcess.map(q => loadComment(q.id))) // TODO: refactor
-        .then(res => {
+      axios
+        .all(inquiriesPendingProcess.map((q) => loadComment(q.id))) // TODO: refactor
+        .then((res) => {
           if (res) {
             let commentList = [];
             // get attachments file in comment reply/answer
-            res.map(r => {
+            res.map((r) => {
               commentList = [...commentList, ...r];
               r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
               const curInq = inquiriesPendingProcess[countLoadComment];
@@ -170,57 +173,73 @@ function ToolbarLayout1(props) {
                 if (!commentIdList.includes(itemRes.id)) {
                   commentIdList.push(itemRes.id);
                   if (itemRes.mediaFile.length > 0) {
-                    const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ...itemRes.mediaFile];
+                    const mediaTemp = [
+                      ...curInq.mediaFile,
+                      ...curInq.mediaFilesAnswer,
+                      ...itemRes.mediaFile
+                    ];
                     const attachmentTemp = mediaTemp.map((f) => {
                       return {
                         ...f,
                         field: curInq.field,
                         inquiryId: curInq.id,
-                        inqType: curInq.inqType,
-                      }
-                    })
+                        inqType: curInq.inqType
+                      };
+                    });
                     if (attachmentTemp.length > 0) {
-                      attachmentTemp.forEach(att => {
-                        const tempAttList = getAttachmentFiles.filter(attItem => (
-                          attItem.name === att.name
-                          && attItem.field === att.field
-                          && attItem.inqType === att.inqType
-                        ));
+                      attachmentTemp.forEach((att) => {
+                        const tempAttList = getAttachmentFiles.filter(
+                          (attItem) =>
+                            attItem.name === att.name &&
+                            attItem.field === att.field &&
+                            attItem.inqType === att.inqType
+                        );
                         if (tempAttList.length === 0) getAttachmentFiles.push(att);
-                      })
+                      });
                     }
                   }
                 }
-              })
+              });
 
-              countLoadComment += 1
-              if (inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)) {
+              countLoadComment += 1;
+              if (
+                inquiriesPendingProcess &&
+                amendment &&
+                countLoadComment === inquiriesPendingProcess.length &&
+                countAmendment === amendment.length
+              ) {
                 setAttachmentLength(getAttachmentFiles.length);
               }
             });
 
             if (user.role !== 'Admin') {
-              const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'REP_A_DRF');
+              const filterRepADraft = commentList.some(
+                (r) => r.state !== null && r.state === 'REP_A_DRF'
+              );
               if (filterRepADraft) isSubmit = false;
-              setIsSubmit(isSubmit)
+              setIsSubmit(isSubmit);
             } else {
-              const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'REP_Q_DRF');
+              const filterRepADraft = commentList.some(
+                (r) => r.state !== null && r.state === 'REP_Q_DRF'
+              );
               if (filterRepADraft) dispatch(InquiryActions.checkSend(true));
             }
           }
-        }).catch(err => {
-          console.error(err)
         })
+        .catch((err) => {
+          console.error(err);
+        });
 
       setAmendmentLength(amendment.length);
 
       if (amendment.length) {
-        axios.all(amendment.map(q => getCommentDraftBl(myBL.id, q.field))) // TODO: refactor
+        axios
+          .all(amendment.map((q) => getCommentDraftBl(myBL.id, q.field))) // TODO: refactor
           .then((res) => {
             if (res) {
               let commentList = [];
               // check and add attachment of amendment/answer to Att List
-              res.map(r => {
+              res.map((r) => {
                 commentList = [...commentList, ...r];
                 const curInq = amendment[countAmendment];
                 r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
@@ -228,40 +247,61 @@ function ToolbarLayout1(props) {
                 r.forEach((itemRes) => {
                   if (!commentDraftIdList.includes(itemRes.id)) {
                     commentDraftIdList.push(itemRes.id);
-                    const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ...itemRes.content.mediaFile];
+                    const mediaTemp = [
+                      ...curInq.mediaFile,
+                      ...curInq.mediaFilesAnswer,
+                      ...itemRes.content.mediaFile
+                    ];
                     const attachmentAmendmentTemp = mediaTemp.map((f) => {
                       return {
                         ...f,
                         field: curInq.field,
                         inquiryId: curInq.id,
-                        inqType: curInq.inqType,
-                      }
-                    })
+                        inqType: curInq.inqType
+                      };
+                    });
                     if (attachmentAmendmentTemp.length > 0) {
-                      attachmentAmendmentTemp.forEach(attAmendment => {
+                      attachmentAmendmentTemp.forEach((attAmendment) => {
                         const fileNameList = getAttachmentFiles.map((item) => {
-                          if (item.inqType === curInq.inqType) return item.name
-                        })
-                        if (attAmendment && !curInq.inqType && !fileNameList.includes(attAmendment.name)) getAttachmentFiles.push(attAmendment);
-                      })
+                          if (item.inqType === curInq.inqType) return item.name;
+                        });
+                        if (
+                          attAmendment &&
+                          !curInq.inqType &&
+                          !fileNameList.includes(attAmendment.name)
+                        )
+                          getAttachmentFiles.push(attAmendment);
+                      });
                     }
                   }
-                })
+                });
                 countAmendment += 1;
-                if (inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)) {
+                if (
+                  inquiriesPendingProcess &&
+                  amendment &&
+                  countLoadComment === inquiriesPendingProcess.length &&
+                  countAmendment === amendment.length
+                ) {
                   setAttachmentLength(getAttachmentFiles.length);
                 }
               });
               if (user.role !== 'Admin') {
-                const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'AME_DRF');
+                const filterRepADraft = commentList.some(
+                  (r) => r.state !== null && r.state === 'AME_DRF'
+                );
                 if (filterRepADraft) isSubmit = false;
-                setIsSubmit(isSubmit)
+                setIsSubmit(isSubmit);
               } else {
-                const filterRepADraft = commentList.some((r) => r.state !== null && r.state === 'REP_DRF');
+                const filterRepADraft = commentList.some(
+                  (r) => r.state !== null && r.state === 'REP_DRF'
+                );
                 if (filterRepADraft) dispatch(InquiryActions.checkSend(true));
               }
             }
-          }).catch(err => { console.error(err) });
+          })
+          .catch((err) => {
+            console.error(err);
+          });
       }
     }
   }, [enableSubmit, inquiries]);
@@ -294,7 +334,7 @@ function ToolbarLayout1(props) {
   }, [user, allowAccess]);
 
   const openAllInquiry = () => {
-    if (inquiries.filter(inq => inq.process === 'pending').length) {
+    if (inquiries.filter((inq) => inq.process === 'pending').length) {
       dispatch(FormActions.toggleAllInquiry(true));
       dispatch(FormActions.toggleSaveInquiry(true));
     } else {
@@ -327,7 +367,7 @@ function ToolbarLayout1(props) {
 
   const handleClose = () => {
     setOpen(false);
-  }
+  };
 
   const confirmBlDraft = () => {
     setOpen(true);
@@ -341,151 +381,154 @@ function ToolbarLayout1(props) {
   const onSubmit = async () => {
     dispatch(FormActions.toggleAllInquiry(true));
     dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
-  }
+  };
 
   return (
     <ThemeProvider theme={toolbarTheme}>
-      <AppBar id="fuse-toolbar" className="flex relative z-10" color="inherit">
-        <Toolbar className="p-0">
-          {config.navbar.display && config.navbar.position === 'left' && (
-            <Hidden lgUp>
-              <NavbarMobileToggleButton className="w-64 h-64 p-0" />
-              <div className={classes.separator} />
-            </Hidden>
-          )}
-
-          <div className="flex flex-1" style={{ marginLeft: 35 }}>
-            <div style={{ paddingRight: '32px' }} className={classes.iconWrapper}>
-              <Avatar
-                src="assets/images/logos/one_ocean_network-logo.png"
-                className={clsx(classes.logo, classes.fitAvatar)}
-                alt="one-logo"
-              // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
-              //   component: Link,
-              //   to: '/'
-              // })}
-              />
-            </div>
-
-            <PermissionProvider
-              action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
-              extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
-              <Button
-                variant="text"
-                size="medium"
-                className={clsx('h-64', classes.button)}
-                onClick={openAllInquiry}>
-                <Badge color="primary" badgeContent={inquiryLength}>
-                  <NotificationsIcon />
-                </Badge>
-                <span className="pl-12">Inquiries List</span>
-              </Button>
-            </PermissionProvider>
-
-            {myBL?.state?.includes('DRF_') && user?.userType !== 'ONSHORE' && ['/workspace', '/guest'].some((el) => pathname.includes(el)) && (
-              <Button
-                variant="text"
-                size="medium"
-                className={clsx('h-64', classes.button)}
-                onClick={openAmendmentsList}>
-                <Badge color="primary" badgeContent={amendmentsLength}>
-                  <NotificationsIcon />
-                </Badge>
-                <span className="pl-12">Amendments List</span>
-              </Button>
+      {!isLoading && (
+        <AppBar id="fuse-toolbar" className="flex relative z-10" color="inherit">
+          <Toolbar className="p-0">
+            {config.navbar.display && config.navbar.position === 'left' && (
+              <Hidden lgUp>
+                <NavbarMobileToggleButton className="w-64 h-64 p-0" />
+                <div className={classes.separator} />
+              </Hidden>
             )}
 
-            <PermissionProvider
-              action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
-              extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
-              <Button
-                variant="text"
-                size="medium"
-                className={clsx('h-64', classes.button)}
-                onClick={openAttachment}>
-                <Badge color="primary" badgeContent={attachmentLength} id='no-att'>
-                  <DescriptionIcon />
-                </Badge>
-                <span className="pl-12">Attachments List</span>
-              </Button>
-            </PermissionProvider>
-          </div>
-          <div className="flex" style={{ marginRight: 35, alignItems: 'center' }}>
-            <PreviewDraftBL />
+            <div className="flex flex-1" style={{ marginLeft: 35 }}>
+              <div style={{ paddingRight: '32px' }} className={classes.iconWrapper}>
+                <Avatar
+                  src="assets/images/logos/one_ocean_network-logo.png"
+                  className={clsx(classes.logo, classes.fitAvatar)}
+                  alt="one-logo"
+                  // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+                  //   component: Link,
+                  //   to: '/'
+                  // })}
+                />
+              </div>
 
-            <PermissionProvider
-              action={PERMISSION.VIEW_EDIT_DRAFT_BL}
-              extraCondition={pathname.includes('/draft-bl') && !pathname.includes('/edit')}>
-              <Button
-                className={clsx(classes.button, classes.buttonEditDraftBL)}
-                onClick={redirectEditDraftBL}>
-                Amendment
-              </Button>
-
-              <Button
-                variant="contained"
-                className={clsx(classes.button, classes.buttonComfirm)}
-                onClick={confirmBlDraft}>
-                Confirm
-              </Button>
-              <DialogConfirm open={open} handleClose={handleClose} />
-            </PermissionProvider>
-
-            <PermissionProvider
-              action={PERMISSION.MAIL_SEND_MAIL}
-              extraCondition={pathname.includes('/workspace')}>
-              <div style={{ paddingRight: 5 }}>
+              <PermissionProvider
+                action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
+                extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
                 <Button
-                  style={{
-                    width: '120px',
-                    height: '30px',
-                    borderRadius: '20px'
-                  }}
-                  disabled={!enabledMail}
-                  color='primary'
-                  variant="contained"
+                  variant="text"
                   size="medium"
                   className={clsx('h-64', classes.button)}
-                  onClick={openEmail}>
-                  <span className="pl-4">E-mail</span>
+                  onClick={openAllInquiry}>
+                  <Badge color="primary" badgeContent={inquiryLength}>
+                    <NotificationsIcon />
+                  </Badge>
+                  <span className="pl-12">Inquiries List</span>
                 </Button>
-              </div>
-            </PermissionProvider>
+              </PermissionProvider>
 
-            {/* <PermissionProvider
+              {myBL?.state?.includes('DRF_') &&
+                user?.userType !== 'ONSHORE' &&
+                ['/workspace', '/guest'].some((el) => pathname.includes(el)) && (
+                  <Button
+                    variant="text"
+                    size="medium"
+                    className={clsx('h-64', classes.button)}
+                    onClick={openAmendmentsList}>
+                    <Badge color="primary" badgeContent={amendmentsLength}>
+                      <NotificationsIcon />
+                    </Badge>
+                    <span className="pl-12">Amendments List</span>
+                  </Button>
+                )}
+
+              <PermissionProvider
+                action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
+                extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
+                <Button
+                  variant="text"
+                  size="medium"
+                  className={clsx('h-64', classes.button)}
+                  onClick={openAttachment}>
+                  <Badge color="primary" badgeContent={attachmentLength} id="no-att">
+                    <DescriptionIcon />
+                  </Badge>
+                  <span className="pl-12">Attachments List</span>
+                </Button>
+              </PermissionProvider>
+            </div>
+            <div className="flex" style={{ marginRight: 35, alignItems: 'center' }}>
+              <PreviewDraftBL />
+
+              <PermissionProvider
+                action={PERMISSION.VIEW_EDIT_DRAFT_BL}
+                extraCondition={pathname.includes('/draft-bl') && !pathname.includes('/edit')}>
+                <Button
+                  className={clsx(classes.button, classes.buttonEditDraftBL)}
+                  onClick={redirectEditDraftBL}>
+                  Amendment
+                </Button>
+
+                <Button
+                  variant="contained"
+                  className={clsx(classes.button, classes.buttonComfirm)}
+                  onClick={confirmBlDraft}>
+                  Confirm
+                </Button>
+                <DialogConfirm open={open} handleClose={handleClose} />
+              </PermissionProvider>
+
+              <PermissionProvider
+                action={PERMISSION.MAIL_SEND_MAIL}
+                extraCondition={pathname.includes('/workspace')}>
+                <div style={{ paddingRight: 5 }}>
+                  <Button
+                    style={{
+                      width: '120px',
+                      height: '30px',
+                      borderRadius: '20px'
+                    }}
+                    disabled={!enabledMail}
+                    color="primary"
+                    variant="contained"
+                    size="medium"
+                    className={clsx('h-64', classes.button)}
+                    onClick={openEmail}>
+                    <span className="pl-4">E-mail</span>
+                  </Button>
+                </div>
+              </PermissionProvider>
+
+              {/* <PermissionProvider
               action={PERMISSION.VIEW_SHOW_BL_HISTORY}
               extraCondition={pathname.includes('/workspace')}>
               <History />
               {openTrans && transId && <RestoreVersion />}
             </PermissionProvider>  */}
 
-            <PermissionProvider
-              action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
-              extraCondition={!pathname.includes('/draft-bl')}>
-              <Button
-                variant="contained"
-                className={clsx(classes.button, classes.buttonSend)}
-                disabled={isSubmit}
-                onClick={onSubmit}>
-                Submit
-              </Button>
-            </PermissionProvider>
+              <PermissionProvider
+                action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
+                extraCondition={!pathname.includes('/draft-bl')}>
+                <Button
+                  variant="contained"
+                  className={clsx(classes.button, classes.buttonSend)}
+                  disabled={isSubmit}
+                  onClick={onSubmit}>
+                  Submit
+                </Button>
+              </PermissionProvider>
 
-            <PermissionProvider
-              action={PERMISSION.VIEW_SHOW_USER_MENU}
-              extraCondition={!pathname.includes('/guest')}
-            >
-              <UserProfile classes={classes} history={history} />
-            </PermissionProvider>
-          </div>
+              <PermissionProvider
+                action={PERMISSION.VIEW_SHOW_USER_MENU}
+                extraCondition={!pathname.includes('/guest')}>
+                <UserProfile classes={classes} history={history} />
+              </PermissionProvider>
+            </div>
 
-          {config.navbar.display && config.navbar.position === 'right' && (
-            <Hidden lgUp>
-              <NavbarMobileToggleButton />
-            </Hidden>
-          )}
-        </Toolbar>
-      </AppBar>
+            {config.navbar.display && config.navbar.position === 'right' && (
+              <Hidden lgUp>
+                <NavbarMobileToggleButton />
+              </Hidden>
+            )}
+          </Toolbar>
+        </AppBar>
+      )}
     </ThemeProvider>
   );
 }

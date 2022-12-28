@@ -41,7 +41,6 @@ export const sendMail =
             }
 
             dispatch(InquiryActions.checkSend(false));
-            dispatch(Actions.toggleReload());
             return dispatch({
               type: SENDMAIL_SUCCESS
             });

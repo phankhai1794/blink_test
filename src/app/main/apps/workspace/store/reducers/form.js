@@ -7,7 +7,6 @@ const initialState = {
   showSaveInquiry: false,
   showAddInquiry: true,
   openAttachment: false,
-  reload: false,
   openTrans: false,
   openEmail: false,
   openInqReview: false,
@@ -28,6 +27,7 @@ const initialState = {
   openNotificationBLReloadWarning: false,
   inqViewerFocus: null,
   validateInput: { isValid: true, prohibitedInfo: null, handleConfirm: null },
+  isLoading: 0
 };
 
 const formReducer = function (state = initialState, action) {
@@ -54,10 +54,12 @@ const formReducer = function (state = initialState, action) {
       return { ...state, openAttachment: action.state };
     }
     case Actions.RELOAD: {
-      return { ...state, reload: !state.reload, openDialog: false, openAllInquiry: false, openAttachment: false };
-    }
-    case Actions.RELOAD_INQ: {
-      return { ...state, reload: !state.reload };
+      return {
+        ...state,
+        openDialog: false,
+        openAllInquiry: false,
+        openAttachment: false
+      };
     }
     case Actions.OPEN_TRANSACTION: {
       return { ...state, openTrans: !state.openTrans };
@@ -96,19 +98,25 @@ const formReducer = function (state = initialState, action) {
       return { ...state, enableSaveInquiriesList: action.state };
     }
     case Actions.OPEN_CONFIRM_POPUP: {
-      return { ...state, ...action.state }
+      return { ...state, ...action.state };
     }
     case Actions.CONFIRM_POPUP_CLICK: {
-      return { ...state, openConfirmPopup: false, confirmClick: action.state }
+      return { ...state, openConfirmPopup: false, confirmClick: action.state };
     }
     case Actions.OPEN_CREATE_AMENDMENT: {
-      return { ...state, openAmendmentForm: action.state }
+      return { ...state, openAmendmentForm: action.state };
     }
     case Actions.INQUIRY_VIEWER_FOCUS: {
-      return { ...state, inqViewerFocus: action.state }
+      return { ...state, inqViewerFocus: action.state };
     }
     case Actions.VALIDATE_INPUT: {
-      return { ...state, validateInput: action.state }
+      return { ...state, validateInput: action.state };
+    }
+    case Actions.INCREASE_LOADING: {
+      return { ...state, isLoading: state.isLoading + 1 };
+    }
+    case Actions.DECREASE_LOADING: {
+      return { ...state, isLoading: state.isLoading - 1 };
     }
     default: {
       return state;
