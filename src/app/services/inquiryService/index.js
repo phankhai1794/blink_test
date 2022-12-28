@@ -56,8 +56,8 @@ export async function resolveInquiry(body) {
   return response.data;
 }
 
-export async function uploadOPUS(myblId, id, fieldId) {
-  const response = await axios().post(`${PATH}/uploadOPUS/${myblId}/${id}/${fieldId}`);
+export async function uploadOPUS(myblId, id, fieldId, inqAnsId) {
+  const response = await axios().post(`${PATH}/uploadOPUS/${myblId}/${id}/${fieldId}/${inqAnsId}`);
   return response.data;
 }
 

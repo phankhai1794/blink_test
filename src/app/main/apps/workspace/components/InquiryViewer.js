@@ -210,8 +210,8 @@ const InquiryViewer = (props) => {
   const [disableSaveReply, setDisableSaveReply] = useState(false);
   const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
   const inqViewerFocus = useSelector(({ workspace }) => workspace.formReducer.inqViewerFocus);
+  const [inqAnsId, setInqAnsId] = useState('');
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
-
   const [loading, setLoading] = useState(false);
 
   const handleViewMore = (id) => {
@@ -251,6 +251,10 @@ const InquiryViewer = (props) => {
             // filter comment
             // console.log(res)
             const filterOffshoreSent = res[res.length - 1];
+            if (filterOffshoreSent.type === 'REP' && filterOffshoreSent.state === 'COMPL') {
+              setInqAnsId(filterOffshoreSent.id);
+            }
+
             lastest.mediaFile = filterOffshoreSent.mediaFile;
             lastest.mediaFilesAnswer = filterOffshoreSent.answersMedia;
             lastest.answerObj = filterOffshoreSent.answerObj;
@@ -401,7 +405,7 @@ const InquiryViewer = (props) => {
               setQuestion(lastest);
               setInqHasComment(true);
             }
-            setTextResolve(content[lastest.field] || '');
+            // setTextResolve(content[lastest.field] || '');
           }
           setIsLoadedComment(true);
         })
@@ -417,6 +421,9 @@ const InquiryViewer = (props) => {
             // console.log(res)
             const { content: contentField, mediaFile } = res[res.length - 1].content;
             const lastestComment = res[res.length - 1];
+            if (lastestComment.state === 'RESOLVED') {
+              setInqAnsId(lastestComment.id);
+            }
             // filter comment
             lastest.mediaFile = mediaFile;
             lastest.answerObj = [{ content: contentField }];
@@ -508,8 +515,8 @@ const InquiryViewer = (props) => {
                 setTempReply({});
               }
             }
-            if (isEditOriginalAmendment) {
-              dispatch(InquiryActions.setContent({ ...content, [question.field]: lastest.content }));
+            if (lastest.state.includes('AME_')) {
+              dispatch(InquiryActions.setContent({ ...content, [lastest.field]: lastest.content }));
             }
             setQuestion(lastest);
 
@@ -854,7 +861,7 @@ const InquiryViewer = (props) => {
         } else {
           const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
           const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
-          dispatch(InquiryActions.setContent({ ...content, [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: textResolveSeparate.address.trim(), [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: textResolveSeparate.name.trim() }));
+          dispatch(InquiryActions.setContent({ ...content, [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: textResolveSeparate.address.trim(), [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: textResolveSeparate.name.trim(), [question.field]: contentField }));
         }
         // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
@@ -865,7 +872,7 @@ const InquiryViewer = (props) => {
   const onUpload = () => {
     setLoading(true);
     const optionsInquires = [...inquiries];
-    uploadOPUS(myBL.id, question.id, question.field)
+    uploadOPUS(myBL.id, question.id, question.field, inqAnsId)
       .then((res) => {
         if (res && res.status === 'F') {
           dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
@@ -889,7 +896,10 @@ const InquiryViewer = (props) => {
               dispatch(InquiryActions.setListCommentDraft(optionAmendment));
             }
           }
-
+          // Set new Content when EBL has new data
+          if (res?.newData) {
+            dispatch(InquiryActions.setContent({ ...content, ...res.newData }));
+          }
           if (res.warning) {
             dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
           } else {
@@ -1133,7 +1143,6 @@ const InquiryViewer = (props) => {
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
           if (res) {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
-            setEditOriginalAmendment(res.isEditOriginalAmendment);
           }
           optionsInquires[editedIndex].createdAt = res.createdAt;
           dispatch(InquiryActions.setInquiries(optionsInquires));

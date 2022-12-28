@@ -454,7 +454,7 @@ const DraftPage = (props) => {
                   </div>
                 </div>
               </Grid>
-              <Grid item xs={1} style={{ borderRight: BODER_COLOR,  display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
+              <Grid item xs={1} style={{ borderRight: BODER_COLOR, display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     <span className={classes.tittle_S}>H</span>
