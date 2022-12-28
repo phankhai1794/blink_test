@@ -98,7 +98,7 @@ export const setConfirmDraftBL = () => (dispatch) => {
   confirmDraftBl(bl)
     .then(() => 
       dispatch(setBL({ state: draftConfirm }),
-        dispatch(AppActions.updateOpusStatus(bl, "CC", "No more amendments (IRQD will be updated correspondingly)"))
+        dispatch(AppActions.updateOpusStatus(bl, "CC", "")) //BL Confirm by Customer (CC)
       ))
     .catch((err) => console.error(err));
 };
