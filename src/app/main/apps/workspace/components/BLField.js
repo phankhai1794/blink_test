@@ -140,7 +140,6 @@ const useStyles = makeStyles((theme) => ({
   },
   attachIcon: {
     transform: 'rotate(45deg)',
-    marginLeft: '-2.5rem',
   },
   iconSvg: {
     width: 17,
