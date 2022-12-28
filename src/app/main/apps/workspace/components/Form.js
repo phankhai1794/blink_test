@@ -185,7 +185,7 @@ const useStyles = makeStyles(() => ({
 
 const LinkButton = ({ text, disable, handleClick }) => {
   return (
-    <div style={{ position: 'absolute', right: '1rem', padding: 21 }}>
+    <div style={{ position: 'absolute', right: '1rem', zIndex: 10, padding: 21 }}>
       <Link
         component="button"
         variant="body2"
