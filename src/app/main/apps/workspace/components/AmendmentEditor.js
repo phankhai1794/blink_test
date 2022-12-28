@@ -192,7 +192,21 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   useEffect(() => {
     !openAmendmentList ? setFieldValue(content[currentField] || "") : setFieldValue('');
+    setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(currentField));
   }, [content, currentField])
+
+  useEffect(() => {
+    if (isSeparate) {
+      const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
+      const fieldIndex = arrFields.findIndex(key => metadata.field[key] === currentField);
+      const fieldName = metadata.field?.[`${arrFields[fieldIndex]}Name`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Name`]] : '';
+      const fieldAddress = metadata.field?.[`${arrFields[fieldIndex]}Address`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Address`]] : '';
+      setFieldValueSeparate({
+        name: fieldName || '',
+        address: fieldAddress || ''
+      })
+    }
+  }, [isSeparate])
 
   const styles = (width) => {
     return {
