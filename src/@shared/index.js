@@ -45,9 +45,9 @@ export const validateExtensionFile = (file) => {
   return fileExt.match(/jpe|jpg|png|pdf|csv|xls|sheet|ppt|doc|txt|gif/g);
 };
 
-export const checkNewInquiry = (metadata, inquiries, type) => {
+export const checkNewInquiry = (metadata, inquiries, type, status = ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF']) => {
   const list = [];
-  const temp = inquiries?.filter(inq => inq.receiver[0] === type && ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
+  const temp = inquiries?.filter(inq => inq.receiver[0] === type && status.includes(inq.state));
   if (temp.length) {
     const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
     sortDateList.forEach(inq => {

@@ -1,20 +1,13 @@
 import axios from '@shared/axios';
 const PATH = '/mail';
 
-export async function sendmail(myblId, from, toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc, subject, content, replyInqs, user) {
+export async function sendmail({ myblId, replyInqs, user, header, ...form }) {
   const response = await axios().post(`${PATH}/sendMail`, {
     myblId,
-    from,
-    toCustomer,
-    toCustomerCc,
-    toCustomerBcc,
-    toOnshore,
-    toOnshoreCc,
-    toOnshoreBcc,
-    subject,
-    body: content,
     user,
-    replyInqs
+    replyInqs,
+    header,
+    ...form
   });
   return response;
 }
