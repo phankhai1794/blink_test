@@ -182,7 +182,6 @@ const InquiryViewer = (props) => {
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
-  const [inqReopen, setInqReopen] = useState();
   const [question, setQuestion] = useState(props.question);
   const [type, setType] = useState(props.question.ansType);
   const [allowDeleteInq, setAllowDeleteInq] = useState(true);
@@ -732,41 +731,6 @@ const InquiryViewer = (props) => {
           // setSaveComment(!isSaveComment);
         }).catch((error) => console.error(error));
     }
-    else if (confirmClick && confirmPopupType === 'reopenInq'){
-      reOpenInquiry(inqReopen)
-      .then((res) => {
-        const optionsInquires = [...inquiries];
-        if (res) {
-          if (question.process === 'draft') {
-            const optionAmendment = [...listCommentDraft.filter(({ id }) => id !== question.id)];
-            dispatch(InquiryActions.setListCommentDraft(optionAmendment));
-
-            const indexAmenment = optionsInquires.findIndex(inq => (inq.field === question.field && inq.process === 'draft'))
-            // optionsInquires[indexAmenment].state = res?.prevState;
-            optionsInquires[indexAmenment].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
-            optionsInquires[indexAmenment].createdAt = res.updatedAt;
-          } else {
-            const indexInq = optionsInquires.findIndex(inq => inq.id === inqReopen)
-            // optionsInquires[indexInq].state = res?.prevState;
-            optionsInquires[indexInq].createdAt = res.updatedAt;
-            optionsInquires[indexInq].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
-          }
-          dispatch(InquiryActions.setInquiries(optionsInquires));
-
-          props.getUpdatedAt();
-          setViewDropDown('');
-          // setSaveComment(!isSaveComment);
-          dispatch(
-            AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
-          );
-        }
-      })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
-      .finally(() => {
-        // setContent
-        dispatch(Actions.loadContent(myBL?.id));
-      });
-    }
     dispatch(
       FormActions.openConfirmPopup({
         openConfirmPopup: false,
@@ -890,7 +854,6 @@ const InquiryViewer = (props) => {
         optionsInquires[editedIndex].createdAt = res.updatedAt;
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
-
         props.getUpdatedAt();
         setIsResolve(false);
         setViewDropDown('');
@@ -1104,7 +1067,6 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].process = 'pending';
             optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
-
             props.getUpdatedAt();
             dispatch(InquiryActions.checkSend(true));
             dispatch(
@@ -1136,7 +1098,6 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].process = 'pending';
             optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
-
             props.getUpdatedAt();
             // if (props.isInquiryDetail) {
             //   setSaveComment(!isSaveComment);
@@ -1282,14 +1243,39 @@ const InquiryViewer = (props) => {
   }
 
   const reOpen = (idInq) => {
-    setInqReopen(idInq);
-    dispatch(
-      FormActions.openConfirmPopup({
-        openConfirmPopup: true,
-        confirmPopupMsg: `Are you sure you want to re-open ${question.process === 'pending'? 'inquiry': 'amendment'}?`,
-        confirmPopupType: 'reopenInq'
+    reOpenInquiry(idInq)
+      .then((res) => {
+        const optionsInquires = [...inquiries];
+        if (res) {
+          if (question.process === 'draft') {
+            const optionAmendment = [...listCommentDraft.filter(({ id }) => id !== question.id)];
+            dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+
+            const indexAmenment = optionsInquires.findIndex(inq => (inq.field === question.field && inq.process === 'draft'))
+            // optionsInquires[indexAmenment].state = res?.prevState;
+            optionsInquires[indexAmenment].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
+            optionsInquires[indexAmenment].createdAt = res.updatedAt;
+          } else {
+            const indexInq = optionsInquires.findIndex(inq => inq.id === idInq)
+            // optionsInquires[indexInq].state = res?.prevState;
+            optionsInquires[indexInq].createdAt = res.updatedAt;
+            optionsInquires[indexInq].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
+          }
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+          props.getUpdatedAt();
+          setViewDropDown('');
+          // setSaveComment(!isSaveComment);
+          dispatch(
+            AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
+          );
+        }
       })
-    );
+      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
+      .finally(() => {
+        // setContent
+        dispatch(Actions.loadContent(myBL?.id));
+      });
+
   };
 
   useEffect(() => {
