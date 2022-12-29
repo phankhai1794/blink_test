@@ -45,9 +45,9 @@ export const validateExtensionFile = (file) => {
   return fileExt.match(/jpe|jpg|png|pdf|csv|xls|sheet|ppt|doc|txt|gif/g);
 };
 
-export const checkNewInquiry = (metadata, inquiries, type) => {
+export const checkNewInquiry = (metadata, inquiries, type, status = ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF']) => {
   const list = [];
-  const temp = inquiries?.filter(inq => inq.receiver[0] === type && ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
+  const temp = inquiries?.filter(inq => inq.receiver[0] === type && status.includes(inq.state));
   if (temp.length) {
     const sortDateList = temp.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
     sortDateList.forEach(inq => {
@@ -85,7 +85,7 @@ export const COUNTRIES = [
 
 export const sentStatus = [
   ...['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'REOPEN_Q', 'REOPEN_A'], // inquiry status
-  ...['AME_SENT', 'REP_SENT'] // draft status
+  ...['REP_SENT'] // draft status
 ];
 
 export const validatePartiesContent = (partiesContent, type) => {
@@ -103,7 +103,7 @@ export const validatePartiesContent = (partiesContent, type) => {
     errorType = maxRowsError;
   };
 
-  return {isError, errorType}
+  return { isError, errorType }
 }
 
 
@@ -133,4 +133,14 @@ export function groupBy(list, keyGetter) {
     }
   });
   return map;
+}
+
+export function isJsonText(str) {
+  try {
+    JSON.parse(str);
+    if (['object'].includes(typeof JSON.parse(str))) return true;
+  } catch (e) {
+    return false;
+  }
+  return false;
 }

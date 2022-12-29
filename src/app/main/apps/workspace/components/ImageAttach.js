@@ -200,7 +200,8 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
           onClose={closeImageViewer}
           disableScroll={false}
           backgroundStyle={{
-            backgroundColor: 'rgba(0,0,0,0.7)'
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            zIndex: 15
           }}
           closeOnClickOutside={true}
         />

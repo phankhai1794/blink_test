@@ -140,7 +140,6 @@ const useStyles = makeStyles((theme) => ({
   },
   attachIcon: {
     transform: 'rotate(45deg)',
-    marginLeft: '-2.5rem',
   },
   iconSvg: {
     width: 17,
@@ -197,6 +196,9 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   };
 
   const onClick = (e) => {
+    dispatch(
+      InquiryActions.validate({ inqType: true, field: true, receiver: true, ansType: true, content: true, answerContent: true })
+    );
     if (!disableClick) {
       if (isEmpty && allowAddInquiry) {
         dispatch(InquiryActions.addQuestion(id));
@@ -264,7 +266,6 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         {isResolved && <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)} />}
         {isUploaded && <img src='/assets/images/icons/icon-uploaded.svg' className={classes.iconSvg} />}
       </>
-     
     }
   }
 
@@ -274,9 +275,8 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         id,
         user,
         inquiries,
-        listCommentDraft
       );
-      
+
       setIsEmpty(colorStatusObj.isEmpty);
       setHasInquiry(colorStatusObj.hasInquiry);
       setHasAmendment(colorStatusObj.hasAmendment);

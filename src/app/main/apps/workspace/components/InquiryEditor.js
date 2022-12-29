@@ -16,17 +16,13 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { uploadFile } from 'app/services/fileService';
-import {
-  updateInquiry,
-  saveInquiry,
-  deleteInquiry,
-  getUpdatedAtAnswer
-} from 'app/services/inquiryService';
+import { updateInquiry, saveInquiry, getUpdatedAtAnswer } from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
 import { validateTextInput } from 'app/services/myBLService';
 
+import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 import { MSG_INQUIRY_CONTENT } from '../store/reducers/inquiry';
@@ -114,6 +110,7 @@ const InquiryEditor = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles();
   const { onCancel, setSave } = props;
+  const scrollTopPopup = useRef(null);
   const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize] = useSelector(
     ({ workspace }) => [
       workspace.inquiryReducer.metadata,
@@ -124,8 +121,6 @@ const InquiryEditor = (props) => {
       workspace.inquiryReducer.listMinimize
     ]
   );
-  const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
-
   const user = useSelector(({ user }) => user);
 
   const optionsAnsType = [
@@ -180,6 +175,9 @@ const InquiryEditor = (props) => {
         .sort((a, b) => a.label.localeCompare(b.label));
       setInqTypeOption(filter);
     }
+    if (scrollTopPopup.current) {
+      scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [fieldValue]);
 
   const handleTypeChange = (e) => {
@@ -191,10 +189,10 @@ const InquiryEditor = (props) => {
       inq.content = contentEdited;
     } else {
       inq.content =
-      MSG_INQUIRY_CONTENT.replace(
-        '{{INQ_TYPE}}',
-        e.label
-      );
+        MSG_INQUIRY_CONTENT.replace(
+          '{{INQ_TYPE}}',
+          e.label
+        );
     }
     setValueType(e);
     setNameType(e.label);
@@ -211,10 +209,10 @@ const InquiryEditor = (props) => {
       inq.content = contentEdited;
     } else {
       inq.content =
-      MSG_INQUIRY_CONTENT.replace(
-        '{{INQ_TYPE}}',
-        ''
-      );
+        MSG_INQUIRY_CONTENT.replace(
+          '{{INQ_TYPE}}',
+          ''
+        );
     }
     dispatch(InquiryActions.validate({ ...valid, field: true }));
     setFieldValue(e);
@@ -295,24 +293,9 @@ const InquiryEditor = (props) => {
     return false;
   };
 
-  const handleValidateInput = async (confirm = null) => {
-    setDisabled(true);
-    let textInput = currentEditInq?.content || '';
-    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
-    if (isWarning) {
-      dispatch(
-        FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm })
-      );
-    } else {
-      confirm && confirm();
-    }
-  };
-
   const onSave = async () => {
+    setDisabled(true);
     const inquiriesOp = [...inquiries];
-    dispatch(
-      FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null })
-    );
     let check = true;
     const ansTypeChoice = metadata.ans_type['choice'];
     let validate = {};
@@ -396,7 +379,6 @@ const InquiryEditor = (props) => {
           );
           setDisabled(false);
           return;
-          // break;
         }
         // check empty a field
         if (inquiry.answerObj.length > 0) {
@@ -438,6 +420,7 @@ const InquiryEditor = (props) => {
         const res = await uploadFile(form_data);
         mediaCreate[f].id = res.response[0].id;
       }
+
       if (
         JSON.stringify(inq(currentEditInq)) !== JSON.stringify(inq(inquiry)) ||
         JSON.stringify(currentEditInq.answerObj) !== JSON.stringify(inquiry.answerObj) ||
@@ -470,6 +453,7 @@ const InquiryEditor = (props) => {
         inquiriesOp[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setEditInq());
         dispatch(InquiryActions.setInquiries(inquiriesOp));
+
         props.getUpdatedAt();
         setDisabled(false);
         // setSave();
@@ -535,6 +519,10 @@ const InquiryEditor = (props) => {
               const optionsInquires = [...inquiries];
               optionsInquires.push(inqResponse);
               optionsMinimize.push(inqResponse);
+              if (optionsInquires.length === 1) {
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "DC", "")) // Draft of Inquiry Created (DC)
+              }
+
               dispatch(
                 AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
               );
@@ -554,14 +542,10 @@ const InquiryEditor = (props) => {
     }
   };
 
-  useEffect(() => {
-    if (!validateInput?.isValid) setDisabled(false);
-  }, [validateInput])
-
   return (
     <>
       <div className="flex justify-between" style={{ padding: '0.5rem', marginRight: '-15px' }}>
-        <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
+        <div ref={scrollTopPopup} style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
           {currentEditInq.field
             ? getLabelById(metadata['field_options'], currentEditInq.field)
             : 'New Inquiry'}
@@ -598,7 +582,7 @@ const InquiryEditor = (props) => {
                   value={fieldValue}
                   isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleFieldChange}
-                  placeholder="Select Field Type"
+                  placeholder="BL Data Field"
                   textFieldProps={{
                     variant: 'outlined'
                   }}
@@ -619,7 +603,7 @@ const InquiryEditor = (props) => {
                   customStyle={styles(fullscreen ? 330 : 295)}
                   isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleTypeChange}
-                  placeholder="Type of Inquiry"
+                  placeholder="Type of Question"
                   textFieldProps={{
                     variant: 'outlined'
                   }}
@@ -640,7 +624,7 @@ const InquiryEditor = (props) => {
                   customStyle={styles(fullscreen ? 330 : 295)}
                   isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   onChange={handleAnswerTypeChange}
-                  placeholder="Type of Question"
+                  placeholder="Type of Answer"
                   textFieldProps={{
                     variant: 'outlined'
                   }}
@@ -683,7 +667,7 @@ const InquiryEditor = (props) => {
             />
           )}
           <Divider className="mt-12" />
-          <>
+          <div style={{ width: '80%' }}>
             {currentEditInq.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
             {currentEditInq.mediaFile?.length > 0 &&
               currentEditInq.mediaFile?.map((file, mediaIndex) => (
@@ -695,7 +679,7 @@ const InquiryEditor = (props) => {
                   )}
                 </div>
               ))}
-          </>
+          </div>
           <>
             {user.role !== 'Admin' && (
               <>
@@ -723,7 +707,7 @@ const InquiryEditor = (props) => {
                 variant="contained"
                 color="primary"
                 disabled={isDisabled}
-                onClick={() => handleValidateInput(onSave)}
+                onClick={() => onSave()}
                 classes={{ root: classes.button }}>
                 Save
               </Button>

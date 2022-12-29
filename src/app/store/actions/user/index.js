@@ -5,7 +5,7 @@ export const SET_USER_PROCESSING_BY = 'SET_USER_PROCESSING_BY';
 export function setUser(state) {
   return {
     type: SET_USER,
-    state: state
+    state
   };
 }
 
@@ -18,6 +18,6 @@ export function removeUser() {
 export function userProcessingBy(state) {
   return {
     type: SET_USER_PROCESSING_BY,
-    state: state
+    state
   };
 }

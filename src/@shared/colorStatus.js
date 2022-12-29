@@ -9,10 +9,11 @@ export const checkClassName = (
   classes
 ) => {
   let response = { className: '', iconColor: '' };
-  if (hasInquiry || hasAmendment) response = { className: classes.hasInquiry, iconColor: classes.colorHasInqIcon };
-  else if (hasAnswer) response = { className: classes.hasAnswer, iconColor: classes.colorHasAnswer };
-  else if (isResolved) response = { className: classes.hasResolved, iconColor: classes.colorHasResolved };
+
+  if (hasAnswer) response = { className: classes.hasAnswer, iconColor: classes.colorHasAnswer };
+  if (isResolved) response = { className: classes.hasResolved, iconColor: classes.colorHasResolved };
   else if (isUploaded) response = { className: classes.hasUploaded, iconColor: classes.colorHasUploaded };
+  else if (hasInquiry || hasAmendment) response = { className: classes.hasInquiry, iconColor: classes.colorHasInqIcon };
   return response;
 }
 
@@ -20,7 +21,6 @@ export const checkColorStatus = (
   id,
   user,
   inquiries,
-  listCommentDraft
 ) => {
   const colorStatusObj = {
     isEmpty: true,
@@ -33,51 +33,26 @@ export const checkColorStatus = (
   };
 
   /** Check Inquiry */
-  const lstInq = inquiries.filter((q) => q.field === id && q.process === 'pending');
+  const lstInq = inquiries.filter((q) => q.field === id);
+  const inqSort = lstInq.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
   if (lstInq.length) {
-    colorStatusObj.isEmpty = false;
-    const statusReply = user?.role === 'Admin' ? sentStatus : [...sentStatus, ...['ANS_DRF']];
-
-    lstInq.forEach(inq => {
-      // check has attachment
-      if (!colorStatusObj.hasAttachment && inq.mediaFile?.length) colorStatusObj.hasAttachment = true;
-
-      // check has inquiry
-      if (!colorStatusObj.hasInquiry && ['OPEN', 'INQ_SENT', ...(user?.role === 'Admin' ? ['ANS_DRF'] : [])].includes(inq.state)) colorStatusObj.hasInquiry = true;
-
-      // check has reply/answer
-      else if (!colorStatusObj.hasAnswer, statusReply.includes(inq.state)) colorStatusObj.hasAnswer = true;
-
-      // check is resolved
-      else if (!colorStatusObj.isResolved && inq.state === 'COMPL') colorStatusObj.isResolved = true;
-
-      // check is resolved
-      else if (!colorStatusObj.isUploaded && inq.state === 'UPLOADED') colorStatusObj.isUploaded = true;
-    });
-  }
-
-  /** Check Amendment */
-  const listCommentFilter = listCommentDraft.filter(q => q.field === id);
-  if (listCommentFilter.length) {
+    const inq = inqSort[0];
     colorStatusObj.isEmpty = false;
     const statusReply = [...sentStatus, ...['REP_DRF']];
-    const amendment = listCommentFilter[0] || {};
-    const lastComment = listCommentFilter[listCommentFilter.length - 1] || {};
 
     // check has attachment
-    if (!colorStatusObj.hasAttachment && amendment.content?.mediaFile?.length) colorStatusObj.hasAttachment = true;
-
-    // check has amendment
-    if (!colorStatusObj.hasAmendment && listCommentFilter.length === 1) colorStatusObj.hasAmendment = true;
+    if (inq.mediaFile?.length) colorStatusObj.hasAttachment = true;
 
     // check has reply/answer
-    else if (!colorStatusObj.hasAnswer && statusReply.includes(lastComment.state)) colorStatusObj.hasAnswer = true;
-
+    if (statusReply.includes(inq.state)) colorStatusObj.hasAnswer = true;
     // check is resolved
-    else if (!colorStatusObj.isResolved && ['RESOLVED'].includes(lastComment.state)) colorStatusObj.isResolved = true;
-
+    else if (['RESOLVED', 'COMPL'].includes(inq.state)) colorStatusObj.isResolved = true;
     // check is resolved
-    else if (!colorStatusObj.isUploaded && ['UPLOADED'].includes(lastComment.state)) colorStatusObj.isUploaded = true;
+    else if (inq.state === 'UPLOADED') colorStatusObj.isUploaded = true;
+    // check has amendment
+    else if (inq.process === 'draft') colorStatusObj.hasAmendment = true;
+    // check has inquiry
+    else if (inq.process === 'pending') colorStatusObj.hasInquiry = true;
   }
 
   return colorStatusObj;

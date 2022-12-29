@@ -1025,8 +1025,8 @@
   }
 ];
 
-export const packageUnits = packageUnitsJson.map(p => p['package unit'])
+export const packageUnits = packageUnitsJson.map(p => ({label: `${p['package unit']} - ${p.code}`, value: p.code}))
 
-export const weightUnits = ['KGS']
+export const weightUnits = [{label: 'KGS', value: 'KGS'}]
 
-export const measurementUnits = ['CBM']
+export const measurementUnits = [{label: 'CBM', value: 'CBM'}]
