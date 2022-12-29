@@ -331,10 +331,12 @@ const InquiryViewer = (props) => {
                   setSubmitLabel(true);
                   lastest.showIconEdit = true;
                 } else if (filterOffshoreSent.state === 'ANS_DRF') {
+                  setSubmitLabel(false);
                   setStateReplyDraft(false);
                   lastest.showIconEdit = true;
                   lastest.showIconAttachAnswerFile = false;
                 } else if (filterOffshoreSent.state === 'INQ_SENT') {
+                  setSubmitLabel(false);
                   lastest.showIconReply = true;
                   lastest.showIconEdit = false;
                   setStateReplyDraft(false);
