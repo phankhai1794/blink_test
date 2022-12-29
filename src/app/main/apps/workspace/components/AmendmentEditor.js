@@ -7,10 +7,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
 import * as AppActions from 'app/store/actions';
-import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from '@shared/keyword';
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY } from '@shared/keyword';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
+import { validatePartiesContent } from '@shared';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -89,7 +90,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const [attachments, setAttachments] = useState(question?.content?.mediaFile || []);
   const [fieldValue, setFieldValue] = useState("");
   const [fieldValueSelect, setFieldValueSelect] = useState();
+  const [fieldValueSeparate, setFieldValueSeparate] = useState({ name: '', address: '' });
   const fieldType = metadata.field_options.filter(filDrf => filDrf.display && !filterInqDrf.includes(filDrf.value));
+  const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(currentField));
 
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
@@ -106,6 +109,10 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   const handleChange = (e) => setFieldValue(e.target.value);
 
+  const inputTextSeparate = (e, type) => {
+    setFieldValueSeparate(Object.assign({}, fieldValueSeparate, { [type]: e.target.value }));
+  };
+
   const handleValidateInput = async (confirm = null) => {
     let textInput = fieldValue || '';
     const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
@@ -118,6 +125,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   const handleSave = () => {
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
+    let contentField = isSeparate ? JSON.stringify(fieldValueSeparate) : fieldValue;
     const uploads = [];
     const fieldReq = openAmendmentList ? fieldValueSelect?.value : currentField;
     const optionsInquires = [...inquiries];
@@ -131,9 +139,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         }
       });
     }
-    if (openAmendmentList && !fieldReq) {
-      return;
-    }
+    if (openAmendmentList && !fieldReq) return;
 
     axios
       .all(uploads.map((endpoint) => uploadFile(endpoint)))
@@ -146,29 +152,22 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
         let service;
         // if (edit) service = updateDraftBLReply({ content: { content: fieldValue, mediaFile: mediaList } }, question.id);
-        service = saveEditedField({ field: fieldReq, content: { content: fieldValue, mediaFile: mediaList }, mybl: myBL.id });
+        service = saveEditedField({ field: fieldReq, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id });
         service.then((res) => {
           dispatch(AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' })
           );
           dispatch(DraftBLActions.setCurrentField());
           dispatch(InquiryActions.addAmendment());
-          if (!openAmendmentList) {
-            dispatch(FormActions.toggleReload());
-          } else {
-            const response = {
-              ...res?.newAmendment,
-              showIconEditInq: true,
-            };
-            optionsInquires.push(response);
-            optionsMinimize.push(response);
-            dispatch(InquiryActions.setInquiries(optionsInquires));
-            dispatch(InquiryActions.setListMinimize(optionsMinimize));
-            getUpdatedAt();
-          }
+          const response = { ...res?.newAmendment, showIconEditInq: true };
+          optionsInquires.push(response);
+          optionsMinimize.push(response);
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+          dispatch(InquiryActions.setListMinimize(optionsMinimize));
+          getUpdatedAt();
         }).catch((err) => console.error(err));
       })
 
-    dispatch(InquiryActions.setContent({ ...content, [fieldReq]: fieldValue }));
+    dispatch(InquiryActions.setContent({ ...content, [fieldReq]: contentField }));
     dispatch(FormActions.toggleCreateAmendment(false));
     dispatch(InquiryActions.setOneInq({}));
   }
@@ -186,7 +185,21 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   useEffect(() => {
     !openAmendmentList ? setFieldValue(content[currentField] || "") : setFieldValue('');
+    setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(currentField));
   }, [content, currentField])
+
+  useEffect(() => {
+    if (isSeparate) {
+      const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
+      const fieldIndex = arrFields.findIndex(key => metadata.field[key] === currentField);
+      const fieldName = metadata.field?.[`${arrFields[fieldIndex]}Name`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Name`]] : '';
+      const fieldAddress = metadata.field?.[`${arrFields[fieldIndex]}Address`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Address`]] : '';
+      setFieldValueSeparate({
+        name: fieldName || '',
+        address: fieldAddress || ''
+      })
+    }
+  }, [isSeparate])
 
   const styles = (width) => {
     return {
@@ -196,6 +209,42 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
       }
     };
   };
+
+  // Separate Shipper/Consignee/Notify 
+  const renderSeparateField = (field) => {
+    if (isSeparate) {
+      const LABEL_TYPE = ['name', 'address']
+      const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[field]
+      const labelNameCapitalize = labelName?.charAt(0).toUpperCase() + labelName?.slice(1);
+      return LABEL_TYPE.map((type, index) =>
+        <div key={index} style={{ paddingTop: '15px' }}>
+          <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
+          <TextField
+            className={classes.inputText}
+            value={fieldValueSeparate[type]}
+            multiline
+            rows={['name'].includes(type) ? 2 : 3}
+            onChange={(e) => inputTextSeparate(e, type, field)}
+            error={validatePartiesContent(fieldValueSeparate[type], type).isError}
+            helperText={
+              validatePartiesContent(fieldValueSeparate[type], type).isError ? validatePartiesContent(fieldValueSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
+            }
+            variant='outlined'
+          />
+        </div>)
+    } else {
+      return (
+        <TextField
+          className={classes.inputText}
+          value={fieldValue}
+          multiline
+          rows={3}
+          onChange={handleChange}
+          variant='outlined'
+        />
+      )
+    }
+  }
 
   return (
     <div style={{ paddingLeft: 18, borderLeft: `2px solid ${colorInq}` }}>
@@ -235,7 +284,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             customStyle={styles(fullscreen ? 320 : 295)}
             value={fieldValueSelect}
             onChange={handleChangeField}
-            placeholder="Select Field Type"
+            placeholder="BL Data Field"
             textFieldProps={{
               variant: 'outlined'
             }}
@@ -261,15 +310,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             disableInput={false}
           />
         </div>
-      ) : <div className="flex" style={{ alignItems: 'flex-end', margin: '15px 0' }}>
-        <TextField
-          className={classes.inputText}
-          value={fieldValue}
-          multiline
-          rows={3}
-          onChange={handleChange}
-          variant='outlined'
-        />
+      ) : <div style={{ paddingTop: '5px' }}>
+        {renderSeparateField(currentField)}
       </div>
       }
 
@@ -286,7 +328,12 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
       <div style={{ marginTop: 20 }}>
         <Button
           className={classes.btn}
-          disabled={fieldValue.length === 0}
+          disabled={
+            isSeparate ?
+              (validatePartiesContent(fieldValueSeparate.name, 'name')?.isError
+                || validatePartiesContent(fieldValueSeparate.address, 'address')?.isError)
+              : (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0))
+          }
           onClick={() => handleValidateInput(handleSave)}
           color="primary"
           variant="contained"

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import history from '@history';
 import _ from 'lodash';
-import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDING, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, COMMODITY_CODE, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT } from '@shared/keyword';
+import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDING, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, COMMODITY_CODE, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, BOOKING_NO } from '@shared/keyword';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
@@ -193,10 +193,10 @@ const DraftPage = (props) => {
   const dispatch = useDispatch();
   const [containersDetail, setContainersDetail] = useState([]);
   const [containersManifest, setContainersManifest] = useState([]);
-  const [metadata, myBL, orgContent] = useSelector(({ draftBL }) => [
+  const [metadata, myBL, content] = useSelector(({ draftBL }) => [
     draftBL.metadata,
     draftBL.myBL,
-    draftBL.orgContent
+    draftBL.content
   ]);
 
   const getField = (field) => {
@@ -204,7 +204,7 @@ const DraftPage = (props) => {
   };
 
   const getValueField = (field) => {
-    return orgContent[getField(field)] || '';
+    return content[getField(field)] || '';
   };
 
   const getInqType = (field) => {
@@ -227,11 +227,11 @@ const DraftPage = (props) => {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(orgContent).length && Object.keys(metadata).length) {
+    if (Object.keys(content).length && Object.keys(metadata).length) {
       setContainersDetail(getValueField(CONTAINER_DETAIL));
       setContainersManifest(getValueField(CONTAINER_MANIFEST));
     }
-  }, [metadata, orgContent]);
+  }, [metadata, content]);
 
   return (
     <div className={classes.wrapper}>
@@ -272,7 +272,7 @@ const DraftPage = (props) => {
               }}>
                 <div className={classes.tittle_M}>BOOKING NO.</div>
                 <div className={clsx(classes.content_L, classes.bkgNo)} data-type="textarea">
-                  {myBL.bkgNo}
+                  {getValueField(BOOKING_NO)}
                 </div>
               </Grid>
               <Grid item xs={6}>
@@ -454,7 +454,7 @@ const DraftPage = (props) => {
                   </div>
                 </div>
               </Grid>
-              <Grid item xs={1} style={{ borderRight: BODER_COLOR,  display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
+              <Grid item xs={1} style={{ borderRight: BODER_COLOR, display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     <span className={classes.tittle_S}>H</span>
@@ -494,7 +494,7 @@ const DraftPage = (props) => {
                   {containersDetail &&
                     containersDetail.map((cd, idx) => (
                       <span key={idx} style={{ whiteSpace: 'pre' }}>
-                        {`${cd[getInqType(CONTAINER_NUMBER)] || ''}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${cd[getInqType(CONTAINER_PACKAGE_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_TYPE) || '']}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                        {`${cd[getInqType(CONTAINER_NUMBER)] || ''}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${cd[getInqType(CONTAINER_PACKAGE_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
                         <br />
                       </span>
                     ))}
@@ -526,7 +526,7 @@ const DraftPage = (props) => {
                     </Grid>
                     <Grid item xs={1} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
                     </Grid>
-                    <Grid item xs={3} style={{ borderRight: BODER_COLOR, padding: '8px', whiteSpace: 'pre' }}>
+                    <Grid item xs={3} style={{ borderRight: BODER_COLOR, padding: '8px' }}>
                       {cm[getInqType(CM_DESCRIPTION)]}
                     </Grid>
                     <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'end', padding: '8px' }}>

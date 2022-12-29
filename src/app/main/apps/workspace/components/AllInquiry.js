@@ -290,16 +290,6 @@ const AllInquiry = (props) => {
     }
   }, [currentAmendment]);
 
-  const checkCommentDraft = (amendment, conditionStates) => {
-    let result = true;
-    if (amendment?.process === 'draft') {
-      const lst = listCommentDraft.filter(comment => comment.field === amendment.field);
-      if (lst.length === 1) result = false; // has only 1 customer's amendment
-      else result = Boolean(lst.filter(comment => conditionStates.includes(comment.state)).length);
-    }
-    return result;
-  }
-
   return (
     <>
       {openInquiryReview && !inquiries.length &&
@@ -352,9 +342,9 @@ const AllInquiry = (props) => {
                     <div
                       className={clsx(
                         classes.boxItem,
-                        (q.state === 'UPLOADED') && 'uploaded',
-                        ['COMPL', 'RESOLVED'].includes(q.state) && 'resolved',
-                        [...sentStatus, ...['REP_DRF']].includes(q.state) && checkCommentDraft(q, ['REP_DRF', 'REP_SENT']) && 'offshoreReply'
+                        (['UPLOADED'].includes(q.state)) && 'uploaded',
+                        (['COMPL', 'RESOLVED'].includes(q.state)) && 'resolved',
+                        ([...sentStatus, ...['REP_DRF']].includes(q.state)) && 'offshoreReply'
                       )}>
                       <div style={{marginBottom: '12px'}}>
                         <Typography color="primary" variant="h5" className={classes.inqTitle}>
@@ -392,9 +382,9 @@ const AllInquiry = (props) => {
                 <div
                   className={clsx(
                     classes.boxItem,
-                    (q.state === 'UPLOADED') && 'uploaded',
-                    (q.state === 'COMPL') && 'resolved',
-                    (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED', 'RESOLVED'].includes(q.state) && checkCommentDraft(q, ['REP_SENT'])) && 'customerReply'
+                    (['UPLOADED'].includes(q.state)) && 'uploaded',
+                    (['COMPL', 'RESOLVED'].includes(q.state)) && 'resolved',
+                    ([...sentStatus, ...['REP_DRF']].includes(q.state)) && 'offshoreReply'
                   )}>
                   <div style={{ marginBottom: '12px' }}>
                     <Typography color="primary" variant="h5" className={classes.inqTitle}>

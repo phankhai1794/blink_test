@@ -9,7 +9,7 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime, validatePartiesContent, groupBy } from '@shared';
+import { getLabelById, displayTime, validatePartiesContent, groupBy, isJsonText } from '@shared';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import {
   CONTAINER_DETAIL,
@@ -31,6 +31,7 @@ import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
+import ErrorOutlineOutlined from '@material-ui/icons/ErrorOutlineOutlined';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -72,7 +73,23 @@ const useStyles = makeStyles((theme) => ({
     padding: '2px 9px',
     fontWeight: 600,
     fontSize: 14,
-    borderRadius: 4
+    borderRadius: 4,
+  },
+  labelMargin: {
+    marginRight: 21
+  },
+  labelText: {
+    color: '#36B37E',
+    fontWeight: 400,
+    fontSize: 12,
+  },
+  timeSent: {
+    position: 'relative',
+    '& img': {
+      position: 'absolute',
+      left: -16,
+      bottom: 6
+    }
   },
   hideText: {
     overflow: 'hidden',
@@ -142,6 +159,10 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
       borderWidth: '1px',
       borderColor: '#BAC3CB'
+    },
+    '& .MuiFormHelperText-root': {
+      fontFamily: 'Montserrat',
+      fontSize: '14px'
     }
   }
 }));
@@ -161,6 +182,7 @@ const InquiryViewer = (props) => {
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
+  const [inqReopen, setInqReopen] = useState();
   const [question, setQuestion] = useState(props.question);
   const [type, setType] = useState(props.question.ansType);
   const [allowDeleteInq, setAllowDeleteInq] = useState(true);
@@ -180,7 +202,6 @@ const InquiryViewer = (props) => {
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const [isSaveComment, setSaveComment] = useState(false);
-  const [isReopenLabel, setReopenLabel] = useState(false);
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
   const [submitLabel, setSubmitLabel] = useState(false);
   const [isShowViewAll, setShowViewAll] = useState(false);
@@ -189,7 +210,8 @@ const InquiryViewer = (props) => {
   const [disableSaveReply, setDisableSaveReply] = useState(false);
   const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
   const inqViewerFocus = useSelector(({ workspace }) => workspace.formReducer.inqViewerFocus);
-
+  const [inqAnsId, setInqAnsId] = useState('');
+  const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
   const [loading, setLoading] = useState(false);
 
   const handleViewMore = (id) => {
@@ -229,14 +251,20 @@ const InquiryViewer = (props) => {
             // filter comment
             // console.log(res)
             const filterOffshoreSent = res[res.length - 1];
+            if (filterOffshoreSent.type === 'REP' && filterOffshoreSent.state === 'COMPL') {
+              setInqAnsId(filterOffshoreSent.id);
+            }
+
             lastest.mediaFile = filterOffshoreSent.mediaFile;
             lastest.mediaFilesAnswer = filterOffshoreSent.answersMedia;
             lastest.answerObj = filterOffshoreSent.answerObj;
             lastest.content = filterOffshoreSent.content;
+            lastest.status = filterOffshoreSent.status;
+            lastest.sentAt = filterOffshoreSent.sentAt;
             lastest.name = "";
             lastest.creator = filterOffshoreSent.updater;
             lastest.createdAt = filterOffshoreSent.createdAt;
-            lastest.process = 'pending';
+            lastest.createdAt = filterOffshoreSent.createdAt;
             setType(filterOffshoreSent.ansType);
             //
             if (Object.keys(filterOffshoreSent).length > 0) {
@@ -263,15 +291,6 @@ const InquiryViewer = (props) => {
                 setShowLabelSent(false);
                 setSubmitLabel(false);
                 lastest.showIconReply = true;
-              }
-
-              const getResolvedLastest = res.filter(r => r.state === 'COMPL');
-              if (getResolvedLastest.length) {
-                getResolvedLastest.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
-                const { content: contentResolved } = getResolvedLastest[getResolvedLastest.length - 1];
-                setTextResolve(contentResolved instanceof String ? `"${contentResolved}"` : contentResolved || '');
-              } else {
-                setTextResolve(content[lastest.field] || '');
               }
 
               if (user.role === 'Admin') {
@@ -386,7 +405,7 @@ const InquiryViewer = (props) => {
               setQuestion(lastest);
               setInqHasComment(true);
             }
-            setTextResolve(content[lastest.field] || '');
+            // setTextResolve(content[lastest.field] || '');
           }
           setIsLoadedComment(true);
         })
@@ -402,6 +421,9 @@ const InquiryViewer = (props) => {
             // console.log(res)
             const { content: contentField, mediaFile } = res[res.length - 1].content;
             const lastestComment = res[res.length - 1];
+            if (lastestComment.state === 'RESOLVED') {
+              setInqAnsId(lastestComment.id);
+            }
             // filter comment
             lastest.mediaFile = mediaFile;
             lastest.answerObj = [{ content: contentField }];
@@ -410,6 +432,8 @@ const InquiryViewer = (props) => {
             lastest.mediaFilesAnswer = [];
             // lastest.id = lastestComment.id;
             lastest.state = lastestComment.state;
+            lastest.status = lastestComment.status;
+            lastest.sentAt = lastestComment.sentAt;
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
@@ -433,15 +457,6 @@ const InquiryViewer = (props) => {
             }
             if (lastest.state === 'RESOLVED') {
               setStateReplyDraft(false);
-            }
-
-            const getResolvedLastest = res.filter(r => r.state === 'RESOLVED');
-            if (getResolvedLastest.length) {
-              getResolvedLastest.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
-              const { content: contentResolved } = getResolvedLastest[getResolvedLastest.length - 1].content;
-              setTextResolve(contentResolved instanceof String ? `"${contentResolved}"` : contentResolved || '');
-            } else {
-              setTextResolve(lastest.content || '')
             }
 
             if (user.role === 'Admin') {
@@ -474,6 +489,8 @@ const InquiryViewer = (props) => {
                 if (['REP_SENT', 'AME_SENT'].includes(lastest.state)) {
                   lastest.showIconReply = false;
                   setSubmitLabel(true);
+                } else if (['AME_DRF', 'REP_DRF'].includes(lastest.state)) {
+                  setSubmitLabel(false);
                 }
               } else {
                 if (['REP_SENT'].includes(lastest.state)) {
@@ -501,7 +518,7 @@ const InquiryViewer = (props) => {
               }
             }
             if (isEditOriginalAmendment) {
-              dispatch(InquiryActions.setContent({ ...content, [question.field]: lastest.content }));
+              dispatch(InquiryActions.setContent({ ...content, [lastest.field]: lastest.content }));
             }
             setQuestion(lastest);
 
@@ -529,6 +546,8 @@ const InquiryViewer = (props) => {
                 updatedAt: r.createdAt,
                 answersMedia: mediaFile,
                 content: content instanceof String ? `"${content}"` : content,
+                status: r.status,
+                sentAt: r.sentAt,
                 process: 'draft',
                 state: r?.state,
               });
@@ -555,7 +574,10 @@ const InquiryViewer = (props) => {
         .catch((error) => console.error(error));
     }
 
-    return () => isUnmounted = true;
+    return () => {
+      isUnmounted = true;
+      dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
+    }
   }, [isSaveComment, isSaveAnswer]);
 
   const resetAnswerActionSave = () => {
@@ -710,6 +732,41 @@ const InquiryViewer = (props) => {
           // setSaveComment(!isSaveComment);
         }).catch((error) => console.error(error));
     }
+    else if (confirmClick && confirmPopupType === 'reopenInq'){
+      reOpenInquiry(inqReopen)
+      .then((res) => {
+        const optionsInquires = [...inquiries];
+        if (res) {
+          if (question.process === 'draft') {
+            const optionAmendment = [...listCommentDraft.filter(({ id }) => id !== question.id)];
+            dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+
+            const indexAmenment = optionsInquires.findIndex(inq => (inq.field === question.field && inq.process === 'draft'))
+            // optionsInquires[indexAmenment].state = res?.prevState;
+            optionsInquires[indexAmenment].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
+            optionsInquires[indexAmenment].createdAt = res.updatedAt;
+          } else {
+            const indexInq = optionsInquires.findIndex(inq => inq.id === inqReopen)
+            // optionsInquires[indexInq].state = res?.prevState;
+            optionsInquires[indexInq].createdAt = res.updatedAt;
+            optionsInquires[indexInq].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
+          }
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+
+          props.getUpdatedAt();
+          setViewDropDown('');
+          // setSaveComment(!isSaveComment);
+          dispatch(
+            AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
+          );
+        }
+      })
+      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
+      .finally(() => {
+        // setContent
+        dispatch(Actions.loadContent(myBL?.id));
+      });
+    }
     dispatch(
       FormActions.openConfirmPopup({
         openConfirmPopup: false,
@@ -730,6 +787,8 @@ const InquiryViewer = (props) => {
         name: fieldName || '',
         address: fieldAddress || ''
       })
+    } else {
+      setTextResolve(content[question.field] || '');
     }
   }, [isResolve])
 
@@ -803,16 +862,15 @@ const InquiryViewer = (props) => {
   }
 
   const onConfirm = () => {
-    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     let contentField = '';
     if (isSeparate) {
-      contentField = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
+      contentField = `${textResolveSeparate.name.toUpperCase()}\n${textResolveSeparate.address.toUpperCase()}`;
     } else if (typeof textResolve === 'string') {
-      contentField = textResolve.trim();
+      contentField = textResolve.toUpperCase().trim();
     } else {
       contentField = textResolve;
       contentField.forEach((obj) => {
-        if (obj[question.inqType]) obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].trim() : obj[question.inqType];
+        if (obj[question.inqType]) obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType].toUpperCase();
       });
     }
     const body = {
@@ -820,8 +878,8 @@ const InquiryViewer = (props) => {
       inqId: question?.id || tempReply?.answer.id,
       fieldContent: contentField,
       blId: myBL.id,
-      fieldNameContent: textResolveSeparate.name.trim() || '',
-      fieldAddressContent: textResolveSeparate.address.trim() || ''
+      fieldNameContent: textResolveSeparate.name.toUpperCase().trim() || '',
+      fieldAddressContent: textResolveSeparate.address.toUpperCase().trim() || ''
     };
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
@@ -831,20 +889,28 @@ const InquiryViewer = (props) => {
         optionsInquires[editedIndex].state = 'COMPL';
         optionsInquires[editedIndex].createdAt = res.updatedAt;
         dispatch(InquiryActions.setInquiries(optionsInquires));
+        dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
+
         props.getUpdatedAt();
         setIsResolve(false);
         setViewDropDown('');
-        dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
+        if (!isSeparate) {
+          dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
+        } else {
+          const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
+          const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
+          dispatch(InquiryActions.setContent({ ...content, [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: textResolveSeparate.address.trim(), [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: textResolveSeparate.name.trim(), [question.field]: contentField }));
+        }
         // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
       })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
   };
 
   const onUpload = () => {
     setLoading(true);
     const optionsInquires = [...inquiries];
-    uploadOPUS(myBL.id, question.id, question.field)
+    uploadOPUS(myBL.id, question.id, question.field, inqAnsId)
       .then((res) => {
         if (res && res.status === 'F') {
           dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
@@ -868,7 +934,10 @@ const InquiryViewer = (props) => {
               dispatch(InquiryActions.setListCommentDraft(optionAmendment));
             }
           }
-
+          // Set new Content when EBL has new data
+          if (res?.newData) {
+            dispatch(InquiryActions.setContent({ ...content, ...res.newData }));
+          }
           if (res.warning) {
             dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
           } else {
@@ -882,6 +951,7 @@ const InquiryViewer = (props) => {
   };
 
   const cancelResolve = () => {
+    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
     setIsResolveCDCM(false);
@@ -896,8 +966,14 @@ const InquiryViewer = (props) => {
     setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value }));
   };
 
-  const handleChangeContentReply = (e) => {
-    const value = e.target.value;
+  const handleChangeContentReply = (e, type = '') => {
+    let value = e.target.value;
+    if (['name', 'address'].includes(type)) {
+      let content = tempReply?.answer?.content ? JSON.parse(tempReply?.answer?.content) : { name: '', address: '' };
+      content[type] = e.target.value;
+      value = JSON.stringify(content);
+    }
+
     const reqReply = {
       inqAns: {
         ...tempReply.inqAns,
@@ -974,7 +1050,6 @@ const InquiryViewer = (props) => {
   };
 
   const onSaveReply = async () => {
-    dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     const mediaListId = [];
     let mediaListAmendment = [];
     const mediaRest = [];
@@ -1008,7 +1083,11 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) {
         const reqReply = {
           inqAns: tempReply.inqAns,
-          answer: {content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, type: tempReply.answer.type},
+          answer: {
+            content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
+            type: tempReply.answer.type
+          },
+
           mediaFiles: mediaListId
         };
         saveReply({ ...reqReply })
@@ -1025,6 +1104,7 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].process = 'pending';
             optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
+
             props.getUpdatedAt();
             dispatch(InquiryActions.checkSend(true));
             dispatch(
@@ -1038,7 +1118,7 @@ const InquiryViewer = (props) => {
       } else {
         // Edit
         const reqReply = {
-          content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT,
+          content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
           mediaFiles: mediaListId.map(media => media.id),
           mediaRest
         };
@@ -1056,6 +1136,7 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].process = 'pending';
             optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
+
             props.getUpdatedAt();
             // if (props.isInquiryDetail) {
             //   setSaveComment(!isSaveComment);
@@ -1074,13 +1155,22 @@ const InquiryViewer = (props) => {
       if (!tempReply.answer?.id) { // Create amendment / reply
         const reqReply = {
           field: question.field,
-          content: { content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
+          content: {
+            content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
+            mediaFile: mediaListAmendment
+          },
           mybl: myBL.id
         };
         saveEditedField({ ...reqReply })
           .then((res) => {
             optionsInquires[editedIndex].createdAt = res.createdAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
+            if (question.state.includes('AME_')) {
+              dispatch(InquiryActions.setContent({
+                ...content,
+                [question.field]: question.content
+              }));
+            }
             props.getUpdatedAt();
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             setDisableSaveReply(false);
@@ -1091,12 +1181,14 @@ const InquiryViewer = (props) => {
       }
       else { // Edit amendment / reply
         const reqReply = {
-          content: { content: ['string'].includes(typeof tempReply.answer.content) ?tempReply.answer.content.trim() : tempReply.answer.content || ONLY_ATT, mediaFile: mediaListAmendment },
+          content: {
+            content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
+            mediaFile: mediaListAmendment
+          },
         };
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
           if (res) {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
-            setEditOriginalAmendment(res.isEditOriginalAmendment);
           }
           optionsInquires[editedIndex].createdAt = res.createdAt;
           dispatch(InquiryActions.setInquiries(optionsInquires));
@@ -1105,7 +1197,12 @@ const InquiryViewer = (props) => {
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
-          if (isEditOriginalAmendment) dispatch(InquiryActions.setContent({ ...content, [res.newAmendment?.field]: tempReply.answer.content }));
+          if (question.state.includes('AME_')) {
+            dispatch(InquiryActions.setContent({
+              ...content,
+              [res.newAmendment?.field]: tempReply.answer.content
+            }));
+          }
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
     }
@@ -1185,39 +1282,14 @@ const InquiryViewer = (props) => {
   }
 
   const reOpen = (idInq) => {
-    reOpenInquiry(idInq)
-      .then((res) => {
-        const optionsInquires = [...inquiries];
-        if (res) {
-          if (question.process === 'draft') {
-            const optionAmendment = [...listCommentDraft.filter(({ id }) => id !== question.id)];
-            dispatch(InquiryActions.setListCommentDraft(optionAmendment));
-
-            const indexAmenment = optionsInquires.findIndex(inq => (inq.field === question.field && inq.process === 'draft'))
-            // optionsInquires[indexAmenment].state = res?.prevState;
-            optionsInquires[indexAmenment].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
-            optionsInquires[indexAmenment].createdAt = res.updatedAt;
-          } else {
-            const indexInq = optionsInquires.findIndex(inq => inq.id === idInq)
-            // optionsInquires[indexInq].state = res?.prevState;
-            optionsInquires[indexInq].createdAt = res.updatedAt;
-            optionsInquires[indexInq].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
-          }
-          dispatch(InquiryActions.setInquiries(optionsInquires));
-          props.getUpdatedAt();
-          setViewDropDown('');
-          // setSaveComment(!isSaveComment);
-          dispatch(
-            AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
-          );
-        }
+    setInqReopen(idInq);
+    dispatch(
+      FormActions.openConfirmPopup({
+        openConfirmPopup: true,
+        confirmPopupMsg: `Are you sure you want to re-open ${question.process === 'pending'? 'inquiry': 'amendment'}?`,
+        confirmPopupType: 'reopenInq'
       })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
-      .finally(() => {
-        // setContent
-        dispatch(Actions.loadContent(myBL?.id));
-      });
-
+    );
   };
 
   useEffect(() => {
@@ -1260,6 +1332,46 @@ const InquiryViewer = (props) => {
     }
   }
 
+  // Text Helper for separate fields
+  const renderTextHelper = (type) => {
+    let isErr = false, textHelper = '', prohibitedInfo = { countries: [], danger_cargo: [] };
+    const countries = validateInput?.prohibitedInfo?.countries ? validateInput?.prohibitedInfo?.countries : [];
+    const dangerCargo = validateInput?.prohibitedInfo?.countries ? validateInput?.prohibitedInfo?.danger_cargo : [];
+    countries.forEach(text => {
+      if (textResolveSeparate[type].toUpperCase().includes(text)) {
+        prohibitedInfo.countries.push(text);
+        isErr = true;
+      }
+    });
+    dangerCargo.forEach(text => {
+      if (textResolveSeparate[type].toUpperCase().includes(text)) {
+        prohibitedInfo.danger_cargo.push(text);
+        isErr = true;
+      }
+    });
+    // Check for each case NAME || ADDRESS
+    if (isErr) {
+      textHelper = (<>
+        {(prohibitedInfo?.countries.length > 0) &&
+          <span style={{ display: 'flex', alignItems: 'center' }}>
+            <ErrorOutlineOutlined fontSize='small' />
+            &nbsp;{`Countries: ${prohibitedInfo?.countries.join(', ')}`}
+          </span>
+        }
+        {(prohibitedInfo?.danger_cargo.length > 0) &&
+          <>
+            <span style={{ display: 'flex', alignItems: 'center' }}>
+              <ErrorOutlineOutlined fontSize='small' />
+              &nbsp;{`Danger Cargo: ${prohibitedInfo?.danger_cargo.join(', ')}`}
+            </span>
+          </>
+        }
+      </>)
+    }
+
+    return { isErr, textHelper };
+  }
+
   // Separate Shipper/Consignee/Notify 
   const renderSeparateField = (field) => {
     if (isSeparate) {
@@ -1275,11 +1387,15 @@ const InquiryViewer = (props) => {
             multiline
             rows={['name'].includes(type) ? 2 : 3}
             onChange={(e) => inputTextSeparate(e, type, field)}
-            error={validatePartiesContent(textResolveSeparate[type], type).isError}
+            variant='outlined'
+            inputProps={{ style: { textTransform: 'uppercase' } }}
+            error={
+              renderTextHelper(type).isErr
+              || validatePartiesContent(textResolveSeparate[type], type).isError}
             helperText={
               validatePartiesContent(textResolveSeparate[type], type).isError ? validatePartiesContent(textResolveSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
+                || renderTextHelper(type).textHelper
             }
-            variant='outlined'
           />
         </div>)
     } else {
@@ -1291,6 +1407,28 @@ const InquiryViewer = (props) => {
           rows={3}
           onChange={inputText}
           variant='outlined'
+          inputProps={{ style: { textTransform: 'uppercase' } }}
+          error={!validateInput?.isValid}
+          helperText={
+            !validateInput?.isValid ?
+              (<>
+                {(validateInput?.prohibitedInfo?.countries.length > 0) &&
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    <ErrorOutlineOutlined fontSize='small' />
+                    &nbsp;{`Countries: ${validateInput?.prohibitedInfo?.countries.join(', ')}`}
+                  </span>
+                }
+                {(validateInput?.prohibitedInfo?.danger_cargo.length > 0) &&
+                  <>
+                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                      <ErrorOutlineOutlined fontSize='small' />
+                      &nbsp;{`Danger Cargo: ${validateInput?.prohibitedInfo?.danger_cargo.join(', ')}`}
+                    </span>
+                  </>
+                }
+              </>)
+              : ''
+          }
         />
       )
     }
@@ -1309,6 +1447,8 @@ const InquiryViewer = (props) => {
                 name={question.creator?.userName}
                 time={displayTime(question.createdAt || question.updatedAt)}
                 avatar={question.creator?.avatar}
+                state={question.state}
+                status={question.status}
               />
               {user.role === 'Admin' ? ( // TODO
                 <div className="flex items-center mr-2">
@@ -1333,11 +1473,22 @@ const InquiryViewer = (props) => {
                     </div>
                   </PermissionProvider>
                   <div className='flex' style={{ alignItems: 'center' }}>
-                    <div style={{ marginRight: 15 }}>
+                    {/*.display time sent mail and label sent.*/}
+                    <div style={{ marginRight: 15, display: 'flex' }}>
                       {showLabelSent && !['COMPL', 'UPLOADED', 'RESOLVED'].includes(question.state) && (
-                        <span className={classes.labelStatus}>Sent</span>
+                        <>
+                          <span className={clsx(classes.labelStatus, question.sentAt && classes.labelMargin)}>Sent</span>
+                        </>
+                      )}
+                      {question.sentAt && (
+                        <div className={classes.timeSent}>
+                          <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />
+                          <span className={classes.labelText}>{displayTime(question.sentAt)}</span>
+                        </div>
                       )}
                     </div>
+                    {/*..*/}
+
                     {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
                     {!['COMPL', 'UPLOADED'].includes(question.state) && (
                       isReply ? (
@@ -1403,13 +1554,19 @@ const InquiryViewer = (props) => {
                 </div>
               ) : (
                 <div className='flex' style={{ alignItems: 'center' }}>
-                  <div style={{ marginRight: 15 }}>
+                  <div style={{ marginRight: 15, display: 'flex' }}>
                     {question.state === 'UPLOADED' ?
                       <span className={classes.labelStatus}>Uploaded</span> :
                       ['COMPL', 'RESOLVED'].includes(question.state) ?
                         <span className={classes.labelStatus}>Resolved</span> :
                         <>
-                          {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={classes.labelStatus}>Submitted</span>}
+                          {(['ANS_SENT'].includes(question.state) || submitLabel) && <span className={clsx(classes.labelStatus, question.sentAt && classes.labelMargin)}>Submitted</span>}
+                          {question.sentAt && (
+                            <div className={classes.timeSent}>
+                              <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />
+                              <span className={classes.labelText}>{displayTime(question.sentAt)}</span>
+                            </div>
+                          )}
                         </>
                     }
                   </div>
@@ -1519,7 +1676,10 @@ const InquiryViewer = (props) => {
                     color: '#132535',
                     whiteSpace: 'pre-wrap'
                   }}>
-                  {`${question.content}`}
+                  {/* Check is amendment JSON */}
+                  {((question.content !== null) && isJsonText(question.content)) ?
+                    `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}`
+                    : `${question.content}`}
                 </Typography>
             }
 
@@ -1701,7 +1861,7 @@ const InquiryViewer = (props) => {
                             : false
                         }
                         color="primary"
-                        onClick={() => handleValidateInput('RESOLVE', onConfirm)}
+                        onClick={() => !validateInput?.isValid ? onConfirm() : handleValidateInput('RESOLVE', onConfirm)}
                         classes={{ root: clsx(classes.button, 'w120') }}>
                         Accept
                       </Button>
@@ -1719,16 +1879,41 @@ const InquiryViewer = (props) => {
                 <>
                   {isReply || isReplyCDCM ? (
                     <>
-                      {isReply && <div style={{ display: 'flex', alignItems: 'center', marginBottom: 15 }}>
-                        <TextField
-                          className={classes.inputText}
-                          value={tempReply?.answer?.content}
-                          multiline
-                          rows={2}
-                          onChange={handleChangeContentReply}
-                          variant='outlined'
-                          placeholder='Reply...'
-                        />
+                      {isReply && <div style={{ marginBottom: 15 }}>
+                        {/* Edit Amendment by customer */}
+                        {(isSeparate && (['AME_DRF', 'AME_SENT'].includes(question.state) && (user.role === 'Guest'))) ?
+                          ['name', 'address'].map((type, index) => {
+                            const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[question.field]
+                            const labelNameCapitalize = labelName?.charAt(0).toUpperCase() + labelName?.slice(1);
+                            const content = (tempReply?.answer?.content) ? JSON.parse(tempReply?.answer?.content) : { name: '', address: '' };
+                            return (
+                              <div key={index} style={{ paddingTop: '15px' }}>
+                                <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
+                                <TextField
+                                  className={classes.inputText}
+                                  value={content[type] || ''}
+                                  multiline
+                                  rows={['name'].includes(type) ? 2 : 3}
+                                  onChange={(e) => handleChangeContentReply(e, type)}
+                                  error={validatePartiesContent(content[type], type).isError}
+                                  helperText={
+                                    validatePartiesContent(content[type], type).isError ? validatePartiesContent(content[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
+                                  }
+                                  variant='outlined'
+                                />
+                              </div>
+                            )
+                          })
+                          :
+                          <TextField
+                            className={classes.inputText}
+                            value={tempReply?.answer?.content}
+                            multiline
+                            rows={2}
+                            onChange={handleChangeContentReply}
+                            variant='outlined'
+                            placeholder='Reply...'
+                          />}
                       </div>
                       }
                       {/*{tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}*/}
@@ -1769,11 +1954,19 @@ const InquiryViewer = (props) => {
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={() => handleValidateInput('REPLY', onSaveReply)}
+                          onClick={() => onSaveReply()}
                           disabled={
-                            (question.state === "AME_DRF" && (['string'].includes(typeof question.content) && tempReply?.answer?.content?.trim()))
-                            || (question.state !== "AME_DRF" && (['string'].includes(typeof question.content) && !tempReply?.answer?.content?.trim()) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
+                            (question.state === "AME_DRF" && (
+                              (['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content?.trim())
+                              || (!['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content)
+
+                            ))
+                            || (question.state !== "AME_DRF" && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
+                            || ((isSeparate && (['AME_DRF', 'AME_SENT'].includes(question.state) && (user.role === 'Guest'))) ?
+                              (validatePartiesContent(tempReply?.answer?.content ? JSON.parse(tempReply?.answer?.content).name : '', 'name')?.isError
+                                || validatePartiesContent(tempReply?.answer?.content ? JSON.parse(tempReply?.answer?.content).address : '', 'address')?.isError)
+                              : false)
                           }
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
@@ -1912,6 +2105,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                     borderTopRightRadius: rowIndex === 0 && rowValues.length - 1 === index1 ? 8 : null,
                     // borderBottomRightRadius:
                     //     index1 === rowValues.length - 1 && rowIndex === typeList.length - 1 ? 8 : null
+                    textTransform: 'uppercase'
                   }}
                   disabled={disabled}
                   value={nodeValue ? nodeValue[getType(type)] : ''}

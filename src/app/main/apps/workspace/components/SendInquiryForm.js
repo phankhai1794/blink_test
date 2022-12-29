@@ -70,10 +70,6 @@ const StyledMenuItem = withStyles((theme) => ({
   }
 }))(MenuItem);
 
-const convertToList = (array) => {
-  return array.map(a => `- ${a}`).join('\n')
-}
-
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -99,7 +95,6 @@ const SendInquiryForm = (props) => {
     toOnshore: '',
     toOnshoreCc: '',
     toOnshoreBcc: '',
-    from: '',
     subject: '',
     content: ''
   };
@@ -139,6 +134,23 @@ const SendInquiryForm = (props) => {
     setEditorState(initiateContentState(content));
   };
 
+  const convertToList = (array, tabValue) => {
+    const newInq = checkNewInquiry(metadata, inquiries, tabValue, ['OPEN'])
+    const newRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_Q_DRF'])
+    const convert = (array) => array.map(a => `- ${a}`).join('\n')
+    let header = 'BL has been updated'
+    if (newInq.length && newRep.length) {
+      return [` \nNew inquiry:\n${convert(newInq)}\n \nNew reply:\n${convert(newRep)}`, header]
+    }
+    else if (newInq.length) {
+      header = 'New Inquiry'
+    }
+    else if (newRep.length) {
+      header = 'New Reply'
+    }
+    return [array.map(a => `- ${a}`).join('\n'), header]
+  }
+
   useEffect(() => {
     if (hasCustomer) {
       setTabValue('customer');
@@ -160,9 +172,10 @@ const SendInquiryForm = (props) => {
       subject = `[Onshore - BL Query]_[${inqOnshore.join(
         ', '
       )}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
-      content = `Dear Onshore,\n \nWe need your assistance for BL completion. Pending issues:\n ${convertToList(inqOnshore)}`;
+      const [msg, header] = convertToList(inqOnshore, 'onshore')
+      content = `Dear Onshore,\n \nWe need your assistance for BL completion. Pending issues:\n${msg}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
-      setOnshoreValue({ subject, content: bodyHtml, html: initiateContentState(content) });
+      setOnshoreValue({ ...onshoreValue, subject, content: bodyHtml, html: initiateContentState(content), header });
       setForm({ ...form, subject, content: bodyHtml });
       handleEditorState(content);
     }
@@ -170,9 +183,10 @@ const SendInquiryForm = (props) => {
       subject = `[Customer BL Query]_[${inqCustomer.join(
         ', '
       )}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
-      content = `Dear Customer,\n \nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:\n ${convertToList(inqCustomer)} `;
+      const [msg, header] = convertToList(inqCustomer, 'customer')
+      content = `Dear Customer,\n \nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:\n${msg} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
-      setCustomerValue({ subject, content: bodyHtml, html: initiateContentState(content) });
+      setCustomerValue({ ...customerValue, subject, content: bodyHtml, html: initiateContentState(content), header });
       setForm({ ...form, subject, content: bodyHtml });
       handleEditorState(content);
     }
@@ -234,7 +248,6 @@ const SendInquiryForm = (props) => {
       else {
         setTabValue('customer');
       }
-      setForm(initialState);
     } else if (error) {
       dispatch(
         Actions.showMessage({
@@ -261,17 +274,20 @@ const SendInquiryForm = (props) => {
         }
       });
       const formClone = JSON.parse(JSON.stringify(form));
+      let header = ''
       if (tabValue === 'onshore') {
         formClone.toCustomer = '';
         formClone.toCustomerCc = '';
         formClone.toCustomerBcc = '';
+        header = onshoreValue.header
       } else if (tabValue === 'customer') {
         formClone.toOnshore = '';
         formClone.toOnshoreCc = '';
         formClone.toOnshoreBcc = '';
+        header = customerValue.header
       }
       dispatch({ type: mailActions.SENDMAIL_LOADING });
-      dispatch(mailActions.sendMail({ myblId: mybl.id, bkgNo, ...formClone, inquiries: cloneInquiries, user: user }));
+      dispatch(mailActions.sendMail({ myblId: mybl.id, bkgNo, ...formClone, inquiries: cloneInquiries, user: user, header, tab: tabValue }));
       dispatch(InquiryActions.setInquiries(cloneInquiries));
       dispatch(
         FormActions.openConfirmPopup({

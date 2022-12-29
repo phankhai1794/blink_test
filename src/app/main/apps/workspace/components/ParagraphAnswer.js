@@ -3,6 +3,7 @@ import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import {useDispatch, useSelector} from 'react-redux';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import { ONLY_ATT } from '@shared/keyword'
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -60,9 +61,7 @@ const ParagraphAnswer = (props) => {
         setParagraphText('');
       }
     }
-    // if (question.answerObj.length) {
-    //   setParagraphText(question.answerObj[0]?.content);
-    // }
+    if (['string'].includes(typeof paragraphText) && paragraphText.trim() === '') setParagraphText(ONLY_ATT)
   }, [saveStatus, question]);
 
   return (

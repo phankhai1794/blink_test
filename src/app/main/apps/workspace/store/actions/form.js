@@ -22,9 +22,11 @@ export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
 export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
 export const OPEN_CREATE_AMENDMENT = 'OPEN_CREATE_AMENDMENT';
 export const OPEN_NOTIFICATION_INQUIRY_LIST = 'OPEN_NOTIFICATION_INQUIRY_LIST'
-export const RELOAD_INQ = 'RELOAD_INQ';
 export const INQUIRY_VIEWER_FOCUS = 'INQUIRY_VIEWER_FOCUS';
 export const VALIDATE_INPUT = 'VALIDATE_INPUT';
+export const INCREASE_LOADING = 'INCREASE_LOADING';
+export const DECREASE_LOADING = 'DECREASE_LOADING';
+
 export function setFullscreen(state) {
   return {
     type: SET_FULLSCREEN,
@@ -84,12 +86,6 @@ export function toggleAttachment(state) {
 export function toggleReload() {
   return {
     type: RELOAD
-  };
-}
-
-export function toggleReloadInq() {
-  return {
-    type: RELOAD_INQ
   };
 }
 
@@ -209,4 +205,16 @@ export function validateInput(state) {
     type: VALIDATE_INPUT,
     state
   };
+}
+
+export function increaseLoading(){
+  return {
+    type: INCREASE_LOADING,
+  }
+}
+
+export function decreaseLoading(){
+  return {
+    type: DECREASE_LOADING,
+  }
 }

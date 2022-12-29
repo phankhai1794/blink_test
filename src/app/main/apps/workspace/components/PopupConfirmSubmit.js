@@ -1,13 +1,13 @@
 import React from 'react';
-import {Button} from "@material-ui/core";
-import {useDispatch, useSelector} from "react-redux";
-import {makeStyles} from "@material-ui/core/styles";
+import { Button } from "@material-ui/core";
+import { useDispatch, useSelector } from "react-redux";
+import { makeStyles } from "@material-ui/core/styles";
 import { submitInquiryAnswer } from 'app/services/inquiryService';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
+import { getBlInfo } from 'app/services/myBLService';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
-import { getBlInfo } from 'app/services/myBLService';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -65,13 +65,13 @@ const PopupConfirmSubmit = (props) => {
   const classes = useStyles();
 
   const handleConfirm = async () => {
-    const inqs = [... inquiries];
+    const inqs = [...inquiries];
     const fields = [];
     const lstInq = inqs.map((item) => {
       if ((props.field === "INQUIRY_LIST" || props.field === item.field) &&
-          (item.answerObj && (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(item.state)))
+        (item.answerObj && (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(item.state)))
       ) {
-        return {inquiryId: item.id, currentState: item.state, field: item.field};
+        return { inquiryId: item.id, currentState: item.state, field: item.field };
       }
       return null;
     });
@@ -87,14 +87,12 @@ const PopupConfirmSubmit = (props) => {
 
     getBlInfo(bl).then(res => {
       const { bkgNo } = res.myBL;
-      if (user.role === 'guest') {
-        dispatch(AppActions.updateOpusStatus(bkgNo, "RC", "Return back from Customer via workspace"));
-      } else{
-        dispatch(AppActions.updateOpusStatus(bkgNo, "RO", "Return back from Onshore via workspace"));
-      }
+      const inqsDraft = inquiries?.filter(inq => inq.process === 'draft');
+      const inqType = inqsDraft.length > 0 ? "AN" : "IN"; // AN: Amendment Notification, IN: BL Inquired
+      const userType = user.role === 'guest' ? "TO" : "TW"; // TO: Return back from Customer via BLink, TW: Return back from Onshore via BLink
+      dispatch(AppActions.updateOpusStatus(bkgNo, inqType, userType));
     });
-    
-    //
+
     const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
     inqs.forEach((item) => {
       if (listIdInq.includes(item.id)) {

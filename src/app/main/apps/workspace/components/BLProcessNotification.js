@@ -61,7 +61,6 @@ const BLProcessNotification = () => {
   const [open, setOpen] = useState(false);
 
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
-  const reload = useSelector(({ workspace }) => workspace.formReducer.reload);
 
   const startBLProcess = () => {
     dispatch(TransActions.setStatusTransaction('start'));
@@ -69,10 +68,12 @@ const BLProcessNotification = () => {
   };
 
   const checkBLProcess = async () => {
+    dispatch(FormActions.increaseLoading());
     const [lengthInq, lengthContent] = [
       await getInquiryById(myBL.id).then((res) => res.length),
       await getBlInfo(myBL.id).then((res) => Object.keys(res.myBL.content).length)
     ];
+    dispatch(FormActions.decreaseLoading());
     if (!lengthInq && !lengthContent) setOpen(true);
     else startBLProcess();
   };
@@ -89,7 +90,7 @@ const BLProcessNotification = () => {
 
   useEffect(() => {
     if (myBL.id) checkBLProcess();
-  }, [reload, myBL]);
+  }, [myBL]);
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md">
