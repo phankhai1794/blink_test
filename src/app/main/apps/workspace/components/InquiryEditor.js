@@ -1,5 +1,5 @@
 import { FuseChipSelect } from '@fuse';
-import React, { useEffect, useRef, useState, useContext } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLabelById, toFindDuplicates } from '@shared';
 import {
@@ -21,7 +21,6 @@ import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
 import { validateTextInput } from 'app/services/myBLService';
-import { SocketContext } from 'app/AppContext';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -112,7 +111,6 @@ const InquiryEditor = (props) => {
   const classes = useStyles();
   const { onCancel, setSave } = props;
   const scrollTopPopup = useRef(null);
-  const socket = useContext(SocketContext);
   const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize] = useSelector(
     ({ workspace }) => [
       workspace.inquiryReducer.metadata,
@@ -456,9 +454,6 @@ const InquiryEditor = (props) => {
         dispatch(InquiryActions.setEditInq());
         dispatch(InquiryActions.setInquiries(inquiriesOp));
 
-        dispatch(AppActions.isSyncingInquiry(true));
-        socket.emit('sync/update_inquiry', inquiriesOp);
-
         props.getUpdatedAt();
         setDisabled(false);
         // setSave();
@@ -538,9 +533,6 @@ const InquiryEditor = (props) => {
               dispatch(InquiryActions.setInquiries(optionsInquires));
               dispatch(InquiryActions.setListMinimize(optionsMinimize));
               setDisabled(false);
-
-              dispatch(AppActions.isSyncingInquiry(true));
-              socket.emit('sync/create_inquiry', optionsInquires);
             })
             .catch((error) =>
               dispatch(AppActions.showMessage({ message: error, variant: 'error' }))

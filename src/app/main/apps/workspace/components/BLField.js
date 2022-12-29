@@ -173,8 +173,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
   const onMouseEnter = (e) => {
-    // if (isEmpty) setAnchorEl(e.currentTarget);
-    setAnchorEl(e.currentTarget);
+    if (isEmpty) setAnchorEl(e.currentTarget);
   };
 
   const onMouseLeave = (e) => {
@@ -329,7 +328,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
                     rows ? classes[`adornmentRow_${rows}`] : ''
                   )}>
                   {checkDisplayIcon()}
-                  {anchorEl && anchorEl.id === id && allowAddInquiry && isEmpty && (
+                  {anchorEl && anchorEl.id === id && allowAddInquiry && (
                     <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
                   )}
                 </InputAdornment>
