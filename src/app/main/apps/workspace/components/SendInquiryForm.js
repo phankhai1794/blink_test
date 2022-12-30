@@ -3,7 +3,16 @@ import { checkNewInquiry } from '@shared';
 import { VVD_CODE, POD_CODE, DEL_CODE } from '@shared/keyword';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Icon, Button, Tabs, Tab, Select, MenuItem } from '@material-ui/core';
+import {
+  Icon,
+  Button,
+  Tabs,
+  Tab,
+  Select,
+  MenuItem,
+  FormControl,
+  FormHelperText
+} from '@material-ui/core';
 import { EditorState, convertToRaw, ContentState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import draftToHtml from 'draftjs-to-html';
@@ -70,6 +79,14 @@ const StyledMenuItem = withStyles((theme) => ({
   }
 }))(MenuItem);
 
+const HelperText = withStyles((theme) => ({
+  root: {
+    fontStyle: 'italic',
+    fontFamily: 'Montserrat',
+    fontSize: 13
+  }
+}))(FormHelperText);
+
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -104,8 +121,17 @@ const SendInquiryForm = (props) => {
   const handleChange = (event) => {
     setPreviewValue(event.target?.value || event);
   };
-  const hasCustomer = inquiries.some((inq) => inq.receiver[0] === 'customer' && ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
-  const hasOnshore = inquiries.some((inq) => inq.receiver[0] === 'onshore' && ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
+  const [formError, setFormError] = useState({ subject: '', content: '' });
+  const hasCustomer = inquiries.some(
+    (inq) =>
+      inq.receiver[0] === 'customer' &&
+      ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state)
+  );
+  const hasOnshore = inquiries.some(
+    (inq) =>
+      inq.receiver[0] === 'onshore' &&
+      ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state)
+  );
   const [inqCustomer, setInqCustomer] = useState([]);
   const [inqOnshore, setInqOnshore] = useState([]);
   const [tabSelected, setTabSelected] = useState(0);
@@ -135,21 +161,19 @@ const SendInquiryForm = (props) => {
   };
 
   const convertToList = (array, tabValue) => {
-    const newInq = checkNewInquiry(metadata, inquiries, tabValue, ['OPEN'])
-    const newRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_Q_DRF'])
-    const convert = (array) => array.map(a => `- ${a}`).join('\n')
-    let header = 'BL has been updated'
+    const newInq = checkNewInquiry(metadata, inquiries, tabValue, ['OPEN']);
+    const newRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_Q_DRF']);
+    const convert = (array) => array.map((a) => `- ${a}`).join('\n');
+    let header = 'BL has been updated';
     if (newInq.length && newRep.length) {
-      return [` \nNew inquiry:\n${convert(newInq)}\n \nNew reply:\n${convert(newRep)}`, header]
+      return [` \nNew inquiry:\n${convert(newInq)}\n \nNew reply:\n${convert(newRep)}`, header];
+    } else if (newInq.length) {
+      header = 'New Inquiry';
+    } else if (newRep.length) {
+      header = 'New Reply';
     }
-    else if (newInq.length) {
-      header = 'New Inquiry'
-    }
-    else if (newRep.length) {
-      header = 'New Reply'
-    }
-    return [array.map(a => `- ${a}`).join('\n'), header]
-  }
+    return [array.map((a) => `- ${a}`).join('\n'), header];
+  };
 
   useEffect(() => {
     if (hasCustomer) {
@@ -169,24 +193,36 @@ const SendInquiryForm = (props) => {
     let content = '';
     let bodyHtml = '';
     if (hasOnshore) {
-      subject = `[Onshore - BL Query]_[${inqOnshore.join(
-        ', '
-      )}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
-      const [msg, header] = convertToList(inqOnshore, 'onshore')
+      subject = `[Onshore - BL Query]_[${
+        inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]
+      }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      const [msg, header] = convertToList(inqOnshore, 'onshore');
       content = `Dear Onshore,\n \nWe need your assistance for BL completion. Pending issues:\n${msg}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
-      setOnshoreValue({ ...onshoreValue, subject, content: bodyHtml, html: initiateContentState(content), header });
+      setOnshoreValue({
+        ...onshoreValue,
+        subject,
+        content: bodyHtml,
+        html: initiateContentState(content),
+        header
+      });
       setForm({ ...form, subject, content: bodyHtml });
       handleEditorState(content);
     }
     if (hasCustomer) {
-      subject = `[Customer BL Query]_[${inqCustomer.join(
-        ', '
-      )}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
-      const [msg, header] = convertToList(inqCustomer, 'customer')
+      subject = `[Customer BL Query]_[${
+        inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]
+      }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      const [msg, header] = convertToList(inqCustomer, 'customer');
       content = `Dear Customer,\n \nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:\n${msg} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
-      setCustomerValue({ ...customerValue, subject, content: bodyHtml, html: initiateContentState(content), header });
+      setCustomerValue({
+        ...customerValue,
+        subject,
+        content: bodyHtml,
+        html: initiateContentState(content),
+        header
+      });
       setForm({ ...form, subject, content: bodyHtml });
       handleEditorState(content);
     }
@@ -202,11 +238,15 @@ const SendInquiryForm = (props) => {
     }
   }, [tabValue, inquiries]);
 
-  const isFormValid = () => {
+  const isRecipientValid = () => {
     if (tabValue === 'customer') {
       return Boolean(form.toCustomer);
     }
     return Boolean(form.toOnshore);
+  };
+
+  const isBodyValid = () => {
+    return Boolean(form.content.replace(/<[^>]*>|\n|&nbsp;/g, ''));
   };
 
   const isMailVaid = () => Object.values(inputMail).filter((e) => e).length;
@@ -240,12 +280,10 @@ const SendInquiryForm = (props) => {
         type: mailActions.SENDMAIL_NONE
       });
       if (!hasCustomer && !hasOnshore) {
-        dispatch(FormActions.toggleOpenEmail(false))
-      }
-      else if (!hasCustomer) {
+        dispatch(FormActions.toggleOpenEmail(false));
+      } else if (!hasCustomer) {
         setTabValue('onshore');
-      }
-      else {
+      } else {
         setTabValue('customer');
       }
     } else if (error) {
@@ -274,20 +312,30 @@ const SendInquiryForm = (props) => {
         }
       });
       const formClone = JSON.parse(JSON.stringify(form));
-      let header = ''
+      let header = '';
       if (tabValue === 'onshore') {
         formClone.toCustomer = '';
         formClone.toCustomerCc = '';
         formClone.toCustomerBcc = '';
-        header = onshoreValue.header
+        header = onshoreValue.header;
       } else if (tabValue === 'customer') {
         formClone.toOnshore = '';
         formClone.toOnshoreCc = '';
         formClone.toOnshoreBcc = '';
-        header = customerValue.header
+        header = customerValue.header;
       }
       dispatch({ type: mailActions.SENDMAIL_LOADING });
-      dispatch(mailActions.sendMail({ myblId: mybl.id, bkgNo, ...formClone, inquiries: cloneInquiries, user: user, header, tab: tabValue }));
+      dispatch(
+        mailActions.sendMail({
+          myblId: mybl.id,
+          bkgNo,
+          ...formClone,
+          inquiries: cloneInquiries,
+          user: user,
+          header,
+          tab: tabValue
+        })
+      );
       dispatch(InquiryActions.setInquiries(cloneInquiries));
       dispatch(
         FormActions.openConfirmPopup({
@@ -307,17 +355,16 @@ const SendInquiryForm = (props) => {
   }, [openEmail]);
 
   const sendMailClick = () => {
+    setFormError({
+      ...formError,
+      recipient: !isRecipientValid() ? 'Please specify at least one recipient.' : '',
+      subject: !form.subject ? 'Please enter your email subject.' : '',
+      content: !isBodyValid() ? 'Please enter your email content.' : ''
+    });
     if (isMailVaid()) {
       dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
-    } else if (!isFormValid()) {
-      dispatch(
-        Actions.showMessage({ message: 'Please fill in recipient field', variant: 'error' })
-      );
-    } else if (
-      (tabValue === 'onshore' && inqOnshore.length == 0) ||
-      (tabValue === 'customer' && inqCustomer.length == 0)
-    ) {
-      dispatch(Actions.showMessage({ message: 'No inquiries to Send Mail', variant: 'error' }));
+    } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
+      return;
     } else {
       dispatch(
         FormActions.openConfirmPopup({
@@ -407,7 +454,18 @@ const SendInquiryForm = (props) => {
         }}>
         {previewValue === 'default' && (
           <>
-            <InputUI id={tabValue === 'customer' ? "Customer" : "Onshore"} onChanged={handleFieldChange} />
+            <FormControl style={{ width: '100%' }} error={formError.recipient}>
+              <div
+                style={{
+                  borderBottom: formError.recipient ? '1px solid #DC2626' : '1px solid #BAC3CB'
+                }}>
+                <InputUI
+                  id={tabValue === 'customer' ? 'Customer' : 'Onshore'}
+                  onChanged={handleFieldChange}
+                />
+              </div>
+              {formError.recipient && <HelperText>{formError.recipient}</HelperText>}
+            </FormControl>
             {hasCustomer && hasOnshore && (
               <Tabs
                 indicatorColor="primary"
@@ -419,36 +477,51 @@ const SendInquiryForm = (props) => {
                 <Tab className={classes.tab} value="onshore" label="Onshore" />
               </Tabs>
             )}
-            <input
-              value={form.subject}
-              onChange={handleSubjectChange}
-              placeholder='Subject'
-              style={{ border: 'none', fontSize: 15, fontFamily: 'Montserrat', height: '25px', padding: '5px 0', marginBottom: 10, width: '100%', borderBottom: '1px solid #BAC3CB' }}
-            />
-            <Editor
-              editorState={editorState}
-              wrapperClassName="demo-wrapper"
-              editorClassName="demo-editor"
-              onEditorStateChange={onEditorStateChange}
-              toolbar={{
-                options: [
-                  'inline',
-                  'blockType',
-                  'fontFamily',
-                  'list',
-                  'textAlign',
-                  'colorPicker',
-                  'remove',
-                  'history'
-                ],
-                inline: {
-                  options: ['bold', 'italic', 'underline', 'strikethrough', 'monospace']
-                },
-                list: {
-                  options: ['unordered', 'ordered']
-                }
-              }}
-            />
+            <FormControl
+              style={{ width: '100%', padding: '5px 0', marginBottom: 10 }}
+              error={formError.subject}>
+              <input
+                value={form.subject}
+                onChange={handleSubjectChange}
+                placeholder="Subject"
+                style={{
+                  border: 'none',
+                  fontSize: 15,
+                  fontFamily: 'Montserrat',
+                  height: '25px',
+                  width: '100%',
+                  borderBottom: formError.subject ? '1px solid #DC2626' : '1px solid #BAC3CB'
+                }}
+              />
+              {formError.subject && <HelperText>{formError.subject}</HelperText>}
+            </FormControl>
+            <FormControl style={{ width: '100%' }} error={formError.content}>
+              <Editor
+                editorState={editorState}
+                wrapperClassName="demo-wrapper"
+                editorClassName="demo-editor"
+                onEditorStateChange={onEditorStateChange}
+                toolbar={{
+                  options: [
+                    'inline',
+                    'blockType',
+                    'fontFamily',
+                    'list',
+                    'textAlign',
+                    'colorPicker',
+                    'remove',
+                    'history'
+                  ],
+                  inline: {
+                    options: ['bold', 'italic', 'underline', 'strikethrough', 'monospace']
+                  },
+                  list: {
+                    options: ['unordered', 'ordered']
+                  }
+                }}
+              />
+              {formError.content && <HelperText>{formError.content}</HelperText>}
+            </FormControl>
           </>
         )}
         {previewValue === 'email' && (
