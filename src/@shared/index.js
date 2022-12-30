@@ -93,6 +93,7 @@ export const validatePartiesContent = (partiesContent, type) => {
   const maxLenghtError = 'The maximum length of a row is 35 digits!';
   const maxRowsError = 'The maximum row of {{fieldName}} Name is 2!'
   let isError = false, errorType = maxLenghtError;
+  const textInput = partiesContent;
   const arrTextInput = typeof textInput === 'string' ? textInput.split('\n') : [];
   arrTextInput.forEach(text => {
     if (text.length > MAX_LENGTH) isError = true;
