@@ -26,6 +26,7 @@ export const INQUIRY_VIEWER_FOCUS = 'INQUIRY_VIEWER_FOCUS';
 export const VALIDATE_INPUT = 'VALIDATE_INPUT';
 export const INCREASE_LOADING = 'INCREASE_LOADING';
 export const DECREASE_LOADING = 'DECREASE_LOADING';
+export const RESET_LOADING = 'RESET_LOADING';
 
 export function setFullscreen(state) {
   return {
@@ -216,5 +217,11 @@ export function increaseLoading(){
 export function decreaseLoading(){
   return {
     type: DECREASE_LOADING,
+  }
+}
+
+export function resetLoading(){
+  return {
+    type: RESET_LOADING,
   }
 }

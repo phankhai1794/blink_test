@@ -287,6 +287,7 @@ const BLWorkspace = (props) => {
     }
 
     return () => {
+      dispatch(FormActions.resetLoading())
       if (userInfo) {
         socket.emit('user_processing_out', {
           mybl: bkgNo,
