@@ -80,10 +80,10 @@ const PopupConfirmSubmit = (props) => {
         fields.push(item.field);
       }
     });
-    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields });
 
     const { search } = window.location;
     const bl = new URLSearchParams(search).get('bl');
+    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields });
 
     getBlInfo(bl).then(res => {
       const { bkgNo } = res.myBL;

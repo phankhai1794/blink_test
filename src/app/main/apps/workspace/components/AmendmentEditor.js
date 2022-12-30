@@ -93,6 +93,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const [fieldValueSeparate, setFieldValueSeparate] = useState({ name: '', address: '' });
   const fieldType = metadata.field_options.filter(filDrf => filDrf.display && !filterInqDrf.includes(filDrf.value));
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(currentField));
+  const [disableSave, setDisableSave] = useState(false);
 
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
@@ -114,6 +115,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   };
 
   const handleValidateInput = async (confirm = null) => {
+    setDisableSave(true);
     let textInput = fieldValue || '';
     const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
     if (isWarning) {
@@ -164,6 +166,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           dispatch(InquiryActions.setInquiries(optionsInquires));
           dispatch(InquiryActions.setListMinimize(optionsMinimize));
           getUpdatedAt();
+          setDisableSave(false);
         }).catch((err) => console.error(err));
       })
 
@@ -329,10 +332,10 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         <Button
           className={classes.btn}
           disabled={
-            isSeparate ?
+            (isSeparate ?
               (validatePartiesContent(fieldValueSeparate.name, 'name')?.isError
                 || validatePartiesContent(fieldValueSeparate.address, 'address')?.isError)
-              : (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0))
+              : (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0))) || disableSave
           }
           onClick={() => handleValidateInput(handleSave)}
           color="primary"
