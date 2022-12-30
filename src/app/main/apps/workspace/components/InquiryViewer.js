@@ -207,6 +207,8 @@ const InquiryViewer = (props) => {
   const [isUploadFile, setIsUploadFile] = useState(false);
   const [isRemoveFile, setIsRemoveFile] = useState(false);
   const [disableSaveReply, setDisableSaveReply] = useState(false);
+  const [disableAcceptResolve, setDisableAcceptResolve] = useState(false);
+  const [disableReopen, setDisableReopen] = useState(false);
   const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
   const inqViewerFocus = useSelector(({ workspace }) => workspace.formReducer.inqViewerFocus);
   const [inqAnsId, setInqAnsId] = useState('');
@@ -868,6 +870,7 @@ const InquiryViewer = (props) => {
         }
         // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
+        setDisableAcceptResolve(false);
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
   };
@@ -1015,13 +1018,13 @@ const InquiryViewer = (props) => {
   };
 
   const onSaveReply = async () => {
+    setDisableSaveReply(true);
     const mediaListId = [];
     let mediaListAmendment = [];
     const mediaRest = [];
     let mediaFilesResp;
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
-    setDisableSaveReply(true);
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
@@ -1730,7 +1733,11 @@ const InquiryViewer = (props) => {
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => reOpen(question.process === 'draft' ? tempReply?.answer.id : question.id)}
+                    disabled={disableReopen}
+                    onClick={() => {
+                      setDisableReopen(true);
+                      reOpen(question.process === 'draft' ? tempReply?.answer.id : question.id)
+                    }}
                     classes={{ root: classes.button }}
                   >
                     ReOpen
@@ -1843,13 +1850,16 @@ const InquiryViewer = (props) => {
                       <Button
                         variant="contained"
                         disabled={
-                          isSeparate ?
+                          (isSeparate ?
                             (validatePartiesContent(textResolveSeparate.name, 'name')?.isError
                               || validatePartiesContent(textResolveSeparate.address, 'address')?.isError)
-                            : false
+                            : false) || disableAcceptResolve
                         }
                         color="primary"
-                        onClick={() => !validateInput?.isValid ? onConfirm() : handleValidateInput('RESOLVE', onConfirm)}
+                        onClick={() => {
+                          setDisableAcceptResolve(true);
+                          !validateInput?.isValid ? onConfirm() : handleValidateInput('RESOLVE', onConfirm)
+                        }}
                         classes={{ root: clsx(classes.button, 'w120') }}>
                         Accept
                       </Button>
