@@ -10,6 +10,7 @@ import OtpInput from 'react-otp-input';
 import { isEmail } from 'validator';
 import { verifyEmail, verifyGuest, isVerified, decodeAuthParam, requestCode } from 'app/services/authService';
 import * as Actions from 'app/store/actions';
+import './otp.css';
 
 const otpLength = 6;
 const mainColor = '#BD0F72';
@@ -151,7 +152,7 @@ const OtpCheck = ({ children }) => {
   const dispatch = useDispatch();
   const [myBL, setMyBL] = useState({ id: '' });
   const [mail, setMail] = useState({ value: '', isValid: false, isSubmitted: false });
-  const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true });
+  const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true, resendAfter: 0 });
   const [step, setStep] = useState(0);
 
   const catchError = (error, condition = true) => {
@@ -183,13 +184,16 @@ const OtpCheck = ({ children }) => {
   };
 
   const handleRequestCode = () => {
-    requestCode({ email: mail.value, bl: myBL.id })
-      .then(({ message }) => {
-        dispatch(Actions.showMessage({ message, variant: 'success' }));
-      })
-      .catch((error) => {
-        catchError(error);
-      });
+    if (otpCode.resendAfter === 0) {
+      setOtpCode({ ...otpCode, resendAfter: 15 });
+      requestCode({ email: mail.value, bl: myBL.id })
+        .then(({ message }) => {
+          dispatch(Actions.showMessage({ message, variant: 'success' }));
+        })
+        .catch((error) => {
+          catchError(error);
+        });
+    }
   }
 
   const handleChangeCode = (code) =>
@@ -274,6 +278,15 @@ const OtpCheck = ({ children }) => {
     }
   }, [otpCode.value]);
 
+  useEffect(() => {
+    // countdown timer resend access code
+    const timer = () => setOtpCode({ ...otpCode, resendAfter: otpCode.resendAfter - 1 });
+    if (otpCode.resendAfter === 0) return;
+
+    const countdown = setInterval(timer, 1000);
+    return () => clearInterval(countdown);
+  }, [otpCode.resendAfter]);
+
   return (
     <>
       {step === 2 ? <>{children}</> : (
@@ -335,7 +348,10 @@ const OtpCheck = ({ children }) => {
                         <Typography className={classes.boldLabel}>Access Code</Typography>
                         <Typography style={{ fontSize: 14, fontWeight: 600 }}>
                           {`We just emailed ${mail.value} with a 6-digit code. If you don't see it, please check your spam folder or `}
-                          <a style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={() => handleRequestCode()}>
+                          <a
+                            data-content="resend code"
+                            className={otpCode.resendAfter === 0 ? "resendText" : "resendTextEffect"}
+                            onClick={() => handleRequestCode()}>
                             resend code
                           </a>
                           {'.'}
