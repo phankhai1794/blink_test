@@ -94,12 +94,11 @@ export function toggleDraftBLEdit(state) {
   };
 }
 
-export const setConfirmDraftBL = () => (dispatch) => {
-  const bl = new URLSearchParams(window.location.search).get('bl');
-  confirmDraftBl(bl)
+export const setConfirmDraftBL = (myBL) => (dispatch) => {
+  confirmDraftBl(myBL.id)
     .then(() => {
       dispatch(setBL({ state: draftConfirm }));
-      dispatch(AppActions.updateOpusStatus(bl, "CC", "")); //BL Confirm by Customer (CC)
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "CC", "")); // BL Confirm by Customer (CC)
     })
     .catch((err) => console.error(err));
 };
