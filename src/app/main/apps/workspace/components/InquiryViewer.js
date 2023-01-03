@@ -1271,16 +1271,11 @@ const InquiryViewer = (props) => {
           setViewDropDown('');
           // setSaveComment(!isSaveComment);
           dispatch(
-            AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
+            AppAction.showMessage({ message: 'Update inquiry successfully', variant: 'success' })
           );
         }
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
-      .finally(() => {
-        // setContent
-        dispatch(Actions.loadContent(myBL?.id));
-      });
-
   };
 
   useEffect(() => {
