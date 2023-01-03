@@ -832,7 +832,7 @@ const InquiryViewer = (props) => {
   const onConfirm = () => {
     let contentField = '';
     if (isSeparate) {
-      contentField = `${textResolveSeparate.name.toUpperCase()}\n${textResolveSeparate.address.toUpperCase()}`;
+      contentField = `${textResolveSeparate.name.toUpperCase().trim()}\n${textResolveSeparate.address.toUpperCase().trim()}`;
     } else if (typeof textResolve === 'string') {
       contentField = textResolve.toUpperCase().trim();
     } else {
