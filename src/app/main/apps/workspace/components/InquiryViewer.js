@@ -838,7 +838,12 @@ const InquiryViewer = (props) => {
     } else {
       contentField = textResolve;
       contentField.forEach((obj) => {
-        if (obj[question.inqType]) obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType].toUpperCase();
+        const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
+        if (getTypeName === CONTAINER_SEAL) {
+          obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
+        } else if (obj[question.inqType]) {
+          obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType].toUpperCase();
+        }
       });
     }
     const body = {
@@ -2028,7 +2033,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const typeList = container === CONTAINER_DETAIL ? cdType : cmType;
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values));
-    temp[index][type] = e.target.value;
+    temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? [e.target.value] : e.target.value;
     setValues(temp);
     setTextResolve(temp);
   };
