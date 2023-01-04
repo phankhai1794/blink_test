@@ -127,7 +127,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   const handleSave = () => {
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
-    let contentField = isSeparate ? JSON.stringify(fieldValueSeparate) : fieldValue;
+    fieldValueSeparate.name = fieldValueSeparate.name.trim();
+    fieldValueSeparate.address = fieldValueSeparate.address.trim();
+    let contentField = isSeparate ? JSON.stringify(fieldValueSeparate) : fieldValue.trim();
     const uploads = [];
     const fieldReq = openAmendmentList ? fieldValueSelect?.value : currentField;
     const optionsInquires = [...inquiries];
