@@ -103,9 +103,9 @@ const DialogTitle = withStyles(styles)((props) => {
               <CropDinIcon />
             </IconButton>
           )}
-          <IconButton aria-label="close">
+          {/* <IconButton aria-label="close">
             <OpenInNew />
-          </IconButton>
+          </IconButton> */}
           <IconButton
             aria-label="close"
             onClick={() => {
