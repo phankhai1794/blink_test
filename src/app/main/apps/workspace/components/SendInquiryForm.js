@@ -166,13 +166,19 @@ const SendInquiryForm = (props) => {
     const convert = (array) => array.map((a) => `- ${a}`).join('\n');
     let header = 'BL has been updated';
     if (newInq.length && newRep.length) {
-      return [` \nNew inquiry:\n${convert(newInq)}\n \nNew reply:\n${convert(newRep)}`, header];
+      const msg =
+        'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
+      return [
+        msg,
+        ` \nNew inquiry:\n${convert(newInq)}\n \nNew reply:\n${convert(newRep)}`,
+        header
+      ];
     } else if (newInq.length) {
       header = 'New Inquiry';
     } else if (newRep.length) {
       header = 'New Reply';
     }
-    return [array.map((a) => `- ${a}`).join('\n'), header];
+    return ['', array.map((a) => `- ${a}`).join('\n'), header];
   };
 
   useEffect(() => {
@@ -196,8 +202,10 @@ const SendInquiryForm = (props) => {
       subject = `[Onshore - BL Query]_[${
         inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]
       }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
-      const [msg, header] = convertToList(inqOnshore, 'onshore');
-      content = `Dear Onshore,\n \nWe need your assistance for BL completion. Pending issues:\n${msg}`;
+      const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
+      content = `Dear Onshore,\n \n${
+        msg1 || 'We need your assistance for BL completion. Pending issues:'
+      }\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setOnshoreValue({
         ...onshoreValue,
@@ -213,8 +221,11 @@ const SendInquiryForm = (props) => {
       subject = `[Customer BL Query]_[${
         inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]
       }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
-      const [msg, header] = convertToList(inqCustomer, 'customer');
-      content = `Dear Customer,\n \nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:\n${msg} `;
+      const [msg1, msg2, header] = convertToList(inqCustomer, 'customer');
+      content = `Dear Customer,\n \n${
+        msg1 ||
+        `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`
+      }\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({
         ...customerValue,
@@ -541,15 +552,6 @@ const SendInquiryForm = (props) => {
                 fontWeight: 500
               }}>
               <div className="preview_editor-content">{parse(form.content)}</div>
-              <p>
-                Please visit the link below and help us answer our inquiry. <br />
-                BLink Workspace: <br />
-                Access Code:{' '}
-              </p>
-              <p>
-                Thank you <br />
-                ONE Offshore Center
-              </p>
             </div>
           </div>
         )}
