@@ -34,7 +34,7 @@ function DialogConfirm(props) {
             }}
             variant="contained"
             onClick={() => {
-              dispatch(DraftBLActions.setConfirmDraftBL());
+              dispatch(DraftBLActions.setConfirmDraftBL(myBL));
               dispatch(Actions.openDialog({
                 children: (
                   <React.Fragment>

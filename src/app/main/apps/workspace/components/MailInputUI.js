@@ -60,28 +60,6 @@ const InputUI = ({ id, onChanged }) => {
   const onCc = (value) => dispatch(MailActions.setCc({ ...mode, [`isCc${id}`]: value }));
   const onBcc = (value) => dispatch(MailActions.setCc({ ...mode, [`isBcc${id}`]: value }));
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (ref.current && !ref.current.contains(event.target)) {
-        if (isCc && !inputMail[`to${id}Cc`] && !tags[`to${id}Cc`].length) {
-          onCc(false);
-        }
-        if (isBcc && !inputMail[`to${id}Bcc`] && !tags[`to${id}Bcc`].length) {
-          onBcc(false);
-        }
-        setState({
-          activeSuggestion: -1,
-          filteredSuggestions: [],
-          showSuggestions: false
-        });
-        setFocus(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [ref, inputMail, tags, isCc, isBcc]);
   const isEmailValid = (tag) => {
     const regexp =
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -247,6 +225,33 @@ const InputUI = ({ id, onChanged }) => {
     }
     setCtrlA({ state: false });
   };
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        onBlur(`to${id}`)
+        onBlur(`to${id}Cc`)
+        onBlur(`to${id}Bcc`)
+        if (isCc && !inputMail[`to${id}Cc`] && !tags[`to${id}Cc`].length) {
+          onCc(false);
+        }
+        if (isBcc && !inputMail[`to${id}Bcc`] && !tags[`to${id}Bcc`].length) {
+          onBcc(false);
+        }
+        setState({
+          activeSuggestion: -1,
+          filteredSuggestions: [],
+          showSuggestions: false
+        });
+        setFocus(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [ref, inputMail, tags, isCc, isBcc]);
+
   const totalStringLength = (array) => {
     let total = 0,
       index = 0;
@@ -419,7 +424,7 @@ const InputUI = ({ id, onChanged }) => {
   return (
     <>
       {focus ? (
-        <div ref={ref} onFocus={() => setFocus(true)} style={{ borderBottom: '1px solid #BAC3CB' }}>
+        <div ref={ref} onFocus={() => setFocus(true)}>
           <div className="flex" style={{ position: 'relative' }}>
             <span className='m-auto mr-8'>To</span>
             {TagsInput(`to${id}`, `To ${id}`)}
@@ -441,7 +446,6 @@ const InputUI = ({ id, onChanged }) => {
         <div
           style={{
             height: 22,
-            borderBottom: '1px solid #BAC3CB',
             cursor: 'text',
             padding: '5px 0'
           }}

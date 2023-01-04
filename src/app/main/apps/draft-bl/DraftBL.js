@@ -8,6 +8,7 @@ import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
+import { isJsonText } from '@shared';
 
 import * as Actions from './store/actions';
 
@@ -256,7 +257,11 @@ const DraftPage = (props) => {
           }}>
             <div className={classes.tittle_M}>SHIPPER/EXPORTER</div>
             <div className={classes.content_L} style={{ width: '70%' }}>
-              <span className={classes.shipper}>{getValueField(SHIPPER)}</span>
+              <span className={classes.shipper}>
+                {(getValueField(SHIPPER) && isJsonText(getValueField(SHIPPER))) ?
+                  `${JSON.parse(getValueField(SHIPPER)).name}\n${JSON.parse(getValueField(SHIPPER)).address}`
+                  : getValueField(SHIPPER)}
+              </span>
             </div>
           </Grid>
           <Grid container item xs={5} style={{
@@ -304,7 +309,9 @@ const DraftPage = (props) => {
               }}>
                 <div className={classes.tittle_M}>CONSIGNEE</div>
                 <span className={clsx(classes.consignee, classes.content_L)} style={{ width: '70%' }}>
-                  {getValueField(CONSIGNEE)}
+                  {(getValueField(CONSIGNEE) && isJsonText(getValueField(CONSIGNEE))) ?
+                    `${JSON.parse(getValueField(CONSIGNEE)).name}\n${JSON.parse(getValueField(CONSIGNEE)).address}`
+                    : getValueField(CONSIGNEE)}
                 </span>
               </Grid>
               <Grid item xs={12}>
@@ -312,7 +319,9 @@ const DraftPage = (props) => {
                   {`NOTIFY PARTY (It is agreed that no responsibility shall be attached to the Carrier or its Agents for failure to notify)`}
                 </div>
                 <span className={clsx(classes.notify, classes.content_L)}>
-                  {getValueField(NOTIFY)}
+                  {(getValueField(NOTIFY) && isJsonText(getValueField(NOTIFY))) ?
+                    `${JSON.parse(getValueField(NOTIFY)).name}\n${JSON.parse(getValueField(NOTIFY)).address}`
+                    : getValueField(NOTIFY)}
                 </span>
               </Grid>
 

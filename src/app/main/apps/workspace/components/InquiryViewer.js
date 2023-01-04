@@ -207,6 +207,8 @@ const InquiryViewer = (props) => {
   const [isUploadFile, setIsUploadFile] = useState(false);
   const [isRemoveFile, setIsRemoveFile] = useState(false);
   const [disableSaveReply, setDisableSaveReply] = useState(false);
+  const [disableAcceptResolve, setDisableAcceptResolve] = useState(false);
+  const [disableReopen, setDisableReopen] = useState(false);
   const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
   const inqViewerFocus = useSelector(({ workspace }) => workspace.formReducer.inqViewerFocus);
   const [inqAnsId, setInqAnsId] = useState('');
@@ -331,10 +333,12 @@ const InquiryViewer = (props) => {
                   setSubmitLabel(true);
                   lastest.showIconEdit = true;
                 } else if (filterOffshoreSent.state === 'ANS_DRF') {
+                  setSubmitLabel(false);
                   setStateReplyDraft(false);
                   lastest.showIconEdit = true;
                   lastest.showIconAttachAnswerFile = false;
                 } else if (filterOffshoreSent.state === 'INQ_SENT') {
+                  setSubmitLabel(false);
                   lastest.showIconReply = true;
                   lastest.showIconEdit = false;
                   setStateReplyDraft(false);
@@ -828,13 +832,18 @@ const InquiryViewer = (props) => {
   const onConfirm = () => {
     let contentField = '';
     if (isSeparate) {
-      contentField = `${textResolveSeparate.name.toUpperCase()}\n${textResolveSeparate.address.toUpperCase()}`;
+      contentField = `${textResolveSeparate.name.toUpperCase().trim()}\n${textResolveSeparate.address.toUpperCase().trim()}`;
     } else if (typeof textResolve === 'string') {
       contentField = textResolve.toUpperCase().trim();
     } else {
       contentField = textResolve;
       contentField.forEach((obj) => {
-        if (obj[question.inqType]) obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType].toUpperCase();
+        const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
+        if (getTypeName === CONTAINER_SEAL) {
+          obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
+        } else if (obj[question.inqType]) {
+          obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType].toUpperCase();
+        }
       });
     }
     const body = {
@@ -866,6 +875,7 @@ const InquiryViewer = (props) => {
         }
         // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
+        setDisableAcceptResolve(false);
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
   };
@@ -1013,13 +1023,13 @@ const InquiryViewer = (props) => {
   };
 
   const onSaveReply = async () => {
+    setDisableSaveReply(true);
     const mediaListId = [];
     let mediaListAmendment = [];
     const mediaRest = [];
     let mediaFilesResp;
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
-    setDisableSaveReply(true);
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
@@ -1266,16 +1276,11 @@ const InquiryViewer = (props) => {
           setViewDropDown('');
           // setSaveComment(!isSaveComment);
           dispatch(
-            AppAction.showMessage({ message: 'Update inquiry is successfully', variant: 'success' })
+            AppAction.showMessage({ message: 'Update inquiry successfully', variant: 'success' })
           );
         }
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
-      .finally(() => {
-        // setContent
-        dispatch(Actions.loadContent(myBL?.id));
-      });
-
   };
 
   useEffect(() => {
@@ -1728,7 +1733,11 @@ const InquiryViewer = (props) => {
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => reOpen(question.process === 'draft' ? tempReply?.answer.id : question.id)}
+                    disabled={disableReopen}
+                    onClick={() => {
+                      setDisableReopen(true);
+                      reOpen(question.process === 'draft' ? tempReply?.answer.id : question.id)
+                    }}
                     classes={{ root: classes.button }}
                   >
                     ReOpen
@@ -1841,13 +1850,16 @@ const InquiryViewer = (props) => {
                       <Button
                         variant="contained"
                         disabled={
-                          isSeparate ?
+                          (isSeparate ?
                             (validatePartiesContent(textResolveSeparate.name, 'name')?.isError
                               || validatePartiesContent(textResolveSeparate.address, 'address')?.isError)
-                            : false
+                            : false) || disableAcceptResolve
                         }
                         color="primary"
-                        onClick={() => !validateInput?.isValid ? onConfirm() : handleValidateInput('RESOLVE', onConfirm)}
+                        onClick={() => {
+                          setDisableAcceptResolve(true);
+                          !validateInput?.isValid ? onConfirm() : handleValidateInput('RESOLVE', onConfirm)
+                        }}
                         classes={{ root: clsx(classes.button, 'w120') }}>
                         Accept
                       </Button>
@@ -2021,7 +2033,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const typeList = container === CONTAINER_DETAIL ? cdType : cmType;
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values));
-    temp[index][type] = e.target.value;
+    temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? [e.target.value] : e.target.value;
     setValues(temp);
     setTextResolve(temp);
   };

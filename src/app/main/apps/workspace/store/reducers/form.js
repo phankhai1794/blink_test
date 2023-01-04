@@ -118,6 +118,9 @@ const formReducer = function (state = initialState, action) {
     case Actions.DECREASE_LOADING: {
       return { ...state, isLoading: state.isLoading - 1 };
     }
+    case Actions.RESET_LOADING: {
+      return { ...state, isLoading: 0 };
+    }
     default: {
       return state;
     }
