@@ -11,8 +11,6 @@ import { isEmail } from 'validator';
 import { verifyEmail, verifyGuest, isVerified, decodeAuthParam, requestCode } from 'app/services/authService';
 import * as Actions from 'app/store/actions';
 
-import { StyleResend, StyleResendEffect } from './OTPStyles';
-
 const otpLength = 6;
 const timeCodeMailDelay = 15; // second
 const mainColor = '#BD0F72';
@@ -146,6 +144,13 @@ const useStyles = makeStyles((theme) => ({
     width: 18,
     margin: '0 auto',
     cursor: 'pointer'
+  },
+  enableResend: {
+    textDecoration: 'underline !important',
+    cursor: 'pointer'
+  },
+  disableResend: {
+    textDecoration: 'underline !important',
   }
 }));
 
@@ -182,32 +187,35 @@ const OtpCheck = ({ children }) => {
   }
 
   const handleCheckMail = () => {
-    let sentCode = localStorage.getItem("sentCode");
-    const [isValidTime, secondsAfterSent] = sentCode ? validateTimeSendCode(JSON.parse(sentCode)) : [true, 0];
-    if (!sentCode || isValidTime) {
-      localStorage.setItem("sentCode", JSON.stringify({ bl: myBL.id, requestAt: new Date() }));
-      setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
-      setMail({ ...mail, isSubmitted: true });
-      verifyEmail({ email: mail.value, bl: myBL.id })
-        .then((res) => {
-          if (res) setStep(1);
-        })
-        .catch((error) => {
-          catchError(error);
-          setMail({ ...mail, isSubmitted: false });
-        });
-    }
-    else {
-      alert(`The countdown time allow to send code is ${timeCodeMailDelay - parseInt(secondsAfterSent)}s`);
-    }
+    setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
+    setMail({ ...mail, isSubmitted: true });
+    verifyEmail({ email: mail.value, bl: myBL.id })
+      .then((res) => {
+        if (res) {
+          localStorage.setItem("sentCode", JSON.stringify({
+            bl: myBL.id,
+            mail: mail.value,
+            requestAt: new Date()
+          }));
+          setStep(1);
+        }
+      })
+      .catch((error) => {
+        catchError(error);
+        setMail({ ...mail, isSubmitted: false });
+      });
   };
 
   const handleRequestCode = () => {
     if (otpCode.resendAfter === 0) {
-      localStorage.setItem("sentCode", JSON.stringify({ bl: myBL.id, requestAt: new Date() }));
-      setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
       requestCode({ email: mail.value, bl: myBL.id })
         .then(({ message }) => {
+          localStorage.setItem("sentCode", JSON.stringify({
+            bl: myBL.id,
+            mail: mail.value,
+            requestAt: new Date()
+          }));
+          setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
           dispatch(Actions.showMessage({ message, variant: 'success' }));
         })
         .catch((error) => {
@@ -271,22 +279,37 @@ const OtpCheck = ({ children }) => {
           catchError(error, error.response?.data?.error.status === 403);
         });
     }
-    else { // verify token in localStorage
-      let userInfo = localStorage.getItem('USER');
-      if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
-        const { email } = JSON.parse(userInfo);
-        if (email) {
-          setMail({
-            ...mail,
-            value: email,
-            isValid: isEmail(email)
+
+    // verify token in localStorage
+    let userInfo = localStorage.getItem('USER');
+    if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
+      const { email } = JSON.parse(userInfo);
+      if (email) {
+        setMail({
+          ...mail,
+          value: email,
+          isValid: isEmail(email)
+        });
+        isVerified({ email, bl })
+          .then(() => {
+            setStep(2);
+            return;
+          })
+          .catch((error) => {
+            catchError(error, error.response?.data?.error.status === 403);
           });
-          isVerified({ email, bl })
-            .then(() => setStep(2))
-            .catch((error) => {
-              catchError(error, error.response?.data?.error.status === 403);
-            });
-        }
+      }
+    }
+
+    // check request code delay time
+    let sentCode = localStorage.getItem('sentCode');
+    if (sentCode) {
+      sentCode = JSON.parse(sentCode);
+      if (sentCode.bl === bl) {
+        const [__, secondsAfterSent] = validateTimeSendCode(sentCode);
+        setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay - parseInt(secondsAfterSent) });
+        setMail({ ...mail, value: sentCode.mail, isValid: isEmail(sentCode.mail) });
+        setStep(1);
       }
     }
   }, []);
@@ -368,16 +391,12 @@ const OtpCheck = ({ children }) => {
                         <Typography className={classes.boldLabel}>Access Code</Typography>
                         <Typography style={{ fontSize: 14, fontWeight: 600 }}>
                           {`We just emailed ${mail.value} with a 6-digit code. If you don't see it, please check your spam folder or `}
-                          {otpCode.resendAfter === 0 ?
-                            <StyleResend onClick={() => handleRequestCode()}>resend code</StyleResend> :
-                            <StyleResendEffect
-                              content="resend code"
-                              duration={timeCodeMailDelay + 2} // 2 = delay duration css
-                              onClick={() => handleRequestCode()}
-                            >
-                              resend code
-                            </StyleResendEffect>
-                          }
+                          <a
+                            className={otpCode.resendAfter > 0 ? classes.disableResend : classes.enableResend}
+                            onClick={() => handleRequestCode()}
+                          >
+                            resend code{otpCode.resendAfter > 0 && `(${otpCode.resendAfter})`}
+                          </a>
                           {'.'}
                         </Typography>
                         <Box style={{ marginTop: 11, marginBottom: 24 }}>
