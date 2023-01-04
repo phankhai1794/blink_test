@@ -876,6 +876,7 @@ const InquiryViewer = (props) => {
         // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
         setDisableAcceptResolve(false);
+        setDisableReopen(false);
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
   };
