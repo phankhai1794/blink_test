@@ -55,9 +55,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PopupConfirmSubmit = (props) => {
-  const [inquiries, mybl, isShowBackground] = useSelector(({ workspace }) => [
+  const [inquiries, myBL, isShowBackground] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
-    workspace.inquiryReducer.mybl,
+    workspace.inquiryReducer.myBL,
     workspace.inquiryReducer.isShowBackground,
   ]);
   const user = useSelector(({ auth }) => auth.user);
@@ -67,11 +67,14 @@ const PopupConfirmSubmit = (props) => {
   const handleConfirm = async () => {
     const inqs = [...inquiries];
     const fields = [];
+
     const lstInq = inqs.map((item) => {
-      if ((props.field === "INQUIRY_LIST" || props.field === item.field) &&
-        (item.answerObj && (!['OPEN', 'INQ_SENT', 'COMPL', 'UPLOADED'].includes(item.state)))
+      if (
+        (props.field === "INQUIRY_LIST" || props.field === item.field)
+        && item.answerObj
+        && !['OPEN', 'INQ_SENT', 'ANS_SENT', 'AME_SENT', 'COMPL', 'UPLOADED'].includes(item.state)
       ) {
-        return { inquiryId: item.id, currentState: item.state, field: item.field };
+        return { inquiryId: item.id, currentState: item.state, field: item.field, process: item.process };
       }
       return null;
     });
@@ -82,16 +85,13 @@ const PopupConfirmSubmit = (props) => {
     });
     await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields });
 
-    const { search } = window.location;
-    const bl = new URLSearchParams(search).get('bl');
-
-    getBlInfo(bl).then(res => {
-      const { bkgNo } = res.myBL;
-      const inqsDraft = inquiries?.filter(inq => inq.process === 'draft');
-      const inqType = inqsDraft.length > 0 ? "AN" : "IN"; // AN: Amendment Notification, IN: BL Inquired
+    const inqsPending = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && inq.currentState === 'ANS_DRF');
+    const inqsDraft = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && inq.currentState === 'AME_DRF');
+    if (inqsPending.length > 0 || inqsDraft.length > 0) {
+      const inqType = inqsPending.length > 0 ? "IN" : "AN"; // AN: Amendment Notification, IN: BL Inquired
       const userType = user.role === 'guest' ? "TO" : "TW"; // TO: Return back from Customer via BLink, TW: Return back from Onshore via BLink
-      dispatch(AppActions.updateOpusStatus(bkgNo, inqType, userType));
-    });
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
+    }
 
     const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
     inqs.forEach((item) => {

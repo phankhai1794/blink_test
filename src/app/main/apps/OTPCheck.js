@@ -11,7 +11,10 @@ import { isEmail } from 'validator';
 import { verifyEmail, verifyGuest, isVerified, decodeAuthParam, requestCode } from 'app/services/authService';
 import * as Actions from 'app/store/actions';
 
+import { StyleResend, StyleResendEffect } from './OTPStyles';
+
 const otpLength = 6;
+const timeCodeMailDelay = 15; // second
 const mainColor = '#BD0F72';
 const borderColor = '#8D9AA6';
 const errColor = '#DC2626';
@@ -151,7 +154,7 @@ const OtpCheck = ({ children }) => {
   const dispatch = useDispatch();
   const [myBL, setMyBL] = useState({ id: '' });
   const [mail, setMail] = useState({ value: '', isValid: false, isSubmitted: false });
-  const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true });
+  const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true, resendAfter: 0 });
   const [step, setStep] = useState(0);
 
   const catchError = (error, condition = true) => {
@@ -170,26 +173,47 @@ const OtpCheck = ({ children }) => {
     });
   };
 
+  const validateTimeSendCode = ({ bl, requestAt }) => {
+    let isValidTime = true;
+    const blId = new URLSearchParams(window.location.search).get('bl');
+    const secondsAfterSent = Math.abs(new Date() - new Date(requestAt)) / 1000;
+    if (blId === bl && secondsAfterSent < timeCodeMailDelay) isValidTime = false;
+    return [isValidTime, secondsAfterSent];
+  }
+
   const handleCheckMail = () => {
-    setMail({ ...mail, isSubmitted: true });
-    verifyEmail({ email: mail.value, bl: myBL.id })
-      .then((res) => {
-        if (res) setStep(1);
-      })
-      .catch((error) => {
-        catchError(error);
-        setMail({ ...mail, isSubmitted: false });
-      });
+    let sentCode = localStorage.getItem("sentCode");
+    const [isValidTime, secondsAfterSent] = sentCode ? validateTimeSendCode(JSON.parse(sentCode)) : [true, 0];
+    if (!sentCode || isValidTime) {
+      localStorage.setItem("sentCode", JSON.stringify({ bl: myBL.id, requestAt: new Date() }));
+      setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
+      setMail({ ...mail, isSubmitted: true });
+      verifyEmail({ email: mail.value, bl: myBL.id })
+        .then((res) => {
+          if (res) setStep(1);
+        })
+        .catch((error) => {
+          catchError(error);
+          setMail({ ...mail, isSubmitted: false });
+        });
+    }
+    else {
+      alert(`The countdown time allow to send code is ${timeCodeMailDelay - parseInt(secondsAfterSent)}s`);
+    }
   };
 
   const handleRequestCode = () => {
-    requestCode({ email: mail.value, bl: myBL.id })
-      .then(({ message }) => {
-        dispatch(Actions.showMessage({ message, variant: 'success' }));
-      })
-      .catch((error) => {
-        catchError(error);
-      });
+    if (otpCode.resendAfter === 0) {
+      localStorage.setItem("sentCode", JSON.stringify({ bl: myBL.id, requestAt: new Date() }));
+      setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
+      requestCode({ email: mail.value, bl: myBL.id })
+        .then(({ message }) => {
+          dispatch(Actions.showMessage({ message, variant: 'success' }));
+        })
+        .catch((error) => {
+          catchError(error);
+        });
+    }
   }
 
   const handleChangeCode = (code) =>
@@ -274,6 +298,15 @@ const OtpCheck = ({ children }) => {
     }
   }, [otpCode.value]);
 
+  useEffect(() => {
+    // countdown timer resend access code
+    const timer = () => setOtpCode({ ...otpCode, resendAfter: otpCode.resendAfter - 1 });
+    if (otpCode.resendAfter === 0) return;
+
+    const countdown = setInterval(timer, 1000);
+    return () => clearInterval(countdown);
+  }, [otpCode.resendAfter]);
+
   return (
     <>
       {step === 2 ? <>{children}</> : (
@@ -335,9 +368,16 @@ const OtpCheck = ({ children }) => {
                         <Typography className={classes.boldLabel}>Access Code</Typography>
                         <Typography style={{ fontSize: 14, fontWeight: 600 }}>
                           {`We just emailed ${mail.value} with a 6-digit code. If you don't see it, please check your spam folder or `}
-                          <a style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={() => handleRequestCode()}>
-                            resend code
-                          </a>
+                          {otpCode.resendAfter === 0 ?
+                            <StyleResend onClick={() => handleRequestCode()}>resend code</StyleResend> :
+                            <StyleResendEffect
+                              content="resend code"
+                              duration={timeCodeMailDelay + 2} // 2 = delay duration css
+                              onClick={() => handleRequestCode()}
+                            >
+                              resend code
+                            </StyleResendEffect>
+                          }
                           {'.'}
                         </Typography>
                         <Box style={{ marginTop: 11, marginBottom: 24 }}>

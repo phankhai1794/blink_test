@@ -1,6 +1,6 @@
 import { getMetadata } from 'app/services/inquiryService';
 import { getFieldContent, confirmDraftBl } from 'app/services/draftblService';
-import { createBL, getBlInfo, getCustomerAmendment } from 'app/services/myBLService';
+import { getBlInfo, getCustomerAmendment } from 'app/services/myBLService';
 import { filterMetadata, draftConfirm } from '@shared';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
 
@@ -31,8 +31,9 @@ export const loadContent = (bl) => async (dispatch) => {
       await getBlInfo(bl),
       await getCustomerAmendment(bl)
     ];
-    const { content } = blResponse?.myBL;
+    const { id, bkgNo, state, content } = blResponse?.myBL;
     const { contentAmendmentRs } = contentRespone;
+    dispatch(setBL({ id, bkgNo, state }));
     dispatch(setOrgContent(blResponse?.myBL.content));
     const cloneContent = { ...content };
     contentAmendmentRs?.length && contentAmendmentRs.forEach(a => cloneContent[a.field] = a.content);
@@ -93,12 +94,11 @@ export function toggleDraftBLEdit(state) {
   };
 }
 
-export const setConfirmDraftBL = () => (dispatch) => {
-  const bl = new URLSearchParams(window.location.search).get('bl');
-  confirmDraftBl(bl)
+export const setConfirmDraftBL = (myBL) => (dispatch) => {
+  confirmDraftBl(myBL.id)
     .then(() => {
       dispatch(setBL({ state: draftConfirm }));
-      dispatch(AppActions.updateOpusStatus(bl, "CC", "")); //BL Confirm by Customer (CC)
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "CC", "")); // BL Confirm by Customer (CC)
     })
     .catch((err) => console.error(err));
 };

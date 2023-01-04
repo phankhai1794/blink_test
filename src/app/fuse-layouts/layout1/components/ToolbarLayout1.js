@@ -3,23 +3,18 @@ import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarM
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
-import * as Actions from 'app/main/apps/workspace/store/actions';
-import * as DraftBLActions from 'app/main/apps/workspace/store/actions/draft-bl';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { draftConfirm } from '@shared';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppBar, Toolbar, Avatar, Badge, Button, Hidden } from '@material-ui/core';
-import EditIcon from '@material-ui/icons/Edit';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 import { loadComment } from 'app/services/inquiryService';
 import { getCommentDraftBl } from 'app/services/draftblService';
 import axios from 'axios';
-import { getBlInfo } from 'app/services/myBLService';
 
 import * as InquiryActions from '../../../main/apps/workspace/store/actions/inquiry';
 
