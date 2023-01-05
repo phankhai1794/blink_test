@@ -102,7 +102,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   };
 
   const getValueField = (field) => {
-    return content[getField(field)] || '';
+    return content[getField(field)] || [];
   };
 
   const originalData = originalValues || getValueField(container) || [{}];
