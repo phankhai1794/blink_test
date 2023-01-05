@@ -78,6 +78,11 @@ const useStyles = makeStyles((theme) => ({
   labelMargin: {
     marginRight: 21
   },
+  labelDisabled: {
+    '&.Mui-disabled': {
+      color: '#132535',
+    },
+  },
   labelText: {
     color: '#36B37E',
     fontWeight: 400,
@@ -1481,7 +1486,7 @@ const InquiryViewer = (props) => {
                     </div>
                     {/*..*/}
 
-                    {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
+                    {showReceiver && <FormControlLabel classes={{ label: classes.labelDisabled }} control={<Radio checked disabled style={{ color: '#132535' }} />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
                     {!['COMPL', 'UPLOADED'].includes(question.state) && (
                       isReply ? (
                         <>
@@ -1506,7 +1511,7 @@ const InquiryViewer = (props) => {
                                 <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                                   <img
                                     style={{ height: '22px', cursor: 'pointer' }}
-                                    src="/assets/images/icons/trash-gray.svg"
+                                    src="/assets/images/icons/trash.svg"
                                   />
                                 </div>
                               </Tooltip>
@@ -1538,7 +1543,7 @@ const InquiryViewer = (props) => {
                       <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion()}>
                         <img
                           style={{ height: '22px', cursor: 'pointer' }}
-                          src="/assets/images/icons/trash-gray.svg"
+                          src="/assets/images/icons/trash.svg"
                         />
                       </div>
                     </Tooltip>
@@ -1574,7 +1579,7 @@ const InquiryViewer = (props) => {
                           <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                             <img
                               style={{ height: '22px', cursor: 'pointer' }}
-                              src="/assets/images/icons/trash-gray.svg"
+                              src="/assets/images/icons/trash.svg"
                             />
                           </div>
                         </Tooltip>
