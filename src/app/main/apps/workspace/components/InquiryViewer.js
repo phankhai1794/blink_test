@@ -1507,7 +1507,7 @@ const InquiryViewer = (props) => {
                               </Tooltip>
                             </PermissionProvider>
                             {question.process === 'draft' && !['REP_SENT', 'AME_SENT'].includes(question.state) && (
-                              <Tooltip title="Delete Reply">
+                              <Tooltip title="Delete">
                                 <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                                   <img
                                     style={{ height: '22px', cursor: 'pointer' }}
@@ -1575,7 +1575,7 @@ const InquiryViewer = (props) => {
                         </div>
                       </Tooltip>
                       {question.process === 'draft' && !['AME_SENT', 'REP_SENT'].includes(question.state) && (
-                        <Tooltip title="Delete Reply">
+                        <Tooltip title="Delete">
                           <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                             <img
                               style={{ height: '22px', cursor: 'pointer' }}
