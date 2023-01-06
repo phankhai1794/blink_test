@@ -847,7 +847,7 @@ const InquiryViewer = (props) => {
         if (getTypeName === CONTAINER_SEAL) {
           obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
-          obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType].toUpperCase();
+          obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
         }
       });
     }
@@ -2034,8 +2034,8 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
 
   const inqType = getLabelById(metadata['inq_type_options'], question.inqType);
   const cdType =
-    inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CONTAINER_SEAL];
-  const cmType = inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CM_PACKAGE];
+    inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER];
+  const cmType = inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER];
   const typeList = container === CONTAINER_DETAIL ? cdType : cmType;
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values));
@@ -2097,7 +2097,8 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               if (rowIndex - 1 < item.value.length) {
                 nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
               }
-              const disabled = !(rowIndex > 0 && nodeValue && !disableInput);
+              const disabled = !((rowIndex > 0 || inqType === CONTAINER_NUMBER) && nodeValue && !disableInput);
+              // const disabled = !(nodeValue && !disableInput);
               return (
                 <input
                   className={clsx(classes.text)}
@@ -2119,7 +2120,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
             })
           }
         </div>);
-        if (!hasData) {
+        if (!hasData || typeList.length == 1) {
           isRunning = false;
         }
         rowIndex += 1;
