@@ -28,9 +28,9 @@ function Error404Page() {
           </Typography>
         </FuseAnimate>
 
-        <Link className="font-medium" to="/apps/dashboards">
+        {/* <Link className="font-medium" to="/apps/dashboards">
           Go back to main page
-        </Link>
+        </Link> */}
       </div>
     </div>
   );
