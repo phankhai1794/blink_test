@@ -234,7 +234,7 @@ const InquiryViewer = (props) => {
       setIsReplyCDCM(false)
       setIsResolve(false)
       setIsReplyCDCM(false)
-      setShowViewAll(false)
+      // setShowViewAll(false)
       setViewDropDown()
     }
   }, [inqViewerFocus])
@@ -379,7 +379,7 @@ const InquiryViewer = (props) => {
               setInqHasComment(true);
             }
             if (res.length === 1) {
-              setShowViewAll(false);
+              // setShowViewAll(false);
               setInqHasComment(false)
             }
           } else {
@@ -1291,7 +1291,6 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     const el = document.getElementById(question.id);
-    setShowViewAll(false);
     if (el && el.scrollHeight > el.clientHeight) setShowViewAll(true);
   }, [isLoadedComment]);
 
