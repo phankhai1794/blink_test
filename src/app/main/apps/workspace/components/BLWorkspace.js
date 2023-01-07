@@ -1,4 +1,4 @@
-import { checkNewInquiry, NUMBER_INQ_BOTTOM, isJsonText } from '@shared';
+import { checkNewInquiry, NUMBER_INQ_BOTTOM, isJsonText, formatDate } from '@shared';
 import { FuseLoading } from '@fuse';
 import {
   SHIPPER,
@@ -69,7 +69,6 @@ import TableCD from './TableCD';
 import TableCM from './TableCM';
 import ListNotification from './ListNotification';
 import SubmitAnswerNotification from "./SubmitAnswerNotification";
-
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -793,7 +792,7 @@ const BLWorkspace = (props) => {
                     <Grid item>
                       <Label>DATE CARGO RECEIVED</Label>
                       <BLField id={getField(DATE_CARGO)}>
-                        {getValueField(DATE_CARGO)}
+                        {getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO),'YYYY-MM-DD')}
                       </BLField>
                     </Grid>
                   </Grid>
@@ -801,13 +800,13 @@ const BLWorkspace = (props) => {
                     <Grid item>
                       <Label>DATED</Label>
                       <BLField id={getField(DATED)}>
-                        {getValueField(DATED)}
+                        {getValueField(DATED) && formatDate(getValueField(DATED),'YYYY-MM-DD')}
                       </BLField>
                     </Grid>
                     <Grid item>
                       <Label>DATE LADEN ON BOARD</Label>
                       <BLField id={getField(DATE_LADEN)}>
-                        {getValueField(DATE_LADEN)}
+                        {getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN),'YYYY-MM-DD')}
                       </BLField>
                     </Grid>
                   </Grid>
