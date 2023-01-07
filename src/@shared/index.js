@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export const getLabelById = (fieldOptions, id) => {
   const result = fieldOptions.filter(({ value }) => value === id);
   return result.length ? result[0].label : "";
@@ -143,4 +145,8 @@ export function isJsonText(str) {
     return false;
   }
   return false;
+}
+
+export function formatDate(time, formatType) {
+  return moment(time).format(formatType)
 }
