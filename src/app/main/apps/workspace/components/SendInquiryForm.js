@@ -552,6 +552,27 @@ const SendInquiryForm = (props) => {
                 fontWeight: 500
               }}>
               <div className="preview_editor-content">{parse(form.content)}</div>
+              <p>Please visit the link below and help advise us information for further checking</p>
+              <div style={{ textAlign: 'center' }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled
+                  style={{
+                    borderRadius: 8,
+                    padding: '9px 30px',
+                    textAlign: 'center',
+                    fontSize: 14,
+                    fontFamily: 'Montserrat',
+                    color: 'white',
+                    background: '#BD0F72',
+                    textTransform: 'none'
+                  }}>
+                  View Link
+                </Button>
+              </div>
+              <br />
+              <span>Thank you for choosing ONE</span>
             </div>
           </div>
         )}
