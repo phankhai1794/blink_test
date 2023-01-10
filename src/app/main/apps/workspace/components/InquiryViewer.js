@@ -78,6 +78,11 @@ const useStyles = makeStyles((theme) => ({
   labelMargin: {
     marginRight: 21
   },
+  labelDisabled: {
+    '&.Mui-disabled': {
+      color: '#132535',
+    },
+  },
   labelText: {
     color: '#36B37E',
     fontWeight: 400,
@@ -229,7 +234,7 @@ const InquiryViewer = (props) => {
       setIsReplyCDCM(false)
       setIsResolve(false)
       setIsReplyCDCM(false)
-      setShowViewAll(false)
+      // setShowViewAll(false)
       setViewDropDown()
     }
   }, [inqViewerFocus])
@@ -374,7 +379,7 @@ const InquiryViewer = (props) => {
               setInqHasComment(true);
             }
             if (res.length === 1) {
-              setShowViewAll(false);
+              // setShowViewAll(false);
               setInqHasComment(false)
             }
           } else {
@@ -842,7 +847,7 @@ const InquiryViewer = (props) => {
         if (getTypeName === CONTAINER_SEAL) {
           obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
-          obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType].toUpperCase();
+          obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
         }
       });
     }
@@ -876,6 +881,7 @@ const InquiryViewer = (props) => {
         // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
         setDisableAcceptResolve(false);
+        setDisableReopen(false);
       })
       .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
   };
@@ -1285,7 +1291,6 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     const el = document.getElementById(question.id);
-    setShowViewAll(false);
     if (el && el.scrollHeight > el.clientHeight) setShowViewAll(true);
   }, [isLoadedComment]);
 
@@ -1480,7 +1485,7 @@ const InquiryViewer = (props) => {
                     </div>
                     {/*..*/}
 
-                    {showReceiver && <FormControlLabel control={<Radio color={'primary'} checked disabled />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
+                    {showReceiver && <FormControlLabel classes={{ label: classes.labelDisabled }} control={<Radio checked disabled style={{ color: '#132535' }} />} label={question.receiver.includes('customer') ? "Customer" : "Onshore"} />}
                     {!['COMPL', 'UPLOADED'].includes(question.state) && (
                       isReply ? (
                         <>
@@ -1501,11 +1506,11 @@ const InquiryViewer = (props) => {
                               </Tooltip>
                             </PermissionProvider>
                             {question.process === 'draft' && !['REP_SENT', 'AME_SENT'].includes(question.state) && (
-                              <Tooltip title="Delete Reply">
+                              <Tooltip title="Delete">
                                 <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                                   <img
                                     style={{ height: '22px', cursor: 'pointer' }}
-                                    src="/assets/images/icons/trash-gray.svg"
+                                    src="/assets/images/icons/trash.svg"
                                   />
                                 </div>
                               </Tooltip>
@@ -1537,7 +1542,7 @@ const InquiryViewer = (props) => {
                       <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion()}>
                         <img
                           style={{ height: '22px', cursor: 'pointer' }}
-                          src="/assets/images/icons/trash-gray.svg"
+                          src="/assets/images/icons/trash.svg"
                         />
                       </div>
                     </Tooltip>
@@ -1569,11 +1574,11 @@ const InquiryViewer = (props) => {
                         </div>
                       </Tooltip>
                       {question.process === 'draft' && !['AME_SENT', 'REP_SENT'].includes(question.state) && (
-                        <Tooltip title="Delete Reply">
+                        <Tooltip title="Delete">
                           <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                             <img
                               style={{ height: '22px', cursor: 'pointer' }}
-                              src="/assets/images/icons/trash-gray.svg"
+                              src="/assets/images/icons/trash.svg"
                             />
                           </div>
                         </Tooltip>
@@ -2028,8 +2033,8 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
 
   const inqType = getLabelById(metadata['inq_type_options'], question.inqType);
   const cdType =
-    inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CONTAINER_SEAL];
-  const cmType = inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER, CM_PACKAGE];
+    inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER];
+  const cmType = inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER];
   const typeList = container === CONTAINER_DETAIL ? cdType : cmType;
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values));
@@ -2091,7 +2096,8 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               if (rowIndex - 1 < item.value.length) {
                 nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
               }
-              const disabled = !(rowIndex > 0 && nodeValue && !disableInput);
+              const disabled = !((rowIndex > 0 || inqType === CONTAINER_NUMBER) && nodeValue && !disableInput);
+              // const disabled = !(nodeValue && !disableInput);
               return (
                 <input
                   className={clsx(classes.text)}
@@ -2113,7 +2119,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
             })
           }
         </div>);
-        if (!hasData) {
+        if (!hasData || typeList.length == 1) {
           isRunning = false;
         }
         rowIndex += 1;

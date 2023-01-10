@@ -47,7 +47,7 @@ const inquiryReducer = function (state = initialState, action) {
   }
 
   case Actions.SET_EDIT_INQUIRY: {
-    return { ...state, currentEditInq: action.state };
+    return { ...state, currentEditInq: action.state, validation: { inqType: true, field: true, receiver: true, ansType: true, content: true, answerContent: true } }; // RESET VALIDATION
   }
   case Actions.ADD_QUESTION: {
     return {
