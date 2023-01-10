@@ -638,7 +638,7 @@ const ActionUI = (props) => {
           MenuProps={{ classes: { paper: classes.paper } }}
           disableUnderline>
           <StyledMenuItem value="default">Preview</StyledMenuItem>
-          <StyledMenuItem value="inquiry"> Preview List</StyledMenuItem>
+          <StyledMenuItem value="inquiry"> Preview Inquiries</StyledMenuItem>
           <StyledMenuItem value="email"> Preview Email Layout</StyledMenuItem>
         </Select>
       </div>
