@@ -94,12 +94,11 @@ export function toggleDraftBLEdit(state) {
   };
 }
 
-export const setConfirmDraftBL = (myBL, role) => (dispatch) => {
+export const setConfirmDraftBL = (myBL) => (dispatch) => {
   confirmDraftBl(myBL.id)
     .then(() => {
       dispatch(setBL({ state: draftConfirm }));
-      // BL Confirm by Customer (CC), TO: Return back from Customer via BLink, TW: Return back from Onshore via BLink
-      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "CC", role === 'Guest' ? "TO" : "TW"));
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "CC", "")); // BL Confirm by Customer (CC)
     })
     .catch((err) => console.error(err));
 };

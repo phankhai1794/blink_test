@@ -84,7 +84,7 @@ const DialogTitle = withStyles(styles)((props) => {
           <IconButton
             aria-label="close"
             // onClick={handleOpenSnackBar}
-            onClick={() => { }}
+            onClick={() => {}}
             style={{ textAlign: 'center' }}>
             <MinimizeIcon />
           </IconButton>
@@ -505,7 +505,7 @@ export default function Form(props) {
           classes={{
             root:
               field === 'ATTACHMENT_LIST' ||
-                ((field === 'INQUIRY_LIST' || field === currentField) && isShowBackground)
+              ((field === 'INQUIRY_LIST' || field === currentField) && isShowBackground)
                 ? classes.dialogContentAttachment
                 : classes.dialogContent
           }}
@@ -518,7 +518,6 @@ export default function Form(props) {
         {field !== 'ATTACHMENT_LIST' && (
           <PopupConfirmSubmit
             field={field}
-            user={user}
             handleCheckSubmit={() => setCheckSubmit(!checkSubmit)}
           />
         )}

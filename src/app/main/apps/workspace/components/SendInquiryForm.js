@@ -199,11 +199,13 @@ const SendInquiryForm = (props) => {
     let content = '';
     let bodyHtml = '';
     if (hasOnshore) {
-      subject = `
-        [Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})
-      `;
+      subject = `[Onshore - BL Query]_[${
+        inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]
+      }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
-      content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion. Pending issues:'}\n${msg2}`;
+      content = `Dear Onshore,\n \n${
+        msg1 || 'We need your assistance for BL completion. Pending issues:'
+      }\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setOnshoreValue({
         ...onshoreValue,
@@ -216,12 +218,14 @@ const SendInquiryForm = (props) => {
       handleEditorState(content);
     }
     if (hasCustomer) {
-      subject = `[Customer BL Query]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]
-        }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      subject = `[Customer BL Query]_[${
+        inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]
+      }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
       const [msg1, msg2, header] = convertToList(inqCustomer, 'customer');
-      content = `Dear Customer,\n \n${msg1 ||
+      content = `Dear Customer,\n \n${
+        msg1 ||
         `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`
-        }\n${msg2} `;
+      }\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({
         ...customerValue,
@@ -309,6 +313,15 @@ const SendInquiryForm = (props) => {
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'sendMail') {
       const cloneInquiries = [...inquiries];
+      cloneInquiries.forEach((q) => {
+        if (q.receiver[0] === tabValue) {
+          if (q.state === 'OPEN') q.state = 'INQ_SENT';
+          // inquiry
+          else if (q.state === 'REP_Q_DRF') q.state = 'REP_Q_SENT';
+          // inquiry
+          else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
+        }
+      });
       const formClone = JSON.parse(JSON.stringify(form));
       let header = '';
       if (tabValue === 'onshore') {
@@ -334,6 +347,7 @@ const SendInquiryForm = (props) => {
           tab: tabValue
         })
       );
+      dispatch(InquiryActions.setInquiries(cloneInquiries));
       dispatch(
         FormActions.openConfirmPopup({
           openConfirmPopup: false,
