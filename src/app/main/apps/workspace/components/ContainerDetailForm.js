@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux';
 import { Icon, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Drawer, Popper } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import styled from 'styled-components';
+import { formatContainerNo } from '@shared';
 
 import AmendmentPopup from './AmendmentPopup';
 
@@ -127,7 +128,11 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }, [container])
 
   const handleEdit = (state) => {
-    setOpenEdit(state)
+    setOpenEdit(state);
+    valueEdit.forEach(data => {
+      const containerNoId = metadata.inq_type[CONTAINER_NUMBER];
+      data[containerNoId] = formatContainerNo(data[containerNoId]);
+    })
     setEditContent(valueEdit);
   }
 
