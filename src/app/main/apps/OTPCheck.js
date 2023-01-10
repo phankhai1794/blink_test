@@ -207,7 +207,7 @@ const OtpCheck = ({ children }) => {
   };
 
   const handleRequestCode = () => {
-    if (otpCode.resendAfter === 0) {
+    if (otpCode.resendAfter <= 0) {
       requestCode({ email: mail.value, bl: myBL.id })
         .then(({ message }) => {
           localStorage.setItem("sentCode", JSON.stringify({
@@ -324,7 +324,7 @@ const OtpCheck = ({ children }) => {
   useEffect(() => {
     // countdown timer resend access code
     const timer = () => setOtpCode({ ...otpCode, resendAfter: otpCode.resendAfter - 1 });
-    if (otpCode.resendAfter === 0) return;
+    if (otpCode.resendAfter <= 0) return;
 
     const countdown = setInterval(timer, 1000);
     return () => clearInterval(countdown);
