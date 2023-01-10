@@ -217,11 +217,11 @@ const SendInquiryForm = (props) => {
     }
     if (hasCustomer) {
       subject = `[Customer BL Query]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]
-        }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
       const [msg1, msg2, header] = convertToList(inqCustomer, 'customer');
       content = `Dear Customer,\n \n${msg1 ||
         `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`
-        }\n${msg2} `;
+      }\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({
         ...customerValue,
@@ -359,7 +359,12 @@ const SendInquiryForm = (props) => {
       content: !isBodyValid() ? 'Please enter your email content.' : ''
     });
     if (isMailVaid()) {
-      dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
+      const to = tabValue === 'customer' ? 'Customer' : 'Onshore'
+      const regex = /.*@.*com.+/
+      if (regex.test(inputMail[`to${to}`]) || regex.test(inputMail[`to${to}Cc`]) || regex.test(inputMail[`to${to}Bcc`]))
+        dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
+      else
+        dispatch(Actions.showMessage({ message: 'EMAIL ADDRESS DOES NOT EXIST', variant: 'error' }));
     } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
       return;
     } else {

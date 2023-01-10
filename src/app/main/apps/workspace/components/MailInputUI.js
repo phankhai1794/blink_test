@@ -90,10 +90,26 @@ const InputUI = ({ id, onChanged }) => {
     if (focus && refInput[`to${id}`].current) refInput[`to${id}`].current.focus();
   }, [focus]);
 
+  const splitEmailValid = (id, values) => {
+    const result = [];
+    const temp = [];
+    values.forEach((v) => {
+      if (isEmailValid(v)) {
+        result.push(v);
+      } else if (v) {
+        temp.push(v);
+      }
+    });
+    if (result.length) {
+      const newTags = [...new Set([...tags[id], ...result])]
+      onChanged(id, newTags);
+      dispatch(MailActions.setTags({ ...tags, [id]: newTags }));
+      dispatch(MailActions.inputMail({ ...inputMail, [id]: temp.join(',') }));
+    }
+  }
+
   const onPaste = (id, e) => {
     e.preventDefault();
-    const result = [];
-    let temp = '';
     const removeDuplicate = [
       ...new Set(
         e.clipboardData
@@ -102,17 +118,7 @@ const InputUI = ({ id, onChanged }) => {
           .map((str) => str.trim())
       )
     ];
-    removeDuplicate.forEach((v) => {
-      if (isEmailValid(v)) {
-        result.push(v);
-      } else if (v) {
-        temp += v + ',';
-      }
-    });
-    if (result.length) {
-      dispatch(MailActions.setTags({ ...tags, [id]: [...new Set([...tags[id], ...result])] }));
-      dispatch(MailActions.inputMail({ ...inputMail, [id]: temp.slice(0, -1) }));
-    }
+    splitEmailValid(id, removeDuplicate)
   };
   const onDelete = (id, tagIndex) => {
     const newTags = ctrlA.state ? [] : tags[id].filter((_, i) => i !== tagIndex);
@@ -216,13 +222,8 @@ const InputUI = ({ id, onChanged }) => {
   };
 
   const onBlur = (id) => {
-    const input = inputMail[id];
-    if (input && isEmailValid(input.trim())) {
-      const newTags = [...new Set([...tags[id], input.trim()])];
-      onChanged(id, newTags);
-      dispatch(MailActions.setTags({ ...tags, [id]: newTags }));
-      dispatch(MailActions.inputMail({ ...inputMail, [id]: '' }));
-    }
+    const input = inputMail[id].split(/,|;|\n/).map((str) => str.trim());
+    splitEmailValid(id, input)
     setCtrlA({ state: false });
   };
 
