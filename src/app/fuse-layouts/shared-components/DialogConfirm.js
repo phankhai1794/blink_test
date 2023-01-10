@@ -12,6 +12,7 @@ import history from '@history';
 
 function DialogConfirm(props) {
   const { handleClose, open } = props;
+  const user = useSelector(({ user }) => user);
   const myBL = useSelector(({ draftBL }) => draftBL.myBL);
   const dispatch = useDispatch();
 
@@ -34,7 +35,7 @@ function DialogConfirm(props) {
             }}
             variant="contained"
             onClick={() => {
-              dispatch(DraftBLActions.setConfirmDraftBL(myBL));
+              dispatch(DraftBLActions.setConfirmDraftBL(myBL, user.role));
               dispatch(Actions.openDialog({
                 children: (
                   <React.Fragment>

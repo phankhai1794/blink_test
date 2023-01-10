@@ -59,8 +59,8 @@ const PopupConfirmSubmit = (props) => {
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.myBL,
     workspace.inquiryReducer.isShowBackground,
+    
   ]);
-  const user = useSelector(({ auth }) => auth.user);
   const dispatch = useDispatch();
   const classes = useStyles();
 
@@ -89,10 +89,10 @@ const PopupConfirmSubmit = (props) => {
     const inqsDraft = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && inq.currentState === 'AME_DRF');
     if (inqsPending.length > 0 || inqsDraft.length > 0) {
       const inqType = inqsPending.length > 0 ? "IN" : "AN"; // AN: Amendment Notification, IN: BL Inquired
-      const userType = user.role === 'guest' ? "TO" : "TW"; // TO: Return back from Customer via BLink, TW: Return back from Onshore via BLink
+      const userType = props.user.toLowerCase() === 'guest' ? "TO" : "TW"; // TO: Return back from Customer via BLink, TW: Return back from Onshore via BLink
       dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
     }
-
+    
     const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
     inqs.forEach((item) => {
       if (listIdInq.includes(item.id)) {
