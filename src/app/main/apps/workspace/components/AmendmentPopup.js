@@ -35,6 +35,7 @@ import {
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import ClearIcon from '@material-ui/icons/Clear';
 import WindowedSelect from "react-windowed-select";
+import { formatContainerNo } from '@shared';
 
 const useStyles = makeStyles((theme) => ({
   selectRoot: {
@@ -200,6 +201,8 @@ const AmendmentPopup = (props) => {
     const { title, ...prop } = props;
     const type = inqType === CONTAINER_DETAIL ? CDTitle : CMTitle;
     const field = type.find((f) => f.title === title);
+    // TODO: Case for Dummy ContainerNo
+    const isUpperCase = field.title !== CONTAINER_NUMBER;
     return (
       <TextField
         {...prop}
@@ -207,13 +210,13 @@ const AmendmentPopup = (props) => {
         error={Boolean(errors[title])}
         helperText={errors[title]?.message}
         className={clsx(classes.textField, !isEdit && classes.lock)}
-        value={field.value}
+        value={!isUpperCase ? formatContainerNo(field.value) : field.value}
         onChange={(e) => handleChange(field.id, e.target.value)}
         InputProps={{
           disabled: !isEdit,
           endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
         }}
-        inputProps={{ style: { textTransform: 'uppercase' } }}
+        inputProps={{ style: { textTransform: isUpperCase ? 'uppercase' : 'none'} }}
       />
     );
   };

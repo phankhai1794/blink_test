@@ -150,3 +150,8 @@ export function isJsonText(str) {
 export function formatDate(time, formatType) {
   return moment(time).format(formatType)
 }
+
+// Format Dummy Container Data
+export function formatContainerNo(containerNo) {
+  return containerNo ? containerNo.toUpperCase().replace('CONT-NO', 'Cont-No') : '';
+}
