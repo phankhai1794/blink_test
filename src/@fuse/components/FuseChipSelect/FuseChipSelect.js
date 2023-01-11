@@ -116,26 +116,6 @@ const useStyles = makeStyles((theme) => ({
       fontWeight: '600 !important'
     }
   },
-  inputLongText: {
-    '&:hover': {
-      background: `#FDF2F2 !important`,
-      color: '#BD0F72',
-      fontWeight: '600 !important',
-      animation: '$moveText 15s linear infinite',
-      
-    }
-  },
-  '@keyframes moveText': {
-    '0%': {
-      transform: 'translateX(0%)',
-    },
-    '50%': {
-      transform: 'translateX(-100%)',
-    },
-    '100%': {
-      transform: 'translateX(0%)',
-    },
-  },
   errorField: {
     '& .MuiInputBase-root fieldset': {
       border: '2px solid red',
@@ -196,13 +176,7 @@ function Option(props) {
       className={classes.menuItem}
       {...props.innerProps}
     >
-        <div 
-          className={clsx(
-            props.children.length > 33 ? classes.inputLongText : ''
-          )}
-        >
-          {props.children}
-        </div> 
+      {props.children}
     </MenuItem>
   );
 }
@@ -219,6 +193,7 @@ function Placeholder(props) {
 
 function SingleValue(props) {
   const classes = useStyles();
+
   return (
     <Typography className={classes.singleValue} {...props.innerProps}>
       {props.children}
@@ -256,7 +231,7 @@ function MultiValue(props) {
 
 function Menu(props) {
   const classes = useStyles();
-  
+
   return (
     <Paper square className={classes.paper} {...props.innerProps}>
       {props.children}
