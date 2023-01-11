@@ -75,11 +75,12 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const user = useSelector(({ user }) => user);
-  const [metadata, content, myBL, inquiries] = useSelector(({ workspace }) => [
+  const [metadata, content, myBL, inquiries, enableSubmit] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.metadata,
     workspace.inquiryReducer.content,
     workspace.inquiryReducer.myBL,
     workspace.inquiryReducer.inquiries,
+    workspace.inquiryReducer.enableSubmit,
   ]);
   const currentField = useSelector(({ draftBL }) => draftBL.currentField);
   const filterInqDrf = inquiries.filter(inq => inq.process === 'draft').map(val => val.field);
@@ -167,6 +168,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           optionsMinimize.push(response);
           dispatch(InquiryActions.setInquiries(optionsInquires));
           dispatch(InquiryActions.setListMinimize(optionsMinimize));
+          //
+          dispatch(InquiryActions.checkSubmit(!enableSubmit));
           getUpdatedAt();
           setDisableSave(false);
         }).catch((err) => console.error(err));

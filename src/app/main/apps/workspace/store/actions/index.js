@@ -128,6 +128,8 @@ export const loadInquiry = (myBL_Id) => async (dispatch) => {
     const field_list = [...resInq.map((e) => e.field), ...resDraft.map((e) => e.field)];
     dispatch(saveField(field_list));
 
+    dispatch(InquiryActions.checkSubmit(true));
+
     const optionTabs = [
       { id: 'inquiryList', field: 'INQUIRY_LIST' },
       { id: 'attachmentList', field: 'ATTACHMENT_LIST' },

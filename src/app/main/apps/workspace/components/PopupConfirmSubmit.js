@@ -55,11 +55,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PopupConfirmSubmit = (props) => {
-  const [inquiries, myBL, isShowBackground] = useSelector(({ workspace }) => [
+  const [inquiries, myBL, isShowBackground, enableSubmit] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.myBL,
     workspace.inquiryReducer.isShowBackground,
-    
+    workspace.inquiryReducer.enableSubmit,
   ]);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -92,12 +92,14 @@ const PopupConfirmSubmit = (props) => {
       const userType = props.user.toLowerCase() === 'guest' ? "TO" : "TW"; // TO: Return back from Customer via BLink, TW: Return back from Onshore via BLink
       dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
     }
-    
+
     const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
     inqs.forEach((item) => {
       if (listIdInq.includes(item.id)) {
         if (item.state === 'ANS_DRF') item.state = 'ANS_SENT';
-        if (item.state === 'REP_A_DRF') item.state = 'REP_A_SENT';
+        else if (item.state === 'REP_A_DRF') item.state = 'REP_A_SENT';
+        else if (item.state === 'AME_DRF') item.state = 'AME_SENT';
+        else if (item.state === 'REP_DRF') item.state = 'REP_SENT';
       }
     });
     dispatch(InquiryActions.setInquiries(inqs));
@@ -108,7 +110,7 @@ const PopupConfirmSubmit = (props) => {
     } else {
       dispatch(InquiryActions.setOneInq({}));
     }
-    dispatch(InquiryActions.checkSubmit(false));
+    dispatch(InquiryActions.checkSubmit(!enableSubmit));
     dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
     dispatch(FormActions.toggleReload());
   };

@@ -735,6 +735,7 @@ const InquiryViewer = (props) => {
                 }
               }).catch((error) => console.error(error));
             }
+            dispatch(InquiryActions.checkSubmit(!enableSubmit));
             props.getUpdatedAt();
           }
           // setSaveComment(!isSaveComment);
@@ -1087,6 +1088,7 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
             props.getUpdatedAt();
+            dispatch(InquiryActions.checkSubmit(!enableSubmit));
             dispatch(InquiryActions.checkSend(true));
             dispatch(
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
@@ -1118,6 +1120,7 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
             props.getUpdatedAt();
+            dispatch(InquiryActions.checkSubmit(!enableSubmit));
             // if (props.isInquiryDetail) {
             //   setSaveComment(!isSaveComment);
             // }
