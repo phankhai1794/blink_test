@@ -2061,8 +2061,14 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       item.index = index;
       index += 1;
     })
-    const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
-    const groupsValues = [...groups].map(([name, value]) => ({ name, value }));
+    let groupsValues = [];
+    if (typeList.length === 1){
+       groupsValues = [...valueCopy].map(value => ({ name: value[getType(CONTAINER_NUMBER)], value: [value] }))
+    }
+    else{
+      const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
+      groupsValues = [...groups].map(([name, value]) => ({ name, value }));
+    }
     while (groupsValues.length) {
       let rowValues = groupsValues.splice(0, 4);
       let rowIndex = 0;
