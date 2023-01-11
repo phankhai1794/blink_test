@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import clsx from 'clsx';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
@@ -16,6 +16,7 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
+import ArrowTooltip from '../shared-components/ArrowTooltip';
 const theme = createMuiTheme({
   typography: {
     fontFamily: 'Montserrat'
@@ -85,6 +86,7 @@ const useStyles = makeStyles((theme) => ({
     padding: '9px 0 9px 16px',
     lineHeight: '22px',
     fontWeight: '500',
+    textOverflow: 'ellipsis',
   },
   notchedOutlineNotChecked: {
     borderColor: `${red} !important`,
@@ -168,16 +170,20 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
-
+  const [isLongText, setIsLongText] = useState(false);
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
-
   const onMouseEnter = (e) => {
     if (isEmpty) setAnchorEl(e.currentTarget);
+    const overflow = e.target.scrollWidth > e.target.clientWidth;
+    if (overflow && !rows) {
+      setIsLongText(true);
+    } else setIsLongText(false);
   };
 
   const onMouseLeave = (e) => {
     if (e.currentTarget !== null) setAnchorEl(null);
+    setIsLongText(false);
   };
 
   const checkValidate = (question) => {
@@ -300,6 +306,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         onMouseLeave={onMouseLeave}
         onClick={onClick}>
         <ThemeProvider theme={theme}>
+          <ArrowTooltip isLongText={isLongText} title={selectedChoice || children || ''} placement='right'>
           <TextField
             value={selectedChoice || children || ''}
             variant="outlined"
@@ -336,10 +343,11 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
               classes: {
                 root: classes.root,
                 input: classes.input,
-                notchedOutline: isEmpty ? '' : classes.notchedOutlineNotChecked
-              }
+                notchedOutline: isEmpty ? '' : classes.notchedOutlineNotChecked,
+              },
             }}
           />
+          </ArrowTooltip>
         </ThemeProvider>
       </div>
     </>
