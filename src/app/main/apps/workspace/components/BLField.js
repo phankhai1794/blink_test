@@ -15,7 +15,7 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
-
+import ArrowTooltip from '../shared-components/ArrowTooltip';
 const theme = createMuiTheme({
   typography: {
     fontFamily: 'Montserrat'
@@ -85,6 +85,7 @@ const useStyles = makeStyles((theme) => ({
     padding: '9px 0 9px 16px',
     lineHeight: '22px',
     fontWeight: '500',
+    textOverflow: 'ellipsis',
   },
   notchedOutlineNotChecked: {
     borderColor: `${red} !important`,
@@ -168,16 +169,20 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
-
+  const [isLongText, setIsLongText] = useState(false);
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
   const onMouseEnter = (e) => {
-    if (isEmpty) setAnchorEl(e.currentTarget);
+    const { currentTarget, target } = e;
+    const { scrollWidth, clientWidth } = target;
+    if (isEmpty) setAnchorEl(currentTarget);
+    setIsLongText(Boolean((scrollWidth > clientWidth) && !rows));
   };
 
   const onMouseLeave = (e) => {
     if (e.currentTarget !== null) setAnchorEl(null);
+    setIsLongText(false);
   };
 
   const checkValidate = (question) => {
@@ -300,46 +305,48 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         onMouseLeave={onMouseLeave}
         onClick={onClick}>
         <ThemeProvider theme={theme}>
-          <TextField
-            value={selectedChoice || children || ''}
-            variant="outlined"
-            fullWidth={true}
-            multiline={multiline}
-            rows={rows}
-            className={clsx(
-              classes.root,
-              lock ? classes.locked : checkClassName(
-                hasInquiry,
-                hasAmendment,
-                hasAnswer,
-                isResolved,
-                isUploaded,
-                classes
-              ).className
-            )}
-            InputProps={{
-              readOnly: readOnly || true,
-              endAdornment: (
-                <InputAdornment
-                  position="end"
-                  className={clsx(
-                    classes.adornment,
-                    multiline ? classes.adornmentMultiline : '',
-                    rows ? classes[`adornmentRow_${rows}`] : ''
-                  )}>
-                  {checkDisplayIcon()}
-                  {anchorEl && anchorEl.id === id && allowAddInquiry && (
-                    <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
-                  )}
-                </InputAdornment>
-              ),
-              classes: {
-                root: classes.root,
-                input: classes.input,
-                notchedOutline: isEmpty ? '' : classes.notchedOutlineNotChecked
-              }
-            }}
-          />
+          <ArrowTooltip isLongText={isLongText} title={selectedChoice || children || ''} placement='right'>
+            <TextField
+              value={selectedChoice || children || ''}
+              variant="outlined"
+              fullWidth={true}
+              multiline={multiline}
+              rows={rows}
+              className={clsx(
+                classes.root,
+                lock ? classes.locked : checkClassName(
+                  hasInquiry,
+                  hasAmendment,
+                  hasAnswer,
+                  isResolved,
+                  isUploaded,
+                  classes
+                ).className
+              )}
+              InputProps={{
+                readOnly: readOnly || true,
+                endAdornment: (
+                  <InputAdornment
+                    position="end"
+                    className={clsx(
+                      classes.adornment,
+                      multiline ? classes.adornmentMultiline : '',
+                      rows ? classes[`adornmentRow_${rows}`] : ''
+                    )}>
+                    {checkDisplayIcon()}
+                    {anchorEl && anchorEl.id === id && allowAddInquiry && (
+                      <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
+                    )}
+                  </InputAdornment>
+                ),
+                classes: {
+                  root: classes.root,
+                  input: classes.input,
+                  notchedOutline: isEmpty ? '' : classes.notchedOutlineNotChecked
+                },
+              }}
+            />
+          </ArrowTooltip>
         </ThemeProvider>
       </div>
     </>
