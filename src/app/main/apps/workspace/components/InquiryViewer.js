@@ -9,7 +9,7 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime, validatePartiesContent, groupBy, isJsonText } from '@shared';
+import { getLabelById, displayTime, validatePartiesContent, groupBy, isJsonText, formatContainerNo } from '@shared';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import {
   CONTAINER_DETAIL,
@@ -844,6 +844,9 @@ const InquiryViewer = (props) => {
       contentField = textResolve;
       contentField.forEach((obj) => {
         const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
+        if (getTypeName === CONTAINER_NUMBER) {
+          obj[question.inqType] = formatContainerNo(obj[question.inqType]);
+        }
         if (getTypeName === CONTAINER_SEAL) {
           obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
@@ -2098,6 +2101,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               }
               const disabled = !((rowIndex > 0 || inqType === CONTAINER_NUMBER) && nodeValue && !disableInput);
               // const disabled = !(nodeValue && !disableInput);
+              const isUpperCase = inqType !== CONTAINER_NUMBER;
               return (
                 <input
                   className={clsx(classes.text)}
@@ -2109,10 +2113,10 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                     borderTopRightRadius: rowIndex === 0 && rowValues.length - 1 === index1 ? 8 : null,
                     // borderBottomRightRadius:
                     //     index1 === rowValues.length - 1 && rowIndex === typeList.length - 1 ? 8 : null
-                    textTransform: 'uppercase'
+                    textTransform: isUpperCase ? 'uppercase' : 'none'
                   }}
                   disabled={disabled}
-                  value={nodeValue ? nodeValue[getType(type)] : ''}
+                  value={nodeValue ? (!isUpperCase ? formatContainerNo(nodeValue[getType(type)]) : nodeValue[getType(type)]) : ''}
                   onChange={(e) => onChange(e, nodeValue.index, getType(type))}
                 />
               );
