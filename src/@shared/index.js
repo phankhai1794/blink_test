@@ -150,3 +150,20 @@ export function isJsonText(str) {
 export function formatDate(time, formatType) {
   return moment(time).format(formatType)
 }
+
+// Format Dummy Container Data
+export function formatContainerNo(containerNo) {
+  let result = containerNo ? containerNo.toUpperCase() : '';
+  if (result) {
+    let contNo = containerNo.toUpperCase().match(/(CONT-NO)/g);
+    let contName = containerNo.toUpperCase().match(/:(.*)/) || '';
+    if (contName) {
+      contName = contName[1]?.trim() || '';
+    }
+    if (contNo) {
+      contNo = contNo[0] ? contNo[0].replace('CONT-NO', 'Cont-No') : '';
+      result = `${contNo}: ${contName}`
+    }
+  }
+  return result;
+}
