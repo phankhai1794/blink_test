@@ -331,6 +331,7 @@ const InquiryViewer = (props) => {
                   lastest.showIconAttachReplyFile = false;
                   lastest.showIconAttachAnswerFile = false;
                   props.getStateReplyDraft(true);
+                  setSubmitLabel(false);
                   //
                 } else if (['REP_Q_SENT'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = true;
