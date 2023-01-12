@@ -849,7 +849,7 @@ const InquiryViewer = (props) => {
           obj[question.inqType] = formatContainerNo(obj[question.inqType]);
         }
         if (getTypeName === CONTAINER_SEAL) {
-          obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
+          obj[question.inqType] = obj[question.inqType].filter(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
           obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
         }
@@ -2034,7 +2034,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
-  const [tableScrollTop, setTableScrollTop] = useState(0);
   const [values, setValues] = useState(originalValues || getValueField(container) || [{}]);
 
   const inqType = getLabelById(metadata['inq_type_options'], question.inqType);
@@ -2044,7 +2043,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const typeList = container === CONTAINER_DETAIL ? cdType : cmType;
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values));
-    temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? [e.target.value] : e.target.value;
+    temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? e.target.value.split(',') : e.target.value;
     setValues(temp);
     setTextResolve(temp);
   };
@@ -2094,7 +2093,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               fontWeight: 600,
               borderTopLeftRadius: rowIndex === 0 && 8,
               fontSize: 14,
-              // borderBottomLeftRadius: rowIndex === typeList.length - 1 && 8
             }}
             disabled
             defaultValue={type}
@@ -2109,7 +2107,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                 nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
               }
               const disabled = !((rowIndex > 0 || inqType === CONTAINER_NUMBER) && nodeValue && !disableInput);
-              // const disabled = !(nodeValue && !disableInput);
               const isUpperCase = inqType !== CONTAINER_NUMBER;
               return (
                 <input
@@ -2120,8 +2117,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                     backgroundColor: disabled && '#FDF2F2',
                     fontSize: 15,
                     borderTopRightRadius: rowIndex === 0 && rowValues.length - 1 === index1 ? 8 : null,
-                    // borderBottomRightRadius:
-                    //     index1 === rowValues.length - 1 && rowIndex === typeList.length - 1 ? 8 : null
                     textTransform: isUpperCase ? 'uppercase' : 'none'
                   }}
                   disabled={disabled}
