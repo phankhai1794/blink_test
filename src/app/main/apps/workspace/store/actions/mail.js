@@ -36,11 +36,11 @@ export const sendMail =
           if (res.status === 200) {
             const cloneInquiries = [...inquiries];
             const inqsOpenState = inquiries.filter(op => op.process === 'pending' && op.state === 'OPEN');
-            if (inqsOpenState.length > 0) {
-              if (form.toCustomer) //IN: BL Inquiried,  RO: Return to Customer via BLink
-                dispatch(AppActions.updateOpusStatus(bkgNo, "IN", "RO"));
-              if (form.toOnshore) //IN: BL Inquiried,  RW: Return to Onshore via BLink
-                dispatch(AppActions.updateOpusStatus(bkgNo, "IN", "RW"));
+            if (inqsOpenState.length > 0 || replyInqs.length > 0) {
+              if (form.toCustomer) //BI: BL Inquiried,  RO: Return to Customer via BLink. 
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RO"));//Send inquiries to customer
+              if (form.toOnshore) //BI: BL Inquiried,  RW: Return to Onshore via BLink
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RW")); //Send inquiries to Onshore
             }
             cloneInquiries.forEach((q) => {
               if (q.receiver[0] === tab) {

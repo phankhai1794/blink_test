@@ -99,7 +99,7 @@ export const setConfirmDraftBL = (myBL, role) => (dispatch) => {
     .then(() => {
       dispatch(setBL({ state: draftConfirm }));
       // BL Confirm by Customer (CC), TO: Return back from Customer via BLink, TW: Return back from Onshore via BLink
-      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "CC", role === 'Guest' ? "TO" : "TW"));
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "BM", role === 'Guest' ? "TO" : "TW"));
     })
     .catch((err) => console.error(err));
 };

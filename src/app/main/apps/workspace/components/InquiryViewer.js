@@ -683,6 +683,7 @@ const InquiryViewer = (props) => {
           }
           if (!optionsOfQuestion.length) {
             (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
+            dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "")) //BX: Delete all inquiries draft
           }
         })
         .catch((error) => console.error(error));
@@ -926,6 +927,24 @@ const InquiryViewer = (props) => {
             dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
           } else {
             dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
+          }
+          const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && inq.state !== 'COMPL');
+          const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && inq.state !== 'COMPL');
+          if (myBL.bkgNo) {
+            if (optionsInquires[editedInqIndex].process === "pending" && inqsPending.length > 0 && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
+              if (optionsInquires[editedInqIndex].receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
+                //BL Inquired Resolved (BR) , Upload all to Opus.  RO: Return to Customer via BLink, 
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
+              }
+              if (optionsInquires[editedInqIndex].receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
+                //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
+              }
+            }
+            if (optionsInquires[editedInqIndex].process === "draft" && inqsDraft.length > 0 && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
+              //BL Amendment Success (BS) , Upload all to Opus.  
+              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
+            }
           }
         }
       })

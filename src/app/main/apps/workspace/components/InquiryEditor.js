@@ -520,7 +520,7 @@ const InquiryEditor = (props) => {
               optionsInquires.push(inqResponse);
               optionsMinimize.push(inqResponse);
               if (optionsInquires.length === 1) {
-                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "DC", "")) // Draft of Inquiry Created (DC)
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BC", "")) // Draft of Inquiry Created (BC)
               }
 
               dispatch(

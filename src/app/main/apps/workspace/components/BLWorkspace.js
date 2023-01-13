@@ -193,31 +193,6 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
     setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore') || []);
-    const inqsPending = inquiries?.filter(inq => inq.process === 'pending');
-    const inqsDraft = inquiries?.filter(inq => inq.process === 'draft');
-    if (myBL.bkgNo) {
-      if (inqsPending.length > 0 && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
-        if (inqsPending.any(q => q.receiver === 'customer')) {
-          //BL Inquired Resolved (IR) , Upload all to Opus.  RO: Return to Customer via BLink, 
-          dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "RO"))
-        }
-        if (inqsPending.any(q => q.receiver === 'onshore')) {
-          //BL Inquired Resolved (IR) , Upload all to Opus.  RW: Return to Onshore via BLink
-          dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "RW"))
-        }
-      }
-      if (inqsDraft.length > 0 && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
-        if (inqsDraft.any(q => q.receiver === 'customer')) {
-          //BL Amendment Success (AS) , Upload all to Opus, RO: Return to Customer via BLink
-          dispatch(Actions.updateOpusStatus(myBL.bkgNo, "AS", "RO"))
-        }
-        if (inqsDraft.any(q => q.receiver === 'onshore')) {
-          //BL Amendment Success (AS) , Upload all to Opus.  RW: Return to Onshore via BLink
-          dispatch(Actions.updateOpusStatus(myBL.bkgNo, "AS", "RW"))
-        }
-
-      }
-    }
   }, [inquiries]);
 
   // TODO: TBU Logic after create new reply amendment
