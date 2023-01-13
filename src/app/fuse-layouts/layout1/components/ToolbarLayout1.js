@@ -3,6 +3,7 @@ import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarM
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
+import * as Actions from 'app/main/apps/workspace/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
@@ -336,6 +337,7 @@ function ToolbarLayout1(props) {
   const redirectEditDraftBL = () => {
     const bl = new URLSearchParams(search).get('bl');
     if (bl) history.push(`/guest?bl=${bl}`);
+    dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BA", "TO")); //Customer edited/revised BL
   };
 
   const onSubmit = async () => {
