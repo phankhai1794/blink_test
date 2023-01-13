@@ -165,8 +165,9 @@ const SendInquiryForm = (props) => {
     const newRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_Q_DRF']);
     const convert = (array) => array.map((a) => `- ${a}`).join('\n');
     let header = 'BL has been updated';
+    let msg = ''
     if (newInq.length && newRep.length) {
-      const msg =
+      msg =
         'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
       return [
         msg,
@@ -176,9 +177,10 @@ const SendInquiryForm = (props) => {
     } else if (newInq.length) {
       header = 'New Inquiry';
     } else if (newRep.length) {
+      msg = 'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
       header = 'New Reply';
     }
-    return ['', array.map((a) => `- ${a}`).join('\n'), header];
+    return [msg, array.map((a) => `- ${a}`).join('\n'), header];
   };
 
   useEffect(() => {
@@ -199,9 +201,7 @@ const SendInquiryForm = (props) => {
     let content = '';
     let bodyHtml = '';
     if (hasOnshore) {
-      subject = `
-        [Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})
-      `;
+      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
       content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion. Pending issues:'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
@@ -359,12 +359,18 @@ const SendInquiryForm = (props) => {
       content: !isBodyValid() ? 'Please enter your email content.' : ''
     });
     if (isMailVaid()) {
-      const to = tabValue === 'customer' ? 'Customer' : 'Onshore'
-      const regex = /.*@.*com.+/
-      if (regex.test(inputMail[`to${to}`]) || regex.test(inputMail[`to${to}Cc`]) || regex.test(inputMail[`to${to}Bcc`]))
+      const to = tabValue === 'customer' ? 'Customer' : 'Onshore';
+      const regex = /.*@.*com.+/;
+      if (
+        regex.test(inputMail[`to${to}`]) ||
+        regex.test(inputMail[`to${to}Cc`]) ||
+        regex.test(inputMail[`to${to}Bcc`])
+      )
         dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
       else
-        dispatch(Actions.showMessage({ message: 'EMAIL ADDRESS DOES NOT EXIST', variant: 'error' }));
+        dispatch(
+          Actions.showMessage({ message: 'EMAIL ADDRESS DOES NOT EXIST', variant: 'error' })
+        );
     } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
       return;
     } else {
@@ -413,10 +419,11 @@ const SendInquiryForm = (props) => {
     }
   };
 
-  const countInq = (recevier) => {
+  const countInq = (receiver) => {
     return inquiries.filter(
       (inq) =>
-        inq.receiver.includes(recevier) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')
+        (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')) ||
+        (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
     ).length;
   };
 
