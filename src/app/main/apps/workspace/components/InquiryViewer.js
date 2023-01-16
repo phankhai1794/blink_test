@@ -829,6 +829,7 @@ const InquiryViewer = (props) => {
       const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
       if (isWarning) {
         dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
+        setDisableAcceptResolve(false);
       } else {
         confirm && confirm();
       }
