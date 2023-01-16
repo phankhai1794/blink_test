@@ -145,11 +145,17 @@ const useStyles = makeStyles((theme) => ({
     margin: '0 auto',
     cursor: 'pointer'
   },
+  resendText: {
+    fontSize: 15,
+    fontWeight: 500
+  },
   enableResend: {
+    color: `${mainColor} !important`,
     textDecoration: 'underline !important',
     cursor: 'pointer'
   },
   disableResend: {
+    color: `${mainColor} !important`,
     textDecoration: 'underline !important',
   }
 }));
@@ -355,7 +361,7 @@ const OtpCheck = ({ children }) => {
                       <Formsy
                         onValidSubmit={handleCheckMail}
                         className="flex flex-col justify-center w-full">
-                        <Typography className={classes.boldLabel}>Your Email</Typography>
+                        <Typography className={classes.boldLabel}>Please enter your email address for verification</Typography>
                         <TextField
                           id="email"
                           name="email"
@@ -388,8 +394,8 @@ const OtpCheck = ({ children }) => {
                       <Formsy
                         onValidSubmit={handleSendCode}
                         className="flex flex-col justify-center w-full">
-                        <Typography className={classes.boldLabel}>Access Code</Typography>
-                        <Typography style={{ fontSize: 14, fontWeight: 600 }}>
+                        <Typography className={classes.boldLabel}>Enter your code</Typography>
+                        <Typography className={classes.resendText}>
                           {`We just emailed ${mail.value} with a 6-digit code. If you don't see it, please check your spam folder or `}
                           <a
                             className={otpCode.resendAfter > 0 ? classes.disableResend : classes.enableResend}
