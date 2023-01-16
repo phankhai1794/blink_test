@@ -34,12 +34,22 @@ export const sendMail =
       sendmail({ myblId, replyInqs, user, header, ...form })
         .then((res) => {
           if (res.status === 200) {
-            if (inquiries.filter(op => op.process === 'pending' && op.state === 'OPEN')) {
-              let rtrnCd = "RW"; //RO: Return to Customer via BLink
-              if (form.toCustomer) rtrnCd = "RO";// RW: Return to Onshore via BLink
-              dispatch(AppActions.updateOpusStatus(bkgNo, "IN", rtrnCd)); //BL Inquiried
+            const cloneInquiries = [...inquiries];
+            const inqsOpenState = inquiries.filter(op => op.process === 'pending' && op.state === 'OPEN');
+            if (inqsOpenState.length > 0 || replyInqs.length > 0) {
+              if (form.toCustomer) //BI: BL Inquiried,  RO: Return to Customer via BLink. 
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RO"));//Send inquiries to customer
+              if (form.toOnshore) //BI: BL Inquiried,  RW: Return to Onshore via BLink
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RW")); //Send inquiries to Onshore
             }
-
+            cloneInquiries.forEach((q) => {
+              if (q.receiver[0] === tab) {
+                if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
+                else if (q.state === 'REP_Q_DRF') q.state = 'REP_Q_SENT'; // inquiry
+                else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
+              }
+            });
+            dispatch(InquiryActions.setInquiries(cloneInquiries));
             dispatch(InquiryActions.checkSend(false));
             return dispatch({
               type: SENDMAIL_SUCCESS

@@ -55,12 +55,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PopupConfirmSubmit = (props) => {
-  const [inquiries, myBL, isShowBackground] = useSelector(({ workspace }) => [
+  const [inquiries, myBL, isShowBackground, enableSubmit] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.myBL,
     workspace.inquiryReducer.isShowBackground,
+    workspace.inquiryReducer.enableSubmit,
   ]);
-  const user = useSelector(({ auth }) => auth.user);
+  const user = useSelector(({ user }) => user);
+
   const dispatch = useDispatch();
   const classes = useStyles();
 
@@ -87,9 +89,23 @@ const PopupConfirmSubmit = (props) => {
 
     const inqsPending = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && inq.currentState === 'ANS_DRF');
     const inqsDraft = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && inq.currentState === 'AME_DRF');
-    if (inqsPending.length > 0 || inqsDraft.length > 0) {
-      const inqType = inqsPending.length > 0 ? "IN" : "AN"; // AN: Amendment Notification, IN: BL Inquired
-      const userType = user.role === 'guest' ? "TO" : "TW"; // TO: Return back from Customer via BLink, TW: Return back from Onshore via BLink
+    const inqsReply = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && inq.currentState === 'REP_A_DRF');
+    const draftReply = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && inq.currentState === 'REP_DRF');
+    if(draftReply.length > 0){
+      // BK. Reply from Customer, Onshore
+      const inqType = user.userType === 'CUSTOMER' ? "BP" : "BQ"; // BP: Customer Amendment Reply, BO: Offshore Amendment Inquiry
+      const userType = user.userType=== 'CUSTOMER' ? "TO" : "RO"; // TO: Return to Customer via BLink, RO: Return to Onshore via BLink
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
+    }
+    else if (inqsReply.length > 0 ){
+      // BK. Reply from Customer, Onshore
+      const inqType = user.userType === 'CUSTOMER' ? "BK" : "BO"; // BK: Reply from Customer, BO: Reply from Onshore
+      const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
+    }
+    else if (inqsPending.length > 0 || inqsDraft.length > 0) {
+      const inqType = inqsPending.length > 0 ? "BI" : "AN"; // AN: Amendment Notification, BI: BLink BL Inquired
+      const userType = user.userType === 'CUSTOMER' ? "RO" : "RW"; // RO: Return to Customer via BLink, RW: Return to Onshore via BLink
       dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
     }
 
@@ -97,7 +113,9 @@ const PopupConfirmSubmit = (props) => {
     inqs.forEach((item) => {
       if (listIdInq.includes(item.id)) {
         if (item.state === 'ANS_DRF') item.state = 'ANS_SENT';
-        if (item.state === 'REP_A_DRF') item.state = 'REP_A_SENT';
+        else if (item.state === 'REP_A_DRF') item.state = 'REP_A_SENT';
+        else if (item.state === 'AME_DRF') item.state = 'AME_SENT';
+        else if (item.state === 'REP_DRF') item.state = 'REP_SENT';
       }
     });
     dispatch(InquiryActions.setInquiries(inqs));
@@ -108,7 +126,7 @@ const PopupConfirmSubmit = (props) => {
     } else {
       dispatch(InquiryActions.setOneInq({}));
     }
-    dispatch(InquiryActions.checkSubmit(false));
+    dispatch(InquiryActions.checkSubmit(!enableSubmit));
     dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
     dispatch(FormActions.toggleReload());
   };

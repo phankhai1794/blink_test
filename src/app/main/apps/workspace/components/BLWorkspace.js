@@ -165,7 +165,7 @@ const BLWorkspace = (props) => {
       let excludeFirstUser = false;
       if (data.processingBy) {
         data.processingBy.forEach((p) => {
-          if (userInfo.displayName === data.processingBy[ 0 ]) {
+          if (userInfo.displayName === data.processingBy[0]) {
             excludeFirstUser = true;
           }
         });
@@ -173,8 +173,8 @@ const BLWorkspace = (props) => {
           // assign permission
           permissions = permissionViewer
           // show popup for lastest user
-          if (userInfo.displayName === data.processingBy[ data.processingBy.length - 1 ]) {
-            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[ 0 ] }));
+          if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
+            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
           }
         } else {
           // assign permission
@@ -193,16 +193,6 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
     setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore') || []);
-    const inqsPending = inquiries?.filter(inq => inq.process === 'pending');
-    const inqsDraft = inquiries?.filter(inq => inq.process === 'draft');
-    if (myBL.bkgNo) {
-      if (inqsPending.length > 0 && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
-        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "IR", "")) //BL Inquired Resolved (IR) , Upload all to Opus
-      }
-      if (inqsDraft.length > 0 && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
-        dispatch(Actions.updateOpusStatus(myBL.bkgNo, "AS", "")) //BL Amendment Success (AS) , Upload all to Opus
-      }
-    }
   }, [inquiries]);
 
   // TODO: TBU Logic after create new reply amendment
@@ -792,7 +782,7 @@ const BLWorkspace = (props) => {
                     <Grid item>
                       <Label>DATE CARGO RECEIVED</Label>
                       <BLField id={getField(DATE_CARGO)}>
-                        {getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO),'YYYY-MM-DD')}
+                        {getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'YYYY-MM-DD')}
                       </BLField>
                     </Grid>
                   </Grid>
@@ -800,13 +790,13 @@ const BLWorkspace = (props) => {
                     <Grid item>
                       <Label>DATED</Label>
                       <BLField id={getField(DATED)}>
-                        {getValueField(DATED) && formatDate(getValueField(DATED),'YYYY-MM-DD')}
+                        {getValueField(DATED) && formatDate(getValueField(DATED), 'YYYY-MM-DD')}
                       </BLField>
                     </Grid>
                     <Grid item>
                       <Label>DATE LADEN ON BOARD</Label>
                       <BLField id={getField(DATE_LADEN)}>
-                        {getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN),'YYYY-MM-DD')}
+                        {getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'YYYY-MM-DD')}
                       </BLField>
                     </Grid>
                   </Grid>

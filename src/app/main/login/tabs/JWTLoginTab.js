@@ -141,7 +141,7 @@ function JWTLoginTab({ onLogged, country }) {
     let isValid = false;
     const { name, value } = e.target;
     if (
-      (name == 'email' && isEmail(value)) ||
+      (name == 'email' && isEmail(value.trim())) ||
       (name == 'password' && value.length >= passwordLength)
     )
       isValid = true;
@@ -171,7 +171,7 @@ function JWTLoginTab({ onLogged, country }) {
 
   function handleSubmit() {
     onLogged({
-      email: account.email.value,
+      email: account.email.value.trim(),
       password: account.password.value,
       country: account.country.value
     });

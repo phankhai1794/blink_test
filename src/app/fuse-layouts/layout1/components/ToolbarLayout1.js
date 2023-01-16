@@ -3,6 +3,7 @@ import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarM
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
+import * as Actions from 'app/main/apps/workspace/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
@@ -103,28 +104,18 @@ function ToolbarLayout1(props) {
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const [open, setOpen] = useState(false);
   const [attachmentLength, setAttachmentLength] = useState(0);
-  const [isSubmit, setIsSubmit] = useState(true);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const enabledMail = inquiries.some((inq) =>
     ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state)
   );
+  const enableSubmitInq = inquiries.some((inq) =>
+    ['ANS_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
 
   useEffect(() => {
     dispatch(InquiryActions.checkSend(false));
     let optionInquiries = [...inquiries];
     let getAttachmentFiles = [];
-    let isSubmit = true;
-    optionInquiries.forEach((item) => {
-      if (user.role !== 'Admin') {
-        isSubmit = false;
-      } else {
-        if (item.state === 'OPEN') dispatch(InquiryActions.checkSend(true));
-      }
-    });
-    if (enableSubmit) {
-      isSubmit = false;
-    }
 
     const inquiriesPendingProcess = optionInquiries.filter((op) => op.process === 'pending');
     setInquiryLength(inquiriesPendingProcess.length);
@@ -206,19 +197,6 @@ function ToolbarLayout1(props) {
                 setAttachmentLength(getAttachmentFiles.length);
               }
             });
-
-            if (user.role !== 'Admin') {
-              const filterRepADraft = commentList.some(
-                (r) => r.state !== null && r.state === 'REP_A_DRF'
-              );
-              if (filterRepADraft) isSubmit = false;
-              setIsSubmit(isSubmit);
-            } else {
-              const filterRepADraft = commentList.some(
-                (r) => r.state !== null && r.state === 'REP_Q_DRF'
-              );
-              if (filterRepADraft) dispatch(InquiryActions.checkSend(true));
-            }
           }
         })
         .catch((err) => {
@@ -280,18 +258,6 @@ function ToolbarLayout1(props) {
                   setAttachmentLength(getAttachmentFiles.length);
                 }
               });
-              if (user.role !== 'Admin') {
-                const filterRepADraft = commentList.some(
-                  (r) => r.state !== null && r.state === 'AME_DRF'
-                );
-                if (filterRepADraft) isSubmit = false;
-                setIsSubmit(isSubmit);
-              } else {
-                const filterRepADraft = commentList.some(
-                  (r) => r.state !== null && r.state === 'REP_DRF'
-                );
-                if (filterRepADraft) dispatch(InquiryActions.checkSend(true));
-              }
             }
           })
           .catch((err) => {
@@ -299,7 +265,7 @@ function ToolbarLayout1(props) {
           });
       }
     }
-  }, [enableSubmit, inquiries]);
+  }, [enableSubmit]);
 
   useEffect(() => {
     if (!user.displayName || !validToken) {
@@ -371,6 +337,7 @@ function ToolbarLayout1(props) {
   const redirectEditDraftBL = () => {
     const bl = new URLSearchParams(search).get('bl');
     if (bl) history.push(`/guest?bl=${bl}`);
+    dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BA", "TO")); //Customer edited/revised BL
   };
 
   const onSubmit = async () => {
@@ -396,10 +363,10 @@ function ToolbarLayout1(props) {
                   src="assets/images/logos/one_ocean_network-logo.png"
                   className={clsx(classes.logo, classes.fitAvatar)}
                   alt="one-logo"
-                  // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
-                  //   component: Link,
-                  //   to: '/'
-                  // })}
+                // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+                //   component: Link,
+                //   to: '/'
+                // })}
                 />
               </div>
 
@@ -503,7 +470,7 @@ function ToolbarLayout1(props) {
                 <Button
                   variant="contained"
                   className={clsx(classes.button, classes.buttonSend)}
-                  disabled={isSubmit}
+                  disabled={!enableSubmitInq}
                   onClick={onSubmit}>
                   Submit
                 </Button>
