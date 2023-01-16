@@ -9,7 +9,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import { getInquiryById } from 'app/services/inquiryService';
+import {getInquiryById, getUpdatedAtAnswer} from 'app/services/inquiryService';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -180,7 +180,8 @@ const AllInquiry = (props) => {
   const inputAddAmendmentEndRef = useRef(null);
   const scrollTopPopup = useRef(null);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
-
+  const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+  
   useEffect(() => {
     let inquiriesSet = [...inquiryCopy];
     if (openAllInquiry) {
@@ -188,7 +189,7 @@ const AllInquiry = (props) => {
     } else if (openAmendmentList) {
       inquiriesSet = inquiriesSet.filter(inq => inq.process === 'draft');
     } else if (openInquiryReview) {
-      inquiriesSet = inquiriesSet.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF' || (inq.process === 'draft' && inq.state === 'REP_DRF'));
+      inquiriesSet = inquiriesSet.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF');
     }
     let inquiriesSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     setInquiries(inquiriesSort);
@@ -333,11 +334,11 @@ const AllInquiry = (props) => {
                     <Divider
                       className="my-32"
                       variant="middle"
-                      style={{ height: '2px', color: '#BAC3CB' }}
+                      style={{height: '2px', color: '#BAC3CB'}}
                     />
                   </div>
                 ) : (
-                  <Card key={index} elevation={0} style={{ padding: '1rem ' }}>
+                  <Card key={index} elevation={0} style={{padding: '1rem '}}>
                     <div
                       className={clsx(
                         classes.boxItem,
@@ -345,7 +346,7 @@ const AllInquiry = (props) => {
                         (['COMPL', 'RESOLVED'].includes(q.state)) && 'resolved',
                         ([...sentStatus, ...['REP_DRF']].includes(q.state)) && 'offshoreReply'
                       )}>
-                      <div style={{ marginBottom: '12px' }}>
+                      <div style={{marginBottom: '12px'}}>
                         <Typography color="primary" variant="h5" className={classes.inqTitle}>
                           {`${getLabelById(metadata['field_options'], q.field)}`}
                         </Typography>
@@ -366,7 +367,7 @@ const AllInquiry = (props) => {
                     <Divider
                       className="my-32"
                       variant="middle"
-                      style={{ height: '2px', color: '#BAC3CB' }}
+                      style={{height: '2px', color: '#BAC3CB'}}
                     />
                   </Card>
                 )
@@ -406,13 +407,13 @@ const AllInquiry = (props) => {
                       }}
                     />
                     {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
-                      <InquiryAnswer
-                        onCancel={() => handleCancel(q)}
-                        question={q}
-                        getUpdatedAt={() => {
-                          setUpdateReply(true)
-                        }}
-                      />}
+                          <InquiryAnswer
+                            onCancel={() => handleCancel(q)}
+                            question={q}
+                            getUpdatedAt={() => {
+                              setUpdateReply(true)
+                            }}
+                          />}
                   </div>
                 </div>
                 <Divider
