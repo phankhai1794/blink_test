@@ -105,6 +105,7 @@ function ToolbarLayout1(props) {
   const [open, setOpen] = useState(false);
   const [attachmentLength, setAttachmentLength] = useState(0);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const myBLDrf = useSelector(({ draftBL }) => draftBL.myBL);
   const enabledMail = inquiries.some((inq) =>
     ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state)
   );
@@ -337,7 +338,7 @@ function ToolbarLayout1(props) {
   const redirectEditDraftBL = () => {
     const bl = new URLSearchParams(search).get('bl');
     if (bl) history.push(`/guest?bl=${bl}`);
-    dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BA", "TO")); //Customer edited/revised BL
+    dispatch(Actions.updateOpusStatus(myBLDrf.bkgNo, "BA", "TO")); //Customer edited/revised BL
   };
 
   const onSubmit = async () => {
@@ -420,7 +421,7 @@ function ToolbarLayout1(props) {
 
               <PermissionProvider
                 action={PERMISSION.VIEW_EDIT_DRAFT_BL}
-                extraCondition={pathname.includes('/draft-bl') && !pathname.includes('/edit')}>
+                extraCondition={pathname.includes('/draft-bl')}>
                 <Button
                   className={clsx(classes.button, classes.buttonEditDraftBL)}
                   onClick={redirectEditDraftBL}>
