@@ -840,15 +840,19 @@ const InquiryViewer = (props) => {
 
   const onConfirm = () => {
     let contentField = '';
+    const contsNoChange = {};
     if (isSeparate) {
       contentField = `${textResolveSeparate.name.toUpperCase().trim()}\n${textResolveSeparate.address.toUpperCase().trim()}`;
     } else if (typeof textResolve === 'string') {
       contentField = textResolve.toUpperCase().trim();
     } else {
       contentField = textResolve;
-      contentField.forEach((obj) => {
+      const orgContentField = content[question.field];
+      contentField.forEach((obj, index) => {
         const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
         if (getTypeName === CONTAINER_NUMBER) {
+          const containerNo = orgContentField[index][question.inqType];
+          contsNoChange[containerNo] = obj[question.inqType];
           obj[question.inqType] = formatContainerNo(obj[question.inqType]);
         }
         if (getTypeName === CONTAINER_SEAL) {
@@ -858,11 +862,13 @@ const InquiryViewer = (props) => {
         }
       });
     }
+
     const body = {
       fieldId: question.field,
       inqId: question?.id || tempReply?.answer.id,
       fieldContent: contentField,
       blId: myBL.id,
+      contsNoChange,
       fieldNameContent: textResolveSeparate.name.toUpperCase().trim() || '',
       fieldAddressContent: textResolveSeparate.address.toUpperCase().trim() || ''
     };
@@ -879,7 +885,8 @@ const InquiryViewer = (props) => {
         setIsResolve(false);
         setViewDropDown('');
         if (!isSeparate) {
-          dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
+          if (contsNoChange) dispatch(InquiryActions.setContent({ ...res.content }));
+          else dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
         } else {
           const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
           const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
@@ -2085,10 +2092,10 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       index += 1;
     })
     let groupsValues = [];
-    if (typeList.length === 1){
-       groupsValues = [...valueCopy].map(value => ({ name: value[getType(CONTAINER_NUMBER)], value: [value] }))
+    if (typeList.length === 1) {
+      groupsValues = [...valueCopy].map(value => ({ name: value[getType(CONTAINER_NUMBER)], value: [value] }));
     }
-    else{
+    else {
       const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
       groupsValues = [...groups].map(([name, value]) => ({ name, value }));
     }
