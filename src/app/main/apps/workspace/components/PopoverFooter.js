@@ -57,6 +57,8 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
   );
+  const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
+  const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
   const [isSubmit, setIsSubmit] = useState(true);
 
   useEffect(() => {
@@ -69,41 +71,25 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
       else if (title === currentField) {
         currentFields = inquiries.filter(inq => inq.field === currentField);
       }
-      let isSubmit = true;
-      currentFields.forEach((item) => {
-        if (item.answerObj && item.state === "ANS_DRF") {
-          isSubmit = false;
-        }
-      });
+
       //
-      const inquiriesPendingProcess = currentFields.filter(op => op.process === 'pending');
-      const amendment = currentFields.filter(op => op.process === 'draft');
-      axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)))
-        .then(res => {
-          if (res) {
-            let commentList = [];
-            res.map(r => {
-              commentList = [...commentList, ...r];
-            });
-            const filterRepADraft = commentList.some((r) => r.state === 'REP_A_DRF');
-            if (filterRepADraft) isSubmit = false;
-            setIsSubmit(isSubmit)
-          }
-        }).catch(err => {
-          console.error(err)
-        })
-      if (amendment.length) {
-        getCommentDraftBl(myBL.id, amendment[0].field)
-          .then((res) => {
-            res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
-            const lastestComment = res[res.length - 1];
-            // const filterRepADraft = res.some((r) => ['AME_DRF', 'REP_DRF']);
-            if (['AME_DRF', 'REP_DRF'].includes(lastestComment.state) && lastestComment.role === 'Guest') isSubmit = false;
-            setIsSubmit(isSubmit)
-          }).catch(err => { console.error(err) });
+      const inquiriesPendingProcess = currentFields.filter(op => op.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(op.state));
+      const amendmentFields = currentFields.filter(op => op.process === 'draft' && ['REP_DRF', 'AME_DRF'].includes(op.state));
+      if (inquiriesPendingProcess.length && openAllInquiry) {
+        setIsSubmit(false)
+      } else if (amendmentFields.length && openAmendmentList) {
+        setIsSubmit(false)
+      } else if (title !== 'INQUIRY_LIST') {
+        if (!inquiriesPendingProcess.length && !amendmentFields.length) {
+          setIsSubmit(true)
+        } else {
+          setIsSubmit(false)
+        }
+      } else {
+        setIsSubmit(true)
       }
     }
-  }, [inquiries, checkSubmit, enableSubmit]);
+  }, [checkSubmit, enableSubmit]);
 
   const toggleInquiriresDialog = () => {
     dispatch(FormActions.toggleAllInquiry(true));

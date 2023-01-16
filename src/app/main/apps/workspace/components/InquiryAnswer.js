@@ -99,6 +99,7 @@ const InquiryAnswer = (props) => {
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
+  const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const metadata = useSelector(({ draftBL }) => draftBL.metadata);
   const [isDisableSave, setDisableSave] = useState(false);
   const inq = (inq) => {
@@ -245,6 +246,7 @@ const InquiryAnswer = (props) => {
         await updateParagraphAnswer(answerId, question.paragraphAnswer);
       }
     }
+    dispatch(InquiryActions.checkSubmit(!enableSubmit));
     if (question.attachmentAnswer) {
       await saveAttachmentAnswer(question, responseSelectChoice);
       dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));

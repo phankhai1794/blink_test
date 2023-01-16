@@ -5,9 +5,10 @@ import {
   IconButton,
   Chip,
   FormControl,
-  FormHelperText
+  FormHelperText,
+  Tooltip
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles, withStyles } from '@material-ui/styles';
 import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import clsx from 'clsx';
@@ -93,8 +94,12 @@ const useStyles = makeStyles((theme) => ({
       color: '#BD0F72',
       border: '1px solid #BD0F72'
     }
-  },
-  chip: {
+  }
+}));
+
+const StyledChip = withStyles(theme => ({
+  root: {
+    maxWidth: 350,
     borderRadius: '8px',
     border: '0.5px solid #515F6B',
     background: 'white',
@@ -103,8 +108,14 @@ const useStyles = makeStyles((theme) => ({
     color: '#515E6A',
     fontSize: 15,
     fontFamily: 'Montserrat'
+  },
+  label: {
+    display: 'inline-block',
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis"
   }
-}));
+}))(Chip);
 
 const AmendmentPopup = (props) => {
   const { onClose, inqType, isEdit, data, index, updateData, updateEdit, containerDetail } = props;
@@ -225,18 +236,19 @@ const AmendmentPopup = (props) => {
             }}>
             <>
               {value.map((tag, i) => (
-                <Chip
-                  classes={{ root: classes.chip }}
-                  key={i}
-                  label={tag}
-                  onDelete={() => onDelete(value, i)}
-                  deleteIcon={<ClearIcon fontSize="small" />}
-                />
+                <Tooltip key={i} title={tag} enterDelay={1000}>
+                  <StyledChip
+                    label={tag}
+                    onDelete={() => onDelete(value, i)}
+                    deleteIcon={<ClearIcon fontSize="small" />}
+                  />
+                </Tooltip>
               ))}
             </>
             <input
               style={{
                 width: 20,
+                minHeight: 26,
                 flexGrow: 1,
                 border: 'none',
                 fontSize: 15,

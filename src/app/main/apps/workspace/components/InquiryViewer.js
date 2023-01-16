@@ -331,6 +331,7 @@ const InquiryViewer = (props) => {
                   lastest.showIconAttachReplyFile = false;
                   lastest.showIconAttachAnswerFile = false;
                   props.getStateReplyDraft(true);
+                  setSubmitLabel(false);
                   //
                 } else if (['REP_Q_SENT'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = true;
@@ -682,6 +683,7 @@ const InquiryViewer = (props) => {
           }
           if (!optionsOfQuestion.length) {
             (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
+            dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "")) //BX: Delete all inquiries draft
           }
         })
         .catch((error) => console.error(error));
@@ -735,6 +737,7 @@ const InquiryViewer = (props) => {
                 }
               }).catch((error) => console.error(error));
             }
+            dispatch(InquiryActions.checkSubmit(!enableSubmit));
             props.getUpdatedAt();
           }
           // setSaveComment(!isSaveComment);
@@ -826,6 +829,7 @@ const InquiryViewer = (props) => {
       const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
       if (isWarning) {
         dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
+        setDisableAcceptResolve(false);
       } else {
         confirm && confirm();
       }
@@ -848,7 +852,7 @@ const InquiryViewer = (props) => {
           obj[question.inqType] = formatContainerNo(obj[question.inqType]);
         }
         if (getTypeName === CONTAINER_SEAL) {
-          obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
+          obj[question.inqType] = obj[question.inqType].filter(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
           obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
         }
@@ -924,6 +928,24 @@ const InquiryViewer = (props) => {
             dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
           } else {
             dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
+          }
+          const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && inq.state !== 'COMPL');
+          const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && inq.state !== 'COMPL');
+          if (myBL.bkgNo) {
+            if (optionsInquires[editedInqIndex].process === "pending" && inqsPending.length > 0 && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
+              if (optionsInquires[editedInqIndex].receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
+                //BL Inquired Resolved (BR) , Upload all to Opus.  RO: Return to Customer via BLink, 
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
+              }
+              if (optionsInquires[editedInqIndex].receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
+                //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
+              }
+            }
+            if (optionsInquires[editedInqIndex].process === "draft" && inqsDraft.length > 0 && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
+              //BL Amendment Success (BS) , Upload all to Opus.  
+              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
+            }
           }
         }
       })
@@ -1087,6 +1109,7 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
             props.getUpdatedAt();
+            dispatch(InquiryActions.checkSubmit(!enableSubmit));
             dispatch(InquiryActions.checkSend(true));
             dispatch(
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
@@ -1118,6 +1141,7 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].createdAt = res.updatedAt;
             dispatch(InquiryActions.setInquiries(optionsInquires));
             props.getUpdatedAt();
+            dispatch(InquiryActions.checkSubmit(!enableSubmit));
             // if (props.isInquiryDetail) {
             //   setSaveComment(!isSaveComment);
             // }
@@ -2031,7 +2055,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
-  const [tableScrollTop, setTableScrollTop] = useState(0);
   const [values, setValues] = useState(originalValues || getValueField(container) || [{}]);
 
   const inqType = getLabelById(metadata['inq_type_options'], question.inqType);
@@ -2041,7 +2064,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const typeList = container === CONTAINER_DETAIL ? cdType : cmType;
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values));
-    temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? [e.target.value] : e.target.value;
+    temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? e.target.value.split(',') : e.target.value;
     setValues(temp);
     setTextResolve(temp);
   };
@@ -2061,8 +2084,14 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       item.index = index;
       index += 1;
     })
-    const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
-    const groupsValues = [...groups].map(([name, value]) => ({ name, value }));
+    let groupsValues = [];
+    if (typeList.length === 1){
+       groupsValues = [...valueCopy].map(value => ({ name: value[getType(CONTAINER_NUMBER)], value: [value] }))
+    }
+    else{
+      const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
+      groupsValues = [...groups].map(([name, value]) => ({ name, value }));
+    }
     while (groupsValues.length) {
       let rowValues = groupsValues.splice(0, 4);
       let rowIndex = 0;
@@ -2085,7 +2114,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               fontWeight: 600,
               borderTopLeftRadius: rowIndex === 0 && 8,
               fontSize: 14,
-              // borderBottomLeftRadius: rowIndex === typeList.length - 1 && 8
             }}
             disabled
             defaultValue={type}
@@ -2100,7 +2128,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                 nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
               }
               const disabled = !((rowIndex > 0 || inqType === CONTAINER_NUMBER) && nodeValue && !disableInput);
-              // const disabled = !(nodeValue && !disableInput);
               const isUpperCase = inqType !== CONTAINER_NUMBER;
               return (
                 <input
@@ -2111,8 +2138,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                     backgroundColor: disabled && '#FDF2F2',
                     fontSize: 15,
                     borderTopRightRadius: rowIndex === 0 && rowValues.length - 1 === index1 ? 8 : null,
-                    // borderBottomRightRadius:
-                    //     index1 === rowValues.length - 1 && rowIndex === typeList.length - 1 ? 8 : null
                     textTransform: isUpperCase ? 'uppercase' : 'none'
                   }}
                   disabled={disabled}

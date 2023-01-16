@@ -165,8 +165,9 @@ const SendInquiryForm = (props) => {
     const newRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_Q_DRF']);
     const convert = (array) => array.map((a) => `- ${a}`).join('\n');
     let header = 'BL has been updated';
+    let msg = ''
     if (newInq.length && newRep.length) {
-      const msg =
+      msg =
         'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
       return [
         msg,
@@ -176,9 +177,10 @@ const SendInquiryForm = (props) => {
     } else if (newInq.length) {
       header = 'New Inquiry';
     } else if (newRep.length) {
+      msg = 'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
       header = 'New Reply';
     }
-    return ['', array.map((a) => `- ${a}`).join('\n'), header];
+    return [msg, array.map((a) => `- ${a}`).join('\n'), header];
   };
 
   useEffect(() => {
@@ -199,13 +201,9 @@ const SendInquiryForm = (props) => {
     let content = '';
     let bodyHtml = '';
     if (hasOnshore) {
-      subject = `[Onshore - BL Query]_[${
-        inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]
-      }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
-      content = `Dear Onshore,\n \n${
-        msg1 || 'We need your assistance for BL completion. Pending issues:'
-      }\n${msg2}`;
+      content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion. Pending issues:'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setOnshoreValue({
         ...onshoreValue,
@@ -218,12 +216,10 @@ const SendInquiryForm = (props) => {
       handleEditorState(content);
     }
     if (hasCustomer) {
-      subject = `[Customer BL Query]_[${
-        inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]
+      subject = `[Customer BL Query]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]
       }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
       const [msg1, msg2, header] = convertToList(inqCustomer, 'customer');
-      content = `Dear Customer,\n \n${
-        msg1 ||
+      content = `Dear Customer,\n \n${msg1 ||
         `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`
       }\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
@@ -313,15 +309,6 @@ const SendInquiryForm = (props) => {
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'sendMail') {
       const cloneInquiries = [...inquiries];
-      cloneInquiries.forEach((q) => {
-        if (q.receiver[0] === tabValue) {
-          if (q.state === 'OPEN') q.state = 'INQ_SENT';
-          // inquiry
-          else if (q.state === 'REP_Q_DRF') q.state = 'REP_Q_SENT';
-          // inquiry
-          else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
-        }
-      });
       const formClone = JSON.parse(JSON.stringify(form));
       let header = '';
       if (tabValue === 'onshore') {
@@ -347,7 +334,6 @@ const SendInquiryForm = (props) => {
           tab: tabValue
         })
       );
-      dispatch(InquiryActions.setInquiries(cloneInquiries));
       dispatch(
         FormActions.openConfirmPopup({
           openConfirmPopup: false,
@@ -373,7 +359,18 @@ const SendInquiryForm = (props) => {
       content: !isBodyValid() ? 'Please enter your email content.' : ''
     });
     if (isMailVaid()) {
-      dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
+      const to = tabValue === 'customer' ? 'Customer' : 'Onshore';
+      const regex = /.*@.*com.+/;
+      if (
+        regex.test(inputMail[`to${to}`]) ||
+        regex.test(inputMail[`to${to}Cc`]) ||
+        regex.test(inputMail[`to${to}Bcc`])
+      )
+        dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
+      else
+        dispatch(
+          Actions.showMessage({ message: 'EMAIL ADDRESS DOES NOT EXIST', variant: 'error' })
+        );
     } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
       return;
     } else {
@@ -422,10 +419,11 @@ const SendInquiryForm = (props) => {
     }
   };
 
-  const countInq = (recevier) => {
+  const countInq = (receiver) => {
     return inquiries.filter(
       (inq) =>
-        inq.receiver.includes(recevier) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')
+        (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')) ||
+        (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
     ).length;
   };
 
@@ -552,15 +550,27 @@ const SendInquiryForm = (props) => {
                 fontWeight: 500
               }}>
               <div className="preview_editor-content">{parse(form.content)}</div>
-              <p>
-                Please visit the link below and help us answer our inquiry. <br />
-                BLink Workspace: <br />
-                Access Code:{' '}
-              </p>
-              <p>
-                Thank you <br />
-                ONE Offshore Center
-              </p>
+              <p>Please visit the link below and help advise us information for further checking</p>
+              <div style={{ textAlign: 'center' }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled
+                  style={{
+                    borderRadius: 8,
+                    padding: '9px 30px',
+                    textAlign: 'center',
+                    fontSize: 14,
+                    fontFamily: 'Montserrat',
+                    color: 'white',
+                    background: '#BD0F72',
+                    textTransform: 'none'
+                  }}>
+                  View Link
+                </Button>
+              </div>
+              <br />
+              <span>Thank you for choosing ONE</span>
             </div>
           </div>
         )}
@@ -626,7 +636,7 @@ const ActionUI = (props) => {
           MenuProps={{ classes: { paper: classes.paper } }}
           disableUnderline>
           <StyledMenuItem value="default">Preview</StyledMenuItem>
-          <StyledMenuItem value="inquiry"> Preview Inquiries</StyledMenuItem>
+          <StyledMenuItem value="inquiry"> Preview List</StyledMenuItem>
           <StyledMenuItem value="email"> Preview Email Layout</StyledMenuItem>
         </Select>
       </div>
