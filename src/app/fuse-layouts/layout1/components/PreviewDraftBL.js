@@ -34,31 +34,35 @@ const PreviewDraftBL = () => {
 
   return (
     <>
-      <PermissionProvider
-        action={PERMISSION.VIEW_PREVIEW_DRAFT_BL}
-        extraCondition={['/guest'].some((el) => pathname.includes(el)) && !myBL?.state?.includes('DRF_')}>
-        <Tooltip title="Preview Draft B/L">
-          <img
-            src="assets/images/icons/preview-draft.svg"
-            alt="Draft BL Icon"
-            className={classes.iconDraftBL}
-            onClick={previewDraftBL}
-          />
-        </Tooltip>
-      </PermissionProvider>
+      {myBL?.state &&
+        <>
+          <PermissionProvider
+            action={PERMISSION.VIEW_PREVIEW_DRAFT_BL}
+            extraCondition={pathname.includes('/guest') && !myBL.state.includes('DRF_')}>
+            <Tooltip title="Preview Draft B/L">
+              <img
+                src="assets/images/icons/preview-draft.svg"
+                alt="Draft BL Icon"
+                className={classes.iconDraftBL}
+                onClick={previewDraftBL}
+              />
+            </Tooltip>
+          </PermissionProvider>
 
-      <PermissionProvider
-        action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
-        extraCondition={pathname.includes('/guest') && myBL?.state?.includes('DRF_')}>
-        <Tooltip title="Redirect to Draft B/L">
-          <img
-            src="assets/images/icons/preview-draft.svg"
-            alt="Draft BL Icon"
-            className={classes.iconDraftBL}
-            onClick={redirectDraftBL}
-          />
-        </Tooltip>
-      </PermissionProvider>
+          <PermissionProvider
+            action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
+            extraCondition={pathname.includes('/guest') && myBL.state.includes('DRF_')}>
+            <Tooltip title="Redirect to Draft B/L">
+              <img
+                src="assets/images/icons/preview-draft.svg"
+                alt="Draft BL Icon"
+                className={classes.iconDraftBL}
+                onClick={redirectDraftBL}
+              />
+            </Tooltip>
+          </PermissionProvider>
+        </>
+      }
     </>
   );
 };
