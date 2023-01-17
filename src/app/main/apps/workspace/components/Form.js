@@ -252,6 +252,7 @@ export default function Form(props) {
   );
 
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
+  const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
   const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
   const currentAmendment = useSelector(
     ({ workspace }) => workspace.inquiryReducer.currentAmendment
@@ -430,6 +431,10 @@ export default function Form(props) {
     }
   }, [listInqMinimize]);
 
+  const showAddAmendment = () => {
+    return !(openAllInquiry || openPreviewListSubmit);
+  };
+
   return (
     <div>
       {openFab && (
@@ -544,7 +549,7 @@ export default function Form(props) {
             <PermissionProvider
               action={PERMISSION.VIEW_CREATE_AMENDMENT}
               extraCondition={
-                !openAllInquiry && myBL?.state?.includes('DRF_') && userType === 'CUSTOMER' // Allow only customer to create amendment
+                showAddAmendment() && myBL?.state?.includes('DRF_') && userType === 'CUSTOMER' // Allow only customer to create amendment
               }>
               <LinkButton
                 text="Add Amendment"

@@ -341,7 +341,7 @@ function ToolbarLayout1(props) {
   };
 
   const onSubmit = async () => {
-    dispatch(FormActions.toggleAllInquiry(true));
+    dispatch(FormActions.togglePreviewSubmitList(true));
     dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
   };
 

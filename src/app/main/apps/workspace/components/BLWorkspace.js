@@ -135,6 +135,8 @@ const BLWorkspace = (props) => {
   const openNotification = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitAnswer);
   const openNotificationReply = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteReply);
   const openNotificationBLWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning);
+  const openNotificationSubmitPreview = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitPreview);
+  const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
   const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
@@ -336,19 +338,26 @@ const BLWorkspace = (props) => {
     }
   }
 
+  const renderTitle = () => {
+    if (openAllInquiry) return 'Inquiries List';
+    else if (openAmendmentList) return 'Amendments List';
+    else if (openPreviewListSubmit) return 'Preview List';
+  }
+
   const popupOpen = (inquiry, curField) => {
     switch (inquiry.field) {
     case 'INQUIRY_LIST':
       return {
-        status: openAllInquiry || openAmendmentList,
+        status: openAllInquiry || openAmendmentList || openPreviewListSubmit,
         tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
         nums: user.role === 'Admin' ? [countInq(inquiries, openAllInquiry ? 'pending' : 'draft', 'customer'), countInq(inquiries, openAllInquiry ? 'pending' : 'draft', 'onshore')] : [],
         toggleForm: (status) => {
           dispatch(FormActions.toggleAllInquiry(status));
           dispatch(FormActions.toggleAmendmentsList(status))
+          dispatch(FormActions.togglePreviewSubmitList(status))
         },
-        fabTitle: openAllInquiry ? 'Inquiries List' : 'Amendments List',
-        title: openAllInquiry ? 'Inquiries List' : 'Amendments List',
+        fabTitle: renderTitle(),
+        title: renderTitle(),
         field: 'INQUIRY_LIST',
         showBtnSend: true,
         disableSendBtn: disableSendBtn,
@@ -485,6 +494,13 @@ const BLWorkspace = (props) => {
           <span>{`The BL is opening by [${openNotificationBLWarning.userName}].`}</span>
         </>
       )
+    } else if (openNotificationSubmitPreview) {
+      return (
+        <>
+          <div>Your inquiries and amendments</div>
+          <div>have been sent successfully.</div>
+        </>
+      )
     }
   };
 
@@ -496,7 +512,7 @@ const BLWorkspace = (props) => {
   };
 
   const renderIconType = () => {
-    if (openNotification || openNotificationReply || openNotificationAmendment) {
+    if (openNotification || openNotificationReply || openNotificationAmendment || openNotificationSubmitPreview) {
       return <img src={`/assets/images/icons/vector.svg`} />;
     }
     return null
@@ -509,7 +525,7 @@ const BLWorkspace = (props) => {
         <>
           <ListNotification />
           <SubmitAnswerNotification
-            open={openNotification || openNotificationReply || openNotificationAmendment || openNotificationBLWarning.status}
+            open={openNotification || openNotificationReply || openNotificationAmendment || openNotificationBLWarning.status || openNotificationSubmitPreview}
             msg={renderMsgNoti()}
             // msg2={`Please wait for ${openNotificationBLWarning.userName} complete his/her work!`}
             msg2={renderMsgNoti2()}
@@ -519,6 +535,7 @@ const BLWorkspace = (props) => {
               dispatch(FormActions.toggleOpenNotificationDeleteReply(false));
               dispatch(FormActions.toggleOpenNotificationDeleteAmendment(false));
               dispatch(FormActions.toggleOpenBLWarning(false));
+              dispatch(FormActions.toggleOpenNotificationPreviewSubmit(false));
             }}
           />
           <div className={clsx('max-w-5xl', classes.root)}>

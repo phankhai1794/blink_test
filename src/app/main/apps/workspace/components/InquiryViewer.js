@@ -204,6 +204,7 @@ const InquiryViewer = (props) => {
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
+  const openConfirmPopup = useSelector(({ workspace }) => workspace.formReducer.openConfirmPopup);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const [isSaveComment, setSaveComment] = useState(false);
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
@@ -466,6 +467,7 @@ const InquiryViewer = (props) => {
             }
             if (lastest.state === 'RESOLVED') {
               setStateReplyDraft(false);
+              setDisableReopen(false);
             }
 
             if (user.role === 'Admin') {
@@ -715,13 +717,12 @@ const InquiryViewer = (props) => {
             setEditOriginalAmendment(res.isEditOriginalAmendment);
             setViewDropDown('');
             setDisableSaveReply(false);
+            const optionsOfQuestion = [...inquiries];
+            const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
+            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
             if (res.checkEmpty) {
-              const optionsOfQuestion = [...inquiries];
               const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
-              const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
-              const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
               optionsOfQuestion.splice(removeIndex, 1);
-              dispatch(InquiryActions.setInquiries(optionsOfQuestion));
               getBlInfo(myBL.id).then(res => {
                 dispatch(InquiryActions.setContent({ ...content, [question.field]: res.myBL.content[question.field] }));
                 if (field !== 'INQUIRY_LIST') {
@@ -736,7 +737,13 @@ const InquiryViewer = (props) => {
                   }
                 }
               }).catch((error) => console.error(error));
+            } else {
+              if (res.checkReplyEmpty) {
+                optionsOfQuestion[removeIndex].state = 'REP_SENT';
+              }
             }
+            setReplyRemove();
+            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             props.getUpdatedAt();
           }
@@ -752,6 +759,10 @@ const InquiryViewer = (props) => {
       })
     );
   }, [confirmClick]);
+
+  useEffect(() => {
+    if (!openConfirmPopup) setReplyRemove();
+  }, [openConfirmPopup]);
 
   useEffect(() => {
     if (isSeparate) {
@@ -1175,13 +1186,16 @@ const InquiryViewer = (props) => {
         saveEditedField({ ...reqReply })
           .then((res) => {
             optionsInquires[editedIndex].createdAt = res.createdAt;
-            dispatch(InquiryActions.setInquiries(optionsInquires));
             if (question.state.includes('AME_')) {
               dispatch(InquiryActions.setContent({
                 ...content,
                 [question.field]: question.content
               }));
+              optionsInquires[editedIndex].state = 'AME_DRF';
+            } else {
+              optionsInquires[editedIndex].state = 'REP_DRF';
             }
+            dispatch(InquiryActions.setInquiries(optionsInquires));
             props.getUpdatedAt();
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             setDisableSaveReply(false);
@@ -1202,9 +1216,6 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           }
           optionsInquires[editedIndex].createdAt = res.createdAt;
-          dispatch(InquiryActions.setInquiries(optionsInquires));
-          props.getUpdatedAt();
-          dispatch(InquiryActions.checkSubmit(!enableSubmit));
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
           dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
@@ -1213,7 +1224,13 @@ const InquiryViewer = (props) => {
               ...content,
               [res.newAmendment?.field]: tempReply.answer.content
             }));
+            optionsInquires[editedIndex].state = 'AME_DRF';
+          } else {
+            optionsInquires[editedIndex].state = 'REP_DRF';
           }
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+          props.getUpdatedAt();
+          dispatch(InquiryActions.checkSubmit(!enableSubmit));
         }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
       }
     }

@@ -61,6 +61,7 @@ const PopupConfirmSubmit = (props) => {
     workspace.inquiryReducer.isShowBackground,
     workspace.inquiryReducer.enableSubmit,
   ]);
+  const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
   const user = useSelector(({ user }) => user);
 
   const dispatch = useDispatch();
@@ -91,13 +92,13 @@ const PopupConfirmSubmit = (props) => {
     const inqsDraft = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && inq.currentState === 'AME_DRF');
     const inqsReply = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && inq.currentState === 'REP_A_DRF');
     const draftReply = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && inq.currentState === 'REP_DRF');
-    if(draftReply.length > 0){
+    if (draftReply.length > 0) {
       // BK. Reply from Customer, Onshore
       const inqType = user.userType === 'CUSTOMER' ? "BP" : "BQ"; // BP: Customer Amendment Reply, BO: Offshore Amendment Inquiry
-      const userType = user.userType=== 'CUSTOMER' ? "TO" : "RO"; // TO: Return to Customer via BLink, RO: Return to Onshore via BLink
+      const userType = user.userType === 'CUSTOMER' ? "TO" : "RO"; // TO: Return to Customer via BLink, RO: Return to Onshore via BLink
       dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
     }
-    else if (inqsReply.length > 0 ){
+    else if (inqsReply.length > 0) {
       // BK. Reply from Customer, Onshore
       const inqType = user.userType === 'CUSTOMER' ? "BK" : "BO"; // BK: Reply from Customer, BO: Reply from Onshore
       const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
@@ -123,11 +124,15 @@ const PopupConfirmSubmit = (props) => {
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
     if (props.field === 'INQUIRY_LIST') {
       dispatch(FormActions.toggleAllInquiry(false));
+      if (openPreviewListSubmit) {
+        dispatch(FormActions.toggleOpenNotificationPreviewSubmit(true));
+      } else {
+        dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
+      }
     } else {
       dispatch(InquiryActions.setOneInq({}));
     }
     dispatch(InquiryActions.checkSubmit(!enableSubmit));
-    dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
     dispatch(FormActions.toggleReload());
   };
 
