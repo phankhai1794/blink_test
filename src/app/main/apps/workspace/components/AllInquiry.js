@@ -172,6 +172,7 @@ const AllInquiry = (props) => {
   ]);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
+  const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
   const [inquiries, setInquiries] = useState([]);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
@@ -189,6 +190,9 @@ const AllInquiry = (props) => {
       inquiriesSet = inquiriesSet.filter(inq => inq.process === 'draft');
     } else if (openInquiryReview) {
       inquiriesSet = inquiriesSet.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF' || (inq.process === 'draft' && inq.state === 'REP_DRF'));
+    } else if (openPreviewListSubmit) {
+      inquiriesSet = inquiriesSet.filter(inq => ['ANS_DRF', 'REP_A_DRF', 'REP_DRF', 'AME_DRF'].includes(inq.state));
+      if (!inquiriesSet.length) dispatch(FormActions.togglePreviewSubmitList(false));
     }
     let inquiriesSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     setInquiries(inquiriesSort);

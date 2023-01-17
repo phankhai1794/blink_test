@@ -7,6 +7,7 @@ export const TOGGLE_SAVE_INQUIRY = 'TOGGLE_SAVE_INQUIRY';
 export const TOGGLE_ADD_INQUIRY = 'TOGGLE_ADD_INQUIRY';
 export const TOGGLE_AMENDMENTS_LIST = 'TOGGLE_AMENDMENTS_LIST';
 export const OPEN_NOTIFICATION_AMENDMENT_LIST = 'OPEN_NOTIFICATION_AMENDMENT_LIST';
+export const TOGGLE_PREVIEW_SUBMIT_LIST = 'TOGGLE_PREVIEW_SUBMIT_LIST';
 export const RELOAD = 'RELOAD';
 export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 export const OPEN_EMAIL = 'OPEN_EMAIL';
@@ -16,6 +17,7 @@ export const OPEN_NOTIFICATION_SUBMIT_ANSWER = 'OPEN_NOTIFICATION_SUBMIT_ANSWER'
 export const OPEN_NOTIFICATION_DELETE_REPLY = 'OPEN_NOTIFICATION_DELETE_REPLY';
 export const OPEN_NOTIFICATION_DELETE_AMENDMENT = 'OPEN_NOTIFICATION_DELETE_AMENDMENT';
 export const TOGGLE_OPEN_BL_WARNING = 'TOGGLE_OPEN_BL_WARNING';
+export const OPEN_NOTIFICATION_PREVIEW_SUBMIT = 'OPEN_NOTIFICATION_PREVIEW_SUBMIT';
 export const TOGGLE_OPEN_RELOAD_WARNING = 'TOGGLE_OPEN_RELOAD_WARNING';
 export const ENABLE_SAVE_INQUIRIES = 'ENABLE_SAVE_INQUIRIES';
 export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
@@ -73,6 +75,13 @@ export function toggleAmendmentsList(state) {
 export function toggleAddInquiry(state) {
   return {
     type: TOGGLE_ADD_INQUIRY,
+    state
+  };
+}
+
+export function togglePreviewSubmitList(state) {
+  return {
+    type: TOGGLE_PREVIEW_SUBMIT_LIST,
     state
   };
 }
@@ -166,6 +175,13 @@ export function toggleOpenBLWarning(state) {
   };
 }
 
+export function toggleOpenNotificationPreviewSubmit(state) {
+  return {
+    type: OPEN_NOTIFICATION_PREVIEW_SUBMIT,
+    state
+  };
+}
+
 export function toggleOpenReloadWarning(state) {
   return {
     type: TOGGLE_OPEN_RELOAD_WARNING,
@@ -208,19 +224,19 @@ export function validateInput(state) {
   };
 }
 
-export function increaseLoading(){
+export function increaseLoading() {
   return {
     type: INCREASE_LOADING,
   }
 }
 
-export function decreaseLoading(){
+export function decreaseLoading() {
   return {
     type: DECREASE_LOADING,
   }
 }
 
-export function resetLoading(){
+export function resetLoading() {
   return {
     type: RESET_LOADING,
   }
