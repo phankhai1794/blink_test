@@ -88,10 +88,9 @@ const PopupConfirmSubmit = (props) => {
     });
     await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields });
 
-    const inqsPending = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && inq.currentState === 'ANS_DRF');
-    const inqsDraft = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && inq.currentState === 'AME_DRF');
-    const inqsReply = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && inq.currentState === 'REP_A_DRF');
-    const draftReply = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && inq.currentState === 'REP_DRF');
+    const inqsDraft = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && ['AME_DRF'].includes(inq.currentState));
+    const inqsReply = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(inq.currentState));
+    const draftReply = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && ['REP_DRF'].includes(inq.currentState));
     if (draftReply.length > 0) {
       // BK. Reply from Customer, Onshore
       const inqType = user.userType === 'CUSTOMER' ? "BP" : "BQ"; // BP: Customer Amendment Reply, BO: Offshore Amendment Inquiry
@@ -104,10 +103,9 @@ const PopupConfirmSubmit = (props) => {
       const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
       dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
     }
-    else if (inqsPending.length > 0 || inqsDraft.length > 0) {
-      const inqType = inqsPending.length > 0 ? "BI" : "AN"; // AN: Amendment Notification, BI: BLink BL Inquired
-      const userType = user.userType === 'CUSTOMER' ? "RO" : "RW"; // RO: Return to Customer via BLink, RW: Return to Onshore via BLink
-      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
+    else if (inqsDraft.length > 0) {
+      const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "BA", userType));// BA: Customer Amendment Request
     }
 
     const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);

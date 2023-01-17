@@ -36,12 +36,23 @@ export const sendMail =
           if (res.status === 200) {
             const cloneInquiries = [...inquiries];
             const inqsOpenState = inquiries.filter(op => op.process === 'pending' && op.state === 'OPEN');
-            if (inqsOpenState.length > 0 || replyInqs.length > 0) {
-              if (form.toCustomer) //BI: BL Inquiried,  RO: Return to Customer via BLink. 
-                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RO"));//Send inquiries to customer
-              if (form.toOnshore) //BI: BL Inquiried,  RW: Return to Onshore via BLink
-                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RW")); //Send inquiries to Onshore
+            const draftReply = inquiries.filter(op => op.process === 'draft' && op.state === 'REP_DRF');
+            if (draftReply.length > 0) {
+              // BQ: Offshore replied on BL Draft
+              if (form.toCustomer) //  RO: Return to Customer via BLink
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "RO"));
+              if (form.toOnshore) // TO: Return to Onshore via BLink
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "TO"));
+
+            } else {
+              if (inqsOpenState.length > 0 || replyInqs.length > 0) {
+                if (form.toCustomer) //BI: BL Inquiried,  RO: Return to Customer via BLink. 
+                  dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RO"));//Send inquiries to customer
+                if (form.toOnshore) //BI: BL Inquiried,  RW: Return to Onshore via BLink
+                  dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RW")); //Send inquiries to Onshore
+              }
             }
+
             cloneInquiries.forEach((q) => {
               if (q.receiver[0] === tab) {
                 if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
