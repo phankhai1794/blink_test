@@ -2152,7 +2152,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                 nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
               }
               const disabled = !((rowIndex > 0 || inqType === CONTAINER_NUMBER) && nodeValue && !disableInput);
-              const isUpperCase = inqType !== CONTAINER_NUMBER;
+              const isUpperCase = inqType !== CONTAINER_NUMBER && rowIndex > 0;
               return (
                 <input
                   className={clsx(classes.text)}
