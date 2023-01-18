@@ -173,7 +173,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
-  const onMouseEnter = (e) => {
+  const onMouseOver = (e) => {
     const { currentTarget, target } = e;
     const { scrollWidth, clientWidth } = target;
     if (isEmpty) setAnchorEl(currentTarget);
@@ -301,7 +301,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
       <div
         id={id}
         style={{ width }}
-        onMouseEnter={onMouseEnter}
+        onMouseOver={onMouseOver}
         onMouseLeave={onMouseLeave}
         onClick={onClick}>
         <ThemeProvider theme={theme}>

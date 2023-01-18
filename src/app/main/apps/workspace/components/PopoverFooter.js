@@ -59,6 +59,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
   );
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
+  const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
   const [isSubmit, setIsSubmit] = useState(true);
 
   useEffect(() => {
@@ -71,25 +72,21 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
       else if (title === currentField) {
         currentFields = inquiries.filter(inq => inq.field === currentField);
       }
-
       //
       const inquiriesPendingProcess = currentFields.filter(op => op.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(op.state));
       const amendmentFields = currentFields.filter(op => op.process === 'draft' && ['REP_DRF', 'AME_DRF'].includes(op.state));
+      const previewList = currentFields.filter(op => ['REP_A_DRF', 'ANS_DRF', 'REP_DRF', 'AME_DRF'].includes(op.state));
       if (inquiriesPendingProcess.length && openAllInquiry) {
         setIsSubmit(false)
       } else if (amendmentFields.length && openAmendmentList) {
         setIsSubmit(false)
-      } else if (title !== 'INQUIRY_LIST') {
-        if (!inquiriesPendingProcess.length && !amendmentFields.length) {
-          setIsSubmit(true)
-        } else {
-          setIsSubmit(false)
-        }
+      } else if (previewList.length && (openPreviewListSubmit || title !== 'INQUIRY_LIST')) {
+        setIsSubmit(false)
       } else {
         setIsSubmit(true)
       }
     }
-  }, [checkSubmit, enableSubmit]);
+  }, [checkSubmit, inquiries]);
 
   const toggleInquiriresDialog = () => {
     dispatch(FormActions.toggleAllInquiry(true));

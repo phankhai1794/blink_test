@@ -209,6 +209,7 @@ const AmendmentPopup = (props) => {
         variant="outlined"
         error={Boolean(errors[title])}
         helperText={errors[title]?.message}
+        autoComplete="off"
         className={clsx(classes.textField, !isEdit && classes.lock)}
         value={!isUpperCase ? formatContainerNo(field.value) : field.value}
         onChange={(e) => handleChange(field.id, e.target.value)}
@@ -216,7 +217,7 @@ const AmendmentPopup = (props) => {
           disabled: !isEdit,
           endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
         }}
-        inputProps={{ style: { textTransform: isUpperCase ? 'uppercase' : 'none'} }}
+        inputProps={{ style: { textTransform: isUpperCase ? 'uppercase' : 'none' } }}
       />
     );
   };
@@ -314,7 +315,8 @@ const AmendmentPopup = (props) => {
                     control: (base) => ({
                       ...base,
                       borderRadius: 8,
-                      border: isError ? '1px solid red' : ''
+                      border: isError ? '1px solid red' : '',
+                      height: '39.75px'
                     }),
                     dropdownIndicator: (base) => ({
                       ...base,
@@ -366,7 +368,7 @@ const AmendmentPopup = (props) => {
                 style: { width: '90%' }, title: field, ...register(field, { required, pattern })
               })}
             </div>
-            <div style={{ flexGrow: 1 }}>
+            <div style={{ flexGrow: 1, height: '39.75px' }}>
               <p style={{ fontWeight: 600 }}>{`${title} UNIT`}
                 {required && <span style={{ color: 'red' }}> *</span>}
               </p>

@@ -242,7 +242,6 @@ export default function Form(props) {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
-  const currentInquiries = inquiries.filter((q) => q.field === currentField);
   const userType = useSelector(({ user }) => user.userType);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
 
@@ -252,16 +251,15 @@ export default function Form(props) {
   );
 
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
+  const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
   const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
   const currentAmendment = useSelector(
     ({ workspace }) => workspace.inquiryReducer.currentAmendment
   );
   const isLoading = useSelector(({ workspace }) => workspace.mailReducer.isLoading);
-  const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
 
   const [openFab, setOpenFab] = useState(false);
-  const [disableSend, setDisableSend] = useState(!enableSend);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const classes = useStyles({ isFullScreen, style: props.style });
   const classesHover = useStyles();
@@ -269,9 +267,9 @@ export default function Form(props) {
   const [checkSubmit, setCheckSubmit] = useState(true);
   const [value, setValue] = useState(0);
 
-  useEffect(() => {
-    setDisableSend(!enableSend);
-  }, [enableSend]);
+  const enableSend = inquiries.some((inq) =>
+    ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state)
+  );
 
   const handleOpenFab = () => {
     setIdBtn(currentField);
@@ -369,36 +367,6 @@ export default function Form(props) {
   };
 
   const sendMailClick = () => {
-    // setDisableSend(true);
-    // getMail(myBL.id).then((res) => {
-    //   if (res.data.length) {
-    //     let tags = {}, toCustomer = [], toOnshore = [];
-    //     // Offshore
-    //     res.data[0]?.toCustomer?.length && res.data[0].toCustomer.forEach(customer => {
-    //       toCustomer.push(customer.email)
-    //     });
-    //     // Onshore
-    //     res.data[0]?.toOnshore?.length && res.data[0].toOnshore.forEach(onshore => {
-    //       toOnshore.push(onshore.email)
-    //     });
-    //     toCustomer.length && (tags.toCustomer = toCustomer);
-    //     toOnshore.length && (tags.toOnshore = toOnshore);
-    //     setDisableSend(false);
-    //     dispatch(
-    //       FormActions.openConfirmPopup({
-    //         openConfirmPopup: true,
-    //         form: { toCustomer: tags.toCustomer ? tags.toCustomer.join(',') : '', toOnshore: tags.toOnshore ? tags.toOnshore.join(',') : '' },
-    //         confirmPopupMsg: 'Are you sure you want to send this email?',
-    //         confirmPopupType: 'autoSendMail'
-    //       })
-    //     );
-    //   }
-    //   else{
-    // }
-    // }).catch((error) => {
-    //   console.error(error)
-    // });
-
     toggleForm(false);
     dispatch(FormActions.toggleOpenEmail(true));
     dispatch(InquiryActions.setOneInq({}));
@@ -429,6 +397,10 @@ export default function Form(props) {
       }
     }
   }, [listInqMinimize]);
+
+  const showAddAmendment = () => {
+    return !(openAllInquiry || openPreviewListSubmit);
+  };
 
   return (
     <div>
@@ -544,7 +516,7 @@ export default function Form(props) {
             <PermissionProvider
               action={PERMISSION.VIEW_CREATE_AMENDMENT}
               extraCondition={
-                !openAllInquiry && myBL?.state?.includes('DRF_') && userType === 'CUSTOMER' // Allow only customer to create amendment
+                showAddAmendment() && myBL?.state?.includes('DRF_') && userType === 'CUSTOMER' // Allow only customer to create amendment
               }>
               <LinkButton
                 text="Add Amendment"
@@ -564,11 +536,11 @@ export default function Form(props) {
                       fontWeight: 'bold',
                       width: 120,
                       color: 'white',
-                      backgroundColor: disableSend || isLoading ? '#CCD3D1' : '#bd1874',
+                      backgroundColor: (!enableSend || isLoading) ? '#CCD3D1' : '#bd1874',
                       borderRadius: '8px',
                       fontFamily: 'Montserrat'
                     }}
-                    disabled={disableSend || isLoading}
+                    disabled={!enableSend || isLoading}
                     onClick={sendMailClick}>
                     E-mail
                   </Button>
