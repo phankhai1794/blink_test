@@ -1550,7 +1550,7 @@ const InquiryViewer = (props) => {
                         {checkStateReplyDraft && (
                           <>
                             <PermissionProvider action={PERMISSION.INQUIRY_UPDATE_REPLY}>
-                              <Tooltip title={'Edit Reply'}>
+                              <Tooltip title={'Edit'}>
                                 <div onClick={() => handleEdit(question)}>
                                   <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
                                 </div>
@@ -1576,7 +1576,7 @@ const InquiryViewer = (props) => {
                   <PermissionProvider
                     action={PERMISSION.VIEW_EDIT_INQUIRY}
                     extraCondition={['OPEN', 'INQ_SENT', 'ANS_DRF'].includes(question.state) && question.showIconEditInq}>
-                    <Tooltip title="Edit Inquiry">
+                    <Tooltip title="Edit">
                       <div onClick={() => changeToEditor(question)}>
                         <img
                           style={{ width: 20, cursor: 'pointer' }}
@@ -1589,7 +1589,7 @@ const InquiryViewer = (props) => {
                     action={PERMISSION.INQUIRY_DELETE_INQUIRY}
                     extraCondition={allowDeleteInq}
                   >
-                    <Tooltip title="Delete Inquiry">
+                    <Tooltip title="Delete">
                       <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion()}>
                         <img
                           style={{ height: '22px', cursor: 'pointer' }}
@@ -1641,7 +1641,7 @@ const InquiryViewer = (props) => {
                       action={PERMISSION.INQUIRY_CREATE_REPLY || PERMISSION.DRAFTBL_CREATE_REPLY}
                       extraCondition={!checkStateReplyDraft && !['ANS_DRF', 'COMPL', 'UPLOADED'].includes(question.state)}
                     >
-                      <Tooltip title="Reply Inquiry">
+                      <Tooltip title="Reply">
                         <div onClick={() => onReply(question)} style={{ marginRight: 8 }}>
                           <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/reply.svg" />
                         </div>
