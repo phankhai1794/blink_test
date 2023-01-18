@@ -859,19 +859,27 @@ const InquiryViewer = (props) => {
     } else {
       contentField = textResolve;
       const orgContentField = content[question.field];
+      let duplicateContsNo = false;
       contentField.forEach((obj, index) => {
         const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
         if (getTypeName === CONTAINER_NUMBER) {
           const containerNo = orgContentField[index][question.inqType];
+          if (obj[question.inqType] in contsNoChange) duplicateContsNo = true;
           contsNoChange[containerNo] = obj[question.inqType];
           obj[question.inqType] = formatContainerNo(obj[question.inqType]);
         }
+        
         if (getTypeName === CONTAINER_SEAL) {
           obj[question.inqType] = obj[question.inqType].filter(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
           obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
         }
       });
+
+      if (duplicateContsNo && question.field === containerCheck[0]) {
+        setDisableAcceptResolve(false);
+        return;
+      }
     }
 
     const body = {
@@ -2092,7 +2100,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     setValues(temp);
     setTextResolve(temp);
   };
-
+  
   useEffect(() => {
     if (!originalValues) {
       setValues(getValueField(container) || [{}]);
@@ -2110,11 +2118,11 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     })
     let groupsValues = [];
     if (typeList.length === 1) {
-      groupsValues = [...valueCopy].map(value => ({ name: value[getType(CONTAINER_NUMBER)], value: [value] }));
+      groupsValues = [...valueCopy].map(value => ({ name: value[getType(CONTAINER_NUMBER)], value: [value], duplicate: [...valueCopy].filter((cntrNo) => cntrNo[getType(CONTAINER_NUMBER)] === value[getType(CONTAINER_NUMBER)]).length > 1 }));
     }
     else {
       const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
-      groupsValues = [...groups].map(([name, value]) => ({ name, value }));
+      groupsValues = [...groups].map(([name, value]) => ({ name, value, duplicate: false }));
     }
     while (groupsValues.length) {
       let rowValues = groupsValues.splice(0, 4);
@@ -2162,7 +2170,8 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                     backgroundColor: disabled && '#FDF2F2',
                     fontSize: 15,
                     borderTopRightRadius: rowIndex === 0 && rowValues.length - 1 === index1 ? 8 : null,
-                    textTransform: isUpperCase ? 'uppercase' : 'none'
+                    textTransform: isUpperCase ? 'uppercase' : 'none',
+                    borderColor: item.duplicate ? 'red' : '#bac3cb'
                   }}
                   disabled={disabled}
                   value={nodeValue ? (!isUpperCase ? formatContainerNo(nodeValue[getType(type)]) : nodeValue[getType(type)]) : ''}
