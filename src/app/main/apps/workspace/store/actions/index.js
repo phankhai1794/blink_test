@@ -51,7 +51,7 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
     ];
     const { content } = blResponse?.myBL;
     const { contentAmendmentRs } = contentRespone;
-    dispatch(setOrgContent(blResponse?.myBL.content));
+    dispatch(setOrgContent(blResponse?.myBL.orgContent));
     const cloneContent = { ...content };
     contentAmendmentRs?.length &&
       contentAmendmentRs.forEach((a) => (cloneContent[a.field] = a.content));
