@@ -687,6 +687,7 @@ const InquiryViewer = (props) => {
             (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "")) //BX: Delete all inquiries draft
           }
+          dispatch(InquiryActions.checkSubmit(!enableSubmit));
         })
         .catch((error) => console.error(error));
     } else if (confirmPopupType === 'removeReply' && replyRemove) {
