@@ -54,8 +54,9 @@ const Inquiry = (props) => {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const [isSaveAnswer, setSaveAnswer] = useState(false);
   const scrollTopPopup = useRef(null);
+  const inputAddAmendmentEndRef = useRef(null);
 
-  useEffect(()=>{
+  useEffect(() => {
     let inquiriesSet = [...inquiries];
     inquiriesSet = inquiriesSet.filter((q, index) => q.field === currentField);
     setReceiver(null);
@@ -163,6 +164,12 @@ const Inquiry = (props) => {
     return result;
   }
 
+  useEffect(() => {
+    if (currentAmendment !== undefined && inputAddAmendmentEndRef.current) {
+      inputAddAmendmentEndRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [currentAmendment]);
+
   return props.user === 'workspace' ? (
     <div ref={scrollTopPopup}>
       {listInqsField.map((q, index) => {
@@ -211,7 +218,7 @@ const Inquiry = (props) => {
         !currentEditInq.id &&  // Case: Add Inquiry
         <InquiryEditor onCancel={onCancel} getUpdatedAt={() => {
           setUpdateReply(true)
-        }}/>
+        }} />
       }
     </div>
   ) : (
@@ -254,11 +261,13 @@ const Inquiry = (props) => {
           );
         })}
       </div>
-      {currentAmendment || currentAmendment === null &&
-        <div style={{ marginTop: 30 }}>
-          <AmendmentEditor />
-        </div>
-      }
+      <div ref={inputAddAmendmentEndRef}>
+        {currentAmendment || currentAmendment === null &&
+          <div style={{ marginTop: 30 }}>
+            <AmendmentEditor />
+          </div>
+        }
+      </div>
     </div>
   );
 };
