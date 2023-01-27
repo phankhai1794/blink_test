@@ -98,6 +98,7 @@ const Comment = (props) => {
             <UserInfo name={checkSystemResolved(question?.process, id) ? 'System' : userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
 
             {['COMPL', 'RESOLVED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Resolved</span></div>)}
+            {['UPLOADED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Uploaded</span></div>)}
             {reply.sentAt && (
               <div className={classes.timeSent}>
                 <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />

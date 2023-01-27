@@ -922,7 +922,8 @@ const InquiryViewer = (props) => {
   const onUpload = () => {
     setLoading(true);
     const optionsInquires = [...inquiries];
-    uploadOPUS(myBL.id, question.id, question.field, inqAnsId)
+    const idUpload = question.process === 'pending' ? question.id : tempReply?.answer?.id;
+    uploadOPUS(myBL.id, idUpload, question.field, inqAnsId)
       .then((res) => {
         if (res && res.status === 'F') {
           dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
@@ -960,7 +961,7 @@ const InquiryViewer = (props) => {
           if (myBL.bkgNo) {
             if (optionsInquires[editedInqIndex].process === "pending" && inqsPending.length > 0 && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
               if (optionsInquires[editedInqIndex].receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
-                //BL Inquired Resolved (BR) , Upload all to Opus.  RO: Return to Customer via BLink, 
+                // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
               }
               if (optionsInquires[editedInqIndex].receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
@@ -969,11 +970,13 @@ const InquiryViewer = (props) => {
               }
             }
             if (optionsInquires[editedInqIndex].process === "draft" && inqsDraft.length > 0 && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
-              //BL Amendment Success (BS) , Upload all to Opus.  
+              // BL Amendment Success (BS), Upload all to Opus.
               dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
             }
           }
         }
+        props.getUpdatedAt();
+        setViewDropDown('');
       })
       .catch((error) => {
         dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
