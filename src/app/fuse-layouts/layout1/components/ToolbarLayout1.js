@@ -272,7 +272,7 @@ function ToolbarLayout1(props) {
     if (!user.displayName || !validToken) {
       if (!allowAccess) {
         localStorage.clear();
-        sessionStorage.clear();
+        sessionStorage.removeItem("permissions");
         history.push({
           pathname: '/login',
           ...(!logout && { cachePath: pathname, cacheSearch: search })
