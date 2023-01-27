@@ -32,11 +32,15 @@ function UserProfile(props) {
 
   const handleLogOut = () => {
     localStorage.clear();
-    sessionStorage.clear();
+    sessionStorage.removeItem("permissions");
     socket.emit('user_processing_out');
     dispatch(AppActions.removeUser());
     dispatch(AppActions.checkAllow(false));
     window.location.logout = true;
+    sessionStorage.setItem('prevUrl', JSON.stringify({
+      cachePath: window.location.pathname,
+      cacheSearch: window.location.search
+    }));
   };
 
   return (

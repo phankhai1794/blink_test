@@ -216,12 +216,9 @@ const SendInquiryForm = (props) => {
       handleEditorState(content);
     }
     if (hasCustomer) {
-      subject = `[Customer BL Query]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]
-      }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      subject = `[Customer BL Query]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
       const [msg1, msg2, header] = convertToList(inqCustomer, 'customer');
-      content = `Dear Customer,\n \n${msg1 ||
-        `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`
-      }\n${msg2} `;
+      content = `Dear Customer,\n \n${msg1 || `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`}\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({
         ...customerValue,
@@ -409,6 +406,7 @@ const SendInquiryForm = (props) => {
   const handleTabChange = (_, newValue) => {
     setTabValue(newValue);
   };
+
   const onEditorStateChange = (evt) => {
     handleBodyChange(draftToHtml(convertToRaw(evt.getCurrentContent())).replace('<p></p>', '<br>'));
     setEditorState(evt);
@@ -434,6 +432,7 @@ const SendInquiryForm = (props) => {
       return tabSelected === 0 ? 'customer' : 'onshore';
     }
   };
+
   return (
     <>
       <SubmitAnswerNotification
@@ -463,7 +462,7 @@ const SendInquiryForm = (props) => {
         }}>
         {previewValue === 'default' && (
           <>
-            <FormControl style={{ width: '100%' }} error={formError.recipient}>
+            <FormControl style={{ width: '100%' }} error={Boolean(formError.recipient)}>
               <div
                 style={{
                   borderBottom: formError.recipient ? '1px solid #DC2626' : '1px solid #BAC3CB'
@@ -488,7 +487,7 @@ const SendInquiryForm = (props) => {
             )}
             <FormControl
               style={{ width: '100%', padding: '5px 0', marginBottom: 10 }}
-              error={formError.subject}>
+              error={Boolean(formError.subject)}>
               <input
                 value={form.subject}
                 onChange={handleSubjectChange}
@@ -504,7 +503,7 @@ const SendInquiryForm = (props) => {
               />
               {formError.subject && <HelperText>{formError.subject}</HelperText>}
             </FormControl>
-            <FormControl style={{ width: '100%' }} error={formError.content}>
+            <FormControl style={{ width: '100%' }} error={Boolean(formError.content)}>
               <Editor
                 editorState={editorState}
                 wrapperClassName="demo-wrapper"

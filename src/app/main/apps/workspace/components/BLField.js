@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import _ from 'lodash';
 import clsx from 'clsx';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
@@ -305,7 +306,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         onMouseLeave={onMouseLeave}
         onClick={onClick}>
         <ThemeProvider theme={theme}>
-          <ArrowTooltip isLongText={isLongText} title={selectedChoice || children || ''} placement='right'>
+          <ArrowTooltip isLongText={isLongText} title={selectedChoice || _.isArray(children) ? children.join(", ") : children || ''} placement='right'>
             <TextField
               value={selectedChoice || children || ''}
               variant="outlined"
