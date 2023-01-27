@@ -329,6 +329,7 @@ const InquiryViewer = (props) => {
               } else {
                 if (filterOffshoreSent.state === 'REP_A_DRF') {
                   setStateReplyDraft(true);
+                  setSubmitLabel(false);
                   lastest.showIconAttachReplyFile = false;
                   lastest.showIconAttachAnswerFile = false;
                   props.getStateReplyDraft(true);
@@ -869,7 +870,7 @@ const InquiryViewer = (props) => {
           contsNoChange[containerNo] = obj[question.inqType];
           obj[question.inqType] = formatContainerNo(obj[question.inqType]);
         }
-        
+
         if (getTypeName === CONTAINER_SEAL) {
           obj[question.inqType] = obj[question.inqType].filter(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
@@ -2104,7 +2105,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     setValues(temp);
     setTextResolve(temp);
   };
-  
+
   useEffect(() => {
     if (!originalValues) {
       setValues(getValueField(container) || [{}]);

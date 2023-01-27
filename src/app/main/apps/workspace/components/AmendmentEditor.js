@@ -35,6 +35,7 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: 'none',
     textTransform: 'capitalize',
     margin: theme.spacing(1),
+    marginLeft: 0
   },
   btnCancel: {
     color: greyText,
@@ -52,7 +53,6 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: 'Montserrat',
     width: '100%',
     paddingTop: 10,
-    paddingLeft: 5,
     marginTop: 10,
     minHeight: 50,
     resize: 'none',
@@ -68,6 +68,9 @@ const useStyles = makeStyles((theme) => ({
       borderWidth: '1px',
       borderColor: '#BAC3CB'
     }
+  },
+  attachmentFiles: {
+    marginTop: 10,
   }
 }));
 
@@ -104,11 +107,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     setAttachments(optionsAttachmentList)
   }
 
-  const handleChangeField = (e) => {
-    setFieldValueSelect(e);
-    setFieldValue(content[e.value] || "");
-  };
-
   const handleChange = (e) => setFieldValue(e.target.value);
 
   const inputTextSeparate = (e, type) => {
@@ -132,7 +130,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     fieldValueSeparate.address = fieldValueSeparate.address.trim();
     let contentField = isSeparate ? JSON.stringify(fieldValueSeparate) : typeof fieldValue === 'string' ? fieldValue.trim() : fieldValue;
     const uploads = [];
-    const fieldReq = openAmendmentList ? fieldValueSelect?.value : currentField;
+    const fieldReq = fieldValueSelect?.value;
     const optionsInquires = [...inquiries];
     const optionsMinimize = [...listMinimize];
     if (attachments.length) {
@@ -191,38 +189,11 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
-  useEffect(() => {
-    !openAmendmentList ? setFieldValue(content[currentField] || "") : setFieldValue('');
-    setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(currentField));
-  }, [content, currentField])
-
-  useEffect(() => {
-    if (isSeparate) {
-      const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
-      const fieldIndex = arrFields.findIndex(key => metadata.field[key] === currentField);
-      const fieldName = metadata.field?.[`${arrFields[fieldIndex]}Name`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Name`]] : '';
-      const fieldAddress = metadata.field?.[`${arrFields[fieldIndex]}Address`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Address`]] : '';
-      setFieldValueSeparate({
-        name: fieldName || '',
-        address: fieldAddress || ''
-      })
-    }
-  }, [isSeparate])
-
-  const styles = (width) => {
-    return {
-      control: {
-        width: `${width}px`,
-        borderRadius: 11
-      }
-    };
-  };
-
   // Separate Shipper/Consignee/Notify 
   const renderSeparateField = (field) => {
     if (isSeparate) {
       const LABEL_TYPE = ['name', 'address']
-      const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[field]
+      const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[fieldValueSelect ? fieldValueSelect.value : field];
       const labelNameCapitalize = labelName?.charAt(0).toUpperCase() + labelName?.slice(1);
       return LABEL_TYPE.map((type, index) =>
         <div key={index} style={{ paddingTop: '15px' }}>
@@ -254,6 +225,49 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     }
   }
 
+  const handleChangeField = (e) => {
+    setFieldValueSelect(e);
+    setFieldValue(content[e.value] || "");
+    setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(e.value));
+    setValueSeparate(e.value);
+  };
+
+  const checkCurField = () => {
+    const filterCurrentField = fieldType.find(f => f.value === currentField);
+    setFieldValueSelect(filterCurrentField ? filterCurrentField : fieldType[0]);
+    setFieldValue(filterCurrentField ? content[filterCurrentField.value] : content[fieldType[0].value]);
+    setValueSeparate(filterCurrentField ? filterCurrentField.value : fieldType[0].value);
+  };
+
+  const setValueSeparate = (fieldValue) => {
+    const checkSeparate = [SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(fieldValue);
+    setIsSeparate(checkSeparate);
+    if (checkSeparate) {
+      const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
+      const fieldIndex = arrFields.findIndex(key => metadata.field[key] === fieldValue);
+      const fieldName = metadata.field?.[`${arrFields[fieldIndex]}Name`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Name`]] : '';
+      const fieldAddress = metadata.field?.[`${arrFields[fieldIndex]}Address`] ? content[metadata.field?.[`${arrFields[fieldIndex]}Address`]] : '';
+      setFieldValueSeparate({
+        name: fieldName || '',
+        address: fieldAddress || ''
+      })
+    }
+  };
+
+  useEffect(() => {
+    !openAmendmentList ? setFieldValue(content[currentField] || "") : setFieldValue('');
+    checkCurField();
+  }, [content, currentField])
+
+  const styles = (width) => {
+    return {
+      control: {
+        width: `${width}px`,
+        borderRadius: 11
+      }
+    };
+  };
+
   return (
     <div style={{ paddingLeft: 18, borderLeft: `2px solid ${colorInq}` }}>
       {!openAmendmentList && (
@@ -273,7 +287,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         </p>
       )}
 
-      <div className='flex justify-between'>
+      <div className='flex justify-between' style={{ marginBottom: 15 }}>
         {!openAmendmentList ? (
           <UserInfo
             name={user?.displayName}
@@ -282,11 +296,11 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           />
         ) : <Typography color="primary" variant="h5" className={classes.inqTitle}>New Amendment</Typography>}
         <div className={'flex'} style={{ alignItems: 'center' }}>
-          <AttachFileAmendment setAttachment={getAttachment} />
+          <AttachFileAmendment setAttachment={getAttachment} attachmentFiles={attachments} />
         </div>
       </div>
 
-      {openAmendmentList && (
+      {(
         <FormControl error={!fieldValueSelect}>
           <FuseChipSelect
             customStyle={styles(fullscreen ? 320 : 295)}
@@ -323,15 +337,18 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
       </div>
       }
 
-      {attachments?.map((file, mediaIndex) => (
-        <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-          {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-            <ImageAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />)
-            : (
-              <FileAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />
-            )}
-        </div>
-      ))}
+      <div className={classes.attachmentFiles}>
+        {attachments?.map((file, mediaIndex) => (
+          <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+            {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+              <ImageAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />)
+              : (
+                <FileAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />
+              )}
+          </div>
+        ))}
+      </div>
+
 
       <div style={{ marginTop: 20 }}>
         <Button
@@ -340,7 +357,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             (isSeparate ?
               (validatePartiesContent(fieldValueSeparate.name, 'name')?.isError
                 || validatePartiesContent(fieldValueSeparate.address, 'address')?.isError)
-              : (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0))) || disableSave
+              : (fieldValue && (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0)))) || disableSave
           }
           onClick={() => handleValidateInput(handleSave)}
           color="primary"

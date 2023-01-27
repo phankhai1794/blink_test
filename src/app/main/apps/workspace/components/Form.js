@@ -402,6 +402,16 @@ export default function Form(props) {
     return !(openAllInquiry || openPreviewListSubmit);
   };
 
+  useEffect(() => {
+    const isEmptyPopup = inquiries.filter(inq => inq.field === currentField);
+    if (!openAmendmentList) {
+      if (!isEmptyPopup.length) dispatch(InquiryActions.addAmendment(null));
+      else dispatch(InquiryActions.addAmendment());
+    } else {
+      dispatch(InquiryActions.addAmendment());
+    }
+  }, [open]);
+
   return (
     <div>
       {openFab && (
@@ -520,7 +530,7 @@ export default function Form(props) {
               }>
               <LinkButton
                 text="Add Amendment"
-                disable={!checkEnableBtnAddAmendment() || currentAmendment !== undefined}
+                disable={currentAmendment !== undefined}
                 handleClick={() => dispatch(InquiryActions.addAmendment(null))}
               />
             </PermissionProvider>
