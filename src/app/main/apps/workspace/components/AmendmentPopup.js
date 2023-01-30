@@ -290,7 +290,7 @@ const AmendmentPopup = (props) => {
       if (!field.value && options.length === 1)
         handleChange(field.id, options[0].value);
     }, []);
-
+  
     return (
       <>
         {isEdit ? (
@@ -314,9 +314,10 @@ const AmendmentPopup = (props) => {
                   styles={{
                     control: (base) => ({
                       ...base,
+                      height: 35,
+                      minHeight: 35,
                       borderRadius: 8,
                       border: isError ? '1px solid red' : '',
-                      height: '39.75px'
                     }),
                     dropdownIndicator: (base) => ({
                       ...base,
@@ -368,7 +369,7 @@ const AmendmentPopup = (props) => {
                 style: { width: '90%' }, title: field, ...register(field, { required, pattern })
               })}
             </div>
-            <div style={{ flexGrow: 1, height: '39.75px' }}>
+            <div style={{ flexGrow: 1 }}>
               <p style={{ fontWeight: 600 }}>{`${title} UNIT`}
                 {required && <span style={{ color: 'red' }}> *</span>}
               </p>
