@@ -156,7 +156,7 @@ const useStyles = makeStyles((theme) => ({
   },
   disableResend: {
     color: `${mainColor} !important`,
-    textDecoration: 'underline !important',
+    textDecoration: 'none !important',
   }
 }));
 

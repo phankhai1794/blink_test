@@ -1,11 +1,10 @@
 import { sendmail, getSuggestMail } from 'app/services/mailService';
 import { loadComment } from 'app/services/inquiryService';
 import axios from 'axios';
-import { VVD_CODE, POD_CODE, DEL_CODE } from '@shared/keyword';
+import { PRE_CARRIAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY } from '@shared/keyword';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
 
 import * as InquiryActions from '../actions/inquiry';
-import * as Actions from "../../../draft-bl/store/actions";
 
 export const SENDMAIL_NONE = 'SENDMAIL_NONE';
 export const SENDMAIL_LOADING = 'SENDMAIL_LOADING';
@@ -140,16 +139,16 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   let contentCus = ''
   const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
   const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
-  const vvd = getValueField(content, VVD_CODE)
-  const pod = getValueField(content, POD_CODE)
-  const del = getValueField(content, DEL_CODE)
+  const preVvd = getValueField(content, PRE_CARRIAGE)
+  const pod = getValueField(content, PORT_OF_DISCHARGE)
+  const del = getValueField(content, PLACE_OF_DELIVERY)
   const bkgNo = mybl.bkgNo
   dispatch(InquiryActions.setInquiries(cloneInquiries));
 
   if (hasOnshore && form.toOnshore && inqOnshore.length > 0) {
     const formOnshore = { ...form };
     formOnshore['toCustomer'] = '';
-    subjectOns = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
+    subjectOns = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + DEL(${del})`
     contentOns = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`
     dispatch(sendMail({ myblId: mybl.id, bkgNo, ...formOnshore, subject: subjectOns, content: contentOns, inquiries: inquiries }));
   }
@@ -157,7 +156,7 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   if (hasCustomer && form.toCustomer && inqCustomer.length > 0) {
     const formCustomer = { ...form };
     formCustomer['toOnshore'] = '';
-    subjectCus = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`
+    subjectCus = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + DEL(${del})`
     contentCus = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer.join(', ')}]`
     dispatch(sendMail({ myblId: mybl.id, bkgNo, ...formCustomer, subject: subjectCus, content: contentCus, inquiries: inquiries }));
   }

@@ -111,14 +111,15 @@ const InquiryEditor = (props) => {
   const classes = useStyles();
   const { onCancel, setSave } = props;
   const scrollTopPopup = useRef(null);
-  const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize] = useSelector(
+  const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize, enableSubmit] = useSelector(
     ({ workspace }) => [
       workspace.inquiryReducer.metadata,
       workspace.inquiryReducer.validation,
       workspace.inquiryReducer.inquiries,
       workspace.inquiryReducer.currentEditInq,
       workspace.inquiryReducer.myBL,
-      workspace.inquiryReducer.listMinimize
+      workspace.inquiryReducer.listMinimize,
+      workspace.inquiryReducer.enableSubmit,
     ]
   );
   const user = useSelector(({ user }) => user);
@@ -532,6 +533,7 @@ const InquiryEditor = (props) => {
               dispatch(InquiryActions.setEditInq());
               dispatch(InquiryActions.setInquiries(optionsInquires));
               dispatch(InquiryActions.setListMinimize(optionsMinimize));
+              dispatch(InquiryActions.checkSubmit(!enableSubmit));
               setDisabled(false);
             })
             .catch((error) =>

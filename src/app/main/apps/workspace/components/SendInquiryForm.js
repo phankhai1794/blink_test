@@ -1,6 +1,6 @@
 import * as Actions from 'app/store/actions';
 import { checkNewInquiry } from '@shared';
-import { VVD_CODE, POD_CODE, DEL_CODE } from '@shared/keyword';
+import { PRE_CARRIAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY } from '@shared/keyword';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -24,7 +24,6 @@ import parse from 'html-react-parser';
 
 import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
-import * as InquiryActions from '../store/actions/inquiry';
 
 import SubmitAnswerNotification from './SubmitAnswerNotification';
 import InputUI from './MailInputUI';
@@ -147,9 +146,9 @@ const SendInquiryForm = (props) => {
     return content[getField(keyword)] || '';
   };
 
-  const vvd = getValueField(VVD_CODE);
-  const pod = getValueField(POD_CODE);
-  const del = getValueField(DEL_CODE);
+  const preVvd = getValueField(PRE_CARRIAGE);
+  const pod = getValueField(PORT_OF_DISCHARGE);
+  const del = getValueField(PLACE_OF_DELIVERY);
   const bkgNo = mybl.bkgNo;
 
   const initiateContentState = (content) => {
@@ -201,7 +200,7 @@ const SendInquiryForm = (props) => {
     let content = '';
     let bodyHtml = '';
     if (hasOnshore) {
-      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + DEL(${del})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
       content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion. Pending issues:'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
@@ -216,12 +215,9 @@ const SendInquiryForm = (props) => {
       handleEditorState(content);
     }
     if (hasCustomer) {
-      subject = `[Customer BL Query]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]
-      }] ${bkgNo}: VVD(${vvd}) + POD(${pod}) + DEL(${del})`;
+      subject = `[Customer BL Query]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + DEL(${del})`;
       const [msg1, msg2, header] = convertToList(inqCustomer, 'customer');
-      content = `Dear Customer,\n \n${msg1 ||
-        `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`
-      }\n${msg2} `;
+      content = `Dear Customer,\n \n${msg1 || `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`}\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({
         ...customerValue,
@@ -409,6 +405,7 @@ const SendInquiryForm = (props) => {
   const handleTabChange = (_, newValue) => {
     setTabValue(newValue);
   };
+
   const onEditorStateChange = (evt) => {
     handleBodyChange(draftToHtml(convertToRaw(evt.getCurrentContent())).replace('<p></p>', '<br>'));
     setEditorState(evt);
@@ -434,6 +431,7 @@ const SendInquiryForm = (props) => {
       return tabSelected === 0 ? 'customer' : 'onshore';
     }
   };
+
   return (
     <>
       <SubmitAnswerNotification
@@ -463,7 +461,7 @@ const SendInquiryForm = (props) => {
         }}>
         {previewValue === 'default' && (
           <>
-            <FormControl style={{ width: '100%' }} error={formError.recipient}>
+            <FormControl style={{ width: '100%' }} error={Boolean(formError.recipient)}>
               <div
                 style={{
                   borderBottom: formError.recipient ? '1px solid #DC2626' : '1px solid #BAC3CB'
@@ -488,7 +486,7 @@ const SendInquiryForm = (props) => {
             )}
             <FormControl
               style={{ width: '100%', padding: '5px 0', marginBottom: 10 }}
-              error={formError.subject}>
+              error={Boolean(formError.subject)}>
               <input
                 value={form.subject}
                 onChange={handleSubjectChange}
@@ -504,7 +502,7 @@ const SendInquiryForm = (props) => {
               />
               {formError.subject && <HelperText>{formError.subject}</HelperText>}
             </FormControl>
-            <FormControl style={{ width: '100%' }} error={formError.content}>
+            <FormControl style={{ width: '100%' }} error={Boolean(formError.content)}>
               <Editor
                 editorState={editorState}
                 wrapperClassName="demo-wrapper"
