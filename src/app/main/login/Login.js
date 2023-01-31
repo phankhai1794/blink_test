@@ -91,7 +91,14 @@ function Login(props) {
           dispatch(Actions.checkAuthToken(true));
           dispatch(Actions.showMessage({ message: message, variant: 'success' }));
 
-          history.push(cachePath ? `${cachePath + cacheSearch}` : '/');
+          let prevUrl = sessionStorage.getItem('prevUrl');
+          if (prevUrl) {
+            prevUrl = JSON.parse(prevUrl);
+            sessionStorage.removeItem("prevUrl");
+            prevUrl = `${prevUrl.cachePath + prevUrl.cacheSearch}`;
+          } else prevUrl = "/";
+
+          history.push(cachePath ? `${cachePath + cacheSearch}` : prevUrl);
         }
       })
       .catch((error) => {

@@ -272,7 +272,7 @@ function ToolbarLayout1(props) {
     if (!user.displayName || !validToken) {
       if (!allowAccess) {
         localStorage.clear();
-        sessionStorage.clear();
+        sessionStorage.removeItem("permissions");
         history.push({
           pathname: '/login',
           ...(!logout && { cachePath: pathname, cacheSearch: search })
@@ -338,7 +338,6 @@ function ToolbarLayout1(props) {
   const redirectEditDraftBL = () => {
     const bl = new URLSearchParams(search).get('bl');
     if (bl) history.push(`/guest?bl=${bl}`);
-    dispatch(Actions.updateOpusStatus(myBLDrf.bkgNo, "BA", "TO")); //Customer edited/revised BL
   };
 
   const onSubmit = async () => {

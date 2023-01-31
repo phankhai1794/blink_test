@@ -49,12 +49,12 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
       await getBlInfo(myBL_Id),
       await getCustomerAmendment(myBL_Id)
     ];
-    const { content } = blResponse?.myBL;
+    const { orgContent, content } = blResponse?.myBL;
     const { contentAmendmentRs } = contentRespone;
-    dispatch(setOrgContent(blResponse?.myBL.content));
     const cloneContent = { ...content };
-    contentAmendmentRs?.length &&
-      contentAmendmentRs.forEach((a) => (cloneContent[a.field] = a.content));
+
+    dispatch(setOrgContent(orgContent));
+    contentAmendmentRs?.length && contentAmendmentRs.forEach((a) => (cloneContent[a.field] = a.content));
     dispatch(setContent(cloneContent));
     dispatch(FormActions.decreaseLoading());
   } catch (err) {

@@ -33,3 +33,13 @@ export const handleDuplicateAttachment = (dispatch, metadata, attachments, media
   }));
   return isExist;
 }
+
+export const handleDuplicateAmendmentAttachment = (dispatch, attachments, fileUploads) => {
+  const attachFileName = attachments.map(f => f.name);
+  const isExist = fileUploads.some(m => attachFileName.includes(m.name));
+  if (isExist) dispatch(Actions.showMessage({
+    message: `Duplicate file(s)`,
+    variant: 'error'
+  }));
+  return isExist;
+}
