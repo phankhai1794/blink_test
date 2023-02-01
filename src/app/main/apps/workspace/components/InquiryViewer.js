@@ -2123,12 +2123,13 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     })
     let groupsValues = [];
     if (typeList.length === 1) {
-      groupsValues = [...valueCopy].map(value => ({ name: value[getType(CONTAINER_NUMBER)], value: [value], duplicate: [...valueCopy].filter((cntrNo) => cntrNo[getType(CONTAINER_NUMBER)] === value[getType(CONTAINER_NUMBER)]).length > 1 }));
+      groupsValues = [...valueCopy].map(value => ({ name: value[getType(CONTAINER_NUMBER)], value: [value], duplicate: container === CONTAINER_MANIFEST ? false : [...valueCopy].filter((cntrNo) => cntrNo[getType(CONTAINER_NUMBER)] === value[getType(CONTAINER_NUMBER)]).length > 1 }));
     }
     else {
       const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
       groupsValues = [...groups].map(([name, value]) => ({ name, value, duplicate: false }));
     }
+    
     while (groupsValues.length) {
       let rowValues = groupsValues.splice(0, 4);
       let rowIndex = 0;
