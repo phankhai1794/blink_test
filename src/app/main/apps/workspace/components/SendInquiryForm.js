@@ -162,15 +162,16 @@ const SendInquiryForm = (props) => {
   const convertToList = (array, tabValue) => {
     const newInq = checkNewInquiry(metadata, inquiries, tabValue, ['OPEN']);
     const newRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_Q_DRF']);
+    const newAmeRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_DRF']);
     const convert = (array) => array.map((a) => `- ${a}`).join('\n');
     let header = 'BL has been updated';
     let msg = ''
-    if (newInq.length && newRep.length) {
+    if (newInq.length && newRep.length || newInq.length && newAmeRep.length) {
       msg =
         'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
       return [
         msg,
-        ` \nNew inquiry:\n${convert(newInq)}\n \nNew reply:\n${convert(newRep)}`,
+        ` \nNew inquiry:\n${convert(newInq)}\n \nNew reply:\n${convert([...new Set([...newRep, ...newAmeRep])])}`,
         header
       ];
     } else if (newInq.length) {
@@ -178,6 +179,9 @@ const SendInquiryForm = (props) => {
     } else if (newRep.length) {
       msg = 'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
       header = 'New Reply';
+    } else if (newAmeRep.length) {
+      msg = 'Thank you very much for checking BL draft. Your amendment requests are in progress; however, there are still some pending issues that need to be clarified in the following BL fields:';
+      header = 'You have received a reply';
     }
     return [msg, array.map((a) => `- ${a}`).join('\n'), header];
   };
