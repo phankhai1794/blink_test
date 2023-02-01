@@ -42,16 +42,15 @@ export const sendMail =
                 dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "RO"));
               if (form.toOnshore) // TO: Return to Onshore via BLink
                 dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "TO"));
+            } 
 
-            } else {
-              if (inqsOpenState.length > 0 || replyInqs.length > 0) {
-                if (form.toCustomer) //BI: BL Inquiried,  RO: Return to Customer via BLink. 
-                  dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RO"));//Send inquiries to customer
-                if (form.toOnshore) //BI: BL Inquiried,  RW: Return to Onshore via BLink
-                  dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RW")); //Send inquiries to Onshore
-              }
+            if (inqsOpenState.length > 0 || replyInqs.length > 0) {
+              if (form.toCustomer) //BI: BL Inquiried,  RO: Return to Customer via BLink. 
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RO"));//Send inquiries to customer
+              if (form.toOnshore) //BI: BL Inquiried,  RW: Return to Onshore via BLink
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RW")); //Send inquiries to Onshore
             }
-
+           
             cloneInquiries.forEach((q) => {
               if (q.receiver[0] === tab) {
                 if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
