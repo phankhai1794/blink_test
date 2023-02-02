@@ -234,7 +234,8 @@ export default function Form(props) {
     tabs,
     popoverfooter,
     showBtnSend,
-    nums
+    nums, 
+    tabSelected
   } = props;
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -244,6 +245,7 @@ export default function Form(props) {
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const userType = useSelector(({ user }) => user.userType);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
+  const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
 
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const isShowBackground = useSelector(
@@ -265,7 +267,6 @@ export default function Form(props) {
   const classesHover = useStyles();
   const [idBtn, setIdBtn] = useState('');
   const [checkSubmit, setCheckSubmit] = useState(true);
-  const [value, setValue] = useState(0);
 
   const enableSend = inquiries.some((inq) =>
     ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state)
@@ -350,9 +351,19 @@ export default function Form(props) {
   };
 
   const handleChange = (_, newValue) => {
-    setValue(newValue);
     props.tabChange(newValue);
   };
+
+  useEffect(() => {
+    let setNumber = 0;
+    const countOnshore = inquiries.filter((inq) => {
+      return inq.process === 'pending' && inq.receiver.includes('onshore')
+    }).length;
+    if (countOnshore !== 0 && tabSelected === 1) {
+      setNumber = 1;
+    }
+    props.tabChange(setNumber);
+  }, [enableSubmit, openAllInquiry]);
 
   const openMinimize = () => {
     dispatch(InquiryActions.setField(idBtn));
@@ -384,7 +395,6 @@ export default function Form(props) {
   useEffect(() => {
     if (tabs) {
       props.tabChange(0);
-      setValue(0);
     }
   }, [openInqReview]);
 
@@ -447,15 +457,15 @@ export default function Form(props) {
             <Tabs
               indicatorColor="primary"
               style={{ display: 'flex', margin: 0, height: '50px' }}
-              value={value}
+              value={tabSelected}
               onChange={handleChange}>
               {nums[0] && (
                 <Tab
                   classes={{ wrapper: classes.iconLabelWrapper }}
-                  className={clsx(classes.tab, value === 0 && classes.colorSelectedTab)}
+                  className={clsx(classes.tab, tabSelected === 0 && classes.colorSelectedTab)}
                   label="Customer"
                   icon={
-                    <div className={clsx(classes.countBtn, value === 0 && classes.colorCountBtn)}>
+                    <div className={clsx(classes.countBtn, tabSelected === 0 && classes.colorCountBtn)}>
                       {nums[0]}
                     </div>
                   }
@@ -466,14 +476,14 @@ export default function Form(props) {
                   classes={{ wrapper: classes.iconLabelWrapper }}
                   className={clsx(
                     classes.tab,
-                    (value === 1 || !nums[1]) && classes.colorSelectedTab
+                    (tabSelected === 1 || !nums[1]) && classes.colorSelectedTab
                   )}
                   label="Onshore"
                   icon={
                     <div
                       className={clsx(
                         classes.countBtn,
-                        (value === 1 || !nums[1]) && classes.colorCountBtn
+                        (tabSelected === 1 || !nums[1]) && classes.colorCountBtn
                       )}>
                       {nums[1]}
                     </div>

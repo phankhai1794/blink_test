@@ -142,7 +142,10 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         }
       });
     }
-    if (openAmendmentList && !fieldReq) return;
+    if (openAmendmentList && !fieldReq) {
+      setDisableSave(false);
+      return;
+    }
 
     axios
       .all(uploads.map((endpoint) => uploadFile(endpoint)))
@@ -256,7 +259,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   useEffect(() => {
     !openAmendmentList ? setFieldValue(content[currentField] || "") : setFieldValue('');
-    checkCurField();
+    if (!openAmendmentList) checkCurField();
   }, [content, currentField])
 
   const styles = (width) => {
@@ -306,7 +309,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             customStyle={styles(fullscreen ? 320 : 295)}
             value={fieldValueSelect}
             onChange={handleChangeField}
-            placeholder="BL Data Field"
+            placeholder="BL Field"
             textFieldProps={{
               variant: 'outlined'
             }}
