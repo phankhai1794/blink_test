@@ -165,8 +165,8 @@ const SendInquiryForm = (props) => {
     const newAmeRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_DRF']);
     const convert = (array) => array.map((a) => `- ${a}`).join('\n');
     let header = 'BL has been updated';
-    let msg = ''
-    if (newInq.length && newRep.length || newInq.length && newAmeRep.length) {
+    let msg = '';
+    if ((newInq.length && newRep.length) || (newInq.length && newAmeRep.length)) {
       msg =
         'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
       return [
@@ -371,6 +371,10 @@ const SendInquiryForm = (props) => {
         dispatch(
           Actions.showMessage({ message: 'EMAIL ADDRESS DOES NOT EXIST', variant: 'error' })
         );
+    } else if (tabValue === 'onshore' && [...tags['toOnshore'], ...tags['toOnshoreCc'], ...tags['toOnshoreBcc']].some(
+      (mail) => !/.*@one-line.com/.test(mail)
+    )) {
+      dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
     } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
       return;
     } else {
