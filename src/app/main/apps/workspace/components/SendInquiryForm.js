@@ -1,6 +1,6 @@
 import * as Actions from 'app/store/actions';
 import { checkNewInquiry } from '@shared';
-import { PRE_CARRIAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY } from '@shared/keyword';
+import { PRE_CARRIAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, PORT_OF_LOADING } from '@shared/keyword';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -149,6 +149,7 @@ const SendInquiryForm = (props) => {
   const preVvd = getValueField(PRE_CARRIAGE);
   const pod = getValueField(PORT_OF_DISCHARGE);
   const del = getValueField(PLACE_OF_DELIVERY);
+  const pol = getValueField(PORT_OF_LOADING)
   const bkgNo = mybl.bkgNo;
 
   const initiateContentState = (content) => {
@@ -204,7 +205,7 @@ const SendInquiryForm = (props) => {
     let content = '';
     let bodyHtml = '';
     if (hasOnshore) {
-      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + DEL(${del})`;
+      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + POL(${pol})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
       content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion. Pending issues:'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
