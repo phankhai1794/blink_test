@@ -343,7 +343,7 @@ export default function Form(props) {
 
     dispatch(InquiryActions.setOpenedInqForm(false));
     dispatch(FormActions.setEnableSaveInquiriesList(true));
-    dispatch(InquiryActions.setShowBackgroundAttachmentList({ isShowBackground: false }));
+    dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
     dispatch(FormActions.openConfirmPopup({ openConfirmPopup: false }));
     dispatch(InquiryActions.addAmendment());
     dispatch(DraftBLActions.setCurrentField());

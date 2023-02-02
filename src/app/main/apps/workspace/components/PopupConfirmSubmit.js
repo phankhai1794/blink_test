@@ -2,14 +2,12 @@ import React from 'react';
 import { Button } from "@material-ui/core";
 import { useDispatch, useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
-import {submitInquiryAnswer, uploadOPUS} from 'app/services/inquiryService';
+import { submitInquiryAnswer } from 'app/services/inquiryService';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
 import { getBlInfo } from 'app/services/myBLService';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
-import * as AppAction from "../../../../store/actions";
-import * as Actions from "../store/actions";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -57,14 +55,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PopupConfirmSubmit = (props) => {
-  const [inquiries, myBL, isShowBackground, enableSubmit, requestConfirm, content, listCommentDraft] = useSelector(({ workspace }) => [
+  const [inquiries, myBL, isShowBackground, enableSubmit] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.myBL,
     workspace.inquiryReducer.isShowBackground,
     workspace.inquiryReducer.enableSubmit,
-    workspace.inquiryReducer.requestConfirm,
-    workspace.inquiryReducer.content,
-    workspace.inquiryReducer.listCommentDraft,
   ]);
   const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
   const user = useSelector(({ user }) => user);
@@ -75,136 +70,74 @@ const PopupConfirmSubmit = (props) => {
   const handleConfirm = async () => {
     const inqs = [...inquiries];
     const fields = [];
-    if (requestConfirm) {
-      const { myBL, idUpload, question, inqAnsId } = requestConfirm.objRequest;
-      console.log(myBL, idUpload, question, inqAnsId);
-      uploadOPUS(myBL.id, idUpload, question.field, inqAnsId)
-        .then((res) => {
-          if (res && res.status === 'F') {
-            dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
-          } else {
-            // setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
 
-            // Update list inquiry
-            let editedInqIndex = inqs.findIndex(inq => question.id === inq.id);
-            if (inqs[editedInqIndex]?.process === 'pending') {
-              inqs[editedInqIndex].state = 'UPLOADED';
-              dispatch(InquiryActions.setInquiries(inqs));
-            } else {
-              // Update list amendment
-              let editedAmeIndex = inqs.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
-              if (editedAmeIndex !== -1) {
-                inqs[editedAmeIndex].state = 'UPLOADED';
-                dispatch(InquiryActions.setInquiries(inqs));
-                const optionAmendment = [...listCommentDraft];
-                editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
-                optionAmendment[editedAmeIndex].state = 'UPLOADED';
-                dispatch(InquiryActions.setListCommentDraft(optionAmendment));
-              }
-            }
-            // Set new Content when EBL has new data
-            if (res?.newData) {
-              dispatch(InquiryActions.setContent({ ...content, ...res.newData }));
-            }
-            if (res.warning) {
-              dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
-            } else {
-              dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
-            }
-            const inqsPending = inqs?.filter(inq => inq.process === 'pending' && inq.state !== 'COMPL');
-            const inqsDraft = inqs?.filter(inq => inq.process === 'draft' && inq.state !== 'COMPL');
-            if (myBL.bkgNo) {
-              if (inqs[editedInqIndex].process === "pending" && inqsPending.length > 0 && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
-                if (inqs[editedInqIndex].receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
-                  // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
-                  dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
-                }
-                if (inqs[editedInqIndex].receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
-                  //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
-                  dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
-                }
-              }
-              if (inqs[editedInqIndex].process === "draft" && inqsDraft.length > 0 && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
-                // BL Amendment Success (BS), Upload all to Opus.
-                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
-              }
-            }
-          }
-          props.getUpdatedAt();
-        })
-        .catch((error) => {
-          dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-        })
-    } else {
-      const lstInq = inqs.map((item) => {
-        if (
-          (props.field === "INQUIRY_LIST" || props.field === item.field)
-            && item.answerObj
-            && !['OPEN', 'INQ_SENT', 'ANS_SENT', 'AME_SENT', 'COMPL', 'UPLOADED'].includes(item.state)
-        ) {
-          return { inquiryId: item.id, currentState: item.state, field: item.field, process: item.process };
-        }
-        return null;
-      });
-      lstInq.filter(x => x !== null).forEach(item => {
-        if (!fields.includes(item.field)) {
-          fields.push(item.field);
-        }
-      });
-      await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields });
+    const lstInq = inqs.map((item) => {
+      if (
+        (props.field === "INQUIRY_LIST" || props.field === item.field)
+        && item.answerObj
+        && !['OPEN', 'INQ_SENT', 'ANS_SENT', 'AME_SENT', 'COMPL', 'UPLOADED'].includes(item.state)
+      ) {
+        return { inquiryId: item.id, currentState: item.state, field: item.field, process: item.process };
+      }
+      return null;
+    });
+    lstInq.filter(x => x !== null).forEach(item => {
+      if (!fields.includes(item.field)) {
+        fields.push(item.field);
+      }
+    });
+    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields });
 
-      const inqsDraft = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && ['AME_DRF'].includes(inq.currentState));
-      const inqsReply = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(inq.currentState));
-      const draftReply = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && ['REP_DRF'].includes(inq.currentState));
-      if (draftReply.length > 0) {
-        // BK. Reply from Customer, Onshore
-        const inqType = user.userType === 'CUSTOMER' ? "BP" : "BQ"; // BP: Customer Amendment Reply, BO: Offshore Amendment Inquiry
-        const userType = user.userType === 'CUSTOMER' ? "TO" : "RO"; // TO: Return to Customer via BLink, RO: Return to Onshore via BLink
-        dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
-      }
-      if (inqsReply.length > 0) {
-        // BK. Reply from Customer, Onshore
-        const inqType = user.userType === 'CUSTOMER' ? "BK" : "BO"; // BK: Reply from Customer, BO: Reply from Onshore
-        const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
-        dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
-      }
-
-      if (inqsDraft.length > 0) {
-        const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
-        dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "BA", userType));// BA: Customer Amendment Request
-      }
-
-      const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
-      inqs.forEach((item) => {
-        if (listIdInq.includes(item.id)) {
-          if (item.state === 'ANS_DRF') item.state = 'ANS_SENT';
-          else if (item.state === 'REP_A_DRF') item.state = 'REP_A_SENT';
-          else if (item.state === 'AME_DRF') item.state = 'AME_SENT';
-          else if (item.state === 'REP_DRF') item.state = 'REP_SENT';
-        }
-      });
-      dispatch(InquiryActions.setInquiries(inqs));
-      props.handleCheckSubmit();
-      dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-      if (props.field === 'INQUIRY_LIST') {
-        dispatch(FormActions.toggleAllInquiry(false));
-        if (openPreviewListSubmit) {
-          dispatch(FormActions.toggleOpenNotificationPreviewSubmit(true));
-        } else {
-          dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
-        }
-      } else {
-        dispatch(InquiryActions.setOneInq({}));
-      }
-      dispatch(InquiryActions.checkSubmit(!enableSubmit));
-      dispatch(FormActions.toggleReload());
+    const inqsDraft = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && ['AME_DRF'].includes(inq.currentState));
+    const inqsReply = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(inq.currentState));
+    const draftReply = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && ['REP_DRF'].includes(inq.currentState));
+    if (draftReply.length > 0) {
+      // BK. Reply from Customer, Onshore
+      const inqType = user.userType === 'CUSTOMER' ? "BP" : "BQ"; // BP: Customer Amendment Reply, BO: Offshore Amendment Inquiry
+      const userType = user.userType === 'CUSTOMER' ? "TO" : "RO"; // TO: Return to Customer via BLink, RO: Return to Onshore via BLink
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
+    }
+    if (inqsReply.length > 0) {
+      // BK. Reply from Customer, Onshore
+      const inqType = user.userType === 'CUSTOMER' ? "BK" : "BO"; // BK: Reply from Customer, BO: Reply from Onshore
+      const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
     }
 
+    if (inqsDraft.length > 0) {
+      const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "BA", userType));// BA: Customer Amendment Request
+    }
+
+    const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
+    inqs.forEach((item) => {
+      if (listIdInq.includes(item.id)) {
+        if (item.state === 'ANS_DRF') item.state = 'ANS_SENT';
+        else if (item.state === 'REP_A_DRF') item.state = 'REP_A_SENT';
+        else if (item.state === 'AME_DRF') item.state = 'AME_SENT';
+        else if (item.state === 'REP_DRF') item.state = 'REP_SENT';
+      }
+    });
+    dispatch(InquiryActions.setInquiries(inqs));
+    props.handleCheckSubmit();
+    dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+    if (props.field === 'INQUIRY_LIST') {
+      dispatch(FormActions.toggleAllInquiry(false));
+      if (openPreviewListSubmit) {
+        dispatch(FormActions.toggleOpenNotificationPreviewSubmit(true));
+      } else {
+        dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
+      }
+    } else {
+      dispatch(InquiryActions.setOneInq({}));
+    }
+    dispatch(InquiryActions.checkSubmit(!enableSubmit));
+    dispatch(FormActions.toggleReload());
   };
 
   const handleCancelConfirm = () => {
     props.handleCheckSubmit();
-    dispatch(InquiryActions.setShowBackgroundAttachmentList({ isShowBackground: false }));
+    dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
   };
 
   return (
