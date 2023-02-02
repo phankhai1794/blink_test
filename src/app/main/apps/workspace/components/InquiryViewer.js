@@ -184,6 +184,7 @@ const InquiryViewer = (props) => {
   const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
+  const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
@@ -709,7 +710,7 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: prevAmendment }));
           }
           //
-          dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+          dispatch(InquiryActions.setShowBackgroundAttachmentList({ isShowBackground: false }));
 
           // Update state of listDraftComments for re-rendering UI
           let cloneListCommentDraft = listCommentDraft.filter(({ id }) => id !== replyRemove.id);
@@ -922,67 +923,69 @@ const InquiryViewer = (props) => {
   };
 
   const onUpload = () => {
-    setLoading(true);
+    // setLoading(true);
     const optionsInquires = [...inquiries];
     const idUpload = question.process === 'pending' ? question.id : tempReply?.answer?.id;
-    uploadOPUS(myBL.id, idUpload, question.field, inqAnsId)
-      .then((res) => {
-        if (res && res.status === 'F') {
-          dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
-        } else {
-          setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
-
-          // Update list inquiry
-          let editedInqIndex = optionsInquires.findIndex(inq => question.id === inq.id);
-          if (optionsInquires[editedInqIndex]?.process === 'pending') {
-            optionsInquires[editedInqIndex].state = 'UPLOADED';
-            dispatch(InquiryActions.setInquiries(optionsInquires));
-          } else {
-            // Update list amendment
-            let editedAmeIndex = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
-            if (editedAmeIndex !== -1) {
-              optionsInquires[editedAmeIndex].state = 'UPLOADED';
-              dispatch(InquiryActions.setInquiries(optionsInquires));
-              const optionAmendment = [...listCommentDraft];
-              editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
-              optionAmendment[editedAmeIndex].state = 'UPLOADED';
-              dispatch(InquiryActions.setListCommentDraft(optionAmendment));
-            }
-          }
-          // Set new Content when EBL has new data
-          if (res?.newData) {
-            dispatch(InquiryActions.setContent({ ...content, ...res.newData }));
-          }
-          if (res.warning) {
-            dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
-          } else {
-            dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
-          }
-          const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && inq.state !== 'COMPL');
-          const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && inq.state !== 'COMPL');
-          if (myBL.bkgNo) {
-            if (optionsInquires[editedInqIndex].process === "pending" && inqsPending.length > 0 && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
-              if (optionsInquires[editedInqIndex].receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
-                // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
-                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
-              }
-              if (optionsInquires[editedInqIndex].receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
-                //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
-                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
-              }
-            }
-            if (optionsInquires[editedInqIndex].process === "draft" && inqsDraft.length > 0 && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
-              // BL Amendment Success (BS), Upload all to Opus.
-              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
-            }
-          }
-        }
-        props.getUpdatedAt();
-        setViewDropDown('');
-      })
-      .catch((error) => {
-        dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-      }).finally(() => setLoading(false));
+    const objRequest = { myBL: myBL.id, idUpload, question, inqAnsId };
+    dispatch(InquiryActions.setShowBackgroundAttachmentList({ isShowBackground: true, requestConfirm: { action: 'uploadOpus', objRequest }} ));
+    // uploadOPUS(myBL.id, idUpload, question.field, inqAnsId)
+    //   .then((res) => {
+    //     if (res && res.status === 'F') {
+    //       dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
+    //     } else {
+    //       setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
+    //
+    //       // Update list inquiry
+    //       let editedInqIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    //       if (optionsInquires[editedInqIndex]?.process === 'pending') {
+    //         optionsInquires[editedInqIndex].state = 'UPLOADED';
+    //         dispatch(InquiryActions.setInquiries(optionsInquires));
+    //       } else {
+    //         // Update list amendment
+    //         let editedAmeIndex = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
+    //         if (editedAmeIndex !== -1) {
+    //           optionsInquires[editedAmeIndex].state = 'UPLOADED';
+    //           dispatch(InquiryActions.setInquiries(optionsInquires));
+    //           const optionAmendment = [...listCommentDraft];
+    //           editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
+    //           optionAmendment[editedAmeIndex].state = 'UPLOADED';
+    //           dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+    //         }
+    //       }
+    //       // Set new Content when EBL has new data
+    //       if (res?.newData) {
+    //         dispatch(InquiryActions.setContent({ ...content, ...res.newData }));
+    //       }
+    //       if (res.warning) {
+    //         dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
+    //       } else {
+    //         dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
+    //       }
+    //       const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && inq.state !== 'COMPL');
+    //       const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && inq.state !== 'COMPL');
+    //       if (myBL.bkgNo) {
+    //         if (optionsInquires[editedInqIndex].process === "pending" && inqsPending.length > 0 && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
+    //           if (optionsInquires[editedInqIndex].receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
+    //             // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
+    //             dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
+    //           }
+    //           if (optionsInquires[editedInqIndex].receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
+    //             //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
+    //             dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
+    //           }
+    //         }
+    //         if (optionsInquires[editedInqIndex].process === "draft" && inqsDraft.length > 0 && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
+    //           // BL Amendment Success (BS), Upload all to Opus.
+    //           dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
+    //         }
+    //       }
+    //     }
+    //     props.getUpdatedAt();
+    //     setViewDropDown('');
+    //   })
+    //   .catch((error) => {
+    //     dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
+    //   }).finally(() => setLoading(false));
   };
 
   const cancelResolve = () => {

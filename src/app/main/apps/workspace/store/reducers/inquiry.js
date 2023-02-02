@@ -25,6 +25,7 @@ const initialState = {
   lastField: '',
   openedInquiresForm: false,
   isShowBackground: false,
+  requestConfirm: { action: '', objRequest: {} },
   enableSubmit: false,
   enableSend: false,
   listCommentDraft: [],
@@ -135,7 +136,7 @@ const inquiryReducer = function (state = initialState, action) {
     return { ...state, openedInquiresForm: action.state };
   }
   case Actions.SET_BACKGROUND_ATTACHMENT_LIST: {
-    return { ...state, isShowBackground: action.state };
+    return { ...state, isShowBackground: action.state.isShowBackground, requestConfirm: action.state.requestConfirm };
   }
   case Actions.CHECK_SUBMIT: {
     return { ...state, enableSubmit: action.state };

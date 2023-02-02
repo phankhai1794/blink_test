@@ -311,7 +311,7 @@ const AttachmentList = (props) => {
               combineFieldType.sort((a, b) => a.label.localeCompare(b.label));
               setAttachmentFiles(getAttachmentFiles);
               setFieldType(combineFieldType);
-              dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+              dispatch(InquiryActions.setShowBackgroundAttachmentList({ isShowBackground: false }));
               setIsLoading(false);
             }
           });
@@ -358,7 +358,7 @@ const AttachmentList = (props) => {
               combineFieldType.sort((a, b) => a.label.localeCompare(b.label));
               setAttachmentFiles(getAttachmentFiles);
               setFieldType(combineFieldType);
-              dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+              dispatch(InquiryActions.setShowBackgroundAttachmentList({ isShowBackground: false }));
               setIsLoading(false);
             }
           });
@@ -546,7 +546,7 @@ const AttachmentList = (props) => {
         setAttachmentFiles(mediaR);
         setSelectedIndexFile([]);
         setShowConfirm(false);
-        dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+        dispatch(InquiryActions.setShowBackgroundAttachmentList({ isShowBackground: false }));
         dispatch(AppAction.showMessage({ message: 'Delete attachment successfully', variant: 'success' }));
       });
     } else {
@@ -555,18 +555,18 @@ const AttachmentList = (props) => {
       setAttachmentFiles(restMedia);
       setSelectedIndexFile([]);
       setShowConfirm(false);
-      dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+      dispatch(InquiryActions.setShowBackgroundAttachmentList({ isShowBackground: false }));
     }
   };
 
   const handleCancel = () => {
     setShowConfirm(false);
-    dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+    dispatch(InquiryActions.setShowBackgroundAttachmentList({ isShowBackground: false }));
   };
 
   const handleRemove = () => {
     setShowConfirm(true);
-    dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
+    dispatch(InquiryActions.setShowBackgroundAttachmentList({ isShowBackground: true }));
   };
 
   const handleCheck = (e, media, idx) => {

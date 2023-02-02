@@ -147,7 +147,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
 
   const onSubmit = () => {
     setIsSubmit(true);
-    dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
+    dispatch(InquiryActions.setShowBackgroundAttachmentList({ isShowBackground: true }));
   };
 
   return (
