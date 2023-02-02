@@ -461,6 +461,7 @@ const InquiryEditor = (props) => {
         dispatch(
           AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
         );
+        dispatch(InquiryActions.checkSubmit(!enableSubmit));
       } else {
         dispatch(InquiryActions.setEditInq());
       }

@@ -580,6 +580,7 @@ const BLWorkspace = (props) => {
                         tabs={popupObj.tabs || null}
                         nums={popupObj.nums || null}
                         key={inquiry.id}
+                        tabSelected={tabSelected}
                         tabChange={(newValue) => {
                           setTabSelected(newValue);
                         }}

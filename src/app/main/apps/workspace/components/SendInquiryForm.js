@@ -464,6 +464,7 @@ const SendInquiryForm = (props) => {
         FabTitle="E-mail"
         tabs={previewValue === 'inquiry' && ['Customer', 'Onshore']}
         nums={previewValue === 'inquiry' && [countInq('customer'), countInq('onshore')]}
+        tabSelected={tabSelected}
         tabChange={(newValue) => {
           setTabSelected(newValue);
         }}>
