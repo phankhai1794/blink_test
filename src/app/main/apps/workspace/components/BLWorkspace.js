@@ -158,35 +158,18 @@ const BLWorkspace = (props) => {
   };
 
   socket.on('msg_processing', async (data) => {
-    if (userInfo) {
+    if (userInfo?.displayName && data.processingBy.length) {
       console.log('processingBy: ', data.processingBy);
-      let permissionAssign = userInfo.role === 'Admin' ? await getPermissionByRole('Admin') : await getPermissionByRole('Guest');
-      let permissionViewer = await getPermissionByRole('Viewer');
-      let assignPermissionViewer = userInfo;
       let permissions = [];
-      let excludeFirstUser = false;
-      if (data.processingBy) {
-        data.processingBy.forEach((p) => {
-          if (userInfo.displayName === data.processingBy[0]) {
-            excludeFirstUser = true;
-          }
-        });
-        if (!excludeFirstUser && assignPermissionViewer) {
-          // assign permission
-          permissions = permissionViewer
-          // show popup for lastest user
-          if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
-            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
-          }
-        } else {
-          // assign permission
-          permissions = permissionAssign;
-          dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-        }
-      } else if (data.processingBy.length === 1) {
-        // assign permission
-        permissions = permissionAssign;
+      if (userInfo.displayName === data.processingBy[0]) { // if to be the first user
+        permissions = await getPermissionByRole(userInfo.role);
         dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+      } else {
+        permissions = await getPermissionByRole('Viewer');
+
+        if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
+          dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
+        }
       }
       sessionStorage.setItem('permissions', JSON.stringify(permissions));
     }
