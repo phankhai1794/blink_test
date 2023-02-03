@@ -745,7 +745,7 @@ const InquiryViewer = (props) => {
               }).catch((error) => console.error(error));
             } else {
               if (res.checkReplyEmpty) {
-                optionsOfQuestion[removeIndex].state = 'REP_SENT';
+                optionsOfQuestion[removeIndex].state = user.role === 'Admin' ? 'AME_SENT' : 'REP_SENT';
               }
             }
             setReplyRemove();
