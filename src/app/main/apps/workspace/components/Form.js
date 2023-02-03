@@ -86,7 +86,7 @@ const DialogTitle = withStyles(styles)((props) => {
             // onClick={handleOpenSnackBar}
             onClick={() => { }}
             style={{ textAlign: 'center' }}>
-            <MinimizeIcon />
+            {/* <MinimizeIcon /> */}
           </IconButton>
           {isFullScreen ? (
             <IconButton
