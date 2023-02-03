@@ -906,6 +906,9 @@ const InquiryViewer = (props) => {
         setIsResolve(false);
         setViewDropDown('');
         if (!isSeparate) {
+          if (containerCheck.includes(question.field)){
+            setQuestion((q) => ({ ...q, content: contentField }));
+          }
           if (contsNoChange) dispatch(InquiryActions.setContent({ ...res.content }));
           else dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
         } else {
@@ -1707,6 +1710,7 @@ const InquiryViewer = (props) => {
                           container={
                             question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                           }
+                          originalValues={question.content}
                           setEditContent={(value) => {
                             if (isReplyCDCM || isResolveCDCM) {
                               handleChangeContainerDetail(value);
@@ -1721,6 +1725,7 @@ const InquiryViewer = (props) => {
                       question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                     }
                     question={question}
+                    originalValues={isJsonText(question.content) ? JSON.parse(question.content): null}
                     setTextResolve={setTextResolve}
                     disableInput={true}
                   />
@@ -1896,6 +1901,7 @@ const InquiryViewer = (props) => {
                           handleChangeContainerDetail(value);
                           setTextResolve(value)
                         }}
+                        originalValues={question.content}
                         setTextResolve={setTextResolve}
                       />
                       : <ContainerDetailFormOldVersion
@@ -1903,6 +1909,7 @@ const InquiryViewer = (props) => {
                           question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                         }
                         question={question}
+                        originalValues={isJsonText(question.content) ? JSON.parse(question.content): null}
                         setTextResolve={setTextResolve}
                       />
                     }
@@ -2123,12 +2130,13 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     })
     let groupsValues = [];
     if (typeList.length === 1) {
-      groupsValues = [...valueCopy].map(value => ({ name: value[getType(CONTAINER_NUMBER)], value: [value], duplicate: [...valueCopy].filter((cntrNo) => cntrNo[getType(CONTAINER_NUMBER)] === value[getType(CONTAINER_NUMBER)]).length > 1 }));
+      groupsValues = [...valueCopy].map(value => ({ name: value[getType(CONTAINER_NUMBER)], value: [value], duplicate: container === CONTAINER_MANIFEST ? false : [...valueCopy].filter((cntrNo) => cntrNo[getType(CONTAINER_NUMBER)] === value[getType(CONTAINER_NUMBER)]).length > 1 }));
     }
     else {
       const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
       groupsValues = [...groups].map(([name, value]) => ({ name, value, duplicate: false }));
     }
+    
     while (groupsValues.length) {
       let rowValues = groupsValues.splice(0, 4);
       let rowIndex = 0;

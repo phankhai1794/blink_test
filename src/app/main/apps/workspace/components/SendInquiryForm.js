@@ -1,6 +1,6 @@
 import * as Actions from 'app/store/actions';
 import { checkNewInquiry } from '@shared';
-import { PRE_CARRIAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY } from '@shared/keyword';
+import { PRE_CARRIAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, PORT_OF_LOADING } from '@shared/keyword';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -149,6 +149,7 @@ const SendInquiryForm = (props) => {
   const preVvd = getValueField(PRE_CARRIAGE);
   const pod = getValueField(PORT_OF_DISCHARGE);
   const del = getValueField(PLACE_OF_DELIVERY);
+  const pol = getValueField(PORT_OF_LOADING)
   const bkgNo = mybl.bkgNo;
 
   const initiateContentState = (content) => {
@@ -162,15 +163,16 @@ const SendInquiryForm = (props) => {
   const convertToList = (array, tabValue) => {
     const newInq = checkNewInquiry(metadata, inquiries, tabValue, ['OPEN']);
     const newRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_Q_DRF']);
+    const newAmeRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_DRF']);
     const convert = (array) => array.map((a) => `- ${a}`).join('\n');
     let header = 'BL has been updated';
-    let msg = ''
-    if (newInq.length && newRep.length) {
+    let msg = '';
+    if ((newInq.length && newRep.length) || (newInq.length && newAmeRep.length)) {
       msg =
         'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
       return [
         msg,
-        ` \nNew inquiry:\n${convert(newInq)}\n \nNew reply:\n${convert(newRep)}`,
+        ` \nNew inquiry:\n${convert(newInq)}\n \nNew reply:\n${convert([...new Set([...newRep, ...newAmeRep])])}`,
         header
       ];
     } else if (newInq.length) {
@@ -178,6 +180,9 @@ const SendInquiryForm = (props) => {
     } else if (newRep.length) {
       msg = 'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
       header = 'New Reply';
+    } else if (newAmeRep.length) {
+      msg = 'Thank you very much for checking BL draft. Your amendment requests are in progress; however, there are still some pending issues that need to be clarified in the following BL fields:';
+      header = 'You have received a reply';
     }
     return [msg, array.map((a) => `- ${a}`).join('\n'), header];
   };
@@ -200,7 +205,7 @@ const SendInquiryForm = (props) => {
     let content = '';
     let bodyHtml = '';
     if (hasOnshore) {
-      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + DEL(${del})`;
+      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + POL(${pol})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
       content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion. Pending issues:'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
@@ -367,6 +372,10 @@ const SendInquiryForm = (props) => {
         dispatch(
           Actions.showMessage({ message: 'EMAIL ADDRESS DOES NOT EXIST', variant: 'error' })
         );
+    } else if (tabValue === 'onshore' && [...tags['toOnshore'], ...tags['toOnshoreCc'], ...tags['toOnshoreBcc']].some(
+      (mail) => !/.*@one-line.com/.test(mail)
+    )) {
+      dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
     } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
       return;
     } else {
@@ -456,6 +465,7 @@ const SendInquiryForm = (props) => {
         FabTitle="E-mail"
         tabs={previewValue === 'inquiry' && ['Customer', 'Onshore']}
         nums={previewValue === 'inquiry' && [countInq('customer'), countInq('onshore')]}
+        tabSelected={tabSelected}
         tabChange={(newValue) => {
           setTabSelected(newValue);
         }}>

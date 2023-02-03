@@ -184,6 +184,7 @@ const AllInquiry = (props) => {
 
   useEffect(() => {
     let inquiriesSet = [...inquiryCopy];
+    if (!openAmendmentList) dispatch(InquiryActions.addAmendment());
     if (openAllInquiry) {
       inquiriesSet = inquiriesSet.filter(inq => inq.process === 'pending');
     } else if (openAmendmentList) {
@@ -324,58 +325,61 @@ const AllInquiry = (props) => {
         {props.user === 'workspace' ? (
           inquiries.map((q, index) => {
             CURRENT_NUMBER += 1;
-            if (receiver && q.receiver.includes(receiver)) {
+            if (receiver && !q.receiver.includes(receiver) && !openAmendmentList) {
               return (
-                currentEditInq && q.id === currentEditInq.id ? (
-                  <div key={index}>
-                    {<InquiryEditor
-                      onCancel={onCancel}
-                      getUpdatedAt={() => {
-                        setUpdateReply(true)
-                      }}
-                    />}
-                    <Divider
-                      className="my-32"
-                      variant="middle"
-                      style={{ height: '2px', color: '#BAC3CB' }}
-                    />
-                  </div>
-                ) : (
-                  <Card key={index} elevation={0} style={{ padding: '1rem ' }}>
-                    <div
-                      className={clsx(
-                        classes.boxItem,
-                        (['UPLOADED'].includes(q.state)) && 'uploaded',
-                        (['COMPL', 'RESOLVED'].includes(q.state)) && 'resolved',
-                        ([...sentStatus, ...['REP_DRF']].includes(q.state)) && 'offshoreReply'
-                      )}>
-                      <div style={{ marginBottom: '12px' }}>
-                        <Typography color="primary" variant="h5" className={classes.inqTitle}>
-                          {`${getLabelById(metadata['field_options'], q.field)}`}
-                        </Typography>
-
-                        <InquiryViewer
-                          user={props.user}
-                          question={q}
-                          index={index}
-                          openInquiryReview={openInquiryReview}
-                          field={field}
-                          isSaveAnswer={isSaveAnswer}
-                          getUpdatedAt={() => {
-                            setUpdateReply(true)
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <Divider
-                      className="my-32"
-                      variant="middle"
-                      style={{ height: '2px', color: '#BAC3CB' }}
-                    />
-                  </Card>
-                )
-              )
+                <div key={index} style={{ display: 'flex' }}></div>
+              );
             }
+            return (
+              currentEditInq && q.id === currentEditInq.id ? (
+                <div key={index}>
+                  {<InquiryEditor
+                    onCancel={onCancel}
+                    getUpdatedAt={() => {
+                      setUpdateReply(true)
+                    }}
+                  />}
+                  <Divider
+                    className="my-32"
+                    variant="middle"
+                    style={{ height: '2px', color: '#BAC3CB' }}
+                  />
+                </div>
+              ) : (
+                <Card key={index} elevation={0} style={{ padding: '1rem ' }}>
+                  <div
+                    className={clsx(
+                      classes.boxItem,
+                      (['UPLOADED'].includes(q.state)) && 'uploaded',
+                      (['COMPL', 'RESOLVED'].includes(q.state)) && 'resolved',
+                      ([...sentStatus, ...['REP_DRF']].includes(q.state)) && 'offshoreReply'
+                    )}>
+                    <div style={{ marginBottom: '12px' }}>
+                      <Typography color="primary" variant="h5" className={classes.inqTitle}>
+                        {`${getLabelById(metadata['field_options'], q.field)}`}
+                      </Typography>
+
+                      <InquiryViewer
+                        user={props.user}
+                        question={q}
+                        index={index}
+                        openInquiryReview={openInquiryReview}
+                        field={field}
+                        isSaveAnswer={isSaveAnswer}
+                        getUpdatedAt={() => {
+                          setUpdateReply(true)
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <Divider
+                    className="my-32"
+                    variant="middle"
+                    style={{ height: '2px', color: '#BAC3CB' }}
+                  />
+                </Card>
+              )
+            )
           })
         ) : (
           inquiries.map((q, index) => {

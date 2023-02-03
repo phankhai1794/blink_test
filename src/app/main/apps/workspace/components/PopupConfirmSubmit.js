@@ -97,13 +97,14 @@ const PopupConfirmSubmit = (props) => {
       const userType = user.userType === 'CUSTOMER' ? "TO" : "RO"; // TO: Return to Customer via BLink, RO: Return to Onshore via BLink
       dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
     }
-    else if (inqsReply.length > 0) {
+    if (inqsReply.length > 0) {
       // BK. Reply from Customer, Onshore
       const inqType = user.userType === 'CUSTOMER' ? "BK" : "BO"; // BK: Reply from Customer, BO: Reply from Onshore
       const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
       dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType));
     }
-    else if (inqsDraft.length > 0) {
+
+    if (inqsDraft.length > 0) {
       const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
       dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "BA", userType));// BA: Customer Amendment Request
     }
