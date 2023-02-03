@@ -833,7 +833,7 @@ const InquiryViewer = (props) => {
     }
   };
 
-  const handleValidateInput = async (type, confirm = null) => {
+  const handleValidateInput = async (type, confirm = null, isWrapText = false) => {
     // Check if no CM/CD
     if (['string'].includes(typeof textResolve)) {
       let textInput = tempReply?.answer?.content.trim() || '';
@@ -848,14 +848,14 @@ const InquiryViewer = (props) => {
         dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
         setDisableAcceptResolve(false);
       } else {
-        confirm && confirm();
+        confirm && confirm(isWrapText);
       }
     } else {
-      confirm && confirm();
+      confirm && confirm(isWrapText);
     }
   }
 
-  const onConfirm = () => {
+  const onConfirm = (isWrapText = false) => {
     let contentField = '';
     const contsNoChange = {};
     if (isSeparate) {
@@ -895,7 +895,8 @@ const InquiryViewer = (props) => {
       blId: myBL.id,
       contsNoChange,
       fieldNameContent: textResolveSeparate.name.toUpperCase().trim() || '',
-      fieldAddressContent: textResolveSeparate.address.toUpperCase().trim() || ''
+      fieldAddressContent: textResolveSeparate.address.toUpperCase().trim() || '',
+      isWrapText
     };
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
@@ -916,9 +917,16 @@ const InquiryViewer = (props) => {
           if (contsNoChange) dispatch(InquiryActions.setContent({ ...res.content }));
           else dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
         } else {
+          const contentWrapText = res?.contentWrapText || '';
           const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
           const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
-          dispatch(InquiryActions.setContent({ ...content, [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: textResolveSeparate.address.trim(), [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: textResolveSeparate.name.trim(), [question.field]: contentField }));
+          // setContent here
+          dispatch(InquiryActions.setContent({
+            ...content,
+            [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: isWrapText ? (contentWrapText.fieldAddressContentWrap || '') : textResolveSeparate.address.trim(),
+            [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: isWrapText ? (contentWrapText.fieldNameContentWrap || '') : textResolveSeparate.name.trim(),
+            [question.field]: isWrapText ? `${contentWrapText.fieldNameContentWrap}\n${contentWrapText.fieldAddressContentWrap}` : contentField
+          }));
         }
         // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
@@ -1460,7 +1468,7 @@ const InquiryViewer = (props) => {
               renderTextHelper(type).isErr
               || validatePartiesContent(textResolveSeparate[type], type).isError}
             helperText={
-              validatePartiesContent(textResolveSeparate[type], type).isError ? validatePartiesContent(textResolveSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
+              (!renderTextHelper(type).textHelper && validatePartiesContent(textResolveSeparate[type], type).isError) ? validatePartiesContent(textResolveSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
                 || renderTextHelper(type).textHelper
             }
           />
@@ -1943,6 +1951,16 @@ const InquiryViewer = (props) => {
                         classes={{ root: clsx(classes.button, 'w120') }}>
                         Accept
                       </Button>
+                      {
+                        isSeparate &&
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => !validateInput?.isValid ? onConfirm(true) : handleValidateInput('RESOLVE', onConfirm, true)}
+                          classes={{ root: clsx(classes.button) }}>
+                          Accept & Wrap Text
+                        </Button>
+                      }
                       <Button
                         variant="contained"
                         classes={{ root: clsx(classes.button, 'w120', 'reply') }}
@@ -2140,7 +2158,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
       groupsValues = [...groups].map(([name, value]) => ({ name, value, duplicate: false }));
     }
-    
+
     while (groupsValues.length) {
       let rowValues = groupsValues.splice(0, 4);
       let rowIndex = 0;
