@@ -448,6 +448,10 @@ const InquiryViewer = (props) => {
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
+            if (containerCheck.includes(question.field)) {
+              lastest.contentCDCM = res[0].content.content;
+            }
+            
             if (Object.keys(lastestComment).length > 0) {
               setStateReplyDraft(true);
               const reqReply = {
@@ -1710,7 +1714,7 @@ const InquiryViewer = (props) => {
                           container={
                             question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                           }
-                          originalValues={question.content}
+                          originalValues={Array.isArray(question.content) ? question.content : question.contentCDCM }
                           setEditContent={(value) => {
                             if (isReplyCDCM || isResolveCDCM) {
                               handleChangeContainerDetail(value);
