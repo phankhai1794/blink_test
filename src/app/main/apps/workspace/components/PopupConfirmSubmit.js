@@ -86,7 +86,7 @@ const PopupConfirmSubmit = (props) => {
         fields.push(item.field);
       }
     });
-    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields });
+    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields, bl: myBL.id });
 
     const inqsDraft = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && ['AME_DRF'].includes(inq.currentState));
     const inqsReply = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(inq.currentState));
