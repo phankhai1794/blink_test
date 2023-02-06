@@ -426,7 +426,7 @@ const InquiryViewer = (props) => {
         .then((res) => {
           if (isUnmounted) return;
           // setEditOriginalAmendment(res.length === 1);
-          res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+          // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
           const lastest = { ...question };
           if (res.length > 0) {
             // console.log(res)
@@ -549,7 +549,7 @@ const InquiryViewer = (props) => {
               answersMedia: [],
               content: orgContent[lastest.field] || '',
               process: 'draft',
-              state: res[0]?.state,
+              state: lastestComment[0]?.state,
             }];
 
             res.map(r => {
@@ -718,7 +718,6 @@ const InquiryViewer = (props) => {
           // Update state of listDraftComments for re-rendering UI
           let cloneListCommentDraft = listCommentDraft.filter(({ id }) => id !== replyRemove.id);
           dispatch(InquiryActions.setListCommentDraft(cloneListCommentDraft));
-          dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
           if (res) {
             setEditOriginalAmendment(res.isEditOriginalAmendment);
             setViewDropDown('');
