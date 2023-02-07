@@ -834,7 +834,7 @@ const InquiryViewer = (props) => {
     }
   };
 
-  const handleValidateInput = async (type, confirm = null, isWrapText = false) => {
+  const handleValidateInput = async (type, confirm = null, isWrapText = false, isLostFocus = false) => {
     // Check if no CM/CD
     if (['string'].includes(typeof textResolve)) {
       let textInput = tempReply?.answer?.content.trim() || '';
@@ -849,10 +849,10 @@ const InquiryViewer = (props) => {
         dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
         setDisableAcceptResolve(false);
       } else {
-        confirm && confirm(isWrapText);
+        !isLostFocus && confirm && confirm(isWrapText);
       }
     } else {
-      confirm && confirm(isWrapText);
+      !isLostFocus && confirm && confirm(isWrapText);
     }
   }
 
@@ -1007,10 +1007,12 @@ const InquiryViewer = (props) => {
   };
 
   const inputText = (e) => {
+    !validateInput?.isValid && dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     setTextResolve(e.target.value);
   };
 
   const inputTextSeparate = (e, type) => {
+    !validateInput?.isValid && dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value }));
   };
 
@@ -1469,6 +1471,7 @@ const InquiryViewer = (props) => {
               (!renderTextHelper(type).textHelper && validatePartiesContent(textResolveSeparate[type], type).isError) ? validatePartiesContent(textResolveSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
                 || renderTextHelper(type).textHelper
             }
+            onBlur={() => handleValidateInput('RESOLVE', onConfirm, true, true)}
           />
         </div>)
     } else {
@@ -1502,6 +1505,7 @@ const InquiryViewer = (props) => {
               </>)
               : ''
           }
+          onBlur={() => handleValidateInput('RESOLVE', onConfirm, true, true)}
         />
       )
     }
