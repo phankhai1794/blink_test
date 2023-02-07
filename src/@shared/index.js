@@ -92,10 +92,8 @@ export const sentStatus = [
 
 export const validatePartiesContent = (partiesContent, type) => {
   const MAX_LENGTH = 35;
-  const maxLengthError = 'The maximum length of a row is 35 digits!';
-  const maxRowsNameError = 'The maximum rows of {{fieldName}} Name is 2. In case data exceeds 2 rows, click Accept & Wrap.'
-  const maxRowsAddressError = 'The maximum rows of {{fieldName}} Address is 3. In case data exceeds 3 rows, click Accept & Wrap.'
-  let isError = false, errorType = maxLengthError;
+  const ErrorMessage = 'The maximum number of lines is 2. No more than 35 characters per each line. '
+  let isError = false, errorType = ErrorMessage;
   const textInput = partiesContent;
   const arrTextInput = typeof textInput === 'string' ? textInput.split('\n') : [];
   arrTextInput.forEach(text => {
@@ -103,11 +101,11 @@ export const validatePartiesContent = (partiesContent, type) => {
   })
   if (['name'].includes(type) && arrTextInput.length > 2) {
     isError = true;
-    errorType = maxRowsNameError;
+    errorType = ErrorMessage;
   };
   if (['address'].includes(type) && arrTextInput.length > 3) {
     isError = true;
-    errorType = maxRowsAddressError;
+    errorType = ErrorMessage;
   };
 
   return { isError, errorType }
