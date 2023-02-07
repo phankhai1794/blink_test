@@ -199,6 +199,7 @@ const InquiryViewer = (props) => {
   const [comment, setComment] = useState([]);
   const [isLoadedComment, setIsLoadedComment] = useState(false);
   const [textResolve, setTextResolve] = useState(content[question.field] || '');
+  const [validationCDCM, setValidationCDCM] = useState(true);
   const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
@@ -220,6 +221,12 @@ const InquiryViewer = (props) => {
   const [inqAnsId, setInqAnsId] = useState('');
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
   const [loading, setLoading] = useState(false);
+
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
@@ -451,7 +458,7 @@ const InquiryViewer = (props) => {
             if (containerCheck.includes(question.field)) {
               lastest.contentCDCM = res[0].content.content;
             }
-            
+
             if (Object.keys(lastestComment).length > 0) {
               setStateReplyDraft(true);
               const reqReply = {
@@ -647,12 +654,6 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     question?.state !== 'OPEN' && setAllowDeleteInq(false);
   }, [question]);
-
-  const getField = (field) => {
-    return metadata.field?.[field] || '';
-  };
-
-  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
   const resetInquiry = () => {
     const optionsInquires = [...inquiries];
@@ -858,6 +859,10 @@ const InquiryViewer = (props) => {
   const onConfirm = (isWrapText = false) => {
     let contentField = '';
     const contsNoChange = {};
+    if (!validationCDCM) {
+      setDisableAcceptResolve(false);
+      return;
+    }
     if (isSeparate) {
       contentField = `${textResolveSeparate.name.toUpperCase().trim()}\n${textResolveSeparate.address.toUpperCase().trim()}`;
     } else if (typeof textResolve === 'string') {
@@ -865,12 +870,10 @@ const InquiryViewer = (props) => {
     } else {
       contentField = textResolve;
       const orgContentField = content[question.field];
-      let duplicateContsNo = false;
       contentField.forEach((obj, index) => {
         const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
         if (getTypeName === CONTAINER_NUMBER) {
           const containerNo = orgContentField[index][question.inqType];
-          if (obj[question.inqType] in contsNoChange) duplicateContsNo = true;
           contsNoChange[containerNo] = obj[question.inqType];
           obj[question.inqType] = formatContainerNo(obj[question.inqType]);
         }
@@ -881,11 +884,6 @@ const InquiryViewer = (props) => {
           obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
         }
       });
-
-      if (duplicateContsNo && question.field === containerCheck[0]) {
-        setDisableAcceptResolve(false);
-        return;
-      }
     }
 
     const body = {
@@ -911,7 +909,7 @@ const InquiryViewer = (props) => {
         setIsResolve(false);
         setViewDropDown('');
         if (!isSeparate) {
-          if (containerCheck.includes(question.field)){
+          if (containerCheck.includes(question.field)) {
             setQuestion((q) => ({ ...q, content: contentField }));
           }
           if (contsNoChange) dispatch(InquiryActions.setContent({ ...res.content }));
@@ -1722,7 +1720,7 @@ const InquiryViewer = (props) => {
                           container={
                             question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                           }
-                          originalValues={Array.isArray(question.content) ? question.content : question.contentCDCM }
+                          originalValues={Array.isArray(question.content) ? question.content : question.contentCDCM}
                           setEditContent={(value) => {
                             if (isReplyCDCM || isResolveCDCM) {
                               handleChangeContainerDetail(value);
@@ -1737,7 +1735,8 @@ const InquiryViewer = (props) => {
                       question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                     }
                     question={question}
-                    originalValues={isJsonText(question.content) ? JSON.parse(question.content): null}
+                    originalValues={isJsonText(question.content) ? JSON.parse(question.content) : null}
+                    validation={setValidationCDCM}
                     setTextResolve={setTextResolve}
                     disableInput={true}
                   />
@@ -1920,8 +1919,9 @@ const InquiryViewer = (props) => {
                         container={
                           question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                         }
+                        validation={setValidationCDCM}
                         question={question}
-                        originalValues={isJsonText(question.content) ? JSON.parse(question.content): null}
+                        originalValues={isJsonText(question.content) ? JSON.parse(question.content) : null}
                         setTextResolve={setTextResolve}
                       />
                     }
@@ -1941,7 +1941,7 @@ const InquiryViewer = (props) => {
                           (isSeparate ?
                             (validatePartiesContent(textResolveSeparate.name, 'name')?.isError
                               || validatePartiesContent(textResolveSeparate.address, 'address')?.isError)
-                            : false) || disableAcceptResolve
+                            : false) || disableAcceptResolve || !validationCDCM
                         }
                         color="primary"
                         onClick={() => {
@@ -2102,7 +2102,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false }) => {
+export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -2122,12 +2122,12 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     return content[getField(field)] || '';
   };
   const [values, setValues] = useState(originalValues || getValueField(container) || [{}]);
-
   const inqType = getLabelById(metadata['inq_type_options'], question.inqType);
   const cdType =
     inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER];
   const cmType = inqType !== CONTAINER_NUMBER ? [CONTAINER_NUMBER, inqType] : [CONTAINER_NUMBER];
   const typeList = container === CONTAINER_DETAIL ? cdType : cmType;
+
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values));
     temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? e.target.value.split(',') : e.target.value;
@@ -2139,11 +2139,26 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     if (!originalValues) {
       setValues(getValueField(container) || [{}]);
     }
+    if (container === CONTAINER_MANIFEST) {
+      let containerManifestSorted = [];
+      let containerDetail = getValueField(CONTAINER_DETAIL);
+      (containerDetail || []).map(item => {
+        const containerNo = item?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
+        if (containerNo) {
+          let arr = values.filter((item) =>
+            item?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
+          )
+          containerManifestSorted = [...containerManifestSorted, ...arr]
+        }
+      })
+      setValues(containerManifestSorted)
+    }
   }, [content]);
 
 
   const renderTB = () => {
     let td = [];
+    validation(true);
     const valueCopy = JSON.parse(JSON.stringify(values));
     let index = 0;
     valueCopy.map((item) => {
@@ -2196,6 +2211,18 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               }
               const disabled = !((rowIndex > 0 || inqType === CONTAINER_NUMBER) && nodeValue && !disableInput);
               const isUpperCase = inqType !== CONTAINER_NUMBER && rowIndex > 0;
+              let inValidContainerNo = false;
+              if (type === CONTAINER_NUMBER && container === CONTAINER_MANIFEST && !disableInput) {
+                // Validation in CD
+                const value = nodeValue ? (!isUpperCase ? formatContainerNo(nodeValue[getType(type)]) : nodeValue[getType(type)]) : '';
+                const contsNo = getValueField(CONTAINER_DETAIL).map(value => value[getType(CONTAINER_NUMBER)]);
+                if (!contsNo.includes(value)) {
+                  inValidContainerNo = true;
+                  validation(false);
+                }
+              } else if (type === CONTAINER_NUMBER && container === CONTAINER_DETAIL && !disableInput && item.duplicate) {
+                validation(false);
+              }
               return (
                 <input
                   className={clsx(classes.text)}
@@ -2206,7 +2233,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                     fontSize: 15,
                     borderTopRightRadius: rowIndex === 0 && rowValues.length - 1 === index1 ? 8 : null,
                     textTransform: isUpperCase ? 'uppercase' : 'none',
-                    borderColor: item.duplicate ? 'red' : '#bac3cb'
+                    borderColor: item.duplicate || inValidContainerNo ? 'red' : '#bac3cb'
                   }}
                   disabled={disabled}
                   value={nodeValue ? (!isUpperCase ? formatContainerNo(nodeValue[getType(type)]) : nodeValue[getType(type)]) : ''}
