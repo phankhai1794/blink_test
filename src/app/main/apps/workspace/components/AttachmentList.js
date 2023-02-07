@@ -21,6 +21,7 @@ import { handleDuplicateAttachment } from '@shared/handleError';
 import { getCommentDraftBl } from "app/services/draftblService";
 import Checkbox from "@material-ui/core/Checkbox";
 
+import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as InquiryActions from "../store/actions/inquiry";
 
 import PDFViewer from './PDFViewer';
@@ -548,6 +549,7 @@ const AttachmentList = (props) => {
         setShowConfirm(false);
         dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
         dispatch(AppAction.showMessage({ message: 'Delete attachment successfully', variant: 'success' }));
+        if (mediaR.length === 0) dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
       });
     } else {
       // update attachment list
