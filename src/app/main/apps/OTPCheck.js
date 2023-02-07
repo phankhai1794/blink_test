@@ -296,7 +296,7 @@ const OtpCheck = ({ children }) => {
           value: email,
           isValid: isEmail(email)
         });
-        isVerified({ email, bl })
+        isVerified({ bl })
           .then(() => {
             setStep(2);
             return;
