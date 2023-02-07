@@ -749,6 +749,7 @@ const BLWorkspace = (props) => {
 
             <Grid container spacing={2}>
               <TableCM
+                containerDetail={getValueField(CONTAINER_DETAIL)}
                 containerManifest={getValueField(CONTAINER_MANIFEST)}
                 id={getField(CONTAINER_MANIFEST)}
               />

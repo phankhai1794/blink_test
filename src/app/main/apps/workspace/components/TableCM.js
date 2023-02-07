@@ -1,4 +1,4 @@
-import { CM_MARK, CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT, CM_PACKAGE_UNIT, CM_WEIGHT_UNIT, CM_MEASUREMENT_UNIT } from '@shared/keyword';
+import { CM_PACKAGE, CM_DESCRIPTION, CM_WEIGHT, CM_MEASUREMENT, CM_PACKAGE_UNIT, CM_WEIGHT_UNIT, CM_MEASUREMENT_UNIT, CONTAINER_NUMBER } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useSelector, useDispatch } from 'react-redux';
@@ -113,15 +113,25 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const TableCM = (props) => {
-  const { id, containerManifest } = props;
+  const { id, containerDetail, containerManifest } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
-
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const user = useSelector(({ user }) => user);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+
+  let containerManifestSorted = [];
+  (containerDetail || []).map(item => {
+    const containerNo = item?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
+    if (containerNo) {
+      let arr = containerManifest.filter((item) =>
+        item?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
+      )
+      containerManifestSorted = [...containerManifestSorted, ...arr]
+    }
+  })
 
   const [isHovering, setIsHovering] = useState(false);
   const [isEmpty, setIsEmpty] = useState(true);
@@ -276,10 +286,10 @@ const TableCM = (props) => {
         <Grid container item xs={2} spacing={1}>
           <Label className={clsx(classes.labelMargin)}>GROSS MEASUREMENT</Label>
         </Grid>
-        {containerManifest?.length > 0 ? containerManifest.map((cm, index) =>
+        {containerManifestSorted?.length > 0 ? containerManifestSorted.map((cm, index) =>
           <Grid container spacing={2} className='px-8 py-2' key={index}>
             <Grid item xs={2}>
-              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
+              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>
             </Grid>
             <Grid item xs={2}>
               <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${cm?.[metadata?.inq_type?.[CM_PACKAGE]] || ''} ${cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]] || ''}`}</BLField>
