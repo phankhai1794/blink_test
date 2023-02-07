@@ -1,6 +1,6 @@
 import * as Actions from 'app/store/actions';
 import { checkNewInquiry } from '@shared';
-import { PRE_CARRIAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, PORT_OF_LOADING } from '@shared/keyword';
+import { PRE_CARRIAGE, PORT_OF_DISCHARGE, PORT_OF_LOADING } from '@shared/keyword';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -148,7 +148,6 @@ const SendInquiryForm = (props) => {
 
   const preVvd = getValueField(PRE_CARRIAGE);
   const pod = getValueField(PORT_OF_DISCHARGE);
-  const del = getValueField(PLACE_OF_DELIVERY);
   const pol = getValueField(PORT_OF_LOADING)
   const bkgNo = mybl.bkgNo;
 
@@ -220,7 +219,7 @@ const SendInquiryForm = (props) => {
       handleEditorState(content);
     }
     if (hasCustomer) {
-      subject = `[Customer BL Query]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + DEL(${del})`;
+      subject = `[Customer BL Query]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + POL(${pol})`;
       const [msg1, msg2, header] = convertToList(inqCustomer, 'customer');
       content = `Dear Customer,\n \n${msg1 || `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`}\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
