@@ -146,7 +146,6 @@ const BLWorkspace = (props) => {
   );
   const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
-  let userInfo = JSON.parse(localStorage.getItem('USER'));
   const socket = useContext(SocketContext);
 
   const getField = (keyword) => {
@@ -158,6 +157,7 @@ const BLWorkspace = (props) => {
   };
 
   socket.on('msg_processing', async (data) => {
+    const userInfo = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
     if (userInfo?.displayName && data.processingBy.length) {
       console.log('processingBy: ', data.processingBy);
       let permissions = [];
@@ -230,6 +230,7 @@ const BLWorkspace = (props) => {
 
 
   const checkBLSameRequest = async (bl) => {
+    const userInfo = JSON.parse(localStorage.getItem('USER'));
     if (bl && userInfo) {
       socket.emit('user_processing_in', {
         mybl: bl,
@@ -261,7 +262,8 @@ const BLWorkspace = (props) => {
     }
 
     return () => {
-      dispatch(FormActions.resetLoading())
+      dispatch(FormActions.resetLoading());
+      const userInfo = JSON.parse(localStorage.getItem('USER'));
       if (userInfo) {
         socket.emit('user_processing_out', {
           mybl: bkgNo,
