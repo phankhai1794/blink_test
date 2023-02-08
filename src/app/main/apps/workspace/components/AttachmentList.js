@@ -10,7 +10,7 @@ import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
 import ImageViewer from "react-simple-image-viewer";
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import { FuseChipSelect } from "@fuse";
-import { validateExtensionFile } from '@shared';
+import { validateExtensionFile, validateMaximunFile } from '@shared';
 import * as AppAction from "app/store/actions";
 import { useDropzone } from "react-dropzone";
 import { uploadFile, getFile } from 'app/services/fileService';
@@ -205,6 +205,12 @@ const AttachmentList = (props) => {
     if (props.newFileAttachment) {
       const files = props.newFileAttachment;
       const optionsAttachmentList = [...attachmentFiles];
+
+      const maximum = validateMaximunFile(files);
+      if (!maximum) {
+        dispatch(AppAction.showMessage({ message: 'Send up files limit 25 MB in attachments!', variant: 'error' }));
+      }
+
       const inValidFile = files.find((elem) => !validateExtensionFile(elem));
       if (inValidFile) {
         dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
