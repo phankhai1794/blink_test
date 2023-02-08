@@ -1992,10 +1992,6 @@ const InquiryViewer = (props) => {
                                   multiline
                                   rows={['name'].includes(type) ? 2 : 3}
                                   onChange={(e) => handleChangeContentReply(e, type)}
-                                  error={validatePartiesContent(content[type], type).isError}
-                                  helperText={
-                                    validatePartiesContent(content[type], type).isError ? validatePartiesContent(content[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
-                                  }
                                   variant='outlined'
                                 />
                               </div>
@@ -2060,10 +2056,6 @@ const InquiryViewer = (props) => {
                             ))
                             || (question.state !== "AME_DRF" && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
-                            || ((isSeparate && (['AME_DRF', 'AME_SENT'].includes(question.state) && (user.role === 'Guest'))) ?
-                              (validatePartiesContent(tempReply?.answer?.content ? JSON.parse(tempReply?.answer?.content).name : '', 'name')?.isError
-                                || validatePartiesContent(tempReply?.answer?.content ? JSON.parse(tempReply?.answer?.content).address : '', 'address')?.isError)
-                              : false)
                           }
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save

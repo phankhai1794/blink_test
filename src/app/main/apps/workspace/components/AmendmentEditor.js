@@ -11,7 +11,6 @@ import { CONTAINER_DETAIL, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY } from
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
-import { validatePartiesContent } from '@shared';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -207,10 +206,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             multiline
             rows={['name'].includes(type) ? 2 : 3}
             onChange={(e) => inputTextSeparate(e, type, field)}
-            error={validatePartiesContent(fieldValueSeparate[type], type).isError}
-            helperText={
-              validatePartiesContent(fieldValueSeparate[type], type).isError ? validatePartiesContent(fieldValueSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
-            }
             variant='outlined'
           />
         </div>)
@@ -371,9 +366,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         <Button
           className={classes.btn}
           disabled={
-            (isSeparate ?
-              (validatePartiesContent(fieldValueSeparate.name, 'name')?.isError
-                || validatePartiesContent(fieldValueSeparate.address, 'address')?.isError)
+            (isSeparate ? false
               : (fieldValue && (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0)))) || disableSave
           }
           onClick={() => handleValidateInput(handleSave)}
