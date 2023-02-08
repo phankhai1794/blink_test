@@ -18,6 +18,7 @@ const PreviewDraftBL = () => {
   const { pathname } = window.location;
   const classes = useStyles();
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const userType = useSelector(({ user }) => user.userType);
 
   const previewDraftBL = () => {
     const bl = myBL.id;
@@ -51,7 +52,7 @@ const PreviewDraftBL = () => {
 
           <PermissionProvider
             action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
-            extraCondition={pathname.includes('/guest') && myBL.state.includes('DRF_')}>
+            extraCondition={pathname.includes('/guest') && myBL.state.includes('DRF_') && userType === 'CUSTOMER'}>
             <Tooltip title="Redirect to Draft B/L">
               <img
                 src="assets/images/icons/preview-draft.svg"
