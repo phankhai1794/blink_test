@@ -629,7 +629,10 @@ const BLWorkspace = (props) => {
                   <Grid item xs={6} className={classes.leftPanel}>
                     <Grid item>
                       <Label>PRE-CARRIAGE BY</Label>
-                      <BLField id={getField(PRE_CARRIAGE)}>
+                      <BLField 
+                        lock={true} 
+                        // id={getField(PRE_CARRIAGE)}
+                      >
                         {getValueField(PRE_CARRIAGE)}
                       </BLField>
                     </Grid>
@@ -678,7 +681,11 @@ const BLWorkspace = (props) => {
                 </Grid>
                 <Grid item>
                   <Label>FORWARDING AGENT-REFERENCES FMC NO.</Label>
-                  <BLField id={getField(FORWARDING)} multiline={true} rows={5}>
+                  <BLField 
+                    lock={true} 
+                    // id={getField(FORWARDING)} 
+                    multiline={true} rows={5}
+                  >
                     {getValueField(FORWARDING)}
                   </BLField>
                 </Grid>
@@ -693,14 +700,21 @@ const BLWorkspace = (props) => {
                     {`TYPE OF MOVEMENT (IF MIXED, USE DESCRIPTION OF PACKAGES AND`} <br></br>
                     {`GOODS FIELD)`}
                   </Label>
-                  <BLField id={getField(TYPE_OF_MOVEMENT)}>
+                  <BLField 
+                    lock={true} 
+                    // id={getField(TYPE_OF_MOVEMENT)}
+                  >
                     {getValueField(TYPE_OF_MOVEMENT)}
                   </BLField>
                 </Grid>
                 <Grid item>
                   <Grid item>
                     <Label>OCEAN VESSEL VOYAGE NO. FlAG</Label>
-                    <BLField id={getField(VESSEL_VOYAGE)} width={`calc(50% - 15px)`}>
+                    <BLField 
+                      lock={true} 
+                      // id={getField(VESSEL_VOYAGE)} 
+                      width={`calc(50% - 15px)`}
+                    >
                       {getValueField(VESSEL_VOYAGE)}
                     </BLField>
                   </Grid>
@@ -761,13 +775,19 @@ const BLWorkspace = (props) => {
               <Grid item xs={6} className={classes.leftPanel}>
                 <Grid item>
                   <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
-                  <BLField id={getField(FREIGHT_CHARGES)}>
+                  <BLField 
+                    lock={true} 
+                    // id={getField(FREIGHT_CHARGES)}
+                  >
                     {getValueField(FREIGHT_CHARGES)}
                   </BLField>
                 </Grid>
                 <Grid item>
                   <Label>COMMODITY CODE</Label>
-                  <BLField id={getField(COMMODITY_CODE)}>
+                  <BLField 
+                    lock={true}
+                    // id={getField(COMMODITY_CODE)}
+                  >
                     {getValueField(COMMODITY_CODE)}
                   </BLField>
                 </Grid>
@@ -777,13 +797,19 @@ const BLWorkspace = (props) => {
                   <Grid item xs={6} className={classes.leftPanel}>
                     <Grid item>
                       <Label>PLACE OF BILL(S) ISSUE</Label>
-                      <BLField id={getField(PLACE_OF_BILL)}>
+                      <BLField 
+                        lock={true} 
+                        // id={getField(PLACE_OF_BILL)}
+                      >
                         {getValueField(PLACE_OF_BILL)}
                       </BLField>
                     </Grid>
                     <Grid item>
                       <Label>DATE CARGO RECEIVED</Label>
-                      <BLField id={getField(DATE_CARGO)}>
+                      <BLField 
+                        lock={true} 
+                        // id={getField(DATE_CARGO)}
+                      >
                         {getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'YYYY-MM-DD')}
                       </BLField>
                     </Grid>
@@ -791,13 +817,19 @@ const BLWorkspace = (props) => {
                   <Grid item xs={6} className={classes.rightPanel}>
                     <Grid item>
                       <Label>DATED</Label>
-                      <BLField id={getField(DATED)}>
+                      <BLField 
+                        lock={true} 
+                        // id={getField(DATED)}
+                      >
                         {getValueField(DATED) && formatDate(getValueField(DATED), 'YYYY-MM-DD')}
                       </BLField>
                     </Grid>
                     <Grid item>
                       <Label>DATE LADEN ON BOARD</Label>
-                      <BLField id={getField(DATE_LADEN)}>
+                      <BLField 
+                        lock={true} 
+                        // id={getField(DATE_LADEN)}
+                      >
                         {getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'YYYY-MM-DD')}
                       </BLField>
                     </Grid>
