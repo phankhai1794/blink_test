@@ -631,6 +631,14 @@ const InquiryViewer = (props) => {
         quest.showIconReply = true;
       }
       quest.mediaFilesAnswer = [];
+      const optionsInquires = [...inquiries];
+      const editedIndex = optionsInquires.findIndex(inq => currentQuestion.id === inq.id);
+      quest.answerObj.forEach(ans => {
+        ans.confirmed = false;
+        if (optionsInquires[editedIndex].selectChoice && ans.id === optionsInquires[editedIndex].selectChoice.answer) {
+          ans.confirmed = true;
+        }
+      })
       setQuestion(quest);
       setSaveComment(!isSaveComment);
     }
@@ -644,6 +652,14 @@ const InquiryViewer = (props) => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     const quest = { ...question };
+    if (optionsInquires[editedIndex].selectChoice && optionsInquires[editedIndex].selectChoice.answer) {
+      quest.answerObj.forEach(ans => {
+        ans.confirmed = false;
+        if (ans.id === optionsInquires[editedIndex].selectChoice.answer) {
+          ans.confirmed = true;
+        }
+      })
+    }
     setQuestion({ ...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer });
   }
 

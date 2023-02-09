@@ -105,9 +105,13 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
       const optionsInquires = [...questions];
       const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
       optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
-      optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMedia, 1);
-      setIsRemoveFile(!isRemoveFile);
+      let indexMediaFile = indexMedia;
+      if (file.id) {
+        indexMediaFile = optionsInquires[editedIndex].mediaFilesAnswer.findIndex(m => file.id === m.id);
+      }
+      optionsInquires[editedIndex].mediaFilesAnswer.splice(indexMediaFile, 1);
       dispatch(InquiryActions.setInquiries(optionsInquires));
+      setIsRemoveFile(!isRemoveFile);
     }
     else if (isReply) {
       const temp = {...templateReply};
