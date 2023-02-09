@@ -186,15 +186,36 @@ const SendInquiryForm = (props) => {
     return [msg, array.map((a) => `- ${a}`).join('\n'), header];
   };
 
-  useEffect(() => {
-    if (hasCustomer) setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer'));
-    else setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer', ['INQ_SENT', 'ANS_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'COMPL', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A', 'AME_SENT', 'REP_SENT', 'RESOVLED', 'UPLOADED', 'RESOLVED']));
+  async function fetchData() {
+    const status = ['INQ_SENT', 'ANS_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'COMPL', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A'];
+    let toCustomer = [], toOnshore = [];
 
-    if (hasOnshore) setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore'));
-    else setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore', ['INQ_SENT', 'ANS_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'COMPL', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A']));
-  }, [inquiries]);
+    const res = await getMail(mybl.id);
+    if (res.data.length) {
+      // Offshore
+      res.data[0]?.toCustomer?.length &&
+        res.data[0].toCustomer.forEach((customer) => {
+          toCustomer.push(customer.email);
+        });
+      // Onshore
+      res.data[0]?.toOnshore?.length &&
+        res.data[0].toOnshore.forEach((onshore) => {
+          toOnshore.push(onshore.email);
+        });
+      dispatch(mailActions.setTags({ ...tags, toCustomer, toOnshore }));
+    }
+    toCustomer = toCustomer.join(',');
+    toOnshore = toOnshore.join(',');
 
-  useEffect(() => {
+    // check inquiries
+    let inqOnshore = [], inqCustomer = [];
+    if (hasCustomer) setInqCustomer(inqOnshore = checkNewInquiry(metadata, inquiries, 'customer'));
+    else setInqCustomer(inqOnshore = checkNewInquiry(metadata, inquiries, 'customer', [...status, 'AME_SENT', 'REP_SENT', 'RESOVLED', 'UPLOADED', 'RESOLVED']));
+
+    if (hasOnshore) setInqOnshore(inqCustomer = checkNewInquiry(metadata, inquiries, 'onshore'));
+    else setInqOnshore(inqCustomer = checkNewInquiry(metadata, inquiries, 'onshore', status));
+
+    // set subject, content
     let subject = '';
     let content = '';
     let bodyHtml = '';
@@ -212,7 +233,7 @@ const SendInquiryForm = (props) => {
         html: initiateContentState(content),
         header
       });
-      setForm({ ...form, subject, content: bodyHtml });
+      setForm({ ...form, subject, content: bodyHtml, toOnshore });
       handleEditorState(content);
     }
     if (hasCustomer || (!hasCustomer && inqCustomer.length)) {
@@ -229,10 +250,16 @@ const SendInquiryForm = (props) => {
         html: initiateContentState(content),
         header
       });
-      setForm({ ...form, subject, content: bodyHtml });
+      setForm({ ...form, subject, content: bodyHtml, toCustomer });
       handleEditorState(content);
     }
-  }, [openEmail]);
+  }
+
+  useEffect(() => {
+    // call API suggest mail
+    if (!suggestMails.length) dispatch(mailActions.suggestMail(''));
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (tabValue === 'onshore') {
@@ -242,7 +269,7 @@ const SendInquiryForm = (props) => {
       setForm({ ...form, subject: customerValue.subject, content: customerValue.content });
       setEditorState(customerValue.html);
     }
-  }, [tabValue, inquiries]);
+  }, [tabValue]);
 
   const isRecipientValid = () => {
     if (tabValue === 'customer') {
@@ -255,31 +282,9 @@ const SendInquiryForm = (props) => {
     return Boolean(form.content.replace(/<[^>]*>|\n|&nbsp;/g, ''));
   };
 
-  const isMailVaid = () => Object.values(inputMail).filter((e) => e).length;
+  const isMailVaid = (tab) => ["", "Cc", "Bcc"].some((to) => Boolean(inputMail[`to${tab}${to}`].length));
 
   useEffect(() => {
-    getMail(mybl.id)
-      .then((res) => {
-        if (res.data.length) {
-          let toCustomer = [],
-            toOnshore = [];
-          // Offshore
-          res.data[0]?.toCustomer?.length &&
-            res.data[0].toCustomer.forEach((customer) => {
-              toCustomer.push(customer.email);
-            });
-          // Onshore
-          res.data[0]?.toOnshore?.length &&
-            res.data[0].toOnshore.forEach((onshore) => {
-              toOnshore.push(onshore.email);
-            });
-          dispatch(mailActions.setTags({ ...tags, toCustomer, toOnshore }));
-          setForm({ ...form, toCustomer: toCustomer.join(','), toOnshore: toOnshore.join(',') });
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
     if (success) {
       setOpenNotification(true);
       dispatch({
@@ -337,27 +342,18 @@ const SendInquiryForm = (props) => {
     }
   }, [confirmClick]);
 
-  useEffect(() => {
-    if (openEmail && !suggestMails.length) {
-      dispatch(mailActions.suggestMail(''));
-    }
-  }, [openEmail]);
-
-  const sendMailClick = (resend=false) => {
+  const sendMailClick = (resend = false) => {
     setFormError({
       ...formError,
       recipient: !isRecipientValid() ? 'Please specify at least one recipient.' : '',
       subject: !form.subject ? 'Please enter your email subject.' : '',
       content: !isBodyValid() ? 'Please enter your email content.' : ''
     });
-    if (isMailVaid()) {
-      const to = tabValue === 'customer' ? 'Customer' : 'Onshore';
+
+    const to = (tabValue === 'customer') ? 'Customer' : 'Onshore';
+    if (isMailVaid(to)) {
       const regex = /.*@.*com.+/;
-      if (
-        regex.test(inputMail[`to${to}`]) ||
-        regex.test(inputMail[`to${to}Cc`]) ||
-        regex.test(inputMail[`to${to}Bcc`])
-      )
+      if (["", "Cc", "Bcc"].some((c) => regex.test(inputMail[`to${to}${c}`])))
         dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
       else
         dispatch(
@@ -373,7 +369,7 @@ const SendInquiryForm = (props) => {
       dispatch(
         FormActions.openConfirmPopup({
           openConfirmPopup: true,
-          confirmPopupMsg: `Are you sure you want to ${resend ? 'resend': 'send'} this email?`,
+          confirmPopupMsg: `Are you sure you want to ${resend ? 'resend' : 'send'} this email?`,
           confirmPopupType: 'sendMail'
         })
       );

@@ -140,6 +140,7 @@ const BLWorkspace = (props) => {
   const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
+  const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -556,7 +557,7 @@ const BLWorkspace = (props) => {
                 {listMinimize.map((inquiry) => {
                   const field = metadata.field_options.find(f => inquiry.field === f.value);
                   if (inquiry.field === 'EMAIL') {
-                    return <SendInquiryForm field={'EMAIL'} key={inquiry.id} />;
+                    return openEmail && <SendInquiryForm field={'EMAIL'} key={inquiry.id} />;
                   } else {
                     const popupObj = popupOpen(inquiry, field);
                     return (
