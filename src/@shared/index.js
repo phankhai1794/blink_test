@@ -98,7 +98,7 @@ export const sentStatus = [
 
 export const validatePartiesContent = (partiesContent, type) => {
   const MAX_LENGTH = 35;
-  const ErrorMessage = 'The maximum number of lines is 2. No more than 35 characters per each line.';
+  const ErrorMessage = `The maximum number of lines is ${type === 'name' ? 2 : 3}. No more than 35 characters per each line.`;
   let isError = false, errorType = ErrorMessage;
   const textInput = partiesContent;
   const arrTextInput = typeof textInput === 'string' ? textInput.split('\n') : [];
