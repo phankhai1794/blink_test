@@ -189,6 +189,7 @@ const AllInquiry = (props) => {
       inquiriesSet = inquiriesSet.filter(inq => inq.process === 'pending');
     } else if (openAmendmentList) {
       inquiriesSet = inquiriesSet.filter(inq => inq.process === 'draft');
+      if (!inquiriesSet.length) dispatch(InquiryActions.addAmendment(null));
     } else if (openInquiryReview) {
       inquiriesSet = inquiriesSet.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF' || (inq.process === 'draft' && inq.state === 'REP_DRF'));
     } else if (openPreviewListSubmit) {

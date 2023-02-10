@@ -187,23 +187,20 @@ const SendInquiryForm = (props) => {
   };
 
   useEffect(() => {
-    if (hasCustomer) {
-      setTabValue('customer');
-    } else if (hasOnshore) {
-      setTabValue('onshore');
-    }
-  }, [openEmail]);
-
-  useEffect(() => {
     if (hasCustomer) setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer'));
+    else setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer', ['INQ_SENT', 'ANS_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'COMPL', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A', 'AME_SENT', 'REP_SENT', 'RESOVLED', 'UPLOADED', 'RESOLVED']));
+
     if (hasOnshore) setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore'));
+    else setInqOnshore(checkNewInquiry(metadata, inquiries, 'onshore', ['INQ_SENT', 'ANS_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'COMPL', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A']));
   }, [inquiries]);
 
   useEffect(() => {
     let subject = '';
     let content = '';
     let bodyHtml = '';
-    if (hasOnshore) {
+    if (hasOnshore || (!hasOnshore && inqOnshore.length)) {
+      setTabValue('onshore');
+
       subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + POL(${pol})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
       content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion. Pending issues:'}\n${msg2}`;
@@ -218,7 +215,9 @@ const SendInquiryForm = (props) => {
       setForm({ ...form, subject, content: bodyHtml });
       handleEditorState(content);
     }
-    if (hasCustomer) {
+    if (hasCustomer || (!hasCustomer && inqCustomer.length)) {
+      setTabValue('customer');
+
       subject = `[Customer BL Query]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + POL(${pol})`;
       const [msg1, msg2, header] = convertToList(inqCustomer, 'customer');
       content = `Dear Customer,\n \n${msg1 || `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`}\n${msg2} `;
@@ -286,13 +285,6 @@ const SendInquiryForm = (props) => {
       dispatch({
         type: mailActions.SENDMAIL_NONE
       });
-      if (!hasCustomer && !hasOnshore) {
-        dispatch(FormActions.toggleOpenEmail(false));
-      } else if (!hasCustomer) {
-        setTabValue('onshore');
-      } else {
-        setTabValue('customer');
-      }
     } else if (error) {
       dispatch(
         Actions.showMessage({
@@ -351,7 +343,7 @@ const SendInquiryForm = (props) => {
     }
   }, [openEmail]);
 
-  const sendMailClick = () => {
+  const sendMailClick = (resend=false) => {
     setFormError({
       ...formError,
       recipient: !isRecipientValid() ? 'Please specify at least one recipient.' : '',
@@ -381,7 +373,7 @@ const SendInquiryForm = (props) => {
       dispatch(
         FormActions.openConfirmPopup({
           openConfirmPopup: true,
-          confirmPopupMsg: 'Are you sure you want to send this email?',
+          confirmPopupMsg: `Are you sure you want to ${resend ? 'resend': 'send'} this email?`,
           confirmPopupType: 'sendMail'
         })
       );
@@ -427,7 +419,7 @@ const SendInquiryForm = (props) => {
   const countInq = (receiver) => {
     return inquiries.filter(
       (inq) =>
-        (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')) ||
+        (inq.receiver.includes(receiver)) ||
         (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
     ).length;
   };
@@ -439,6 +431,15 @@ const SendInquiryForm = (props) => {
       return tabSelected === 0 ? 'customer' : 'onshore';
     }
   };
+
+  const handleSendOrResend = () => {
+    let isResending = (
+      (tabValue === 'customer' && !hasCustomer && inqCustomer.length)
+      ||
+      (tabValue === 'onshore' && !hasOnshore && inqOnshore.length)
+    );
+    sendMailClick(Boolean(isResending));
+  }
 
   return (
     <>
@@ -457,7 +458,7 @@ const SendInquiryForm = (props) => {
         style={previewValue === 'email' && { backgroundColor: '#fdf2f2' }}
         customActions={
           <ActionUI
-            sendMailClick={sendMailClick}
+            sendMailClick={handleSendOrResend}
             previewValue={previewValue}
             handleChange={handleChange}></ActionUI>
         }
@@ -482,8 +483,8 @@ const SendInquiryForm = (props) => {
               </div>
               {formError.recipient && <HelperText>{formError.recipient}</HelperText>}
             </FormControl>
-            {hasCustomer && hasOnshore && (
-              <Tabs
+            {
+              Boolean(inqCustomer.length && inqOnshore.length) && <Tabs
                 indicatorColor="primary"
                 value={tabValue}
                 onChange={handleTabChange}
@@ -492,7 +493,7 @@ const SendInquiryForm = (props) => {
                 <Tab className={classes.tab} value="customer" label="Customer" />
                 <Tab className={classes.tab} value="onshore" label="Onshore" />
               </Tabs>
-            )}
+            }
             <FormControl
               style={{ width: '100%', padding: '5px 0', marginBottom: 10 }}
               error={Boolean(formError.subject)}>
