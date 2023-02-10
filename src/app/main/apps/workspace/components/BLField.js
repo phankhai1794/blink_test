@@ -83,7 +83,7 @@ const useStyles = makeStyles((theme) => ({
   input: {
     fontSize: '15px',
     color: darkGray,
-    padding: '5px 0 5px 16px',
+    padding: '9px 0 9px 16px',
     lineHeight: '22px',
     fontWeight: '500',
     textOverflow: 'ellipsis',
