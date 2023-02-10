@@ -88,7 +88,13 @@ const ListNotification = () => {
       dispatch(InquiryActions.addAmendment(null));
       dispatch(FormActions.toggleAmendmentsList(true));
     } else {
-      dispatch(FormActions.toggleAllInquiry(true));
+      const isEmptyInquiry = inquiries.filter(inq => inq.process === 'pending');
+      if (!isEmptyInquiry.length) {
+        dispatch(FormActions.toggleCreateInquiry(true));
+        dispatch(InquiryActions.addQuestion());
+      } else {
+        dispatch(FormActions.toggleAllInquiry(true));
+      }
     }
     handleClose();
   };

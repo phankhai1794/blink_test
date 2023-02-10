@@ -689,7 +689,8 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setOneInq({}));
             dispatch(FormActions.toggleCreateInquiry(false));
           }
-          if (!optionsOfQuestion.length) {
+          const isEmptyInq = optionsOfQuestion.filter(op => op.process === 'pending');
+          if (!isEmptyInq.length) {
             (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "")) //BX: Delete all inquiries draft
           }
