@@ -105,10 +105,6 @@ function ToolbarLayout1(props) {
   const [open, setOpen] = useState(false);
   const [attachmentLength, setAttachmentLength] = useState(0);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
-  const myBLDrf = useSelector(({ draftBL }) => draftBL.myBL);
-  const enabledMail = inquiries.some((inq) =>
-    ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state)
-  );
   const enableSubmitInq = inquiries.some((inq) =>
     ['ANS_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
@@ -446,7 +442,7 @@ function ToolbarLayout1(props) {
                       height: '30px',
                       borderRadius: '20px'
                     }}
-                    disabled={!enabledMail}
+                    disabled={inquiries.length === 0}
                     color="primary"
                     variant="contained"
                     size="medium"

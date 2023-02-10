@@ -11,7 +11,6 @@ import { CONTAINER_DETAIL, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY } from
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
-import { validatePartiesContent } from '@shared';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -207,10 +206,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             multiline
             rows={['name'].includes(type) ? 2 : 3}
             onChange={(e) => inputTextSeparate(e, type, field)}
-            error={validatePartiesContent(fieldValueSeparate[type], type).isError}
-            helperText={
-              validatePartiesContent(fieldValueSeparate[type], type).isError ? validatePartiesContent(fieldValueSeparate[type], type).errorType.replace('{{fieldName}}', labelNameCapitalize) : ''
-            }
             variant='outlined'
           />
         </div>)
@@ -228,20 +223,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     }
   }
 
-  const handleChangeField = (e) => {
-    setFieldValueSelect(e);
-    setFieldValue(content[e.value] || "");
-    setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(e.value));
-    setValueSeparate(e.value);
-  };
-
-  const checkCurField = () => {
-    const filterCurrentField = fieldType.find(f => f.value === currentField);
-    setFieldValueSelect(filterCurrentField ? filterCurrentField : fieldType[0]);
-    setFieldValue(filterCurrentField ? content[filterCurrentField.value] : content[fieldType[0].value]);
-    setValueSeparate(filterCurrentField ? filterCurrentField.value : fieldType[0].value);
-  };
-
   const setValueSeparate = (fieldValue) => {
     const checkSeparate = [SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(fieldValue);
     setIsSeparate(checkSeparate);
@@ -257,9 +238,37 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     }
   };
 
+  const handleChangeField = (e) => {
+    setFieldValueSelect(e);
+    setFieldValue(content[e.value] || "");
+    setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(e.value));
+    setValueSeparate(e.value);
+  };
+
+  const checkCurField = () => {
+    const filterCurrentField = fieldType.find(f => f.value === currentField);
+    const findInqs = inquiries.filter(inq => inq.field === currentField);
+    if (findInqs.length) {
+      setFieldValueSelect();
+      setFieldValue();
+      setValueSeparate();
+    } else {
+      if (filterCurrentField) {
+        setFieldValueSelect(filterCurrentField);
+        setFieldValue(content[filterCurrentField.value]);
+        setValueSeparate(filterCurrentField.value);
+      }
+    }
+  };
+
   useEffect(() => {
-    !openAmendmentList ? setFieldValue(content[currentField] || "") : setFieldValue('');
-    if (!openAmendmentList) checkCurField();
+    if (!openAmendmentList) {
+      setFieldValue(content[currentField] || "")
+      checkCurField();
+    } else {
+      setFieldValue('');
+      setIsSeparate(false);
+    }
   }, [content, currentField])
 
   const styles = (width) => {
@@ -309,7 +318,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             customStyle={styles(fullscreen ? 320 : 295)}
             value={fieldValueSelect}
             onChange={handleChangeField}
-            placeholder="BL Field"
+            placeholder="BL Data Field"
             textFieldProps={{
               variant: 'outlined'
             }}
@@ -357,9 +366,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         <Button
           className={classes.btn}
           disabled={
-            (isSeparate ?
-              (validatePartiesContent(fieldValueSeparate.name, 'name')?.isError
-                || validatePartiesContent(fieldValueSeparate.address, 'address')?.isError)
+            (isSeparate ? false
               : (fieldValue && (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0)))) || disableSave
           }
           onClick={() => handleValidateInput(handleSave)}
