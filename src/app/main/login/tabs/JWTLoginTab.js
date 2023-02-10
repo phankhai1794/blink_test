@@ -106,6 +106,7 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   menuList: {
+    maxHeight: 300,
     padding: 0
   },
   menuItem: {
@@ -251,7 +252,7 @@ function JWTLoginTab({ onLogged, country }) {
           }
         />
 
-        <Typography className={classes.boldLabel}>Country</Typography>
+        {/* <Typography className={classes.boldLabel}>Country</Typography>
         <TextField
           id="country"
           name="country"
@@ -290,7 +291,7 @@ function JWTLoginTab({ onLogged, country }) {
               {country.name}
             </MenuItem>
           ))}
-        </TextField>
+        </TextField> */}
 
         <Button
           type="submit"

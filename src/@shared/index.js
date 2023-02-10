@@ -74,21 +74,93 @@ export const stateResquest = 'REQUEST';
 
 export const COUNTRIES = [
   {
-    name: 'Vietnam',
-    value: 'VN'
-  },
-  {
-    name: 'Korea',
-    value: 'KR'
+    name: 'United States',
+    value: 'US'
   },
   {
     name: 'Singapore',
     value: 'SG'
   },
   {
+    name: 'Thailand',
+    value: 'TH'
+  },
+  {
+    name: 'Vietnam',
+    value: 'VN'
+  },
+  {
+    name: 'Czechia',
+    value: 'CZ'
+  },
+  {
+    name: 'Denmark',
+    value: 'DK'
+  },
+  {
+    name: 'Finland',
+    value: 'FI'
+  },
+  {
+    name: 'France',
+    value: 'FR'
+  },
+  {
+    name: 'Hungary',
+    value: 'HU'
+  },
+  {
+    name: 'Italy',
+    value: 'IT'
+  },
+  {
+    name: 'Norway',
+    value: 'NO'
+  },
+  {
+    name: 'Poland',
+    value: 'PL'
+  },
+  {
+    name: 'Russian',
+    value: 'RU'
+  },
+  {
+    name: 'Sweden',
+    value: 'SE'
+  },
+  {
+    name: 'Switzerland',
+    value: 'CH'
+  },
+  {
     name: 'Spain',
     value: 'ES'
-  }
+  },
+  {
+    name: 'Portugal',
+    value: 'PT'
+  },
+  {
+    name: 'Taiwan',
+    value: 'TW'
+  },
+  {
+    name: 'Japan',
+    value: 'JP'
+  },
+  {
+    name: 'New Zealand',
+    value: 'OC_ML'
+  },
+  {
+    name: 'Myanmar',
+    value: 'MM'
+  },
+  {
+    name: 'Montenegro	',
+    value: 'ME'
+  },
 ];
 
 export const sentStatus = [
