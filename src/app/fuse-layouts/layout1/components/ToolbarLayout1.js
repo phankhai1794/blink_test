@@ -110,12 +110,19 @@ function ToolbarLayout1(props) {
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
 
   useEffect(() => {
+    const countInquiry = inquiries.filter((inq) => inq.process === 'pending' && !['COMPL', 'UPLOADED'].includes(inq.state))
+    setInquiryLength(countInquiry.length);
+  
+    const countAmend = inquiries.filter((ame) => ame.process === 'draft' && !['RESOLVED', 'UPLOADED', 'COMPL'].includes(ame.state))
+    setAmendmentLength(countAmend.length);
+  },[inquiries])
+
+  useEffect(() => {
     dispatch(InquiryActions.checkSend(false));
     let optionInquiries = [...inquiries];
     let getAttachmentFiles = [];
 
     const inquiriesPendingProcess = optionInquiries.filter((op) => op.process === 'pending');
-    setInquiryLength(inquiriesPendingProcess.length);
     inquiries.forEach((e) => {
       const mediaFile = e.mediaFile.map((f) => {
         return {
@@ -199,8 +206,6 @@ function ToolbarLayout1(props) {
         .catch((err) => {
           console.error(err);
         });
-
-      setAmendmentLength(amendment.length);
 
       if (amendment.length) {
         axios
@@ -301,7 +306,7 @@ function ToolbarLayout1(props) {
   };
 
   const openAmendmentsList = () => {
-    if (amendmentsLength) {
+    if (inquiries.filter((inq) => inq.process === 'draft').length) {
       dispatch(FormActions.toggleAmendmentsList(true));
     } else dispatch(FormActions.toggleOpenNotificationAmendmentList(true));
   };
