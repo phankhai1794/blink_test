@@ -157,7 +157,7 @@ const ChoiceAnswerEditor = (props) => {
         </div>
         <TextField
           style={{ border: 'none' }}
-          placeholder="Add Option"
+          placeholder="Add an option"
           onClick={handleAddChoice}
           InputProps={{ classes }}
           disabled

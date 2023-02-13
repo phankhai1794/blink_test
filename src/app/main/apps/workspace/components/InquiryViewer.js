@@ -2182,17 +2182,19 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
         }
         let hasData = false;
         td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: type === typeList[0] ? 10 : 5 }}>
-          <input
-            className={clsx(classes.text)}
-            style={{
-              backgroundColor: '#FDF2F2',
-              fontWeight: 600,
-              borderTopLeftRadius: rowIndex === 0 && 8,
-              fontSize: 14,
-            }}
-            disabled
-            defaultValue={type}
-          />
+          <Tooltip title={type} enterDelay={1000}>
+            <input
+              className={clsx(classes.text)}
+              style={{
+                backgroundColor: '#FDF2F2',
+                fontWeight: 600,
+                borderTopLeftRadius: rowIndex === 0 && 8,
+                fontSize: 14,
+              }}
+              disabled
+              defaultValue={type}
+            />
+          </Tooltip>
           {
             rowValues.map((item, index1) => {
               if (item.value.length > rowIndex) {
