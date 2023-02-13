@@ -47,12 +47,6 @@ export const validateExtensionFile = (file) => {
   return fileExt.match(/jpe|jpg|png|pdf|csv|xls|sheet|ppt|doc|txt|gif/g);
 };
 
-export const validateMaximunFile = (files) => {
-  let sum = 0;
-  files.map((file) => sum += file ? file.size / 1024 / 1024 : 0);
-  return sum > 25;
-};
-
 export const checkNewInquiry = (metadata, inquiries, type, status = ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF']) => {
   const list = [];
   const temp = inquiries?.filter(inq => inq.receiver[0] === type && status.includes(inq.state));
