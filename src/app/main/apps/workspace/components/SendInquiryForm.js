@@ -209,11 +209,11 @@ const SendInquiryForm = (props) => {
 
     // check inquiries
     let inqOnshore = [], inqCustomer = [];
-    if (hasCustomer) setInqCustomer(inqOnshore = checkNewInquiry(metadata, inquiries, 'customer'));
-    else setInqCustomer(inqOnshore = checkNewInquiry(metadata, inquiries, 'customer', [...status, 'AME_SENT', 'REP_SENT', 'RESOVLED', 'UPLOADED', 'RESOLVED']));
+    if (hasCustomer) setInqCustomer(inqCustomer = checkNewInquiry(metadata, inquiries, 'customer'));
+    else setInqCustomer(inqCustomer = checkNewInquiry(metadata, inquiries, 'customer', [...status, 'AME_SENT', 'REP_SENT', 'RESOVLED', 'UPLOADED', 'RESOLVED']));
 
-    if (hasOnshore) setInqOnshore(inqCustomer = checkNewInquiry(metadata, inquiries, 'onshore'));
-    else setInqOnshore(inqCustomer = checkNewInquiry(metadata, inquiries, 'onshore', status));
+    if (hasOnshore) setInqOnshore(inqOnshore = checkNewInquiry(metadata, inquiries, 'onshore'));
+    else setInqOnshore(inqOnshore = checkNewInquiry(metadata, inquiries, 'onshore', status));
 
     // set subject, content
     let subject = '';
@@ -415,7 +415,7 @@ const SendInquiryForm = (props) => {
   const countInq = (receiver) => {
     return inquiries.filter(
       (inq) =>
-        (inq.receiver.includes(receiver)) ||
+        (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')) ||
         (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
     ).length;
   };
