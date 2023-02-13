@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import * as AppAction from 'app/store/actions';
-import { validateExtensionFile, validateMaximunFile } from '@shared';
+import { validateExtensionFile } from '@shared';
 import { handleDuplicateAttachment } from '@shared/handleError';
 
 import * as FormActions from '../store/actions/form';
@@ -48,7 +48,6 @@ const AttachFile = (props) => {
         const answerUpdate = optionsInquires[editedIndex].answerObj[answerIndex];
         answerUpdate.confirmed = true;
       }
-
       if (checkDuplicate(optionsInquires[editedIndex].mediaFilesAnswer, files)) {
         dispatch(AppAction.showMessage({
           message: `Duplicate file(s)`,
@@ -62,11 +61,6 @@ const AttachFile = (props) => {
       optionsInquires[editedIndex].attachmentAnswer = { inquiry: question.id };
       props.setIsUploadFile(!isUploadFile);
       return dispatch(InquiryActions.setInquiries(optionsInquires));
-    }
-
-    const maxSize = validateMaximunFile([...currentEditInq.mediaFile.map(item => item.fileUpload), ...files]);
-    if (!maxSize) {
-      dispatch(AppAction.showMessage({ message: 'Send up files limit 25 MB in attachments!', variant: 'error' }));
     }
 
     const isExist = handleDuplicateAttachment(
