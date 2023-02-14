@@ -668,6 +668,9 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     question?.state !== 'OPEN' && setAllowDeleteInq(false);
+    if (!['REOPEN_A', 'REOPEN_Q'].includes(question.state)) {
+      setDisableReopen(false);
+    }
   }, [question]);
 
   const resetInquiry = () => {
@@ -969,10 +972,13 @@ const InquiryViewer = (props) => {
             if (editedAmeIndex !== -1) {
               optionsInquires[editedAmeIndex].state = 'UPLOADED';
               dispatch(InquiryActions.setInquiries(optionsInquires));
+
               const optionAmendment = [...listCommentDraft];
               editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
-              optionAmendment[editedAmeIndex].state = 'UPLOADED';
-              dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+              if (optionAmendment[editedAmeIndex]) {
+                optionAmendment[editedAmeIndex].state = 'UPLOADED';
+                dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+              }
             }
           }
           // Set new Content when EBL has new data
