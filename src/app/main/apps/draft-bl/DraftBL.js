@@ -8,7 +8,7 @@ import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
-import { isJsonText } from '@shared';
+import { isJsonText, formatDate } from '@shared';
 
 import * as Actions from './store/actions';
 
@@ -690,13 +690,13 @@ const DraftPage = (props) => {
               <Grid item style={{ borderBottom: BODER_COLOR }}>
                 <div className={classes.tittle_M}>DATE CARGO RECEIVED</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATE_CARGO)}</span>
+                  <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')}</span>
                 </div>
               </Grid>
               <Grid item style={{ borderBottom: BODER_COLOR }}>
                 <div className={classes.tittle_M}>DATE LADEN ON BOARD</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATE_LADEN)}</span>
+                  <span>{getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')}</span>
                 </div>
               </Grid>
               <Grid item style={{ borderBottom: BODER_COLOR }}>
@@ -708,7 +708,7 @@ const DraftPage = (props) => {
               <Grid item>
                 <div className={classes.tittle_M}>DATED</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATED)}</span>
+                  <span>{getValueField(DATED) && formatDate(getValueField(DATED), 'DD MMM YYYY')}</span>
                 </div>
               </Grid>
             </Grid>
