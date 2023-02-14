@@ -78,7 +78,7 @@ const ParagraphAnswer = (props) => {
         setParagraphText('');
       }
     }
-    if (['string'].includes(typeof paragraphText) && paragraphText.trim() === '') setParagraphText(ONLY_ATT)
+    if (!paragraphText && question.answerObj.length > 0 && question.mediaFilesAnswer.length > 0) setParagraphText(ONLY_ATT)
   }, [saveStatus, question]);
 
   return (
