@@ -403,7 +403,7 @@ const BLWorkspace = (props) => {
         fabTitle: 'Amendment Form',
         title: metadata?.field_options.find((f) => f.value === currentField)?.label,
         field: 'AMENDMENT_FORM',
-        child: <AmendmentEditor />
+        child: <AmendmentEditor getUpdatedAt={() => {}} />
       };
     default:
       return {
