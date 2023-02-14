@@ -20,6 +20,7 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { handleDuplicateAttachment } from '@shared/handleError';
 import { getCommentDraftBl } from "app/services/draftblService";
 import Checkbox from "@material-ui/core/Checkbox";
+
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as InquiryActions from "../store/actions/inquiry";
 
@@ -527,7 +528,6 @@ const AttachmentList = (props) => {
 
   const handleConfirm = () => {
     const optionsAttachmentList = [...attachmentFiles];
-    const optionsInquiries = [...inquiries];
     // update attachment list
     const listIdMedia = [];
     selectedIndexFile.forEach(val => {
@@ -538,26 +538,16 @@ const AttachmentList = (props) => {
     if (listIdMedia.length > 0) {
       removeMultipleMedia({ mediaIds: listIdMedia }).then(res => {
         // update attachment list
-        let mediaOther = [];
-        let mediaRemove = [];
+        let mediaR = [];
         optionsAttachmentList.forEach((op, i) => {
           if (!selectedIndexFile.includes(i)) {
-            mediaOther = [...mediaOther, op];
-          } else mediaRemove = [...mediaRemove, op.id]
+            mediaR = [...mediaR, op];
+          }
         });
-        setAttachmentFiles(mediaOther);
+        setAttachmentFiles(mediaR);
         setSelectedIndexFile([]);
         setShowConfirm(false);
         dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-        optionsInquiries.forEach(item => {
-          item.mediaFile = item.mediaFile.filter(f => !mediaRemove.includes(f.id));
-          item.mediaFilesAnswer = item.mediaFilesAnswer.filter(f => !mediaRemove.includes(f.id));
-        })
-        if (mediaOther.length === 0) {
-          document.querySelectorAll('#no-att span')[0].style.display = 'none'
-        }
-        
-        dispatch(InquiryActions.setInquiries(optionsInquiries))
         dispatch(AppAction.showMessage({ message: 'Delete attachment successfully', variant: 'success' }));
         if (mediaR.length === 0) dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
       });
