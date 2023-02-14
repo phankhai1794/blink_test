@@ -140,6 +140,7 @@ const Comment = (props) => {
                     container={
                       question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                     }
+                    validation={() => null}
                     question={question}
                     originalValues={JSON.parse(content)}
                     disableInput={true}
