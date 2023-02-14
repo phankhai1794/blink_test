@@ -267,7 +267,7 @@ function ToolbarLayout1(props) {
           });
       }
     }
-  }, [enableSubmit, inquiries]);
+  }, [enableSubmit]);
 
   useEffect(() => {
     if (!user.displayName || !validToken) {
