@@ -29,6 +29,8 @@ export const VALIDATE_INPUT = 'VALIDATE_INPUT';
 export const INCREASE_LOADING = 'INCREASE_LOADING';
 export const DECREASE_LOADING = 'DECREASE_LOADING';
 export const RESET_LOADING = 'RESET_LOADING';
+export const PROCESS_LOADING = 'PROCESS_LOADING';
+export const OPEN_WARNING_UPLOAD_OPUS = 'OPEN_WARNING_UPLOAD_OPUS';
 
 export function setFullscreen(state) {
   return {
@@ -236,8 +238,22 @@ export function decreaseLoading() {
   }
 }
 
+export function isLoadingProcess(state) {
+  return {
+    type: PROCESS_LOADING,
+    state
+  }
+}
+
 export function resetLoading() {
   return {
     type: RESET_LOADING,
+  }
+}
+
+export function toggleWarningUploadOpus(state) {
+  return {
+    type: OPEN_WARNING_UPLOAD_OPUS,
+    state
   }
 }
