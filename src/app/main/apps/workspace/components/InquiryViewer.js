@@ -201,6 +201,7 @@ const InquiryViewer = (props) => {
   const [textResolve, setTextResolve] = useState(content[question.field] || '');
   const [validationCDCM, setValidationCDCM] = useState(true);
   const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
+  const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
@@ -653,6 +654,9 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     question?.state !== 'OPEN' && setAllowDeleteInq(false);
+    if (!['REOPEN_A', 'REOPEN_Q'].includes(question.state) && openAmendmentList) {
+      setDisableReopen(false);
+    }
   }, [question]);
 
   const resetInquiry = () => {
@@ -955,8 +959,10 @@ const InquiryViewer = (props) => {
               dispatch(InquiryActions.setInquiries(optionsInquires));
               const optionAmendment = [...listCommentDraft];
               editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
-              optionAmendment[editedAmeIndex].state = 'UPLOADED';
-              dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+              if (optionAmendment[editedAmeIndex]) {
+                optionAmendment[editedAmeIndex].state = 'UPLOADED';
+                dispatch(InquiryActions.setListCommentDraft(optionAmendment));
+              }
             }
           }
           // Set new Content when EBL has new data
