@@ -893,7 +893,7 @@ const InquiryViewer = (props) => {
         }
 
         if (getTypeName === CONTAINER_SEAL) {
-          obj[question.inqType] = obj[question.inqType].filter(seal => seal.toUpperCase().trim())
+          obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
           obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
         }
