@@ -262,7 +262,7 @@ function ToolbarLayout1(props) {
           });
       }
     }
-  }, [enableSubmit]);
+  }, [enableSubmit, inquiries]);
 
   useEffect(() => {
     if (!user.displayName || !validToken) {
