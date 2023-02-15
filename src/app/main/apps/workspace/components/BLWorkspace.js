@@ -634,6 +634,7 @@ const BLWorkspace = (props) => {
                       <Label>PRE-CARRIAGE BY</Label>
                       <BLField 
                         lock={true} 
+                        disableClick={true}
                         // id={getField(PRE_CARRIAGE)}
                       >
                         {getValueField(PRE_CARRIAGE)}
@@ -666,11 +667,11 @@ const BLWorkspace = (props) => {
                 <Grid container>
                   <Grid item xs={6} className={classes.leftPanel}>
                     <Label>BOOKING NO.</Label>
-                    <BLField lock={true}>{myBL.bkgNo || ""}</BLField>
+                    <BLField lock={true} disableClick={true}>{myBL.bkgNo || ""}</BLField>
                   </Grid>
                   <Grid item xs={6} className={classes.rightPanel}>
                     <Label>SEA WAYBILL NO.</Label>
-                    <BLField lock={true}>{(myBL.bkgNo && `ONYE${myBL.bkgNo}`) || ""}</BLField>
+                    <BLField lock={true} disableClick={true}>{(myBL.bkgNo && `ONYE${myBL.bkgNo}`) || ""}</BLField>
                   </Grid>
                 </Grid>
                 <Grid item>
@@ -686,6 +687,7 @@ const BLWorkspace = (props) => {
                   <Label>FORWARDING AGENT-REFERENCES FMC NO.</Label>
                   <BLField 
                     lock={true} 
+                    disableClick={true}
                     // id={getField(FORWARDING)} 
                     multiline={true} rows={5}
                   >
@@ -705,6 +707,7 @@ const BLWorkspace = (props) => {
                   </Label>
                   <BLField 
                     lock={true} 
+                    disableClick={true}
                     // id={getField(TYPE_OF_MOVEMENT)}
                   >
                     {getValueField(TYPE_OF_MOVEMENT)}
@@ -715,6 +718,7 @@ const BLWorkspace = (props) => {
                     <Label>OCEAN VESSEL VOYAGE NO. FlAG</Label>
                     <BLField 
                       lock={true} 
+                      disableClick={true}
                       // id={getField(VESSEL_VOYAGE)} 
                       width={`calc(50% - 15px)`}
                     >
@@ -780,6 +784,7 @@ const BLWorkspace = (props) => {
                   <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
                   <BLField 
                     lock={true} 
+                    disableClick={true}
                     // id={getField(FREIGHT_CHARGES)}
                   >
                     {getValueField(FREIGHT_CHARGES)}
@@ -789,6 +794,7 @@ const BLWorkspace = (props) => {
                   <Label>COMMODITY CODE</Label>
                   <BLField 
                     lock={true}
+                    disableClick={true}
                     // id={getField(COMMODITY_CODE)}
                   >
                     {getValueField(COMMODITY_CODE)}
@@ -802,6 +808,7 @@ const BLWorkspace = (props) => {
                       <Label>PLACE OF BILL(S) ISSUE</Label>
                       <BLField 
                         lock={true} 
+                        disableClick={true}
                         // id={getField(PLACE_OF_BILL)}
                       >
                         {getValueField(PLACE_OF_BILL)}
@@ -811,6 +818,7 @@ const BLWorkspace = (props) => {
                       <Label>DATE CARGO RECEIVED</Label>
                       <BLField 
                         lock={true} 
+                        disableClick={true}
                         // id={getField(DATE_CARGO)}
                       >
                         {getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'YYYY-MM-DD')}
@@ -822,6 +830,7 @@ const BLWorkspace = (props) => {
                       <Label>DATED</Label>
                       <BLField 
                         lock={true} 
+                        disableClick={true}
                         // id={getField(DATED)}
                       >
                         {getValueField(DATED) && formatDate(getValueField(DATED), 'YYYY-MM-DD')}
@@ -831,6 +840,7 @@ const BLWorkspace = (props) => {
                       <Label>DATE LADEN ON BOARD</Label>
                       <BLField 
                         lock={true} 
+                        disableClick={true}
                         // id={getField(DATE_LADEN)}
                       >
                         {getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'YYYY-MM-DD')}
