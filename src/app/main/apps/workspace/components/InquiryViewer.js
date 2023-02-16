@@ -1327,6 +1327,7 @@ const InquiryViewer = (props) => {
     const reply = { ...question };
     reply.showIconEdit = false;
     reply.showIconReply = false;
+    setShowViewAll(false);
     if (['ANS_DRF', 'ANS_SENT'].includes(question.state) || (user.role === 'Guest' && ['REP_Q_DRF'].includes(question.state))) {
       optionsInquires[editedIndex].showIconEdit = false;
       optionsInquires[editedIndex].showIconReply = false;
