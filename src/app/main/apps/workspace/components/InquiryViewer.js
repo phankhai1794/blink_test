@@ -957,8 +957,8 @@ const InquiryViewer = (props) => {
     uploadOPUS(myBL.id, idUpload, question.field, inqAnsId)
       .then((res) => {
         if (res && res.status === 'F') {
-          dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: res.message, icon: 'failed' }));
-          // dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
+          // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: res.message, icon: 'failed' }));
+          dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
         } else {
           setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
 
@@ -987,11 +987,11 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setContent({ ...content, ...res.newData }));
           }
           if (res.warning) {
-            dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: res.warning, icon: 'warning' }));
-            // dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
+            // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: res.warning, icon: 'warning' }));
+            dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
           } else {
-            dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: 'Upload to OPUS successfully', icon: 'success' }));
-            // dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
+            // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: 'Upload to OPUS successfully', icon: 'success' }));
+            dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
           }
           const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && inq.state !== 'COMPL');
           const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && inq.state !== 'COMPL');
@@ -1016,8 +1016,8 @@ const InquiryViewer = (props) => {
         setViewDropDown('');
       })
       .catch((error) => {
-        dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: error, icon: 'failed' }));
-        // dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
+        // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: error, icon: 'failed' }));
+        dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
       }).finally(() => dispatch(FormActions.isLoadingProcess(false)));
   };
 
