@@ -136,7 +136,6 @@ const BLWorkspace = (props) => {
   const openNotificationReply = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteReply);
   const openNotificationBLWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning);
   const openNotificationSubmitPreview = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitPreview);
-  const openNotificationUploadOpus = useSelector(({ workspace }) => workspace.formReducer.openNotificationUploadOpus);
   const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
   const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
@@ -488,12 +487,6 @@ const BLWorkspace = (props) => {
           <div>have been sent successfully.</div>
         </>
       )
-    } else if (openNotificationUploadOpus.status) {
-      return (
-        <>
-          <span>{openNotificationUploadOpus.message}</span>
-        </>
-      )
     }
   };
 
@@ -507,12 +500,6 @@ const BLWorkspace = (props) => {
   const renderIconType = () => {
     if (openNotification || openNotificationReply || openNotificationAmendment || openNotificationSubmitPreview) {
       return <img src={`/assets/images/icons/vector.svg`} />;
-    } else if (openNotificationUploadOpus.status) {
-      if (openNotificationUploadOpus.icon === 'failed') {
-        return <img src={`/assets/images/icons/error.svg`} height={45} width={45} />
-      } else if (openNotificationUploadOpus.icon === 'warning' || openNotificationUploadOpus.icon === 'success') {
-        return <img src={`/assets/images/icons/vector.svg`} height={35} width={35} />
-      }
     }
     return null
   }
@@ -528,8 +515,7 @@ const BLWorkspace = (props) => {
             openNotificationReply ||
             openNotificationAmendment ||
             openNotificationBLWarning.status ||
-            openNotificationSubmitPreview ||
-            openNotificationUploadOpus.status}
+            openNotificationSubmitPreview}
             msg={renderMsgNoti()}
             // msg2={`Please wait for ${openNotificationBLWarning.userName} complete his/her work!`}
             msg2={renderMsgNoti2()}
@@ -540,7 +526,6 @@ const BLWorkspace = (props) => {
               dispatch(FormActions.toggleOpenNotificationDeleteAmendment(false));
               dispatch(FormActions.toggleOpenBLWarning(false));
               dispatch(FormActions.toggleOpenNotificationPreviewSubmit(false));
-              dispatch(FormActions.toggleWarningUploadOpus({ status: false, message: '' }));
             }}
           />
           <div className={clsx('max-w-5xl', classes.root)}>
