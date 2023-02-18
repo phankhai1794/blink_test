@@ -168,9 +168,9 @@ const OtpCheck = ({ children }) => {
   const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true, resendAfter: 0 });
   const [step, setStep] = useState(0);
 
-  const catchError = (error, condition = true) => {
+  const catchError = (error) => {
     console.error(error);
-    if (condition) {
+    if (error.response?.data?.error.status !== 403) {
       const { message } = error.response.data.error || error.message;
       dispatch(Actions.showMessage({ message, variant: 'error' }));
     }
@@ -282,7 +282,7 @@ const OtpCheck = ({ children }) => {
           window.history.pushState({}, '', `/guest?bl=${bl}`);
         })
         .catch((error) => {
-          catchError(error, error.response?.data?.error.status === 403);
+          catchError(error);
         });
     }
 
@@ -302,7 +302,7 @@ const OtpCheck = ({ children }) => {
             return;
           })
           .catch((error) => {
-            catchError(error, error.response?.data?.error.status === 403);
+            catchError(error);
           });
       }
     }

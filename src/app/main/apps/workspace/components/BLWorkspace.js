@@ -403,7 +403,7 @@ const BLWorkspace = (props) => {
         fabTitle: 'Amendment Form',
         title: metadata?.field_options.find((f) => f.value === currentField)?.label,
         field: 'AMENDMENT_FORM',
-        child: <AmendmentEditor />
+        child: <AmendmentEditor getUpdatedAt={() => {}} />
       };
     default:
       return {
@@ -511,7 +511,11 @@ const BLWorkspace = (props) => {
         <>
           <ListNotification />
           <SubmitAnswerNotification
-            open={openNotification || openNotificationReply || openNotificationAmendment || openNotificationBLWarning.status || openNotificationSubmitPreview}
+            open={openNotification ||
+            openNotificationReply ||
+            openNotificationAmendment ||
+            openNotificationBLWarning.status ||
+            openNotificationSubmitPreview}
             msg={renderMsgNoti()}
             // msg2={`Please wait for ${openNotificationBLWarning.userName} complete his/her work!`}
             msg2={renderMsgNoti2()}
@@ -821,7 +825,7 @@ const BLWorkspace = (props) => {
                         disableClick={true}
                         // id={getField(DATE_CARGO)}
                       >
-                        {getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'YYYY-MM-DD')}
+                        {getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')}
                       </BLField>
                     </Grid>
                   </Grid>
@@ -833,7 +837,7 @@ const BLWorkspace = (props) => {
                         disableClick={true}
                         // id={getField(DATED)}
                       >
-                        {getValueField(DATED) && formatDate(getValueField(DATED), 'YYYY-MM-DD')}
+                        {getValueField(DATED) && formatDate(getValueField(DATED), 'DD MMM YYYY')}
                       </BLField>
                     </Grid>
                     <Grid item>
@@ -843,7 +847,7 @@ const BLWorkspace = (props) => {
                         disableClick={true}
                         // id={getField(DATE_LADEN)}
                       >
-                        {getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'YYYY-MM-DD')}
+                        {getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')}
                       </BLField>
                     </Grid>
                   </Grid>

@@ -28,7 +28,8 @@ const mailReducer = function (state = initialState, action) {
   }
   case Actions.SENDMAIL_SUCCESS: {
     return {
-      ...initialState,
+      ...state,
+      error: '',
       success: true,
       isLoading: false
     };

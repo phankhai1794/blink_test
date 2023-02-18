@@ -13,7 +13,7 @@ export const handleError = (dispatch, err) => {
     dispatch(Actions.checkAuthToken(false));
     dispatch(Actions.checkAllow(false));
   }
-  dispatch(Actions.showMessage({ message, variant: 'error' }));
+  else dispatch(Actions.showMessage({ message, variant: 'error' }));
   return [status, message];
 };
 

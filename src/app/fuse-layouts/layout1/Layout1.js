@@ -7,6 +7,8 @@ import { renderRoutes } from 'react-router-config';
 import { makeStyles } from '@material-ui/styles';
 import { useSelector } from 'react-redux';
 
+import Loading from "../shared-components/Loading";
+
 import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
 import ToolbarLayout1 from './components/ToolbarLayout1';
 
@@ -82,13 +84,15 @@ function Layout1(props) {
   const { routes } = appContext;
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const openTrans = useSelector(({ workspace }) => workspace.formReducer.openTrans);
+  const isLoadingProcess = useSelector(({ workspace }) => workspace.formReducer.isLoadingProcess);
   return (
     <div id="fuse-layout" className={clsx(classes.root, config.mode, 'scroll-' + config.scroll)}>
       <div className="flex flex-1 flex-col overflow-hidden relative">
         <div className={classes.wrapper}>
           {config.navbar.display && <NavbarWrapperLayout1 />}
 
-          <div className={classes.contentWrapper}>
+          <div className={classes.contentWrapper} id={'content-wrapper'}>
+            {isLoadingProcess && <Loading />}
             {config.toolbar.display && <ToolbarLayout1 />}
 
             <FuseScrollbars className={classes.content} scrollToTopOnChildChange>
