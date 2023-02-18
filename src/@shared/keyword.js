@@ -1,5 +1,7 @@
 export const BOOKING_NO = 'bkgNo';
 
+export const BL_TYPE = 'blType';
+
 export const SHIPPER = 'shipper';
 
 export const CONSIGNEE = 'consignee';

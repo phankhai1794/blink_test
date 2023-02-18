@@ -9,18 +9,18 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime, validatePartiesContent, groupBy, isJsonText, formatContainerNo } from '@shared';
-import { getBlInfo, validateTextInput } from 'app/services/myBLService';
+import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo } from '@shared';
+import { validateTextInput } from 'app/services/myBLService';
 import {
   CONTAINER_DETAIL,
   CONTAINER_MANIFEST,
   CONTAINER_NUMBER,
   CONTAINER_SEAL,
-  CM_PACKAGE,
   SHIPPER,
   CONSIGNEE,
   NOTIFY,
-  ONLY_ATT
+  ONLY_ATT,
+  BL_TYPE
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useState, useEffect } from 'react';
@@ -234,6 +234,14 @@ const InquiryViewer = (props) => {
       setViewDropDown(id);
     }
   };
+
+  const validateField = (field, value) => {
+    let response = { isError: false, errorType: "" };
+    if (Object.keys(metadata.field).find(key => metadata.field[key] === field) === BL_TYPE) {
+      response = validateBLType(value);
+    }
+    return response;
+  }
 
   useEffect(() => {
     if (question.id !== inqViewerFocus) {
@@ -1507,7 +1515,7 @@ const InquiryViewer = (props) => {
           onChange={inputText}
           variant='outlined'
           inputProps={{ style: { textTransform: 'uppercase' } }}
-          error={!validateInput?.isValid}
+          error={!validateInput?.isValid || validateField(field, textResolve).isError}
           helperText={
             !validateInput?.isValid ?
               (<>
@@ -1526,7 +1534,9 @@ const InquiryViewer = (props) => {
                   </>
                 }
               </>)
-              : ''
+              : validateField(field, textResolve).errorType.split('\n').map((line, idx) => (
+                <span key={idx} style={{ display: 'block', lineHeight: '20px' }}>{line}</span>
+              ))
           }
           onBlur={() => handleValidateInput('RESOLVE', onConfirm, true, true)}
         />
@@ -1967,7 +1977,7 @@ const InquiryViewer = (props) => {
                           (isSeparate ?
                             (validatePartiesContent(textResolveSeparate.name, 'name')?.isError
                               || validatePartiesContent(textResolveSeparate.address, 'address')?.isError)
-                            : false) || disableAcceptResolve || !validationCDCM
+                            : validateField(question?.field, textResolve).isError) || disableAcceptResolve || !validationCDCM
                         }
                         color="primary"
                         onClick={() => {
