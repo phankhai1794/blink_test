@@ -201,7 +201,6 @@ const InquiryViewer = (props) => {
   const [textResolve, setTextResolve] = useState(content[question.field] || '');
   const [validationCDCM, setValidationCDCM] = useState(true);
   const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
-  const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
@@ -221,7 +220,6 @@ const InquiryViewer = (props) => {
   const inqViewerFocus = useSelector(({ workspace }) => workspace.formReducer.inqViewerFocus);
   const [inqAnsId, setInqAnsId] = useState('');
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
-  const [loading, setLoading] = useState(false);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -434,7 +432,7 @@ const InquiryViewer = (props) => {
         .then((res) => {
           if (isUnmounted) return;
           // setEditOriginalAmendment(res.length === 1);
-          res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+          // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
           const lastest = { ...question };
           if (res.length > 0) {
             // console.log(res)
@@ -557,7 +555,7 @@ const InquiryViewer = (props) => {
               answersMedia: [],
               content: orgContent[lastest.field] || '',
               process: 'draft',
-              state: res[0]?.state,
+              state: lastestComment[0]?.state,
             }];
 
             res.map(r => {
@@ -632,6 +630,14 @@ const InquiryViewer = (props) => {
         quest.showIconReply = true;
       }
       quest.mediaFilesAnswer = [];
+      const optionsInquires = [...inquiries];
+      const editedIndex = optionsInquires.findIndex(inq => currentQuestion.id === inq.id);
+      quest.answerObj.forEach(ans => {
+        ans.confirmed = false;
+        if (optionsInquires[editedIndex].selectChoice && ans.id === optionsInquires[editedIndex].selectChoice.answer) {
+          ans.confirmed = true;
+        }
+      })
       setQuestion(quest);
       setSaveComment(!isSaveComment);
     }
@@ -645,6 +651,14 @@ const InquiryViewer = (props) => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     const quest = { ...question };
+    if (optionsInquires[editedIndex].selectChoice && optionsInquires[editedIndex].selectChoice.answer) {
+      quest.answerObj.forEach(ans => {
+        ans.confirmed = false;
+        if (ans.id === optionsInquires[editedIndex].selectChoice.answer) {
+          ans.confirmed = true;
+        }
+      })
+    }
     setQuestion({ ...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer });
   }
 
@@ -654,7 +668,7 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     question?.state !== 'OPEN' && setAllowDeleteInq(false);
-    if (!['REOPEN_A', 'REOPEN_Q'].includes(question.state) && openAmendmentList) {
+    if (!['REOPEN_A', 'REOPEN_Q'].includes(question.state)) {
       setDisableReopen(false);
     }
   }, [question]);
@@ -693,7 +707,8 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setOneInq({}));
             dispatch(FormActions.toggleCreateInquiry(false));
           }
-          if (!optionsOfQuestion.length) {
+          const isEmptyInq = optionsOfQuestion.filter(op => op.process === 'pending');
+          if (!isEmptyInq.length) {
             (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "")) //BX: Delete all inquiries draft
           }
@@ -723,7 +738,6 @@ const InquiryViewer = (props) => {
           // Update state of listDraftComments for re-rendering UI
           let cloneListCommentDraft = listCommentDraft.filter(({ id }) => id !== replyRemove.id);
           dispatch(InquiryActions.setListCommentDraft(cloneListCommentDraft));
-          dispatch(FormActions.toggleOpenNotificationDeleteReply(true));
           if (res) {
             setEditOriginalAmendment(res.isEditOriginalAmendment);
             setViewDropDown('');
@@ -880,7 +894,7 @@ const InquiryViewer = (props) => {
         }
 
         if (getTypeName === CONTAINER_SEAL) {
-          obj[question.inqType] = obj[question.inqType].filter(seal => seal.toUpperCase().trim())
+          obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
           obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
         }
@@ -936,12 +950,14 @@ const InquiryViewer = (props) => {
   };
 
   const onUpload = () => {
-    setLoading(true);
+    // setLoading(true);
+    dispatch(FormActions.isLoadingProcess(true));
     const optionsInquires = [...inquiries];
     const idUpload = question.process === 'pending' ? question.id : tempReply?.answer?.id;
     uploadOPUS(myBL.id, idUpload, question.field, inqAnsId)
       .then((res) => {
         if (res && res.status === 'F') {
+          // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: res.message, icon: 'failed' }));
           dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
         } else {
           setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
@@ -957,6 +973,7 @@ const InquiryViewer = (props) => {
             if (editedAmeIndex !== -1) {
               optionsInquires[editedAmeIndex].state = 'UPLOADED';
               dispatch(InquiryActions.setInquiries(optionsInquires));
+
               const optionAmendment = [...listCommentDraft];
               editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
               if (optionAmendment[editedAmeIndex]) {
@@ -970,8 +987,10 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setContent({ ...content, ...res.newData }));
           }
           if (res.warning) {
+            // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: res.warning, icon: 'warning' }));
             dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
           } else {
+            // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: 'Upload to OPUS successfully', icon: 'success' }));
             dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
           }
           const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && inq.state !== 'COMPL');
@@ -997,8 +1016,9 @@ const InquiryViewer = (props) => {
         setViewDropDown('');
       })
       .catch((error) => {
+        // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: error, icon: 'failed' }));
         dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-      }).finally(() => setLoading(false));
+      }).finally(() => dispatch(FormActions.isLoadingProcess(false)));
   };
 
   const cancelResolve = () => {
@@ -1307,6 +1327,7 @@ const InquiryViewer = (props) => {
     const reply = { ...question };
     reply.showIconEdit = false;
     reply.showIconReply = false;
+    setShowViewAll(false);
     if (['ANS_DRF', 'ANS_SENT'].includes(question.state) || (user.role === 'Guest' && ['REP_Q_DRF'].includes(question.state))) {
       optionsInquires[editedIndex].showIconEdit = false;
       optionsInquires[editedIndex].showIconReply = false;
@@ -1541,14 +1562,13 @@ const InquiryViewer = (props) => {
                         <span className={classes.labelStatus}>{question.state === 'UPLOADED' ? 'Uploaded' : 'Resolved'}</span>
                       </div>
                       <Button
-                        disabled={loading || question.state === 'UPLOADED'}
+                        disabled={question.state === 'UPLOADED'}
                         variant="contained"
                         color="primary"
                         onClick={onUpload}
                         classes={{ root: classes.button }}
                       >
                         Upload to OPUS
-                        {loading && <CircularProgress className='absolute' color='primary' size={'25px'} />}
                       </Button>
                     </div>
                   </PermissionProvider>

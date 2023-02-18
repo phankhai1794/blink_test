@@ -437,6 +437,7 @@ export default function Form(props) {
         aria-labelledby="customized-dialog-title"
         open={open}
         maxWidth="md"
+        container={() => document.getElementById('content-wrapper')}
         classes={{ paperScrollPaper: isFullScreen ? null : classes.dialogPaper }}>
         <DialogTitle
           id="customized-dialog-title"

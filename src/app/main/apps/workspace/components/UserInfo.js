@@ -49,7 +49,9 @@ const UserInfo = (props) => {
           <p className={classes.name}>{name}</p>
           <div className="flex" style={{ marginLeft: '1rem' }}>
             <p className={classes.time}>
-              {time} {!['REOPEN_A', 'REOPEN_Q', 'COMPL', 'RESOLVED', 'UPLOADED'].includes(state) && status === 'UPDATE' && (<span className={classes.styleMark}> - Edited</span>)}
+              {time}
+              {!['REOPEN_A', 'REOPEN_Q', 'COMPL', 'RESOLVED', 'UPLOADED', 'REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(state) && status === 'UPDATE' && (<span className={classes.styleMark}> - Edited</span>)}
+              {(['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(state) || status === 'DELETED') && (<span className={classes.styleMark}> - Deleted</span>)}
             </p>
           </div>
         </div> :

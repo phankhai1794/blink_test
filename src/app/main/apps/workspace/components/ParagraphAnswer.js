@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/styles';
 import {useDispatch, useSelector} from 'react-redux';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { ONLY_ATT } from '@shared/keyword'
+import clsx from "clsx";
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -18,6 +19,22 @@ const useStyles = makeStyles((theme) => ({
     },
     '& .MuiInputBase-input': {
       width: '93%'
+    }
+  },
+  inputText: {
+    '& .MuiInputBase-input': {
+      color: '#132535',
+      fontSize: 15,
+      fontWeight: 500,
+      fontStyle: 'italic',
+    }
+  },
+  placeHolder: {
+    '& .MuiInputBase-input': {
+      color: '#BAC3CB',
+      fontSize: 14,
+      fontWeight: 400,
+      fontStyle: 'normal'
     }
   }
 }));
@@ -61,12 +78,12 @@ const ParagraphAnswer = (props) => {
         setParagraphText('');
       }
     }
-    if (['string'].includes(typeof paragraphText) && paragraphText.trim() === '') setParagraphText(ONLY_ATT)
+    if (!paragraphText && question.answerObj.length > 0 && question.mediaFilesAnswer.length > 0) setParagraphText(ONLY_ATT)
   }, [saveStatus, question]);
 
   return (
     <div>
-      <div className="flex">
+      <div className={clsx("flex", paragraphText ? classes.inputText : classes.placeHolder)}>
         <TextField
           style={{ border: 'none', display: !isPermission ? (!paragraphText ? 'none' : '') : '' }}
           fullWidth
@@ -75,7 +92,8 @@ const ParagraphAnswer = (props) => {
           disabled={!isPermission || disable}
           InputProps={{
             style: {
-              fontSize: '1.7rem'
+              fontSize: '1.7rem',
+              fontFamily: 'Montserrat',
             },
           }}
           InputLabelProps={{

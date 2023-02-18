@@ -17,6 +17,7 @@ const initialState = {
   openNotificationDeleteReply: false,
   openNotificationSubmitPreview: false,
   openNotificationDeleteAmendment: false,
+  openNotificationUploadOpus: { status: false, message: '', icon: '' },
   enableSaveInquiriesList: true,
   openAmendmentList: false,
   openPreviewListSubmit: false,
@@ -29,7 +30,8 @@ const initialState = {
   openNotificationBLReloadWarning: false,
   inqViewerFocus: null,
   validateInput: { isValid: true, prohibitedInfo: null, handleConfirm: null },
-  isLoading: 0
+  isLoading: 0,
+  isLoadingProcess: false,
 };
 
 const formReducer = function (state = initialState, action) {
@@ -128,8 +130,14 @@ const formReducer = function (state = initialState, action) {
   case Actions.DECREASE_LOADING: {
     return { ...state, isLoading: state.isLoading - 1 };
   }
+  case Actions.PROCESS_LOADING: {
+    return { ...state, isLoadingProcess: action.state };
+  }
   case Actions.RESET_LOADING: {
     return { ...state, isLoading: 0 };
+  }
+  case Actions.OPEN_WARNING_UPLOAD_OPUS: {
+    return { ...state, openNotificationUploadOpus: action.state };
   }
   default: {
     return state;
