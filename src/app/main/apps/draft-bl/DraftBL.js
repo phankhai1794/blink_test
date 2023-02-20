@@ -606,9 +606,7 @@ const DraftPage = (props) => {
                   </Grid>
                   <Grid item xs={4} style={{ textAlign: 'center' }}>
                     <div className={classes.tittle_M}>COMMODITY CODE</div>
-                    <div className={classes.content_L} style={{ minHeight: '35px' }}>
-                      <span>{getValueField(COMMODITY_CODE)}</span>
-                    </div>
+                    <div className={classes.content_L} style={{ minHeight: '35px' }}/>
                   </Grid>
                 </Grid>
                 <Grid item xs={2}
