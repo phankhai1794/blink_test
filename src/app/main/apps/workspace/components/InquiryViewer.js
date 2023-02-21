@@ -15,6 +15,7 @@ import {
   CONTAINER_DETAIL,
   CONTAINER_MANIFEST,
   CONTAINER_NUMBER,
+  CONTAINER_PACKAGE,
   CONTAINER_SEAL,
   SHIPPER,
   CONSIGNEE,
@@ -2162,7 +2163,14 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
 
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values));
-    temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? e.target.value.split(',') : e.target.value;
+    const { value } = e.target;
+    if (getTypeName(type) === CONTAINER_PACKAGE) {
+      if (parseInt(value)) {
+        temp[index][type] = parseInt(value).toLocaleString();
+      }
+    } else {
+      temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? value.split(',') : value;
+    }
     setValues(temp);
     setTextResolve(temp);
   };
