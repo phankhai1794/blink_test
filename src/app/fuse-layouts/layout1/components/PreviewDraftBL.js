@@ -30,7 +30,7 @@ const PreviewDraftBL = () => {
 
   const redirectDraftBL = () => {
     const bl = myBL.id || window.location.pathname.split('/')[3];
-    if (bl) history.push(`/draft-bl?bl=${bl}`);
+    if (bl) history.push(`/draft-bl?bl=${bl}`, { skipVerification: true });
   };
 
   return (

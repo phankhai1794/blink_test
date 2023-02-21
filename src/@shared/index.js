@@ -183,6 +183,18 @@ export const validatePartiesContent = (partiesContent, type) => {
   return { isError, errorType }
 }
 
+export const validateBLType = (input) => {
+  let response = { isError: false, errorType: "" };
+  let value = input.trim();
+  if (!value || !["B", "W"].includes(value.toUpperCase())) {
+    response = {
+      ...response,
+      isError: true,
+      errorType: `The value you entered should be "B" or "W".\n- "B" for Ocean B/L\n- "W" for Seaway Bill`
+    };
+  }
+  return response;
+}
 
 /**
  * @description

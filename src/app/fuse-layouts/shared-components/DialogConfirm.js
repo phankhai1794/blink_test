@@ -100,7 +100,7 @@ function DialogConfirm(props) {
             variant="contained"
             onClick={() => {
               handleClose();
-              history.push(`/guest?bl=${myBL.id}`);
+              history.push(`/guest?bl=${myBL.id}`, { skipVerification: true });
             }
             }
             className='normal-case'>

@@ -69,28 +69,39 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
   };
 
   const downloadFile = () => {
-    getFile(file.id).then((f) => {
-      const link = document.createElement('a');
-      link.href = urlMedia(file.ext, f);
-      link.setAttribute(
-        'download',
-        file.name,
-      );
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-    }).catch((error) => {
-      console.error(error);
-    });
+    // getFile(file.id).then((f) => {
+    //   const link = document.createElement('a');
+    //   link.href = urlMedia(file.ext, f);
+    //   link.setAttribute(
+    //     'download',
+    //     file.name,
+    //   );
+    //   document.body.appendChild(link);
+    //   link.click();
+    //   link.parentNode.removeChild(link);
+    // }).catch((error) => {
+    //   console.error(error);
+    // });
+    const link = document.createElement('a');
+    link.href = file.u;
+    link.setAttribute('download', file.name);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
   };
 
   const previewPDF = () => {
-    getFile(file.id).then((f) => {
-      setPdfUrl(urlMedia(file.ext, f));
-      setView(true)
-    }).catch((error) => {
-      console.error(error);
-    });
+    if (file.id) {
+      getFile(file.id).then((f) => {
+        setPdfUrl(urlMedia(file.ext, f));
+        setView(true);
+      }).catch((error) => {
+        console.error(error);
+      });
+    } else if (file.src) {
+      setPdfUrl(file.src);
+      setView(true);
+    }
   };
 
   const handleClose = () => {
@@ -114,7 +125,7 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
       setIsRemoveFile(!isRemoveFile);
     }
     else if (isReply) {
-      const temp = {...templateReply};
+      const temp = { ...templateReply };
       temp.mediaFiles.splice(indexMedia, 1);
       setTemplateReply(temp)
     }
