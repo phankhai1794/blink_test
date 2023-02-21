@@ -20,7 +20,10 @@ import {
   CONSIGNEE,
   NOTIFY,
   ONLY_ATT,
-  BL_TYPE
+  BL_TYPE,
+  HS_CODE,
+  HTS_CODE,
+  NCM_CODE
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useState, useEffect } from 'react';
@@ -2218,7 +2221,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
         }
         let hasData = false;
         td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: type === typeList[0] ? 10 : 5 }}>
-          <Tooltip title={type} enterDelay={1000}>
+          <Tooltip title={type === 'HS/HTS/NCM Code' ? HS_CODE : type} enterDelay={1000}>
             <input
               className={clsx(classes.text)}
               style={{
@@ -2228,7 +2231,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                 fontSize: 14,
               }}
               disabled
-              defaultValue={type}
+              defaultValue={type === 'HS/HTS/NCM Code' ? HS_CODE : type}
             />
           </Tooltip>
           {
@@ -2274,6 +2277,50 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
             })
           }
         </div>);
+
+        // View HTS code, NCM code
+        if (type === 'HS/HTS/NCM Code') {
+          [HTS_CODE, NCM_CODE].map((code, index) => {
+            td.push(<div key={index} style={{ display: 'flex', marginTop: type === typeList[0] ? 10 : 5 }}>
+              <Tooltip title={code} enterDelay={1000}>
+                <input
+                  className={clsx(classes.text)}
+                  style={{
+                    backgroundColor: '#FDF2F2',
+                    fontWeight: 600,
+                    borderTopLeftRadius: rowIndex === 0 && 8,
+                    fontSize: 14
+                  }}
+                  disabled
+                  defaultValue={code}
+                />
+              </Tooltip>
+              {
+                rowValues.map((item) => {
+                  let nodeValue = null;
+                  if (rowIndex - 1 < item.value.length) {
+                    nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
+                  }
+                  return (
+                    <input
+                      className={clsx(classes.text)}
+                      key={index}
+                      style={{
+                        marginLeft: 5,
+                        backgroundColor: '#CCD3D1',
+                        fontSize: 15,
+                        textTransform: 'uppercase',
+                        color: '#999999'
+                      }}
+                      disabled
+                      value={(nodeValue && nodeValue[getType(type)]) ? (index ? nodeValue[getType(type)].slice(0, 4) : nodeValue[getType(type)]) : ''}
+                    />
+                  );
+                })
+              }
+            </div>);
+          })
+        }
         if (!hasData || typeList.length == 1) {
           isRunning = false;
         }
