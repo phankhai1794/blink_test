@@ -10,6 +10,7 @@ import OtpInput from 'react-otp-input';
 import { isEmail } from 'validator';
 import { verifyEmail, verifyGuest, isVerified, decodeAuthParam, requestCode } from 'app/services/authService';
 import * as Actions from 'app/store/actions';
+import history from '@history';
 
 const otpLength = 6;
 const timeCodeMailDelay = 15; // second
@@ -338,7 +339,7 @@ const OtpCheck = ({ children }) => {
 
   return (
     <>
-      {step === 2 ? <>{children}</> : (
+      {step === 2 || history.location.state?.skipVerification ? <>{children}</> : (
         <div
           className={clsx(
             classes.root,

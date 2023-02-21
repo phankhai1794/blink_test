@@ -112,10 +112,10 @@ function ToolbarLayout1(props) {
   useEffect(() => {
     const countInquiry = inquiries.filter((inq) => inq.process === 'pending' && !['COMPL', 'UPLOADED'].includes(inq.state))
     setInquiryLength(countInquiry.length);
-  
+
     const countAmend = inquiries.filter((ame) => ame.process === 'draft' && !['RESOLVED', 'UPLOADED', 'COMPL'].includes(ame.state))
     setAmendmentLength(countAmend.length);
-  },[inquiries])
+  }, [inquiries]);
 
   useEffect(() => {
     dispatch(InquiryActions.checkSend(false));
@@ -336,9 +336,9 @@ function ToolbarLayout1(props) {
     setOpen(true);
   };
 
-  const redirectEditDraftBL = () => {
+  const redirectWorkspace = () => {
     const bl = new URLSearchParams(search).get('bl');
-    if (bl) history.push(`/guest?bl=${bl}`);
+    if (bl) history.push(`/guest?bl=${bl}`, { skipVerification: true });
   };
 
   const onSubmit = async () => {
@@ -424,7 +424,7 @@ function ToolbarLayout1(props) {
                 extraCondition={pathname.includes('/draft-bl')}>
                 <Button
                   className={clsx(classes.button, classes.buttonEditDraftBL)}
-                  onClick={redirectEditDraftBL}>
+                  onClick={redirectWorkspace}>
                   Amendment
                 </Button>
 

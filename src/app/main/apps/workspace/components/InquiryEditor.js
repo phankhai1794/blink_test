@@ -433,6 +433,10 @@ const InquiryEditor = (props) => {
           ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
           files: { mediaCreate, mediaDelete }
         });
+        const optionsMinimize = [...listMinimize];
+        const index = optionsMinimize.findIndex((e) => e.id === inquiry.id);
+        optionsMinimize[index].field = currentEditInq.field;
+        dispatch(InquiryActions.setListMinimize(optionsMinimize));
         const editedIndex = inquiriesOp.findIndex((inq) => inq.id === inquiry.id);
         inquiriesOp[editedIndex] = currentEditInq;
         if (update.data.length && editedIndex !== -1) {
