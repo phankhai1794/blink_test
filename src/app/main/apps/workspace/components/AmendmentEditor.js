@@ -7,7 +7,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
 import * as AppActions from 'app/store/actions';
-import { CONTAINER_DETAIL, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY } from '@shared/keyword';
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, BL_TYPE } from '@shared/keyword';
+import { validateBLType } from '@shared';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
@@ -196,7 +197,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     if (isSeparate) {
       const LABEL_TYPE = ['name', 'address']
       const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[fieldValueSelect ? fieldValueSelect.value : field];
-      const labelNameCapitalize = labelName?.charAt(0).toUpperCase() + labelName?.slice(1);
       return LABEL_TYPE.map((type, index) =>
         <div key={index} style={{ paddingTop: '15px' }}>
           <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
@@ -220,6 +220,12 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           rows={3}
           onChange={handleChange}
           variant='outlined'
+          error={validateField(field, fieldValue).isError}
+          helperText={
+            validateField(field, fieldValue).errorType.split('\n').map((line, idx) => (
+              <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14 }}>{line}</span>
+            ))
+          }
         />
       )
     }
@@ -262,6 +268,15 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
       }
     }
   };
+
+  const validateField = (field, value) => {
+    let response = { isError: false, errorType: "" };
+    const fieldId = field || fieldValueSelect?.value;
+    if (Object.keys(metadata.field).find(key => metadata.field[key] === fieldId) === BL_TYPE) {
+      response = validateBLType(value);
+    }
+    return response;
+  }
 
   useEffect(() => {
     if (!openAmendmentList) {
@@ -368,8 +383,13 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         <Button
           className={classes.btn}
           disabled={
-            (isSeparate ? false
-              : (fieldValue && (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0)))) || disableSave
+            (isSeparate ? false : (
+              validateField(fieldValueSelect?.value, fieldValue).isError
+              ||
+              (fieldValue && (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0)))
+            ))
+            ||
+            disableSave
           }
           onClick={() => handleValidateInput(handleSave)}
           color="primary"
