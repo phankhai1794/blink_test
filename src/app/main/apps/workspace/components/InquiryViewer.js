@@ -2222,7 +2222,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
       groupsValues = [...groups].map(([name, value]) => ({ name, value, duplicate: false }));
     }
-
+    
     while (groupsValues.length) {
       let rowValues = groupsValues.splice(0, 4);
       let rowIndex = 0;
@@ -2263,7 +2263,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               const disabled = !((rowIndex > 0 || inqType === CONTAINER_NUMBER) && nodeValue && !disableInput);
               const isUpperCase = inqType !== CONTAINER_NUMBER && rowIndex > 0;
               let inValidContainerNo = false;
-              if (type === CONTAINER_NUMBER && container === CONTAINER_MANIFEST && !disableInput) {
+              if (inqType === CONTAINER_NUMBER && container === CONTAINER_MANIFEST && !disableInput) {
                 // Validation in CD
                 const value = nodeValue ? (!isUpperCase ? formatContainerNo(nodeValue[getType(type)]) : nodeValue[getType(type)]) : '';
                 const contsNo = getValueField(CONTAINER_DETAIL).map(value => value[getType(CONTAINER_NUMBER)]);
@@ -2271,7 +2271,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                   inValidContainerNo = true;
                   validation(false);
                 }
-              } else if (type === CONTAINER_NUMBER && container === CONTAINER_DETAIL && !disableInput && item.duplicate) {
+              } else if (inqType === CONTAINER_NUMBER && container === CONTAINER_DETAIL && !disableInput && item.duplicate) {
                 validation(false);
               }
               return (
