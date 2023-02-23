@@ -334,7 +334,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         </FormControl>
       )}
 
-      {containerCheck.includes(fieldValueSelect?.value || (!openAmendmentList && currentField)) ? (
+      {containerCheck.includes(fieldValueSelect?.value) ? (
         <div style={{ margin: '15px 0' }}>
           <ContainerDetailForm
             container={
