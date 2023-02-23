@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Snackbar, IconButton, Icon, SnackbarContent } from '@material-ui/core';
 import { green, amber, blue } from '@material-ui/core/colors';
 import { useDispatch, useSelector } from 'react-redux';
 import clsx from 'clsx';
 import * as Actions from 'app/store/actions';
 import { makeStyles } from '@material-ui/styles';
+import CircularProgress from "@material-ui/core/CircularProgress";
+import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -22,7 +24,23 @@ const useStyles = makeStyles((theme) => ({
   },
   warning: {
     backgroundColor: amber[600],
-    color: '#FFFFFF'
+    color: '#FFFFFF',
+    '& .MuiSvgIcon-root': {
+      marginRight: '0.8rem'
+    }
+  },
+  circularSuccess: {
+    display: 'flex',
+    position: 'relative',
+    width: 40,
+    height: 40,
+    '& .MuiCircularProgress-root': {
+      position: 'absolute'
+    },
+    '& .MuiButtonBase-root': {
+      position: 'absolute',
+      padding: '7px 6px 8px 7px'
+    }
   }
 }));
 
@@ -33,18 +51,69 @@ const variantIcon = {
   info: 'info'
 };
 
-function FuseMessage(props) {
+function FuseMessage() {
   const dispatch = useDispatch();
   const state = useSelector(({ fuse }) => fuse.message.state);
   const options = useSelector(({ fuse }) => fuse.message.options);
-
+  const [progress, setProgress] = React.useState(0);
   const classes = useStyles();
+
+  useEffect(() => {
+    if (progress === 100) {
+      dispatch(Actions.hideMessage());
+      setProgress(0)
+    }
+  }, [progress]);
+
+  useEffect(() => {
+    if (state && options.variant === 'success') {
+      const timer = setInterval(() => {
+        setProgress((oldProgress) => oldProgress >= 100 ? 0 : oldProgress + 10);
+      }, 500);
+      return () => {
+        clearInterval(timer);
+      };
+    }
+  });
+
+  const renderIconButton = () => {
+    if (options.variant !== 'success') {
+      return (
+        <IconButton
+          key="close"
+          aria-label="Close"
+          color="inherit"
+          onClick={() => dispatch(Actions.hideMessage())}
+        >
+          <Icon>close</Icon>
+        </IconButton>
+      )
+    } else {
+      return (
+        <div className={classes.circularSuccess}>
+          <CircularProgress
+            variant="static"
+            value={progress}
+            color="inherit"
+            thickness={2}
+          />
+          <IconButton
+            key="close"
+            aria-label="Close"
+            color="inherit"
+            onClick={() => dispatch(Actions.hideMessage())}
+          >
+            <Icon>close</Icon>
+          </IconButton>
+        </div>
+      )
+    }
+  }
 
   return (
     <Snackbar
       {...options}
       open={state}
-      autoHideDuration={3000}
       onClose={() => dispatch(Actions.hideMessage())}
       classes={{
         root: classes.root
@@ -62,26 +131,25 @@ function FuseMessage(props) {
         message={
           <div className="flex items-center">
             {variantIcon[options.variant] && (
-              <Icon className="mr-8" color="inherit">
-                {variantIcon[options.variant]}
-              </Icon>
+              <>
+                {options.variant === 'warning' ? (
+                  <ReportProblemOutlinedIcon />
+                ) : (
+                  <Icon className="mr-8" color="inherit">
+                    {variantIcon[options.variant]}
+                  </Icon>
+                )}
+              </>
             )}
             {options.message}
           </div>
         }
         action={[
-          <IconButton
-            key="close"
-            aria-label="Close"
-            color="inherit"
-            onClick={() => dispatch(Actions.hideMessage())}
-          >
-            <Icon>close</Icon>
-          </IconButton>
+          renderIconButton()
         ]}
       />
     </Snackbar>
   );
-}
+};
 
 export default React.memo(FuseMessage);
