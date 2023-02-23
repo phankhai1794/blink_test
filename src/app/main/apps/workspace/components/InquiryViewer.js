@@ -2180,18 +2180,27 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       setValues(getValueField(container) || [{}]);
     }
     if (container === CONTAINER_MANIFEST) {
-      let containerManifestSorted = [];
+      let cmSorted = [];
+      let contsNo = [];
       let containerDetail = getValueField(CONTAINER_DETAIL);
-      (containerDetail || []).map(item => {
-        const containerNo = item?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
+      (containerDetail || []).map(cd => {
+        const containerNo = cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
         if (containerNo) {
-          let arr = values.filter((item) =>
-            item?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
+          let arr = values.filter(cm =>
+            cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
           )
-          containerManifestSorted = [...containerManifestSorted, ...arr]
+          cmSorted = [...cmSorted, ...arr];
         }
-      })
-      setValues(containerManifestSorted)
+        contsNo.push(containerNo);
+      });
+  
+      let cmNolist = (values || []).filter(cm =>
+        contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
+      )
+      if (cmNolist) cmSorted = [...cmSorted, ...cmNolist];
+      if (!cmSorted.length) cmSorted = values;
+      
+      setValues(cmSorted)
     }
   }, [content]);
 
