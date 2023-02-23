@@ -2021,7 +2021,6 @@ const InquiryViewer = (props) => {
                         {(isSeparate && (['AME_DRF', 'AME_SENT'].includes(question.state) && (user.role === 'Guest'))) ?
                           ['name', 'address'].map((type, index) => {
                             const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[question.field]
-                            const labelNameCapitalize = labelName?.charAt(0).toUpperCase() + labelName?.slice(1);
                             const content = (tempReply?.answer?.content) ? JSON.parse(tempReply?.answer?.content) : { name: '', address: '' };
                             return (
                               <div key={index} style={{ paddingTop: '15px' }}>
@@ -2046,6 +2045,12 @@ const InquiryViewer = (props) => {
                             onChange={handleChangeContentReply}
                             variant='outlined'
                             placeholder='Reply...'
+                            error={validateField(question.field, tempReply?.answer?.content).isError}
+                            helperText={
+                              validateField(question.field, tempReply?.answer?.content).errorType.split('\n').map((line, idx) => (
+                                <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14 }}>{line}</span>
+                              ))
+                            }
                           />}
                       </div>
                       }
@@ -2090,7 +2095,8 @@ const InquiryViewer = (props) => {
                           onClick={() => onSaveReply()}
                           disabled={
                             (question.state === "AME_DRF" && (
-                              (['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content?.trim())
+                              validateField(question.field, tempReply?.answer?.content).isError
+                              || (['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content?.trim())
                               || (!['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content)
 
                             ))
