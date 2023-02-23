@@ -123,17 +123,6 @@ const TableCM = (props) => {
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const [containerManifestSorted, setContainerManifestSorted] = useState([]);
 
-  let containerManifestSorted = [];
-  (containerDetail || []).map(item => {
-    const containerNo = item?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
-    if (containerNo) {
-      let arr = containerManifest.filter((item) =>
-        item?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
-      )
-      containerManifestSorted = [...containerManifestSorted, ...arr]
-    }
-  })
-
   const [isHovering, setIsHovering] = useState(false);
   const [isEmpty, setIsEmpty] = useState(true);
   const [hasInquiry, setHasInquiry] = useState(false);
