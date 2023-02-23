@@ -121,6 +121,7 @@ const TableCM = (props) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+  const [containerManifestSorted, setContainerManifestSorted] = useState([]);
 
   let containerManifestSorted = [];
   (containerDetail || []).map(item => {
@@ -144,6 +145,29 @@ const TableCM = (props) => {
 
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
+
+  useEffect(() => {
+    let cmSorted = [];
+    let contsNo = [];
+    (containerDetail || []).map(cd => {
+      const containerNo = cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
+      if (containerNo) {
+        let arr = containerManifest.filter(cm =>
+          cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
+        )
+        cmSorted = [...cmSorted, ...arr];
+      }
+      contsNo.push(containerNo);
+    });
+
+    let cmNolist = (containerManifest || []).filter(cm =>
+      contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
+    )
+    if (cmNolist) cmSorted = [...cmSorted, ...cmNolist];
+    if (!cmSorted.length) cmSorted = containerManifest;
+
+    setContainerManifestSorted(cmSorted);
+  }, []);
 
   const onMouseEnter = (e) => setIsHovering(true);
 
