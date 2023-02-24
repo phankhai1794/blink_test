@@ -290,14 +290,14 @@ const OtpCheck = ({ children }) => {
     // verify token in localStorage
     let userInfo = localStorage.getItem('USER');
     if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
-      const { email } = JSON.parse(userInfo);
+      const { email, userType } = JSON.parse(userInfo);
       if (email) {
         setMail({
           ...mail,
           value: email,
           isValid: isEmail(email)
         });
-        isVerified({ bl })
+        isVerified({ bl, userType })
           .then(() => {
             setStep(2);
             return;
