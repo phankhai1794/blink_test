@@ -2321,10 +2321,10 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                       key={index}
                       style={{
                         marginLeft: 5,
-                        backgroundColor: '#CCD3D1',
+                        backgroundColor: disableInput ? '#FDF2F2' : '#CCD3D1',
                         fontSize: 15,
                         textTransform: 'uppercase',
-                        color: '#999999'
+                        color: disableInput ? '' : '#999999'
                       }}
                       disabled
                       value={(nodeValue && nodeValue[getType(type)]) ? (index ? nodeValue[getType(type)].slice(0, 4) : nodeValue[getType(type)]) : ''}
