@@ -2180,13 +2180,14 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       setValues(getValueField(container) || [{}]);
     }
     if (container === CONTAINER_MANIFEST) {
+      const getVals = originalValues || getValueField(container) || [{}];
       let cmSorted = [];
       let contsNo = [];
       let containerDetail = getValueField(CONTAINER_DETAIL);
       (containerDetail || []).map(cd => {
         const containerNo = cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
         if (containerNo) {
-          let arr = values.filter(cm =>
+          let arr = getVals.filter(cm =>
             cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
           )
           cmSorted = [...cmSorted, ...arr];
@@ -2194,11 +2195,11 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
         contsNo.push(containerNo);
       });
   
-      let cmNolist = (values || []).filter(cm =>
+      let cmNolist = (getVals || []).filter(cm =>
         contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
       )
       if (cmNolist) cmSorted = [...cmSorted, ...cmNolist];
-      if (!cmSorted.length) cmSorted = values;
+      if (!cmSorted.length) cmSorted = getVals;
       
       setValues(cmSorted)
     }
