@@ -15,12 +15,16 @@ import {
   CONTAINER_DETAIL,
   CONTAINER_MANIFEST,
   CONTAINER_NUMBER,
+  CONTAINER_PACKAGE,
   CONTAINER_SEAL,
   SHIPPER,
   CONSIGNEE,
   NOTIFY,
   ONLY_ATT,
-  BL_TYPE
+  BL_TYPE,
+  HS_CODE,
+  HTS_CODE,
+  NCM_CODE
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useState, useEffect } from 'react';
@@ -2017,7 +2021,6 @@ const InquiryViewer = (props) => {
                         {(isSeparate && (['AME_DRF', 'AME_SENT'].includes(question.state) && (user.role === 'Guest'))) ?
                           ['name', 'address'].map((type, index) => {
                             const labelName = Object.assign({}, ...[SHIPPER, CONSIGNEE, NOTIFY].map(key => ({ [metadata.field?.[key]]: key })))[question.field]
-                            const labelNameCapitalize = labelName?.charAt(0).toUpperCase() + labelName?.slice(1);
                             const content = (tempReply?.answer?.content) ? JSON.parse(tempReply?.answer?.content) : { name: '', address: '' };
                             return (
                               <div key={index} style={{ paddingTop: '15px' }}>
@@ -2042,6 +2045,12 @@ const InquiryViewer = (props) => {
                             onChange={handleChangeContentReply}
                             variant='outlined'
                             placeholder='Reply...'
+                            error={validateField(question.field, tempReply?.answer?.content).isError}
+                            helperText={
+                              validateField(question.field, tempReply?.answer?.content).errorType.split('\n').map((line, idx) => (
+                                <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14 }}>{line}</span>
+                              ))
+                            }
                           />}
                       </div>
                       }
@@ -2086,7 +2095,8 @@ const InquiryViewer = (props) => {
                           onClick={() => onSaveReply()}
                           disabled={
                             (question.state === "AME_DRF" && (
-                              (['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content?.trim())
+                              validateField(question.field, tempReply?.answer?.content).isError
+                              || (['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content?.trim())
                               || (!['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content)
 
                             ))
@@ -2159,7 +2169,14 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
 
   const onChange = (e, index, type) => {
     const temp = JSON.parse(JSON.stringify(values));
-    temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? e.target.value.split(',') : e.target.value;
+    const { value } = e.target;
+    if (getTypeName(type) === CONTAINER_PACKAGE) {
+      if (parseInt(value)) {
+        temp[index][type] = parseInt(value).toLocaleString();
+      }
+    } else {
+      temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? value.split(',') : value;
+    }
     setValues(temp);
     setTextResolve(temp);
   };
@@ -2169,18 +2186,28 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       setValues(getValueField(container) || [{}]);
     }
     if (container === CONTAINER_MANIFEST) {
-      let containerManifestSorted = [];
+      const getVals = originalValues || getValueField(container) || [{}];
+      let cmSorted = [];
+      let contsNo = [];
       let containerDetail = getValueField(CONTAINER_DETAIL);
-      (containerDetail || []).map(item => {
-        const containerNo = item?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
+      (containerDetail || []).map(cd => {
+        const containerNo = cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
         if (containerNo) {
-          let arr = values.filter((item) =>
-            item?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
+          let arr = getVals.filter(cm =>
+            cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
           )
-          containerManifestSorted = [...containerManifestSorted, ...arr]
+          cmSorted = [...cmSorted, ...arr];
         }
-      })
-      setValues(containerManifestSorted)
+        contsNo.push(containerNo);
+      });
+  
+      let cmNolist = (getVals || []).filter(cm =>
+        contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
+      )
+      if (cmNolist) cmSorted = [...cmSorted, ...cmNolist];
+      if (!cmSorted.length) cmSorted = getVals;
+      
+      setValues(cmSorted)
     }
   }, [content]);
 
@@ -2202,7 +2229,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
       groupsValues = [...groups].map(([name, value]) => ({ name, value, duplicate: false }));
     }
-
+    
     while (groupsValues.length) {
       let rowValues = groupsValues.splice(0, 4);
       let rowIndex = 0;
@@ -2218,7 +2245,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
         }
         let hasData = false;
         td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: type === typeList[0] ? 10 : 5 }}>
-          <Tooltip title={type} enterDelay={1000}>
+          <Tooltip title={type === 'HS/HTS/NCM Code' ? HS_CODE : type} enterDelay={1000}>
             <input
               className={clsx(classes.text)}
               style={{
@@ -2228,7 +2255,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                 fontSize: 14,
               }}
               disabled
-              defaultValue={type}
+              defaultValue={type === 'HS/HTS/NCM Code' ? HS_CODE : type}
             />
           </Tooltip>
           {
@@ -2243,7 +2270,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               const disabled = !((rowIndex > 0 || inqType === CONTAINER_NUMBER) && nodeValue && !disableInput);
               const isUpperCase = inqType !== CONTAINER_NUMBER && rowIndex > 0;
               let inValidContainerNo = false;
-              if (type === CONTAINER_NUMBER && container === CONTAINER_MANIFEST && !disableInput) {
+              if (inqType === CONTAINER_NUMBER && container === CONTAINER_MANIFEST && !disableInput) {
                 // Validation in CD
                 const value = nodeValue ? (!isUpperCase ? formatContainerNo(nodeValue[getType(type)]) : nodeValue[getType(type)]) : '';
                 const contsNo = getValueField(CONTAINER_DETAIL).map(value => value[getType(CONTAINER_NUMBER)]);
@@ -2251,7 +2278,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                   inValidContainerNo = true;
                   validation(false);
                 }
-              } else if (type === CONTAINER_NUMBER && container === CONTAINER_DETAIL && !disableInput && item.duplicate) {
+              } else if (inqType === CONTAINER_NUMBER && container === CONTAINER_DETAIL && !disableInput && item.duplicate) {
                 validation(false);
               }
               return (
@@ -2274,6 +2301,50 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
             })
           }
         </div>);
+
+        // View HTS code, NCM code
+        if (type === 'HS/HTS/NCM Code') {
+          [HTS_CODE, NCM_CODE].map((code, index) => {
+            td.push(<div key={index} style={{ display: 'flex', marginTop: type === typeList[0] ? 10 : 5 }}>
+              <Tooltip title={code} enterDelay={1000}>
+                <input
+                  className={clsx(classes.text)}
+                  style={{
+                    backgroundColor: '#FDF2F2',
+                    fontWeight: 600,
+                    borderTopLeftRadius: rowIndex === 0 && 8,
+                    fontSize: 14
+                  }}
+                  disabled
+                  defaultValue={code}
+                />
+              </Tooltip>
+              {
+                rowValues.map((item) => {
+                  let nodeValue = null;
+                  if (rowIndex - 1 < item.value.length) {
+                    nodeValue = item.value[rowIndex > 0 ? rowIndex - 1 : 0];
+                  }
+                  return (
+                    <input
+                      className={clsx(classes.text)}
+                      key={index}
+                      style={{
+                        marginLeft: 5,
+                        backgroundColor: disableInput ? '#FDF2F2' : '#CCD3D1',
+                        fontSize: 15,
+                        textTransform: 'uppercase',
+                        color: disableInput ? '' : '#999999'
+                      }}
+                      disabled
+                      value={(nodeValue && nodeValue[getType(type)]) ? (index ? nodeValue[getType(type)].slice(0, 4) : nodeValue[getType(type)]) : ''}
+                    />
+                  );
+                })
+              }
+            </div>);
+          })
+        }
         if (!hasData || typeList.length == 1) {
           isRunning = false;
         }
