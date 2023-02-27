@@ -233,8 +233,6 @@ const SendInquiryForm = (props) => {
         html: initiateContentState(content),
         header
       });
-      setForm({ ...form, subject, content: bodyHtml, toOnshore });
-      handleEditorState(content);
     }
     if (hasCustomer || (!hasCustomer && inqCustomer.length)) {
       setTabValue('customer');
@@ -250,9 +248,9 @@ const SendInquiryForm = (props) => {
         html: initiateContentState(content),
         header
       });
-      setForm({ ...form, subject, content: bodyHtml, toCustomer });
-      handleEditorState(content);
     }
+    setForm({ ...form, subject, content: bodyHtml, toOnshore, toCustomer });
+    handleEditorState(content);
   }
 
   useEffect(() => {
