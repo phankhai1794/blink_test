@@ -1,24 +1,25 @@
 import {
-  resolveInquiry,
+  deleteComment,
   deleteInquiry,
-  uploadOPUS,
+  loadComment,
+  reOpenInquiry,
+  resolveInquiry,
   saveReply,
   updateReply,
-  loadComment,
-  reOpenInquiry
+  uploadOPUS
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo } from '@shared';
 import { validateTextInput } from 'app/services/myBLService';
 import {
+  CONSIGNEE,
   CONTAINER_DETAIL,
   CONTAINER_MANIFEST,
   CONTAINER_NUMBER,
   CONTAINER_PACKAGE,
   CONTAINER_SEAL,
   SHIPPER,
-  CONSIGNEE,
   NOTIFY,
   ONLY_ATT,
   BL_TYPE,
@@ -27,9 +28,17 @@ import {
   NCM_CODE
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Typography, Tooltip, Grid, Button, FormControlLabel, Radio, CircularProgress, TextField } from '@material-ui/core';
+import {
+  Button,
+  FormControlLabel,
+  Grid,
+  Radio,
+  TextField,
+  Tooltip,
+  Typography
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
@@ -224,6 +233,7 @@ const InquiryViewer = (props) => {
   const inqViewerFocus = useSelector(({ workspace }) => workspace.formReducer.inqViewerFocus);
   const [inqAnsId, setInqAnsId] = useState('');
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
+  const [isDeleteAnswer, setDeleteAnswer] = useState({ status: false, content: '' });
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -306,7 +316,7 @@ const InquiryViewer = (props) => {
                   type: metadata.ans_type['paragraph']
                 }
               };
-              if (['REP_Q_DRF', 'REP_A_DRF'].includes(filterOffshoreSent.state)) {
+              if (['REP_Q_DRF', 'REP_A_DRF', 'ANS_DRF'].includes(filterOffshoreSent.state)) {
                 setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
               }
               lastest.state = filterOffshoreSent.state;
@@ -315,6 +325,7 @@ const InquiryViewer = (props) => {
               if (['REOPEN_A', 'REOPEN_Q'].includes(filterOffshoreSent.state)) {
                 setShowLabelSent(false);
                 setSubmitLabel(false);
+                setStateReplyDraft(false);
                 lastest.showIconReply = true;
               }
 
@@ -355,6 +366,7 @@ const InquiryViewer = (props) => {
                   //
                 } else if (['REP_Q_SENT'].includes(filterOffshoreSent.state)) {
                   lastest.showIconReply = true;
+                  setStateReplyDraft(false);
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                   setSubmitLabel(true);
                   lastest.showIconEdit = true;
@@ -646,7 +658,7 @@ const InquiryViewer = (props) => {
       const editedIndex = optionsInquires.findIndex(inq => currentQuestion.id === inq.id);
       quest.answerObj.forEach(ans => {
         ans.confirmed = false;
-        if (optionsInquires[editedIndex].selectChoice && ans.id === optionsInquires[editedIndex].selectChoice.answer) {
+        if (ans.id === optionsInquires[editedIndex].selectChoice?.answer) {
           ans.confirmed = true;
         }
       })
@@ -727,7 +739,7 @@ const InquiryViewer = (props) => {
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
         })
         .catch((error) => console.error(error));
-    } else if (confirmPopupType === 'removeReply' && replyRemove) {
+    } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove) {
       deleteDraftBLReply(replyRemove?.draftId, replyRemove.field, myBL.id)
         .then((res) => {
           // Case: Offshore reply customer's amendment first time => delete
@@ -783,6 +795,50 @@ const InquiryViewer = (props) => {
           }
           // setSaveComment(!isSaveComment);
         }).catch((error) => console.error(error));
+    } else if (confirmPopupType === 'removeReplyInquiry' && replyRemove) {
+      deleteComment(replyRemove?.draftId, replyRemove.id).then((res) => {
+        if (res) {
+          const optionsOfQuestion = [...inquiries];
+          const indexQuestion = optionsOfQuestion.findIndex(inq => inq.id === replyRemove.id);
+          if (res.isOldestReply) {
+            if (!res.statePrev) {
+              optionsOfQuestion[indexQuestion].state = 'ANS_SENT';
+            } else {
+              optionsOfQuestion.splice(indexQuestion, 1);
+            }
+          }
+          if (res.response.type) {
+            setDeleteAnswer({ status: true, content: res.response.content || '' });
+            if (!res.response.content) {
+              optionsOfQuestion[indexQuestion].mediaFilesAnswer = [];
+            }
+            if (res.response.type === 'paragraph') {
+              if (res.response.content) {
+                optionsOfQuestion[indexQuestion].mediaFilesAnswer = res.response.mediaFilesAnswer;
+                optionsOfQuestion[indexQuestion].paragraphAnswer = {
+                  inquiry: question.id,
+                  content: res.response.content,
+                };
+              }
+            }
+            else if (res.response.type === 'choice') {
+              if (res.response.content) {
+                optionsOfQuestion[indexQuestion].mediaFilesAnswer = res.response.mediaFilesAnswer;
+                optionsOfQuestion[indexQuestion].selectChoice = {
+                  inquiry: question.id,
+                  answer: res.response.content,
+                  confirmed: true
+                };
+              }
+            }
+          }
+          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+          setReplyRemove();
+          setDisableSaveReply(false);
+          props.getUpdatedAt();
+          setViewDropDown('');
+        }
+      }).catch((error) => console.error(error));
     }
     dispatch(
       FormActions.openConfirmPopup({
@@ -825,19 +881,23 @@ const InquiryViewer = (props) => {
   };
 
   const removeReply = (question) => {
+    let confirmPopupType = 'removeReplyAmendment';
+    let confirmPopupMsg = 'Are you sure you want to remove this amendment?';
+    if (comment.length > 2 || question.process === 'pending') {
+      confirmPopupMsg = 'Are you sure you want to delete this reply?';
+    }
     if (tempReply.answer) {
       question.draftId = tempReply.answer.id;
     }
-    setReplyRemove(question);
-    let confirmPopupMsg = 'Are you sure you want to remove this amendment?';
-    if (comment.length > 2) {
-      confirmPopupMsg = 'Are you sure you want to delete this reply?';
+    if (question.process === 'pending') {
+      confirmPopupType = 'removeReplyInquiry';
     }
+    setReplyRemove(question);
     dispatch(
       FormActions.openConfirmPopup({
         openConfirmPopup: true,
         confirmPopupMsg,
-        confirmPopupType: 'removeReply'
+        confirmPopupType
       })
     );
   }
@@ -962,7 +1022,6 @@ const InquiryViewer = (props) => {
   };
 
   const onUpload = () => {
-    // setLoading(true);
     dispatch(FormActions.isLoadingProcess(true));
     const optionsInquires = [...inquiries];
     const idUpload = question.process === 'pending' ? question.id : tempReply?.answer?.id;
@@ -1348,7 +1407,7 @@ const InquiryViewer = (props) => {
       dispatch(InquiryActions.setInquiries(optionsInquires));
       reply.showIconAttachReplyFile = false;
       reply.showIconAttachAnswerFile = true;
-      if (props.question.answerObj.length) reply.answerObj = props.question.answerObj;
+      // if (props.question.answerObj.length) reply.answerObj = props.question.answerObj;
       // reply.mediaFilesAnswer = reply.mediaFile;
       // reply.mediaFile = [];
     } else if (Array.isArray(reply.content)) {
@@ -1623,7 +1682,7 @@ const InquiryViewer = (props) => {
                                 </div>
                               </Tooltip>
                             </PermissionProvider>
-                            {question.process === 'draft' && !['REP_SENT', 'AME_SENT'].includes(question.state) && (
+                            {!['REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT'].includes(question.state) && (
                               <Tooltip title="Delete">
                                 <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                                   <img
@@ -1691,7 +1750,7 @@ const InquiryViewer = (props) => {
                           <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
                         </div>
                       </Tooltip>
-                      {question.process === 'draft' && !['AME_SENT', 'REP_SENT'].includes(question.state) && (
+                      {!['REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT', 'ANS_SENT'].includes(question.state) && (
                         <Tooltip title="Delete">
                           <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                             <img
@@ -1810,6 +1869,10 @@ const InquiryViewer = (props) => {
                     disable={!question.showIconAttachAnswerFile}
                     saveStatus={isSaved}
                     currentQuestion={currentQuestion}
+                    isDeleteAnswer={isDeleteAnswer}
+                    setDeleteAnswer={() => {
+                      setDeleteAnswer({ status: false, content: '' });
+                    }}
                   />
                 )}
               {type === metadata.ans_type.paragraph && ((['OPEN', 'INQ_SENT', 'REP_Q_DRF', 'ANS_DRF', 'ANS_SENT'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
@@ -1821,6 +1884,10 @@ const InquiryViewer = (props) => {
                     disable={!question.showIconAttachAnswerFile}
                     saveStatus={isSaved}
                     currentQuestion={currentQuestion}
+                    isDeleteAnswer={isDeleteAnswer}
+                    setDeleteAnswer={() => {
+                      setDeleteAnswer({ status: false, content: '' });
+                    }}
                   />
                 )}
             </div>
@@ -2200,13 +2267,13 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
         }
         contsNo.push(containerNo);
       });
-  
+
       let cmNolist = (getVals || []).filter(cm =>
         contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
       )
       if (cmNolist) cmSorted = [...cmSorted, ...cmNolist];
       if (!cmSorted.length) cmSorted = getVals;
-      
+
       setValues(cmSorted)
     }
   }, [content]);
@@ -2229,7 +2296,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       const groups = groupBy(valueCopy, value => value[getType(CONTAINER_NUMBER)]);
       groupsValues = [...groups].map(([name, value]) => ({ name, value, duplicate: false }));
     }
-    
+
     while (groupsValues.length) {
       let rowValues = groupsValues.splice(0, 4);
       let rowIndex = 0;
