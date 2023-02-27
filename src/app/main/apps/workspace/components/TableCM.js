@@ -137,20 +137,16 @@ const TableCM = (props) => {
 
   useEffect(() => {
     let cmSorted = [];
-    let contsNo = [];
-    (containerDetail || []).map(cd => {
-      const containerNo = cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
-      if (containerNo) {
-        let arr = containerManifest.filter(cm =>
-          cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
-        )
-        cmSorted = [...cmSorted, ...arr];
-      }
-      contsNo.push(containerNo);
-    });
+    const contsNo = [...new Set((containerDetail || []).map(cd => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))];
+    if (contsNo.length) {
+      const arr = containerManifest.filter(cm =>
+        contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
+      )
+      cmSorted = [...cmSorted, ...arr];
+    }
 
-    let cmNolist = (containerManifest || []).filter(cm =>
-      contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
+    const cmNolist = (containerManifest || []).filter(cm =>
+      !contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
     )
     if (cmNolist) cmSorted = [...cmSorted, ...cmNolist];
     if (!cmSorted.length) cmSorted = containerManifest;
