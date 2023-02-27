@@ -80,7 +80,9 @@ const PopupConfirm = () => {
           <Button variant="outlined" style={{ textTransform: 'none', fontSize: 16 }} onClick={handleCancelConfirm}>Close</Button>
         </div> :
         <div className='btnConfirm'>
-          <Button variant="outlined" style={{ marginRight: 15, textTransform: 'none', fontSize: 16 }} onClick={handleConfirm}>Confirm</Button>
+          <Button variant="outlined" style={{ marginRight: 15, textTransform: 'none', fontSize: 16 }} onClick={handleConfirm}>
+            {confirmPopupMsg.includes('resend') ? 'Resend' : 'Confirm'}
+          </Button>
           <Button variant="outlined" style={{ textTransform: 'none', fontSize: 16 }} onClick={handleCancelConfirm}>Cancel</Button>
         </div>
     )

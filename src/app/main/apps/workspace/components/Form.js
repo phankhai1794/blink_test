@@ -145,7 +145,8 @@ const useStyles = makeStyles(() => ({
     width: (props) => (props.isFullScreen ? '1200px' : '950px')
   },
   divider: {
-    backgroundColor: '#8A97A3'
+    backgroundColor: '#8A97A3',
+    zIndex: 1
   },
   chip: {
     marginLeft: '0.2rem'
