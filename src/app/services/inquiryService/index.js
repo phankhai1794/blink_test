@@ -41,8 +41,8 @@ export async function loadComment(id) {
   return response.data;
 }
 
-export async function deleteComment(id) {
-  const response = await axios().delete(`${PATH}/comment/${id}`);
+export async function deleteComment(answerId, inqId) {
+  const response = await axios().delete(`${PATH}/comment/${answerId}/${inqId}`);
   return response.data;
 }
 

@@ -1,22 +1,20 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Radio,
   FormControl,
   RadioGroup,
   FormControlLabel
 } from '@material-ui/core';
-import {useDispatch, useSelector} from 'react-redux';
-import {PERMISSION, PermissionProvider} from "@shared/permission";
+import { useDispatch, useSelector } from 'react-redux';
+import { PERMISSION, PermissionProvider } from "@shared/permission";
 
 import * as InquiryActions from '../store/actions/inquiry';
 
 const ChoiceAnswer = (props) => {
-  const { question, questions, disableChecked, disable = false, saveStatus, currentQuestion } = props;
+  const { question, questions, disableChecked, disable = false, saveStatus, currentQuestion, isDeleteAnswer, setDeleteAnswer } = props;
   const user = useSelector(({ user }) => user);
   let questionIsEmpty = question === undefined;
-  let prevChoiceArray = question.answerObj.filter((choice) => {
-    return choice.confirmed;
-  });
+  let prevChoiceArray = question.answerObj?.filter(choice => choice.confirmed) || [];
   const [isPermission, setPermission] = useState(false);
   const dispatch = useDispatch();
 
@@ -68,6 +66,13 @@ const ChoiceAnswer = (props) => {
     }
   }, [question]);
 
+  useEffect(() => {
+    if (isDeleteAnswer?.status) {
+      setSelectedChoice(isDeleteAnswer.content);
+      setDeleteAnswer();
+    }
+  }, [isDeleteAnswer]);
+
   return (
     <>
       <FormControl>
@@ -76,11 +81,11 @@ const ChoiceAnswer = (props) => {
           name="controlled-radio-buttons-group"
           onChange={handleChange}
         >
-          {question.answerObj.map((choice, index) => (
+          {question.answerObj?.map((choice, index) => (
             <div key={index} style={{ marginTop: '0.5rem' }}>
               <FormControlLabel
                 disabled={!isPermission || disable}
-                checked={!disableChecked&&selectedChoice === choice.id}
+                checked={!disableChecked && selectedChoice === choice.id}
                 value={choice.id}
                 control={<Radio color={'primary'} />}
                 label={<span style={{ fontSize: '1.7rem', whiteSpace: 'pre' }}>{choice.content}</span>}

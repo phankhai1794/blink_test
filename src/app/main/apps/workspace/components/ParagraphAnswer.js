@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { ONLY_ATT } from '@shared/keyword'
 import clsx from "clsx";
@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ParagraphAnswer = (props) => {
-  const { questions, question, disable = false, saveStatus, currentQuestion } = props;
+  const { questions, question, disable = false, saveStatus, currentQuestion, isDeleteAnswer, setDeleteAnswer } = props;
   const allowUpdateParagraphAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
   });
@@ -65,7 +65,7 @@ const ParagraphAnswer = (props) => {
   };
 
   useEffect(() => {
-    if (allowUpdateParagraphAnswer && allowUpdateParagraphAnswer && !['REP_A_SENT', 'COMPL'].includes(question.state) ) {
+    if (allowUpdateParagraphAnswer && allowUpdateParagraphAnswer && !['REP_A_SENT', 'COMPL'].includes(question.state)) {
       setPermission(true);
     } else {
       setPermission(false);
@@ -80,6 +80,13 @@ const ParagraphAnswer = (props) => {
     }
     if (!paragraphText && question.answerObj.length > 0 && question.mediaFilesAnswer.length > 0) setParagraphText(ONLY_ATT)
   }, [saveStatus, question]);
+
+  useEffect(() => {
+    if (isDeleteAnswer && isDeleteAnswer.status) {
+      setParagraphText(isDeleteAnswer.content);
+      setDeleteAnswer();
+    }
+  }, [isDeleteAnswer]);
 
   return (
     <div>
