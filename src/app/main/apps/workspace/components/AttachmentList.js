@@ -20,6 +20,7 @@ import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { handleDuplicateAttachment } from '@shared/handleError';
 import { getCommentDraftBl } from "app/services/draftblService";
 import Checkbox from "@material-ui/core/Checkbox";
+import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 
 import * as InquiryActions from "../store/actions/inquiry";
 
@@ -532,11 +533,11 @@ const AttachmentList = (props) => {
     const listIdMedia = [];
     selectedIndexFile.forEach(val => {
       if (optionsAttachmentList[val].id !== null) {
-        listIdMedia.push(optionsAttachmentList[val].id);
+        listIdMedia.push(optionsAttachmentList[val]);
       }
     });
     if (listIdMedia.length > 0) {
-      removeMultipleMedia({ mediaIds: listIdMedia }).then(res => {
+      removeMultipleMedia({ medias: listIdMedia }).then(res => {
         // update attachment list
         let mediaOther = [];
         let mediaRemove = [];
@@ -556,6 +557,7 @@ const AttachmentList = (props) => {
         dispatch(InquiryActions.setInquiries(optionsInquiries))
         dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
         dispatch(AppAction.showMessage({ message: 'Delete attachment successfully', variant: 'success' }));
+        if (mediaOther.length === 0) dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
       });
     } else {
       // update attachment list

@@ -238,6 +238,7 @@ const BLWorkspace = (props) => {
         type: 'warning_duplicate',
         userName: userInfo.displayName,
         role: userInfo.role,
+        userType: userInfo.userType
       });
     }
   };
@@ -271,6 +272,7 @@ const BLWorkspace = (props) => {
           type: 'warning_duplicate',
           userName: userInfo.displayName,
           role: userInfo.role,
+          userType: userInfo.userType
         });
       }
 
