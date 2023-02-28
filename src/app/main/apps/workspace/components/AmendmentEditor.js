@@ -160,8 +160,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         // if (edit) service = updateDraftBLReply({ content: { content: fieldValue, mediaFile: mediaList } }, question.id);
         service = saveEditedField({ field: fieldReq, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id });
         service.then((res) => {
-          dispatch(AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' })
-          );
           dispatch(DraftBLActions.setCurrentField());
           dispatch(InquiryActions.addAmendment());
           const response = { ...res?.newAmendment, showIconEditInq: true };
@@ -174,11 +172,11 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           getUpdatedAt();
           setDisableSave(false);
         }).catch((err) => console.error(err));
+        dispatch(InquiryActions.setContent({ ...content, [fieldReq]: contentField }));
+        dispatch(FormActions.toggleCreateAmendment(false));
+        dispatch(FormActions.toggleAmendmentsList(true));
+        dispatch(InquiryActions.setOneInq({}));
       })
-
-    dispatch(InquiryActions.setContent({ ...content, [fieldReq]: contentField }));
-    dispatch(FormActions.toggleCreateAmendment(false));
-    dispatch(InquiryActions.setOneInq({}));
   }
 
   const handleCancel = () => {
