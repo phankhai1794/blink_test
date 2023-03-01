@@ -997,7 +997,7 @@ const InquiryViewer = (props) => {
       fieldAddressContent: textResolveSeparate.address.toUpperCase().trim() || '',
       isWrapText
     };
-    if (containerCheck.includes(question.field)){
+    if (containerCheck.includes(question.field)) {
       setIsResolveCDCM(true);
     }
     const optionsInquires = [...inquiries];
