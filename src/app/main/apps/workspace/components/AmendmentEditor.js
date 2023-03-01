@@ -12,11 +12,11 @@ import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNE
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
+import * as Actions from 'app/main/apps/workspace/store/actions';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
-import * as Actions from 'app/main/apps/workspace/store/actions';
 import UserInfo from './UserInfo';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
@@ -219,7 +219,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
               }
             })
             if (arr){
-              content[fieldId]  = arr;
+              content[fieldId] = arr;
               let service = saveEditedField({ field: fieldId, content: { content: arr, mediaFile: []}, mybl: myBL.id });
               service.then((res) => {
                 dispatch(Actions.loadInquiry(myBL.id));
@@ -243,6 +243,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         dispatch(InquiryActions.setContent({ ...content, [fieldReq]: contentField }));
         dispatch(FormActions.toggleCreateAmendment(false));
         dispatch(FormActions.toggleAmendmentsList(true));
+        dispatch(InquiryActions.addAmendment());
         dispatch(InquiryActions.setOneInq({}));
       })
   }
