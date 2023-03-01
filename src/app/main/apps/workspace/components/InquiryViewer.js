@@ -1365,29 +1365,6 @@ const InquiryViewer = (props) => {
           optionsInquires[editedIndex].createdAt = res.createdAt;
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
-          if (containerCheck.includes(question.field)){
-            let contsNoChange = {}
-            const orgContentField = content[question.field];
-            const contentField = tempReply.answer.content;
-            contentField.forEach((obj, index) => {
-              const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
-              const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
-              if (getTypeName === CONTAINER_NUMBER) {
-                contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
-              }
-            })
-            const fieldId = getField(question.field ===containerCheck[0]?CONTAINER_MANIFEST : CONTAINER_DETAIL)
-            let arr = content[fieldId] 
-            arr.map((item, index) => {
-              if (item[getType(CONTAINER_NUMBER)] in contsNoChange){
-                item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
-              }
-            })
-            if (arr){
-              content[fieldId]  = arr;
-              saveEditedField({ field: fieldId, content: { content: arr, mediaFile: []}, mybl: myBL.id });
-            }    
-           }
 
           dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           if (question.state.includes('AME_')) {
@@ -1395,32 +1372,7 @@ const InquiryViewer = (props) => {
               ...content,
               [res.newAmendment?.field]: tempReply.answer.content
             }));
-            if (containerCheck.includes(question.field) && tempReply.answer.content.length === 1) {
-                let fieldCdCM = question.field === getField(CONTAINER_DETAIL)? containerCheck[1] : containerCheck[0];
-                let arr = content[fieldCdCM]
-                if (arr.length > 0) {
-                  if(question.field === getField(CONTAINER_DETAIL)){
-                    CONTAINER_LIST.cmNumber.map((key, index) => {
-                      arr[0][getType(CONTAINER_LIST.cmNumber[index])] = tempReply.answer.content[0][getType(key)];
-                    });
-                    CONTAINER_LIST.cmUnit.map((key, index) => {
-                      arr[0][getType(CONTAINER_LIST.cmUnit[index])] = tempReply.answer.content[0][getType(key)];
-                    });
-                  }else{
-                    CONTAINER_LIST.cdNumber.map((key, index) => {
-                      arr[0][getType(CONTAINER_LIST.cmNumber[index])] = tempReply.answer.content[0][getType(key)];
-                    });
-                    CONTAINER_LIST.cdUnit.map((key, index) => {
-                      arr[0][getType(CONTAINER_LIST.cmUnit[index])] = tempReply.answer.content[0][getType(key)];
-                    });
-                  }
-                  content[fieldCdCM] = arr;
-                    let service;
-                    service = saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id });
-                    service.then((res) => {
-                    });
-                }
-            }
+            
             optionsInquires[editedIndex].state = 'AME_DRF';
           } else {
             optionsInquires[editedIndex].state = 'REP_DRF';
