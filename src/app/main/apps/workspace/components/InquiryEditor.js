@@ -462,6 +462,9 @@ const InquiryEditor = (props) => {
         props.getUpdatedAt();
         setDisabled(false);
         // setSave();
+        dispatch(
+          AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+        );
         dispatch(InquiryActions.checkSubmit(!enableSubmit));
       } else {
         dispatch(InquiryActions.setEditInq());
@@ -525,6 +528,10 @@ const InquiryEditor = (props) => {
               if (optionsInquires.length === 1) {
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BC", "")) // Draft of Inquiry Created (BC)
               }
+
+              dispatch(
+                AppActions.showMessage({ message: 'Save inquiry successfully', variant: 'success' })
+              );
               dispatch(InquiryActions.saveInquiry());
               dispatch(InquiryActions.setField(inqContentTrim[0].field));
               dispatch(InquiryActions.setOpenedInqForm(false));
@@ -532,9 +539,6 @@ const InquiryEditor = (props) => {
               dispatch(InquiryActions.setInquiries(optionsInquires));
               dispatch(InquiryActions.setListMinimize(optionsMinimize));
               dispatch(InquiryActions.checkSubmit(!enableSubmit));
-              dispatch(FormActions.toggleAllInquiry(true));
-              dispatch(FormActions.toggleCreateInquiry(false));
-              dispatch(InquiryActions.setOneInq());
               setDisabled(false);
             })
             .catch((error) =>

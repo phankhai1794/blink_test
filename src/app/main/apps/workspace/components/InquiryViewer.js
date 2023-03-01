@@ -25,8 +25,7 @@ import {
   BL_TYPE,
   HS_CODE,
   HTS_CODE,
-  NCM_CODE,
-  CONTAINER_LIST
+  NCM_CODE
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
@@ -480,8 +479,7 @@ const InquiryViewer = (props) => {
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
             if (containerCheck.includes(question.field)) {
-              const lastestContentCDCM = res.filter(r => r.state.includes('AME_') || r.state.includes('REOPEN_'));
-              lastest.contentCDCM = lastestContentCDCM[lastestContentCDCM.length - 1].content.content;
+              lastest.contentCDCM = res[0].content.content;
             }
 
             if (Object.keys(lastestComment).length > 0) {
@@ -505,8 +503,6 @@ const InquiryViewer = (props) => {
             if (lastest.state === 'RESOLVED') {
               setStateReplyDraft(false);
               setDisableReopen(false);
-              setIsReplyCDCM(false);
-              setIsResolveCDCM(false);
             }
 
             if (user.role === 'Admin') {
@@ -528,14 +524,11 @@ const InquiryViewer = (props) => {
               if (['REOPEN_A'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 setStateReplyDraft(false);
+                setTempReply({});
               } else if (['REOPEN_Q'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 setStateReplyDraft(false);
-              }
-              if (['REOPEN_A', 'REOPEN_Q'].includes(lastest.state)) {
-                if (typeof lastest.content === 'string') {
-                  setTempReply({})
-                }
+                setTempReply({});
               }
             } else {
               if (lastestComment.role === 'Guest') {
@@ -562,19 +555,12 @@ const InquiryViewer = (props) => {
                 lastest.showIconEdit = false;
                 setSubmitLabel(false);
                 setStateReplyDraft(false);
+                setTempReply({});
               } else if (['REOPEN_Q'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 lastest.showIconEdit = false;
                 setStateReplyDraft(false);
-              }
-              if (['REOPEN_A', 'REOPEN_Q'].includes(lastest.state)) {
-                // is CM CD Amendment
-                if (typeof lastest.content !== 'string') {
-                  setIsReplyCDCM(true)
-                }
-                else {
-                  setTempReply({})
-                }
+                setTempReply({});
               }
             }
             if (isEditOriginalAmendment) {
@@ -1148,9 +1134,6 @@ const InquiryViewer = (props) => {
     setTempReply({ ...tempReply, ...reqReply });
   };
 
-  const getType = (type) => {
-    return metadata.inq_type?.[type] || '';
-  };
   const handleChangeContainerDetail = (value) => {
     const reqReply = {
       inqAns: {
@@ -1168,7 +1151,6 @@ const InquiryViewer = (props) => {
     setDisableSaveReply(false);
     setTempReply({ ...tempReply, ...reqReply });
   };
-  
 
   const handleSetAttachmentReply = (val) => {
     const reqReply = {
@@ -1346,14 +1328,11 @@ const InquiryViewer = (props) => {
       }
       else { // Edit amendment / reply
         const reqReply = {
-          field: question.field,
           content: {
             content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
             mediaFile: mediaListAmendment
           },
-          mybl: myBL.id
         };
-
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
           if (res) {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
@@ -1361,19 +1340,16 @@ const InquiryViewer = (props) => {
           optionsInquires[editedIndex].createdAt = res.createdAt;
           setDisableSaveReply(false);
           dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
-
           dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           if (question.state.includes('AME_')) {
             dispatch(InquiryActions.setContent({
               ...content,
               [res.newAmendment?.field]: tempReply.answer.content
             }));
-            
             optionsInquires[editedIndex].state = 'AME_DRF';
           } else {
             optionsInquires[editedIndex].state = 'REP_DRF';
           }
-
           dispatch(InquiryActions.setInquiries(optionsInquires));
           props.getUpdatedAt();
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
@@ -1411,7 +1387,6 @@ const InquiryViewer = (props) => {
       // case: Reply Comment
       setIsReply(true);
       setQuestion(q => ({ ...q, showIconReply: false, showIconAttachAnswerFile: false, showIconAttachReplyFile: true }));
-      setTempReply({})
     }
   };
 
@@ -2045,7 +2020,7 @@ const InquiryViewer = (props) => {
                           handleChangeContainerDetail(value);
                           setTextResolve(value)
                         }}
-                        originalValues={Array.isArray(question.content) ? question.content : question.contentCDCM}
+                        originalValues={question.content}
                         setTextResolve={setTextResolve}
                       />
                       : <ContainerDetailFormOldVersion
