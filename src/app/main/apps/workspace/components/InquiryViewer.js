@@ -2342,7 +2342,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       });
 
       let cmNolist = (getVals || []).filter(cm =>
-        contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
+        !contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
       )
       if (cmNolist) cmSorted = [...cmSorted, ...cmNolist];
       if (!cmSorted.length) cmSorted = getVals;
