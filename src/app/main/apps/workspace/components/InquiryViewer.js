@@ -997,6 +997,9 @@ const InquiryViewer = (props) => {
       fieldAddressContent: textResolveSeparate.address.toUpperCase().trim() || '',
       isWrapText
     };
+    if (containerCheck.includes(question.field)) {
+      setIsResolveCDCM(true);
+    }
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     resolveInquiry(body)
@@ -1008,6 +1011,7 @@ const InquiryViewer = (props) => {
         dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
         props.getUpdatedAt();
         setIsResolve(false);
+        setIsResolveCDCM(true);
         setViewDropDown('');
         if (!isSeparate) {
           if (containerCheck.includes(question.field)) {
