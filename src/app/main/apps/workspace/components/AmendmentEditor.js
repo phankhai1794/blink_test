@@ -7,8 +7,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
 import * as AppActions from 'app/store/actions';
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, BL_TYPE } from '@shared/keyword';
 import { validateBLType } from '@shared';
-import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE } from '@shared/keyword';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
@@ -16,7 +16,6 @@ import { validateTextInput } from 'app/services/myBLService';
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
-import * as Actions from 'app/main/apps/workspace/store/actions';
 import UserInfo from './UserInfo';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
@@ -99,7 +98,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const fieldType = metadata.field_options.filter(filDrf => filDrf.display && !filterInqDrf.includes(filDrf.value));
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(currentField));
   const [disableSave, setDisableSave] = useState(false);
-  
+
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
   const removeAttachment = (index) => {
@@ -107,10 +106,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     optionsAttachmentList.splice(index, 1);
     setAttachments(optionsAttachmentList)
   }
-  
-  const getType = (type) => {
-    return metadata.inq_type?.[type] || '';
-  };
 
   const handleChange = (e) => setFieldValue(e.target.value);
 
@@ -164,25 +159,26 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         let service;
         // if (edit) service = updateDraftBLReply({ content: { content: fieldValue, mediaFile: mediaList } }, question.id);
         service = saveEditedField({ field: fieldReq, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id });
-        service.then((res) => { 
-          dispatch(AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' }));
+        service.then((res) => {
+          dispatch(AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' })
+          );
           dispatch(DraftBLActions.setCurrentField());
           dispatch(InquiryActions.addAmendment());
           const response = { ...res?.newAmendment, showIconEditInq: true };
           optionsInquires.push(response);
           optionsMinimize.push(response);
-
           dispatch(InquiryActions.setInquiries(optionsInquires));
           dispatch(InquiryActions.setListMinimize(optionsMinimize));
+          //
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           getUpdatedAt();
           setDisableSave(false);
         }).catch((err) => console.error(err));
-        dispatch(InquiryActions.setContent({ ...content, [fieldReq]: contentField }));
-        dispatch(FormActions.toggleCreateAmendment(false));
-        dispatch(FormActions.toggleAmendmentsList(true));
-        dispatch(InquiryActions.setOneInq({}));
       })
+
+    dispatch(InquiryActions.setContent({ ...content, [fieldReq]: contentField }));
+    dispatch(FormActions.toggleCreateAmendment(false));
+    dispatch(InquiryActions.setOneInq({}));
   }
 
   const handleCancel = () => {
