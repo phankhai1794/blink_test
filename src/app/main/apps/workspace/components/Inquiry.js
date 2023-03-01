@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/styles';
 import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { getInquiryById, getUpdatedAtAnswer } from 'app/services/inquiryService';
+import { sentStatus } from '@shared';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -12,7 +13,6 @@ import InquiryEditor from './InquiryEditor';
 import InquiryAnswer from './InquiryAnswer';
 import InquiryViewer from './InquiryViewer';
 import AmendmentEditor from './AmendmentEditor';
-import { sentStatus } from '@shared';
 
 const useStyles = makeStyles((theme) => ({
   boxItem: {
@@ -264,7 +264,7 @@ const Inquiry = (props) => {
       <div ref={inputAddAmendmentEndRef}>
         {currentAmendment || currentAmendment === null &&
           <div style={{ marginTop: 30 }}>
-            <AmendmentEditor />
+            <AmendmentEditor getUpdatedAt={() => {}}/>
           </div>
         }
       </div>

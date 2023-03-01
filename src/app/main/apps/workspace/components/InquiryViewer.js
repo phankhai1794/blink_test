@@ -2318,6 +2318,9 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       if (parseInt(value)) {
         temp[index][type] = parseInt(value).toLocaleString();
       }
+      else {
+        temp[index][type] = "";
+      }
     } else {
       temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? value.split(',') : value;
     }
