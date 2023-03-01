@@ -164,69 +164,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         let service;
         // if (edit) service = updateDraftBLReply({ content: { content: fieldValue, mediaFile: mediaList } }, question.id);
         service = saveEditedField({ field: fieldReq, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id });
-        service.then((res) => {
-          if (contentField.length === 1) {
-            if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
-              let cm = content[containerCheck[1]]
-              if (cm) {
-                cm[0][getType(CONTAINER_NUMBER)] = contentField[0][getType(CONTAINER_NUMBER)];
-                CONTAINER_LIST.cdNumber.map((key, index) => {
-                  cm[0][getType(CONTAINER_LIST.cmNumber[index])] = contentField[0][getType(key)];
-                });
-                CONTAINER_LIST.cmUnit.map((key, index) => {
-                  cm[0][getType(CONTAINER_LIST.cmUnit[index])] = contentField[0][getType(key)];
-                });
-                content[containerCheck[1]] = cm;
-                let service = saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id });
-                service.then((res) => {
-                  dispatch(Actions.loadInquiry(myBL.id));
-                })
-              }
-            }
-            else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
-              let cd = content[containerCheck[0]]
-              if (cd) {
-                cd[0][getType(CONTAINER_NUMBER)] = contentField[0][getType(CONTAINER_NUMBER)];
-                CONTAINER_LIST.cmNumber.map((key, index) => {
-                  cd[0][getType(CONTAINER_LIST.cdNumber[index])] = contentField[0][getType(key)];
-                });
-                CONTAINER_LIST.cmUnit.map((key, index) => {
-                  cd[0][getType(CONTAINER_LIST.cdUnit[index])] = contentField[0][getType(key)];
-                });
-                content[containerCheck[0]] = cd;
-                let service = saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id });
-                service.then((res) => {
-                  dispatch(Actions.loadInquiry(myBL.id));
-                })
-              }
-            }
-          }
-          else if ([CONTAINER_DETAIL, CONTAINER_MANIFEST].includes(fieldValueSelect.keyword)){
-            let contsNoChange = {}
-            const orgContentField = content[getField(fieldValueSelect.keyword)];
-            contentField.forEach((obj, index) => {
-              const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
-              const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
-              if (getTypeName === CONTAINER_NUMBER) {
-                contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
-              }
-            })
-            const fieldId = getField(fieldValueSelect.keyword ===CONTAINER_DETAIL?CONTAINER_MANIFEST : CONTAINER_DETAIL)
-            let arr = content[fieldId] 
-            arr.map((item) => {
-              if (item[getType(CONTAINER_NUMBER)] in contsNoChange){
-                item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
-              }
-            })
-            if (arr){
-              content[fieldId] = arr;
-              let service = saveEditedField({ field: fieldId, content: { content: arr, mediaFile: []}, mybl: myBL.id });
-              service.then((res) => {
-                dispatch(Actions.loadInquiry(myBL.id));
-              })
-            }    
-          }
-          
+        service.then((res) => { 
           dispatch(AppActions.showMessage({ message: 'Edit field successfully', variant: 'success' }));
           dispatch(DraftBLActions.setCurrentField());
           dispatch(InquiryActions.addAmendment());
