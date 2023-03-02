@@ -134,20 +134,18 @@ const TableCM = (props) => {
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
+  // Sort CMs based on contNo
   let cmSorted = [];
+  let cms = [...containerManifest];
   const contsNo = [...new Set((containerDetail || []).map(cd => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))];
   if (contsNo.length) {
-    const arr = containerManifest.filter(cm =>
-      contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
-    )
-    cmSorted = [...cmSorted, ...arr];
+    contsNo.forEach(contNo => {
+      cmSorted = [...cmSorted, ...cms.filter(cm => contNo === cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])];
+      cms = cms.filter(cm => contNo !== cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+    });
   }
-
-  const cmNolist = (containerManifest || []).filter(cm =>
-    !contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
-  )
-  if (cmNolist) cmSorted = [...cmSorted, ...cmNolist];
-  if (!cmSorted.length) cmSorted = containerManifest;
+  if (cmSorted.length) cmSorted = [...cmSorted, ...cms];
+  else cmSorted = containerManifest;
   
   const onMouseEnter = (e) => setIsHovering(true);
 
