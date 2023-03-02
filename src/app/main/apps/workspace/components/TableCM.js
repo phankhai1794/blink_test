@@ -144,8 +144,7 @@ const TableCM = (props) => {
       cms = cms.filter(cm => contNo !== cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
     });
   }
-  if (cmSorted.length) cmSorted = [...cmSorted, ...cms];
-  else cmSorted = containerManifest;
+  cmSorted = [...cmSorted, ...cms];
   
   const onMouseEnter = (e) => setIsHovering(true);
 
