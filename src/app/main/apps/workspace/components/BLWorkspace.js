@@ -22,6 +22,7 @@ import {
   DATE_LADEN,
   COMMODITY_CODE,
   DATED,
+  BL_TYPE,
   // FREIGHTED_AS,
   // RATE,
   // EXCHANGE_RATE,
@@ -673,7 +674,9 @@ const BLWorkspace = (props) => {
                     <BLField lock={true} disableClick={true}>{myBL.bkgNo || ""}</BLField>
                   </Grid>
                   <Grid item xs={6} className={classes.rightPanel}>
-                    <Label>SEA WAYBILL NO.</Label>
+                    <Label>
+                      {(getValueField(BL_TYPE) === "B" || getValueField(BL_TYPE) === "oceanBill") ? "BILL OF LADING" : "SEAWAY BILL"}
+                    </Label>
                     <BLField lock={true} disableClick={true}>{(myBL.bkgNo && `ONYE${myBL.bkgNo}`) || ""}</BLField>
                   </Grid>
                 </Grid>
