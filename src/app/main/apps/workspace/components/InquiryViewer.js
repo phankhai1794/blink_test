@@ -762,6 +762,10 @@ const InquiryViewer = (props) => {
     //
   }
 
+  const getTypeCDCM = (type) => {
+    return metadata.inq_type?.[type] || '';
+  };
+
   useEffect(() => {
     resetInquiry();
     ['INQ_SENT', 'ANS_DRF'].includes(question.state) ? setShowLabelSent(true) : setShowLabelSent(false);
@@ -835,6 +839,39 @@ const InquiryViewer = (props) => {
               if (res.checkReplyEmpty) {
                 optionsOfQuestion[removeIndex].state = user.role === 'Admin' ? 'AME_SENT' : 'REP_SENT';
               }
+              //
+              const idCD = metadata.field[CONTAINER_DETAIL];
+              const idCM = metadata.field[CONTAINER_MANIFEST];
+              if (res.drfAnswersTrans) {
+                if (idCD === question.field) {
+                  let cm = content[containerCheck[1]]
+                  if (cm) {
+                    cm[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans.content[0][getTypeCDCM(CONTAINER_NUMBER)];
+                    CONTAINER_LIST.cdNumber.map((key, index) => {
+                      cm[0][getTypeCDCM(CONTAINER_LIST.cmNumber[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                    });
+                    CONTAINER_LIST.cmUnit.map((key, index) => {
+                      cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                    });
+                    content[containerCheck[1]] = cm;
+                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id,autoUpdate:true });
+                  }
+                } else if (idCM === question.field) {
+                  let cd = content[containerCheck[0]]
+                  if (cd) {
+                    cd[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans.content[0][getTypeCDCM(CONTAINER_NUMBER)];
+                    CONTAINER_LIST.cmNumber.map((key, index) => {
+                      cd[0][getTypeCDCM(CONTAINER_LIST.cdNumber[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                    });
+                    CONTAINER_LIST.cmUnit.map((key, index) => {
+                      cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                    });
+                    content[containerCheck[0]] = cd;
+                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: []}, mybl: myBL.id,autoUpdate:true });
+                  }
+                }
+              }
+              //
             }
             setReplyRemove();
             dispatch(InquiryActions.setInquiries(optionsOfQuestion));
@@ -1399,15 +1436,65 @@ const InquiryViewer = (props) => {
           }
           optionsInquires[editedIndex].createdAt = res.createdAt;
           setDisableSaveReply(false);
-          dispatch(AppAction.showMessage({ message: 'Edit Reply successfully', variant: 'success' }));
-
-          dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           if (question.state.includes('AME_')) {
             dispatch(InquiryActions.setContent({
               ...content,
               [res.newAmendment?.field]: tempReply.answer.content
             }));
-            
+            if (containerCheck.includes(question.field) && tempReply.answer.content.length === 1) {
+              let fieldCdCM = question.field === getField(CONTAINER_DETAIL)? containerCheck[1] : containerCheck[0];
+              let arr = content[fieldCdCM]
+              if (arr.length > 0) {
+                arr[0][getType(CONTAINER_NUMBER)] = tempReply.answer.content[0][getType(CONTAINER_NUMBER)];
+                if(question.field === getField(CONTAINER_DETAIL)){
+                  CONTAINER_LIST.cdNumber.map((key, index) => {
+                    arr[0][getType(CONTAINER_LIST.cmNumber[index])] = tempReply.answer.content[0][getType(key)];
+                  });
+                  CONTAINER_LIST.cdUnit.map((key, index) => {
+                    arr[0][getType(CONTAINER_LIST.cmUnit[index])] = tempReply.answer.content[0][getType(key)];
+                  });
+                }else{
+                  CONTAINER_LIST.cmNumber.map((key, index) => {
+                    arr[0][getType(CONTAINER_LIST.cdNumber[index])] = tempReply.answer.content[0][getType(key)];
+                  });
+                  CONTAINER_LIST.cmUnit.map((key, index) => {
+                    arr[0][getType(CONTAINER_LIST.cdUnit[index])] = tempReply.answer.content[0][getType(key)];
+                  });
+                }
+                content[fieldCdCM] = arr;
+                  let service;
+                  service = saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate:true });
+                  service.then((res) => {
+                    dispatch(Actions.loadInquiry(myBL.id));
+                  })
+              }
+          }
+          else if (containerCheck.includes(question.field)){
+            let contsNoChange = {}
+            const orgContentField = content[question.field];
+            const contentField = tempReply.answer.content;
+            contentField.forEach((obj, index) => {
+              const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
+              const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
+              if (getTypeName === CONTAINER_NUMBER) {
+                contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
+              }
+            })
+            const fieldId = getField(question.field ===containerCheck[0]?CONTAINER_MANIFEST : CONTAINER_DETAIL)
+            let arr = content[fieldId] 
+            arr.map((item, index) => {
+              if (item[getType(CONTAINER_NUMBER)] in contsNoChange){
+                item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
+              }
+            })
+            if (arr){
+              content[fieldId]  = arr;
+              let service = saveEditedField({ field: fieldId, content: { content: arr, mediaFile: []}, mybl: myBL.id, autoUpdate :true });
+              service.then((res) => {
+                dispatch(Actions.loadInquiry(myBL.id));
+              })
+            }    
+           }
             optionsInquires[editedIndex].state = 'AME_DRF';
           } else {
             optionsInquires[editedIndex].state = 'REP_DRF';
