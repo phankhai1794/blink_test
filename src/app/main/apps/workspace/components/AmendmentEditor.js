@@ -131,9 +131,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   const handleSave = () => {
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
-    fieldValueSeparate.name = fieldValueSeparate.name.trim();
-    fieldValueSeparate.address = fieldValueSeparate.address.trim();
-    let contentField = isSeparate ? JSON.stringify(fieldValueSeparate) : typeof fieldValue === 'string' ? fieldValue.trim() : fieldValue;
+    fieldValueSeparate.name = fieldValueSeparate.name.toUpperCase().trim();
+    fieldValueSeparate.address = fieldValueSeparate.address.toUpperCase().trim();
+    let contentField = isSeparate ? JSON.stringify(fieldValueSeparate) : typeof fieldValue === 'string' ? fieldValue.toUpperCase().trim() : fieldValue;
     const uploads = [];
     const fieldReq = fieldValueSelect?.value;
     const optionsInquires = [...inquiries];
@@ -283,6 +283,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             value={fieldValueSeparate[type]}
             multiline
             rows={['name'].includes(type) ? 2 : 3}
+            inputProps={{ style: { textTransform: 'uppercase' } }}
             onChange={(e) => inputTextSeparate(e, type, field)}
             variant='outlined'
           />
@@ -295,6 +296,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           value={fieldValue}
           multiline
           rows={3}
+          inputProps={{ style: { textTransform: 'uppercase' } }}
           onChange={handleChange}
           variant='outlined'
           error={validateField(field, fieldValue).isError}

@@ -1421,10 +1421,24 @@ const InquiryViewer = (props) => {
           .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }
       else { // Edit amendment / reply
+        let newContent = tempReply.answer.content || ONLY_ATT;
+        if (newContent && typeof newContent === "string") {
+          if (isJsonText(newContent)) {
+            const parseContent = JSON.parse(newContent);
+            parseContent.name = parseContent.name.toUpperCase().trim();
+            parseContent.address = parseContent.address.toUpperCase().trim();
+            newContent = JSON.stringify(parseContent);
+          }
+          else {
+            newContent = newContent.trim() || ONLY_ATT;
+            if (!isReply) newContent = newContent.toUpperCase();
+          }
+        }
+
         const reqReply = {
           field: question.field,
           content: {
-            content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
+            content: newContent,
             mediaFile: mediaListAmendment
           },
           mybl: myBL.id
@@ -1439,26 +1453,26 @@ const InquiryViewer = (props) => {
           if (question.state.includes('AME_')) {
             dispatch(InquiryActions.setContent({
               ...content,
-              [res.newAmendment?.field]: tempReply.answer.content
+              [res.newAmendment?.field]: newContent
             }));
-            if (containerCheck.includes(question.field) && tempReply.answer.content.length === 1) {
+            if (containerCheck.includes(question.field) && newContent.length === 1) {
               let fieldCdCM = question.field === getField(CONTAINER_DETAIL)? containerCheck[1] : containerCheck[0];
               let arr = content[fieldCdCM]
               if (arr.length > 0) {
-                arr[0][getType(CONTAINER_NUMBER)] = tempReply.answer.content[0][getType(CONTAINER_NUMBER)];
+                arr[0][getType(CONTAINER_NUMBER)] = newContent[0][getType(CONTAINER_NUMBER)];
                 if(question.field === getField(CONTAINER_DETAIL)){
                   CONTAINER_LIST.cdNumber.map((key, index) => {
-                    arr[0][getType(CONTAINER_LIST.cmNumber[index])] = tempReply.answer.content[0][getType(key)];
+                    arr[0][getType(CONTAINER_LIST.cmNumber[index])] = newContent[0][getType(key)];
                   });
                   CONTAINER_LIST.cdUnit.map((key, index) => {
-                    arr[0][getType(CONTAINER_LIST.cmUnit[index])] = tempReply.answer.content[0][getType(key)];
+                    arr[0][getType(CONTAINER_LIST.cmUnit[index])] = newContent[0][getType(key)];
                   });
                 }else{
                   CONTAINER_LIST.cmNumber.map((key, index) => {
-                    arr[0][getType(CONTAINER_LIST.cdNumber[index])] = tempReply.answer.content[0][getType(key)];
+                    arr[0][getType(CONTAINER_LIST.cdNumber[index])] = newContent[0][getType(key)];
                   });
                   CONTAINER_LIST.cmUnit.map((key, index) => {
-                    arr[0][getType(CONTAINER_LIST.cdUnit[index])] = tempReply.answer.content[0][getType(key)];
+                    arr[0][getType(CONTAINER_LIST.cdUnit[index])] = newContent[0][getType(key)];
                   });
                 }
                 content[fieldCdCM] = arr;
@@ -1471,7 +1485,7 @@ const InquiryViewer = (props) => {
           else if (containerCheck.includes(question.field)){
             let contsNoChange = {}
             const orgContentField = content[question.field];
-            const contentField = tempReply.answer.content;
+            const contentField = newContent;
             contentField.forEach((obj, index) => {
               const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
               const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
@@ -2246,6 +2260,7 @@ const InquiryViewer = (props) => {
                                   value={content[type] || ''}
                                   multiline
                                   rows={['name'].includes(type) ? 2 : 3}
+                                  inputProps={{ style: { textTransform: 'uppercase' } }}
                                   onChange={(e) => handleChangeContentReply(e, type)}
                                   variant='outlined'
                                 />
@@ -2258,6 +2273,7 @@ const InquiryViewer = (props) => {
                             value={tempReply?.answer?.content}
                             multiline
                             rows={2}
+                            inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
                             onChange={handleChangeContentReply}
                             variant='outlined'
                             placeholder='Reply...'
