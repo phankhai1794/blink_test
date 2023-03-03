@@ -26,7 +26,17 @@ import {
   HS_CODE,
   HTS_CODE,
   NCM_CODE,
-  CONTAINER_LIST
+  CONTAINER_LIST,
+  FORWARDING,
+  TYPE_OF_MOVEMENT,
+  PRE_CARRIAGE,
+  VESSEL_VOYAGE,
+  FREIGHT_CHARGES,
+  PLACE_OF_BILL,
+  DATED,
+  COMMODITY_CODE,
+  DATE_CARGO,
+  DATE_LADEN
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
@@ -235,12 +245,36 @@ const InquiryViewer = (props) => {
   const [inqAnsId, setInqAnsId] = useState('');
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
   const [isDeleteAnswer, setDeleteAnswer] = useState({ status: false, content: '' });
+  const [listFieldDisableUpload, setListFieldDisableUpload] = useState([]);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
   };
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
+
+  const fieldsNotSendOPUS = [
+    FORWARDING,
+    TYPE_OF_MOVEMENT,
+    PRE_CARRIAGE,
+    VESSEL_VOYAGE,
+    FREIGHT_CHARGES,
+    PLACE_OF_BILL,
+    DATED,
+    COMMODITY_CODE,
+    DATE_CARGO,
+    DATE_LADEN
+  ];
+
+  const isDisableBtnUpload = () => {
+    const listField = [];
+    metadata['field_options'].forEach(item => { 
+      if (fieldsNotSendOPUS.includes(item.keyword)) {
+        listField.push(item.value)
+      }
+    })
+    setListFieldDisableUpload(listField)
+  }
 
   const handleViewMore = (id) => {
     if (viewDropDown === id) {
@@ -731,6 +765,7 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     resetInquiry();
     ['INQ_SENT', 'ANS_DRF'].includes(question.state) ? setShowLabelSent(true) : setShowLabelSent(false);
+    isDisableBtnUpload();
   }, []);
 
   useEffect(() => {
@@ -1657,7 +1692,7 @@ const InquiryViewer = (props) => {
                 <div className="flex items-center mr-2">
                   <PermissionProvider
                     action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
-                    extraCondition={question.state === 'COMPL' || question.state === 'UPLOADED' || question.state === 'RESOLVED'}
+                    extraCondition={(question.state === 'COMPL' || question.state === 'UPLOADED' || question.state === 'RESOLVED') && !listFieldDisableUpload.includes(question.field)}
                   >
                     <div className='flex' style={{ alignItems: 'center' }}>
                       <div style={{ marginRight: 15 }}>
