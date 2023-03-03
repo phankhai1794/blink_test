@@ -311,17 +311,10 @@ function ToolbarLayout1(props) {
   };
 
   const openAttachment = () => {
-    let isExistMedia = false;
-    inquiries.forEach((inq) => {
-      if (inq.mediaFile.length > 0 || inq.mediaFilesAnswer.length > 0) {
-        isExistMedia = true;
-        return;
-      }
-    });
-    if (inquiries.length === 0 || !isExistMedia) {
-      dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
-    } else {
+    if (attachmentLength > 0) {
       dispatch(FormActions.toggleAttachment(true));
+    } else {
+      dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
     }
   };
 

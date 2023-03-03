@@ -235,7 +235,7 @@ export default function Form(props) {
     tabs,
     popoverfooter,
     showBtnSend,
-    nums, 
+    nums,
     tabSelected
   } = props;
 
@@ -450,7 +450,7 @@ export default function Form(props) {
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
-        {tabs && nums && nums.some((num) => num > 0) && !openAmendmentList && (
+        {tabs && ((nums && nums.some((num) => num > 0)) || openAllInquiry) && !openAmendmentList && (
           <Box
             style={{ marginLeft: 20, marginRight: 20, borderBottom: '1px solid #515F6B' }}
             sx={{}}>
@@ -459,7 +459,7 @@ export default function Form(props) {
               style={{ display: 'flex', margin: 0, height: '50px' }}
               value={tabSelected}
               onChange={handleChange}>
-              {nums[0] && (
+              {(nums[0] || (openAllInquiry && inquiries.some((inq) => inq.receiver.includes('customer')))) && (
                 <Tab
                   classes={{ wrapper: classes.iconLabelWrapper }}
                   className={clsx(classes.tab, tabSelected === 0 && classes.colorSelectedTab)}
@@ -471,7 +471,7 @@ export default function Form(props) {
                   }
                 />
               )}
-              {nums[1] && (
+              {(nums[1] || (openAllInquiry && inquiries.some((inq) => inq.receiver.includes('onshore')))) && (
                 <Tab
                   classes={{ wrapper: classes.iconLabelWrapper }}
                   className={clsx(

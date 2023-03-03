@@ -121,7 +121,6 @@ const TableCM = (props) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
-  const [containerManifestSorted, setContainerManifestSorted] = useState([]);
 
   const [isHovering, setIsHovering] = useState(false);
   const [isEmpty, setIsEmpty] = useState(true);
@@ -135,25 +134,18 @@ const TableCM = (props) => {
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
-  useEffect(() => {
-    let cmSorted = [];
-    const contsNo = [...new Set((containerDetail || []).map(cd => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))];
-    if (contsNo.length) {
-      const arr = containerManifest.filter(cm =>
-        contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
-      )
-      cmSorted = [...cmSorted, ...arr];
-    }
-
-    const cmNolist = (containerManifest || []).filter(cm =>
-      !contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
-    )
-    if (cmNolist) cmSorted = [...cmSorted, ...cmNolist];
-    if (!cmSorted.length) cmSorted = containerManifest;
-
-    setContainerManifestSorted(cmSorted);
-  }, []);
-
+  // Sort CMs based on contNo
+  let cmSorted = [];
+  let cms = [...containerManifest];
+  const contsNo = [...new Set((containerDetail || []).map(cd => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))];
+  if (contsNo.length) {
+    contsNo.forEach(contNo => {
+      cmSorted = [...cmSorted, ...cms.filter(cm => contNo === cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])];
+      cms = cms.filter(cm => contNo !== cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+    });
+  }
+  cmSorted = [...cmSorted, ...cms];
+  
   const onMouseEnter = (e) => setIsHovering(true);
 
   const onMouseLeave = (e) => setIsHovering(false);
@@ -295,7 +287,7 @@ const TableCM = (props) => {
         <Grid container item xs={2} spacing={1}>
           <Label className={clsx(classes.labelMargin)}>GROSS MEASUREMENT</Label>
         </Grid>
-        {containerManifestSorted?.length > 0 ? containerManifestSorted.map((cm, index) =>
+        {cmSorted?.length > 0 ? cmSorted.map((cm, index) =>
           <Grid container spacing={2} className='px-8 py-2' key={index}>
             <Grid item xs={2}>
               <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>

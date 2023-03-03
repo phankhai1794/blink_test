@@ -1,1032 +1,775 @@
 ﻿export const packageUnitsJson = [
   {
-    'package unit': 'BRL',
-    code: 'BA'
+    code: '1A',
+    description: 'STEEL DRUM'
   },
   {
-    'package unit': 'BULK BAG',
-    code: 'BG'
+    code: '1B',
+    description: 'ALUMINIUM DRUM'
   },
   {
-    'package unit': 'BIG BAG',
-    code: 'BG'
+    code: '1D',
+    description: 'PLYWOOD DRUM'
   },
   {
-    'package unit': 'FLEXIBAG',
-    code: 'BG'
+    code: '1G',
+    description: 'FIBRE DRUM'
   },
   {
-    'package unit': 'BG',
-    code: 'BG'
+    code: '1W',
+    description: 'WOODEN DRUM'
   },
   {
-    'package unit': 'PLASTIC',
-    code: 'BG'
+    code: '2C',
+    description: 'WOODEN BARREL'
   },
   {
-    'package unit': 'BOXE',
-    code: 'BX'
+    code: '3A',
+    description: 'STEEL JERRICAN'
   },
   {
-    'package unit': 'CARDBOARD BOXE',
-    code: 'BX'
+    code: '3H',
+    description: 'PLASTIC JERRICAN'
   },
   {
-    'package unit': 'CRT',
-    code: 'CR'
+    code: '43',
+    description: 'SUPER BULK BAG'
   },
   {
-    'package unit': 'PLYWOOD CASE',
-    code: 'CS'
+    code: '4A',
+    description: 'STEEL BOX'
   },
   {
-    'package unit': 'PLASTIC CASE',
-    code: 'CS'
+    code: '4B',
+    description: 'ALUMINIUM BOX'
   },
   {
-    'package unit': 'CAS',
-    code: 'CS'
+    code: '4C',
+    description: 'NATURAL WOOD BOX'
   },
   {
-    'package unit': 'CATON',
-    code: 'CT'
+    code: '4D',
+    description: 'PLYWOOD BOX'
   },
   {
-    'package unit': 'CTN',
-    code: 'CT'
+    code: '4F',
+    description: 'RECONSTITUTED WOOD BOX'
   },
   {
-    'package unit': 'CNTR',
-    code: 'CT'
+    code: '4G',
+    description: 'FIBREBOARD BOX'
   },
   {
-    'package unit': 'CTS',
-    code: 'CT'
+    code: '4H',
+    description: 'PLASTIC BOX'
   },
   {
-    'package unit': 'CNT',
-    code: 'CT'
+    code: '5H',
+    description: 'WOVEN PLASTIC BAG'
   },
   {
-    'package unit': 'CYL',
-    code: 'CY'
+    code: '5L',
+    description: 'TEXTILE BAG'
   },
   {
-    'package unit': 'WOODEN CRATE',
-    code: 'DB'
+    code: '5M',
+    description: 'PAPER BAG'
   },
   {
-    'package unit': 'PACKGE',
-    code: 'PK'
+    code: '6H',
+    description: 'PLASTIC RECEPTACLE COMPOSITE PACKAGING'
   },
   {
-    'package unit': 'PKG',
-    code: 'PK'
+    code: '6P',
+    description: 'GLASS RECEPTACLE COMPOSITE PACKAGING'
   },
   {
-    'package unit': 'PK',
-    code: 'PK'
+    code: '7B',
+    description: 'CASE, WOODEN'
   },
   {
-    'package unit': 'LOOSE',
-    code: 'PK'
+    code: '8A',
+    description: 'PALLET, WOODEN'
   },
   {
-    'package unit': "P'KG",
-    code: 'PK'
+    code: '8B',
+    description: 'CRATE, WOODEN'
   },
   {
-    'package unit': 'PACKAGS',
-    code: 'PK'
+    code: 'AA',
+    description: 'IBC, RIGID PLASTIC'
   },
   {
-    'package unit': 'PC',
-    code: 'PS'
+    code: 'AB',
+    description: 'FIBRE RECEPTACLE'
   },
   {
-    'package unit': 'PIECES',
-    code: 'PS'
+    code: 'AC',
+    description: 'PAPER RECEPTACLE'
   },
   {
-    'package unit': 'PCE',
-    code: 'PS'
+    code: 'AD',
+    description: 'WOODEN RECEPTACLE'
   },
   {
-    'package unit': 'HT PALLET',
-    code: 'PX'
+    code: 'AE',
+    description: 'AEROSOL'
   },
   {
-    'package unit': 'PLYWOOD PALLET',
-    code: 'PX'
+    code: 'AF',
+    description: 'PAPER PALLET'
   },
   {
-    'package unit': 'PYLWOOD PALLET',
-    code: 'PX'
+    code: 'AG',
+    description: 'SHRINKWRAPPED PALLET'
   },
   {
-    'package unit': 'PLT',
-    code: 'PX'
+    code: 'AM',
+    description: 'AMPOULE'
   },
   {
-    'package unit': 'PP',
-    code: 'PX'
+    code: 'AT',
+    description: 'ATOMIZER'
   },
   {
-    'package unit': 'WOODEN',
-    code: 'PX'
+    code: 'BA',
+    description: 'BARREL'
   },
   {
-    'package unit': 'PLASTIC PALLET',
-    code: 'PX'
+    code: 'BB',
+    description: 'BOBBIN'
   },
   {
-    'package unit': 'RAKC',
-    code: 'RK'
+    code: 'BC',
+    description: 'BOTTLERACK'
   },
   {
-    'package unit': 'ROL',
-    code: 'RO'
+    code: 'BD',
+    description: 'BOARD'
   },
   {
-    'package unit': 'SKD',
-    code: 'SI'
+    code: 'BE',
+    description: 'BUNDLE'
   },
   {
-    'package unit': 'TNK',
-    code: 'TK'
+    code: 'BF',
+    description: 'BALLOON'
   },
   {
-    'package unit': 'UNT',
-    code: 'UN'
+    code: 'BG',
+    description: 'BAG'
   },
   {
-    'package unit': 'SEMI-BULK',
-    code: 'VO'
+    code: 'BH',
+    description: 'BUNCH'
   },
   {
-    'package unit': 'IBC',
-    code: 'WA'
+    code: 'BI',
+    description: 'BIN'
   },
   {
-    'package unit': 'JUMBO BAG',
-    code: 'ZB'
+    code: 'BJ',
+    description: 'BUCKET'
   },
   {
-    'package unit': 'JUGJUMBO BAG',
-    code: 'ZB'
+    code: 'BK',
+    description: 'BASKET'
   },
   {
-    'package unit': 'SCS',
-    code: 'PK'
+    code: 'BL',
+    description: 'BALE'
   },
   {
-    'package unit': 'STACK',
-    code: 'PK'
+    code: 'BM',
+    description: 'BASIN'
   },
   {
-    'package unit': 'WDC',
-    code: 'PK'
+    code: 'BO',
+    description: 'BOTTLE'
   },
   {
-    'package unit': 'LIFTVAN',
-    code: 'LV'
+    code: 'BQ',
+    description: 'PROTECTED CYLINDRICAL BOTTLE'
   },
   {
-    'package unit': 'ALUMINIUM DRUMAMPOULE',
-    code: 'AM'
+    code: 'BR',
+    description: 'BAR'
   },
   {
-    'package unit': 'ALUMINIUM AMPOULE',
-    code: 'AM'
+    code: 'BS',
+    description: 'NON-PROTECTED, BULBOUS BOTTLE'
   },
   {
-    'package unit': 'CARON',
-    code: 'PK'
+    code: 'BT',
+    description: 'BOLT'
   },
   {
-    'package unit': 'COLLIE',
-    code: 'PK'
+    code: 'BU',
+    description: 'BUTT'
   },
   {
-    'package unit': 'CRA',
-    code: 'PK'
+    code: 'BX',
+    description: 'BOX'
   },
   {
-    'package unit': 'DRM',
-    code: 'DR'
+    code: 'CA',
+    description: 'RECTANGULAR CAN'
   },
   {
-    'package unit': 'EMPTY TANK',
-    code: 'TK'
+    code: 'CB',
+    description: 'BEER CRATE'
   },
   {
-    'package unit': 'IRON',
-    code: 'PK'
+    code: 'CC',
+    description: 'CHURN'
   },
   {
-    'package unit': 'IRON DRUMS',
-    code: 'DI'
+    code: 'CD',
+    description: 'CAN'
   },
   {
-    'package unit': 'ISOTANK',
-    code: 'TK'
+    code: 'CE',
+    description: 'CREEL'
   },
   {
-    'package unit': 'ISPM15 HEAT',
-    code: 'PK'
+    code: 'CF',
+    description: 'COFFER'
   },
   {
-    'package unit': 'PCS',
-    code: 'PS'
+    code: 'CG',
+    description: 'CAGE'
   },
   {
-    'package unit': 'PLP',
-    code: 'PK'
+    code: 'CH',
+    description: 'CHEST'
   },
   {
-    'package unit': 'POLYBAGS',
-    code: 'BG'
+    code: 'CI',
+    description: 'CANISTER'
   },
   {
-    'package unit': 'RAC',
-    code: 'RK'
+    code: 'CJ',
+    description: 'COFFIN'
   },
   {
-    'package unit': 'REAM',
-    code: 'PK'
+    code: 'CK',
+    description: 'CASK'
   },
   {
-    'package unit': 'STC',
-    code: 'SS'
+    code: 'CL',
+    description: 'COIL'
   },
   {
-    'package unit': 'STEEL',
-    code: 'PK'
+    code: 'CM',
+    description: 'CARD'
   },
   {
-    'package unit': 'W/CASE',
-    code: 'EE'
+    code: 'CN',
+    description: 'CONTAINER'
   },
   {
-    'package unit': 'WCS',
-    code: 'EE'
+    code: 'CO',
+    description: 'NON-PROTECTED CARBOY'
   },
   {
-    'package unit': 'WOODEN PALLETS',
-    code: 'PD'
+    code: 'CR',
+    description: 'CRATE'
   },
   {
-    'package unit': 'PALETTES',
-    code: 'PX'
+    code: 'CS',
+    description: 'CASE'
   },
   {
-    'package unit': 'GUNNY BAGS',
-    code: 'BG'
+    code: 'CT',
+    description: 'CARTON'
   },
   {
-    'package unit': 'PICES',
-    code: 'PS'
+    code: 'CU',
+    description: 'CUP'
   },
   {
-    'package unit': 'PLALLET',
-    code: 'PX'
+    code: 'CV',
+    description: 'COVER'
   },
   {
-    'package unit': 'BDL',
-    code: 'BE'
+    code: 'CX',
+    description: 'CAN, CYLINDRICAL'
   },
   {
-    'package unit': 'PALLTS',
-    code: 'PX'
+    code: 'CY',
+    description: 'CYLINDER'
   },
   {
-    'package unit': 'CAISSE',
-    code: 'CS'
+    code: 'CZ',
+    description: 'CANVAS'
   },
   {
-    'package unit': 'CS',
-    code: 'CS'
+    code: 'DB',
+    description: 'WOODEN CRATE'
   },
   {
-    'package unit': 'COMPOSITE IBCS',
-    code: 'WA'
+    code: 'DH',
+    description: 'EUROBOX'
   },
   {
-    'package unit': 'BULTOS',
-    code: 'PK'
+    code: 'DI',
+    description: 'IRON DRUM'
   },
   {
-    'package unit': 'VO',
-    code: 'VO'
+    code: 'DR',
+    description: 'DRUM'
   },
   {
-    'package unit': 'CT',
-    code: 'CT'
+    code: 'EC',
+    description: 'PLASTIC BAG'
   },
   {
-    'package unit': 'PAPERBOARD',
-    code: 'RL'
+    code: 'EE',
+    description: 'WOODEN CASE'
   },
   {
-    'package unit': 'MB5 PALLETS',
-    code: 'PX'
+    code: 'EF',
+    description: 'CARDBOARD PALLET'
   },
   {
-    'package unit': 'PALETTE',
-    code: 'PX'
+    code: 'EN',
+    description: 'ENVELOPE'
   },
   {
-    'package unit': 'PALET',
-    code: 'PX'
+    code: 'FC',
+    description: 'FRUIT CRATE'
   },
   {
-    'package unit': 'TK',
-    code: 'TK'
+    code: 'FD',
+    description: 'FRAMED CRATE'
   },
   {
-    'package unit': 'PAL',
-    code: 'PX'
+    code: 'FE',
+    description: 'FLEXITANK'
   },
   {
-    'package unit': 'LOTE',
-    code: 'LT'
+    code: 'FI',
+    description: 'FIRKIN'
   },
   {
-    'package unit': 'VOLS',
-    code: 'PK'
+    code: 'FL',
+    description: 'FLASK'
   },
   {
-    'package unit': 'PX',
-    code: 'PX'
+    code: 'FO',
+    description: 'FOOTLOCKER'
   },
   {
-    'package unit': 'NEW UNIT',
-    code: 'UN'
+    code: 'FP',
+    description: 'FILMPACK'
   },
   {
-    'package unit': 'PKGS',
-    code: 'PK'
+    code: 'FR',
+    description: 'FRAME'
   },
   {
-    'package unit': 'CAJA',
-    code: 'BX'
+    code: 'FX',
+    description: 'BAG, FLEXIBLE CONTAINER'
   },
   {
-    'package unit': 'PALETTEN',
-    code: 'PX'
+    code: 'GB',
+    description: 'GAS BOTTLE'
   },
   {
-    'package unit': 'PAKETE',
-    code: 'PK'
+    code: 'GI',
+    description: 'GIRDER'
   },
   {
-    'package unit': 'PACK',
-    code: 'PK'
+    code: 'HG',
+    description: 'HOGSHEAD'
   },
   {
-    'package unit': 'PAQUETE',
-    code: 'PK'
+    code: 'HR',
+    description: 'HAMPER'
   },
   {
-    'package unit': 'L/VEN',
-    code: 'LV'
+    code: 'IE',
+    description: 'BLOCK'
   },
   {
-    'package unit': 'RL',
-    code: 'RL'
+    code: 'IH',
+    description: 'PLASTIC DRUM'
   },
   {
-    'package unit': 'STEEL CRATE',
-    code: 'YB'
+    code: 'IN',
+    description: 'INGOT'
   },
   {
-    'package unit': 'WOODEN REEL',
-    code: 'WR'
+    code: 'JC',
+    description: 'JERRICAN'
   },
   {
-    'package unit': 'WICKERBOTTLE',
-    code: 'WB'
+    code: 'JG',
+    description: 'JUG'
   },
   {
-    'package unit': 'VR',
-    code: 'VR'
+    code: 'JR',
+    description: 'JAR'
   },
   {
-    'package unit': 'VACUUMPACKED',
-    code: 'VP'
+    code: 'JT',
+    description: 'JUTEBAG'
   },
   {
-    'package unit': 'VANPACK',
-    code: 'VK'
+    code: 'JY',
+    description: 'JERRICAN, CYLINDRICAL'
   },
   {
-    'package unit': 'VIAL',
-    code: 'VI'
+    code: 'KG',
+    description: 'KEG'
   },
   {
-    'package unit': 'VAT',
-    code: 'VA'
+    code: 'LG',
+    description: 'LOG'
   },
   {
-    'package unit': 'TUBE',
-    code: 'TU'
+    code: 'LT',
+    description: 'LOT'
   },
   {
-    'package unit': 'TRUSS',
-    code: 'TS'
+    code: 'LV',
+    description: 'LIFT VAN'
   },
   {
-    'package unit': 'TRUNK',
-    code: 'TR'
+    code: 'MB',
+    description: 'MULTIPLE BAG'
   },
   {
-    'package unit': 'TUN',
-    code: 'TO'
+    code: 'MC',
+    description: 'MILK CRATE'
   },
   {
-    'package unit': 'TIN',
-    code: 'TN'
+    code: 'MS',
+    description: 'MULTIWALL SACK'
   },
   {
-    'package unit': 'COLLAPSIBLE TUBE',
-    code: 'TD'
+    code: 'MT',
+    description: 'MAT'
   },
   {
-    'package unit': 'TEA-CHEST',
-    code: 'TC'
+    code: 'MX',
+    description: 'MATCH BOX'
   },
   {
-    'package unit': 'TUB',
-    code: 'TB'
+    code: 'NE',
+    description: 'UNPACKED OR UNPACKAGED'
   },
   {
-    'package unit': 'SET',
-    code: 'SX'
+    code: 'NF',
+    description: 'UNPACKED OR UNPACKAGED, SINGLE UNIT'
   },
   {
-    'package unit': 'SHRINKWRAPPED',
-    code: 'SW'
+    code: 'NG',
+    description: 'UNPACKED OR UNPACKAGED, MULTIPLE UNIT'
   },
   {
-    'package unit': 'SUITCASE',
-    code: 'SU'
+    code: 'NS',
+    description: 'NEST'
   },
   {
-    'package unit': 'SHEET',
-    code: 'ST'
+    code: 'NT',
+    description: 'NET'
   },
   {
-    'package unit': 'SPOOL',
-    code: 'SO'
+    code: 'PA',
+    description: 'PACKET'
   },
   {
-    'package unit': 'SHEETMETAL',
-    code: 'SM'
+    code: 'PB',
+    description: 'BOX PALLET'
   },
   {
-    'package unit': 'SLIPSHEET',
-    code: 'SL'
+    code: 'PC',
+    description: 'PARCEL'
   },
   {
-    'package unit': 'SKELETON CASE',
-    code: 'SK'
+    code: 'PD',
+    description: 'WOODEN PALLET'
   },
   {
-    'package unit': 'SACHET',
-    code: 'SH'
+    code: 'PE',
+    description: 'PALLET, MODULAR, COLLARS 80CMS  120CMS'
   },
   {
-    'package unit': 'SEA-CHEST',
-    code: 'SE'
+    code: 'PH',
+    description: 'PITCHER'
   },
   {
-    'package unit': 'SPINDLE',
-    code: 'SD'
+    code: 'PI',
+    description: 'PIPE'
   },
   {
-    'package unit': 'SHALLOW CRATE',
-    code: 'SC'
+    code: 'PJ',
+    description: 'PUNNET'
   },
   {
-    'package unit': 'SLAB',
-    code: 'SB'
+    code: 'PK',
+    description: 'PACKAGE'
   },
   {
-    'package unit': 'SACK',
-    code: 'SA'
+    code: 'PL',
+    description: 'PAIL'
   },
   {
-    'package unit': 'REDNET',
-    code: 'RT'
+    code: 'PN',
+    description: 'PLANK'
   },
   {
-    'package unit': 'RING',
-    code: 'RG'
+    code: 'PO',
+    description: 'POUCH'
   },
   {
-    'package unit': 'ROD',
-    code: 'RD'
+    code: 'PS',
+    description: 'PIECE'
   },
   {
-    'package unit': 'TRAY',
-    code: 'PU'
+    code: 'PT',
+    description: 'POT'
   },
   {
-    'package unit': 'POT',
-    code: 'PT'
+    code: 'PU',
+    description: 'TRAY'
   },
   {
-    'package unit': 'POUCH',
-    code: 'PO'
+    code: 'PX',
+    description: 'PALLET'
   },
   {
-    'package unit': 'PLANK',
-    code: 'PN'
+    code: 'RD',
+    description: 'ROD'
   },
   {
-    'package unit': 'PAIL',
-    code: 'PL'
+    code: 'RG',
+    description: 'RING'
   },
   {
-    'package unit': 'PUNNET',
-    code: 'PJ'
+    code: 'RK',
+    description: 'RACK'
   },
   {
-    'package unit': 'PITCHER',
-    code: 'PH'
+    code: 'RL',
+    description: 'REEL'
   },
   {
-    'package unit': 'BOX PALLET',
-    code: 'PB'
+    code: 'RO',
+    description: 'ROLL'
   },
   {
-    'package unit': 'PACKET',
-    code: 'PA'
+    code: 'RT',
+    description: 'REDNET'
   },
   {
-    'package unit': 'NET',
-    code: 'NT'
+    code: 'SA',
+    description: 'SACK'
   },
   {
-    'package unit': 'NEST',
-    code: 'NS'
+    code: 'SB',
+    description: 'SLAB'
   },
   {
-    'package unit': 'MATCH BOX',
-    code: 'MX'
+    code: 'SC',
+    description: 'SHALLOW CRATE'
   },
   {
-    'package unit': 'MAT',
-    code: 'MT'
+    code: 'SD',
+    description: 'SPINDLE'
   },
   {
-    'package unit': 'MULTIWALL SACK',
-    code: 'MS'
+    code: 'SE',
+    description: 'SEA-CHEST'
   },
   {
-    'package unit': 'MILK CRATE',
-    code: 'MC'
+    code: 'SH',
+    description: 'SACHET'
   },
   {
-    'package unit': 'MULTIPLE BAG',
-    code: 'MB'
+    code: 'SI',
+    description: 'SKID'
   },
   {
-    'package unit': 'LOG',
-    code: 'LG'
+    code: 'SK',
+    description: 'SKELETON CASE'
   },
   {
-    'package unit': 'KEG',
-    code: 'KG'
+    code: 'SL',
+    description: 'SLIPSHEET'
   },
   {
-    'package unit': 'JUTEBAG',
-    code: 'JT'
+    code: 'SM',
+    description: 'SHEETMETAL'
   },
   {
-    'package unit': 'JAR',
-    code: 'JR'
+    code: 'SO',
+    description: 'SPOOL'
   },
   {
-    'package unit': 'JERRICAN',
-    code: 'JC'
+    code: 'SS',
+    description: 'STEEL CASE'
   },
   {
-    'package unit': 'INGOT',
-    code: 'IN'
+    code: 'ST',
+    description: 'SHEET'
   },
   {
-    'package unit': 'PLASTIC DRUM',
-    code: 'IH'
+    code: 'SU',
+    description: 'SUITCASE'
   },
   {
-    'package unit': 'BLOCK',
-    code: 'IE'
+    code: 'SW',
+    description: 'SHRINKWRAPPED'
   },
   {
-    'package unit': 'HAMPER',
-    code: 'HR'
+    code: 'SX',
+    description: 'SET'
   },
   {
-    'package unit': 'HOGSHEAD',
-    code: 'HG'
+    code: 'SZ',
+    description: 'SHEETS, IN BUNDLE BUNCH TRUSS'
   },
   {
-    'package unit': 'GIRDER',
-    code: 'GI'
+    code: 'TB',
+    description: 'TUB'
   },
   {
-    'package unit': 'GAS BOTTLE',
-    code: 'GB'
+    code: 'TC',
+    description: 'TEA-CHEST'
   },
   {
-    'package unit': 'FRAME',
-    code: 'FR'
+    code: 'TD',
+    description: 'COLLAPSIBLE TUBE'
   },
   {
-    'package unit': 'FILMPACK',
-    code: 'FP'
+    code: 'TK',
+    description: 'TANK'
   },
   {
-    'package unit': 'FOOTLOCKER',
-    code: 'FO'
+    code: 'TN',
+    description: 'TIN'
   },
   {
-    'package unit': 'FLASK',
-    code: 'FL'
+    code: 'TO',
+    description: 'TUN'
   },
   {
-    'package unit': 'FIRKIN',
-    code: 'FI'
+    code: 'TR',
+    description: 'TRUNK'
   },
   {
-    'package unit': 'FRAMED CRATE',
-    code: 'FD'
+    code: 'TS',
+    description: 'TRUSS'
   },
   {
-    'package unit': 'FRUIT CRATE',
-    code: 'FC'
+    code: 'TT',
+    description: 'TOTE'
   },
   {
-    'package unit': 'ENVELOPE',
-    code: 'EN'
+    code: 'TU',
+    description: 'TUBE'
   },
   {
-    'package unit': 'CARDBOARD PALLET',
-    code: 'EF'
+    code: 'TY',
+    description: 'TANK, CYLINDRICAL'
   },
   {
-    'package unit': 'PLASTIC BAG',
-    code: 'EC'
+    code: 'UN',
+    description: 'UNIT'
   },
   {
-    'package unit': 'EUROBOX',
-    code: 'DH'
+    code: 'VA',
+    description: 'VAT'
   },
   {
-    'package unit': 'CANVAS',
-    code: 'CZ'
+    code: 'VG',
+    description: 'BULK,GAS'
   },
   {
-    'package unit': 'COVER',
-    code: 'CV'
+    code: 'VI',
+    description: 'VIAL'
   },
   {
-    'package unit': 'CUP',
-    code: 'CU'
+    code: 'VK',
+    description: 'VANPACK'
   },
   {
-    'package unit': 'NON-PROTECTED CARBOY',
-    code: 'CO'
+    code: 'VL',
+    description: 'BULK,LIQUID'
   },
   {
-    'package unit': 'SOC CONTAINER',
-    code: 'CN'
+    code: 'VO',
+    description: 'BULK'
   },
   {
-    'package unit': 'CARD',
-    code: 'CM'
+    code: 'VP',
+    description: 'VACUUMPACKED'
   },
   {
-    'package unit': 'COIL',
-    code: 'CL'
+    code: 'VQ',
+    description: 'BULK, LIQUEFIED GAS'
   },
   {
-    'package unit': 'CASK',
-    code: 'CK'
+    code: 'VR',
+    description: 'BULK, SOLID, GRANULAR PARTICLES (GRAINS)'
   },
   {
-    'package unit': 'CANISTER',
-    code: 'CI'
+    code: 'VY',
+    description: 'BULK, SOLID, FINE PARTICLES (POWDERS)'
   },
   {
-    'package unit': 'CHEST',
-    code: 'CH'
+    code: 'WA',
+    description: 'IBC'
   },
   {
-    'package unit': 'COFFER',
-    code: 'CF'
+    code: 'WB',
+    description: 'WICKERBOTTLE'
   },
   {
-    'package unit': 'CREEL',
-    code: 'CE'
+    code: 'WC',
+    description: 'IBC, STEEL CONTAINER'
   },
   {
-    'package unit': 'CAN',
-    code: 'CD'
+    code: 'WP',
+    description: 'IBC, COATED WOVEN PLASTIC'
   },
   {
-    'package unit': 'CHURN',
-    code: 'CC'
+    code: 'WR',
+    description: 'WOODEN REEL'
   },
   {
-    'package unit': 'BEER CRATE',
-    code: 'CB'
+    code: 'WT',
+    description: 'IBC, WITHOUT COATLINER TEXTILE'
   },
   {
-    'package unit': 'RECTANGULAR CAN',
-    code: 'CA'
+    code: 'XD',
+    description: 'PLASTICS FILM BAG'
   },
   {
-    'package unit': 'BOLT',
-    code: 'BT'
+    code: 'YB',
+    description: 'STEEL CRATE'
   },
   {
-    'package unit': 'BAR',
-    code: 'BR'
+    code: 'ZB',
+    description: 'JUMBO BAG'
   },
   {
-    'package unit': 'BOTTLE',
-    code: 'BO'
+    code: 'ZS',
+    description: 'IBC, COMPOSITE, FLEXIBLE PLASTIC, LIQUIDS (31HA1)'
   },
   {
-    'package unit': 'BND',
-    code: 'BN'
-  },
-  {
-    'package unit': 'BASIN',
-    code: 'BM'
-  },
-  {
-    'package unit': 'BASKET',
-    code: 'BK'
-  },
-  {
-    'package unit': 'BUCKET',
-    code: 'BJ'
-  },
-  {
-    'package unit': 'BIN',
-    code: 'BI'
-  },
-  {
-    'package unit': 'BUNCH',
-    code: 'BH'
-  },
-  {
-    'package unit': 'BALLOON',
-    code: 'BF'
-  },
-  {
-    'package unit': 'BOARD',
-    code: 'BD'
-  },
-  {
-    'package unit': 'BOTTLERACK',
-    code: 'BC'
-  },
-  {
-    'package unit': 'BOBBIN',
-    code: 'BB'
-  },
-  {
-    'package unit': 'ATOMIZER',
-    code: 'AT'
-  },
-  {
-    'package unit': 'SHRINKWRAPPED PALLET',
-    code: 'AG'
-  },
-  {
-    'package unit': 'PAPER PALLET',
-    code: 'AF'
-  },
-  {
-    'package unit': 'AEROSOL',
-    code: 'AE'
-  },
-  {
-    'package unit': 'WOODEN RECEPTACLE',
-    code: 'AD'
-  },
-  {
-    'package unit': 'PAPER RECEPTACLE',
-    code: 'AC'
-  },
-  {
-    'package unit': 'FIBRE RECEPTACLE',
-    code: 'AB'
-  },
-  {
-    'package unit': 'PAPER BAG',
-    code: '5M'
-  },
-  {
-    'package unit': 'TEXTILE BAG',
-    code: '5L'
-  },
-  {
-    'package unit': 'PLASTIC BOX',
-    code: '4H'
-  },
-  {
-    'package unit': 'FIBREBOARD BOX',
-    code: '4G'
-  },
-  {
-    'package unit': 'PLYWOOD BOX',
-    code: '4D'
-  },
-  {
-    'package unit': 'NATURAL WOOD BOX',
-    code: '4C'
-  },
-  {
-    'package unit': 'ALUMINIUM BOX',
-    code: '4B'
-  },
-  {
-    'package unit': 'STEEL BOX',
-    code: '4A'
-  },
-  {
-    'package unit': 'PLASTIC JERRICAN',
-    code: '3H'
-  },
-  {
-    'package unit': 'STEEL JERRICAN',
-    code: '3A'
-  },
-  {
-    'package unit': 'WOODEN BARREL',
-    code: '2C'
-  },
-  {
-    'package unit': 'WOODEN DRUM',
-    code: '1W'
-  },
-  {
-    'package unit': 'FIBRE DRUM',
-    code: '1G'
-  },
-  {
-    'package unit': 'PLYWOOD DRUM',
-    code: '1D'
-  },
-  {
-    'package unit': 'ALUMINIUM DRUM & AMPOULE',
-    code: '1B'
-  },
-  {
-    'package unit': 'STEEL DRUM',
-    code: '1A'
-  },
-  {
-    'package unit': 'PACKAGE',
-    code: 'PK'
-  },
-  {
-    'package unit': 'PALLET',
-    code: 'PX'
-  },
-  {
-    'package unit': 'BAG',
-    code: 'BG'
-  },
-  {
-    'package unit': 'CARTON',
-    code: 'CT'
-  },
-  {
-    'package unit': 'PIECE',
-    code: 'PS'
-  },
-  {
-    'package unit': 'CASE',
-    code: 'CS'
-  },
-  {
-    'package unit': 'TANK',
-    code: 'TK'
-  },
-  {
-    'package unit': 'BOX',
-    code: 'BX'
-  },
-  {
-    'package unit': 'UNIT',
-    code: 'UN'
-  },
-  {
-    'package unit': 'REEL',
-    code: 'RL'
-  },
-  {
-    'package unit': 'WOODEN CASE',
-    code: 'EE'
-  },
-  {
-    'package unit': 'DRUM',
-    code: 'DR'
-  },
-  {
-    'package unit': 'BULK',
-    code: 'VO'
-  },
-  {
-    'package unit': 'ROLL',
-    code: 'RO'
-  },
-  {
-    'package unit': 'RACK',
-    code: 'RK'
-  },
-  {
-    'package unit': 'LIFT VAN',
-    code: 'LV'
-  },
-  {
-    'package unit': 'CYLINDER',
-    code: 'CY'
-  },
-  {
-    'package unit': 'CRATE',
-    code: 'CR'
-  },
-  {
-    'package unit': 'BUNDLE',
-    code: 'BE'
-  },
-  {
-    'package unit': 'TOTE',
-    code: 'TT'
-  },
-  {
-    'package unit': 'STEEL CASE',
-    code: 'SS'
-  },
-  {
-    'package unit': 'SKID',
-    code: 'SI'
-  },
-  {
-    'package unit': 'PIPE',
-    code: 'PI'
-  },
-  {
-    'package unit': 'WOODEN PALLET',
-    code: 'PD'
-  },
-  {
-    'package unit': 'PARCEL',
-    code: 'PC'
-  },
-  {
-    'package unit': 'LOT',
-    code: 'LT'
-  },
-  {
-    'package unit': 'IRON DRUM',
-    code: 'DI'
-  },
-  {
-    'package unit': 'COFFIN',
-    code: 'CJ'
-  },
-  {
-    'package unit': 'CAGE',
-    code: 'CG'
-  },
-  {
-    'package unit': 'BUTT',
-    code: 'BU'
-  },
-  {
-    'package unit': 'BALE',
-    code: 'BL'
-  },
-  {
-    'package unit': 'BARREL',
-    code: 'BA'
-  },
-  {
-    'package unit': 'AMPOULE',
-    code: 'AM'
+    code: 'ZU',
+    description: 'INTERMEDIATE BULK CONTAINER, FLEXIBLE (BIG BAGS)'
   }
 ];
 
-export const packageUnits = packageUnitsJson.map(p => ({label: `${p['package unit']} - ${p.code}`, value: p.code}))
+export const packageUnits = packageUnitsJson.map((p) => ({
+  label: `${p['description']} - ${p.code}`,
+  value: p.code
+}));
 
-export const weightUnits = [{label: 'KGS', value: 'KGS'}]
+export const weightUnits = [{ label: 'KGS', value: 'KGS' }];
 
-export const measurementUnits = [{label: 'CBM', value: 'CBM'}]
+export const measurementUnits = [{ label: 'CBM', value: 'CBM' }];
