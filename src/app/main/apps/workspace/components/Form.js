@@ -450,7 +450,7 @@ export default function Form(props) {
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
-        {tabs && ((nums && nums.some((num) => num > 0)) || openAllInquiry) && !openAmendmentList && (
+        {tabs?.length > 0 && ((nums && nums.some((num) => num > 0)) || openAllInquiry) && !openAmendmentList && (
           <Box
             style={{ marginLeft: 20, marginRight: 20, borderBottom: '1px solid #515F6B' }}
             sx={{}}>
