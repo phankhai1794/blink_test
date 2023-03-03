@@ -22,6 +22,7 @@ import {
   DATE_LADEN,
   COMMODITY_CODE,
   DATED,
+  BL_TYPE,
   // FREIGHTED_AS,
   // RATE,
   // EXCHANGE_RATE,
@@ -312,10 +313,7 @@ const BLWorkspace = (props) => {
   }, [enableSend]);
 
   const countInq = (inqs, process, recevier) => {
-    let count = 0;
-    inqs.forEach((inq) => inq.process === process && inq.receiver.includes(recevier) && (count += 1));
-
-    return count;
+    return inqs.filter((inq) => inq.process === process && inq.receiver.includes(recevier)).length;
   };
 
   const handleTabSelected = (inqs, process = 'pending') => {
@@ -338,7 +336,7 @@ const BLWorkspace = (props) => {
       return {
         status: openAllInquiry || openAmendmentList || openPreviewListSubmit,
         tabs: user.role === 'Admin' ? ['Customer', 'Onshore'] : [],
-        nums: user.role === 'Admin' ? [countInq(inquiries, openAllInquiry ? 'pending' : 'draft', 'customer'), countInq(inquiries, openAllInquiry ? 'pending' : 'draft', 'onshore')] : [],
+        nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => !['RESOLVED', 'COMPL', 'UPLOADED'].includes(q.state)), openAllInquiry ? 'pending' : 'draft', 'customer'), countInq(inquiries.filter((q) => !['RESOLVED', 'COMPL', 'UPLOADED'].includes(q.state)), openAllInquiry ? 'pending' : 'draft', 'onshore')] : [],
         toggleForm: (status) => {
           dispatch(FormActions.toggleAllInquiry(status));
           dispatch(FormActions.toggleAmendmentsList(status))
@@ -676,7 +674,9 @@ const BLWorkspace = (props) => {
                     <BLField lock={true} disableClick={true}>{myBL.bkgNo || ""}</BLField>
                   </Grid>
                   <Grid item xs={6} className={classes.rightPanel}>
-                    <Label>SEA WAYBILL NO.</Label>
+                    <Label>
+                      {(getValueField(BL_TYPE) === "B" || getValueField(BL_TYPE) === "oceanBill") ? "BILL OF LADING" : "SEAWAY BILL"}
+                    </Label>
                     <BLField lock={true} disableClick={true}>{(myBL.bkgNo && `ONYE${myBL.bkgNo}`) || ""}</BLField>
                   </Grid>
                 </Grid>
