@@ -1465,7 +1465,6 @@ const InquiryViewer = (props) => {
                   let service;
                   service = saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate:true });
                   service.then((res) => {
-                    dispatch(Actions.loadInquiry(myBL.id));
                   })
               }
           }
@@ -1491,7 +1490,6 @@ const InquiryViewer = (props) => {
               content[fieldId]  = arr;
               let service = saveEditedField({ field: fieldId, content: { content: arr, mediaFile: []}, mybl: myBL.id, autoUpdate :true });
               service.then((res) => {
-                dispatch(Actions.loadInquiry(myBL.id));
               })
             }    
            }
