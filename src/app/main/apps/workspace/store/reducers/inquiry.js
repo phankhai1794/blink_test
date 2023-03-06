@@ -1,4 +1,5 @@
 import * as Actions from '../actions/inquiry';
+import {SET_CONTENT_BL} from "../actions/inquiry";
 
 export const MSG_INQUIRY_CONTENT = 'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details';
 
@@ -7,6 +8,7 @@ const initialState = {
   metadata: {},
   orgContent: {},
   content: {},
+  contentBL: {},
   currentEditInq: null,
   currentAmendment: undefined,
   displayCmt: false,
@@ -35,6 +37,9 @@ const inquiryReducer = function (state = initialState, action) {
   switch (action.type) {
   case Actions.SET_MYBL: {
     return { ...state, myBL: action.state };
+  }
+  case Actions.SET_CONTENT_BL: {
+    return { ...state, contentBL: action.state };
   }
   case Actions.SET_REPLY: {
     return { ...state, reply: action.state };

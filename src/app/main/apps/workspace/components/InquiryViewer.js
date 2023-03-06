@@ -207,6 +207,7 @@ const InquiryViewer = (props) => {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+  const contentBL = useSelector(({ workspace }) => workspace.inquiryReducer.contentBL);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
@@ -827,7 +828,7 @@ const InquiryViewer = (props) => {
               optionsOfQuestion.splice(removeIndex, 1);
               // remove all cd cm amendment
               if (res.removeAllCDCM) {
-                dispatch(InquiryActions.setContent({ ...content, [containerCheck[0]]: orgContent[containerCheck[0]], [containerCheck[1]]: orgContent[containerCheck[1]] }));
+                dispatch(InquiryActions.setContent({ ...content, [containerCheck[0]]: contentBL[containerCheck[0]], [containerCheck[1]]: contentBL[containerCheck[1]] }));
               } else {
                 dispatch(InquiryActions.setContent({ ...content, [question.field]: res.drfAnswersTrans && res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[question.field] }));
               }
@@ -1485,7 +1486,7 @@ const InquiryViewer = (props) => {
               }
             })
             const fieldId = getField(question.field ===containerCheck[0]?CONTAINER_MANIFEST : CONTAINER_DETAIL)
-            let arr = content[fieldId] 
+            let arr = content[fieldId]
             arr.map((item, index) => {
               if (item[getType(CONTAINER_NUMBER)] in contsNoChange){
                 item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
@@ -1496,7 +1497,7 @@ const InquiryViewer = (props) => {
               let service = saveEditedField({ field: fieldId, content: { content: arr, mediaFile: []}, mybl: myBL.id, autoUpdate :true });
               service.then((res) => {
               })
-            }    
+            }
            }
             optionsInquires[editedIndex].state = 'AME_DRF';
           } else {

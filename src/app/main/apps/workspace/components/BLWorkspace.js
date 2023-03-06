@@ -258,8 +258,9 @@ const BLWorkspace = (props) => {
       dispatch(FormActions.increaseLoading())
       checkBLSameRequest(props.myBL?.id);
       getBlInfo(props.myBL?.id).then(res => {
-        const { id, state, bkgNo } = res.myBL;
+        const { id, state, bkgNo, content } = res.myBL;
         dispatch(InquiryActions.setMyBL({ id, state, bkgNo }));
+        dispatch(InquiryActions.setContentBL(content));
         dispatch(FormActions.decreaseLoading())
       });
     }
