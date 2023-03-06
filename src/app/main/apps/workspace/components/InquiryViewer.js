@@ -823,8 +823,8 @@ const InquiryViewer = (props) => {
             const optionsOfQuestion = [...inquiries];
             const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
             const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+            const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
-              const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
               optionsOfQuestion.splice(removeIndex, 1);
               // remove all cd cm amendment
               if (res.removeAllCDCM) {
@@ -835,7 +835,8 @@ const InquiryViewer = (props) => {
                   }
                 })
               } else {
-                dispatch(InquiryActions.setContent({ ...content, [question.field]: res.drfAnswersTrans && res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[question.field] }));
+                const response = res.drfAnswersTrans && res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[question.field];
+                dispatch(InquiryActions.setContent({ ...content, [question.field]: response }));
               }
               if (field !== 'INQUIRY_LIST') {
                 if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
@@ -879,6 +880,19 @@ const InquiryViewer = (props) => {
                     });
                     content[containerCheck[0]] = cd;
                     saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: []}, mybl: myBL.id,autoUpdate:true });
+                  }
+                }
+                if (res.emptyCDorCMAmendment) {
+                  optionsOfQuestion.splice(removeIndex, 1);
+                  dispatch(InquiryActions.setContent({ ...content, [question.field]: res.drfAnswersTrans }));
+                  if (field !== 'INQUIRY_LIST') {
+                    if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
+                  } else {
+                    const draftBl = optionsOfQuestion.filter(inq => inq.process === 'draft');
+                    if (!draftBl.length) {
+                      dispatch(FormActions.toggleAllInquiry(false));
+                      dispatch(FormActions.toggleAmendmentsList(false));
+                    }
                   }
                 }
               }
