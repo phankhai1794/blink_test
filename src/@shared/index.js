@@ -185,7 +185,7 @@ export const validatePartiesContent = (partiesContent, type) => {
 
 export const validateBLType = (input) => {
   let response = { isError: false, errorType: "" };
-  let value = input.trim();
+  let value = input?.trim();
   if (!value || !["B", "W"].includes(value.toUpperCase())) {
     response = {
       ...response,

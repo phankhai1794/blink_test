@@ -99,7 +99,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const fieldType = metadata.field_options.filter(filDrf => filDrf.display && !filterInqDrf.includes(filDrf.value));
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(currentField));
   const [disableSave, setDisableSave] = useState(false);
-  
+
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
   const removeAttachment = (index) => {
@@ -107,7 +107,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     optionsAttachmentList.splice(index, 1);
     setAttachments(optionsAttachmentList)
   }
-  
+
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
   };
@@ -131,9 +131,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   const handleSave = () => {
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
-    fieldValueSeparate.name = fieldValueSeparate.name.trim();
-    fieldValueSeparate.address = fieldValueSeparate.address.trim();
-    let contentField = isSeparate ? JSON.stringify(fieldValueSeparate) : typeof fieldValue === 'string' ? fieldValue.trim() : fieldValue;
+    fieldValueSeparate.name = fieldValueSeparate.name.toUpperCase().trim();
+    fieldValueSeparate.address = fieldValueSeparate.address.toUpperCase().trim();
+    let contentField = isSeparate ? JSON.stringify(fieldValueSeparate) : typeof fieldValue === 'string' ? fieldValue.toUpperCase().trim() : fieldValue;
     const uploads = [];
     const fieldReq = fieldValueSelect?.value;
     const optionsInquires = [...inquiries];
@@ -162,11 +162,10 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         });
 
         let service;
-        // if (edit) service = updateDraftBLReply({ content: { content: fieldValue, mediaFile: mediaList } }, question.id);
         service = saveEditedField({ field: fieldReq, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id });
         service.then((res) => {
-          if([CONTAINER_DETAIL, CONTAINER_MANIFEST].includes(fieldValueSelect.keyword)){
-            if (contentField.length === 1 && content[fieldValueSelect.keyword === CONTAINER_DETAIL?containerCheck[1]:containerCheck[0]].length === 1) {
+          if ([CONTAINER_DETAIL, CONTAINER_MANIFEST].includes(fieldValueSelect.keyword)) {
+            if (contentField.length === 1 && content[fieldValueSelect.keyword === CONTAINER_DETAIL ? containerCheck[1] : containerCheck[0]].length === 1) {
               if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
                 let cm = content[containerCheck[1]]
                 if (cm) {
@@ -178,9 +177,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     cm[0][getType(CONTAINER_LIST.cmUnit[index])] = contentField[0][getType(key)];
                   });
                   content[containerCheck[1]] = cm;
-                  let service = saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id,autoUpdate:true });
-                  service.then((res) => {
-                  })
+                  saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
                 }
               }
               else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
@@ -194,9 +191,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     cd[0][getType(CONTAINER_LIST.cdUnit[index])] = contentField[0][getType(key)];
                   });
                   content[containerCheck[0]] = cd;
-                  let service = saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: []}, mybl: myBL.id,autoUpdate:true });
-                  service.then((res) => {
-                  })
+                  saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
                 }
               }
             }
@@ -210,31 +205,33 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                   contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
                 }
               })
-              const fieldId = getField(fieldValueSelect.keyword ===CONTAINER_DETAIL?CONTAINER_MANIFEST : CONTAINER_DETAIL)
-              let arr = content[fieldId] 
-              arr.map((item) => {
-                if (item[getType(CONTAINER_NUMBER)] in contsNoChange){
+              const fieldId = getField(fieldValueSelect.keyword === CONTAINER_DETAIL ? CONTAINER_MANIFEST : CONTAINER_DETAIL)
+              let fieldAutoUpdate = content[fieldId];
+              fieldAutoUpdate.map((item) => {
+                if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
                   item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
                 }
               })
-              if (arr){
-                content[fieldId] = arr;
-                // if (fieldValueSelect.keyword === CONTAINER_MANIFEST){
-                //     arr.forEach((cd) => {
-                //       let cmOfCd = [...new Set((contentField || []).map(cm => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))]
-                //       CONTAINER_LIST.cmNumber.map((key, index) => {
-                //         let total = 0;
-                //         cmOfCd.map((cm) => {
-                //           total += cm[getType(key)];
-                //         });
-                //         cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
-                //       });
-                //     })
-                // }
-                let service = saveEditedField({ field: fieldId, content: { content: arr, mediaFile: []}, mybl: myBL.id, autoUpdate:true });
-                service.then((res) => {
-                })
-              }  
+              if (fieldAutoUpdate) {
+                content[fieldId] = fieldAutoUpdate;
+                if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
+                  fieldAutoUpdate.forEach((cd) => {
+                    let cmOfCd = [...new Set((contentField || []).filter(cm =>
+                      cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+                    ))]
+                    if (cmOfCd.length > 0) {
+                      CONTAINER_LIST.cmNumber.map((key, index) => {
+                        let total = 0;
+                        cmOfCd.map((cm) => {
+                          total += parseInt(cm[getType(key)]);
+                        });
+                        cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
+                      });
+                    }
+                  })
+                }
+                saveEditedField({ field: fieldId, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+              }
             }
           }
 
@@ -283,6 +280,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             value={fieldValueSeparate[type]}
             multiline
             rows={['name'].includes(type) ? 2 : 3}
+            inputProps={{ style: { textTransform: 'uppercase' } }}
             onChange={(e) => inputTextSeparate(e, type, field)}
             variant='outlined'
           />
@@ -295,6 +293,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           value={fieldValue}
           multiline
           rows={3}
+          inputProps={{ style: { textTransform: 'uppercase' } }}
           onChange={handleChange}
           variant='outlined'
           error={validateField(field, fieldValue).isError}
