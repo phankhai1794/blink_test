@@ -193,6 +193,16 @@ const useStyles = makeStyles((theme) => ({
       fontFamily: 'Montserrat',
       fontSize: '14px'
     }
+  },
+  btnBlockFields: {
+    fontWeight: 600,
+    display:'flex',
+    backgroundColor: '#E4E4E4',
+    height: '20px',
+    alignItems: 'center',
+    borderRadius: '8px',
+    padding: '10px',
+    color:'#AFAFAF'
   }
 }));
 
@@ -1802,25 +1812,38 @@ const InquiryViewer = (props) => {
                 state={question.state}
                 status={question.status}
               />
-              {user.role === 'Admin' ? ( // TODO
+              {user.role === 'Admin' ? (
                 <div className="flex items-center mr-2">
                   <PermissionProvider
                     action={PERMISSION.INQUIRY_RESOLVE_INQUIRY}
-                    extraCondition={(question.state === 'COMPL' || question.state === 'UPLOADED' || question.state === 'RESOLVED') && !listFieldDisableUpload.includes(question.field)}
+                    extraCondition={(question.state === 'COMPL' || question.state === 'UPLOADED' || question.state === 'RESOLVED')}
                   >
                     <div className='flex' style={{ alignItems: 'center' }}>
                       <div style={{ marginRight: 15 }}>
                         <span className={classes.labelStatus}>{question.state === 'UPLOADED' ? 'Uploaded' : 'Resolved'}</span>
                       </div>
-                      <Button
-                        disabled={question.state === 'UPLOADED'}
-                        variant="contained"
-                        color="primary"
-                        onClick={onUpload}
-                        classes={{ root: classes.button }}
-                      >
-                        Upload to OPUS
-                      </Button>
+                      {listFieldDisableUpload.includes(question.field) ?
+                        <div className={classes.btnBlockFields}>
+                          Upload to OPUS
+                          {
+                            <Tooltip
+                              title={'It is not allowed to upload this field, please revise information on OPUS manually.'}
+                              placement='bottom-end'
+                            >
+                              <span>&nbsp;&nbsp;<img src="assets/images/icons/help.svg" alt="Help" style={{ paddingTop: '2px'}} /></span>
+                            </Tooltip>
+                          }
+                        </div>
+                        : <Button
+                          disabled={question.state === 'UPLOADED' || listFieldDisableUpload.includes(question.field)}
+                          variant="contained"
+                          color="primary"
+                          onClick={onUpload}
+                          classes={{ root: classes.button }}
+                        >
+                          Upload to OPUS
+                        </Button>
+                      }
                     </div>
                   </PermissionProvider>
                   <div className='flex' style={{ alignItems: 'center' }}>
