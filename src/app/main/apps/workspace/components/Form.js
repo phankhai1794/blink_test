@@ -465,9 +465,10 @@ export default function Form(props) {
                   className={clsx(classes.tab, tabSelected === 0 && classes.colorSelectedTab)}
                   label="Customer"
                   icon={
-                    <div className={clsx(classes.countBtn, tabSelected === 0 && classes.colorCountBtn)}>
-                      {nums[0]}
-                    </div>
+                    nums[0] ?
+                      <div className={clsx(classes.countBtn, tabSelected === 0 && classes.colorCountBtn)}>
+                        {nums[0]}
+                      </div> : null
                   }
                 />
               )}
@@ -480,13 +481,14 @@ export default function Form(props) {
                   )}
                   label="Onshore"
                   icon={
-                    <div
-                      className={clsx(
-                        classes.countBtn,
-                        (tabSelected === 1 || !nums[1]) && classes.colorCountBtn
-                      )}>
-                      {nums[1]}
-                    </div>
+                    nums[1] ?
+                      <div
+                        className={clsx(
+                          classes.countBtn,
+                          (tabSelected === 1 || !nums[1]) && classes.colorCountBtn
+                        )}>
+                        {nums[1]}
+                      </div> : null
                   }
                 />
               )}
