@@ -180,7 +180,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                   content[containerCheck[1]] = cm;
                   let service = saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id,autoUpdate:true });
                   service.then((res) => {
-                    dispatch(Actions.loadInquiry(myBL.id));
                   })
                 }
               }
@@ -197,7 +196,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                   content[containerCheck[0]] = cd;
                   let service = saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: []}, mybl: myBL.id,autoUpdate:true });
                   service.then((res) => {
-                    dispatch(Actions.loadInquiry(myBL.id));
                   })
                 }
               }
@@ -235,7 +233,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                 // }
                 let service = saveEditedField({ field: fieldId, content: { content: arr, mediaFile: []}, mybl: myBL.id, autoUpdate:true });
                 service.then((res) => {
-                  dispatch(Actions.loadInquiry(myBL.id));
                 })
               }  
             }

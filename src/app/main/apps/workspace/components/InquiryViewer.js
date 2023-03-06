@@ -1467,39 +1467,37 @@ const InquiryViewer = (props) => {
                   });
                 }
                 content[fieldCdCM] = arr;
-                let service;
-                service = saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate:true });
-                service.then((res) => {
-                  dispatch(Actions.loadInquiry(myBL.id));
-                })
+                  let service;
+                  service = saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate:true });
+                  service.then((res) => {
+                  })
               }
-            }
-            else if (containerCheck.includes(question.field)){
-              let contsNoChange = {}
-              const orgContentField = content[question.field];
-              const contentField = tempReply.answer.content;
-              contentField.forEach((obj, index) => {
-                const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
-                const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
-                if (getTypeName === CONTAINER_NUMBER) {
-                  contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
-                }
+          }
+          else if (containerCheck.includes(question.field)){
+            let contsNoChange = {}
+            const orgContentField = content[question.field];
+            const contentField = tempReply.answer.content;
+            contentField.forEach((obj, index) => {
+              const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
+              const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
+              if (getTypeName === CONTAINER_NUMBER) {
+                contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
+              }
+            })
+            const fieldId = getField(question.field ===containerCheck[0]?CONTAINER_MANIFEST : CONTAINER_DETAIL)
+            let arr = content[fieldId] 
+            arr.map((item, index) => {
+              if (item[getType(CONTAINER_NUMBER)] in contsNoChange){
+                item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
+              }
+            })
+            if (arr){
+              content[fieldId]  = arr;
+              let service = saveEditedField({ field: fieldId, content: { content: arr, mediaFile: []}, mybl: myBL.id, autoUpdate :true });
+              service.then((res) => {
               })
-              const fieldId = getField(question.field ===containerCheck[0]?CONTAINER_MANIFEST : CONTAINER_DETAIL)
-              let arr = content[fieldId] 
-              arr.map((item, index) => {
-                if (item[getType(CONTAINER_NUMBER)] in contsNoChange){
-                  item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
-                }
-              })
-              if (arr){
-                content[fieldId] = arr;
-                let service = saveEditedField({ field: fieldId, content: { content: arr, mediaFile: []}, mybl: myBL.id, autoUpdate :true });
-                service.then((res) => {
-                  dispatch(Actions.loadInquiry(myBL.id));
-                })
-              }    
-            }
+            }    
+           }
             optionsInquires[editedIndex].state = 'AME_DRF';
           } else {
             optionsInquires[editedIndex].state = 'REP_DRF';
