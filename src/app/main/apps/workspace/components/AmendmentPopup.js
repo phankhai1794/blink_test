@@ -175,11 +175,12 @@ const AmendmentPopup = (props) => {
 
   const onAddition = (value) => {
     if (inputSeal) {
+      const input = inputSeal.split(/,|;/).map((str) => str.toUpperCase().trim()).filter(str => str);
       setInputSeal('');
       updateEdit((old) =>
         old.map((row, i) =>
           index === i
-            ? { ...old[index], [getType(CONTAINER_SEAL)]: [...new Set([...value, inputSeal.toUpperCase().trim()])] }
+            ? { ...old[index], [getType(CONTAINER_SEAL)]: [...new Set([...value, ...input])] }
             : row
         )
       );
