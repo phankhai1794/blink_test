@@ -1255,7 +1255,6 @@ const InquiryViewer = (props) => {
     setDisableSaveReply(false);
     setTempReply({ ...tempReply, ...reqReply });
   };
-  
 
   const handleSetAttachmentReply = (val) => {
     const reqReply = {

@@ -99,7 +99,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const fieldType = metadata.field_options.filter(filDrf => filDrf.display && !filterInqDrf.includes(filDrf.value));
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(currentField));
   const [disableSave, setDisableSave] = useState(false);
-  
+
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
   const removeAttachment = (index) => {
@@ -107,7 +107,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     optionsAttachmentList.splice(index, 1);
     setAttachments(optionsAttachmentList)
   }
-  
+
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
   };
