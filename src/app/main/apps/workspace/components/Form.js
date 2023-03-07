@@ -475,10 +475,7 @@ export default function Form(props) {
               {(nums[1] || (openAllInquiry && inquiries.some((inq) => inq.receiver.includes('onshore')))) && (
                 <Tab
                   classes={{ wrapper: classes.iconLabelWrapper }}
-                  className={clsx(
-                    classes.tab,
-                    (tabSelected === 1 || !nums[1]) && classes.colorSelectedTab
-                  )}
+                  className={clsx(classes.tab, tabSelected === 1 && classes.colorSelectedTab)}
                   label="Onshore"
                   icon={
                     nums[1] ?
