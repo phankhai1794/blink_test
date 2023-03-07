@@ -163,7 +163,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
         let service;
         service = saveEditedField({ field: fieldReq, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id });
-        service.then((res) => {
+        service.then(async (res) => {
           if ([CONTAINER_DETAIL, CONTAINER_MANIFEST].includes(fieldValueSelect.keyword)) {
             if (contentField.length === 1 && content[fieldValueSelect.keyword === CONTAINER_DETAIL ? containerCheck[1] : containerCheck[0]].length === 1) {
               if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
@@ -177,7 +177,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     cm[0][getType(CONTAINER_LIST.cmUnit[index])] = contentField[0][getType(key)];
                   });
                   content[containerCheck[1]] = cm;
-                  saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+                  await saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                 }
               }
               else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
@@ -191,7 +191,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     cd[0][getType(CONTAINER_LIST.cdUnit[index])] = contentField[0][getType(key)];
                   });
                   content[containerCheck[0]] = cd;
-                  saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+                  await saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                 }
               }
             }
@@ -230,7 +230,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     }
                   })
                 }
-                saveEditedField({ field: fieldId, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                await saveEditedField({ field: fieldId, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
               }
             }
           }
