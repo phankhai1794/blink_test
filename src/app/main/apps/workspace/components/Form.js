@@ -465,28 +465,27 @@ export default function Form(props) {
                   className={clsx(classes.tab, tabSelected === 0 && classes.colorSelectedTab)}
                   label="Customer"
                   icon={
-                    <div className={clsx(classes.countBtn, tabSelected === 0 && classes.colorCountBtn)}>
-                      {nums[0]}
-                    </div>
+                    nums[0] ?
+                      <div className={clsx(classes.countBtn, tabSelected === 0 && classes.colorCountBtn)}>
+                        {nums[0]}
+                      </div> : null
                   }
                 />
               )}
               {(nums[1] || (openAllInquiry && inquiries.some((inq) => inq.receiver.includes('onshore')))) && (
                 <Tab
                   classes={{ wrapper: classes.iconLabelWrapper }}
-                  className={clsx(
-                    classes.tab,
-                    (tabSelected === 1 || !nums[1]) && classes.colorSelectedTab
-                  )}
+                  className={clsx(classes.tab, tabSelected === 1 && classes.colorSelectedTab)}
                   label="Onshore"
                   icon={
-                    <div
-                      className={clsx(
-                        classes.countBtn,
-                        (tabSelected === 1 || !nums[1]) && classes.colorCountBtn
-                      )}>
-                      {nums[1]}
-                    </div>
+                    nums[1] ?
+                      <div
+                        className={clsx(
+                          classes.countBtn,
+                          (tabSelected === 1 || !nums[1]) && classes.colorCountBtn
+                        )}>
+                        {nums[1]}
+                      </div> : null
                   }
                 />
               )}
