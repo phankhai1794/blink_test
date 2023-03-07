@@ -863,7 +863,7 @@ const InquiryViewer = (props) => {
               //
               const idCD = metadata.field[CONTAINER_DETAIL];
               const idCM = metadata.field[CONTAINER_MANIFEST];
-              if (res.drfAnswersTrans) {
+              if (res.drfAnswersTrans && question.state.includes('AME_')) {
                 if (idCD === question.field) {
                   let cm = content[containerCheck[1]]
                   if (cm) {
@@ -875,7 +875,7 @@ const InquiryViewer = (props) => {
                       cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[1]] = cm;
-                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment'});
                   }
                 } else if (idCM === question.field) {
                   let cd = content[containerCheck[0]]
@@ -888,7 +888,13 @@ const InquiryViewer = (props) => {
                       cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[0]] = cd;
-                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' }).then(res => {
+                      if (res && res.removeAmendment) {
+                        const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
+                        const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+                        optionsOfQuestion.splice(removeIndex, 1);
+                      }
+                    });
                   }
                 }
                 if (res.emptyCDorCMAmendment) {
@@ -1512,7 +1518,7 @@ const InquiryViewer = (props) => {
                     });
                   }
                   content[fieldCdCM] = arr;
-                  saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                  saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
               }
               // Multiple case
