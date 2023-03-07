@@ -28,7 +28,6 @@ export const CHECK_SUBMIT = 'CHECK_SUBMIT';
 export const CHECK_SEND = 'CHECK_SEND';
 export const SET_LIST_COMMENT_DRAFT = 'SET_LIST_COMMENT_DRAFT';
 export const SET_NEW_AMENDMENT = 'SET_NEW_AMENDMENT';
-export const SET_CONTENT_BL = 'SET_CONTENT_BL';
 
 export function saveInquiry() {
   return {
@@ -81,13 +80,6 @@ export function setDisplayComment(state) {
 export function setMyBL(state) {
   return {
     type: SET_MYBL,
-    state
-  };
-}
-
-export function setContentBL(state) {
-  return {
-    type: SET_CONTENT_BL,
     state
   };
 }

@@ -217,7 +217,6 @@ const InquiryViewer = (props) => {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-  const contentBL = useSelector(({ workspace }) => workspace.inquiryReducer.contentBL);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
