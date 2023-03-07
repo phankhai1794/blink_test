@@ -213,7 +213,6 @@ const InquiryViewer = (props) => {
   const classes = useStyles();
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
-  const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
@@ -831,13 +830,11 @@ const InquiryViewer = (props) => {
             setViewDropDown('');
             setDisableSaveReply(false);
             const optionsOfQuestion = [...inquiries];
-            const optionsMinimize = [...listMinimize];
             const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
             const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
             const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
               optionsOfQuestion.splice(removeIndex, 1);
-              optionsMinimize.splice(removeIndex, 1);
               // remove all cd cm amendment
               if (res.removeAllCDCM) {
                 getBlInfo(myBL.id).then((res) => {
@@ -884,7 +881,6 @@ const InquiryViewer = (props) => {
                         const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
                         if (removeAmendment.length) {
                           optionsOfQuestion.splice(removeIndex, 1);
-                          optionsMinimize.splice(removeIndex, 1);
                         }
                       }
                     });
@@ -906,7 +902,6 @@ const InquiryViewer = (props) => {
                         if (removeAmendment.length) {
                           const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
                           optionsOfQuestion.splice(removeIndex, 1);
-                          optionsMinimize.splice(removeIndex, 1);
                         }
                       }
                     });
@@ -914,7 +909,6 @@ const InquiryViewer = (props) => {
                 }
                 if (res.emptyCDorCMAmendment) {
                   optionsOfQuestion.splice(removeIndex, 1);
-                  optionsMinimize.splice(removeIndex, 1);
                   dispatch(InquiryActions.setContent({ ...content, [question.field]: res.drfAnswersTrans }));
                   if (field !== 'INQUIRY_LIST') {
                     if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
@@ -931,7 +925,6 @@ const InquiryViewer = (props) => {
             }
             setReplyRemove();
             dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-            dispatch(InquiryActions.setListMinimize(optionsMinimize));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             dispatch(InquiryActions.addAmendment());
             props.getUpdatedAt();
