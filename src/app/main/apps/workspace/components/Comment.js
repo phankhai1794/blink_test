@@ -160,9 +160,10 @@ const Comment = (props) => {
               ) : <span className={'markReopen'}>Marked as reopened</span>
             ) :
             <div className={clsx((['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(reply.state) || reply.status === 'DELETED') ? 'delete-content' : '', 'content-reply')} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-              {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ? `${title ? `${title} "${content}"` : content}` : (
-                type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>
-              )}
+              {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
+                <div className={reply.isChangeRecipient ? 'markReopen' : ''}>{content}</div> :
+                (type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>)
+              }
             </div>
           }
 
