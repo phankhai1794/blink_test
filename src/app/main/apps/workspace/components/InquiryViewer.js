@@ -196,13 +196,13 @@ const useStyles = makeStyles((theme) => ({
   },
   btnBlockFields: {
     fontWeight: 600,
-    display:'flex',
+    display: 'flex',
     backgroundColor: '#E4E4E4',
     height: '20px',
     alignItems: 'center',
     borderRadius: '8px',
     padding: '10px',
-    color:'#AFAFAF'
+    color: '#AFAFAF'
   }
 }));
 
@@ -733,15 +733,24 @@ const InquiryViewer = (props) => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     const quest = { ...question };
-    if (optionsInquires[editedIndex].selectChoice && optionsInquires[editedIndex].selectChoice.answer) {
-      quest.answerObj.forEach(ans => {
-        ans.confirmed = false;
-        if (ans.id === optionsInquires[editedIndex].selectChoice.answer) {
-          ans.confirmed = true;
-        }
-      })
+    const currentEditInq = optionsInquires[editedIndex];
+    //
+    if (currentEditInq.paragraphAnswer) {
+      // update paragraph answer
+      quest.answerObj[0].content = currentEditInq.paragraphAnswer.content;
+    } else if (currentEditInq.selectChoice) {
+      // update choice answer
+      const answersObj = quest.answerObj;
+      answersObj.forEach((item, i) => {
+        answersObj[i].confirmed = false;
+      });
+      const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
+      const answerUpdate = answersObj[answerIndex];
+      answerUpdate.confirmed = true;
+      quest.answerObj = answersObj;
     }
-    setQuestion({ ...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer });
+    //
+    setQuestion({ ...quest, mediaFilesAnswer: currentEditInq.mediaFilesAnswer });
   }
 
   useEffect(() => {
@@ -1870,7 +1879,7 @@ const InquiryViewer = (props) => {
                               title={'It is not allowed to upload this field, please revise information on OPUS manually.'}
                               placement='bottom-end'
                             >
-                              <span>&nbsp;&nbsp;<img src="assets/images/icons/help.svg" alt="Help" style={{ paddingTop: '2px'}} /></span>
+                              <span>&nbsp;&nbsp;<img src="assets/images/icons/help.svg" alt="Help" style={{ paddingTop: '2px' }} /></span>
                             </Tooltip>
                           }
                         </div>
