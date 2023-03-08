@@ -196,7 +196,6 @@ const Comment = (props) => {
           <div className='attachment-answer'>
             {answersMedia?.length > 0 && (
               <>
-                {reply.process !== 'draft' && <div style={{ fontWeight: 600 }}>Attachment Answer: </div>}
                 {answersMedia?.map((file, mediaIndex) => (
                   <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
@@ -230,6 +229,10 @@ const Comment = (props) => {
         if (k.content && isJsonText(k.content) && !JSON.parse(k.content).length) {
           content = `${JSON.parse(k.content).name}\n${JSON.parse(k.content).address}`
         }
+        let mediaFiles = k.mediaFile;
+        if (k.type === 'ANS' || (k.type === 'INQ') && k.state === 'ANS_SENT') {
+          mediaFiles = [];
+        }
         return contentUI({
           id,
           userName: k.updater?.userName,
@@ -237,7 +240,7 @@ const Comment = (props) => {
           avatar: k.updater?.avatar,
           title: k.title || '',
           content,
-          media: k.mediaFile,
+          media: mediaFiles,
           answersMedia: k.answersMedia,
           type: k.type,
           reply: k,

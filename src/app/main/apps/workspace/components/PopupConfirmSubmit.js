@@ -61,7 +61,12 @@ const PopupConfirmSubmit = (props) => {
     workspace.inquiryReducer.isShowBackground,
     workspace.inquiryReducer.enableSubmit,
   ]);
-  const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
+
+  const [openPreviewListSubmit, openAmendmentList] = useSelector(({ workspace }) => [
+    workspace.formReducer.openPreviewListSubmit,
+    workspace.formReducer.openAmendmentList
+  ]);
+
   const user = useSelector(({ user }) => user);
 
   const dispatch = useDispatch();
@@ -144,7 +149,7 @@ const PopupConfirmSubmit = (props) => {
     <>
       {isShowBackground && (
         <div className={classes.dialogConfirm}>
-          <p>Are you sure you want to submit your responses?</p>
+          <p> Are you sure you want to submit your {openAmendmentList ? 'amendment' : 'responses'}?</p>
           <div className='btnConfirm'>
             <Button variant="outlined" style={{ marginRight: 15, textTransform: 'none', fontSize: 16 }} onClick={handleConfirm}>Confirm</Button>
             <Button variant="outlined" style={{ textTransform: 'none', fontSize: 16 }} onClick={handleCancelConfirm}>Cancel</Button>
