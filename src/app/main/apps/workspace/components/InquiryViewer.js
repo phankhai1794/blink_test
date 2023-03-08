@@ -1450,7 +1450,7 @@ const InquiryViewer = (props) => {
           }
           else {
             newContent = newContent.trim() || ONLY_ATT;
-            if (!isReply) newContent = newContent.toUpperCase();
+            if (!isReply || question.state.includes('AME_')) newContent = newContent.toUpperCase();
           }
         }
 
