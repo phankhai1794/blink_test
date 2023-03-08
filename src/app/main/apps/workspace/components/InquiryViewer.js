@@ -2153,31 +2153,34 @@ const InquiryViewer = (props) => {
               )}
 
               {question.mediaFile?.length > 0 &&
-                question.mediaFile?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach
-                        file={file}
-                        hiddenRemove={true}
-                        field={question.field}
-                        indexInquiry={index}
-                        style={{ margin: '2.5rem' }}
-                      />
-                    ) : (
-                      <FileAttach
-                        hiddenRemove={true}
-                        file={file}
-                        field={question.field}
-                        indexInquiry={index}
-                      />
-                    )}
-                  </div>
-                ))}
+              !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
+              question.mediaFile?.map((file, mediaIndex) => (
+                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                    <ImageAttach
+                      file={file}
+                      hiddenRemove={true}
+                      field={question.field}
+                      indexInquiry={index}
+                      style={{ margin: '2.5rem' }}
+                    />
+                  ) : (
+                    <FileAttach
+                      hiddenRemove={true}
+                      file={file}
+                      field={question.field}
+                      indexInquiry={index}
+                    />
+                  )}
+                </div>
+              ))}
             </>
             {
               question.mediaFilesAnswer?.length > 0 &&
               <>
-                {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+                {question.mediaFilesAnswer?.length > 0 &&
+                !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
+                <h3>Attachment Answer:</h3>}
                 {question.mediaFilesAnswer?.map((file, mediaIndex) => (
                   <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (

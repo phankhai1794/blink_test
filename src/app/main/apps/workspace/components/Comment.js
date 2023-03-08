@@ -196,7 +196,6 @@ const Comment = (props) => {
           <div className='attachment-answer'>
             {answersMedia?.length > 0 && (
               <>
-                {reply.process !== 'draft' && <div style={{ fontWeight: 600 }}>Attachment Answer: </div>}
                 {answersMedia?.map((file, mediaIndex) => (
                   <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
@@ -237,7 +236,7 @@ const Comment = (props) => {
           avatar: k.updater?.avatar,
           title: k.title || '',
           content,
-          media: k.mediaFile,
+          media: k.type !== 'ANS' ? k.mediaFile : [],
           answersMedia: k.answersMedia,
           type: k.type,
           reply: k,
