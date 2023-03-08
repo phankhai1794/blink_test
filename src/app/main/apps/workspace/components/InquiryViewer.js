@@ -1503,7 +1503,7 @@ const InquiryViewer = (props) => {
           mybl: myBL.id
         };
 
-        updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then(async (res) => {
+        updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
           if (res) {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           }
@@ -1537,7 +1537,7 @@ const InquiryViewer = (props) => {
                     });
                   }
                   content[fieldCdCM] = arr;
-                  await saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
+                  saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
               }
               // Multiple case
@@ -1577,7 +1577,7 @@ const InquiryViewer = (props) => {
                       }
                     })
                   }
-                  await saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                  saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
                 }
               }
             }
