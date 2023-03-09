@@ -47,7 +47,7 @@ const ParagraphAnswer = (props) => {
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
 
-  const [paragraphText, setParagraphText] = useState(question.answerObj && question.answerObj.length && question.answerObj[0]?.content);
+  const [paragraphText, setParagraphText] = useState(question.answerObj && question.answerObj.length ? question.answerObj[0]?.content : '');
 
   const classes = useStyles();
   const [isPermission, setPermission] = useState(false);
