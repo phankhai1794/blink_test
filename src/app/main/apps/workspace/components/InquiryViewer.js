@@ -194,6 +194,11 @@ const useStyles = makeStyles((theme) => ({
       fontSize: '14px'
     }
   },
+  placeholder: {
+    '&::placeholder': {
+      textTransform: 'none',
+    },
+  },
   btnBlockFields: {
     fontWeight: 600,
     display: 'flex',
@@ -735,19 +740,28 @@ const InquiryViewer = (props) => {
     const quest = { ...question };
     const currentEditInq = optionsInquires[editedIndex];
     //
+    const answersObj = quest.answerObj;
     if (currentEditInq.paragraphAnswer) {
       // update paragraph answer
-      quest.answerObj[0].content = currentEditInq.paragraphAnswer.content;
+      if (answersObj.length) {
+        quest.answerObj[0].content = currentEditInq.paragraphAnswer.content;
+      } else {
+        const objectContent = {
+          content: currentEditInq.paragraphAnswer.content,
+        }
+        answersObj.push(objectContent)
+      }
     } else if (currentEditInq.selectChoice) {
-      // update choice answer
-      const answersObj = quest.answerObj;
-      answersObj.forEach((item, i) => {
-        answersObj[i].confirmed = false;
-      });
-      const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
-      const answerUpdate = answersObj[answerIndex];
-      answerUpdate.confirmed = true;
-      quest.answerObj = answersObj;
+      if (answersObj.length) {
+        // update choice answer
+        answersObj.forEach((item, i) => {
+          answersObj[i].confirmed = false;
+        });
+        const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
+        const answerUpdate = answersObj[answerIndex];
+        answerUpdate.confirmed = true;
+        quest.answerObj = answersObj;
+      }
     }
     //
     setQuestion({ ...quest, mediaFilesAnswer: currentEditInq.mediaFilesAnswer });
@@ -946,6 +960,11 @@ const InquiryViewer = (props) => {
           const optionsOfQuestion = [...inquiries];
           const indexQuestion = optionsOfQuestion.findIndex(inq => inq.id === replyRemove.id);
           if (res.isOldestReply) {
+            if (indexQuestion !== -1) {
+              if (metadata.ans_type.paragraph === optionsOfQuestion[indexQuestion].ansType && optionsOfQuestion[indexQuestion].answerObj && optionsOfQuestion[indexQuestion].answerObj.length) {
+                setDeleteAnswer({ status: true, content: optionsOfQuestion[indexQuestion].answerObj[0].content });
+              }
+            }
             if (!res.statePrev) {
               optionsOfQuestion[indexQuestion].state = 'ANS_SENT';
             } else {
@@ -964,6 +983,8 @@ const InquiryViewer = (props) => {
                   inquiry: question.id,
                   content: res.response.content,
                 };
+              } else {
+                optionsOfQuestion[indexQuestion].answerObj = [];
               }
             }
             else if (res.response.type === 'choice') {
@@ -2364,6 +2385,9 @@ const InquiryViewer = (props) => {
                             multiline
                             rows={2}
                             inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
+                            InputProps={{
+                              classes: { input: classes.placeholder}
+                            }}
                             onChange={handleChangeContentReply}
                             variant='outlined'
                             placeholder='Reply...'

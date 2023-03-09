@@ -70,6 +70,11 @@ const useStyles = makeStyles((theme) => ({
       borderColor: '#BAC3CB'
     }
   },
+  placeholder: {
+    '&::placeholder': {
+      textTransform: 'none',
+    },
+  },
   attachmentFiles: {
     marginTop: 10,
   }
@@ -278,12 +283,15 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         <div key={index} style={{ paddingTop: '15px' }}>
           <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
           <TextField
-            placeholder='Please share your response here'
+            placeholder='Typing...'
             className={classes.inputText}
             value={fieldValueSeparate[type]}
             multiline
             rows={['name'].includes(type) ? 2 : 3}
             inputProps={{ style: { textTransform: 'uppercase' } }}
+            InputProps={{
+              classes: { input: classes.placeholder}
+            }}
             onChange={(e) => inputTextSeparate(e, type, field)}
             variant='outlined'
           />
@@ -291,12 +299,15 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     } else {
       return (
         <TextField
-          placeholder='Please share your response here'
+          placeholder='Typing...'
           className={classes.inputText}
           value={fieldValue}
           multiline
           rows={3}
           inputProps={{ style: { textTransform: 'uppercase' } }}
+          InputProps={{
+            classes: { input: classes.placeholder}
+          }}
           onChange={handleChange}
           variant='outlined'
           error={validateField(field, fieldValue).isError}
