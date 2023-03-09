@@ -735,19 +735,28 @@ const InquiryViewer = (props) => {
     const quest = { ...question };
     const currentEditInq = optionsInquires[editedIndex];
     //
+    const answersObj = quest.answerObj;
     if (currentEditInq.paragraphAnswer) {
       // update paragraph answer
-      quest.answerObj[0].content = currentEditInq.paragraphAnswer.content;
+      if (answersObj.length) {
+        quest.answerObj[0].content = currentEditInq.paragraphAnswer.content;
+      } else {
+        const objectContent = {
+          content: currentEditInq.paragraphAnswer.content,
+        }
+        answersObj.push(objectContent)
+      }
     } else if (currentEditInq.selectChoice) {
-      // update choice answer
-      const answersObj = quest.answerObj;
-      answersObj.forEach((item, i) => {
-        answersObj[i].confirmed = false;
-      });
-      const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
-      const answerUpdate = answersObj[answerIndex];
-      answerUpdate.confirmed = true;
-      quest.answerObj = answersObj;
+      if (answersObj.length) {
+        // update choice answer
+        answersObj.forEach((item, i) => {
+          answersObj[i].confirmed = false;
+        });
+        const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
+        const answerUpdate = answersObj[answerIndex];
+        answerUpdate.confirmed = true;
+        quest.answerObj = answersObj;
+      }
     }
     //
     setQuestion({ ...quest, mediaFilesAnswer: currentEditInq.mediaFilesAnswer });
@@ -924,6 +933,8 @@ const InquiryViewer = (props) => {
                   inquiry: question.id,
                   content: res.response.content,
                 };
+              } else {
+                optionsOfQuestion[indexQuestion].answerObj = [];
               }
             }
             else if (res.response.type === 'choice') {
