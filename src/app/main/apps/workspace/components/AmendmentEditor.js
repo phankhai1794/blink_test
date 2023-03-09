@@ -238,7 +238,11 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             dispatch(InquiryActions.addAmendment());
             const response = { ...res?.newAmendment, showIconEditInq: true };
             optionsInquires.push(response);
-            optionsMinimize.push(response);
+            const idMinimize = optionsMinimize.map(op => op.id);
+            if (!idMinimize.includes(response.id)) {
+              optionsMinimize.push(response);
+              dispatch(InquiryActions.setListMinimize(optionsMinimize));
+            }
 
             dispatch(InquiryActions.setInquiries(optionsInquires));
             dispatch(InquiryActions.setListMinimize(optionsMinimize));

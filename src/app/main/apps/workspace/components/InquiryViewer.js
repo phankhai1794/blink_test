@@ -887,8 +887,8 @@ const InquiryViewer = (props) => {
                     saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment'}).then(res => {
                       if (res && res.removeAmendment) {
                         const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
-                        const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
                         if (removeAmendment.length) {
+                          const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
                           optionsOfQuestion.splice(removeIndex, 1);
                         }
                       }
