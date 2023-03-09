@@ -70,6 +70,11 @@ const useStyles = makeStyles((theme) => ({
       borderColor: '#BAC3CB'
     }
   },
+  placeholder: {
+    '&::placeholder': {
+      textTransform: 'none',
+    },
+  },
   attachmentFiles: {
     marginTop: 10,
   }
@@ -280,6 +285,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             multiline
             rows={['name'].includes(type) ? 2 : 3}
             inputProps={{ style: { textTransform: 'uppercase' } }}
+            InputProps={{
+              classes: { input: classes.placeholder}
+            }}
             onChange={(e) => inputTextSeparate(e, type, field)}
             variant='outlined'
           />
@@ -293,6 +301,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           multiline
           rows={3}
           inputProps={{ style: { textTransform: 'uppercase' } }}
+          InputProps={{
+            classes: { input: classes.placeholder}
+          }}
           onChange={handleChange}
           variant='outlined'
           error={validateField(field, fieldValue).isError}

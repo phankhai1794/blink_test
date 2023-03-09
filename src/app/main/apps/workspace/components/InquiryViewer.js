@@ -194,6 +194,11 @@ const useStyles = makeStyles((theme) => ({
       fontSize: '14px'
     }
   },
+  placeholder: {
+    '&::placeholder': {
+      textTransform: 'none',
+    },
+  },
   btnBlockFields: {
     fontWeight: 600,
     display: 'flex',
@@ -2340,6 +2345,9 @@ const InquiryViewer = (props) => {
                             multiline
                             rows={2}
                             inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
+                            InputProps={{
+                              classes: { input: classes.placeholder}
+                            }}
                             onChange={handleChangeContentReply}
                             variant='outlined'
                             placeholder='Reply...'
