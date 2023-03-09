@@ -47,7 +47,7 @@ const ParagraphAnswer = (props) => {
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
 
-  const [paragraphText, setParagraphText] = useState(question.answerObj[0]?.content);
+  const [paragraphText, setParagraphText] = useState(question.answerObj && question.answerObj.length && question.answerObj[0]?.content);
 
   const classes = useStyles();
   const [isPermission, setPermission] = useState(false);
@@ -78,7 +78,7 @@ const ParagraphAnswer = (props) => {
         setParagraphText('');
       }
     }
-    if (!paragraphText && question.answerObj.length > 0 && question.mediaFilesAnswer.length > 0) setParagraphText(ONLY_ATT)
+    if (!paragraphText && question.answerObj && question.answerObj.length > 0 && question.mediaFilesAnswer.length > 0) setParagraphText(ONLY_ATT)
   }, [saveStatus, question]);
 
   useEffect(() => {

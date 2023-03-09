@@ -915,6 +915,11 @@ const InquiryViewer = (props) => {
           const optionsOfQuestion = [...inquiries];
           const indexQuestion = optionsOfQuestion.findIndex(inq => inq.id === replyRemove.id);
           if (res.isOldestReply) {
+            if (indexQuestion !== -1) {
+              if (metadata.ans_type.paragraph === optionsOfQuestion[indexQuestion].ansType && optionsOfQuestion[indexQuestion].answerObj && optionsOfQuestion[indexQuestion].answerObj.length) {
+                setDeleteAnswer({ status: true, content: optionsOfQuestion[indexQuestion].answerObj[0].content });
+              }
+            }
             if (!res.statePrev) {
               optionsOfQuestion[indexQuestion].state = 'ANS_SENT';
             } else {
