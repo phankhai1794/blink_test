@@ -274,7 +274,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         <div key={index} style={{ paddingTop: '15px' }}>
           <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
           <TextField
-            placeholder='Please share your response here'
+            placeholder='Typing...'
             className={classes.inputText}
             value={fieldValueSeparate[type]}
             multiline
@@ -287,7 +287,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     } else {
       return (
         <TextField
-          placeholder='Please share your response here'
+          placeholder='Typing...'
           className={classes.inputText}
           value={fieldValue}
           multiline

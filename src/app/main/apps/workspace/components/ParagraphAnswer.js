@@ -94,7 +94,7 @@ const ParagraphAnswer = (props) => {
         <TextField
           style={{ border: 'none', display: !isPermission ? (!paragraphText ? 'none' : '') : '' }}
           fullWidth
-          placeholder={isPermission ? 'Please share your response here' : ''}
+          placeholder={isPermission ? 'Typing...' : ''}
           classes={{ root: classes.root }}
           disabled={!isPermission || disable}
           InputProps={{
