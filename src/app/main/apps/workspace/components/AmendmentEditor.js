@@ -254,6 +254,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             dispatch(FormActions.toggleAmendmentsList(true));
             dispatch(InquiryActions.addAmendment());
             dispatch(InquiryActions.setOneInq({}));
+            setPristine()
           }).catch((err) => console.error(err));
       });
   }
