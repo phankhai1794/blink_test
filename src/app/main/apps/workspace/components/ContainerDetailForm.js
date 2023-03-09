@@ -88,7 +88,7 @@ const StyledPopper = styled(Popper)`&&{
     }
   }
 }`;
-const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false }) => {
+const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, deleteAmendment, setDeleteAmendment }) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const user = useSelector(({ user }) => user);
@@ -126,6 +126,10 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
       setValueEdit(originalData);
     }
   }, [container])
+
+  useEffect(() => {
+    setValues(originalData);
+  }, [originalData]);
 
   const handleEdit = (state) => {
     setOpenEdit(state);
