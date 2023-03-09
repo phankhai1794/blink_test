@@ -2262,6 +2262,7 @@ const InquiryViewer = (props) => {
                         question={question}
                         originalValues={isJsonText(question.content) ? JSON.parse(question.content) : null}
                         setTextResolve={setTextResolve}
+                        setDirty={setDirty}
                       />
                     }
                   </>
@@ -2445,7 +2446,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation }) => {
+export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation, setDirty }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -2486,6 +2487,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     }
     setValues(temp);
     setTextResolve(temp);
+    setDirty()
   };
 
   useEffect(() => {
