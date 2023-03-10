@@ -12,6 +12,7 @@ import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLRe
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo } from '@shared';
 import { validateTextInput } from 'app/services/myBLService';
+import { useUnsavedChangesWarning } from 'app/hooks'
 import {
   CONSIGNEE,
   CONTAINER_DETAIL,
@@ -216,6 +217,7 @@ const InquiryViewer = (props) => {
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
+  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
@@ -1228,14 +1230,17 @@ const InquiryViewer = (props) => {
     setIsResolve(false);
     setIsResolveCDCM(false);
     setTempReply({});
+    setPristine()
   };
 
   const inputText = (e) => {
     !validateInput?.isValid && dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     setTextResolve(e.target.value);
+    setDirty()
   };
 
   const inputTextSeparate = (e, type) => {
+    setDirty()
     !validateInput?.isValid && dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value }));
   };
@@ -1262,6 +1267,7 @@ const InquiryViewer = (props) => {
       }
     };
     setTempReply({ ...tempReply, ...reqReply });
+    setDirty()
   };
 
   const getType = (type) => {
@@ -1329,6 +1335,7 @@ const InquiryViewer = (props) => {
 
   const onSaveReply = async () => {
     setDisableSaveReply(true);
+    setPristine()
     const mediaListId = [];
     let mediaListAmendment = [];
     const mediaRest = [];
@@ -2265,6 +2272,7 @@ const InquiryViewer = (props) => {
                         question={question}
                         originalValues={isJsonText(question.content) ? JSON.parse(question.content) : null}
                         setTextResolve={setTextResolve}
+                        setDirty={setDirty}
                       />
                     }
                   </>
@@ -2287,6 +2295,7 @@ const InquiryViewer = (props) => {
                         }
                         color="primary"
                         onClick={() => {
+                          setPristine()
                           setDisableAcceptResolve(true);
                           !validateInput?.isValid ? onConfirm() : handleValidateInput('RESOLVE', onConfirm)
                         }}
@@ -2298,7 +2307,10 @@ const InquiryViewer = (props) => {
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={() => !validateInput?.isValid ? onConfirm(true) : handleValidateInput('RESOLVE', onConfirm, true)}
+                          onClick={() => {
+                            setPristine()
+                            !validateInput?.isValid ? onConfirm(true) : handleValidateInput('RESOLVE', onConfirm, true)
+                          }}
                           classes={{ root: clsx(classes.button) }}>
                           Accept & Wrap Text
                         </Button>
@@ -2447,7 +2459,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation }) => {
+export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation, setDirty }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -2488,6 +2500,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     }
     setValues(temp);
     setTextResolve(temp);
+    setDirty()
   };
 
   useEffect(() => {
