@@ -194,15 +194,20 @@ const useStyles = makeStyles((theme) => ({
       fontSize: '14px'
     }
   },
+  placeholder: {
+    '&::placeholder': {
+      textTransform: 'none',
+    },
+  },
   btnBlockFields: {
     fontWeight: 600,
-    display:'flex',
+    display: 'flex',
     backgroundColor: '#E4E4E4',
     height: '20px',
     alignItems: 'center',
     borderRadius: '8px',
     padding: '10px',
-    color:'#AFAFAF'
+    color: '#AFAFAF'
   }
 }));
 
@@ -733,15 +738,33 @@ const InquiryViewer = (props) => {
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     const quest = { ...question };
-    if (optionsInquires[editedIndex].selectChoice && optionsInquires[editedIndex].selectChoice.answer) {
-      quest.answerObj.forEach(ans => {
-        ans.confirmed = false;
-        if (ans.id === optionsInquires[editedIndex].selectChoice.answer) {
-          ans.confirmed = true;
+    const currentEditInq = optionsInquires[editedIndex];
+    //
+    const answersObj = quest.answerObj;
+    if (currentEditInq.paragraphAnswer) {
+      // update paragraph answer
+      if (answersObj.length) {
+        quest.answerObj[0].content = currentEditInq.paragraphAnswer.content;
+      } else {
+        const objectContent = {
+          content: currentEditInq.paragraphAnswer.content,
         }
-      })
+        answersObj.push(objectContent)
+      }
+    } else if (currentEditInq.selectChoice) {
+      if (answersObj.length) {
+        // update choice answer
+        answersObj.forEach((item, i) => {
+          answersObj[i].confirmed = false;
+        });
+        const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
+        const answerUpdate = answersObj[answerIndex];
+        answerUpdate.confirmed = true;
+        quest.answerObj = answersObj;
+      }
     }
-    setQuestion({ ...quest, mediaFilesAnswer: optionsInquires[editedIndex].mediaFilesAnswer });
+    //
+    setQuestion({ ...quest, mediaFilesAnswer: currentEditInq.mediaFilesAnswer });
   }
 
   useEffect(() => {
@@ -897,6 +920,11 @@ const InquiryViewer = (props) => {
           const optionsOfQuestion = [...inquiries];
           const indexQuestion = optionsOfQuestion.findIndex(inq => inq.id === replyRemove.id);
           if (res.isOldestReply) {
+            if (indexQuestion !== -1) {
+              if (metadata.ans_type.paragraph === optionsOfQuestion[indexQuestion].ansType && optionsOfQuestion[indexQuestion].answerObj && optionsOfQuestion[indexQuestion].answerObj.length) {
+                setDeleteAnswer({ status: true, content: optionsOfQuestion[indexQuestion].answerObj[0].content });
+              }
+            }
             if (!res.statePrev) {
               optionsOfQuestion[indexQuestion].state = 'ANS_SENT';
             } else {
@@ -915,6 +943,8 @@ const InquiryViewer = (props) => {
                   inquiry: question.id,
                   content: res.response.content,
                 };
+              } else {
+                optionsOfQuestion[indexQuestion].answerObj = [];
               }
             }
             else if (res.response.type === 'choice') {
@@ -1441,7 +1471,7 @@ const InquiryViewer = (props) => {
           }
           else {
             newContent = newContent.trim() || ONLY_ATT;
-            if (!isReply) newContent = newContent.toUpperCase();
+            if (!isReply || question.state.includes('AME_')) newContent = newContent.toUpperCase();
           }
         }
 
@@ -1830,7 +1860,7 @@ const InquiryViewer = (props) => {
                               title={'It is not allowed to upload this field, please revise information on OPUS manually.'}
                               placement='bottom-end'
                             >
-                              <span>&nbsp;&nbsp;<img src="assets/images/icons/help.svg" alt="Help" style={{ paddingTop: '2px'}} /></span>
+                              <span>&nbsp;&nbsp;<img src="assets/images/icons/help.svg" alt="Help" style={{ paddingTop: '2px' }} /></span>
                             </Tooltip>
                           }
                         </div>
@@ -2144,31 +2174,34 @@ const InquiryViewer = (props) => {
               )}
 
               {question.mediaFile?.length > 0 &&
-                question.mediaFile?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach
-                        file={file}
-                        hiddenRemove={true}
-                        field={question.field}
-                        indexInquiry={index}
-                        style={{ margin: '2.5rem' }}
-                      />
-                    ) : (
-                      <FileAttach
-                        hiddenRemove={true}
-                        file={file}
-                        field={question.field}
-                        indexInquiry={index}
-                      />
-                    )}
-                  </div>
-                ))}
+              !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
+              question.mediaFile?.map((file, mediaIndex) => (
+                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                    <ImageAttach
+                      file={file}
+                      hiddenRemove={true}
+                      field={question.field}
+                      indexInquiry={index}
+                      style={{ margin: '2.5rem' }}
+                    />
+                  ) : (
+                    <FileAttach
+                      hiddenRemove={true}
+                      file={file}
+                      field={question.field}
+                      indexInquiry={index}
+                    />
+                  )}
+                </div>
+              ))}
             </>
             {
               question.mediaFilesAnswer?.length > 0 &&
               <>
-                {question.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+                {question.mediaFilesAnswer?.length > 0 &&
+                !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
+                <h3>Attachment Answer:</h3>}
                 {question.mediaFilesAnswer?.map((file, mediaIndex) => (
                   <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
@@ -2312,6 +2345,9 @@ const InquiryViewer = (props) => {
                             multiline
                             rows={2}
                             inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
+                            InputProps={{
+                              classes: { input: classes.placeholder}
+                            }}
                             onChange={handleChangeContentReply}
                             variant='outlined'
                             placeholder='Reply...'
