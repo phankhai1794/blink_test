@@ -93,13 +93,6 @@ const ParagraphAnswer = (props) => {
     }
   }, [isDeleteAnswer]);
 
-  useEffect(() => {
-    if (isDeleteAnswer && isDeleteAnswer.status) {
-      setParagraphText(isDeleteAnswer.content);
-      setDeleteAnswer();
-    }
-  }, [isDeleteAnswer]);
-
   return (
     <div>
       <div className={clsx("flex", paragraphText ? classes.inputText : classes.placeHolder)}>
