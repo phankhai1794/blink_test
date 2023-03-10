@@ -827,7 +827,7 @@ const InquiryViewer = (props) => {
         .catch((error) => console.error(error));
     } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove) {
       deleteDraftBLReply(replyRemove?.draftId, replyRemove.field, myBL.id)
-        .then(async (res) => {
+        .then((res) => {
           // Case: Offshore reply customer's amendment first time => delete
           if (comment.length === 3) {
             const prevAmendment = {
