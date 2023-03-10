@@ -108,18 +108,6 @@ function ToolbarLayout1(props) {
     ['ANS_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
 
-  const onUnload = (e) => {
-    e.preventDefault();
-    e.returnValue = '';
-  }
-
-  useEffect(() => {
-    if (inquiries.some((inq) => ['OPEN', 'REP_Q_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state))) {
-      window.addEventListener("beforeunload", onUnload);
-    }
-    return () => window.removeEventListener("beforeunload", onUnload);
-  }, [inquiries])
-
   useEffect(() => {
     const countInquiry = inquiries.filter((inq) => inq.process === 'pending' && !['COMPL', 'UPLOADED'].includes(inq.state))
     setInquiryLength(countInquiry.length);
