@@ -11,7 +11,7 @@ import {
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo } from '@shared';
-import { validateTextInput } from 'app/services/myBLService';
+import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import { useUnsavedChangesWarning } from 'app/hooks'
 import {
   CONSIGNEE,
@@ -857,10 +857,21 @@ const InquiryViewer = (props) => {
             const optionsOfQuestion = [...inquiries];
             const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
             const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+            const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
-              const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
               optionsOfQuestion.splice(removeIndex, 1);
-              dispatch(InquiryActions.setContent({ ...content, [question.field]: orgContent[question.field] }));
+              // remove all cd cm amendment
+              if (res.removeAllCDCM) {
+                getBlInfo(myBL.id).then((res) => {
+                  if (res) {
+                    const {content} = res.myBL;
+                    dispatch(InquiryActions.setContent({ ...content, [containerCheck[0]]: content[containerCheck[0]], [containerCheck[1]]: content[containerCheck[1]] }));
+                  }
+                })
+              } else {
+                const response = res.drfAnswersTrans && res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[question.field];
+                dispatch(InquiryActions.setContent({ ...content, [question.field]: response }));
+              }
               if (field !== 'INQUIRY_LIST') {
                 if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
               } else {
@@ -877,32 +888,61 @@ const InquiryViewer = (props) => {
               //
               const idCD = metadata.field[CONTAINER_DETAIL];
               const idCM = metadata.field[CONTAINER_MANIFEST];
-              if (res.drfAnswersTrans) {
+              if (res.drfAnswersTrans && question.state.includes('AME_')) {
                 if (idCD === question.field) {
                   let cm = content[containerCheck[1]]
                   if (cm) {
-                    cm[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans.content[0][getTypeCDCM(CONTAINER_NUMBER)];
+                    cm[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans[0][getTypeCDCM(CONTAINER_NUMBER)];
                     CONTAINER_LIST.cdNumber.map((key, index) => {
-                      cm[0][getTypeCDCM(CONTAINER_LIST.cmNumber[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                      cm[0][getTypeCDCM(CONTAINER_LIST.cmNumber[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     CONTAINER_LIST.cmUnit.map((key, index) => {
-                      cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                      cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[1]] = cm;
-                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment'}).then(res => {
+                      if (res && res.removeAmendment) {
+                        const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
+                        if (removeAmendment.length) {
+                          const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+                          optionsOfQuestion.splice(removeIndex, 1);
+                        }
+                      }
+                    });
                   }
                 } else if (idCM === question.field) {
                   let cd = content[containerCheck[0]]
                   if (cd) {
-                    cd[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans.content[0][getTypeCDCM(CONTAINER_NUMBER)];
+                    cd[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans[0][getTypeCDCM(CONTAINER_NUMBER)];
                     CONTAINER_LIST.cmNumber.map((key, index) => {
-                      cd[0][getTypeCDCM(CONTAINER_LIST.cdNumber[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                      cd[0][getTypeCDCM(CONTAINER_LIST.cdNumber[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     CONTAINER_LIST.cmUnit.map((key, index) => {
-                      cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                      cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[0]] = cd;
-                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' }).then(res => {
+                      if (res && res.removeAmendment) {
+                        const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
+                        if (removeAmendment.length) {
+                          const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+                          optionsOfQuestion.splice(removeIndex, 1);
+                        }
+                      }
+                    });
+                  }
+                }
+                if (res.emptyCDorCMAmendment) {
+                  optionsOfQuestion.splice(removeIndex, 1);
+                  dispatch(InquiryActions.setContent({ ...content, [question.field]: res.drfAnswersTrans }));
+                  if (field !== 'INQUIRY_LIST') {
+                    if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
+                  } else {
+                    const draftBl = optionsOfQuestion.filter(inq => inq.process === 'draft');
+                    if (!draftBl.length) {
+                      dispatch(FormActions.toggleAllInquiry(false));
+                      dispatch(FormActions.toggleAmendmentsList(false));
+                    }
                   }
                 }
               }
@@ -1525,7 +1565,7 @@ const InquiryViewer = (props) => {
                     });
                   }
                   content[fieldCdCM] = arr;
-                  saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                  saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
               }
               // Multiple case
@@ -1565,7 +1605,7 @@ const InquiryViewer = (props) => {
                       }
                     })
                   }
-                  saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                  saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
               }
             }

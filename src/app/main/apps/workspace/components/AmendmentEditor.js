@@ -185,7 +185,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       cm[0][getType(CONTAINER_LIST.cmUnit[index])] = contentField[0][getType(key)];
                     });
                     content[containerCheck[1]] = cm;
-                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                   }
                 }
                 else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
@@ -199,7 +199,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       cd[0][getType(CONTAINER_LIST.cdUnit[index])] = contentField[0][getType(key)];
                     });
                     content[containerCheck[0]] = cd;
-                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                   }
                 }
               }
@@ -247,7 +247,11 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             dispatch(InquiryActions.addAmendment());
             const response = { ...res?.newAmendment, showIconEditInq: true };
             optionsInquires.push(response);
-            optionsMinimize.push(response);
+            const idMinimize = optionsMinimize.map(op => op.id);
+            if (!idMinimize.includes(response.id)) {
+              optionsMinimize.push(response);
+              dispatch(InquiryActions.setListMinimize(optionsMinimize));
+            }
 
             dispatch(InquiryActions.setInquiries(optionsInquires));
             dispatch(InquiryActions.setListMinimize(optionsMinimize));
