@@ -156,13 +156,16 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   };
 
   const combineValueUnit = (name, row) => {
-    const value = isArray(row[getType(name)]);
-    if (Object.keys(mapUnit).includes(name)) {
-      const id = getType(mapUnit[name]);
-      const unit = row[id] || '';
-      return value ? `${value} ${unit}` : value;
+    if (row){
+      const value = isArray(row[getType(name)]);
+      if (Object.keys(mapUnit).includes(name)) {
+        const id = getType(mapUnit[name]);
+        const unit = row[id] || '';
+        return value ? `${value} ${unit}` : value;
+      }
+      return value;
     }
-    return value;
+    return ""
   }
 
   const isValueChange = (key, index, row) => {

@@ -76,10 +76,15 @@ const ParagraphAnswer = (props) => {
     if (currentQuestion && currentQuestion.id === question.id) {
       if (!currentQuestion.answerObj.length) {
         setParagraphText('');
+      } else if (currentQuestion.answerObj && currentQuestion.answerObj.length) {
+        setParagraphText(currentQuestion.answerObj[0].content);
       }
     }
+  }, [saveStatus, currentQuestion]);
+
+  useEffect(() => {
     if (!paragraphText && question.answerObj && question.answerObj.length > 0 && question.mediaFilesAnswer.length > 0) setParagraphText(ONLY_ATT)
-  }, [saveStatus, question]);
+  }, [saveStatus, question])
 
   useEffect(() => {
     if (isDeleteAnswer && isDeleteAnswer.status) {
