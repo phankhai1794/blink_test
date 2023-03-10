@@ -222,6 +222,33 @@ const InquiryEditor = (props) => {
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
+  const checkInqChanged = (currInq, valInput, isTypeChoice) => {
+    const checkContent = currInq.content.trim().localeCompare(valInput.content.trim());
+    const checkAnsType = currInq.ansType === valInput.ansType;
+    const checkReceiver = currInq.receiver[0] === valInput.receiver[0];
+
+    if (isTypeChoice) {
+      if (currInq.answerObj.length && valInput.answerObj.length) {
+        const arrContentInq = currInq.answerObj.map(ans => ans.content.trim());
+        const arrContentInput = valInput.answerObj.map(ans => ans.content.trim());
+        if (arrContentInq.length !== arrContentInput.length) return false;
+        else if (arrContentInq.length === arrContentInput.length) {
+          let countDuplicate = 0;
+          arrContentInq.forEach(content => {
+            if (arrContentInput.includes(content)) {
+              countDuplicate = countDuplicate + 1;
+            }
+          });
+          if (countDuplicate !== arrContentInq.length) return false;
+        }
+      }
+    }
+
+    if (checkContent !== 0 || !checkAnsType || !checkReceiver) return false;
+
+    return true;
+  }
+
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
 
@@ -373,6 +400,7 @@ const InquiryEditor = (props) => {
         setDisabled(false);
         return;
       }
+
       if (ansTypeChoice === currentEditInq.ansType) {
         if (currentEditInq.answerObj.length === 1) {
           dispatch(
@@ -397,6 +425,19 @@ const InquiryEditor = (props) => {
           // break;
         }
       }
+
+      if (checkInqChanged(inquiry, currentEditInq, ansTypeChoice === currentEditInq.ansType)) {
+        dispatch(
+          FormActions.openConfirmPopup({
+            openConfirmPopup: true,
+            confirmPopupMsg: 'The inquiry has not changed !',
+            confirmPopupType: 'warningInq'
+          })
+        );
+        setDisabled(false);
+        return;
+      }
+
       const ansCreate = currentEditInq.answerObj.filter(
         ({ id: id1 }) => !inquiry.answerObj.some(({ id: id2 }) => id2 === id1)
       );
