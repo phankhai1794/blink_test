@@ -6,14 +6,13 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
-import * as AppActions from 'app/store/actions';
 import { validateBLType } from '@shared';
 import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE } from '@shared/keyword';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
-import * as Actions from 'app/main/apps/workspace/store/actions';
 
+import { useUnsavedChangesWarning } from 'app/hooks'
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -91,6 +90,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.enableSubmit,
   ]);
+  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
   const currentField = useSelector(({ draftBL }) => draftBL.currentField);
   const filterInqDrf = inquiries.filter(inq => inq.process === 'draft').map(val => val.field);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
@@ -117,9 +117,13 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     return metadata.inq_type?.[type] || '';
   };
 
-  const handleChange = (e) => setFieldValue(e.target.value);
+  const handleChange = (e) => {
+    setDirty();
+    setFieldValue(e.target.value)
+  };
 
   const inputTextSeparate = (e, type) => {
+    setDirty();
     setFieldValueSeparate(Object.assign({}, fieldValueSeparate, { [type]: e.target.value }));
   };
 
@@ -259,6 +263,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             dispatch(FormActions.toggleAmendmentsList(true));
             dispatch(InquiryActions.addAmendment());
             dispatch(InquiryActions.setOneInq({}));
+            setPristine()
           }).catch((err) => console.error(err));
       });
   }
