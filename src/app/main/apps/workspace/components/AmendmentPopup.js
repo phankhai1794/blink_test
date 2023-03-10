@@ -32,6 +32,7 @@ import {
   NCM_CODE,
   mapUnit
 } from '@shared/keyword';
+import { useUnsavedChangesWarning } from 'app/hooks'
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import ClearIcon from '@material-ui/icons/Clear';
 import WindowedSelect from "react-windowed-select";
@@ -120,6 +121,8 @@ const StyledChip = withStyles(theme => ({
 const AmendmentPopup = (props) => {
   const { onClose, inqType, isEdit, data, index, updateData, updateEdit, containerDetail } = props;
   const classes = useStyles();
+  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
+
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const user = useSelector(({ user }) => user);
   const [inputSeal, setInputSeal] = useState('');
@@ -155,11 +158,13 @@ const AmendmentPopup = (props) => {
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
     onClose();
+    setPristine()
   };
 
   const show = (value) => user.role === 'Admin' && value;
 
   const handleChange = (id, value) => {
+    setDirty();
     updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [id]: value } : row)));
   };
 
@@ -259,7 +264,10 @@ const AmendmentPopup = (props) => {
               }}
               value={inputSeal}
               onKeyDown={(e) => onKeyDown(e, value)}
-              onChange={(e) => setInputSeal(e.target.value)}
+              onChange={(e) => {
+                setInputSeal(e.target.value)
+                setDirty()
+              }}
               onBlur={() => onAddition(value)}
             />
           </div>
