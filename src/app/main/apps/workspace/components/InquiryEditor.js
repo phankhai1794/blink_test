@@ -20,7 +20,7 @@ import { updateInquiry, saveInquiry, getUpdatedAtAnswer } from 'app/services/inq
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
-import { useUnsavedChangesWarning } from 'app/hooks'
+import { validateTextInput } from 'app/services/myBLService';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -156,8 +156,6 @@ const InquiryEditor = (props) => {
   const [contentEdited, setContentEdited] = useState(valueType?.label);
   const [isDisabled, setDisabled] = useState(false);
   const [prevField, setPrevField] = useState('');
-  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
-
   const styles = (width) => {
     return {
       control: {
@@ -262,7 +260,6 @@ const InquiryEditor = (props) => {
     dispatch(InquiryActions.validate({ ...valid, content: inq.content }));
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
-    setDirty()
   };
 
   const handleAnswerTypeChange = (e) => {
@@ -587,7 +584,6 @@ const InquiryEditor = (props) => {
         })
         .catch((error) => console.log(error));
     }
-    setPristine()
   };
 
   return (
