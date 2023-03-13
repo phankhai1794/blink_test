@@ -864,7 +864,7 @@ const InquiryViewer = (props) => {
               if (res.removeAllCDCM) {
                 getBlInfo(myBL.id).then((res) => {
                   if (res) {
-                    const {content} = res.myBL;
+                    const { content } = res.myBL;
                     dispatch(InquiryActions.setContent({ ...content, [containerCheck[0]]: content[containerCheck[0]], [containerCheck[1]]: content[containerCheck[1]] }));
                   }
                 })
@@ -900,7 +900,7 @@ const InquiryViewer = (props) => {
                       cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[1]] = cm;
-                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment'}).then(res => {
+                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' }).then(res => {
                       if (res && res.removeAmendment) {
                         const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
                         if (removeAmendment.length) {
@@ -1543,8 +1543,8 @@ const InquiryViewer = (props) => {
               [res.newAmendment?.field]: newContent
             }));
             if (containerCheck.includes(question.field)) {
+              //CASE 1-1 CD CM
               if (tempReply.answer.content.length === 1 && content[question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0]].length === 1) {
-                // if (tempReply.answer.content.length === 1) {
                 let fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
                 let arr = content[fieldCdCM]
                 if (arr.length > 0) {
@@ -1568,7 +1568,7 @@ const InquiryViewer = (props) => {
                   saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
               }
-              // Multiple case
+              // MULTIPLE CASE CD CM
               else {
                 let contsNoChange = {}
                 const orgContentField = content[question.field];
@@ -1589,6 +1589,22 @@ const InquiryViewer = (props) => {
                 })
                 if (fieldAutoUpdate) {
                   content[fieldCdCM] = fieldAutoUpdate;
+
+                  if (question.field === getField(CONTAINER_DETAIL)) {
+                    contentField.forEach((cd) => {
+                      let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
+                        cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+                      ))]
+                      if (cmOfCd.length === 1) {
+                        CONTAINER_LIST.cdNumber.map((key, index) => {
+                          cmOfCd[0][getType(CONTAINER_LIST.cmNumber[index])] = cd[getType(key)];
+                        });
+                        CONTAINER_LIST.cdUnit.map((key, index) => {
+                          cmOfCd[0][getType(CONTAINER_LIST.cmUnit[index])] = cd[getType(key)];
+                        });
+                      }
+                    })
+                  }
                   if (question.field === getField(CONTAINER_MANIFEST)) {
                     fieldAutoUpdate.forEach((cd) => {
                       let cmOfCd = [...new Set((contentField || []).filter(cm =>
@@ -2221,34 +2237,34 @@ const InquiryViewer = (props) => {
               )}
 
               {question.mediaFile?.length > 0 &&
-              !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
-              question.mediaFile?.map((file, mediaIndex) => (
-                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                    <ImageAttach
-                      file={file}
-                      hiddenRemove={true}
-                      field={question.field}
-                      indexInquiry={index}
-                      style={{ margin: '2.5rem' }}
-                    />
-                  ) : (
-                    <FileAttach
-                      hiddenRemove={true}
-                      file={file}
-                      field={question.field}
-                      indexInquiry={index}
-                    />
-                  )}
-                </div>
-              ))}
+                !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
+                question.mediaFile?.map((file, mediaIndex) => (
+                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                      <ImageAttach
+                        file={file}
+                        hiddenRemove={true}
+                        field={question.field}
+                        indexInquiry={index}
+                        style={{ margin: '2.5rem' }}
+                      />
+                    ) : (
+                      <FileAttach
+                        hiddenRemove={true}
+                        file={file}
+                        field={question.field}
+                        indexInquiry={index}
+                      />
+                    )}
+                  </div>
+                ))}
             </>
             {
               question.mediaFilesAnswer?.length > 0 &&
               <>
                 {question.mediaFilesAnswer?.length > 0 &&
-                !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
-                <h3>Attachment Answer:</h3>}
+                  !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
+                  <h3>Attachment Answer:</h3>}
                 {question.mediaFilesAnswer?.map((file, mediaIndex) => (
                   <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
@@ -2398,7 +2414,7 @@ const InquiryViewer = (props) => {
                             rows={2}
                             inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
                             InputProps={{
-                              classes: { input: classes.placeholder}
+                              classes: { input: classes.placeholder }
                             }}
                             onChange={handleChangeContentReply}
                             variant='outlined'
