@@ -71,6 +71,7 @@ import AttachFile from './AttachFile';
 import Comment from './Comment';
 import TagsComponent from './TagsComponent';
 import ContainerDetailForm from './ContainerDetailForm';
+import WarningMessage from './WarningMessage';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -1125,20 +1126,47 @@ const InquiryViewer = (props) => {
     } else {
       contentField = textResolve;
       const orgContentField = content[question.field];
+      const warningLeast1CM = [];
+      const contsNo = [];
       contentField.forEach((obj, index) => {
         const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
         if (getTypeName === CONTAINER_NUMBER) {
+          contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
           const containerNo = orgContentField[index][question.inqType];
           contsNoChange[containerNo] = obj[question.inqType];
           obj[question.inqType] = formatContainerNo(obj[question.inqType]);
         }
-
         if (getTypeName === CONTAINER_SEAL) {
           obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
           obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
         }
       });
+
+      // Validation container number must include at least one C/M.
+      if (question.field == getField(CONTAINER_DETAIL)) {
+        contsNo.forEach((containerNo, index) => {
+          let cmOfCd = [...new Set((content[getField(CONTAINER_MANIFEST)] || []).filter(cm =>
+            cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
+          ))]
+          if (cmOfCd.length === 0) {
+            warningLeast1CM.push({ containerNo, row: index });
+          }
+        })
+        if (warningLeast1CM && warningLeast1CM.length) {
+          dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningLeast1CM, warningType: 'atLeast1CM' }));
+        }
+      }
+      // Validation The C/M below does not match any container numbers that already exist in C/D
+      if (question.field == getField(CONTAINER_DETAIL)) {
+        const cmsNotInCD = [];
+        (content[getField(CONTAINER_MANIFEST)] || []).forEach((cm, index) => {
+          if (!contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])) {
+            cmsNotInCD.push(cm);
+          }
+        });
+      }
+
     }
 
     const body = {
@@ -1893,7 +1921,7 @@ const InquiryViewer = (props) => {
     <>
       {isLoadedComment && (
         <div onClick={() => dispatch(FormActions.inqViewerFocus(question.id))}>
-          <div >
+          <div>
             {(question?.process === 'draft') &&
               <TagsComponent tagName='AMENDMENT' tagColor='primary' />
             }
