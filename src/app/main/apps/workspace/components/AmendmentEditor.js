@@ -173,6 +173,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         saveEditedField({ field: fieldReq, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id })
           .then((res) => {
             if ([CONTAINER_DETAIL, CONTAINER_MANIFEST].includes(fieldValueSelect.keyword)) {
+              // CASE 1-1 CD CM
               if (contentField.length === 1 && content[fieldValueSelect.keyword === CONTAINER_DETAIL ? containerCheck[1] : containerCheck[0]].length === 1) {
                 if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
                   let cm = content[containerCheck[1]]
@@ -203,6 +204,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                   }
                 }
               }
+              // MULTIPLE CASE CD CM
               else {
                 let contsNoChange = {}
                 const orgContentField = content[getField(fieldValueSelect.keyword)];
@@ -222,6 +224,21 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                 })
                 if (fieldAutoUpdate) {
                   content[fieldId] = fieldAutoUpdate;
+                  if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
+                    contentField.forEach((cd) => {
+                      let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
+                        cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+                      ))]
+                      if (cmOfCd.length === 1) {
+                        CONTAINER_LIST.cdNumber.map((key, index) => {
+                          cmOfCd[0][getType(CONTAINER_LIST.cmNumber[index])] = cd[getType(key)];
+                        });
+                        CONTAINER_LIST.cdUnit.map((key, index) => {
+                          cmOfCd[0][getType(CONTAINER_LIST.cmUnit[index])] = cd[getType(key)];
+                        });
+                      }
+                    })
+                  }
                   if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
                     fieldAutoUpdate.forEach((cd) => {
                       let cmOfCd = [...new Set((contentField || []).filter(cm =>
@@ -295,7 +312,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             rows={['name'].includes(type) ? 2 : 3}
             inputProps={{ style: { textTransform: 'uppercase' } }}
             InputProps={{
-              classes: { input: classes.placeholder}
+              classes: { input: classes.placeholder }
             }}
             onChange={(e) => inputTextSeparate(e, type, field)}
             variant='outlined'
@@ -311,7 +328,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           rows={3}
           inputProps={{ style: { textTransform: 'uppercase' } }}
           InputProps={{
-            classes: { input: classes.placeholder}
+            classes: { input: classes.placeholder }
           }}
           onChange={handleChange}
           variant='outlined'
