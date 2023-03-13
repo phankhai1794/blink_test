@@ -1614,7 +1614,7 @@ const InquiryViewer = (props) => {
                         CONTAINER_LIST.cmNumber.map((key, index) => {
                           let total = 0;
                           cmOfCd.map((cm) => {
-                            total += parseInt(cm[getType(key)]);
+                            total += parseFloat(cm[getType(key)]);
                           });
                           cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
                         });
