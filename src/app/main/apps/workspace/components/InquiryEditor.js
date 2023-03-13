@@ -228,6 +228,14 @@ const InquiryEditor = (props) => {
     const checkContent = currInq.content.trim().localeCompare(valInput.content.trim());
     const checkAnsType = currInq.ansType === valInput.ansType;
     const checkReceiver = currInq.receiver[0] === valInput.receiver[0];
+    
+    let isSameFile = false;
+    const listId1 = currInq.mediaFile.map(item => item.id);
+    const listId2 = valInput.mediaFile.map(item => item.id);
+
+    if (listId1.length === listId2.length ) {
+      isSameFile = Boolean(listId1.length === 0 || listId1.every(id => listId2.includes(id)));
+    }
 
     if (isTypeChoice) {
       if (currInq.answerObj.length && valInput.answerObj.length) {
@@ -245,8 +253,8 @@ const InquiryEditor = (props) => {
         }
       }
     }
-
-    if (checkContent !== 0 || !checkAnsType || !checkReceiver) return false;
+    
+    if (checkContent !== 0 || !checkAnsType || !checkReceiver || !isSameFile) return false;
 
     return true;
   }
