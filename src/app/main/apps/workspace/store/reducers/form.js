@@ -18,6 +18,7 @@ const initialState = {
   openNotificationSubmitPreview: false,
   openNotificationDeleteAmendment: false,
   openNotificationUploadOpus: { status: false, message: '', icon: '' },
+  openWarningCDCMContainerNo: { status: false, contentsWarning: [], warningType: '' },
   enableSaveInquiriesList: true,
   openAmendmentList: false,
   openPreviewListSubmit: false,
@@ -117,6 +118,9 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.OPEN_CREATE_AMENDMENT: {
     return { ...state, openAmendmentForm: action.state };
+  }
+  case Actions.OPEN_WARNING_CD_CM: {
+    return { ...state, openWarningCDCMContainerNo: action.state };
   }
   case Actions.INQUIRY_VIEWER_FOCUS: {
     return { ...state, inqViewerFocus: action.state };

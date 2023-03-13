@@ -113,6 +113,10 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     setAttachments(optionsAttachmentList)
   }
 
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
   };
@@ -138,6 +142,30 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     }
   }
 
+  const validationCDCM = (contsNo) => {
+    const warningLeast1CM = [];
+    const warningCmsNotInCD = [];
+    // Validation container number must include at least one C/M.
+    if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
+      let cmOfCdContainerNo = [...new Set((content[getField(CONTAINER_MANIFEST)] || []))].map(cm => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+      contsNo.forEach((containerNo, index) => {
+        if (cmOfCdContainerNo.length && !cmOfCdContainerNo.includes(containerNo)) {
+          warningLeast1CM.push({ containerNo, row: index + 1 });
+        }
+      })
+    } else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
+      // Validation The C/M below does not match any container numbers that already exist in C/D
+      let cdOfCmContainerNo = [...new Set((content[getField(CONTAINER_DETAIL)] || []))].map(cm => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+      contsNo.forEach((containerNo, index) => {
+        if (cdOfCmContainerNo.length && !cdOfCmContainerNo.includes(containerNo)) {
+          warningCmsNotInCD.push({ containerNo, row: index + 1 });
+        }
+      });
+    }
+    if (warningLeast1CM.length) dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningLeast1CM, warningType: 'atLeast1CM' }));
+    if (warningCmsNotInCD.length) dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningCmsNotInCD, warningType: 'CmNotMatch' }));
+  }
+
   const handleSave = () => {
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     fieldValueSeparate.name = fieldValueSeparate.name.toUpperCase().trim();
@@ -159,6 +187,45 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     if (openAmendmentList && !fieldReq) {
       setDisableSave(false);
       return;
+    }
+
+    let contsNoChange = {};
+    const contsNo = [];
+    const orgContentField = content[getField(fieldValueSelect.keyword)];
+    contentField.forEach((obj, index) => {
+      const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
+      const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
+      if (getTypeName === CONTAINER_NUMBER) {
+        contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
+        contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
+      }
+    })
+    const fieldId = getField(fieldValueSelect.keyword === CONTAINER_DETAIL ? CONTAINER_MANIFEST : CONTAINER_DETAIL)
+    let fieldAutoUpdate = content[fieldId];
+    fieldAutoUpdate.map((item) => {
+      if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
+        item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
+      }
+    });
+
+    if (fieldAutoUpdate) {
+      content[fieldId] = fieldAutoUpdate;
+      if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
+        fieldAutoUpdate.forEach((cd) => {
+          let cmOfCd = [...new Set((contentField || []).filter(cm =>
+            cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+          ))]
+          if (cmOfCd.length > 0) {
+            CONTAINER_LIST.cmNumber.map((key, index) => {
+              let total = 0;
+              cmOfCd.map((cm) => {
+                total += parseInt(cm[getType(key)]);
+              });
+              cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
+            });
+          }
+        })
+      }
     }
 
     axios
@@ -206,13 +273,15 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
               }
               // MULTIPLE CASE CD CM
               else {
-                let contsNoChange = {}
+                let contsNoChange = {};
+                const contsNo = [];
                 const orgContentField = content[getField(fieldValueSelect.keyword)];
                 contentField.forEach((obj, index) => {
                   const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
                   const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
                   if (getTypeName === CONTAINER_NUMBER) {
                     contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
+                    contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
                   }
                 })
                 const fieldId = getField(fieldValueSelect.keyword === CONTAINER_DETAIL ? CONTAINER_MANIFEST : CONTAINER_DETAIL)
@@ -261,7 +330,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             }
 
             dispatch(DraftBLActions.setCurrentField());
-            dispatch(InquiryActions.addAmendment());
             const response = { ...res?.newAmendment, showIconEditInq: true };
             optionsInquires.push(response);
             const idMinimize = optionsMinimize.map(op => op.id);
@@ -280,6 +348,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             dispatch(FormActions.toggleAmendmentsList(true));
             dispatch(InquiryActions.addAmendment());
             dispatch(InquiryActions.setOneInq({}));
+            validationCDCM(contsNo);
             setPristine()
           }).catch((err) => console.error(err));
       });
@@ -289,10 +358,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     dispatch(InquiryActions.addAmendment());
     dispatch(FormActions.toggleCreateAmendment(false));
   }
-
-  const getField = (field) => {
-    return metadata.field?.[field] || '';
-  };
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
