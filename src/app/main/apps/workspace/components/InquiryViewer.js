@@ -861,7 +861,7 @@ const InquiryViewer = (props) => {
             const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
             const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
-              optionsOfQuestion.splice(removeIndex, 1);
+              if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
               // remove all cd cm amendment
               if (res.removeAllCDCM) {
                 getBlInfo(myBL.id).then((res) => {
@@ -885,7 +885,7 @@ const InquiryViewer = (props) => {
               }
             } else {
               if (res.checkReplyEmpty) {
-                optionsOfQuestion[removeIndex].state = user.role === 'Admin' ? 'AME_SENT' : 'REP_SENT';
+                if (removeIndex !== -1) optionsOfQuestion[removeIndex].state = user.role === 'Admin' ? 'AME_SENT' : 'REP_SENT';
               }
               //
               const idCD = metadata.field[CONTAINER_DETAIL];
@@ -935,7 +935,7 @@ const InquiryViewer = (props) => {
                   }
                 }
                 if (res.emptyCDorCMAmendment) {
-                  optionsOfQuestion.splice(removeIndex, 1);
+                  if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
                   dispatch(InquiryActions.setContent({ ...content, [question.field]: res.drfAnswersTrans }));
                   if (field !== 'INQUIRY_LIST') {
                     if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
