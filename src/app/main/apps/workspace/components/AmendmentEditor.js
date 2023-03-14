@@ -189,45 +189,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
       return;
     }
 
-    let contsNoChange = {};
-    const contsNo = [];
-    const orgContentField = content[getField(fieldValueSelect.keyword)];
-    contentField.forEach((obj, index) => {
-      const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
-      const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
-      if (getTypeName === CONTAINER_NUMBER) {
-        contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
-        contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
-      }
-    })
-    const fieldId = getField(fieldValueSelect.keyword === CONTAINER_DETAIL ? CONTAINER_MANIFEST : CONTAINER_DETAIL)
-    let fieldAutoUpdate = content[fieldId];
-    fieldAutoUpdate.map((item) => {
-      if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
-        item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
-      }
-    });
-
-    if (fieldAutoUpdate) {
-      content[fieldId] = fieldAutoUpdate;
-      if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
-        fieldAutoUpdate.forEach((cd) => {
-          let cmOfCd = [...new Set((contentField || []).filter(cm =>
-            cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
-          ))]
-          if (cmOfCd.length > 0) {
-            CONTAINER_LIST.cmNumber.map((key, index) => {
-              let total = 0;
-              cmOfCd.map((cm) => {
-                total += parseInt(cm[getType(key)]);
-              });
-              cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
-            });
-          }
-        })
-      }
-    }
-
     axios
       .all(uploads.map((endpoint) => uploadFile(endpoint)))
       .then((files) => {
@@ -326,6 +287,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                   }
                   saveEditedField({ field: fieldId, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
                 }
+                validationCDCM(contsNo);
               }
             }
 
@@ -348,7 +310,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             dispatch(FormActions.toggleAmendmentsList(true));
             dispatch(InquiryActions.addAmendment());
             dispatch(InquiryActions.setOneInq({}));
-            validationCDCM(contsNo);
             setPristine()
           }).catch((err) => console.error(err));
       });
