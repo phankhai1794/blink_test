@@ -309,7 +309,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             }
 
             dispatch(InquiryActions.setInquiries(optionsInquires));
-            dispatch(InquiryActions.setListMinimize(optionsMinimize));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             getUpdatedAt();
             setDisableSave(false);
