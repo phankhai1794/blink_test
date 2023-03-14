@@ -10,9 +10,9 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo } from '@shared';
+import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile } from '@shared';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
-import { useUnsavedChangesWarning } from 'app/hooks'
+import { useUnsavedChangesWarning } from 'app/hooks';
 import {
   CONSIGNEE,
   CONTAINER_DETAIL,
@@ -264,6 +264,7 @@ const InquiryViewer = (props) => {
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
   const [isDeleteAnswer, setDeleteAnswer] = useState({ status: false, content: '' });
   const [listFieldDisableUpload, setListFieldDisableUpload] = useState([]);
+  const [originEditData, setOriginEditData] = useState();
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -1560,6 +1561,12 @@ const InquiryViewer = (props) => {
         };
 
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
+          const temp = originEditData.map(item => {
+            if (res.newAmendment.id === item.id) return res.newAmendment;
+            return item;
+          })
+          setOriginEditData(temp);
+
           if (res) {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           }
@@ -1776,6 +1783,12 @@ const InquiryViewer = (props) => {
     const el = document.getElementById(question.id);
     if (el && el.scrollHeight > el.clientHeight) setShowViewAll(true);
   }, [isLoadedComment]);
+
+  useState(() => {
+    const optionsInquires = [...inquiries];
+    const originAmendmentList = optionsInquires.filter(item => (item.state === 'AME_DRF'));
+    setOriginEditData(originAmendmentList);
+  }, [])
 
   const renderBtnReply = () => {
     if (question.process === 'pending') {
@@ -2498,9 +2511,11 @@ const InquiryViewer = (props) => {
                           disabled={
                             (question.state === "AME_DRF" && (
                               validateField(question.field, tempReply?.answer?.content).isError
-                              || (['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content?.trim())
-                              || (!['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content)
-
+                              ||
+                              (
+                                (question.answerObj[0].content === tempReply?.answer?.content)
+                                && (tempReply && tempReply.mediaFiles && isSameFile(originEditData.filter(item => item.id === tempReply.answer.id), tempReply.mediaFiles))
+                              )
                             ))
                             || (question.state !== "AME_DRF" && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
