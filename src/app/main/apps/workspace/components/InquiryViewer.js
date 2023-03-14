@@ -1117,14 +1117,14 @@ const InquiryViewer = (props) => {
     const warningLeast1CM = [];
     const warningCmsNotInCD = [];
     // Validation container number must include at least one C/M.
-    if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
+    if (question.field === getField(CONTAINER_DETAIL)) {
       let cmOfCdContainerNo = [...new Set((content[getField(CONTAINER_MANIFEST)] || []))].map(cm => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
       contsNo.forEach((containerNo, index) => {
         if (cmOfCdContainerNo.length && !cmOfCdContainerNo.includes(containerNo)) {
           warningLeast1CM.push({ containerNo, row: index + 1 });
         }
       })
-    } else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
+    } else if (question.field === getField(CONTAINER_MANIFEST)) {
       // Validation The C/M below does not match any container numbers that already exist in C/D
       let cdOfCmContainerNo = [...new Set((content[getField(CONTAINER_DETAIL)] || []))].map(cm => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
       contsNo.forEach((containerNo, index) => {
