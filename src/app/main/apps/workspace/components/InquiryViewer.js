@@ -907,7 +907,7 @@ const InquiryViewer = (props) => {
                         const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
                         if (removeAmendment.length) {
                           const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
-                          optionsOfQuestion.splice(removeIndex, 1);
+                          if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
                         }
                       }
                     });
@@ -928,7 +928,7 @@ const InquiryViewer = (props) => {
                         const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
                         if (removeAmendment.length) {
                           const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
-                          optionsOfQuestion.splice(removeIndex, 1);
+                          if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
                         }
                       }
                     });
