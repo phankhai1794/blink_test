@@ -858,7 +858,10 @@ const InquiryViewer = (props) => {
             setDisableSaveReply(false);
             const optionsOfQuestion = [...inquiries];
             const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
-            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+            let removeIndex = -1;
+            if (removeAmendment.length) {
+              removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+            }
             const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
               if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
