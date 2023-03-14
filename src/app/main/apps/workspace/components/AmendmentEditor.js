@@ -104,6 +104,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const fieldType = metadata.field_options.filter(filDrf => filDrf.display && !filterInqDrf.includes(filDrf.value));
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(currentField));
   const [disableSave, setDisableSave] = useState(false);
+  const [isChange, setChange] = useState(false);
 
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
@@ -123,12 +124,14 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   const handleChange = (e) => {
     setDirty();
-    setFieldValue(e.target.value)
-  };
+    setFieldValue(e.target.value);
+    setChange(true);
+  }
 
   const inputTextSeparate = (e, type) => {
     setDirty();
     setFieldValueSeparate(Object.assign({}, fieldValueSeparate, { [type]: e.target.value }));
+    setChange(true);
   };
 
   const handleValidateInput = async (confirm = null) => {
@@ -389,6 +392,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     setFieldValue(content[e.value] || "");
     setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(e.value));
     setValueSeparate(e.value);
+    setChange(false);
   };
 
   const checkCurField = () => {
@@ -521,10 +525,15 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         <Button
           className={classes.btn}
           disabled={
-            (isSeparate ? false : (
+            (isSeparate ? (
+              !fieldValueSeparate.name
+              && !fieldValueSeparate.address
+              && !isChange
+            ) : (
               validateField(fieldValueSelect?.value, fieldValue).isError
               ||
-              (fieldValue && (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0)))
+              (!isChange && fieldValue && (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0)))
+              || (!fieldValue && !isChange)
             ))
             ||
             disableSave

@@ -254,3 +254,16 @@ export function formatContainerNo(containerNo) {
   }
   return result;
 }
+
+export const isSameFile = (originItem, compareFile) => {
+  if (originItem !== []) return true;
+
+  let isSame = false;
+  const listId1 = originItem[0].mediaFile.map(item => item.id);
+  const listId2 = compareFile.map(item => item.id);
+  if (listId1.length === listId2.length) {
+    if (listId1.length === 0 || (listId1.every(id => listId2.includes(id)))) isSame = true;
+  }
+
+  return isSame;
+}
