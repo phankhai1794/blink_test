@@ -15,6 +15,7 @@ import { useUnsavedChangesWarning } from 'app/hooks'
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
+import * as AppAction from "../../../../store/actions";
 
 import UserInfo from './UserInfo';
 import ImageAttach from './ImageAttach';
@@ -165,8 +166,12 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         }
       });
     }
-    if (warningLeast1CM.length) dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningLeast1CM, warningType: 'atLeast1CM' }));
-    if (warningCmsNotInCD.length) dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningCmsNotInCD, warningType: 'CmNotMatch' }));
+    if (warningLeast1CM.length) {
+      dispatch(AppAction.showMessage({ message: 'A container number must include at least one C/M. Please check again the container numbers below', variant: 'warning' }));
+    }
+    if (warningCmsNotInCD.length) {
+      dispatch(AppAction.showMessage({ message: `Container Manifest doesn't match with Container Details`, variant: 'warning' }));
+    }
   }
 
   const handleSave = () => {
