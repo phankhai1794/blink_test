@@ -6,13 +6,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
-import * as AppActions from 'app/store/actions';
 import { validateBLType } from '@shared';
 import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE } from '@shared/keyword';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
-import * as Actions from 'app/main/apps/workspace/store/actions';
+import { useUnsavedChangesWarning } from 'app/hooks'
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -91,6 +90,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.enableSubmit,
   ]);
+  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
   const currentField = useSelector(({ draftBL }) => draftBL.currentField);
   const filterInqDrf = inquiries.filter(inq => inq.process === 'draft').map(val => val.field);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
@@ -113,13 +113,21 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     setAttachments(optionsAttachmentList)
   }
 
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
   };
 
-  const handleChange = (e) => setFieldValue(e.target.value);
+  const handleChange = (e) => {
+    setDirty();
+    setFieldValue(e.target.value)
+  };
 
   const inputTextSeparate = (e, type) => {
+    setDirty();
     setFieldValueSeparate(Object.assign({}, fieldValueSeparate, { [type]: e.target.value }));
   };
 
@@ -132,6 +140,30 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     } else {
       confirm && confirm();
     }
+  }
+
+  const validationCDCM = (contsNo) => {
+    const warningLeast1CM = [];
+    const warningCmsNotInCD = [];
+    // Validation container number must include at least one C/M.
+    if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
+      let cmOfCdContainerNo = [...new Set((content[getField(CONTAINER_MANIFEST)] || []))].map(cm => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+      contsNo.forEach((containerNo, index) => {
+        if (cmOfCdContainerNo.length && !cmOfCdContainerNo.includes(containerNo)) {
+          warningLeast1CM.push({ containerNo, row: index + 1 });
+        }
+      })
+    } else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
+      // Validation The C/M below does not match any container numbers that already exist in C/D
+      let cdOfCmContainerNo = [...new Set((content[getField(CONTAINER_DETAIL)] || []))].map(cm => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+      contsNo.forEach((containerNo, index) => {
+        if (cdOfCmContainerNo.length && !cdOfCmContainerNo.includes(containerNo)) {
+          warningCmsNotInCD.push({ containerNo, row: index + 1 });
+        }
+      });
+    }
+    if (warningLeast1CM.length) dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningLeast1CM, warningType: 'atLeast1CM' }));
+    if (warningCmsNotInCD.length) dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningCmsNotInCD, warningType: 'CmNotMatch' }));
   }
 
   const handleSave = () => {
@@ -157,6 +189,45 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
       return;
     }
 
+    let contsNoChange = {};
+    const contsNo = [];
+    const orgContentField = content[getField(fieldValueSelect.keyword)];
+    contentField.forEach((obj, index) => {
+      const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
+      const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
+      if (getTypeName === CONTAINER_NUMBER) {
+        contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
+        contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
+      }
+    })
+    const fieldId = getField(fieldValueSelect.keyword === CONTAINER_DETAIL ? CONTAINER_MANIFEST : CONTAINER_DETAIL)
+    let fieldAutoUpdate = content[fieldId];
+    fieldAutoUpdate.map((item) => {
+      if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
+        item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
+      }
+    });
+
+    if (fieldAutoUpdate) {
+      content[fieldId] = fieldAutoUpdate;
+      if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
+        fieldAutoUpdate.forEach((cd) => {
+          let cmOfCd = [...new Set((contentField || []).filter(cm =>
+            cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+          ))]
+          if (cmOfCd.length > 0) {
+            CONTAINER_LIST.cmNumber.map((key, index) => {
+              let total = 0;
+              cmOfCd.map((cm) => {
+                total += parseInt(cm[getType(key)]);
+              });
+              cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
+            });
+          }
+        })
+      }
+    }
+
     axios
       .all(uploads.map((endpoint) => uploadFile(endpoint)))
       .then((files) => {
@@ -169,6 +240,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         saveEditedField({ field: fieldReq, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id })
           .then((res) => {
             if ([CONTAINER_DETAIL, CONTAINER_MANIFEST].includes(fieldValueSelect.keyword)) {
+              // CASE 1-1 CD CM
               if (contentField.length === 1 && content[fieldValueSelect.keyword === CONTAINER_DETAIL ? containerCheck[1] : containerCheck[0]].length === 1) {
                 if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
                   let cm = content[containerCheck[1]]
@@ -181,7 +253,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       cm[0][getType(CONTAINER_LIST.cmUnit[index])] = contentField[0][getType(key)];
                     });
                     content[containerCheck[1]] = cm;
-                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                   }
                 }
                 else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
@@ -195,18 +267,21 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       cd[0][getType(CONTAINER_LIST.cdUnit[index])] = contentField[0][getType(key)];
                     });
                     content[containerCheck[0]] = cd;
-                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                   }
                 }
               }
+              // MULTIPLE CASE CD CM
               else {
-                let contsNoChange = {}
+                let contsNoChange = {};
+                const contsNo = [];
                 const orgContentField = content[getField(fieldValueSelect.keyword)];
                 contentField.forEach((obj, index) => {
                   const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
                   const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
                   if (getTypeName === CONTAINER_NUMBER) {
                     contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
+                    contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
                   }
                 })
                 const fieldId = getField(fieldValueSelect.keyword === CONTAINER_DETAIL ? CONTAINER_MANIFEST : CONTAINER_DETAIL)
@@ -218,6 +293,21 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                 })
                 if (fieldAutoUpdate) {
                   content[fieldId] = fieldAutoUpdate;
+                  if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
+                    contentField.forEach((cd) => {
+                      let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
+                        cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+                      ))]
+                      if (cmOfCd.length === 1) {
+                        CONTAINER_LIST.cdNumber.map((key, index) => {
+                          cmOfCd[0][getType(CONTAINER_LIST.cmNumber[index])] = cd[getType(key)];
+                        });
+                        CONTAINER_LIST.cdUnit.map((key, index) => {
+                          cmOfCd[0][getType(CONTAINER_LIST.cmUnit[index])] = cd[getType(key)];
+                        });
+                      }
+                    })
+                  }
                   if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
                     fieldAutoUpdate.forEach((cd) => {
                       let cmOfCd = [...new Set((contentField || []).filter(cm =>
@@ -227,7 +317,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                         CONTAINER_LIST.cmNumber.map((key, index) => {
                           let total = 0;
                           cmOfCd.map((cm) => {
-                            total += parseInt(cm[getType(key)]);
+                            total += parseFloat(cm[getType(key)]);
                           });
                           cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
                         });
@@ -240,10 +330,13 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             }
 
             dispatch(DraftBLActions.setCurrentField());
-            dispatch(InquiryActions.addAmendment());
             const response = { ...res?.newAmendment, showIconEditInq: true };
             optionsInquires.push(response);
-            optionsMinimize.push(response);
+            const idMinimize = optionsMinimize.map(op => op.id);
+            if (!idMinimize.includes(response.id)) {
+              optionsMinimize.push(response);
+              dispatch(InquiryActions.setListMinimize(optionsMinimize));
+            }
 
             dispatch(InquiryActions.setInquiries(optionsInquires));
             dispatch(InquiryActions.setListMinimize(optionsMinimize));
@@ -255,6 +348,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             dispatch(FormActions.toggleAmendmentsList(true));
             dispatch(InquiryActions.addAmendment());
             dispatch(InquiryActions.setOneInq({}));
+            validationCDCM(contsNo);
+            setPristine()
           }).catch((err) => console.error(err));
       });
   }
@@ -263,10 +358,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     dispatch(InquiryActions.addAmendment());
     dispatch(FormActions.toggleCreateAmendment(false));
   }
-
-  const getField = (field) => {
-    return metadata.field?.[field] || '';
-  };
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
@@ -286,7 +377,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             rows={['name'].includes(type) ? 2 : 3}
             inputProps={{ style: { textTransform: 'uppercase' } }}
             InputProps={{
-              classes: { input: classes.placeholder}
+              classes: { input: classes.placeholder }
             }}
             onChange={(e) => inputTextSeparate(e, type, field)}
             variant='outlined'
@@ -302,7 +393,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           rows={3}
           inputProps={{ style: { textTransform: 'uppercase' } }}
           InputProps={{
-            classes: { input: classes.placeholder}
+            classes: { input: classes.placeholder }
           }}
           onChange={handleChange}
           variant='outlined'

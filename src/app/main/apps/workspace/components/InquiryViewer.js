@@ -11,7 +11,8 @@ import {
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo } from '@shared';
-import { validateTextInput } from 'app/services/myBLService';
+import { getBlInfo, validateTextInput } from 'app/services/myBLService';
+import { useUnsavedChangesWarning } from 'app/hooks'
 import {
   CONSIGNEE,
   CONTAINER_DETAIL,
@@ -70,6 +71,7 @@ import AttachFile from './AttachFile';
 import Comment from './Comment';
 import TagsComponent from './TagsComponent';
 import ContainerDetailForm from './ContainerDetailForm';
+import WarningMessage from './WarningMessage';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -216,6 +218,7 @@ const InquiryViewer = (props) => {
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
+  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
@@ -855,10 +858,21 @@ const InquiryViewer = (props) => {
             const optionsOfQuestion = [...inquiries];
             const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
             const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+            const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
-              const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
               optionsOfQuestion.splice(removeIndex, 1);
-              dispatch(InquiryActions.setContent({ ...content, [question.field]: orgContent[question.field] }));
+              // remove all cd cm amendment
+              if (res.removeAllCDCM) {
+                getBlInfo(myBL.id).then((res) => {
+                  if (res) {
+                    const { content } = res.myBL;
+                    dispatch(InquiryActions.setContent({ ...content, [containerCheck[0]]: content[containerCheck[0]], [containerCheck[1]]: content[containerCheck[1]] }));
+                  }
+                })
+              } else {
+                const response = res.drfAnswersTrans && res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[question.field];
+                dispatch(InquiryActions.setContent({ ...content, [question.field]: response }));
+              }
               if (field !== 'INQUIRY_LIST') {
                 if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
               } else {
@@ -875,32 +889,61 @@ const InquiryViewer = (props) => {
               //
               const idCD = metadata.field[CONTAINER_DETAIL];
               const idCM = metadata.field[CONTAINER_MANIFEST];
-              if (res.drfAnswersTrans) {
+              if (res.drfAnswersTrans && question.state.includes('AME_')) {
                 if (idCD === question.field) {
                   let cm = content[containerCheck[1]]
                   if (cm) {
-                    cm[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans.content[0][getTypeCDCM(CONTAINER_NUMBER)];
+                    cm[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans[0][getTypeCDCM(CONTAINER_NUMBER)];
                     CONTAINER_LIST.cdNumber.map((key, index) => {
-                      cm[0][getTypeCDCM(CONTAINER_LIST.cmNumber[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                      cm[0][getTypeCDCM(CONTAINER_LIST.cmNumber[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     CONTAINER_LIST.cmUnit.map((key, index) => {
-                      cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                      cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[1]] = cm;
-                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' }).then(res => {
+                      if (res && res.removeAmendment) {
+                        const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
+                        if (removeAmendment.length) {
+                          const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+                          optionsOfQuestion.splice(removeIndex, 1);
+                        }
+                      }
+                    });
                   }
                 } else if (idCM === question.field) {
                   let cd = content[containerCheck[0]]
                   if (cd) {
-                    cd[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans.content[0][getTypeCDCM(CONTAINER_NUMBER)];
+                    cd[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans[0][getTypeCDCM(CONTAINER_NUMBER)];
                     CONTAINER_LIST.cmNumber.map((key, index) => {
-                      cd[0][getTypeCDCM(CONTAINER_LIST.cdNumber[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                      cd[0][getTypeCDCM(CONTAINER_LIST.cdNumber[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     CONTAINER_LIST.cmUnit.map((key, index) => {
-                      cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans.content[0][getTypeCDCM(key)];
+                      cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[0]] = cd;
-                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' }).then(res => {
+                      if (res && res.removeAmendment) {
+                        const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
+                        if (removeAmendment.length) {
+                          const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+                          optionsOfQuestion.splice(removeIndex, 1);
+                        }
+                      }
+                    });
+                  }
+                }
+                if (res.emptyCDorCMAmendment) {
+                  optionsOfQuestion.splice(removeIndex, 1);
+                  dispatch(InquiryActions.setContent({ ...content, [question.field]: res.drfAnswersTrans }));
+                  if (field !== 'INQUIRY_LIST') {
+                    if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
+                  } else {
+                    const draftBl = optionsOfQuestion.filter(inq => inq.process === 'draft');
+                    if (!draftBl.length) {
+                      dispatch(FormActions.toggleAllInquiry(false));
+                      dispatch(FormActions.toggleAmendmentsList(false));
+                    }
                   }
                 }
               }
@@ -1083,20 +1126,47 @@ const InquiryViewer = (props) => {
     } else {
       contentField = textResolve;
       const orgContentField = content[question.field];
+      const warningLeast1CM = [];
+      const contsNo = [];
       contentField.forEach((obj, index) => {
         const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
         if (getTypeName === CONTAINER_NUMBER) {
+          contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
           const containerNo = orgContentField[index][question.inqType];
           contsNoChange[containerNo] = obj[question.inqType];
           obj[question.inqType] = formatContainerNo(obj[question.inqType]);
         }
-
         if (getTypeName === CONTAINER_SEAL) {
           obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
           obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
         }
       });
+
+      // Validation container number must include at least one C/M.
+      if (question.field == getField(CONTAINER_DETAIL)) {
+        contsNo.forEach((containerNo, index) => {
+          let cmOfCd = [...new Set((content[getField(CONTAINER_MANIFEST)] || []).filter(cm =>
+            cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
+          ))]
+          if (cmOfCd.length === 0) {
+            warningLeast1CM.push({ containerNo, row: index });
+          }
+        })
+        if (warningLeast1CM && warningLeast1CM.length) {
+          dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningLeast1CM, warningType: 'atLeast1CM' }));
+        }
+      }
+      // Validation The C/M below does not match any container numbers that already exist in C/D
+      if (question.field == getField(CONTAINER_DETAIL)) {
+        const cmsNotInCD = [];
+        (content[getField(CONTAINER_MANIFEST)] || []).forEach((cm, index) => {
+          if (!contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])) {
+            cmsNotInCD.push(cm);
+          }
+        });
+      }
+
     }
 
     const body = {
@@ -1228,14 +1298,17 @@ const InquiryViewer = (props) => {
     setIsResolve(false);
     setIsResolveCDCM(false);
     setTempReply({});
+    setPristine()
   };
 
   const inputText = (e) => {
     !validateInput?.isValid && dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     setTextResolve(e.target.value);
+    setDirty()
   };
 
   const inputTextSeparate = (e, type) => {
+    setDirty()
     !validateInput?.isValid && dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value }));
   };
@@ -1262,6 +1335,7 @@ const InquiryViewer = (props) => {
       }
     };
     setTempReply({ ...tempReply, ...reqReply });
+    setDirty()
   };
 
   const getType = (type) => {
@@ -1329,6 +1403,7 @@ const InquiryViewer = (props) => {
 
   const onSaveReply = async () => {
     setDisableSaveReply(true);
+    setPristine()
     const mediaListId = [];
     let mediaListAmendment = [];
     const mediaRest = [];
@@ -1496,8 +1571,8 @@ const InquiryViewer = (props) => {
               [res.newAmendment?.field]: newContent
             }));
             if (containerCheck.includes(question.field)) {
+              //CASE 1-1 CD CM
               if (tempReply.answer.content.length === 1 && content[question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0]].length === 1) {
-                // if (tempReply.answer.content.length === 1) {
                 let fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
                 let arr = content[fieldCdCM]
                 if (arr.length > 0) {
@@ -1518,10 +1593,10 @@ const InquiryViewer = (props) => {
                     });
                   }
                   content[fieldCdCM] = arr;
-                  saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                  saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
               }
-              // Multiple case
+              // MULTIPLE CASE CD CM
               else {
                 let contsNoChange = {}
                 const orgContentField = content[question.field];
@@ -1542,6 +1617,22 @@ const InquiryViewer = (props) => {
                 })
                 if (fieldAutoUpdate) {
                   content[fieldCdCM] = fieldAutoUpdate;
+
+                  if (question.field === getField(CONTAINER_DETAIL)) {
+                    contentField.forEach((cd) => {
+                      let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
+                        cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+                      ))]
+                      if (cmOfCd.length === 1) {
+                        CONTAINER_LIST.cdNumber.map((key, index) => {
+                          cmOfCd[0][getType(CONTAINER_LIST.cmNumber[index])] = cd[getType(key)];
+                        });
+                        CONTAINER_LIST.cdUnit.map((key, index) => {
+                          cmOfCd[0][getType(CONTAINER_LIST.cmUnit[index])] = cd[getType(key)];
+                        });
+                      }
+                    })
+                  }
                   if (question.field === getField(CONTAINER_MANIFEST)) {
                     fieldAutoUpdate.forEach((cd) => {
                       let cmOfCd = [...new Set((contentField || []).filter(cm =>
@@ -1551,14 +1642,14 @@ const InquiryViewer = (props) => {
                         CONTAINER_LIST.cmNumber.map((key, index) => {
                           let total = 0;
                           cmOfCd.map((cm) => {
-                            total += parseInt(cm[getType(key)]);
+                            total += parseFloat(cm[getType(key)]);
                           });
                           cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
                         });
                       }
                     })
                   }
-                  saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                  saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
               }
             }
@@ -1830,7 +1921,7 @@ const InquiryViewer = (props) => {
     <>
       {isLoadedComment && (
         <div onClick={() => dispatch(FormActions.inqViewerFocus(question.id))}>
-          <div >
+          <div>
             {(question?.process === 'draft') &&
               <TagsComponent tagName='AMENDMENT' tagColor='primary' />
             }
@@ -2174,34 +2265,34 @@ const InquiryViewer = (props) => {
               )}
 
               {question.mediaFile?.length > 0 &&
-              !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
-              question.mediaFile?.map((file, mediaIndex) => (
-                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                    <ImageAttach
-                      file={file}
-                      hiddenRemove={true}
-                      field={question.field}
-                      indexInquiry={index}
-                      style={{ margin: '2.5rem' }}
-                    />
-                  ) : (
-                    <FileAttach
-                      hiddenRemove={true}
-                      file={file}
-                      field={question.field}
-                      indexInquiry={index}
-                    />
-                  )}
-                </div>
-              ))}
+                !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
+                question.mediaFile?.map((file, mediaIndex) => (
+                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                      <ImageAttach
+                        file={file}
+                        hiddenRemove={true}
+                        field={question.field}
+                        indexInquiry={index}
+                        style={{ margin: '2.5rem' }}
+                      />
+                    ) : (
+                      <FileAttach
+                        hiddenRemove={true}
+                        file={file}
+                        field={question.field}
+                        indexInquiry={index}
+                      />
+                    )}
+                  </div>
+                ))}
             </>
             {
               question.mediaFilesAnswer?.length > 0 &&
               <>
                 {question.mediaFilesAnswer?.length > 0 &&
-                !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
-                <h3>Attachment Answer:</h3>}
+                  !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
+                  <h3>Attachment Answer:</h3>}
                 {question.mediaFilesAnswer?.map((file, mediaIndex) => (
                   <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
@@ -2265,6 +2356,7 @@ const InquiryViewer = (props) => {
                         question={question}
                         originalValues={isJsonText(question.content) ? JSON.parse(question.content) : null}
                         setTextResolve={setTextResolve}
+                        setDirty={setDirty}
                       />
                     }
                   </>
@@ -2287,6 +2379,7 @@ const InquiryViewer = (props) => {
                         }
                         color="primary"
                         onClick={() => {
+                          setPristine()
                           setDisableAcceptResolve(true);
                           !validateInput?.isValid ? onConfirm() : handleValidateInput('RESOLVE', onConfirm)
                         }}
@@ -2298,7 +2391,10 @@ const InquiryViewer = (props) => {
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={() => !validateInput?.isValid ? onConfirm(true) : handleValidateInput('RESOLVE', onConfirm, true)}
+                          onClick={() => {
+                            setPristine()
+                            !validateInput?.isValid ? onConfirm(true) : handleValidateInput('RESOLVE', onConfirm, true)
+                          }}
                           classes={{ root: clsx(classes.button) }}>
                           Accept & Wrap Text
                         </Button>
@@ -2346,7 +2442,7 @@ const InquiryViewer = (props) => {
                             rows={2}
                             inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
                             InputProps={{
-                              classes: { input: classes.placeholder}
+                              classes: { input: classes.placeholder }
                             }}
                             onChange={handleChangeContentReply}
                             variant='outlined'
@@ -2447,7 +2543,7 @@ const InquiryViewer = (props) => {
   );
 };
 
-export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation }) => {
+export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation, setDirty }) => {
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -2488,6 +2584,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     }
     setValues(temp);
     setTextResolve(temp);
+    setDirty()
   };
 
   useEffect(() => {

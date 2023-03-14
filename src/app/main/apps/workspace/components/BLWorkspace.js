@@ -70,6 +70,7 @@ import TableCD from './TableCD';
 import TableCM from './TableCM';
 import ListNotification from './ListNotification';
 import SubmitAnswerNotification from "./SubmitAnswerNotification";
+import WarningMessage from "./WarningMessage";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -142,6 +143,7 @@ const BLWorkspace = (props) => {
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
+  const openWarningCDCMContainerNo = useSelector(({ workspace }) => workspace.formReducer.openWarningCDCMContainerNo);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -403,7 +405,7 @@ const BLWorkspace = (props) => {
         fabTitle: 'Amendment Form',
         title: metadata?.field_options.find((f) => f.value === currentField)?.label,
         field: 'AMENDMENT_FORM',
-        child: <AmendmentEditor getUpdatedAt={() => {}} />
+        child: <AmendmentEditor getUpdatedAt={() => { }} />
       };
     default:
       return {
@@ -512,10 +514,10 @@ const BLWorkspace = (props) => {
           <ListNotification />
           <SubmitAnswerNotification
             open={openNotification ||
-            openNotificationReply ||
-            openNotificationAmendment ||
-            openNotificationBLWarning.status ||
-            openNotificationSubmitPreview}
+              openNotificationReply ||
+              openNotificationAmendment ||
+              openNotificationBLWarning.status ||
+              openNotificationSubmitPreview}
             msg={renderMsgNoti()}
             // msg2={`Please wait for ${openNotificationBLWarning.userName} complete his/her work!`}
             msg2={renderMsgNoti2()}
@@ -527,6 +529,18 @@ const BLWorkspace = (props) => {
               dispatch(FormActions.toggleOpenBLWarning(false));
               dispatch(FormActions.toggleOpenNotificationPreviewSubmit(false));
             }}
+          />
+          <WarningMessage
+            open={openWarningCDCMContainerNo.status}
+            msg={openWarningCDCMContainerNo.warningType === 'atLeast1CM' ? "A container number must include at least one C/M. Please check again the container numbers below" : `Container Manifest doesn't match with Container Details`}
+            content={openWarningCDCMContainerNo.contentsWarning}
+            handleClose={() => dispatch(FormActions.toggleWarningCDCM({ status: false, contentsWarning: [], warningType: '' }))}
+            iconType={
+              <img
+                style={{ verticalAlign: 'middle', paddingBottom: 2, paddingLeft: 5, paddingRight: 5, }}
+                src={`/assets/images/icons/warning.svg`}
+              />
+            }
           />
           <div className={clsx('max-w-5xl', classes.root)}>
             <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
@@ -636,9 +650,7 @@ const BLWorkspace = (props) => {
                   <Grid item xs={6} className={classes.leftPanel}>
                     <Grid item>
                       <Label>PRE-CARRIAGE BY</Label>
-                      <BLField 
-                        id={getField(PRE_CARRIAGE)}
-                      >
+                      <BLField id={getField(PRE_CARRIAGE)}>
                         {getValueField(PRE_CARRIAGE)}
                       </BLField>
                     </Grid>
@@ -689,10 +701,7 @@ const BLWorkspace = (props) => {
                 </Grid>
                 <Grid item>
                   <Label>FORWARDING AGENT-REFERENCES FMC NO.</Label>
-                  <BLField 
-                    id={getField(FORWARDING)} 
-                    multiline={true} rows={5}
-                  >
+                  <BLField id={getField(FORWARDING)} multiline={true} rows={5}>
                     {getValueField(FORWARDING)}
                   </BLField>
                 </Grid>
@@ -707,19 +716,14 @@ const BLWorkspace = (props) => {
                     {`TYPE OF MOVEMENT (IF MIXED, USE DESCRIPTION OF PACKAGES AND`} <br></br>
                     {`GOODS FIELD)`}
                   </Label>
-                  <BLField 
-                    id={getField(TYPE_OF_MOVEMENT)}
-                  >
+                  <BLField id={getField(TYPE_OF_MOVEMENT)}>
                     {getValueField(TYPE_OF_MOVEMENT)}
                   </BLField>
                 </Grid>
                 <Grid item>
                   <Grid item>
                     <Label>OCEAN VESSEL VOYAGE NO. FlAG</Label>
-                    <BLField 
-                      id={getField(VESSEL_VOYAGE)} 
-                      width={`calc(50% - 15px)`}
-                    >
+                    <BLField id={getField(VESSEL_VOYAGE)} width={`calc(50% - 15px)`}>
                       {getValueField(VESSEL_VOYAGE)}
                     </BLField>
                   </Grid>
@@ -780,17 +784,13 @@ const BLWorkspace = (props) => {
               <Grid item xs={6} className={classes.leftPanel}>
                 <Grid item>
                   <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
-                  <BLField 
-                    id={getField(FREIGHT_CHARGES)}
-                  >
+                  <BLField id={getField(FREIGHT_CHARGES)}>
                     {getValueField(FREIGHT_CHARGES)}
                   </BLField>
                 </Grid>
                 <Grid item>
                   <Label>COMMODITY CODE</Label>
-                  <BLField 
-                    id={getField(COMMODITY_CODE)}
-                  >
+                  <BLField id={getField(COMMODITY_CODE)}>
                     {getValueField(COMMODITY_CODE)}
                   </BLField>
                 </Grid>
@@ -800,17 +800,13 @@ const BLWorkspace = (props) => {
                   <Grid item xs={6} className={classes.leftPanel}>
                     <Grid item>
                       <Label>PLACE OF BILL(S) ISSUE</Label>
-                      <BLField 
-                        id={getField(PLACE_OF_BILL)}
-                      >
+                      <BLField id={getField(PLACE_OF_BILL)}>
                         {getValueField(PLACE_OF_BILL)}
                       </BLField>
                     </Grid>
                     <Grid item>
                       <Label>DATE CARGO RECEIVED</Label>
-                      <BLField 
-                        id={getField(DATE_CARGO)}
-                      >
+                      <BLField id={getField(DATE_CARGO)}>
                         {getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')}
                       </BLField>
                     </Grid>
@@ -818,17 +814,13 @@ const BLWorkspace = (props) => {
                   <Grid item xs={6} className={classes.rightPanel}>
                     <Grid item>
                       <Label>DATED</Label>
-                      <BLField 
-                        id={getField(DATED)}
-                      >
+                      <BLField id={getField(DATED)}>
                         {getValueField(DATED) && formatDate(getValueField(DATED), 'DD MMM YYYY')}
                       </BLField>
                     </Grid>
                     <Grid item>
                       <Label>DATE LADEN ON BOARD</Label>
-                      <BLField 
-                        id={getField(DATE_LADEN)}
-                      >
+                      <BLField id={getField(DATE_LADEN)}>
                         {getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')}
                       </BLField>
                     </Grid>
