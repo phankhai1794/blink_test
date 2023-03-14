@@ -1644,7 +1644,7 @@ const InquiryViewer = (props) => {
                           cmOfCd.map((cm) => {
                             total += parseFloat(cm[getType(key)]);
                           });
-                          cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
+                          cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                         });
                       }
                     })

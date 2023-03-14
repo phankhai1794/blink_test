@@ -280,7 +280,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                           cmOfCd.map((cm) => {
                             total += parseFloat(cm[getType(key)]);
                           });
-                          cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
+                          cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                         });
                       }
                     })
