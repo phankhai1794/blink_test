@@ -23,6 +23,7 @@ export const ENABLE_SAVE_INQUIRIES = 'ENABLE_SAVE_INQUIRIES';
 export const OPEN_CONFIRM_POPUP = 'OPEN_CONFIRM_POPUP';
 export const CONFIRM_POPUP_CLICK = 'CONFIRM_POPUP_CLICK';
 export const OPEN_CREATE_AMENDMENT = 'OPEN_CREATE_AMENDMENT';
+export const OPEN_WARNING_CD_CM = 'OPEN_WARNING_CD_CM';
 export const OPEN_NOTIFICATION_INQUIRY_LIST = 'OPEN_NOTIFICATION_INQUIRY_LIST'
 export const INQUIRY_VIEWER_FOCUS = 'INQUIRY_VIEWER_FOCUS';
 export const VALIDATE_INPUT = 'VALIDATE_INPUT';
@@ -215,6 +216,13 @@ export function confirmPopupClick(state) {
 export function toggleCreateAmendment(state) {
   return {
     type: OPEN_CREATE_AMENDMENT,
+    state
+  };
+}
+
+export function toggleWarningCDCM(state) {
+  return {
+    type: OPEN_WARNING_CD_CM,
     state
   };
 }
