@@ -13,6 +13,7 @@ import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile } from '@shared';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import { useUnsavedChangesWarning } from 'app/hooks';
+import { sendmailResolve } from 'app/services/mailService';
 import {
   CONSIGNEE,
   CONTAINER_DETAIL,
@@ -1116,6 +1117,18 @@ const InquiryViewer = (props) => {
     }
   }
 
+  const autoSendMailResolve = (inquiries, type) => {
+    const check = inquiries.filter(inq => inq.process === 'pending' && inq.receiver[0] === type)
+    if (check.every(inq => inq.state === 'COMPL')) {
+      const ids = []
+      check.forEach(inq => {
+        const find = metadata?.field_options.find(field => field.value === inq.field);
+        ids.push({ id: inq.id, field: find.label })
+      })
+      sendmailResolve({ type: type === 'customer' ? 'Customer' : 'Onshore', myBL, user, content, ids })
+    }
+  }
+
   const validationCDCMContainerNo = (contsNo) => {
     const warningLeast1CM = [];
     const warningCmsNotInCD = [];
@@ -1197,6 +1210,9 @@ const InquiryViewer = (props) => {
         // setQuestion((q) => ({ ...q, state: 'COMPL' }));
         optionsInquires[editedIndex].state = 'COMPL';
         optionsInquires[editedIndex].createdAt = res.updatedAt;
+        const receiver = optionsInquires[editedIndex].receiver[0]
+        //auto send mail if every inquiry is resolved
+        autoSendMailResolve(optionsInquires, receiver)
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
         props.getUpdatedAt();
