@@ -859,7 +859,10 @@ const InquiryViewer = (props) => {
             setDisableSaveReply(false);
             const optionsOfQuestion = [...inquiries];
             const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
-            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+            let removeIndex = -1;
+            if (removeAmendment.length) {
+              removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+            }
             const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
               if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
@@ -1126,6 +1129,34 @@ const InquiryViewer = (props) => {
     }
   }
 
+  const validationCDCMContainerNo = (contsNo) => {
+    const warningLeast1CM = [];
+    const warningCmsNotInCD = [];
+    // Validation container number must include at least one C/M.
+    if (question.field === getField(CONTAINER_DETAIL)) {
+      let cmOfCdContainerNo = [...new Set((content[getField(CONTAINER_MANIFEST)] || []))].map(cm => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+      contsNo.forEach((containerNo, index) => {
+        if (cmOfCdContainerNo.length && !cmOfCdContainerNo.includes(containerNo)) {
+          warningLeast1CM.push({ containerNo, row: index + 1 });
+        }
+      })
+    } else if (question.field === getField(CONTAINER_MANIFEST)) {
+      // Validation The C/M below does not match any container numbers that already exist in C/D
+      let cdOfCmContainerNo = [...new Set((content[getField(CONTAINER_DETAIL)] || []))].map(cm => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+      contsNo.forEach((containerNo, index) => {
+        if (cdOfCmContainerNo.length && !cdOfCmContainerNo.includes(containerNo)) {
+          warningCmsNotInCD.push({ containerNo, row: index + 1 });
+        }
+      });
+    }
+    if (warningLeast1CM.length) {
+      dispatch(AppAction.showMessage({ message: 'A container number must include at least one C/M. Please check again the container numbers below', variant: 'warning' }));
+    }
+    if (warningCmsNotInCD.length) {
+      dispatch(AppAction.showMessage({ message: `Container Manifest doesn't match with Container Details`, variant: 'warning' }));
+    }
+  }
+
   const onConfirm = (isWrapText = false) => {
     let contentField = '';
     const contsNoChange = {};
@@ -1140,7 +1171,6 @@ const InquiryViewer = (props) => {
     } else {
       contentField = textResolve;
       const orgContentField = content[question.field];
-      const warningLeast1CM = [];
       const contsNo = [];
       contentField.forEach((obj, index) => {
         const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
@@ -1157,30 +1187,7 @@ const InquiryViewer = (props) => {
         }
       });
 
-      // Validation container number must include at least one C/M.
-      if (question.field == getField(CONTAINER_DETAIL)) {
-        contsNo.forEach((containerNo, index) => {
-          let cmOfCd = [...new Set((content[getField(CONTAINER_MANIFEST)] || []).filter(cm =>
-            cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
-          ))]
-          if (cmOfCd.length === 0) {
-            warningLeast1CM.push({ containerNo, row: index });
-          }
-        })
-        if (warningLeast1CM && warningLeast1CM.length) {
-          dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningLeast1CM, warningType: 'atLeast1CM' }));
-        }
-      }
-      // Validation The C/M below does not match any container numbers that already exist in C/D
-      if (question.field == getField(CONTAINER_DETAIL)) {
-        const cmsNotInCD = [];
-        (content[getField(CONTAINER_MANIFEST)] || []).forEach((cm, index) => {
-          if (!contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])) {
-            cmsNotInCD.push(cm);
-          }
-        });
-      }
-
+      validationCDCMContainerNo(contsNo);
     }
 
     const body = {
@@ -1622,12 +1629,14 @@ const InquiryViewer = (props) => {
               // MULTIPLE CASE CD CM
               else {
                 let contsNoChange = {}
+                const contsNo = [];
                 const orgContentField = content[question.field];
                 const contentField = tempReply.answer.content;
                 contentField.forEach((obj, index) => {
                   const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
                   const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
                   if (getTypeName === CONTAINER_NUMBER) {
+                    contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
                     contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
                   }
                 })
@@ -1674,6 +1683,7 @@ const InquiryViewer = (props) => {
                   }
                   saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
+                validationCDCMContainerNo(contsNo)
               }
             }
             optionsInquires[editedIndex].state = 'AME_DRF';

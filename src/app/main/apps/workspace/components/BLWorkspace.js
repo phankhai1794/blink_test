@@ -1,52 +1,43 @@
-import { checkNewInquiry, NUMBER_INQ_BOTTOM, isJsonText, formatDate } from '@shared';
-import { FuseLoading } from '@fuse';
+import {checkNewInquiry, formatDate, isJsonText, NUMBER_INQ_BOTTOM} from '@shared';
+import {FuseLoading} from '@fuse';
 import {
-  SHIPPER,
+  BL_TYPE,
+  COMMODITY_CODE,
   CONSIGNEE,
-  NOTIFY,
-  EXPORT_REF,
-  FORWARDING,
-  PLACE_OF_RECEIPT,
-  PORT_OF_LOADING,
-  PORT_OF_DISCHARGE,
-  PLACE_OF_DELIVERY,
-  FINAL_DESTINATION,
-  VESSEL_VOYAGE,
-  PRE_CARRIAGE,
-  TYPE_OF_MOVEMENT,
   CONTAINER_DETAIL,
   CONTAINER_MANIFEST,
-  FREIGHT_CHARGES,
-  PLACE_OF_BILL,
   DATE_CARGO,
   DATE_LADEN,
-  COMMODITY_CODE,
   DATED,
-  BL_TYPE,
-  // FREIGHTED_AS,
-  // RATE,
-  // EXCHANGE_RATE,
-  // SERVICE_CONTRACT_NO,
-  // DOC_FORM_NO,
-  // CODE,
-  // TARIFF_ITEM,
-  // PREPAID,
-  // COLLECT,
+  EXPORT_REF,
+  FINAL_DESTINATION,
+  FORWARDING,
+  FREIGHT_CHARGES,
+  NOTIFY,
+  PLACE_OF_BILL,
+  PLACE_OF_DELIVERY,
+  PLACE_OF_RECEIPT,
+  PORT_OF_DISCHARGE,
+  PORT_OF_LOADING,
+  PRE_CARRIAGE,
+  SHIPPER,
+  TYPE_OF_MOVEMENT,
+  VESSEL_VOYAGE,
 } from '@shared/keyword';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
+import {PERMISSION, PermissionProvider} from '@shared/permission';
 import * as AppActions from 'app/store/actions';
-import React, { useEffect, useRef, useContext, useState } from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import clsx from 'clsx';
 import _ from 'lodash';
-import { Grid, Divider, Chip } from '@material-ui/core';
-import { useDispatch, useSelector } from 'react-redux';
-import { makeStyles } from '@material-ui/styles';
+import {Chip, Divider, Grid} from '@material-ui/core';
+import {useDispatch, useSelector} from 'react-redux';
+import {makeStyles} from '@material-ui/styles';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { getBlInfo } from 'app/services/myBLService';
-import { getPermissionByRole } from 'app/services/authService';
-import { SocketContext } from 'app/AppContext';
+import {getBlInfo} from 'app/services/myBLService';
+import {getPermissionByRole} from 'app/services/authService';
+import {SocketContext} from 'app/AppContext';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -54,7 +45,6 @@ import * as TransActions from '../store/actions/transaction';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as DraftActions from '../store/actions/draft-bl';
 import * as mailActions from '../store/actions/mail';
-import DialogCommon from '../shared-components/DialogCommon';
 
 import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
@@ -63,14 +53,13 @@ import Form from './Form';
 import Label from './FieldLabel';
 import BtnAddInquiry from './BtnAddInquiry';
 import BLField from './BLField';
-import { AttachmentList, AttachFileList } from './AttachmentList';
+import {AttachFileList, AttachmentList} from './AttachmentList';
 import BLProcessNotification from './BLProcessNotification';
-import { SendInquiryForm } from './SendInquiryForm';
+import {SendInquiryForm} from './SendInquiryForm';
 import TableCD from './TableCD';
 import TableCM from './TableCM';
 import ListNotification from './ListNotification';
 import SubmitAnswerNotification from "./SubmitAnswerNotification";
-import WarningMessage from "./WarningMessage";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -529,18 +518,6 @@ const BLWorkspace = (props) => {
               dispatch(FormActions.toggleOpenBLWarning(false));
               dispatch(FormActions.toggleOpenNotificationPreviewSubmit(false));
             }}
-          />
-          <WarningMessage
-            open={openWarningCDCMContainerNo.status}
-            msg={openWarningCDCMContainerNo.warningType === 'atLeast1CM' ? "A container number must include at least one C/M. Please check again the container numbers below" : `Container Manifest doesn't match with Container Details`}
-            content={openWarningCDCMContainerNo.contentsWarning}
-            handleClose={() => dispatch(FormActions.toggleWarningCDCM({ status: false, contentsWarning: [], warningType: '' }))}
-            iconType={
-              <img
-                style={{ verticalAlign: 'middle', paddingBottom: 2, paddingLeft: 5, paddingRight: 5, }}
-                src={`/assets/images/icons/warning.svg`}
-              />
-            }
           />
           <div className={clsx('max-w-5xl', classes.root)}>
             <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
