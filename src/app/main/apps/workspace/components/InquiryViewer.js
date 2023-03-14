@@ -888,9 +888,11 @@ const InquiryViewer = (props) => {
                   dispatch(FormActions.toggleOpenNotificationAmendmentList(true));
                 }
               }
+              dispatch(InquiryActions.setInquiries(optionsOfQuestion));
             } else {
               if (res.checkReplyEmpty) {
                 if (removeIndex !== -1) optionsOfQuestion[removeIndex].state = user.role === 'Admin' ? 'AME_SENT' : 'REP_SENT';
+                dispatch(InquiryActions.setInquiries(optionsOfQuestion));
               }
               //
               const idCD = metadata.field[CONTAINER_DETAIL];
@@ -953,12 +955,11 @@ const InquiryViewer = (props) => {
                       dispatch(FormActions.toggleAmendmentsList(false));
                     }
                   }
+                  dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                 }
               }
-              //
             }
             setReplyRemove();
-            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             dispatch(InquiryActions.addAmendment());
             props.getUpdatedAt();
