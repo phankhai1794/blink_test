@@ -885,6 +885,7 @@ const InquiryViewer = (props) => {
                 if (!draftBl.length) {
                   dispatch(FormActions.toggleAllInquiry(false));
                   dispatch(FormActions.toggleAmendmentsList(false));
+                  dispatch(FormActions.toggleOpenNotificationAmendmentList(true));
                 }
               }
             } else {
@@ -913,6 +914,7 @@ const InquiryViewer = (props) => {
                           const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
                           if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
                         }
+                        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                       }
                     });
                   }
@@ -934,6 +936,7 @@ const InquiryViewer = (props) => {
                           const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
                           if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
                         }
+                        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                       }
                     });
                   }
