@@ -1155,7 +1155,6 @@ const InquiryViewer = (props) => {
     } else {
       contentField = textResolve;
       const orgContentField = content[question.field];
-      const warningLeast1CM = [];
       const contsNo = [];
       contentField.forEach((obj, index) => {
         const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
@@ -1611,12 +1610,14 @@ const InquiryViewer = (props) => {
               // MULTIPLE CASE CD CM
               else {
                 let contsNoChange = {}
+                const contsNo = [];
                 const orgContentField = content[question.field];
                 const contentField = tempReply.answer.content;
                 contentField.forEach((obj, index) => {
                   const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
                   const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
                   if (getTypeName === CONTAINER_NUMBER) {
+                    contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
                     contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
                   }
                 })
@@ -1663,6 +1664,7 @@ const InquiryViewer = (props) => {
                   }
                   saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
+                validationCDCMContainerNo(contsNo)
               }
             }
             optionsInquires[editedIndex].state = 'AME_DRF';
