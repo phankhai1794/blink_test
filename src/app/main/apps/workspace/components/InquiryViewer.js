@@ -905,7 +905,7 @@ const InquiryViewer = (props) => {
                     CONTAINER_LIST.cdNumber.map((key, index) => {
                       cm[0][getTypeCDCM(CONTAINER_LIST.cmNumber[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
-                    CONTAINER_LIST.cmUnit.map((key, index) => {
+                    CONTAINER_LIST.cdUnit.map((key, index) => {
                       cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[1]] = cm;
