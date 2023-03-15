@@ -255,7 +255,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                 })
 
                 const fieldAutoUpdate = content[fieldId];
-                const fieldId = getField( CONTAINER_MANIFEST)  
+                const fieldId = getField(CONTAINER_MANIFEST);
                 if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
                   fieldAutoUpdate.map((item) => {
                     if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
@@ -520,9 +520,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         {attachments?.map((file, mediaIndex) => (
           <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
             {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-              <ImageAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />)
+              <ImageAttach file={file} files={attachments} question={question} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />)
               : (
-                <FileAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />
+                <FileAttach file={file} files={attachments} question={question} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />
               )}
           </div>
         ))}

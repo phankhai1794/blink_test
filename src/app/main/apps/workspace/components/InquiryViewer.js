@@ -2313,6 +2313,7 @@ const InquiryViewer = (props) => {
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                       <ImageAttach
                         file={file}
+                        files={question.mediaFile}
                         hiddenRemove={true}
                         field={question.field}
                         indexInquiry={index}
@@ -2322,6 +2323,7 @@ const InquiryViewer = (props) => {
                       <FileAttach
                         hiddenRemove={true}
                         file={file}
+                        files={question.mediaFile}
                         field={question.field}
                         indexInquiry={index}
                       />
@@ -2342,6 +2344,7 @@ const InquiryViewer = (props) => {
                         file={file}
                         field={question.field}
                         style={{ margin: '2.5rem' }}
+                        files={question.mediaFilesAnswer}
                         indexMedia={mediaIndex}
                         isAnswer={true}
                         question={question}
@@ -2355,6 +2358,7 @@ const InquiryViewer = (props) => {
                     ) : (
                       <FileAttach
                         file={file}
+                        files={question.mediaFilesAnswer}
                         field={question.field}
                         indexMedia={mediaIndex}
                         isAnswer={true}
@@ -2507,6 +2511,8 @@ const InquiryViewer = (props) => {
                             <ImageAttach
                               hiddenRemove={!question.showIconAttachReplyFile}
                               file={file}
+                              files={tempReply.mediaFiles}
+                              question={question}
                               field={question.field}
                               style={{ margin: '2.5rem' }}
                               indexMedia={mediaIndex}
@@ -2520,7 +2526,9 @@ const InquiryViewer = (props) => {
                             <FileAttach
                               hiddenRemove={!question.showIconAttachReplyFile}
                               file={file}
+                              files={tempReply.mediaFiles}
                               field={question.field}
+                              question={question}
                               indexMedia={mediaIndex}
                               isReply={true}
                               templateReply={tempReply}

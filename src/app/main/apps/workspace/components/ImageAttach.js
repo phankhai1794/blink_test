@@ -1,4 +1,4 @@
-import ImageViewer from 'react-simple-image-viewer';
+// import ImageViewer from 'react-simple-image-viewer';
 import React, { useEffect, useState } from 'react';
 import { getFile } from 'app/services/fileService';
 import { makeStyles } from '@material-ui/styles';
@@ -6,10 +6,19 @@ import CloseIcon from '@material-ui/icons/Close';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from "@shared/permission";
+// import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
+// import ReactDOM from 'react-dom';
+// import {
+//   Dialog,
+//   DialogTitle,
+//   Button,
+//   DialogContent,
+//   DialogContentText,
+//   TextField
+// } from '@material-ui/core';
 
-import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
-
+import * as InquiryActions from '../store/actions/inquiry';
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '165px',
@@ -37,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, isReply = false, question, questions, templateReply, setTemplateReply, draftBL = false, removeAttachmentDraftBL, isRemoveFile, setIsRemoveFile }) => {
+const ImageAttach = ({ indexMedia, file, files, field, hiddenRemove = false, isAnswer = false, isReply = false, question, questions, templateReply, setTemplateReply, draftBL = false, removeAttachmentDraftBL, isRemoveFile, setIsRemoveFile }) => {
   const [currentEditInq, attachmentList] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.attachmentList
@@ -46,6 +55,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [srcUrl, setSrcUrl] = useState(file.src || null);
   const [isDeletedFile, setDeletedFile] = useState(false);
+  const [allFileUrl, setFileUrl] = useState([]);
   const classes = useStyles();
 
   const urlMedia = (fileExt, file) => {
@@ -72,6 +82,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
 
   const openImageViewer = () => {
     setIsViewerOpen(true);
+    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file } }));
   };
 
   const closeImageViewer = () => {
@@ -79,12 +90,13 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
   };
 
   const downloadFile = () => {
-    const link = document.createElement('a');
-    link.href = srcUrl;
-    link.setAttribute('download', file.name);
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
+    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file } }));
+    // const link = document.createElement('a');
+    // link.href = srcUrl;
+    // link.setAttribute('download', file.name);
+    // document.body.appendChild(link);
+    // link.click();
+    // link.parentNode.removeChild(link);
   };
 
   const handleRemoveFile = (file) => {
@@ -103,7 +115,7 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
       setIsRemoveFile(!isRemoveFile);
     }
     else if (isReply) {
-      const temp = {...templateReply};
+      const temp = { ...templateReply };
       temp.mediaFiles.splice(indexMedia, 1);
       setTemplateReply(temp);
     }
@@ -197,19 +209,6 @@ const ImageAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer =
           </IconButton>
         }
       </div>
-      {isViewerOpen && (
-        <ImageViewer
-          src={[srcUrl]}
-          currentIndex={0}
-          onClose={closeImageViewer}
-          disableScroll={false}
-          backgroundStyle={{
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            zIndex: 15
-          }}
-          closeOnClickOutside={true}
-        />
-      )}
     </div>
   );
 };
