@@ -183,12 +183,19 @@ const Comment = (props) => {
                   {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                     <ImageAttach
                       file={file}
+                      files={media}
                       hiddenRemove={true}
                       indexInquiry={id}
                       style={{ margin: '2.5rem' }}
+                      question={question}
                     />
                   ) : (
-                    <FileAttach hiddenRemove={true} file={file} indexInquiry={id} />
+                    <FileAttach
+                      hiddenRemove={true}
+                      file={file}
+                      files={media}
+                      indexInquiry={id}
+                      question={question} />
                   )}
                 </div>
               ))}
@@ -201,12 +208,14 @@ const Comment = (props) => {
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                       <ImageAttach
                         file={file}
+                        files={answersMedia}
                         hiddenRemove={true}
                         indexInquiry={id}
                         style={{ margin: '2.5rem' }}
+                        question={question}
                       />
                     ) : (
-                      <FileAttach hiddenRemove={true} file={file} indexInquiry={id} />
+                      <FileAttach hiddenRemove={true} file={file} files={answersMedia} indexInquiry={id} question={question} />
                     )}
                   </div>
                 ))}

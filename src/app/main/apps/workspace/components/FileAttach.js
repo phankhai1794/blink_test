@@ -47,7 +47,23 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = false, isReply = false, questions, question, templateReply, setTemplateReply, draftBL = false, removeAttachmentDraftBL, isRemoveFile, setIsRemoveFile }) => {
+const FileAttach = ({
+  indexMedia,
+  file,
+  files,
+  field,
+  hiddenRemove = false,
+  isAnswer = false,
+  isReply = false,
+  questions,
+  question,
+  templateReply,
+  setTemplateReply,
+  draftBL = false,
+  removeAttachmentDraftBL,
+  isRemoveFile,
+  setIsRemoveFile
+}) => {
   const classes = useStyles();
   const [attachmentList, currentEditInq] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.attachmentList,
@@ -55,8 +71,8 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
   ]);
 
   const dispatch = useDispatch();
-  const [view, setView] = useState(false)
-  const [pdfUrl, setPdfUrl] = useState(null)
+  // const [view, setView] = useState(false);
+  // const [pdfUrl, setPdfUrl] = useState(null);
 
   const urlMedia = (fileExt, file) => {
     if (fileExt.toLowerCase().match(/jpeg|jpg|png/g)) {
@@ -90,23 +106,24 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
     link.parentNode.removeChild(link);
   };
 
-  const previewPDF = () => {
-    if (file.id) {
-      getFile(file.id).then((f) => {
-        setPdfUrl(urlMedia(file.ext, f));
-        setView(true);
-      }).catch((error) => {
-        console.error(error);
-      });
-    } else if (file.src) {
-      setPdfUrl(file.src);
-      setView(true);
-    }
+  const previewFile = () => {
+    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file } }));
+    // if (file.id) {
+    //   getFile(file.id).then((f) => {
+    //     setPdfUrl(urlMedia(file.ext, f));
+    //     setView(true);
+    //   }).catch((error) => {
+    //     console.error(error);
+    //   });
+    // } else if (file.src) {
+    //   setPdfUrl(file.src);
+    //   setView(true);
+    // }
   };
 
-  const handleClose = () => {
-    setView(false)
-  }
+  // const handleClose = () => {
+  //   setView(false)
+  // }
 
   const handleRemoveFile = (id) => {
     const optionsOfQuestion = { ...currentEditInq };
@@ -167,22 +184,22 @@ const FileAttach = ({ indexMedia, file, field, hiddenRemove = false, isAnswer = 
     <div className={classes.root}>
       <div style={{ height: 126, textAlign: 'center' }}>
         {file.ext.toLowerCase().includes('pdf') ? (
-          <img src={`/assets/images/logos/pdf_icon.png`} onClick={previewPDF} />
+          <img src={`/assets/images/logos/pdf_icon.png`} onClick={previewFile} />
         ) : file.ext.toLowerCase().match(/csv|xls|xlsx|excel|sheet/g) ? (
-          <img src={`/assets/images/logos/excel_icon.png`} />
+          <img src={`/assets/images/logos/excel_icon.png`} onClick={previewFile} />
         ) : file.ext.toLowerCase().match(/doc|msword/g) ? (
-          <img src={`/assets/images/logos/word_icon.png`} />
+          <img src={`/assets/images/logos/word_icon.png`} onClick={previewFile} />
         ) : (
-          <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} fontSize='large' />
+          <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} fontSize='large' onClick={previewFile} />
         )}
       </div>
-      <PDFViewer view={view} handleClose={handleClose} pdfUrl={pdfUrl} name={file.name} />
+      {/* <PDFViewer view={view} handleClose={handleClose} pdfUrl={pdfUrl} name={file.name} /> */}
 
       <div style={{ display: 'flex', flexDirection: 'row', height: 30 }}>
         <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
           <h3
             style={{ width: hiddenRemove ? 180 : 160 }}
-            onClick={file.ext.toLowerCase().includes('pdf') ? previewPDF : downloadFile}
+            onClick={previewFile}
           >
             {file.name}
           </h3>
