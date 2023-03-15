@@ -248,18 +248,22 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                 contentField.forEach((obj, index) => {
                   const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
                   const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
-                  if (getTypeName === CONTAINER_NUMBER) {
+                  if (getTypeName === CONTAINER_NUMBER && containerNo !== obj[getType(CONTAINER_NUMBER)]) {
                     contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
                     contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
                   }
                 })
-                const fieldId = getField(fieldValueSelect.keyword === CONTAINER_DETAIL ? CONTAINER_MANIFEST : CONTAINER_DETAIL)
-                let fieldAutoUpdate = content[fieldId];
-                fieldAutoUpdate.map((item) => {
-                  if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
-                    item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
-                  }
-                })
+
+                const fieldAutoUpdate = content[fieldId];
+                const fieldId = getField( CONTAINER_MANIFEST)  
+                if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
+                  fieldAutoUpdate.map((item) => {
+                    if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
+                      item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
+                    }
+                  })
+                }
+
                 if (fieldAutoUpdate) {
                   content[fieldId] = fieldAutoUpdate;
                   if (fieldValueSelect.keyword === CONTAINER_DETAIL) {

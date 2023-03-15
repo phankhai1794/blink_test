@@ -1639,13 +1639,12 @@ const InquiryViewer = (props) => {
                 contentField.forEach((obj, index) => {
                   const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
                   const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
-                  if (getTypeName === CONTAINER_NUMBER) {
-                    contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+                  if (getTypeName === CONTAINER_NUMBER && containerNo !== obj[getType(CONTAINER_NUMBER)]) {
                     contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
                   }
                 })
-                let fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
-                let fieldAutoUpdate = content[fieldCdCM]
+                const fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
+                const fieldAutoUpdate = content[fieldCdCM];
                 fieldAutoUpdate.map((item) => {
                   if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
                     item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
