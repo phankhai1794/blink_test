@@ -337,7 +337,7 @@ const InquiryViewer = (props) => {
           if (isUnmounted) return;
           const lastest = { ...question };
           if (res.length > 0) {
-            res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+            // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
             // filter comment
             // console.log(res)
             const filterOffshoreSent = res[res.length - 1];
