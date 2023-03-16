@@ -265,7 +265,6 @@ const InquiryViewer = (props) => {
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
   const [isDeleteAnswer, setDeleteAnswer] = useState({ status: false, content: '' });
   const [listFieldDisableUpload, setListFieldDisableUpload] = useState([]);
-  const [originEditData, setOriginEditData] = useState();
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -833,6 +832,16 @@ const InquiryViewer = (props) => {
     } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove) {
       deleteDraftBLReply(replyRemove?.draftId, replyRemove.field, myBL.id)
         .then((res) => {
+          // update mediaFile in inquiries
+          const optionsInquires = [...inquiries];
+          const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+          const newMediaFile = comment.at(-2).answersMedia.filter(({ id: id1 }) => !comment.at(-1).answersMedia.some(({ id: id2 }) => id2 === id1));
+          const removeMediaFile = comment.at(-1).answersMedia.filter(({ id: id1 }) => !comment.at(-2).answersMedia.some(({ id: id2 }) => id2 === id1)).map(({ id }) => id);
+          optionsInquires[editedIndex].createdAt = res.updatedAt;
+          optionsInquires[editedIndex].mediaFile = optionsInquires[editedIndex].mediaFile.filter(inq => !removeMediaFile.includes(inq.id));
+          optionsInquires[editedIndex].mediaFile.push(...newMediaFile);
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+
           // Case: Offshore reply customer's amendment first time => delete
           if (comment.length === 3) {
             const prevAmendment = {
@@ -1438,6 +1447,7 @@ const InquiryViewer = (props) => {
     let mediaFilesResp;
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    const newMediaFile = [];
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
@@ -1454,6 +1464,7 @@ const InquiryViewer = (props) => {
         response.forEach((file) => {
           const media = { id: file.id };
           mediaListId.push(media);
+          newMediaFile.push({ id: file.id, ext: file.ext, name: file.name });
           //
           mediaListAmendment.push({ id: file.id, ext: file.ext, name: file.name });
         });
@@ -1484,6 +1495,8 @@ const InquiryViewer = (props) => {
             }
             optionsInquires[editedIndex].process = 'pending';
             optionsInquires[editedIndex].createdAt = res.updatedAt;
+            // optionsInquires[editedIndex].mediaFilesAnswer = mediaListAmendment;
+            if (mediaListAmendment.length) optionsInquires[editedIndex].mediaFilesAnswer.push(...mediaListAmendment);
             dispatch(InquiryActions.setInquiries(optionsInquires));
             props.getUpdatedAt();
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
@@ -1588,15 +1601,10 @@ const InquiryViewer = (props) => {
         };
 
         updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
-          const temp = originEditData.map(item => {
-            if (res.newAmendment.id === item.id) return res.newAmendment;
-            return item;
-          })
-          setOriginEditData(temp);
-
           if (res) {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           }
+          optionsInquires[editedIndex].mediaFile = mediaListAmendment;
           optionsInquires[editedIndex].createdAt = res.createdAt;
           setDisableSaveReply(false);
           if (question.state.includes('AME_')) {
@@ -1812,12 +1820,6 @@ const InquiryViewer = (props) => {
     const el = document.getElementById(question.id);
     if (el && el.scrollHeight > el.clientHeight) setShowViewAll(true);
   }, [isLoadedComment]);
-
-  useState(() => {
-    const optionsInquires = [...inquiries];
-    const originAmendmentList = optionsInquires.filter(item => (item.state === 'AME_DRF'));
-    setOriginEditData(originAmendmentList);
-  }, [])
 
   const renderBtnReply = () => {
     if (question.process === 'pending') {
@@ -2551,7 +2553,7 @@ const InquiryViewer = (props) => {
                               ||
                               (
                                 (question.answerObj[0].content === tempReply?.answer?.content)
-                                && (tempReply && tempReply.mediaFiles && isSameFile(originEditData.filter(item => item.id === tempReply.answer.id), tempReply.mediaFiles))
+                                && (tempReply && tempReply.mediaFiles && isSameFile(inquiries, tempReply))
                               )
                             ))
                             || (question.state !== "AME_DRF" && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
