@@ -336,7 +336,7 @@ const InquiryViewer = (props) => {
           if (isUnmounted) return;
           const lastest = { ...question };
           if (res.length > 0) {
-            res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+            // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
             // filter comment
             // console.log(res)
             const filterOffshoreSent = res[res.length - 1];
@@ -1005,6 +1005,7 @@ const InquiryViewer = (props) => {
                   content: res.response.content,
                 };
               } else {
+                optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
                 optionsOfQuestion[indexQuestion].answerObj = [];
               }
             }
@@ -1016,6 +1017,8 @@ const InquiryViewer = (props) => {
                   answer: res.response.content,
                   confirmed: true
                 };
+              } else {
+                optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
               }
             }
           }
