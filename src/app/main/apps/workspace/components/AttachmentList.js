@@ -703,9 +703,9 @@ const AttachmentList = (props) => {
                     </div>
                     <div className='flex' style={{ alignItems: 'center' }}>
                       {media.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                        <ImageAttachList file={media} style={{ margin: '2.5rem' }} />
+                        <ImageAttachList file={media} files={attachmentFiles} style={{ margin: '2.5rem' }} />
                       ) : (
-                        <FileAttachList file={media} />
+                        <FileAttachList file={media} files={attachmentFiles} />
                       )}
                     </div>
                   </div>
@@ -830,10 +830,13 @@ const useStylesImage = makeStyles((theme) => ({
     cursor: 'pointer'
   }
 }));
-const ImageAttachList = ({ file }) => {
-  const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const images = [file.src];
+const ImageAttachList = ({ file, files }) => {
   const classes = useStylesImage();
+  const dispatch = useDispatch();
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const currentInqPreview = useSelector(({ workspace }) => workspace.formReducer.currentInqPreview);
+  const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
+  const images = [file.src];
   const openImageViewer = () => {
     setIsViewerOpen(true);
   };
@@ -841,20 +844,22 @@ const ImageAttachList = ({ file }) => {
   const closeImageViewer = () => {
     setIsViewerOpen(false);
   };
+
   const downloadFile = () => {
-    getFile(file.id).then((f) => {
-      const link = document.createElement('a');
-      link.href = urlMedia(file.ext, f);
-      link.setAttribute(
-        'download',
-        file.name,
-      );
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-    }).catch((error) => {
-      console.error(error);
-    });
+    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file } }));
+    // getFile(file.id).then((f) => {
+    //   const link = document.createElement('a');
+    //   link.href = urlMedia(file.ext, f);
+    //   link.setAttribute(
+    //     'download',
+    //     file.name,
+    //   );
+    //   document.body.appendChild(link);
+    //   link.click();
+    //   link.parentNode.removeChild(link);
+    // }).catch((error) => {
+    //   console.error(error);
+    // });
   }
 
   return (
@@ -865,7 +870,8 @@ const ImageAttachList = ({ file }) => {
           {file.name}
         </span>
       </Tooltip>
-      {isViewerOpen && (
+      {isViewerOpen && openPreviewFiles && <PDFViewer inquiry={currentInqPreview} />}
+      {/* {isViewerOpen && (
         <ImageViewer
           src={images}
           currentIndex={0}
@@ -876,7 +882,7 @@ const ImageAttachList = ({ file }) => {
           }}
           closeOnClickOutside={true}
         />
-      )}
+      )} */}
     </div>
   );
 };
@@ -903,10 +909,13 @@ const useStylesFile = makeStyles((theme) => ({
     cursor: 'pointer'
   }
 }));
-const FileAttachList = ({ file }) => {
+const FileAttachList = ({ file, files }) => {
   const classes = useStylesFile();
-  const [view, setView] = useState(false)
-  const [pdfUrl, setPdfUrl] = useState(null)
+  const dispatch = useDispatch();
+  const [view, setView] = useState(false);
+  // const [pdfUrl, setPdfUrl] = useState(null)
+  const currentInqPreview = useSelector(({ workspace }) => workspace.formReducer.currentInqPreview);
+  const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
 
   const downloadFile = () => {
     getFile(file.id).then((f) => {
@@ -928,17 +937,18 @@ const FileAttachList = ({ file }) => {
   }
 
   const previewPDF = () => {
-    getFile(file.id).then((f) => {
-      setPdfUrl(urlMedia(file.ext, f));
-      setView(true)
-    }).catch((error) => {
-      console.error(error);
-    });
+    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file } }));
+    // getFile(file.id).then((f) => {
+    //   setPdfUrl(urlMedia(file.ext, f));
+    //   setView(true)
+    // }).catch((error) => {
+    //   console.error(error);
+    // });
   }
 
   return (
     <div className={classes.root}>
-      <PDFViewer view={view} handleClose={handleClose} pdfUrl={pdfUrl} name={file.name} />
+      {view && openPreviewFiles && <PDFViewer inquiry={currentInqPreview} />}
       {file.ext.toLowerCase().includes("pdf") ?
         <img style={{ height: '25px', width: '25px' }} src={`/assets/images/logos/pdf_icon.png`} />
         :

@@ -28,6 +28,22 @@ export const PRE_CARRIAGE = 'preVvd';
 
 export const TYPE_OF_MOVEMENT = 'moveTypeDesc';
 
+export const SHIPPING_MARK = 'shippingMark';
+
+export const DESCRIPTION_OF_GOODS = 'cargoDescription';
+
+export const TOTAL_PACKAGE = 'totalPackages';
+
+export const TOTAL_PACKAGE_UNIT = 'totalPackageUnit';
+
+export const TOTAL_WEIGHT = 'totalWeight';
+
+export const TOTAL_WEIGHT_UNIT = 'totalWeightUnit';
+
+export const TOTAL_MEASUREMENT = 'totalMeasurement';
+
+export const TOTAL_MEASUREMENT_UNIT = 'totalMeasurementUnit';
+
 export const CONTAINER_DETAIL = 'containerDetail';
 
 export const CONTAINER_NUMBER = 'Container No.';
@@ -118,7 +134,7 @@ export const CONTAINER_LIST = {
   cdNumber: [CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT],
   cdUnit: [CONTAINER_PACKAGE_UNIT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT_UNIT],
   cmNumber: [CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT],
-  cmUnit: [ CM_PACKAGE_UNIT, CM_WEIGHT_UNIT, CM_MEASUREMENT_UNIT],
+  cmUnit: [CM_PACKAGE_UNIT, CM_WEIGHT_UNIT, CM_MEASUREMENT_UNIT],
 }
 
 export const mapUnit = {

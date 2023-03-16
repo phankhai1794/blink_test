@@ -15,7 +15,10 @@ function FuseLoading(props) {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center">
+    <div
+      className="flex flex-1 flex-col items-center justify-center"
+      style={{ position: 'absolute', left: '50%', top: '40%', transform: 'translate(-50%, -50%)' }}
+    >
       <Typography className="text-20 mb-16" color="textSecondary">
         Loading...
       </Typography>

@@ -253,9 +253,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
                   }
                 })
-
-                const fieldAutoUpdate = content[fieldId];
-                const fieldId = getField( CONTAINER_MANIFEST)  
+                const fieldCmId = getField(CONTAINER_MANIFEST)
+                const fieldAutoUpdate = content[fieldCmId];
                 if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
                   fieldAutoUpdate.map((item) => {
                     if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
@@ -265,7 +264,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                 }
 
                 if (fieldAutoUpdate) {
-                  content[fieldId] = fieldAutoUpdate;
+                  content[fieldCmId] = fieldAutoUpdate;
                   if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
                     contentField.forEach((cd) => {
                       let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
@@ -297,7 +296,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       }
                     })
                   }
-                  saveEditedField({ field: fieldId, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                  saveEditedField({ field: fieldCmId, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
                 }
                 validationCDCM(contsNo);
               }
@@ -520,9 +519,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         {attachments?.map((file, mediaIndex) => (
           <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
             {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-              <ImageAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />)
+              <ImageAttach file={file} files={attachments} question={question} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />)
               : (
-                <FileAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />
+                <FileAttach file={file} files={attachments} question={question} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />
               )}
           </div>
         ))}

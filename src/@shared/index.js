@@ -255,12 +255,12 @@ export function formatContainerNo(containerNo) {
   return result;
 }
 
-export const isSameFile = (originItem, compareFile) => {
-  if (originItem !== []) return true;
-
+export const isSameFile = (inquiries, tempReply) => {
   let isSame = false;
-  const listId1 = originItem[0].mediaFile.map(item => item.id);
-  const listId2 = compareFile.map(item => item.id);
+  const orgItem = inquiries.filter(item => item.id === tempReply.answer.id);
+  const listId1 = orgItem[0].mediaFile.map(item => item.id);
+  const listId2 = tempReply.mediaFiles.map(item => item.id);
+
   if (listId1.length === listId2.length) {
     if (listId1.length === 0 || (listId1.every(id => listId2.includes(id)))) isSame = true;
   }
