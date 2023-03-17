@@ -36,6 +36,11 @@ const useStyles = makeStyles((theme) => ({
       fontWeight: 400,
       fontStyle: 'normal'
     }
+  },
+  deleteContent: {
+    '& .MuiInputBase-input': {
+      textDecorationLine: 'line-through'
+    }
   }
 }));
 
@@ -49,7 +54,7 @@ const ParagraphAnswer = (props) => {
 
   const [paragraphText, setParagraphText] = useState(question.answerObj && question.answerObj.length ? question.answerObj[0]?.content : '');
 
-  const classes = useStyles();
+  const classes = useStyles(question);
   const [isPermission, setPermission] = useState(false);
 
   const handleChangeInput = (e) => {
@@ -83,7 +88,14 @@ const ParagraphAnswer = (props) => {
   }, [saveStatus, currentQuestion]);
 
   useEffect(() => {
-    if (!paragraphText && question.answerObj && question.answerObj.length > 0 && question.mediaFilesAnswer.length > 0) setParagraphText(ONLY_ATT)
+    if (!paragraphText &&
+        question.answerObj &&
+        question.answerObj.length > 0 &&
+        ((question.mediaFilesAnswer &&
+        question.mediaFilesAnswer.length > 0) ||
+        (question.answersMedia &&
+        question.answersMedia.length > 0))
+    ) setParagraphText(ONLY_ATT)
   }, [saveStatus, question])
 
   useEffect(() => {
@@ -95,7 +107,7 @@ const ParagraphAnswer = (props) => {
 
   return (
     <div>
-      <div className={clsx("flex", paragraphText ? classes.inputText : classes.placeHolder)}>
+      <div className={clsx("flex", paragraphText ? classes.inputText : classes.placeHolder, ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && classes.deleteContent)}>
         <TextField
           style={{ border: 'none', display: !isPermission ? (!paragraphText ? 'none' : '') : '' }}
           fullWidth

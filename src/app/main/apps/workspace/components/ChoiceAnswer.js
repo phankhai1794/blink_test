@@ -88,7 +88,13 @@ const ChoiceAnswer = (props) => {
                 checked={!disableChecked && selectedChoice === choice.id}
                 value={choice.id}
                 control={<Radio color={'primary'} />}
-                label={<span style={{ fontSize: '1.7rem', whiteSpace: 'pre' }}>{choice.content}</span>}
+                label={
+                  <span style={{
+                    fontSize: '1.7rem',
+                    whiteSpace: 'pre',
+                    textDecorationLine: ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && 'line-through'
+                  }}>{choice.content}</span>
+                }
               />
             </div>
           ))}
