@@ -28,7 +28,7 @@ export const sendMail =
       const replyInqs = [];
       const inquiriesPendingProcess = inquiries.filter(op => op.process === 'pending');
       const listComment = await axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)));
-      listComment.forEach((comment) => comment.length && comment[0].receiver[0] === tab && replyInqs.push(comment[0].id));
+      listComment.forEach((comment, index) => comment.length && inquiries[index].receiver[0] === tab && replyInqs.push(inquiries[index].id));
       dispatch({ type: SENDMAIL_LOADING });
       sendmail({ myblId, replyInqs, user, header, ...form })
         .then((res) => {
