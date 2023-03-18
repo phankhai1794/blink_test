@@ -1133,15 +1133,15 @@ const InquiryViewer = (props) => {
     }
   }
 
-  const autoSendMailResolve = (inquiries, type) => {
-    const check = inquiries.filter(inq => inq.process === 'pending' && inq.receiver[0] === type)
-    if (check.every(inq => inq.state === 'COMPL')) {
+  const autoSendMailResolve = (inquiries, type, process) => {
+    const check = inquiries.filter(inq => inq.process === process && inq.receiver[0] === type);
+    if (check.every(inq => ['COMPL', 'RESOLVED'].includes(inq.state))) {
       const ids = []
       check.forEach(inq => {
         const find = metadata?.field_options.find(field => field.value === inq.field);
         ids.push({ id: inq.id, field: find.label })
       })
-      sendmailResolve({ type: type === 'customer' ? 'Customer' : 'Onshore', myBL, user, content, ids })
+      sendmailResolve({ type: type === 'customer' ? 'Customer' : 'Onshore', myBL, user, content, ids, process });
     }
   }
 
@@ -1226,9 +1226,12 @@ const InquiryViewer = (props) => {
         // setQuestion((q) => ({ ...q, state: 'COMPL' }));
         optionsInquires[editedIndex].state = 'COMPL';
         optionsInquires[editedIndex].createdAt = res.updatedAt;
-        const receiver = optionsInquires[editedIndex].receiver[0]
+        const receiver = optionsInquires[editedIndex].receiver[0];
+        const process = optionsInquires[editedIndex].process;
+        if (process === 'draft') optionsInquires[editedIndex].id = res.id;
         //auto send mail if every inquiry is resolved
-        autoSendMailResolve(optionsInquires, receiver)
+        autoSendMailResolve(optionsInquires, receiver, process);
+
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
         props.getUpdatedAt();
