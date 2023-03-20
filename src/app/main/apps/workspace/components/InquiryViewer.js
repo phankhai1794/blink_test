@@ -2419,7 +2419,6 @@ const InquiryViewer = (props) => {
                         }
                         validation={setValidationCDCM}
                         question={question}
-                        originalValues={isJsonText(question.content) ? JSON.parse(question.content) : null}
                         setTextResolve={setTextResolve}
                         setDirty={setDirty}
                       />
