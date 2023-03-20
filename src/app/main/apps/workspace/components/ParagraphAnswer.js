@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { ONLY_ATT } from '@shared/keyword'
 import clsx from "clsx";
+import { useUnsavedChangesWarning } from 'app/hooks';
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -49,8 +50,8 @@ const ParagraphAnswer = (props) => {
   const allowUpdateParagraphAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
   });
-  const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
+  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
 
   const [paragraphText, setParagraphText] = useState(question.answerObj && question.answerObj.length ? question.answerObj[0]?.content : '');
 
@@ -67,6 +68,7 @@ const ParagraphAnswer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     optionsInquires[editedIndex].paragraphAnswer = body;
     dispatch(InquiryActions.setInquiries(optionsInquires));
+    setDirty();
   };
 
   useEffect(() => {
@@ -84,19 +86,21 @@ const ParagraphAnswer = (props) => {
       } else if (currentQuestion.answerObj && currentQuestion.answerObj.length) {
         setParagraphText(currentQuestion.answerObj[0].content);
       }
+      setPristine();
     }
   }, [saveStatus, currentQuestion]);
 
   useEffect(() => {
-    if (!paragraphText &&
-        question.answerObj &&
-        question.answerObj.length > 0 &&
-        ((question.mediaFilesAnswer &&
-        question.mediaFilesAnswer.length > 0) ||
-        (question.answersMedia &&
-        question.answersMedia.length > 0))
-    ) setParagraphText(ONLY_ATT)
-  }, [saveStatus, question])
+    if (
+      !paragraphText &&
+      question.answerObj &&
+      question.answerObj.length > 0 &&
+      (
+        (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) ||
+        (question.answersMedia && question.answersMedia.length > 0)
+      )
+    ) setParagraphText(ONLY_ATT);
+  }, [saveStatus, question]);
 
   useEffect(() => {
     if (isDeleteAnswer && isDeleteAnswer.status) {
