@@ -32,6 +32,9 @@ const initialState = {
   inqViewerFocus: null,
   validateInput: { isValid: true, prohibitedInfo: null, handleConfirm: null },
   isLoading: 0,
+  openPreviewFiles: false,
+  currentInqPreview: {},
+  currentFilePreview: {},
   isLoadingProcess: false,
 };
 
@@ -142,6 +145,12 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.OPEN_WARNING_UPLOAD_OPUS: {
     return { ...state, openNotificationUploadOpus: action.state };
+  }
+  case Actions.OPEN_PREVIEW_FILES: {
+    return { ...state, openPreviewFiles: action.state.openPreviewFiles, currentInqPreview: action.state.currentInqPreview };
+  }
+  case Actions.CURRENT_FILE_PREVIEW: {
+    return { ...state, currentFilePreview: action.state };
   }
   default: {
     return state;

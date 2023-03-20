@@ -15,6 +15,7 @@ import { useUnsavedChangesWarning } from 'app/hooks'
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
+import * as AppAction from "../../../../store/actions";
 
 import UserInfo from './UserInfo';
 import ImageAttach from './ImageAttach';
@@ -104,6 +105,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const fieldType = metadata.field_options.filter(filDrf => filDrf.display && !filterInqDrf.includes(filDrf.value));
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(currentField));
   const [disableSave, setDisableSave] = useState(false);
+  const [isChange, setChange] = useState(false);
 
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
@@ -123,12 +125,14 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   const handleChange = (e) => {
     setDirty();
-    setFieldValue(e.target.value)
-  };
+    setFieldValue(e.target.value);
+    setChange(true);
+  }
 
   const inputTextSeparate = (e, type) => {
     setDirty();
     setFieldValueSeparate(Object.assign({}, fieldValueSeparate, { [type]: e.target.value }));
+    setChange(true);
   };
 
   const handleValidateInput = async (confirm = null) => {
@@ -162,8 +166,12 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         }
       });
     }
-    if (warningLeast1CM.length) dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningLeast1CM, warningType: 'atLeast1CM' }));
-    if (warningCmsNotInCD.length) dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningCmsNotInCD, warningType: 'CmNotMatch' }));
+    if (warningLeast1CM.length) {
+      dispatch(AppAction.showMessage({ message: 'A container number must include at least one C/M. Please check again the container numbers below', variant: 'warning' }));
+    }
+    if (warningCmsNotInCD.length) {
+      dispatch(AppAction.showMessage({ message: `Container Manifest doesn't match with Container Details`, variant: 'warning' }));
+    }
   }
 
   const handleSave = () => {
@@ -240,20 +248,23 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                 contentField.forEach((obj, index) => {
                   const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
                   const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
-                  if (getTypeName === CONTAINER_NUMBER) {
+                  if (getTypeName === CONTAINER_NUMBER && containerNo !== obj[getType(CONTAINER_NUMBER)]) {
                     contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
                     contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
                   }
                 })
-                const fieldId = getField(fieldValueSelect.keyword === CONTAINER_DETAIL ? CONTAINER_MANIFEST : CONTAINER_DETAIL)
-                let fieldAutoUpdate = content[fieldId];
-                fieldAutoUpdate.map((item) => {
-                  if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
-                    item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
-                  }
-                })
+                const fieldCmId = getField(CONTAINER_MANIFEST)
+                const fieldAutoUpdate = content[fieldCmId];
+                if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
+                  fieldAutoUpdate.map((item) => {
+                    if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
+                      item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
+                    }
+                  })
+                }
+
                 if (fieldAutoUpdate) {
-                  content[fieldId] = fieldAutoUpdate;
+                  content[fieldCmId] = fieldAutoUpdate;
                   if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
                     contentField.forEach((cd) => {
                       let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
@@ -280,12 +291,12 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                           cmOfCd.map((cm) => {
                             total += parseFloat(cm[getType(key)]);
                           });
-                          cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
+                          cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                         });
                       }
                     })
                   }
-                  saveEditedField({ field: fieldId, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                  saveEditedField({ field: fieldCmId, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
                 }
                 validationCDCM(contsNo);
               }
@@ -301,7 +312,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             }
 
             dispatch(InquiryActions.setInquiries(optionsInquires));
-            dispatch(InquiryActions.setListMinimize(optionsMinimize));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             getUpdatedAt();
             setDisableSave(false);
@@ -389,6 +399,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     setFieldValue(content[e.value] || "");
     setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(e.value));
     setValueSeparate(e.value);
+    setChange(false);
   };
 
   const checkCurField = () => {
@@ -508,9 +519,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         {attachments?.map((file, mediaIndex) => (
           <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
             {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-              <ImageAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />)
+              <ImageAttach file={file} files={attachments} question={question} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />)
               : (
-                <FileAttach file={file} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />
+                <FileAttach file={file} files={attachments} question={question} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />
               )}
           </div>
         ))}
@@ -521,10 +532,15 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         <Button
           className={classes.btn}
           disabled={
-            (isSeparate ? false : (
+            (isSeparate ? (
+              !fieldValueSeparate.name
+              && !fieldValueSeparate.address
+              && !isChange
+            ) : (
               validateField(fieldValueSelect?.value, fieldValue).isError
               ||
-              (fieldValue && (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0)))
+              (!isChange && fieldValue && (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0)))
+              || (!fieldValue && !isChange)
             ))
             ||
             disableSave
