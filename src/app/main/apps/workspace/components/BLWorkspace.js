@@ -60,7 +60,6 @@ import TableCD from './TableCD';
 import TableCM from './TableCM';
 import ListNotification from './ListNotification';
 import SubmitAnswerNotification from "./SubmitAnswerNotification";
-import WarningMessage from "./WarningMessage";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -519,18 +518,6 @@ const BLWorkspace = (props) => {
               dispatch(FormActions.toggleOpenBLWarning(false));
               dispatch(FormActions.toggleOpenNotificationPreviewSubmit(false));
             }}
-          />
-          <WarningMessage
-            open={openWarningCDCMContainerNo.status}
-            msg={openWarningCDCMContainerNo.warningType === 'atLeast1CM' ? "A container number must include at least one C/M. Please check again the container numbers below" : `Container Manifest doesn't match with Container Details`}
-            content={openWarningCDCMContainerNo.contentsWarning}
-            handleClose={() => dispatch(FormActions.toggleWarningCDCM({ status: false, contentsWarning: [], warningType: '' }))}
-            iconType={
-              <img
-                style={{ verticalAlign: 'middle', paddingBottom: 2, paddingLeft: 5, paddingRight: 5, }}
-                src={`/assets/images/icons/warning.svg`}
-              />
-            }
           />
           <div className={clsx('max-w-5xl', classes.root)}>
             <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>

@@ -253,6 +253,7 @@ const InquiryEditor = (props) => {
         }
       }
     }
+
     if (checkContent !== 0 || !checkAnsType || !checkReceiver || !isSameFile) return false;
 
     return true;
