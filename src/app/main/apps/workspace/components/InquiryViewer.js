@@ -1275,7 +1275,18 @@ const InquiryViewer = (props) => {
           dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
         } else {
           setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
-
+          // Update State list separate
+          if (res.fieldsChangesState?.length) {
+            res.fieldsChangesState.forEach(item => {
+              if (item.process === 'pending') {
+                let inqIndex = optionsInquires.findIndex(inq => inq.id === item.id);
+                optionsInquires[inqIndex].state = 'UPLOADED';
+              } else {
+                let amendIndex = optionsInquires.findIndex(inq => ((inq.field === item.id) && (inq.process === 'draft')));
+                optionsInquires[amendIndex].state = 'UPLOADED';
+              }
+            });
+          }
           // Update list inquiry
           let editedInqIndex = optionsInquires.findIndex(inq => question.id === inq.id);
           if (optionsInquires[editedInqIndex]?.process === 'pending') {
