@@ -3,12 +3,13 @@ import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarM
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
+import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
-import { AppBar, Toolbar, Avatar, Badge, Button, Hidden } from '@material-ui/core';
+import { AppBar, Toolbar, Avatar, Badge, Button, Hidden, TextField, MenuItem } from '@material-ui/core';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
@@ -21,7 +22,13 @@ import * as InquiryActions from '../../../main/apps/workspace/store/actions/inqu
 import PreviewDraftBL from './PreviewDraftBL';
 
 const themeColor = '#BD0F72';
+const lightThemeColor = '#FDF2F2';
 const whiteColor = '#FFFFFF';
+const blackColor = '#132535';
+const drfViews = [
+  { label: "M&D View", value: "MD" },
+  { label: "C/M View", value: "CM" }
+];
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -83,6 +90,43 @@ const useStyles = makeStyles((theme) => ({
     '&:hover': {
       backgroundColor: themeColor
     }
+  },
+  input: {
+    marginLeft: 10,
+    '& fieldset': {
+      border: `1px solid ${themeColor} !important`,
+      borderRadius: '8px'
+    },
+    '& div > div': {
+      paddingTop: 5,
+      paddingBottom: 5.5
+    },
+    '&:hover fieldset': {
+      borderColor: `${themeColor} !important`
+    },
+    '&:focus-within fieldset': {
+      border: `1px solid ${themeColor} !important`
+    },
+  },
+  inputSelect: {
+    color: themeColor,
+    fontWeight: 600
+  },
+  menuItem: {
+    background: whiteColor,
+    color: blackColor,
+    fontSize: 15,
+    '&:hover': {
+      background: `${lightThemeColor} !important`,
+      color: themeColor,
+      fontWeight: 600
+    }
+  },
+  menuItemSelected: {
+    background: `${lightThemeColor} !important`,
+    color: themeColor,
+    fontSize: 15,
+    fontWeight: 600
   }
 }));
 
@@ -98,15 +142,17 @@ function ToolbarLayout1(props) {
     header.validToken
   ]);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
-  const [amendmentsLength, setAmendmentLength] = useState();
-  const [inquiryLength, setInquiryLength] = useState();
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
+  const drfView = useSelector(({ draftBL }) => draftBL.drfView);
+
   const [open, setOpen] = useState(false);
   const [attachmentLength, setAttachmentLength] = useState(0);
-  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
-  const enableSubmitInq = inquiries.some((inq) =>
-    ['ANS_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
-  const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
+  const [amendmentsLength, setAmendmentLength] = useState();
+  const [inquiryLength, setInquiryLength] = useState();
+
+  const enableSubmitInq = inquiries.some((inq) => ['ANS_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
 
   const onUnload = (e) => {
     e.preventDefault();
@@ -350,6 +396,11 @@ function ToolbarLayout1(props) {
     dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
   };
 
+  const handleSelectView = (e) => {
+    const { value } = e.target;
+    dispatch(DraftBLActions.setDrfView(value));
+  }
+
   return (
     <ThemeProvider theme={toolbarTheme}>
       {!isLoading && (
@@ -431,7 +482,32 @@ function ToolbarLayout1(props) {
                   onClick={redirectWorkspace}>
                   Amendment
                 </Button>
-
+                <TextField
+                  id="view"
+                  name="view"
+                  select
+                  value={drfView}
+                  onChange={(e) => handleSelectView(e)}
+                  variant="outlined"
+                  className={classes.input}
+                  InputProps={{
+                    className: classes.inputSelect
+                  }}
+                  SelectProps={{
+                    MenuProps: {
+                      anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                      getContentAnchorEl: null
+                    }
+                  }}>
+                  {drfViews.map(view => (
+                    <MenuItem
+                      key={view.value}
+                      value={view.value}
+                      className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
+                      {view.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
                 <Button
                   variant="contained"
                   className={clsx(classes.button, classes.buttonComfirm)}

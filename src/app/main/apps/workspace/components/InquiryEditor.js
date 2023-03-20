@@ -228,12 +228,12 @@ const InquiryEditor = (props) => {
     const checkContent = currInq.content.trim().localeCompare(valInput.content.trim());
     const checkAnsType = currInq.ansType === valInput.ansType;
     const checkReceiver = currInq.receiver[0] === valInput.receiver[0];
-    
+
     let isSameFile = false;
     const listId1 = currInq.mediaFile.map(item => item.id);
     const listId2 = valInput.mediaFile.map(item => item.id);
 
-    if (listId1.length === listId2.length ) {
+    if (listId1.length === listId2.length) {
       isSameFile = Boolean(listId1.length === 0 || listId1.every(id => listId2.includes(id)));
     }
 
@@ -253,7 +253,6 @@ const InquiryEditor = (props) => {
         }
       }
     }
-    
     if (checkContent !== 0 || !checkAnsType || !checkReceiver || !isSameFile) return false;
 
     return true;
@@ -729,9 +728,9 @@ const InquiryEditor = (props) => {
               currentEditInq.mediaFile?.map((file, mediaIndex) => (
                 <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                   {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                    <ImageAttach file={file} field={currentEditInq.field} />
+                    <ImageAttach file={file} files={currentEditInq.mediaFile} field={currentEditInq.field} />
                   ) : (
-                    <FileAttach file={file} field={currentEditInq.field} />
+                    <FileAttach file={file} files={currentEditInq.mediaFile} field={currentEditInq.field} />
                   )}
                 </div>
               ))}
@@ -745,12 +744,20 @@ const InquiryEditor = (props) => {
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                       <ImageAttach
                         file={file}
+                        files={currentEditInq.mediaFilesAnswer}
                         field={currentEditInq.field}
+                        question={currentEditInq}
                         style={{ margin: '2.5rem' }}
                         isAnswer={true}
                       />
                     ) : (
-                      <FileAttach file={file} field={currentEditInq.field} isAnswer={true} />
+                      <FileAttach
+                        file={file}
+                        files={currentEditInq.mediaFilesAnswer}
+                        field={currentEditInq.field}
+                        isAnswer={true}
+                        question={currentEditInq}
+                      />
                     )}
                   </div>
                 ))}

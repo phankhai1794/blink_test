@@ -10,9 +10,10 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo } from '@shared';
+import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile } from '@shared';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
-import { useUnsavedChangesWarning } from 'app/hooks'
+import { useUnsavedChangesWarning } from 'app/hooks';
+import { sendmailResolve } from 'app/services/mailService';
 import {
   CONSIGNEE,
   CONTAINER_DETAIL,
@@ -335,7 +336,7 @@ const InquiryViewer = (props) => {
           if (isUnmounted) return;
           const lastest = { ...question };
           if (res.length > 0) {
-            res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+            // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
             // filter comment
             // console.log(res)
             const filterOffshoreSent = res[res.length - 1];
@@ -831,6 +832,16 @@ const InquiryViewer = (props) => {
     } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove) {
       deleteDraftBLReply(replyRemove?.draftId, replyRemove.field, myBL.id)
         .then((res) => {
+          // update mediaFile in inquiries
+          const optionsInquires = [...inquiries];
+          const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+          const newMediaFile = comment.at(-2).answersMedia.filter(({ id: id1 }) => !comment.at(-1).answersMedia.some(({ id: id2 }) => id2 === id1));
+          const removeMediaFile = comment.at(-1).answersMedia.filter(({ id: id1 }) => !comment.at(-2).answersMedia.some(({ id: id2 }) => id2 === id1)).map(({ id }) => id);
+          optionsInquires[editedIndex].createdAt = res.updatedAt;
+          optionsInquires[editedIndex].mediaFile = optionsInquires[editedIndex].mediaFile.filter(inq => !removeMediaFile.includes(inq.id));
+          optionsInquires[editedIndex].mediaFile.push(...newMediaFile);
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+
           // Case: Offshore reply customer's amendment first time => delete
           if (comment.length === 3) {
             const prevAmendment = {
@@ -857,10 +868,13 @@ const InquiryViewer = (props) => {
             setDisableSaveReply(false);
             const optionsOfQuestion = [...inquiries];
             const removeAmendment = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'draft');
-            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+            let removeIndex = -1;
+            if (removeAmendment.length) {
+              removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+            }
             const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
-              optionsOfQuestion.splice(removeIndex, 1);
+              if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
               // remove all cd cm amendment
               if (res.removeAllCDCM) {
                 getBlInfo(myBL.id).then((res) => {
@@ -880,11 +894,14 @@ const InquiryViewer = (props) => {
                 if (!draftBl.length) {
                   dispatch(FormActions.toggleAllInquiry(false));
                   dispatch(FormActions.toggleAmendmentsList(false));
+                  dispatch(FormActions.toggleOpenNotificationAmendmentList(true));
                 }
               }
+              dispatch(InquiryActions.setInquiries(optionsOfQuestion));
             } else {
               if (res.checkReplyEmpty) {
-                optionsOfQuestion[removeIndex].state = user.role === 'Admin' ? 'AME_SENT' : 'REP_SENT';
+                if (removeIndex !== -1) optionsOfQuestion[removeIndex].state = user.role === 'Admin' ? 'AME_SENT' : 'REP_SENT';
+                dispatch(InquiryActions.setInquiries(optionsOfQuestion));
               }
               //
               const idCD = metadata.field[CONTAINER_DETAIL];
@@ -897,17 +914,18 @@ const InquiryViewer = (props) => {
                     CONTAINER_LIST.cdNumber.map((key, index) => {
                       cm[0][getTypeCDCM(CONTAINER_LIST.cmNumber[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
-                    CONTAINER_LIST.cmUnit.map((key, index) => {
+                    CONTAINER_LIST.cdUnit.map((key, index) => {
                       cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[1]] = cm;
                     saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' }).then(res => {
                       if (res && res.removeAmendment) {
-                        const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
+                        const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[1] && inq.process === 'draft');
                         if (removeAmendment.length) {
                           const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
-                          optionsOfQuestion.splice(removeIndex, 1);
+                          if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
                         }
+                        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                       }
                     });
                   }
@@ -927,14 +945,15 @@ const InquiryViewer = (props) => {
                         const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
                         if (removeAmendment.length) {
                           const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
-                          optionsOfQuestion.splice(removeIndex, 1);
+                          if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
                         }
+                        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                       }
                     });
                   }
                 }
                 if (res.emptyCDorCMAmendment) {
-                  optionsOfQuestion.splice(removeIndex, 1);
+                  if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
                   dispatch(InquiryActions.setContent({ ...content, [question.field]: res.drfAnswersTrans }));
                   if (field !== 'INQUIRY_LIST') {
                     if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
@@ -945,12 +964,11 @@ const InquiryViewer = (props) => {
                       dispatch(FormActions.toggleAmendmentsList(false));
                     }
                   }
+                  dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                 }
               }
-              //
             }
             setReplyRemove();
-            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             dispatch(InquiryActions.addAmendment());
             props.getUpdatedAt();
@@ -987,6 +1005,7 @@ const InquiryViewer = (props) => {
                   content: res.response.content,
                 };
               } else {
+                optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
                 optionsOfQuestion[indexQuestion].answerObj = [];
               }
             }
@@ -998,6 +1017,8 @@ const InquiryViewer = (props) => {
                   answer: res.response.content,
                   confirmed: true
                 };
+              } else {
+                optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
               }
             }
           }
@@ -1112,6 +1133,46 @@ const InquiryViewer = (props) => {
     }
   }
 
+  const autoSendMailResolve = (inquiries, type, process) => {
+    const check = inquiries.filter(inq => inq.process === process && inq.receiver[0] === type);
+    if (check.every(inq => ['COMPL', 'RESOLVED'].includes(inq.state))) {
+      const ids = []
+      check.forEach(inq => {
+        const find = metadata?.field_options.find(field => field.value === inq.field);
+        ids.push({ id: inq.id, field: find.label })
+      })
+      sendmailResolve({ type: type === 'customer' ? 'Customer' : 'Onshore', myBL, user, content, ids, process });
+    }
+  }
+
+  const validationCDCMContainerNo = (contsNo) => {
+    const warningLeast1CM = [];
+    const warningCmsNotInCD = [];
+    // Validation container number must include at least one C/M.
+    if (question.field === getField(CONTAINER_DETAIL)) {
+      let cmOfCdContainerNo = [...new Set((content[getField(CONTAINER_MANIFEST)] || []))].map(cm => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+      contsNo.forEach((containerNo, index) => {
+        if (cmOfCdContainerNo.length && !cmOfCdContainerNo.includes(containerNo)) {
+          warningLeast1CM.push({ containerNo, row: index + 1 });
+        }
+      })
+    } else if (question.field === getField(CONTAINER_MANIFEST)) {
+      // Validation The C/M below does not match any container numbers that already exist in C/D
+      let cdOfCmContainerNo = [...new Set((content[getField(CONTAINER_DETAIL)] || []))].map(cm => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+      contsNo.forEach((containerNo, index) => {
+        if (cdOfCmContainerNo.length && !cdOfCmContainerNo.includes(containerNo)) {
+          warningCmsNotInCD.push({ containerNo, row: index + 1 });
+        }
+      });
+    }
+    if (warningLeast1CM.length) {
+      dispatch(AppAction.showMessage({ message: 'A container number must include at least one C/M. Please check again the container numbers below', variant: 'warning' }));
+    }
+    if (warningCmsNotInCD.length) {
+      dispatch(AppAction.showMessage({ message: `Container Manifest doesn't match with Container Details`, variant: 'warning' }));
+    }
+  }
+
   const onConfirm = (isWrapText = false) => {
     let contentField = '';
     const contsNoChange = {};
@@ -1126,7 +1187,6 @@ const InquiryViewer = (props) => {
     } else {
       contentField = textResolve;
       const orgContentField = content[question.field];
-      const warningLeast1CM = [];
       const contsNo = [];
       contentField.forEach((obj, index) => {
         const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
@@ -1143,30 +1203,7 @@ const InquiryViewer = (props) => {
         }
       });
 
-      // Validation container number must include at least one C/M.
-      if (question.field == getField(CONTAINER_DETAIL)) {
-        contsNo.forEach((containerNo, index) => {
-          let cmOfCd = [...new Set((content[getField(CONTAINER_MANIFEST)] || []).filter(cm =>
-            cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === containerNo
-          ))]
-          if (cmOfCd.length === 0) {
-            warningLeast1CM.push({ containerNo, row: index });
-          }
-        })
-        if (warningLeast1CM && warningLeast1CM.length) {
-          dispatch(FormActions.toggleWarningCDCM({ status: true, contentsWarning: warningLeast1CM, warningType: 'atLeast1CM' }));
-        }
-      }
-      // Validation The C/M below does not match any container numbers that already exist in C/D
-      if (question.field == getField(CONTAINER_DETAIL)) {
-        const cmsNotInCD = [];
-        (content[getField(CONTAINER_MANIFEST)] || []).forEach((cm, index) => {
-          if (!contsNo.includes(cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])) {
-            cmsNotInCD.push(cm);
-          }
-        });
-      }
-
+      validationCDCMContainerNo(contsNo);
     }
 
     const body = {
@@ -1189,6 +1226,12 @@ const InquiryViewer = (props) => {
         // setQuestion((q) => ({ ...q, state: 'COMPL' }));
         optionsInquires[editedIndex].state = 'COMPL';
         optionsInquires[editedIndex].createdAt = res.updatedAt;
+        const receiver = optionsInquires[editedIndex].receiver[0];
+        const process = optionsInquires[editedIndex].process;
+        if (process === 'draft') optionsInquires[editedIndex].id = res.id;
+        //auto send mail if every inquiry is resolved
+        autoSendMailResolve(optionsInquires, receiver, process);
+
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
         props.getUpdatedAt();
@@ -1410,6 +1453,7 @@ const InquiryViewer = (props) => {
     let mediaFilesResp;
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    const newMediaFile = [];
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
@@ -1426,6 +1470,7 @@ const InquiryViewer = (props) => {
         response.forEach((file) => {
           const media = { id: file.id };
           mediaListId.push(media);
+          newMediaFile.push({ id: file.id, ext: file.ext, name: file.name });
           //
           mediaListAmendment.push({ id: file.id, ext: file.ext, name: file.name });
         });
@@ -1456,6 +1501,8 @@ const InquiryViewer = (props) => {
             }
             optionsInquires[editedIndex].process = 'pending';
             optionsInquires[editedIndex].createdAt = res.updatedAt;
+            // optionsInquires[editedIndex].mediaFilesAnswer = mediaListAmendment;
+            if (mediaListAmendment.length) optionsInquires[editedIndex].mediaFilesAnswer.push(...mediaListAmendment);
             dispatch(InquiryActions.setInquiries(optionsInquires));
             props.getUpdatedAt();
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
@@ -1563,6 +1610,7 @@ const InquiryViewer = (props) => {
           if (res) {
             dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
           }
+          optionsInquires[editedIndex].mediaFile = mediaListAmendment;
           optionsInquires[editedIndex].createdAt = res.createdAt;
           setDisableSaveReply(false);
           if (question.state.includes('AME_')) {
@@ -1599,17 +1647,18 @@ const InquiryViewer = (props) => {
               // MULTIPLE CASE CD CM
               else {
                 let contsNoChange = {}
+                const contsNo = [];
                 const orgContentField = content[question.field];
                 const contentField = tempReply.answer.content;
                 contentField.forEach((obj, index) => {
                   const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
                   const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
-                  if (getTypeName === CONTAINER_NUMBER) {
+                  if (getTypeName === CONTAINER_NUMBER && containerNo !== obj[getType(CONTAINER_NUMBER)]) {
                     contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
                   }
                 })
-                let fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
-                let fieldAutoUpdate = content[fieldCdCM]
+                const fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
+                const fieldAutoUpdate = content[fieldCdCM];
                 fieldAutoUpdate.map((item) => {
                   if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
                     item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
@@ -1644,13 +1693,14 @@ const InquiryViewer = (props) => {
                           cmOfCd.map((cm) => {
                             total += parseFloat(cm[getType(key)]);
                           });
-                          cd[getType(CONTAINER_LIST.cdNumber[index])] = total;
+                          cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                         });
                       }
                     })
                   }
                   saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
+                validationCDCMContainerNo(contsNo)
               }
             }
             optionsInquires[editedIndex].state = 'AME_DRF';
@@ -2271,6 +2321,7 @@ const InquiryViewer = (props) => {
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
                       <ImageAttach
                         file={file}
+                        files={question.mediaFile}
                         hiddenRemove={true}
                         field={question.field}
                         indexInquiry={index}
@@ -2280,6 +2331,7 @@ const InquiryViewer = (props) => {
                       <FileAttach
                         hiddenRemove={true}
                         file={file}
+                        files={question.mediaFile}
                         field={question.field}
                         indexInquiry={index}
                       />
@@ -2300,6 +2352,7 @@ const InquiryViewer = (props) => {
                         file={file}
                         field={question.field}
                         style={{ margin: '2.5rem' }}
+                        files={question.mediaFilesAnswer}
                         indexMedia={mediaIndex}
                         isAnswer={true}
                         question={question}
@@ -2313,6 +2366,7 @@ const InquiryViewer = (props) => {
                     ) : (
                       <FileAttach
                         file={file}
+                        files={question.mediaFilesAnswer}
                         field={question.field}
                         indexMedia={mediaIndex}
                         isAnswer={true}
@@ -2465,6 +2519,8 @@ const InquiryViewer = (props) => {
                             <ImageAttach
                               hiddenRemove={!question.showIconAttachReplyFile}
                               file={file}
+                              files={tempReply.mediaFiles}
+                              question={question}
                               field={question.field}
                               style={{ margin: '2.5rem' }}
                               indexMedia={mediaIndex}
@@ -2478,7 +2534,9 @@ const InquiryViewer = (props) => {
                             <FileAttach
                               hiddenRemove={!question.showIconAttachReplyFile}
                               file={file}
+                              files={tempReply.mediaFiles}
                               field={question.field}
+                              question={question}
                               indexMedia={mediaIndex}
                               isReply={true}
                               templateReply={tempReply}
@@ -2498,9 +2556,11 @@ const InquiryViewer = (props) => {
                           disabled={
                             (question.state === "AME_DRF" && (
                               validateField(question.field, tempReply?.answer?.content).isError
-                              || (['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content?.trim())
-                              || (!['string'].includes(typeof tempReply?.answer?.content) && !tempReply?.answer?.content)
-
+                              ||
+                              (
+                                (question.answerObj[0].content === tempReply?.answer?.content)
+                                && (tempReply && tempReply.mediaFiles && isSameFile(inquiries, tempReply))
+                              )
                             ))
                             || (question.state !== "AME_DRF" && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply

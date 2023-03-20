@@ -11,7 +11,8 @@ const initialState = {
   reload: false,
   enableSendDraftBl: false,
   openSendNotification: false,
-  edit: false
+  edit: false,
+  drfView: "MD"
 };
 
 const draftBL = function (state = initialState, action) {
@@ -48,6 +49,9 @@ const draftBL = function (state = initialState, action) {
   }
   case Actions.SET_EDIT_INQUIRY: {
     return { ...state, edit: action.state };
+  }
+  case Actions.SET_DRF_VIEW: {
+    return { ...state, drfView: action.state }
   }
   default: {
     return state;

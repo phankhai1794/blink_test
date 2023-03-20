@@ -8,10 +8,10 @@ import { makeStyles } from '@material-ui/styles';
 import { useSelector } from 'react-redux';
 
 import Loading from "../shared-components/Loading";
+import PDFViewer from "../../main/apps/workspace/components/PDFViewer";
 
 import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
 import ToolbarLayout1 from './components/ToolbarLayout1';
-
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     '&.boxed': {
       maxWidth: 1280,
       margin: '0 auto',
-      boxShadow: theme.shadows[ 3 ]
+      boxShadow: theme.shadows[3]
     },
     '&.scroll-body': {
       '& $wrapper': {
@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
-    zIndex: 3,
+    // zIndex: 3,
     overflow: 'hidden',
     flex: '1 1 auto'
   },
@@ -84,6 +84,8 @@ function Layout1(props) {
   const { routes } = appContext;
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const openTrans = useSelector(({ workspace }) => workspace.formReducer.openTrans);
+  const currentInqPreview = useSelector(({ workspace }) => workspace.formReducer.currentInqPreview);
+  const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
   const isLoadingProcess = useSelector(({ workspace }) => workspace.formReducer.isLoadingProcess);
   return (
     <div id="fuse-layout" className={clsx(classes.root, config.mode, 'scroll-' + config.scroll)}>
@@ -92,6 +94,7 @@ function Layout1(props) {
           {config.navbar.display && <NavbarWrapperLayout1 />}
 
           <div className={classes.contentWrapper} id={'content-wrapper'}>
+            {openPreviewFiles && <PDFViewer inquiry={currentInqPreview} />}
             {isLoadingProcess && <Loading />}
             {config.toolbar.display && <ToolbarLayout1 />}
 

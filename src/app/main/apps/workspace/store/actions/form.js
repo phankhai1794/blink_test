@@ -16,6 +16,7 @@ export const OPEN_NOTIFICATION_ATTACHMENT_LIST = 'OPEN_NOTIFICATION_ATTACHMENT_L
 export const OPEN_NOTIFICATION_SUBMIT_ANSWER = 'OPEN_NOTIFICATION_SUBMIT_ANSWER';
 export const OPEN_NOTIFICATION_DELETE_REPLY = 'OPEN_NOTIFICATION_DELETE_REPLY';
 export const OPEN_NOTIFICATION_DELETE_AMENDMENT = 'OPEN_NOTIFICATION_DELETE_AMENDMENT';
+export const OPEN_PREVIEW_FILES = 'OPEN_PREVIEW_FILES';
 export const TOGGLE_OPEN_BL_WARNING = 'TOGGLE_OPEN_BL_WARNING';
 export const OPEN_NOTIFICATION_PREVIEW_SUBMIT = 'OPEN_NOTIFICATION_PREVIEW_SUBMIT';
 export const TOGGLE_OPEN_RELOAD_WARNING = 'TOGGLE_OPEN_RELOAD_WARNING';
@@ -32,6 +33,7 @@ export const DECREASE_LOADING = 'DECREASE_LOADING';
 export const RESET_LOADING = 'RESET_LOADING';
 export const PROCESS_LOADING = 'PROCESS_LOADING';
 export const OPEN_WARNING_UPLOAD_OPUS = 'OPEN_WARNING_UPLOAD_OPUS';
+export const CURRENT_FILE_PREVIEW = 'CURRENT_FILE_PREVIEW';
 
 export function setFullscreen(state) {
   return {
@@ -264,4 +266,18 @@ export function toggleWarningUploadOpus(state) {
     type: OPEN_WARNING_UPLOAD_OPUS,
     state
   }
+}
+
+export function toggleOpenPreviewFiles(state) {
+  return {
+    type: OPEN_PREVIEW_FILES,
+    state
+  };
+}
+
+export function setCurrentFile(state) {
+  return {
+    type: CURRENT_FILE_PREVIEW,
+    state
+  };
 }

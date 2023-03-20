@@ -12,6 +12,10 @@ export async function sendmail({ myblId, replyInqs, user, header, ...form }) {
   return response;
 }
 
+export async function sendmailResolve(data) {
+  const response = await axios().post(`${PATH}/sendMailResolve`, data);
+  return response;
+}
 
 export async function getSuggestMail(keyword) {
   const response = await axios().get(`${PATH}/suggestMail?keyword=${keyword}`);

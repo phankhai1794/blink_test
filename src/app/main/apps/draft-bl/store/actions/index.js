@@ -15,6 +15,7 @@ export const SET_SEND_DRAFT_BL = 'SET_SEND_DRAFT_BL';
 export const OPEN_SEND_NOTIFICATION = 'OPEN_SEND_NOTIFICATION';
 export const RELOAD = 'RELOAD';
 export const SET_EDIT_INQUIRY = 'SET_EDIT_INQUIRY'
+export const SET_DRF_VIEW = 'SET_DRF_VIEW';
 
 export const loadMetadata = () => (dispatch) => {
   getMetadata()
@@ -140,6 +141,13 @@ export function toggleSendNotification(state) {
 export function toggleEditInquiry(state) {
   return {
     type: SET_EDIT_INQUIRY,
+    state
+  };
+}
+
+export function setDrfView(state) {
+  return {
+    type: SET_DRF_VIEW,
     state
   };
 }
