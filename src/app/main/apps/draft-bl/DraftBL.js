@@ -9,6 +9,7 @@ import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
 import { isJsonText, formatDate } from '@shared';
+import { packageUnitsJson } from '@shared/units';
 
 import * as Actions from './store/actions';
 
@@ -506,7 +507,7 @@ const DraftPage = (props) => {
                   {containersDetail &&
                     containersDetail.map((cd, idx) => (
                       <span key={idx} style={{ whiteSpace: 'pre' }}>
-                        {`${cd[getInqType(CONTAINER_NUMBER)] || ''}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${cd[getInqType(CONTAINER_PACKAGE_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                        {`${cd[getInqType(CONTAINER_NUMBER)] || ''}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${packageUnitsJson.find(pkg => pkg.code === cd[getInqType(CONTAINER_PACKAGE_UNIT)])?.description || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
                         <br />
                       </span>
                     ))}
@@ -533,7 +534,7 @@ const DraftPage = (props) => {
                       <Grid item style={{ textAlign: 'end' }}>
                         <span>{cm[getInqType(CM_PACKAGE)]}</span>
                         <br />
-                        <span>{cm[getInqType(CM_PACKAGE_UNIT)]}</span>
+                        <span>{packageUnitsJson.find(pkg => pkg.code === cm[getInqType(CM_PACKAGE_UNIT)])?.description}</span>
                       </Grid>
                     </Grid>
                     <Grid item xs={1} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
@@ -566,7 +567,7 @@ const DraftPage = (props) => {
                     <Grid item style={{ textAlign: 'end' }}>
                       <span>{getValueField(TOTAL_PACKAGE)}</span>
                       <br />
-                      <span>{getValueField(TOTAL_PACKAGE_UNIT)}</span>
+                      <span>{packageUnitsJson.find(pkg => pkg.code === getValueField(TOTAL_PACKAGE_UNIT))?.description}</span>
                     </Grid>
                   </Grid>
                   <Grid item xs={1} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
