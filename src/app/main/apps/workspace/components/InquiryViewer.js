@@ -265,6 +265,7 @@ const InquiryViewer = (props) => {
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
   const [isDeleteAnswer, setDeleteAnswer] = useState({ status: false, content: '' });
   const [listFieldDisableUpload, setListFieldDisableUpload] = useState([]);
+  const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -1228,7 +1229,13 @@ const InquiryViewer = (props) => {
         optionsInquires[editedIndex].createdAt = res.updatedAt;
         const receiver = optionsInquires[editedIndex].receiver[0];
         const process = optionsInquires[editedIndex].process;
-        if (process === 'draft') optionsInquires[editedIndex].id = res.id;
+        if (process === 'draft') {
+          const optionsMinimize = [...listMinimize];
+          const index = optionsMinimize.findIndex((e) => e.id === optionsInquires[editedIndex].id);
+          optionsMinimize[index].id = res.id;
+          optionsInquires[editedIndex].id = res.id;
+          dispatch(InquiryActions.setListMinimize(optionsMinimize));
+        }
         //auto send mail if every inquiry is resolved
         autoSendMailResolve(optionsInquires, receiver, process);
 
