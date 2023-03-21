@@ -1245,13 +1245,14 @@ const InquiryViewer = (props) => {
         dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
         props.getUpdatedAt();
         setIsResolve(false);
-        setIsResolveCDCM(true);
+        setIsResolveCDCM(false);
         setViewDropDown('');
         if (!isSeparate) {
           if (containerCheck.includes(question.field)) {
             setQuestion((q) => ({ ...q, content: contentField }));
+            dispatch(InquiryActions.setContent({ ...res.content }));
+
           }
-          if (contsNoChange) dispatch(InquiryActions.setContent({ ...res.content }));
           else dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
         } else {
           const contentWrapText = res?.contentWrapText || '';
@@ -2430,7 +2431,6 @@ const InquiryViewer = (props) => {
                         }
                         validation={setValidationCDCM}
                         question={question}
-                        originalValues={isJsonText(question.content) ? JSON.parse(question.content) : null}
                         setTextResolve={setTextResolve}
                         setDirty={setDirty}
                       />
