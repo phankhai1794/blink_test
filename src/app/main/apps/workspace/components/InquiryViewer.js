@@ -666,7 +666,8 @@ const InquiryViewer = (props) => {
               });
             });
             //
-            if (['REOPEN_A', 'REOPEN_Q'].includes(lastestComment.state)) {
+            const sortComments = [...comments].sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+            if (sortComments.length && ['REOPEN_A', 'REOPEN_Q'].includes(sortComments[sortComments.length - 1].state)) {
               const markReopen = {
                 creator: lastestComment.creator,
                 updater: lastestComment.creator,
