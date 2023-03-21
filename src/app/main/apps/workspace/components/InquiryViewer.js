@@ -1833,6 +1833,8 @@ const InquiryViewer = (props) => {
           dispatch(InquiryActions.setInquiries(optionsInquires));
           props.getUpdatedAt();
           setViewDropDown('');
+          setIsResolve(false);
+          setIsResolveCDCM(false);
           // setSaveComment(!isSaveComment);
           dispatch(
             AppAction.showMessage({ message: 'Update inquiry successfully', variant: 'success' })
