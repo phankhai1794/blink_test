@@ -91,8 +91,8 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: themeColor
     }
   },
-  input: {
-    // marginLeft: 10,
+  selectView: {
+    width: 124,
     '& fieldset': {
       border: `1px solid ${themeColor} !important`,
       borderRadius: '8px'
@@ -101,6 +101,9 @@ const useStyles = makeStyles((theme) => ({
       paddingTop: 5,
       paddingBottom: 5.5
     },
+    '& div > svg': {
+      color: themeColor
+    },
     '&:hover fieldset': {
       borderColor: `${themeColor} !important`
     },
@@ -108,7 +111,7 @@ const useStyles = makeStyles((theme) => ({
       border: `1px solid ${themeColor} !important`
     },
   },
-  inputSelect: {
+  selectViewProps: {
     color: themeColor,
     fontWeight: 600
   },
@@ -481,9 +484,9 @@ function ToolbarLayout1(props) {
                 value={drfView}
                 onChange={(e) => handleSelectView(e)}
                 variant="outlined"
-                className={clsx(classes.button, classes.input)}
+                className={clsx(classes.button, classes.selectView)}
                 InputProps={{
-                  className: classes.inputSelect
+                  className: classes.selectViewProps
                 }}
                 SelectProps={{
                   MenuProps: {
