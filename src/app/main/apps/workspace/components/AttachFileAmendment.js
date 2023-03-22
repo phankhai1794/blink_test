@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useDropzone } from 'react-dropzone';
-import { useDispatch, useSelector } from 'react-redux';
 import { validateExtensionFile } from '@shared';
+import { useDispatch } from 'react-redux';
 import * as AppAction from 'app/store/actions';
 
 import { handleDuplicateAmendmentAttachment } from "../../../../../@shared/handleError";
 
 const AttachFile = (props) => {
-  const { setAttachment, attachmentFiles } = props
+  const { setAttachment, attachmentFiles, filepaste, dropfiles } = props
   const dispatch = useDispatch();
 
   const handleUploadImageAttach = (files) => {
@@ -21,11 +21,21 @@ const AttachFile = (props) => {
       setAttachment(attachments);
     }
   }
+  useEffect(() => {
+    if (filepaste) handleUploadImageAttach([filepaste]);
+  }, [filepaste]);
+
+  useEffect(() => {
+    if (dropfiles?.length) handleUploadImageAttach(dropfiles);
+  }, [dropfiles]);
+
   const { getRootProps, getInputProps, open } = useDropzone({
     // Disable click and keydown behavior
     noClick: true,
     noKeyboard: true,
-    onDrop: handleUploadImageAttach
+    onDrop: handleUploadImageAttach,
+    noDrag: true,
+
   });
   return (
     <div className="container">

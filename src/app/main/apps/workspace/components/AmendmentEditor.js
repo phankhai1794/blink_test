@@ -13,6 +13,7 @@ import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
 import { useUnsavedChangesWarning } from 'app/hooks'
+import { useDropzone } from 'react-dropzone';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -93,6 +94,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     workspace.inquiryReducer.enableSubmit,
   ]);
   const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
+  const [filepaste, setFilepaste] = useState('');
+  const [dropfiles, setDropfiles] = useState([]);
   const currentField = useSelector(({ draftBL }) => draftBL.currentField);
   const filterInqDrf = inquiries.filter(inq => inq.process === 'draft').map(val => val.field);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
@@ -454,8 +457,21 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     };
   };
 
+  const onPaste = (e) => {
+    if (e.clipboardData.files.length) {
+      const fileObject = e.clipboardData.files[0];
+      setFilepaste(fileObject);
+    }
+  }
+
+  const { isDragActive, getRootProps } = useDropzone({
+    onDrop: files => setDropfiles(files),
+    noClick: true
+  });
+
   return (
-    <div style={{ paddingLeft: 18, borderLeft: `2px solid ${colorInq}` }}>
+    <div style={{ paddingLeft: 18, borderLeft: `2px solid ${colorInq}`, position: 'relative' }} onPaste={onPaste} {...getRootProps({})}>
+      {isDragActive && <div className='dropzone'>Drop files here</div>}
       {!openAmendmentList && (
         <p style={{
           color: pink,
@@ -482,7 +498,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           />
         ) : <Typography color="primary" variant="h5" className={classes.inqTitle}>New Amendment</Typography>}
         <div className={'flex'} style={{ alignItems: 'center' }}>
-          <AttachFileAmendment setAttachment={getAttachment} attachmentFiles={attachments} />
+          <AttachFileAmendment filepaste={filepaste} dropfiles={dropfiles} setAttachment={getAttachment} attachmentFiles={attachments} />
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,7 +10,7 @@ import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 const AttachFile = (props) => {
-  const { disabled, isAnswer, isReply, question, questions, setAttachmentReply, isUploadFile } = props;
+  const { disabled, isAnswer, isReply, question, questions, setAttachmentReply, isUploadFile, filepaste, dropfiles } = props;
   const dispatch = useDispatch();
   const [currentEditInq, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
@@ -91,10 +91,19 @@ const AttachFile = (props) => {
     }
   };
 
-  const { getRootProps, getInputProps, open } = useDropzone({
+  useEffect(() => {
+    if (filepaste) handleUploadImageAttach([filepaste]);
+  }, [filepaste]);
+
+  useEffect(() => {
+    if (dropfiles?.length) handleUploadImageAttach(dropfiles);
+  }, [dropfiles]);
+
+  const { getInputProps, getRootProps, open } = useDropzone({
     // Disable click and keydown behavior
     noClick: true,
     noKeyboard: true,
+    noDrag: true,
     onDrop: handleUploadImageAttach
   });
 
