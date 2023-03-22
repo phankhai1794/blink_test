@@ -6,7 +6,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
-import { validateBLType } from '@shared';
+import { validateBLType, compareObject } from '@shared';
+import { NO_CONTENT_AMENDMENT } from '@shared/keyword';
 import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE } from '@shared/keyword';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
@@ -178,7 +179,14 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     fieldValueSeparate.name = fieldValueSeparate.name.toUpperCase().trim();
     fieldValueSeparate.address = fieldValueSeparate.address.toUpperCase().trim();
+    if (fieldValueSeparate.name === '' && fieldValueSeparate.address === '') {
+      fieldValueSeparate.name = NO_CONTENT_AMENDMENT;
+      fieldValueSeparate.address = '';
+    }
+
     let contentField = isSeparate ? JSON.stringify(fieldValueSeparate) : typeof fieldValue === 'string' ? fieldValue.toUpperCase().trim() : fieldValue;
+    if (!isSeparate && (!fieldValue || fieldValue.trim() === '')) contentField = NO_CONTENT_AMENDMENT;
+
     const uploads = [];
     const fieldReq = fieldValueSelect?.value;
     const optionsInquires = [...inquiries];
@@ -533,15 +541,23 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           className={classes.btn}
           disabled={
             (isSeparate ? (
-              !fieldValueSeparate.name
-              && !fieldValueSeparate.address
-              && !isChange
+              (fieldValueSelect && (attachments.length === 0 && content[fieldValueSelect.value] === (fieldValueSeparate.name.trim() + '\n' + fieldValueSeparate.address.trim())))
+              ||
+              (fieldValueSelect && !content[fieldValueSelect.value] && (fieldValueSeparate.name === '' && fieldValueSeparate.address === '') && attachments.length === 0)
             ) : (
               validateField(fieldValueSelect?.value, fieldValue).isError
               ||
-              (!isChange && fieldValue && (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0)))
-              || (!fieldValue && !isChange)
-            ))
+              (
+                (fieldValue && fieldValueSelect && ['containerDetail', 'containerManifest'].includes(fieldValueSelect.keyword)) ? (
+                  (compareObject(content[fieldValueSelect.value], fieldValue) && attachments.length === 0)
+                ) : (
+                  (fieldValue && fieldValueSelect && (fieldValue.trim() === content[fieldValueSelect.value] && attachments.length === 0))
+                  ||
+                  (fieldValueSelect && !content[fieldValueSelect.value] && (!fieldValue || fieldValue.trim() === '') && attachments.length === 0)
+                )
+              )))
+            ||
+            !fieldValueSelect
             ||
             disableSave
           }

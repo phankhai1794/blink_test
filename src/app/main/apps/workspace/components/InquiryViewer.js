@@ -24,6 +24,7 @@ import {
   SHIPPER,
   NOTIFY,
   ONLY_ATT,
+  NO_CONTENT_AMENDMENT,
   BL_TYPE,
   HS_CODE,
   HTS_CODE,
@@ -448,7 +449,7 @@ const InquiryViewer = (props) => {
             }
             //
             const sortComments = [...res].sort((a, b) => (a.updatedAt > b.updatedAt ? 1 : -1));
-            if (sortComments.length && ['REOPEN_A', 'REOPEN_Q'].includes(sortComments[sortComments.length -1].state)) {
+            if (sortComments.length && ['REOPEN_A', 'REOPEN_Q'].includes(sortComments[sortComments.length - 1].state)) {
               const markReopen = {
                 creator: filterOffshoreSent.creator,
                 updater: filterOffshoreSent.creator,
@@ -1604,16 +1605,17 @@ const InquiryViewer = (props) => {
           .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }
       else { // Edit amendment / reply
-        let newContent = tempReply.answer.content || ONLY_ATT;
+        let newContent = tempReply.answer.content || (question.state === 'AME_DRF' ? NO_CONTENT_AMENDMENT : ONLY_ATT);
         if (newContent && typeof newContent === "string") {
           if (isJsonText(newContent)) {
             const parseContent = JSON.parse(newContent);
             parseContent.name = parseContent.name.toUpperCase().trim();
             parseContent.address = parseContent.address.toUpperCase().trim();
+            if (question.state === 'AME_DRF' && parseContent.name === '' && parseContent.address === '') parseContent.name = NO_CONTENT_AMENDMENT;
             newContent = JSON.stringify(parseContent);
           }
           else {
-            newContent = newContent.trim() || ONLY_ATT;
+            newContent = newContent.trim() || (question.state === 'AME_DRF' ? NO_CONTENT_AMENDMENT : ONLY_ATT);
             if (!isReply || question.state.includes('AME_')) newContent = newContent.toUpperCase();
           }
         }
