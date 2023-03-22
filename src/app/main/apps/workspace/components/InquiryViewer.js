@@ -21,6 +21,11 @@ import {
   CONTAINER_NUMBER,
   CONTAINER_PACKAGE,
   CONTAINER_SEAL,
+  CONTAINER_WEIGHT,
+  CONTAINER_MEASUREMENT,
+  CM_PACKAGE,
+  CM_WEIGHT,
+  CM_MEASUREMENT,
   SHIPPER,
   NOTIFY,
   ONLY_ATT,
@@ -73,7 +78,7 @@ import AttachFile from './AttachFile';
 import Comment from './Comment';
 import TagsComponent from './TagsComponent';
 import ContainerDetailForm from './ContainerDetailForm';
-import WarningMessage from './WarningMessage';
+import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -1714,7 +1719,7 @@ const InquiryViewer = (props) => {
                         CONTAINER_LIST.cmNumber.map((key, index) => {
                           let total = 0;
                           cmOfCd.map((cm) => {
-                            total += parseFloat(cm[getType(key)]);
+                            total += parseFloat(cm[getType(key)].replace(',', ''));
                           });
                           cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                         });
@@ -2631,6 +2636,21 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
+
+  const cdUnit = [
+    { field: CONTAINER_PACKAGE, title: 'PACKAGE', unit: packageUnits, required: 'This is required', pattern: regInteger },
+    { field: CONTAINER_WEIGHT, title: 'WEIGHT', unit: weightUnits, required: 'This is required', pattern: regNumber },
+    { field: CONTAINER_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits, required: false, pattern: regNumber }
+  ];
+
+  const cmUnit = [
+    { field: CM_PACKAGE, title: 'PACKAGE', unit: packageUnits, required: 'This is required', pattern: regInteger },
+    { field: CM_WEIGHT, title: 'WEIGHT', unit: weightUnits, required: 'This is required', pattern: regNumber },
+    { field: CM_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits, required: false, pattern: regNumber }
+  ];
+
   const getField = (field) => {
     return metadata.field?.[field] || '';
   };
@@ -2666,6 +2686,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     } else {
       temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? value.split(',') : value;
     }
+
     setValues(temp);
     setTextResolve(temp);
     setDirty()
@@ -2700,7 +2721,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       setValues(cmSorted)
     }
   }, [content]);
-
 
   const renderTB = () => {
     let td = [];
@@ -2770,6 +2790,33 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                 }
               } else if (inqType === CONTAINER_NUMBER && container === CONTAINER_DETAIL && !disableInput && item.duplicate) {
                 validation(false);
+              }
+              if (CONTAINER_LIST.cdNumber.includes(type) || CONTAINER_LIST.cmNumber.includes(type)) {
+                const filteredCdUnit = (CONTAINER_LIST.cdNumber.includes(type) ? cdUnit : cmUnit).filter((item) => item.field === type);
+                const reg = new RegExp(filteredCdUnit[0].pattern.value);
+                const inputValid = nodeValue[getType(type)].length === 0 || reg.test(nodeValue[getType(type)]);
+                if (!inputValid) validation(false);
+
+                return (
+                  <div>
+                    <input
+                      className={clsx(classes.text)}
+                      key={index1}
+                      style={{
+                        marginLeft: 5,
+                        backgroundColor: disabled && '#FDF2F2',
+                        fontSize: 15,
+                        borderTopRightRadius: rowIndex === 0 && rowValues.length - 1 === index1 ? 8 : null,
+                        textTransform: isUpperCase ? 'uppercase' : 'none',
+                        borderColor: inputValid === true ? '#bac3cb' : 'red'
+                      }}
+                      disabled={disabled}
+                      value={nodeValue ? nodeValue[getType(type)] || '' : ''}
+                      onChange={(e) => onChange(e, nodeValue.index, getType(type))}
+                    />
+                    {inputValid ? null : <p style={{ color: 'red' }}>{filteredCdUnit[0].pattern.message}</p>}
+                  </div>
+                )
               }
               return (
                 <input
