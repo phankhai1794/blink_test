@@ -150,10 +150,6 @@ const Inquiry = (props) => {
     resetActionInquiry(q, true);
   };
 
-  const handleSetSave = (q) => {
-    resetActionInquiry(q, false);
-  };
-
   const checkCommentDraft = (amendment, conditionStates) => {
     let result = true;
     if (amendment?.process === 'draft') {
@@ -264,7 +260,7 @@ const Inquiry = (props) => {
       <div ref={inputAddAmendmentEndRef}>
         {currentAmendment || currentAmendment === null &&
           <div style={{ marginTop: 30 }}>
-            <AmendmentEditor getUpdatedAt={() => {}}/>
+            <AmendmentEditor getUpdatedAt={() => { }} />
           </div>
         }
       </div>

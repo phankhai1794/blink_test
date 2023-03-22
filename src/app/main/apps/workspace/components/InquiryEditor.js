@@ -21,6 +21,7 @@ import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
 import { useUnsavedChangesWarning } from 'app/hooks'
+import { useDropzone } from 'react-dropzone';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -150,7 +151,8 @@ const InquiryEditor = (props) => {
     metadata.field_options.filter((v) => currentEditInq.field === v.value)[0]
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
-  const [nameType, setNameType] = useState(valueType?.label);
+  const [filepaste, setFilepaste] = useState('');
+  const [dropfiles, setDropfiles] = useState([]);
   const [fieldEdited, setFieldEdited] = useState();
   const [nameTypeEdited, setNameTypeEdited] = useState();
   const [contentEdited, setContentEdited] = useState(valueType?.label);
@@ -198,7 +200,6 @@ const InquiryEditor = (props) => {
         );
     }
     setValueType(e);
-    setNameType(e.label);
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
@@ -598,195 +599,210 @@ const InquiryEditor = (props) => {
     setPristine()
   };
 
+  const onPaste = (e) => {
+    if (e.clipboardData.files.length) {
+      const fileObject = e.clipboardData.files[0];
+      setFilepaste(fileObject);
+    }
+  }
+
+  const { isDragActive, getRootProps } = useDropzone({
+    onDrop: files => setDropfiles(files),
+    noClick: true
+  });
+
   return (
-    <>
-      <div className="flex justify-between" style={{ padding: '0.5rem', marginRight: '-15px' }}>
-        <div ref={scrollTopPopup} style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
-          {currentEditInq.field
-            ? getLabelById(metadata['field_options'], currentEditInq.field)
-            : 'New Inquiry'}
+    <div style={{ position: 'relative' }} onPaste={onPaste} {...getRootProps({})}>
+      {isDragActive && <div className='dropzone'>Drop files here</div>}
+      <>
+        <div className="flex justify-between" style={{ padding: '0.5rem', marginRight: '-15px' }}>
+          <div ref={scrollTopPopup} style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
+            {currentEditInq.field
+              ? getLabelById(metadata['field_options'], currentEditInq.field)
+              : 'New Inquiry'}
+          </div>
+
+          <FormControl className={classes.checkedIcon}>
+            <RadioGroup
+              aria-label="receiver"
+              name="receiver"
+              value={currentEditInq.receiver[0]}
+              onChange={(e) => handleReceiverChange(e)}>
+              <FormControlLabel
+                value="customer"
+                control={<Radio color={'primary'} />}
+                label="Customer"
+              />
+              <FormControlLabel
+                value="onshore"
+                control={<Radio color={'primary'} />}
+                label="Onshore"
+              />
+            </RadioGroup>
+
+            <AttachFile filepaste={filepaste} dropfiles={dropfiles} />
+          </FormControl>
         </div>
-
-        <FormControl className={classes.checkedIcon}>
-          <RadioGroup
-            aria-label="receiver"
-            name="receiver"
-            value={currentEditInq.receiver[0]}
-            onChange={(e) => handleReceiverChange(e)}>
-            <FormControlLabel
-              value="customer"
-              control={<Radio color={'primary'} />}
-              label="Customer"
-            />
-            <FormControlLabel
-              value="onshore"
-              control={<Radio color={'primary'} />}
-              label="Onshore"
-            />
-          </RadioGroup>
-
-          <AttachFile />
-        </FormControl>
-      </div>
-      {currentEditInq && (
-        <div className={classes.form}>
-          <Grid container spacing={4}>
-            <Grid item xs={4}>
-              <FormControl error={!valid.field}>
-                <FuseChipSelect
-                  customStyle={styles(fullscreen ? 320 : 295)}
-                  value={fieldValue}
-                  isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
-                  onChange={handleFieldChange}
-                  placeholder="BL Data Field"
-                  textFieldProps={{
-                    variant: 'outlined'
-                  }}
-                  options={fieldType}
-                  errorStyle={valid.field}
-                />
-                <div style={{ height: '20px' }}>
-                  {!valid.field && (
-                    <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
-                  )}
-                </div>
-              </FormControl>
+        {currentEditInq && (
+          <div className={classes.form} style={isDragActive ? { visibility: 'hidden' } : {}}>
+            <Grid container spacing={4}>
+              <Grid item xs={4}>
+                <FormControl error={!valid.field}>
+                  <FuseChipSelect
+                    customStyle={styles(fullscreen ? 320 : 295)}
+                    value={fieldValue}
+                    isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
+                    onChange={handleFieldChange}
+                    placeholder="BL Data Field"
+                    textFieldProps={{
+                      variant: 'outlined'
+                    }}
+                    options={fieldType}
+                    errorStyle={valid.field}
+                  />
+                  <div style={{ height: '20px' }}>
+                    {!valid.field && (
+                      <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+                    )}
+                  </div>
+                </FormControl>
+              </Grid>
+              <Grid item xs={4}>
+                <FormControl error={!valid.inqType}>
+                  <FuseChipSelect
+                    value={valueType}
+                    customStyle={styles(fullscreen ? 330 : 295)}
+                    isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
+                    onChange={handleTypeChange}
+                    placeholder="Type of Question"
+                    textFieldProps={{
+                      variant: 'outlined'
+                    }}
+                    options={inqTypeOption}
+                    errorStyle={valid.inqType}
+                  />
+                  <div style={{ height: '20px' }}>
+                    {!valid.inqType && (
+                      <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+                    )}
+                  </div>
+                </FormControl>
+              </Grid>
+              <Grid item xs={4}>
+                <FormControl error={!valid.ansType}>
+                  <FuseChipSelect
+                    value={valueAnsType}
+                    customStyle={styles(fullscreen ? 330 : 295)}
+                    isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
+                    onChange={handleAnswerTypeChange}
+                    placeholder="Type of Answer"
+                    textFieldProps={{
+                      variant: 'outlined'
+                    }}
+                    options={optionsAnsType}
+                    errorStyle={valid.ansType}
+                  />
+                  <div style={{ height: '15px' }}>
+                    {!valid.ansType && (
+                      <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+                    )}
+                  </div>
+                </FormControl>
+              </Grid>
             </Grid>
-            <Grid item xs={4}>
-              <FormControl error={!valid.inqType}>
-                <FuseChipSelect
-                  value={valueType}
-                  customStyle={styles(fullscreen ? 330 : 295)}
-                  isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
-                  onChange={handleTypeChange}
-                  placeholder="Type of Question"
-                  textFieldProps={{
-                    variant: 'outlined'
-                  }}
-                  options={inqTypeOption}
-                  errorStyle={valid.inqType}
-                />
-                <div style={{ height: '20px' }}>
-                  {!valid.inqType && (
-                    <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
-                  )}
-                </div>
-              </FormControl>
-            </Grid>
-            <Grid item xs={4}>
-              <FormControl error={!valid.ansType}>
-                <FuseChipSelect
-                  value={valueAnsType}
-                  customStyle={styles(fullscreen ? 330 : 295)}
-                  isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
-                  onChange={handleAnswerTypeChange}
-                  placeholder="Type of Answer"
-                  textFieldProps={{
-                    variant: 'outlined'
-                  }}
-                  options={optionsAnsType}
-                  errorStyle={valid.ansType}
-                />
-                <div style={{ height: '15px' }}>
-                  {!valid.ansType && (
-                    <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
-                  )}
-                </div>
-              </FormControl>
-            </Grid>
-          </Grid>
-          <div className="mt-32 mx-8">
-            <TextField
-              value={currentEditInq.content.replace('{{INQ_TYPE}}', '')}
-              multiline
-              error={!valid.content}
-              helperText={!valid.content ? 'This is required!' : ''}
-              onFocus={(e) => e.target.select()}
-              onChange={handleNameChange}
-              style={{ width: '100%', resize: 'none' }}
-            />
-          </div>
-          {currentEditInq.ansType === metadata.ans_type.choice && (
-            <div className="mt-16">
-              <ChoiceAnswerEditor />
+            <div className="mt-32 mx-8">
+              <TextField
+                value={currentEditInq.content.replace('{{INQ_TYPE}}', '')}
+                multiline
+                error={!valid.content}
+                helperText={!valid.content ? 'This is required!' : ''}
+                onFocus={(e) => e.target.select()}
+                onChange={handleNameChange}
+                style={{ width: '100%', resize: 'none' }}
+              />
             </div>
-          )}
-          {currentEditInq.ansType === metadata.ans_type.paragraph && (
-            <div className="mt-40">
-              <ParagraphAnswerEditor />
-            </div>
-          )}
-          {currentEditInq.ansType === metadata.ans_type.attachment && (
-            <AttachmentAnswer
-              style={{ marginTop: '1rem' }}
-              isPermissionAttach={allowCreateAttachmentAnswer}
-            />
-          )}
-          <Divider className="mt-12" />
-          <div style={{ width: '80%' }}>
-            {currentEditInq.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
-            {currentEditInq.mediaFile?.length > 0 &&
-              currentEditInq.mediaFile?.map((file, mediaIndex) => (
-                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                    <ImageAttach file={file} files={currentEditInq.mediaFile} field={currentEditInq.field} />
-                  ) : (
-                    <FileAttach file={file} files={currentEditInq.mediaFile} field={currentEditInq.field} />
-                  )}
-                </div>
-              ))}
-          </div>
-          <>
-            {user.role !== 'Admin' && (
-              <>
-                {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-                {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
+            {currentEditInq.ansType === metadata.ans_type.choice && (
+              <div className="mt-16">
+                <ChoiceAnswerEditor />
+              </div>
+            )}
+            {currentEditInq.ansType === metadata.ans_type.paragraph && (
+              <div className="mt-40">
+                <ParagraphAnswerEditor />
+              </div>
+            )}
+            {currentEditInq.ansType === metadata.ans_type.attachment && (
+              <AttachmentAnswer
+                style={{ marginTop: '1rem' }}
+                isPermissionAttach={allowCreateAttachmentAnswer}
+              />
+            )}
+            <Divider className="mt-12" />
+            <div style={{ width: '80%' }}>
+              {currentEditInq.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
+              {currentEditInq.mediaFile?.length > 0 &&
+                currentEditInq.mediaFile?.map((file, mediaIndex) => (
                   <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                     {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach
-                        file={file}
-                        files={currentEditInq.mediaFilesAnswer}
-                        field={currentEditInq.field}
-                        question={currentEditInq}
-                        style={{ margin: '2.5rem' }}
-                        isAnswer={true}
-                      />
+                      <ImageAttach file={file} files={currentEditInq.mediaFile} field={currentEditInq.field} />
                     ) : (
-                      <FileAttach
-                        file={file}
-                        files={currentEditInq.mediaFilesAnswer}
-                        field={currentEditInq.field}
-                        isAnswer={true}
-                        question={currentEditInq}
-                      />
+                      <FileAttach file={file} files={currentEditInq.mediaFile} field={currentEditInq.field} />
                     )}
                   </div>
                 ))}
-              </>
-            )}
-          </>
-          <div className="flex">
+            </div>
+            <>
+              {user.role !== 'Admin' && (
+                <>
+                  {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+                  {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
+                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+                        <ImageAttach
+                          file={file}
+                          files={currentEditInq.mediaFilesAnswer}
+                          field={currentEditInq.field}
+                          question={currentEditInq}
+                          style={{ margin: '2.5rem' }}
+                          isAnswer={true}
+                        />
+                      ) : (
+                        <FileAttach
+                          file={file}
+                          files={currentEditInq.mediaFilesAnswer}
+                          field={currentEditInq.field}
+                          isAnswer={true}
+                          question={currentEditInq}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </>
+              )}
+            </>
             <div className="flex">
-              <Button
-                variant="contained"
-                color="primary"
-                disabled={isDisabled}
-                onClick={() => onSave()}
-                classes={{ root: classes.button }}>
-                Save
-              </Button>
-              <Button
-                variant="contained"
-                classes={{ root: clsx(classes.button, 'reply') }}
-                color="primary"
-                onClick={onCancel}>
-                Cancel
-              </Button>
+              <div className="flex">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={isDisabled}
+                  onClick={() => onSave()}
+                  classes={{ root: classes.button }}>
+                  Save
+                </Button>
+                <Button
+                  variant="contained"
+                  classes={{ root: clsx(classes.button, 'reply') }}
+                  color="primary"
+                  onClick={onCancel}>
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </>
+    </div>
   );
 };
 
