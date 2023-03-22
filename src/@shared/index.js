@@ -267,3 +267,22 @@ export const isSameFile = (inquiries, tempReply) => {
 
   return isSame;
 }
+
+export const compareObject = (a, b) => {
+  if (a.length === b.length && a.length === 0) return true;
+
+  const keyList = Object.keys(a[0]);
+  for (let index in a) {
+    for (let key of keyList) {
+      if (typeof a[index][key] === 'string' && a[index][key]?.trim() !== b[index][key]?.trim()) return false;
+      if (typeof a[index][key] === 'number' && a[index][key] !== b[index][key]) return false;
+      if (typeof a[index][key] === 'object') {
+        if (b[index][key].length !== a[index][key].length) return false;
+
+        const checkList = b[index][key].filter(item3 => a[index][key].includes(item3.trim()));
+        if (checkList.length !== b[index][key].length) return false;
+      }
+    }
+  }
+  return true;
+}
