@@ -2,6 +2,7 @@ import { getMetadata } from 'app/services/inquiryService';
 import { getFieldContent, confirmDraftBl } from 'app/services/draftblService';
 import { getBlInfo, getCustomerAmendment } from 'app/services/myBLService';
 import { filterMetadata, draftConfirm } from '@shared';
+import { handleError } from '@shared/handleError';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
 
 export const SET_METADATA = 'SAVE_METADATA';
@@ -23,7 +24,7 @@ export const loadMetadata = () => (dispatch) => {
       const data = filterMetadata(res);
       dispatch(setMetadata(data));
     })
-    .catch((err) => console.error(err));
+    .catch((err) => handleError(dispatch, err));
 };
 
 export const loadContent = (bl) => async (dispatch) => {
@@ -102,7 +103,7 @@ export const setConfirmDraftBL = (myBL, role) => (dispatch) => {
       // BL Confirm by Customer (CC), TO: Return back from Customer via BLink, TW: Return back from Onshore via BLink
       dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "BM", role === 'Guest' ? "TO" : "TW"));
     })
-    .catch((err) => console.error(err));
+    .catch((err) => handleError(dispatch, err));
 };
 
 export function setCurrentField(state) {

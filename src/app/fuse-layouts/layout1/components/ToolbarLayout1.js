@@ -4,6 +4,8 @@ import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
+import { clearLocalStorage } from '@shared';
+import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
@@ -209,7 +211,7 @@ function ToolbarLayout1(props) {
       let countLoadComment = 0;
       let countAmendment = 0;
       axios
-        .all(inquiriesPendingProcess.map((q) => loadComment(q.id))) // TODO: refactor
+        .all(inquiriesPendingProcess.map((q) => loadComment(q.id).catch(err => handleError(dispatch, err)))) // TODO: refactor
         .then((res) => {
           if (res) {
             let commentList = [];
@@ -332,9 +334,14 @@ function ToolbarLayout1(props) {
   useEffect(() => {
     if (!user.displayName || !validToken) {
       if (!allowAccess) {
-        localStorage.clear();
+        clearLocalStorage();
         sessionStorage.removeItem("permissions");
-        history.push({
+
+        const bl = new URLSearchParams(search).get('bl');
+        if (bl) {
+          window.location.reload();
+          // history.push(`/guest?bl=${bl}`);
+        } else history.push({
           pathname: '/login',
           ...(!logout && { cachePath: pathname, cacheSearch: search })
         });

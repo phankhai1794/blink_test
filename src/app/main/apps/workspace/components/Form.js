@@ -17,7 +17,6 @@ import { Box, Tabs, Tab, Divider, Link, Chip, Button } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import OpenInNew from '@material-ui/icons/OpenInNew';
-import { getMail } from 'app/services/mailService';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 

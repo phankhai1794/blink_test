@@ -48,6 +48,8 @@ import {
   ALSO_NOTIFY,
   DESCRIPTION_OF_GOODS
 } from '@shared/keyword';
+import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
+import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -80,7 +82,6 @@ import AttachFile from './AttachFile';
 import Comment from './Comment';
 import TagsComponent from './TagsComponent';
 import ContainerDetailForm from './ContainerDetailForm';
-import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -520,7 +521,7 @@ const InquiryViewer = (props) => {
           }
           setIsLoadedComment(true);
         })
-        .catch((error) => console.error(error));
+        .catch((error) => handleError(dispatch, error));
     } else {
       getCommentDraftBl(myBL.id, question.field)
         .then((res) => {
@@ -701,7 +702,7 @@ const InquiryViewer = (props) => {
           }
           setIsLoadedComment(true);
         })
-        .catch((error) => console.error(error));
+        .catch((error) => handleError(dispatch, error));
     }
 
     return () => {
@@ -845,7 +846,7 @@ const InquiryViewer = (props) => {
           }
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
         })
-        .catch((error) => console.error(error));
+        .catch((error) => handleError(dispatch, error));
     } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove) {
       deleteDraftBLReply(replyRemove?.draftId, replyRemove.field, myBL.id)
         .then((res) => {
@@ -935,16 +936,18 @@ const InquiryViewer = (props) => {
                       cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[1]] = cm;
-                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' }).then(res => {
-                      if (res && res.removeAmendment) {
-                        const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[1] && inq.process === 'draft');
-                        if (removeAmendment.length) {
-                          const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
-                          if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                      .then(res => {
+                        if (res && res.removeAmendment) {
+                          const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[1] && inq.process === 'draft');
+                          if (removeAmendment.length) {
+                            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+                            if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                          }
+                          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                         }
-                        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-                      }
-                    });
+                      })
+                      .catch((err) => handleError(dispatch, err));
                   }
                 } else if (idCM === question.field) {
                   let cd = content[containerCheck[0]]
@@ -957,16 +960,18 @@ const InquiryViewer = (props) => {
                       cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[0]] = cd;
-                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' }).then(res => {
-                      if (res && res.removeAmendment) {
-                        const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
-                        if (removeAmendment.length) {
-                          const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
-                          if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                      .then(res => {
+                        if (res && res.removeAmendment) {
+                          const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
+                          if (removeAmendment.length) {
+                            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+                            if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                          }
+                          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                         }
-                        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-                      }
-                    });
+                      })
+                      .catch((err) => handleError(dispatch, err));
                   }
                 }
                 if (res.emptyCDorCMAmendment) {
@@ -991,61 +996,63 @@ const InquiryViewer = (props) => {
             props.getUpdatedAt();
           }
           // setSaveComment(!isSaveComment);
-        }).catch((error) => console.error(error));
+        }).catch((error) => handleError(dispatch, error));
     } else if (confirmPopupType === 'removeReplyInquiry' && replyRemove) {
-      deleteComment(replyRemove?.draftId, replyRemove.id).then((res) => {
-        if (res) {
-          const optionsOfQuestion = [...inquiries];
-          const indexQuestion = optionsOfQuestion.findIndex(inq => inq.id === replyRemove.id);
-          if (res.isOldestReply) {
-            if (indexQuestion !== -1) {
-              if (metadata.ans_type.paragraph === optionsOfQuestion[indexQuestion].ansType && optionsOfQuestion[indexQuestion].answerObj && optionsOfQuestion[indexQuestion].answerObj.length) {
-                setDeleteAnswer({ status: true, content: optionsOfQuestion[indexQuestion].answerObj[0].content });
+      deleteComment(replyRemove?.draftId, replyRemove.id)
+        .then((res) => {
+          if (res) {
+            const optionsOfQuestion = [...inquiries];
+            const indexQuestion = optionsOfQuestion.findIndex(inq => inq.id === replyRemove.id);
+            if (res.isOldestReply) {
+              if (indexQuestion !== -1) {
+                if (metadata.ans_type.paragraph === optionsOfQuestion[indexQuestion].ansType && optionsOfQuestion[indexQuestion].answerObj && optionsOfQuestion[indexQuestion].answerObj.length) {
+                  setDeleteAnswer({ status: true, content: optionsOfQuestion[indexQuestion].answerObj[0].content });
+                }
               }
-            }
-            if (!res.statePrev) {
-              optionsOfQuestion[indexQuestion].state = 'ANS_SENT';
-            } else {
-              optionsOfQuestion.splice(indexQuestion, 1);
-            }
-          }
-          if (res.response.type) {
-            setDeleteAnswer({ status: true, content: res.response.content || '' });
-            if (!res.response.content) {
-              optionsOfQuestion[indexQuestion].mediaFilesAnswer = [];
-            }
-            if (res.response.type === 'paragraph') {
-              if (res.response.content) {
-                optionsOfQuestion[indexQuestion].mediaFilesAnswer = res.response.mediaFilesAnswer;
-                optionsOfQuestion[indexQuestion].paragraphAnswer = {
-                  inquiry: question.id,
-                  content: res.response.content,
-                };
+              if (!res.statePrev) {
+                optionsOfQuestion[indexQuestion].state = 'ANS_SENT';
               } else {
-                optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
-                optionsOfQuestion[indexQuestion].answerObj = [];
+                optionsOfQuestion.splice(indexQuestion, 1);
               }
             }
-            else if (res.response.type === 'choice') {
-              if (res.response.content) {
-                optionsOfQuestion[indexQuestion].mediaFilesAnswer = res.response.mediaFilesAnswer;
-                optionsOfQuestion[indexQuestion].selectChoice = {
-                  inquiry: question.id,
-                  answer: res.response.content,
-                  confirmed: true
-                };
-              } else {
-                optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
+            if (res.response.type) {
+              setDeleteAnswer({ status: true, content: res.response.content || '' });
+              if (!res.response.content) {
+                optionsOfQuestion[indexQuestion].mediaFilesAnswer = [];
+              }
+              if (res.response.type === 'paragraph') {
+                if (res.response.content) {
+                  optionsOfQuestion[indexQuestion].mediaFilesAnswer = res.response.mediaFilesAnswer;
+                  optionsOfQuestion[indexQuestion].paragraphAnswer = {
+                    inquiry: question.id,
+                    content: res.response.content,
+                  };
+                } else {
+                  optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
+                  optionsOfQuestion[indexQuestion].answerObj = [];
+                }
+              }
+              else if (res.response.type === 'choice') {
+                if (res.response.content) {
+                  optionsOfQuestion[indexQuestion].mediaFilesAnswer = res.response.mediaFilesAnswer;
+                  optionsOfQuestion[indexQuestion].selectChoice = {
+                    inquiry: question.id,
+                    answer: res.response.content,
+                    confirmed: true
+                  };
+                } else {
+                  optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
+                }
               }
             }
+            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+            setReplyRemove();
+            setDisableSaveReply(false);
+            props.getUpdatedAt();
+            setViewDropDown('');
           }
-          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-          setReplyRemove();
-          setDisableSaveReply(false);
-          props.getUpdatedAt();
-          setViewDropDown('');
-        }
-      }).catch((error) => console.error(error));
+        })
+        .catch((error) => handleError(dispatch, error));
     }
     dispatch(
       FormActions.openConfirmPopup({
@@ -1138,7 +1145,7 @@ const InquiryViewer = (props) => {
         textInput = textResolve.trim();
       }
 
-      const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
+      const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo }).catch(err => handleError(dispatch, err));
       if (isWarning) {
         dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
         setDisableAcceptResolve(false);
@@ -1158,7 +1165,8 @@ const InquiryViewer = (props) => {
         const find = metadata?.field_options.find(field => field.value === inq.field);
         ids.push({ id: inq.id, field: find.label })
       })
-      sendmailResolve({ type: type === 'customer' ? 'Customer' : 'Onshore', myBL, user, content, ids, process });
+      sendmailResolve({ type: type === 'customer' ? 'Customer' : 'Onshore', myBL, user, content, ids, process })
+        .catch(err => handleError(dispatch, err));
     }
   }
 
@@ -1289,7 +1297,7 @@ const InquiryViewer = (props) => {
         setDisableAcceptResolve(false);
         setDisableReopen(false);
       })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
+      .catch((error) => handleError(dispatch, error));
   };
 
   const onUpload = () => {
@@ -1370,8 +1378,9 @@ const InquiryViewer = (props) => {
       })
       .catch((error) => {
         // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: error, icon: 'failed' }));
-        dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-      }).finally(() => dispatch(FormActions.isLoadingProcess(false)));
+        handleError(dispatch, error);
+      })
+      .finally(() => dispatch(FormActions.isLoadingProcess(false)));
   };
 
   const cancelResolve = () => {
@@ -1503,7 +1512,7 @@ const InquiryViewer = (props) => {
           mediaListAmendment.push({ id: mediaFileAns.id, ext: mediaFileAns.ext, name: mediaFileAns.name })
         }
       });
-      if (formData.get('files')) mediaFilesResp = await uploadFile(formData);
+      if (formData.get('files')) mediaFilesResp = await uploadFile(formData).catch((err) => handleError(dispatch, err));
       if (mediaFilesResp) {
         const { response } = mediaFilesResp;
         response.forEach((file) => {
@@ -1551,9 +1560,7 @@ const InquiryViewer = (props) => {
             );
             setViewDropDown('');
             setDisableSaveReply(false);
-          }).catch((error) =>
-            dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-          );
+          }).catch((error) => handleError(dispatch, error));
       } else {
         // Edit
         const reqReply = {
@@ -1586,9 +1593,7 @@ const InquiryViewer = (props) => {
             dispatch(
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
             );
-          }).catch((error) =>
-            dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-          );
+          }).catch((error) => handleError(dispatch, error));
       }
     } else {
       if (!tempReply.answer?.id) { // Create amendment / reply
@@ -1619,7 +1624,7 @@ const InquiryViewer = (props) => {
             dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
             dispatch(InquiryActions.setNewAmendment({ oldAmendmentId: question.id, newAmendment: res.newAmendment }));
           })
-          .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+          .catch((error) => handleError(dispatch, error));
       }
       else { // Edit amendment / reply
         let newContent = tempReply.answer.content || (question.state === 'AME_DRF' ? NO_CONTENT_AMENDMENT : ONLY_ATT);
@@ -1751,7 +1756,7 @@ const InquiryViewer = (props) => {
           dispatch(InquiryActions.setInquiries(optionsInquires));
           props.getUpdatedAt();
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
-        }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
+        }).catch((err) => handleError(dispatch, err));
       }
     }
     setIsReply(false);
@@ -1861,7 +1866,7 @@ const InquiryViewer = (props) => {
           );
         }
       })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
+      .catch((error) => handleError(dispatch, error));
   };
 
   useEffect(() => {

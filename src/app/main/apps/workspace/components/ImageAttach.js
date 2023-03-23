@@ -5,6 +5,7 @@ import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import { IconButton, Tooltip } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
+import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from "@shared/permission";
 // import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 // import ReactDOM from 'react-dom';
@@ -74,7 +75,7 @@ const ImageAttach = ({ indexMedia, file, files, field, hiddenRemove = false, isA
         .then((f) => {
           setSrcUrl(urlMedia(file.ext, f));
         })
-        .catch((error) => console.error(error));
+        .catch((error) => handleError(dispatch, error));
     } else if (!file.id && file.src) {
       setSrcUrl(file.src)
     }

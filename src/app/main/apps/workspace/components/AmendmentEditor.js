@@ -8,6 +8,7 @@ import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
 import { validateBLType, compareObject } from '@shared';
 import { NO_CONTENT_AMENDMENT } from '@shared/keyword';
+import { handleError } from '@shared/handleError';
 import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE } from '@shared/keyword';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
@@ -142,7 +143,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const handleValidateInput = async (confirm = null) => {
     setDisableSave(true);
     let textInput = fieldValue || '';
-    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
+    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo }).catch(err => handleError(dispatch, err));
     if (isWarning) {
       dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
     } else {
@@ -331,8 +332,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             dispatch(InquiryActions.addAmendment());
             dispatch(InquiryActions.setOneInq({}));
             setPristine()
-          }).catch((err) => console.error(err));
-      });
+          }).catch((err) => handleError(dispatch, err));
+      })
+      .catch((err) => handleError(dispatch, err))
   }
 
   const handleCancel = () => {

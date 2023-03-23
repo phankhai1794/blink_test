@@ -2,6 +2,7 @@ import { FuseChipSelect } from '@fuse';
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLabelById, toFindDuplicates } from '@shared';
+import { handleError } from '@shared/handleError';
 import {
   FormControl,
   FormControlLabel,
@@ -471,7 +472,7 @@ const InquiryEditor = (props) => {
 
       for (const f in mediaCreate) {
         const form_data = mediaCreate[f].data;
-        const res = await uploadFile(form_data);
+        const res = await uploadFile(form_data).catch((err) => handleError(dispatch, err));
         mediaCreate[f].id = res.response[0].id;
       }
 
@@ -481,17 +482,18 @@ const InquiryEditor = (props) => {
         mediaCreate.length ||
         mediaDelete.length
       ) {
-        const update = await updateInquiry(inquiry.id, {
-          inq: inq(currentEditInq),
-          ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
-          files: { mediaCreate, mediaDelete }
-        });
         const optionsMinimize = [...listMinimize];
         const index = optionsMinimize.findIndex((e) => e.id === inquiry.id);
         optionsMinimize[index].field = currentEditInq.field;
         dispatch(InquiryActions.setListMinimize(optionsMinimize));
         const editedIndex = inquiriesOp.findIndex((inq) => inq.id === inquiry.id);
         inquiriesOp[editedIndex] = currentEditInq;
+
+        const update = await updateInquiry(inquiry.id, {
+          inq: inq(currentEditInq),
+          ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
+          files: { mediaCreate, mediaDelete }
+        }).catch(err => handleError(dispatch, err));
         if (update.data.length && editedIndex !== -1) {
           inquiriesOp[editedIndex].answerObj = [
             ...currentEditInq.answerObj,
@@ -506,7 +508,7 @@ const InquiryEditor = (props) => {
           }
         }
         //
-        const dataDate = await getUpdatedAtAnswer(inquiry.id);
+        const dataDate = await getUpdatedAtAnswer(inquiry.id).catch(err => handleError(dispatch, err));
         inquiriesOp[editedIndex].createdAt = dataDate.data;
         inquiriesOp[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setEditInq());
@@ -554,7 +556,7 @@ const InquiryEditor = (props) => {
         return contentTrim;
       });
       axios
-        .all(uploads.map((endpoint) => uploadFile(endpoint)))
+        .all(uploads.map((endpoint) => uploadFile(endpoint).catch((err) => handleError(dispatch, err))))
         .then((media) => {
           let mediaList = [];
           media.forEach((file) => {
@@ -590,11 +592,9 @@ const InquiryEditor = (props) => {
               dispatch(InquiryActions.setOneInq());
               setDisabled(false);
             })
-            .catch((error) =>
-              dispatch(AppActions.showMessage({ message: error, variant: 'error' }))
-            );
+            .catch((error) => handleError(dispatch, error));
         })
-        .catch((error) => console.log(error));
+        .catch((error) => handleError(dispatch, error));
     }
     setPristine()
   };

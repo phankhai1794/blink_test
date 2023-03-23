@@ -6,10 +6,10 @@ export async function saveInquiry(data) {
   return response.data;
 }
 
-export async function saveComment(data) {
-  const response = await axios().post(`${PATH}/comment`, data);
-  return response.data;
-}
+// export async function saveComment(data) {
+//   const response = await axios().post(`${PATH}/comment`, data);
+//   return response.data;
+// }
 
 export async function saveReply(data) {
   const response = await axios().post(`${PATH}/reply`, data);
@@ -46,10 +46,10 @@ export async function deleteComment(answerId, inqId) {
   return response.data;
 }
 
-export async function editComment(id, content) {
-  const response = await axios().patch(`${PATH}/comment/${id}`, { content });
-  return response.data;
-}
+// export async function editComment(id, content) {
+//   const response = await axios().patch(`${PATH}/comment/${id}`, { content });
+//   return response.data;
+// }
 
 export async function resolveInquiry(body) {
   const response = await axios().post(`${PATH}/resolve`, body);

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import { submitInquiryAnswer } from 'app/services/inquiryService';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
-import { getBlInfo } from 'app/services/myBLService';
+import { handleError } from '@shared/handleError';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
@@ -91,7 +91,7 @@ const PopupConfirmSubmit = (props) => {
         fields.push(item.field);
       }
     });
-    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields, bl: myBL.id });
+    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields, bl: myBL.id }).catch(err => handleError(dispatch, err));
 
     const inqsDraft = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && ['AME_DRF'].includes(inq.currentState));
     const inqsReply = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(inq.currentState));

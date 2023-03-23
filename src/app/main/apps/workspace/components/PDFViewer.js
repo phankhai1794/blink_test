@@ -5,6 +5,7 @@ import { getFile } from 'app/services/fileService';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
+import { handleError } from '@shared/handleError';
 
 import * as FormActions from '../store/actions/form';
 
@@ -458,7 +459,7 @@ const PDFViewer = (props) => {
         fileIds.forEach(async (f, i) => {
           let url = '';
           if (f.id) {
-            const blob = await getFile(f.id);
+            const blob = await getFile(f.id).catch((err) => handleError(dispatch, err));
             url = urlMedia(f.ext, blob);
           } else url = f.url;
           if (url) {
