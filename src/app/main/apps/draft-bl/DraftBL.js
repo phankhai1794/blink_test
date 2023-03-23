@@ -8,13 +8,21 @@ import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
-import { isJsonText, formatDate } from '@shared';
+import { isJsonText, formatDate, maxChars, lineBreakAtBoundary, checkMaxRows } from '@shared';
 import { packageUnitsJson } from '@shared/units';
 
 import * as Actions from './store/actions';
+import NextPage from './NextPage';
 
-const BODER_COLOR = '1px solid #2929FF';
-const BODER_COLOR_BOLD = '2px solid #2929FF';
+const BORDER = '1px solid #2929FF';
+const BORDER_BOLD = '2px solid #2929FF';
+const WIDTH_COL_MARK = 220;
+const WIDTH_COL_PKG = 163;
+const WIDTH_COL_HM = 15;
+const WIDTH_COL_DOG = 370;
+const WIDTH_COL_WEIGHT = 191;
+const WIDTH_COL_MEAS = 191;
+
 const useStyles = makeStyles((theme) => ({
   wrapper: {
     background: '#515E6A',
@@ -23,37 +31,11 @@ const useStyles = makeStyles((theme) => ({
   },
   layout: {
     width: 1150,
-    minHeight: 1756,
+    height: 1732.2,
+    overflow: 'hidden',
     background: '#fff',
     padding: '0 30px 30px 30px',
     margin: 'auto'
-  },
-  general: {
-    marginTop: 15,
-    borderBottom: BODER_COLOR
-  },
-  leftCol: {
-    width: '55%',
-    borderTop: BODER_COLOR,
-    borderRight: BODER_COLOR
-  },
-  rightCol: {
-    width: '45%',
-    borderTop: BODER_COLOR
-  },
-  flexContainer: {
-    borderBottom: BODER_COLOR
-  },
-  drawLine: {
-    position: 'absolute',
-    zIndex: '-1px',
-    left: 30,
-    height: '50%',
-    width: 1259
-  },
-  line: {
-    height: '100%',
-    borderRight: BODER_COLOR
   },
   tittle_S: {
     fontFamily: 'Arial, serif',
@@ -67,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
     color: 'rgb(0, 0, 255) !important',
     paddingTop: 2
   },
-  tittle_M_GRAY: {
+  tittle_M_gray: {
     fontFamily: 'Arial, serif',
     fontSize: 13 /*1vw*/,
     paddingTop: 2
@@ -76,17 +58,28 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: 'Courier, serif',
     fontSize: 35 /*2.5vw*/,
     fontWeight: 'bold',
-    width: '60.5%',
+    width: '65%',
     paddingTop: 15,
     marginLeft: 120
   },
-  tittle_Break_Line: {
+  tittle_break_line: {
     fontFamily: 'Courier, serif',
     fontSize: 20 /*1vw*/,
     paddingTop: 2,
     color: '#4A4A4A'
   },
-  billType: {
+  page_Number: {
+    color: '#000',
+    fontFamily: 'Courier, serif',
+    fontSize: 15,
+    textAlign: 'right',
+  },
+  page_Count: {
+    display: 'inline-block',
+    margin: 0,
+    width: 30
+  },
+  blType: {
     color: '#000',
     fontFamily: 'Courier, serif',
     fontSize: 27 /*1.8vw*/,
@@ -118,10 +111,14 @@ const useStyles = makeStyles((theme) => ({
     color: 'rgb(0, 0, 255)'
   },
   /* ################################################################## */
-  header_1: {
+  header: {
     position: 'relative',
     top: 15,
-    paddingBottom: '15px'
+    paddingBottom: 10
+  },
+  logo: {
+    width: 135 /*10vw*/,
+    padding: 7
   },
   bkgNo: {
     display: 'block',
@@ -149,7 +146,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'block',
     lineHeight: 'initial',
     whiteSpace: 'pre-wrap',
-    borderBottom: BODER_COLOR
+    borderBottom: BORDER
   },
   exportFef: {
     minHeight: 79,
@@ -166,12 +163,11 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: 'initial'
   },
   /* ################################# */
-  logo: {
-    width: 135 /*10vw*/,
-    padding: 7
-  },
-  cont_details_description_1: {
-    paddingTop: 5
+  th: {
+    textAlign: 'center',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   description_payment_dash: {
     fontFamily: 'Courier, serif',
@@ -183,7 +179,7 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: '14px',
     color: '#DC2626',
   },
-  line_Usd: {
+  line_usd: {
     fontSize: 13,
     lineHeight: '14px',
     color: '#0000FE',
@@ -201,6 +197,7 @@ const DraftPage = (props) => {
     draftBL.content,
     draftBL.drfView
   ]);
+  const [isInBound, setIsInBound] = useState({ MD: true, CM: true });
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -213,6 +210,8 @@ const DraftPage = (props) => {
   const getInqType = (field) => {
     return metadata ? metadata.inq_type[field] : '';
   };
+
+  const getPackageName = (packageCode) => packageUnitsJson.find(pkg => pkg.code === packageCode)?.description;
 
   useEffect(() => {
     const { pathname, search } = window.location;
@@ -236,10 +235,108 @@ const DraftPage = (props) => {
     }
   }, [metadata, content]);
 
+  useEffect(() => {
+    if (containersDetail.length) {
+      // CM view
+      let totalMark = getValueField(SHIPPING_MARK).split("\n").map(line => lineBreakAtBoundary(line, maxChars.mark)).join("\n");
+      let totalPackage = `${getValueField(TOTAL_PACKAGE)}\n${getPackageName(getValueField(TOTAL_PACKAGE_UNIT))}`.split("\n").map(line => lineBreakAtBoundary(line, maxChars.package)).join("\n");
+      let totalDescription = getValueField(DESCRIPTION_OF_GOODS).split("\n").map(line => lineBreakAtBoundary(line, maxChars.description)).join("\n");
+      setIsInBound({
+        ...isInBound,
+        MD: checkMaxRows(
+          containersDetail.length + 1, // 1 more dash line
+          totalMark,
+          totalPackage,
+          totalDescription
+        )
+      });
+
+      // MD view
+      let cmMark = "";
+      let cmPackage = "";
+      let cmDescription = "";
+      containersManifest.forEach(cm => {
+        cmMark += lineBreakAtBoundary(cm[getInqType(CM_MARK)], maxChars.mark) + "\n";
+        cmPackage += `${cm[getInqType(CM_PACKAGE)]}\n${getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}`.split("\n").map(line => lineBreakAtBoundary(line, maxChars.package)).join("\n");
+        cmDescription += lineBreakAtBoundary(cm[getInqType(CM_DESCRIPTION)], maxChars.description) + "\n";
+      });
+      setIsInBound({
+        ...isInBound,
+        CM: checkMaxRows(
+          containersDetail.length + containersManifest.length + 1, // 1 more dash line
+          cmMark.trim().replace(/^\s+|\s+$/g, ''),
+          cmPackage.trim().replace(/^\s+|\s+$/g, ''),
+          cmDescription.trim().replace(/^\s+|\s+$/g, '')
+        )
+      });
+    }
+  }, [containersDetail, containersManifest]);
+
+  const renderMDCMTable = () => {
+    if (drfView === "CM" && isInBound[drfView] && containersManifest.length) {
+      return containersManifest.map((cm, index) => (
+        <Grid container item key={index} className={classes.content_L}>
+          <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
+            {cm[getInqType(CM_MARK)]}
+          </Grid>
+          <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
+            <Grid item style={{ textAlign: 'end' }}>
+              <span>{cm[getInqType(CM_PACKAGE)]}</span>
+              <br />
+              <span>{getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}</span>
+            </Grid>
+          </Grid>
+          <Grid style={{ width: WIDTH_COL_HM, borderRight: BORDER, boxSizing: 'border-box' }}></Grid>
+          <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
+            {cm[getInqType(CM_DESCRIPTION)]}
+          </Grid>
+          <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
+            {`${cm[getInqType(CM_WEIGHT)]} ${cm[getInqType(CM_WEIGHT_UNIT)]}`}
+          </Grid>
+          <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
+            {`${cm[getInqType(CM_MEASUREMENT)]} ${cm[getInqType(CM_MEASUREMENT_UNIT)]}`}
+          </Grid>
+        </Grid>
+      ))
+    } else if (drfView === "MD" && isInBound[drfView]) {
+      return <Grid container item className={classes.content_L}>
+        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 5 }}>
+          {getValueField(SHIPPING_MARK)}
+        </Grid>
+        <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 5 }}>
+          <Grid item style={{ textAlign: 'end' }}>
+            <span>{getValueField(TOTAL_PACKAGE)}</span>
+            <br />
+            <span>{getPackageName(getValueField(TOTAL_PACKAGE_UNIT))}</span>
+          </Grid>
+        </Grid>
+        <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }}></Grid>
+        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 5 }}>
+          {getValueField(DESCRIPTION_OF_GOODS)}
+        </Grid>
+        <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 5 }}>
+          {`${getValueField(TOTAL_WEIGHT)} ${getValueField(TOTAL_WEIGHT_UNIT)}`}
+        </Grid>
+        <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 5 }}>
+          {`${getValueField(TOTAL_MEASUREMENT)} ${getValueField(TOTAL_MEASUREMENT_UNIT)}`}
+        </Grid>
+      </Grid>
+    } else {
+      return <Grid container item className={classes.content_L}>
+        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'center', padding: '8px' }} />
+        <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', padding: '8px' }} />
+        <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER, boxSizing: 'border-box' }} />
+        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, padding: '8px' }} />
+        <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', padding: '8px' }} />
+        <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', padding: '8px' }} />
+      </Grid>
+    }
+  }
+
   return (
     <div className={classes.wrapper}>
       <div className={classes.layout}>
-        <div className={classes.header_1} style={{ display: 'flex' }}>
+        <div className={classes.header} style={{ display: 'flex' }}>
           <img className={classes.logo} src="assets/images/logos/one_logo.svg" />
           <div
             className={classes.tittle_L}
@@ -247,7 +344,10 @@ const DraftPage = (props) => {
             DRAFT - NON NEGOTIABLE
           </div>
           <div style={{ width: '30%', paddingTop: 15 }}>
-            <span className={classes.billType}>
+            <div className={classes.page_Number}>
+              PAGE: <p className={classes.page_Count}>1</p> OF <p className={classes.page_Count}>{isInBound[drfView] ? 1 : 2}</p>
+            </div>
+            <span className={classes.blType}>
               {getValueField(BL_TYPE) ? getValueField(BL_TYPE) === "W" ? "SEAWAY BILL" : "BILL OF LADING" : ""}
             </span>
           </div>
@@ -255,9 +355,9 @@ const DraftPage = (props) => {
 
         <Grid container style={{ display: 'flex', marginTop: 15 }}>
           <Grid item xs={7} style={{
-            borderTop: BODER_COLOR,
-            borderBottom: BODER_COLOR,
-            borderRight: BODER_COLOR,
+            borderTop: BORDER,
+            borderBottom: BORDER,
+            borderRight: BORDER,
           }}>
             <div className={classes.tittle_M}>SHIPPER/EXPORTER</div>
             <div className={classes.content_L} style={{ width: '70%' }}>
@@ -269,15 +369,15 @@ const DraftPage = (props) => {
             </div>
           </Grid>
           <Grid container item xs={5} style={{
-            borderTop: BODER_COLOR,
-            borderBottom: BODER_COLOR,
+            borderTop: BORDER,
+            borderBottom: BORDER,
           }}>
             <Grid container item style={{
-              borderBottom: BODER_COLOR,
+              borderBottom: BORDER,
               maxHeight: '70px'
             }}>
               <Grid item xs={6} style={{
-                borderRight: BODER_COLOR,
+                borderRight: BORDER,
               }}>
                 <div className={classes.tittle_M}>BOOKING NO.</div>
                 <div className={clsx(classes.content_L, classes.bkgNo)} data-type="textarea">
@@ -303,13 +403,13 @@ const DraftPage = (props) => {
 
           <Grid container item style={{
             display: 'flex',
-            borderBottom: BODER_COLOR,
+            borderBottom: BORDER,
           }}>
             <Grid container item xs={7} style={{
-              borderRight: BODER_COLOR,
+              borderRight: BORDER,
             }}>
               <Grid item xs={12} style={{
-                borderBottom: BODER_COLOR,
+                borderBottom: BORDER,
               }}>
                 <div className={classes.tittle_M}>CONSIGNEE</div>
                 <span className={clsx(classes.consignee, classes.content_L)} style={{ width: '70%' }}>
@@ -331,7 +431,7 @@ const DraftPage = (props) => {
 
               <Grid container item>
                 <Grid item xs={6} style={{
-                  borderRight: BODER_COLOR,
+                  borderRight: BORDER,
                 }}>
                   <div className={classes.tittle_M}>PRE-CARRIAGE BY</div>
                   <span className={clsx(classes.content_L, classes.singleLine)}>
@@ -356,7 +456,7 @@ const DraftPage = (props) => {
                   {getValueField(FORWARDING)}
                 </span>
               </Grid>
-              <Grid item style={{ borderTop: BODER_COLOR }}>
+              <Grid item style={{ borderTop: BORDER }}>
                 <div className={classes.declaration_M}>
                   {`RECEIVED by the Carrier in apparent good order and condition (unless otherwise stated herein) the total
                 number or quantity of Containers or other packages or units indicated in the box entitled "Carrier's
@@ -379,10 +479,10 @@ const DraftPage = (props) => {
             </Grid>
           </Grid>
 
-          <Grid container item style={{ borderBottom: BODER_COLOR_BOLD }}>
-            <Grid container item xs={12} style={{ borderBottom: BODER_COLOR }}>
-              <Grid container item xs={7} style={{ borderRight: BODER_COLOR }}>
-                <Grid item xs={6} style={{ borderRight: BODER_COLOR }}>
+          <Grid container item style={{ borderBottom: BORDER_BOLD }}>
+            <Grid container item xs={12} style={{ borderBottom: BORDER }}>
+              <Grid container item xs={7} style={{ borderRight: BORDER }}>
+                <Grid item xs={6} style={{ borderRight: BORDER }}>
                   <div className={classes.tittle_M}>OCEAN VESSEL VOYAGE NO. FLAG</div>
                   <span className={clsx(classes.content_L, classes.singleLine)}>
                     {getValueField(VESSEL_VOYAGE)}
@@ -406,8 +506,8 @@ const DraftPage = (props) => {
             </Grid>
 
             <Grid container item xs={12}>
-              <Grid container item xs={7} style={{ borderRight: BODER_COLOR }}>
-                <Grid item xs={6} style={{ borderRight: BODER_COLOR }}>
+              <Grid container item xs={7} style={{ borderRight: BORDER }}>
+                <Grid item xs={6} style={{ borderRight: BORDER }}>
                   <div className={classes.tittle_M}>PORT OF DISCHARGE</div>
                   <span className={clsx(classes.content_L, classes.singleLine)}>
                     {getValueField(PORT_OF_DISCHARGE)}
@@ -434,7 +534,7 @@ const DraftPage = (props) => {
             </Grid>
           </Grid>
 
-          <Grid container item style={{ borderBottom: BODER_COLOR, minHeight: '35px' }}>
+          <Grid container item style={{ minHeight: '35px' }}>
             <Grid item xs={4}>
               <div className={classes.declaration_L}>
                 {`(CHECK "HM" COLUMN IF HAZARDOUS MATERIAL)`}
@@ -448,15 +548,15 @@ const DraftPage = (props) => {
           </Grid>
 
           <Grid container>
-            <Grid container item style={{ borderBottom: BODER_COLOR }}>
-              <Grid item xs={2} style={{ borderRight: BODER_COLOR, display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
+            <Grid container item style={{ borderTop: BORDER, borderBottom: BORDER }}>
+              <Grid item className={classes.th} style={{ width: WIDTH_COL_MARK, borderRight: BORDER }}>
                 <div className={classes.tittle_S}>
                   <span className={classes.tittle_S}>CNTR. NOS. W/SEAL NOS.</span>
                   <br />
                   <span className={classes.tittle_S}>{`MARKS & NUMBERS`}</span>
                 </div>
               </Grid>
-              <Grid item xs={2} style={{ borderRight: BODER_COLOR, display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
+              <Grid item className={classes.th} style={{ width: WIDTH_COL_PKG, borderRight: BORDER }}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     <span className={classes.tittle_S}>QUANTITY</span>
@@ -467,7 +567,7 @@ const DraftPage = (props) => {
                   </div>
                 </div>
               </Grid>
-              <Grid item xs={1} style={{ borderRight: BODER_COLOR, display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
+              <Grid item className={classes.th} style={{ width: WIDTH_COL_HM, borderRight: BORDER }}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     <span className={classes.tittle_S}>H</span>
@@ -476,21 +576,21 @@ const DraftPage = (props) => {
                   </div>
                 </div>
               </Grid>
-              <Grid item xs={3} style={{ borderRight: BODER_COLOR, display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
+              <Grid item className={classes.th} style={{ width: WIDTH_COL_DOG, borderRight: BORDER }}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     DESCRIPTION OF GOODS
                   </div>
                 </div>
               </Grid>
-              <Grid item xs={2} style={{ borderRight: BODER_COLOR, display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
+              <Grid item className={classes.th} style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     GROSS WEIGHT
                   </div>
                 </div>
               </Grid>
-              <Grid item xs={2} style={{ display: 'flex', textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
+              <Grid item className={classes.th} style={{ width: WIDTH_COL_MEAS }}>
                 <div className={classes.declaration_L}>
                   <div className={classes.tittle_S}>
                     GROSS MEASUREMENT
@@ -501,13 +601,12 @@ const DraftPage = (props) => {
 
             {/* Container First Line */}
             <Grid container item>
-              <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
-                <div className={classes.content_M}
-                  style={{ width: '251px', paddingTop: 5 }}>
+              <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER }}>
+                <div className={classes.content_M} style={{ paddingTop: 5 }}>
                   {containersDetail &&
                     containersDetail.map((cd, idx) => (
                       <span key={idx} style={{ whiteSpace: 'pre' }}>
-                        {`${cd[getInqType(CONTAINER_NUMBER)] || ''}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${packageUnitsJson.find(pkg => pkg.code === cd[getInqType(CONTAINER_PACKAGE_UNIT)])?.description || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                        {`${cd[getInqType(CONTAINER_NUMBER)] || ''}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
                         <br />
                       </span>
                     ))}
@@ -516,83 +615,25 @@ const DraftPage = (props) => {
                   </span>
                 </div>
               </Grid>
-              <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center' }} />
-              <Grid item xs={1} style={{ borderRight: BODER_COLOR, textAlign: 'center' }} />
-              <Grid item xs={3} style={{ borderRight: BODER_COLOR, textAlign: 'center' }} />
-              <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center' }} />
-              <Grid item xs={2} style={{ textAlign: 'center' }} />
+              <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER }} />
+              <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }} />
+              <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER }} />
+              <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }} />
+              <Grid item style={{ width: WIDTH_COL_MEAS }} />
             </Grid>
 
             <Grid container item style={{ minHeight: '200px' }}>
-              {drfView === "CM" ? (
-                containersManifest.length ? containersManifest.map((cm, index) => (
-                  <Grid container item key={index} className={classes.content_L}>
-                    <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'left', paddingTop: '8px', paddingRight: '5px' }}>
-                      {cm[getInqType(CM_MARK)]}
-                    </Grid>
-                    <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
-                      <Grid item style={{ textAlign: 'end' }}>
-                        <span>{cm[getInqType(CM_PACKAGE)]}</span>
-                        <br />
-                        <span>{packageUnitsJson.find(pkg => pkg.code === cm[getInqType(CM_PACKAGE_UNIT)])?.description}</span>
-                      </Grid>
-                    </Grid>
-                    <Grid item xs={1} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
-                    </Grid>
-                    <Grid item xs={3} style={{ borderRight: BODER_COLOR, padding: '8px' }}>
-                      {cm[getInqType(CM_DESCRIPTION)]}
-                    </Grid>
-                    <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'end', padding: '8px' }}>
-                      {`${cm[getInqType(CM_WEIGHT)]} ${cm[getInqType(CM_WEIGHT_UNIT)]}`}
-                    </Grid>
-                    <Grid item xs={2} style={{ textAlign: 'end', padding: '8px' }}>
-                      {`${cm[getInqType(CM_MEASUREMENT)]} ${cm[getInqType(CM_MEASUREMENT_UNIT)]}`}
-                    </Grid>
-                  </Grid>
-                )) :
-                  <Grid container item className={classes.content_L}>
-                    <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }} />
-                    <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }} />
-                    <Grid item xs={1} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }} />
-                    <Grid item xs={3} style={{ borderRight: BODER_COLOR, padding: '8px' }} />
-                    <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'end', padding: '8px' }} />
-                    <Grid item xs={2} style={{ textAlign: 'end', padding: '8px' }} />
-                  </Grid>
-              ) : (
-                <Grid container item className={classes.content_L}>
-                  <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'left', paddingTop: '8px', paddingRight: '5px' }}>
-                    {getValueField(SHIPPING_MARK)}
-                  </Grid>
-                  <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
-                    <Grid item style={{ textAlign: 'end' }}>
-                      <span>{getValueField(TOTAL_PACKAGE)}</span>
-                      <br />
-                      <span>{packageUnitsJson.find(pkg => pkg.code === getValueField(TOTAL_PACKAGE_UNIT))?.description}</span>
-                    </Grid>
-                  </Grid>
-                  <Grid item xs={1} style={{ borderRight: BODER_COLOR, textAlign: 'center', padding: '8px' }}>
-                  </Grid>
-                  <Grid item xs={3} style={{ borderRight: BODER_COLOR, padding: '8px' }}>
-                    {getValueField(DESCRIPTION_OF_GOODS)}
-                  </Grid>
-                  <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'end', padding: '8px' }}>
-                    {`${getValueField(TOTAL_WEIGHT)} ${getValueField(TOTAL_WEIGHT_UNIT)}`}
-                  </Grid>
-                  <Grid item xs={2} style={{ textAlign: 'end', padding: '8px' }}>
-                    {`${getValueField(TOTAL_MEASUREMENT)} ${getValueField(TOTAL_MEASUREMENT_UNIT)}`}
-                  </Grid>
-                </Grid>
-              )}
+              {renderMDCMTable()}
             </Grid>
           </Grid>
 
           <Grid container justify="center">
-            <span className={classes.tittle_Break_Line}>** TO BE CONTINUED ON ATTACHED LIST **</span>
+            <span className={classes.tittle_break_line}>** TO BE CONTINUED ON ATTACHED LIST **</span>
           </Grid>
 
           <Grid container style={{ display: 'flex', alignItems: 'center', paddingTop: '12px', paddingBottom: '12px' }}>
             <span className={classes.note}>Declared Cargo Value US $</span>
-            <span className={classes.line_Usd}>&emsp;_____________________&emsp;</span>
+            <span className={classes.line_usd}>&emsp;_____________________&emsp;</span>
             <span className={classes.note}>
               {
                 "If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged"
@@ -600,13 +641,13 @@ const DraftPage = (props) => {
             </span>
           </Grid>
 
-          <Grid container style={{ borderTop: BODER_COLOR_BOLD, borderBottom: BODER_COLOR }}>
+          <Grid container style={{ borderTop: BORDER_BOLD, borderBottom: BORDER }}>
             <Grid container item xs={10}>
               <Grid container item>
                 <Grid item xs={4}
                   style={{
-                    borderRight: BODER_COLOR,
-                    borderBottom: BODER_COLOR,
+                    borderRight: BORDER,
+                    borderBottom: BORDER,
                   }}>
                   <div className={classes.tittle_M}>FREIGHT & CHARGES PAYABLE AT / BY:</div>
                   <div className={classes.content_L} style={{ minHeight: '35px' }}>
@@ -615,17 +656,17 @@ const DraftPage = (props) => {
                 </Grid>
                 <Grid container item xs={6}
                   style={{
-                    borderRight: BODER_COLOR,
-                    borderBottom: BODER_COLOR,
+                    borderRight: BORDER,
+                    borderBottom: BORDER,
                     textAlign: 'center'
                   }}>
-                  <Grid item xs={4} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
+                  <Grid item xs={4} style={{ borderRight: BORDER, textAlign: 'center' }}>
                     <div className={classes.tittle_M} style={{ minWidth: '160px' }} >SERVICE CONTRACT NO.</div>
                     <div className={classes.content_L} style={{ minHeight: '35px' }}>
                       <span>{getValueField(SERVICE_CONTRACT_NO)}</span>
                     </div>
                   </Grid>
-                  <Grid item xs={4} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
+                  <Grid item xs={4} style={{ borderRight: BORDER, textAlign: 'center' }}>
                     <div className={classes.tittle_M} >DOC FORM NO.</div>
                     <div className={classes.content_L} style={{ minHeight: '35px' }}>
                       <span>{getValueField(DOC_FORM_NO)}</span>
@@ -638,8 +679,8 @@ const DraftPage = (props) => {
                 </Grid>
                 <Grid item xs={2}
                   style={{
-                    borderRight: BODER_COLOR,
-                    borderBottom: BODER_COLOR,
+                    borderRight: BORDER,
+                    borderBottom: BORDER,
                   }}>
                   <div className={classes.tittle_M}>EXCHANGE RATE</div>
                   <div className={classes.content_L} style={{ minHeight: '35px' }}>
@@ -648,45 +689,45 @@ const DraftPage = (props) => {
                 </Grid>
               </Grid>
 
-              <Grid container item style={{ borderRight: BODER_COLOR }}>
+              <Grid container item style={{ borderRight: BORDER }}>
                 <Grid container item xs={10}
                   style={{
-                    borderLeft: BODER_COLOR,
+                    borderLeft: BORDER,
                   }}>
                   <Grid item xs={2} style={{ textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BODER_COLOR }}>
+                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       CODE
                     </div>
                     <div className={classes.content_L} style={{ minHeight: '250px' }}>
                       <span>{getValueField(CODE)}</span>
                     </div>
                   </Grid>
-                  <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BODER_COLOR }}>
+                  <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
+                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       TARIFF ITEM
                     </div>
                     <div className={classes.content_L}>
                       <span>{getValueField(TARIFF_ITEM)}</span>
                     </div>
                   </Grid>
-                  <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BODER_COLOR }}>
+                  <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
+                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       FREIGHTED AS
                     </div>
                     <div className={classes.content_L}>
                       <span>{getValueField(FREIGHTED_AS)}</span>
                     </div>
                   </Grid>
-                  <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BODER_COLOR }}>
+                  <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
+                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       RATE
                     </div>
                     <div className={classes.content_L}>
                       <span>{getValueField(RATE)}</span>
                     </div>
                   </Grid>
-                  <Grid item xs={2} style={{ borderRight: BODER_COLOR, textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BODER_COLOR }}>
+                  <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
+                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       PREPAID
                     </div>
                     <div className={classes.content_L}>
@@ -694,7 +735,7 @@ const DraftPage = (props) => {
                     </div>
                   </Grid>
                   <Grid item xs={2} style={{ textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BODER_COLOR }}>
+                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       COLLECT
                     </div>
                     <div className={classes.content_L}>
@@ -703,30 +744,28 @@ const DraftPage = (props) => {
                   </Grid>
                 </Grid>
 
-                <Grid container item xs={2} style={{ borderLeft: BODER_COLOR }}>
-
-                </Grid>
+                <Grid container item xs={2} style={{ borderLeft: BORDER }}></Grid>
               </Grid>
             </Grid>
 
             <Grid container item xs={2} direction='column'>
-              <Grid item style={{ borderBottom: BODER_COLOR }}>
-                <div className={classes.tittle_M_GRAY} style={{ minHeight: '150px' }}>[1] ORIGINAL BILLS(S) HAVE BEEN SIGNED</div>
+              <Grid item style={{ borderBottom: BORDER }}>
+                <div className={classes.tittle_M_gray} style={{ minHeight: '150px' }}>[1] ORIGINAL BILLS(S) HAVE BEEN SIGNED</div>
               </Grid>
 
-              <Grid item style={{ borderBottom: BODER_COLOR }}>
+              <Grid item style={{ borderBottom: BORDER }}>
                 <div className={classes.tittle_M}>DATE CARGO RECEIVED</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
                   <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')}</span>
                 </div>
               </Grid>
-              <Grid item style={{ borderBottom: BODER_COLOR }}>
+              <Grid item style={{ borderBottom: BORDER }}>
                 <div className={classes.tittle_M}>DATE LADEN ON BOARD</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
                   <span>{getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')}</span>
                 </div>
               </Grid>
-              <Grid item style={{ borderBottom: BODER_COLOR }}>
+              <Grid item style={{ borderBottom: BORDER }}>
                 <div className={classes.tittle_M}>PLACE OF BILL(S) ISSUE</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
                   <span>{getValueField(PLACE_OF_BILL)}</span>
@@ -743,17 +782,17 @@ const DraftPage = (props) => {
 
           <Grid container item xs={10}>
             <Grid container item xs={10}>
-              <Grid item xs={8} style={{ minHeight: '100px', borderRight: BODER_COLOR }} >
+              <Grid item xs={8} style={{ minHeight: '100px', borderRight: BORDER }} >
                 <div className={classes.tittle_M} >
                   {'The printed terms and conditions on this Bill are available at its website at www.one-line.com'}
                 </div>
               </Grid>
-              <Grid item xs={2} style={{ borderRight: BODER_COLOR }}>
-                <div className={classes.tittle_M} style={{ borderBottom: BODER_COLOR, minHeight: '100px' }}>
+              <Grid item xs={2} style={{ borderRight: BORDER }}>
+                <div className={classes.tittle_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
                 </div>
               </Grid>
-              <Grid item xs={2} style={{ borderRight: BODER_COLOR }}>
-                <div className={classes.tittle_M} style={{ borderBottom: BODER_COLOR, minHeight: '100px' }}>
+              <Grid item xs={2} style={{ borderRight: BORDER }}>
+                <div className={classes.tittle_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
                 </div>
               </Grid>
             </Grid>
@@ -773,6 +812,8 @@ const DraftPage = (props) => {
           </Grid>
         </Grid>
       </div>
+
+      {!isInBound[drfView] && <NextPage containersManifest={containersManifest} />}
     </div >
   );
 };

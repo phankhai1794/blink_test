@@ -285,6 +285,37 @@ export const isSameFile = (inquiries, tempReply) => {
   return isSame;
 }
 
+export const maxChars = {
+  mark: 21,
+  package: 14,
+  description: 35
+}
+
+export const lineBreakAtBoundary = (string, boundary) => {
+  let line = "";
+  let newString = "";
+  const arr = string.split(" ");
+
+  for (let idx = 0; idx < arr.length; idx++) {
+    if (`${line}${arr[idx]}`.length > boundary) {
+      newString += line.trim() + "\n";
+      line = "";
+    }
+    line += arr[idx] + " ";
+  }
+
+  newString += line;
+  return newString.trim();
+}
+
+export const checkMaxRows = (containerLength, mark, packages, description) => {
+  const maxLength = Math.max(
+    mark.trim().split("\n").length,
+    packages.trim().split("\n").length,
+    description.trim().split("\n").length
+  );
+  return (containerLength + maxLength) <= 17; // max num of lines
+}
 export const compareObject = (a, b) => {
   if (a.length === b.length && a.length === 0) return true;
 
