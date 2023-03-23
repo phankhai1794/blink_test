@@ -12,6 +12,7 @@ import {
 } from '@material-ui/core';
 import { cyan } from '@material-ui/core/colors';
 import { Link } from 'react-router-dom';
+import { clearLocalStorage } from '@shared';
 import * as AppActions from 'app/store/actions';
 import { SocketContext } from 'app/AppContext';
 
@@ -31,7 +32,7 @@ function UserProfile(props) {
   };
 
   const handleLogOut = () => {
-    localStorage.clear();
+    clearLocalStorage();
     sessionStorage.removeItem("permissions");
     socket.emit('user_processing_out');
     dispatch(AppActions.removeUser());

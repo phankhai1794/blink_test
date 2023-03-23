@@ -16,10 +16,10 @@ export async function createBL(bkgNo) {
   return response.data;
 }
 
-export async function updateBL(id, data) {
-  const response = await axios().patch(`${PATH}/${id}`, data);
-  return response.data;
-}
+// export async function updateBL(id, data) {
+//   const response = await axios().patch(`${PATH}/${id}`, data);
+//   return response.data;
+// }
 
 export async function getCustomerAmendment(id) {
   const response = await axios().get(`${PATH}/${id}/customer-amendments-latest`);

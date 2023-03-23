@@ -7,7 +7,6 @@ import CachedIcon from '@material-ui/icons/Cached';
 import DescriptionIcon from '@material-ui/icons/Description';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
-import ImageViewer from "react-simple-image-viewer";
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import { FuseChipSelect } from "@fuse";
 import { validateExtensionFile } from '@shared';
@@ -17,7 +16,7 @@ import { uploadFile, getFile } from 'app/services/fileService';
 import { updateInquiryAttachment, removeMultipleMedia, replaceFile, addNewMedia, loadComment } from 'app/services/inquiryService';
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { handleDuplicateAttachment } from '@shared/handleError';
+import { handleDuplicateAttachment, handleError } from '@shared/handleError';
 import { getCommentDraftBl } from "app/services/draftblService";
 import Checkbox from "@material-ui/core/Checkbox";
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
@@ -271,7 +270,7 @@ const AttachmentList = (props) => {
 
     let countLoadComment = 0;
     let countAmendment = 0;
-    axios.all(inquiriesPendingProcess.map(q => loadComment(q.id))) // TODO: refactor
+    axios.all(inquiriesPendingProcess.map(q => loadComment(q.id).catch(err => handleError(dispatch, err)))) // TODO: refactor
       .then(res => {
         if (res) {
           let commentList = [];
@@ -364,7 +363,7 @@ const AttachmentList = (props) => {
             }
           });
         }
-      }).catch(err => { console.error(err) });
+      }).catch(err => handleError(dispatch, err));
   }, []);
 
   const handleFieldChange = (e, index) => {
@@ -400,7 +399,7 @@ const AttachmentList = (props) => {
             };
             setAttachmentFiles(optionsAttachmentList);
           }).catch((error) => {
-            console.error(error);
+            handleError(dispatch, error);
             optionsAttachmentList[index] = {
               ...optionsAttachmentList[index],
               field: 'false',
@@ -409,7 +408,7 @@ const AttachmentList = (props) => {
             setAttachmentFiles(optionsAttachmentList);
           })
         }).catch((error) => {
-          console.error(error);
+          handleError(dispatch, error);
           optionsAttachmentList[index] = {
             ...optionsAttachmentList[index],
             field: 'false',
@@ -451,7 +450,7 @@ const AttachmentList = (props) => {
             };
             setAttachmentFiles(optionsAttachmentList);
           }).catch((error) => {
-            console.error(error);
+            handleError(dispatch, error);
             optionsAttachmentList[index] = {
               ...media,
               success: false,
@@ -507,7 +506,7 @@ const AttachmentList = (props) => {
             };
             setAttachmentFiles(optionsAttachmentList);
           }).catch((error) => {
-            console.error(error);
+            handleError(dispatch, error);
             optionsAttachmentList[attachmentIndex] = {
               ...optionsAttachmentList[attachmentIndex],
               success: false,
@@ -515,7 +514,7 @@ const AttachmentList = (props) => {
             setAttachmentFiles(optionsAttachmentList);
           });
         }).catch((error) => {
-          console.error(error);
+          handleError(dispatch, error);
           optionsAttachmentList[attachmentIndex] = {
             ...optionsAttachmentList[attachmentIndex],
             success: false,
@@ -558,7 +557,7 @@ const AttachmentList = (props) => {
         dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
         dispatch(AppAction.showMessage({ message: 'Delete attachment successfully', variant: 'success' }));
         if (mediaOther.length === 0) dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
-      });
+      }).catch(err => handleError(dispatch, err));
     } else {
       // update attachment list
       const restMedia = optionsAttachmentList.filter((op, i) => !selectedIndexFile.includes(i));
@@ -928,9 +927,7 @@ const FileAttachList = ({ file, files }) => {
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
-    }).catch((error) => {
-      console.error(error);
-    });
+    }).catch((error) => handleError(dispatch, error));
   }
   const handleClose = () => {
     setView(false)

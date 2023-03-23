@@ -319,6 +319,10 @@ const OtpCheck = ({ children }) => {
         setStep(1);
       }
     }
+
+    // refill email when code expires
+    let lastEmail = localStorage.getItem('lastEmail');
+    if (lastEmail) setMail({ ...mail, value: lastEmail, isValid: isEmail(lastEmail) });
   }, []);
 
   useEffect(() => {

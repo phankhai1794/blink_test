@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/styles';
 import { createParagraphAnswer, updateParagraphAnswer } from 'app/services/inquiryService';
 import { useDispatch } from 'react-redux';
 import * as AppAction from 'app/store/actions';
+import { handleError } from '@shared/handleError';
 
 import UserInfo from './UserInfo';
 
@@ -51,7 +52,7 @@ const ParagraphAnswer = (props) => {
           saveQuestion(optionsOfQuestion);
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }
-      });
+      }).catch(err => handleError(dispatch, err));
     } else {
       const answerId = question.answerObj[0].id;
       updateParagraphAnswer(answerId, body).then((res) => {
@@ -61,7 +62,7 @@ const ParagraphAnswer = (props) => {
           saveQuestion(optionsOfQuestion);
           dispatch(AppAction.showMessage({ message: message, variant: 'success' }));
         }
-      });
+      }).catch(err => handleError(dispatch, err));
     }
   };
 

@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { getInquiryById, getUpdatedAtAnswer } from 'app/services/inquiryService';
 import { sentStatus } from '@shared';
+import { handleError } from '@shared/handleError';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -136,7 +137,7 @@ const Inquiry = (props) => {
         }
       });
     } else if (!isCancel) {
-      const dataDate = await getUpdatedAtAnswer(q.id);
+      const dataDate = await getUpdatedAtAnswer(q.id).catch(err => handleError(dispatch, err));
       optionsInquires[editedIndex].createdAt = dataDate.data;
       setSaveAnswer(!isSaveAnswer);
     }

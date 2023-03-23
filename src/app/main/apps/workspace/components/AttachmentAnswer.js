@@ -11,7 +11,6 @@ import { makeStyles } from '@material-ui/styles';
 // import { createAttachmentAnswer } from 'app/services/inquiryService';
 // import * as FormActions from "../store/actions/form";
 
-
 // style
 const baseStyle = {
   flex: 1,
@@ -41,14 +40,38 @@ const rejectStyle = {
   borderColor: '#ff1744'
 };
 
-//   component
+const useStyles = makeStyles((theme) => ({
+  button: {
+    paddingTop: '5px',
+    paddingBottom: '5px',
+    paddingLeft: '20px',
+    paddingRight: '20px',
+    background: 'white',
+    color: '#BD0F72',
+    border: '1px solid #BD0F72',
+    borderRadius: '8px',
+    justifyContent: 'center'
+  },
+  buttonDisable: {
+    paddingTop: '10px',
+    paddingBottom: '5px',
+    paddingLeft: '20px',
+    paddingRight: '20px',
+    background: '#FFFFFF',
+    border: '1px solid #BAC3CB',
+    borderRadius: '8px',
+    justifyContent: 'center'
+  },
+}));
+
 const AttachmentAnswer = (props) => {
   const { question, index, questions, saveQuestion, isShowBtn, isPermissionAttach } = props;
-  const [ showBtn, setShowBtn ] = useState(false);
+  const [showBtn, setShowBtn] = useState(false);
   const dispatch = useDispatch();
+  const classes = useStyles();
 
   const uploadImageAttach = (files) => {
-    const optionsOfQuestion = [ ...questions ];
+    const optionsOfQuestion = [...questions];
     const inValidFile = files.find(elem => !validateExtensionFile(elem));
     if (inValidFile) {
       dispatch(AppAction.showMessage({ message: 'Invalid file extension', variant: 'error' }));
@@ -57,10 +80,10 @@ const AttachmentAnswer = (props) => {
         const formData = new FormData();
         formData.append('file', src);
         formData.append('name', src.name);
-        if (optionsOfQuestion[ index ].answerObj.length === 0) {
-          optionsOfQuestion[ index ].answerObj = [ { mediaFiles: [] } ];
+        if (optionsOfQuestion[index].answerObj.length === 0) {
+          optionsOfQuestion[index].answerObj = [{ mediaFiles: [] }];
         }
-        optionsOfQuestion[ index ].answerObj[ 0 ].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
+        optionsOfQuestion[index].answerObj[0].mediaFiles.push({ id: null, src: URL.createObjectURL(src), ext: src.type, name: src.name, data: formData });
       });
       dispatch(saveQuestion(optionsOfQuestion));
       setShowBtn(true);
@@ -68,19 +91,20 @@ const AttachmentAnswer = (props) => {
   }
   useEffect(() => {
     setShowBtn(isShowBtn);
-  }, [ isShowBtn ]);
+  }, [isShowBtn]);
+
   const onDrop = (acceptedFiles) => {
     if (isPermissionAttach) {
       uploadImageAttach(acceptedFiles);
     }
   }
-  const { isDragActive, isDragAccept, isDragReject, getRootProps, getInputProps, open } =
-    useDropzone({
-      // Disable click and keydown behavior
-      noClick: true,
-      noKeyboard: true,
-      onDrop,
-    });
+
+  const { isDragActive, isDragAccept, isDragReject, getRootProps, getInputProps, open } = useDropzone({
+    // Disable click and keydown behavior
+    noClick: true,
+    noKeyboard: true,
+    onDrop,
+  });
 
   /* const handleSave = () => {
     const formData = [];
@@ -124,39 +148,14 @@ const AttachmentAnswer = (props) => {
         }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
       }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
   };*/
-  const style = useMemo(
-    () => ({
-      ...baseStyle,
-      ...(isDragActive ? activeStyle : {}),
-      ...(isDragAccept ? acceptStyle : {}),
-      ...(isDragReject ? rejectStyle : {})
-    }),
-    [ isDragActive, isDragReject, isDragAccept ]
-  );
-  const useStyles = makeStyles((theme) => ({
-    button: {
-      paddingTop: '5px',
-      paddingBottom: '5px',
-      paddingLeft: '20px',
-      paddingRight: '20px',
-      background: 'white',
-      color: '#BD0F72',
-      border: '1px solid #BD0F72',
-      borderRadius: '8px',
-      justifyContent: 'center'
-    },
-    buttonDisable: {
-      paddingTop: '10px',
-      paddingBottom: '5px',
-      paddingLeft: '20px',
-      paddingRight: '20px',
-      background: '#FFFFFF',
-      border: '1px solid #BAC3CB',
-      borderRadius: '8px',
-      justifyContent: 'center'
-    },
-  }));
-  const classes = useStyles();
+
+  const style = useMemo(() => ({
+    ...baseStyle,
+    ...(isDragActive ? activeStyle : {}),
+    ...(isDragAccept ? acceptStyle : {}),
+    ...(isDragReject ? rejectStyle : {})
+  }), [isDragActive, isDragReject, isDragAccept]);
+
   return (
     <div>
       {isPermissionAttach && (

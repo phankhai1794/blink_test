@@ -5,12 +5,11 @@ import {
   createAttachmentAnswer,
   addTransactionAnswer, getUpdatedAtAnswer
 } from 'app/services/inquiryService';
+import { handleError } from '@shared/handleError';
 import { uploadFile } from 'app/services/fileService';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Button,
-} from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
@@ -173,7 +172,7 @@ const InquiryAnswer = (props) => {
             optionsInquires[editedIndex].state = 'ANS_DRF';
           }
           //
-          const dataDate = await getUpdatedAtAnswer(question.inqId);
+          const dataDate = await getUpdatedAtAnswer(question.inqId).catch(err => handleError(dispatch, err));
           optionsInquires[editedIndex].createdAt = dataDate.data;
           optionsInquires[editedIndex].showIconAttachAnswerFile = false;
           dispatch(InquiryActions.setInquiries(optionsInquires));
@@ -182,7 +181,7 @@ const InquiryAnswer = (props) => {
         }).catch((error) => {
           console.log(error)
         });
-      }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      }).catch((error) => handleError(dispatch, error));
     } else {
       createAttachmentAnswer({ question, mediaFile: mediaList, mediaRest }).then(async (res) => {
         optionsInquires[editedIndex].mediaFilesAnswer = currentEditInq.mediaFilesAnswer;
@@ -207,13 +206,13 @@ const InquiryAnswer = (props) => {
           optionsInquires[editedIndex].state = 'ANS_DRF';
         }
         //
-        const dataDate = await getUpdatedAtAnswer(question.inqId);
+        const dataDate = await getUpdatedAtAnswer(question.inqId).catch(err => handleError(dispatch, err));
         optionsInquires[editedIndex].createdAt = dataDate.data;
         optionsInquires[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setInquiries(optionsInquires));
         props.getUpdatedAt();
         // setSave();
-      }).catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+      }).catch((error) => handleError(dispatch, error));
     }
   }
 
@@ -230,20 +229,20 @@ const InquiryAnswer = (props) => {
       }
     }
     //
-    await addTransactionAnswer({ inquiryId: question.id });
+    await addTransactionAnswer({ inquiryId: question.id }).catch(err => handleError(dispatch, err));
     //
     if (question.selectChoice) {
-      responseSelectChoice = await updateInquiryChoice(question.selectChoice);
+      responseSelectChoice = await updateInquiryChoice(question.selectChoice).catch(err => handleError(dispatch, err));
     } else if (question.paragraphAnswer) {
       if (question.answerObj.length === 0) {
-        const response = await createParagraphAnswer(question.paragraphAnswer);
+        const response = await createParagraphAnswer(question.paragraphAnswer).catch(err => handleError(dispatch, err));
         optionsInquires[editedIndex].answerObj.push(response.answerObj);
       } else {
         const answerId = question.answerObj[0].id;
         if (question.paragraphAnswer.content.trim() === '') {
           question.paragraphAnswer.content = ONLY_ATT;
         }
-        await updateParagraphAnswer(answerId, question.paragraphAnswer);
+        await updateParagraphAnswer(answerId, question.paragraphAnswer).catch(err => handleError(dispatch, err));
       }
     }
     dispatch(InquiryActions.checkSubmit(!enableSubmit));
@@ -266,7 +265,7 @@ const InquiryAnswer = (props) => {
           optionsInquires[editedIndex].state = 'ANS_DRF';
         }
         //
-        const dataDate = await getUpdatedAtAnswer(question.id);
+        const dataDate = await getUpdatedAtAnswer(question.id).catch(err => handleError(dispatch, err));
         optionsInquires[editedIndex].createdAt = dataDate.data;
         optionsInquires[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setInquiries(optionsInquires));
@@ -280,7 +279,7 @@ const InquiryAnswer = (props) => {
         if (optionsInquires[editedIndex].state === 'INQ_SENT') {
           optionsInquires[editedIndex].state = 'ANS_DRF';
         }
-        const dataDate = await getUpdatedAtAnswer(question.id);
+        const dataDate = await getUpdatedAtAnswer(question.id).catch(err => handleError(dispatch, err));
         optionsInquires[editedIndex].createdAt = dataDate.data;
         optionsInquires[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setInquiries(optionsInquires));
