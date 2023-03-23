@@ -188,7 +188,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     }
 
     let contentField = isSeparate ? JSON.stringify(fieldValueSeparate) : typeof fieldValue === 'string' ? fieldValue.toUpperCase().trim() : fieldValue;
-    if (!isSeparate && (!fieldValue || fieldValue.trim() === '')) contentField = NO_CONTENT_AMENDMENT;
+    if (!isSeparate && (!fieldValue || (typeof fieldValue === 'string' && fieldValue.trim() === ''))) contentField = NO_CONTENT_AMENDMENT;
 
     const uploads = [];
     const fieldReq = fieldValueSelect?.value;
