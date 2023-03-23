@@ -257,6 +257,10 @@ const SendInquiryForm = (props) => {
     // call API suggest mail
     if (!suggestMails.length) dispatch(mailActions.suggestMail(''));
     fetchData();
+    return () => {
+      dispatch(mailActions.setTags({ toCustomer: [], toOnshore: [], toCustomerCc: [], toOnshoreCc: [], toCustomerBcc: [], toOnshoreBcc: [] }));
+      dispatch(mailActions.inputMail({ toCustomer: '', toOnshore: '', toCustomerCc: '', toOnshoreCc: '', toCustomerBcc: '', toOnshoreBcc: '' }));
+    }
   }, []);
 
   useEffect(() => {
