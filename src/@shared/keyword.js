@@ -8,6 +8,8 @@ export const CONSIGNEE = 'consignee';
 
 export const NOTIFY = 'notify';
 
+export const ALSO_NOTIFY = 'alsoNotify';
+
 export const EXPORT_REF = 'expRef';
 
 export const FORWARDING = 'fwrdrRef';

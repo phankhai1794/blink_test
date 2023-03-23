@@ -10,7 +10,7 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile } from '@shared';
+import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify } from '@shared';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import { useUnsavedChangesWarning } from 'app/hooks';
 import { sendmailResolve } from 'app/services/mailService';
@@ -45,6 +45,7 @@ import {
   COMMODITY_CODE,
   DATE_CARGO,
   DATE_LADEN,
+  ALSO_NOTIFY,
   DESCRIPTION_OF_GOODS
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -252,6 +253,7 @@ const InquiryViewer = (props) => {
   const [validationCDCM, setValidationCDCM] = useState(true);
   const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
+  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
@@ -313,8 +315,12 @@ const InquiryViewer = (props) => {
 
   const validateField = (field, value) => {
     let response = { isError: false, errorType: "" };
+    const isAlsoNotify = metadata.field[ALSO_NOTIFY] === field;
     if (Object.keys(metadata.field).find(key => metadata.field[key] === field) === BL_TYPE) {
       response = validateBLType(value);
+    }
+    if (isAlsoNotify) {
+      response = validateAlsoNotify(value);
     }
     return response;
   }
@@ -338,6 +344,7 @@ const InquiryViewer = (props) => {
     let isUnmounted = false;
     setTempReply({});
     setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
+    setIsAlsoNotifies([ALSO_NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
     if (question && question.process === 'pending') {
       loadComment(question.id)
         .then((res) => {
@@ -1961,6 +1968,8 @@ const InquiryViewer = (props) => {
           />
         </div>)
     } else {
+      // TODO: Check WrapText for alsoNotify 1,2,3
+      const isAlsoNotify = metadata.field[ALSO_NOTIFY] === field;
       return (
         <TextField
           className={classes.inputText}
@@ -1970,7 +1979,7 @@ const InquiryViewer = (props) => {
           onChange={inputText}
           variant='outlined'
           inputProps={{ style: { textTransform: 'uppercase' } }}
-          error={!validateInput?.isValid || validateField(field, textResolve).isError}
+          error={!validateInput?.isValid || validateField(field, textResolve).isError || isAlsoNotify ? validateAlsoNotify(textResolve).isError : false}
           helperText={
             !validateInput?.isValid ?
               (<>
@@ -2472,7 +2481,7 @@ const InquiryViewer = (props) => {
                         Accept
                       </Button>
                       {
-                        isSeparate &&
+                        (isSeparate || isAlsoNotifies) &&
                         <Button
                           variant="contained"
                           color="primary"

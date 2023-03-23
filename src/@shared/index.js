@@ -183,6 +183,23 @@ export const validatePartiesContent = (partiesContent, type) => {
   return { isError, errorType }
 }
 
+export const validateAlsoNotify = (content) => {
+  const MAX_LENGTH = 35;
+  const ErrorMessage = 'The maximum number of lines is 5. No more than 35 characters per each line.';
+  let isError = false, errorType = "";
+  const textInput = content;
+  const arrTextInput = typeof textInput === 'string' ? textInput.split('\n') : [];
+  arrTextInput.forEach(text => {
+    if (text.length > MAX_LENGTH) isError = true;
+  })
+  if (arrTextInput.length > 5) {
+    isError = true;
+  };
+  isError && (errorType = ErrorMessage);
+
+  return { isError, errorType }
+}
+
 export const validateBLType = (input) => {
   let response = { isError: false, errorType: "" };
   let value = input?.trim();
