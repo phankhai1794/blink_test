@@ -1265,9 +1265,12 @@ const InquiryViewer = (props) => {
           if (containerCheck.includes(question.field)) {
             setQuestion((q) => ({ ...q, content: contentField }));
             dispatch(InquiryActions.setContent({ ...res.content }));
-
           }
-          else dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
+          else dispatch(InquiryActions.setContent({ 
+            ...content, 
+            [question.field]: contentField,
+            [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
+           }));
         } else {
           const contentWrapText = res?.contentWrapText || '';
           const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
