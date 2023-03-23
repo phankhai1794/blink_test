@@ -1266,11 +1266,11 @@ const InquiryViewer = (props) => {
             setQuestion((q) => ({ ...q, content: contentField }));
             dispatch(InquiryActions.setContent({ ...res.content }));
           }
-          else dispatch(InquiryActions.setContent({ 
-            ...content, 
+          else dispatch(InquiryActions.setContent({
+            ...content,
             [question.field]: contentField,
             [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
-           }));
+          }));
         } else {
           const contentWrapText = res?.contentWrapText || '';
           const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
@@ -1731,7 +1731,7 @@ const InquiryViewer = (props) => {
                         CONTAINER_LIST.cmNumber.map((key, index) => {
                           let total = 0;
                           cmOfCd.map((cm) => {
-                            total += parseFloat(cm[getType(key)].replace(',', ''));
+                            total += parseFloat(cm[getType(key)]);
                           });
                           cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                         });
