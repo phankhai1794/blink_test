@@ -264,18 +264,17 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
                   }
                 })
-                const fieldCmId = getField(CONTAINER_MANIFEST)
-                const fieldAutoUpdate = content[fieldCmId];
-                if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
-                  fieldAutoUpdate.map((item) => {
-                    if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
-                      item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
-                    }
-                  })
-                }
 
+                const fieldCdCM = fieldValueSelect.keyword === CONTAINER_DETAIL ? containerCheck[1] : containerCheck[0];
+                const fieldAutoUpdate = content[fieldCdCM];
+                fieldAutoUpdate.map((item) => {
+                  if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
+                    item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
+                  }
+                })
                 if (fieldAutoUpdate) {
-                  content[fieldCmId] = fieldAutoUpdate;
+                  content[fieldCdCM] = fieldAutoUpdate;
+
                   if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
                     contentField.forEach((cd) => {
                       let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
@@ -307,7 +306,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       }
                     })
                   }
-                  saveEditedField({ field: fieldCmId, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                  saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
                 validationCDCM(contsNo);
               }

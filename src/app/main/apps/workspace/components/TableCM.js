@@ -14,7 +14,8 @@ import {
   TOTAL_WEIGHT,
   TOTAL_WEIGHT_UNIT,
   TOTAL_MEASUREMENT,
-  TOTAL_MEASUREMENT_UNIT
+  TOTAL_MEASUREMENT_UNIT,
+  CONTAINER_LIST,
 } from '@shared/keyword';
 import { packageUnitsJson } from '@shared/units';
 import React, { useEffect, useState } from 'react';
@@ -173,6 +174,38 @@ const TableCM = (props) => {
   }
   cmSorted = [...cmSorted, ...cms];
 
+  const getType = (type) => {
+    return metadata.inq_type?.[type] || '';
+  };
+
+  let drfMD = {}
+  if (drfView === 'MD' && containerDetail) {
+    const defaultUnit = {}
+    defaultUnit[TOTAL_PACKAGE_UNIT] = "PK";
+    defaultUnit[TOTAL_WEIGHT_UNIT] = "KGS";
+    defaultUnit[TOTAL_MEASUREMENT_UNIT] = "CBM";
+
+    CONTAINER_LIST.totalUnit.forEach((totalKey, index) => {
+      const units = [];
+      containerDetail.forEach((cd) => {
+        units.push(cd[getType(CONTAINER_LIST.cdUnit[index])])
+      })
+      if ([... new Set(units)].length === 1) {
+        drfMD[totalKey] = units[0].toString();
+      } else {
+        drfMD[totalKey] = defaultUnit[totalKey];
+      }
+    })
+
+    CONTAINER_LIST.totalNumber.map((key, index) => {
+      let total = 0;
+      containerDetail.forEach((item) => {
+        total += parseFloat(item[getType(CONTAINER_LIST.cdNumber[index])]);
+      });
+      drfMD[key] = parseFloat(total.toFixed(3));;
+    })
+  }
+
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
   };
@@ -324,7 +357,7 @@ const TableCM = (props) => {
             </Grid>
             <Grid item xs={2}>
               <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>
-                {`${getValueField(TOTAL_PACKAGE)} ${packageUnitsJson.find(pkg => pkg.code === getValueField(TOTAL_PACKAGE_UNIT))?.description}`}
+                {`${drfMD[TOTAL_PACKAGE]} ${packageUnitsJson.find(pkg => pkg.code === drfMD[TOTAL_PACKAGE_UNIT])?.description}`}
               </BLField>
             </Grid>
             <Grid item xs={4}>
@@ -337,18 +370,18 @@ const TableCM = (props) => {
                 disableClick={true}
                 multiline={true}
                 rows={6}
-                disableIcon={true}>{`${getValueField(TOTAL_WEIGHT)} ${getValueField(
-                  TOTAL_WEIGHT_UNIT
-                )}`}</BLField>
+                disableIcon={true}>
+                {`${drfMD[TOTAL_WEIGHT]} ${drfMD[TOTAL_WEIGHT_UNIT]}`}
+              </BLField>
             </Grid>
             <Grid item xs={2}>
               <BLField
                 disableClick={true}
                 multiline={true}
                 rows={6}
-                disableIcon={true}>{`${getValueField(TOTAL_MEASUREMENT)} ${getValueField(
-                  TOTAL_MEASUREMENT_UNIT
-                )}`}</BLField>
+                disableIcon={true}>
+                {`${drfMD[TOTAL_MEASUREMENT]} ${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
+              </BLField>
             </Grid>
           </Grid>
         ) : cmSorted?.length > 0 ? (
