@@ -1224,7 +1224,7 @@ const InquiryViewer = (props) => {
         if (getTypeName === CONTAINER_SEAL) {
           obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
-          obj[question.inqType] = (typeof obj[question.inqType] === 'string') ? obj[question.inqType].toUpperCase().replace(/^0*/g,"").trim() : obj[question.inqType];
+          obj[question.inqType] = (typeof obj[question.inqType] === 'string') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
         }
       });
 
@@ -1704,15 +1704,16 @@ const InquiryViewer = (props) => {
                 })
                 const fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
                 const fieldAutoUpdate = content[fieldCdCM];
-                fieldAutoUpdate.map((item) => {
-                  if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
-                    item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
-                  }
-                })
                 if (fieldAutoUpdate) {
-                  content[fieldCdCM] = fieldAutoUpdate;
-
                   if (question.field === getField(CONTAINER_DETAIL)) {
+                    if (fieldAutoUpdate.length) {
+                      fieldAutoUpdate.map((item) => {
+                        if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
+                          item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
+                        }
+                      })
+                    }
+                    content[fieldCdCM] = fieldAutoUpdate;
                     contentField.forEach((cd) => {
                       let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
                         cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
