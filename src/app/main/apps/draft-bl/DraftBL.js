@@ -8,7 +8,7 @@ import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
-import { isJsonText, formatDate, maxChars, lineBreakAtBoundary, checkMaxRows } from '@shared';
+import { isJsonText, formatDate, maxChars, lineBreakAtBoundary, checkMaxRows, getTotalValueMDView } from '@shared';
 import { packageUnitsJson } from '@shared/units';
 
 import * as Actions from './store/actions';
@@ -213,6 +213,8 @@ const DraftPage = (props) => {
 
   const getPackageName = (packageCode) => packageUnitsJson.find(pkg => pkg.code === packageCode)?.description;
 
+  const drfMD = getTotalValueMDView(drfView, containersDetail, getInqType);
+
   useEffect(() => {
     const { pathname, search } = window.location;
     if (pathname.includes('/draft-bl') && !pathname.includes('/preview')) dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
@@ -305,9 +307,9 @@ const DraftPage = (props) => {
         </Grid>
         <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 5 }}>
           <Grid item style={{ textAlign: 'end' }}>
-            <span>{getValueField(TOTAL_PACKAGE)}</span>
+            <span>{drfMD[TOTAL_PACKAGE]}</span>
             <br />
-            <span>{getPackageName(getValueField(TOTAL_PACKAGE_UNIT))}</span>
+            <span>{getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}</span>
           </Grid>
         </Grid>
         <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }}></Grid>
@@ -315,10 +317,10 @@ const DraftPage = (props) => {
           {getValueField(DESCRIPTION_OF_GOODS)}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 5 }}>
-          {`${getValueField(TOTAL_WEIGHT)} ${getValueField(TOTAL_WEIGHT_UNIT)}`}
+          {`${drfMD[TOTAL_WEIGHT]} ${drfMD[TOTAL_WEIGHT_UNIT]}`}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 5 }}>
-          {`${getValueField(TOTAL_MEASUREMENT)} ${getValueField(TOTAL_MEASUREMENT_UNIT)}`}
+          {`${drfMD[TOTAL_MEASUREMENT]} ${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
         </Grid>
       </Grid>
     } else {
@@ -813,7 +815,7 @@ const DraftPage = (props) => {
         </Grid>
       </div>
 
-      {!isInBound[drfView] && <NextPage containersManifest={containersManifest} />}
+      {!isInBound[drfView] && <NextPage containersManifest={containersManifest} drfMD={drfMD} />}
     </div >
   );
 };
