@@ -15,8 +15,8 @@ import {
   TOTAL_WEIGHT_UNIT,
   TOTAL_MEASUREMENT,
   TOTAL_MEASUREMENT_UNIT,
-  CONTAINER_LIST,
 } from '@shared/keyword';
+import { getTotalValueMDView } from '@shared';
 import { packageUnitsJson } from '@shared/units';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
@@ -178,33 +178,7 @@ const TableCM = (props) => {
     return metadata.inq_type?.[type] || '';
   };
 
-  let drfMD = {}
-  if (drfView === 'MD' && containerDetail) {
-    const defaultUnit = {}
-    defaultUnit[TOTAL_PACKAGE_UNIT] = "PK";
-    defaultUnit[TOTAL_WEIGHT_UNIT] = "KGS";
-    defaultUnit[TOTAL_MEASUREMENT_UNIT] = "CBM";
-
-    CONTAINER_LIST.totalUnit.forEach((totalKey, index) => {
-      const units = [];
-      containerDetail.forEach((cd) => {
-        units.push(cd[getType(CONTAINER_LIST.cdUnit[index])])
-      })
-      if ([... new Set(units)].length === 1) {
-        drfMD[totalKey] = units[0].toString();
-      } else {
-        drfMD[totalKey] = defaultUnit[totalKey];
-      }
-    })
-
-    CONTAINER_LIST.totalNumber.map((key, index) => {
-      let total = 0;
-      containerDetail.forEach((item) => {
-        total += parseFloat(item[getType(CONTAINER_LIST.cdNumber[index])]);
-      });
-      drfMD[key] = parseFloat(total.toFixed(3));;
-    })
-  }
+  const drfMD = getTotalValueMDView(drfView, containerDetail, getType);
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -213,6 +187,9 @@ const TableCM = (props) => {
   const getValueField = (field) => {
     return content[getField(field)] || '';
   };
+
+  const getPackageName = (packageCode) => packageUnitsJson.find(pkg => pkg.code === packageCode)?.description || "";
+
   const onMouseEnter = (e) => setIsHovering(true);
 
   const onMouseLeave = (e) => setIsHovering(false);
@@ -357,7 +334,7 @@ const TableCM = (props) => {
             </Grid>
             <Grid item xs={2}>
               <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>
-                {`${drfMD[TOTAL_PACKAGE]} ${packageUnitsJson.find(pkg => pkg.code === drfMD[TOTAL_PACKAGE_UNIT])?.description}`}
+                {`${drfMD[TOTAL_PACKAGE]} ${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`}
               </BLField>
             </Grid>
             <Grid item xs={4}>
@@ -393,7 +370,7 @@ const TableCM = (props) => {
                 </BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${cm?.[metadata?.inq_type?.[CM_PACKAGE]] || ''} ${packageUnitsJson.find(pkg => pkg.code === cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]])?.description || ''}`}</BLField>
+                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${cm?.[metadata?.inq_type?.[CM_PACKAGE]] || ''} ${getPackageName(cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]])}`}</BLField>
               </Grid>
               <Grid item xs={4}>
                 <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>

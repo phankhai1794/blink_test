@@ -1,4 +1,10 @@
 import moment from 'moment';
+import {
+  TOTAL_PACKAGE_UNIT,
+  TOTAL_WEIGHT_UNIT,
+  TOTAL_MEASUREMENT_UNIT,
+  CONTAINER_LIST,
+} from '@shared/keyword';
 
 export const getLabelById = (fieldOptions, id) => {
   const result = fieldOptions.filter(({ value }) => value === id);
@@ -343,4 +349,35 @@ export const clearLocalStorage = () => {
   let user = JSON.parse(localStorage.getItem("USER"));
   localStorage.clear();
   if (user) localStorage.setItem("lastEmail", user.email);
+}
+
+export const getTotalValueMDView = (drfView, containerDetail, getType) => {
+  const drfMD = {};
+  if (drfView === 'MD' && containerDetail) {
+    const defaultUnit = {}
+    defaultUnit[TOTAL_PACKAGE_UNIT] = "PK";
+    defaultUnit[TOTAL_WEIGHT_UNIT] = "KGS";
+    defaultUnit[TOTAL_MEASUREMENT_UNIT] = "CBM";
+
+    CONTAINER_LIST.totalUnit.forEach((totalKey, index) => {
+      const units = [];
+      containerDetail.forEach((cd) => {
+        units.push(cd[getType(CONTAINER_LIST.cdUnit[index])])
+      })
+      if ([... new Set(units)].length === 1) {
+        drfMD[totalKey] = units[0].toString();
+      } else {
+        drfMD[totalKey] = defaultUnit[totalKey];
+      }
+    })
+
+    CONTAINER_LIST.totalNumber.map((key, index) => {
+      let total = 0;
+      containerDetail.forEach((item) => {
+        total += parseFloat(item[getType(CONTAINER_LIST.cdNumber[index])]);
+      });
+      drfMD[key] = parseFloat(total.toFixed(3));;
+    })
+  }
+  return drfMD;
 }
