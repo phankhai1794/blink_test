@@ -267,16 +267,17 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                 })
 
                 const fieldCdCM = fieldValueSelect.keyword === CONTAINER_DETAIL ? containerCheck[1] : containerCheck[0];
-                const fieldAutoUpdate = content[fieldCdCM];
-                fieldAutoUpdate.map((item) => {
-                  if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
-                    item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
-                  }
-                })
+                const fieldAutoUpdate = [...content[fieldCdCM]];
                 if (fieldAutoUpdate) {
-                  content[fieldCdCM] = fieldAutoUpdate;
-
                   if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
+                    if (fieldAutoUpdate.length) {
+                      fieldAutoUpdate.map((item) => {
+                        if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
+                          item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
+                        }
+                      })
+                    }
+                    content[fieldCdCM] = fieldAutoUpdate;
                     contentField.forEach((cd) => {
                       let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
                         cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
