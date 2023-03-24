@@ -141,7 +141,7 @@ const NextPage = ({ containersManifest, drfMD }) => {
       ))
     } else {
       return <Grid container item className={classes.content_L}>
-        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 5 }}>
+        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 5, whiteSpace: 'pre-wrap' }}>
           {getValueField(SHIPPING_MARK)}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 5 }}>
@@ -152,7 +152,7 @@ const NextPage = ({ containersManifest, drfMD }) => {
           </Grid>
         </Grid>
         <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }}></Grid>
-        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 5 }}>
+        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 5, whiteSpace: 'pre-wrap' }}>
           {getValueField(DESCRIPTION_OF_GOODS)}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 5 }}>
