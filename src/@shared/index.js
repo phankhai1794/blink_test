@@ -183,6 +183,23 @@ export const validatePartiesContent = (partiesContent, type) => {
   return { isError, errorType }
 }
 
+export const validateAlsoNotify = (content) => {
+  const MAX_LENGTH = 35;
+  const ErrorMessage = 'The maximum number of lines is 5. No more than 35 characters per each line.';
+  let isError = false, errorType = "";
+  const textInput = content;
+  const arrTextInput = typeof textInput === 'string' ? textInput.split('\n') : [];
+  arrTextInput.forEach(text => {
+    if (text.length > MAX_LENGTH) isError = true;
+  })
+  if (arrTextInput.length > 5) {
+    isError = true;
+  };
+  isError && (errorType = ErrorMessage);
+
+  return { isError, errorType }
+}
+
 export const validateBLType = (input) => {
   let response = { isError: false, errorType: "" };
   let value = input?.trim();
@@ -266,4 +283,64 @@ export const isSameFile = (inquiries, tempReply) => {
   }
 
   return isSame;
+}
+
+export const maxChars = {
+  mark: 21,
+  package: 14,
+  description: 35
+}
+
+export const lineBreakAtBoundary = (string, boundary) => {
+  let line = "";
+  let newString = "";
+  const arr = string.split(" ");
+
+  for (let idx = 0; idx < arr.length; idx++) {
+    if (`${line}${arr[idx]}`.length > boundary) {
+      newString += line.trim() + "\n";
+      line = "";
+    }
+    line += arr[idx] + " ";
+  }
+
+  newString += line;
+  return newString.trim();
+}
+
+export const checkMaxRows = (containerLength, mark, packages, description) => {
+  const maxLength = Math.max(
+    mark.trim().split("\n").length,
+    packages.trim().split("\n").length,
+    description.trim().split("\n").length
+  );
+  return (containerLength + maxLength) <= 17; // max num of lines
+}
+export const compareObject = (a, b) => {
+  if (a.length === b.length && a.length === 0) return true;
+
+  const keyList = Object.keys(a[0]);
+  for (let index in a) {
+    for (let key of keyList) {
+      if (typeof a[index][key] === 'string' && a[index][key]?.trim() !== b[index][key]?.trim()) return false;
+      if (typeof a[index][key] === 'number' && a[index][key] !== b[index][key]) return false;
+      if (typeof a[index][key] === 'object') {
+        if (a[index][key]) {
+          if (b[index][key].length !== a[index][key].length) return false;
+
+          const checkList = b[index][key].filter(item3 => a[index][key].includes(item3.trim()));
+          if (checkList.length !== b[index][key].length) return false;
+        } else {
+          if (b[index][key] && typeof b[index][key] === 'string' && b[index][key].trim() !== '') return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+export const clearLocalStorage = () => {
+  let user = JSON.parse(localStorage.getItem("USER"));
+  localStorage.clear();
+  if (user) localStorage.setItem("lastEmail", user.email);
 }

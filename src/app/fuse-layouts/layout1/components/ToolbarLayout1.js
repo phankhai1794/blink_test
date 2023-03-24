@@ -4,6 +4,8 @@ import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
+import { clearLocalStorage } from '@shared';
+import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
@@ -61,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: 'Montserrat',
     marginLeft: 10
   },
-  buttonSend: {
+  buttonSubmit: {
     padding: '10px 28.5px',
     color: whiteColor,
     fontSize: 16,
@@ -91,8 +93,8 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: themeColor
     }
   },
-  input: {
-    marginLeft: 10,
+  selectView: {
+    width: 124,
     '& fieldset': {
       border: `1px solid ${themeColor} !important`,
       borderRadius: '8px'
@@ -101,6 +103,9 @@ const useStyles = makeStyles((theme) => ({
       paddingTop: 5,
       paddingBottom: 5.5
     },
+    '& div > svg': {
+      color: themeColor
+    },
     '&:hover fieldset': {
       borderColor: `${themeColor} !important`
     },
@@ -108,7 +113,7 @@ const useStyles = makeStyles((theme) => ({
       border: `1px solid ${themeColor} !important`
     },
   },
-  inputSelect: {
+  selectViewProps: {
     color: themeColor,
     fontWeight: 600
   },
@@ -206,7 +211,7 @@ function ToolbarLayout1(props) {
       let countLoadComment = 0;
       let countAmendment = 0;
       axios
-        .all(inquiriesPendingProcess.map((q) => loadComment(q.id))) // TODO: refactor
+        .all(inquiriesPendingProcess.map((q) => loadComment(q.id).catch(err => handleError(dispatch, err)))) // TODO: refactor
         .then((res) => {
           if (res) {
             let commentList = [];
@@ -329,9 +334,14 @@ function ToolbarLayout1(props) {
   useEffect(() => {
     if (!user.displayName || !validToken) {
       if (!allowAccess) {
-        localStorage.clear();
+        clearLocalStorage();
         sessionStorage.removeItem("permissions");
-        history.push({
+
+        const bl = new URLSearchParams(search).get('bl');
+        if (bl) {
+          window.location.reload();
+          // history.push(`/guest?bl=${bl}`);
+        } else history.push({
           pathname: '/login',
           ...(!logout && { cachePath: pathname, cacheSearch: search })
         });
@@ -399,6 +409,7 @@ function ToolbarLayout1(props) {
   const handleSelectView = (e) => {
     const { value } = e.target;
     dispatch(DraftBLActions.setDrfView(value));
+    localStorage.setItem("drfView", value);
   }
 
   return (
@@ -471,43 +482,45 @@ function ToolbarLayout1(props) {
                 </Button>
               </PermissionProvider>
             </div>
+
             <div className="flex" style={{ marginRight: 35, alignItems: 'center' }}>
+              <TextField
+                id="view"
+                name="view"
+                select
+                value={drfView}
+                onChange={(e) => handleSelectView(e)}
+                variant="outlined"
+                className={clsx(classes.button, classes.selectView)}
+                InputProps={{
+                  className: classes.selectViewProps
+                }}
+                SelectProps={{
+                  MenuProps: {
+                    anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                    getContentAnchorEl: null
+                  }
+                }}>
+                {drfViews.map(view => (
+                  <MenuItem
+                    key={view.value}
+                    value={view.value}
+                    className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
+                    {view.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+
               <PreviewDraftBL />
 
               <PermissionProvider
                 action={PERMISSION.VIEW_EDIT_DRAFT_BL}
-                extraCondition={pathname.includes('/draft-bl')}>
+                extraCondition={pathname.includes('/draft-bl') || pathname.includes('/workspace')}>
                 <Button
                   className={clsx(classes.button, classes.buttonEditDraftBL)}
                   onClick={redirectWorkspace}>
                   Amendment
                 </Button>
-                <TextField
-                  id="view"
-                  name="view"
-                  select
-                  value={drfView}
-                  onChange={(e) => handleSelectView(e)}
-                  variant="outlined"
-                  className={classes.input}
-                  InputProps={{
-                    className: classes.inputSelect
-                  }}
-                  SelectProps={{
-                    MenuProps: {
-                      anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                      getContentAnchorEl: null
-                    }
-                  }}>
-                  {drfViews.map(view => (
-                    <MenuItem
-                      key={view.value}
-                      value={view.value}
-                      className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
-                      {view.label}
-                    </MenuItem>
-                  ))}
-                </TextField>
                 <Button
                   variant="contained"
                   className={clsx(classes.button, classes.buttonComfirm)}
@@ -520,7 +533,7 @@ function ToolbarLayout1(props) {
               <PermissionProvider
                 action={PERMISSION.MAIL_SEND_MAIL}
                 extraCondition={pathname.includes('/workspace')}>
-                <div style={{ paddingRight: 5 }}>
+                <div>
                   <Button
                     style={{
                       width: '120px',
@@ -539,18 +552,18 @@ function ToolbarLayout1(props) {
               </PermissionProvider>
 
               {/* <PermissionProvider
-              action={PERMISSION.VIEW_SHOW_BL_HISTORY}
-              extraCondition={pathname.includes('/workspace')}>
-              <History />
-              {openTrans && transId && <RestoreVersion />}
-            </PermissionProvider>  */}
+                action={PERMISSION.VIEW_SHOW_BL_HISTORY}
+                extraCondition={pathname.includes('/workspace')}>
+                <History />
+                {openTrans && transId && <RestoreVersion />}
+              </PermissionProvider>  */}
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
                 extraCondition={!pathname.includes('/draft-bl')}>
                 <Button
                   variant="contained"
-                  className={clsx(classes.button, classes.buttonSend)}
+                  className={clsx(classes.button, classes.buttonSubmit)}
                   disabled={!enableSubmitInq}
                   onClick={onSubmit}>
                   Submit

@@ -8,6 +8,8 @@ export const CONSIGNEE = 'consignee';
 
 export const NOTIFY = 'notify';
 
+export const ALSO_NOTIFY = 'alsoNotify';
+
 export const EXPORT_REF = 'expRef';
 
 export const FORWARDING = 'fwrdrRef';
@@ -128,6 +130,8 @@ export const SEQ = 'Seq';
 
 export const ONLY_ATT = 'Please refer to the attached file for your reference.';
 
+export const NO_CONTENT_AMENDMENT = 'THERE IS NO CONTENT IN THE AMENDMENT';
+
 export const CONTAINER_LIST = {
   cd: [CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT],
   cm: [CM_MARK, HS_CODE, HTS_CODE, NCM_CODE, CM_DESCRIPTION, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT],
@@ -135,6 +139,8 @@ export const CONTAINER_LIST = {
   cdUnit: [CONTAINER_PACKAGE_UNIT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT_UNIT],
   cmNumber: [CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT],
   cmUnit: [CM_PACKAGE_UNIT, CM_WEIGHT_UNIT, CM_MEASUREMENT_UNIT],
+  totalNumber: [TOTAL_PACKAGE, TOTAL_WEIGHT, TOTAL_MEASUREMENT],
+  totalUnit: [TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT_UNIT]
 }
 
 export const mapUnit = {

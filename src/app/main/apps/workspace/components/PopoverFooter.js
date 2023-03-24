@@ -3,9 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, IconButton, Link } from '@material-ui/core';
-import axios from "axios";
-import { loadComment } from 'app/services/inquiryService';
-import { getCommentDraftBl } from "app/services/draftblService";
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';

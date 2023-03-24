@@ -64,21 +64,19 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
 
 export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnCd) => async (dispatch) => {
   try {
-    const [blResponse] = [
-      await updateBlStatus({
-        shineUrl: `${window.location.origin}/apps/workspace/${bkgNo}?usrId=admin&cntr=VN`,
-        srKndCd: '',
-        srNo: '',
-        bkgNo: bkgNo,
-        srAmdTpCd: '',
-        srAmdSeq: '',
-        stsCd: '',
-        stsDesc: '',
-        blinkStsCd: blinkStsCd,
-        rtrnCd,
-        shineId: "Blink User"
-      }),
-    ];
+    const blResponse = await updateBlStatus({
+      shineUrl: `${window.location.origin}/apps/workspace/${bkgNo}?usrId=admin&cntr=VN`,
+      srKndCd: '',
+      srNo: '',
+      bkgNo: bkgNo,
+      srAmdTpCd: '',
+      srAmdSeq: '',
+      stsCd: '',
+      stsDesc: '',
+      blinkStsCd: blinkStsCd,
+      rtrnCd,
+      shineId: "Blink User"
+    });
     console.log(blResponse);
   } catch (err) {
     handleError(dispatch, err);

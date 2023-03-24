@@ -9,6 +9,7 @@ import {
   CONTAINER_WEIGHT_UNIT,
   CONTAINER_MEASUREMENT_UNIT
 } from '@shared/keyword';
+import { packageUnitsJson } from '@shared/units';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useSelector, useDispatch } from 'react-redux';
@@ -301,7 +302,7 @@ const TableCD = (props) => {
                 </Grid>
                 <Grid item xs={2}>
                   <BLField disableClick={true} disableIcon={true}>
-                    {`${cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]] || ''} ${cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE_UNIT]] || ''}`}
+                    {`${cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]] || ''} ${packageUnitsJson.find(pkg => pkg.code === cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE_UNIT]])?.description || ''}`}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
