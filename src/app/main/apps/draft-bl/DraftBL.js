@@ -239,21 +239,12 @@ const DraftPage = (props) => {
 
   useEffect(() => {
     if (containersDetail.length) {
-      // CM view
+      // MD view
       let totalMark = getValueField(SHIPPING_MARK).split("\n").map(line => lineBreakAtBoundary(line, maxChars.mark)).join("\n");
       let totalPackage = `${getValueField(TOTAL_PACKAGE)}\n${getPackageName(getValueField(TOTAL_PACKAGE_UNIT))}`.split("\n").map(line => lineBreakAtBoundary(line, maxChars.package)).join("\n");
       let totalDescription = getValueField(DESCRIPTION_OF_GOODS).split("\n").map(line => lineBreakAtBoundary(line, maxChars.description)).join("\n");
-      setIsInBound({
-        ...isInBound,
-        MD: checkMaxRows(
-          containersDetail.length + 1, // 1 more dash line
-          totalMark,
-          totalPackage,
-          totalDescription
-        )
-      });
 
-      // MD view
+      // CM view
       let cmMark = "";
       let cmPackage = "";
       let cmDescription = "";
@@ -262,8 +253,14 @@ const DraftPage = (props) => {
         cmPackage += `${cm[getInqType(CM_PACKAGE)]}\n${getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}`.split("\n").map(line => lineBreakAtBoundary(line, maxChars.package)).join("\n");
         cmDescription += lineBreakAtBoundary(cm[getInqType(CM_DESCRIPTION)], maxChars.description) + "\n";
       });
+
       setIsInBound({
-        ...isInBound,
+        MD: checkMaxRows(
+          containersDetail.length + 1, // 1 more dash line
+          totalMark,
+          totalPackage,
+          totalDescription
+        ),
         CM: checkMaxRows(
           containersDetail.length + containersManifest.length + 1, // 1 more dash line
           cmMark.trim().replace(/^\s+|\s+$/g, ''),
@@ -302,7 +299,7 @@ const DraftPage = (props) => {
       ))
     } else if (drfView === "MD" && isInBound[drfView]) {
       return <Grid container item className={classes.content_L}>
-        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 5 }}>
+        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 5, whiteSpace: 'pre-wrap' }}>
           {getValueField(SHIPPING_MARK)}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 5 }}>
@@ -313,7 +310,7 @@ const DraftPage = (props) => {
           </Grid>
         </Grid>
         <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }}></Grid>
-        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 5 }}>
+        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 5, whiteSpace: 'pre-wrap' }}>
           {getValueField(DESCRIPTION_OF_GOODS)}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 5 }}>

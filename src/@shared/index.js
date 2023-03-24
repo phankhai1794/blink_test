@@ -322,6 +322,7 @@ export const checkMaxRows = (containerLength, mark, packages, description) => {
   );
   return (containerLength + maxLength) <= 17; // max num of lines
 }
+
 export const compareObject = (a, b) => {
   if (a.length === b.length && a.length === 0) return true;
 
