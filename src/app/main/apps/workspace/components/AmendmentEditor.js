@@ -6,12 +6,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
-import { validateBLType } from '@shared';
+import { validateBLType, compareObject } from '@shared';
+import { NO_CONTENT_AMENDMENT } from '@shared/keyword';
+import { handleError } from '@shared/handleError';
 import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE } from '@shared/keyword';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
 import { useUnsavedChangesWarning } from 'app/hooks'
+import { useDropzone } from 'react-dropzone';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -92,6 +95,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     workspace.inquiryReducer.enableSubmit,
   ]);
   const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
+  const [filepaste, setFilepaste] = useState('');
+  const [dropfiles, setDropfiles] = useState([]);
   const currentField = useSelector(({ draftBL }) => draftBL.currentField);
   const filterInqDrf = inquiries.filter(inq => inq.process === 'draft').map(val => val.field);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
@@ -138,7 +143,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const handleValidateInput = async (confirm = null) => {
     setDisableSave(true);
     let textInput = fieldValue || '';
-    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
+    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo }).catch(err => handleError(dispatch, err));
     if (isWarning) {
       dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
     } else {
@@ -178,7 +183,14 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     fieldValueSeparate.name = fieldValueSeparate.name.toUpperCase().trim();
     fieldValueSeparate.address = fieldValueSeparate.address.toUpperCase().trim();
+    if (fieldValueSeparate.name === '' && fieldValueSeparate.address === '') {
+      fieldValueSeparate.name = NO_CONTENT_AMENDMENT;
+      fieldValueSeparate.address = '';
+    }
+
     let contentField = isSeparate ? JSON.stringify(fieldValueSeparate) : typeof fieldValue === 'string' ? fieldValue.toUpperCase().trim() : fieldValue;
+    if (!isSeparate && (!fieldValue || (typeof fieldValue === 'string' && fieldValue.trim() === ''))) contentField = NO_CONTENT_AMENDMENT;
+
     const uploads = [];
     const fieldReq = fieldValueSelect?.value;
     const optionsInquires = [...inquiries];
@@ -253,18 +265,17 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
                   }
                 })
-                const fieldCmId = getField(CONTAINER_MANIFEST)
-                const fieldAutoUpdate = content[fieldCmId];
-                if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
-                  fieldAutoUpdate.map((item) => {
-                    if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
-                      item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
-                    }
-                  })
-                }
 
+                const fieldCdCM = fieldValueSelect.keyword === CONTAINER_DETAIL ? containerCheck[1] : containerCheck[0];
+                const fieldAutoUpdate = content[fieldCdCM];
+                fieldAutoUpdate.map((item) => {
+                  if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
+                    item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
+                  }
+                })
                 if (fieldAutoUpdate) {
-                  content[fieldCmId] = fieldAutoUpdate;
+                  content[fieldCdCM] = fieldAutoUpdate;
+
                   if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
                     contentField.forEach((cd) => {
                       let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
@@ -296,7 +307,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       }
                     })
                   }
-                  saveEditedField({ field: fieldCmId, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true });
+                  saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
                 }
                 validationCDCM(contsNo);
               }
@@ -321,8 +332,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             dispatch(InquiryActions.addAmendment());
             dispatch(InquiryActions.setOneInq({}));
             setPristine()
-          }).catch((err) => console.error(err));
-      });
+          }).catch((err) => handleError(dispatch, err));
+      })
+      .catch((err) => handleError(dispatch, err))
   }
 
   const handleCancel = () => {
@@ -446,8 +458,21 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     };
   };
 
+  const onPaste = (e) => {
+    if (e.clipboardData.files.length) {
+      const fileObject = e.clipboardData.files[0];
+      setFilepaste(fileObject);
+    }
+  }
+
+  const { isDragActive, getRootProps } = useDropzone({
+    onDrop: files => setDropfiles(files),
+    noClick: true
+  });
+
   return (
-    <div style={{ paddingLeft: 18, borderLeft: `2px solid ${colorInq}` }}>
+    <div style={{ paddingLeft: 18, borderLeft: `2px solid ${colorInq}`, position: 'relative' }} onPaste={onPaste} {...getRootProps({})}>
+      {isDragActive && <div className='dropzone'>Drop files here</div>}
       {!openAmendmentList && (
         <p style={{
           color: pink,
@@ -474,7 +499,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           />
         ) : <Typography color="primary" variant="h5" className={classes.inqTitle}>New Amendment</Typography>}
         <div className={'flex'} style={{ alignItems: 'center' }}>
-          <AttachFileAmendment setAttachment={getAttachment} attachmentFiles={attachments} />
+          <AttachFileAmendment filepaste={filepaste} dropfiles={dropfiles} setAttachment={getAttachment} attachmentFiles={attachments} />
         </div>
       </div>
 
@@ -533,15 +558,23 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           className={classes.btn}
           disabled={
             (isSeparate ? (
-              !fieldValueSeparate.name
-              && !fieldValueSeparate.address
-              && !isChange
+              (fieldValueSelect && (attachments.length === 0 && content[fieldValueSelect.value] === (fieldValueSeparate.name.trim() + '\n' + fieldValueSeparate.address.trim())))
+              ||
+              (fieldValueSelect && !content[fieldValueSelect.value] && (fieldValueSeparate.name === '' && fieldValueSeparate.address === '') && attachments.length === 0)
             ) : (
               validateField(fieldValueSelect?.value, fieldValue).isError
               ||
-              (!isChange && fieldValue && (fieldValue.length === 0 || (['string'].includes(typeof fieldValue) && fieldValue.trim().length === 0)))
-              || (!fieldValue && !isChange)
-            ))
+              (
+                (fieldValue && fieldValueSelect && ['containerDetail', 'containerManifest'].includes(fieldValueSelect.keyword)) ? (
+                  (compareObject(content[fieldValueSelect.value], fieldValue) && attachments.length === 0)
+                ) : (
+                  (fieldValue && fieldValueSelect && (fieldValue.trim() === content[fieldValueSelect.value] && attachments.length === 0))
+                  ||
+                  (fieldValueSelect && !content[fieldValueSelect.value] && (!fieldValue || fieldValue.trim() === '') && attachments.length === 0)
+                )
+              )))
+            ||
+            !fieldValueSelect
             ||
             disableSave
           }

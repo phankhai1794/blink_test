@@ -12,7 +12,7 @@ const initialState = {
   enableSendDraftBl: false,
   openSendNotification: false,
   edit: false,
-  drfView: "MD"
+  drfView: localStorage.getItem("drfView") || "MD",
 };
 
 const draftBL = function (state = initialState, action) {

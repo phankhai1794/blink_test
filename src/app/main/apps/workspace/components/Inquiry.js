@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { getInquiryById, getUpdatedAtAnswer } from 'app/services/inquiryService';
 import { sentStatus } from '@shared';
+import { handleError } from '@shared/handleError';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -136,7 +137,7 @@ const Inquiry = (props) => {
         }
       });
     } else if (!isCancel) {
-      const dataDate = await getUpdatedAtAnswer(q.id);
+      const dataDate = await getUpdatedAtAnswer(q.id).catch(err => handleError(dispatch, err));
       optionsInquires[editedIndex].createdAt = dataDate.data;
       setSaveAnswer(!isSaveAnswer);
     }
@@ -148,10 +149,6 @@ const Inquiry = (props) => {
 
   const handleCancel = (q) => {
     resetActionInquiry(q, true);
-  };
-
-  const handleSetSave = (q) => {
-    resetActionInquiry(q, false);
   };
 
   const checkCommentDraft = (amendment, conditionStates) => {
@@ -264,7 +261,7 @@ const Inquiry = (props) => {
       <div ref={inputAddAmendmentEndRef}>
         {currentAmendment || currentAmendment === null &&
           <div style={{ marginTop: 30 }}>
-            <AmendmentEditor getUpdatedAt={() => {}}/>
+            <AmendmentEditor getUpdatedAt={() => { }} />
           </div>
         }
       </div>

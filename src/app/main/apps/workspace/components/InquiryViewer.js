@@ -10,7 +10,7 @@ import {
 } from 'app/services/inquiryService';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile } from '@shared';
+import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify } from '@shared';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import { useUnsavedChangesWarning } from 'app/hooks';
 import { sendmailResolve } from 'app/services/mailService';
@@ -21,9 +21,15 @@ import {
   CONTAINER_NUMBER,
   CONTAINER_PACKAGE,
   CONTAINER_SEAL,
+  CONTAINER_WEIGHT,
+  CONTAINER_MEASUREMENT,
+  CM_PACKAGE,
+  CM_WEIGHT,
+  CM_MEASUREMENT,
   SHIPPER,
   NOTIFY,
   ONLY_ATT,
+  NO_CONTENT_AMENDMENT,
   BL_TYPE,
   HS_CODE,
   HTS_CODE,
@@ -38,8 +44,12 @@ import {
   DATED,
   COMMODITY_CODE,
   DATE_CARGO,
-  DATE_LADEN
+  DATE_LADEN,
+  ALSO_NOTIFY,
+  DESCRIPTION_OF_GOODS
 } from '@shared/keyword';
+import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
+import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -72,7 +82,6 @@ import AttachFile from './AttachFile';
 import Comment from './Comment';
 import TagsComponent from './TagsComponent';
 import ContainerDetailForm from './ContainerDetailForm';
-import WarningMessage from './WarningMessage';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -245,6 +254,7 @@ const InquiryViewer = (props) => {
   const [validationCDCM, setValidationCDCM] = useState(true);
   const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
+  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
@@ -265,6 +275,7 @@ const InquiryViewer = (props) => {
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
   const [isDeleteAnswer, setDeleteAnswer] = useState({ status: false, content: '' });
   const [listFieldDisableUpload, setListFieldDisableUpload] = useState([]);
+  const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -305,8 +316,12 @@ const InquiryViewer = (props) => {
 
   const validateField = (field, value) => {
     let response = { isError: false, errorType: "" };
+    const isAlsoNotify = metadata.field[ALSO_NOTIFY] === field;
     if (Object.keys(metadata.field).find(key => metadata.field[key] === field) === BL_TYPE) {
       response = validateBLType(value);
+    }
+    if (isAlsoNotify) {
+      response = validateAlsoNotify(value);
     }
     return response;
   }
@@ -330,6 +345,7 @@ const InquiryViewer = (props) => {
     let isUnmounted = false;
     setTempReply({});
     setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
+    setIsAlsoNotifies([ALSO_NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
     if (question && question.process === 'pending') {
       loadComment(question.id)
         .then((res) => {
@@ -446,7 +462,8 @@ const InquiryViewer = (props) => {
               }
             }
             //
-            if (['REOPEN_A', 'REOPEN_Q'].includes(filterOffshoreSent.state)) {
+            const sortComments = [...res].sort((a, b) => (a.updatedAt > b.updatedAt ? 1 : -1));
+            if (sortComments.length && ['REOPEN_A', 'REOPEN_Q'].includes(sortComments[sortComments.length - 1].state)) {
               const markReopen = {
                 creator: filterOffshoreSent.creator,
                 updater: filterOffshoreSent.creator,
@@ -504,7 +521,7 @@ const InquiryViewer = (props) => {
           }
           setIsLoadedComment(true);
         })
-        .catch((error) => console.error(error));
+        .catch((error) => handleError(dispatch, error));
     } else {
       getCommentDraftBl(myBL.id, question.field)
         .then((res) => {
@@ -666,7 +683,8 @@ const InquiryViewer = (props) => {
               });
             });
             //
-            if (['REOPEN_A', 'REOPEN_Q'].includes(lastestComment.state)) {
+            const sortComments = [...comments].sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+            if (sortComments.length && ['REOPEN_A', 'REOPEN_Q'].includes(sortComments[sortComments.length - 1].state)) {
               const markReopen = {
                 creator: lastestComment.creator,
                 updater: lastestComment.creator,
@@ -684,7 +702,7 @@ const InquiryViewer = (props) => {
           }
           setIsLoadedComment(true);
         })
-        .catch((error) => console.error(error));
+        .catch((error) => handleError(dispatch, error));
     }
 
     return () => {
@@ -828,7 +846,7 @@ const InquiryViewer = (props) => {
           }
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
         })
-        .catch((error) => console.error(error));
+        .catch((error) => handleError(dispatch, error));
     } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove) {
       deleteDraftBLReply(replyRemove?.draftId, replyRemove.field, myBL.id)
         .then((res) => {
@@ -918,16 +936,18 @@ const InquiryViewer = (props) => {
                       cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[1]] = cm;
-                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' }).then(res => {
-                      if (res && res.removeAmendment) {
-                        const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[1] && inq.process === 'draft');
-                        if (removeAmendment.length) {
-                          const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
-                          if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                      .then(res => {
+                        if (res && res.removeAmendment) {
+                          const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[1] && inq.process === 'draft');
+                          if (removeAmendment.length) {
+                            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+                            if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                          }
+                          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                         }
-                        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-                      }
-                    });
+                      })
+                      .catch((err) => handleError(dispatch, err));
                   }
                 } else if (idCM === question.field) {
                   let cd = content[containerCheck[0]]
@@ -940,16 +960,18 @@ const InquiryViewer = (props) => {
                       cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[0]] = cd;
-                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' }).then(res => {
-                      if (res && res.removeAmendment) {
-                        const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
-                        if (removeAmendment.length) {
-                          const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
-                          if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                      .then(res => {
+                        if (res && res.removeAmendment) {
+                          const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
+                          if (removeAmendment.length) {
+                            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+                            if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                          }
+                          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                         }
-                        dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-                      }
-                    });
+                      })
+                      .catch((err) => handleError(dispatch, err));
                   }
                 }
                 if (res.emptyCDorCMAmendment) {
@@ -974,61 +996,63 @@ const InquiryViewer = (props) => {
             props.getUpdatedAt();
           }
           // setSaveComment(!isSaveComment);
-        }).catch((error) => console.error(error));
+        }).catch((error) => handleError(dispatch, error));
     } else if (confirmPopupType === 'removeReplyInquiry' && replyRemove) {
-      deleteComment(replyRemove?.draftId, replyRemove.id).then((res) => {
-        if (res) {
-          const optionsOfQuestion = [...inquiries];
-          const indexQuestion = optionsOfQuestion.findIndex(inq => inq.id === replyRemove.id);
-          if (res.isOldestReply) {
-            if (indexQuestion !== -1) {
-              if (metadata.ans_type.paragraph === optionsOfQuestion[indexQuestion].ansType && optionsOfQuestion[indexQuestion].answerObj && optionsOfQuestion[indexQuestion].answerObj.length) {
-                setDeleteAnswer({ status: true, content: optionsOfQuestion[indexQuestion].answerObj[0].content });
+      deleteComment(replyRemove?.draftId, replyRemove.id)
+        .then((res) => {
+          if (res) {
+            const optionsOfQuestion = [...inquiries];
+            const indexQuestion = optionsOfQuestion.findIndex(inq => inq.id === replyRemove.id);
+            if (res.isOldestReply) {
+              if (indexQuestion !== -1) {
+                if (metadata.ans_type.paragraph === optionsOfQuestion[indexQuestion].ansType && optionsOfQuestion[indexQuestion].answerObj && optionsOfQuestion[indexQuestion].answerObj.length) {
+                  setDeleteAnswer({ status: true, content: optionsOfQuestion[indexQuestion].answerObj[0].content });
+                }
               }
-            }
-            if (!res.statePrev) {
-              optionsOfQuestion[indexQuestion].state = 'ANS_SENT';
-            } else {
-              optionsOfQuestion.splice(indexQuestion, 1);
-            }
-          }
-          if (res.response.type) {
-            setDeleteAnswer({ status: true, content: res.response.content || '' });
-            if (!res.response.content) {
-              optionsOfQuestion[indexQuestion].mediaFilesAnswer = [];
-            }
-            if (res.response.type === 'paragraph') {
-              if (res.response.content) {
-                optionsOfQuestion[indexQuestion].mediaFilesAnswer = res.response.mediaFilesAnswer;
-                optionsOfQuestion[indexQuestion].paragraphAnswer = {
-                  inquiry: question.id,
-                  content: res.response.content,
-                };
+              if (!res.statePrev) {
+                optionsOfQuestion[indexQuestion].state = 'ANS_SENT';
               } else {
-                optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
-                optionsOfQuestion[indexQuestion].answerObj = [];
+                optionsOfQuestion.splice(indexQuestion, 1);
               }
             }
-            else if (res.response.type === 'choice') {
-              if (res.response.content) {
-                optionsOfQuestion[indexQuestion].mediaFilesAnswer = res.response.mediaFilesAnswer;
-                optionsOfQuestion[indexQuestion].selectChoice = {
-                  inquiry: question.id,
-                  answer: res.response.content,
-                  confirmed: true
-                };
-              } else {
-                optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
+            if (res.response.type) {
+              setDeleteAnswer({ status: true, content: res.response.content || '' });
+              if (!res.response.content) {
+                optionsOfQuestion[indexQuestion].mediaFilesAnswer = [];
+              }
+              if (res.response.type === 'paragraph') {
+                if (res.response.content) {
+                  optionsOfQuestion[indexQuestion].mediaFilesAnswer = res.response.mediaFilesAnswer;
+                  optionsOfQuestion[indexQuestion].paragraphAnswer = {
+                    inquiry: question.id,
+                    content: res.response.content,
+                  };
+                } else {
+                  optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
+                  optionsOfQuestion[indexQuestion].answerObj = [];
+                }
+              }
+              else if (res.response.type === 'choice') {
+                if (res.response.content) {
+                  optionsOfQuestion[indexQuestion].mediaFilesAnswer = res.response.mediaFilesAnswer;
+                  optionsOfQuestion[indexQuestion].selectChoice = {
+                    inquiry: question.id,
+                    answer: res.response.content,
+                    confirmed: true
+                  };
+                } else {
+                  optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
+                }
               }
             }
+            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+            setReplyRemove();
+            setDisableSaveReply(false);
+            props.getUpdatedAt();
+            setViewDropDown('');
           }
-          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-          setReplyRemove();
-          setDisableSaveReply(false);
-          props.getUpdatedAt();
-          setViewDropDown('');
-        }
-      }).catch((error) => console.error(error));
+        })
+        .catch((error) => handleError(dispatch, error));
     }
     dispatch(
       FormActions.openConfirmPopup({
@@ -1121,7 +1145,7 @@ const InquiryViewer = (props) => {
         textInput = textResolve.trim();
       }
 
-      const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo });
+      const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo }).catch(err => handleError(dispatch, err));
       if (isWarning) {
         dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
         setDisableAcceptResolve(false);
@@ -1141,7 +1165,8 @@ const InquiryViewer = (props) => {
         const find = metadata?.field_options.find(field => field.value === inq.field);
         ids.push({ id: inq.id, field: find.label })
       })
-      sendmailResolve({ type: type === 'customer' ? 'Customer' : 'Onshore', myBL, user, content, ids, process });
+      sendmailResolve({ type: type === 'customer' ? 'Customer' : 'Onshore', myBL, user, content, ids, process })
+        .catch(err => handleError(dispatch, err));
     }
   }
 
@@ -1199,7 +1224,7 @@ const InquiryViewer = (props) => {
         if (getTypeName === CONTAINER_SEAL) {
           obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
-          obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
+          obj[question.inqType] = (typeof obj[question.inqType] === 'string') ? obj[question.inqType].toUpperCase().replace(/^0*/g,"").trim() : obj[question.inqType];
         }
       });
 
@@ -1228,7 +1253,13 @@ const InquiryViewer = (props) => {
         optionsInquires[editedIndex].createdAt = res.updatedAt;
         const receiver = optionsInquires[editedIndex].receiver[0];
         const process = optionsInquires[editedIndex].process;
-        if (process === 'draft') optionsInquires[editedIndex].id = res.id;
+        if (process === 'draft') {
+          const optionsMinimize = [...listMinimize];
+          const index = optionsMinimize.findIndex((e) => e.id === optionsInquires[editedIndex].id);
+          optionsMinimize[index].id = res.id;
+          optionsInquires[editedIndex].id = res.id;
+          dispatch(InquiryActions.setListMinimize(optionsMinimize));
+        }
         //auto send mail if every inquiry is resolved
         autoSendMailResolve(optionsInquires, receiver, process);
 
@@ -1236,14 +1267,18 @@ const InquiryViewer = (props) => {
         dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
         props.getUpdatedAt();
         setIsResolve(false);
-        setIsResolveCDCM(true);
+        setIsResolveCDCM(false);
         setViewDropDown('');
         if (!isSeparate) {
           if (containerCheck.includes(question.field)) {
             setQuestion((q) => ({ ...q, content: contentField }));
+            dispatch(InquiryActions.setContent({ ...res.content }));
           }
-          if (contsNoChange) dispatch(InquiryActions.setContent({ ...res.content }));
-          else dispatch(InquiryActions.setContent({ ...content, [question.field]: contentField }));
+          else dispatch(InquiryActions.setContent({
+            ...content,
+            [question.field]: contentField,
+            [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
+          }));
         } else {
           const contentWrapText = res?.contentWrapText || '';
           const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
@@ -1253,7 +1288,8 @@ const InquiryViewer = (props) => {
             ...content,
             [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: isWrapText ? (contentWrapText.fieldAddressContentWrap || '') : textResolveSeparate.address.trim(),
             [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: isWrapText ? (contentWrapText.fieldNameContentWrap || '') : textResolveSeparate.name.trim(),
-            [question.field]: isWrapText ? `${contentWrapText.fieldNameContentWrap}\n${contentWrapText.fieldAddressContentWrap}` : contentField
+            [question.field]: isWrapText ? `${contentWrapText.fieldNameContentWrap}\n${contentWrapText.fieldAddressContentWrap}` : contentField,
+            [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
           }));
         }
         // setSaveComment(!isSaveComment);
@@ -1261,7 +1297,7 @@ const InquiryViewer = (props) => {
         setDisableAcceptResolve(false);
         setDisableReopen(false);
       })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
+      .catch((error) => handleError(dispatch, error));
   };
 
   const onUpload = () => {
@@ -1275,7 +1311,18 @@ const InquiryViewer = (props) => {
           dispatch(AppAction.showMessage({ message: res.message, variant: 'error' }));
         } else {
           setQuestion((q) => ({ ...q, state: 'UPLOADED' }));
-
+          // Update State list separate
+          if (res.fieldsChangesState?.length) {
+            res.fieldsChangesState.forEach(item => {
+              if (item.process === 'pending') {
+                let inqIndex = optionsInquires.findIndex(inq => inq.id === item.id);
+                optionsInquires[inqIndex].state = 'UPLOADED';
+              } else {
+                let amendIndex = optionsInquires.findIndex(inq => ((inq.field === item.id) && (inq.process === 'draft')));
+                optionsInquires[amendIndex].state = 'UPLOADED';
+              }
+            });
+          }
           // Update list inquiry
           let editedInqIndex = optionsInquires.findIndex(inq => question.id === inq.id);
           if (optionsInquires[editedInqIndex]?.process === 'pending') {
@@ -1331,8 +1378,9 @@ const InquiryViewer = (props) => {
       })
       .catch((error) => {
         // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: error, icon: 'failed' }));
-        dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-      }).finally(() => dispatch(FormActions.isLoadingProcess(false)));
+        handleError(dispatch, error);
+      })
+      .finally(() => dispatch(FormActions.isLoadingProcess(false)));
   };
 
   const cancelResolve = () => {
@@ -1464,7 +1512,7 @@ const InquiryViewer = (props) => {
           mediaListAmendment.push({ id: mediaFileAns.id, ext: mediaFileAns.ext, name: mediaFileAns.name })
         }
       });
-      if (formData.get('files')) mediaFilesResp = await uploadFile(formData);
+      if (formData.get('files')) mediaFilesResp = await uploadFile(formData).catch((err) => handleError(dispatch, err));
       if (mediaFilesResp) {
         const { response } = mediaFilesResp;
         response.forEach((file) => {
@@ -1512,9 +1560,7 @@ const InquiryViewer = (props) => {
             );
             setViewDropDown('');
             setDisableSaveReply(false);
-          }).catch((error) =>
-            dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-          );
+          }).catch((error) => handleError(dispatch, error));
       } else {
         // Edit
         const reqReply = {
@@ -1547,9 +1593,7 @@ const InquiryViewer = (props) => {
             dispatch(
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
             );
-          }).catch((error) =>
-            dispatch(AppAction.showMessage({ message: error, variant: 'error' }))
-          );
+          }).catch((error) => handleError(dispatch, error));
       }
     } else {
       if (!tempReply.answer?.id) { // Create amendment / reply
@@ -1580,19 +1624,20 @@ const InquiryViewer = (props) => {
             dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
             dispatch(InquiryActions.setNewAmendment({ oldAmendmentId: question.id, newAmendment: res.newAmendment }));
           })
-          .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })));
+          .catch((error) => handleError(dispatch, error));
       }
       else { // Edit amendment / reply
-        let newContent = tempReply.answer.content || ONLY_ATT;
+        let newContent = tempReply.answer.content || (question.state === 'AME_DRF' ? NO_CONTENT_AMENDMENT : ONLY_ATT);
         if (newContent && typeof newContent === "string") {
           if (isJsonText(newContent)) {
             const parseContent = JSON.parse(newContent);
             parseContent.name = parseContent.name.toUpperCase().trim();
             parseContent.address = parseContent.address.toUpperCase().trim();
+            if (question.state === 'AME_DRF' && parseContent.name === '' && parseContent.address === '') parseContent.name = NO_CONTENT_AMENDMENT;
             newContent = JSON.stringify(parseContent);
           }
           else {
-            newContent = newContent.trim() || ONLY_ATT;
+            newContent = newContent.trim() || (question.state === 'AME_DRF' ? NO_CONTENT_AMENDMENT : ONLY_ATT);
             if (!isReply || question.state.includes('AME_')) newContent = newContent.toUpperCase();
           }
         }
@@ -1711,7 +1756,7 @@ const InquiryViewer = (props) => {
           dispatch(InquiryActions.setInquiries(optionsInquires));
           props.getUpdatedAt();
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
-        }).catch((err) => dispatch(AppAction.showMessage({ message: err, variant: 'error' })));
+        }).catch((err) => handleError(dispatch, err));
       }
     }
     setIsReply(false);
@@ -1813,13 +1858,15 @@ const InquiryViewer = (props) => {
           dispatch(InquiryActions.setInquiries(optionsInquires));
           props.getUpdatedAt();
           setViewDropDown('');
+          setIsResolve(false);
+          setIsResolveCDCM(false);
           // setSaveComment(!isSaveComment);
           dispatch(
             AppAction.showMessage({ message: 'Update inquiry successfully', variant: 'success' })
           );
         }
       })
-      .catch((error) => dispatch(AppAction.showMessage({ message: error, variant: 'error' })))
+      .catch((error) => handleError(dispatch, error));
   };
 
   useEffect(() => {
@@ -1929,6 +1976,8 @@ const InquiryViewer = (props) => {
           />
         </div>)
     } else {
+      // TODO: Check WrapText for alsoNotify 1,2,3
+      const isAlsoNotify = metadata.field[ALSO_NOTIFY] === field;
       return (
         <TextField
           className={classes.inputText}
@@ -1938,7 +1987,7 @@ const InquiryViewer = (props) => {
           onChange={inputText}
           variant='outlined'
           inputProps={{ style: { textTransform: 'uppercase' } }}
-          error={!validateInput?.isValid || validateField(field, textResolve).isError}
+          error={!validateInput?.isValid || validateField(field, textResolve).isError || isAlsoNotify ? validateAlsoNotify(textResolve).isError : false}
           helperText={
             !validateInput?.isValid ?
               (<>
@@ -2408,7 +2457,6 @@ const InquiryViewer = (props) => {
                         }
                         validation={setValidationCDCM}
                         question={question}
-                        originalValues={isJsonText(question.content) ? JSON.parse(question.content) : null}
                         setTextResolve={setTextResolve}
                         setDirty={setDirty}
                       />
@@ -2441,7 +2489,7 @@ const InquiryViewer = (props) => {
                         Accept
                       </Button>
                       {
-                        isSeparate &&
+                        (isSeparate || isAlsoNotifies) &&
                         <Button
                           variant="contained"
                           color="primary"
@@ -2607,6 +2655,21 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+  const regNumber = { value: /^\s*(([0-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regInteger = { value: /^\s*[0-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
+
+  const cdUnit = [
+    { field: CONTAINER_PACKAGE, title: 'PACKAGE', unit: packageUnits, required: 'This is required', pattern: regInteger },
+    { field: CONTAINER_WEIGHT, title: 'WEIGHT', unit: weightUnits, required: 'This is required', pattern: regNumber },
+    { field: CONTAINER_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits, required: false, pattern: regNumber }
+  ];
+
+  const cmUnit = [
+    { field: CM_PACKAGE, title: 'PACKAGE', unit: packageUnits, required: 'This is required', pattern: regInteger },
+    { field: CM_WEIGHT, title: 'WEIGHT', unit: weightUnits, required: 'This is required', pattern: regNumber },
+    { field: CM_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits, required: false, pattern: regNumber }
+  ];
+
   const getField = (field) => {
     return metadata.field?.[field] || '';
   };
@@ -2642,6 +2705,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     } else {
       temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? value.split(',') : value;
     }
+
     setValues(temp);
     setTextResolve(temp);
     setDirty()
@@ -2676,7 +2740,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       setValues(cmSorted)
     }
   }, [content]);
-
 
   const renderTB = () => {
     let td = [];
@@ -2746,6 +2809,33 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                 }
               } else if (inqType === CONTAINER_NUMBER && container === CONTAINER_DETAIL && !disableInput && item.duplicate) {
                 validation(false);
+              }
+              if (CONTAINER_LIST.cdNumber.includes(type) || CONTAINER_LIST.cmNumber.includes(type)) {
+                const filteredCdUnit = (CONTAINER_LIST.cdNumber.includes(type) ? cdUnit : cmUnit).filter((item) => item.field === type);
+                const reg = new RegExp(filteredCdUnit[0].pattern.value);
+                const inputValid = (nodeValue[getType(type)] && nodeValue[getType(type)].length === 0) || reg.test(nodeValue[getType(type)]);
+                if (!inputValid) validation(false);
+
+                return (
+                  <div>
+                    <input
+                      className={clsx(classes.text)}
+                      key={index1}
+                      style={{
+                        marginLeft: 5,
+                        backgroundColor: disabled && '#FDF2F2',
+                        fontSize: 15,
+                        borderTopRightRadius: rowIndex === 0 && rowValues.length - 1 === index1 ? 8 : null,
+                        textTransform: isUpperCase ? 'uppercase' : 'none',
+                        borderColor: inputValid === true ? '#bac3cb' : 'red'
+                      }}
+                      disabled={disabled}
+                      value={nodeValue ? nodeValue[getType(type)] || '' : ''}
+                      onChange={(e) => onChange(e, nodeValue.index, getType(type))}
+                    />
+                    {inputValid ? null : <p style={{ color: 'red' }}>{filteredCdUnit[0].pattern.message}</p>}
+                  </div>
+                )
               }
               return (
                 <input

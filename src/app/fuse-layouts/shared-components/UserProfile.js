@@ -12,13 +12,14 @@ import {
 } from '@material-ui/core';
 import { cyan } from '@material-ui/core/colors';
 import { Link } from 'react-router-dom';
+import { clearLocalStorage } from '@shared';
 import * as AppActions from 'app/store/actions';
 import { SocketContext } from 'app/AppContext';
 
 function UserProfile(props) {
   const { classes } = props;
   const dispatch = useDispatch();
-  const [ open, setOpen ] = useState(null);
+  const [open, setOpen] = useState(null);
   const user = useSelector(({ user }) => user);
   const socket = useContext(SocketContext);
 
@@ -31,7 +32,7 @@ function UserProfile(props) {
   };
 
   const handleLogOut = () => {
-    localStorage.clear();
+    clearLocalStorage();
     sessionStorage.removeItem("permissions");
     socket.emit('user_processing_out');
     dispatch(AppActions.removeUser());
@@ -45,10 +46,10 @@ function UserProfile(props) {
 
   return (
     <>
-      <Button className="h-64" onClick={handleClick}>
+      <Button className="h-64" onClick={handleClick} style={{ marginLeft: 2 }}>
         <Avatar
           className={classes.fitAvatar}
-          style={{ background: cyan[ 400 ] }}
+          style={{ background: cyan[400] }}
           src={user.photoURL ? user.photoURL : ''}
           alt="User photo">
           {!user.photoURL ? user.displayName.charAt(0).toUpperCase() : ''}

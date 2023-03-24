@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => ({
   iconDraftBL: {
     width: 40,
     height: 40,
-    margin: '0 5px',
+    marginLeft: 10,
     cursor: 'pointer'
   }
 }));

@@ -1,6 +1,7 @@
 import { sendmail, getSuggestMail } from 'app/services/mailService';
 import { loadComment } from 'app/services/inquiryService';
 import axios from 'axios';
+import { handleError } from '@shared/handleError';
 import { PRE_CARRIAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY } from '@shared/keyword';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
 
@@ -27,7 +28,7 @@ export const sendMail =
     async (dispatch) => {
       const replyInqs = [];
       const inquiriesPendingProcess = inquiries.filter(op => op.process === 'pending');
-      const listComment = await axios.all(inquiriesPendingProcess.map(q => loadComment(q.id)));
+      const listComment = await axios.all(inquiriesPendingProcess.map(q => loadComment(q.id).catch(err => handleError(dispatch, err))));
       listComment.forEach((comment, index) => comment.length && inquiries[index].receiver[0] === tab && replyInqs.push(inquiries[index].id));
       dispatch({ type: SENDMAIL_LOADING });
       sendmail({ myblId, replyInqs, user, header, ...form })

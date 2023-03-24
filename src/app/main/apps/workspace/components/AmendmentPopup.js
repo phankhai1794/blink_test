@@ -127,8 +127,8 @@ const AmendmentPopup = (props) => {
   const user = useSelector(({ user }) => user);
   const [inputSeal, setInputSeal] = useState('');
   const { register, control, handleSubmit, formState: { errors } } = useForm();
-  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
-  const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
+  const regNumber = { value: /^\s*(([0-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regInteger = { value: /^\s*[0-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
@@ -154,7 +154,7 @@ const AmendmentPopup = (props) => {
   const onSave = () => {
     Object.keys(data).forEach((key) => {
       if (typeof data[key] === 'string')
-        data[key] = data[key].toUpperCase().trim();
+        data[key] = data[key].toUpperCase().replace(/^0*/g,"").trim();
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
     onClose();
@@ -323,8 +323,8 @@ const AmendmentPopup = (props) => {
                   styles={{
                     control: (base) => ({
                       ...base,
-                      height: 35,
-                      minHeight: 35,
+                      height: 39.75,
+                      minHeight: 39.75,
                       borderRadius: 8,
                       border: isError ? '1px solid red' : '',
                     }),
