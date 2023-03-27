@@ -473,6 +473,7 @@ const BLWorkspace = (props) => {
       )
     } else if (openNotificationSubmitPreview) {
       return (
+        // not used, change to toast
         <>
           <div>Your inquiries and amendments</div>
           <div>have been sent successfully.</div>
