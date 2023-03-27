@@ -25,7 +25,6 @@ import parse from 'html-react-parser';
 import * as mailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
 
-import SubmitAnswerNotification from './SubmitAnswerNotification';
 import InputUI from './MailInputUI';
 import AllInquiry from './AllInquiry';
 import Form from './Form';
@@ -136,7 +135,6 @@ const SendInquiryForm = (props) => {
   const [tabSelected, setTabSelected] = useState(0);
   const [customerValue, setCustomerValue] = useState({ subject: '', content: '' });
   const [onshoreValue, setOnshoreValue] = useState({ subject: '', content: '' });
-  const [openNotification, setOpenNotification] = useState(false);
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const getField = (keyword) => {
@@ -288,10 +286,10 @@ const SendInquiryForm = (props) => {
 
   useEffect(() => {
     if (success) {
-      setOpenNotification(true);
       dispatch({
         type: mailActions.SENDMAIL_NONE
       });
+      dispatch(Actions.showMessage({ message: 'Your inquiries have been sent successfully', variant: 'success' }));
     } else if (error) {
       dispatch(
         Actions.showMessage({
@@ -441,12 +439,6 @@ const SendInquiryForm = (props) => {
 
   return (
     <>
-      <SubmitAnswerNotification
-        open={openNotification}
-        iconType={<img src={`/assets/images/icons/vector.svg`} />}
-        msg="Your inquires have been sent successfully."
-        handleClose={() => setOpenNotification(false)}
-      />
       <Form
         title={'New Mail'}
         open={openEmail}
