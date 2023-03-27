@@ -2243,6 +2243,7 @@ const InquiryViewer = (props) => {
                             question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                           }
                           originalValues={Array.isArray(question.content) ? question.content : question.contentCDCM}
+                          isResolveCDCM={isResolveCDCM}
                           setEditContent={(value) => {
                             if (isReplyCDCM || isResolveCDCM) {
                               handleChangeContainerDetail(value);
