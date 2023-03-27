@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom';
 
 function InquiringHeader(props) {
   const mainTheme = useSelector(({ fuse }) => fuse.settings.mainTheme);
-  console.log(">>>>>>>>>>>>>>>>>>>>>>");
 
   return (
     <div className="flex flex-1 w-full items-center justify-between">
