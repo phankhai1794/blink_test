@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLabelById, toFindDuplicates } from '@shared';
 import { handleError } from '@shared/handleError';
-import { template } from '@shared/template'
 import {
   FormControl,
   FormControlLabel,
@@ -186,16 +185,20 @@ const InquiryEditor = (props) => {
       scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [fieldValue]);
+
   const handleTypeChange = (e) => {
     const inq = { ...currentEditInq };
     inq.inqType = e.value;
-    // if (e.__isNew__) inq.isNew = e.__isNew__;
-    const filter = template.find(({field, type}) => type.toUpperCase() === e.label.toUpperCase() && fieldValue.label.toUpperCase() === field)
+    if (e.__isNew__) inq.isNew = e.__isNew__;
     dispatch(InquiryActions.validate({ ...valid, inqType: true }));
     if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
       inq.content = contentEdited;
     } else {
-      inq.content = filter?.content || ''
+      inq.content =
+        MSG_INQUIRY_CONTENT.replace(
+          '{{INQ_TYPE}}',
+          e.label
+        );
     }
     setValueType(e);
     dispatch(InquiryActions.setEditInq(inq));
