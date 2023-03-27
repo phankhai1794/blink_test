@@ -154,7 +154,7 @@ const AmendmentPopup = (props) => {
   const onSave = () => {
     Object.keys(data).forEach((key) => {
       if (typeof data[key] === 'string')
-        data[key] = data[key].toUpperCase().replace(/^0*/g,"").trim();
+        data[key] = data[key].toUpperCase().replace(/^0*/g, "").trim();
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
     onClose();
@@ -209,10 +209,12 @@ const AmendmentPopup = (props) => {
     const field = type.find((f) => f.title === title);
     // TODO: Case for Dummy ContainerNo
     const isUpperCase = field.title !== CONTAINER_NUMBER;
+
     return (
       <TextField
         {...prop}
         variant="outlined"
+        rows={6}
         error={Boolean(errors[title])}
         helperText={errors[title]?.message}
         autoComplete="off"
@@ -299,7 +301,7 @@ const AmendmentPopup = (props) => {
       if (!field.value && options.length === 1)
         handleChange(field.id, options[0].value);
     }, []);
-  
+
     return (
       <>
         {isEdit ? (

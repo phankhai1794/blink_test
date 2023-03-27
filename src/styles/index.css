@@ -70,13 +70,13 @@ a[role='button'] {
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
-    background-color: #fff;
+    background-color: #d7045200;
   }
 
   ::-webkit-scrollbar:hover {
     width: 10px;
     height: 10px;
-    background-color: #fff;
+    background-color: #d7045200;
     /* background-color: rgba(201, 24, 24, 0.06); */
   }
 
