@@ -87,7 +87,7 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: '22px',
     fontWeight: '500',
     textOverflow: 'ellipsis',
-    overflow: 'hidden',
+    overflow: 'auto',
   },
   notchedOutlineNotChecked: {
     borderColor: `${red} !important`,
@@ -327,7 +327,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
               )}
               InputProps={{
                 readOnly: readOnly || true,
-                endAdornment: (
+                endAdornment: ((rows < 6) ? (
                   <InputAdornment
                     position="end"
                     className={clsx(
@@ -340,7 +340,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
                       <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
                     )}
                   </InputAdornment>
-                ),
+                ) : <></>),
                 classes: {
                   root: classes.root,
                   input: classes.input,
