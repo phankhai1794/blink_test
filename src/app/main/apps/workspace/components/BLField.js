@@ -327,7 +327,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
               )}
               InputProps={{
                 readOnly: readOnly || true,
-                endAdornment: ((rows < 6 || !rows) ? (
+                endAdornment: ((!rows || rows < 6) ? (
                   <InputAdornment
                     position="end"
                     className={clsx(
