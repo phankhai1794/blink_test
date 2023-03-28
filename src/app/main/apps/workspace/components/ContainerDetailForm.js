@@ -134,6 +134,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   useEffect(() => {
     if (!isResolveCDCM) {
       setValues(originalData);
+      setValueEdit(originalData);
     }
   }, [isResolveCDCM]);
 
