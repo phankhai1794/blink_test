@@ -303,7 +303,7 @@ const TableCD = (props) => {
                 </Grid>
                 <Grid item xs={2}>
                   <BLField disableClick={true} disableIcon={true}>
-                    {`${cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]] || ''} ${packageUnitsJson.find(pkg => pkg.code === cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE_UNIT]])?.description || ''}`}
+                    {`${NumberFormat(cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]) || ''} ${packageUnitsJson.find(pkg => pkg.code === cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE_UNIT]])?.description || ''}`}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>

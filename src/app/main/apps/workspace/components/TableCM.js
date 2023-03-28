@@ -334,7 +334,7 @@ const TableCM = (props) => {
             </Grid>
             <Grid item xs={2}>
               <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>
-                {`${drfMD[TOTAL_PACKAGE]} ${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`}
+                {`${NumberFormat(drfMD[TOTAL_PACKAGE])} ${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`}
               </BLField>
             </Grid>
             <Grid item xs={4}>
@@ -370,7 +370,7 @@ const TableCM = (props) => {
                 </BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${cm?.[metadata?.inq_type?.[CM_PACKAGE]] || ''} ${getPackageName(cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]])}`}</BLField>
+                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${NumberFormat(cm?.[metadata?.inq_type?.[CM_PACKAGE]]) || ''} ${getPackageName(cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]])}`}</BLField>
               </Grid>
               <Grid item xs={4}>
                 <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>
