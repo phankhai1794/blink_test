@@ -169,7 +169,7 @@ export const sentStatus = [
 ];
 
 export function NumberFormat(number) {
-  if (number.length === 0)
+  if (!number||number.length === 0)
     return ''
     
   const formattedNumber = (typeof number === 'string'? parseFloat(number.replace(",", "")): number).toLocaleString("en-US", {
