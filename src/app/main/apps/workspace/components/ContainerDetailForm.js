@@ -88,7 +88,7 @@ const StyledPopper = styled(Popper)`&&{
     }
   }
 }`;
-const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, deleteAmendment, setDeleteAmendment }) => {
+const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, deleteAmendment, setDeleteAmendment, isResolveCDCM }) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const user = useSelector(({ user }) => user);
@@ -130,6 +130,13 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   useEffect(() => {
     setValues(originalData);
   }, [originalData]);
+
+  useEffect(() => {
+    if (!isResolveCDCM) {
+      setValues(originalData);
+      setValueEdit(originalData);
+    }
+  }, [isResolveCDCM]);
 
   const handleEdit = (state) => {
     setOpenEdit(state);
