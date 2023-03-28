@@ -30,6 +30,8 @@ export const PRE_CARRIAGE = 'preVvd';
 
 export const TYPE_OF_MOVEMENT = 'moveTypeDesc';
 
+export const RD_TERMS = 'rdTerms';
+
 export const SHIPPING_MARK = 'shippingMark';
 
 export const DESCRIPTION_OF_GOODS = 'cargoDescription';
@@ -127,6 +129,7 @@ export const HTS_CODE = 'HTS Code';
 export const NCM_CODE = 'NCM Code';
 
 export const SEQ = 'Seq';
+
 
 export const ONLY_ATT = 'Please refer to the attached file for your reference.';
 
