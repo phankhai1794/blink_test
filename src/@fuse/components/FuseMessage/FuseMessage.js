@@ -9,7 +9,9 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import ReportProblemOutlinedIcon from '@material-ui/icons/ReportProblemOutlined';
 
 const useStyles = makeStyles((theme) => ({
-  root: {},
+  root: {
+    width: '60%'
+  },
   success: {
     backgroundColor: green[600],
     color: '#FFFFFF'
