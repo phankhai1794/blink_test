@@ -168,6 +168,17 @@ export const sentStatus = [
   ...['REP_SENT'] // draft status
 ];
 
+export function NumberFormat(number) {
+  if (!number||number.length === 0)
+    return ''
+    
+  const formattedNumber = (typeof number === 'string'? parseFloat(number.replace(",", "")): number).toLocaleString("en-US", {
+    maximumFractionDigits: 3,
+  });
+  
+  return formattedNumber;
+}
+
 export const validatePartiesContent = (partiesContent, type) => {
   const MAX_LENGTH = 35;
   const ErrorMessage = `The maximum number of lines is ${type === 'name' ? 2 : 3}. No more than 35 characters per each line.`;
