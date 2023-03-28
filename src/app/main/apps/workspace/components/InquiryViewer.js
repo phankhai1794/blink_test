@@ -8,6 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
+import {  parseNumberValue } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify } from '@shared';
@@ -1737,7 +1738,7 @@ const InquiryViewer = (props) => {
                         CONTAINER_LIST.cmNumber.map((key, index) => {
                           let total = 0;
                           cmOfCd.map((cm) => {
-                            total += parseFloat(cm[getType(key)]);
+                            total += parseNumberValue(cm[getType(key)]);
                           });
                           cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                         });

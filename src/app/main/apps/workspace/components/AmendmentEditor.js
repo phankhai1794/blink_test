@@ -6,7 +6,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
-import { validateBLType, compareObject } from '@shared';
+import { validateBLType, compareObject, parseNumberValue } from '@shared';
 import { NO_CONTENT_AMENDMENT } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE } from '@shared/keyword';
@@ -301,7 +301,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                         CONTAINER_LIST.cmNumber.map((key, index) => {
                           let total = 0;
                           cmOfCd.map((cm) => {
-                            total += parseFloat(cm[getType(key)]);
+                            total += parseNumberValue(cm[getType(key)]);
                           });
                           cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                         });
