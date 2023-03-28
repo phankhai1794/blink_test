@@ -169,9 +169,13 @@ export const sentStatus = [
 ];
 
 export function NumberFormat(number) {
-  const formattedNumber = number.toLocaleString("en-US", {
-    maximumFractionDigits: 2,
+  if (number.length === 0)
+    return ''
+    
+  const formattedNumber = (typeof number === 'string'? parseFloat(number.replace(",", "")): number).toLocaleString("en-US", {
+    maximumFractionDigits: 3,
   });
+  
   return formattedNumber;
 }
 
