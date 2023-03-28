@@ -168,6 +168,17 @@ export const sentStatus = [
   ...['REP_SENT'] // draft status
 ];
 
+export function NumberFormat(number) {
+  if (!number||number.length === 0)
+    return ''
+    
+  const formattedNumber = (typeof number === 'string'? parseFloat(number.replace(",", "")): number).toLocaleString("en-US", {
+    maximumFractionDigits: 3,
+  });
+  
+  return formattedNumber;
+}
+
 export const validatePartiesContent = (partiesContent, type) => {
   const MAX_LENGTH = 35;
   const ErrorMessage = `The maximum number of lines is ${type === 'name' ? 2 : 3}. No more than 35 characters per each line.`;
@@ -246,6 +257,7 @@ export function groupBy(list, keyGetter) {
   });
   return map;
 }
+
 
 export function isJsonText(str) {
   try {
@@ -352,6 +364,20 @@ export const clearLocalStorage = () => {
   if (user) localStorage.setItem("lastEmail", user.email);
 }
 
+export const parseNumberValue = (value) =>{
+  if (!value)
+    return 0
+  
+  // Remove commas from the string
+  const stripped = typeof value === 'string' ?value.replace(/,/g, ''): value;
+  
+  // Parse the stripped string as a floating-point number
+  const num = parseFloat(stripped);
+  
+  // Return the parsed number
+  return num;
+}
+
 export const getTotalValueMDView = (drfView, containerDetail, getType) => {
   const drfMD = {};
   if (drfView === 'MD' && containerDetail) {
@@ -375,7 +401,7 @@ export const getTotalValueMDView = (drfView, containerDetail, getType) => {
     CONTAINER_LIST.totalNumber.map((key, index) => {
       let total = 0;
       containerDetail.forEach((item) => {
-        total += parseFloat(item[getType(CONTAINER_LIST.cdNumber[index])]);
+        total += parseNumberValue(item[getType(CONTAINER_LIST.cdNumber[index])]);
       });
       drfMD[key] = parseFloat(total.toFixed(3));;
     })

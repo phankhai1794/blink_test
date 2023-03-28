@@ -16,7 +16,7 @@ import {
   TOTAL_MEASUREMENT,
   TOTAL_MEASUREMENT_UNIT,
 } from '@shared/keyword';
-import { getTotalValueMDView } from '@shared';
+import { getTotalValueMDView, NumberFormat } from '@shared';
 import { packageUnitsJson } from '@shared/units';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
@@ -334,7 +334,7 @@ const TableCM = (props) => {
             </Grid>
             <Grid item xs={2}>
               <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>
-                {`${drfMD[TOTAL_PACKAGE]} ${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`}
+                {`${NumberFormat(drfMD[TOTAL_PACKAGE])} ${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`}
               </BLField>
             </Grid>
             <Grid item xs={4}>
@@ -348,7 +348,7 @@ const TableCM = (props) => {
                 multiline={true}
                 rows={6}
                 disableIcon={true}>
-                {`${drfMD[TOTAL_WEIGHT]} ${drfMD[TOTAL_WEIGHT_UNIT]}`}
+                {`${NumberFormat(drfMD[TOTAL_WEIGHT])} ${drfMD[TOTAL_WEIGHT_UNIT]}`}
               </BLField>
             </Grid>
             <Grid item xs={2}>
@@ -357,7 +357,7 @@ const TableCM = (props) => {
                 multiline={true}
                 rows={6}
                 disableIcon={true}>
-                {`${drfMD[TOTAL_MEASUREMENT]} ${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
+                {`${NumberFormat(drfMD[TOTAL_MEASUREMENT])} ${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
               </BLField>
             </Grid>
           </Grid>
@@ -370,7 +370,7 @@ const TableCM = (props) => {
                 </BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${cm?.[metadata?.inq_type?.[CM_PACKAGE]] || ''} ${getPackageName(cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]])}`}</BLField>
+                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${NumberFormat(cm?.[metadata?.inq_type?.[CM_PACKAGE]]) || ''} ${getPackageName(cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]])}`}</BLField>
               </Grid>
               <Grid item xs={4}>
                 <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>
@@ -378,10 +378,10 @@ const TableCM = (props) => {
                 </BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${cm?.[metadata?.inq_type?.[CM_WEIGHT]] || ''} ${cm?.[metadata?.inq_type?.[CM_WEIGHT_UNIT]] || ''}`}</BLField>
+                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${NumberFormat(cm?.[metadata?.inq_type?.[CM_WEIGHT]]) || ''} ${cm?.[metadata?.inq_type?.[CM_WEIGHT_UNIT]] || ''}`}</BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${cm?.[metadata?.inq_type?.[CM_MEASUREMENT]] || ''} ${cm?.[metadata?.inq_type?.[CM_MEASUREMENT_UNIT]] || ''}`}</BLField>
+                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${NumberFormat(cm?.[metadata?.inq_type?.[CM_MEASUREMENT]])|| ''} ${cm?.[metadata?.inq_type?.[CM_MEASUREMENT_UNIT]] || ''}`}</BLField>
               </Grid>
             </Grid>
           ))
