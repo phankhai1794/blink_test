@@ -5,6 +5,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { submitInquiryAnswer } from 'app/services/inquiryService';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
 import { handleError } from '@shared/handleError';
+import * as Actions from 'app/store/actions';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
@@ -129,9 +130,9 @@ const PopupConfirmSubmit = (props) => {
     if (props.field === 'INQUIRY_LIST') {
       dispatch(FormActions.toggleAllInquiry(false));
       if (openPreviewListSubmit) {
-        dispatch(FormActions.toggleOpenNotificationPreviewSubmit(true));
+        dispatch(Actions.showMessage({ message: 'Your inquiries and amendments have been sent successfully.', variant: 'success' }));
       } else {
-        dispatch(FormActions.toggleOpenNotificationSubmitAnswer(true));
+        dispatch(Actions.showMessage({ message: 'Your answer has been submitted successfully.', variant: 'success' }));
       }
     } else {
       dispatch(InquiryActions.setOneInq({}));

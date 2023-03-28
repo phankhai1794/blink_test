@@ -1,4 +1,10 @@
 import moment from 'moment';
+import {
+  TOTAL_PACKAGE_UNIT,
+  TOTAL_WEIGHT_UNIT,
+  TOTAL_MEASUREMENT_UNIT,
+  CONTAINER_LIST,
+} from '@shared/keyword';
 
 export const getLabelById = (fieldOptions, id) => {
   const result = fieldOptions.filter(({ value }) => value === id);
@@ -162,6 +168,17 @@ export const sentStatus = [
   ...['REP_SENT'] // draft status
 ];
 
+export function NumberFormat(number) {
+  if (!number||number.length === 0)
+    return ''
+    
+  const formattedNumber = (typeof number === 'string'? parseFloat(number.replace(",", "")): number).toLocaleString("en-US", {
+    maximumFractionDigits: 3,
+  });
+  
+  return formattedNumber;
+}
+
 export const validatePartiesContent = (partiesContent, type) => {
   const MAX_LENGTH = 35;
   const ErrorMessage = `The maximum number of lines is ${type === 'name' ? 2 : 3}. No more than 35 characters per each line.`;
@@ -241,6 +258,7 @@ export function groupBy(list, keyGetter) {
   return map;
 }
 
+
 export function isJsonText(str) {
   try {
     JSON.parse(str);
@@ -316,6 +334,7 @@ export const checkMaxRows = (containerLength, mark, packages, description) => {
   );
   return (containerLength + maxLength) <= 17; // max num of lines
 }
+
 export const compareObject = (a, b) => {
   if (a.length === b.length && a.length === 0) return true;
 
@@ -343,4 +362,49 @@ export const clearLocalStorage = () => {
   let user = JSON.parse(localStorage.getItem("USER"));
   localStorage.clear();
   if (user) localStorage.setItem("lastEmail", user.email);
+}
+
+export const parseNumberValue = (value) =>{
+  if (!value)
+    return 0
+  
+  // Remove commas from the string
+  const stripped = typeof value === 'string' ?value.replace(/,/g, ''): value;
+  
+  // Parse the stripped string as a floating-point number
+  const num = parseFloat(stripped);
+  
+  // Return the parsed number
+  return num;
+}
+
+export const getTotalValueMDView = (drfView, containerDetail, getType) => {
+  const drfMD = {};
+  if (drfView === 'MD' && containerDetail) {
+    const defaultUnit = {}
+    defaultUnit[TOTAL_PACKAGE_UNIT] = "PK";
+    defaultUnit[TOTAL_WEIGHT_UNIT] = "KGS";
+    defaultUnit[TOTAL_MEASUREMENT_UNIT] = "CBM";
+
+    CONTAINER_LIST.totalUnit.forEach((totalKey, index) => {
+      const units = [];
+      containerDetail.forEach((cd) => {
+        units.push(cd[getType(CONTAINER_LIST.cdUnit[index])])
+      })
+      if ([... new Set(units)].length === 1) {
+        drfMD[totalKey] = units[0].toString();
+      } else {
+        drfMD[totalKey] = defaultUnit[totalKey];
+      }
+    })
+
+    CONTAINER_LIST.totalNumber.map((key, index) => {
+      let total = 0;
+      containerDetail.forEach((item) => {
+        total += parseNumberValue(item[getType(CONTAINER_LIST.cdNumber[index])]);
+      });
+      drfMD[key] = parseFloat(total.toFixed(3));;
+    })
+  }
+  return drfMD;
 }

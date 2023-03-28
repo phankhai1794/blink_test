@@ -1,5 +1,5 @@
 import React from 'react';
-import { CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, BL_TYPE, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT, VESSEL_VOYAGE } from '@shared/keyword';
+import { CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT, VESSEL_VOYAGE } from '@shared/keyword';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Grid } from '@material-ui/core';
@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const NextPage = ({ containersManifest }) => {
+const NextPage = ({ containersManifest, drfMD }) => {
   const classes = useStyles();
   const [metadata, myBL, content, drfView] = useSelector(({ draftBL }) => [
     draftBL.metadata,
@@ -141,25 +141,25 @@ const NextPage = ({ containersManifest }) => {
       ))
     } else {
       return <Grid container item className={classes.content_L}>
-        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 5 }}>
+        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 5, whiteSpace: 'pre-wrap' }}>
           {getValueField(SHIPPING_MARK)}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 5 }}>
           <Grid item style={{ textAlign: 'end' }}>
-            <span>{getValueField(TOTAL_PACKAGE)}</span>
+            <span>{drfMD[TOTAL_PACKAGE]}</span>
             <br />
-            <span>{getPackageName(getValueField(TOTAL_PACKAGE_UNIT))}</span>
+            <span>{getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}</span>
           </Grid>
         </Grid>
         <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }}></Grid>
-        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 5 }}>
+        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 5, whiteSpace: 'pre-wrap' }}>
           {getValueField(DESCRIPTION_OF_GOODS)}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 5 }}>
-          {`${getValueField(TOTAL_WEIGHT)} ${getValueField(TOTAL_WEIGHT_UNIT)}`}
+          {`${drfMD[TOTAL_WEIGHT]} ${drfMD[TOTAL_WEIGHT_UNIT]}`}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 5 }}>
-          {`${getValueField(TOTAL_MEASUREMENT)} ${getValueField(TOTAL_MEASUREMENT_UNIT)}`}
+          {`${drfMD[TOTAL_MEASUREMENT]} ${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
         </Grid>
       </Grid>
     }

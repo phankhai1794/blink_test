@@ -8,6 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
+import {  parseNumberValue } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify } from '@shared';
@@ -48,6 +49,8 @@ import {
   ALSO_NOTIFY,
   DESCRIPTION_OF_GOODS
 } from '@shared/keyword';
+
+import {  NumberFormat } from '@shared';
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -1224,7 +1227,7 @@ const InquiryViewer = (props) => {
         if (getTypeName === CONTAINER_SEAL) {
           obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
         } else if (obj[question.inqType]) {
-          obj[question.inqType] = obj[question.inqType] instanceof String ? obj[question.inqType].toUpperCase().trim() : obj[question.inqType];
+          obj[question.inqType] = (typeof obj[question.inqType] === 'string') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
         }
       });
 
@@ -1704,15 +1707,16 @@ const InquiryViewer = (props) => {
                 })
                 const fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
                 const fieldAutoUpdate = content[fieldCdCM];
-                fieldAutoUpdate.map((item) => {
-                  if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
-                    item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]]
-                  }
-                })
                 if (fieldAutoUpdate) {
-                  content[fieldCdCM] = fieldAutoUpdate;
-
                   if (question.field === getField(CONTAINER_DETAIL)) {
+                    if (fieldAutoUpdate.length) {
+                      fieldAutoUpdate.map((item) => {
+                        if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
+                          item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
+                        }
+                      })
+                    }
+                    content[fieldCdCM] = fieldAutoUpdate;
                     contentField.forEach((cd) => {
                       let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
                         cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
@@ -1736,7 +1740,7 @@ const InquiryViewer = (props) => {
                         CONTAINER_LIST.cmNumber.map((key, index) => {
                           let total = 0;
                           cmOfCd.map((cm) => {
-                            total += parseFloat(cm[getType(key)]);
+                            total += parseNumberValue(cm[getType(key)]);
                           });
                           cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                         });
@@ -2242,6 +2246,7 @@ const InquiryViewer = (props) => {
                             question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                           }
                           originalValues={Array.isArray(question.content) ? question.content : question.contentCDCM}
+                          isResolveCDCM={isResolveCDCM}
                           setEditContent={(value) => {
                             if (isReplyCDCM || isResolveCDCM) {
                               handleChangeContainerDetail(value);
@@ -2830,7 +2835,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                         borderColor: inputValid === true ? '#bac3cb' : 'red'
                       }}
                       disabled={disabled}
-                      value={nodeValue ? nodeValue[getType(type)] || '' : ''}
+                      value={nodeValue ? NumberFormat(nodeValue[getType(type)]) || '' : ''}
                       onChange={(e) => onChange(e, nodeValue.index, getType(type))}
                     />
                     {inputValid ? null : <p style={{ color: 'red' }}>{filteredCdUnit[0].pattern.message}</p>}
