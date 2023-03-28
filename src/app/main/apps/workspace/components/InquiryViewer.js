@@ -48,6 +48,8 @@ import {
   ALSO_NOTIFY,
   DESCRIPTION_OF_GOODS
 } from '@shared/keyword';
+
+import {  NumberFormat } from '@shared';
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -2831,7 +2833,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                         borderColor: inputValid === true ? '#bac3cb' : 'red'
                       }}
                       disabled={disabled}
-                      value={nodeValue ? nodeValue[getType(type)] || '' : ''}
+                      value={nodeValue ? NumberFormat(nodeValue[getType(type)]) || '' : ''}
                       onChange={(e) => onChange(e, nodeValue.index, getType(type))}
                     />
                     {inputValid ? null : <p style={{ color: 'red' }}>{filteredCdUnit[0].pattern.message}</p>}
