@@ -1,6 +1,7 @@
 import * as Actions from 'app/store/actions';
 import { checkNewInquiry } from '@shared';
 import { PRE_CARRIAGE, PORT_OF_DISCHARGE, PORT_OF_LOADING } from '@shared/keyword';
+import { handleError } from '@shared/handleError';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -185,7 +186,7 @@ const SendInquiryForm = (props) => {
   };
 
   async function fetchData() {
-    const status = ['INQ_SENT', 'ANS_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'COMPL', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A'];
+    const status = ['INQ_SENT', 'ANS_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'asCOMPL', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A'];
     let toCustomer = [], toOnshore = [];
 
     const res = await getMail(mybl.id);
@@ -291,12 +292,7 @@ const SendInquiryForm = (props) => {
       });
       dispatch(Actions.showMessage({ message: 'Your inquiries have been sent successfully', variant: 'success' }));
     } else if (error) {
-      dispatch(
-        Actions.showMessage({
-          message: 'Mail not sent!. Please try again',
-          variant: 'error'
-        })
-      );
+      handleError(dispatch, error);
       dispatch({
         type: mailActions.SENDMAIL_NONE
       });

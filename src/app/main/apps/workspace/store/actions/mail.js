@@ -64,11 +64,6 @@ export const sendMail =
             return dispatch({
               type: SENDMAIL_SUCCESS
             });
-          } else {
-            return dispatch({
-              type: SENDMAIL_ERROR,
-              payload: res
-            });
           }
         })
         .catch((error) => {
