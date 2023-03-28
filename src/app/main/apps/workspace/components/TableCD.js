@@ -26,7 +26,7 @@ import ReplyIcon from "@material-ui/icons/Reply";
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
-import BLField from './BLField';
+import BLField from './BLFieldCont';
 import Label from './FieldLabel';
 
 const red = '#DC2626';
@@ -287,32 +287,32 @@ const TableCD = (props) => {
             containerDetail.map((cd, index) => (
               <Grid container spacing={2} className="px-8 py-2" key={index}>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} disableIcon={true}>
+                  <BLField>
                     {cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} disableIcon={true}>
+                  <BLField>
                     {cd?.[metadata?.inq_type?.[CONTAINER_SEAL]]}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} disableIcon={true}>
+                  <BLField>
                     {cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} disableIcon={true}>
+                  <BLField>
                     {`${NumberFormat(cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]) || ''} ${packageUnitsJson.find(pkg => pkg.code === cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE_UNIT]])?.description || ''}`}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} disableIcon={true}>
+                  <BLField>
                     {`${NumberFormat(cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]) || ''} ${cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT_UNIT]] || ''}`}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
-                  <BLField disableClick={true} disableIcon={true}>
+                  <BLField>
                     {`${NumberFormat(cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]) || ''} ${cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT_UNIT]] || ''}`}
                   </BLField>
                 </Grid>
@@ -321,22 +321,22 @@ const TableCD = (props) => {
           ) : (
             <Grid container spacing={2} className="px-8 py-2">
               <Grid item xs={2}>
-                <BLField disableClick={true} ></BLField>
+                <BLField />
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} ></BLField>
+                <BLField />
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} ></BLField>
+                <BLField />
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} ></BLField>
+                <BLField />
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} ></BLField>
+                <BLField />
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} ></BLField>
+                <BLField />
               </Grid>
             </Grid>
           )}

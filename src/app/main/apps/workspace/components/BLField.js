@@ -298,6 +298,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
     setColorStatus();
   }, [inquiries, metadata, listCommentDraft]);
 
+  // should put theme provider at top component
   return (
     <>
       <div
