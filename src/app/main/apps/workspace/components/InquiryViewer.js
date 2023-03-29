@@ -54,7 +54,7 @@ import {
   FREIGHTED_AS,
   RATE,
   SERVICE_CONTRACT_NO,
-  RD_TERMS
+  RD_TERMS, CM_DESCRIPTION
 } from '@shared/keyword';
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
@@ -929,6 +929,7 @@ const InquiryViewer = (props) => {
                     // map cd -> cm
                     let cm = content[containerCheck[1]]
                     if (cm) {
+                      cm[0][getTypeCDCM(CM_DESCRIPTION)] = orgContent[containerCheck[1]][0][getTypeCDCM(CM_DESCRIPTION)];
                       cm[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans[0][getTypeCDCM(CONTAINER_NUMBER)];
                       CONTAINER_LIST.cdNumber.map((key, index) => {
                         cm[0][getTypeCDCM(CONTAINER_LIST.cmNumber[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
