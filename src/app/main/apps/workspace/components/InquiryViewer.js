@@ -938,7 +938,7 @@ const InquiryViewer = (props) => {
                       });
                       saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
                     }
-                  } else {
+                  } else if (question.field === idCD) {
                     // response drfAnswersTrans cm content
                     const response = res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[idCM];
                     dispatch(InquiryActions.setContent({ ...content, [idCM]: response }));
