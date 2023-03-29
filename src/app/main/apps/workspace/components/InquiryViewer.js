@@ -928,7 +928,6 @@ const InquiryViewer = (props) => {
                     dispatch(InquiryActions.setContent({ ...content, [idCD]: response }));
                     // map cd -> cm
                     let cm = content[containerCheck[1]]
-                    console.log('cm before map', content[containerCheck[1]])
                     if (cm) {
                       cm[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans[0][getTypeCDCM(CONTAINER_NUMBER)];
                       CONTAINER_LIST.cdNumber.map((key, index) => {
@@ -937,7 +936,6 @@ const InquiryViewer = (props) => {
                       CONTAINER_LIST.cdUnit.map((key, index) => {
                         cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                       });
-                      console.log('cm after map', cm)
                       saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
                     }
                   } else {
