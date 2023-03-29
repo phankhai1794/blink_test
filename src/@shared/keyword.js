@@ -130,6 +130,9 @@ export const NCM_CODE = 'NCM Code';
 
 export const SEQ = 'Seq';
 
+export const BL_PRINT_COUNT = 'blPrintCount';
+
+export const FREIGHT_TERM = 'freightTerm';
 
 export const ONLY_ATT = 'Please refer to the attached file for your reference.';
 
