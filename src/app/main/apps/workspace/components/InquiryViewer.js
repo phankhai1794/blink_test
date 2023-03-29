@@ -47,7 +47,15 @@ import {
   DATE_CARGO,
   DATE_LADEN,
   ALSO_NOTIFY,
-  DESCRIPTION_OF_GOODS
+  DESCRIPTION_OF_GOODS,
+  BL_PRINT_COUNT,
+  FREIGHT_TERM,
+  PREPAID,
+  COLLECT,
+  FREIGHTED_AS,
+  RATE,
+  SERVICE_CONTRACT_NO,
+  RD_TERMS
 } from '@shared/keyword';
 
 import {  NumberFormat } from '@shared';
@@ -296,7 +304,16 @@ const InquiryViewer = (props) => {
     DATED,
     COMMODITY_CODE,
     DATE_CARGO,
-    DATE_LADEN
+    DATE_LADEN,
+    ALSO_NOTIFY,
+    BL_PRINT_COUNT,
+    FREIGHT_TERM,
+    PREPAID,
+    COLLECT,
+    FREIGHTED_AS,
+    RATE,
+    SERVICE_CONTRACT_NO,
+    RD_TERMS
   ];
 
   const isDisableBtnUpload = () => {
