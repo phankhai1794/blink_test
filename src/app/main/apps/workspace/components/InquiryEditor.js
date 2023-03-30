@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLabelById, toFindDuplicates } from '@shared';
 import { handleError } from '@shared/handleError';
-import { template } from '@shared/template'
 import {
   FormControl,
   FormControlLabel,
@@ -13,7 +12,9 @@ import {
   RadioGroup,
   Divider,
   Grid,
-  TextField
+  TextField,
+  Icon,
+  Popover
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -104,6 +105,24 @@ const useStyles = makeStyles((theme) => ({
         color: 'rgba(0, 0, 0, 0.38)'
       }
     }
+  },
+  menuList: {
+    width: 400,
+    maxHeight: 400
+  },
+  formRadio: {
+    display: 'block',
+    margin: '10px 10px 5px'
+  },
+  radioLabel: {
+    display: 'block',
+    marginLeft: 35,
+    fontFamily: 'Montserrat',
+    whiteSpace: 'pre-line',
+    fontSize: 12
+  },
+  radioRoot: {
+    padding: 0
   }
 }));
 
@@ -161,6 +180,25 @@ const InquiryEditor = (props) => {
   const [isDisabled, setDisabled] = useState(false);
   const [prevField, setPrevField] = useState('');
   const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [templateList, setTemplateList] = useState([]);
+  const [template, setTemplate] = useState(0);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleChange = (event) => {
+    const index = Number(event.target.value);
+    setTemplate(index);
+    const inq = { ...currentEditInq };
+    inq.content = templateList[index];
+    dispatch(InquiryActions.setEditInq(inq));
+  };
 
   const styles = (width) => {
     return {
@@ -190,14 +228,16 @@ const InquiryEditor = (props) => {
     const inq = { ...currentEditInq };
     inq.inqType = e.value;
     // if (e.__isNew__) inq.isNew = e.__isNew__;
-    const filter = template.find(({field, type}) => type.toUpperCase() === e.label.toUpperCase() && fieldValue.label.toUpperCase() === field)
+    const filter = metadata.template.find(({ field, type }) => (type.toUpperCase() === e.label.toUpperCase() || type === e.value) && fieldValue.keyword === field);
     dispatch(InquiryActions.validate({ ...valid, inqType: true }));
     if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
       inq.content = contentEdited;
     } else {
-      inq.content = filter?.content || ''
+      inq.content = filter?.content[0] || '';
     }
     setValueType(e);
+    setTemplateList(filter?.content || []);
+    setTemplate(0);
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
@@ -707,6 +747,44 @@ const InquiryEditor = (props) => {
                 </FormControl>
               </Grid>
             </Grid>
+            {templateList.length > 1 &&
+              <Button
+                style={{ float: 'right', color: '#515F6B', fontWeight: 500, textTransform: 'none' }}
+                onClick={handleClick}
+              >
+                Template
+                <Icon>{anchorEl ? 'arrow_drop_up' : 'arrow_drop_down'}</Icon>
+              </Button>
+            }
+            <Popover
+              id="simple-menu"
+              anchorEl={anchorEl}
+              // keepMounted
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              classes={{ paper: classes.menuList }}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+            >
+              <RadioGroup value={template} onChange={handleChange}>
+                {templateList.map((temp, index) => (
+                  <>
+                    <FormControlLabel
+                      classes={{ root: classes.formRadio, label: classes.radioLabel }}
+                      value={index}
+                      control={<Radio color={'primary'} classes={{ root: classes.radioRoot }} style={{ position: 'absolute' }} />}
+                      label={temp}
+                    />
+                  </>
+                ))}
+              </RadioGroup>
+            </Popover>
             <div className="mt-32 mx-8">
               <TextField
                 value={currentEditInq.content.replace('{{INQ_TYPE}}', '')}
