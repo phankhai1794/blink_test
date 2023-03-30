@@ -301,7 +301,9 @@ export const isSameFile = (inquiries, tempReply) => {
   return isSame;
 }
 
-export const maxChars = {
+export const MAX_ROWS_CD = 13;
+
+export const MAX_CHARS = {
   mark: 21,
   package: 14,
   description: 35
@@ -330,7 +332,7 @@ export const checkMaxRows = (containerLength, mark, packages, description) => {
     packages.trim().split("\n").length,
     description.trim().split("\n").length
   );
-  return (containerLength + maxLength) <= 17; // max num of lines
+  return (containerLength + maxLength) <= MAX_ROWS_CD; // max num of lines
 }
 
 export const compareObject = (a, b) => {
