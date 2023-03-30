@@ -222,10 +222,12 @@ const DraftPage = (props) => {
     if (pathname.includes('/draft-bl/preview')) {
       const isAllow = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL });
       if (!isAllow) history.push({ pathname: '/login', cachePath: pathname, cacheSearch: search });
-    } else
-      dispatch(
-        AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL }))
-      );
+    } else {
+      dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL })));
+    }
+
+    // dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+    // dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL })));
 
     dispatch(Actions.loadMetadata());
     dispatch(Actions.loadContent(props.myBL?.id));
@@ -604,7 +606,7 @@ const DraftPage = (props) => {
               </Grid>
             </Grid>
 
-            <Grid container style={{ height: 320 }}>
+            <Grid container style={!isInBound[drfView] ? { height: 320 } : {}}>
               <Grid container item>
                 <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER }}>
                   <div className={classes.content_M} style={{ paddingTop: 5 }}>
@@ -630,7 +632,7 @@ const DraftPage = (props) => {
                 <Grid item style={{ width: WIDTH_COL_MEAS }} />
               </Grid>
 
-              <Grid container item>
+              <Grid container item style={isInBound[drfView] ? { minHeight: 200 } : {}}>
                 {renderMDCMTable()}
               </Grid>
             </Grid>
