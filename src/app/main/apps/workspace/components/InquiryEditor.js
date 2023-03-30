@@ -108,7 +108,7 @@ const useStyles = makeStyles((theme) => ({
   },
   menuList: {
     width: 400,
-    maxHeight: 400
+    maxHeight: 350
   },
   formRadio: {
     display: 'block',
@@ -182,7 +182,7 @@ const InquiryEditor = (props) => {
   const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
   const [anchorEl, setAnchorEl] = useState(null);
   const [templateList, setTemplateList] = useState([]);
-  const [template, setTemplate] = useState(0);
+  const [template, setTemplate] = useState(valueType?.value || 0);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -210,6 +210,9 @@ const InquiryEditor = (props) => {
   };
 
   useEffect(() => {
+    const filter = metadata.template.find(({ field, type }) => type === valueType?.value && fieldValue.keyword === field);
+    setTemplateList(filter?.content || []);
+
     setPrevField(currentEditInq.field);
   }, []);
 
