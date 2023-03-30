@@ -23,6 +23,9 @@ import {
   SHIPPER,
   TYPE_OF_MOVEMENT,
   VESSEL_VOYAGE,
+  ALSO_NOTIFY,
+  RD_TERMS,
+  FREIGHT_TERM
 } from '@shared/keyword';
 import {PERMISSION, PermissionProvider} from '@shared/permission';
 import * as AppActions from 'app/store/actions';
@@ -624,14 +627,14 @@ const BLWorkspace = (props) => {
                       : getValueField(NOTIFY)}
                   </BLField>
                 </Grid>
+                <Grid item>
+                  <Label>ALSO NOTIFY</Label>
+                  <BLField id={getField(ALSO_NOTIFY)} multiline={true} rows={5}>
+                    {getValueField(ALSO_NOTIFY)}
+                  </BLField>
+                </Grid>
                 <Grid container style={{ marginTop: '53px' }}>
                   <Grid item xs={6} className={classes.leftPanel}>
-                    <Grid item>
-                      <Label>PRE-CARRIAGE BY</Label>
-                      <BLField id={getField(PRE_CARRIAGE)}>
-                        {getValueField(PRE_CARRIAGE)}
-                      </BLField>
-                    </Grid>
                     <Grid item>
                       <Label>PORT OF LOADING</Label>
                       <BLField id={getField(PORT_OF_LOADING)}>
@@ -640,12 +643,6 @@ const BLWorkspace = (props) => {
                     </Grid>
                   </Grid>
                   <Grid item xs={6} className={classes.rightPanel}>
-                    <Grid item>
-                      <Label>PLACE OF RECEIPT</Label>
-                      <BLField id={getField(PLACE_OF_RECEIPT)}>
-                        {getValueField(PLACE_OF_RECEIPT)}
-                      </BLField>
-                    </Grid>
                     <Grid item>
                       <Label>PORT OF DISCHARGE</Label>
                       <BLField id={getField(PORT_OF_DISCHARGE)}>
@@ -698,10 +695,30 @@ const BLWorkspace = (props) => {
                     {getValueField(TYPE_OF_MOVEMENT)}
                   </BLField>
                 </Grid>
-                <Grid item>
-                  <Grid item>
+                <Grid container>
+                  <Grid item xs={6} className={classes.leftPanel}>
+                    <Label>R/D TERM</Label>
+                    <BLField id={getField(RD_TERMS)}>
+                      {getValueField(RD_TERMS)}
+                    </BLField>
+                  </Grid>
+                  <Grid item xs={6} className={classes.rightPanel}>
+                    <Label>PRE-CARRIAGE BY</Label>
+                    <BLField id={getField(PRE_CARRIAGE)}>
+                      {getValueField(PRE_CARRIAGE)}
+                    </BLField>
+                  </Grid>
+                </Grid>
+                <Grid container>
+                  <Grid item xs={6} className={classes.leftPanel}>
+                    <Label>PLACE OF RECEIPT</Label>
+                    <BLField id={getField(PLACE_OF_RECEIPT)}>
+                      {getValueField(PLACE_OF_RECEIPT)}
+                    </BLField>
+                  </Grid>
+                  <Grid item xs={6} className={classes.rightPanel}>
                     <Label>OCEAN VESSEL VOYAGE NO. FlAG</Label>
-                    <BLField id={getField(VESSEL_VOYAGE)} width={`calc(50% - 15px)`}>
+                    <BLField id={getField(VESSEL_VOYAGE)}>
                       {getValueField(VESSEL_VOYAGE)}
                     </BLField>
                   </Grid>
@@ -766,40 +783,48 @@ const BLWorkspace = (props) => {
                     {getValueField(FREIGHT_CHARGES)}
                   </BLField>
                 </Grid>
-                <Grid item>
-                  <Label>COMMODITY CODE</Label>
-                  <BLField id={getField(COMMODITY_CODE)}>
-                    {getValueField(COMMODITY_CODE)}
-                  </BLField>
+                <Grid container>
+                  <Grid item xs={6} className={classes.leftPanel}>
+                    <Label>DATE CARGO RECEIVED</Label>
+                    <BLField id={getField(DATE_CARGO)}>
+                      {getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')}
+                    </BLField>
+                  </Grid>
+                  <Grid item xs={6} className={classes.rightPanel}>
+                    <Label>DATE LADEN ON BOARD</Label>
+                    <BLField id={getField(DATE_LADEN)}>
+                      {getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')}
+                    </BLField>
+                  </Grid>
                 </Grid>
               </Grid>
               <Grid item xs={6} className={classes.rightPanel}>
                 <Grid container>
                   <Grid item xs={6} className={classes.leftPanel}>
                     <Grid item>
+                      <Label>FREIGHT TERM</Label>
+                      <BLField id={getField(FREIGHT_TERM)}>
+                        {getValueField(FREIGHT_TERM)}
+                      </BLField>
+                    </Grid>
+                    <Grid item>
                       <Label>PLACE OF BILL(S) ISSUE</Label>
                       <BLField id={getField(PLACE_OF_BILL)}>
                         {getValueField(PLACE_OF_BILL)}
                       </BLField>
                     </Grid>
+                  </Grid>
+                  <Grid item xs={6} className={classes.leftPanel}>
                     <Grid item>
-                      <Label>DATE CARGO RECEIVED</Label>
-                      <BLField id={getField(DATE_CARGO)}>
-                        {getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')}
+                      <Label>COMMODITY CODE</Label>
+                      <BLField id={getField(COMMODITY_CODE)}>
+                        {getValueField(COMMODITY_CODE)}
                       </BLField>
                     </Grid>
-                  </Grid>
-                  <Grid item xs={6} className={classes.rightPanel}>
                     <Grid item>
                       <Label>DATED</Label>
                       <BLField id={getField(DATED)}>
                         {getValueField(DATED) && formatDate(getValueField(DATED), 'DD MMM YYYY')}
-                      </BLField>
-                    </Grid>
-                    <Grid item>
-                      <Label>DATE LADEN ON BOARD</Label>
-                      <BLField id={getField(DATE_LADEN)}>
-                        {getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')}
                       </BLField>
                     </Grid>
                   </Grid>
