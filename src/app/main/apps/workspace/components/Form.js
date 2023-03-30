@@ -268,7 +268,7 @@ export default function Form(props) {
   const [idBtn, setIdBtn] = useState('');
   const [checkSubmit, setCheckSubmit] = useState(true);
 
-  const enableSend = inquiries.length > 0;
+  const enableSend = inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED'].includes(inq.state)).length !== inquiries.length;
 
   const handleOpenFab = () => {
     setIdBtn(currentField);
