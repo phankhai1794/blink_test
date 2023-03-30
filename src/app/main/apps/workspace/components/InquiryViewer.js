@@ -8,10 +8,9 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import {  parseNumberValue } from '@shared';
+import { parseNumberValue , getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify , NumberFormat } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
-import { getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify } from '@shared';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import { useUnsavedChangesWarning } from 'app/hooks';
 import { sendmailResolve } from 'app/services/mailService';
@@ -55,10 +54,8 @@ import {
   FREIGHTED_AS,
   RATE,
   SERVICE_CONTRACT_NO,
-  RD_TERMS
+  RD_TERMS, CM_DESCRIPTION
 } from '@shared/keyword';
-
-import {  NumberFormat } from '@shared';
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -922,8 +919,45 @@ const InquiryViewer = (props) => {
                   }
                 })
               } else {
-                const response = res.drfAnswersTrans && res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[question.field];
-                dispatch(InquiryActions.setContent({ ...content, [question.field]: response }));
+                const idCD = metadata.field[CONTAINER_DETAIL];
+                const idCM = metadata.field[CONTAINER_MANIFEST];
+                if (res.drfAnswersTrans) {
+                  if (question.field === idCM) {
+                    // response drfAnswersTrans cd content
+                    const response = res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[idCD];
+                    dispatch(InquiryActions.setContent({ ...content, [idCD]: response }));
+                    // map cd -> cm
+                    let cm = content[containerCheck[1]]
+                    if (cm) {
+                      cm[0][getTypeCDCM(CM_DESCRIPTION)] = orgContent[containerCheck[1]][0][getTypeCDCM(CM_DESCRIPTION)];
+                      cm[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans[0][getTypeCDCM(CONTAINER_NUMBER)];
+                      CONTAINER_LIST.cdNumber.map((key, index) => {
+                        cm[0][getTypeCDCM(CONTAINER_LIST.cmNumber[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
+                      });
+                      CONTAINER_LIST.cdUnit.map((key, index) => {
+                        cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
+                      });
+                      saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                    }
+                  } else if (question.field === idCD) {
+                    // response drfAnswersTrans cm content
+                    const response = res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[idCM];
+                    dispatch(InquiryActions.setContent({ ...content, [idCM]: response }));
+                    // map cm -> cd
+                    let cd = content[containerCheck[0]]
+                    if (cd) {
+                      cd[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans[0][getTypeCDCM(CONTAINER_NUMBER)];
+                      CONTAINER_LIST.cmNumber.map((key, index) => {
+                        cd[0][getTypeCDCM(CONTAINER_LIST.cdNumber[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
+                      });
+                      CONTAINER_LIST.cmUnit.map((key, index) => {
+                        cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
+                      });
+                      saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                    }
+                  }
+                }
+                //
               }
               if (field !== 'INQUIRY_LIST') {
                 if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
