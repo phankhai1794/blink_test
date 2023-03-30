@@ -2835,7 +2835,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                         borderColor: inputValid === true ? '#bac3cb' : 'red'
                       }}
                       disabled={disabled}
-                      value={nodeValue ? NumberFormat(nodeValue[getType(type)]) || '' : ''}
+                      value={nodeValue ? disabled?NumberFormat(nodeValue[getType(type)]): nodeValue[getType(type)] || '' : ''}
                       onChange={(e) => onChange(e, nodeValue.index, getType(type))}
                     />
                     {inputValid ? null : <p style={{ color: 'red' }}>{filteredCdUnit[0].pattern.message}</p>}
