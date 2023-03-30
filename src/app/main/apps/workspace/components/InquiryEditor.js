@@ -210,8 +210,10 @@ const InquiryEditor = (props) => {
   };
 
   useEffect(() => {
-    const filter = metadata.template.find(({ field, type }) => type === valueType?.value && fieldValue.keyword === field);
-    setTemplateList(filter?.content || []);
+    if (valueType?.value) {
+      const filter = metadata.template.find(({ field, type }) => type === valueType.value && fieldValue.keyword === field);
+      setTemplateList(filter?.content || []);
+    }
 
     setPrevField(currentEditInq.field);
   }, []);
