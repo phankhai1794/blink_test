@@ -33,7 +33,7 @@ import ReplyIcon from '@material-ui/icons/Reply';
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
-import BLField from './BLField';
+import BLField from './BLFieldCont';
 import Label from './FieldLabel';
 
 const red = '#DC2626';
@@ -328,35 +328,25 @@ const TableCM = (props) => {
         {drfView === 'MD' ? (
           <Grid container spacing={2} className="px-8 py-2">
             <Grid item xs={2}>
-              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>
-                {getValueField(SHIPPING_MARK)}
-              </BLField>
+              <BLField multiline={true}>{getValueField(SHIPPING_MARK)}</BLField>
             </Grid>
             <Grid item xs={2}>
-              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>
+              <BLField multiline={true}>
                 {`${NumberFormat(drfMD[TOTAL_PACKAGE])} ${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`}
               </BLField>
             </Grid>
             <Grid item xs={4}>
-              <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>
+              <BLField multiline={true}>
                 {getValueField(DESCRIPTION_OF_GOODS)}
               </BLField>
             </Grid>
             <Grid item xs={2}>
-              <BLField
-                disableClick={true}
-                multiline={true}
-                rows={6}
-                disableIcon={true}>
+              <BLField multiline={true}>
                 {`${NumberFormat(drfMD[TOTAL_WEIGHT])} ${drfMD[TOTAL_WEIGHT_UNIT]}`}
               </BLField>
             </Grid>
             <Grid item xs={2}>
-              <BLField
-                disableClick={true}
-                multiline={true}
-                rows={6}
-                disableIcon={true}>
+              <BLField multiline={true}>
                 {`${NumberFormat(drfMD[TOTAL_MEASUREMENT])} ${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
               </BLField>
             </Grid>
@@ -365,42 +355,48 @@ const TableCM = (props) => {
           cmSorted.map((cm, index) => (
             <Grid container spacing={2} className="px-8 py-2" key={index}>
               <Grid item xs={2}>
-                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>
+                <BLField multiline={true}>
                   {cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}
                 </BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${NumberFormat(cm?.[metadata?.inq_type?.[CM_PACKAGE]]) || ''} ${getPackageName(cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]])}`}</BLField>
+                <BLField multiline={true}>
+                  {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_PACKAGE]]) || ''} ${getPackageName(cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]])}`}
+                </BLField>
               </Grid>
               <Grid item xs={4}>
-                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>
+                <BLField multiline={true}>
                   {cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}
                 </BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${NumberFormat(cm?.[metadata?.inq_type?.[CM_WEIGHT]]) || ''} ${cm?.[metadata?.inq_type?.[CM_WEIGHT_UNIT]] || ''}`}</BLField>
+                <BLField multiline={true}>
+                  {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_WEIGHT]]) || ''} ${cm?.[metadata?.inq_type?.[CM_WEIGHT_UNIT]] || ''}`}
+                </BLField>
               </Grid>
               <Grid item xs={2}>
-                <BLField disableClick={true} multiline={true} rows={6} disableIcon={true}>{`${NumberFormat(cm?.[metadata?.inq_type?.[CM_MEASUREMENT]])|| ''} ${cm?.[metadata?.inq_type?.[CM_MEASUREMENT_UNIT]] || ''}`}</BLField>
+                <BLField multiline={true}>
+                  {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]) || ''} ${cm?.[metadata?.inq_type?.[CM_MEASUREMENT_UNIT]] || ''}`}
+                </BLField>
               </Grid>
             </Grid>
           ))
         ) : (
           <Grid container spacing={2} className="px-8 py-2">
             <Grid item xs={2}>
-              <BLField disableClick={true}></BLField>
+              <BLField />
             </Grid>
             <Grid item xs={2}>
-              <BLField disableClick={true}></BLField>
+              <BLField />
             </Grid>
             <Grid item xs={4}>
-              <BLField disableClick={true} width="360px"></BLField>
+              <BLField />
             </Grid>
             <Grid item xs={2}>
-              <BLField disableClick={true}></BLField>
+              <BLField />
             </Grid>
             <Grid item xs={2}>
-              <BLField disableClick={true}></BLField>
+              <BLField />
             </Grid>
           </Grid>
         )}
