@@ -387,6 +387,7 @@ const InquiryViewer = (props) => {
             lastest.creator = filterOffshoreSent.updater;
             lastest.createdAt = filterOffshoreSent.createdAt;
             lastest.createdAt = filterOffshoreSent.createdAt;
+            lastest.type = filterOffshoreSent.type;
             setType(filterOffshoreSent.ansType);
             //
             if (Object.keys(filterOffshoreSent).length > 0) {
@@ -2326,6 +2327,7 @@ const InquiryViewer = (props) => {
                     wordBreak: 'break-word',
                     fontFamily: 'Montserrat',
                     fontSize: 15,
+                    fontStyle: !['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A'].includes(question.state) && 'italic',
                     color: '#132535',
                     whiteSpace: 'pre-wrap'
                   }}>
