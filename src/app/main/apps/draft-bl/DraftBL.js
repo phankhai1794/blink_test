@@ -8,11 +8,11 @@ import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
-import { isJsonText, formatDate, maxChars, lineBreakAtBoundary, checkMaxRows, getTotalValueMDView } from '@shared';
+import { isJsonText, formatDate, MAX_CHARS, MAX_ROWS_CD, lineBreakAtBoundary, checkMaxRows, getTotalValueMDView } from '@shared';
 import { packageUnitsJson } from '@shared/units';
 
 import * as Actions from './store/actions';
-import NextPage from './NextPage';
+import Rider from './Rider';
 
 const BORDER = '1px solid #2929FF';
 const BORDER_BOLD = '2px solid #2929FF';
@@ -198,6 +198,7 @@ const DraftPage = (props) => {
     draftBL.drfView
   ]);
   const [isInBound, setIsInBound] = useState({ MD: true, CM: true });
+  const [totalPage, setTotalPage] = useState(1);
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -221,10 +222,12 @@ const DraftPage = (props) => {
     if (pathname.includes('/draft-bl/preview')) {
       const isAllow = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL });
       if (!isAllow) history.push({ pathname: '/login', cachePath: pathname, cacheSearch: search });
-    } else
-      dispatch(
-        AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL }))
-      );
+    } else {
+      dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL })));
+    }
+
+    // dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
+    // dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL })));
 
     dispatch(Actions.loadMetadata());
     dispatch(Actions.loadContent(props.myBL?.id));
@@ -240,18 +243,18 @@ const DraftPage = (props) => {
   useEffect(() => {
     if (containersDetail.length) {
       // MD view
-      let totalMark = getValueField(SHIPPING_MARK).split("\n").map(line => lineBreakAtBoundary(line, maxChars.mark)).join("\n");
-      let totalPackage = `${getValueField(TOTAL_PACKAGE)}\n${getPackageName(getValueField(TOTAL_PACKAGE_UNIT))}`.split("\n").map(line => lineBreakAtBoundary(line, maxChars.package)).join("\n");
-      let totalDescription = getValueField(DESCRIPTION_OF_GOODS).split("\n").map(line => lineBreakAtBoundary(line, maxChars.description)).join("\n");
+      let totalMark = getValueField(SHIPPING_MARK).split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.mark)).join("\n");
+      let totalPackage = `${getValueField(TOTAL_PACKAGE)}\n${getPackageName(getValueField(TOTAL_PACKAGE_UNIT))}`.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)).join("\n");
+      let totalDescription = getValueField(DESCRIPTION_OF_GOODS).split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.description)).join("\n");
 
       // CM view
       let cmMark = "";
       let cmPackage = "";
       let cmDescription = "";
       containersManifest.forEach(cm => {
-        cmMark += lineBreakAtBoundary(cm[getInqType(CM_MARK)], maxChars.mark) + "\n";
-        cmPackage += `${cm[getInqType(CM_PACKAGE)]}\n${getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}`.split("\n").map(line => lineBreakAtBoundary(line, maxChars.package)).join("\n");
-        cmDescription += lineBreakAtBoundary(cm[getInqType(CM_DESCRIPTION)], maxChars.description) + "\n";
+        cmMark += lineBreakAtBoundary(cm[getInqType(CM_MARK)], MAX_CHARS.mark) + "\n";
+        cmPackage += `${cm[getInqType(CM_PACKAGE)]}\n${getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}`.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)).join("\n");
+        cmDescription += lineBreakAtBoundary(cm[getInqType(CM_DESCRIPTION)], MAX_CHARS.description) + "\n";
       });
 
       setIsInBound({
@@ -344,7 +347,7 @@ const DraftPage = (props) => {
           </div>
           <div style={{ width: '30%', paddingTop: 15 }}>
             <div className={classes.page_Number}>
-              PAGE: <p className={classes.page_Count}>1</p> OF <p className={classes.page_Count}>{isInBound[drfView] ? 1 : 2}</p>
+              PAGE: <p className={classes.page_Count}>1</p> OF <p className={classes.page_Count}>{totalPage}</p>
             </div>
             <span className={classes.blType}>
               {getValueField(BL_TYPE) ? getValueField(BL_TYPE) === "W" ? "SEAWAY BILL" : "BILL OF LADING" : ""}
@@ -527,7 +530,7 @@ const DraftPage = (props) => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span className={classes.content_L}>
-                      {getValueField(TYPE_OF_MOVEMENT)} 
+                      {getValueField(TYPE_OF_MOVEMENT)}
                     </span>
                     <span className={classes.content_L}>
                       {getValueField(RD_TERMS)}
@@ -538,7 +541,7 @@ const DraftPage = (props) => {
             </Grid>
           </Grid>
 
-          <Grid container item style={{ minHeight: '35px' }}>
+          <Grid container item style={{ minHeight: 35 }}>
             <Grid item xs={4}>
               <div className={classes.declaration_L}>
                 {`(CHECK "HM" COLUMN IF HAZARDOUS MATERIAL)`}
@@ -603,31 +606,35 @@ const DraftPage = (props) => {
               </Grid>
             </Grid>
 
-            {/* Container First Line */}
-            <Grid container item>
-              <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER }}>
-                <div className={classes.content_M} style={{ paddingTop: 5 }}>
-                  {containersDetail &&
-                    containersDetail.map((cd, idx) => (
-                      <span key={idx} style={{ whiteSpace: 'pre' }}>
-                        {`${cd[getInqType(CONTAINER_NUMBER)] || ''}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
-                        <br />
+            <Grid container style={!isInBound[drfView] ? { height: 320 } : {}}>
+              <Grid container item>
+                <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER }}>
+                  <div className={classes.content_M} style={{ paddingTop: 5 }}>
+                    {containersDetail &&
+                      containersDetail.map((cd, idx) => (
+                        (idx < MAX_ROWS_CD) && <span key={idx} style={{ whiteSpace: 'pre', lineHeight: '20px' }}>
+                          {`${cd[getInqType(CONTAINER_NUMBER)] || ''}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                          <br />
+                        </span>
+                      ))
+                    }
+                    {containersDetail.length <= MAX_ROWS_CD &&
+                      <span className={classes.description_payment_dash}>
+                        -----------------------------------------------------------------------------------------------------------------------------------------
                       </span>
-                    ))}
-                  <span className={classes.description_payment_dash}>
-                    -----------------------------------------------------------------------------------------------------------------------------------------
-                  </span>
-                </div>
+                    }
+                  </div>
+                </Grid>
+                <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER }} />
+                <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }} />
+                <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER }} />
+                <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }} />
+                <Grid item style={{ width: WIDTH_COL_MEAS }} />
               </Grid>
-              <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER }} />
-              <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }} />
-              <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER }} />
-              <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }} />
-              <Grid item style={{ width: WIDTH_COL_MEAS }} />
-            </Grid>
 
-            <Grid container item style={{ minHeight: '200px' }}>
-              {renderMDCMTable()}
+              <Grid container item style={isInBound[drfView] ? { minHeight: 200 } : {}}>
+                {renderMDCMTable()}
+              </Grid>
             </Grid>
           </Grid>
 
@@ -639,9 +646,7 @@ const DraftPage = (props) => {
             <span className={classes.note}>Declared Cargo Value US $</span>
             <span className={classes.line_usd}>&emsp;_____________________&emsp;</span>
             <span className={classes.note}>
-              {
-                "If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged"
-              }
+              {"If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged"}
             </span>
           </Grid>
 
@@ -817,7 +822,14 @@ const DraftPage = (props) => {
         </Grid>
       </div>
 
-      {!isInBound[drfView] && <NextPage containersManifest={containersManifest} drfMD={drfMD} />}
+      {!isInBound[drfView] &&
+        <Rider
+          drfMD={drfMD}
+          containersDetail={containersDetail}
+          containersManifest={containersManifest}
+          setTotalPage={setTotalPage}
+        />
+      }
     </div >
   );
 };

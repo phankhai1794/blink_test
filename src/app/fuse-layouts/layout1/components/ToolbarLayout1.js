@@ -540,7 +540,7 @@ function ToolbarLayout1(props) {
                       height: '30px',
                       borderRadius: '20px'
                     }}
-                    disabled={inquiries.length === 0}
+                    disabled={inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED'].includes(inq.state)).length === inquiries.length}
                     color="primary"
                     variant="contained"
                     size="medium"
