@@ -1,5 +1,5 @@
 import React from 'react';
-import { CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT, VESSEL_VOYAGE } from '@shared/keyword';
+import { VESSEL_VOYAGE, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT } from '@shared/keyword';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Grid } from '@material-ui/core';
@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const NextPage = ({ containersManifest, drfMD }) => {
+const NextPage = ({ drfMD, containersDetail, containersManifest, currentPage, totalPage }) => {
   const classes = useStyles();
   const [metadata, myBL, content, drfView] = useSelector(({ draftBL }) => [
     draftBL.metadata,
@@ -176,7 +176,7 @@ const NextPage = ({ containersManifest, drfMD }) => {
         </div>
         <div style={{ width: '30%', paddingTop: 15 }}>
           <div className={classes.page_Number}>
-            PAGE: <p className={classes.page_Count}>2</p> OF <p className={classes.page_Count}>2</p>
+            PAGE: <p className={classes.page_Count}>{currentPage}</p> OF <p className={classes.page_Count}>{totalPage}</p>
           </div>
         </div>
       </div>
@@ -241,28 +241,55 @@ const NextPage = ({ containersManifest, drfMD }) => {
         </Grid>
       </Grid>
 
+      {Boolean(containersDetail.length) &&
+        <Grid container item>
+          <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER }}>
+            <div className={classes.content_M} style={{ paddingTop: 5 }}>
+              {containersDetail.map((cd, idx) => (
+                <span key={idx} style={{ whiteSpace: 'pre', lineHeight: '20px' }}>
+                  {`${cd[getInqType(CONTAINER_NUMBER)] || ''}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                  <br />
+                </span>
+              ))
+              }
+              <span className={classes.description_payment_dash}>
+                -----------------------------------------------------------------------------------------------------------------------------------------
+              </span>
+            </div>
+          </Grid>
+          <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER }} />
+          <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }} />
+          <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER }} />
+          <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }} />
+          <Grid item style={{ width: WIDTH_COL_MEAS }} />
+        </Grid>
+      }
+
       <Grid container>
         {renderMDCMTable()}
       </Grid>
 
-      <Grid container item>
-        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, minHeight: '100vh' }}>
-          <div className={classes.content_M} style={{ paddingTop: 5 }}>
-            <span className={classes.description_payment_dash}>
-              -----------------------------------------------------------------------------------------------------------------------------------------
-            </span>
-            <br />
-            <span>
-              OCEAN FREIGHT PREPAID
-            </span>
-          </div>
+      {/* If is last page */}
+      {(currentPage === totalPage) &&
+        <Grid container item>
+          <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, minHeight: '100vh' }}>
+            <div className={classes.content_M} style={{ paddingTop: 5 }}>
+              <span className={classes.description_payment_dash}>
+                -----------------------------------------------------------------------------------------------------------------------------------------
+              </span>
+              <br />
+              <span>
+                OCEAN FREIGHT PREPAID
+              </span>
+            </div>
+          </Grid>
+          <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER }} />
+          <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }} />
+          <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER }} />
+          <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }} />
+          <Grid item style={{ width: WIDTH_COL_MEAS }} />
         </Grid>
-        <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER }} />
-        <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }} />
-        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER }} />
-        <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }} />
-        <Grid item style={{ width: WIDTH_COL_MEAS }} />
-      </Grid>
+      }
     </div>
   );
 };

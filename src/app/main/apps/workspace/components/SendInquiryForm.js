@@ -186,7 +186,7 @@ const SendInquiryForm = (props) => {
   };
 
   async function fetchData() {
-    const status = ['INQ_SENT', 'ANS_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'asCOMPL', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A'];
+    const status = ['INQ_SENT', 'ANS_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'REOPEN_Q', 'REOPEN_A'];
     let toCustomer = [], toOnshore = [];
 
     const res = await getMail(mybl.id);
@@ -209,7 +209,7 @@ const SendInquiryForm = (props) => {
     // check inquiries
     let inqOnshore = [], inqCustomer = [];
     if (hasCustomer) setInqCustomer(inqCustomer = checkNewInquiry(metadata, inquiries, 'customer'));
-    else setInqCustomer(inqCustomer = checkNewInquiry(metadata, inquiries, 'customer', [...status, 'AME_SENT', 'REP_SENT', 'RESOVLED', 'UPLOADED', 'RESOLVED']));
+    else setInqCustomer(inqCustomer = checkNewInquiry(metadata, inquiries, 'customer', [...status, 'AME_SENT', 'REP_SENT']));
 
     if (hasOnshore) setInqOnshore(inqOnshore = checkNewInquiry(metadata, inquiries, 'onshore'));
     else setInqOnshore(inqOnshore = checkNewInquiry(metadata, inquiries, 'onshore', status));

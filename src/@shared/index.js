@@ -27,7 +27,7 @@ export const displayTime = (time) => {
 };
 
 export const filterMetadata = (data) => {
-  const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [] };
+  const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [], template: data.template };
   for (const field of data['field']) {
     if (field.keyword.toLowerCase() !== 'other') {
       dict['field'][field.keyword] = field.id;
@@ -169,13 +169,11 @@ export const sentStatus = [
 ];
 
 export function NumberFormat(number) {
-  if (!number||number.length === 0)
-    return ''
-    
-  const formattedNumber = (typeof number === 'string'? parseFloat(number.replace(",", "")): number).toLocaleString("en-US", {
+  if (!number || number.length === 0) return '';
+
+  const formattedNumber = (typeof number === 'string' ? parseFloat(number.replace(",", "")) : number).toLocaleString("en-US", {
     maximumFractionDigits: 3,
   });
-  
   return formattedNumber;
 }
 
@@ -303,7 +301,9 @@ export const isSameFile = (inquiries, tempReply) => {
   return isSame;
 }
 
-export const maxChars = {
+export const MAX_ROWS_CD = 13;
+
+export const MAX_CHARS = {
   mark: 21,
   package: 14,
   description: 35
@@ -332,7 +332,7 @@ export const checkMaxRows = (containerLength, mark, packages, description) => {
     packages.trim().split("\n").length,
     description.trim().split("\n").length
   );
-  return (containerLength + maxLength) <= 17; // max num of lines
+  return (containerLength + maxLength) <= MAX_ROWS_CD; // max num of lines
 }
 
 export const compareObject = (a, b) => {
@@ -364,18 +364,11 @@ export const clearLocalStorage = () => {
   if (user) localStorage.setItem("lastEmail", user.email);
 }
 
-export const parseNumberValue = (value) =>{
-  if (!value)
-    return 0
-  
-  // Remove commas from the string
-  const stripped = typeof value === 'string' ?value.replace(/,/g, ''): value;
-  
-  // Parse the stripped string as a floating-point number
-  const num = parseFloat(stripped);
-  
-  // Return the parsed number
-  return num;
+export const parseNumberValue = (value) => {
+  if (!value) return 0;
+
+  const stripped = (typeof value === 'string') ? value.replace(/,/g, '') : value;
+  return parseFloat(stripped);
 }
 
 export const getTotalValueMDView = (drfView, containerDetail, getType) => {
