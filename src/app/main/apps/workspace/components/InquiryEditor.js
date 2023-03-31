@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLabelById, toFindDuplicates } from '@shared';
 import { handleError } from '@shared/handleError';
-import { template } from '@shared/template'
 import {
   FormControl,
   FormControlLabel,

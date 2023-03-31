@@ -56,7 +56,6 @@ import {
   SERVICE_CONTRACT_NO,
   RD_TERMS, CM_DESCRIPTION
 } from '@shared/keyword';
-
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
