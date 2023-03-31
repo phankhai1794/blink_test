@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiInputBase-input': {
       fontSize: 14,
       fontWeight: 400,
-      fontStyle: 'normal'
+      fontStyle: 'italic'
     }
   },
   deleteContent: {
