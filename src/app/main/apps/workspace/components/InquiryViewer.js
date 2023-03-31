@@ -458,6 +458,7 @@ const InquiryViewer = (props) => {
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                   setSubmitLabel(true);
                   lastest.showIconEdit = true;
+                  lastest.showIconAttachAnswerFile = false;
                 } else if (filterOffshoreSent.state === 'ANS_DRF') {
                   setSubmitLabel(false);
                   setStateReplyDraft(false);

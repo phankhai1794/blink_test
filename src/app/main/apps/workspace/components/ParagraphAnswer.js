@@ -22,6 +22,13 @@ const useStyles = makeStyles((theme) => ({
       width: '93%'
     }
   },
+  inputText: {
+    '& .MuiInputBase-input': {
+      fontSize: 14,
+      fontWeight: 400,
+      fontStyle: 'normal'
+    }
+  },
   placeHolder: {
     '& .MuiInputBase-input': {
       fontSize: 14,
@@ -102,7 +109,7 @@ const ParagraphAnswer = (props) => {
 
   return (
     <div>
-      <div className={clsx("flex", classes.placeHolder, ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && classes.deleteContent)}>
+      <div className={clsx("flex", !disable ? classes.inputText : classes.placeHolder, ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && classes.deleteContent)}>
         <TextField
           style={{ border: 'none', display: !isPermission ? (!paragraphText ? 'none' : '') : '' }}
           fullWidth
