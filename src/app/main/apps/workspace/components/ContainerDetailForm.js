@@ -173,7 +173,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   useEffect(() => {
-    setValues(sortValues(values))
+    const sort = sortValues(values)
+    setValues(sort)
+    setValueEdit(sort)
   }, [])
 
 
@@ -206,7 +208,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const isValueChange = (key, index, row) => {
-    const originalValue = combineValueUnit(key, originalData[index]);
+    const originalValue = combineValueUnit(key, values[index]);
     return originalValue !== combineValueUnit(key, row) ? '#FEF4E6' : '';
   }
 
