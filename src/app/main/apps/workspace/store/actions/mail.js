@@ -2,7 +2,7 @@ import { sendmail, getSuggestMail } from 'app/services/mailService';
 import { loadComment } from 'app/services/inquiryService';
 import axios from 'axios';
 import { handleError } from '@shared/handleError';
-import { PRE_CARRIAGE, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY } from '@shared/keyword';
+import { PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, VESSEL_VOYAGE_CODE } from '@shared/keyword';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
 
 import * as InquiryActions from '../actions/inquiry';
@@ -43,7 +43,7 @@ export const sendMail =
                 dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "RO"));
               if (form.toOnshore) // TO: Return to Onshore via BLink
                 dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "TO"));
-            } 
+            }
 
             if (inqsOpenState.length > 0 || replyInqs.length > 0) {
               if (form.toCustomer) //BI: BL Inquiried,  RO: Return to Customer via BLink. 
@@ -51,7 +51,7 @@ export const sendMail =
               if (form.toOnshore) //BI: BL Inquiried,  RW: Return to Onshore via BLink
                 dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RW")); //Send inquiries to Onshore
             }
-           
+
             cloneInquiries.forEach((q) => {
               if (q.receiver[0] === tab) {
                 if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
@@ -134,7 +134,7 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   let contentCus = ''
   const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
   const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
-  const preVvd = getValueField(content, PRE_CARRIAGE)
+  const vvdCode = getValueField(content, VESSEL_VOYAGE_CODE)
   const pod = getValueField(content, PORT_OF_DISCHARGE)
   const del = getValueField(content, PLACE_OF_DELIVERY)
   const bkgNo = mybl.bkgNo
@@ -143,7 +143,7 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   if (hasOnshore && form.toOnshore && inqOnshore.length > 0) {
     const formOnshore = { ...form };
     formOnshore['toCustomer'] = '';
-    subjectOns = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + DEL(${del})`
+    subjectOns = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: VVD(${vvdCode}) + POD(${pod}) + DEL(${del})`
     contentOns = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`
     dispatch(sendMail({ myblId: mybl.id, bkgNo, ...formOnshore, subject: subjectOns, content: contentOns, inquiries: inquiries }));
   }
@@ -151,7 +151,7 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   if (hasCustomer && form.toCustomer && inqCustomer.length > 0) {
     const formCustomer = { ...form };
     formCustomer['toOnshore'] = '';
-    subjectCus = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${preVvd}) + POD(${pod}) + DEL(${del})`
+    subjectCus = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: VVD(${vvdCode}) + POD(${pod}) + DEL(${del})`
     contentCus = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer.join(', ')}]`
     dispatch(sendMail({ myblId: mybl.id, bkgNo, ...formCustomer, subject: subjectCus, content: contentCus, inquiries: inquiries }));
   }
