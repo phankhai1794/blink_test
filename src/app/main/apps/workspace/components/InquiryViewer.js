@@ -1410,8 +1410,8 @@ const InquiryViewer = (props) => {
             // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: 'Upload to OPUS successfully', icon: 'success' }));
             dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
           }
-          const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && inq.state !== 'COMPL');
-          const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && inq.state !== 'COMPL');
+          const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && inq.state !== 'COMPL' && ![listFieldDisableUpload].includes(inq.field));
+          const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && inq.state !== 'RESOLVED' && ![listFieldDisableUpload].includes(inq.field));
           if (myBL.bkgNo) {
             if (optionsInquires[editedInqIndex].process === "pending" && inqsPending.length > 0 && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
               if (optionsInquires[editedInqIndex].receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
