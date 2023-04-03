@@ -46,7 +46,7 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage }) =>
 
   useEffect(() => {
     let arr = [[]];
-    let filledLines = cdSplitted.length ? (MAX_ROW_NEXT_PAGE - cdSplitted[cdSplitted.length - 1].length + 1) : 0; // +1 dashline
+    let filledLines = cdSplitted.length ? (cdSplitted[cdSplitted.length - 1].length + 1) : 0; // +1 dashline
 
     if (drfView === "MD") {
       let result = { mark: [[]], package: [[]], description: [[]] };
@@ -96,6 +96,7 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage }) =>
       let cmMark = "";
       let cmPackage = "";
       let cmDescription = "";
+
       containersManifest.forEach(cm => {
         cmMark += lineBreakAtBoundary(cm[getInqType(CM_MARK)], MAX_CHARS.mark) + "\n";
         cmPackage += `${cm[getInqType(CM_PACKAGE)]}\n${getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}`.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)).join("\n");
