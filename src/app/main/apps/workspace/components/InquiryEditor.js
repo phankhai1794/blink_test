@@ -269,7 +269,7 @@ const InquiryEditor = (props) => {
   };
 
   const checkInqChanged = (currInq, valInput, isTypeChoice) => {
-    const checkContent = currInq.content.trim().localeCompare(valInput.content.trim());
+    const checkContent = (currInq.content.trim().localeCompare(valInput.content.trim()) && currInq.inqType === valInput.inqType && currInq.field === valInput.field);
     const checkAnsType = currInq.ansType === valInput.ansType;
     const checkReceiver = currInq.receiver[0] === valInput.receiver[0];
 
