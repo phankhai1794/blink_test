@@ -26,6 +26,8 @@ export const FINAL_DESTINATION = 'des';
 
 export const VESSEL_VOYAGE = 'vvd';
 
+export const VESSEL_VOYAGE_CODE = 'vvdCode';
+
 export const PRE_CARRIAGE = 'preVvd';
 
 export const TYPE_OF_MOVEMENT = 'moveTypeDesc';
