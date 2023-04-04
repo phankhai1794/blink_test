@@ -204,7 +204,7 @@ const AmendmentPopup = (props) => {
   };
 
   const CustomTextField = (props) => {
-    const { title, ...prop } = props;
+    const { title, rows, ...prop } = props;
     const type = inqType === CONTAINER_DETAIL ? CDTitle : CMTitle;
     const field = type.find((f) => f.title === title);
     // TODO: Case for Dummy ContainerNo
@@ -214,7 +214,7 @@ const AmendmentPopup = (props) => {
       <TextField
         {...prop}
         variant="outlined"
-        rows={6}
+        rows={rows}
         error={Boolean(errors[title])}
         helperText={errors[title]?.message}
         autoComplete="off"
@@ -225,7 +225,7 @@ const AmendmentPopup = (props) => {
           disabled: !isEdit,
           endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
         }}
-        inputProps={{ style: { textTransform: isUpperCase ? 'uppercase' : 'none' } }}
+        inputProps={{ style: { textTransform: isUpperCase ? 'uppercase' : 'none'} }}
       />
     );
   };
@@ -325,8 +325,8 @@ const AmendmentPopup = (props) => {
                   styles={{
                     control: (base) => ({
                       ...base,
-                      height: 39.75,
-                      minHeight: 39.75,
+                      height: 35,
+                      minHeight: 35,
                       borderRadius: 8,
                       border: isError ? '1px solid red' : '',
                     }),
@@ -405,7 +405,7 @@ const AmendmentPopup = (props) => {
         <p style={{ fontWeight: 600 }}>CONTAINER SEAL</p>
         {CustomContainerSeal(CMTitle.find((f) => f.title === CONTAINER_SEAL).value)}
         <p style={{ fontWeight: 600 }}>MARKS</p>
-        {CustomTextField({ fullWidth: true, multiline: true, title: CM_MARK })}
+        {CustomTextField({ fullWidth: true, multiline: true, title: CM_MARK, rows: 3 })}
         {[HS_CODE, HTS_CODE, NCM_CODE].map((title) => {
           const value = CMTitle.find((f) => f.title === title).value;
           return (
@@ -420,7 +420,7 @@ const AmendmentPopup = (props) => {
         <p style={{ fontWeight: 600 }}>C/M DESCRIPTION
           <span style={{ color: 'red' }}> *</span>
         </p>
-        {CustomTextField({ fullWidth: true, multiline: true, title: CM_DESCRIPTION, ...register(CM_DESCRIPTION, { required: "This is required" }) })}
+        {CustomTextField({ fullWidth: true, multiline: true, title: CM_DESCRIPTION, rows: 6, ...register(CM_DESCRIPTION, { required: "This is required" }) })}
         {cmUnit.map(({ field, title, unit, required, pattern }, i) => (
           <div key={i} className="flex justify-start">
             <div style={{ flex: '0 0 50%' }}>
@@ -456,7 +456,7 @@ const AmendmentPopup = (props) => {
           <Icon style={{ color: '#8A97A3' }}>close</Icon>
         </IconButton>
       </div>
-      <div style={{ padding: '20px 30px', overflow: 'auto' }}>
+      <div style={{ padding: '20px 30px'}}>
         {inqType === CONTAINER_DETAIL ? CDFields() : CMFields()}
       </div>
       {isEdit && (
