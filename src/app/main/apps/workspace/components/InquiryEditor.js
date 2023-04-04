@@ -270,6 +270,7 @@ const InquiryEditor = (props) => {
 
   const checkInqChanged = (currInq, valInput, isTypeChoice) => {
     const checkContent = currInq.content.trim().localeCompare(valInput.content.trim());
+    const checkField = (currInq.inqType === valInput.inqType && currInq.field === valInput.field);
     const checkAnsType = currInq.ansType === valInput.ansType;
     const checkReceiver = currInq.receiver[0] === valInput.receiver[0];
 
@@ -298,7 +299,7 @@ const InquiryEditor = (props) => {
       }
     }
 
-    if (checkContent !== 0 || !checkAnsType || !checkReceiver || !isSameFile) return false;
+    if (!checkField || checkContent !== 0 || !checkAnsType || !checkReceiver || !isSameFile) return false;
 
     return true;
   }
