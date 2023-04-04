@@ -5,7 +5,8 @@ import {
   HS_CODE,
   HTS_CODE,
   NCM_CODE,
-  mapUnit
+  mapUnit,
+  CONTAINER_MANIFEST
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -88,7 +89,9 @@ const StyledPopper = styled(Popper)`&&{
     }
   }
 }`;
+
 const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, deleteAmendment, setDeleteAmendment, isResolveCDCM }) => {
+  
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const user = useSelector(({ user }) => user);
@@ -120,6 +123,28 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const type = (container === CONTAINER_DETAIL) ? CDTitle : CMTitle;
   const open = Boolean(anchorEl);
 
+  const sortValues =(vals) =>{
+    let valuesSorted = [];
+    if(container === CONTAINER_MANIFEST && disableInput && vals === valueEdit){
+      let cms = [...vals];
+      const contsNo = [
+        ...new Set((getValueField(CONTAINER_DETAIL) ||[]).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
+      ];
+      if (contsNo.length) {
+        contsNo.forEach((contNo) => {
+          valuesSorted = [
+            ...valuesSorted,
+            ...cms.filter((cm) => contNo === cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
+          ];
+          cms = cms.filter((cm) => contNo !== cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+        });
+      }
+      valuesSorted = [...valuesSorted, ...cms];
+      return valuesSorted;
+    }
+    return values;
+  }
+
   useEffect(() => {
     if (!originalValues) {
       setValues(originalData);
@@ -146,6 +171,13 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     })
     setEditContent(valueEdit);
   }
+
+  useEffect(() => {
+    const sort = sortValues(values)
+    setValues(sort)
+    setValueEdit(sort)
+  }, [])
+
 
   const getTotals = (data, name) => {
     if (!Object.keys(mapUnit).includes(name)) return ''
@@ -176,7 +208,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const isValueChange = (key, index, row) => {
-    const originalValue = combineValueUnit(key, originalData[index]);
+    const originalValue = combineValueUnit(key, values[index]);
     return originalValue !== combineValueUnit(key, row) ? '#FEF4E6' : '';
   }
 
@@ -198,8 +230,10 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const handleArrorRef = (node) => setArrowRef(node);
+  
 
   return (
+    
     <>
       <Drawer
         classes={{ paper: classes.paper }}

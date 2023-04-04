@@ -1,5 +1,6 @@
 import React from 'react';
-import { VESSEL_VOYAGE, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT } from '@shared/keyword';
+import { formatNoneContNo } from '@shared';
+import { VESSEL_VOYAGE, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_WEIGHT, TOTAL_MEASUREMENT } from '@shared/keyword';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Grid } from '@material-ui/core';
@@ -90,13 +91,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const NextPage = ({ drfMD, containersDetail, containersManifest, currentPage, totalPage }) => {
+const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage }) => {
   const classes = useStyles();
-  const [metadata, myBL, content, drfView] = useSelector(({ draftBL }) => [
+  const [metadata, myBL, content] = useSelector(({ draftBL }) => [
     draftBL.metadata,
     draftBL.myBL,
-    draftBL.content,
-    draftBL.drfView
+    draftBL.content
   ]);
 
   const getField = (field) => {
@@ -114,55 +114,50 @@ const NextPage = ({ drfMD, containersDetail, containersManifest, currentPage, to
   const getPackageName = (packageCode) => packageUnitsJson.find(pkg => pkg.code === packageCode)?.description;
 
   const renderMDCMTable = () => {
-    if (drfView === "CM") {
-      return containersManifest.map((cm, index) => (
-        <Grid container item key={index} className={classes.content_L}>
-          <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            {cm[getInqType(CM_MARK)]}
-          </Grid>
-          <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            <Grid item style={{ textAlign: 'end' }}>
-              <span>{cm[getInqType(CM_PACKAGE)]}</span>
-              <br />
-              <span>{getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}</span>
-            </Grid>
-          </Grid>
-          <Grid style={{ width: WIDTH_COL_HM, borderRight: BORDER, boxSizing: 'border-box' }}></Grid>
-          <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            {cm[getInqType(CM_DESCRIPTION)]}
-          </Grid>
-          <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            {`${cm[getInqType(CM_WEIGHT)]} ${cm[getInqType(CM_WEIGHT_UNIT)]}`}
-          </Grid>
-          <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            {`${cm[getInqType(CM_MEASUREMENT)]} ${cm[getInqType(CM_MEASUREMENT_UNIT)]}`}
+    return containersManifest.map((cm, index) => (
+      <Grid container item key={index} className={classes.content_L}>
+        <Grid item style={{ whiteSpace: 'pre-wrap', width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
+          {cm[SHIPPING_MARK] || cm[getInqType(CM_MARK)] || ""}
+        </Grid>
+        <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
+          <Grid item style={{ textAlign: 'end', whiteSpace: 'pre-wrap' }}>
+            {
+              cm[TOTAL_PACKAGE]
+              ||
+              <>
+                <span>{cm[getInqType(CM_PACKAGE)]}</span>
+                <br />
+                <span>{getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}</span>
+              </>
+              ||
+              ""
+            }
           </Grid>
         </Grid>
-      ))
-    } else {
-      return <Grid container item className={classes.content_L}>
-        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 5, whiteSpace: 'pre-wrap' }}>
-          {getValueField(SHIPPING_MARK)}
+        <Grid style={{ width: WIDTH_COL_HM, borderRight: BORDER, boxSizing: 'border-box' }}></Grid>
+        <Grid item style={{ whiteSpace: 'pre-wrap', width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
+          {cm[DESCRIPTION_OF_GOODS] || cm[getInqType(CM_DESCRIPTION)] || ""}
         </Grid>
-        <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 5 }}>
-          <Grid item style={{ textAlign: 'end' }}>
-            <span>{drfMD[TOTAL_PACKAGE]}</span>
-            <br />
-            <span>{getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}</span>
-          </Grid>
+        <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
+          {
+            cm[TOTAL_WEIGHT]
+            ||
+            cm[getInqType(CM_WEIGHT)] && `${cm[getInqType(CM_WEIGHT)]} ${cm[getInqType(CM_WEIGHT_UNIT)]}`
+            ||
+            ""
+          }
         </Grid>
-        <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }}></Grid>
-        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 5, whiteSpace: 'pre-wrap' }}>
-          {getValueField(DESCRIPTION_OF_GOODS)}
-        </Grid>
-        <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 5 }}>
-          {`${drfMD[TOTAL_WEIGHT]} ${drfMD[TOTAL_WEIGHT_UNIT]}`}
-        </Grid>
-        <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 5 }}>
-          {`${drfMD[TOTAL_MEASUREMENT]} ${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
+        <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
+          {
+            cm[TOTAL_MEASUREMENT]
+            ||
+            cm[getInqType(CM_MEASUREMENT)] && `${cm[getInqType(CM_MEASUREMENT)]} ${cm[getInqType(CM_MEASUREMENT_UNIT)]}`
+            ||
+            ""
+          }
         </Grid>
       </Grid>
-    }
+    ))
   }
 
   return (
@@ -247,7 +242,7 @@ const NextPage = ({ drfMD, containersDetail, containersManifest, currentPage, to
             <div className={classes.content_M} style={{ paddingTop: 5 }}>
               {containersDetail.map((cd, idx) => (
                 <span key={idx} style={{ whiteSpace: 'pre', lineHeight: '20px' }}>
-                  {`${cd[getInqType(CONTAINER_NUMBER)] || ''}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                  {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
                   <br />
                 </span>
               ))
