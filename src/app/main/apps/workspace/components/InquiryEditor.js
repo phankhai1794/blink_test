@@ -18,6 +18,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import { OTHERS } from '@shared/keyword';
 import { uploadFile } from 'app/services/fileService';
 import { updateInquiry, saveInquiry, getUpdatedAtAnswer } from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
@@ -25,6 +26,7 @@ import clsx from 'clsx';
 import axios from 'axios';
 import { useUnsavedChangesWarning } from 'app/hooks'
 import { useDropzone } from 'react-dropzone';
+import ContentEditable from 'react-contenteditable';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -183,6 +185,7 @@ const InquiryEditor = (props) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [templateList, setTemplateList] = useState([]);
   const [template, setTemplate] = useState(valueType?.value || 0);
+  const [content, setContent] = useState(currentEditInq.content || '');
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -192,11 +195,21 @@ const InquiryEditor = (props) => {
     setAnchorEl(null);
   };
 
+  const formatTemplate = (content) => {
+    let parts = content.split(/(\[.*\])|(\(insert[^)]*\))|(\([lL]ist[^)]*\))/).filter(e => e);
+    parts = parts.map((p, i) => {
+      const test = /\[.*\]|^\(.*\)$/.test(p);
+      return test ? `<span style='color: #BAC3CB; text-decoration: underline'>${p}</span>` : p;
+    })
+    return parts.join("");
+  }
+
   const handleChange = (event) => {
     const index = Number(event.target.value);
     setTemplate(index);
     const inq = { ...currentEditInq };
     inq.content = templateList[index];
+    setContent(formatTemplate(templateList[index]));
     dispatch(InquiryActions.setEditInq(inq));
   };
 
@@ -220,9 +233,14 @@ const InquiryEditor = (props) => {
 
   useEffect(() => {
     if (fieldValue) {
-      const filter = metadata.inq_type_options
-        .filter((data) => data.field?.includes(fieldValue.value))
-        .sort((a, b) => a.label.localeCompare(b.label));
+      const filter = metadata.inq_type_options.filter((data) => (
+        data.field?.includes(fieldValue.value)
+        && metadata.template.some((temp) => (
+          temp.field === fieldValue.keyword
+          && temp.type === data.value
+          && (temp.content[0]) || data.label === OTHERS)
+        ))
+      ).sort((a, b) => a.label.localeCompare(b.label));
       setInqTypeOption(filter);
     }
     if (scrollTopPopup.current) {
@@ -233,12 +251,13 @@ const InquiryEditor = (props) => {
     const inq = { ...currentEditInq };
     inq.inqType = e.value;
     // if (e.__isNew__) inq.isNew = e.__isNew__;
-    const filter = metadata.template.find(({ field, type }) => (type.toUpperCase() === e.label.toUpperCase() || type === e.value) && fieldValue.keyword === field);
+    const filter = metadata.template.find(({ field, type }) => type === e.value && fieldValue.keyword === field);
     dispatch(InquiryActions.validate({ ...valid, inqType: true }));
     if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
       inq.content = contentEdited;
     } else {
-      inq.content = filter?.content[0] || '';
+      inq.content = filter?.content[0] || MSG_INQUIRY_CONTENT;
+      setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
     setValueType(e);
     setTemplateList(filter?.content || []);
@@ -306,8 +325,8 @@ const InquiryEditor = (props) => {
 
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
-
-    inq.content = e.target.value;
+    inq.content = e.currentTarget.textContent;
+    setContent(e.target.value);
     setFieldEdited(inq.field);
     setNameTypeEdited(inq.inqType);
     setContentEdited(inq.content);
@@ -792,14 +811,11 @@ const InquiryEditor = (props) => {
               </RadioGroup>
             </Popover>
             <div className="mt-32 mx-8">
-              <TextField
-                value={currentEditInq.content.replace('{{INQ_TYPE}}', '')}
-                multiline
-                error={!valid.content}
-                helperText={!valid.content ? 'This is required!' : ''}
-                onFocus={(e) => e.target.select()}
-                onChange={handleNameChange}
-                style={{ width: '100%', resize: 'none' }}
+              <ContentEditable
+                html={content} // innerHTML of the editable div
+                disabled={false} // use true to disable editing
+                onChange={handleNameChange} // handle innerHTML change
+                style={{ whiteSpace: 'pre-line' }}
               />
             </div>
             {currentEditInq.ansType === metadata.ans_type.choice && (

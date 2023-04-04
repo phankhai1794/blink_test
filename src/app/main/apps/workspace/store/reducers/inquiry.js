@@ -1,6 +1,6 @@
 import * as Actions from '../actions/inquiry';
 
-export const MSG_INQUIRY_CONTENT = 'We found discrepancy in the {{INQ_TYPE}} information between SI and OPUS booking details';
+export const MSG_INQUIRY_CONTENT = 'We found discrepancy in the information between SI and OPUS booking details';
 
 const initialState = {
   myBL: {},
@@ -28,7 +28,7 @@ const initialState = {
   enableSubmit: false,
   enableSend: false,
   listCommentDraft: [],
-  objectNewAmendment: { oldAmendmentId:null, newAmendment:null },
+  objectNewAmendment: { oldAmendmentId: null, newAmendment: null },
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -52,18 +52,16 @@ const inquiryReducer = function (state = initialState, action) {
   case Actions.ADD_QUESTION: {
     return {
       ...state,
-      currentEditInq:
-        {
-          content:
-            MSG_INQUIRY_CONTENT,
-          inqType: '',
-          ansType: '',
-          field: action.state,
-          answerObj: [],
-          addOther: '',
-          receiver: ['customer'],
-          mediaFile: []
-        }
+      currentEditInq: {
+        content: MSG_INQUIRY_CONTENT,
+        inqType: '',
+        ansType: '',
+        field: action.state,
+        answerObj: [],
+        addOther: '',
+        receiver: ['customer'],
+        mediaFile: []
+      }
     };
   }
   case Actions.ADD_AMENDMENT: {
@@ -75,8 +73,7 @@ const inquiryReducer = function (state = initialState, action) {
       currentEdit: 0,
       question: [
         {
-          content:
-              MSG_INQUIRY_CONTENT,
+          content: MSG_INQUIRY_CONTENT,
           inqType: '',
           ansType: '',
           field: '',
@@ -147,7 +144,7 @@ const inquiryReducer = function (state = initialState, action) {
     return { ...state, listCommentDraft: action.state };
   }
   case Actions.SET_NEW_AMENDMENT: {
-    return { ...state, objectNewAmendment: { ...state.objectNewAmendment, ...action.state }};
+    return { ...state, objectNewAmendment: { ...state.objectNewAmendment, ...action.state } };
   }
   default: {
     return state;

@@ -136,6 +136,8 @@ export const BL_PRINT_COUNT = 'blPrintCount';
 
 export const FREIGHT_TERM = 'freightTerm';
 
+export const OTHERS = 'Others (Free Text)';
+
 export const ONLY_ATT = 'Please refer to the attached file for your reference.';
 
 export const NO_CONTENT_AMENDMENT = 'THERE IS NO CONTENT IN THE AMENDMENT';
