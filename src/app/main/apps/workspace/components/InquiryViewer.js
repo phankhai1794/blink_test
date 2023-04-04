@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue , getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify , NumberFormat } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -1270,17 +1270,24 @@ const InquiryViewer = (props) => {
       const orgContentField = content[question.field];
       const contsNo = [];
       contentField.forEach((obj, index) => {
-        const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
-        if (getTypeName === CONTAINER_NUMBER) {
+        if (question.process === 'pending') {
+          const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
+          if (getTypeName === CONTAINER_NUMBER) {
+            contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+            const containerNo = orgContentField[index][question.inqType];
+            contsNoChange[containerNo] = obj[question.inqType];
+            obj[question.inqType] = formatContainerNo(obj[question.inqType]);
+          }
+          if (getTypeName === CONTAINER_SEAL) {
+            obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
+          } else if (obj[question.inqType]) {
+            obj[question.inqType] = (typeof obj[question.inqType] === 'string') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
+          }
+        } else if (question.process === 'draft') {
+          // map container no
           contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
-          const containerNo = orgContentField[index][question.inqType];
-          contsNoChange[containerNo] = obj[question.inqType];
-          obj[question.inqType] = formatContainerNo(obj[question.inqType]);
-        }
-        if (getTypeName === CONTAINER_SEAL) {
-          obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
-        } else if (obj[question.inqType]) {
-          obj[question.inqType] = (typeof obj[question.inqType] === 'string') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
+          const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
+          contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
         }
       });
 
@@ -2832,7 +2839,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
           type = typeList[typeList.length - 1];
         }
         let hasData = false;
-        td.push(<div key={rowIndex} style={{ display: 'flex', marginTop: type === typeList[0] ? 10 : 5 }}>
+        td.push(<div style={{ display: 'flex', marginTop: type === typeList[0] ? 10 : 5 }}>
           <Tooltip title={type === 'HS/HTS/NCM Code' ? HS_CODE : type} enterDelay={1000}>
             <input
               className={clsx(classes.text)}
@@ -2889,7 +2896,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                         borderColor: inputValid === true ? '#bac3cb' : 'red'
                       }}
                       disabled={disabled}
-                      value={nodeValue ? disabled?NumberFormat(nodeValue[getType(type)]): nodeValue[getType(type)] || '' : ''}
+                      value={nodeValue ? disabled ? NumberFormat(nodeValue[getType(type)]) : nodeValue[getType(type)] || '' : ''}
                       onChange={(e) => onChange(e, nodeValue.index, getType(type))}
                     />
                     {inputValid ? null : <p style={{ color: 'red' }}>{filteredCdUnit[0].pattern.message}</p>}
