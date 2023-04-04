@@ -495,7 +495,13 @@ const InquiryViewer = (props) => {
               }
               res.splice(res.length - 1, 0, markReopen);
             }
-            setComment([...res]);
+            const listComments = [...res].map(r => {
+              return {
+                ...r,
+                process: 'pending'
+              }
+            })
+            setComment(listComments);
             // setType(metadata.ans_type.paragraph);
             setQuestion(lastest);
             if (res.length > 1) {
@@ -682,7 +688,7 @@ const InquiryViewer = (props) => {
               answersMedia: [],
               content: orgContent[lastest.field] || '',
               process: 'draft',
-              state: lastestComment[0]?.state,
+              state: 'AME_ORG'
             }];
 
             res.map(r => {
@@ -2335,7 +2341,8 @@ const InquiryViewer = (props) => {
                     wordBreak: 'break-word',
                     fontFamily: 'Montserrat',
                     fontSize: 15,
-                    fontStyle: !['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A'].includes(question.state) && 'italic',
+                    fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED'].includes(question.state) && question.process === 'pending') ||
+                        (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
                     color: '#132535',
                     whiteSpace: 'pre-wrap'
                   }}>
