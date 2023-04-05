@@ -10,14 +10,12 @@ export const handleError = (dispatch, err) => {
     message = err.response.data?.message || err.response.data?.error.message;
   }
   if (!message) message = err.message || "Your token has expired";
-  dispatch(Actions.showMessage({ message, variant: 'error' }));
 
-  if ([401, 410].includes(status)) {
-    setTimeout(() => {
-      dispatch(Actions.checkAuthToken(false));
-      dispatch(Actions.checkAllow(false));
-    }, 1000);
+  if (status === 401) {
+    dispatch(Actions.checkAuthToken(false));
+    dispatch(Actions.checkAllow(false));
   }
+  else dispatch(Actions.showMessage({ message, variant: 'error' }));
   return [status, message];
 };
 
