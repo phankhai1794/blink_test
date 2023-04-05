@@ -356,6 +356,7 @@ export default function Form(props) {
     let setNumber = 0;
     const countOnshore = inquiries.filter((inq) => {
       return inq.process === 'pending' && inq.receiver.includes('onshore')
+          && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')
     }).length;
     if (countOnshore !== 0 && tabSelected === 1) {
       setNumber = 1;
