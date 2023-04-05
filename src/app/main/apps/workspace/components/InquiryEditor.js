@@ -199,7 +199,7 @@ const InquiryEditor = (props) => {
     let parts = content.split(/(\[.*\])|(\(insert[^)]*\))|(\([lL]ist[^)]*\))/).filter(e => e);
     parts = parts.map((p, i) => {
       const test = /\[.*\]|^\(.*\)$/.test(p);
-      return test ? `<span style='color: #BAC3CB; text-decoration: underline'>${p}</span>` : p;
+      return test ? `<span style='color: #BD1874; text-decoration: underline'>${p}</span>` : p;
     })
     return parts.join("");
   }
@@ -815,7 +815,7 @@ const InquiryEditor = (props) => {
                 html={content} // innerHTML of the editable div
                 disabled={false} // use true to disable editing
                 onChange={handleNameChange} // handle innerHTML change
-                style={{ whiteSpace: 'pre-line' }}
+                style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
               />
             </div>
             {currentEditInq.ansType === metadata.ans_type.choice && (

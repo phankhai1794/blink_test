@@ -1939,10 +1939,10 @@ const InquiryViewer = (props) => {
       .catch((error) => handleError(dispatch, error));
   };
 
-  useEffect(() => {
-    const el = document.getElementById(question.id);
-    if (el && el.scrollHeight > el.clientHeight) setShowViewAll(true);
-  }, [isLoadedComment]);
+  // useEffect(() => {
+  //   const el = document.getElementById(question.id);
+  //   if (el && el.scrollHeight > el.clientHeight) setShowViewAll(true);
+  // }, [isLoadedComment]);
 
   const renderBtnReply = () => {
     if (question.process === 'pending') {
@@ -2295,7 +2295,7 @@ const InquiryViewer = (props) => {
                   <>
                     {
                       typeof question.content === 'string' ? <Typography
-                        className={viewDropDown !== question.id ? classes.hideText : ''}
+                        // className={viewDropDown !== question.id ? classes.hideText : ''}
                         variant="h5"
                         id={question.id}
                         style={{
@@ -2334,7 +2334,7 @@ const InquiryViewer = (props) => {
                   />
               ) :
                 <Typography
-                  className={viewDropDown !== question.id ? classes.hideText : ''}
+                  // className={viewDropDown !== question.id ? classes.hideText : ''}
                   variant="h5"
                   id={question.id}
                   style={{
