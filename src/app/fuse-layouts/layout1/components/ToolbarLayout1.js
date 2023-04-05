@@ -401,7 +401,14 @@ function ToolbarLayout1(props) {
     if (bl) history.push(`/guest?bl=${bl}`, { skipVerification: true });
   };
 
+  const showMessageReply = () => {
+    return inquiries.some((inq) => ['INQ_SENT', 'REP_Q_SENT', 'REP_SENT'].includes(inq.state));
+  }
+
   const onSubmit = async () => {
+    if (showMessageReply()) {
+      dispatch(AppActions.showMessage({ message: 'There are still remaining Inquiries/Amendments that have not yet been replied', variant: 'warning' }));
+    }
     dispatch(FormActions.togglePreviewSubmitList(true));
     dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
   };

@@ -7,13 +7,11 @@ import jssExtend from 'jss-extend';
 import history from '@history';
 import { create } from 'jss';
 import { StylesProvider, jssPreset, createGenerateClassName } from '@material-ui/styles';
-import { ReactNotifications } from 'react-notifications-component';
 
 import { Auth } from './auth';
 import store from './store';
 import AppContext, { SocketContext, socket } from './AppContext';
 import routes from './fuse-configs/routesConfig';
-import 'react-notifications-component/dist/theme.css';
 
 const jss = create({
   ...jssPreset(),
@@ -30,7 +28,6 @@ const App = () => {
         routes
       }}
     >
-      <ReactNotifications />
       <SocketContext.Provider value={socket}>
         <StylesProvider jss={jss} generateClassName={generateClassName}>
           <Provider store={store}>

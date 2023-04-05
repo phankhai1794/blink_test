@@ -158,6 +158,14 @@ const SendInquiryForm = (props) => {
     setEditorState(initiateContentState(content));
   };
 
+  const showMessageReply = () => {
+    return inquiries.some(
+      (inq) =>
+        inq.receiver[0] === tabValue &&
+        ['ANS_SENT', 'REP_A_SENT', 'AME_SENT', 'REP_SENT'].includes(inq.state)
+    )
+  }
+
   const convertToList = (array, tabValue) => {
     const newInq = checkNewInquiry(metadata, inquiries, tabValue, ['OPEN']);
     const newRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_Q_DRF']);
@@ -362,6 +370,9 @@ const SendInquiryForm = (props) => {
     } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
       return;
     } else {
+      if (showMessageReply()) {
+        dispatch(Actions.showMessage({ message: 'There are still remaining Inquiries/Amendments that have not yet been replied', variant: 'warning' }));
+      }
       dispatch(
         FormActions.openConfirmPopup({
           openConfirmPopup: true,
