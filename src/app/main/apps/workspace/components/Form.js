@@ -295,14 +295,8 @@ export default function Form(props) {
 
   const handleClick = () => {
     if (!currentEditInq) {
-      if (openAllInquiry) {
-        toggleForm(false);
-        dispatch(FormActions.toggleSaveInquiry(false));
-        dispatch(FormActions.toggleCreateInquiry(true));
-      } else {
-        if (inquiries.length + 1 === metadata.field_options.length) {
-          dispatch(FormActions.toggleAddInquiry(false));
-        }
+      if (inquiries.length + 1 === metadata.field_options.length) {
+        dispatch(FormActions.toggleAddInquiry(false));
       }
       dispatch(InquiryActions.addQuestion());
     }
