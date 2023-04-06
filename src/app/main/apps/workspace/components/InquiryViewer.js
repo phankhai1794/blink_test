@@ -1378,8 +1378,8 @@ const InquiryViewer = (props) => {
           if (question.process === "pending"
               && inqsPending.length
               && inqsPending.every(q => ['UPLOADED'].includes(q.state))
-              && (filterFieldPendingNotUploadOpus.length
-                ? filterFieldPendingNotUploadOpus.every(q => ['COMPL', 'UPLOADED'].includes(q.state)) : true)) {
+              && filterFieldPendingNotUploadOpus.length
+              && filterFieldPendingNotUploadOpus.every(q => ['COMPL', 'UPLOADED'].includes(q.state))) {
             if (question.receiver && question.receiver.length && question.receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
               // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
               console.log('status inquiry customer')
@@ -1393,8 +1393,8 @@ const InquiryViewer = (props) => {
           } else if (question.process === 'draft'
               && inqsDraft.length
               && inqsDraft.every(q => ['UPLOADED'].includes(q.state))
-              && (filterFieldDrfNotUploadOpus.length
-                ? filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state)) : true)) {
+              && filterFieldDrfNotUploadOpus.length
+              && filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state))) {
             // BL Amendment Success (BS), Upload all to Opus.
             console.log('status draft')
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
