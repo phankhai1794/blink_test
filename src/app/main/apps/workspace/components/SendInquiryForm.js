@@ -552,7 +552,9 @@ const SendInquiryForm = (props) => {
                 padding: 20,
                 fontFamily: 'Montserrat',
                 fontSize: 15,
-                fontWeight: 500
+                fontWeight: 500,
+                width: 468,
+                wordBreak: 'break-word'
               }}>
               <div className="preview_editor-content">{parse(form.content)}</div>
               <p>Please visit the link below and help advise us information for further checking</p>
