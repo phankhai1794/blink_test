@@ -433,6 +433,12 @@ const AllInquiry = (props) => {
             )
           })
         )}
+        {currentEditInq &&
+          !currentEditInq.id &&  // Case: Add Inquiry
+          <InquiryEditor onCancel={onCancel} getUpdatedAt={() => {
+            setUpdateReply(true)
+          }} />
+        }
         <div ref={inputAddAmendmentEndRef}>
           {props.user !== 'workspace' && currentAmendment !== undefined && (
             <div style={{ marginTop: 30 }}>
