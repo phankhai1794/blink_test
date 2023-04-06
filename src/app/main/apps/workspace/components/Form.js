@@ -107,10 +107,7 @@ const DialogTitle = withStyles(styles)((props) => {
           </IconButton> */}
           <IconButton
             aria-label="close"
-            onClick={() => {
-              handleClose();
-              openFullScreen(false);
-            }}>
+            onClick={() => handleClose(openFullScreen)}>
             <CloseIcon />
           </IconButton>
         </div>
@@ -246,6 +243,8 @@ export default function Form(props) {
   const userType = useSelector(({ user }) => user.userType);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
+  const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
+  const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
 
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const isShowBackground = useSelector(
@@ -348,6 +347,18 @@ export default function Form(props) {
     dispatch(DraftBLActions.setCurrentField());
   };
 
+  const confirmClose = (openFullScreen) => {
+    if (currentEditInq || currentAmendment || openEmail || reply) {
+      if (window.confirm('The changed you made has not been saved')) {
+        handleClose();
+        openFullScreen(false);
+      }
+    }
+    else {
+      handleClose();
+      openFullScreen(false);
+    }
+  }
   const handleChange = (_, newValue) => {
     props.tabChange(newValue);
   };
@@ -356,7 +367,7 @@ export default function Form(props) {
     let setNumber = 0;
     const countOnshore = inquiries.filter((inq) => {
       return inq.process === 'pending' && inq.receiver.includes('onshore')
-          && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')
+        && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')
     }).length;
     if (countOnshore !== 0 && tabSelected === 1) {
       setNumber = 1;
@@ -434,7 +445,6 @@ export default function Form(props) {
       )}
       <Dialog
         fullScreen={isFullScreen}
-        onClose={handleClose}
         aria-labelledby="customized-dialog-title"
         open={open}
         maxWidth="md"
@@ -446,7 +456,7 @@ export default function Form(props) {
           handleOpenSnackBar={handleOpenFab}
           toggleForm={toggleForm}
           isFullScreen={isFullScreen}
-          handleClose={handleClose}>
+          handleClose={confirmClose}>
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
