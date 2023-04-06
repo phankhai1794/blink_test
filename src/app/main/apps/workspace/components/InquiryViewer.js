@@ -1639,6 +1639,7 @@ const InquiryViewer = (props) => {
             );
             setViewDropDown('');
             setDisableSaveReply(false);
+            dispatch(InquiryActions.setReply(false));
           }).catch((error) => handleError(dispatch, error));
       } else {
         // Edit
@@ -1669,6 +1670,7 @@ const InquiryViewer = (props) => {
             //
             dispatch(InquiryActions.checkSend(true));
             setDisableSaveReply(false);
+            dispatch(InquiryActions.setReply(false));
             dispatch(
               AppAction.showMessage({ message: 'Save Reply SuccessFully', variant: 'success' })
             );
@@ -1700,6 +1702,7 @@ const InquiryViewer = (props) => {
             props.getUpdatedAt();
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             setDisableSaveReply(false);
+            dispatch(InquiryActions.setReply(false));
             dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
             dispatch(InquiryActions.setNewAmendment({ oldAmendmentId: question.id, newAmendment: res.newAmendment }));
           })
@@ -1844,6 +1847,7 @@ const InquiryViewer = (props) => {
   }
 
   const cancelReply = (q) => {
+    dispatch(InquiryActions.setReply(false));
     setIsReply(false);
     setIsReplyCDCM(false);
     const reply = { ...question };
@@ -1869,6 +1873,7 @@ const InquiryViewer = (props) => {
     } else {
       // case: Reply Comment
       setIsReply(true);
+      dispatch(InquiryActions.setReply(true));
       setQuestion(q => ({ ...q, showIconReply: false, showIconAttachAnswerFile: false, showIconAttachReplyFile: true }));
       setTempReply({})
     }
@@ -1902,6 +1907,7 @@ const InquiryViewer = (props) => {
       reply.showIconAttachAnswerFile = false;
     } else {
       // Edit Reply
+      dispatch(InquiryActions.setReply(true));
       setIsReply(true);
       setIsResolve(false);
       reply.content = '';
@@ -2352,7 +2358,7 @@ const InquiryViewer = (props) => {
                     fontFamily: 'Montserrat',
                     fontSize: 15,
                     fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED'].includes(question.state) && question.process === 'pending') ||
-                        (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
+                      (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
                     color: '#132535',
                     whiteSpace: 'pre-wrap'
                   }}>

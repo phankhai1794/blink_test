@@ -158,6 +158,14 @@ const SendInquiryForm = (props) => {
     setEditorState(initiateContentState(content));
   };
 
+  const showMessageReply = () => {
+    return inquiries.some(
+      (inq) =>
+        inq.receiver[0] === tabValue &&
+        ['ANS_SENT', 'REP_A_SENT', 'AME_SENT', 'REP_SENT'].includes(inq.state)
+    )
+  }
+
   const convertToList = (array, tabValue) => {
     const newInq = checkNewInquiry(metadata, inquiries, tabValue, ['OPEN']);
     const newRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_Q_DRF']);
@@ -362,6 +370,9 @@ const SendInquiryForm = (props) => {
     } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
       return;
     } else {
+      if (showMessageReply()) {
+        dispatch(Actions.showMessage({ message: 'There are still remaining Inquiries/Amendments that have not yet been replied', variant: 'warning' }));
+      }
       dispatch(
         FormActions.openConfirmPopup({
           openConfirmPopup: true,
@@ -541,7 +552,9 @@ const SendInquiryForm = (props) => {
                 padding: 20,
                 fontFamily: 'Montserrat',
                 fontSize: 15,
-                fontWeight: 500
+                fontWeight: 500,
+                width: 468,
+                wordBreak: 'break-word'
               }}>
               <div className="preview_editor-content">{parse(form.content)}</div>
               <p>Please visit the link below and help advise us information for further checking</p>
