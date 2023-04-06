@@ -172,6 +172,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   const [isResolved, setIsResolved] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const [isLongText, setIsLongText] = useState(false);
+
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
@@ -298,6 +299,21 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
     setColorStatus();
   }, [inquiries, metadata, listCommentDraft]);
 
+  let isContinue = false;
+  let finalChidren = children;
+  const lines = children.split('\n');
+
+  if (children && id) {
+    if (metadata.field['shipper'] === id && typeof children === 'string' && children.slice(-3,) === 'SH>') isContinue = 'SH>';
+    if (metadata.field['consignee'] === id && typeof children === 'string' && children.slice(-3,) === 'CN>') isContinue = 'CN>';
+    if (metadata.field['notify'] === id && typeof children === 'string' && children.slice(-3,) === 'NP>') isContinue = 'NP>';
+    if (metadata.field['alsoNotify'] === id && typeof children === 'string' && children.slice(-5,) === 'A/NF>') isContinue = 'A/NF>';
+  }
+  if (isContinue && lines.length > 3) {
+    if (isContinue === 'A/NF>') finalChidren = finalChidren.slice(0, -5);
+    else finalChidren = finalChidren.slice(0, -3);
+  }
+
   // should put theme provider at top component
   return (
     <>
@@ -310,7 +326,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         <ThemeProvider theme={theme}>
           <ArrowTooltip isLongText={isLongText} title={selectedChoice || _.isArray(children) ? children.join(", ") : children || ''} placement='right'>
             <TextField
-              value={selectedChoice || children || ''}
+              value={selectedChoice || finalChidren || ''}
               variant="outlined"
               fullWidth={true}
               multiline={multiline}
@@ -336,6 +352,19 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
                       multiline ? classes.adornmentMultiline : '',
                       rows ? classes[`adornmentRow_${rows}`] : ''
                     )}>
+                    {isContinue && lines.length > 3 &&
+                      <div style={{
+                        fontSize: '15px',
+                        color: darkGray,
+                        lineHeight: '22px',
+                        fontWeight: '500',
+                        position: 'absolute',
+                        left: isContinue === 'A/NF>' ? '68%' : '71%',
+                        top: lines.length === 5 ? '76%' : '58%'
+                      }}>
+                        {isContinue}
+                      </div>
+                    }
                     {checkDisplayIcon()}
                     {anchorEl && anchorEl.id === id && allowAddInquiry && (
                       <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
