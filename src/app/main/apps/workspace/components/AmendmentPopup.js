@@ -127,8 +127,8 @@ const AmendmentPopup = (props) => {
   const user = useSelector(({ user }) => user);
   const [inputSeal, setInputSeal] = useState('');
   const { register, control, handleSubmit, formState: { errors } } = useForm();
-  const regNumber = { value: /^\s*(([0-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
-  const regInteger = { value: /^\s*[0-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
+  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
@@ -154,7 +154,7 @@ const AmendmentPopup = (props) => {
   const onSave = () => {
     Object.keys(data).forEach((key) => {
       if (typeof data[key] === 'string')
-        data[key] = data[key].toUpperCase().replace(/^0*/g, "").trim();
+        data[key] = data[key].toUpperCase().trim();
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
     onClose();
@@ -167,6 +167,13 @@ const AmendmentPopup = (props) => {
     setDirty();
     updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [id]: value } : row)));
   };
+
+  const handleMouseOut = (field, value) => {
+    setDirty();
+    if([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(field.title) && !isNaN(value)) {
+      updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [field.id]: (typeof value === 'string' ? (parseFloat(value).toString()) : value)} : row)));
+    }
+  }
 
   const onDelete = (value, tagIndex) => {
     updateEdit((old) =>
@@ -221,6 +228,7 @@ const AmendmentPopup = (props) => {
         className={clsx(classes.textField, !isEdit && classes.lock)}
         value={!isUpperCase ? formatContainerNo(field.value) : field.value}
         onChange={(e) => handleChange(field.id, e.target.value)}
+        onMouseOut={(e) => handleMouseOut(field, e.target.value)}
         InputProps={{
           disabled: !isEdit,
           endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
