@@ -28,23 +28,21 @@ export const displayTime = (time) => {
 
 export const filterMetadata = (data) => {
   const dict = { field: {}, inq_type: {}, ans_type: {}, inq_type_options: [], field_options: [], template: data.template };
-  for (const field of data['field']) {
-    if (field.keyword.toLowerCase() !== 'other') {
-      dict['field'][field.keyword] = field.id;
-      dict['field_options'].push({ label: field.name, value: field.id, keyword: field.keyword, display: field.show });
-    }
-  }
-  for (const inq of data['inqType']) {
-    dict['inq_type'][inq.name] = inq.id;
+  data['field'].forEach(({ id, keyword, name, show }) => {
+    dict['field'][keyword] = id;
+    dict['field_options'].push({ label: name, value: id, keyword, display: show });
+  })
+  data['inqType'].forEach(({ id, name, field }) => {
+    dict['inq_type'][name] = id;
     dict['inq_type_options'].push({
-      label: inq.name,
-      value: inq.id,
-      field: inq.field
+      label: name,
+      value: id,
+      field
     });
-  }
-  for (const ans of data['ansType']) {
-    dict['ans_type'][ans.name] = ans.id;
-  }
+  })
+  data['ansType'].forEach(({id , name}) => {
+    dict['ans_type'][name] = id;
+  })
   return dict;
 };
 

@@ -251,7 +251,7 @@ const InquiryEditor = (props) => {
     const inq = { ...currentEditInq };
     inq.inqType = e.value;
     // if (e.__isNew__) inq.isNew = e.__isNew__;
-    const filter = metadata.template.find(({ field, type }) => type === e.value && fieldValue.keyword === field);
+    const filter = metadata.template.find(({ field, type }) => type === e.value && fieldValue?.keyword === field);
     dispatch(InquiryActions.validate({ ...valid, inqType: true }));
     if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
       inq.content = contentEdited;
