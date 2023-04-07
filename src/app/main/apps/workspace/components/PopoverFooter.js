@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, IconButton, Link } from '@material-ui/core';
+import * as AppActions from 'app/store/actions';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -143,6 +144,9 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
   };
 
   const onSubmit = () => {
+    if (inquiries.some((inq) => ['INQ_SENT', 'REP_Q_SENT', 'REP_SENT'].includes(inq.state))) {
+      dispatch(AppActions.showMessage({ message: 'There are still remaining Inquiries/Amendments that have not yet been replied', variant: 'warning' }));
+    }
     setIsSubmit(true);
     dispatch(InquiryActions.setShowBackgroundAttachmentList(true));
   };

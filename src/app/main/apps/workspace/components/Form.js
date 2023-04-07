@@ -107,7 +107,10 @@ const DialogTitle = withStyles(styles)((props) => {
           </IconButton> */}
           <IconButton
             aria-label="close"
-            onClick={() => handleClose(openFullScreen)}>
+            onClick={() => {
+              handleClose();
+              openFullScreen(false);
+            }}>
             <CloseIcon />
           </IconButton>
         </div>
@@ -244,7 +247,7 @@ export default function Form(props) {
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
-  const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
+  const currentFieldAmend = useSelector(({ draftBL }) => draftBL.currentField);
 
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const isShowBackground = useSelector(
@@ -292,6 +295,17 @@ export default function Form(props) {
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
   };
+  const onUnload = (e) => {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+
+  useEffect(() => {
+    if (currentEditInq || currentFieldAmend || reply) {
+      window.addEventListener("beforeunload", onUnload);
+    }
+    return () => window.removeEventListener("beforeunload", onUnload);
+  }, [currentEditInq, currentFieldAmend, reply])
 
   const handleClick = () => {
     if (!currentEditInq) {
@@ -341,18 +355,6 @@ export default function Form(props) {
     dispatch(DraftBLActions.setCurrentField());
   };
 
-  const confirmClose = (openFullScreen) => {
-    if (currentEditInq || currentAmendment || openEmail || reply) {
-      if (window.confirm('The changed you made has not been saved')) {
-        handleClose();
-        openFullScreen(false);
-      }
-    }
-    else {
-      handleClose();
-      openFullScreen(false);
-    }
-  }
   const handleChange = (_, newValue) => {
     props.tabChange(newValue);
   };
@@ -450,7 +452,7 @@ export default function Form(props) {
           handleOpenSnackBar={handleOpenFab}
           toggleForm={toggleForm}
           isFullScreen={isFullScreen}
-          handleClose={confirmClose}>
+          handleClose={handleClose}>
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
