@@ -91,7 +91,7 @@ const StyledPopper = styled(Popper)`&&{
 }`;
 
 const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, deleteAmendment, setDeleteAmendment, isResolveCDCM }) => {
-  
+
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const user = useSelector(({ user }) => user);
@@ -125,7 +125,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
   const sortValues =(vals) =>{
     let valuesSorted = [];
-    if(container === CONTAINER_MANIFEST && disableInput && vals === valueEdit){
+    if(container === CONTAINER_MANIFEST && vals === valueEdit){
       let cms = [...vals];
       const contsNo = [
         ...new Set((getValueField(CONTAINER_DETAIL) ||[]).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
