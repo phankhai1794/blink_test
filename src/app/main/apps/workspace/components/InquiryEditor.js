@@ -485,8 +485,8 @@ const InquiryEditor = (props) => {
           return;
         }
         // check empty a field
-        if (currentEditInq.answerObj.length > 0) {
-          const checkOptionEmpty = currentEditInq.answerObj.filter((item) => !item.content);
+        if (inquiry.answerObj.length > 0) {
+          const checkOptionEmpty = inquiry.answerObj.filter((item) => !item.content);
           if (checkOptionEmpty.length > 0) {
             dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
             setDisabled(false);

@@ -387,7 +387,6 @@ const InquiryViewer = (props) => {
             lastest.creator = filterOffshoreSent.updater;
             lastest.createdAt = filterOffshoreSent.createdAt;
             lastest.createdAt = filterOffshoreSent.createdAt;
-            lastest.type = filterOffshoreSent.type;
             setType(filterOffshoreSent.ansType);
             //
             if (Object.keys(filterOffshoreSent).length > 0) {
@@ -458,7 +457,6 @@ const InquiryViewer = (props) => {
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                   setSubmitLabel(true);
                   lastest.showIconEdit = true;
-                  lastest.showIconAttachAnswerFile = false;
                 } else if (filterOffshoreSent.state === 'ANS_DRF') {
                   setSubmitLabel(false);
                   setStateReplyDraft(false);
@@ -2239,7 +2237,7 @@ const InquiryViewer = (props) => {
                                 </div>
                               </Tooltip>
                             </PermissionProvider>
-                            {(!['REP_Q_DRF', 'REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT'].includes(question.state) || (['REP_Q_DRF'].includes(question.state) && user.role === 'Admin')) && (
+                            {!['REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT'].includes(question.state) && (
                               <Tooltip title="Delete">
                                 <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                                   <img
@@ -2307,7 +2305,7 @@ const InquiryViewer = (props) => {
                           <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
                         </div>
                       </Tooltip>
-                      {(!['REP_Q_DRF', 'REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT', 'ANS_SENT'].includes(question.state) || (['REP_Q_DRF'].includes(question.state) && user.role === 'Admin')) && (
+                      {!['REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT', 'ANS_SENT'].includes(question.state) && (
                         <Tooltip title="Delete">
                           <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                             <img

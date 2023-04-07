@@ -92,7 +92,6 @@ const ChoiceAnswer = (props) => {
                   <span style={{
                     fontSize: '1.7rem',
                     whiteSpace: 'pre',
-                    fontStyle: 'italic',
                     textDecorationLine: ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && 'line-through'
                   }}>{choice.content}</span>
                 }

@@ -24,10 +24,10 @@ const useStyles = makeStyles(() => ({
     '& .content-reply': {
       fontSize: 15,
       fontWeight: 500,
-    },
-    '& .markReopen': {
-      color: 'gray',
-      fontStyle: 'italic'
+      '& .markReopen': {
+        color: 'gray',
+        fontStyle: 'italic'
+      }
     },
     '& .delete-content': {
       textDecorationLine: 'line-through'
