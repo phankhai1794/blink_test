@@ -1367,20 +1367,20 @@ const InquiryViewer = (props) => {
       .then((res) => {
         if (editedIndex !== -1) {
           // setQuestion((q) => ({ ...q, state: 'COMPL' }));
-          optionsInquires[editedIndex].state = 'COMPL';
-          optionsInquires[editedIndex].createdAt = res.updatedAt;
-          const receiver = optionsInquires[editedIndex].receiver[0];
-          const process = optionsInquires[editedIndex].process;
-          if (process === 'draft') {
-            const optionsMinimize = [...listMinimize];
-            const index = optionsMinimize.findIndex((e) => e.id === optionsInquires[editedIndex].id);
-            optionsMinimize[index].id = res.id;
-            optionsInquires[editedIndex].id = res.id;
-            dispatch(InquiryActions.setListMinimize(optionsMinimize));
-          }
-          //auto send mail if every inquiry is resolved
-          autoSendMailResolve(optionsInquires, receiver, process);
+        optionsInquires[editedIndex].state = 'COMPL';
+        optionsInquires[editedIndex].createdAt = res.updatedAt;
+        const receiver = optionsInquires[editedIndex].receiver[0];
+        const process = optionsInquires[editedIndex].process;
+        if (process === 'draft') {
+          const optionsMinimize = [...listMinimize];
+          const index = optionsMinimize.findIndex((e) => e.id === optionsInquires[editedIndex].id);
+          optionsMinimize[index].id = res.id;
+          optionsInquires[editedIndex].id = res.id;
+          dispatch(InquiryActions.setListMinimize(optionsMinimize));
         }
+        //auto send mail if every inquiry is resolved
+        autoSendMailResolve(optionsInquires, receiver, process);
+      }
 
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
@@ -2911,8 +2911,8 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-  const regNumber = { value: /^\s*(([0-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
-  const regInteger = { value: /^\s*[0-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
+  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
   const cdUnit = [
     { field: CONTAINER_PACKAGE, title: 'PACKAGE', unit: packageUnits, required: 'This is required', pattern: regInteger },
@@ -2966,6 +2966,18 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     setTextResolve(temp);
     setDirty()
   };
+
+  const handleMouseOut = (e, nodeValue, type) => {
+    const { value } = e.target;
+    const temp = JSON.parse(JSON.stringify(values));
+    const index = nodeValue.index;
+    console.log(nodeValue)
+    if([CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName(type)) && !isNaN(value)) {
+      temp[index][type] = (typeof value === 'string' ? (parseFloat(temp[index][type]).toString()) : temp[index][type])
+    }
+    setValues(temp);
+    setTextResolve(temp);
+  }
 
   useEffect(() => {
     if (!originalValues) {
@@ -3088,6 +3100,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                       disabled={disabled}
                       value={nodeValue ? disabled ? NumberFormat(nodeValue[getType(type)]) : nodeValue[getType(type)] || '' : ''}
                       onChange={(e) => onChange(e, nodeValue.index, getType(type))}
+                      onMouseOut={(e) => handleMouseOut(e, nodeValue, getType(type))}
                     />
                     {inputValid ? null : <p style={{ color: 'red' }}>{filteredCdUnit[0].pattern.message}</p>}
                   </div>
