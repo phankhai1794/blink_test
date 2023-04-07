@@ -915,7 +915,10 @@ const InquiryViewer = (props) => {
             }
             const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
-              if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+              if (removeIndex !== -1) {
+                dispatch(InquiryActions.setContent({ ...content, [question.field]: orgContent[question.field] }));
+                optionsOfQuestion.splice(removeIndex, 1);
+              }
               // remove all cd cm amendment
               if (res.removeAllCDCM) {
                 getBlInfo(myBL.id).then((res) => {
@@ -978,7 +981,14 @@ const InquiryViewer = (props) => {
               dispatch(InquiryActions.setInquiries(optionsOfQuestion));
             } else {
               if (res.checkReplyEmpty) {
-                if (removeIndex !== -1) optionsOfQuestion[removeIndex].state = user.role === 'Admin' ? 'AME_SENT' : 'REP_SENT';
+                if (removeIndex !== -1) {
+                  if (comment.length) {
+                    const revertHistory = comment.filter(c => c.state !== 'REP_DRF_DELETED')
+                    optionsOfQuestion[removeIndex].state = revertHistory[revertHistory.length - 2] && revertHistory[revertHistory.length - 2].state;
+                  } else {
+                    optionsOfQuestion[removeIndex].state = user.role === 'Admin' ? 'AME_SENT' : 'REP_SENT';
+                  }
+                }
                 dispatch(InquiryActions.setInquiries(optionsOfQuestion));
               }
               //
