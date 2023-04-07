@@ -1315,22 +1315,25 @@ const InquiryViewer = (props) => {
     }
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    const editedAmeIndex = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
     resolveInquiry(body)
       .then((res) => {
-        // setQuestion((q) => ({ ...q, state: 'COMPL' }));
-        optionsInquires[editedIndex].state = 'COMPL';
-        optionsInquires[editedIndex].createdAt = res.updatedAt;
-        const receiver = optionsInquires[editedIndex].receiver[0];
-        const process = optionsInquires[editedIndex].process;
-        if (process === 'draft') {
-          const optionsMinimize = [...listMinimize];
-          const index = optionsMinimize.findIndex((e) => e.id === optionsInquires[editedIndex].id);
-          optionsMinimize[index].id = res.id;
-          optionsInquires[editedIndex].id = res.id;
-          dispatch(InquiryActions.setListMinimize(optionsMinimize));
+        if (editedIndex !== -1) {
+          // setQuestion((q) => ({ ...q, state: 'COMPL' }));
+          optionsInquires[editedIndex].state = 'COMPL';
+          optionsInquires[editedIndex].createdAt = res.updatedAt;
+          const receiver = optionsInquires[editedIndex].receiver[0];
+          const process = optionsInquires[editedIndex].process;
+          if (process === 'draft') {
+            const optionsMinimize = [...listMinimize];
+            const index = optionsMinimize.findIndex((e) => e.id === optionsInquires[editedIndex].id);
+            optionsMinimize[index].id = res.id;
+            optionsInquires[editedIndex].id = res.id;
+            dispatch(InquiryActions.setListMinimize(optionsMinimize));
+          }
+          //auto send mail if every inquiry is resolved
+          autoSendMailResolve(optionsInquires, receiver, process);
         }
-        //auto send mail if every inquiry is resolved
-        autoSendMailResolve(optionsInquires, receiver, process);
 
         dispatch(InquiryActions.setInquiries(optionsInquires));
         dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
@@ -1361,6 +1364,43 @@ const InquiryViewer = (props) => {
             [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
           }));
         }
+
+        // change status
+        const filterFieldPendingNotUploadOpus = optionsInquires.filter(op => op.process === 'pending' && listFieldDisableUpload.includes(op.field));
+        const filterFieldDrfNotUploadOpus = optionsInquires.filter(op => op.process === 'draft' && listFieldDisableUpload.includes(op.field));
+        //
+        const mapFieldPending = filterFieldPendingNotUploadOpus.map(f => f.field);
+        const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && !mapFieldPending.includes(inq.field));
+        //
+        const mapFieldDraft = filterFieldDrfNotUploadOpus.map(f => f.field);
+        const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && !mapFieldDraft.includes(inq.field));
+        if (myBL && myBL.bkgNo) {
+          if (question.process === "pending"
+              && inqsPending.length
+              && inqsPending.every(q => ['UPLOADED'].includes(q.state))
+              && filterFieldPendingNotUploadOpus.length
+              && filterFieldPendingNotUploadOpus.every(q => ['COMPL', 'UPLOADED'].includes(q.state))) {
+            if (question.receiver && question.receiver.length && question.receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
+              // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
+              console.log('status inquiry customer')
+              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
+            }
+            if (question.receiver && question.receiver.length && question.receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
+              //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
+              console.log('status inquiry onshore')
+              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
+            }
+          } else if (question.process === 'draft'
+              && inqsDraft.length
+              && inqsDraft.every(q => ['UPLOADED'].includes(q.state))
+              && filterFieldDrfNotUploadOpus.length
+              && filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state))) {
+            // BL Amendment Success (BS), Upload all to Opus.
+            console.log('status draft')
+            dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
+          }
+        }
+
         // setSaveComment(!isSaveComment);
         setStateReplyDraft(false);
         setDisableAcceptResolve(false);
@@ -1423,24 +1463,44 @@ const InquiryViewer = (props) => {
             // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: 'Upload to OPUS successfully', icon: 'success' }));
             dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
           }
-          const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && inq.state !== 'COMPL' && ![listFieldDisableUpload].includes(inq.field));
-          const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && inq.state !== 'RESOLVED' && ![listFieldDisableUpload].includes(inq.field));
-          if (myBL.bkgNo) {
-            if (optionsInquires[editedInqIndex].process === "pending" && inqsPending.length > 0 && inqsPending.every(q => ['UPLOADED'].includes(q.state))) {
-              if (optionsInquires[editedInqIndex].receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
+
+          // change status
+          const filterFieldPendingNotUploadOpus = optionsInquires.filter(op => op.process === 'pending' && listFieldDisableUpload.includes(op.field));
+          const filterFieldDrfNotUploadOpus = optionsInquires.filter(op => op.process === 'draft' && listFieldDisableUpload.includes(op.field));
+          //
+          const mapFieldPending = filterFieldPendingNotUploadOpus.map(f => f.field);
+          const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && !mapFieldPending.includes(inq.field));
+          //
+          const mapFieldDraft = filterFieldDrfNotUploadOpus.map(f => f.field);
+          const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && !mapFieldDraft.includes(inq.field));
+          //
+          if (myBL && myBL.bkgNo) {
+            if (question.process === "pending"
+                && inqsPending.length
+                && inqsPending.every(q => ['UPLOADED'].includes(q.state))
+                && (filterFieldPendingNotUploadOpus.length
+                  ? filterFieldPendingNotUploadOpus.every(q => ['COMPL', 'UPLOADED'].includes(q.state)) : true)) {
+              if (question.receiver && question.receiver.length && question.receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
                 // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
+                console.log('status inquiry customer')
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
               }
-              if (optionsInquires[editedInqIndex].receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
+              if (question.receiver && question.receiver.length && question.receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
                 //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
+                console.log('status inquiry onshore')
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
               }
-            }
-            if (optionsInquires[editedInqIndex].process === "draft" && inqsDraft.length > 0 && inqsDraft.every(q => ['UPLOADED'].includes(q.state))) {
+            } else if (question.process === 'draft'
+                && inqsDraft.length
+                && inqsDraft.every(q => ['UPLOADED'].includes(q.state))
+                && (filterFieldDrfNotUploadOpus.length
+                  ? filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state)) : true)) {
               // BL Amendment Success (BS), Upload all to Opus.
+              console.log('status draft')
               dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
             }
           }
+
         }
         props.getUpdatedAt();
         setViewDropDown('');
