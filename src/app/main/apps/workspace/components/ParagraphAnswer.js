@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
       color: '#132535',
       fontSize: 15,
       fontWeight: 500,
-      fontStyle: 'italic',
+      fontStyle: 'normal',
     }
   },
   placeHolder: {
@@ -111,17 +111,21 @@ const ParagraphAnswer = (props) => {
 
   return (
     <div>
-      <div className={clsx("flex", paragraphText ? classes.inputText : classes.placeHolder, ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && classes.deleteContent)}>
+      <div className={clsx("flex", ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && classes.deleteContent)}>
         <TextField
-          style={{ border: 'none', display: !isPermission ? (!paragraphText ? 'none' : '') : '' }}
+          style={{
+            border: 'none',
+            display: !isPermission ? (!paragraphText ? 'none' : '') : '',
+          }}
           fullWidth
           placeholder={isPermission ? 'Typing...' : ''}
           classes={{ root: classes.root }}
           disabled={!isPermission || disable}
           InputProps={{
             style: {
-              fontSize: '1.7rem',
+              fontSize: '14px',
               fontFamily: 'Montserrat',
+              fontStyle: !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT'].includes(question.state) && 'italic'
             },
           }}
           InputLabelProps={{

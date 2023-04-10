@@ -2415,7 +2415,7 @@ const InquiryViewer = (props) => {
                     wordBreak: 'break-word',
                     fontFamily: 'Montserrat',
                     fontSize: 15,
-                    fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED'].includes(question.state) && question.process === 'pending') ||
+                    fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(question.state) && question.process === 'pending') ||
                       (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
                     color: '#132535',
                     whiteSpace: 'pre-wrap'
