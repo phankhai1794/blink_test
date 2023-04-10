@@ -398,6 +398,6 @@ export const getTotalValueMDView = (drfView, containerDetail, getType) => {
 }
 
 export const formatNoneContNo = (contNo) => {
-  if (!contNo || /Cont-No:\s\d+/.test(contNo)) return "<none>";
+  if (!contNo || /CONT-NO:\s\d+/.test(contNo.toUpperCase())) return "<none>";
   return contNo;
 }
