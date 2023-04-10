@@ -144,7 +144,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
   };
 
   const onSubmit = () => {
-    if (inquiries.some((inq) => ['INQ_SENT', 'REP_Q_SENT', 'REP_SENT'].includes(inq.state))) {
+    if (inquiries.some((inq) => ['INQ_SENT', 'REP_Q_SENT'].includes(inq.state) || inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Admin')) {
       dispatch(AppActions.showMessage({ message: 'There are still remaining Inquiries/Amendments that have not yet been replied', variant: 'warning' }));
     }
     setIsSubmit(true);
