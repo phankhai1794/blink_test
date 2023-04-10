@@ -983,8 +983,9 @@ const InquiryViewer = (props) => {
               if (res.checkReplyEmpty) {
                 if (removeIndex !== -1) {
                   if (comment.length) {
-                    const revertHistory = comment.filter(c => c.state !== 'REP_DRF_DELETED')
-                    optionsOfQuestion[removeIndex].state = revertHistory[revertHistory.length - 2] && revertHistory[revertHistory.length - 2].state;
+                    const revertHistory = comment.filter(c => c.state !== 'REP_DRF_DELETED').at(-2)
+                    optionsOfQuestion[removeIndex].creator = revertHistory && { ...revertHistory.creator, accountRole: revertHistory.creator.accountRole.name}
+                    optionsOfQuestion[removeIndex].state = revertHistory && revertHistory.state;
                   } else {
                     optionsOfQuestion[removeIndex].state = user.role === 'Admin' ? 'AME_SENT' : 'REP_SENT';
                   }

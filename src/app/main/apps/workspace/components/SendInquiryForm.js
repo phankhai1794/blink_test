@@ -162,7 +162,7 @@ const SendInquiryForm = (props) => {
     return inquiries.some(
       (inq) =>
         inq.receiver[0] === tabValue &&
-        ['ANS_SENT', 'REP_A_SENT', 'AME_SENT', 'REP_SENT'].includes(inq.state)
+        ['ANS_SENT', 'REP_A_SENT', 'AME_SENT'].includes(inq.state) || inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Guest'
     )
   }
 
