@@ -1112,8 +1112,13 @@ const InquiryViewer = (props) => {
                   };
                 } else {
                   optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
+                  optionsOfQuestion[indexQuestion].answerObj.forEach((a) => { a.confirmed = false })
+                  optionsOfQuestion[indexQuestion].selectChoice = {}
                 }
               }
+            }
+            if (res.updatedTime) {
+              optionsOfQuestion[indexQuestion].createdAt = res.updatedTime;
             }
             dispatch(InquiryActions.setInquiries(optionsOfQuestion));
             setReplyRemove();
@@ -2315,7 +2320,7 @@ const InquiryViewer = (props) => {
                           <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
                         </div>
                       </Tooltip>
-                      {!['REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT', 'ANS_SENT'].includes(question.state) && (
+                      {(!['REP_Q_DRF', 'REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT', 'ANS_SENT'].includes(question.state) || ['REP_Q_DRF'].includes(question.state) && user.role === 'Admin') && (
                         <Tooltip title="Delete">
                           <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                             <img
