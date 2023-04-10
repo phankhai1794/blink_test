@@ -91,6 +91,14 @@ const ParagraphAnswer = (props) => {
   }, [saveStatus, currentQuestion]);
 
   useEffect(() => {
+    if (question.answerObj && question.answerObj.length) {
+      setParagraphText(question.answerObj[0]?.content);
+    } else if (!question.answerObj || !question.answerObj.length) {
+      setParagraphText('')
+    }
+  }, [question]);
+
+  useEffect(() => {
     if (
       !paragraphText &&
       question.answerObj &&
