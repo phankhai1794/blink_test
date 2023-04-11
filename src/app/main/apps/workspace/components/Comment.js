@@ -240,7 +240,7 @@ const Comment = (props) => {
           content = `${JSON.parse(k.content).name}\n${JSON.parse(k.content).address}`
         }
         let mediaFiles = k.mediaFile;
-        if (k.type === 'ANS' || (k.type === 'INQ') && k.state === 'ANS_SENT') {
+        if (k.type === 'ANS' && ['ANS_SENT', 'ANS_DRF'].includes(k.state)) {
           mediaFiles = [];
         }
         return contentUI({
