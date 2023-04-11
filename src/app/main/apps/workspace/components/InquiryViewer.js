@@ -2897,12 +2897,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     }
   }, [content]);
 
-  useEffect(() => {
-    if (isResolved) {
-      setValues(contentBl[getField(container)])
-    }
-  }, [isResolved]);
-
   const renderTB = () => {
     let td = [];
     validation(true);
