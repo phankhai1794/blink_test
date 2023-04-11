@@ -565,7 +565,7 @@ export default function Form(props) {
                       borderRadius: '8px',
                       fontFamily: 'Montserrat'
                     }}
-                    disabled={!enableSend || isLoading}
+                    disabled={!enableSend || isLoading || inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED', 'AME_SENT', 'ANS_SENT', 'REP_A_SENT'].includes(inq.state)).length === inquiries.length}
                     onClick={sendMailClick}>
                     E-mail
                   </Button>
