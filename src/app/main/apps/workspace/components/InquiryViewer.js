@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -2757,10 +2757,14 @@ const InquiryViewer = (props) => {
                               validateField(question.field, tempReply?.answer?.content).isError
                               ||
                               (
-                                (question.answerObj[0].content === tempReply?.answer?.content)
-                                && (tempReply && tempReply.mediaFiles && isSameFile(inquiries, tempReply))
-                              )
-                            ))
+                                [metadata.field[CONTAINER_DETAIL], metadata.field[CONTAINER_MANIFEST]].includes(question.field) ?
+                                  (question.contentCDCM && compareObject(question.contentCDCM, tempReply.answer.content) && isSameFile(inquiries, tempReply))
+                                  : (
+                                    (question.answerObj[0].content === tempReply?.answer?.content)
+                                    && (tempReply && tempReply.mediaFiles && isSameFile(inquiries, tempReply))
+                                  )
+                              ))
+                            )
                             || (question.state !== "AME_DRF" && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
                           }
