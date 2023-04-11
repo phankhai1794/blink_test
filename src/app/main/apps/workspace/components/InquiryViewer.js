@@ -1080,10 +1080,8 @@ const InquiryViewer = (props) => {
                   setDeleteAnswer({ status: true, content: optionsOfQuestion[indexQuestion].answerObj[0].content });
                 }
               }
-              if (!res.statePrev) {
-                optionsOfQuestion[indexQuestion].state = 'ANS_SENT';
-              } else {
-                optionsOfQuestion.splice(indexQuestion, 1);
+              if (res.response && res.response?.statePrev) {
+                optionsOfQuestion[indexQuestion].state = res.response?.statePrev || 'ANS_SENT';
               }
             }
             if (res.response.type) {
@@ -1313,6 +1311,7 @@ const InquiryViewer = (props) => {
 
       validationCDCMContainerNo(contsNo);
     }
+    console.log('contsNoChange', contsNoChange)
 
     const body = {
       fieldId: question.field,
@@ -2411,6 +2410,7 @@ const InquiryViewer = (props) => {
                     validation={setValidationCDCM}
                     setTextResolve={setTextResolve}
                     disableInput={true}
+                    isResolved={isResolve}
                   />
               ) :
                 <Typography
@@ -2612,6 +2612,7 @@ const InquiryViewer = (props) => {
                         question={question}
                         setTextResolve={setTextResolve}
                         setDirty={setDirty}
+                        isResolved={isResolve}
                       />
                     }
                   </>
@@ -2804,10 +2805,12 @@ const InquiryViewer = (props) => {
   );
 };
 
-export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation, setDirty }) => {
+export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation, setDirty, isResolved }) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+  const contentBl = useSelector(({ workspace }) => workspace.inquiryReducer.contentBL);
   const regNumber = { value: /^\s*(([0-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
   const regInteger = { value: /^\s*[0-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
@@ -2893,6 +2896,12 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
       setValues(cmSorted)
     }
   }, [content]);
+
+  useEffect(() => {
+    if (isResolved) {
+      setValues(contentBl[getField(container)])
+    }
+  }, [isResolved]);
 
   const renderTB = () => {
     let td = [];
