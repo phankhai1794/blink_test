@@ -12,13 +12,12 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import FilterNoneIcon from '@material-ui/icons/FilterNone';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import MinimizeIcon from '@material-ui/icons/Minimize';
-import { Box, Tabs, Tab, Divider, Link, Chip, Button } from '@material-ui/core';
+import { Box, Tabs, Tab, Divider, Link, Chip, Button, Paper } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import OpenInNew from '@material-ui/icons/OpenInNew';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
+import Draggable from 'react-draggable';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -54,6 +53,17 @@ const styles = (theme) => ({
     color: theme.palette.grey[500]
   }
 });
+
+function PaperComponent(props) {
+  return (
+    <Draggable
+      handle="#draggable-dialog-title"
+      cancel={'[class*="MuiDialogContent-root"]'}
+    >
+      <Paper {...props} />
+    </Draggable>
+  );
+}
 
 const DialogTitle = withStyles(styles)((props) => {
   const {
@@ -443,11 +453,13 @@ export default function Form(props) {
         fullScreen={isFullScreen}
         aria-labelledby="customized-dialog-title"
         open={open}
+        PaperComponent={PaperComponent}
         maxWidth="md"
         container={() => document.getElementById('content-wrapper')}
         classes={{ paperScrollPaper: isFullScreen ? null : classes.dialogPaper }}>
         <DialogTitle
-          id="customized-dialog-title"
+          id="draggable-dialog-title"
+          style={{ cursor: 'move' }}
           toggleFullScreen={toggleFullScreen}
           handleOpenSnackBar={handleOpenFab}
           toggleForm={toggleForm}

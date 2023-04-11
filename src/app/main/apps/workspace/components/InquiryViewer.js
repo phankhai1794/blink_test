@@ -1080,10 +1080,8 @@ const InquiryViewer = (props) => {
                   setDeleteAnswer({ status: true, content: optionsOfQuestion[indexQuestion].answerObj[0].content });
                 }
               }
-              if (!res.statePrev) {
-                optionsOfQuestion[indexQuestion].state = 'ANS_SENT';
-              } else {
-                optionsOfQuestion.splice(indexQuestion, 1);
+              if (res.response && res.response?.statePrev) {
+                optionsOfQuestion[indexQuestion].state = res.response?.statePrev || 'ANS_SENT';
               }
             }
             if (res.response.type) {
