@@ -1311,7 +1311,6 @@ const InquiryViewer = (props) => {
 
       validationCDCMContainerNo(contsNo);
     }
-    console.log('contsNoChange', contsNoChange)
 
     const body = {
       fieldId: question.field,
