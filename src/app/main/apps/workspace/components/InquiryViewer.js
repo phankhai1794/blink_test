@@ -2971,9 +2971,8 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     const { value } = e.target;
     const temp = JSON.parse(JSON.stringify(values));
     const index = nodeValue.index;
-    console.log(nodeValue)
-    if([CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName(type)) && !isNaN(value)) {
-      temp[index][type] = (typeof value === 'string' ? (parseFloat(temp[index][type]).toString()) : temp[index][type])
+    if ([CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName(type)) && !isNaN(value)) {
+      temp[index][type] = (typeof value === 'string' ? (parseFloat(temp[index][type]).toString()) : temp[index][type]);
     }
     setValues(temp);
     setTextResolve(temp);
