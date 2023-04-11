@@ -984,7 +984,7 @@ const InquiryViewer = (props) => {
                 if (removeIndex !== -1) {
                   if (comment.length) {
                     const revertHistory = comment.filter(c => c.state !== 'REP_DRF_DELETED').at(-2)
-                    optionsOfQuestion[removeIndex].creator = revertHistory && { ...revertHistory.creator, accountRole: revertHistory.creator.accountRole.name}
+                    optionsOfQuestion[removeIndex].creator = revertHistory && { ...revertHistory.creator, accountRole: revertHistory.creator.accountRole.name }
                     optionsOfQuestion[removeIndex].state = revertHistory && revertHistory.state;
                   } else {
                     optionsOfQuestion[removeIndex].state = user.role === 'Admin' ? 'AME_SENT' : 'REP_SENT';
@@ -1387,11 +1387,13 @@ const InquiryViewer = (props) => {
         const mapFieldDraft = filterFieldDrfNotUploadOpus.map(f => f.field);
         const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && !mapFieldDraft.includes(inq.field));
         if (myBL && myBL.bkgNo) {
-          if (question.process === "pending"
-              && inqsPending.length
-              && inqsPending.every(q => ['UPLOADED'].includes(q.state))
-              && filterFieldPendingNotUploadOpus.length
-              && filterFieldPendingNotUploadOpus.every(q => ['COMPL', 'UPLOADED'].includes(q.state))) {
+          if (
+            question.process === "pending"
+            && inqsPending.length
+            && inqsPending.every(q => ['UPLOADED'].includes(q.state))
+            && filterFieldPendingNotUploadOpus.length
+            && filterFieldPendingNotUploadOpus.every(q => ['COMPL', 'UPLOADED'].includes(q.state))
+          ) {
             if (question.receiver && question.receiver.length && question.receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
               // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
               console.log('status inquiry customer')
@@ -1402,11 +1404,13 @@ const InquiryViewer = (props) => {
               console.log('status inquiry onshore')
               dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
             }
-          } else if (question.process === 'draft'
-              && inqsDraft.length
-              && inqsDraft.every(q => ['UPLOADED'].includes(q.state))
-              && filterFieldDrfNotUploadOpus.length
-              && filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state))) {
+          } else if (
+            question.process === 'draft'
+            && inqsDraft.length
+            && inqsDraft.every(q => ['UPLOADED'].includes(q.state))
+            && filterFieldDrfNotUploadOpus.length
+            && filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state))
+          ) {
             // BL Amendment Success (BS), Upload all to Opus.
             console.log('status draft')
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
@@ -1487,11 +1491,12 @@ const InquiryViewer = (props) => {
           const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && !mapFieldDraft.includes(inq.field));
           //
           if (myBL && myBL.bkgNo) {
-            if (question.process === "pending"
-                && inqsPending.length
-                && inqsPending.every(q => ['UPLOADED'].includes(q.state))
-                && (filterFieldPendingNotUploadOpus.length
-                  ? filterFieldPendingNotUploadOpus.every(q => ['COMPL', 'UPLOADED'].includes(q.state)) : true)) {
+            if (
+              question.process === "pending"
+              && inqsPending.length
+              && inqsPending.every(q => ['UPLOADED'].includes(q.state))
+              && (filterFieldPendingNotUploadOpus.length ? filterFieldPendingNotUploadOpus.every(q => ['COMPL', 'UPLOADED'].includes(q.state)) : true)
+            ) {
               if (question.receiver && question.receiver.length && question.receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
                 // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
                 console.log('status inquiry customer')
@@ -1502,11 +1507,12 @@ const InquiryViewer = (props) => {
                 console.log('status inquiry onshore')
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
               }
-            } else if (question.process === 'draft'
-                && inqsDraft.length
-                && inqsDraft.every(q => ['UPLOADED'].includes(q.state))
-                && (filterFieldDrfNotUploadOpus.length
-                  ? filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state)) : true)) {
+            } else if (
+              question.process === 'draft'
+              && inqsDraft.length
+              && inqsDraft.every(q => ['UPLOADED'].includes(q.state))
+              && (filterFieldDrfNotUploadOpus.length ? filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state)) : true)
+            ) {
               // BL Amendment Success (BS), Upload all to Opus.
               console.log('status draft')
               dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
@@ -2806,8 +2812,8 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-  const regNumber = { value: /^\s*(([0-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
-  const regInteger = { value: /^\s*[0-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
+  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
   const cdUnit = [
     { field: CONTAINER_PACKAGE, title: 'PACKAGE', unit: packageUnits, required: 'This is required', pattern: regInteger },
@@ -2861,6 +2867,17 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
     setTextResolve(temp);
     setDirty()
   };
+
+  const handleMouseOut = (e, nodeValue, type) => {
+    const { value } = e.target;
+    const temp = JSON.parse(JSON.stringify(values));
+    const index = nodeValue.index;
+    if ([CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName(type)) && !isNaN(value)) {
+      temp[index][type] = (typeof value === 'string' ? (parseFloat(temp[index][type]).toString()) : temp[index][type]);
+    }
+    setValues(temp);
+    setTextResolve(temp);
+  }
 
   useEffect(() => {
     if (!originalValues) {
@@ -2983,6 +3000,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                       disabled={disabled}
                       value={nodeValue ? disabled ? NumberFormat(nodeValue[getType(type)]) : nodeValue[getType(type)] || '' : ''}
                       onChange={(e) => onChange(e, nodeValue.index, getType(type))}
+                      onMouseOut={(e) => handleMouseOut(e, nodeValue, getType(type))}
                     />
                     {inputValid ? null : <p style={{ color: 'red' }}>{filteredCdUnit[0].pattern.message}</p>}
                   </div>
