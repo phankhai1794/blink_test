@@ -119,7 +119,7 @@ const ParagraphAnswer = (props) => {
 
   return (
     <div>
-      <div className={clsx("flex", ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && classes.deleteContent)}>
+      <div className={clsx("flex", !disable && classes.inputText, ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && classes.deleteContent)}>
         <TextField
           style={{
             border: 'none',
