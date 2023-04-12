@@ -234,6 +234,7 @@ const InquiryAnswer = (props) => {
     if (question.selectChoice) {
       responseSelectChoice = await updateInquiryChoice(question.selectChoice).catch(err => handleError(dispatch, err));
     } else if (question.paragraphAnswer) {
+      console.log('question', question)
       if (question.answerObj.length === 0) {
         const response = await createParagraphAnswer(question.paragraphAnswer).catch(err => handleError(dispatch, err));
         optionsInquires[editedIndex].answerObj.push(response.answerObj);

@@ -80,6 +80,8 @@ const ParagraphAnswer = (props) => {
   }, []);
 
   useEffect(() => {
+    console.log('currentQuestion', currentQuestion)
+    console.log('question', question)
     if (currentQuestion && currentQuestion.id === question.id) {
       if (!currentQuestion.answerObj.length) {
         setParagraphText('');
