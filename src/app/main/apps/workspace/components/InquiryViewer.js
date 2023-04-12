@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -2681,7 +2681,7 @@ const InquiryViewer = (props) => {
                                   className={classes.inputText}
                                   value={content[type] || ''}
                                   multiline
-                                  rows={['name'].includes(type) ? 2 : 3}
+                                  // rows={['name'].includes(type) ? 2 : 3}
                                   inputProps={{ style: { textTransform: 'uppercase' } }}
                                   onChange={(e) => handleChangeContentReply(e, type)}
                                   variant='outlined'
@@ -2694,7 +2694,7 @@ const InquiryViewer = (props) => {
                             className={classes.inputText}
                             value={tempReply?.answer?.content}
                             multiline
-                            rows={2}
+                            // rows={2}
                             inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
                             InputProps={{
                               classes: { input: classes.placeholder }
@@ -2759,10 +2759,14 @@ const InquiryViewer = (props) => {
                               validateField(question.field, tempReply?.answer?.content).isError
                               ||
                               (
-                                (question.answerObj[0].content === tempReply?.answer?.content)
-                                && (tempReply && tempReply.mediaFiles && isSameFile(inquiries, tempReply))
-                              )
-                            ))
+                                [metadata.field[CONTAINER_DETAIL], metadata.field[CONTAINER_MANIFEST]].includes(question.field) ?
+                                  (question.contentCDCM && compareObject(question.contentCDCM, tempReply.answer.content) && isSameFile(inquiries, tempReply))
+                                  : (
+                                    (question.answerObj[0].content === tempReply?.answer?.content)
+                                    && (tempReply && tempReply.mediaFiles && isSameFile(inquiries, tempReply))
+                                  )
+                              ))
+                            )
                             || (question.state !== "AME_DRF" && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
                           }
