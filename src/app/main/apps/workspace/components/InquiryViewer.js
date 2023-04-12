@@ -803,8 +803,10 @@ const InquiryViewer = (props) => {
           answersObj[i].confirmed = false;
         });
         const answerIndex = answersObj.findIndex((item) => item.id === currentEditInq.selectChoice.answer);
-        const answerUpdate = answersObj[answerIndex];
-        answerUpdate.confirmed = true;
+        if (answerIndex !== -1) {
+          const answerUpdate = answersObj[answerIndex];
+          answerUpdate.confirmed = true;
+        }
         quest.answerObj = answersObj;
       }
     }
