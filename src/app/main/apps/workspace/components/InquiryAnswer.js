@@ -234,16 +234,18 @@ const InquiryAnswer = (props) => {
     if (question.selectChoice) {
       responseSelectChoice = await updateInquiryChoice(question.selectChoice).catch(err => handleError(dispatch, err));
     } else if (question.paragraphAnswer) {
-      console.log('question', question)
-      if (question.answerObj.length === 0) {
-        const response = await createParagraphAnswer(question.paragraphAnswer).catch(err => handleError(dispatch, err));
-        optionsInquires[editedIndex].answerObj.push(response.answerObj);
-      } else {
-        const answerId = question.answerObj[0].id;
-        if (question.paragraphAnswer.content.trim() === '') {
-          question.paragraphAnswer.content = ONLY_ATT;
+      if (question.answerObj) {
+        if (question.answerObj.length && question.answerObj[0].id) {
+          const answerId = question.answerObj[0].id;
+          if (question.paragraphAnswer.content.trim() === '') {
+            question.paragraphAnswer.content = ONLY_ATT;
+          }
+          await updateParagraphAnswer(answerId, question.paragraphAnswer).catch(err => handleError(dispatch, err));
+        } else {
+          const response = await createParagraphAnswer(question.paragraphAnswer).catch(err => handleError(dispatch, err));
+          optionsInquires[editedIndex].answerObj = [];
+          optionsInquires[editedIndex].answerObj.push(response.answerObj);
         }
-        await updateParagraphAnswer(answerId, question.paragraphAnswer).catch(err => handleError(dispatch, err));
       }
     }
     dispatch(InquiryActions.checkSubmit(!enableSubmit));

@@ -1090,7 +1090,6 @@ const InquiryViewer = (props) => {
                 optionsOfQuestion[indexQuestion].mediaFilesAnswer = [];
               }
               if (res.response.type === 'paragraph') {
-                console.log(res)
                 if (res.response.content) {
                   optionsOfQuestion[indexQuestion].mediaFilesAnswer = res.response.mediaFilesAnswer;
                   optionsOfQuestion[indexQuestion].paragraphAnswer = {
