@@ -652,6 +652,7 @@ const InquiryEditor = (props) => {
               dispatch(FormActions.toggleAllInquiry(true));
               dispatch(FormActions.toggleCreateInquiry(false));
               dispatch(InquiryActions.setOneInq());
+              props.getUpdatedAt();
               setDisabled(false);
             })
             .catch((error) => handleError(dispatch, error));
