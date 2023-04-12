@@ -153,7 +153,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }, [container])
 
   useEffect(() => {
-    setValues(originalData);
+    const sort = sortValues(originalData)
+    setValues(sort)
   }, [originalData]);
 
   useEffect(() => {
