@@ -818,6 +818,7 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     question?.state !== 'OPEN' && setAllowDeleteInq(false);
+    question?.state === 'OPEN' && setAllowDeleteInq(true);
     if (!['REOPEN_A', 'REOPEN_Q'].includes(question.state)) {
       setDisableReopen(false);
     }
