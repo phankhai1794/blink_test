@@ -2409,7 +2409,6 @@ const InquiryViewer = (props) => {
                     validation={setValidationCDCM}
                     setTextResolve={setTextResolve}
                     disableInput={true}
-                    isResolved={isResolve}
                   />
               ) :
                 <Typography
@@ -2611,7 +2610,6 @@ const InquiryViewer = (props) => {
                         question={question}
                         setTextResolve={setTextResolve}
                         setDirty={setDirty}
-                        isResolved={isResolve}
                       />
                     }
                   </>
@@ -2808,9 +2806,8 @@ const InquiryViewer = (props) => {
   );
 };
 
-export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation, setDirty, isResolved }) => {
+export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation, setDirty }) => {
   const classes = useStyles();
-  const dispatch = useDispatch();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const regNumber = { value: /^\s*(([0-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }

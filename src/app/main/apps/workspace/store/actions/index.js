@@ -54,7 +54,6 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
     const cloneContent = { ...content };
 
     dispatch(setOrgContent(orgContent));
-    dispatch(setContentBL(content));
     contentAmendmentRs?.length && contentAmendmentRs.forEach((a) => (cloneContent[a.field] = a.content));
     dispatch(setContent(cloneContent));
     dispatch(FormActions.decreaseLoading());

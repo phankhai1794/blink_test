@@ -6,7 +6,6 @@ const initialState = {
   myBL: {},
   metadata: {},
   orgContent: {},
-  contentBL: {},
   content: {},
   currentEditInq: null,
   currentAmendment: undefined,
@@ -98,9 +97,6 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SET_ORG_CONTENT: {
     return { ...state, orgContent: action.state };
-  }
-  case Actions.SET_CONTENT_BL: {
-    return { ...state, contentBL: action.state };
   }
   case Actions.SET_CONTENT: {
     return { ...state, content: action.state };
