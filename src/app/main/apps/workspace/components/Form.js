@@ -54,17 +54,6 @@ const styles = (theme) => ({
   }
 });
 
-function PaperComponent(props) {
-  return (
-    <Draggable
-      handle="#draggable-dialog-title"
-      cancel={'[class*="MuiDialogContent-root"]'}
-    >
-      <Paper {...props} />
-    </Draggable>
-  );
-}
-
 const DialogTitle = withStyles(styles)((props) => {
   const {
     children,
@@ -302,6 +291,22 @@ export default function Form(props) {
     }
   };
 
+  const PaperComponent = React.useMemo(
+    () =>
+      // eslint-disable-next-line react/display-name
+      React.forwardRef((props) => {
+        return isFullScreen ?
+          <Paper {...props} /> :
+          <Draggable
+            handle="#draggable-dialog-title"
+            cancel={'[class*="MuiDialogContent-root"]'}
+          >
+            <Paper {...props} />
+          </Draggable>
+      }),
+    [isFullScreen]
+  );
+
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
   };
@@ -459,7 +464,7 @@ export default function Form(props) {
         classes={{ paperScrollPaper: isFullScreen ? null : classes.dialogPaper }}>
         <DialogTitle
           id="draggable-dialog-title"
-          style={{ cursor: 'move' }}
+          style={isFullScreen ? null : { cursor: 'move' }}
           toggleFullScreen={toggleFullScreen}
           handleOpenSnackBar={handleOpenFab}
           toggleForm={toggleForm}
