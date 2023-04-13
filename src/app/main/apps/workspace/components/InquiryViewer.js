@@ -1102,6 +1102,10 @@ const InquiryViewer = (props) => {
                 } else {
                   optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
                   optionsOfQuestion[indexQuestion].answerObj = [];
+                  optionsOfQuestion[indexQuestion].paragraphAnswer = {
+                    inquiry: question.id,
+                    content: '',
+                  };
                 }
               }
               else if (res.response.type === 'choice') {
@@ -1115,7 +1119,7 @@ const InquiryViewer = (props) => {
                 } else {
                   optionsOfQuestion[indexQuestion].state = 'INQ_SENT';
                   optionsOfQuestion[indexQuestion].answerObj.forEach((a) => { a.confirmed = false })
-                  optionsOfQuestion[indexQuestion].selectChoice = {}
+                  optionsOfQuestion[indexQuestion].selectChoice = '';
                 }
               }
             }
