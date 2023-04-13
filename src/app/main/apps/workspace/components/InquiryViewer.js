@@ -197,9 +197,11 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: 10,
     marginTop: 10,
     minHeight: 50,
-    resize: 'none',
     '& .MuiOutlinedInput-multiline': {
       padding: '10.5px'
+    },
+    '& .MuiInputBase-inputMultiline': {
+      resize: 'vertical',
     },
     '& fieldset': {
       borderWidth: '0.5px',
@@ -2693,7 +2695,8 @@ const InquiryViewer = (props) => {
                             className={classes.inputText}
                             value={tempReply?.answer?.content}
                             multiline
-                            // rows={2}
+                            rows={3}
+                            rowsMax={10}
                             inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
                             InputProps={{
                               classes: { input: classes.placeholder }
