@@ -1901,6 +1901,7 @@ const InquiryViewer = (props) => {
           }
 
           dispatch(InquiryActions.setInquiries(optionsInquires));
+          setIsResolveCDCM(false);
           props.getUpdatedAt();
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
         }).catch((err) => handleError(dispatch, err));
