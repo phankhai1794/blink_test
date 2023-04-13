@@ -13,7 +13,7 @@ import {
   saveField,
   setInquiries,
   saveMetadata,
-  setListCommentDraft, setContentBL
+  setListCommentDraft
 } from './inquiry';
 import * as InquiryActions from './inquiry';
 import * as FormActions from './form';
