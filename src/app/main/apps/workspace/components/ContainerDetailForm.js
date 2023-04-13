@@ -125,7 +125,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
   const sortValues =(vals) =>{
     let valuesSorted = [];
-    if(container === CONTAINER_MANIFEST && vals === valueEdit){
+    if(container === CONTAINER_MANIFEST && (vals === valueEdit || !isResolveCDCM)){
       let cms = [...vals];
       const contsNo = [
         ...new Set((getValueField(CONTAINER_DETAIL) ||[]).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
