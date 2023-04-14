@@ -30,6 +30,8 @@ export const VESSEL_VOYAGE_CODE = 'vvdCode';
 
 export const PRE_CARRIAGE = 'preVvd';
 
+export const PRE_CARRIAGE_CODE = 'preVvdCode';
+
 export const TYPE_OF_MOVEMENT = 'moveTypeDesc';
 
 export const RD_TERMS = 'rdTerms';
@@ -117,8 +119,6 @@ export const PREPAID = 'prepaid';
 export const COLLECT = 'collect';
 
 export const DATED = 'dated';
-
-export const VVD_CODE = 'vvdCode';
 
 export const POD_CODE = 'podCode';
 
