@@ -71,6 +71,9 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
       borderWidth: '1px',
       borderColor: '#BAC3CB'
+    },
+    '& .MuiInputBase-inputMultiline': {
+      resize: 'vertical',
     }
   },
   placeholder: {
@@ -358,7 +361,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             className={classes.inputText}
             value={fieldValueSeparate[type]}
             multiline
-            rows={['name'].includes(type) ? 2 : 3}
+            rows={3}
+            rowsMax={10}
             inputProps={{ style: { textTransform: 'uppercase' } }}
             InputProps={{
               classes: { input: classes.placeholder }
@@ -375,6 +379,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           value={fieldValue}
           multiline
           rows={3}
+          rowsMax={10}
           inputProps={{ style: { textTransform: 'uppercase' } }}
           InputProps={{
             classes: { input: classes.placeholder }
