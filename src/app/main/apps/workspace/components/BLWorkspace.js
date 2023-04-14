@@ -11,7 +11,7 @@ import {
   DATED,
   EXPORT_REF,
   FINAL_DESTINATION,
-  FORWARDING,
+  FORWARDER,
   FREIGHT_CHARGES,
   NOTIFY,
   PLACE_OF_BILL,
@@ -676,8 +676,8 @@ const BLWorkspace = (props) => {
                 </Grid>
                 <Grid item>
                   <Label>FORWARDING AGENT-REFERENCES FMC NO.</Label>
-                  <BLField id={getField(FORWARDING)} multiline={true} rows={5}>
-                    {getValueField(FORWARDING)}
+                  <BLField id={getField(FORWARDER)} multiline={true} rows={5}>
+                    {getValueField(FORWARDER)}
                   </BLField>
                 </Grid>
                 <Grid item>
