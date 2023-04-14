@@ -10,6 +10,8 @@ export const NOTIFY = 'notify';
 
 export const ALSO_NOTIFY = 'alsoNotify';
 
+export const FORWARDER = 'forwarder';
+
 export const EXPORT_REF = 'expRef';
 
 export const FORWARDING = 'fwrdrRef';
