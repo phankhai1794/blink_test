@@ -1,4 +1,5 @@
 import {
+  CONTAINER_MANIFEST,
   CM_MARK,
   CM_PACKAGE,
   CM_DESCRIPTION,
@@ -144,7 +145,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const TableCM = (props) => {
-  const { id, containerDetail, containerManifest } = props;
+  const { containerDetail, containerManifest } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
@@ -157,6 +158,15 @@ const TableCM = (props) => {
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const drfView = useSelector(({ draftBL }) => draftBL.drfView);
 
+  const getField = (field) => {
+    return metadata.field ? metadata.field[field] : '';
+  };
+
+  const getValueField = (field) => {
+    return content[getField(field)] || '';
+  };
+
+  const [id, setId] = useState(getField(DESCRIPTION_OF_GOODS));
   const [isHovering, setIsHovering] = useState(false);
   const [isEmpty, setIsEmpty] = useState(true);
   const [hasInquiry, setHasInquiry] = useState(false);
@@ -191,14 +201,6 @@ const TableCM = (props) => {
   };
 
   const drfMD = getTotalValueMDView(drfView, containerDetail, getType);
-
-  const getField = (field) => {
-    return metadata.field ? metadata.field[field] : '';
-  };
-
-  const getValueField = (field) => {
-    return content[getField(field)] || '';
-  };
 
   const getPackageName = (packageCode) =>
     packageUnitsJson.find((pkg) => pkg.code === packageCode)?.description || '';
@@ -294,7 +296,11 @@ const TableCM = (props) => {
 
   useEffect(() => {
     setColorStatus();
-  }, [metadata, inquiries, listCommentDraft]);
+  }, [metadata, id, inquiries, listCommentDraft]);
+
+  useEffect(() => {
+    setId(drfView === 'MD' ? getField(DESCRIPTION_OF_GOODS) : getField(CONTAINER_MANIFEST));
+  }, [drfView]);
 
   return (
     <div

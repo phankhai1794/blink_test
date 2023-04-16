@@ -135,7 +135,6 @@ const BLWorkspace = (props) => {
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
-  const openWarningCDCMContainerNo = useSelector(({ workspace }) => workspace.formReducer.openWarningCDCMContainerNo);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -659,10 +658,10 @@ const BLWorkspace = (props) => {
                     <BLField lock={true} disableClick={true}>{myBL.bkgNo || ""}</BLField>
                   </Grid>
                   <Grid item xs={6} className={classes.rightPanel}>
-                    <Label>
-                      {(getValueField(BL_TYPE) === "B" || getValueField(BL_TYPE) === "oceanBill") ? "BILL OF LADING" : "SEAWAY BILL"}
-                    </Label>
-                    <BLField lock={true} disableClick={true}>{(myBL.bkgNo && `ONYE${myBL.bkgNo}`) || ""}</BLField>
+                    <Label>BL TYPE</Label>
+                    <BLField id={getField(BL_TYPE)}>
+                      {['oceanBill', 'B'].includes(getValueField(BL_TYPE)) ? 'BILL OF LADING' : 'SEAWAY BILL'}
+                    </BLField>
                   </Grid>
                 </Grid>
                 <Grid item>
@@ -752,7 +751,6 @@ const BLWorkspace = (props) => {
               <TableCM
                 containerDetail={getValueField(CONTAINER_DETAIL)}
                 containerManifest={getValueField(CONTAINER_MANIFEST)}
-                id={getField(CONTAINER_MANIFEST)}
               />
             </Grid>
 
