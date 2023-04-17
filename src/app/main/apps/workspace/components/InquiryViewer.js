@@ -2195,15 +2195,9 @@ const InquiryViewer = (props) => {
       // TODO: Check WrapText for alsoNotify 1,2,3
       const isAlsoNotify = metadata.field[ALSO_NOTIFY] === field;
       return (
-<<<<<<< HEAD
         isDateTime ?
-          <DateTimePickers time={formatDate(textResolve, 'YYYY-MM-DD') || ''} onChange={inputText} /> :
+          <DateTimePickers time={textResolve ? formatDate(textResolve, 'YYYY-MM-DD') : ''} onChange={e => inputText(e, true)} /> :
           <TextField
-=======
-        isDateTime ?
-          <DateTimePickers time={textResolve ? formatDate(textResolve, 'YYYY-MM-DD') : ''} onChange={e => inputText(e, true)} />
-          : <TextField
->>>>>>> fix comment
             className={classes.inputText}
             value={textResolve}
             multiline
