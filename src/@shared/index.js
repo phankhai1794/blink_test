@@ -4,6 +4,9 @@ import {
   TOTAL_WEIGHT_UNIT,
   TOTAL_MEASUREMENT_UNIT,
   CONTAINER_LIST,
+  DATED,
+  DATE_CARGO,
+  DATE_LADEN
 } from '@shared/keyword';
 
 export const getLabelById = (fieldOptions, id) => {
@@ -400,4 +403,16 @@ export const getTotalValueMDView = (drfView, containerDetail, getType) => {
 export const formatNoneContNo = (contNo) => {
   if (!contNo || /CONT-NO:\s\d+/.test(contNo.toUpperCase())) return "<none>";
   return contNo;
+}
+
+export const isDateField = (metadata, field) => {
+  const fieldsDateTime = [
+    DATED,
+    DATE_CARGO,
+    DATE_LADEN
+  ];
+  const fieldInfo = metadata['field_options'].find(item => item.value === field)
+  const isDate = fieldsDateTime.includes(fieldInfo.keyword);
+
+  return isDate;
 }

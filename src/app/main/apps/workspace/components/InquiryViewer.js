@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject, formatDate, isDateField } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -90,6 +90,7 @@ import AttachFile from './AttachFile';
 import Comment from './Comment';
 import TagsComponent from './TagsComponent';
 import ContainerDetailForm from './ContainerDetailForm';
+import DateTimePickers from '../shared-components/DateTimePickers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -230,6 +231,11 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: '8px',
     padding: '10px',
     color: '#AFAFAF'
+  },
+  textFieldDateTime: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    width: 200
   }
 }));
 
@@ -285,7 +291,9 @@ const InquiryViewer = (props) => {
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
   const [isDeleteAnswer, setDeleteAnswer] = useState({ status: false, content: '' });
   const [listFieldDisableUpload, setListFieldDisableUpload] = useState([]);
+  const [isDateTime, setIsDateTime] = useState(false);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
+  const [isValidDate, setIsValidDate] = useState(false);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -323,6 +331,10 @@ const InquiryViewer = (props) => {
       }
     })
     setListFieldDisableUpload(listField)
+  }
+
+  const isDateTimeField = () => {
+    setIsDateTime(isDateField(metadata, question.field));
   }
 
   const handleViewMore = (id) => {
@@ -824,6 +836,7 @@ const InquiryViewer = (props) => {
     if (!['REOPEN_A', 'REOPEN_Q'].includes(question.state)) {
       setDisableReopen(false);
     }
+    isDateTimeField();
   }, [question]);
 
   const resetInquiry = () => {
@@ -1547,9 +1560,19 @@ const InquiryViewer = (props) => {
     setPristine()
   };
 
-  const inputText = (e) => {
+  const inputText = (e, isDate = false) => {
     !validateInput?.isValid && dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
-    setTextResolve(e.target.value);
+    if (isDate) {
+      if (!isNaN(e?.getTime())) {
+        setTextResolve(e.toISOString());
+        setIsValidDate(false);
+      } else {
+        setTextResolve(e);
+        setIsValidDate(true);
+      }
+    } else {
+      setTextResolve(e.target.value);
+    }
     setDirty()
   };
 
@@ -1559,8 +1582,19 @@ const InquiryViewer = (props) => {
     setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value }));
   };
 
-  const handleChangeContentReply = (e, type = '') => {
-    let value = e.target.value;
+  const handleChangeContentReply = (e, type = '', isDate = false) => {
+    let value = '';
+    if (isDate) {
+      if (!isNaN(e?.getTime())) {
+        value = e.toISOString();
+        setIsValidDate(false);
+      } else {
+        value = e;
+        setIsValidDate(true);
+      }
+    } else {
+      value = e.target.value;
+    }
     if (['name', 'address'].includes(type)) {
       let content = tempReply?.answer?.content ? JSON.parse(tempReply?.answer?.content) : { name: '', address: '' };
       content[type] = e.target.value;
@@ -1796,7 +1830,12 @@ const InquiryViewer = (props) => {
           }
           else {
             newContent = newContent.trim() || (question.state === 'AME_DRF' ? NO_CONTENT_AMENDMENT : ONLY_ATT);
-            if (!isReply || question.state.includes('AME_')) newContent = newContent.toUpperCase();
+            if (!isReply || question.state.includes('AME_')) {
+              newContent = newContent.toUpperCase();
+              if (isDateTime && newContent) {
+                newContent = new Date(newContent).toISOString();
+              }
+            }
           }
         }
 
@@ -1997,6 +2036,7 @@ const InquiryViewer = (props) => {
     setStateReplyDraft(false);
     setViewDropDown('');
     setInqHasComment(false);
+    setIsDateTime(isDateField(metadata, question.field));
   }
 
   const reOpen = (idInq) => {
@@ -2111,6 +2151,14 @@ const InquiryViewer = (props) => {
     return { isErr, textHelper };
   }
 
+  const renderContent = (content) => {
+    let result = content || '';
+    if (result && isDateTime && ['AME_DRF', 'AME_SENT', 'AME_ORG', 'REOPEN_Q', 'REOPEN_A', 'COMPL', 'RESOLVED', 'UPLOADED'].includes(question.state)) {
+      result = formatDate(result, 'DD MMM YYYY')
+    }
+    return result;
+  }
+
   // Separate Shipper/Consignee/Notify 
   const renderSeparateField = (field) => {
     if (isSeparate) {
@@ -2144,19 +2192,25 @@ const InquiryViewer = (props) => {
       // TODO: Check WrapText for alsoNotify 1,2,3
       const isAlsoNotify = metadata.field[ALSO_NOTIFY] === field;
       return (
-        <TextField
-          className={classes.inputText}
-          value={textResolve}
-          multiline
-          rows={3}
-          rowsMax={10}
-          onChange={inputText}
-          variant='outlined'
-          inputProps={{ style: { textTransform: 'uppercase' } }}
-          error={!validateInput?.isValid || validateField(field, textResolve).isError || isAlsoNotify ? validateAlsoNotify(textResolve).isError : false}
-          helperText={
-            !validateInput?.isValid ?
-              (<>
+<<<<<<< HEAD
+        isDateTime ?
+          <DateTimePickers time={formatDate(textResolve, 'YYYY-MM-DD') || ''} onChange={inputText} /> :
+          <TextField
+=======
+        isDateTime ?
+          <DateTimePickers time={textResolve ? formatDate(textResolve, 'YYYY-MM-DD') : ''} onChange={e => inputText(e, true)} />
+          : <TextField
+>>>>>>> fix comment
+            className={classes.inputText}
+            value={textResolve}
+            multiline
+            rows={3}
+            onChange={inputText}
+            variant='outlined'
+            inputProps={{ style: { textTransform: 'uppercase' } }}
+            error={!validateInput?.isValid || validateField(field, textResolve).isError || isAlsoNotify ? validateAlsoNotify(textResolve).isError : false}
+            helperText={!validateInput?.isValid ?
+              <>
                 {(validateInput?.prohibitedInfo?.countries.length > 0) &&
                   <span style={{ display: 'flex', alignItems: 'center' }}>
                     <ErrorOutlineOutlined fontSize='small' />
@@ -2171,13 +2225,13 @@ const InquiryViewer = (props) => {
                     </span>
                   </>
                 }
-              </>)
+              </>
               : validateField(field, textResolve).errorType.split('\n').map((line, idx) => (
                 <span key={idx} style={{ display: 'block', lineHeight: '20px' }}>{line}</span>
               ))
-          }
-          onBlur={() => handleValidateInput('RESOLVE', onConfirm, true, true)}
-        />
+            }
+            onBlur={() => handleValidateInput('RESOLVE', onConfirm, true, true)}
+          />
       )
     }
   }
@@ -2444,8 +2498,9 @@ const InquiryViewer = (props) => {
                   }}>
                   {/* Check is amendment JSON */}
                   {((question.content !== null) && isJsonText(question.content)) ?
-                    `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}`
-                    : `${question.content}`}
+                    `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
+                    `${renderContent(question.content)}`
+                  }
                 </Typography>
             }
 
@@ -2529,7 +2584,7 @@ const InquiryViewer = (props) => {
               </PermissionProvider>
 
               {viewDropDown === question.id && inqHasComment && (
-                <Comment question={props.question} comment={comment} />
+                <Comment question={props.question} comment={comment} isDateTime={isDateTime} />
               )}
 
               {question.mediaFile?.length > 0 &&
@@ -2646,7 +2701,7 @@ const InquiryViewer = (props) => {
                           (isSeparate ?
                             (validatePartiesContent(textResolveSeparate.name, 'name')?.isError
                               || validatePartiesContent(textResolveSeparate.address, 'address')?.isError)
-                            : validateField(question?.field, textResolve).isError) || disableAcceptResolve || !validationCDCM
+                            : validateField(question?.field, textResolve).isError) || disableAcceptResolve || !validationCDCM || isValidDate
                         }
                         color="primary"
                         onClick={() => {
@@ -2697,9 +2752,7 @@ const InquiryViewer = (props) => {
                                   className={classes.inputText}
                                   value={content[type] || ''}
                                   multiline
-                                  // rows={['name'].includes(type) ? 2 : 3}
-                                  rows={3}
-                                  rowsMax={10}
+                                  rows={['name'].includes(type) ? 2 : 3}
                                   inputProps={{ style: { textTransform: 'uppercase' } }}
                                   onChange={(e) => handleChangeContentReply(e, type)}
                                   variant='outlined'
@@ -2708,29 +2761,29 @@ const InquiryViewer = (props) => {
                             )
                           })
                           :
-                          <TextField
-                            className={classes.inputText}
-                            value={tempReply?.answer?.content}
-                            multiline
-                            rows={3}
-                            rowsMax={10}
-                            inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
-                            InputProps={{
-                              classes: { input: classes.placeholder }
-                            }}
-                            onChange={handleChangeContentReply}
-                            variant='outlined'
-                            placeholder='Reply...'
-                            error={validateField(question.field, tempReply?.answer?.content).isError}
-                            helperText={
-                              validateField(question.field, tempReply?.answer?.content).errorType.split('\n').map((line, idx) => (
-                                <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14 }}>{line}</span>
-                              ))
-                            }
-                          />}
+                          (isDateTime && question.state.includes("AME_") && user.role === 'Guest') ?
+                            <DateTimePickers time={tempReply?.answer?.content ? formatDate(tempReply?.answer?.content, 'YYYY-MM-DD') : ''} onChange={e => handleChangeContentReply(e, '', true)} />
+                            : <TextField
+                              className={classes.inputText}
+                              value={tempReply?.answer?.content}
+                              multiline
+                              rows={2}
+                              inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
+                              InputProps={{
+                                classes: { input: classes.placeholder }
+                              }}
+                              onChange={handleChangeContentReply}
+                              variant='outlined'
+                              placeholder='Reply...'
+                              error={validateField(question.field, tempReply?.answer?.content).isError}
+                              helperText={
+                                validateField(question.field, tempReply?.answer?.content).errorType.split('\n').map((line, idx) => (
+                                  <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14 }}>{line}</span>
+                                ))
+                              }
+                            />}
                       </div>
                       }
-                      {/*{tempReply?.mediaFiles?.length > 0 && <h3>Attachment Reply:</h3>}*/}
                       {tempReply?.mediaFiles?.map((file, mediaIndex) => (
                         <div
                           style={{ position: 'relative', display: 'inline-block' }}
@@ -2788,6 +2841,7 @@ const InquiryViewer = (props) => {
                             )
                             || (question.state !== "AME_DRF" && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
+                            || isValidDate
                           }
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
@@ -2831,8 +2885,8 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-  const regNumber = { value: /^\s*(([0-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
-  const regInteger = { value: /^\s*[0-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
+  const regNumber = { value: /^\s*(([0-9]\d{0, 2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regInteger = { value: /^\s*[0-9]\d{0, 2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
   const cdUnit = [
     { field: CONTAINER_PACKAGE, title: 'PACKAGE', unit: packageUnits, required: 'This is required', pattern: regInteger },
