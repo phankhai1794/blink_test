@@ -165,6 +165,7 @@ const ImageAttach = ({ indexMedia, file, files, field, hiddenRemove = false, isA
         }}
         src={srcUrl}
         onClick={openImageViewer}
+        onDragStart={(event) => event.preventDefault()}
       />
       <div style={{ display: 'flex', height: '30px', flexDirection: 'row' }}>
         <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
