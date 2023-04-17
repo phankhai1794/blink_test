@@ -2124,7 +2124,9 @@ const InquiryViewer = (props) => {
             className={classes.inputText}
             value={textResolveSeparate[type]}
             multiline
-            rows={['name'].includes(type) ? 2 : 3}
+            // rows={['name'].includes(type) ? 2 : 3}
+            rows={3}
+            rowsMax={10}
             onChange={(e) => inputTextSeparate(e, type, field)}
             variant='outlined'
             inputProps={{ style: { textTransform: 'uppercase' } }}
@@ -2147,6 +2149,7 @@ const InquiryViewer = (props) => {
           value={textResolve}
           multiline
           rows={3}
+          rowsMax={10}
           onChange={inputText}
           variant='outlined'
           inputProps={{ style: { textTransform: 'uppercase' } }}
@@ -2695,6 +2698,8 @@ const InquiryViewer = (props) => {
                                   value={content[type] || ''}
                                   multiline
                                   // rows={['name'].includes(type) ? 2 : 3}
+                                  rows={3}
+                                  rowsMax={10}
                                   inputProps={{ style: { textTransform: 'uppercase' } }}
                                   onChange={(e) => handleChangeContentReply(e, type)}
                                   variant='outlined'
