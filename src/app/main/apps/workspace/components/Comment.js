@@ -1,5 +1,5 @@
 import { Divider } from '@material-ui/core';
-import { displayTime, isJsonText } from '@shared';
+import { displayTime, isJsonText, formatDate } from '@shared';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
@@ -64,7 +64,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 const Comment = (props) => {
-  const { question, comment } = props;
+  const { question, comment, isDateTime } = props;
   const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length - 1) : []);
   const [value, setValue] = useState('');
   const [key, setKey] = useState();
@@ -162,7 +162,7 @@ const Comment = (props) => {
             <div className={clsx((['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(reply.state) || reply.status === 'DELETED') ? 'delete-content' : '', 'content-reply')} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontStyle: ((!['INQ', 'ANS'].includes(type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(reply.state) && reply.process === 'pending') ||
                   (!['AME_ORG', 'AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(reply.state) && reply.process === 'draft')) && 'italic' }}>
               {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
-                <div className={reply.isChangeRecipient ? 'markReopen' : ''}>{content}</div> :
+                <div className={reply.isChangeRecipient ? 'markReopen' : ''}>{(isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG' ].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content}</div> :
                 (type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>)
               }
             </div>
