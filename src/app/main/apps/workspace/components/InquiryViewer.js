@@ -76,6 +76,7 @@ import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
 import ErrorOutlineOutlined from '@material-ui/icons/ErrorOutlineOutlined';
+import { useDropzone } from 'react-dropzone';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -244,6 +245,8 @@ const InquiryViewer = (props) => {
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
+  const [filepaste, setFilepaste] = useState('');
+  const [dropfiles, setDropfiles] = useState([]);
   const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -2236,10 +2239,27 @@ const InquiryViewer = (props) => {
     }
   }
 
+  const onPaste = (e) => {
+    if ((isReply || question.showIconAttachAnswerFile) && e.clipboardData.files.length) {
+      const fileObject = e.clipboardData.files[0];
+      setFilepaste(fileObject);
+    }
+  }
+
+  const { isDragActive, getRootProps } = useDropzone({
+    onDrop: files => (isReply || question.showIconAttachAnswerFile) && setDropfiles(files),
+    noClick: true
+  });
+
   return (
     <>
       {isLoadedComment && (
-        <div onClick={() => dispatch(FormActions.inqViewerFocus(question.id))}>
+        <div
+          style={{ position: 'relative' }}
+          onClick={() => dispatch(FormActions.inqViewerFocus(question.id))}
+          onPaste={onPaste}
+          {...getRootProps({})}>
+          {(isReply || question.showIconAttachAnswerFile) && isDragActive && <div className='dropzone'>Drop files here</div>}
           <div>
             {(question?.process === 'draft') &&
               <TagsComponent tagName='AMENDMENT' tagColor='primary' />
@@ -2311,6 +2331,8 @@ const InquiryViewer = (props) => {
                             isReply={true}
                             question={question}
                             setAttachmentReply={handleSetAttachmentReply}
+                            filepaste={filepaste}
+                            dropfiles={dropfiles}
                           />}
                         </>
                       ) : <>
@@ -2421,6 +2443,8 @@ const InquiryViewer = (props) => {
                           <AttachFile isAnswer={true}
                             question={question}
                             questions={inquiries}
+                            filepaste={filepaste}
+                            dropfiles={dropfiles}
                             setIsUploadFile={(val) => {
                               setIsUploadFile(val)
                             }}
@@ -2431,6 +2455,8 @@ const InquiryViewer = (props) => {
                           isReply={true}
                           question={question}
                           setAttachmentReply={handleSetAttachmentReply}
+                          filepaste={filepaste}
+                          dropfiles={dropfiles}
                         />
                       )}
                     </>
