@@ -1427,12 +1427,10 @@ const InquiryViewer = (props) => {
           ) {
             if (question.receiver && question.receiver.length && question.receiver.includes('customer') && (inqsPending.length ? inqsPending.filter(q => q.receiver.includes('customer')).length > 0 : true)) {
               // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
-              console.log('status customer')
               dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
             }
             if (question.receiver && question.receiver.length && question.receiver.includes('onshore') && (inqsPending.length ? inqsPending.filter(q => q.receiver.includes('onshore')).length > 0 : true)) {
               //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
-              console.log('status onshore')
               dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
             }
           } else if (
@@ -1442,7 +1440,6 @@ const InquiryViewer = (props) => {
             && filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state))
           ) {
             // BL Amendment Success (BS), Upload all to Opus.
-            console.log('status draft')
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
           }
         }
@@ -1529,12 +1526,10 @@ const InquiryViewer = (props) => {
             ) {
               if (question.receiver && question.receiver.length && question.receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
                 // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
-                console.log('status customer')
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
               }
               if (question.receiver && question.receiver.length && question.receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
                 //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
-                console.log('status onshore')
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
               }
             } else if (
@@ -1544,7 +1539,6 @@ const InquiryViewer = (props) => {
               && (filterFieldDrfNotUploadOpus.length ? filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state)) : true)
             ) {
               // BL Amendment Success (BS), Upload all to Opus.
-              console.log('status draft')
               dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
             }
           }
