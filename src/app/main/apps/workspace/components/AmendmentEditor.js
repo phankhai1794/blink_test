@@ -6,10 +6,10 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
-import { validateBLType, compareObject, parseNumberValue } from '@shared';
+import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField } from '@shared';
 import { NO_CONTENT_AMENDMENT } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
-import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE } from '@shared/keyword';
+import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
@@ -25,6 +25,7 @@ import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import AttachFileAmendment from './AttachFileAmendment';
 import ContainerDetailForm from './ContainerDetailForm';
+import DateTimePickers from '../shared-components/DateTimePickers';
 
 const colorInq = '#DC2626';
 const white = '#FFFFFF';
@@ -71,6 +72,9 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
       borderWidth: '1px',
       borderColor: '#BAC3CB'
+    },
+    '& .MuiInputBase-inputMultiline': {
+      resize: 'vertical',
     }
   },
   placeholder: {
@@ -111,6 +115,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(currentField));
   const [disableSave, setDisableSave] = useState(false);
   const [isChange, setChange] = useState(false);
+  const [isDateTime, setIsDateTime] = useState(false);
+  const [isValidDate, setIsValidDate] = useState(false);
 
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
@@ -128,9 +134,19 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     return metadata.inq_type?.[type] || '';
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e, isDate = false) => {
     setDirty();
-    setFieldValue(e.target.value);
+    if (isDate) {
+      if (!isNaN(e?.getTime())) {
+        setFieldValue(e.toISOString());
+        setIsValidDate(false);
+      } else {
+        setFieldValue(e);
+        setIsValidDate(true);
+      }
+    } else {
+      setFieldValue(e.target.value);
+    }
     setChange(true);
   }
 
@@ -180,6 +196,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   }
 
   const handleSave = () => {
+    setDisableSave(true);
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     fieldValueSeparate.name = fieldValueSeparate.name.toUpperCase().trim();
     fieldValueSeparate.address = fieldValueSeparate.address.toUpperCase().trim();
@@ -208,7 +225,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
       setDisableSave(false);
       return;
     }
-
+    if (isDateTime && contentField) {
+      contentField = new Date(contentField).toISOString();
+    }
     axios
       .all(uploads.map((endpoint) => uploadFile(endpoint)))
       .then((files) => {
@@ -358,7 +377,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             className={classes.inputText}
             value={fieldValueSeparate[type]}
             multiline
-            rows={['name'].includes(type) ? 2 : 3}
+            rows={3}
+            rowsMax={10}
             inputProps={{ style: { textTransform: 'uppercase' } }}
             InputProps={{
               classes: { input: classes.placeholder }
@@ -369,25 +389,28 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         </div>)
     } else {
       return (
-        <TextField
-          placeholder='Typing...'
-          className={classes.inputText}
-          value={fieldValue}
-          multiline
-          rows={3}
-          inputProps={{ style: { textTransform: 'uppercase' } }}
-          InputProps={{
-            classes: { input: classes.placeholder }
-          }}
-          onChange={handleChange}
-          variant='outlined'
-          error={validateField(field, fieldValue).isError}
-          helperText={
-            validateField(field, fieldValue).errorType.split('\n').map((line, idx) => (
-              <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14 }}>{line}</span>
-            ))
-          }
-        />
+        isDateTime ?
+          <DateTimePickers time={fieldValue ? formatDate(fieldValue, 'YYYY-MM-DD') : ''} onChange={e => handleChange(e, true)} /> :
+          <TextField
+            placeholder='Typing...'
+            className={classes.inputText}
+            value={fieldValue}
+            multiline
+            rows={3}
+            rowsMax={10}
+            inputProps={{ style: { textTransform: 'uppercase' } }}
+            InputProps={{
+              classes: { input: classes.placeholder }
+            }}
+            onChange={handleChange}
+            variant='outlined'
+            error={validateField(field, fieldValue).isError}
+            helperText={
+              validateField(field, fieldValue).errorType.split('\n').map((line, idx) => (
+                <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14 }}>{line}</span>
+              ))
+            }
+          />
       )
     }
   }
@@ -449,6 +472,10 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
       setIsSeparate(false);
     }
   }, [content, currentField])
+
+  useEffect(() => {
+    fieldValueSelect && setIsDateTime(isDateField(metadata, fieldValueSelect.value));
+  }, [fieldValueSelect])
 
   const styles = (width) => {
     return {
@@ -569,17 +596,20 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                 (fieldValue && fieldValueSelect && ['containerDetail', 'containerManifest'].includes(fieldValueSelect.keyword)) ? (
                   (compareObject(content[fieldValueSelect.value], fieldValue) && attachments.length === 0)
                 ) : (
-                  (fieldValue && fieldValueSelect && (fieldValue.trim() === content[fieldValueSelect.value] && attachments.length === 0))
-                  ||
-                  (fieldValueSelect && !content[fieldValueSelect.value] && (!fieldValue || fieldValue.trim() === '') && attachments.length === 0)
+                  (isDateTime ?
+                    isValidDate
+                    : (
+                      (fieldValue && fieldValueSelect && (fieldValue.trim() === content[fieldValueSelect.value] && attachments.length === 0))
+                      ||
+                      (fieldValueSelect && !content[fieldValueSelect.value] && (!fieldValue || fieldValue.trim() === '') && attachments.length === 0)
+                    ))
                 )
               )))
-            ||
-            !fieldValueSelect
-            ||
-            disableSave
+            || !fieldValueSelect
+            || disableSave
+            || isValidDate
           }
-          onClick={() => handleValidateInput(handleSave)}
+          onClick={handleSave}
           color="primary"
           variant="contained"
         >

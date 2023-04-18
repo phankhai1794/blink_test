@@ -12,13 +12,12 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import FilterNoneIcon from '@material-ui/icons/FilterNone';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import MinimizeIcon from '@material-ui/icons/Minimize';
-import { Box, Tabs, Tab, Divider, Link, Chip, Button } from '@material-ui/core';
+import { Box, Tabs, Tab, Divider, Link, Chip, Button, Paper } from '@material-ui/core';
 import CropDinIcon from '@material-ui/icons/CropDin';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import OpenInNew from '@material-ui/icons/OpenInNew';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
+import Draggable from 'react-draggable';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -107,7 +106,10 @@ const DialogTitle = withStyles(styles)((props) => {
           </IconButton> */}
           <IconButton
             aria-label="close"
-            onClick={() => handleClose(openFullScreen)}>
+            onClick={() => {
+              handleClose();
+              openFullScreen(false);
+            }}>
             <CloseIcon />
           </IconButton>
         </div>
@@ -244,7 +246,7 @@ export default function Form(props) {
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
-  const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
+  const currentFieldAmend = useSelector(({ draftBL }) => draftBL.currentField);
 
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const isShowBackground = useSelector(
@@ -289,9 +291,36 @@ export default function Form(props) {
     }
   };
 
+  const PaperComponent = React.useMemo(
+    () =>
+      // eslint-disable-next-line react/display-name
+      React.forwardRef((props) => {
+        return isFullScreen ?
+          <Paper {...props} /> :
+          <Draggable
+            handle="#draggable-dialog-title"
+            cancel={'[class*="MuiDialogContent-root"]'}
+          >
+            <Paper {...props} />
+          </Draggable>
+      }),
+    [isFullScreen]
+  );
+
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
   };
+  const onUnload = (e) => {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+
+  useEffect(() => {
+    if (currentEditInq || currentFieldAmend || reply) {
+      window.addEventListener("beforeunload", onUnload);
+    }
+    return () => window.removeEventListener("beforeunload", onUnload);
+  }, [currentEditInq, currentFieldAmend, reply])
 
   const handleClick = () => {
     if (!currentEditInq) {
@@ -341,18 +370,6 @@ export default function Form(props) {
     dispatch(DraftBLActions.setCurrentField());
   };
 
-  const confirmClose = (openFullScreen) => {
-    if (currentEditInq || currentAmendment || openEmail || reply) {
-      if (window.confirm('The changed you made has not been saved')) {
-        handleClose();
-        openFullScreen(false);
-      }
-    }
-    else {
-      handleClose();
-      openFullScreen(false);
-    }
-  }
   const handleChange = (_, newValue) => {
     props.tabChange(newValue);
   };
@@ -441,16 +458,18 @@ export default function Form(props) {
         fullScreen={isFullScreen}
         aria-labelledby="customized-dialog-title"
         open={open}
+        PaperComponent={PaperComponent}
         maxWidth="md"
         container={() => document.getElementById('content-wrapper')}
         classes={{ paperScrollPaper: isFullScreen ? null : classes.dialogPaper }}>
         <DialogTitle
-          id="customized-dialog-title"
+          id="draggable-dialog-title"
+          style={isFullScreen ? null : { cursor: 'move' }}
           toggleFullScreen={toggleFullScreen}
           handleOpenSnackBar={handleOpenFab}
           toggleForm={toggleForm}
           isFullScreen={isFullScreen}
-          handleClose={confirmClose}>
+          handleClose={handleClose}>
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
@@ -563,7 +582,7 @@ export default function Form(props) {
                       borderRadius: '8px',
                       fontFamily: 'Montserrat'
                     }}
-                    disabled={!enableSend || isLoading}
+                    disabled={!enableSend || isLoading || inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED', 'AME_SENT', 'ANS_SENT', 'REP_A_SENT'].includes(inq.state)).length === inquiries.length}
                     onClick={sendMailClick}>
                     E-mail
                   </Button>

@@ -403,7 +403,7 @@ function ToolbarLayout1(props) {
   };
 
   const showMessageReply = () => {
-    return inquiries.some((inq) => ['INQ_SENT', 'REP_Q_SENT', 'REP_SENT'].includes(inq.state));
+    return inquiries.some((inq) => ['INQ_SENT', 'REP_Q_SENT'].includes(inq.state) || inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Admin');
   }
 
   const onSubmit = async () => {

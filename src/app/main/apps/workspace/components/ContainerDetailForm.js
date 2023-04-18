@@ -91,9 +91,10 @@ const StyledPopper = styled(Popper)`&&{
 }`;
 
 const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, deleteAmendment, setDeleteAmendment, isResolveCDCM }) => {
-  
+
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+  const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const user = useSelector(({ user }) => user);
   const classes = useStyles();
 
@@ -125,7 +126,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
   const sortValues =(vals) =>{
     let valuesSorted = [];
-    if(container === CONTAINER_MANIFEST && disableInput && vals === valueEdit){
+    if(container === CONTAINER_MANIFEST && (vals === valueEdit || !isResolveCDCM)){
       let cms = [...vals];
       const contsNo = [
         ...new Set((getValueField(CONTAINER_DETAIL) ||[]).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
@@ -153,7 +154,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }, [container])
 
   useEffect(() => {
-    setValues(originalData);
+    const sort = sortValues(originalData)
+    setValues(sort)
   }, [originalData]);
 
   useEffect(() => {
@@ -208,7 +210,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const isValueChange = (key, index, row) => {
-    const originalValue = combineValueUnit(key, values[index]);
+    const originalValue = combineValueUnit(key, orgContent[getField(container)]?.[index]);
     return originalValue !== combineValueUnit(key, row) ? '#FEF4E6' : '';
   }
 

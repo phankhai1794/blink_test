@@ -20,6 +20,9 @@ const useStyles = makeStyles((theme) => ({
     },
     '& .MuiInputBase-input': {
       width: '93%'
+    },
+    '& .MuiInputBase-inputMultiline': {
+      resize: 'vertical',
     }
   },
   inputText: {
@@ -27,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
       color: '#132535',
       fontSize: 15,
       fontWeight: 500,
-      fontStyle: 'italic',
+      fontStyle: 'normal',
     }
   },
   placeHolder: {
@@ -91,6 +94,14 @@ const ParagraphAnswer = (props) => {
   }, [saveStatus, currentQuestion]);
 
   useEffect(() => {
+    if (question.answerObj && question.answerObj.length) {
+      setParagraphText(question.answerObj[0]?.content);
+    } else if (!question.answerObj || !question.answerObj.length) {
+      setParagraphText('')
+    }
+  }, [question]);
+
+  useEffect(() => {
     if (
       !paragraphText &&
       question.answerObj &&
@@ -111,17 +122,23 @@ const ParagraphAnswer = (props) => {
 
   return (
     <div>
-      <div className={clsx("flex", paragraphText ? classes.inputText : classes.placeHolder, ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && classes.deleteContent)}>
+      <div className={clsx("flex", !disable && classes.inputText, ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && classes.deleteContent)}>
         <TextField
-          style={{ border: 'none', display: !isPermission ? (!paragraphText ? 'none' : '') : '' }}
+          style={{
+            border: 'none',
+            display: !isPermission ? (!paragraphText ? 'none' : '') : '',
+          }}
           fullWidth
+          rows={3}
+          rowsMax={10}
           placeholder={isPermission ? 'Typing...' : ''}
           classes={{ root: classes.root }}
           disabled={!isPermission || disable}
           InputProps={{
             style: {
-              fontSize: '1.7rem',
+              fontSize: '14px',
               fontFamily: 'Montserrat',
+              fontStyle: !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT'].includes(question.state) && 'italic'
             },
           }}
           InputLabelProps={{
@@ -131,8 +148,6 @@ const ParagraphAnswer = (props) => {
           }}
           id="outlined-multiline-flexible"
           multiline
-          rowsMax={4}
-
           value={paragraphText}
           onChange={handleChangeInput}
         />

@@ -1,6 +1,6 @@
 import * as Actions from 'app/store/actions';
 import { checkNewInquiry } from '@shared';
-import { PORT_OF_DISCHARGE, PORT_OF_LOADING, VESSEL_VOYAGE_CODE } from '@shared/keyword';
+import { PORT_OF_DISCHARGE, PORT_OF_LOADING, VESSEL_VOYAGE_CODE, PRE_CARRIAGE_CODE } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -145,7 +145,7 @@ const SendInquiryForm = (props) => {
     return content[getField(keyword)] || '';
   };
 
-  const vvdCode = getValueField(VESSEL_VOYAGE_CODE);
+  const vvdCode = getValueField(PRE_CARRIAGE_CODE) || getValueField(VESSEL_VOYAGE_CODE);
   const pod = getValueField(PORT_OF_DISCHARGE);
   const pol = getValueField(PORT_OF_LOADING)
   const bkgNo = mybl.bkgNo;
@@ -162,7 +162,7 @@ const SendInquiryForm = (props) => {
     return inquiries.some(
       (inq) =>
         inq.receiver[0] === tabValue &&
-        ['ANS_SENT', 'REP_A_SENT', 'AME_SENT', 'REP_SENT'].includes(inq.state)
+        ['ANS_SENT', 'REP_A_SENT', 'AME_SENT'].includes(inq.state) || inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Guest'
     )
   }
 

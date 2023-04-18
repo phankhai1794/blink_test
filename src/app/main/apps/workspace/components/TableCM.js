@@ -1,4 +1,6 @@
 import {
+  CONTAINER_MANIFEST,
+  CM_MARK,
   CM_PACKAGE,
   CM_DESCRIPTION,
   CM_WEIGHT,
@@ -14,7 +16,7 @@ import {
   TOTAL_WEIGHT,
   TOTAL_WEIGHT_UNIT,
   TOTAL_MEASUREMENT,
-  TOTAL_MEASUREMENT_UNIT,
+  TOTAL_MEASUREMENT_UNIT
 } from '@shared/keyword';
 import { getTotalValueMDView, NumberFormat } from '@shared';
 import { packageUnitsJson } from '@shared/units';
@@ -128,11 +130,22 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     textAlign: 'center',
     alignItems: 'center'
-  }
+  },
+  'grid-xs-1': {
+    flexBasis: '14%',
+    maxWidth: '14%'
+  },
+  'grid-xs-2': {
+    flexBasis: '15%'
+  },
+  'grid-xs-3': {
+    flexBasis: '26%',
+    maxWidth: '26%'
+  },
 }));
 
 const TableCM = (props) => {
-  const { id, containerDetail, containerManifest } = props;
+  const { containerDetail, containerManifest } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
@@ -145,6 +158,15 @@ const TableCM = (props) => {
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const drfView = useSelector(({ draftBL }) => draftBL.drfView);
 
+  const getField = (field) => {
+    return metadata.field ? metadata.field[field] : '';
+  };
+
+  const getValueField = (field) => {
+    return content[getField(field)] || '';
+  };
+
+  const [id, setId] = useState(getField(DESCRIPTION_OF_GOODS));
   const [isHovering, setIsHovering] = useState(false);
   const [isEmpty, setIsEmpty] = useState(true);
   const [hasInquiry, setHasInquiry] = useState(false);
@@ -180,15 +202,8 @@ const TableCM = (props) => {
 
   const drfMD = getTotalValueMDView(drfView, containerDetail, getType);
 
-  const getField = (field) => {
-    return metadata.field ? metadata.field[field] : '';
-  };
-
-  const getValueField = (field) => {
-    return content[getField(field)] || '';
-  };
-
-  const getPackageName = (packageCode) => packageUnitsJson.find(pkg => pkg.code === packageCode)?.description || "";
+  const getPackageName = (packageCode) =>
+    packageUnitsJson.find((pkg) => pkg.code === packageCode)?.description || '';
 
   const onMouseEnter = (e) => setIsHovering(true);
 
@@ -281,13 +296,18 @@ const TableCM = (props) => {
 
   useEffect(() => {
     setColorStatus();
-  }, [metadata, inquiries, listCommentDraft]);
+  }, [metadata, id, inquiries, listCommentDraft]);
+
+  useEffect(() => {
+    setId(drfView === 'MD' ? getField(DESCRIPTION_OF_GOODS) : getField(CONTAINER_MANIFEST));
+  }, [drfView]);
 
   return (
     <div
       className={clsx(
         classes.root,
-        checkClassName(hasInquiry, hasAmendment, hasAnswer, isResolved, isUploaded, classes).className
+        checkClassName(hasInquiry, hasAmendment, hasAnswer, isResolved, isUploaded, classes)
+          .className
       )}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -303,20 +323,25 @@ const TableCM = (props) => {
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         className="px-8 justify-between">
-        <Grid container item xs={2} spacing={1}>
+        <Grid container item xs={drfView === 'CM' ? 1 : 2} className={drfView === 'CM' ? clsx(classes['grid-xs-1']) : ''} spacing={1}>
           <Label className={clsx(classes.labelMargin)}>
             {'CNTR. NOS. W/SEAL NOS.\nMARKS & NUMBERS'}
           </Label>
         </Grid>
-        <Grid container item xs={2} spacing={1}>
+        {drfView === 'CM' && (
+          <Grid container item xs={2} className={clsx(classes['grid-xs-2'], 'justify-center')} spacing={1}>
+            <Label className={clsx(classes.labelMargin)}>MARK</Label>
+          </Grid>
+        )}
+        <Grid container item xs={2} className={drfView === 'CM' ? clsx(classes['grid-xs-2']) : ''} spacing={1}>
           <Label className={clsx(classes.labelMargin)}>
             QUANTITY (FOR CUSTOMS DECLARATION ONLY)
           </Label>
         </Grid>
-        <Grid container item xs={4} spacing={1} className="justify-center">
+        <Grid container item xs={drfView === 'CM' ? 3 : 4} spacing={1} className="justify-center">
           <Label className={clsx(classes.labelMargin)}>DESCRIPTION OF GOODS</Label>
         </Grid>
-        <Grid container item xs={2} spacing={1}>
+        <Grid container item xs={2} className={drfView === 'CM' ? clsx(classes['grid-xs-2']) : ''} spacing={1}>
           <Label className={clsx(classes.labelMargin)} style={{ paddingLeft: '20%' }}>
             GROSS WEIGHT
           </Label>
@@ -336,9 +361,7 @@ const TableCM = (props) => {
               </BLField>
             </Grid>
             <Grid item xs={4}>
-              <BLField multiline={true}>
-                {getValueField(DESCRIPTION_OF_GOODS)}
-              </BLField>
+              <BLField multiline={true}>{getValueField(DESCRIPTION_OF_GOODS)}</BLField>
             </Grid>
             <Grid item xs={2}>
               <BLField multiline={true}>
@@ -354,27 +377,28 @@ const TableCM = (props) => {
         ) : cmSorted?.length > 0 ? (
           cmSorted.map((cm, index) => (
             <Grid container spacing={2} className="px-8 py-2" key={index}>
-              <Grid item xs={2}>
+              <Grid item xs={1} className={clsx(classes['grid-xs-1'])}>
+                <BLField multiline={true}>{cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>
+              </Grid>
+              <Grid item xs={2} className={clsx(classes['grid-xs-2'])}>
+                <BLField multiline={true}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
+              </Grid>
+              <Grid item xs={2} className={clsx(classes['grid-xs-2'])}>
                 <BLField multiline={true}>
-                  {cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}
+                  {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_PACKAGE]]) || ''} ${getPackageName(
+                    cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]]
+                  )}`}
                 </BLField>
               </Grid>
-              <Grid item xs={2}>
-                <BLField multiline={true}>
-                  {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_PACKAGE]]) || ''} ${getPackageName(cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]])}`}
-                </BLField>
+              <Grid item xs={3} className={clsx(classes['grid-xs-3'])}>
+                <BLField multiline={true}>{cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}</BLField>
               </Grid>
-              <Grid item xs={4}>
-                <BLField multiline={true}>
-                  {cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}
-                </BLField>
-              </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={2} className={clsx(classes['grid-xs-2'])}>
                 <BLField multiline={true}>
                   {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_WEIGHT]]) || ''} ${cm?.[metadata?.inq_type?.[CM_WEIGHT_UNIT]] || ''}`}
                 </BLField>
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={2} className={clsx(classes['grid-xs-2'])}>
                 <BLField multiline={true}>
                   {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]) || ''} ${cm?.[metadata?.inq_type?.[CM_MEASUREMENT_UNIT]] || ''}`}
                 </BLField>
