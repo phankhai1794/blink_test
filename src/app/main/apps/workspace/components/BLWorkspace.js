@@ -63,6 +63,7 @@ import TableCD from './TableCD';
 import TableCM from './TableCM';
 import ListNotification from './ListNotification';
 import SubmitAnswerNotification from "./SubmitAnswerNotification";
+import QueueList from './QueueList';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -143,6 +144,7 @@ const BLWorkspace = (props) => {
   const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
   const socket = useContext(SocketContext);
+  const openQueueList = useSelector(({ workspace }) => workspace.inquiryReducer.openQueueList);
 
   const getField = (keyword) => {
     return metadata.field?.[keyword] || '';
@@ -504,6 +506,7 @@ const BLWorkspace = (props) => {
       <BLProcessNotification />
       {isLoading > 0 ? <FuseLoading /> :
         <>
+          {openQueueList && <QueueList />}
           <ListNotification />
           <SubmitAnswerNotification
             open={openNotification ||

@@ -17,7 +17,7 @@ function InquiringHeader(props) {
           <FuseAnimate animation="transition.slideDownIn" delay={300}>
             <Paper className="flex items-center w-full max-w-512 px-8 py-4 rounded-8" elevation={1}>
               <Icon className="mr-8" color="action">
-                search
+                searchss
               </Icon>
 
               <Input
