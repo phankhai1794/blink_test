@@ -196,6 +196,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   }
 
   const handleSave = () => {
+    setDisableSave(true);
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     fieldValueSeparate.name = fieldValueSeparate.name.toUpperCase().trim();
     fieldValueSeparate.address = fieldValueSeparate.address.toUpperCase().trim();
@@ -608,7 +609,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             || disableSave
             || isValidDate
           }
-          onClick={() => handleValidateInput(handleSave)}
+          onClick={handleSave}
           color="primary"
           variant="contained"
         >
