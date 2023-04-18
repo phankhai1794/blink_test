@@ -160,7 +160,7 @@ const ChoiceAnswerEditor = (props) => {
           placeholder="Add an option"
           onClick={handleAddChoice}
           InputProps={{ classes }}
-          // disabled
+          disabled
         />
       </div>
       {!valid.answerContent && <span className={'errorChoice'}>Invalid Option !</span>}
