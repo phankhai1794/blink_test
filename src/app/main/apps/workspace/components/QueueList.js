@@ -147,7 +147,7 @@ const SearchLayout = (props) => {
           className={classes.searchBox}
           value={state.bookingNo}
           onChange={(e) => handleChange({ bookingNo: e.target.value })}
-          startAdornment={<InputAdornment className={classes.searchBox} position='start'></InputAdornment>}
+          startAdornment={<InputAdornment className={classes.searchBox} position='start' />}
           labelWidth={110}
         />
       </FormControl>
@@ -158,7 +158,7 @@ const SearchLayout = (props) => {
           className={classes.searchBox}
           value={state.from}
           onChange={(e) => handleChange({ from: e.target.value })}
-          startAdornment={<InputAdornment className={classes.searchBox} position='start' ></InputAdornment>}
+          startAdornment={<InputAdornment className={classes.searchBox} position='start' />}
           labelWidth={40}
           type='date'
         />
@@ -170,7 +170,7 @@ const SearchLayout = (props) => {
           className={classes.searchBox}
           value={state.to}
           onChange={(e) => handleChange({ to: e.target.value })}
-          startAdornment={<InputAdornment position='start'></InputAdornment>}
+          startAdornment={<InputAdornment position='start' />}
           labelWidth={20}
           type='date'
         />
@@ -182,7 +182,7 @@ const SearchLayout = (props) => {
           className={classes.searchBox}
           value={state.blStatus}
           onChange={(e) => handleChange({ blStatus: e.target.value })}
-          startAdornment={<InputAdornment position='start'></InputAdornment>}
+          startAdornment={<InputAdornment position='start' />}
           labelWidth={60}
         />
       </FormControl>
