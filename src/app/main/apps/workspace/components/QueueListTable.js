@@ -90,7 +90,6 @@ const useStyles = makeStyles({
 
 const QueueListTable = () => {
   const classes = useStyles();
-  const dispatch = useDispatch();
 
   const [state, setState] = useState({ queueListBl: [], totalBkgNo: 1 })
   const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
@@ -102,10 +101,12 @@ const QueueListTable = () => {
     }
     handleGetQueueList(searchQueueQuery);
   }, [searchQueueQuery]);
+
   // TODO: Download
   const handleDownload = () => {
     alert('Download Success!')
   };
+
   // TODO: Add Column
   const handleAddColumn = () => {
     alert('Add Column Success!')

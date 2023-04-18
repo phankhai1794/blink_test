@@ -78,12 +78,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 const QueueList = () => {
-  const { pathname } = window.location;
   const classes = useStyles();
   const dispatch = useDispatch();
-  // remove
-  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
-  const userType = useSelector(({ user }) => user.userType);
   const openQueueList = useSelector(({ workspace }) => workspace.inquiryReducer.openQueueList);
 
 
@@ -134,12 +130,12 @@ const SearchLayout = (props) => {
     setState({ ...state, ...query })
   }
 
-  const handelSearch = (e) => dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...state}));
+  const handelSearch = (e) => dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...state }));
 
   const handelReset = (e) => {
     let query = { bookingNo: '', from: '', to: '', blStatus: '' };
     setState({ ...query });
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...query}));
+    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...query }));
   }
 
   return (
@@ -162,8 +158,9 @@ const SearchLayout = (props) => {
           className={classes.searchBox}
           value={state.from}
           onChange={(e) => handleChange({ from: e.target.value })}
-          startAdornment={<InputAdornment className={classes.searchBox} position='start'></InputAdornment>}
+          startAdornment={<InputAdornment className={classes.searchBox} position='start' ></InputAdornment>}
           labelWidth={40}
+          type='date'
         />
       </FormControl>
       {/* To */}
@@ -175,6 +172,7 @@ const SearchLayout = (props) => {
           onChange={(e) => handleChange({ to: e.target.value })}
           startAdornment={<InputAdornment position='start'></InputAdornment>}
           labelWidth={20}
+          type='date'
         />
       </FormControl>
       {/* BL Status */}

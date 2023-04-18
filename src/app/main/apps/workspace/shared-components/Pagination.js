@@ -24,11 +24,7 @@ const useStyles = makeStyles((theme) => ({
             cursor: 'pointer',
         }
     },
-    btn: {
-        fontSize: '32px'
-    },
     pagination: {
-        // width: '250px',
         display: 'flex',
     },
     pageSelected: {
