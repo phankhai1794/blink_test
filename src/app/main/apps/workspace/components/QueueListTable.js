@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, TablePagination , Tooltip } from '@material-ui/core';
+import { useDispatch, useSelector } from 'react-redux';
+import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Tooltip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ControlPoint from '@material-ui/icons/ControlPoint';
 import { getQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
-
 import Pagination from '../shared-components/Pagination';
 
 const useStyles = makeStyles({
@@ -91,32 +90,18 @@ const useStyles = makeStyles({
 
 const QueueListTable = () => {
   const classes = useStyles();
+  const dispatch = useDispatch();
 
-  // remove 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterOption, setFilterOption] = useState('');
-
-  const [state, setState] = useState({ queueListBl: [] })
+  const [state, setState] = useState({ queueListBl: [], totalBkgNo: 1 })
   const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
 
   useEffect(() => {
     const handleGetQueueList = async (search) => {
-      const { dataResult } = await getQueueList(1, 10, `bkgNo=${search.bookingNo}`);
-      setState({ ...state, queueListBl: dataResult})
+      const { total, dataResult } = await getQueueList(search.currentPageNumber, search.pageSize, `bkgNo=${search.bookingNo}&startDate=${search.from}&endDate=${search.to}`);
+      setState({ ...state, queueListBl: dataResult, totalBkgNo: total })
     }
     handleGetQueueList(searchQueueQuery);
   }, [searchQueueQuery]);
-
-  // TODO
-  const handleFilterOptionChange = (event) => {
-    setFilterOption(event.target.value);
-  };
-
-  const handleClearClick = () => {
-    setSearchQuery('');
-    setFilterOption('');
-  };
-
   // TODO: Download
   const handleDownload = () => {
     alert('Download Success!')
@@ -126,14 +111,6 @@ const QueueListTable = () => {
     alert('Add Column Success!')
   };
 
-  const filteredData = state?.queueListBl.filter((item) => {
-    if (filterOption === '') {
-      return item.bookingNo.toLowerCase().includes(searchQuery.toLowerCase());
-    } else {
-      return item.lastUpdate === filterOption && item.bookingNo.toLowerCase().includes(searchQuery.toLowerCase());
-    }
-  });
-
   return (
     <div style={{ padding: '22px' }}>
       <div className={classes.searchContainer}>
@@ -142,101 +119,96 @@ const QueueListTable = () => {
           className={classes.btnDownload}
           onClick={handleDownload}
         >
-          <img src='/assets/images/icons/icon-download.svg' style={{ paddingRight: '10px' }}/>
+          <img src='/assets/images/icons/icon-download.svg' style={{ paddingRight: '10px' }} />
           <span>Download</span>
         </Button>
       </div>
-      <div component={Paper}>
-        <Table className={classes.table} aria-label='simple table'>
-          <TableHead className={classes.headerColor}>
-            <TableRow>
-              <TableCell>
-                <div className={classes.lineColumn}>No.</div>
-              </TableCell>
-              <TableCell>
-                <div className={classes.lineColumn}>
-                  <span>Booking Number</span>
-                  <img src='/assets/images/icons/Icon-sort.svg' />
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className={classes.lineColumn}>
-                  <span>Last Updated</span>
-                  <img src='/assets/images/icons/Icon-sort.svg' />
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className={classes.lineColumn}>
-                  <span>ETD</span>
-                  <img src='/assets/images/icons/Icon-sort.svg' />
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className={classes.lineColumn}>
-                  <span>Status</span>
-                  <img src='/assets/images/icons/Icon-sort.svg' />
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className={classes.lineColumn}>Unresolved</div>
-              </TableCell>
-              <TableCell>
-                <div>Resolved</div>
-              </TableCell>
-              <TableCell style={{ display: 'flex', justifyContent: 'center' }}>
-                <Tooltip title='Add a column'>
-                  <ControlPoint className={classes.btnAddColumn} fontSize='small' onClick={handleAddColumn}/>
-                </Tooltip>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredData.map((row, index) => (
-              <TableRow key={row.id}>
-                <TableCell component='th' scope='row'>
-                  {/* TODO: No. function */}
-                  {index + 1}
+      {(state?.queueListBl.length > 0) ?
+        <div component={Paper}>
+          <Table className={classes.table} aria-label='simple table'>
+            <TableHead className={classes.headerColor}>
+              <TableRow>
+                <TableCell>
+                  <div className={classes.lineColumn}>No.</div>
                 </TableCell>
-                <TableCell component='th' scope='row'>
-                  <a href={`/guest?bl=${row.id}`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bookingNo}</span></a>
-                </TableCell>
-                <TableCell >{formatDate(row.lastestDate, 'DD/MM/YYYY hh:ss')}</TableCell>
-                <TableCell ><span>{row.etd}</span></TableCell>
-                <TableCell ><span style={{ textTransform: 'capitalize' }}>{row?.status.toLowerCase()}</span></TableCell>
-                <TableCell >
-                  <div className={classes.label}>
-                    <div style={{ minWidth: '75px' }}>
-                      {row?.countPending ?
-                        <span className={classes.labelPending}>{`${row.countPending} Pending `}</span> : <span />
-                      }
-                    </div>
-                    <div style={{ minWidth: '75px' }}>
-                      {/* <span className={classes.labelReplies}>{`${row.countNewReply} New Replies`}</span> */}
-                      {row?.countNewReply ?
-                        <span className={classes.labelReplies}>{`${row.countNewReply} New Replies`}</span> : <span />
-                      }
-                    </div>
+                <TableCell>
+                  <div className={classes.lineColumn}>
+                    <span>Booking Number</span>
+                    <img src='/assets/images/icons/Icon-sort.svg' />
                   </div>
                 </TableCell>
-                <TableCell >
-                  {row?.countAll ?
-                    <span className={classes.labelResolved}>{`${row.countResolved}/${row.countAll} Resolved`}</span> : ''
-                  }
+                <TableCell>
+                  <div className={classes.lineColumn}>
+                    <span>Last Updated</span>
+                    <img src='/assets/images/icons/Icon-sort.svg' />
+                  </div>
                 </TableCell>
-                <TableCell />
+                <TableCell>
+                  <div className={classes.lineColumn}>
+                    <span>ETD</span>
+                    <img src='/assets/images/icons/Icon-sort.svg' />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className={classes.lineColumn}>
+                    <span>Status</span>
+                    <img src='/assets/images/icons/Icon-sort.svg' />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className={classes.lineColumn}>Unresolved</div>
+                </TableCell>
+                <TableCell>
+                  <div>Resolved</div>
+                </TableCell>
+                <TableCell style={{ display: 'flex', justifyContent: 'center' }}>
+                  <Tooltip title='Add a column'>
+                    <ControlPoint className={classes.btnAddColumn} fontSize='small' onClick={handleAddColumn} />
+                  </Tooltip>
+                </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        {/* <Pagination pageNumber={1}  totalPage={10} currentNumber={2} /> */}
-        {/* <TablePagination
-          component='div'
-          count={2000}
-          rowsPerPage={10}
-          page={1}
-          onChangePage={() => {}}
-        /> */}
-      </div>
+            </TableHead>
+            <TableBody>
+              {state?.queueListBl.map((row, index) => (
+                <TableRow key={row.id}>
+                  <TableCell component='th' scope='row'>
+                    {/* TODO: No. function */}
+                    {index + 1}
+                  </TableCell>
+                  <TableCell component='th' scope='row'>
+                    <a href={`/guest?bl=${row.id}`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bookingNo}</span></a>
+                  </TableCell>
+                  <TableCell >{formatDate(row.latestDate, 'DD/MM/YYYY hh:ss')}</TableCell>
+                  <TableCell ><span>{row.etd}</span></TableCell>
+                  <TableCell ><span style={{ textTransform: 'capitalize' }}>{row?.status.toLowerCase()}</span></TableCell>
+                  <TableCell >
+                    <div className={classes.label}>
+                      <div style={{ minWidth: '75px' }}>
+                        {row?.countPending ?
+                          <span className={classes.labelPending}>{`${row.countPending} Pending `}</span> : <span />
+                        }
+                      </div>
+                      <div style={{ minWidth: '75px' }}>
+                        {row?.countNewReply ?
+                          <span className={classes.labelReplies}>{`${row.countNewReply} New Replies`}</span> : <span />
+                        }
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell >
+                    {row?.countAll ?
+                      <span className={classes.labelResolved}>{`${row.countResolved}/${row.countAll} Resolved`}</span> : ''
+                    }
+                  </TableCell>
+                  <TableCell />
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <Pagination currentNumber={searchQueueQuery.currentPageNumber} totalPage={searchQueueQuery.totalPageNumber} totalBkgNo={state.totalBkgNo} />
+        </div>
+        : <span>No data!</span>
+      }
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
-import { Button , FormControl, InputLabel, OutlinedInput, InputAdornment, Paper } from '@material-ui/core';
+import { Button, FormControl, InputLabel, OutlinedInput, InputAdornment, Paper } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -87,9 +87,7 @@ const QueueList = () => {
   const openQueueList = useSelector(({ workspace }) => workspace.inquiryReducer.openQueueList);
 
 
-  const handleClose = () => {
-    dispatch(InquiryActions.openQueueList(false));
-  }
+  const handleClose = () => dispatch(InquiryActions.openQueueList(false));
 
   return (
     <div>
@@ -129,21 +127,19 @@ const TableContent = (props) => {
 const SearchLayout = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [state, setState] = useState({ bookingNo: '' })
+  const [state, setState] = useState({ bookingNo: '', from: '', to: '', blStatus: '' })
   const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
 
-  const handleChange = (e) => {
-    setState({ ...state, bookingNo: e.target.value })
+  const handleChange = (query) => {
+    setState({ ...state, ...query })
   }
 
-  const handelSearch = (e) => {
-    dispatch(InquiryActions.searchQueueQuery(state));
-  }
+  const handelSearch = (e) => dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...state}));
 
   const handelReset = (e) => {
-    let query = { bookingNo: '' };
+    let query = { bookingNo: '', from: '', to: '', blStatus: '' };
     setState({ ...query });
-    dispatch(InquiryActions.searchQueueQuery(query));
+    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...query}));
   }
 
   return (
@@ -154,7 +150,7 @@ const SearchLayout = (props) => {
         <OutlinedInput
           className={classes.searchBox}
           value={state.bookingNo}
-          onChange={(e) => handleChange(e)}
+          onChange={(e) => handleChange({ bookingNo: e.target.value })}
           startAdornment={<InputAdornment className={classes.searchBox} position='start'></InputAdornment>}
           labelWidth={110}
         />
@@ -164,8 +160,8 @@ const SearchLayout = (props) => {
         <InputLabel >From</InputLabel>
         <OutlinedInput
           className={classes.searchBox}
-          value={state.bookingNo}
-          onChange={() => handleChange('bookingNo')}
+          value={state.from}
+          onChange={(e) => handleChange({ from: e.target.value })}
           startAdornment={<InputAdornment className={classes.searchBox} position='start'></InputAdornment>}
           labelWidth={40}
         />
@@ -175,8 +171,8 @@ const SearchLayout = (props) => {
         <InputLabel >To</InputLabel>
         <OutlinedInput
           className={classes.searchBox}
-          value={state.bookingNo}
-          onChange={() => handleChange('bookingNo')}
+          value={state.to}
+          onChange={(e) => handleChange({ to: e.target.value })}
           startAdornment={<InputAdornment position='start'></InputAdornment>}
           labelWidth={20}
         />
@@ -186,8 +182,8 @@ const SearchLayout = (props) => {
         <InputLabel >BL Status</InputLabel>
         <OutlinedInput
           className={classes.searchBox}
-          value={state.bookingNo}
-          onChange={() => handleChange('bookingNo')}
+          value={state.blStatus}
+          onChange={(e) => handleChange({ blStatus: e.target.value })}
           startAdornment={<InputAdornment position='start'></InputAdornment>}
           labelWidth={60}
         />

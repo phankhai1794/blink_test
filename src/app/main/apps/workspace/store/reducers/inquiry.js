@@ -30,7 +30,7 @@ const initialState = {
   listCommentDraft: [],
   objectNewAmendment: { oldAmendmentId: null, newAmendment: null },
   openQueueList: false,
-  searchQueueQuery: { bookingNo: '', lastestDate: '' }
+  searchQueueQuery: { bookingNo: '', from: '', to: '', blStatus: '', currentPageNumber: 1, pageSize: 10 , totalPageNumber: 5 }
 };
 
 const inquiryReducer = function (state = initialState, action) {
