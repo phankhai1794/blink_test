@@ -106,12 +106,11 @@ const Inquiry = (props) => {
     //
     let isAnswered = false;
     let choiceAnswer = false;
-    if (metadata.ans_type['paragraph'] === optionsInquires[editedIndex].ansType) {
-      if (optionsInquires[editedIndex].answerObj) {
+    if (optionsInquires[editedIndex].answerObj) {
+      if (metadata.ans_type['paragraph'] === optionsInquires[editedIndex].ansType) {
         isAnswered = true;
       }
-    } else if (metadata.ans_type['choice'] === optionsInquires[editedIndex].ansType) {
-      if (optionsInquires[editedIndex].answerObj) {
+      else if (metadata.ans_type['choice'] === optionsInquires[editedIndex].ansType) {
         const answered = optionsInquires[editedIndex].answerObj.filter(ans => ans.confirmed);
         isAnswered = true;
         choiceAnswer = true;
@@ -121,6 +120,7 @@ const Inquiry = (props) => {
       optionsInquires[editedIndex].mediaFilesAnswer = [];
       optionsInquires[editedIndex].selectChoice = '';
     } else if (isCancel && isAnswered) {
+      optionsInquires[editedIndex].selectChoice = '';
       const [resInq] = [await getInquiryById(myBL.id)];
       resInq.forEach(ans => {
         //reset data click cancel

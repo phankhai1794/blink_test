@@ -184,11 +184,11 @@ const FileAttach = ({
     <div className={classes.root}>
       <div style={{ height: 126, textAlign: 'center' }}>
         {file.ext.toLowerCase().includes('pdf') ? (
-          <img src={`/assets/images/logos/pdf_icon.png`} onClick={previewFile} />
+          <img src={`/assets/images/logos/pdf_icon.png`} onClick={previewFile} onDragStart={(event) => event.preventDefault()}/>
         ) : file.ext.toLowerCase().match(/csv|xls|xlsx|excel|sheet/g) ? (
-          <img src={`/assets/images/logos/excel_icon.png`} onClick={previewFile} />
+          <img src={`/assets/images/logos/excel_icon.png`} onClick={previewFile} onDragStart={(event) => event.preventDefault()}/>
         ) : file.ext.toLowerCase().match(/doc|msword/g) ? (
-          <img src={`/assets/images/logos/word_icon.png`} onClick={previewFile} />
+          <img src={`/assets/images/logos/word_icon.png`} onClick={previewFile} onDragStart={(event) => event.preventDefault()}/>
         ) : (
           <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} fontSize='large' onClick={previewFile} />
         )}

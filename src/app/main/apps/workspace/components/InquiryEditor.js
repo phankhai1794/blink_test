@@ -184,7 +184,7 @@ const InquiryEditor = (props) => {
   const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
   const [anchorEl, setAnchorEl] = useState(null);
   const [templateList, setTemplateList] = useState([]);
-  const [template, setTemplate] = useState(valueType?.value || 0);
+  const [template, setTemplate] = useState(valueType?.value || '0');
   const [content, setContent] = useState(currentEditInq.content || '');
 
   const handleClick = (event) => {
@@ -205,7 +205,7 @@ const InquiryEditor = (props) => {
   }
 
   const handleChange = (event) => {
-    const index = Number(event.target.value);
+    const index = event.target.value;
     setTemplate(index);
     const inq = { ...currentEditInq };
     inq.content = templateList[index];
@@ -261,7 +261,7 @@ const InquiryEditor = (props) => {
     }
     setValueType(e);
     setTemplateList(filter?.content || []);
-    setTemplate(0);
+    setTemplate('0');
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
@@ -485,8 +485,8 @@ const InquiryEditor = (props) => {
           return;
         }
         // check empty a field
-        if (inquiry.answerObj.length > 0) {
-          const checkOptionEmpty = inquiry.answerObj.filter((item) => !item.content);
+        if (currentEditInq.answerObj.length > 0) {
+          const checkOptionEmpty = currentEditInq.answerObj.filter((item) => !item.content);
           if (checkOptionEmpty.length > 0) {
             dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
             setDisabled(false);
@@ -803,7 +803,7 @@ const InquiryEditor = (props) => {
                   <>
                     <FormControlLabel
                       classes={{ root: classes.formRadio, label: classes.radioLabel }}
-                      value={index}
+                      value={index.toString()}
                       control={<Radio color={'primary'} classes={{ root: classes.radioRoot }} style={{ position: 'absolute' }} />}
                       label={temp}
                     />
