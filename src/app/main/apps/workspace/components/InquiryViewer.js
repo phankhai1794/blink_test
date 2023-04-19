@@ -2202,6 +2202,7 @@ const InquiryViewer = (props) => {
             value={textResolve}
             multiline
             rows={3}
+            rowsMax={10}
             onChange={inputText}
             variant='outlined'
             inputProps={{ style: { textTransform: 'uppercase' } }}
@@ -2772,7 +2773,8 @@ const InquiryViewer = (props) => {
                                   className={classes.inputText}
                                   value={content[type] || ''}
                                   multiline
-                                  rows={['name'].includes(type) ? 2 : 3}
+                                  rows={3}
+                                  rowsMax={10}
                                   inputProps={{ style: { textTransform: 'uppercase' } }}
                                   onChange={(e) => handleChangeContentReply(e, type)}
                                   variant='outlined'
@@ -2787,7 +2789,8 @@ const InquiryViewer = (props) => {
                               className={classes.inputText}
                               value={tempReply?.answer?.content}
                               multiline
-                              rows={2}
+                              rows={3}
+                              rowsMax={10}
                               inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
                               InputProps={{
                                 classes: { input: classes.placeholder }
