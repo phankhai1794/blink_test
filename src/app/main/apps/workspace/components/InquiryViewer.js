@@ -2136,14 +2136,14 @@ const InquiryViewer = (props) => {
     if (isErr) {
       textHelper = (<>
         {(prohibitedInfo?.countries.length > 0) &&
-          <span style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
             <ErrorOutlineOutlined fontSize='small' />
             &nbsp;{`Countries: ${prohibitedInfo?.countries.join(', ')}`}
           </span>
         }
         {(prohibitedInfo?.danger_cargo.length > 0) &&
           <>
-            <span style={{ display: 'flex', alignItems: 'center' }}>
+            <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
               <ErrorOutlineOutlined fontSize='small' />
               &nbsp;{`Danger Cargo: ${prohibitedInfo?.danger_cargo.join(', ')}`}
             </span>
@@ -2210,14 +2210,14 @@ const InquiryViewer = (props) => {
             helperText={!validateInput?.isValid ?
               <>
                 {(validateInput?.prohibitedInfo?.countries.length > 0) &&
-                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
                     <ErrorOutlineOutlined fontSize='small' />
                     &nbsp;{`Countries: ${validateInput?.prohibitedInfo?.countries.join(', ')}`}
                   </span>
                 }
                 {(validateInput?.prohibitedInfo?.danger_cargo.length > 0) &&
                   <>
-                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
                       <ErrorOutlineOutlined fontSize='small' />
                       &nbsp;{`Danger Cargo: ${validateInput?.prohibitedInfo?.danger_cargo.join(', ')}`}
                     </span>
