@@ -5,12 +5,12 @@ stages:
 deploy_test:
   stage: test
   only:
-    - "develop"
+    - "test"
   when: manual
   allow_failure: false
   environment:
     name: test
-    url: http://stg-mybl.cyberlogitec.com.vn:8000
+    url: http://blink-dev.one-line.com
   script:
     - echo "${GITLAB_USER_LOGIN} sending Deployment trigger to Test site"
     - 'curl -f -d "commit_id=${CI_COMMIT_SHA:0:8}&triggerer=${GITLAB_USER_LOGIN}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://blink-dev.one-line.com/pipeline/test/portal'
@@ -18,7 +18,7 @@ deploy_test:
 deploy_staging:
   stage: UAT
   only:
-    - "test"
+    - "staging"
   when: manual
   allow_failure: false
   environment:

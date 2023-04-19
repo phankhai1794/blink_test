@@ -2,7 +2,7 @@ import { sendmail, getSuggestMail } from 'app/services/mailService';
 import { loadComment } from 'app/services/inquiryService';
 import axios from 'axios';
 import { handleError } from '@shared/handleError';
-import { PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, VESSEL_VOYAGE_CODE } from '@shared/keyword';
+import { PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, VESSEL_VOYAGE_CODE, PRE_CARRIAGE_CODE } from '@shared/keyword';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
 
 import * as InquiryActions from '../actions/inquiry';
@@ -134,7 +134,7 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   let contentCus = ''
   const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
   const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
-  const vvdCode = getValueField(content, VESSEL_VOYAGE_CODE)
+  const vvdCode = getValueField(PRE_CARRIAGE_CODE) || getValueField(content, VESSEL_VOYAGE_CODE)
   const pod = getValueField(content, PORT_OF_DISCHARGE)
   const del = getValueField(content, PLACE_OF_DELIVERY)
   const bkgNo = mybl.bkgNo
