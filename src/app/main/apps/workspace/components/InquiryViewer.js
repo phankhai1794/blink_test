@@ -2209,7 +2209,7 @@ const InquiryViewer = (props) => {
             helperText={!validateInput?.isValid ?
               <>
                 {(validateInput?.prohibitedInfo?.countries.length > 0) &&
-                  <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>fix
+                  <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
                     <ErrorOutlineOutlined fontSize='small' />
                     &nbsp;{`Countries: ${validateInput?.prohibitedInfo?.countries.join(', ')}`}
                   </span>
