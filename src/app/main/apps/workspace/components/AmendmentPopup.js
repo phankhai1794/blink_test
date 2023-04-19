@@ -153,7 +153,7 @@ const AmendmentPopup = (props) => {
 
   const onSave = () => {
     Object.keys(data).forEach((key) => {
-      if (typeof data[key] === 'string')
+      if (typeof data[key] === 'string' && ![getType(HS_CODE), getType(HTS_CODE), getType(NCM_CODE)].includes(key))
         data[key] = data[key].toUpperCase().replace(/^0*/g, "").trim();
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
@@ -225,7 +225,7 @@ const AmendmentPopup = (props) => {
           disabled: !isEdit,
           endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
         }}
-        inputProps={{ style: { textTransform: isUpperCase ? 'uppercase' : 'none'} }}
+        inputProps={{ style: { textTransform: isUpperCase ? 'uppercase' : 'none' } }}
       />
     );
   };
@@ -456,7 +456,7 @@ const AmendmentPopup = (props) => {
           <Icon style={{ color: '#8A97A3' }}>close</Icon>
         </IconButton>
       </div>
-      <div style={{ padding: '20px 30px'}}>
+      <div style={{ padding: '20px 30px' }}>
         {inqType === CONTAINER_DETAIL ? CDFields() : CMFields()}
       </div>
       {isEdit && (
