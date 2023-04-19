@@ -887,6 +887,7 @@ const InquiryViewer = (props) => {
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "")) //BX: Delete all inquiries draft
           }
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
+          props.getUpdatedAt();
         })
         .catch((error) => handleError(dispatch, error));
     } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove) {
