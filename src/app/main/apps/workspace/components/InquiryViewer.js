@@ -1236,7 +1236,7 @@ const InquiryViewer = (props) => {
     let result = "";
     const data = inquiries.find(({ id }) => question.id === id);
     if (data && data.answerObj?.length !== 0) {
-      result = (metadata.ans_type.choice === data.ansType) ? data.answerObj?.find(choice => choice.confirmed)?.content : data.answerObj[0]?.content;
+      result = (metadata.ans_type.choice === data.ansType) ? data.answerObj?.find(choice => choice.confirmed)?.content : "";
     }
     return result;
   }
