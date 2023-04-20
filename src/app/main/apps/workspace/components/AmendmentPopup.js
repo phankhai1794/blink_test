@@ -36,7 +36,7 @@ import { useUnsavedChangesWarning } from 'app/hooks'
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import ClearIcon from '@material-ui/icons/Clear';
 import WindowedSelect from "react-windowed-select";
-import { formatContainerNo } from '@shared';
+import { formatContainerNo, formatNumber } from '@shared';
 
 const useStyles = makeStyles((theme) => ({
   selectRoot: {
@@ -163,17 +163,15 @@ const AmendmentPopup = (props) => {
 
   const show = (value) => user.role === 'Admin' && value;
 
-  const handleChange = (id, value) => {
+  const handleChange = (field, value) => {
     setDirty();
-    updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [id]: value } : row)));
-  };
-
-  const handleMouseOut = (field, value) => {
-    setDirty();
+    let val = value;
+    const id = field.id;
     if([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(field.title) && !isNaN(value)) {
-      updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [field.id]: (typeof value === 'string' ? (parseFloat(value).toString()) : value)} : row)));
+      val = formatNumber(value);
     }
-  }
+    updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [id]: val } : row)));
+  };
 
   const onDelete = (value, tagIndex) => {
     updateEdit((old) =>
@@ -227,8 +225,7 @@ const AmendmentPopup = (props) => {
         autoComplete="off"
         className={clsx(classes.textField, !isEdit && classes.lock)}
         value={!isUpperCase ? formatContainerNo(field.value) : field.value}
-        onChange={(e) => handleChange(field.id, e.target.value)}
-        onMouseOut={(e) => handleMouseOut(field, e.target.value)}
+        onChange={(e) => handleChange(field, e.target.value)}
         InputProps={{
           disabled: !isEdit,
           endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
@@ -307,7 +304,7 @@ const AmendmentPopup = (props) => {
 
     useEffect(() => {
       if (!field.value && options.length === 1)
-        handleChange(field.id, options[0].value);
+        handleChange(field, options[0].value);
     }, []);
 
     return (
@@ -324,7 +321,7 @@ const AmendmentPopup = (props) => {
                   options={options}
                   onChange={({ value }) => {
                     onChange(value)
-                    handleChange(field.id, value)
+                    handleChange(field, value)
                   }}
                   components={{
                     IndicatorSeparator: () => null
