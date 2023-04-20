@@ -816,7 +816,7 @@ const InquiryEditor = (props) => {
                 ))}
               </RadioGroup>
             </Popover>
-            <div className="mt-32 mx-8">
+            <div className="mt-32 mx-8" style={{ minHeight: 32 }}>
               <ContentEditable
                 html={content} // innerHTML of the editable div
                 disabled={false} // use true to disable editing
