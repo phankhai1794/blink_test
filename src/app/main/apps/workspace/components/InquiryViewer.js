@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject, formatDate, isDateField } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject, formatDate, isDateField, formatNumber } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -2911,7 +2911,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
   const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
   const cdUnit = [
@@ -2959,24 +2959,15 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
         temp[index][type] = "";
       }
     } else {
-      temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? value.split(',') : value;
+      if([CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName(type)) && !isNaN(value)) {
+        temp[index][type] = formatNumber(value)
+      } else temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? value.split(',') : value;
     }
 
     setValues(temp);
     setTextResolve(temp);
     setDirty()
   };
-
-  const handleMouseOut = (e, nodeValue, type) => {
-    const { value } = e.target;
-    const temp = JSON.parse(JSON.stringify(values));
-    const index = nodeValue.index;
-    if ([CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName(type)) && !isNaN(value)) {
-      temp[index][type] = (typeof value === 'string' ? (parseFloat(temp[index][type]).toString()) : temp[index][type]);
-    }
-    setValues(temp);
-    setTextResolve(temp);
-  }
 
   useEffect(() => {
     if (!originalValues) {
@@ -3099,7 +3090,6 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                       disabled={disabled}
                       value={nodeValue ? disabled ? NumberFormat(nodeValue[getType(type)]) : nodeValue[getType(type)] || '' : ''}
                       onChange={(e) => onChange(e, nodeValue.index, getType(type))}
-                      onMouseOut={(e) => handleMouseOut(e, nodeValue, getType(type))}
                     />
                     {inputValid ? null : <p style={{ color: 'red' }}>{filteredCdUnit[0].pattern.message}</p>}
                   </div>
