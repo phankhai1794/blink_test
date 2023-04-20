@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Tooltip, Switch } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Tooltip, Chip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ControlPoint from '@material-ui/icons/ControlPoint';
 import { getQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
 import Pagination from '../shared-components/Pagination';
 import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
+import clsx from 'clsx';
+import HelpIcon from '@material-ui/icons/Help';
+import EditIcon from '@material-ui/icons/Edit';
+import ReplyIcon from '@material-ui/icons/Reply';
 
 const useStyles = makeStyles({
   table: {
@@ -90,6 +94,28 @@ const useStyles = makeStyles({
     color: '#36B37E',
     padding: '3px 8px',
     borderRadius: '4px',
+  },
+  chips: {
+    display: 'flex',
+  },
+  chip: {
+    color: '#FFFF',
+    borderRadius: '4px',
+    height: '24px',
+    width: '53px',
+    margin: 2,
+  },
+  inquiryColor: {
+    backgroundColor: '#DC2626',
+  },
+  replyColor: {
+    backgroundColor: '#2F80ED'
+  },
+  sizeIcon: {
+    fontSize: '18px',
+  },
+  iconColor: {
+    color: '#FFFF'
   }
 });
 
@@ -143,7 +169,7 @@ const QueueListTable = () => {
   };
 
   return (
-    <div style={{ padding: '22px', height: '610px' }}>
+    <div style={{ padding: '22px', height: '675px' }}>
       {/* TODO: TBU */}
       {/* <div className={classes.searchContainer}>
         <Button
@@ -216,16 +242,26 @@ const QueueListTable = () => {
                   <TableCell ><span style={{ textTransform: 'capitalize' }}>{row?.status.toLowerCase()}</span></TableCell>
                   <TableCell >
                     <div className={classes.label}>
-                      <div style={{ minWidth: '75px' }}>
-                        {row?.countPending ?
-                          <span className={classes.labelPending}>{`${row.countPending} Pending `}</span> : <span />
-                        }
-                      </div>
-                      <div style={{ minWidth: '75px' }}>
+                      <Tooltip title={'Inquiry'} placement='bottom-end'>
+                        <div className={classes.chips}>
+                          <Chip label={row.countPendingInq} className={clsx(classes.chip, classes.inquiryColor)} icon={<HelpIcon className={clsx(classes.sizeIcon, classes.iconColor)} />} />
+                        </div>
+                      </Tooltip>
+                      <Tooltip title={'Amendment'} placement='bottom-end'>
+                        <div className={classes.chips}>
+                          <Chip label={row.countPendingAme} className={clsx(classes.chip, classes.inquiryColor)} icon={<EditIcon className={clsx(classes.sizeIcon, classes.iconColor)} />} />
+                        </div>
+                      </Tooltip>
+                      <Tooltip title={'New Replies'} placement='bottom-end'>
+                        <div className={classes.chips}>
+                          <Chip label={row.countNewReply} className={clsx(classes.chip, classes.replyColor)} icon={<ReplyIcon className={clsx(classes.sizeIcon, classes.iconColor)} />} />
+                        </div>
+                      </Tooltip>
+                      {/* <div style={{ minWidth: '75px' }}>
                         {row?.countNewReply ?
                           <span className={classes.labelReplies}>{`${row.countNewReply} New Replies`}</span> : <span />
                         }
-                      </div>
+                      </div> */}
                     </div>
                   </TableCell>
                   <TableCell >
