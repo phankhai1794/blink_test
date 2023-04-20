@@ -133,7 +133,7 @@ const InquiryEditor = (props) => {
   // custom attribute must be lowercase
   const dispatch = useDispatch();
   const classes = useStyles();
-  const { onCancel, setSave } = props;
+  const { onCancel } = props;
   const scrollTopPopup = useRef(null);
   const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize, enableSubmit] = useSelector(
     ({ workspace }) => [
@@ -163,7 +163,8 @@ const InquiryEditor = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const fieldType = metadata.field_options.filter(field => field.display);
+  const fieldDefault = metadata.field_options.filter(field => field.display)
+  const [fieldType, setFieldType] = useState(fieldDefault);
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
   );
@@ -181,7 +182,7 @@ const InquiryEditor = (props) => {
   const [contentEdited, setContentEdited] = useState(valueType?.label);
   const [isDisabled, setDisabled] = useState(false);
   const [prevField, setPrevField] = useState('');
-  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
+  const [_, setDirty, setPristine] = useUnsavedChangesWarning();
   const [anchorEl, setAnchorEl] = useState(null);
   const [templateList, setTemplateList] = useState([]);
   const [template, setTemplate] = useState(valueType?.value || '0');
@@ -247,6 +248,7 @@ const InquiryEditor = (props) => {
       scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [fieldValue]);
+
   const handleTypeChange = (e) => {
     const inq = { ...currentEditInq };
     inq.inqType = e.value;
@@ -259,6 +261,10 @@ const InquiryEditor = (props) => {
       inq.content = filter?.content[0] || MSG_INQUIRY_CONTENT;
       setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
+    if (!fieldValue) {
+      const filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field
+      setFieldType(metadata.field_options.filter(({ value, display }) => display && filterField.includes(value)))
+    }
     setValueType(e);
     setTemplateList(filter?.content || []);
     setTemplate('0');
@@ -269,7 +275,6 @@ const InquiryEditor = (props) => {
   const handleFieldChange = (e) => {
     const inq = { ...currentEditInq };
     inq.field = e.value;
-    inq.inqType = '';
 
     if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
       inq.content = contentEdited;
@@ -282,7 +287,7 @@ const InquiryEditor = (props) => {
     }
     dispatch(InquiryActions.validate({ ...valid, field: true }));
     setFieldValue(e);
-    setValueType(null);
+    setFieldType(fieldDefault)
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
@@ -643,7 +648,7 @@ const InquiryEditor = (props) => {
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BC", "")) // Draft of Inquiry Created (BC)
               }
               dispatch(InquiryActions.saveInquiry());
-              dispatch(InquiryActions.setField(inqContentTrim[0].field));
+              dispatch(InquiryActions.setField());
               dispatch(InquiryActions.setOpenedInqForm(false));
               dispatch(InquiryActions.setEditInq());
               dispatch(InquiryActions.setInquiries(optionsInquires));

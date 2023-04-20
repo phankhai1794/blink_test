@@ -327,7 +327,7 @@ export default function Form(props) {
       if (inquiries.length + 1 === metadata.field_options.length) {
         dispatch(FormActions.toggleAddInquiry(false));
       }
-      dispatch(InquiryActions.addQuestion());
+      dispatch(InquiryActions.addQuestion(currentField));
     }
   };
 
@@ -402,15 +402,6 @@ export default function Form(props) {
     toggleForm(false);
     dispatch(FormActions.toggleOpenEmail(true));
     dispatch(InquiryActions.setOneInq({}));
-  };
-
-  const checkEnableBtnAddAmendment = () => {
-    const filter = inquiries.filter((inq) => inq.field === currentField);
-    if (!openAmendmentList) {
-      if (!filter.length) return false;
-      return !filter.some((inq) => inq.process === 'draft');
-    }
-    return true;
   };
 
   useEffect(() => {
