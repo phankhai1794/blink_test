@@ -887,6 +887,7 @@ const InquiryViewer = (props) => {
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "")) //BX: Delete all inquiries draft
           }
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
+          props.getUpdatedAt();
         })
         .catch((error) => handleError(dispatch, error));
     } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove) {
@@ -1236,7 +1237,7 @@ const InquiryViewer = (props) => {
     let result = "";
     const data = inquiries.find(({ id }) => question.id === id);
     if (data && data.answerObj?.length !== 0) {
-      result = (metadata.ans_type.choice === data.ansType) ? data.answerObj?.find(choice => choice.confirmed)?.content : data.answerObj[0]?.content;
+      result = (metadata.ans_type.choice === data.ansType) ? data.answerObj?.find(choice => choice.confirmed)?.content : "";
     }
     return result;
   }
@@ -2135,14 +2136,14 @@ const InquiryViewer = (props) => {
     if (isErr) {
       textHelper = (<>
         {(prohibitedInfo?.countries.length > 0) &&
-          <span style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
             <ErrorOutlineOutlined fontSize='small' />
             &nbsp;{`Countries: ${prohibitedInfo?.countries.join(', ')}`}
           </span>
         }
         {(prohibitedInfo?.danger_cargo.length > 0) &&
           <>
-            <span style={{ display: 'flex', alignItems: 'center' }}>
+            <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
               <ErrorOutlineOutlined fontSize='small' />
               &nbsp;{`Danger Cargo: ${prohibitedInfo?.danger_cargo.join(', ')}`}
             </span>
@@ -2202,6 +2203,7 @@ const InquiryViewer = (props) => {
             value={textResolve}
             multiline
             rows={3}
+            rowsMax={10}
             onChange={inputText}
             variant='outlined'
             inputProps={{ style: { textTransform: 'uppercase' } }}
@@ -2209,14 +2211,14 @@ const InquiryViewer = (props) => {
             helperText={!validateInput?.isValid ?
               <>
                 {(validateInput?.prohibitedInfo?.countries.length > 0) &&
-                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
                     <ErrorOutlineOutlined fontSize='small' />
                     &nbsp;{`Countries: ${validateInput?.prohibitedInfo?.countries.join(', ')}`}
                   </span>
                 }
                 {(validateInput?.prohibitedInfo?.danger_cargo.length > 0) &&
                   <>
-                    <span style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
                       <ErrorOutlineOutlined fontSize='small' />
                       &nbsp;{`Danger Cargo: ${validateInput?.prohibitedInfo?.danger_cargo.join(', ')}`}
                     </span>
@@ -2772,7 +2774,8 @@ const InquiryViewer = (props) => {
                                   className={classes.inputText}
                                   value={content[type] || ''}
                                   multiline
-                                  rows={['name'].includes(type) ? 2 : 3}
+                                  rows={3}
+                                  rowsMax={10}
                                   inputProps={{ style: { textTransform: 'uppercase' } }}
                                   onChange={(e) => handleChangeContentReply(e, type)}
                                   variant='outlined'
@@ -2787,7 +2790,8 @@ const InquiryViewer = (props) => {
                               className={classes.inputText}
                               value={tempReply?.answer?.content}
                               multiline
-                              rows={2}
+                              rows={3}
+                              rowsMax={10}
                               inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
                               InputProps={{
                                 classes: { input: classes.placeholder }
