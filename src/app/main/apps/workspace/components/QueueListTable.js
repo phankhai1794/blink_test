@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Tooltip } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Tooltip, Switch } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ControlPoint from '@material-ui/icons/ControlPoint';
 import { getQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
 import Pagination from '../shared-components/Pagination';
+import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 
 const useStyles = makeStyles({
   table: {
@@ -62,11 +63,15 @@ const useStyles = makeStyles({
   },
   link: {
     color: '#333333',
-    textDecoration: 'none'
+    textDecoration: 'none',
+    '&:hover': {
+      color: '#BD0F72',
+      fontWeight: '600',
+    }
   },
   label: {
     display: 'flex',
-    justifyContent: 'space-evenly'
+    // justifyContent: 'space-evenly'
   },
   labelPending: {
     backgroundColor: '#FDF2F2',
@@ -90,31 +95,57 @@ const useStyles = makeStyles({
 
 const QueueListTable = () => {
   const classes = useStyles();
+  const dispatch = useDispatch();
 
-  const [state, setState] = useState({ queueListBl: [], totalBkgNo: 1 })
+  const [state, setState] = useState({ queueListBl: [], totalBkgNo: 1, sortBkgNo: 'asc', sortLatestDate: 'asc', sortStatus: 'asc' })
   const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
 
   useEffect(() => {
     const handleGetQueueList = async (search) => {
-      const { total, dataResult } = await getQueueList(search.currentPageNumber, search.pageSize, `bkgNo=${search.bookingNo}&startDate=${search.from}&endDate=${search.to}`);
+      const { total, dataResult } = await getQueueList(search.currentPageNumber, search.pageSize, `bkgNo=${search.bookingNo}&startDate=${search.from}&endDate=${search.to}&status=${search.blStatus}&field=${search.sortField}`);
       setState({ ...state, queueListBl: dataResult, totalBkgNo: total })
     }
     handleGetQueueList(searchQueueQuery);
   }, [searchQueueQuery]);
 
-  // TODO: Download
+  // TODO: Download - TBU
   const handleDownload = () => {
     alert('Download Success!')
   };
 
-  // TODO: Add Column
+  // TODO: Add Column  - TBU
   const handleAddColumn = () => {
     alert('Add Column Success!')
   };
 
+  const handleSort = (query, column) => {
+    let tempQuery = query;
+    if (tempQuery.indexOf('asc') !== -1) {
+      tempQuery = tempQuery.replace('asc', 'desc');
+    } else {
+      tempQuery = tempQuery.replace('desc', 'asc');
+    }
+    switch (column) {
+      case 'bkgNo':
+        setState({ ...state, sortBkgNo: (state.sortBkgNo === 'asc') ? 'desc' : 'asc', sortLatestDate: 'asc', sortStatus: 'asc' });
+        break;
+      case 'latestDate':
+        setState({ ...state, sortBkgNo: 'asc', sortLatestDate: (state.sortLatestDate === 'asc') ? 'desc' : 'asc', sortStatus: 'asc' });
+        break;
+      case 'status':
+        setState({ ...state, sortBkgNo: 'asc', sortLatestDate: 'asc', sortStatus: (state.sortStatus === 'asc') ? 'desc' : 'asc' });
+        break;
+      default:
+        setState({ ...state, sortBkgNo: 'asc', sortLatestDate: 'asc', sortStatus: 'asc' });
+        break;
+    }
+    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, sortField: tempQuery }));
+  };
+
   return (
-    <div style={{ padding: '22px' }}>
-      <div className={classes.searchContainer}>
+    <div style={{ padding: '22px', height: '610px' }}>
+      {/* TODO: TBU */}
+      {/* <div className={classes.searchContainer}>
         <Button
           variant='text'
           className={classes.btnDownload}
@@ -123,7 +154,7 @@ const QueueListTable = () => {
           <img src='/assets/images/icons/icon-download.svg' style={{ paddingRight: '10px' }} />
           <span>Download</span>
         </Button>
-      </div>
+      </div> */}
       {(state?.queueListBl.length > 0) ?
         <div component={Paper}>
           <Table className={classes.table} aria-label='simple table'>
@@ -135,25 +166,25 @@ const QueueListTable = () => {
                 <TableCell>
                   <div className={classes.lineColumn}>
                     <span>Booking Number</span>
-                    <img src='/assets/images/icons/Icon-sort.svg' />
+                    <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`bkgNo&order=${state.sortBkgNo}`, 'bkgNo')} />
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className={classes.lineColumn}>
                     <span>Last Updated</span>
-                    <img src='/assets/images/icons/Icon-sort.svg' />
+                    <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`latestDate&order=${state.sortLatestDate}`, 'latestDate')} />
                   </div>
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <div className={classes.lineColumn}>
                     <span>ETD</span>
                     <img src='/assets/images/icons/Icon-sort.svg' />
                   </div>
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   <div className={classes.lineColumn}>
                     <span>Status</span>
-                    <img src='/assets/images/icons/Icon-sort.svg' />
+                    <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`status&order=${state.sortStatus}`, 'status')} />
                   </div>
                 </TableCell>
                 <TableCell>
@@ -162,16 +193,17 @@ const QueueListTable = () => {
                 <TableCell>
                   <div>Resolved</div>
                 </TableCell>
-                <TableCell style={{ display: 'flex', justifyContent: 'center' }}>
-                  <Tooltip title='Add a column'>
+                <TableCell>
+                  {/* TBU */}
+                  {/* <Tooltip title='Add a column'>
                     <ControlPoint className={classes.btnAddColumn} fontSize='small' onClick={handleAddColumn} />
-                  </Tooltip>
+                  </Tooltip> */}
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {state?.queueListBl.map((row, index) => (
-                <TableRow key={row.id}>
+                <TableRow key={index}>
                   <TableCell component='th' scope='row'>
                     {/* TODO: No. function */}
                     {index + 1}
@@ -180,7 +212,7 @@ const QueueListTable = () => {
                     <a href={`/guest?bl=${row.id}`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bookingNo}</span></a>
                   </TableCell>
                   <TableCell >{formatDate(row.latestDate, 'DD/MM/YYYY hh:ss')}</TableCell>
-                  <TableCell ><span>{row.etd}</span></TableCell>
+                  {/* <TableCell ><span>{row.etd}</span></TableCell> */}
                   <TableCell ><span style={{ textTransform: 'capitalize' }}>{row?.status.toLowerCase()}</span></TableCell>
                   <TableCell >
                     <div className={classes.label}>
