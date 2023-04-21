@@ -213,7 +213,6 @@ const QueueListTable = () => {
                 <TableCell>
                   <div className={classes.lineColumn}>
                     <span>Status</span>
-                    <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`status&order=${state.sortStatus}`, 'status')} />
                   </div>
                 </TableCell>
                 <TableCell>
