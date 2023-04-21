@@ -294,16 +294,23 @@ export default function Form(props) {
   const PaperComponent = React.useMemo(
     () =>
       // eslint-disable-next-line react/display-name
-      React.forwardRef((props) => {
+      (props) => {
+        const getBoundWidth = () => {
+          return (window.innerWidth - document.getElementById('paper')?.getBoundingClientRect().width) / 2
+        }
+        const getBoundHeight = () => {
+          return (window.innerHeight - document.getElementById('paper')?.getBoundingClientRect().height) / 2
+        }
         return isFullScreen ?
           <Paper {...props} /> :
           <Draggable
+            bounds={{ left: -getBoundWidth() + 1, top: -getBoundHeight() + 1, right: getBoundWidth() - 1, bottom: getBoundHeight() - 1 }}
             handle="#draggable-dialog-title"
             cancel={'[class*="MuiDialogContent-root"]'}
           >
-            <Paper {...props} />
+            <Paper {...props} id="paper" />
           </Draggable>
-      }),
+      },
     [isFullScreen]
   );
 
@@ -327,7 +334,7 @@ export default function Form(props) {
       if (inquiries.length + 1 === metadata.field_options.length) {
         dispatch(FormActions.toggleAddInquiry(false));
       }
-      dispatch(InquiryActions.addQuestion());
+      dispatch(InquiryActions.addQuestion(currentField));
     }
   };
 
@@ -402,15 +409,6 @@ export default function Form(props) {
     toggleForm(false);
     dispatch(FormActions.toggleOpenEmail(true));
     dispatch(InquiryActions.setOneInq({}));
-  };
-
-  const checkEnableBtnAddAmendment = () => {
-    const filter = inquiries.filter((inq) => inq.field === currentField);
-    if (!openAmendmentList) {
-      if (!filter.length) return false;
-      return !filter.some((inq) => inq.process === 'draft');
-    }
-    return true;
   };
 
   useEffect(() => {
