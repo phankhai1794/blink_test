@@ -108,6 +108,9 @@ const useStyles = makeStyles({
   inquiryColor: {
     backgroundColor: '#DC2626',
   },
+  amendmentColor: {
+    backgroundColor: '#ECC083',
+  },
   replyColor: {
     backgroundColor: '#2F80ED'
   },
@@ -249,7 +252,7 @@ const QueueListTable = () => {
                       </Tooltip>
                       <Tooltip title={'Amendment'} placement='bottom-end'>
                         <div className={classes.chips}>
-                          <Chip label={row.countPendingAme} className={clsx(classes.chip, classes.inquiryColor)} icon={<EditIcon className={clsx(classes.sizeIcon, classes.iconColor)} />} />
+                          <Chip label={row.countPendingAme} className={clsx(classes.chip, classes.amendmentColor)} icon={<EditIcon className={clsx(classes.sizeIcon, classes.iconColor)} />} />
                         </div>
                       </Tooltip>
                       <Tooltip title={'New Replies'} placement='bottom-end'>
