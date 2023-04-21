@@ -28,6 +28,8 @@ export const CHECK_SUBMIT = 'CHECK_SUBMIT';
 export const CHECK_SEND = 'CHECK_SEND';
 export const SET_LIST_COMMENT_DRAFT = 'SET_LIST_COMMENT_DRAFT';
 export const SET_NEW_AMENDMENT = 'SET_NEW_AMENDMENT';
+export const OPEN_QUEUE_LIST = 'OPEN_QUEUE_LIST';
+export const SEARCH_QUEUE_QUERY = 'SEARCH_QUEUE_QUERY';
 
 export function saveInquiry() {
   return {
@@ -219,6 +221,20 @@ export function setListCommentDraft(state) {
 export function setNewAmendment(state) {
   return {
     type: SET_NEW_AMENDMENT,
+    state: state
+  };
+}
+
+export function openQueueList(state) {
+  return {
+    type: OPEN_QUEUE_LIST,
+    state: state
+  };
+}
+
+export function searchQueueQuery(state) {
+  return {
+    type: SEARCH_QUEUE_QUERY,
     state: state
   };
 }

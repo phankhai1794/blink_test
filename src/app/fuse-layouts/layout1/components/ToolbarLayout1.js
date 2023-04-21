@@ -22,6 +22,7 @@ import axios from 'axios';
 import * as InquiryActions from '../../../main/apps/workspace/store/actions/inquiry';
 
 import PreviewDraftBL from './PreviewDraftBL';
+import BtnQueueList from './BtnQueueList';
 
 const themeColor = '#BD0F72';
 const lightThemeColor = '#FDF2F2';
@@ -517,6 +518,8 @@ function ToolbarLayout1(props) {
                   </MenuItem>
                 ))}
               </TextField>
+
+              <BtnQueueList />
 
               <PreviewDraftBL />
 

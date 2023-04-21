@@ -94,6 +94,8 @@
   },
   "devDependencies": {
     "@babel/core": "7.4.5",
+    "@babel/eslint-parser": "^7.19.1",
+    "@babel/eslint-plugin": "^7.19.1",
     "@babel/node": "7.4.5",
     "@babel/preset-env": "7.4.5",
     "@typescript-eslint/eslint-plugin": "^5.10.0",

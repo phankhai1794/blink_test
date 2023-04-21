@@ -29,6 +29,8 @@ const initialState = {
   enableSend: false,
   listCommentDraft: [],
   objectNewAmendment: { oldAmendmentId: null, newAmendment: null },
+  openQueueList: false,
+  searchQueueQuery: { bookingNo: '', from: '', to: '', blStatus: 'PENDING,IN_QUEUE', currentPageNumber: 1, pageSize: 10 , totalPageNumber: 5, sortField: '' }
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -145,6 +147,12 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SET_NEW_AMENDMENT: {
     return { ...state, objectNewAmendment: { ...state.objectNewAmendment, ...action.state } };
+  }
+  case Actions.OPEN_QUEUE_LIST: {
+    return { ...state, openQueueList: action.state };
+  }
+  case Actions.SEARCH_QUEUE_QUERY: {
+    return { ...state, searchQueueQuery: action.state };
   }
   default: {
     return state;
