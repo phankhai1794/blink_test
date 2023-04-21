@@ -239,7 +239,7 @@ const QueueListTable = () => {
                   <TableCell component='th' scope='row'>
                     <a href={`/guest?bl=${row.id}`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bookingNo}</span></a>
                   </TableCell>
-                  <TableCell >{formatDate(row.latestDate, 'DD/MM/YYYY hh:mm')}</TableCell>
+                  <TableCell >{formatDate(row.latestDate, 'DD/MM/YYYY HH:mm')}</TableCell>
                   {/* <TableCell ><span>{row.etd}</span></TableCell> */}
                   <TableCell ><span style={{ textTransform: 'capitalize' }}>{row?.status.toLowerCase()}</span></TableCell>
                   <TableCell >
