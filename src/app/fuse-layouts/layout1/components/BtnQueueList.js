@@ -39,7 +39,7 @@ const BtnQueueList = () => {
       {myBL?.state &&
         <>
           <PermissionProvider
-            action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
+            action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
             extraCondition={pathname.includes('/guest') && myBL.state.includes('DRF_') && userType === 'CUSTOMER'}>
             <Tooltip title='Open BL Status'>
               <Button
