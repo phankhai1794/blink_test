@@ -12,7 +12,7 @@ export const PERMISSION = {
   VIEW_EDIT_DRAFT_BL: 'view_editDraftBL',
   VIEW_EDIT_INQUIRY: 'view_editInquiry',
   VIEW_SAVE_INQUIRY: 'view_saveInquiry',
-  VIEW_REDIRECT_DRAFT_BL: 'view_redirectDraftBL ',
+  VIEW_REDIRECT_DRAFT_BL: 'view_redirectDraftBL',
   VIEW_CREATE_AMENDMENT: 'view_createAmendment',
 
   // UI + API
@@ -48,6 +48,6 @@ export const PermissionProvider = ({
 
   const permissionsSession = sessionStorage.getItem('permissions') || '';
   const permissions = permissionsSession.length ? JSON.parse(permissionsSession) : JSON.parse(user).permissions;
-  const isAllowed = permissions.filter((p) => `${p.controller}_${p.action}` === action && p.enable).length > 0;
+  const isAllowed = (permissions || []).filter((p) => `${p.controller}_${p.action}` === action && p.enable).length > 0;
   return isAllowed && extraCondition ? (children ? children : true) : fallback;
 };

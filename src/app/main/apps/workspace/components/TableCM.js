@@ -166,7 +166,7 @@ const TableCM = (props) => {
     return content[getField(field)] || '';
   };
 
-  const [id, setId] = useState(getField(DESCRIPTION_OF_GOODS));
+  const [id, setId] = useState(getField(CONTAINER_MANIFEST));
   const [isHovering, setIsHovering] = useState(false);
   const [isEmpty, setIsEmpty] = useState(true);
   const [hasInquiry, setHasInquiry] = useState(false);
@@ -299,8 +299,13 @@ const TableCM = (props) => {
   }, [metadata, id, inquiries, listCommentDraft]);
 
   useEffect(() => {
-    setId(drfView === 'MD' ? getField(DESCRIPTION_OF_GOODS) : getField(CONTAINER_MANIFEST));
-  }, [drfView]);
+    let defaultId = getField(CONTAINER_MANIFEST);
+    const descriptionId = getField(DESCRIPTION_OF_GOODS);
+    if (drfView === 'MD' && inquiries.length && inquiries.filter(inq => inq.field === descriptionId).length) {
+      defaultId = descriptionId;
+    }
+    setId(defaultId);
+  }, [drfView, inquiries]);
 
   return (
     <div

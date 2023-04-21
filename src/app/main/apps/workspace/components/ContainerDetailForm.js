@@ -126,7 +126,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
   const sortValues =(vals) =>{
     let valuesSorted = [];
-    if(container === CONTAINER_MANIFEST && (vals === valueEdit || !isResolveCDCM)){
+    if(container === CONTAINER_MANIFEST && !isResolveCDCM){
       let cms = [...vals];
       const contsNo = [
         ...new Set((getValueField(CONTAINER_DETAIL) ||[]).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
@@ -143,7 +143,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
       valuesSorted = [...valuesSorted, ...cms];
       return valuesSorted;
     }
-    return values;
+    return vals;
   }
 
   useEffect(() => {
@@ -156,6 +156,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   useEffect(() => {
     const sort = sortValues(originalData)
     setValues(sort)
+    setValueEdit(sort);
   }, [originalData]);
 
   useEffect(() => {

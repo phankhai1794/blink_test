@@ -21,9 +21,6 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiInputBase-input': {
       width: '93%'
     },
-    '& .MuiInputBase-inputMultiline': {
-      resize: 'vertical',
-    }
   },
   inputText: {
     '& .MuiInputBase-input': {
@@ -129,8 +126,6 @@ const ParagraphAnswer = (props) => {
             display: !isPermission ? (!paragraphText ? 'none' : '') : '',
           }}
           fullWidth
-          rows={3}
-          rowsMax={10}
           placeholder={isPermission ? 'Typing...' : ''}
           classes={{ root: classes.root }}
           disabled={!isPermission || disable}

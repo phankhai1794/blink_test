@@ -440,8 +440,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   const checkCurField = () => {
     const filterCurrentField = fieldType.find(f => f.value === currentField);
-    const findInqs = inquiries.filter(inq => inq.field === currentField);
-    if (findInqs.length) {
+    const findAme = inquiries.filter(({ field, process }) => field === currentField && process === 'draft');
+    if (findAme.length) {
       setFieldValueSelect();
       setFieldValue();
       setValueSeparate();

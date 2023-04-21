@@ -133,7 +133,7 @@ const InquiryEditor = (props) => {
   // custom attribute must be lowercase
   const dispatch = useDispatch();
   const classes = useStyles();
-  const { onCancel, setSave } = props;
+  const { onCancel } = props;
   const scrollTopPopup = useRef(null);
   const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize, enableSubmit] = useSelector(
     ({ workspace }) => [
@@ -163,7 +163,8 @@ const InquiryEditor = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const fieldType = metadata.field_options.filter(field => field.display);
+  const fieldDefault = metadata.field_options.filter(field => field.display)
+  const [fieldType, setFieldType] = useState(fieldDefault);
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
   );
@@ -181,10 +182,10 @@ const InquiryEditor = (props) => {
   const [contentEdited, setContentEdited] = useState(valueType?.label);
   const [isDisabled, setDisabled] = useState(false);
   const [prevField, setPrevField] = useState('');
-  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
+  const [_, setDirty, setPristine] = useUnsavedChangesWarning();
   const [anchorEl, setAnchorEl] = useState(null);
   const [templateList, setTemplateList] = useState([]);
-  const [template, setTemplate] = useState(valueType?.value || 0);
+  const [template, setTemplate] = useState(valueType?.value || '0');
   const [content, setContent] = useState(currentEditInq.content || '');
 
   const handleClick = (event) => {
@@ -205,7 +206,7 @@ const InquiryEditor = (props) => {
   }
 
   const handleChange = (event) => {
-    const index = Number(event.target.value);
+    const index = event.target.value;
     setTemplate(index);
     const inq = { ...currentEditInq };
     inq.content = templateList[index];
@@ -247,6 +248,7 @@ const InquiryEditor = (props) => {
       scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [fieldValue]);
+
   const handleTypeChange = (e) => {
     const inq = { ...currentEditInq };
     inq.inqType = e.value;
@@ -259,9 +261,13 @@ const InquiryEditor = (props) => {
       inq.content = filter?.content[0] || MSG_INQUIRY_CONTENT;
       setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
+    if (!fieldValue) {
+      const filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field
+      setFieldType(metadata.field_options.filter(({ value, display }) => display && filterField.includes(value)))
+    }
     setValueType(e);
     setTemplateList(filter?.content || []);
-    setTemplate(0);
+    setTemplate('0');
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
@@ -269,7 +275,6 @@ const InquiryEditor = (props) => {
   const handleFieldChange = (e) => {
     const inq = { ...currentEditInq };
     inq.field = e.value;
-    inq.inqType = '';
 
     if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
       inq.content = contentEdited;
@@ -282,7 +287,7 @@ const InquiryEditor = (props) => {
     }
     dispatch(InquiryActions.validate({ ...valid, field: true }));
     setFieldValue(e);
-    setValueType(null);
+    setFieldType(fieldDefault)
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
@@ -485,8 +490,8 @@ const InquiryEditor = (props) => {
           return;
         }
         // check empty a field
-        if (inquiry.answerObj.length > 0) {
-          const checkOptionEmpty = inquiry.answerObj.filter((item) => !item.content);
+        if (currentEditInq.answerObj.length > 0) {
+          const checkOptionEmpty = currentEditInq.answerObj.filter((item) => !item.content);
           if (checkOptionEmpty.length > 0) {
             dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
             setDisabled(false);
@@ -643,7 +648,7 @@ const InquiryEditor = (props) => {
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BC", "")) // Draft of Inquiry Created (BC)
               }
               dispatch(InquiryActions.saveInquiry());
-              dispatch(InquiryActions.setField(inqContentTrim[0].field));
+              dispatch(InquiryActions.setField());
               dispatch(InquiryActions.setOpenedInqForm(false));
               dispatch(InquiryActions.setEditInq());
               dispatch(InquiryActions.setInquiries(optionsInquires));
@@ -803,7 +808,7 @@ const InquiryEditor = (props) => {
                   <>
                     <FormControlLabel
                       classes={{ root: classes.formRadio, label: classes.radioLabel }}
-                      value={index}
+                      value={index.toString()}
                       control={<Radio color={'primary'} classes={{ root: classes.radioRoot }} style={{ position: 'absolute' }} />}
                       label={temp}
                     />
@@ -811,7 +816,7 @@ const InquiryEditor = (props) => {
                 ))}
               </RadioGroup>
             </Popover>
-            <div className="mt-32 mx-8">
+            <div className="mt-32 mx-8" style={{ minHeight: 32 }}>
               <ContentEditable
                 html={content} // innerHTML of the editable div
                 disabled={false} // use true to disable editing
