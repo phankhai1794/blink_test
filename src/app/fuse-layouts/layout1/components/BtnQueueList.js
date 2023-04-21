@@ -40,7 +40,7 @@ const BtnQueueList = () => {
         <>
           <PermissionProvider
             action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
-            extraCondition={pathname.includes('/guest') && myBL.state.includes('DRF_') && userType === 'CUSTOMER'}>
+            extraCondition={pathname.includes('/guest') && myBL.state.includes('DRF_') && (userType === 'CUSTOMER' || userType === 'ONSHORE')}>
             <Tooltip title='Open BL Status'>
               <Button
                 variant='contained'
