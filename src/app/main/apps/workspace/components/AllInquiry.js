@@ -212,15 +212,6 @@ const AllInquiry = (props) => {
 
   let CURRENT_NUMBER = 0;
 
-  const changeToEditor = (inq) => {
-    const index = inquiries.findIndex((q) => q.id === inq.id);
-    if (index >= 0) {
-      const inqEdit = JSON.parse(JSON.stringify(inq));
-      dispatch(InquiryActions.setEditInq(inqEdit));
-      dispatch(InquiryActions.setField(inq.field));
-    }
-  };
-
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
     if (index >= 0) {
@@ -258,7 +249,9 @@ const AllInquiry = (props) => {
     }
     if (isCancel && !isAnswered) {
       optionsInquires[editedIndex].mediaFilesAnswer = [];
+      optionsInquires[editedIndex].selectChoice = '';
     } else if (isCancel && isAnswered) {
+      optionsInquires[editedIndex].selectChoice = '';
       const [resInq] = [await getInquiryById(myBL.id)];
       resInq.forEach(ans => {
         //reset data click cancel

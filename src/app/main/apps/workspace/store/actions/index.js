@@ -13,7 +13,8 @@ import {
   saveField,
   setInquiries,
   saveMetadata,
-  setListCommentDraft
+  setListCommentDraft,
+  setContentInqResolved
 } from './inquiry';
 import * as InquiryActions from './inquiry';
 import * as FormActions from './form';
@@ -52,7 +53,7 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
     const { orgContent, content } = blResponse?.myBL;
     const { contentAmendmentRs } = contentRespone;
     const cloneContent = { ...content };
-
+    dispatch(setContentInqResolved(content));
     dispatch(setOrgContent(orgContent));
     contentAmendmentRs?.length && contentAmendmentRs.forEach((a) => (cloneContent[a.field] = a.content));
     dispatch(setContent(cloneContent));

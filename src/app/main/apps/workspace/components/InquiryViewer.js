@@ -247,12 +247,13 @@ const InquiryViewer = (props) => {
   const classes = useStyles();
   const [filepaste, setFilepaste] = useState('');
   const [dropfiles, setDropfiles] = useState([]);
-  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
+  const [_, setDirty, setPristine] = useUnsavedChangesWarning();
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
+  const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
@@ -938,7 +939,7 @@ const InquiryViewer = (props) => {
             const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
               if (removeIndex !== -1) {
-                dispatch(InquiryActions.setContent({ ...content, [question.field]: orgContent[question.field] }));
+                dispatch(InquiryActions.setContent({ ...content, [question.field]: contentInqResolved[question.field] }));
                 optionsOfQuestion.splice(removeIndex, 1);
               }
               // remove all cd cm amendment
@@ -2858,9 +2859,9 @@ const InquiryViewer = (props) => {
                               ||
                               (
                                 [metadata.field[CONTAINER_DETAIL], metadata.field[CONTAINER_MANIFEST]].includes(question.field) ?
-                                  (question.contentCDCM && compareObject(question.contentCDCM, tempReply.answer.content) && isSameFile(inquiries, tempReply))
+                                  (question.contentCDCM && compareObject(question.contentCDCM, tempReply?.answer?.content) && isSameFile(inquiries, tempReply))
                                   : (
-                                    (question.answerObj[0].content === tempReply?.answer?.content)
+                                    (question.answerObj[0]?.content === tempReply?.answer?.content)
                                     && (tempReply && tempReply.mediaFiles && isSameFile(inquiries, tempReply))
                                   )
                               ))

@@ -94,7 +94,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-  const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
+  const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
   const user = useSelector(({ user }) => user);
   const classes = useStyles();
 
@@ -124,12 +124,12 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const type = (container === CONTAINER_DETAIL) ? CDTitle : CMTitle;
   const open = Boolean(anchorEl);
 
-  const sortValues =(vals) =>{
+  const sortValues = (vals) => {
     let valuesSorted = [];
-    if(container === CONTAINER_MANIFEST && !isResolveCDCM){
+    if (container === CONTAINER_MANIFEST && !isResolveCDCM) {
       let cms = [...vals];
       const contsNo = [
-        ...new Set((getValueField(CONTAINER_DETAIL) ||[]).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
+        ...new Set((getValueField(CONTAINER_DETAIL) || []).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
       ];
       if (contsNo.length) {
         contsNo.forEach((contNo) => {
@@ -198,7 +198,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   };
 
   const combineValueUnit = (name, row) => {
-    if (row){
+    if (row) {
       const value = isArray(row[getType(name)]);
       if (Object.keys(mapUnit).includes(name)) {
         const id = getType(mapUnit[name]);
@@ -211,7 +211,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const isValueChange = (key, index, row) => {
-    const originalValue = combineValueUnit(key, orgContent[getField(container)]?.[index]);
+    const originalValue = combineValueUnit(key, contentInqResolved[getField(container)]?.[index]);
     return originalValue !== combineValueUnit(key, row) ? '#FEF4E6' : '';
   }
 
@@ -233,10 +233,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const handleArrorRef = (node) => setArrowRef(node);
-  
 
   return (
-    
     <>
       <Drawer
         classes={{ paper: classes.paper }}
