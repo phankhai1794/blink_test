@@ -6,6 +6,7 @@ const initialState = {
   myBL: {},
   metadata: {},
   orgContent: {},
+  contentInqResolved: {},
   content: {},
   currentEditInq: null,
   currentAmendment: undefined,
@@ -102,6 +103,9 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SET_CONTENT: {
     return { ...state, content: action.state };
+  }
+  case Actions.SET_CONTENT_INQ_RESOLVED: {
+    return { ...state, contentInqResolved: action.state };
   }
   case Actions.REMOVE_SELECTED_OPTION: {
     return { ...state, removeOptions: action.state };

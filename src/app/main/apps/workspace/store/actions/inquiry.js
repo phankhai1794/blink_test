@@ -30,6 +30,7 @@ export const SET_LIST_COMMENT_DRAFT = 'SET_LIST_COMMENT_DRAFT';
 export const SET_NEW_AMENDMENT = 'SET_NEW_AMENDMENT';
 export const OPEN_QUEUE_LIST = 'OPEN_QUEUE_LIST';
 export const SEARCH_QUEUE_QUERY = 'SEARCH_QUEUE_QUERY';
+export const SET_CONTENT_INQ_RESOLVED = 'SET_CONTENT_INQ_RESOLVED';
 
 export function saveInquiry() {
   return {
@@ -104,6 +105,13 @@ export function setContent(state) {
   return {
     type: SET_CONTENT,
     state
+  };
+}
+
+export function setContentInqResolved(state) {
+  return {
+    type: SET_CONTENT_INQ_RESOLVED,
+    state,
   };
 }
 
