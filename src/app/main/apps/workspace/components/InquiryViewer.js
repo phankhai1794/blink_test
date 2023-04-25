@@ -381,6 +381,8 @@ const InquiryViewer = (props) => {
     setTempReply({});
     setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
     setIsAlsoNotifies([ALSO_NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
+    setIsResolve(false);
+    setIsResolveCDCM(false);
     if (question && question.process === 'pending') {
       loadComment(question.id)
         .then((res) => {
@@ -420,7 +422,7 @@ const InquiryViewer = (props) => {
                   type: metadata.ans_type['paragraph']
                 }
               };
-              if (['REP_Q_DRF', 'REP_A_DRF', 'ANS_DRF'].includes(filterOffshoreSent.state)) {
+              if (['REP_Q_DRF', 'REP_A_DRF', 'ANS_DRF', 'OPEN'].includes(filterOffshoreSent.state)) {
                 setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
               }
               lastest.state = filterOffshoreSent.state;
@@ -873,16 +875,19 @@ const InquiryViewer = (props) => {
   }, []);
 
   useEffect(() => {
-    if (confirmClick && confirmPopupType === 'removeInq' && indexQuestionRemove >= 0) {
+    if (confirmClick && confirmPopupType === 'removeInq' && replyRemove) {
       const optionsOfQuestion = [...inquiries];
-      const inqDelete = optionsOfQuestion.splice(indexQuestionRemove, 1)[0];
-      const hidePopupEmpty = !optionsOfQuestion.filter(inq => inq.field === inqDelete.field).length;
-      deleteInquiry(inqDelete.id)
+      const indexInqRemove = optionsOfQuestion.findIndex(inq => replyRemove.inqId === inq.id);
+      deleteInquiry(replyRemove.inqId)
         .then(() => {
-          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-          if (hidePopupEmpty) {
-            dispatch(InquiryActions.setOneInq({}));
-            dispatch(FormActions.toggleCreateInquiry(false));
+          if (indexInqRemove !== -1) {
+            const inqDelete = optionsOfQuestion.splice(indexInqRemove, 1)[0];
+            const hidePopupEmpty = !optionsOfQuestion.filter(inq => inq.field === inqDelete.field).length;
+            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+            if (hidePopupEmpty) {
+              dispatch(InquiryActions.setOneInq({}));
+              dispatch(FormActions.toggleCreateInquiry(false));
+            }
           }
           const isEmptyInq = optionsOfQuestion.filter(op => op.process === 'pending');
           if (!isEmptyInq.length) {
@@ -1184,8 +1189,12 @@ const InquiryViewer = (props) => {
     }
   }, [isResolve])
 
-  const removeQuestion = () => {
-    setIndexQuestionRemove(inquiries.findIndex((q) => q.id === question.id));
+  const removeQuestion = (question) => {
+    setIndexQuestionRemove(inquiries.findIndex((q) => q.field === question.field && q.inqType === question.inqType));
+    if (tempReply.answer) {
+      question.inqId = tempReply.answer.id;
+    }
+    setReplyRemove(question);
     dispatch(
       FormActions.openConfirmPopup({
         openConfirmPopup: true,
@@ -2378,7 +2387,7 @@ const InquiryViewer = (props) => {
                     extraCondition={allowDeleteInq}
                   >
                     <Tooltip title="Delete">
-                      <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion()}>
+                      <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion(question)}>
                         <img
                           style={{ height: '22px', cursor: 'pointer' }}
                           src="/assets/images/icons/trash.svg"
@@ -3042,6 +3051,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               }}
               disabled
               defaultValue={type === 'HS/HTS/NCM Code' ? HS_CODE : type}
+              value={type === 'HS/HTS/NCM Code' ? HS_CODE : type}
             />
           </Tooltip>
           {
