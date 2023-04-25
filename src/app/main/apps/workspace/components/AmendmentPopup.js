@@ -33,7 +33,7 @@ import {
   mapUnit
 } from '@shared/keyword';
 import { useUnsavedChangesWarning } from 'app/hooks'
-import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
+import { packageUnits, weightUnits, measurementUnits, containerTypeUnit } from '@shared/units';
 import ClearIcon from '@material-ui/icons/Clear';
 import WindowedSelect from "react-windowed-select";
 import { formatContainerNo, formatNumber } from '@shared';
@@ -287,7 +287,7 @@ const AmendmentPopup = (props) => {
             value={value?.join(', ')}
             InputProps={{
               disabled: !unlock,
-              endAdornment: <>{!unlock && <Icon>lock</Icon>}</>
+              endAdornment: <>{!unlock && <Icon style={{ paddingRight: 12 }}>lock</Icon>}</>
             }}
           />
         )}
@@ -348,6 +348,7 @@ const AmendmentPopup = (props) => {
           </FormControl>
         ) : (
           <TextField
+            fullWidth={true}
             variant="outlined"
             className={clsx(classes.textField, !isEdit && classes.lock)}
             value={field.value}
@@ -374,7 +375,7 @@ const AmendmentPopup = (props) => {
         <p style={{ fontWeight: 600 }}>CONTAINER SEAL</p>
         {CustomContainerSeal(data[getType(CONTAINER_SEAL)])}
         <p style={{ fontWeight: 600 }}>CONTAINER TYPE</p>
-        {CustomTextField({ fullWidth: true, title: CONTAINER_TYPE })}
+        {CustomSelect({ options: containerTypeUnit, title: CONTAINER_TYPE })}
         {cdUnit.map(({ field, title, unit, required, pattern }, i) => (
           <div key={i} className="flex justify-start">
             <div style={{ flex: '0 0 50%' }}>
