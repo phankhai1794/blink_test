@@ -365,6 +365,7 @@ function ToolbarLayout1(props) {
   }, [user, allowAccess]);
 
   const openAllInquiry = () => {
+    dispatch(InquiryActions.setField());
     if (inquiries.filter((inq) => inq.process === 'pending').length) {
       dispatch(FormActions.toggleAllInquiry(true));
       dispatch(FormActions.toggleSaveInquiry(true));

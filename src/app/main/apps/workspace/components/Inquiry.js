@@ -93,7 +93,6 @@ const Inquiry = (props) => {
       dispatch(InquiryActions.setEditInq(null));
       dispatch(FormActions.toggleCreateInquiry(false))
     }
-    dispatch(InquiryActions.setField())
   };
 
   const resetActionInquiry = async (q, isCancel) => {
