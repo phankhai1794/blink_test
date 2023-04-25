@@ -129,7 +129,8 @@ const DialogActions = withStyles((theme) => ({
 const useStyles = makeStyles(() => ({
   dialogPaper: {
     minHeight: 600,
-    maxHeight: '80%'
+    maxHeight: '80%',
+    margin: 0
   },
   dialogContent: {
     margin: 'auto',
@@ -294,23 +295,16 @@ export default function Form(props) {
   const PaperComponent = React.useMemo(
     () =>
       // eslint-disable-next-line react/display-name
-      (props) => {
-        const getBoundWidth = () => {
-          return (window.innerWidth - document.getElementById('paper')?.getBoundingClientRect().width) / 2
-        }
-        const getBoundHeight = () => {
-          return (window.innerHeight - document.getElementById('paper')?.getBoundingClientRect().height) / 2
-        }
-        return isFullScreen ?
-          <Paper {...props} /> :
-          <Draggable
-            bounds={{ left: -getBoundWidth() + 1, top: -getBoundHeight() + 1, right: getBoundWidth() - 1, bottom: getBoundHeight() - 1 }}
-            handle="#draggable-dialog-title"
-            cancel={'[class*="MuiDialogContent-root"]'}
-          >
-            <Paper {...props} id="paper" />
-          </Draggable>
-      },
+      (props) => isFullScreen ?
+        <Paper {...props} /> :
+        <Draggable
+          bounds="parent"
+          handle="#draggable-dialog-title"
+          cancel={'[class*="MuiDialogContent-root"]'}
+        >
+          <Paper {...props} id="paper" />
+        </Draggable>
+    ,
     [isFullScreen]
   );
 
