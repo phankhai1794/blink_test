@@ -773,3 +773,12 @@ export const packageUnits = packageUnitsJson.map((p) => ({
 export const weightUnits = [{ label: 'KGS', value: 'KGS' }];
 
 export const measurementUnits = [{ label: 'CBM', value: 'CBM' }];
+
+export const containerTypeUnit = [
+  "B4", "D2", "D3", "D4",
+  "D5", "D7", "F2", "F4",
+  "F5", "O2", "O4", "O5",
+  "P5", "P7", "Q2", "Q4",
+  "Q5", "R2", "R5", "R7",
+  "R8", "T2", "T4",
+].map(unit => ({ label: unit, value: unit }));
