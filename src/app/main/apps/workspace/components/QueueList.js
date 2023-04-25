@@ -11,6 +11,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import SearchIcon from '@material-ui/icons/Search';
 import { formatDate } from '@shared';
 import clsx from 'clsx';
+
 import QueueListTable from './QueueListTable';
 
 const useStyles = makeStyles((theme) => ({
@@ -41,8 +42,10 @@ const useStyles = makeStyles((theme) => ({
   closeBtn: {
     cursor: 'pointer',
   },
-  startIconBtn: {
-
+  popupContent: {
+    '& .MuiDialog-paper': {
+      margin: '0px'
+    }
   },
   paper: {
     display: 'flex',
@@ -50,6 +53,14 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     marginBottom: theme.spacing(1),
     padding: '24px',
+    '& span': {
+      fontFamily: 'Montserrat',
+      fontSize: '13px',
+    },
+    '& input': {
+      fontFamily: 'Montserrat',
+      fontSize: '14px',
+    },
   },
   searchBox: {
     height: '40px',
@@ -86,6 +97,14 @@ const useStyles = makeStyles((theme) => ({
     height: '24px',
     margin: 2,
   },
+  menuItem: {
+    '&:hover': {
+      backgroundColor: '#FDF2F2',
+    },
+  },
+  menuItemSelected: {
+    backgroundColor: '#FDF2F2 !important',
+  }
 }));
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -103,6 +122,7 @@ const QueueList = () => {
   return (
     <div>
       <Dialog
+        className={classes.popupContent}
         open={openQueueList}
         TransitionComponent={Transition}
         keepMounted
@@ -139,7 +159,7 @@ const TableContent = (props) => {
 const SearchLayout = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [state, setState] = useState({ bookingNo: '', from: '', to: '', blStatus: 'PENDING,IN_QUEUE' })
+  const [state, setState] = useState({ bookingNo: '', from: '', to: '', blStatus: 'PENDING,IN_QUEUE', isSelectedAll: false })
   const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
   const [selectedStatus, setSelectedStatus] = React.useState(['In Queue', 'Pending']);
 
@@ -157,21 +177,42 @@ const SearchLayout = (props) => {
   ];
 
   const handleSelectStatus = (event) => {
+    let values = event.target.value;
     const blStatus = {
       'In Queue': 'IN_QUEUE',
       'Pending': 'PENDING',
       'Completed': 'COMPLETED',
     };
     const arrStatus = [];
-    event.target.value.forEach(item => arrStatus.push(blStatus[item]));
-    setSelectedStatus(event.target.value);
-    setState({ ...state, blStatus: arrStatus.join(',') })
+    if ((values.indexOf('All') !== -1) && (selectedStatus.indexOf('All') === -1)) {
+      setSelectedStatus([...blStatusOption, 'All']);
+      setState({ ...state, blStatus: 'IN_QUEUE,PENDING,COMPLETED' })
+    } else if ((values.indexOf('All') === -1) && (selectedStatus.indexOf('All') !== -1)) {
+      setSelectedStatus([]);
+      setState({ ...state, blStatus: '' })
+    } else {
+      const arrSelected = [];
+      values.forEach(item => {
+        if (item !== 'All') {
+          arrStatus.push(blStatus[item]);
+          arrSelected.push(item);
+        }
+      });
+      setSelectedStatus(arrSelected);
+      setState({ ...state, blStatus: arrStatus.join(',') })
+    }
   };
   const handleChange = (query) => {
     setState({ ...state, ...query });
   }
 
-  const handelSearch = (e) => dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...state }));
+  const handelSearch = (e) => {
+    let blStatus = state.blStatus;
+    if (state.blStatus.indexOf() !== -1) {
+      blStatus = blStatus.splice(blStatus.indexOf(), 1);
+    }
+    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...state }));
+  }
 
   const handelReset = (e) => {
     let currentDate = new Date();
@@ -187,7 +228,9 @@ const SearchLayout = (props) => {
     <Paper className={classes.paper}>
       {/* Booking Number */}
       <FormControl className={classes.searchBkgNo} variant='outlined'>
-        <InputLabel >Booking Number</InputLabel>
+        <InputLabel>
+          <span>Booking Number</span>
+        </InputLabel>
         <OutlinedInput
           className={classes.searchBox}
           value={state.bookingNo}
@@ -198,7 +241,9 @@ const SearchLayout = (props) => {
       </FormControl>
       {/* From */}
       <FormControl className={classes.searchFrom} variant='outlined'>
-        <InputLabel >From</InputLabel>
+        <InputLabel>
+          <span>From</span>
+        </InputLabel>
         <OutlinedInput
           className={classes.searchBox}
           value={state.from}
@@ -210,7 +255,9 @@ const SearchLayout = (props) => {
       </FormControl>
       {/* To */}
       <FormControl className={classes.searchTo} variant='outlined'>
-        <InputLabel >To</InputLabel>
+        <InputLabel>
+          <span>To</span>
+        </InputLabel>
         <OutlinedInput
           className={classes.searchBox}
           value={state.to}
@@ -237,14 +284,19 @@ const SearchLayout = (props) => {
               renderValue={(selected) =>
                 <div className={classes.chips}>
                   {selected.map((value) => (
-                    <Chip key={value} label={value} className={classes.chip} />
+                    (value !== 'All') && <Chip key={value} label={value} className={classes.chip} />
                   ))}
                 </div>}
               disableUnderline
             >
+              <MenuItem key={'All'} value={'All'} classes={{ selected: classes.menuItemSelected }}>
+                {/* <Checkbox checked={selectedStatus.indexOf('All') > -1} onChange={(_e, checked) => handleCheckAll(checked)} /> */}
+                <Checkbox checked={selectedStatus.indexOf('All') > -1} color='primary' />
+                <ListItemText primary={'All'} />
+              </MenuItem>
               {blStatusOption.map((status) => (
-                <MenuItem key={status} value={status} >
-                  <Checkbox checked={selectedStatus.indexOf(status) > -1} />
+                <MenuItem key={status} classes={{ selected: classes.menuItemSelected }} value={status}>
+                  <Checkbox checked={selectedStatus.indexOf(status) > -1} color='primary' />
                   <ListItemText primary={status} />
                 </MenuItem>
               ))}
@@ -264,7 +316,9 @@ const SearchLayout = (props) => {
         variant='text'
         style={{ backgroundColor: 'transparent' }}
         onClick={handelReset}>
-        <span className='underline'>Reset</span>
+        <span className='underline'>
+          <span>Reset</span>
+        </span>
       </Button>
     </Paper>
   )
