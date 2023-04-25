@@ -68,11 +68,12 @@ import {
   Radio,
   TextField,
   Tooltip,
-  Typography
+  Typography,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import ArrowDropUp from '@material-ui/icons/ArrowDropUp';
+import WarningIcon from '@material-ui/icons/Warning';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
 import ErrorOutlineOutlined from '@material-ui/icons/ErrorOutlineOutlined';
@@ -2151,14 +2152,14 @@ const InquiryViewer = (props) => {
       textHelper = (<>
         {(prohibitedInfo?.countries.length > 0) &&
           <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
-            <ErrorOutlineOutlined fontSize='small' />
+            <WarningIcon fontSize='small' />
             &nbsp;{`Countries: ${prohibitedInfo?.countries.join(', ')}`}
           </span>
         }
         {(prohibitedInfo?.danger_cargo.length > 0) &&
           <>
             <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
-              <ErrorOutlineOutlined fontSize='small' />
+              <WarningIcon fontSize='small' />
               &nbsp;{`Danger Cargo: ${prohibitedInfo?.danger_cargo.join(', ')}`}
             </span>
           </>
@@ -2226,14 +2227,14 @@ const InquiryViewer = (props) => {
               <>
                 {(validateInput?.prohibitedInfo?.countries.length > 0) &&
                   <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
-                    <ErrorOutlineOutlined fontSize='small' />
+                    <WarningIcon fontSize='small' />
                     &nbsp;{`Countries: ${validateInput?.prohibitedInfo?.countries.join(', ')}`}
                   </span>
                 }
                 {(validateInput?.prohibitedInfo?.danger_cargo.length > 0) &&
                   <>
                     <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
-                      <ErrorOutlineOutlined fontSize='small' />
+                      <WarningIcon fontSize='small' />
                       &nbsp;{`Danger Cargo: ${validateInput?.prohibitedInfo?.danger_cargo.join(', ')}`}
                     </span>
                   </>
