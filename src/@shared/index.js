@@ -416,3 +416,13 @@ export const isDateField = (metadata, field) => {
 
   return isDate;
 }
+
+export const formatNumber = (num) => {
+  let dval = '';
+  if(typeof num === 'string' && num.trim() !== '0') {
+  	if(num && num.match(/^0+\./g)) {
+    	dval = '0'
+    }
+    return num.trim().replace(/^0+/g, dval)
+  } else return num;
+}

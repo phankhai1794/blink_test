@@ -36,7 +36,7 @@ import { useUnsavedChangesWarning } from 'app/hooks'
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import ClearIcon from '@material-ui/icons/Clear';
 import WindowedSelect from "react-windowed-select";
-import { formatContainerNo } from '@shared';
+import { formatContainerNo, formatNumber } from '@shared';
 
 const useStyles = makeStyles((theme) => ({
   selectRoot: {
@@ -127,8 +127,8 @@ const AmendmentPopup = (props) => {
   const user = useSelector(({ user }) => user);
   const [inputSeal, setInputSeal] = useState('');
   const { register, control, handleSubmit, formState: { errors } } = useForm();
-  const regNumber = { value: /^\s*(([0-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
-  const regInteger = { value: /^\s*[0-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
+  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
@@ -154,7 +154,7 @@ const AmendmentPopup = (props) => {
   const onSave = () => {
     Object.keys(data).forEach((key) => {
       if (typeof data[key] === 'string' && ![getType(HS_CODE), getType(HTS_CODE), getType(NCM_CODE)].includes(key))
-        data[key] = data[key].toUpperCase().replace(/^0*/g, "").trim();
+        data[key] = data[key].trim();
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
     onClose();
@@ -163,9 +163,14 @@ const AmendmentPopup = (props) => {
 
   const show = (value) => user.role === 'Admin' && value;
 
-  const handleChange = (id, value) => {
+  const handleChange = (field, value) => {
     setDirty();
-    updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [id]: value } : row)));
+    let val = value;
+    const id = field.id;
+    if([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(field.title) && !isNaN(value)) {
+      val = formatNumber(value);
+    }
+    updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [id]: val } : row)));
   };
 
   const onDelete = (value, tagIndex) => {
@@ -220,7 +225,7 @@ const AmendmentPopup = (props) => {
         autoComplete="off"
         className={clsx(classes.textField, !isEdit && classes.lock)}
         value={!isUpperCase ? formatContainerNo(field.value) : field.value}
-        onChange={(e) => handleChange(field.id, e.target.value)}
+        onChange={(e) => handleChange(field, e.target.value)}
         InputProps={{
           disabled: !isEdit,
           endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
@@ -299,7 +304,7 @@ const AmendmentPopup = (props) => {
 
     useEffect(() => {
       if (!field.value && options.length === 1)
-        handleChange(field.id, options[0].value);
+        handleChange(field, options[0].value);
     }, []);
 
     return (
@@ -316,7 +321,7 @@ const AmendmentPopup = (props) => {
                   options={options}
                   onChange={({ value }) => {
                     onChange(value)
-                    handleChange(field.id, value)
+                    handleChange(field, value)
                   }}
                   components={{
                     IndicatorSeparator: () => null
