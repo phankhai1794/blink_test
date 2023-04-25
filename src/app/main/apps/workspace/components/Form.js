@@ -576,7 +576,7 @@ export default function Form(props) {
                       fontWeight: 'bold',
                       width: 120,
                       color: 'white',
-                      backgroundColor: (!enableSend || isLoading) ? '#CCD3D1' : '#bd1874',
+                      backgroundColor: (!enableSend || isLoading || inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED', 'AME_SENT', 'ANS_SENT', 'REP_A_SENT'].includes(inq.state)).length === inquiries.length) ? '#CCD3D1' : '#bd1874',
                       borderRadius: '8px',
                       fontFamily: 'Montserrat'
                     }}
