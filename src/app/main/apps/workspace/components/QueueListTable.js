@@ -15,6 +15,9 @@ import ReplyIcon from '@material-ui/icons/Reply';
 const useStyles = makeStyles({
   table: {
     minWidth: 650,
+    '& span': {
+      fontFamily: 'Montserrat',
+    }
   },
   searchContainer: {
     display: 'flex',
@@ -190,7 +193,9 @@ const QueueListTable = () => {
             <TableHead className={classes.headerColor}>
               <TableRow>
                 <TableCell>
-                  <div className={classes.lineColumn}>No.</div>
+                  <div className={classes.lineColumn}>
+                    <span>No.</span>
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className={classes.lineColumn}>
@@ -216,10 +221,14 @@ const QueueListTable = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className={classes.lineColumn}>Unresolved</div>
+                  <div className={classes.lineColumn}>
+                    <span>Unresolved</span>
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <div>Resolved</div>
+                  <div>
+                    <span>Resolved</span>
+                  </div>
                 </TableCell>
                 <TableCell>
                   {/* TBU */}
