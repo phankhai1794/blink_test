@@ -220,8 +220,9 @@ const AllInquiry = (props) => {
       dispatch(InquiryActions.setField(inqEdit.field));
     }
   };
+
   const onCancel = () => {
-    if (currentEditInq.id) {
+    if (currentEditInq) {
       dispatch(InquiryActions.setEditInq());
     }
   };

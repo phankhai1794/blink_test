@@ -383,6 +383,8 @@ const InquiryViewer = (props) => {
     setIsAlsoNotifies([ALSO_NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
     setIsResolve(false);
     setIsResolveCDCM(false);
+    setIsReply(false);
+    setIsReplyCDCM(false);
     if (question && question.process === 'pending') {
       loadComment(question.id)
         .then((res) => {
