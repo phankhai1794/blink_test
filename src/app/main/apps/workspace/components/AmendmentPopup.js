@@ -127,7 +127,7 @@ const AmendmentPopup = (props) => {
   const user = useSelector(({ user }) => user);
   const [inputSeal, setInputSeal] = useState('');
   const { register, control, handleSubmit, formState: { errors } } = useForm();
-  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Must be a Number' }
   const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
   const getType = (type) => {
