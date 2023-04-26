@@ -1346,7 +1346,11 @@ const InquiryViewer = (props) => {
           if (getTypeName === CONTAINER_SEAL) {
             obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
           } else if (obj[question.inqType]) {
-            obj[question.inqType] = (typeof obj[question.inqType] === 'string') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
+            if([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName) && !isNaN(obj[question.inqType])){
+              obj[question.inqType] = (typeof obj[question.inqType] === 'string' ? parseFloat( obj[question.inqType]).toFixed(3) :  obj[question.inqType])
+            } else {
+              obj[question.inqType] = (typeof obj[question.inqType] === 'string' && getTypeName !== 'HS/HTS/NCM Code') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
+            }
           }
         } else if (question.process === 'draft') {
           // map container no
@@ -3119,6 +3123,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               return (
                 <input
                   className={clsx(classes.text)}
+                  maxlength= {type === 'HS/HTS/NCM Code' ? "6" : "1000"}
                   key={index1}
                   style={{
                     marginLeft: 5,
