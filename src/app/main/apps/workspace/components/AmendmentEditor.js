@@ -6,7 +6,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
-import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField } from '@shared';
+import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate } from '@shared';
 import { NO_CONTENT_AMENDMENT } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
@@ -596,12 +596,18 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                 (fieldValue && fieldValueSelect && ['containerDetail', 'containerManifest'].includes(fieldValueSelect.keyword)) ? (
                   (compareObject(content[fieldValueSelect.value], fieldValue) && attachments.length === 0)
                 ) : (
-                  (isDateTime ?
-                    isValidDate
+                  (fieldValueSelect && [DATED, DATE_CARGO, DATE_LADEN].includes(fieldValueSelect.keyword) ?
+                    (isValidDate ||
+                      (
+                        (fieldValue && fieldValueSelect && isSameDate(fieldValue, content[fieldValueSelect.value]) && attachments.length === 0)
+                      )
+                    )
                     : (
-                      (fieldValue && fieldValueSelect && (fieldValue.trim() === content[fieldValueSelect.value] && attachments.length === 0))
+                      (fieldValue && fieldValueSelect && (fieldValue.trim() === content[fieldValueSelect.value]?.trim() && attachments.length === 0))
                       ||
                       (fieldValueSelect && !content[fieldValueSelect.value] && (!fieldValue || fieldValue.trim() === '') && attachments.length === 0)
+                      ||
+                      (fieldValueSelect && content[fieldValueSelect.value] && content[fieldValueSelect.value].trim() === '' && attachments.length === 0)
                     ))
                 )
               )))
