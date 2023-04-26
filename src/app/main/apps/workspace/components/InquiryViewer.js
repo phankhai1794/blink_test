@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject, formatDate, isDateField, formatNumber } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -2865,19 +2865,27 @@ const InquiryViewer = (props) => {
                           color="primary"
                           onClick={() => onSaveReply()}
                           disabled={
-                            (question.state === "AME_DRF" && (
+                            ((question.state.includes("AME_DRF") || question.state.includes("AME_SENT")) && (
                               validateField(question.field, tempReply?.answer?.content).isError
                               ||
                               (
                                 [metadata.field[CONTAINER_DETAIL], metadata.field[CONTAINER_MANIFEST]].includes(question.field) ?
                                   (question.contentCDCM && compareObject(question.contentCDCM, tempReply?.answer?.content) && isSameFile(inquiries, tempReply))
                                   : (
-                                    (question.answerObj[0]?.content === tempReply?.answer?.content)
-                                    && (tempReply && tempReply.mediaFiles && isSameFile(inquiries, tempReply))
+                                    ([metadata.field[DATED], metadata.field[DATE_CARGO], metadata.field[DATE_LADEN]].includes(question.field) ?
+                                      (
+                                        isValidDate ||
+                                        (isSameDate(question.answerObj[0].content, tempReply?.answer?.content) && isSameFile(inquiries, tempReply))
+                                      )
+                                      : (
+                                        (question.answerObj[0].content?.trim()?.toLowerCase() === tempReply?.answer?.content?.trim()?.toLowerCase())
+                                        && (tempReply && tempReply.mediaFiles && isSameFile(inquiries, tempReply))
+                                      )
+                                    )
                                   )
                               ))
                             )
-                            || (question.state !== "AME_DRF" && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
+                            || ((!question.state.includes("AME_DRF") && !question.state.includes("AME_SENT")) && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
                             || isValidDate
                           }
@@ -2971,7 +2979,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
         temp[index][type] = "";
       }
     } else {
-      if([CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName(type)) && !isNaN(value)) {
+      if ([CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName(type)) && !isNaN(value)) {
         temp[index][type] = formatNumber(value)
       } else temp[index][type] = (getTypeName(type) === CONTAINER_SEAL) ? value.split(',') : value;
     }

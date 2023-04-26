@@ -43,7 +43,7 @@ export const filterMetadata = (data) => {
       field
     });
   })
-  data['ansType'].forEach(({id , name}) => {
+  data['ansType'].forEach(({ id, name }) => {
     dict['ans_type'][name] = id;
   })
   return dict;
@@ -419,10 +419,20 @@ export const isDateField = (metadata, field) => {
 
 export const formatNumber = (num) => {
   let dval = '';
-  if(typeof num === 'string' && num.trim() !== '0') {
-  	if(num && num.match(/^0+\./g)) {
-    	dval = '0'
+  if (typeof num === 'string' && num.trim() !== '0') {
+    if (num && num.match(/^0+\./g)) {
+      dval = '0'
     }
     return num.trim().replace(/^0+/g, dval)
   } else return num;
+}
+
+export const isSameDate = (d1, d2) => {
+  const t1 = new Date(d1);
+  const t2 = new Date(d2);
+  return (
+    t1.getFullYear() === t2.getFullYear()
+    && t1.getMonth() === t2.getMonth()
+    && t1.getDay() === t2.getDay()
+  )
 }
