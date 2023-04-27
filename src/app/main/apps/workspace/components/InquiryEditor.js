@@ -1,37 +1,40 @@
-import { FuseChipSelect } from '@fuse';
-import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getLabelById, toFindDuplicates } from '@shared';
-import { handleError } from '@shared/handleError';
+import {FuseChipSelect} from '@fuse';
+import React, {useEffect, useRef, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {getLabelById, toFindDuplicates} from '@shared';
+import {handleError} from '@shared/handleError';
 import {
+  Button,
+  Collapse,
+  Divider,
   FormControl,
   FormControlLabel,
   FormHelperText,
-  Button,
-  Radio,
-  RadioGroup,
-  Divider,
   Grid,
-  TextField,
   Icon,
-  Popover
+  ListItem,
+  ListItemText,
+  Popover,
+  Radio,
+  RadioGroup
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { OTHERS } from '@shared/keyword';
-import { uploadFile } from 'app/services/fileService';
-import { updateInquiry, saveInquiry, getUpdatedAtAnswer } from 'app/services/inquiryService';
+import {makeStyles} from '@material-ui/styles';
+import {PERMISSION, PermissionProvider} from '@shared/permission';
+import {CONTAINER_DETAIL, CONTAINER_MANIFEST, OTHERS} from '@shared/keyword';
+import {uploadFile} from 'app/services/fileService';
+import {getUpdatedAtAnswer, saveInquiry, updateInquiry} from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
-import { useUnsavedChangesWarning } from 'app/hooks'
-import { useDropzone } from 'react-dropzone';
+import {useUnsavedChangesWarning} from 'app/hooks'
+import {useDropzone} from 'react-dropzone';
 import ContentEditable from 'react-contenteditable';
+import {ExpandLess, ExpandMore} from "@material-ui/icons";
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
-import { MSG_INQUIRY_CONTENT } from '../store/reducers/inquiry';
+import {MSG_INQUIRY_CONTENT} from '../store/reducers/inquiry';
 
 import ChoiceAnswerEditor from './ChoiceAnswerEditor';
 import ParagraphAnswerEditor from './ParagraphAnswerEditor';
@@ -39,6 +42,7 @@ import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import AttachFile from './AttachFile';
+import ContainerDetailForm from "./ContainerDetailForm";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -187,6 +191,10 @@ const InquiryEditor = (props) => {
   const [templateList, setTemplateList] = useState([]);
   const [template, setTemplate] = useState(valueType?.value || '0');
   const [content, setContent] = useState(currentEditInq.content || '');
+  const [openCD, setOpenCD] = useState(false);
+  const [openCM, setOpenCM] = useState(false);
+  const [getDataCD, setDataCD] = useState({});
+  const [getDataCM, setDataCM] = useState({});
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -223,6 +231,12 @@ const InquiryEditor = (props) => {
     };
   };
 
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
+
   useEffect(() => {
     if (valueType?.value) {
       const filter = metadata.template.find(({ field, type }) => type === valueType.value && fieldValue.keyword === field);
@@ -243,6 +257,13 @@ const InquiryEditor = (props) => {
         ))
       ).sort((a, b) => a.label.localeCompare(b.label));
       setInqTypeOption(filter);
+      if (fieldValue.value === containerCheck[0]) {
+        setOpenCM(false);
+        setOpenCD(true);
+      } else if (fieldValue.value === containerCheck[1]) {
+        setOpenCD(false);
+        setOpenCM(true);
+      }
     }
     if (scrollTopPopup.current) {
       scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
@@ -622,6 +643,10 @@ const InquiryEditor = (props) => {
         }
         return contentTrim;
       });
+      const contentCDCM = {
+        cdContent: {field: containerCheck[0], content: getDataCD},
+        cmContent: {field: containerCheck[1], content: getDataCM},
+      }
       axios
         .all(uploads.map((endpoint) => uploadFile(endpoint).catch((err) => handleError(dispatch, err))))
         .then((media) => {
@@ -630,7 +655,7 @@ const InquiryEditor = (props) => {
             const mediaFileList = file.response.map((item) => item);
             mediaList = [...mediaList, ...mediaFileList];
           });
-          saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
+          saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id, contentCDCM })
             .then((res) => {
               const mediaFile = [];
               mediaList.forEach(({ id, name, ext }) => mediaFile.push({ id, name, ext }));
@@ -678,6 +703,10 @@ const InquiryEditor = (props) => {
     onDrop: files => setDropfiles(files),
     noClick: true
   });
+
+  const handleClickCollapse = (isCD) => {
+    isCD ? setOpenCD(!openCD) : setOpenCM(!openCM);
+  };
 
   return (
     <div style={{ position: 'relative' }} onPaste={onPaste} {...getRootProps({})}>
@@ -854,6 +883,47 @@ const InquiryEditor = (props) => {
                   </div>
                 ))}
             </div>
+            {/*//*/}
+            {
+              containerCheck.includes(currentEditInq?.field) && (
+                <div style={{ width: '100%', marginTop: '10px' }}>
+                  <ListItem button onClick={() => handleClickCollapse(true)}>
+                    <ListItemText primary="Table CD" />
+                    {openCD ? <ExpandLess /> : <ExpandMore />}
+                  </ListItem>
+                  <Collapse in={openCD} timeout="auto" unmountOnExit>
+                    <ListItem>
+                      <ContainerDetailForm
+                        container={CONTAINER_DETAIL}
+                        setEditContent={(value) => {
+                          setDataCD(value)
+                        }}
+                        isPendingProcess={true}
+                        disableInput={false}
+                      />
+                    </ListItem>
+                  </Collapse>
+
+                  <ListItem button onClick={() => handleClickCollapse(false)}>
+                    <ListItemText primary="Table CM" />
+                    {openCM ? <ExpandLess /> : <ExpandMore />}
+                  </ListItem>
+                  <Collapse in={openCM} timeout="auto" unmountOnExit>
+                    <ListItem>
+                      <ContainerDetailForm
+                        container={CONTAINER_MANIFEST}
+                        setEditContent={(value) => {
+                          setDataCM(value)
+                        }}
+                        isPendingProcess={true}
+                        disableInput={false}
+                      />
+                    </ListItem>
+                  </Collapse>
+                </div>
+              )
+            }
+            {/*//*/}
             <>
               {user.role !== 'Admin' && (
                 <>

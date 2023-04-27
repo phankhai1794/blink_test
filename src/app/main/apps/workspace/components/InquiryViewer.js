@@ -81,6 +81,7 @@ import { useDropzone } from 'react-dropzone';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 import * as Actions from '../store/actions';
+import DateTimePickers from '../shared-components/DateTimePickers';
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
@@ -91,7 +92,6 @@ import AttachFile from './AttachFile';
 import Comment from './Comment';
 import TagsComponent from './TagsComponent';
 import ContainerDetailForm from './ContainerDetailForm';
-import DateTimePickers from '../shared-components/DateTimePickers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -392,6 +392,7 @@ const InquiryViewer = (props) => {
           const lastest = { ...question };
           if (res.length > 0) {
             // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+            console.log(res)
             // filter comment
             const filterOffshoreSent = res[res.length - 1];
             if (filterOffshoreSent.type === 'REP' && filterOffshoreSent.state === 'COMPL') {
@@ -1347,7 +1348,7 @@ const InquiryViewer = (props) => {
             obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
           } else if (obj[question.inqType]) {
             if([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName) && !isNaN(obj[question.inqType])){
-              obj[question.inqType] = (typeof obj[question.inqType] === 'string' ? parseFloat( obj[question.inqType]).toFixed(3) :  obj[question.inqType])
+              obj[question.inqType] = (typeof obj[question.inqType] === 'string' ? parseFloat( obj[question.inqType]).toFixed(3) : obj[question.inqType])
             } else {
               obj[question.inqType] = (typeof obj[question.inqType] === 'string' && getTypeName !== 'HS/HTS/NCM Code') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
             }
@@ -3123,7 +3124,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               return (
                 <input
                   className={clsx(classes.text)}
-                  maxlength= {type === 'HS/HTS/NCM Code' ? "6" : "1000"}
+                  maxLength= {type === 'HS/HTS/NCM Code' ? "6" : "1000"}
                   key={index1}
                   style={{
                     marginLeft: 5,

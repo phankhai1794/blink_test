@@ -6,14 +6,28 @@ import {
   HTS_CODE,
   NCM_CODE,
   mapUnit,
-  CONTAINER_MANIFEST
+  CONTAINER_MANIFEST, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Icon, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Drawer, Popper } from '@material-ui/core';
+import {
+  Icon,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Drawer,
+  Popper,
+  TextField
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import styled from 'styled-components';
-import { formatContainerNo } from '@shared';
+import {formatContainerNo, formatNumber} from '@shared';
+import clsx from "clsx";
+
+import {measurementUnits, packageUnits, weightUnits} from "../../../../../@shared/units";
 
 import AmendmentPopup from './AmendmentPopup';
 
@@ -90,7 +104,7 @@ const StyledPopper = styled(Popper)`&&{
   }
 }`;
 
-const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, deleteAmendment, setDeleteAmendment, isResolveCDCM }) => {
+const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD }) => {
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -197,14 +211,51 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     return total === 0 ? '' : parseFloat(total.toFixed(6)).toLocaleString() + ` ${values[0][getType(mapUnit[name])] || ''}`;
   };
 
-  const combineValueUnit = (name, row) => {
+  const handleChange = (name, value, rowIndex) => {
+    const valueEdit = [...values];
+    let val = value;
+    const id = getType(name);
+    if([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(name) && !isNaN(value)) {
+      val = formatNumber(value);
+    }
+    const editedVal = valueEdit.map((row, i) => (rowIndex === i ? { ...valueEdit[rowIndex], [id]: val } : row));
+    setDataCD(editedVal);
+  }
+
+  const combineValueUnit = (name, row, vindex) => {
     if (row) {
       const value = isArray(row[getType(name)]);
       if (Object.keys(mapUnit).includes(name)) {
         const id = getType(mapUnit[name]);
         const unit = row[id] || '';
+        // if (isPendingProcess) {
+        //   return (
+        //     <>
+        //       <TextField id="standard-required"
+        //         defaultValue={value ? `${value} ${unit}` : value}
+        //         onChange={(e) => handleChange(name, e.target.value, vindex)}
+        //         // value={value ? `${value} ${unit}` : value}
+        //       />
+        //     </>
+        //   )
+        // } else {
+        //   return value ? `${value} ${unit}` : value;
+        // }
         return value ? `${value} ${unit}` : value;
       }
+      // if (isPendingProcess) {
+      //   return (
+      //     <>
+      //       <TextField id="standard-required"
+      //         defaultValue={value}
+      //         onChange={(e) => handleChange(name, e.target.value, vindex)}
+      //         // value={value}
+      //       />
+      //     </>
+      //   )
+      // } else {
+      //   return value;
+      // }
       return value;
     }
     return ""
@@ -298,7 +349,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                     <TableCell
                       key={i}
                       className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'}
-                      style={{ backgroundColor: isValueChange(cell, vindex, row) }}
+                      style={{ backgroundColor: !isPendingProcess && isValueChange(cell, vindex, row) }}
                       onMouseEnter={checkPopover}
                       onMouseLeave={closePopover}
                     >
@@ -313,7 +364,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                               {disableInput ? 'visibility' : 'edit_mode'}
                             </Icon>
                           </IconButton>
-                        </div> : combineValueUnit(cell, row)
+                        </div> : combineValueUnit(cell, row, vindex)
                       }
                     </TableCell>
                   )
