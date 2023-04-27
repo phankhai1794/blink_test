@@ -81,6 +81,7 @@ import { useDropzone } from 'react-dropzone';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 import * as Actions from '../store/actions';
+import DateTimePickers from '../shared-components/DateTimePickers';
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
@@ -91,7 +92,6 @@ import AttachFile from './AttachFile';
 import Comment from './Comment';
 import TagsComponent from './TagsComponent';
 import ContainerDetailForm from './ContainerDetailForm';
-import DateTimePickers from '../shared-components/DateTimePickers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -1578,7 +1578,7 @@ const InquiryViewer = (props) => {
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
     setIsResolveCDCM(false);
-    setTempReply({});
+    // setTempReply({});
     setPristine()
   };
 
@@ -3123,7 +3123,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               return (
                 <input
                   className={clsx(classes.text)}
-                  maxlength={type === 'HS/HTS/NCM Code' ? "6" : "1000"}
+                  maxLength={type === 'HS/HTS/NCM Code' ? "6" : "1000"}
                   key={index1}
                   style={{
                     marginLeft: 5,
