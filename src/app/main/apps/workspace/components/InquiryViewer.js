@@ -2869,7 +2869,7 @@ const InquiryViewer = (props) => {
                           color="primary"
                           onClick={() => onSaveReply()}
                           disabled={
-                            ((question.state.includes("AME_DRF") || question.state.includes("AME_SENT")) && (
+                            ((question.state.includes("AME_DRF") || (question.state.includes("AME_SENT") && user.role === 'Guest')) && (
                               validateField(question.field, tempReply?.answer?.content).isError
                               ||
                               (
@@ -2889,7 +2889,7 @@ const InquiryViewer = (props) => {
                                   )
                               ))
                             )
-                            || ((!question.state.includes("AME_DRF") && !question.state.includes("AME_SENT")) && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
+                            || ((!question.state.includes("AME_DRF") && (!question.state.includes("AME_SENT") || user.role !== 'Guest')) && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
                             || isValidDate
                           }
