@@ -6,14 +6,20 @@ import {
   HTS_CODE,
   NCM_CODE,
   mapUnit,
-  CONTAINER_MANIFEST
+  CONTAINER_MANIFEST,
+  CONTAINER_PACKAGE,
+  CM_PACKAGE,
+  CONTAINER_WEIGHT,
+  CONTAINER_MEASUREMENT,
+  CM_WEIGHT,
+  CM_MEASUREMENT
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Icon, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Drawer, Popper } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import styled from 'styled-components';
-import { formatContainerNo } from '@shared';
+import { formatContainerNo, NumberFormat } from '@shared';
 
 import AmendmentPopup from './AmendmentPopup';
 
@@ -199,7 +205,14 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
   const combineValueUnit = (name, row) => {
     if (row) {
-      const value = isArray(row[getType(name)]);
+      let value = isArray(row[getType(name)]);
+      if (value) {
+        let minFrac = -1;
+        if ([CM_MEASUREMENT, CM_WEIGHT, CONTAINER_MEASUREMENT, CONTAINER_WEIGHT].includes(name)) minFrac = 3;
+        if ([CM_PACKAGE, CONTAINER_PACKAGE].includes(name)) minFrac = 0;
+        if (minFrac !== -1) value = NumberFormat(value);
+      }
+
       if (Object.keys(mapUnit).includes(name)) {
         const id = getType(mapUnit[name]);
         const unit = row[id] || '';

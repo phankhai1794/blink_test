@@ -362,7 +362,7 @@ const TableCM = (props) => {
             </Grid>
             <Grid item xs={2}>
               <BLField multiline={true}>
-                {`${NumberFormat(drfMD[TOTAL_PACKAGE])} ${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`}
+                {`${NumberFormat(drfMD[TOTAL_PACKAGE], 0)} ${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`}
               </BLField>
             </Grid>
             <Grid item xs={4}>
@@ -370,12 +370,12 @@ const TableCM = (props) => {
             </Grid>
             <Grid item xs={2}>
               <BLField multiline={true}>
-                {`${NumberFormat(drfMD[TOTAL_WEIGHT])} ${drfMD[TOTAL_WEIGHT_UNIT]}`}
+                {`${NumberFormat(drfMD[TOTAL_WEIGHT], 3)} ${drfMD[TOTAL_WEIGHT_UNIT]}`}
               </BLField>
             </Grid>
             <Grid item xs={2}>
               <BLField multiline={true}>
-                {`${NumberFormat(drfMD[TOTAL_MEASUREMENT])} ${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
+                {`${NumberFormat(drfMD[TOTAL_MEASUREMENT], 3)} ${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
               </BLField>
             </Grid>
           </Grid>
@@ -390,7 +390,7 @@ const TableCM = (props) => {
               </Grid>
               <Grid item xs={2} className={clsx(classes['grid-xs-2'])}>
                 <BLField multiline={true}>
-                  {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_PACKAGE]]) || ''} ${getPackageName(
+                  {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_PACKAGE]], 0) || ''} ${getPackageName(
                     cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]]
                   )}`}
                 </BLField>
@@ -400,12 +400,12 @@ const TableCM = (props) => {
               </Grid>
               <Grid item xs={2} className={clsx(classes['grid-xs-2'])}>
                 <BLField multiline={true}>
-                  {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_WEIGHT]]) || ''} ${cm?.[metadata?.inq_type?.[CM_WEIGHT_UNIT]] || ''}`}
+                  {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_WEIGHT]], 3) || ''} ${cm?.[metadata?.inq_type?.[CM_WEIGHT_UNIT]] || ''}`}
                 </BLField>
               </Grid>
               <Grid item xs={2} className={clsx(classes['grid-xs-2'])}>
                 <BLField multiline={true}>
-                  {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_MEASUREMENT]]) || ''} ${cm?.[metadata?.inq_type?.[CM_MEASUREMENT_UNIT]] || ''}`}
+                  {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_MEASUREMENT]], 3) || ''} ${cm?.[metadata?.inq_type?.[CM_MEASUREMENT_UNIT]] || ''}`}
                 </BLField>
               </Grid>
             </Grid>
