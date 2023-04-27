@@ -1250,7 +1250,7 @@ const InquiryViewer = (props) => {
   const getAnswerResolve = () => {
     let result = "";
     const data = inquiries.find(({ id }) => question.id === id);
-    if (data && data.answerObj?.length !== 0) {
+    if (!containerCheck.includes(question.field) && data && data.answerObj?.length !== 0) {
       result = (metadata.ans_type.choice === data.ansType) ? data.answerObj?.find(choice => choice.confirmed)?.content : "";
     }
     return result;
@@ -1346,8 +1346,8 @@ const InquiryViewer = (props) => {
           if (getTypeName === CONTAINER_SEAL) {
             obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
           } else if (obj[question.inqType]) {
-            if([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName) && !isNaN(obj[question.inqType])){
-              obj[question.inqType] = (typeof obj[question.inqType] === 'string' ? parseFloat( obj[question.inqType]).toFixed(3) :  obj[question.inqType])
+            if ([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName) && !isNaN(obj[question.inqType])) {
+              obj[question.inqType] = (typeof obj[question.inqType] === 'string' ? parseFloat(obj[question.inqType]).toFixed(3) : obj[question.inqType])
             } else {
               obj[question.inqType] = (typeof obj[question.inqType] === 'string' && getTypeName !== 'HS/HTS/NCM Code') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
             }
@@ -3123,7 +3123,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               return (
                 <input
                   className={clsx(classes.text)}
-                  maxlength= {type === 'HS/HTS/NCM Code' ? "6" : "1000"}
+                  maxlength={type === 'HS/HTS/NCM Code' ? "6" : "1000"}
                   key={index1}
                   style={{
                     marginLeft: 5,
