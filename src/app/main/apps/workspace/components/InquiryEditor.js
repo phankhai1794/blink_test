@@ -655,7 +655,7 @@ const InquiryEditor = (props) => {
             const mediaFileList = file.response.map((item) => item);
             mediaList = [...mediaList, ...mediaFileList];
           });
-          saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id, contentCDCM })
+          saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
             .then((res) => {
               const mediaFile = [];
               mediaList.forEach(({ id, name, ext }) => mediaFile.push({ id, name, ext }));
@@ -883,47 +883,7 @@ const InquiryEditor = (props) => {
                   </div>
                 ))}
             </div>
-            {/*//*/}
-            {
-              containerCheck.includes(currentEditInq?.field) && (
-                <div style={{ width: '100%', marginTop: '10px' }}>
-                  <ListItem button onClick={() => handleClickCollapse(true)}>
-                    <ListItemText primary="Table CD" />
-                    {openCD ? <ExpandLess /> : <ExpandMore />}
-                  </ListItem>
-                  <Collapse in={openCD} timeout="auto" unmountOnExit>
-                    <ListItem>
-                      <ContainerDetailForm
-                        container={CONTAINER_DETAIL}
-                        setEditContent={(value) => {
-                          setDataCD(value)
-                        }}
-                        isPendingProcess={true}
-                        disableInput={false}
-                      />
-                    </ListItem>
-                  </Collapse>
 
-                  <ListItem button onClick={() => handleClickCollapse(false)}>
-                    <ListItemText primary="Table CM" />
-                    {openCM ? <ExpandLess /> : <ExpandMore />}
-                  </ListItem>
-                  <Collapse in={openCM} timeout="auto" unmountOnExit>
-                    <ListItem>
-                      <ContainerDetailForm
-                        container={CONTAINER_MANIFEST}
-                        setEditContent={(value) => {
-                          setDataCM(value)
-                        }}
-                        isPendingProcess={true}
-                        disableInput={false}
-                      />
-                    </ListItem>
-                  </Collapse>
-                </div>
-              )
-            }
-            {/*//*/}
             <>
               {user.role !== 'Admin' && (
                 <>

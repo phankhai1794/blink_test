@@ -228,34 +228,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
       if (Object.keys(mapUnit).includes(name)) {
         const id = getType(mapUnit[name]);
         const unit = row[id] || '';
-        // if (isPendingProcess) {
-        //   return (
-        //     <>
-        //       <TextField id="standard-required"
-        //         defaultValue={value ? `${value} ${unit}` : value}
-        //         onChange={(e) => handleChange(name, e.target.value, vindex)}
-        //         // value={value ? `${value} ${unit}` : value}
-        //       />
-        //     </>
-        //   )
-        // } else {
-        //   return value ? `${value} ${unit}` : value;
-        // }
         return value ? `${value} ${unit}` : value;
       }
-      // if (isPendingProcess) {
-      //   return (
-      //     <>
-      //       <TextField id="standard-required"
-      //         defaultValue={value}
-      //         onChange={(e) => handleChange(name, e.target.value, vindex)}
-      //         // value={value}
-      //       />
-      //     </>
-      //   )
-      // } else {
-      //   return value;
-      // }
       return value;
     }
     return ""

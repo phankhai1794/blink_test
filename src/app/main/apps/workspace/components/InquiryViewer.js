@@ -92,6 +92,7 @@ import AttachFile from './AttachFile';
 import Comment from './Comment';
 import TagsComponent from './TagsComponent';
 import ContainerDetailForm from './ContainerDetailForm';
+import ContainerDetailInquiry from "./ContainerDetailInquiry";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -298,6 +299,8 @@ const InquiryViewer = (props) => {
   const [isDateTime, setIsDateTime] = useState(false);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const [isValidDate, setIsValidDate] = useState(false);
+  const [getDataCD, setDataCD] = useState({});
+  const [getDataCM, setDataCM] = useState({});
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -394,7 +397,8 @@ const InquiryViewer = (props) => {
             // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
             console.log(res)
             // filter comment
-            const filterOffshoreSent = res[res.length - 1];
+            const filterCDCM = res.filter(r => r.type !== 'ANS_CD_CM');
+            const filterOffshoreSent = filterCDCM[filterCDCM.length - 1];
             if (filterOffshoreSent.type === 'REP' && filterOffshoreSent.state === 'COMPL') {
               setInqAnsId(filterOffshoreSent.id);
             }
@@ -503,7 +507,7 @@ const InquiryViewer = (props) => {
               }
             }
             //
-            const sortComments = [...res].sort((a, b) => (a.updatedAt > b.updatedAt ? 1 : -1));
+            const sortComments = [...filterCDCM].sort((a, b) => (a.updatedAt > b.updatedAt ? 1 : -1));
             if (sortComments.length && ['REOPEN_A', 'REOPEN_Q'].includes(sortComments[sortComments.length - 1].state)) {
               const markReopen = {
                 creator: filterOffshoreSent.creator,
@@ -515,9 +519,9 @@ const InquiryViewer = (props) => {
                 process: 'pending',
                 state: filterOffshoreSent?.state,
               }
-              res.splice(res.length - 1, 0, markReopen);
+              filterCDCM.splice(filterCDCM.length - 1, 0, markReopen);
             }
-            const listComments = [...res].map(r => {
+            const listComments = [...filterCDCM].map(r => {
               return {
                 ...r,
                 process: 'pending'
@@ -526,10 +530,10 @@ const InquiryViewer = (props) => {
             setComment(listComments);
             // setType(metadata.ans_type.paragraph);
             setQuestion(lastest);
-            if (res.length > 1) {
+            if (filterCDCM.length > 1) {
               setInqHasComment(true);
             }
-            if (res.length === 1) {
+            if (filterCDCM.length === 1) {
               // setShowViewAll(false);
               setInqHasComment(false)
             }
@@ -2182,7 +2186,7 @@ const InquiryViewer = (props) => {
     return result;
   }
 
-  // Separate Shipper/Consignee/Notify 
+  // Separate Shipper/Consignee/Notify
   const renderSeparateField = (field) => {
     if (isSeparate) {
       const LABEL_TYPE = ['name', 'address']
@@ -2524,25 +2528,27 @@ const InquiryViewer = (props) => {
                     disableInput={true}
                   />
               ) :
-                <Typography
-                  // className={viewDropDown !== question.id ? classes.hideText : ''}
-                  variant="h5"
-                  id={question.id}
-                  style={{
-                    wordBreak: 'break-word',
-                    fontFamily: 'Montserrat',
-                    fontSize: 15,
-                    fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(question.state) && question.process === 'pending') ||
-                      (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
-                    color: '#132535',
-                    whiteSpace: 'pre-wrap'
-                  }}>
-                  {/* Check is amendment JSON */}
-                  {((question.content !== null) && isJsonText(question.content)) ?
-                    `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
-                    `${renderContent(question.content)}`
-                  }
-                </Typography>
+                <>
+                  <Typography
+                    // className={viewDropDown !== question.id ? classes.hideText : ''}
+                    variant="h5"
+                    id={question.id}
+                    style={{
+                      wordBreak: 'break-word',
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                      fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(question.state) && question.process === 'pending') ||
+                            (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
+                      color: '#132535',
+                      whiteSpace: 'pre-wrap'
+                    }}>
+                    {/* Check is amendment JSON */}
+                    {((question.content !== null) && isJsonText(question.content)) ?
+                        `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
+                        `${renderContent(question.content)}`
+                    }
+                  </Typography>
+                </>
             }
 
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
@@ -2603,6 +2609,13 @@ const InquiryViewer = (props) => {
                   </Grid>
                 )}
               </Grid>
+              {/*show table cd cm inquiry*/}
+              {containerCheck.includes(question.field) && (
+                <ContainerDetailInquiry
+                  setDataCD={setDataCD}
+                  setDataCM={setDataCM}
+                />
+              )}
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
