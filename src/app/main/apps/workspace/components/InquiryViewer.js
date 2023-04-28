@@ -3098,6 +3098,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                 const reg = new RegExp(filteredCdUnit[0].pattern.value);
                 const inputValid = (nodeValue[getType(type)] && nodeValue[getType(type)].length === 0) || reg.test(nodeValue[getType(type)]);
                 if (!inputValid) validation(false);
+                const minFrac = [CONTAINER_PACKAGE, CM_PACKAGE].includes(type) ? 0 : 3;
 
                 return (
                   <div>
@@ -3113,7 +3114,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                         borderColor: inputValid === true ? '#bac3cb' : 'red'
                       }}
                       disabled={disabled}
-                      value={nodeValue ? disabled ? NumberFormat(nodeValue[getType(type)]) : nodeValue[getType(type)] || '' : ''}
+                      value={nodeValue ? disabled ? NumberFormat(nodeValue[getType(type)], minFrac) : nodeValue[getType(type)] || '' : ''}
                       onChange={(e) => onChange(e, nodeValue.index, getType(type))}
                     />
                     {inputValid ? null : <p style={{ color: 'red' }}>{filteredCdUnit[0].pattern.message}</p>}

@@ -303,17 +303,17 @@ const TableCD = (props) => {
                 </Grid>
                 <Grid item xs={2}>
                   <BLField>
-                    {`${NumberFormat(cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]]) || ''} ${packageUnitsJson.find(pkg => pkg.code === cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE_UNIT]])?.description || ''}`}
+                    {`${NumberFormat(cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE]], 0) || ''} ${packageUnitsJson.find(pkg => pkg.code === cd?.[metadata?.inq_type?.[CONTAINER_PACKAGE_UNIT]])?.description || ''}`}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
                   <BLField>
-                    {`${NumberFormat(cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]]) || ''} ${cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT_UNIT]] || ''}`}
+                    {`${NumberFormat(cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT]], 3) || ''} ${cd?.[metadata?.inq_type?.[CONTAINER_WEIGHT_UNIT]] || ''}`}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
                   <BLField>
-                    {`${NumberFormat(cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]]) || ''} ${cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT_UNIT]] || ''}`}
+                    {`${NumberFormat(cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT]], 3) || ''} ${cd?.[metadata?.inq_type?.[CONTAINER_MEASUREMENT_UNIT]] || ''}`}
                   </BLField>
                 </Grid>
               </Grid>

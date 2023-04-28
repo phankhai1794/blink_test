@@ -169,10 +169,11 @@ export const sentStatus = [
   ...['REP_SENT'] // draft status
 ];
 
-export function NumberFormat(number) {
+export function NumberFormat(number, minFrac) {
   if (!number || number.length === 0) return '';
-  const formattedNumber = (typeof number === 'string' ? parseFloat(number.replace(",", "")).toFixed(3) : number).toLocaleString("en-US", {
+  const formattedNumber = (typeof number === 'string' ? parseFloat(number.replace(",", "")) : number).toLocaleString("en-US", {
     maximumFractionDigits: 3,
+    minimumFractionDigits: minFrac
   });
   return formattedNumber;
 }
