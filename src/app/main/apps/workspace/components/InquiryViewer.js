@@ -54,7 +54,8 @@ import {
   FREIGHTED_AS,
   RATE,
   SERVICE_CONTRACT_NO,
-  RD_TERMS, CM_DESCRIPTION
+  RD_TERMS, CM_DESCRIPTION,
+  FORWARDER,
 } from '@shared/keyword';
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
@@ -274,7 +275,7 @@ const InquiryViewer = (props) => {
   const [validationCDCM, setValidationCDCM] = useState(true);
   const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
+  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY, FORWARDER].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
@@ -351,7 +352,7 @@ const InquiryViewer = (props) => {
 
   const validateField = (field, value) => {
     let response = { isError: false, errorType: "" };
-    const isAlsoNotify = metadata.field[ALSO_NOTIFY] === field;
+    const isAlsoNotify = metadata.field[ALSO_NOTIFY, FORWARDER] === field;
     if (Object.keys(metadata.field).find(key => metadata.field[key] === field) === BL_TYPE) {
       response = validateBLType(value);
     }
@@ -380,7 +381,7 @@ const InquiryViewer = (props) => {
     let isUnmounted = false;
     setTempReply({});
     setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-    setIsAlsoNotifies([ALSO_NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
+    setIsAlsoNotifies([ALSO_NOTIFY, FORWARDER].map(key => metadata.field?.[key]).includes(question.field));
     setIsResolve(false);
     setIsResolveCDCM(false);
     setIsReply(false);
@@ -1404,14 +1405,14 @@ const InquiryViewer = (props) => {
         setIsResolve(false);
         setIsResolveCDCM(false);
         setViewDropDown('');
-        if (!isSeparate) {
+        if (!isSeparate || isAlsoNotifies) {
           if (containerCheck.includes(question.field)) {
-            setQuestion((q) => ({ ...q, content: contentField }));
+            setQuestion((q) => ({ ...q, content: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField }));
             dispatch(InquiryActions.setContent({ ...res.content }));
           }
           else dispatch(InquiryActions.setContent({
             ...content,
-            [question.field]: contentField,
+            [question.field]: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField,
             [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
           }));
         } else {
