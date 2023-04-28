@@ -1187,7 +1187,19 @@ const InquiryViewer = (props) => {
         address: fieldAddress || ''
       })
     } else {
-      setTextResolve(getAnswerResolve() || content[question.field] || '');
+      if (containerCheck.includes(question.field)) {
+        const answer = [...content[question.field]] || '';
+        const ansResolved = getAnswerResolve();
+        if (ansResolved) {
+          answer.forEach((ans) => {
+            ans[question.inqType] = Array.isArray(ans[question.inqType]) ? ansResolved.split(',') : ansResolved
+          })
+        }
+        setTextResolve(answer);
+      }
+      else {
+        setTextResolve(getAnswerResolve() || content[question.field] || '');
+      }
     }
   }, [isResolve])
 
@@ -1250,7 +1262,7 @@ const InquiryViewer = (props) => {
   const getAnswerResolve = () => {
     let result = "";
     const data = inquiries.find(({ id }) => question.id === id);
-    if (!containerCheck.includes(question.field) && data && data.answerObj?.length !== 0) {
+    if (data && data.answerObj?.length) {
       result = (metadata.ans_type.choice === data.ansType) ? data.answerObj?.find(choice => choice.confirmed)?.content : "";
     }
     return result;
