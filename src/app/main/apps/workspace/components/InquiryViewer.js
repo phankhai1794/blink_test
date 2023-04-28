@@ -243,7 +243,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer } = props;
+  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer, setDataCD, setDataCM } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -300,8 +300,6 @@ const InquiryViewer = (props) => {
   const [isDateTime, setIsDateTime] = useState(false);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const [isValidDate, setIsValidDate] = useState(false);
-  const [getDataCD, setDataCD] = useState({});
-  const [getDataCM, setDataCM] = useState({});
 
   const getField = (field) => {
     return metadata.field?.[field] || '';

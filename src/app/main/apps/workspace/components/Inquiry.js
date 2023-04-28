@@ -54,8 +54,12 @@ const Inquiry = (props) => {
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const [isSaveAnswer, setSaveAnswer] = useState(false);
+  const [getDataCD, setDataCD] = useState({});
+  const [getDataCM, setDataCM] = useState({});
   const scrollTopPopup = useRef(null);
   const inputAddAmendmentEndRef = useRef(null);
+  console.log('getDataCD', getDataCD)
+  console.log('getDataCM', getDataCM)
 
   useEffect(() => {
     let inquiriesSet = [...inquiries];
@@ -244,6 +248,8 @@ const Inquiry = (props) => {
                 getUpdatedAt={() => {
                   setUpdateReply(true)
                 }}
+                setDataCD={setDataCD}
+                setDataCM={setDataCM}
               />
               {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                 <InquiryAnswer
