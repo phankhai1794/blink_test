@@ -607,7 +607,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       ||
                       (fieldValueSelect && !content[fieldValueSelect.value] && (!fieldValue || fieldValue.trim() === '') && attachments.length === 0)
                       ||
-                      (fieldValueSelect && content[fieldValueSelect.value] && content[fieldValueSelect.value].trim() === '' && attachments.length === 0)
+                      (fieldValueSelect && content[fieldValueSelect.value] && typeof content[fieldValueSelect.value] === 'string' && content[fieldValueSelect.value].trim() === '' && attachments.length === 0)
                     ))
                 )
               )))
