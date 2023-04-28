@@ -127,7 +127,7 @@ const AmendmentPopup = (props) => {
   const user = useSelector(({ user }) => user);
   const [inputSeal, setInputSeal] = useState('');
   const { register, control, handleSubmit, formState: { errors } } = useForm();
-  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Must be a Number' }
   const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
   const getType = (type) => {
@@ -150,13 +150,14 @@ const AmendmentPopup = (props) => {
       id: getType(title)
     };
   });
-  const idUnit = [getType(CONTAINER_PACKAGE), getType(CONTAINER_WEIGHT), getType(CONTAINER_MEASUREMENT), getType(CM_PACKAGE), getType(CM_WEIGHT), getType(CM_MEASUREMENT)];
+
+  const idUnit = [getType(CONTAINER_WEIGHT), getType(CONTAINER_MEASUREMENT), getType(CM_WEIGHT), getType(CM_MEASUREMENT)];
 
   const onSave = () => {
     Object.keys(data).forEach((key) => {
       if (typeof data[key] === 'string' && ![getType(HS_CODE), getType(HTS_CODE), getType(NCM_CODE)].includes(key))
         data[key] = data[key].toUpperCase().trim();
-      if(typeof data[key] === 'string' && idUnit.includes(key) && !isNaN(data[key])) {
+      if (typeof data[key] === 'string' && idUnit.includes(key) && !isNaN(data[key])) {
         data[key] = parseFloat(data[key]).toFixed(3);
       }
     });
@@ -171,7 +172,7 @@ const AmendmentPopup = (props) => {
     setDirty();
     let val = value;
     const id = field.id;
-    if([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(field.title) && !isNaN(value)) {
+    if ([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(field.title) && !isNaN(value)) {
       val = formatNumber(value);
     }
     updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [id]: val } : row)));

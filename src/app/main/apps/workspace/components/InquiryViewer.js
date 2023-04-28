@@ -54,7 +54,8 @@ import {
   FREIGHTED_AS,
   RATE,
   SERVICE_CONTRACT_NO,
-  RD_TERMS, CM_DESCRIPTION
+  RD_TERMS, CM_DESCRIPTION,
+  FORWARDER,
 } from '@shared/keyword';
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
@@ -275,7 +276,7 @@ const InquiryViewer = (props) => {
   const [validationCDCM, setValidationCDCM] = useState(true);
   const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
+  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY, FORWARDER].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
@@ -354,7 +355,7 @@ const InquiryViewer = (props) => {
 
   const validateField = (field, value) => {
     let response = { isError: false, errorType: "" };
-    const isAlsoNotify = metadata.field[ALSO_NOTIFY] === field;
+    const isAlsoNotify = metadata.field[ALSO_NOTIFY, FORWARDER] === field;
     if (Object.keys(metadata.field).find(key => metadata.field[key] === field) === BL_TYPE) {
       response = validateBLType(value);
     }
@@ -383,7 +384,7 @@ const InquiryViewer = (props) => {
     let isUnmounted = false;
     setTempReply({});
     setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-    setIsAlsoNotifies([ALSO_NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
+    setIsAlsoNotifies([ALSO_NOTIFY, FORWARDER].map(key => metadata.field?.[key]).includes(question.field));
     setIsResolve(false);
     setIsResolveCDCM(false);
     setIsReply(false);
@@ -1192,7 +1193,19 @@ const InquiryViewer = (props) => {
         address: fieldAddress || ''
       })
     } else {
-      setTextResolve(getAnswerResolve() || content[question.field] || '');
+      if (containerCheck.includes(question.field)) {
+        const answer = [...content[question.field]] || '';
+        const ansResolved = getAnswerResolve();
+        if (ansResolved) {
+          answer.forEach((ans) => {
+            ans[question.inqType] = Array.isArray(ans[question.inqType]) ? ansResolved.split(',') : ansResolved
+          })
+        }
+        setTextResolve(answer);
+      }
+      else {
+        setTextResolve(getAnswerResolve() || content[question.field] || '');
+      }
     }
   }, [isResolve])
 
@@ -1255,7 +1268,7 @@ const InquiryViewer = (props) => {
   const getAnswerResolve = () => {
     let result = "";
     const data = inquiries.find(({ id }) => question.id === id);
-    if (data && data.answerObj?.length !== 0) {
+    if (data && data.answerObj?.length) {
       result = (metadata.ans_type.choice === data.ansType) ? data.answerObj?.find(choice => choice.confirmed)?.content : "";
     }
     return result;
@@ -1351,8 +1364,8 @@ const InquiryViewer = (props) => {
           if (getTypeName === CONTAINER_SEAL) {
             obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
           } else if (obj[question.inqType]) {
-            if([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName) && !isNaN(obj[question.inqType])){
-              obj[question.inqType] = (typeof obj[question.inqType] === 'string' ? parseFloat( obj[question.inqType]).toFixed(3) : obj[question.inqType])
+            if ([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName) && !isNaN(obj[question.inqType])) {
+              obj[question.inqType] = (typeof obj[question.inqType] === 'string' ? parseFloat(obj[question.inqType]).toFixed(3) : obj[question.inqType])
             } else {
               obj[question.inqType] = (typeof obj[question.inqType] === 'string' && getTypeName !== 'HS/HTS/NCM Code') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
             }
@@ -1409,14 +1422,14 @@ const InquiryViewer = (props) => {
         setIsResolve(false);
         setIsResolveCDCM(false);
         setViewDropDown('');
-        if (!isSeparate) {
+        if (!isSeparate || isAlsoNotifies) {
           if (containerCheck.includes(question.field)) {
-            setQuestion((q) => ({ ...q, content: contentField }));
+            setQuestion((q) => ({ ...q, content: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField }));
             dispatch(InquiryActions.setContent({ ...res.content }));
           }
           else dispatch(InquiryActions.setContent({
             ...content,
-            [question.field]: contentField,
+            [question.field]: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField,
             [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
           }));
         } else {
@@ -1583,7 +1596,7 @@ const InquiryViewer = (props) => {
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
     setIsResolveCDCM(false);
-    setTempReply({});
+    // setTempReply({});
     setPristine()
   };
 
@@ -2528,27 +2541,25 @@ const InquiryViewer = (props) => {
                     disableInput={true}
                   />
               ) :
-                <>
-                  <Typography
-                    // className={viewDropDown !== question.id ? classes.hideText : ''}
-                    variant="h5"
-                    id={question.id}
-                    style={{
-                      wordBreak: 'break-word',
-                      fontFamily: 'Montserrat',
-                      fontSize: 15,
-                      fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(question.state) && question.process === 'pending') ||
-                            (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
-                      color: '#132535',
-                      whiteSpace: 'pre-wrap'
-                    }}>
-                    {/* Check is amendment JSON */}
-                    {((question.content !== null) && isJsonText(question.content)) ?
-                        `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
-                        `${renderContent(question.content)}`
-                    }
-                  </Typography>
-                </>
+                <Typography
+                  // className={viewDropDown !== question.id ? classes.hideText : ''}
+                  variant="h5"
+                  id={question.id}
+                  style={{
+                    wordBreak: 'break-word',
+                    fontFamily: 'Montserrat',
+                    fontSize: 15,
+                    fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(question.state) && question.process === 'pending') ||
+                      (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
+                    color: '#132535',
+                    whiteSpace: 'pre-wrap'
+                  }}>
+                  {/* Check is amendment JSON */}
+                  {((question.content !== null) && isJsonText(question.content)) ?
+                    `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
+                    `${renderContent(question.content)}`
+                  }
+                </Typography>
             }
 
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
@@ -2883,7 +2894,7 @@ const InquiryViewer = (props) => {
                           color="primary"
                           onClick={() => onSaveReply()}
                           disabled={
-                            ((question.state.includes("AME_DRF") || question.state.includes("AME_SENT")) && (
+                            ((question.state.includes("AME_DRF") || (question.state.includes("AME_SENT") && user.role === 'Guest')) && (
                               validateField(question.field, tempReply?.answer?.content).isError
                               ||
                               (
@@ -2903,7 +2914,7 @@ const InquiryViewer = (props) => {
                                   )
                               ))
                             )
-                            || ((!question.state.includes("AME_DRF") && !question.state.includes("AME_SENT")) && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
+                            || ((!question.state.includes("AME_DRF") && (!question.state.includes("AME_SENT") || user.role !== 'Guest')) && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
                             || disableSaveReply
                             || isValidDate
                           }
@@ -2949,7 +2960,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
   const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*)|0)(\.\d+)?\s*$/g, message: 'Must be a Number' }
+  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Must be a Number' }
   const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
 
   const cdUnit = [
@@ -3112,6 +3123,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                 const reg = new RegExp(filteredCdUnit[0].pattern.value);
                 const inputValid = (nodeValue[getType(type)] && nodeValue[getType(type)].length === 0) || reg.test(nodeValue[getType(type)]);
                 if (!inputValid) validation(false);
+                const minFrac = [CONTAINER_PACKAGE, CM_PACKAGE].includes(type) ? 0 : 3;
 
                 return (
                   <div>
@@ -3127,7 +3139,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
                         borderColor: inputValid === true ? '#bac3cb' : 'red'
                       }}
                       disabled={disabled}
-                      value={nodeValue ? disabled ? NumberFormat(nodeValue[getType(type)]) : nodeValue[getType(type)] || '' : ''}
+                      value={nodeValue ? disabled ? NumberFormat(nodeValue[getType(type)], minFrac) : nodeValue[getType(type)] || '' : ''}
                       onChange={(e) => onChange(e, nodeValue.index, getType(type))}
                     />
                     {inputValid ? null : <p style={{ color: 'red' }}>{filteredCdUnit[0].pattern.message}</p>}
@@ -3137,7 +3149,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               return (
                 <input
                   className={clsx(classes.text)}
-                  maxLength= {type === 'HS/HTS/NCM Code' ? "6" : "1000"}
+                  maxLength={type === 'HS/HTS/NCM Code' ? "6" : "1000"}
                   key={index1}
                   style={{
                     marginLeft: 5,

@@ -6,7 +6,13 @@ import {
   HTS_CODE,
   NCM_CODE,
   mapUnit,
-  CONTAINER_MANIFEST, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT
+  CONTAINER_MANIFEST,
+  CONTAINER_PACKAGE,
+  CM_PACKAGE,
+  CONTAINER_WEIGHT,
+  CONTAINER_MEASUREMENT,
+  CM_WEIGHT,
+  CM_MEASUREMENT
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -24,10 +30,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import styled from 'styled-components';
-import {formatContainerNo, formatNumber} from '@shared';
-import clsx from "clsx";
-
-import {measurementUnits, packageUnits, weightUnits} from "../../../../../@shared/units";
+import { formatContainerNo, NumberFormat } from '@shared';
 
 import AmendmentPopup from './AmendmentPopup';
 
@@ -211,20 +214,16 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     return total === 0 ? '' : parseFloat(total.toFixed(6)).toLocaleString() + ` ${values[0][getType(mapUnit[name])] || ''}`;
   };
 
-  const handleChange = (name, value, rowIndex) => {
-    const valueEdit = [...values];
-    let val = value;
-    const id = getType(name);
-    if([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(name) && !isNaN(value)) {
-      val = formatNumber(value);
-    }
-    const editedVal = valueEdit.map((row, i) => (rowIndex === i ? { ...valueEdit[rowIndex], [id]: val } : row));
-    setDataCD(editedVal);
-  }
-
-  const combineValueUnit = (name, row, vindex) => {
+  const combineValueUnit = (name, row) => {
     if (row) {
-      const value = isArray(row[getType(name)]);
+      let value = isArray(row[getType(name)]);
+      if (value) {
+        let minFrac = -1;
+        if ([CM_MEASUREMENT, CM_WEIGHT, CONTAINER_MEASUREMENT, CONTAINER_WEIGHT].includes(name)) minFrac = 3;
+        if ([CM_PACKAGE, CONTAINER_PACKAGE].includes(name)) minFrac = 0;
+        if (minFrac !== -1) value = NumberFormat(value);
+      }
+
       if (Object.keys(mapUnit).includes(name)) {
         const id = getType(mapUnit[name]);
         const unit = row[id] || '';
@@ -323,7 +322,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                     <TableCell
                       key={i}
                       className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'}
-                      style={{ backgroundColor: !isPendingProcess && isValueChange(cell, vindex, row) }}
+                      style={{ backgroundColor: isValueChange(cell, vindex, row) }}
                       onMouseEnter={checkPopover}
                       onMouseLeave={closePopover}
                     >
@@ -338,7 +337,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                               {disableInput ? 'visibility' : 'edit_mode'}
                             </Icon>
                           </IconButton>
-                        </div> : combineValueUnit(cell, row, vindex)
+                        </div> : combineValueUnit(cell, row)
                       }
                     </TableCell>
                   )
