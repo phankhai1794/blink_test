@@ -3109,6 +3109,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
               if (CONTAINER_LIST.cdNumber.includes(type) || CONTAINER_LIST.cmNumber.includes(type)) {
                 const filteredCdUnit = (CONTAINER_LIST.cdNumber.includes(type) ? cdUnit : cmUnit).filter((item) => item.field === type);
                 const reg = new RegExp(filteredCdUnit[0].pattern.value);
+                if([CONTAINER_PACKAGE, CM_PACKAGE].includes(type)) nodeValue[getType(type)] = NumberFormat(nodeValue[getType(type)], 0);
                 const inputValid = (nodeValue[getType(type)] && nodeValue[getType(type)].length === 0) || reg.test(nodeValue[getType(type)]);
                 if (!inputValid) validation(false);
                 const minFrac = [CONTAINER_PACKAGE, CM_PACKAGE].includes(type) ? 0 : 3;
