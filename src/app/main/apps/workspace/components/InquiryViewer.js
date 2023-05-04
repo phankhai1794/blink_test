@@ -296,6 +296,7 @@ const InquiryViewer = (props) => {
   const [inqAnsId, setInqAnsId] = useState('');
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
   const [isDeleteAnswer, setDeleteAnswer] = useState({ status: false, content: '' });
+  const [getContentCDCMInquiry, setContentCDCMInquiry] = useState({});
   const [listFieldDisableUpload, setListFieldDisableUpload] = useState([]);
   const [isDateTime, setIsDateTime] = useState(false);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
@@ -394,7 +395,10 @@ const InquiryViewer = (props) => {
           const lastest = { ...question };
           if (res.length > 0) {
             // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
-            console.log(res)
+            // console.log(res)
+            if (isJsonText(res[0].content) && containerCheck.includes(res[0].field)) {
+              setContentCDCMInquiry(JSON.parse(res[0].content));
+            }
             // filter comment
             const filterCDCM = res.filter(r => r.type !== 'ANS_CD_CM');
             const filterOffshoreSent = filterCDCM[filterCDCM.length - 1];
@@ -409,6 +413,7 @@ const InquiryViewer = (props) => {
             lastest.status = filterOffshoreSent.status;
             lastest.sentAt = filterOffshoreSent.sentAt;
             lastest.name = "";
+            lastest.process = 'pending';
             lastest.creator = filterOffshoreSent.updater;
             lastest.createdAt = filterOffshoreSent.createdAt;
             lastest.createdAt = filterOffshoreSent.createdAt;
@@ -2618,13 +2623,6 @@ const InquiryViewer = (props) => {
                   </Grid>
                 )}
               </Grid>
-              {/*show table cd cm inquiry*/}
-              {containerCheck.includes(question.field) && (
-                <ContainerDetailInquiry
-                  setDataCD={setDataCD}
-                  setDataCM={setDataCM}
-                />
-              )}
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
@@ -2648,6 +2646,15 @@ const InquiryViewer = (props) => {
 
               {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} isDateTime={isDateTime} />
+              )}
+
+              {/*Show Table Cd Cm Inquiry*/}
+              {question.process !== 'draft' && ((!['INQ_SENT', 'OPEN'].includes(question.state) && user.role === 'Admin') || user.role === 'Guest') && containerCheck.includes(question.field) && (
+                <ContainerDetailInquiry
+                  setDataCD={(value) => setDataCD(value)}
+                  setDataCM={(value) => setDataCM(value)}
+                  contentCDCM={getContentCDCMInquiry}
+                />
               )}
 
               {question.mediaFile?.length > 0 &&

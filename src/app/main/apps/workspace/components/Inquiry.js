@@ -58,8 +58,6 @@ const Inquiry = (props) => {
   const [getDataCM, setDataCM] = useState({});
   const scrollTopPopup = useRef(null);
   const inputAddAmendmentEndRef = useRef(null);
-  console.log('getDataCD', getDataCD)
-  console.log('getDataCM', getDataCM)
 
   useEffect(() => {
     let inquiriesSet = [...inquiries];
@@ -207,6 +205,8 @@ const Inquiry = (props) => {
                     getUpdatedAt={() => {
                       setUpdateReply(true)
                     }}
+                    setDataCD={(value) => setDataCD(value)}
+                    setDataCM={(value) => setDataCM(value)}
                   />
                 </div>
                 {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
@@ -248,8 +248,8 @@ const Inquiry = (props) => {
                 getUpdatedAt={() => {
                   setUpdateReply(true)
                 }}
-                setDataCD={setDataCD}
-                setDataCM={setDataCM}
+                setDataCD={(value) => setDataCD(value)}
+                setDataCM={(value) => setDataCM(value)}
               />
               {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                 <InquiryAnswer
@@ -258,6 +258,8 @@ const Inquiry = (props) => {
                   getUpdatedAt={() => {
                     setUpdateReply(true)
                   }}
+                  getDataCD={getDataCD}
+                  getDataCM={getDataCM}
                 />}
               {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
             </div>

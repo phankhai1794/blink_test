@@ -13,7 +13,7 @@ import { Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
-import { ONLY_ATT } from '@shared/keyword';
+import {CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT} from '@shared/keyword';
 
 import * as InquiryActions from '../store/actions/inquiry';
 
@@ -93,7 +93,7 @@ const useStyles = makeStyles((theme) => ({
 ));
 
 const InquiryAnswer = (props) => {
-  const { onCancel, setSave, question } = props;
+  const { onCancel, setSave, question, getDataCD, getDataCM } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -112,8 +112,12 @@ const InquiryAnswer = (props) => {
   };
   const optionsInquires = [...inquiries];
   const editedIndex = optionsInquires.findIndex(inq1 => question.id === inq1.id);
-  let currentAnswer = optionsInquires[editedIndex]
+  let currentAnswer = optionsInquires[editedIndex];
 
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
   const saveAttachmentAnswer = async (currentEditInq, responseSelectChoice) => {
     const question = {
@@ -228,9 +232,15 @@ const InquiryAnswer = (props) => {
         content: ONLY_ATT
       }
     }
+    let contentCDCM = {};
+    if (containerCheck.includes(question.field)) {
+      contentCDCM = {
+        [getField(CONTAINER_DETAIL)]: getDataCD,
+        [getField(CONTAINER_MANIFEST)]: getDataCM
+      }
+    }
     //
-    await addTransactionAnswer({ inquiryId: question.id }).catch(err => handleError(dispatch, err));
-    //
+    await addTransactionAnswer({ inquiryId: question.id, contentCDCM, ansType: question.ansType }).catch(err => handleError(dispatch, err));
     if (question.selectChoice) {
       responseSelectChoice = await updateInquiryChoice(question.selectChoice).catch(err => handleError(dispatch, err));
     } else if (question.paragraphAnswer) {
