@@ -200,7 +200,10 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         total += item[key];
       }
     });
-    return total === 0 ? '' : parseFloat(total.toFixed(6)).toLocaleString() + ` ${values[0][getType(mapUnit[name])] || ''}`;
+    let minFrac = -1;
+    if ([CM_MEASUREMENT, CM_WEIGHT, CONTAINER_MEASUREMENT, CONTAINER_WEIGHT].includes(name)) minFrac = 3;
+    else if ([CM_PACKAGE, CONTAINER_PACKAGE].includes(name)) minFrac = 0;
+    return total === 0 ? '' : NumberFormat(total, minFrac) + ` ${values[0][getType(mapUnit[name])] || ''}`;
   };
 
   const combineValueUnit = (name, row) => {
@@ -210,7 +213,10 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         let minFrac = -1;
         if ([CM_MEASUREMENT, CM_WEIGHT, CONTAINER_MEASUREMENT, CONTAINER_WEIGHT].includes(name)) minFrac = 3;
         if ([CM_PACKAGE, CONTAINER_PACKAGE].includes(name)) minFrac = 0;
-        if (minFrac !== -1) value = NumberFormat(value);
+        if (minFrac !== -1) {
+          value = NumberFormat(value, minFrac);
+          row[getType(name)] = value;
+        }
       }
 
       if (Object.keys(mapUnit).includes(name)) {
