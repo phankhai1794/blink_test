@@ -127,11 +127,11 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     return content[getField(field)] || [];
   };
 
-  const originalData = originalValues || getValueField(container) || [{}];
-  const [values, setValues] = useState(originalValues || getValueField(container) || [{}]);
+  const originalData = originalValues && originalValues.length ? originalValues : (getValueField(container) || [{}]);
+  const [values, setValues] = useState(originalData);
   const [openEdit, setOpenEdit] = useState(false);
   const [rowIndex, setRowIndex] = useState(0);
-  const [valueEdit, setValueEdit] = useState(originalValues || getValueField(container) || [{}]);
+  const [valueEdit, setValueEdit] = useState(originalData);
   const [popover, setPopover] = useState({ open: false, text: '' });
   const [anchorEl, setAnchorEl] = useState(null);
   const [arrowRef, setArrowRef] = useState(null);
