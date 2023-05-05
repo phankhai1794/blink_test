@@ -243,7 +243,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer, setDataCD, setDataCM } = props;
+  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer, setDataCD, setDataCM, getDataCD, getDataCM } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -396,11 +396,15 @@ const InquiryViewer = (props) => {
           if (res.length > 0) {
             // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
             // console.log(res)
-            if (isJsonText(res[0].content) && containerCheck.includes(res[0].field)) {
-              setContentCDCMInquiry(JSON.parse(res[0].content));
+            let filterCDCM = res;
+            if (isJsonText(res[0].content) && containerCheck.includes(res[0].field) && res[0].type === 'ANS_CD_CM') {
+              const parseJs = JSON.parse(res[0].content);
+              setContentCDCMInquiry({ansId: res[0].id});
+              setDataCD(parseJs?.[getField(CONTAINER_DETAIL)]);
+              setDataCM(parseJs?.[getField(CONTAINER_MANIFEST)]);
+              filterCDCM = res.filter((r, i) => i !== 0);
             }
             // filter comment
-            const filterCDCM = res.filter(r => r.type !== 'ANS_CD_CM');
             const filterOffshoreSent = filterCDCM[filterCDCM.length - 1];
             if (filterOffshoreSent.type === 'REP' && filterOffshoreSent.state === 'COMPL') {
               setInqAnsId(filterOffshoreSent.id);
@@ -1759,13 +1763,22 @@ const InquiryViewer = (props) => {
     if (question.process === 'pending') {
       // Add
       if (!tempReply.answer?.id) {
+        let answerCDCM = {};
+        if (containerCheck.includes(question.field)) {
+          const contentCDCM = {
+            [getField(CONTAINER_DETAIL)]: getDataCD,
+            [getField(CONTAINER_MANIFEST)]: getDataCM
+          };
+          answerCDCM.content = JSON.stringify(contentCDCM);
+          answerCDCM.type = tempReply.answer.type;
+        }
         const reqReply = {
           inqAns: tempReply.inqAns,
           answer: {
             content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
             type: tempReply.answer.type
           },
-
+          answerCDCM,
           mediaFiles: mediaListId
         };
         saveReply({ ...reqReply })
@@ -1795,10 +1808,20 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setReply(false));
           }).catch((error) => handleError(dispatch, error));
       } else {
+        let answerCDCM = {};
+        if (containerCheck.includes(question.field) && Object.keys(getContentCDCMInquiry).length) {
+          const contentCDCM = {
+            [getField(CONTAINER_DETAIL)]: getDataCD,
+            [getField(CONTAINER_MANIFEST)]: getDataCM
+          };
+          answerCDCM.content = JSON.stringify(contentCDCM);
+          answerCDCM.ansCDCMId = getContentCDCMInquiry.ansId;
+        }
         // Edit
         const reqReply = {
           content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
           mediaFiles: mediaListId.map(media => media.id),
+          answerCDCM,
           mediaRest
         };
         updateReply(tempReply.answer.id, { ...reqReply })
@@ -2653,7 +2676,8 @@ const InquiryViewer = (props) => {
                 <ContainerDetailInquiry
                   setDataCD={(value) => setDataCD(value)}
                   setDataCM={(value) => setDataCM(value)}
-                  contentCDCM={getContentCDCMInquiry}
+                  getDataCD={getDataCD}
+                  getDataCM={getDataCM}
                 />
               )}
 

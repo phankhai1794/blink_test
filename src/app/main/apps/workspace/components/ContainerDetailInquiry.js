@@ -7,14 +7,10 @@ import {CONTAINER_DETAIL, CONTAINER_MANIFEST} from "../../../../../@shared/keywo
 
 import ContainerDetailForm from "./ContainerDetailForm";
 
-const ContainerDetailInquiry = ({setDataCD, setDataCM, contentCDCM}) => {
+const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM}) => {
   const user = useSelector(({ user }) => user);
-  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const [openCD, setOpenCD] = useState(true);
-  const [openCM, setOpenCM] = useState(false);
-  const getField = (field) => {
-    return metadata.field?.[field] || '';
-  };
+  const [openCM, setOpenCM] = useState(true);
 
   const handleClickCollapse = (isCD) => {
     isCD ? setOpenCD(!openCD) : setOpenCM(!openCM);
@@ -33,7 +29,7 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, contentCDCM}) => {
             setEditContent={(value) => {
               setDataCD(value)
             }}
-            originalValues={contentCDCM?.[getField(CONTAINER_DETAIL)]}
+            originalValues={getDataCD}
             isPendingProcess={true}
             disableInput={user.role === 'Admin'}
           />
@@ -51,7 +47,7 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, contentCDCM}) => {
             setEditContent={(value) => {
               setDataCM(value)
             }}
-            originalValues={contentCDCM?.[getField(CONTAINER_MANIFEST)]}
+            originalValues={getDataCM}
             isPendingProcess={true}
             disableInput={user.role === 'Admin'}
           />

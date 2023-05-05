@@ -13,6 +13,7 @@ import FileAttach from './FileAttach';
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from "./ParagraphAnswer";
 import { ContainerDetailFormOldVersion } from './InquiryViewer';
+import ContainerDetailInquiry from "./ContainerDetailInquiry";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -95,6 +96,13 @@ const Comment = (props) => {
   }
 
   const contentUI = ({ userName, createdAt, avatar, content, title, media, answersMedia, id, type, reply }) => {
+    let dataCD = [];
+    let dataCM = [];
+    if (isJsonText(reply.content) && containerCheck.includes(reply.field) && reply.type === 'ANS_CD_CM') {
+      const parseJs = JSON.parse(reply.content);
+      dataCD = parseJs?.[getField(CONTAINER_DETAIL)];
+      dataCM = parseJs?.[getField(CONTAINER_MANIFEST)];
+    }
     return (
       <div key={id}>
         <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
@@ -136,27 +144,24 @@ const Comment = (props) => {
             {/*  </>*/}
             {/*)}*/}
           </div>
+          {(containerCheck.includes(question.field) && question.process === 'pending' && (dataCD.length && dataCM.length)) ? (
+            <ContainerDetailInquiry
+              getDataCD={dataCD}
+              getDataCM={dataCM}
+            />
+          ) : ``}
           {(content instanceof Array || isJson(content)) && containerCheck.includes(question.field) ?
             (!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
               (
-                question?.process === 'pending' ?
-                  <ContainerDetailFormOldVersion
-                    container={
-                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                    }
-                    validation={() => null}
-                    question={question}
-                    originalValues={JSON.parse(content)}
-                    disableInput={true}
-                  /> :
-                  <ContainerDetailForm
-                    container={
-                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                    }
-                    setEditContent={() => null}
-                    originalValues={content}
-                    disableInput={true}
-                  />
+                question?.process === 'draft' &&
+                    <ContainerDetailForm
+                      container={
+                        question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                      }
+                      setEditContent={() => null}
+                      originalValues={content}
+                      disableInput={true}
+                    />
               ) : <span className={'markReopen'}>Marked as reopened</span>
             ) :
             <div className={clsx((['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(reply.state) || reply.status === 'DELETED') ? 'delete-content' : '', 'content-reply')} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontStyle: ((!['INQ', 'ANS'].includes(type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(reply.state) && reply.process === 'pending') ||

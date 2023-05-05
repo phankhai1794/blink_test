@@ -54,8 +54,8 @@ const Inquiry = (props) => {
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const [isSaveAnswer, setSaveAnswer] = useState(false);
-  const [getDataCD, setDataCD] = useState({});
-  const [getDataCM, setDataCM] = useState({});
+  const [getDataCD, setDataCD] = useState([]);
+  const [getDataCM, setDataCM] = useState([]);
   const scrollTopPopup = useRef(null);
   const inputAddAmendmentEndRef = useRef(null);
 
@@ -207,6 +207,8 @@ const Inquiry = (props) => {
                     }}
                     setDataCD={(value) => setDataCD(value)}
                     setDataCM={(value) => setDataCM(value)}
+                    getDataCD={getDataCD}
+                    getDataCM={getDataCM}
                   />
                 </div>
                 {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
@@ -250,6 +252,8 @@ const Inquiry = (props) => {
                 }}
                 setDataCD={(value) => setDataCD(value)}
                 setDataCM={(value) => setDataCM(value)}
+                getDataCD={getDataCD}
+                getDataCM={getDataCM}
               />
               {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                 <InquiryAnswer
