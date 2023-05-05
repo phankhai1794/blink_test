@@ -189,7 +189,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
       const containerNoId = metadata.inq_type[CONTAINER_NUMBER];
       data[containerNoId] = formatContainerNo(data[containerNoId]);
     })
-    setEditContent(valueEdit);
+    if (!disableInput) {
+      setEditContent(valueEdit);
+    }
   }
 
   useEffect(() => {

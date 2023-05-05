@@ -144,33 +144,37 @@ const Comment = (props) => {
             {/*  </>*/}
             {/*)}*/}
           </div>
-          {(containerCheck.includes(question.field) && question.process === 'pending' && (dataCD.length && dataCM.length)) ? (
-            <ContainerDetailInquiry
-              getDataCD={dataCD}
-              getDataCM={dataCM}
-            />
-          ) : ``}
-          {(content instanceof Array || isJson(content)) && containerCheck.includes(question.field) ?
+
+          {(content instanceof Array || isJson(content)) && containerCheck.includes(question.field) && question.process === 'draft' ?
             (!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
               (
-                question?.process === 'draft' &&
-                    <ContainerDetailForm
-                      container={
-                        question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                      }
-                      setEditContent={() => null}
-                      originalValues={content}
-                      disableInput={true}
-                    />
+                <ContainerDetailForm
+                  container={
+                    question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                  }
+                  setEditContent={() => null}
+                  originalValues={content}
+                  disableInput={true}
+                />
               ) : <span className={'markReopen'}>Marked as reopened</span>
             ) :
-            <div className={clsx((['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(reply.state) || reply.status === 'DELETED') ? 'delete-content' : '', 'content-reply')} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontStyle: ((!['INQ', 'ANS'].includes(type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(reply.state) && reply.process === 'pending') ||
-                  (!['AME_ORG', 'AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(reply.state) && reply.process === 'draft')) && 'italic' }}>
-              {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
-                <div className={reply.isChangeRecipient ? 'markReopen' : ''}>{(isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG' ].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content}</div> :
-                (type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>)
-              }
-            </div>
+            (
+              (containerCheck.includes(question.field) && (dataCD.length && dataCM.length)) ? (
+                <ContainerDetailInquiry
+                  getDataCD={dataCD}
+                  getDataCM={dataCM}
+                  disableInput={true}
+                />
+              ) : (
+                <div className={clsx((['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(reply.state) || reply.status === 'DELETED') ? 'delete-content' : '', 'content-reply')} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontStyle: ((!['INQ', 'ANS'].includes(type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(reply.state) && reply.process === 'pending') ||
+                            (!['AME_ORG', 'AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(reply.state) && reply.process === 'draft')) && 'italic' }}>
+                  {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
+                    <div className={reply.isChangeRecipient ? 'markReopen' : ''}>{(isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG' ].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content}</div> :
+                    (type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>)
+                  }
+                </div>
+              )
+            )
           }
 
           {<div style={{ display: 'block', margin: '1rem 0rem' }}>

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Collapse, ListItem, ListItemText} from "@material-ui/core";
 import {ExpandLess, ExpandMore} from "@material-ui/icons";
 import {useSelector} from "react-redux";
@@ -7,15 +7,23 @@ import {CONTAINER_DETAIL, CONTAINER_MANIFEST} from "../../../../../@shared/keywo
 
 import ContainerDetailForm from "./ContainerDetailForm";
 
-const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM}) => {
+const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, disableInput}) => {
   const user = useSelector(({ user }) => user);
   const [openCD, setOpenCD] = useState(true);
   const [openCM, setOpenCM] = useState(true);
+  const [disableEdit, setDisableEdit] = useState(false);
+
+  useEffect(() => {
+    if (user.role === 'Admin') {
+      setDisableEdit(true)
+    } else if (user.role === 'Guest') {
+      if (disableInput) setDisableEdit(disableInput);
+    }
+  }, []);
 
   const handleClickCollapse = (isCD) => {
     isCD ? setOpenCD(!openCD) : setOpenCM(!openCM);
   };
-    
   return (
     <div style={{ width: '100%', marginTop: '10px' }}>
       <ListItem button onClick={() => handleClickCollapse(true)}>
@@ -31,7 +39,7 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM}) =>
             }}
             originalValues={getDataCD}
             isPendingProcess={true}
-            disableInput={user.role === 'Admin'}
+            disableInput={disableEdit}
           />
         </ListItem>
       </Collapse>
@@ -49,7 +57,7 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM}) =>
             }}
             originalValues={getDataCM}
             isPendingProcess={true}
-            disableInput={user.role === 'Admin'}
+            disableInput={disableEdit}
           />
         </ListItem>
       </Collapse>
