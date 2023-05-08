@@ -107,7 +107,7 @@ const StyledPopper = styled(Popper)`&&{
   }
 }`;
 
-const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD }) => {
+const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM }) => {
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -145,8 +145,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     let valuesSorted = [];
     if (container === CONTAINER_MANIFEST && !isResolveCDCM) {
       let cms = [...vals];
+      const contentCD = isInqCDCM ? originalData : getValueField(CONTAINER_DETAIL) || [];
       const contsNo = [
-        ...new Set((getValueField(CONTAINER_DETAIL) || []).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
+        ...new Set((contentCD || []).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
       ];
       if (contsNo.length) {
         contsNo.forEach((contNo) => {

@@ -406,8 +406,8 @@ const InquiryViewer = (props) => {
                 setDataCM(parseJs?.[getField(CONTAINER_MANIFEST)]);
                 filterCDCM = res.filter((r, i) => i !== 0);
               } else {
-                setDataCD(content?.[getField(CONTAINER_DETAIL)]);
-                setDataCM(content?.[getField(CONTAINER_MANIFEST)]);
+                setDataCD(contentInqResolved?.[getField(CONTAINER_DETAIL)]);
+                setDataCM(contentInqResolved?.[getField(CONTAINER_MANIFEST)]);
               }
             }
             // filter comment

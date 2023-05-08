@@ -134,6 +134,7 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
             originalValues={getDataCD}
             isPendingProcess={true}
             disableInput={disableEdit}
+            isInqCDCM={true}
           />
         </ListItem>
       </Collapse>
@@ -153,6 +154,7 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
             originalValues={getDataCM}
             isPendingProcess={true}
             disableInput={disableEdit}
+            isInqCDCM={true}
           />
         </ListItem>
       </Collapse>
