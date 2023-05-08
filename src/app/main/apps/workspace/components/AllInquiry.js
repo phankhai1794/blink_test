@@ -370,6 +370,7 @@ const AllInquiry = (props) => {
                         setDataCM={(value) => setDataCM(value)}
                         getDataCD={getDataCD}
                         getDataCM={getDataCM}
+                        isAllInq={true}
                       />
                     </div>
                   </div>
@@ -417,6 +418,7 @@ const AllInquiry = (props) => {
                       setDataCM={(value) => setDataCM(value)}
                       getDataCD={getDataCD}
                       getDataCM={getDataCM}
+                      isAllInq={true}
                     />
                     {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                       <InquiryAnswer

@@ -1,6 +1,9 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/styles';
 import clsx from 'clsx';
+import {useSelector} from "react-redux";
+
+import {CONTAINER_DETAIL} from "../../../../../@shared/keyword";
 
 const tagType = {
   'primary': {
@@ -34,13 +37,20 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const TagsComponent = (props) => {
-  const { tagName, tagColor } = props;
+  const { tagName, tagColor, question, isAllInq } = props;
   const classes = useStyles();
+  const currentAmendField = useSelector(({ draftBL }) => draftBL.currentAmendField);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const getField = (field) => {
+    return metadata.field ? metadata.field[field] : '';
+  };
 
   return (
     <div className={clsx(classes.root)} >
       <span style={{ ...tagType[tagColor] }}>
-        {tagName || ''}
+        {tagName || ''} - {isAllInq
+          ? (question.field === getField(CONTAINER_DETAIL) ? 'CONTAINER DETAIL' : 'CONTAINER MANIFEST')
+          : (currentAmendField === getField(CONTAINER_DETAIL) ? 'CONTAINER DETAIL' : 'CONTAINER MANIFEST')}
         {props.children || ''}
       </span>
     </div>

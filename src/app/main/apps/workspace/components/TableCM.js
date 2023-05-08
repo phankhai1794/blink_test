@@ -34,6 +34,7 @@ import ReplyIcon from '@material-ui/icons/Reply';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
+import * as DraftActions from '../../draft-bl/store/actions/index';
 
 import BLField from './BLFieldCont';
 import Label from './FieldLabel';
@@ -229,6 +230,7 @@ const TableCM = (props) => {
       dispatch(FormActions.toggleCreateAmendment(true));
     }
     dispatch(InquiryActions.setField(id));
+    dispatch(DraftActions.setAmendmentField(getField(CONTAINER_MANIFEST)));
   };
 
   const checkDisplayIcon = () => {

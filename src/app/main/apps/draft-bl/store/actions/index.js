@@ -17,6 +17,7 @@ export const OPEN_SEND_NOTIFICATION = 'OPEN_SEND_NOTIFICATION';
 export const RELOAD = 'RELOAD';
 export const SET_EDIT_INQUIRY = 'SET_EDIT_INQUIRY'
 export const SET_DRF_VIEW = 'SET_DRF_VIEW';
+export const SET_AMENDMENT_FIELD = 'SET_AMENDMENT_FIELD';
 
 export const loadMetadata = () => (dispatch) => {
   getMetadata()
@@ -151,4 +152,11 @@ export function setDrfView(state) {
     type: SET_DRF_VIEW,
     state
   };
+}
+
+export function setAmendmentField(state) {
+  return {
+    type: SET_AMENDMENT_FIELD,
+    state
+  }
 }

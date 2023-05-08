@@ -7,9 +7,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
 import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate } from '@shared';
-import { NO_CONTENT_AMENDMENT } from '@shared/keyword';
+import { NO_CONTENT_AMENDMENT , CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
-import { CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
@@ -19,13 +18,13 @@ import { useDropzone } from 'react-dropzone';
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as AppAction from "../../../../store/actions";
+import DateTimePickers from '../shared-components/DateTimePickers';
 
 import UserInfo from './UserInfo';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import AttachFileAmendment from './AttachFileAmendment';
 import ContainerDetailForm from './ContainerDetailForm';
-import DateTimePickers from '../shared-components/DateTimePickers';
 
 const colorInq = '#DC2626';
 const white = '#FFFFFF';
@@ -102,6 +101,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const [filepaste, setFilepaste] = useState('');
   const [dropfiles, setDropfiles] = useState([]);
   const currentField = useSelector(({ draftBL }) => draftBL.currentField);
+  const currentAmendField = useSelector(({ draftBL }) => draftBL.currentAmendField);
   const filterInqDrf = inquiries.filter(inq => inq.process === 'draft').map(val => val.field);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
@@ -439,7 +439,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   };
 
   const checkCurField = () => {
-    const filterCurrentField = fieldType.find(f => f.value === currentField);
+    let getCurField = currentField;
+    if (containerCheck.includes(currentField)) getCurField = currentAmendField;
+    const filterCurrentField = fieldType.find(f => f.value === getCurField);
     const findAme = inquiries.filter(({ field, process }) => field === currentField && process === 'draft');
     if (findAme.length) {
       setFieldValueSelect();
@@ -465,7 +467,11 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   useEffect(() => {
     if (!openAmendmentList) {
-      setFieldValue(content[currentField] || "")
+      let contentField = content[currentField];
+      if (containerCheck.includes(currentField)) {
+        contentField = content[currentAmendField];
+      }
+      setFieldValue(contentField || "")
       checkCurField();
     } else {
       setFieldValue('');

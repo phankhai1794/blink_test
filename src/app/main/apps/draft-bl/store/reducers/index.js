@@ -8,6 +8,7 @@ const initialState = {
   content: {},
   openDraftBL: false,
   currentField: '',
+  currentAmendField: '',
   reload: false,
   enableSendDraftBl: false,
   openSendNotification: false,
@@ -37,6 +38,9 @@ const draftBL = function (state = initialState, action) {
   }
   case Actions.SET_CURRENT_FIELD: {
     return { ...state, currentField: action.state };
+  }
+  case Actions.SET_AMENDMENT_FIELD: {
+    return { ...state, currentAmendField: action.state };
   }
   case Actions.RELOAD: {
     return { ...state, reload: !state.reload, edit: false };

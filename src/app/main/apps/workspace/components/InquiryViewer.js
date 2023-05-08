@@ -243,7 +243,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer, setDataCD, setDataCM, getDataCD, getDataCM } = props;
+  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer, setDataCD, setDataCM, getDataCD, getDataCM, isAllInq } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -779,6 +779,7 @@ const InquiryViewer = (props) => {
     const quest = { ...question };
     quest.showIconAttachAnswerFile = false;
     quest.showIconAttachReplyFile = false;
+    setDisableCDCM(true);
     if (currentQuestion && currentQuestion.id === quest.id) {
       quest.showIconReply = false;
       quest.showIconEdit = true;
@@ -2330,7 +2331,7 @@ const InquiryViewer = (props) => {
           {(isReply || question.showIconAttachAnswerFile) && isDragActive && <div className='dropzone'>Drop files here</div>}
           <div>
             {(question?.process === 'draft') &&
-              <TagsComponent tagName='AMENDMENT' tagColor='primary' />
+              <TagsComponent tagName='AMENDMENT' tagColor='primary' question={question} isAllInq={isAllInq} />
             }
             <div style={{ paddingTop: 10 }} className="flex justify-between">
               <UserInfo
