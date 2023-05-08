@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import {CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT} from '@shared/keyword';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import {isJsonText} from "../../../../../@shared";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -244,9 +245,19 @@ const InquiryAnswer = (props) => {
     if (question.selectChoice) {
       responseSelectChoice = await updateInquiryChoice(question.selectChoice).catch(err => handleError(dispatch, err));
     } else if (question.paragraphAnswer) {
+      let answerId;
       if (question.answerObj) {
-        if (question.answerObj.length && question.answerObj[0].id) {
-          const answerId = question.answerObj[0].id;
+        if (question.answerObj.length) {
+          if (containerCheck.includes(question.field)
+              && isJsonText(question.answerObj[0].content)
+              && question.answerObj.length > 1
+          ) {
+            answerId = question.answerObj[1].id;
+          } else if (question.answerObj.length) {
+            answerId = question.answerObj[0].id;
+          }
+        }
+        if (answerId) {
           if (question.paragraphAnswer.content.trim() === '') {
             question.paragraphAnswer.content = ONLY_ATT;
           }

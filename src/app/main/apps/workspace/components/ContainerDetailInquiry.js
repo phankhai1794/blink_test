@@ -17,9 +17,9 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
     if (user.role === 'Admin') {
       setDisableEdit(true)
     } else if (user.role === 'Guest') {
-      if (disableInput) setDisableEdit(disableInput);
+      if (disableInput !== null) setDisableEdit(disableInput);
     }
-  }, []);
+  }, [disableInput]);
 
   const handleClickCollapse = (isCD) => {
     isCD ? setOpenCD(!openCD) : setOpenCM(!openCM);

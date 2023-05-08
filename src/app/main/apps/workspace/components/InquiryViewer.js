@@ -301,6 +301,7 @@ const InquiryViewer = (props) => {
   const [isDateTime, setIsDateTime] = useState(false);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const [isValidDate, setIsValidDate] = useState(false);
+  const [disableCDCMInquiry, setDisableCDCM] = useState(true);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -1737,6 +1738,7 @@ const InquiryViewer = (props) => {
     let mediaFilesResp;
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    setDisableCDCM(true);
     const newMediaFile = [];
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
@@ -2029,6 +2031,7 @@ const InquiryViewer = (props) => {
   }
 
   const cancelReply = (q) => {
+    setDisableCDCM(true);
     dispatch(InquiryActions.setReply(false));
     setIsReply(false);
     setIsReplyCDCM(false);
@@ -2042,6 +2045,7 @@ const InquiryViewer = (props) => {
   const onReply = (q) => {
     // case: Reply Answer
     const optionsInquires = [...inquiries];
+    setDisableCDCM(false);
     if (['OPEN', 'INQ_SENT'].includes(q.state)) {
       const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
       //
@@ -2070,6 +2074,7 @@ const InquiryViewer = (props) => {
     reply.showIconEdit = false;
     reply.showIconReply = false;
     setShowViewAll(false);
+    setDisableCDCM(false);
     if (['ANS_DRF', 'ANS_SENT'].includes(question.state) || (user.role === 'Guest' && ['REP_Q_DRF'].includes(question.state))) {
       optionsInquires[editedIndex].showIconEdit = false;
       optionsInquires[editedIndex].showIconReply = false;
@@ -2678,6 +2683,7 @@ const InquiryViewer = (props) => {
                   setDataCM={(value) => setDataCM(value)}
                   getDataCD={getDataCD}
                   getDataCM={getDataCM}
+                  disableInput={disableCDCMInquiry}
                 />
               )}
 
