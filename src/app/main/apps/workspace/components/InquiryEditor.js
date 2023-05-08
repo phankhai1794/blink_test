@@ -152,7 +152,12 @@ const InquiryEditor = (props) => {
   );
   const user = useSelector(({ user }) => user);
 
-  const optionsAnsType = [
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
+
+  const optionsAnsType = !containerCheck.includes(currentEditInq.field) ? [
     {
       label: 'Option Selection',
       value: metadata.ans_type.choice
@@ -161,7 +166,10 @@ const InquiryEditor = (props) => {
       label: 'Onshore/Customer Input',
       value: metadata.ans_type.paragraph
     }
-  ];
+  ] : [{
+    label: 'Onshore/Customer Input',
+    value: metadata.ans_type.paragraph
+  }];
 
   const allowCreateAttachmentAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
@@ -230,12 +238,6 @@ const InquiryEditor = (props) => {
       }
     };
   };
-
-  const getField = (field) => {
-    return metadata.field?.[field] || '';
-  };
-
-  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
   useEffect(() => {
     if (valueType?.value) {

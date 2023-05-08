@@ -398,12 +398,17 @@ const InquiryViewer = (props) => {
             // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
             // console.log(res)
             let filterCDCM = res;
-            if (isJsonText(res[0].content) && containerCheck.includes(res[0].field) && res[0].type === 'ANS_CD_CM') {
-              const parseJs = JSON.parse(res[0].content);
-              setContentCDCMInquiry({ansId: res[0].id});
-              setDataCD(parseJs?.[getField(CONTAINER_DETAIL)]);
-              setDataCM(parseJs?.[getField(CONTAINER_MANIFEST)]);
-              filterCDCM = res.filter((r, i) => i !== 0);
+            if (containerCheck.includes(res[0].field)) {
+              if (isJsonText(res[0].content) && res[0].type === 'ANS_CD_CM') {
+                const parseJs = JSON.parse(res[0].content);
+                setContentCDCMInquiry({ansId: res[0].id});
+                setDataCD(parseJs?.[getField(CONTAINER_DETAIL)]);
+                setDataCM(parseJs?.[getField(CONTAINER_MANIFEST)]);
+                filterCDCM = res.filter((r, i) => i !== 0);
+              } else {
+                setDataCD(content?.[getField(CONTAINER_DETAIL)]);
+                setDataCM(content?.[getField(CONTAINER_MANIFEST)]);
+              }
             }
             // filter comment
             const filterOffshoreSent = filterCDCM[filterCDCM.length - 1];
