@@ -326,6 +326,10 @@ const BLWorkspace = (props) => {
   }
 
   const popupOpen = (inquiry, curField) => {
+    let getTitle = curField && curField.label;
+    if (curField && [CONTAINER_DETAIL, CONTAINER_MANIFEST].includes(curField.keyword)) {
+      getTitle = 'CD - CM';
+    }
     switch (inquiry.field) {
     case 'INQUIRY_LIST':
       return {
@@ -406,7 +410,7 @@ const BLWorkspace = (props) => {
         nums: user.role === 'Admin' ? [countInq(inquiries.filter((q) => q.field === inquiry.field), 'customer'), countInq(inquiries.filter((q) => q.field === inquiry.field), 'onshore')] : [],
         toggleForm: () => { },
         fabTitle: curField?.label,
-        title: curField?.label,
+        title: getTitle,
         field: curField?.value,
         showBtnSend: true,
         disableSendBtn: disableSendBtn,

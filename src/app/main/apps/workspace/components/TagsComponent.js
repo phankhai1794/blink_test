@@ -48,9 +48,8 @@ const TagsComponent = (props) => {
   return (
     <div className={clsx(classes.root)} >
       <span style={{ ...tagType[tagColor] }}>
-        {tagName || ''} - {isAllInq
-          ? (question.field === getField(CONTAINER_DETAIL) ? 'CONTAINER DETAIL' : 'CONTAINER MANIFEST')
-          : (currentAmendField === getField(CONTAINER_DETAIL) ? 'CONTAINER DETAIL' : 'CONTAINER MANIFEST')}
+        {tagName || ''} {!isAllInq
+          && (currentAmendField === getField(CONTAINER_DETAIL) ? ' - CONTAINER DETAIL' : ' - CONTAINER MANIFEST')}
         {props.children || ''}
       </span>
     </div>
