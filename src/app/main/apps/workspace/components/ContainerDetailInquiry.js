@@ -127,10 +127,11 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
         <ListItem>
           <ContainerDetailForm
             container={CONTAINER_DETAIL}
-            setEditContent={(value) => {
+            setAddContent={(value) => {
               autoUpdateCDCM(true, value);
               setDataCD(value)
             }}
+            setEditContent={(value) => {}}
             originalValues={getDataCD}
             isPendingProcess={true}
             disableInput={disableEdit}
@@ -147,10 +148,11 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
         <ListItem>
           <ContainerDetailForm
             container={CONTAINER_MANIFEST}
-            setEditContent={(value) => {
+            setAddContent={(value) => {
               autoUpdateCDCM(false, value);
               setDataCM(value)
             }}
+            setEditContent={(value) => {}}
             originalValues={getDataCM}
             isPendingProcess={true}
             disableInput={disableEdit}

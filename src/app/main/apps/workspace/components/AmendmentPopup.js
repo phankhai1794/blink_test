@@ -119,7 +119,7 @@ const StyledChip = withStyles(theme => ({
 }))(Chip);
 
 const AmendmentPopup = (props) => {
-  const { onClose, inqType, isEdit, data, index, updateData, updateEdit, containerDetail } = props;
+  const { onClose, inqType, isEdit, data, index, updateData, updateEdit, containerDetail, setSave, isInqCDCM } = props;
   const classes = useStyles();
   const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
 
@@ -164,6 +164,7 @@ const AmendmentPopup = (props) => {
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
     onClose();
     setPristine()
+    if (isInqCDCM) setSave();
   };
 
   const show = (value) => user.role === 'Admin' && value;

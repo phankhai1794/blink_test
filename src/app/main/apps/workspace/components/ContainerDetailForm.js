@@ -107,7 +107,7 @@ const StyledPopper = styled(Popper)`&&{
   }
 }`;
 
-const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM }) => {
+const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM, setAddContent }) => {
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
@@ -135,6 +135,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const [popover, setPopover] = useState({ open: false, text: '' });
   const [anchorEl, setAnchorEl] = useState(null);
   const [arrowRef, setArrowRef] = useState(null);
+  const [isSave, setSaveCDCM] = useState(false);
 
   const CDTitle = CONTAINER_LIST.cd
   const CMTitle = user.role === 'Guest' ? [CONTAINER_NUMBER, ...CONTAINER_LIST.cm].filter(item => ![HS_CODE, HTS_CODE, NCM_CODE].includes(item)) : [CONTAINER_NUMBER, ...CONTAINER_LIST.cm]
@@ -200,6 +201,13 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     setValues(sort)
     setValueEdit(sort)
   }, [])
+
+  useEffect(() => {
+    if (isSave) {
+      setAddContent(values)
+      setSaveCDCM(false)
+    }
+  }, [isSave])
 
 
   const getTotals = (data, name) => {
@@ -275,9 +283,11 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           containerDetail={getValueField(CONTAINER_DETAIL)}
           data={valueEdit[rowIndex]}
           isEdit={!disableInput}
+          setSave={() => setSaveCDCM(true)}
           updateData={(value) => setValues(value)}
           updateEdit={(value) => setValueEdit(value)}
           index={rowIndex}
+          isInqCDCM={isInqCDCM}
         />
       </Drawer>
       <StyledPopper
