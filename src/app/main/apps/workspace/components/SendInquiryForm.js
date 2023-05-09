@@ -577,7 +577,8 @@ const SendInquiryForm = (props) => {
                 </Button>
               </div>
               <br />
-              <span>Thank you for choosing ONE</span>
+              <span style={{ display: 'block' }}>Best regards, </span>
+              <span>ONE Offshore Center </span>
             </div>
           </div>
         )}
