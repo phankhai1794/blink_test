@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/styles';
 import clsx from 'clsx';
 import {useSelector} from "react-redux";
 
-import {CONTAINER_DETAIL} from "../../../../../@shared/keyword";
+import {CONTAINER_DETAIL, CONTAINER_MANIFEST} from "../../../../../@shared/keyword";
 
 const tagType = {
   'primary': {
@@ -43,12 +43,21 @@ const TagsComponent = (props) => {
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
   };
+  const renderTitle = () => {
+    if (question) {
+      if (question.field === getField(CONTAINER_DETAIL)) {
+        return 'CONTAINER DETAIL';
+      } else if (question.field === getField(CONTAINER_MANIFEST)) {
+        return 'CONTAINER MANIFEST';
+      }
+    }
+  }
 
+  console.log('question', question)
   return (
     <div className={clsx(classes.root)} >
       <span style={{ ...tagType[tagColor] }}>
-        {tagName || ''} {!isAllInq
-          && ((question && question.field) === getField(CONTAINER_DETAIL) ? ' - CONTAINER DETAIL' : ' - CONTAINER MANIFEST')}
+        {tagName || ''} {!isAllInq && renderTitle()}
         {props.children || ''}
       </span>
     </div>
