@@ -144,6 +144,50 @@ export const ONLY_ATT = 'Please refer to the attached file for your reference.';
 
 export const NO_CONTENT_AMENDMENT = 'THERE IS NO CONTENT IN THE AMENDMENT';
 
+export const HS_HTS_NCM_Code = 'HS/HTS/NCM Code';
+
+export const EVENT_DATE = 'Event Date';
+
+export const TOTAL_CONTAINERS = 'Total Containers';
+
+export const HAZ_REF_OOG = 'HAZ/REF OOG';
+
+export const EQUIPMENT_SUB = 'Equipment Sub';
+
+export const CONTAINER_INF_MISMATCH = 'Container Information Mismatch';
+
+export const CONTAINER_STATUS_INQ = 'Container Status Inquiry';
+
+export const TOTAL_CONTAINERS_PER_TP_SZ = 'Total Containers per TP/SZ';
+
+export const SPECIAL_CARGO_DETAIL = 'Special Cargo Detail';
+
+export const MISSING_GATE_IN_EVENTS = 'Missing Gate In Events';
+
+export const MISMATCH_DRAIN = 'Mismatch Drain';
+
+export const VOLUME_DIFFRENCE = 'Volume Diffrence';
+
+export const CTNR_NOT_LINK_IN_BOOKING = 'CTNR Not Linked In Booking';
+
+export const MISSING_PACKAGING_GROUP = 'Missing/Mismatch Packaging Group';
+
+export const MISSING_TEMPERATURE = 'Missing Temperature';
+
+export const VENTILATION_MISMATCH = 'Ventilation Mismatch';
+
+export const MISSING_PACKAGE_INFORMATION = 'Missing Package Information';
+
+export const MISSING_MISMATCH_UN = 'Missing/Mismatch UN';
+
+export const MISSING_MISMATCH_IMDG = 'Missing/Mismatch IMDG';
+
+export const VOLUME_DIFFERENCE = 'Volume Difference';
+
+export const SPECIAL_CARGO = 'Special Cargo';
+
+export const CM_CUSTOMS_DESCRIPTION = 'C/M Customs Description';
+
 export const CONTAINER_LIST = {
   cd: [CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT],
   cm: [CM_MARK, HS_CODE, HTS_CODE, NCM_CODE, CM_DESCRIPTION, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT],
