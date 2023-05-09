@@ -53,7 +53,6 @@ const TagsComponent = (props) => {
     }
   }
 
-  console.log('question', question)
   return (
     <div className={clsx(classes.root)} >
       <span style={{ ...tagType[tagColor] }}>
