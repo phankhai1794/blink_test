@@ -1,7 +1,7 @@
 import {FuseChipSelect} from '@fuse';
 import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {getLabelById, toFindDuplicates} from '@shared';
+import {combineCDCM, getLabelById, toFindDuplicates} from '@shared';
 import {handleError} from '@shared/handleError';
 import {
   Button,
@@ -175,7 +175,7 @@ const InquiryEditor = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
   });
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const fieldDefault = metadata.field_options.filter(field => field.display)
+  const fieldDefault = metadata.field_options.filter(field => field.display && field.keyword !== 'containerManifest')
   const [fieldType, setFieldType] = useState(fieldDefault);
   const [valueType, setValueType] = useState(
     metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
@@ -183,8 +183,9 @@ const InquiryEditor = (props) => {
   const [valueAnsType, setValueAnsType] = useState(
     optionsAnsType.filter((ansType) => ansType.value === currentEditInq.ansType)
   );
+  const metadataFieldOptions = combineCDCM(metadata.field_options);
   const [fieldValue, setFieldValue] = useState(
-    metadata.field_options.filter((v) => currentEditInq.field === v.value)[0]
+    metadataFieldOptions.filter((v) => currentEditInq.field === v.value)[0]
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
   const [filepaste, setFilepaste] = useState('');

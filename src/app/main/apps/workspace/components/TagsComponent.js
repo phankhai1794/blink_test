@@ -39,7 +39,6 @@ const useStyles = makeStyles((theme) => ({
 const TagsComponent = (props) => {
   const { tagName, tagColor, question, isAllInq } = props;
   const classes = useStyles();
-  const currentAmendField = useSelector(({ draftBL }) => draftBL.currentAmendField);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -49,7 +48,7 @@ const TagsComponent = (props) => {
     <div className={clsx(classes.root)} >
       <span style={{ ...tagType[tagColor] }}>
         {tagName || ''} {!isAllInq
-          && (currentAmendField === getField(CONTAINER_DETAIL) ? ' - CONTAINER DETAIL' : ' - CONTAINER MANIFEST')}
+          && ((question && question.field) === getField(CONTAINER_DETAIL) ? ' - CONTAINER DETAIL' : ' - CONTAINER MANIFEST')}
         {props.children || ''}
       </span>
     </div>
