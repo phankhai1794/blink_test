@@ -103,6 +103,11 @@ const Comment = (props) => {
       dataCD = parseJs?.[getField(CONTAINER_DETAIL)];
       dataCM = parseJs?.[getField(CONTAINER_MANIFEST)];
     }
+    if (content.indexOf(getField(CONTAINER_DETAIL)) !== -1) {
+      const parseJs = JSON.parse(content);
+      dataCD = parseJs[getField(CONTAINER_DETAIL)];
+      dataCM = parseJs[getField(CONTAINER_MANIFEST)];
+    }
     return (
       <div key={id}>
         <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
@@ -245,7 +250,7 @@ const Comment = (props) => {
     <div className={classes.root}>
       {comments.map((k, id) => {
         let content = k.content;
-        if (k.content && isJsonText(k.content) && !JSON.parse(k.content).length) {
+        if (k.content && isJsonText(k.content) && !JSON.parse(k.content).length && !containerCheck.includes(k.field)) {
           content = `${JSON.parse(k.content).name}\n${JSON.parse(k.content).address}`
         }
         let mediaFiles = k.mediaFile;

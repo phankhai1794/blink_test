@@ -22,7 +22,7 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
 
   useEffect(() => {
     if (user.role === 'Admin') {
-      setDisableEdit(true)
+      setDisableEdit(disableInput);
     } else if (user.role === 'Guest') {
       if (disableInput !== null) setDisableEdit(disableInput);
     }

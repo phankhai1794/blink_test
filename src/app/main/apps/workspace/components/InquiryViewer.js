@@ -1330,6 +1330,7 @@ const InquiryViewer = (props) => {
     if (Array.isArray(question.content)) {
       setIsResolveCDCM(true);
     } else {
+      setDisableCDCM(false);
       setIsResolve(true);
     }
   };
@@ -1418,36 +1419,46 @@ const InquiryViewer = (props) => {
     } else if (typeof textResolve === 'string') {
       contentField = textResolve.toUpperCase().trim();
     } else {
-      contentField = textResolve;
-      const orgContentField = content[question.field];
-      const contsNo = [];
-      contentField.forEach((obj, index) => {
-        if (question.process === 'pending') {
-          const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
-          if (getTypeName === CONTAINER_NUMBER) {
-            contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
-            const containerNo = orgContentField[index][question.inqType];
-            contsNoChange[containerNo] = obj[question.inqType];
-            obj[question.inqType] = formatContainerNo(obj[question.inqType]);
-          }
-          if (getTypeName === CONTAINER_SEAL) {
-            obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
-          } else if (obj[question.inqType]) {
-            if ([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName) && !isNaN(obj[question.inqType])) {
-              obj[question.inqType] = (typeof obj[question.inqType] === 'string' ? parseFloat(obj[question.inqType]).toFixed(3) : obj[question.inqType])
-            } else {
-              obj[question.inqType] = (typeof obj[question.inqType] === 'string' && getTypeName !== 'HS/HTS/NCM Code') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
+      if (containerCheck.includes(question.field)) {
+        const contentCDCM = {
+          [getField(CONTAINER_DETAIL)]: getDataCD,
+          [getField(CONTAINER_MANIFEST)]: getDataCM
+        };
+        contentField = contentCDCM;
+      } else {
+        contentField = textResolve;
+      }
+      if (Array.isArray(contentField)) {
+        const orgContentField = content[question.field];
+        const contsNo = [];
+        contentField.forEach((obj, index) => {
+          if (question.process === 'pending') {
+            const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
+            if (getTypeName === CONTAINER_NUMBER) {
+              contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+              const containerNo = orgContentField[index][question.inqType];
+              contsNoChange[containerNo] = obj[question.inqType];
+              obj[question.inqType] = formatContainerNo(obj[question.inqType]);
             }
+            if (getTypeName === CONTAINER_SEAL) {
+              obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
+            } else if (obj[question.inqType]) {
+              if ([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName) && !isNaN(obj[question.inqType])) {
+                obj[question.inqType] = (typeof obj[question.inqType] === 'string' ? parseFloat(obj[question.inqType]).toFixed(3) : obj[question.inqType])
+              } else {
+                obj[question.inqType] = (typeof obj[question.inqType] === 'string' && getTypeName !== 'HS/HTS/NCM Code') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
+              }
+            }
+          } else if (question.process === 'draft') {
+            // map container no
+            contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+            const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
+            contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
           }
-        } else if (question.process === 'draft') {
-          // map container no
-          contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
-          const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
-          contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
-        }
-      });
-
-      validationCDCMContainerNo(contsNo);
+        });
+  
+        validationCDCMContainerNo(contsNo);
+      }
     }
 
     const body = {
@@ -1665,6 +1676,7 @@ const InquiryViewer = (props) => {
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
     setIsResolveCDCM(false);
+    setDisableCDCM(true);
     // setTempReply({});
     setPristine()
   };
@@ -2106,7 +2118,9 @@ const InquiryViewer = (props) => {
   const onReply = (q) => {
     // case: Reply Answer
     const optionsInquires = [...inquiries];
-    setDisableCDCM(false);
+    if (user.role === 'Guest') {
+      setDisableCDCM(false);
+    }
     if (['OPEN', 'INQ_SENT'].includes(q.state)) {
       const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
       //
@@ -2622,14 +2636,10 @@ const InquiryViewer = (props) => {
                           disableInput={!isResolveCDCM && !isReplyCDCM}
                         />
                     }
-                  </> : <ContainerDetailFormOldVersion
-                    container={
-                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                    }
-                    question={question}
-                    originalValues={isJsonText(question.content) ? JSON.parse(question.content) : null}
-                    validation={setValidationCDCM}
-                    setTextResolve={setTextResolve}
+                  </> : 
+                  <ContainerDetailInquiry
+                    setDataCD={(value) => setDataCD(value)}
+                    setDataCM={(value) => setDataCM(value)}
                     disableInput={true}
                   />
               ) :
@@ -2738,7 +2748,7 @@ const InquiryViewer = (props) => {
               )}
 
               {/*Show Table Cd Cm Inquiry*/}
-              {question.process !== 'draft' && ((!['INQ_SENT', 'OPEN'].includes(question.state) && user.role === 'Admin') || user.role === 'Guest') && containerCheck.includes(question.field) && (
+              {question.process !== 'draft' && ((!['INQ_SENT', 'OPEN', 'COMPL'].includes(question.state) && user.role === 'Admin') || user.role === 'Guest') && containerCheck.includes(question.field) && (
                 <ContainerDetailInquiry
                   setDataCD={(value) => setDataCD(value)}
                   setDataCM={(value) => setDataCM(value)}
@@ -2824,7 +2834,7 @@ const InquiryViewer = (props) => {
               {isResolve || isResolveCDCM ? (
                 <>
                   {containerCheck.includes(question.field) && <>
-                    {question?.process === 'draft' ?
+                    {question?.process === 'draft' &&
                       !isResolveCDCM && <ContainerDetailForm
                         container={
                           question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
@@ -2835,15 +2845,6 @@ const InquiryViewer = (props) => {
                         }}
                         originalValues={Array.isArray(question.content) ? question.content : question.contentCDCM}
                         setTextResolve={setTextResolve}
-                      />
-                      : <ContainerDetailFormOldVersion
-                        container={
-                          question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                        }
-                        validation={setValidationCDCM}
-                        question={question}
-                        setTextResolve={setTextResolve}
-                        setDirty={setDirty}
                       />
                     }
                   </>
