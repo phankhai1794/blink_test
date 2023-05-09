@@ -399,6 +399,7 @@ const InquiryViewer = (props) => {
             // console.log(res)
             let filterCDCM = res;
             if (containerCheck.includes(res[0].field)) {
+              setDisableCDCM(true);
               if (isJsonText(res[0].content) && res[0].type === 'ANS_CD_CM') {
                 const parseJs = JSON.parse(res[0].content);
                 setContentCDCMInquiry({ansId: res[0].id});
@@ -779,7 +780,6 @@ const InquiryViewer = (props) => {
     const quest = { ...question };
     quest.showIconAttachAnswerFile = false;
     quest.showIconAttachReplyFile = false;
-    setDisableCDCM(true);
     if (currentQuestion && currentQuestion.id === quest.id) {
       quest.showIconReply = false;
       quest.showIconEdit = true;
