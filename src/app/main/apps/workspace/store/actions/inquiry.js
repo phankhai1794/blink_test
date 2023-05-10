@@ -33,6 +33,7 @@ export const SEARCH_QUEUE_QUERY = 'SEARCH_QUEUE_QUERY';
 export const SET_CONTENT_INQ_RESOLVED = 'SET_CONTENT_INQ_RESOLVED';
 export const SET_DATA_CD_INQ = 'SET_DATA_CD_INQ';
 export const SET_DATA_CM_INQ = 'SET_DATA_CM_INQ';
+export const SET_CANCEL_AME_POPUP = 'SET_CANCEL_AME_POPUP';
 
 export function saveInquiry() {
   return {
@@ -259,6 +260,13 @@ export function openQueueList(state) {
 export function searchQueueQuery(state) {
   return {
     type: SEARCH_QUEUE_QUERY,
+    state: state
+  };
+}
+
+export function setCancelAmePopup(state) {
+  return {
+    type: SET_CANCEL_AME_POPUP,
     state: state
   };
 }

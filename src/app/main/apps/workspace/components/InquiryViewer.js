@@ -281,6 +281,7 @@ const InquiryViewer = (props) => {
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+  const cancelAmePopup = useSelector(({ workspace }) => workspace.inquiryReducer.cancelAmePopup);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
   const [question, setQuestion] = useState(props.question);
@@ -832,7 +833,7 @@ const InquiryViewer = (props) => {
       isUnmounted = true;
       dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     }
-  }, [isSaveComment, isSaveAnswer]);
+  }, [isSaveComment, isSaveAnswer, cancelAmePopup]);
 
   const resetAnswerActionSave = () => {
     const quest = { ...question };
@@ -1680,6 +1681,7 @@ const InquiryViewer = (props) => {
     setIsResolve(false);
     setIsResolveCDCM(false);
     setDisableCDCM(true);
+    dispatch(InquiryActions.setCancelAmePopup(!cancelAmePopup));
     // setTempReply({});
     setPristine()
   };

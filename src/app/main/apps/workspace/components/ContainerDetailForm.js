@@ -15,7 +15,7 @@ import {
   CM_MEASUREMENT
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   Icon,
   IconButton,
@@ -33,6 +33,7 @@ import styled from 'styled-components';
 import { formatContainerNo, NumberFormat } from '@shared';
 
 import AmendmentPopup from './AmendmentPopup';
+import * as InquiryActions from '../store/actions/inquiry';
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -108,11 +109,12 @@ const StyledPopper = styled(Popper)`&&{
 }`;
 
 const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM, setAddContent }) => {
-
+  const dispatch = useDispatch();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
   const user = useSelector(({ user }) => user);
+  const cancelAmePopup = useSelector(({ workspace }) => workspace.inquiryReducer.cancelAmePopup);
   const classes = useStyles();
 
   const getField = (field) => {
@@ -256,8 +258,12 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     return originalValue !== combineValueUnit(key, row) ? '#FEF4E6' : '';
   }
 
-  const handleClose = () => {
-    handleEdit(false)
+  // TODO
+  const handleClose = (type = 'cancel') => {
+    handleEdit(false);
+    if (type === 'cancel') {
+      dispatch(InquiryActions.setCancelAmePopup(!cancelAmePopup));
+    }
   }
 
   const checkPopover = (e) => {
@@ -281,10 +287,10 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         classes={{ paper: classes.paper }}
         anchor='right'
         open={openEdit}
-        onClose={handleClose}
+        onClose={() => handleClose('cancel')}
       >
         <AmendmentPopup
-          onClose={handleClose}
+          onClose={(value) => handleClose(value)}
           inqType={container}
           containerDetail={getValueField(CONTAINER_DETAIL)}
           data={valueEdit[rowIndex]}

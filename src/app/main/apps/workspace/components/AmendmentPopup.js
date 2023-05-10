@@ -30,7 +30,8 @@ import {
   HS_CODE,
   HTS_CODE,
   NCM_CODE,
-  mapUnit
+  mapUnit,
+  CONTAINER_MANIFEST
 } from '@shared/keyword';
 import { useUnsavedChangesWarning } from 'app/hooks'
 import { packageUnits, weightUnits, measurementUnits, containerTypeUnit } from '@shared/units';
@@ -124,11 +125,23 @@ const AmendmentPopup = (props) => {
   const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const user = useSelector(({ user }) => user);
   const [inputSeal, setInputSeal] = useState('');
   const { register, control, handleSubmit, formState: { errors } } = useForm();
   const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Must be a Number' }
   const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
+
+  useEffect(() => {
+    const isResolved = inquiries.filter(inq => (inq.field === metadata.field[CONTAINER_DETAIL] && ['COMPL', 'RESOLVED', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A'].includes(inq.state))).length > 0;
+    if (isResolved && isEdit && user.role !== 'Guest') {
+      const dataResolved = JSON.parse(JSON.stringify(content[metadata.field[(inqType === 'containerDetail') ? CONTAINER_DETAIL : CONTAINER_MANIFEST]]));
+      Object.keys(data).forEach(key => {
+        data[key] = dataResolved[index][key];
+      })
+    }
+  }, []);
 
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
@@ -162,7 +175,7 @@ const AmendmentPopup = (props) => {
       }
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
-    onClose();
+    onClose('save');
     setPristine()
     if (isInqCDCM) setSave();
   };
@@ -464,7 +477,7 @@ const AmendmentPopup = (props) => {
           borderBottom: '2px solid #8A97A3',
           overflow: 'hidden'
         }}>
-        <IconButton style={{ marginRight: '1rem' }} onClick={onClose}>
+        <IconButton style={{ marginRight: '1rem' }} onClick={() => onClose('cancel')}>
           <Icon style={{ color: '#8A97A3' }}>close</Icon>
         </IconButton>
       </div>
@@ -484,7 +497,7 @@ const AmendmentPopup = (props) => {
             variant="contained"
             classes={{ root: clsx(classes.button, 'cancel') }}
             color="primary"
-            onClick={onClose}>
+            onClick={() => onClose('cancel')}>
             Cancel
           </Button>
         </div>
