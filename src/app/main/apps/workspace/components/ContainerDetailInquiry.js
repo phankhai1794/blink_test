@@ -91,7 +91,6 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
             let cmOfCd = [...new Set((cmContent || []).filter(cm =>
                 cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
             ))]
-            console.log('cmOfCd', cmOfCd)
             if (cmOfCd.length === 1) {
               CONTAINER_LIST.cdNumber.map((key, index) => {
                 cmOfCd[0][getType(CONTAINER_LIST.cmNumber[index])] = cd[getType(key)];
