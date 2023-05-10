@@ -68,7 +68,9 @@ const Inquiry = (props) => {
   useEffect(() => {
     let inquiriesSet = [...inquiries];
     inquiriesSet = inquiriesSet.filter((q, index) => (q.field === currentField && q.process === 'pending')
-        || (containerCheck.includes(currentField) && q.process === 'draft'));
+        || (q.process === 'draft'
+            && ((containerCheck.includes(q.field) && containerCheck.includes(currentField)) || (q.field === currentField && !containerCheck.includes(q.field))))
+    );
     setReceiver(null);
     const inqSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     inqSort.forEach(inq => {
