@@ -31,6 +31,8 @@ export const SET_NEW_AMENDMENT = 'SET_NEW_AMENDMENT';
 export const OPEN_QUEUE_LIST = 'OPEN_QUEUE_LIST';
 export const SEARCH_QUEUE_QUERY = 'SEARCH_QUEUE_QUERY';
 export const SET_CONTENT_INQ_RESOLVED = 'SET_CONTENT_INQ_RESOLVED';
+export const SET_DATA_CD_INQ = 'SET_DATA_CD_INQ';
+export const SET_DATA_CM_INQ = 'SET_DATA_CM_INQ';
 
 export function saveInquiry() {
   return {
@@ -76,6 +78,20 @@ export function removeSelectedOption(state) {
 export function setDisplayComment(state) {
   return {
     type: DISPLAY_COMMENT,
+    state
+  };
+}
+
+export function setDataCdInq(state) {
+  return {
+    type: SET_DATA_CD_INQ,
+    state
+  };
+}
+
+export function setDataCmInq(state) {
+  return {
+    type: SET_DATA_CM_INQ,
     state
   };
 }

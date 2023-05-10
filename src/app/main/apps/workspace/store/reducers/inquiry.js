@@ -8,6 +8,8 @@ const initialState = {
   orgContent: {},
   contentInqResolved: {},
   content: {},
+  getDataCDInq: [],
+  getDataCMInq: [],
   currentEditInq: null,
   currentAmendment: undefined,
   displayCmt: false,
@@ -157,6 +159,12 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SEARCH_QUEUE_QUERY: {
     return { ...state, searchQueueQuery: action.state };
+  }
+  case Actions.SET_DATA_CM_INQ: {
+    return { ...state, getDataCMInq: action.state };
+  }
+  case Actions.SET_DATA_CD_INQ: {
+    return { ...state, getDataCDInq: action.state };
   }
   default: {
     return state;

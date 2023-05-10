@@ -101,6 +101,9 @@ const InquiryAnswer = (props) => {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const metadata = useSelector(({ draftBL }) => draftBL.metadata);
+  const getDataCMInq = useSelector(({ workspace }) => workspace.inquiryReducer.getDataCMInq);
+  const getDataCDInq = useSelector(({ workspace }) => workspace.inquiryReducer.getDataCDInq);
+  const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
   const [isDisableSave, setDisableSave] = useState(false);
   const inq = (inq) => {
     return {
@@ -236,8 +239,8 @@ const InquiryAnswer = (props) => {
     let contentCDCM = {};
     if (containerCheck.includes(question.field)) {
       contentCDCM = {
-        [getField(CONTAINER_DETAIL)]: getDataCD,
-        [getField(CONTAINER_MANIFEST)]: getDataCM
+        [getField(CONTAINER_DETAIL)]: getDataCDInq.length ? getDataCDInq : contentInqResolved?.[getField(CONTAINER_DETAIL)],
+        [getField(CONTAINER_MANIFEST)]: getDataCMInq.length ? getDataCMInq : contentInqResolved?.[getField(CONTAINER_MANIFEST)]
       }
     }
     //

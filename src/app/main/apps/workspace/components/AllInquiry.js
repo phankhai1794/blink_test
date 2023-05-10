@@ -178,8 +178,6 @@ const AllInquiry = (props) => {
   const [questionIdSaved, setQuestionIdSaved] = useState();
   const [isSaveAnswer, setSaveAnswer] = useState(false);
   const [isUpdateReply, setUpdateReply] = useState(false);
-  const [getDataCD, setDataCD] = useState([]);
-  const [getDataCM, setDataCM] = useState([]);
   const inputAddAmendmentEndRef = useRef(null);
   const scrollTopPopup = useRef(null);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
@@ -378,10 +376,6 @@ const AllInquiry = (props) => {
                         getUpdatedAt={() => {
                           setUpdateReply(true)
                         }}
-                        setDataCD={(value) => setDataCD(value)}
-                        setDataCM={(value) => setDataCM(value)}
-                        getDataCD={getDataCD}
-                        getDataCM={getDataCM}
                         isAllInq={true}
                       />
                     </div>
@@ -426,10 +420,6 @@ const AllInquiry = (props) => {
                       getUpdatedAt={() => {
                         setUpdateReply(true)
                       }}
-                      setDataCD={(value) => setDataCD(value)}
-                      setDataCM={(value) => setDataCM(value)}
-                      getDataCD={getDataCD}
-                      getDataCM={getDataCM}
                       isAllInq={true}
                     />
                     {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
@@ -439,8 +429,6 @@ const AllInquiry = (props) => {
                         getUpdatedAt={() => {
                           setUpdateReply(true)
                         }}
-                        getDataCD={getDataCD}
-                        getDataCM={getDataCM}
                       />}
                   </div>
                 </div>

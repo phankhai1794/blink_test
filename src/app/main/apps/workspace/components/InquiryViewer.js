@@ -265,7 +265,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer, setDataCD, setDataCM, getDataCD, getDataCM, isAllInq } = props;
+  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer, isAllInq } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -325,6 +325,8 @@ const InquiryViewer = (props) => {
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const [isValidDate, setIsValidDate] = useState(false);
   const [disableCDCMInquiry, setDisableCDCM] = useState(true);
+  const [getDataCD, setDataCD] = useState([]);
+  const [getDataCM, setDataCM] = useState([]);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -455,6 +457,7 @@ const InquiryViewer = (props) => {
             let filterCDCM = res;
             if (containerCheck.includes(res[0].field)) {
               setDisableCDCM(true);
+              const cloneContent = JSON.parse(JSON.stringify(contentInqResolved));
               if (isJsonText(res[0].content) && res[0].type === 'ANS_CD_CM') {
                 const parseJs = JSON.parse(res[0].content);
                 setContentCDCMInquiry({ansId: res[0].id});
@@ -462,8 +465,8 @@ const InquiryViewer = (props) => {
                 setDataCM(parseJs?.[getField(CONTAINER_MANIFEST)]);
                 filterCDCM = res.filter((r, i) => i !== 0);
               } else {
-                setDataCD(contentInqResolved?.[getField(CONTAINER_DETAIL)]);
-                setDataCM(contentInqResolved?.[getField(CONTAINER_MANIFEST)]);
+                setDataCD(cloneContent?.[getField(CONTAINER_DETAIL)]);
+                setDataCM(cloneContent?.[getField(CONTAINER_MANIFEST)]);
               }
             }
             // filter comment
