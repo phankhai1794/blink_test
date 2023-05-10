@@ -2751,7 +2751,7 @@ const InquiryViewer = (props) => {
               )}
 
               {/*Show Table Cd Cm Inquiry*/}
-              {question.process !== 'draft' && ((!['INQ_SENT', 'COMPL', ...((user.role === 'Admin' && !disableCDCMInquiry ) ? [] : ['OPEN'])].includes(question.state) && user.role === 'Admin') || user.role === 'Guest') && containerCheck.includes(question.field) && (
+              {question.process !== 'draft' && ((!['COMPL', ...((user.role === 'Admin' && !disableCDCMInquiry ) ? [] : ['OPEN', 'INQ_SENT'])].includes(question.state) && user.role === 'Admin') || user.role === 'Guest') && containerCheck.includes(question.field) && (
                 <ContainerDetailInquiry
                   setDataCD={(value) => setDataCD(value)}
                   setDataCM={(value) => setDataCM(value)}
