@@ -16,7 +16,7 @@ import {
   TOTAL_WEIGHT,
   TOTAL_WEIGHT_UNIT,
   TOTAL_MEASUREMENT,
-  TOTAL_MEASUREMENT_UNIT
+  TOTAL_MEASUREMENT_UNIT, CONTAINER_DETAIL
 } from '@shared/keyword';
 import { getTotalValueMDView, NumberFormat } from '@shared';
 import { packageUnitsJson } from '@shared/units';
@@ -34,6 +34,7 @@ import ReplyIcon from '@material-ui/icons/Reply';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
+import * as DraftActions from '../../draft-bl/store/actions/index';
 
 import BLField from './BLFieldCont';
 import Label from './FieldLabel';
@@ -166,7 +167,7 @@ const TableCM = (props) => {
     return content[getField(field)] || '';
   };
 
-  const [id, setId] = useState(getField(CONTAINER_MANIFEST));
+  const [id, setId] = useState(getField(CONTAINER_DETAIL));
   const [isHovering, setIsHovering] = useState(false);
   const [isEmpty, setIsEmpty] = useState(true);
   const [hasInquiry, setHasInquiry] = useState(false);
@@ -229,6 +230,7 @@ const TableCM = (props) => {
       dispatch(FormActions.toggleCreateAmendment(true));
     }
     dispatch(InquiryActions.setField(id));
+    dispatch(DraftActions.setAmendmentField(getField(CONTAINER_MANIFEST)));
   };
 
   const checkDisplayIcon = () => {
@@ -299,7 +301,7 @@ const TableCM = (props) => {
   }, [metadata, id, inquiries, listCommentDraft]);
 
   useEffect(() => {
-    let defaultId = getField(CONTAINER_MANIFEST);
+    let defaultId = getField(CONTAINER_DETAIL);
     const descriptionId = getField(DESCRIPTION_OF_GOODS);
     if (drfView === 'MD' && inquiries.length && inquiries.filter(inq => inq.field === descriptionId).length) {
       defaultId = descriptionId;

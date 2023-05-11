@@ -9,6 +9,7 @@ import { handleError } from '@shared/handleError';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
+import {CONTAINER_DETAIL, CONTAINER_MANIFEST} from "../../../../../@shared/keyword";
 
 import InquiryEditor from './InquiryEditor';
 import InquiryAnswer from './InquiryAnswer';
@@ -44,6 +45,7 @@ const Inquiry = (props) => {
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const currentAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.currentAmendment);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const currentAmendField = useSelector(({ draftBL }) => draftBL.currentAmendField);
   const [listInqsField, setListInqsField] = useState([]);
   const isShowBackground = useSelector(({ workspace }) => workspace.inquiryReducer.isShowBackground);
   const [changeQuestion, setChangeQuestion] = useState();
@@ -56,10 +58,17 @@ const Inquiry = (props) => {
   const [isSaveAnswer, setSaveAnswer] = useState(false);
   const scrollTopPopup = useRef(null);
   const inputAddAmendmentEndRef = useRef(null);
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
   useEffect(() => {
     let inquiriesSet = [...inquiries];
-    inquiriesSet = inquiriesSet.filter((q, index) => q.field === currentField);
+    inquiriesSet = inquiriesSet.filter((q, index) => (q.field === currentField && q.process === 'pending')
+        || (q.process === 'draft'
+            && ((containerCheck.includes(q.field) && containerCheck.includes(currentField)) || (q.field === currentField && !containerCheck.includes(q.field))))
+    );
     setReceiver(null);
     const inqSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     inqSort.forEach(inq => {
@@ -203,6 +212,7 @@ const Inquiry = (props) => {
                     getUpdatedAt={() => {
                       setUpdateReply(true)
                     }}
+                    isAllInq={false}
                   />
                 </div>
                 {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
@@ -244,6 +254,7 @@ const Inquiry = (props) => {
                 getUpdatedAt={() => {
                   setUpdateReply(true)
                 }}
+                isAllInq={false}
               />
               {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                 <InquiryAnswer

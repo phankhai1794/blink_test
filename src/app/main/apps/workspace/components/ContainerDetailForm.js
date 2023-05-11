@@ -15,13 +15,25 @@ import {
   CM_MEASUREMENT
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Icon, IconButton, Table, TableBody, TableCell, TableHead, TableRow, Drawer, Popper } from '@material-ui/core';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  Icon,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Drawer,
+  Popper,
+  TextField
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import styled from 'styled-components';
 import { formatContainerNo, NumberFormat } from '@shared';
 
 import AmendmentPopup from './AmendmentPopup';
+import * as InquiryActions from '../store/actions/inquiry';
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -96,12 +108,13 @@ const StyledPopper = styled(Popper)`&&{
   }
 }`;
 
-const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, deleteAmendment, setDeleteAmendment, isResolveCDCM }) => {
-
+const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM, setAddContent }) => {
+  const dispatch = useDispatch();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
   const user = useSelector(({ user }) => user);
+  const cancelAmePopup = useSelector(({ workspace }) => workspace.inquiryReducer.cancelAmePopup);
   const classes = useStyles();
 
   const getField = (field) => {
@@ -116,14 +129,15 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     return content[getField(field)] || [];
   };
 
-  const originalData = originalValues || getValueField(container) || [{}];
-  const [values, setValues] = useState(originalValues || getValueField(container) || [{}]);
+  const originalData = originalValues && originalValues.length ? originalValues : (getValueField(container) || [{}]);
+  const [values, setValues] = useState(originalData);
   const [openEdit, setOpenEdit] = useState(false);
   const [rowIndex, setRowIndex] = useState(0);
-  const [valueEdit, setValueEdit] = useState(originalValues || getValueField(container) || [{}]);
+  const [valueEdit, setValueEdit] = useState(originalData);
   const [popover, setPopover] = useState({ open: false, text: '' });
   const [anchorEl, setAnchorEl] = useState(null);
   const [arrowRef, setArrowRef] = useState(null);
+  const [isSave, setSaveCDCM] = useState(false);
 
   const CDTitle = CONTAINER_LIST.cd
   const CMTitle = user.role === 'Guest' ? [CONTAINER_NUMBER, ...CONTAINER_LIST.cm].filter(item => ![HS_CODE, HTS_CODE, NCM_CODE].includes(item)) : [CONTAINER_NUMBER, ...CONTAINER_LIST.cm]
@@ -134,8 +148,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     let valuesSorted = [];
     if (container === CONTAINER_MANIFEST && !isResolveCDCM) {
       let cms = [...vals];
+      const contentCD = isInqCDCM ? originalData : getValueField(CONTAINER_DETAIL) || [];
       const contsNo = [
-        ...new Set((getValueField(CONTAINER_DETAIL) || []).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
+        ...new Set((contentCD || []).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
       ];
       if (contsNo.length) {
         contsNo.forEach((contNo) => {
@@ -178,7 +193,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
       const containerNoId = metadata.inq_type[CONTAINER_NUMBER];
       data[containerNoId] = formatContainerNo(data[containerNoId]);
     })
-    setEditContent(valueEdit);
+    if (!disableInput) {
+      setEditContent(valueEdit);
+    }
   }
 
   useEffect(() => {
@@ -186,6 +203,13 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     setValues(sort)
     setValueEdit(sort)
   }, [])
+
+  useEffect(() => {
+    if (isSave) {
+      setAddContent(values)
+      setSaveCDCM(false)
+    }
+  }, [isSave])
 
 
   const getTotals = (data, name) => {
@@ -234,8 +258,12 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     return originalValue !== combineValueUnit(key, row) ? '#FEF4E6' : '';
   }
 
-  const handleClose = () => {
-    handleEdit(false)
+  // TODO
+  const handleClose = (type = 'cancel') => {
+    handleEdit(false);
+    if (type === 'cancel') {
+      dispatch(InquiryActions.setCancelAmePopup(!cancelAmePopup));
+    }
   }
 
   const checkPopover = (e) => {
@@ -259,17 +287,19 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         classes={{ paper: classes.paper }}
         anchor='right'
         open={openEdit}
-        onClose={handleClose}
+        onClose={() => handleClose('cancel')}
       >
         <AmendmentPopup
-          onClose={handleClose}
+          onClose={(value) => handleClose(value)}
           inqType={container}
           containerDetail={getValueField(CONTAINER_DETAIL)}
           data={valueEdit[rowIndex]}
           isEdit={!disableInput}
+          setSave={() => setSaveCDCM(true)}
           updateData={(value) => setValues(value)}
           updateEdit={(value) => setValueEdit(value)}
           index={rowIndex}
+          isInqCDCM={isInqCDCM}
         />
       </Drawer>
       <StyledPopper

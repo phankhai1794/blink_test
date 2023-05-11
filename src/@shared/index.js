@@ -9,6 +9,15 @@ import {
   DATE_LADEN
 } from '@shared/keyword';
 
+export const combineCDCM = (metadataFields) => {
+  return metadataFields.map(m => {
+    if (m.keyword === 'containerDetail' || m.keyword === 'containerManifest') {
+      m.label = 'Container Detail - Container Manifest'
+    }
+    return m;
+  })
+}
+
 export const getLabelById = (fieldOptions, id) => {
   const result = fieldOptions.filter(({ value }) => value === id);
   return result.length ? result[0].label : "";

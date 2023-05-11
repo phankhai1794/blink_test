@@ -115,6 +115,7 @@ import AttachFile from './AttachFile';
 import Comment from './Comment';
 import TagsComponent from './TagsComponent';
 import ContainerDetailForm from './ContainerDetailForm';
+import ContainerDetailInquiry from "./ContainerDetailInquiry";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -264,7 +265,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InquiryViewer = (props) => {
-  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer } = props;
+  const { index, showReceiver, isSaved, currentQuestion, openInquiryReview, field, isSaveAnswer, isAllInq } = props;
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -280,6 +281,7 @@ const InquiryViewer = (props) => {
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+  const cancelAmePopup = useSelector(({ workspace }) => workspace.inquiryReducer.cancelAmePopup);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
   const [question, setQuestion] = useState(props.question);
@@ -317,11 +319,15 @@ const InquiryViewer = (props) => {
   const [inqAnsId, setInqAnsId] = useState('');
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
   const [isDeleteAnswer, setDeleteAnswer] = useState({ status: false, content: '' });
+  const [getContentCDCMInquiry, setContentCDCMInquiry] = useState({});
   const [listFieldDisableUpload, setListFieldDisableUpload] = useState([]);
   const [listFieldTypeDisableUpload, setListFieldTypeDisableUpload] = useState([]);
   const [isDateTime, setIsDateTime] = useState(false);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const [isValidDate, setIsValidDate] = useState(false);
+  const [disableCDCMInquiry, setDisableCDCM] = useState(true);
+  const [getDataCD, setDataCD] = useState([]);
+  const [getDataCM, setDataCM] = useState([]);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -448,8 +454,24 @@ const InquiryViewer = (props) => {
           const lastest = { ...question };
           if (res.length > 0) {
             // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
+            // console.log(res)
+            let filterCDCM = res;
+            if (containerCheck.includes(res[0].field)) {
+              setDisableCDCM(true);
+              const cloneContent = JSON.parse(JSON.stringify(contentInqResolved));
+              if (isJsonText(res[0].content) && res[0].type === 'ANS_CD_CM') {
+                const parseJs = JSON.parse(res[0].content);
+                setContentCDCMInquiry({ansId: res[0].id});
+                setDataCD(parseJs?.[getField(CONTAINER_DETAIL)]);
+                setDataCM(parseJs?.[getField(CONTAINER_MANIFEST)]);
+                filterCDCM = res.filter((r, i) => i !== 0);
+              } else {
+                setDataCD(cloneContent?.[getField(CONTAINER_DETAIL)]);
+                setDataCM(cloneContent?.[getField(CONTAINER_MANIFEST)]);
+              }
+            }
             // filter comment
-            const filterOffshoreSent = res[res.length - 1];
+            const filterOffshoreSent = filterCDCM[filterCDCM.length - 1];
             if (filterOffshoreSent.type === 'REP' && filterOffshoreSent.state === 'COMPL') {
               setInqAnsId(filterOffshoreSent.id);
             }
@@ -461,6 +483,7 @@ const InquiryViewer = (props) => {
             lastest.status = filterOffshoreSent.status;
             lastest.sentAt = filterOffshoreSent.sentAt;
             lastest.name = "";
+            lastest.process = 'pending';
             lastest.creator = filterOffshoreSent.updater;
             lastest.createdAt = filterOffshoreSent.createdAt;
             lastest.createdAt = filterOffshoreSent.createdAt;
@@ -558,7 +581,7 @@ const InquiryViewer = (props) => {
               }
             }
             //
-            const sortComments = [...res].sort((a, b) => (a.updatedAt > b.updatedAt ? 1 : -1));
+            const sortComments = [...filterCDCM].sort((a, b) => (a.updatedAt > b.updatedAt ? 1 : -1));
             if (sortComments.length && ['REOPEN_A', 'REOPEN_Q'].includes(sortComments[sortComments.length - 1].state)) {
               const markReopen = {
                 creator: filterOffshoreSent.creator,
@@ -570,9 +593,9 @@ const InquiryViewer = (props) => {
                 process: 'pending',
                 state: filterOffshoreSent?.state,
               }
-              res.splice(res.length - 1, 0, markReopen);
+              filterCDCM.splice(filterCDCM.length - 1, 0, markReopen);
             }
-            const listComments = [...res].map(r => {
+            const listComments = [...filterCDCM].map(r => {
               return {
                 ...r,
                 process: 'pending'
@@ -581,10 +604,10 @@ const InquiryViewer = (props) => {
             setComment(listComments);
             // setType(metadata.ans_type.paragraph);
             setQuestion(lastest);
-            if (res.length > 1) {
+            if (filterCDCM.length > 1) {
               setInqHasComment(true);
             }
-            if (res.length === 1) {
+            if (filterCDCM.length === 1) {
               // setShowViewAll(false);
               setInqHasComment(false)
             }
@@ -810,7 +833,7 @@ const InquiryViewer = (props) => {
       isUnmounted = true;
       dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     }
-  }, [isSaveComment, isSaveAnswer]);
+  }, [isSaveComment, isSaveAnswer, cancelAmePopup]);
 
   const resetAnswerActionSave = () => {
     const quest = { ...question };
@@ -1311,6 +1334,7 @@ const InquiryViewer = (props) => {
     if (Array.isArray(question.content)) {
       setIsResolveCDCM(true);
     } else {
+      setDisableCDCM(false);
       setIsResolve(true);
     }
   };
@@ -1399,36 +1423,46 @@ const InquiryViewer = (props) => {
     } else if (typeof textResolve === 'string') {
       contentField = textResolve.toUpperCase().trim();
     } else {
-      contentField = textResolve;
-      const orgContentField = content[question.field];
-      const contsNo = [];
-      contentField.forEach((obj, index) => {
-        if (question.process === 'pending') {
-          const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
-          if (getTypeName === CONTAINER_NUMBER) {
-            contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
-            const containerNo = orgContentField[index][question.inqType];
-            contsNoChange[containerNo] = obj[question.inqType];
-            obj[question.inqType] = formatContainerNo(obj[question.inqType]);
-          }
-          if (getTypeName === CONTAINER_SEAL) {
-            obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
-          } else if (obj[question.inqType]) {
-            if ([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName) && !isNaN(obj[question.inqType])) {
-              obj[question.inqType] = (typeof obj[question.inqType] === 'string' ? parseFloat(obj[question.inqType]).toFixed(3) : obj[question.inqType])
-            } else {
-              obj[question.inqType] = (typeof obj[question.inqType] === 'string' && getTypeName !== 'HS/HTS/NCM Code') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
+      if (containerCheck.includes(question.field)) {
+        const contentCDCM = {
+          [getField(CONTAINER_DETAIL)]: getDataCD,
+          [getField(CONTAINER_MANIFEST)]: getDataCM
+        };
+        contentField = contentCDCM;
+      } else {
+        contentField = textResolve;
+      }
+      if (Array.isArray(contentField)) {
+        const orgContentField = content[question.field];
+        const contsNo = [];
+        contentField.forEach((obj, index) => {
+          if (question.process === 'pending') {
+            const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === question.inqType);
+            if (getTypeName === CONTAINER_NUMBER) {
+              contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+              const containerNo = orgContentField[index][question.inqType];
+              contsNoChange[containerNo] = obj[question.inqType];
+              obj[question.inqType] = formatContainerNo(obj[question.inqType]);
             }
+            if (getTypeName === CONTAINER_SEAL) {
+              obj[question.inqType] = obj[question.inqType].map(seal => seal.toUpperCase().trim())
+            } else if (obj[question.inqType]) {
+              if ([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_WEIGHT, CM_MEASUREMENT].includes(getTypeName) && !isNaN(obj[question.inqType])) {
+                obj[question.inqType] = (typeof obj[question.inqType] === 'string' ? parseFloat(obj[question.inqType]).toFixed(3) : obj[question.inqType])
+              } else {
+                obj[question.inqType] = (typeof obj[question.inqType] === 'string' && getTypeName !== 'HS/HTS/NCM Code') ? obj[question.inqType].toUpperCase().replace(/^0*/g, "").trim() : obj[question.inqType];
+              }
+            }
+          } else if (question.process === 'draft') {
+            // map container no
+            contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+            const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
+            contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
           }
-        } else if (question.process === 'draft') {
-          // map container no
-          contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
-          const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
-          contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
-        }
-      });
-
-      validationCDCMContainerNo(contsNo);
+        });
+  
+        validationCDCMContainerNo(contsNo);
+      }
     }
 
     const body = {
@@ -1646,6 +1680,8 @@ const InquiryViewer = (props) => {
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
     setIsResolveCDCM(false);
+    setDisableCDCM(true);
+    dispatch(InquiryActions.setCancelAmePopup(!cancelAmePopup));
     // setTempReply({});
     setPristine()
   };
@@ -1780,6 +1816,7 @@ const InquiryViewer = (props) => {
     let mediaFilesResp;
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    setDisableCDCM(true);
     const newMediaFile = [];
     if (tempReply.mediaFiles?.length) {
       const formData = new FormData();
@@ -1806,13 +1843,22 @@ const InquiryViewer = (props) => {
     if (question.process === 'pending') {
       // Add
       if (!tempReply.answer?.id) {
+        let answerCDCM = {};
+        if (containerCheck.includes(question.field) && user.role === 'Guest') {
+          const contentCDCM = {
+            [getField(CONTAINER_DETAIL)]: getDataCD,
+            [getField(CONTAINER_MANIFEST)]: getDataCM
+          };
+          answerCDCM.content = JSON.stringify(contentCDCM);
+          answerCDCM.type = tempReply.answer.type;
+        }
         const reqReply = {
           inqAns: tempReply.inqAns,
           answer: {
             content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
             type: tempReply.answer.type
           },
-
+          answerCDCM,
           mediaFiles: mediaListId
         };
         saveReply({ ...reqReply })
@@ -1842,10 +1888,20 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setReply(false));
           }).catch((error) => handleError(dispatch, error));
       } else {
+        let answerCDCM = {};
+        if (containerCheck.includes(question.field) && Object.keys(getContentCDCMInquiry).length && user.role === 'Guest') {
+          const contentCDCM = {
+            [getField(CONTAINER_DETAIL)]: getDataCD,
+            [getField(CONTAINER_MANIFEST)]: getDataCM
+          };
+          answerCDCM.content = JSON.stringify(contentCDCM);
+          answerCDCM.ansCDCMId = getContentCDCMInquiry.ansId;
+        }
         // Edit
         const reqReply = {
           content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
           mediaFiles: mediaListId.map(media => media.id),
+          answerCDCM,
           mediaRest
         };
         updateReply(tempReply.answer.id, { ...reqReply })
@@ -2053,6 +2109,7 @@ const InquiryViewer = (props) => {
   }
 
   const cancelReply = (q) => {
+    setDisableCDCM(true);
     dispatch(InquiryActions.setReply(false));
     setIsReply(false);
     setIsReplyCDCM(false);
@@ -2066,6 +2123,9 @@ const InquiryViewer = (props) => {
   const onReply = (q) => {
     // case: Reply Answer
     const optionsInquires = [...inquiries];
+    if (user.role === 'Guest') {
+      setDisableCDCM(false);
+    }
     if (['OPEN', 'INQ_SENT'].includes(q.state)) {
       const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
       //
@@ -2094,6 +2154,9 @@ const InquiryViewer = (props) => {
     reply.showIconEdit = false;
     reply.showIconReply = false;
     setShowViewAll(false);
+    if (user.role === 'Guest') {
+      setDisableCDCM(false);
+    }
     if (['ANS_DRF', 'ANS_SENT'].includes(question.state) || (user.role === 'Guest' && ['REP_Q_DRF'].includes(question.state))) {
       optionsInquires[editedIndex].showIconEdit = false;
       optionsInquires[editedIndex].showIconReply = false;
@@ -2249,7 +2312,7 @@ const InquiryViewer = (props) => {
     return result;
   }
 
-  // Separate Shipper/Consignee/Notify 
+  // Separate Shipper/Consignee/Notify
   const renderSeparateField = (field) => {
     if (isSeparate) {
       const LABEL_TYPE = ['name', 'address']
@@ -2344,7 +2407,7 @@ const InquiryViewer = (props) => {
           {(isReply || question.showIconAttachAnswerFile) && isDragActive && <div className='dropzone'>Drop files here</div>}
           <div>
             {(question?.process === 'draft') &&
-              <TagsComponent tagName='AMENDMENT' tagColor='primary' />
+              <TagsComponent tagName='AMENDMENT' tagColor='primary' question={question} isAllInq={isAllInq} />
             }
             <div style={{ paddingTop: 10 }} className="flex justify-between">
               <UserInfo
@@ -2580,14 +2643,10 @@ const InquiryViewer = (props) => {
                           disableInput={!isResolveCDCM && !isReplyCDCM}
                         />
                     }
-                  </> : <ContainerDetailFormOldVersion
-                    container={
-                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                    }
-                    question={question}
-                    originalValues={isJsonText(question.content) ? JSON.parse(question.content) : null}
-                    validation={setValidationCDCM}
-                    setTextResolve={setTextResolve}
+                  </> : 
+                  <ContainerDetailInquiry
+                    setDataCD={(value) => setDataCD(value)}
+                    setDataCM={(value) => setDataCM(value)}
                     disableInput={true}
                   />
               ) :
@@ -2695,6 +2754,17 @@ const InquiryViewer = (props) => {
                 <Comment question={props.question} comment={comment} isDateTime={isDateTime} />
               )}
 
+              {/*Show Table Cd Cm Inquiry*/}
+              {question.process !== 'draft' && ((!['COMPL', ...((user.role === 'Admin' && !disableCDCMInquiry ) ? [] : ['OPEN', 'INQ_SENT'])].includes(question.state) && user.role === 'Admin') || user.role === 'Guest') && containerCheck.includes(question.field) && (
+                <ContainerDetailInquiry
+                  setDataCD={(value) => setDataCD(value)}
+                  setDataCM={(value) => setDataCM(value)}
+                  getDataCD={getDataCD}
+                  getDataCM={getDataCM}
+                  disableInput={disableCDCMInquiry}
+                />
+              )}
+
               {question.mediaFile?.length > 0 &&
                 !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
                 question.mediaFile?.map((file, mediaIndex) => (
@@ -2771,7 +2841,7 @@ const InquiryViewer = (props) => {
               {isResolve || isResolveCDCM ? (
                 <>
                   {containerCheck.includes(question.field) && <>
-                    {question?.process === 'draft' ?
+                    {question?.process === 'draft' &&
                       !isResolveCDCM && <ContainerDetailForm
                         container={
                           question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
@@ -2782,15 +2852,6 @@ const InquiryViewer = (props) => {
                         }}
                         originalValues={Array.isArray(question.content) ? question.content : question.contentCDCM}
                         setTextResolve={setTextResolve}
-                      />
-                      : <ContainerDetailFormOldVersion
-                        container={
-                          question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                        }
-                        validation={setValidationCDCM}
-                        question={question}
-                        setTextResolve={setTextResolve}
-                        setDirty={setDirty}
                       />
                     }
                   </>

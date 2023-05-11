@@ -8,6 +8,8 @@ const initialState = {
   orgContent: {},
   contentInqResolved: {},
   content: {},
+  getDataCDInq: [],
+  getDataCMInq: [],
   currentEditInq: null,
   currentAmendment: undefined,
   displayCmt: false,
@@ -31,7 +33,8 @@ const initialState = {
   listCommentDraft: [],
   objectNewAmendment: { oldAmendmentId: null, newAmendment: null },
   openQueueList: false,
-  searchQueueQuery: { bookingNo: '', from: '', to: '', blStatus: 'PENDING,IN_QUEUE', currentPageNumber: 1, pageSize: 10 , totalPageNumber: 5, sortField: '' }
+  searchQueueQuery: { bookingNo: '', from: '', to: '', blStatus: 'PENDING,IN_QUEUE', currentPageNumber: 1, pageSize: 10 , totalPageNumber: 5, sortField: '' },
+  cancelAmePopup: false,
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -157,6 +160,15 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SEARCH_QUEUE_QUERY: {
     return { ...state, searchQueueQuery: action.state };
+  }
+  case Actions.SET_DATA_CM_INQ: {
+    return { ...state, getDataCMInq: action.state };
+  }
+  case Actions.SET_DATA_CD_INQ: {
+    return { ...state, getDataCDInq: action.state };
+  }
+  case Actions.SET_CANCEL_AME_POPUP: {
+    return { ...state, cancelAmePopup: action.state };
   }
   default: {
     return state;

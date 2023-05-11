@@ -13,6 +13,7 @@ import FileAttach from './FileAttach';
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from "./ParagraphAnswer";
 import { ContainerDetailFormOldVersion } from './InquiryViewer';
+import ContainerDetailInquiry from "./ContainerDetailInquiry";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -95,6 +96,18 @@ const Comment = (props) => {
   }
 
   const contentUI = ({ userName, createdAt, avatar, content, title, media, answersMedia, id, type, reply }) => {
+    let dataCD = [];
+    let dataCM = [];
+    if (isJsonText(reply.content) && containerCheck.includes(reply.field) && reply.type === 'ANS_CD_CM') {
+      const parseJs = JSON.parse(reply.content);
+      dataCD = parseJs?.[getField(CONTAINER_DETAIL)];
+      dataCM = parseJs?.[getField(CONTAINER_MANIFEST)];
+    }
+    if (content.indexOf(getField(CONTAINER_DETAIL)) !== -1) {
+      const parseJs = JSON.parse(content);
+      dataCD = parseJs[getField(CONTAINER_DETAIL)];
+      dataCM = parseJs[getField(CONTAINER_MANIFEST)];
+    }
     return (
       <div key={id}>
         <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
@@ -136,36 +149,37 @@ const Comment = (props) => {
             {/*  </>*/}
             {/*)}*/}
           </div>
-          {(content instanceof Array || isJson(content)) && containerCheck.includes(question.field) ?
+
+          {(content instanceof Array || isJson(content)) && containerCheck.includes(question.field) && question.process === 'draft' ?
             (!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
               (
-                question?.process === 'pending' ?
-                  <ContainerDetailFormOldVersion
-                    container={
-                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                    }
-                    validation={() => null}
-                    question={question}
-                    originalValues={JSON.parse(content)}
-                    disableInput={true}
-                  /> :
-                  <ContainerDetailForm
-                    container={
-                      question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
-                    }
-                    setEditContent={() => null}
-                    originalValues={content}
-                    disableInput={true}
-                  />
+                <ContainerDetailForm
+                  container={
+                    question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
+                  }
+                  setEditContent={() => null}
+                  originalValues={content}
+                  disableInput={true}
+                />
               ) : <span className={'markReopen'}>Marked as reopened</span>
             ) :
-            <div className={clsx((['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(reply.state) || reply.status === 'DELETED') ? 'delete-content' : '', 'content-reply')} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontStyle: ((!['INQ', 'ANS'].includes(type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(reply.state) && reply.process === 'pending') ||
-                  (!['AME_ORG', 'AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(reply.state) && reply.process === 'draft')) && 'italic' }}>
-              {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
-                <div className={reply.isChangeRecipient ? 'markReopen' : ''}>{(isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG' ].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content}</div> :
-                (type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>)
-              }
-            </div>
+            (
+              (containerCheck.includes(question.field) && (dataCD.length && dataCM.length)) ? (
+                <ContainerDetailInquiry
+                  getDataCD={dataCD}
+                  getDataCM={dataCM}
+                  disableInput={true}
+                />
+              ) : (
+                <div className={clsx((['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(reply.state) || reply.status === 'DELETED') ? 'delete-content' : '', 'content-reply')} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontStyle: ((!['INQ', 'ANS'].includes(type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(reply.state) && reply.process === 'pending') ||
+                            (!['AME_ORG', 'AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(reply.state) && reply.process === 'draft')) && 'italic' }}>
+                  {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
+                    <div className={reply.isChangeRecipient ? 'markReopen' : ''}>{(isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG' ].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content}</div> :
+                    (type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>)
+                  }
+                </div>
+              )
+            )
           }
 
           {<div style={{ display: 'block', margin: '1rem 0rem' }}>
@@ -236,7 +250,7 @@ const Comment = (props) => {
     <div className={classes.root}>
       {comments.map((k, id) => {
         let content = k.content;
-        if (k.content && isJsonText(k.content) && !JSON.parse(k.content).length) {
+        if (k.content && isJsonText(k.content) && !JSON.parse(k.content).length && !containerCheck.includes(k.field)) {
           content = `${JSON.parse(k.content).name}\n${JSON.parse(k.content).address}`
         }
         let mediaFiles = k.mediaFile;

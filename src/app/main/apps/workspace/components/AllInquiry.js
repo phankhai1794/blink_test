@@ -289,6 +289,18 @@ const AllInquiry = (props) => {
     }
   }, [currentAmendment]);
 
+  const getLabel = (id) => {
+    const result = metadata['field_options'].filter(({ value }) => value === id);
+    if (result.length) {
+      if (result[0].keyword === 'containerDetail' || result[0].keyword === 'containerManifest') {
+        return 'Container Detail - Container Manifest'
+      } else {
+        return result[0].label;
+      }
+    }
+    return '';
+  }
+
   return (
     <>
       {openInquiryReview && !inquiries.length &&
@@ -351,7 +363,7 @@ const AllInquiry = (props) => {
                     )}>
                     <div style={{ marginBottom: '12px' }}>
                       <Typography color="primary" variant="h5" className={classes.inqTitle}>
-                        {`${getLabelById(metadata['field_options'], q.field)}`}
+                        {getLabel(q.field)}
                       </Typography>
 
                       <InquiryViewer
@@ -364,6 +376,7 @@ const AllInquiry = (props) => {
                         getUpdatedAt={() => {
                           setUpdateReply(true)
                         }}
+                        isAllInq={true}
                       />
                     </div>
                   </div>
@@ -390,7 +403,7 @@ const AllInquiry = (props) => {
                   )}>
                   <div style={{ marginBottom: '12px' }}>
                     <Typography color="primary" variant="h5" className={classes.inqTitle}>
-                      {`${getLabelById(metadata['field_options'], q.field)}`}
+                      {getLabel(q.field)}
                     </Typography>
 
                     <InquiryViewer
@@ -407,6 +420,7 @@ const AllInquiry = (props) => {
                       getUpdatedAt={() => {
                         setUpdateReply(true)
                       }}
+                      isAllInq={true}
                     />
                     {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                       <InquiryAnswer
