@@ -61,7 +61,7 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
             contentCD[0][getType(CONTAINER_LIST.cdUnit[index])] = valueUpdated[0][getType(key)];
           });
           setDataCD(contentCD);
-          dispatch(InquiryActions.setDataCdInq(contentCM));
+          dispatch(InquiryActions.setDataCdInq(contentCD));
         }
       }
     }
