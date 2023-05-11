@@ -1844,7 +1844,7 @@ const InquiryViewer = (props) => {
       // Add
       if (!tempReply.answer?.id) {
         let answerCDCM = {};
-        if (containerCheck.includes(question.field)) {
+        if (containerCheck.includes(question.field) && user.role === 'Guest') {
           const contentCDCM = {
             [getField(CONTAINER_DETAIL)]: getDataCD,
             [getField(CONTAINER_MANIFEST)]: getDataCM
@@ -1889,7 +1889,7 @@ const InquiryViewer = (props) => {
           }).catch((error) => handleError(dispatch, error));
       } else {
         let answerCDCM = {};
-        if (containerCheck.includes(question.field) && Object.keys(getContentCDCMInquiry).length) {
+        if (containerCheck.includes(question.field) && Object.keys(getContentCDCMInquiry).length && user.role === 'Guest') {
           const contentCDCM = {
             [getField(CONTAINER_DETAIL)]: getDataCD,
             [getField(CONTAINER_MANIFEST)]: getDataCM
@@ -2154,7 +2154,9 @@ const InquiryViewer = (props) => {
     reply.showIconEdit = false;
     reply.showIconReply = false;
     setShowViewAll(false);
-    setDisableCDCM(false);
+    if (user.role === 'Guest') {
+      setDisableCDCM(false);
+    }
     if (['ANS_DRF', 'ANS_SENT'].includes(question.state) || (user.role === 'Guest' && ['REP_Q_DRF'].includes(question.state))) {
       optionsInquires[editedIndex].showIconEdit = false;
       optionsInquires[editedIndex].showIconReply = false;
