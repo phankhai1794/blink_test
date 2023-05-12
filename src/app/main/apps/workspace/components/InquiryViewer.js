@@ -1423,7 +1423,7 @@ const InquiryViewer = (props) => {
     } else if (typeof textResolve === 'string') {
       contentField = textResolve.toUpperCase().trim();
     } else {
-      if (containerCheck.includes(question.field)) {
+      if (containerCheck.includes(question.field) && question.process === 'pending') {
         const contentCDCM = {
           [getField(CONTAINER_DETAIL)]: getDataCD,
           [getField(CONTAINER_MANIFEST)]: getDataCM
