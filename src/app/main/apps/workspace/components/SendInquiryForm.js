@@ -171,7 +171,8 @@ const SendInquiryForm = (props) => {
     const newRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_Q_DRF']);
     const newAmeRep = checkNewInquiry(metadata, inquiries, tabValue, ['REP_DRF']);
     const convert = (array) => array.map((a) => `- ${a}`).join('\n');
-    let header = 'BL has been updated';
+    let header = 'New Reply';
+    let subject = 'Customer BL Query';
     let msg = '';
     if ((newInq.length && newRep.length) || (newInq.length && newAmeRep.length)) {
       msg =
@@ -179,18 +180,18 @@ const SendInquiryForm = (props) => {
       return [
         msg,
         ` \nNew inquiry:\n${convert(newInq)}\n \nNew reply:\n${convert([...new Set([...newRep, ...newAmeRep])])}`,
-        header
+        header,
+        subject
       ];
     } else if (newInq.length) {
       header = 'New Inquiry';
     } else if (newRep.length) {
       msg = 'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
-      header = 'New Reply';
     } else if (newAmeRep.length) {
       msg = 'Thank you very much for checking BL draft. Your amendment requests are in progress; however, there are still some pending issues that need to be clarified in the following BL fields:';
-      header = 'You have received a reply';
+      subject = 'BL Amendment Request';
     }
-    return [msg, array.map((a) => `- ${a}`).join('\n'), header];
+    return [msg, array.map((a) => `- ${a}`).join('\n'), header, subject];
   };
 
   async function fetchData() {
@@ -231,7 +232,7 @@ const SendInquiryForm = (props) => {
 
       subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
-      content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion. Pending issues:'}\n${msg2}`;
+      content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion.\n \nPending issues:'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setOnshoreValue({
         ...onshoreValue,
@@ -244,8 +245,8 @@ const SendInquiryForm = (props) => {
     if (hasCustomer || (!hasCustomer && inqCustomer.length)) {
       setTabValue('customer');
 
-      subject = `[Customer BL Query]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
-      const [msg1, msg2, header] = convertToList(inqCustomer, 'customer');
+      const [msg1, msg2, header, subj] = convertToList(inqCustomer, 'customer');
+      subject = `[${subj}]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
       content = `Dear Customer,\n \n${msg1 || `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`}\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({
