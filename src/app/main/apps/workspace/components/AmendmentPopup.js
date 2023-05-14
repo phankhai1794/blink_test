@@ -180,7 +180,7 @@ const AmendmentPopup = (props) => {
     if (isInqCDCM) setSave();
   };
 
-  const show = (value) => user.role === 'Admin' && value;
+  const show = (value) => user.role === 'Admin';
 
   const handleChange = (field, value) => {
     setDirty();
