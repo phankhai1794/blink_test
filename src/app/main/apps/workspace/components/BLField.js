@@ -308,13 +308,22 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
     if (metadata.field['consignee'] === id && typeof children === 'string' && children.slice(-3,) === 'CN>') isContinue = 'CN>';
     if (metadata.field['notify'] === id && typeof children === 'string' && children.slice(-3,) === 'NP>') isContinue = 'NP>';
     if (metadata.field['alsoNotify'] === id && typeof children === 'string' && children.slice(-5,) === 'A/NF>') isContinue = 'A/NF>';
+    if (metadata.field['forwarder'] === id && typeof children === 'string' && children.slice(-3,) === 'FW>') isContinue = 'FW>';
   }
-  if (isContinue && lines.length > 3) {
+  if (isContinue && [3, 4, 5].includes(lines.length)) {
     if (isContinue === 'A/NF>') finalChidren = finalChidren.slice(0, -5);
     else finalChidren = finalChidren.slice(0, -3);
   }
+  if (isContinue && lines.length > 5) {
+    const lastline = lines.slice(-1)[0];
+    const listT = lastline.match(/\w+/g);
+    let count = 0;
+    listT.forEach(item => {
+      count += item.length;
+    })
+    finalChidren = finalChidren.slice(0, -3) + ' '.repeat((35 - count) * 3 + 3) + isContinue;
+  }
 
-  // should put theme provider at top component
   return (
     <>
       <div
@@ -352,7 +361,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
                       multiline ? classes.adornmentMultiline : '',
                       rows ? classes[`adornmentRow_${rows}`] : ''
                     )}>
-                    {isContinue && lines.length > 3 &&
+                    {isContinue && [3, 4, 5].includes(lines.length) &&
                       <div style={{
                         fontSize: '15px',
                         color: darkGray,
@@ -360,7 +369,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
                         fontWeight: '500',
                         position: 'absolute',
                         left: isContinue === 'A/NF>' ? '68%' : '71%',
-                        top: lines.length === 5 ? '76%' : '58%'
+                        top: lines.length === 5 ? '76%' : (lines.length === 4 ? '58%' : '40%')
                       }}>
                         {isContinue}
                       </div>
