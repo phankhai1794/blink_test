@@ -25,7 +25,8 @@ import {
   VESSEL_VOYAGE,
   ALSO_NOTIFY,
   RD_TERMS,
-  FREIGHT_TERM
+  FREIGHT_TERM,
+  DESCRIPTION_OF_GOODS
 } from '@shared/keyword';
 import {PERMISSION, PermissionProvider} from '@shared/permission';
 import * as AppActions from 'app/store/actions';
@@ -136,6 +137,7 @@ const BLWorkspace = (props) => {
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
+  const drfView = useSelector(({ draftBL }) => draftBL.drfView);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -738,6 +740,14 @@ const BLWorkspace = (props) => {
               </Grid>
             </Grid>
 
+            {(drfView === 'CM') && <Grid container>
+              <Grid item xs={6}>
+                <Label>DESCRIPTION OF GOODS</Label>
+                <BLField id={getField(DESCRIPTION_OF_GOODS)} multiline={true} rows={5}>
+                  {getValueField(DESCRIPTION_OF_GOODS)}
+                </BLField>
+              </Grid>
+            </Grid>}
             <Divider className={classes.divider} />
 
             <Grid container spacing={2}>
