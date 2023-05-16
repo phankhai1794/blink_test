@@ -1,8 +1,8 @@
-import {FuseChipSelect} from '@fuse';
-import React, {useEffect, useRef, useState} from 'react';
-import {useDispatch, useSelector} from 'react-redux';
-import {combineCDCM, getLabelById, toFindDuplicates} from '@shared';
-import {handleError} from '@shared/handleError';
+import { FuseChipSelect } from '@fuse';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { combineCDCM, getLabelById, toFindDuplicates } from '@shared';
+import { handleError } from '@shared/handleError';
 import {
   Button,
   Collapse,
@@ -18,23 +18,23 @@ import {
   Radio,
   RadioGroup
 } from '@material-ui/core';
-import {makeStyles} from '@material-ui/styles';
-import {PERMISSION, PermissionProvider} from '@shared/permission';
-import {CONTAINER_DETAIL, CONTAINER_MANIFEST, OTHERS} from '@shared/keyword';
-import {uploadFile} from 'app/services/fileService';
-import {getUpdatedAtAnswer, saveInquiry, updateInquiry} from 'app/services/inquiryService';
+import { makeStyles } from '@material-ui/styles';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST, OTHERS } from '@shared/keyword';
+import { uploadFile } from 'app/services/fileService';
+import { getUpdatedAtAnswer, saveInquiry, updateInquiry } from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
-import {useUnsavedChangesWarning} from 'app/hooks'
-import {useDropzone} from 'react-dropzone';
+import { useUnsavedChangesWarning } from 'app/hooks'
+import { useDropzone } from 'react-dropzone';
 import ContentEditable from 'react-contenteditable';
-import {ExpandLess, ExpandMore} from "@material-ui/icons";
+import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
-import {MSG_INQUIRY_CONTENT} from '../store/reducers/inquiry';
+import { MSG_INQUIRY_CONTENT } from '../store/reducers/inquiry';
 
 import ChoiceAnswerEditor from './ChoiceAnswerEditor';
 import ParagraphAnswerEditor from './ParagraphAnswerEditor';
@@ -251,6 +251,7 @@ const InquiryEditor = (props) => {
 
   useEffect(() => {
     if (fieldValue) {
+      // filter inq type according to field and check if template in inq type has content
       const filter = metadata.inq_type_options.filter((data) => {
         let getDataField = data.field?.includes(fieldValue.value);
         let getTemplate = metadata.template.some((temp) => (
@@ -300,10 +301,12 @@ const InquiryEditor = (props) => {
       inq.content = filter?.content[0] || MSG_INQUIRY_CONTENT;
       setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
-    if (!fieldValue) {
-      const filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field
-      setFieldType(metadata.field_options.filter(({ value, display }) => display && filterField.includes(value)))
-    }
+    let filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field
+    filterField = metadata.field_options.filter(({ value, display, keyword }) => display && filterField.includes(value)
+      && metadata.template.some((temp) => (temp.field === keyword && temp.type === e.value && temp.content[0]))
+    )
+    setFieldType(filterField);
+
     setValueType(e);
     setTemplateList(filter?.content || []);
     setTemplate('0');
@@ -314,19 +317,19 @@ const InquiryEditor = (props) => {
   const handleFieldChange = (e) => {
     const inq = { ...currentEditInq };
     inq.field = e.value;
+    const filter = metadata.template.find(({ field, type }) => type === valueType?.value && e.keyword === field);
 
     if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
       inq.content = contentEdited;
     } else {
-      inq.content =
-        MSG_INQUIRY_CONTENT.replace(
-          '{{INQ_TYPE}}',
-          ''
-        );
+      inq.content = filter?.content[0] || MSG_INQUIRY_CONTENT;
+      setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
+
+    setTemplateList(filter?.content || []);
+    setTemplate('0');
     dispatch(InquiryActions.validate({ ...valid, field: true }));
     setFieldValue(e);
-    setFieldType(fieldDefault)
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
@@ -662,8 +665,8 @@ const InquiryEditor = (props) => {
         return contentTrim;
       });
       const contentCDCM = {
-        cdContent: {field: containerCheck[0], content: getDataCD},
-        cmContent: {field: containerCheck[1], content: getDataCM},
+        cdContent: { field: containerCheck[0], content: getDataCD },
+        cmContent: { field: containerCheck[1], content: getDataCM },
       }
       axios
         .all(uploads.map((endpoint) => uploadFile(endpoint).catch((err) => handleError(dispatch, err))))
