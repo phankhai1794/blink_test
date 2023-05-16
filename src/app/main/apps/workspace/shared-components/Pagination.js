@@ -6,97 +6,142 @@ import NavigateBefore from '@material-ui/icons/NavigateBefore';
 import NavigateNext from '@material-ui/icons/NavigateNext';
 
 const useStyles = makeStyles((theme) => ({
-    container: {
-        display: 'flex',
-        justifyContent: 'center',
-        paddingTop: '16px',
-        paddingBottom: '16px',
-        '& a': {
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: '10px',
-            width: '40px',
-            height: '43px',
-            border: '1px solid #E2E6EA',
-            backgroundColor: '#FFFFFF',
-            color: '#132535',
-            textDecoration: 'none',
-            margin: '5px',
-            cursor: 'pointer',
-        }
-    },
-    pagination: {
-        display: 'flex',
-        position: 'absolute',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        bottom: '-10px',
-    },
-    pageSelected: {
-        backgroundColor: '#BD0F72 !important',
-        color: '#FFFFFF !important',
-    }
+  pageSelected: {
+    backgroundColor: '#BD0F72 !important',
+    color: '#FFFFFF !important',
+  }
 }));
 
-const Pagination = (props) => {
-    const classes = useStyles();
-    const dispatch = useDispatch();
-    const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
+const DOTS = '...';
 
-    const [state, setState] = useState({ currentNumber: props.currentNumber, totalPage: props.totalPage, totalPageNumber: Math.ceil(props.totalBkgNo / searchQueueQuery.pageSize) })
+const range = (start, end) => {
+  let length = end - start + 1;
+  return Array.from({ length }, (_, idx) => idx + start);
+};
 
-    useEffect(() => {
-        setState({ currentNumber: props.currentNumber, totalPage: props.totalPage, totalPageNumber: Math.ceil(props.totalBkgNo / searchQueueQuery.pageSize) })
-    }, [props]);
+const usePagination = (
+  totalCount,
+  pageSize,
+  siblingCount = 1,
+  currentPage
+) => {
 
-    const handleSelectPage = (page) => {
-        dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: page }));
-        setState({ ...state, currentNumber: page });
-    }
+  const totalPageCount = Math.ceil(totalCount / pageSize);
 
-    const handleClickStart = () => {
-        dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: 1 }));
-        setState({ ...state, currentNumber: 1 });
-    }
+  // Pages count is determined as siblingCount + firstPage + lastPage + currentPage + 2*DOTS
+  const totalPageNumbers = siblingCount + 5;
 
-    const handleClickEnd = () => {
-        dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: state.totalPageNumber }));
-        setState({ ...state, currentNumber: state.totalPageNumber });
-    }
+  /*
+    If the number of pages is less than the page numbers we want to show in our
+    paginationComponent, we return the range [1..totalPageCount]
+  */
+  if (totalPageNumbers >= totalPageCount) {
+    return range(1, totalPageCount);
+  }
 
-    const handlePrevious = () => {
-        if (state.currentNumber > 1) {
-            dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: state.totalPageNumber - 1 }));
-            setState({ ...state, currentNumber: state.currentNumber - 1 });
-        }
-    }
+  const leftSiblingIndex = Math.max(currentPage - siblingCount, 1);
+  const rightSiblingIndex = Math.min(
+    currentPage + siblingCount,
+    totalPageCount
+  );
 
-    const handleNext = () => {
-        if (state.currentNumber < state.totalPageNumber) {
-            dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: state.currentNumber + 1 }));
-            setState({ ...state, currentNumber: state.currentNumber + 1 });
-        }
-    }
+  /*
+    We do not want to show dots if there is only one position left 
+    after/before the left/right page count as that would lead to a change if our Pagination
+    component size which we do not want
+  */
+  const shouldShowLeftDots = leftSiblingIndex > 2;
+  const shouldShowRightDots = rightSiblingIndex < totalPageCount - 2;
 
-    const result = () => {
-        return (
-            <div className={classes.pagination}>
-                <a key={'start'} onClick={() => handleClickStart()} style={{ fontSize: '17px' }}>&laquo;</a>
-                <a key={'previous'} onClick={() => handlePrevious()}><NavigateBefore style={{ fontSize: '15px' }} /></a>
-                {Array.from(Array(state.totalPageNumber).keys()).map(key => (
-                    <a key={key + 1} className={(state.currentNumber === key + 1) ? classes.pageSelected : ''} onClick={() => handleSelectPage(key + 1)}>{key + 1}</a>
-                ))}
-                <a key={'next'} onClick={() => handleNext()}><NavigateNext style={{ fontSize: '15px' }} /></a>
-                <a key={'end'} onClick={() => handleClickEnd()} style={{ fontSize: '17px' }}>&raquo;</a>
-            </div>
-        )
-    }
+  const firstPageIndex = 1;
+  const lastPageIndex = totalPageCount;
 
-    return (
-        <div className={classes.container}>
-            {result()}
-        </div>
+  if (!shouldShowLeftDots && shouldShowRightDots) {
+    let leftItemCount = 3 + 2 * siblingCount;
+    let leftRange = range(1, leftItemCount);
+
+    return [...leftRange, DOTS, totalPageCount];
+  }
+
+  if (shouldShowLeftDots && !shouldShowRightDots) {
+    let rightItemCount = 3 + 2 * siblingCount;
+    let rightRange = range(
+      totalPageCount - rightItemCount + 1,
+      totalPageCount
     );
+    return [firstPageIndex, DOTS, ...rightRange];
+  }
+
+  if (shouldShowLeftDots && shouldShowRightDots) {
+    let middleRange = range(leftSiblingIndex, rightSiblingIndex);
+    return [firstPageIndex, DOTS, ...middleRange, DOTS, lastPageIndex];
+  }
+
+};
+const Pagination = (props) => {
+  const classes = useStyles();
+  const dispatch = useDispatch();
+  const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
+
+  const [state, setState] = useState({ currentNumber: props.currentNumber, totalPage: props.totalPage, totalPageNumber: Math.ceil(props.totalBkgNo / searchQueueQuery.pageSize) })
+
+  useEffect(() => {
+    setState({ currentNumber: props.currentNumber, totalPage: props.totalPage, totalPageNumber: Math.ceil(props.totalBkgNo / searchQueueQuery.pageSize) })
+  }, [props]);
+
+  const handleSelectPage = (page) => {
+    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: page }));
+    setState({ ...state, currentNumber: page });
+  }
+
+  const handleClickStart = () => {
+    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: 1 }));
+    setState({ ...state, currentNumber: 1 });
+  }
+
+  const handleClickEnd = () => {
+    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: state.totalPageNumber }));
+    setState({ ...state, currentNumber: state.totalPageNumber });
+  }
+
+  const handlePrevious = () => {
+    if (state.currentNumber > 1) {
+      dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: state.currentNumber - 1 }));
+      setState({ ...state, currentNumber: state.currentNumber - 1 });
+    }
+  }
+
+  const handleNext = () => {
+    if (state.currentNumber < state.totalPageNumber) {
+      dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: state.currentNumber + 1 }));
+      setState({ ...state, currentNumber: state.currentNumber + 1 });
+    }
+  }
+
+  const paginationRange = usePagination(props.totalBkgNo, searchQueueQuery.pageSize, 2, state.currentNumber);
+
+  return (
+    <>
+      {/* <a key={'start'} onClick={() => handleClickStart()} style={{ fontSize: '17px' }}>&laquo;</a> */}
+      <a key={'previous'} onClick={() => handlePrevious()}><NavigateBefore style={{ fontSize: '15px' }} /></a>
+      {paginationRange.map(pageNumber => {
+        if (pageNumber === DOTS) {
+          return <div style={{ margin: 'auto', textAlign: 'center', width: 40 }}>&#8230;</div>;
+        }
+
+        return (
+          <a
+            key={pageNumber + 1}
+            className={(state.currentNumber === pageNumber) ? classes.pageSelected : ''}
+            onClick={() => handleSelectPage(pageNumber)}
+          >
+            {pageNumber}
+          </a>
+        );
+      })}
+      <a key={'next'} onClick={() => handleNext()}><NavigateNext style={{ fontSize: '15px' }} /></a>
+      {/* <a key={'end'} onClick={() => handleClickEnd()} style={{ fontSize: '17px' }}>&raquo;</a> */}
+    </>
+  );
 };
 export default Pagination;

@@ -207,3 +207,18 @@ export const mapUnit = {
   [CONTAINER_WEIGHT]: CONTAINER_WEIGHT_UNIT,
   [CONTAINER_MEASUREMENT]: CONTAINER_MEASUREMENT_UNIT
 }
+
+export const mapperBlinkStatus = {
+  BC: "Draft of Inquiry Created",
+  BX: "<<Blank>>",
+  BI: "BL Inquired",
+  BK: "Reply from Customer",
+  BO: "Reply from Onshore",
+  BR: "BL Inquiry Resolved",
+  BD: "BL Draft Sent",
+  BM: "BL Confirm by Customer",
+  BA: "Customer Amendment Request",
+  BQ: "Offshore Amendment Inquiry",
+  BP: "Customer Amendment Reply",
+  BS: "BL Amendment Success"
+};

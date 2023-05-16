@@ -3,9 +3,10 @@ import { Drawer, Hidden } from '@material-ui/core';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import clsx from 'clsx';
 import * as Actions from 'app/store/actions';
+import { useDispatch, useSelector } from 'react-redux';
+
 import NavbarLayout1 from './NavbarLayout1';
 
-import { useDispatch, useSelector } from 'react-redux';
 const navbarWidth = 280;
 
 const useStyles = makeStyles((theme) => ({
@@ -122,7 +123,7 @@ function NavbarWrapperLayout1(props) {
   const navbar = useSelector(({ fuse }) => fuse.navbar);
   const classes = useStyles();
 
-  const folded = config.navbar.folded;
+  const folded = !config.navbar.folded;
   const foldedAndClosed = folded && !navbar.foldedOpen;
   const foldedAndOpened = folded && navbar.foldedOpen;
   return (

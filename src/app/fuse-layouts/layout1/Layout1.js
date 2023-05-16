@@ -12,6 +12,7 @@ import PDFViewer from "../../main/apps/workspace/components/PDFViewer";
 
 import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
 import ToolbarLayout1 from './components/ToolbarLayout1';
+import ToolbarLayout2 from './components/ToolbarLayout2';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -96,7 +97,7 @@ function Layout1(props) {
           <div className={classes.contentWrapper} id={'content-wrapper'}>
             {openPreviewFiles && <PDFViewer inquiry={currentInqPreview} />}
             {isLoadingProcess && <Loading />}
-            {config.toolbar.display && <ToolbarLayout1 />}
+            {config.toolbar.display && (config.toolbar.layout === 'layout2' ? <ToolbarLayout2 /> : <ToolbarLayout1 />)}
 
             <FuseScrollbars className={classes.content} scrollToTopOnChildChange>
               <FuseDialog />

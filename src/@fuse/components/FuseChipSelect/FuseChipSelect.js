@@ -165,7 +165,7 @@ function Control(props) {
   return (
     <TextField
       className={clsx(classes.root, props.selectProps.textFieldProps.variant, styleErr())}
-      style={props.selectProps.customStyle.control}
+      style={props.selectProps.customStyle?.control}
       InputProps={{
         inputComponent,
         inputProps: {
