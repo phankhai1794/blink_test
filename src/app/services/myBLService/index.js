@@ -35,3 +35,8 @@ export async function getQueueList(page, size, search) {
   const response = await axios().get(`${PATH}/queue/list/${page}/${size}/${search}`);
   return response.data;
 }
+
+export async function getOffshoreQueueList(data) {
+  const response = await axios().post(`${PATH}/get-queue-list/offshore`, data);
+  return response.data;
+}

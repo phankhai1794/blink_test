@@ -13,6 +13,33 @@ import EditIcon from '@material-ui/icons/Edit';
 import ReplyIcon from '@material-ui/icons/Reply';
 
 const useStyles = makeStyles({
+  container: {
+    display: 'flex',
+    justifyContent: 'center',
+    paddingTop: '16px',
+    paddingBottom: '16px',
+    '& a': {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: '10px',
+      width: '40px',
+      height: '43px',
+      border: '1px solid #E2E6EA',
+      backgroundColor: '#FFFFFF',
+      color: '#132535',
+      textDecoration: 'none',
+      margin: '5px',
+      cursor: 'pointer',
+    }
+  },
+  pagination: {
+    display: 'flex',
+    position: 'absolute',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    bottom: '-10px',
+  },
   table: {
     minWidth: 650,
     '& span': {
@@ -285,7 +312,11 @@ const QueueListTable = () => {
               ))}
             </TableBody>
           </Table>
-          <Pagination currentNumber={searchQueueQuery.currentPageNumber} totalPage={searchQueueQuery.totalPageNumber} totalBkgNo={state.totalBkgNo} />
+          <div className={classes.container}>
+            <div className={classes.pagination}>
+              <Pagination currentNumber={searchQueueQuery.currentPageNumber} totalPage={searchQueueQuery.totalPageNumber} totalBkgNo={state.totalBkgNo} />
+            </div>
+          </div>
         </div>
         : <span>No data!</span>
       }

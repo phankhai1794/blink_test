@@ -32,26 +32,30 @@ const BtnQueueList = () => {
   const userType = useSelector(({ user }) => user.userType);
 
   const showQueueList = () => {
-    dispatch(InquiryActions.openQueueList(true));
+    userType === 'ADMIN' ?
+      window.open('/apps/admin') :
+      dispatch(InquiryActions.openQueueList(true));
   }
+
   return (
     <>
       {myBL?.state &&
         <>
-          <PermissionProvider
+          {/* <PermissionProvider
             action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
-            extraCondition={pathname.includes('/guest') && (userType === 'CUSTOMER' || userType === 'ONSHORE')}>
-            <Tooltip title='Open BL Status'>
-              <Button
-                variant='contained'
-                className={classes.btn}
-                onClick={() => showQueueList()}
-              >
-                <FormatListBulleted className={classes.startIconBtn} />
-                BL Status
-              </Button>
-            </Tooltip>
-          </PermissionProvider>
+            extraCondition={pathname.includes('/guest') && (userType === 'CUSTOMER' || userType === 'ONSHORE')}
+          > */}
+          <Tooltip title='Open BL Status'>
+            <Button
+              variant='contained'
+              className={classes.btn}
+              onClick={() => showQueueList()}
+            >
+              <FormatListBulleted className={classes.startIconBtn} />
+              BL Status
+            </Button>
+          </Tooltip>
+          {/* </PermissionProvider> */}
         </>
       }
     </>
