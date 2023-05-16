@@ -130,8 +130,8 @@ const AmendmentPopup = (props) => {
   const user = useSelector(({ user }) => user);
   const [inputSeal, setInputSeal] = useState('');
   const { register, control, handleSubmit, formState: { errors } } = useForm();
-  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Must be a Number' }
-  const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
+  const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Invalid number' }
+  const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Invalid number' }
 
   useEffect(() => {
     const isResolved = inquiries.filter(inq => (inq.field === metadata.field[CONTAINER_DETAIL] && ['COMPL', 'RESOLVED', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A'].includes(inq.state))).length > 0;
