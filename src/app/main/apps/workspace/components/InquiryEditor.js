@@ -251,14 +251,23 @@ const InquiryEditor = (props) => {
 
   useEffect(() => {
     if (fieldValue) {
-      const filter = metadata.inq_type_options.filter((data) => (
-        data.field?.includes(fieldValue.value)
-        && metadata.template.some((temp) => (
+      const filter = metadata.inq_type_options.filter((data) => {
+        let getDataField = data.field?.includes(fieldValue.value);
+        let getTemplate = metadata.template.some((temp) => (
           temp.field === fieldValue.keyword
-          && temp.type === data.value
-          && (temp.content[0]) || data.label === OTHERS)
-        ))
-      ).sort((a, b) => a.label.localeCompare(b.label));
+            && temp.type === data.value
+            && (temp.content[0]) || data.label === OTHERS)
+        );
+        if ([containerCheck[0], containerCheck[1]].includes(fieldValue.value)) {
+          getDataField = (data.field?.includes(containerCheck[0]) || data.field?.includes(containerCheck[1]));
+          getTemplate = metadata.template.some((temp) => (
+            ['containerDetail', 'containerManifest'].includes(temp.field)
+              && temp.type === data.value
+              && (temp.content[0]) || data.label === OTHERS)
+          );
+        }
+        return getDataField && getTemplate
+      }).sort((a, b) => a.label.localeCompare(b.label));
       setInqTypeOption(filter);
       if (fieldValue.value === containerCheck[0]) {
         setOpenCM(false);
@@ -277,7 +286,13 @@ const InquiryEditor = (props) => {
     const inq = { ...currentEditInq };
     inq.inqType = e.value;
     // if (e.__isNew__) inq.isNew = e.__isNew__;
-    const filter = metadata.template.find(({ field, type }) => type === e.value && fieldValue?.keyword === field);
+    const filter = metadata.template.find(({ field, type }) => {
+      let getTemplate = type === e.value && fieldValue?.keyword === field;
+      if ([containerCheck[0], containerCheck[1]].includes(fieldValue.value)) {
+        getTemplate = type === e.value && ['containerDetail', 'containerManifest'].includes(field)
+      }
+      return getTemplate;
+    });
     dispatch(InquiryActions.validate({ ...valid, inqType: true }));
     if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
       inq.content = contentEdited;
