@@ -292,7 +292,7 @@ const AllInquiry = (props) => {
   const getLabel = (id) => {
     const result = metadata['field_options'].filter(({ value }) => value === id);
     if (result.length) {
-      if (result[0].keyword === 'containerDetail' || result[0].keyword === 'containerManifest') {
+      if ((result[0].keyword === 'containerDetail' || result[0].keyword === 'containerManifest') && !openAmendmentList) {
         return 'Container Detail - Container Manifest'
       } else {
         return result[0].label;
