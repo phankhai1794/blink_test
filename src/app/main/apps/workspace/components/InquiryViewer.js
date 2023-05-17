@@ -347,7 +347,6 @@ const InquiryViewer = (props) => {
     COMMODITY_CODE,
     DATE_CARGO,
     DATE_LADEN,
-    ALSO_NOTIFY,
     BL_PRINT_COUNT,
     FREIGHT_TERM,
     PREPAID,
