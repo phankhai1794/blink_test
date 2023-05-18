@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, TableBody, TableCell, TableHead, TableRow, IconButton, Icon, Collapse, Tabs, Tab, Select, MenuItem, FormControl, InputLabel } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableHead, TableRow, IconButton, Icon, Collapse, Tabs, Tab, Select, MenuItem, FormControl, Chip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { getOffshoreQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
@@ -79,7 +79,7 @@ const useStyles = makeStyles({
   },
   label: {
     display: 'flex',
-    justifyContent: 'space-evenly'
+    justifyContent: 'center'
   },
   labelPending: {
     backgroundColor: '#FDF2F2',
@@ -103,20 +103,27 @@ const useStyles = makeStyles({
     display: 'flex',
   },
   chip: {
-    color: '#FFFF',
+    fontFamily: 'Montserrat',
     borderRadius: '4px',
-    height: '24px',
-    width: '53px',
+    height: 26,
+    width: 56,
     margin: 2,
   },
   inquiryColor: {
-    backgroundColor: '#DC2626',
+    backgroundColor: '#FDF2F2',
+    color: '#DC2626'
   },
   amendmentColor: {
-    backgroundColor: '#ECC083',
+    backgroundColor: '#FEF4E6',
+    color: '#F39200'
+  },
+  resolvedColor: {
+    backgroundColor: '#EBF7F2',
+    color: '#36B37E',
   },
   replyColor: {
-    backgroundColor: '#2F80ED'
+    backgroundColor: '#EAF2FD',
+    color: '#2F80ED'
   },
   sizeIcon: {
     fontSize: '18px',
@@ -200,8 +207,7 @@ const StickyTableCell = withStyles((theme) => ({
 }))(TableCell);
 
 const Row = (props) => {
-  const { row, index } = props;
-  const [open, setOpen] = useState(false);
+  const { row, index, open, setOpen } = props;
   const [tab, setTab] = useState(0)
   const classes = useStyles();
 
@@ -227,13 +233,12 @@ const Row = (props) => {
       <TableRow>
         <StickyTableCell>
           <TableCell className={clsx(classes.cellBody, classes.cellSticky)} component='th' scope='row'>
-            {/* TODO: No. function */}
             {index + 1}
           </TableCell>
           <TableCell className={clsx(classes.cellBody, classes.cellSticky)} component='th' scope='row'>
             <IconButton
               style={{ padding: 0 }}
-              onClick={() => setOpen(!open)}
+              onClick={setOpen}
               aria-label="Delete"
             >
               <Icon>  {open ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}</Icon>
@@ -241,28 +246,30 @@ const Row = (props) => {
             <a href={`/apps/workspace/${row.bkgNo}?usrId=admin&cntr=VN`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bkgNo}</span></a>
           </TableCell>
         </StickyTableCell>
-        <TableCell className={classes.cellBody} >{formatDate(row.lastUpdated, 'DD/MM/YYYY HH:mm')}</TableCell>
-        <TableCell className={classes.cellBody}>{row.etd && formatDate(row.etd, 'DD/MM/YYYY HH:mm')}</TableCell>
+        <TableCell className={classes.cellBody} >{formatDate(row.lastUpdated, 'MMM - DD - YYYY HH:mm')}</TableCell>
+        <TableCell className={classes.cellBody}>{row.etd && formatDate(row.etd, 'MMM - DD - YYYY HH:mm')}</TableCell>
         <TableCell className={classes.cellBody} ><span style={{ textTransform: 'capitalize' }}>{row.status.customer}</span></TableCell>
         <TableCell className={classes.cellBody} ><span style={{ textTransform: 'capitalize' }}>{row.status.onshore}</span></TableCell>
-        <TableCell className={classes.cellBody}>{mapperBlinkStatus[row.blinkStatus]}</TableCell>
+        <TableCell className={classes.cellBody}>{mapperBlinkStatus[row.status.bl]}</TableCell>
         <TableCell className={classes.cellBody} style={{ minWidth: 150 }}><span style={{ textTransform: 'capitalize' }}>{row?.vvd}</span></TableCell>
         <TableCell className={classes.cellBody} style={{ minWidth: 200 }}>
           <div className={classes.label}>
-            {Ipending.length ? <span className={classes.labelPending}>{`${Ipending.length} Pending`}</span> : null}
-            {Ireply.length ? <span className={classes.labelReplies}>{`${Ireply.length} ${Ireply.length - 1 ? 'New Replies' : 'New Reply'}`}</span> : null}
+            {Ipending.length ? <Chip label={Ipending.length} className={clsx(classes.chip, classes.inquiryColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.inquiryColor)}>help </Icon>} /> : null}
+            {Ireply.length ? <Chip label={Ireply.length} className={clsx(classes.chip, classes.replyColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.replyColor)}> reply </Icon>} /> : null}
           </div>
         </TableCell>
         <TableCell className={classes.cellBody} style={{ minWidth: 200 }}>
           <div className={classes.label}>
-            {Apending.length ? <span className={classes.labelPending}>{`${Apending.length} Pending`}</span> : null}
-            {Areply.length ? <span className={classes.labelReplies}>{`${Areply.length} ${Areply.length - 1 ? 'New Replies' : 'New Reply'}`}</span> : null}
+            {Apending.length ? <Chip label={Apending.length} className={clsx(classes.chip, classes.amendmentColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.amendmentColor)}> edit </Icon>} /> : null}
+            {Areply.length ? <Chip label={Areply.length} className={clsx(classes.chip, classes.replyColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.replyColor)}> reply </Icon>} /> : null}
           </div>
         </TableCell>
         <TableCell className={classes.cellBody}>
-          {countAllInquiry + countAllAmend ?
-            <span className={classes.labelResolved}>{`${Iresolved.length + Aresolved.length + Iuploaded.length + Auploaded.length}/${countAllInquiry + countAllAmend} Resolved`}</span> : ''
-          }
+          <div className={classes.label}>
+            {countAllInquiry ? <Chip label={`${Iresolved.length + Iuploaded.length}/${countAllInquiry}`} className={clsx(classes.chip, classes.resolvedColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}> help </Icon>} /> : null}
+            {countAllAmend ? <Chip label={`${Aresolved.length + Auploaded.length}/${countAllAmend}`} className={clsx(classes.chip, classes.resolvedColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}> edit </Icon>} /> : null}
+          </div>
+
         </TableCell>
       </TableRow>
       <TableRow>
@@ -314,7 +321,7 @@ const Row = (props) => {
                     <TableCell>{row.field}</TableCell>
                     {!tab ? <TableCell>{row.inqType}</TableCell> : null}
                     <TableCell>
-                      {formatDate(row.updatedAt, 'DD/MM/YYYY HH:mm')}
+                      {formatDate(row.updatedAt, 'MMM - DD - YYYY HH:mm')}
                     </TableCell>
                     <TableCell>
                       {row.status === 'pending' ? 'Pending' : null}
@@ -341,9 +348,10 @@ const QueueListTable = () => {
   const dispatch = useDispatch();
 
   const [state, setState] = useState({ queueListBl: [], totalBkgNo: 1, sortBkgNo: 'asc', sortLatestDate: 'asc', sortStatus: 'asc' });
-  const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
+  const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('bkgNo');
+  const [openDetailIndex, setOpenDetailIndex] = useState();
 
   useEffect(() => {
     if (searchQueueQuery.from && searchQueueQuery.to)
@@ -353,7 +361,7 @@ const QueueListTable = () => {
         query: {
           startDate: searchQueueQuery.from,
           endDate: searchQueueQuery.to,
-          bkgNo: searchQueueQuery.bookingNo,
+          bkgNos: searchQueueQuery.bookingNo.split(',').filter(bkg => bkg).map(bkg => bkg.trim()),
           blinkStatus: searchQueueQuery.blStatus
         },
         sort: searchQueueQuery.sortField || []
@@ -368,6 +376,10 @@ const QueueListTable = () => {
     setOrderBy(property);
     dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, sortField: [property, isAsc] }));
   };
+
+  const openDetails = (index) => {
+    setOpenDetailIndex(index !== openDetailIndex ? index : null)
+  }
 
   const showItems = (e) => {
     searchQueueQuery.currentPageNumber > Math.ceil(state.totalBkgNo / e.target.value) ?
@@ -400,7 +412,7 @@ const QueueListTable = () => {
             </FormControl>
           </div>
           <div style={{ width: '100%', overflowX: 'auto' }}>
-            <Table stickyHeader className={classes.table} aria-label='simple table'>
+            <Table className={classes.table} aria-label='simple table'>
               <TableHead className={classes.headerColor} style={{ backgroundColor: '#FDF2F2', position: 'sticky', top: 0, zIndex: 2 }}>
                 <TableRow>
                   <StickyTableCell>
@@ -450,12 +462,12 @@ const QueueListTable = () => {
                       {/* <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort('vvd')} /> */}
                     </div>
                   </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 220 }}>
+                  <TableCell className={classes.cellHead} style={{ width: 170 }}>
                     <div className={classes.lineColumn}>
                       <span>Unresolved Inquiry</span>
                     </div>
                   </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 220 }}>
+                  <TableCell className={classes.cellHead} style={{ width: 190 }}>
                     <div className={classes.lineColumn}>
                       <span>Unresolved Amendment</span>
                     </div>
@@ -469,7 +481,13 @@ const QueueListTable = () => {
               </TableHead>
               <TableBody style={{ backgroundColor: 'white' }}>
                 {state?.queueListBl.map((row, index) => (
-                  <Row key={index} row={row} index={index + (searchQueueQuery.currentPageNumber - 1) * searchQueueQuery.pageSize} />
+                  <Row
+                    key={index}
+                    row={row}
+                    index={index + (searchQueueQuery.currentPageNumber - 1) * searchQueueQuery.pageSize}
+                    open={openDetailIndex === index}
+                    setOpen={() => openDetails(index)}
+                  />
                 ))}
               </TableBody>
             </Table>
