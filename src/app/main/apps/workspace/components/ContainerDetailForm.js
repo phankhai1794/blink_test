@@ -15,7 +15,7 @@ import {
   CM_MEASUREMENT
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   Icon,
   IconButton,
@@ -33,7 +33,6 @@ import styled from 'styled-components';
 import { formatContainerNo, NumberFormat } from '@shared';
 
 import AmendmentPopup from './AmendmentPopup';
-import * as InquiryActions from '../store/actions/inquiry';
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -109,12 +108,11 @@ const StyledPopper = styled(Popper)`&&{
 }`;
 
 const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM, setAddContent }) => {
-  const dispatch = useDispatch();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
   const user = useSelector(({ user }) => user);
-  const cancelAmePopup = useSelector(({ workspace }) => workspace.inquiryReducer.cancelAmePopup);
+  const originValueCancel = useSelector(({ workspace }) => workspace.inquiryReducer.originValueCancel);
   const classes = useStyles();
 
   const getField = (field) => {
@@ -148,7 +146,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     let valuesSorted = [];
     if (container === CONTAINER_MANIFEST && !isResolveCDCM) {
       let cms = [...vals];
-      const contentCD = isInqCDCM ? originalData : getValueField(CONTAINER_DETAIL) || [];
+      const contentCD = getValueField(CONTAINER_DETAIL) || [];
       const contsNo = [
         ...new Set((contentCD || []).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
       ];
@@ -260,10 +258,13 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
   // TODO
   const handleClose = (type = 'cancel') => {
-    handleEdit(false);
-    if (type === 'cancel') {
-      dispatch(InquiryActions.setCancelAmePopup(!cancelAmePopup));
+    // set data before after cancel resolve
+    if (Object.keys(originValueCancel).length && type == 'cancel') {
+      valueEdit[rowIndex] = originValueCancel;
+      setValues(valueEdit)
+      setValueEdit(valueEdit);
     }
+    handleEdit(false);
   }
 
   const checkPopover = (e) => {
@@ -290,7 +291,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         onClose={() => handleClose('cancel')}
       >
         <AmendmentPopup
-          onClose={(value) => handleClose(value)}
+          onClose={(type) => handleClose(type)}
           inqType={container}
           containerDetail={getValueField(CONTAINER_DETAIL)}
           data={valueEdit[rowIndex]}
@@ -324,7 +325,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         <span style={{ color: '#515E6A' }}>{popover.text}</span>
       </StyledPopper>
 
-      <div style={{ maxWidth: 880, overflowX: 'auto' }}>
+      <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
         <Table className='amend_table' aria-label="simple table" >
           <TableHead>
             <TableRow>
