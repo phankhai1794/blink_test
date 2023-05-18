@@ -34,6 +34,7 @@ export const SET_CONTENT_INQ_RESOLVED = 'SET_CONTENT_INQ_RESOLVED';
 export const SET_DATA_CD_INQ = 'SET_DATA_CD_INQ';
 export const SET_DATA_CM_INQ = 'SET_DATA_CM_INQ';
 export const SET_CANCEL_AME_POPUP = 'SET_CANCEL_AME_POPUP';
+export const ORIGIN_VALUE_CANCEL = 'ORIGIN_VALUE_CANCEL';
 
 export function saveInquiry() {
   return {
@@ -271,3 +272,9 @@ export function setCancelAmePopup(state) {
   };
 }
 
+export function setOriginValueCancel(state) {
+  return {
+    type: ORIGIN_VALUE_CANCEL,
+    state: state
+  };
+}

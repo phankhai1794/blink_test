@@ -12,7 +12,7 @@ import { makeStyles, withStyles } from '@material-ui/styles';
 import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import clsx from 'clsx';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   CONTAINER_DETAIL,
   CONTAINER_NUMBER,
@@ -38,6 +38,8 @@ import { packageUnits, weightUnits, measurementUnits, containerTypeUnit } from '
 import ClearIcon from '@material-ui/icons/Clear';
 import WindowedSelect from "react-windowed-select";
 import { formatContainerNo, formatNumber } from '@shared';
+
+import * as InquiryActions from '../store/actions/inquiry';
 
 const useStyles = makeStyles((theme) => ({
   selectRoot: {
@@ -122,6 +124,8 @@ const StyledChip = withStyles(theme => ({
 const AmendmentPopup = (props) => {
   const { onClose, inqType, isEdit, data, index, updateData, updateEdit, containerDetail, setSave, isInqCDCM } = props;
   const classes = useStyles();
+  const dispatch = useDispatch();
+
   const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
@@ -129,9 +133,15 @@ const AmendmentPopup = (props) => {
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const user = useSelector(({ user }) => user);
   const [inputSeal, setInputSeal] = useState('');
+  const [valueOrigin, setValueOrigin] = useState({});
   const { register, control, handleSubmit, formState: { errors } } = useForm();
   const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Must be a Number' }
   const regInteger = { value: /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g, message: 'Must be a Number' }
+
+  useEffect(() => {
+    setValueOrigin(JSON.parse(JSON.stringify(data)));
+    dispatch(InquiryActions.setOriginValueCancel(JSON.parse(JSON.stringify(data))));
+  }, []);
 
   useEffect(() => {
     const isResolved = inquiries.filter(inq => (inq.field === metadata.field[CONTAINER_DETAIL] && ['COMPL', 'RESOLVED', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A'].includes(inq.state))).length > 0;

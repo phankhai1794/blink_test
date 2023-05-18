@@ -128,15 +128,16 @@ const DialogActions = withStyles((theme) => ({
 
 const useStyles = makeStyles(() => ({
   dialogPaper: {
-    minHeight: 600,
+    minHeight: 690,
     maxHeight: '80%',
-    margin: 0
+    margin: 0,
+    width: '92%'
   },
   dialogContent: {
     margin: 'auto',
     backgroundColor: (props) => props.style?.backgroundColor || 'white', //email preview
     position: 'relative',
-    width: (props) => (props.isFullScreen ? '1200px' : '900px')
+    width: (props) => ('1200px')
   },
   dialogContentAttachment: {
     padding: '0',
@@ -451,7 +452,7 @@ export default function Form(props) {
         aria-labelledby="customized-dialog-title"
         open={open}
         PaperComponent={PaperComponent}
-        maxWidth="md"
+        maxWidth="xl"
         container={() => document.getElementById('content-wrapper')}
         classes={{ paperScrollPaper: isFullScreen ? null : classes.dialogPaper }}>
         <DialogTitle
