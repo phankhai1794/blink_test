@@ -126,7 +126,7 @@ const Pagination = (props) => {
       <a key={'previous'} onClick={() => handlePrevious()}><NavigateBefore style={{ fontSize: '15px' }} /></a>
       {paginationRange.map(pageNumber => {
         if (pageNumber === DOTS) {
-          return <div style={{ margin: 'auto', textAlign: 'center', width: 40 }}>&#8230;</div>;
+          return <div style={{ margin: 'auto 0', textAlign: 'center', width: 40 }}>&#8230;</div>;
         }
 
         return (

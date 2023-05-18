@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Button, FormControl, InputLabel, OutlinedInput, InputAdornment, Paper, Select, MenuItem, Input, Checkbox, ListItemText, Chip, Grid } from '@material-ui/core';
-// import Slide from '@material-ui/core/Slide';
 import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 import SearchIcon from '@material-ui/icons/Search';
 import { formatDate } from '@shared';
@@ -111,18 +110,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-// const Transition = React.forwardRef(function Transition(props, ref) {
-//   return <Slide direction='up' ref={ref} {...props} />;
-// });
 const WEEK_NUMBER = 7;
 
 const QueueList = () => {
-  // const classes = useStyles();
-  // const dispatch = useDispatch();
-  // const openQueueList = useSelector(({ workspace }) => workspace.inquiryReducer.openQueueList);
-
-  // const handleClose = () => dispatch(InquiryActions.openQueueList(false));
-
   return (
     <>
       <SearchLayout />
@@ -130,13 +120,14 @@ const QueueList = () => {
     </>
   );
 };
+const blStatusOption = Object.values(mapperBlinkStatus);
 
 const SearchLayout = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [state, setState] = useState({ bookingNo: '', from: '', to: '', blStatus: [], isSelectedAll: false })
-  const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
-  const [selectedStatus, setSelectedStatus] = useState([]);
+  const [state, setState] = useState({ bookingNo: '', from: '', to: '', blStatus: Object.keys(mapperBlinkStatus), isSelectedAll: false });
+  const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
+  const [selectedStatus, setSelectedStatus] = useState([...blStatusOption, 'All']);
 
   useEffect(() => {
     let currentDate = new Date();
@@ -145,7 +136,6 @@ const SearchLayout = (props) => {
     dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD') }));
   }, [])
 
-  const blStatusOption = Object.values(mapperBlinkStatus);
 
   const handleSelectStatus = (event) => {
     let values = event.target.value;
@@ -184,10 +174,10 @@ const SearchLayout = (props) => {
   const handleReset = (e) => {
     let currentDate = new Date();
     let sevenDayBefore = formatDate(currentDate.setDate(currentDate.getDate() - WEEK_NUMBER), 'YYYY-MM-DD');
-    let query = { bookingNo: '', currentPageNumber: 1, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD'), blStatus: [], sortField: '' };
+    let query = { bookingNo: '', currentPageNumber: 1, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD'), blStatus: Object.keys(mapperBlinkStatus), sortField: '' };
 
     setState({ ...query, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD') })
-    setSelectedStatus([]);
+    setSelectedStatus([...blStatusOption, 'All']);
     dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...query }));
   }
 

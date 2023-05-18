@@ -3,6 +3,7 @@ import auth from 'app/auth/store/reducers';
 import workspace from 'app/main/apps/workspace/store/reducers';
 import listBlReducer from 'app/main/apps/listBL/store/reducers';
 import draftBL from 'app/main/apps/draft-bl/store/reducers';
+import dashboard from 'app/main/apps/dashboards/admin/store/reducers';
 
 import user from './user';
 import header from './header';
@@ -14,6 +15,7 @@ const createReducer = (asyncReducers) =>
     fuse,
     header,
     user,
+    dashboard,
     workspace,
     listBlReducer,
     draftBL,
