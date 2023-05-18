@@ -101,6 +101,7 @@ import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
 import ErrorOutlineOutlined from '@material-ui/icons/ErrorOutlineOutlined';
 import { useDropzone } from 'react-dropzone';
+import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -2659,6 +2660,7 @@ const InquiryViewer = (props) => {
                     disableInput={disableCDCMInquiry}
                   />
               ) :
+              (!['AME_DRF','AME_SENT','RESOLVED','COMPL'].includes(question.state) ?
                 <Typography
                   // className={viewDropDown !== question.id ? classes.hideText : ''}
                   variant="h5"
@@ -2677,9 +2679,19 @@ const InquiryViewer = (props) => {
                     `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
                     `${renderContent(question.content)}`
                   }
-                </Typography>
+                </Typography> :
+                <ReactDiffViewer
+                  oldValue={orgContent[question.field]}
+                  newValue={((question.content !== null) && isJsonText(question.content)) ?
+                    `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
+                    `${renderContent(question.content)}`}
+                  splitView={false}
+                  hideLineNumbers
+                  styles={{ contentText: { fontFamily: 'Montserrat' } }}
+                  compareMethod={DiffMethod.WORDS}
+                />
+              )
             }
-
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'ANS_DRF', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
