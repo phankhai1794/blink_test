@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import history from '@history';
 import _ from 'lodash';
-import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDER, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, BOOKING_NO, BL_TYPE, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT, RD_TERMS } from '@shared/keyword';
+import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDER, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, BOOKING_NO, BL_TYPE, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT, RD_TERMS, NO_CONTENT_AMENDMENT } from '@shared/keyword';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
@@ -205,6 +205,9 @@ const DraftPage = (props) => {
   };
 
   const getValueField = (field) => {
+    if (content[getField(field)] === NO_CONTENT_AMENDMENT) {
+      return '';
+    }
     return content[getField(field)] || '';
   };
 
@@ -365,8 +368,9 @@ const DraftPage = (props) => {
             <div className={classes.content_L} style={{ width: '70%' }}>
               <span className={classes.shipper}>
                 {(getValueField(SHIPPER) && isJsonText(getValueField(SHIPPER))) ?
-                  `${JSON.parse(getValueField(SHIPPER)).name}\n${JSON.parse(getValueField(SHIPPER)).address}`
-                  : getValueField(SHIPPER)}
+                  ((JSON.parse(getValueField(SHIPPER)).name === NO_CONTENT_AMENDMENT) ? ''
+                    : `${JSON.parse(getValueField(SHIPPER)).name}\n${JSON.parse(getValueField(SHIPPER)).address}`)
+                  : getValueField(SHIPPER).replace(NO_CONTENT_AMENDMENT, '')}
               </span>
             </div>
           </Grid>
@@ -416,8 +420,9 @@ const DraftPage = (props) => {
                 <div className={classes.tittle_M}>CONSIGNEE</div>
                 <span className={clsx(classes.consignee, classes.content_L)} style={{ width: '70%' }}>
                   {(getValueField(CONSIGNEE) && isJsonText(getValueField(CONSIGNEE))) ?
-                    `${JSON.parse(getValueField(CONSIGNEE)).name}\n${JSON.parse(getValueField(CONSIGNEE)).address}`
-                    : getValueField(CONSIGNEE)}
+                    ((JSON.parse(getValueField(CONSIGNEE)).name === NO_CONTENT_AMENDMENT) ? ''
+                      : `${JSON.parse(getValueField(CONSIGNEE)).name}\n${JSON.parse(getValueField(CONSIGNEE)).address}`)
+                    : getValueField(CONSIGNEE).replace(NO_CONTENT_AMENDMENT, '')}
                 </span>
               </Grid>
               <Grid item xs={12}>
@@ -426,8 +431,9 @@ const DraftPage = (props) => {
                 </div>
                 <span className={clsx(classes.notify, classes.content_L)}>
                   {(getValueField(NOTIFY) && isJsonText(getValueField(NOTIFY))) ?
-                    `${JSON.parse(getValueField(NOTIFY)).name}\n${JSON.parse(getValueField(NOTIFY)).address}`
-                    : getValueField(NOTIFY)}
+                    ((JSON.parse(getValueField(NOTIFY)).name === NO_CONTENT_AMENDMENT) ? ''
+                      : `${JSON.parse(getValueField(NOTIFY)).name}\n${JSON.parse(getValueField(NOTIFY)).address}`)
+                    : getValueField(NOTIFY).replace(NO_CONTENT_AMENDMENT, '')}
                 </span>
               </Grid>
 
