@@ -2171,6 +2171,7 @@ const InquiryViewer = (props) => {
       optionsInquires[editedIndex].showIconReply = false;
       optionsInquires[editedIndex].showIconAttachReplyFile = false;
       optionsInquires[editedIndex].showIconAttachAnswerFile = true;
+      optionsInquires[editedIndex].selectChoice = '';
       dispatch(InquiryActions.setInquiries(optionsInquires));
       reply.showIconAttachReplyFile = false;
       reply.showIconAttachAnswerFile = true;

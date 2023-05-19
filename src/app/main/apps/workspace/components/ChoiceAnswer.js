@@ -3,12 +3,22 @@ import {
   Radio,
   FormControl,
   RadioGroup,
-  FormControlLabel
+  FormControlLabel,
+  OutlinedInput
 } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from "@shared/permission";
+import { makeStyles } from '@material-ui/styles';
 
 import * as InquiryActions from '../store/actions/inquiry';
+
+const useStyles = makeStyles(() => ({
+  input: {
+    '& .MuiOutlinedInput-input': {
+      padding: 8
+    }
+  },
+}))
 
 const ChoiceAnswer = (props) => {
   const { question, questions, disableChecked, disable = false, saveStatus, currentQuestion, isDeleteAnswer, setDeleteAnswer } = props;
@@ -17,6 +27,8 @@ const ChoiceAnswer = (props) => {
   let prevChoiceArray = question.answerObj?.filter(choice => choice.confirmed) || [];
   const [isPermission, setPermission] = useState(false);
   const dispatch = useDispatch();
+  const classes = useStyles();
+  const [otherOptionText, setOtherOptionText] = useState();
 
   const initSelectedChoice = () => {
     if (!questionIsEmpty && prevChoiceArray.length > 0) {
@@ -37,16 +49,19 @@ const ChoiceAnswer = (props) => {
     }
   }, [saveStatus]);
 
-  const handleChange = (e) => {
-    setSelectedChoice(e.target.value);
-    const selectedObj = {
-      inquiry: question.id,
-      answer: e.target.value,
-      confirmed: true
-    };
-    //
+  const handleChange = (choice, otherOptionText) => {
+    setSelectedChoice(choice);
     const optionsInquires = [...questions];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+    const isOther = question.answerObj[question.answerObj.length - 1].id === choice ? otherOptionText : null;
+    const selectedObj = {
+      inquiry: question.id,
+      answer: choice,
+      confirmed: true,
+      isOther
+    };
+    //
+    
     optionsInquires[editedIndex].selectChoice = selectedObj;
     dispatch(InquiryActions.setInquiries(optionsInquires));
     //
@@ -79,7 +94,7 @@ const ChoiceAnswer = (props) => {
         <RadioGroup
           aria-labelledby="demo-controlled-radio-buttons-group"
           name="controlled-radio-buttons-group"
-          onChange={handleChange}
+          onChange={(e) => handleChange(e.target.value, otherOptionText)}
         >
           {question.answerObj?.map((choice, index) => (
             <div key={index} style={{ marginTop: '0.5rem' }}>
@@ -97,6 +112,17 @@ const ChoiceAnswer = (props) => {
                   }}>{choice.content}</span>
                 }
               />
+              {question.answerObj.length - 1 === index && !disable &&
+                <OutlinedInput
+                  className={classes.input}
+                  disabled={disable}
+                  value={otherOptionText}
+                  onChange={(e) => {
+                    setOtherOptionText(e.target.value)
+                    handleChange(choice.id, e.target.value)
+                  }}
+                />
+              }
             </div>
           ))}
         </RadioGroup>
