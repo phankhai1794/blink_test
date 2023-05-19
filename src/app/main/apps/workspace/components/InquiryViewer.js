@@ -2749,12 +2749,12 @@ const InquiryViewer = (props) => {
                       onClick={() => handleViewMore(question.id)}>
                       {viewDropDown !== question.id ? ( // TODO
                         <>
-                          View All
+                          History
                           <ArrowDropDown />
                         </>
                       ) : (
                         <>
-                          Hide All
+                          History
                           <ArrowDropUp />
                         </>
                       )}
@@ -2785,6 +2785,21 @@ const InquiryViewer = (props) => {
 
               {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} isDateTime={isDateTime} />
+              )}
+
+              {!isShowViewAll && (
+                <Grid item xs={12}>
+                  <div
+                    className={classes.viewMoreBtn}
+                    onClick={() => handleViewMore(question.id)}>
+                    {viewDropDown === question.id && ( // TODO
+                      <>
+                            Show Less
+                        <ArrowDropUp />
+                      </>
+                    )}
+                  </div>
+                </Grid>
               )}
 
               {question.mediaFile?.length > 0 &&
