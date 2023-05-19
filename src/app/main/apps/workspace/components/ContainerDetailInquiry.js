@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Collapse, ListItem, ListItemText} from "@material-ui/core";
 import {ExpandLess, ExpandMore} from "@material-ui/icons";
 import {useDispatch, useSelector} from "react-redux";
+import {makeStyles} from "@material-ui/styles";
 
 import {CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, CONTAINER_NUMBER} from "../../../../../@shared/keyword";
 import {parseNumberValue} from "../../../../../@shared";
@@ -9,11 +10,27 @@ import * as InquiryActions from "../store/actions/inquiry";
 
 import ContainerDetailForm from "./ContainerDetailForm";
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    '& .MuiListItem-button': {
+      height: 50,
+      '& .MuiListItemText-root': {
+        position: 'absolute',
+        left: '5rem'
+      },
+      '& .MuiSvgIcon-root': {
+        position: 'absolute'
+      }
+    }
+  }
+}))
+
 const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, disableInput}) => {
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
-  const [openCD, setOpenCD] = useState(true);
-  const [openCM, setOpenCM] = useState(true);
+  const classes = useStyles();
+  const [openCD, setOpenCD] = useState(false);
+  const [openCM, setOpenCM] = useState(false);
   const [disableEdit, setDisableEdit] = useState(false);
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
@@ -125,8 +142,8 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
   }
 
   return (
-    <div style={{ width: '100%', marginTop: '10px' }}>
-      <ListItem button onClick={() => handleClickCollapse(true)}>
+    <div style={{ width: '100%', margin: '10px 0 10px 0' }} className={classes.root}>
+      <ListItem button onClick={() => handleClickCollapse(true)} className={classes.collapse}>
         <ListItemText primary="Container Detail" />
         {openCD ? <ExpandLess /> : <ExpandMore />}
       </ListItem>
