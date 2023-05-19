@@ -142,7 +142,8 @@ const useStyles = makeStyles(() => ({
   dialogContentAttachment: {
     padding: '0',
     position: 'relative',
-    width: (props) => (props.isFullScreen ? '1200px' : '950px')
+    width: (props) => (props.isFullScreen ? '1200px' : '80%'),
+    alignSelf: 'center'
   },
   divider: {
     backgroundColor: '#8A97A3',
