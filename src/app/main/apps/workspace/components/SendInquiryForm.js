@@ -175,13 +175,15 @@ const SendInquiryForm = (props) => {
     let subject = 'Customer BL Query';
     let msg = '';
     if ((newInq.length && newRep.length) || (newInq.length && newAmeRep.length)) {
+      const countInq = newInq.length > 1;
+      const countRep = [...new Set([...newRep, ...newAmeRep])].length > 1;
       msg =
         'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
       return [
         msg,
-        ` \nNew inquiry:\n${convert(newInq)}\n \nNew reply:\n${convert([...new Set([...newRep, ...newAmeRep])])}`,
+        ` \nNew ${countInq ? 'inquiries' : 'inquiry'}:\n${convert(newInq)}\n \nNew ${countRep ? 'replies' : 'reply'}:\n${convert([...new Set([...newRep, ...newAmeRep])])}`,
         header,
-        subject
+        'NEW REPLY'
       ];
     } else if (newInq.length) {
       header = 'New Inquiry';
@@ -232,7 +234,7 @@ const SendInquiryForm = (props) => {
 
       subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
-      content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion.\n \nPending issues:'}\n${msg2}`;
+      content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion.\n \nPending issue(s):'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setOnshoreValue({
         ...onshoreValue,
