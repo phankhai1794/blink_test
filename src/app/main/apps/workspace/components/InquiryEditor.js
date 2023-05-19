@@ -661,6 +661,11 @@ const InquiryEditor = (props) => {
           op.answerObj.forEach((ans) => {
             ans.content = ans.content.trim();
           });
+          op.answerObj.push({
+            id: null,
+            content: 'Other',
+            createdAt: new Date(),
+          })
         }
         return contentTrim;
       });
