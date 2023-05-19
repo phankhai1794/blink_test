@@ -325,7 +325,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         <span style={{ color: '#515E6A' }}>{popover.text}</span>
       </StyledPopper>
 
-      <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
+      <div style={{ maxWidth: 880, overflowX: 'auto' }}>
         <Table className='amend_table' aria-label="simple table" >
           <TableHead>
             <TableRow>
