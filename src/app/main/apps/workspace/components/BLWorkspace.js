@@ -648,24 +648,33 @@ const BLWorkspace = (props) => {
                     {getValueField(ALSO_NOTIFY)}
                   </BLField>
                 </Grid>
-                <Grid container style={{ marginTop: '53px' }}>
-                  <Grid item xs={6} className={classes.leftPanel}>
-                    <Grid item>
-                      <Label>PORT OF LOADING</Label>
-                      <BLField id={getField(PORT_OF_LOADING)}>
-                        {getValueField(PORT_OF_LOADING)}
-                      </BLField>
+                {(drfView === 'CM') ? 
+                  <Grid item>
+                    <Label>DESCRIPTION OF GOODS</Label>
+                    <BLField id={getField(DESCRIPTION_OF_GOODS)} multiline={true} rows={8}>
+                      {getValueField(DESCRIPTION_OF_GOODS)}
+                    </BLField>
+                  </Grid>
+                  :
+                  <Grid container style={{ marginTop: 53 }}>
+                    <Grid item xs={6} className={classes.leftPanel}>
+                      <Grid item>
+                        <Label>PORT OF LOADING</Label>
+                        <BLField id={getField(PORT_OF_LOADING)}>
+                          {getValueField(PORT_OF_LOADING)}
+                        </BLField>
+                      </Grid>
+                    </Grid>
+                    <Grid item xs={6} className={classes.rightPanel}>
+                      <Grid item>
+                        <Label>PORT OF DISCHARGE</Label>
+                        <BLField id={getField(PORT_OF_DISCHARGE)}>
+                          {getValueField(PORT_OF_DISCHARGE)}
+                        </BLField>
+                      </Grid>
                     </Grid>
                   </Grid>
-                  <Grid item xs={6} className={classes.rightPanel}>
-                    <Grid item>
-                      <Label>PORT OF DISCHARGE</Label>
-                      <BLField id={getField(PORT_OF_DISCHARGE)}>
-                        {getValueField(PORT_OF_DISCHARGE)}
-                      </BLField>
-                    </Grid>
-                  </Grid>
-                </Grid>
+                }
               </Grid>
               <Grid item xs={6} className={classes.rightPanel}>
                 <Grid container>
@@ -738,6 +747,25 @@ const BLWorkspace = (props) => {
                     </BLField>
                   </Grid>
                 </Grid>
+                {(drfView === 'CM') &&
+                <Grid container>
+                  <Grid item xs={6} className={classes.leftPanel}>
+                    <Grid item>
+                      <Label>PORT OF LOADING</Label>
+                      <BLField id={getField(PORT_OF_LOADING)}>
+                        {getValueField(PORT_OF_LOADING)}
+                      </BLField>
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={6} className={classes.rightPanel}>
+                    <Grid item>
+                      <Label>PORT OF DISCHARGE</Label>
+                      <BLField id={getField(PORT_OF_DISCHARGE)}>
+                        {getValueField(PORT_OF_DISCHARGE)}
+                      </BLField>
+                    </Grid>
+                  </Grid>
+                </Grid> }
                 <Grid item xs={6} className={classes.leftPanel}>
                   <Label>PLACE OF DELIVERY</Label>
                   <BLField id={getField(PLACE_OF_DELIVERY)}>
@@ -747,14 +775,6 @@ const BLWorkspace = (props) => {
               </Grid>
             </Grid>
 
-            {(drfView === 'CM') && <Grid container>
-              <Grid item xs={6}>
-                <Label>DESCRIPTION OF GOODS</Label>
-                <BLField id={getField(DESCRIPTION_OF_GOODS)} multiline={true} rows={5}>
-                  {getValueField(DESCRIPTION_OF_GOODS)}
-                </BLField>
-              </Grid>
-            </Grid>}
             <Divider className={classes.divider} />
 
             <Grid container spacing={2}>
