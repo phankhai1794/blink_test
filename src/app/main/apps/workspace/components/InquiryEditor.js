@@ -204,6 +204,7 @@ const InquiryEditor = (props) => {
   const [openCM, setOpenCM] = useState(false);
   const [getDataCD, setDataCD] = useState({});
   const [getDataCM, setDataCM] = useState({});
+  const userType = useSelector(({ user }) => user.role?.toUpperCase());
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -256,15 +257,15 @@ const InquiryEditor = (props) => {
         let getDataField = data.field?.includes(fieldValue.value);
         let getTemplate = metadata.template.some((temp) => (
           temp.field === fieldValue.keyword
-            && temp.type === data.value
-            && (temp.content[0]) || data.label === OTHERS)
+          && temp.type === data.value
+          && (temp.content[0]) || data.label === OTHERS)
         );
         if ([containerCheck[0], containerCheck[1]].includes(fieldValue.value)) {
           getDataField = (data.field?.includes(containerCheck[0]) || data.field?.includes(containerCheck[1]));
           getTemplate = metadata.template.some((temp) => (
             ['containerDetail', 'containerManifest'].includes(temp.field)
-              && temp.type === data.value
-              && (temp.content[0]) || data.label === OTHERS)
+            && temp.type === data.value
+            && (temp.content[0]) || data.label === OTHERS)
           );
         }
         return getDataField && getTemplate
@@ -684,7 +685,7 @@ const InquiryEditor = (props) => {
           saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
             .then((res) => {
               const mediaFile = [];
-              mediaList.forEach(({ id, name, ext }) => mediaFile.push({ id, name, ext }));
+              mediaList.forEach(({ id, name, ext }) => mediaFile.push({ id, name, ext, creator: userType }));
               const inqResponse = res.inqResponse || {};
               inqResponse.creator = {
                 userName: user.displayName || '',

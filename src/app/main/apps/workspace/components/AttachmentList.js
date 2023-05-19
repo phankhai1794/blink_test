@@ -185,6 +185,7 @@ const AttachmentList = (props) => {
   const isAllSelected = attachmentFiles.length > 0 && selectedIndexFile.length === attachmentFiles.length;
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+  const userType = useSelector(({ user }) => user.role?.toUpperCase());
 
   const styles = (validationAttachment, width) => {
     return {
@@ -241,7 +242,8 @@ const AttachmentList = (props) => {
           ...f,
           field: e.field,
           inquiryId: e.id,
-          inqType: e.inqType
+          inqType: e.inqType,
+          creator: f.creator?.accountRole?.type || f.creator || userType
         };
       });
       const mediaAnswer = e.mediaFilesAnswer.map((f) => {
@@ -249,7 +251,8 @@ const AttachmentList = (props) => {
           ...f,
           field: e.field,
           inquiryId: e.id,
-          inqType: e.inqType
+          inqType: e.inqType,
+          creator: f.creator?.accountRole?.type || userType
         };
 
       })
@@ -341,6 +344,7 @@ const AttachmentList = (props) => {
                     field: curInq.field,
                     inquiryId: curInq.id,
                     inqType: curInq.inqType,
+                    creator: itemRes.role
                   }
                 })
                 if (attachmentAmendmentTemp.length > 0) {
@@ -535,12 +539,12 @@ const AttachmentList = (props) => {
       if (optionsAttachmentList[val].id !== null) {
         let draftAnsId = '';
         listCommentDraft.forEach(draftItem => {
-          if(draftItem.field === optionsAttachmentList[val].field && draftItem.content.mediaFile.length > 0) {
+          if (draftItem.field === optionsAttachmentList[val].field && draftItem.content.mediaFile.length > 0) {
             const tempMedia = draftItem.content.mediaFile.filter(f => f.id === optionsAttachmentList[val].id);
-            if(tempMedia.length > 0) draftAnsId = draftItem.draftAnswerId || draftItem.id;
+            if (tempMedia.length > 0) draftAnsId = draftItem.draftAnswerId || draftItem.id;
           }
         })
-        listIdMedia.push({...optionsAttachmentList[val], "draftId": draftAnsId || optionsAttachmentList[val].inquiryId});
+        listIdMedia.push({ ...optionsAttachmentList[val], "draftId": draftAnsId || optionsAttachmentList[val].inquiryId });
       }
     });
     if (listIdMedia.length > 0) {
@@ -614,7 +618,8 @@ const AttachmentList = (props) => {
   }, [selectedIndexFile]);
 
   const handleCheckAll = () => {
-    const mediaIndex = attachmentFiles.map((at, index) => index);
+    const mediaIndex = [];
+    attachmentFiles.forEach((media, index) => userType === media.creator.toUpperCase() && mediaIndex.push(index));
     setSelectedIndexFile(selectedIndexFile.length === attachmentFiles.length ? [] : mediaIndex);
   };
 
@@ -622,7 +627,7 @@ const AttachmentList = (props) => {
     <>
       {isLoading ? <ColoredLinearProgress /> : ''}
       <div className={classes.root}>
-        {attachmentFiles.length > 0 && (
+        {attachmentFiles.length > 0 && attachmentFiles.some(media => userType === media.creator?.toUpperCase()) && (
           <>
             <div className='actions'>
               <div className='checkAll'>
@@ -698,18 +703,21 @@ const AttachmentList = (props) => {
                 <div className="flex justify-between">
                   <div className="flex" style={{ alignItems: 'center' }}>
                     <div className='checkboxDetail' style={{ marginRight: '11px' }}>
-                      <Checkbox
-                        checked={selectedIndexFile.includes(index)}
-                        onChange={(e) => handleCheck(e, media, index)}
-                        checkedIcon={
-                          <>
-                            <span className={clsx(classes.icon, 'borderChecked')}>
-                              <span className={classes.checkedIcon} />
-                            </span>
-                          </>
-                        }
-                        icon={<span className={classes.icon} />}
-                      />
+                      {
+                        userType === media.creator?.toUpperCase() &&
+                        <Checkbox
+                          checked={selectedIndexFile.includes(index)}
+                          onChange={(e) => handleCheck(e, media, index)}
+                          checkedIcon={
+                            <>
+                              <span className={clsx(classes.icon, 'borderChecked')}>
+                                <span className={classes.checkedIcon} />
+                              </span>
+                            </>
+                          }
+                          icon={<span className={classes.icon} />}
+                        />
+                      }
                     </div>
                     <div className='flex' style={{ alignItems: 'center' }}>
                       {media.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
