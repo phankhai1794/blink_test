@@ -2715,6 +2715,27 @@ const InquiryViewer = (props) => {
                   />
                 )}
             </div>
+
+            {/*Show Table Cd Cm Inquiry*/}
+            {
+              question.process !== 'draft'
+              && (
+                ![
+                  'COMPL', 'REOPEN_A', 'REOPEN_Q', ...(((user.role === 'Admin' || user.role === 'Guest') && !disableCDCMInquiry) ? [] : ['OPEN', 'INQ_SENT'])
+                ].includes(question.state)
+                  || (user.role === 'Guest')
+              )
+              && containerCheck.includes(question.field)
+              && (
+                <ContainerDetailInquiry
+                  setDataCD={(value) => setDataCD(value)}
+                  setDataCM={(value) => setDataCM(value)}
+                  getDataCD={getDataCD}
+                  getDataCM={getDataCM}
+                  disableInput={disableCDCMInquiry}
+                />
+              )}
+            
             <>
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={6}>
@@ -2765,26 +2786,6 @@ const InquiryViewer = (props) => {
               {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} isDateTime={isDateTime} />
               )}
-
-              {/*Show Table Cd Cm Inquiry*/}
-              {
-                question.process !== 'draft'
-                && (
-                  ![
-                    'COMPL', 'REOPEN_A', 'REOPEN_Q', ...(((user.role === 'Admin' || user.role === 'Guest') && !disableCDCMInquiry) ? [] : ['OPEN', 'INQ_SENT'])
-                  ].includes(question.state)
-                  && (user.role === 'Admin' || user.role === 'Guest')
-                )
-                && containerCheck.includes(question.field)
-                && (
-                  <ContainerDetailInquiry
-                    setDataCD={(value) => setDataCD(value)}
-                    setDataCM={(value) => setDataCM(value)}
-                    getDataCD={getDataCD}
-                    getDataCM={getDataCM}
-                    disableInput={disableCDCMInquiry}
-                  />
-                )}
 
               {question.mediaFile?.length > 0 &&
                 !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
