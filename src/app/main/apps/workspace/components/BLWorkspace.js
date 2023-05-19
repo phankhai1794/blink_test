@@ -26,7 +26,8 @@ import {
   ALSO_NOTIFY,
   RD_TERMS,
   FREIGHT_TERM,
-  DESCRIPTION_OF_GOODS
+  DESCRIPTION_OF_GOODS,
+  NO_CONTENT_AMENDMENT,
 } from '@shared/keyword';
 import {PERMISSION, PermissionProvider} from '@shared/permission';
 import * as AppActions from 'app/store/actions';
@@ -152,6 +153,9 @@ const BLWorkspace = (props) => {
   };
 
   const getValueField = (keyword) => {
+    if (content[getField(keyword)] === NO_CONTENT_AMENDMENT) {
+      return '';
+    }
     return content[getField(keyword)] || '';
   };
 
@@ -611,16 +615,18 @@ const BLWorkspace = (props) => {
                   <Label>Shipper/Exporter</Label>
                   <BLField id={getField(SHIPPER)} multiline={true} rows={5}>
                     {(getValueField(SHIPPER) && isJsonText(getValueField(SHIPPER))) ?
-                      `${JSON.parse(getValueField(SHIPPER)).name}\n${JSON.parse(getValueField(SHIPPER)).address}`
-                      : getValueField(SHIPPER)}
+                      ((JSON.parse(getValueField(SHIPPER)).name === NO_CONTENT_AMENDMENT) ? ''
+                        : `${JSON.parse(getValueField(SHIPPER)).name}\n${JSON.parse(getValueField(SHIPPER)).address}`)
+                      : getValueField(SHIPPER).replace(NO_CONTENT_AMENDMENT, '')}
                   </BLField>
                 </Grid>
                 <Grid item>
                   <Label>Consignee</Label>
                   <BLField id={getField(CONSIGNEE)} multiline={true} rows={5}>
                     {(getValueField(CONSIGNEE) && isJsonText(getValueField(CONSIGNEE))) ?
-                      `${JSON.parse(getValueField(CONSIGNEE)).name}\n${JSON.parse(getValueField(CONSIGNEE)).address}`
-                      : getValueField(CONSIGNEE)}
+                      ((JSON.parse(getValueField(CONSIGNEE)).name === NO_CONTENT_AMENDMENT) ? ''
+                        : `${JSON.parse(getValueField(CONSIGNEE)).name}\n${JSON.parse(getValueField(CONSIGNEE)).address}`)
+                      : getValueField(CONSIGNEE).replace(NO_CONTENT_AMENDMENT, '')}
                   </BLField>
                 </Grid>
                 <Grid item>
@@ -631,8 +637,9 @@ const BLWorkspace = (props) => {
                   </Label>
                   <BLField id={getField(NOTIFY)} multiline={true} rows={5}>
                     {(getValueField(NOTIFY) && isJsonText(getValueField(NOTIFY))) ?
-                      `${JSON.parse(getValueField(NOTIFY)).name}\n${JSON.parse(getValueField(NOTIFY)).address}`
-                      : getValueField(NOTIFY)}
+                      ((JSON.parse(getValueField(NOTIFY)).name === NO_CONTENT_AMENDMENT) ? ''
+                        : `${JSON.parse(getValueField(NOTIFY)).name}\n${JSON.parse(getValueField(NOTIFY)).address}`)
+                      : getValueField(NOTIFY).replace(NO_CONTENT_AMENDMENT, '')}
                   </BLField>
                 </Grid>
                 <Grid item>

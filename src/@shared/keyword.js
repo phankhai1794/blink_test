@@ -142,7 +142,7 @@ export const OTHERS = 'Others (Free Text)';
 
 export const ONLY_ATT = 'Please refer to the attached file for your reference.';
 
-export const NO_CONTENT_AMENDMENT = 'THERE IS NO CONTENT IN THE AMENDMENT';
+export const NO_CONTENT_AMENDMENT = 'NO CONTENT';
 
 export const HS_HTS_NCM_Code = 'HS/HTS/NCM Code';
 

@@ -1424,9 +1424,13 @@ const InquiryViewer = (props) => {
       return;
     }
     if (isSeparate) {
-      contentField = `${textResolveSeparate.name.toUpperCase().trim()}\n${textResolveSeparate.address.toUpperCase().trim()}`;
+      if (textResolveSeparate.name.trim() === '' && textResolveSeparate.address.trim() === '') {
+        contentField = NO_CONTENT_AMENDMENT;
+      } else {
+        contentField = `${textResolveSeparate.name.toUpperCase().trim()}\n${textResolveSeparate.address.toUpperCase().trim()}`;
+      }
     } else if (typeof textResolve === 'string') {
-      contentField = textResolve.toUpperCase().trim();
+      contentField = textResolve ? textResolve.toUpperCase().trim() : NO_CONTENT_AMENDMENT;
     } else {
       if (containerCheck.includes(question.field) && question.process === 'pending') {
         const contentCDCM = {
@@ -1476,7 +1480,7 @@ const InquiryViewer = (props) => {
       fieldContent: contentField,
       blId: myBL.id,
       contsNoChange,
-      fieldNameContent: textResolveSeparate.name.toUpperCase().trim() || '',
+      fieldNameContent: (textResolveSeparate.name.trim() === '' && textResolveSeparate.address.trim() === '') ? NO_CONTENT_AMENDMENT : textResolveSeparate.name.toUpperCase().trim(),
       fieldAddressContent: textResolveSeparate.address.toUpperCase().trim() || '',
       isWrapText
     };
@@ -2328,7 +2332,7 @@ const InquiryViewer = (props) => {
           <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
           <TextField
             className={classes.inputText}
-            value={textResolveSeparate[type]}
+            value={(type === 'name' && textResolveSeparate[type] === NO_CONTENT_AMENDMENT) ? '' : textResolveSeparate[type]}
             multiline
             // rows={['name'].includes(type) ? 2 : 3}
             rows={3}
@@ -2354,7 +2358,7 @@ const InquiryViewer = (props) => {
           <DateTimePickers time={textResolve ? formatDate(textResolve, 'YYYY-MM-DD') : ''} onChange={e => inputText(e, true)} /> :
           <TextField
             className={classes.inputText}
-            value={textResolve}
+            value={`${(textResolve === NO_CONTENT_AMENDMENT) ? '' : textResolve}`}
             multiline
             rows={3}
             rowsMax={10}
