@@ -184,6 +184,7 @@ const AttachmentList = (props) => {
   const [isLoading, setIsLoading] = useState(true);
   const isAllSelected = attachmentFiles.length > 0 && selectedIndexFile.length === attachmentFiles.length;
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
 
   const styles = (validationAttachment, width) => {
     return {
@@ -532,7 +533,14 @@ const AttachmentList = (props) => {
     const listIdMedia = [];
     selectedIndexFile.forEach(val => {
       if (optionsAttachmentList[val].id !== null) {
-        listIdMedia.push(optionsAttachmentList[val]);
+        let draftAnsId = '';
+        listCommentDraft.forEach(draftItem => {
+          if(draftItem.field === optionsAttachmentList[val].field && draftItem.content.mediaFile.length > 0) {
+            const tempMedia = draftItem.content.mediaFile.filter(f => f.id === optionsAttachmentList[val].id);
+            if(tempMedia.length > 0) draftAnsId = draftItem.draftAnswerId || draftItem.id;
+          }
+        })
+        listIdMedia.push({...optionsAttachmentList[val], "draftId": draftAnsId || optionsAttachmentList[val].inquiryId});
       }
     });
     if (listIdMedia.length > 0) {
@@ -556,7 +564,10 @@ const AttachmentList = (props) => {
         dispatch(InquiryActions.setInquiries(optionsInquiries))
         dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
         dispatch(AppAction.showMessage({ message: 'Delete attachment successfully', variant: 'success' }));
-        if (mediaOther.length === 0) dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
+        if (mediaOther.length === 0) {
+          dispatch(FormActions.toggleAttachment(false));
+          dispatch(FormActions.toggleOpenNotificationAttachmentList(true));
+        }
       }).catch(err => handleError(dispatch, err));
     } else {
       // update attachment list
