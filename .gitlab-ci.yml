@@ -1,20 +1,6 @@
 stages:
-  - develop
   - test
-  - staging
-  - production
-
-deploy_development:
-  stage: development
-  only:
-    - "develop"
-  when: manual
-  allow_failure: false
-  environment:
-    name: development
-  script:
-    - echo "${GITLAB_USER_LOGIN} merged commit ${CI_COMMIT_SHA:0:8} to develop branch"
-    - 'curl -f -d "commit_id=${CI_COMMIT_SHA:0:8}&triggerer=${GITLAB_USER_LOGIN}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://blink-dev.one-line.com/pipeline/development/portal'
+  - UAT
 
 deploy_test:
   stage: test
@@ -30,7 +16,7 @@ deploy_test:
     - 'curl -f -d "commit_id=${CI_COMMIT_SHA:0:8}&triggerer=${GITLAB_USER_LOGIN}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://blink-dev.one-line.com/pipeline/test/portal'
 
 deploy_staging:
-  stage: staging
+  stage: UAT
   only:
     - "staging"
   when: manual
@@ -41,16 +27,3 @@ deploy_staging:
   script:
     - echo "${GITLAB_USER_LOGIN} sending Deployment trigger to Staging site"
     - 'curl -f -d "commit_id=${CI_COMMIT_SHA:0:8}&triggerer=${GITLAB_USER_LOGIN}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://blink-stg.one-line.com/pipeline/staging/portal'
-
-deploy_production:
-  stage: production
-  only:
-    - "main"
-  when: manual
-  allow_failure: false
-  environment:
-    name: production
-    url: http://blink.one-line.com
-  script:
-    - echo "${GITLAB_USER_LOGIN} sending Deployment trigger to Production site"
-    - 'curl -f -d "commit_id=${CI_COMMIT_SHA:0:8}&triggerer=${GITLAB_USER_LOGIN}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://blink.one-line.com/pipeline/production/portal'
