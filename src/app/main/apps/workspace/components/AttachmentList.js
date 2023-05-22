@@ -42,7 +42,8 @@ const attachmentStyle = makeStyles(() => ({
     },
     '& .attachmentList': {
       padding: '0 24px',
-      background: '#ffffff85'
+      background: '#ffffff85',
+      marginTop: '20px'
     },
     '& .checkAll .MuiSvgIcon-root': {
       width: '25px',
