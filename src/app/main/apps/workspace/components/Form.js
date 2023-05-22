@@ -131,6 +131,7 @@ const useStyles = makeStyles(() => ({
     minHeight: 600,
     maxHeight: '80%',
     margin: 0,
+    width: '100%'
   },
   dialogContent: {
     margin: 'auto',
@@ -141,7 +142,7 @@ const useStyles = makeStyles(() => ({
   dialogContentAttachment: {
     padding: '0',
     position: 'relative',
-    width: (props) => (props.isFullScreen ? '1200px' : '80%'),
+    width: (props) => (props.isFullScreen ? '1200px' : '100%'),
     alignSelf: 'center'
   },
   divider: {
