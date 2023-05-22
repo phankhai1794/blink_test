@@ -461,14 +461,9 @@ const InquiryViewer = (props) => {
               const cloneContent = JSON.parse(JSON.stringify(contentInqResolved));
               if (isJsonText(res[0].content) && res[0].type === 'ANS_CD_CM') {
                 setContentCDCMInquiry({ ansId: res[0].id });
-                if (['REOPEN_A', 'REOPEN_Q', 'COMPL'].includes(question?.state)) {
-                  setDataCD(content[metadata.field[CONTAINER_DETAIL]]);
-                  setDataCM(content[metadata.field[CONTAINER_MANIFEST]]);
-                } else {
-                  const parseJs = JSON.parse(res[0].content);
-                  setDataCD(parseJs?.[getField(CONTAINER_DETAIL)]);
-                  setDataCM(parseJs?.[getField(CONTAINER_MANIFEST)]);
-                }
+                const parseJs = JSON.parse(res[0].content);
+                setDataCD(parseJs?.[getField(CONTAINER_DETAIL)]);
+                setDataCM(parseJs?.[getField(CONTAINER_MANIFEST)]);
                 filterCDCM = res.filter((r, i) => i !== 0);
               } else {
                 setDataCD(cloneContent?.[getField(CONTAINER_DETAIL)]);
@@ -477,6 +472,13 @@ const InquiryViewer = (props) => {
             }
             // filter comment
             const filterOffshoreSent = filterCDCM[filterCDCM.length - 1];
+            if (containerCheck.includes(question.field)) {
+              if (['REOPEN_A', 'REOPEN_Q', 'COMPL', 'UPLOADED'].includes(filterOffshoreSent.state)) {
+                const parseJs = JSON.parse(filterOffshoreSent.content);
+                setDataCD(parseJs?.[getField(CONTAINER_DETAIL)]);
+                setDataCM(parseJs?.[getField(CONTAINER_MANIFEST)]);
+              }
+            }
             if (filterOffshoreSent.type === 'REP' && filterOffshoreSent.state === 'COMPL') {
               setInqAnsId(filterOffshoreSent.id);
             }
@@ -2721,9 +2723,9 @@ const InquiryViewer = (props) => {
               question.process !== 'draft'
               && (
                 ![
-                  'COMPL', 'REOPEN_A', 'REOPEN_Q', ...(((user.role === 'Admin' || user.role === 'Guest') && !disableCDCMInquiry) ? [] : ['OPEN', 'INQ_SENT'])
+                  'COMPL', 'REOPEN_A', 'REOPEN_Q', 'UPLOADED', ...(((user.role === 'Admin' || user.role === 'Guest') && !disableCDCMInquiry) ? [] : ['OPEN', 'INQ_SENT'])
                 ].includes(question.state)
-                  || (user.role === 'Guest')
+                  || (user.role === 'Guest' && ['INQ_SENT'].includes(question.state))
               )
               && containerCheck.includes(question.field)
               && (
@@ -2749,12 +2751,12 @@ const InquiryViewer = (props) => {
                       onClick={() => handleViewMore(question.id)}>
                       {viewDropDown !== question.id ? ( // TODO
                         <>
-                          View All
+                          History
                           <ArrowDropDown />
                         </>
                       ) : (
                         <>
-                          Hide All
+                          History
                           <ArrowDropUp />
                         </>
                       )}
@@ -2785,6 +2787,21 @@ const InquiryViewer = (props) => {
 
               {viewDropDown === question.id && inqHasComment && (
                 <Comment question={props.question} comment={comment} isDateTime={isDateTime} />
+              )}
+
+              {!isShowViewAll && (
+                <Grid item xs={12}>
+                  <div
+                    className={classes.viewMoreBtn}
+                    onClick={() => handleViewMore(question.id)}>
+                    {viewDropDown === question.id && ( // TODO
+                      <>
+                            Show Less
+                        <ArrowDropUp />
+                      </>
+                    )}
+                  </div>
+                </Grid>
               )}
 
               {question.mediaFile?.length > 0 &&
