@@ -2958,7 +2958,7 @@ const InquiryViewer = (props) => {
                                 <label><strong>{`${labelName?.toUpperCase()} ${type.toUpperCase()}`}</strong></label>
                                 <TextField
                                   className={classes.inputText}
-                                  value={content[type] || ''}
+                                  value={((type === 'name' && content[type] === NO_CONTENT_AMENDMENT) ? '' : (content[type] || ''))}
                                   multiline
                                   rows={3}
                                   rowsMax={10}
@@ -2974,7 +2974,7 @@ const InquiryViewer = (props) => {
                             <DateTimePickers time={tempReply?.answer?.content ? formatDate(tempReply?.answer?.content, 'YYYY-MM-DD') : ''} onChange={e => handleChangeContentReply(e, '', true)} />
                             : <TextField
                               className={classes.inputText}
-                              value={tempReply?.answer?.content}
+                              value={tempReply?.answer?.content === NO_CONTENT_AMENDMENT ? '' : (tempReply?.answer?.content || '')}
                               multiline
                               rows={3}
                               rowsMax={10}
