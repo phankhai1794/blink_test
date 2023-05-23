@@ -98,6 +98,14 @@ const useStyles = makeStyles((theme) => ({
   },
   adornmentMultiline: {
     alignItems: 'flex-end',
+    position: 'absolute',
+    right: '0%'
+  },
+  adornmentMultilineDoG: {
+    alignItems: 'flex-end',
+    position: 'absolute',
+    right: '0%',
+    bottom: '0%'
   },
   adornmentRow_2: {
     height: '4em',
@@ -178,9 +186,10 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
 
   const onMouseOver = (e) => {
     const { currentTarget, target } = e;
-    const { scrollWidth, clientWidth } = target;
+    const { scrollWidth, clientWidth, scrollHeight, clientHeight } = target;
     if (isEmpty) setAnchorEl(currentTarget);
-    setIsLongText(Boolean((scrollWidth > clientWidth) && !rows));
+
+    setIsLongText(Boolean((scrollWidth > clientWidth) && !rows) || (Boolean((scrollHeight > clientHeight) && rows)));
   };
 
   const onMouseLeave = (e) => {
@@ -353,12 +362,12 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
               )}
               InputProps={{
                 readOnly: readOnly || true,
-                endAdornment: ((!rows || rows < 6) ? (
+                endAdornment: ((!rows || rows < 6 || rows === 8) ? (
                   <InputAdornment
                     position="end"
                     className={clsx(
                       classes.adornment,
-                      multiline ? classes.adornmentMultiline : '',
+                      multiline ? (rows === 8 ? classes.adornmentMultilineDoG : classes.adornmentMultiline) : '',
                       rows ? classes[`adornmentRow_${rows}`] : ''
                     )}>
                     {isContinue && [3, 4, 5].includes(lines.length) &&
@@ -368,8 +377,8 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
                         lineHeight: '22px',
                         fontWeight: '500',
                         position: 'absolute',
-                        left: isContinue === 'A/NF>' ? '68%' : '71%',
-                        top: lines.length === 5 ? '76%' : (lines.length === 4 ? '58%' : '40%')
+                        right: '83px',
+                        bottom: lines.length === 5 ? '8px' : (lines.length === 4 ? '30px' : '53px')
                       }}>
                         {isContinue}
                       </div>

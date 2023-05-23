@@ -51,7 +51,7 @@ const isArray = (value) => {
 
 const StyledPopper = styled(Popper)`&&{
   z-index: 1301;
-  width: 300px;
+  max-width: 400px;
   padding: 15px;
   background: white;
   border-radius: 8px;
@@ -267,17 +267,17 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     handleEdit(false);
   }
 
-  const checkPopover = (e) => {
+  const checkPopover = (e, value) => {
     const overflow = e.target.scrollWidth > e.target.clientWidth;
     if (overflow) {
       setAnchorEl(e.currentTarget);
-      setPopover({ open: true, text: e.target.innerHTML });
+      setPopover({ open: true, text: value });
     }
   }
 
   const closePopover = () => {
     setAnchorEl(null);
-    setPopover({ open: false });
+    setPopover({ open: false, text: '' });
   }
 
   const handleArrorRef = (node) => setArrowRef(node);
@@ -322,7 +322,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         }}
       >
         <div className='arrow' ref={handleArrorRef} />
-        <span style={{ color: '#515E6A' }}>{popover.text}</span>
+        <span style={{ color: '#515E6A', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{popover.text}</span>
       </StyledPopper>
 
       <div style={{ maxWidth: 880, overflowX: 'auto' }}>
@@ -349,7 +349,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                       key={i}
                       className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'}
                       style={{ backgroundColor: isValueChange(cell, vindex, row) }}
-                      onMouseEnter={checkPopover}
+                      onMouseEnter={(e) => checkPopover(e, combineValueUnit(cell, row))}
                       onMouseLeave={closePopover}
                     >
                       {i === 0 ?
