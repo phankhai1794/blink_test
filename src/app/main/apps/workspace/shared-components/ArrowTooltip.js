@@ -121,10 +121,12 @@ const styles = theme => ({
     boxShadow: theme.shadows[3],
     color: '#515E6A',
     fontSize: 15,
+    fontWeight: 600,
     fontFamily: "Montserrat",
-    // whiteSpace: 'break-word	',
+    whiteSpace: 'pre-wrap	',
     position: 'relative',
-    wordWrap: 'break-word	'
+    wordWrap: 'break-word	',
+    maxWidth: 600
   },
 });
 
@@ -142,7 +144,7 @@ class ArrowTooltip extends React.Component {
   render() {
     const { children, classes, title, placement, isLongText } = this.props;
 
-    if (!children.props.rows && isLongText) {
+    if (isLongText) {
       return (
         <Tooltip
           placement={placement}
@@ -167,7 +169,7 @@ class ArrowTooltip extends React.Component {
           {children}
         </Tooltip>
       );
-    } else return <> {children} </>
+    } else return <>{children}</>
   }
 }
 

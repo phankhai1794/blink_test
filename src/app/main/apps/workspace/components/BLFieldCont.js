@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
 import { TextField, makeStyles } from '@material-ui/core';
+
+import ArrowTooltip from '../shared-components/ArrowTooltip';
 
 const white = '#FFFFFF';
 const gray = '#BAC3CB';
@@ -41,22 +43,35 @@ const useStyles = makeStyles((theme) => ({
 
 const BLField = ({ multiline = false, children }) => {
   const classes = useStyles();
+  const [isLongText, setIsLongText] = useState(false);
+  const onMouseOver = (e) => {
+    const { scrollWidth, clientWidth, scrollHeight, clientHeight } = e.target;
+    setIsLongText(Boolean(scrollWidth > clientWidth || scrollHeight > clientHeight));
+  };
+
   return (
-    <TextField
-      value={children || ''}
-      variant="outlined"
-      fullWidth={true}
-      multiline={multiline}
-      rows={multiline ? 6 : null}
-      className={clsx(classes.root)}
-      InputProps={{
-        readOnly: true,
-        classes: {
-          root: classes.root,
-          input: classes.input,
-        },
-      }}
-    />
+    <div
+      onMouseOver={onMouseOver}
+      onMouseLeave={() => setIsLongText(false)}
+    >
+      <ArrowTooltip isLongText={isLongText} title={Array.isArray(children) ? children.join('\n') : children} placement='right'>
+        <TextField
+          value={children || ''}
+          variant="outlined"
+          fullWidth={true}
+          multiline={multiline}
+          rows={multiline ? 6 : null}
+          className={clsx(classes.root)}
+          InputProps={{
+            readOnly: true,
+            classes: {
+              root: classes.root,
+              input: classes.input,
+            },
+          }}
+        />
+      </ArrowTooltip>
+    </div>
   );
 };
 
