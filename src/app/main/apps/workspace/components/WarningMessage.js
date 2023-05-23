@@ -1,8 +1,8 @@
 import React from 'react';
-import { Button, Dialog, makeStyles, IconButton, Icon, Divider } from "@material-ui/core";
+import { useDispatch, useSelector } from 'react-redux';
+import { Button, Dialog, makeStyles, Divider } from "@material-ui/core";
 import MuiDialogContent from "@material-ui/core/DialogContent";
-
-import { ContainerDetailFormOldVersion } from './InquiryViewer';
+import * as AppActions from 'app/store/actions';
 
 const mainColor = '#BD0F72';
 const darkColor = '#132535';
@@ -45,34 +45,36 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const WarningMessage = ({ msg, content, msg2 = 'Thank you!', iconType, open, handleClose }) => {
+const WarningMessage = ({ open, setOpen }) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
+
+  const kickBy = useSelector(({ user }) => user.kickBy);
+
+  const handleClose = () => {
+    dispatch(AppActions.kickForce({ kickBy: "" }));
+    setOpen(false);
+  }
 
   return (
-    <Dialog open={open} onClose={handleClose} classes={{ root: classes.dialog }}>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      classes={{ root: classes.dialog }}
+    >
       <Divider classes={{ root: classes.divider }} />
       <MuiDialogContent classes={{ root: classes.dialogContent }}>
         <div className={classes.firstSentence}>
           <span>
-            {iconType}
+            <img
+              style={{ verticalAlign: 'middle', paddingBottom: 2, paddingLeft: 5, paddingRight: 5, }}
+              src={`/assets/images/icons/warning.svg`}
+            />
           </span>
           <span>
-            {msg}
+            You has been kicked by {kickBy}
           </span>
-          {/*{*/}
-          {/*<ContainerDetailFormOldVersion originalValues={content} />*/}
-
-          {/*  </ContainerDetailFormOldVersion>*/}
-          {/*}*/}
         </div>
-        <div style={{ textAlign: 'left', marginLeft: 22, marginTop: 14 }}>
-          {
-            content.map((k, id) => {
-              return (<strong key={id}> <div>{`[Row ${k.row}] Cont-No: ${k.containerNo}`}</div> </strong>)
-            })
-          }
-        </div>
-        {/*<span className={classes.secondSentence}>{msg2}</span>*/}
       </MuiDialogContent>
       <div className={classes.container}>
         <Button
@@ -96,4 +98,4 @@ const WarningMessage = ({ msg, content, msg2 = 'Thank you!', iconType, open, han
   );
 };
 
-export default WarningMessage;
+export default React.memo(WarningMessage);
