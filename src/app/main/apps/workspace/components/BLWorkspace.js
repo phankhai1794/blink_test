@@ -1,5 +1,5 @@
-import {checkNewInquiry, formatDate, isJsonText, NUMBER_INQ_BOTTOM} from '@shared';
-import {FuseLoading} from '@fuse';
+import { checkNewInquiry, formatDate, isJsonText, NUMBER_INQ_BOTTOM } from '@shared';
+import { FuseLoading } from '@fuse';
 import {
   BL_TYPE,
   COMMODITY_CODE,
@@ -29,20 +29,20 @@ import {
   DESCRIPTION_OF_GOODS,
   NO_CONTENT_AMENDMENT,
 } from '@shared/keyword';
-import {PERMISSION, PermissionProvider} from '@shared/permission';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
-import React, {useContext, useEffect, useRef, useState} from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import _ from 'lodash';
-import {Chip, Divider, Grid} from '@material-ui/core';
-import {useDispatch, useSelector} from 'react-redux';
-import {makeStyles} from '@material-ui/styles';
+import { Chip, Divider, Grid } from '@material-ui/core';
+import { useDispatch, useSelector } from 'react-redux';
+import { makeStyles } from '@material-ui/styles';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import {getBlInfo} from 'app/services/myBLService';
-import {getPermissionByRole} from 'app/services/authService';
-import {SocketContext} from 'app/AppContext';
+import { getBlInfo } from 'app/services/myBLService';
+import { getPermissionByRole } from 'app/services/authService';
+import { SocketContext } from 'app/AppContext';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -58,14 +58,15 @@ import Form from './Form';
 import Label from './FieldLabel';
 import BtnAddInquiry from './BtnAddInquiry';
 import BLField from './BLField';
-import {AttachFileList, AttachmentList} from './AttachmentList';
+import { AttachFileList, AttachmentList } from './AttachmentList';
 import BLProcessNotification from './BLProcessNotification';
-import {SendInquiryForm} from './SendInquiryForm';
+import { SendInquiryForm } from './SendInquiryForm';
 import TableCD from './TableCD';
 import TableCM from './TableCM';
 import ListNotification from './ListNotification';
 import SubmitAnswerNotification from "./SubmitAnswerNotification";
 import QueueList from './QueueList';
+import WarningMessage from "./WarningMessage";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -139,6 +140,8 @@ const BLWorkspace = (props) => {
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
   const drfView = useSelector(({ draftBL }) => draftBL.drfView);
+  const [isWarningKicked, setIsWarningKicked] = useState(false);
+  const [openWarningKicked, setOpenWarningKicked] = useState(false);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -160,23 +163,35 @@ const BLWorkspace = (props) => {
   };
 
   socket.on('msg_processing', async (data) => {
+    const { processingBy, kickBy } = data;
     const userInfo = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
-    if (userInfo?.displayName && data.processingBy.length) {
-      console.log('processingBy: ', data.processingBy);
+
+    if (userInfo?.displayName && processingBy.length) {
+      console.log('processingBy: ', processingBy);
       let permissions = [];
-      if (userInfo.displayName === data.processingBy[0]) { // if to be the first user
+      if (userInfo.displayName === processingBy[0]) { // if to be the first user
         permissions = await getPermissionByRole(userInfo.role);
         dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
       } else {
         permissions = await getPermissionByRole('Viewer');
+        dispatch(AppActions.setUser({ ...user, permissions }));
 
-        if (userInfo.displayName === data.processingBy[data.processingBy.length - 1]) {
-          dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: data.processingBy[0] }));
+        // Display popup has been kicked
+        if (!isWarningKicked && kickBy) {
+          dispatch(AppActions.kickForce({ kickBy }));
+          setIsWarningKicked(true);
+        }
+        if (userInfo.displayName === processingBy[processingBy.length - 1]) {
+          dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: processingBy[0] }));
         }
       }
       sessionStorage.setItem('permissions', JSON.stringify(permissions));
     }
   });
+
+  useEffect(() => {
+    if (isWarningKicked) setOpenWarningKicked(true);
+  }, [isWarningKicked]);
 
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
@@ -517,14 +532,29 @@ const BLWorkspace = (props) => {
         <>
           {openQueueList && <QueueList />}
           <ListNotification />
+          {openWarningKicked &&
+            <WarningMessage
+              open={openWarningKicked}
+              setOpen={setOpenWarningKicked}
+            />
+          }
           <SubmitAnswerNotification
-            open={openNotification ||
+            open={
+              openNotification ||
               openNotificationReply ||
               openNotificationAmendment ||
               openNotificationBLWarning.status ||
-              openNotificationSubmitPreview}
+              openNotificationSubmitPreview
+            }
+            kickForce={{
+              status: openNotificationBLWarning.status,
+              processingBy: {
+                userName: openNotificationBLWarning.userName,
+                userType: user.userType,
+              },
+              kickBy: user.displayName
+            }}
             msg={renderMsgNoti()}
-            // msg2={`Please wait for ${openNotificationBLWarning.userName} complete his/her work!`}
             msg2={renderMsgNoti2()}
             iconType={renderIconType()}
             handleClose={() => {
@@ -648,7 +678,7 @@ const BLWorkspace = (props) => {
                     {getValueField(ALSO_NOTIFY)}
                   </BLField>
                 </Grid>
-                {(drfView === 'CM') ? 
+                {(drfView === 'CM') ?
                   <Grid item>
                     <Label>DESCRIPTION OF GOODS</Label>
                     <BLField id={getField(DESCRIPTION_OF_GOODS)} multiline={true} rows={8}>
@@ -748,24 +778,24 @@ const BLWorkspace = (props) => {
                   </Grid>
                 </Grid>
                 {(drfView === 'CM') &&
-                <Grid container>
-                  <Grid item xs={6} className={classes.leftPanel}>
-                    <Grid item>
-                      <Label>PORT OF LOADING</Label>
-                      <BLField id={getField(PORT_OF_LOADING)}>
-                        {getValueField(PORT_OF_LOADING)}
-                      </BLField>
+                  <Grid container>
+                    <Grid item xs={6} className={classes.leftPanel}>
+                      <Grid item>
+                        <Label>PORT OF LOADING</Label>
+                        <BLField id={getField(PORT_OF_LOADING)}>
+                          {getValueField(PORT_OF_LOADING)}
+                        </BLField>
+                      </Grid>
                     </Grid>
-                  </Grid>
-                  <Grid item xs={6} className={classes.rightPanel}>
-                    <Grid item>
-                      <Label>PORT OF DISCHARGE</Label>
-                      <BLField id={getField(PORT_OF_DISCHARGE)}>
-                        {getValueField(PORT_OF_DISCHARGE)}
-                      </BLField>
+                    <Grid item xs={6} className={classes.rightPanel}>
+                      <Grid item>
+                        <Label>PORT OF DISCHARGE</Label>
+                        <BLField id={getField(PORT_OF_DISCHARGE)}>
+                          {getValueField(PORT_OF_DISCHARGE)}
+                        </BLField>
+                      </Grid>
                     </Grid>
-                  </Grid>
-                </Grid> }
+                  </Grid>}
                 <Grid item xs={6} className={classes.leftPanel}>
                   <Label>PLACE OF DELIVERY</Label>
                   <BLField id={getField(PLACE_OF_DELIVERY)}>
