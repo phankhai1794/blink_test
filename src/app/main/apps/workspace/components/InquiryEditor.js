@@ -260,7 +260,7 @@ const InquiryEditor = (props) => {
           && temp.type === data.value
           && (temp.content[0]) || data.label === OTHERS)
         );
-        if ([containerCheck[0], containerCheck[1]].includes(fieldValue.value)) {
+        if ([containerCheck[0], containerCheck[1]].includes(fieldValue?.value)) {
           getDataField = (data.field?.includes(containerCheck[0]) || data.field?.includes(containerCheck[1]));
           getTemplate = metadata.template.some((temp) => (
             ['containerDetail', 'containerManifest'].includes(temp.field)
@@ -290,7 +290,7 @@ const InquiryEditor = (props) => {
     // if (e.__isNew__) inq.isNew = e.__isNew__;
     const filter = metadata.template.find(({ field, type }) => {
       let getTemplate = type === e.value && fieldValue?.keyword === field;
-      if ([containerCheck[0], containerCheck[1]].includes(fieldValue.value)) {
+      if ([containerCheck[0], containerCheck[1]].includes(fieldValue?.value)) {
         getTemplate = type === e.value && ['containerDetail', 'containerManifest'].includes(field)
       }
       return getTemplate;
