@@ -560,7 +560,15 @@ const InquiryEditor = (props) => {
         setDisabled(false);
         return;
       }
-
+      if (ansTypeChoice === currentEditInq.ansType &&
+        currentEditInq.answerObj[currentEditInq.answerObj.length - 1]?.content !== 'Other'
+      ) {
+        currentEditInq.answerObj.push({
+          id: null,
+          content: 'Other',
+          createdAt: new Date(),
+        })
+      }
       const ansCreate = currentEditInq.answerObj.filter(
         ({ id: id1 }) => !inquiry.answerObj.some(({ id: id2 }) => id2 === id1)
       );
@@ -585,7 +593,7 @@ const InquiryEditor = (props) => {
         const res = await uploadFile(form_data).catch((err) => handleError(dispatch, err));
         mediaCreate[f].id = res.response[0].id;
       }
-
+      // Edit INQUIRY
       if (
         JSON.stringify(inq(currentEditInq)) !== JSON.stringify(inq(inquiry)) ||
         JSON.stringify(currentEditInq.answerObj) !== JSON.stringify(inquiry.answerObj) ||
