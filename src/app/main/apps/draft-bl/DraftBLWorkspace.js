@@ -4,7 +4,6 @@ import { FusePageSimple } from '@fuse';
 import { useDispatch } from 'react-redux';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import * as Actions from 'app/main/apps/workspace/store/actions';
 
 import OtpCheck from '../OTPCheck';
 
@@ -19,8 +18,6 @@ function DraftBLWorkspace() {
   const bl = pathname.split('/')[3] || new URLSearchParams(window.location.search).get('bl');
 
   useEffect(() => {
-    dispatch(Actions.loadInquiry(bl));
-
     const isAllow = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL });
     if (isPreviewing) {
       if (!isAllow) history.push({ pathname: '/login', cachePath: pathname, cacheSearch: search });

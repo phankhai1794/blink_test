@@ -1,9 +1,10 @@
-import { getMetadata } from 'app/services/inquiryService';
+import { getMetadata, getInquiryById } from 'app/services/inquiryService';
 import { getFieldContent, confirmDraftBl } from 'app/services/draftblService';
 import { getBlInfo, getCustomerAmendment } from 'app/services/myBLService';
 import { filterMetadata, draftConfirm } from '@shared';
 import { handleError } from '@shared/handleError';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
+import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 
 export const SET_METADATA = 'SAVE_METADATA';
 export const SET_BL = 'SET_BL';
@@ -18,6 +19,7 @@ export const RELOAD = 'RELOAD';
 export const SET_EDIT_INQUIRY = 'SET_EDIT_INQUIRY'
 export const SET_DRF_VIEW = 'SET_DRF_VIEW';
 export const SET_AMENDMENT_FIELD = 'SET_AMENDMENT_FIELD';
+export const SET_INQUIRIES = 'SET_INQUIRIES';
 
 export const loadMetadata = () => (dispatch) => {
   getMetadata()
@@ -159,4 +161,39 @@ export function setAmendmentField(state) {
     type: SET_AMENDMENT_FIELD,
     state
   }
+}
+
+// As same as app > main > apps > workspace > store > actions > index.js > loadInquiry()
+export const setInquiries = (bl) => async (dispatch) => {
+  const [resInq, resDraft] = [
+    await getInquiryById(bl),
+    await getFieldContent(bl)
+  ];
+
+  resInq.forEach((res) => (res.process = 'pending'));
+  resDraft.forEach((res) => (res.process = 'draft'));
+
+  [resInq, resDraft].map(ele => {
+    ele.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    ele.forEach((inq) =>
+      inq.answerObj?.length
+      && inq.answerObj?.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
+    );
+  });
+
+  const lastestCommentDraft = [];
+  const merge = [...new Set(resDraft.map((d) => d.field))];
+  merge.forEach((m) => {
+    const filterLastestComment = [];
+    filterLastestComment.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    resDraft.forEach((r) => {
+      if (m === r.field) {
+        filterLastestComment.push(r);
+      }
+    });
+    lastestCommentDraft.push(filterLastestComment[0]);
+  });
+
+  const inquiries = JSON.parse(JSON.stringify([...resInq, ...lastestCommentDraft]));
+  dispatch(InquiryActions.setInquiries(inquiries));
 }
