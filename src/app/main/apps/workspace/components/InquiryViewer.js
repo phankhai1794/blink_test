@@ -770,12 +770,7 @@ const InquiryViewer = (props) => {
               }
               if (['REOPEN_A', 'REOPEN_Q'].includes(lastest.state)) {
                 // is CM CD Amendment
-                if (typeof lastest.content !== 'string') {
-                  setIsReplyCDCM(true)
-                }
-                else {
-                  setTempReply({})
-                }
+                if (typeof lastest.content === 'string') setTempReply({});
               }
             }
             if (isEditOriginalAmendment) {
