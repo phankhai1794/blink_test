@@ -1,0 +1,5 @@
+.rdrDateRangePickerWrapper {
+    z-index: 10;
+    top: 120%;
+    position: absolute;
+}

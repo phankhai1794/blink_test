@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Tooltip, Chip } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Tooltip, Chip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import ControlPoint from '@material-ui/icons/ControlPoint';
 import { getQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
 import Pagination from '../shared-components/Pagination';
@@ -314,7 +313,13 @@ const QueueListTable = () => {
           </Table>
           <div className={classes.container}>
             <div className={classes.pagination}>
-              <Pagination currentNumber={searchQueueQuery.currentPageNumber} totalPage={searchQueueQuery.totalPageNumber} totalBkgNo={state.totalBkgNo} />
+              <Pagination
+                currentNumber={searchQueueQuery.currentPageNumber}
+                totalPage={searchQueueQuery.totalPageNumber}
+                totalBkgNo={state.totalBkgNo}
+                query={searchQueueQuery}
+                searchQueueQuery={(search) => dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...search }))}
+              />
             </div>
           </div>
         </div>

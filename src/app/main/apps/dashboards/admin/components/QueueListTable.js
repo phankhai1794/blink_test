@@ -6,6 +6,7 @@ import { getOffshoreQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
 import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 import Pagination from 'app/main/apps/workspace/shared-components/Pagination';
+import EllipsisPopper from 'app/main/apps/workspace/shared-components/EllipsisPopper';
 import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
 import { mapperBlinkStatus } from '@shared/keyword'
@@ -208,8 +209,12 @@ const StickyTableCell = withStyles((theme) => ({
 
 const Row = (props) => {
   const { row, index, open, setOpen } = props;
-  const [tab, setTab] = useState(0)
   const classes = useStyles();
+
+  const [tab, setTab] = useState(0);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [arrowRef, setArrowRef] = useState(null);
+  const [popover, setPopover] = useState({ open: false, text: '' });
 
   const handleChange = (_, value) => setTab(value);
 
@@ -227,6 +232,21 @@ const Row = (props) => {
   const [Apending, Areply, Aresolved, Auploaded] = data(row.amendments);
   const countAllInquiry = Ipending.length + Ireply.length + Iresolved.length + Iuploaded.length;
   const countAllAmend = Apending.length + Areply.length + Aresolved.length + Auploaded.length;
+
+  const handleArrorRef = (node) => setArrowRef(node);
+
+  const checkPopover = (e) => {
+    const overflow = e.target.scrollWidth > e.target.clientWidth;
+    if (overflow) {
+      setAnchorEl(e.currentTarget);
+      setPopover({ open: true, text: e.target.textContent });
+    }
+  }
+
+  const closePopover = () => {
+    setAnchorEl(null);
+    setPopover({ open: false });
+  }
 
   return (
     <>
@@ -246,8 +266,8 @@ const Row = (props) => {
             <a href={`/apps/workspace/${row.bkgNo}?usrId=admin&cntr=VN`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bkgNo}</span></a>
           </TableCell>
         </StickyTableCell>
-        <TableCell className={classes.cellBody} >{formatDate(row.lastUpdated, 'MMM - DD - YYYY HH:mm')}</TableCell>
-        <TableCell className={classes.cellBody}>{row.etd && formatDate(row.etd, 'MMM - DD - YYYY HH:mm')}</TableCell>
+        <TableCell className={classes.cellBody} >{formatDate(row.lastUpdated, 'DD/MM/YYYY HH:mm')}</TableCell>
+        <TableCell className={classes.cellBody}>{row.etd && formatDate(row.etd, 'DD/MM/YYYY HH:mm')}</TableCell>
         <TableCell className={classes.cellBody} ><span style={{ textTransform: 'capitalize' }}>{row.status.customer}</span></TableCell>
         <TableCell className={classes.cellBody} ><span style={{ textTransform: 'capitalize' }}>{row.status.onshore}</span></TableCell>
         <TableCell className={classes.cellBody}>{mapperBlinkStatus[row.status.bl]}</TableCell>
@@ -269,11 +289,10 @@ const Row = (props) => {
             {countAllInquiry ? <Chip label={`${Iresolved.length + Iuploaded.length}/${countAllInquiry}`} className={clsx(classes.chip, classes.resolvedColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}> help </Icon>} /> : null}
             {countAllAmend ? <Chip label={`${Aresolved.length + Auploaded.length}/${countAllAmend}`} className={clsx(classes.chip, classes.resolvedColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}> edit </Icon>} /> : null}
           </div>
-
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0, border: open ? '8px solid #F5F8FA' : '' }} colSpan={10}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0, border: open ? '8px solid #F5F8FA' : '' }} colSpan='100%'>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Tabs
               indicatorColor="primary"
@@ -301,6 +320,10 @@ const Row = (props) => {
                 }
               />
             </Tabs>
+            <EllipsisPopper anchorEl={anchorEl} ref={arrowRef}>
+              <div className='arrow' ref={handleArrorRef} />
+              <span style={{ color: '#515E6A' }}>{popover.text}</span>
+            </EllipsisPopper>
             <Table size="small" aria-label="purchases" style={{ marginTop: 15 }}>
               <TableHead className={classes.headerColor}>
                 <TableRow>
@@ -314,14 +337,14 @@ const Row = (props) => {
               </TableHead>
               <TableBody>
                 {(tab ? [...Apending, ...Areply, ...Aresolved, ...Auploaded] : [...Ipending, ...Ireply, ...Iresolved, ...Iuploaded]).map((row, index) => (
-                  <TableRow key={index}>
+                  <TableRow style={{ height: 50 }} key={index}>
                     <TableCell component="th" scope="row">
                       {index + 1}
                     </TableCell>
                     <TableCell>{row.field}</TableCell>
                     {!tab ? <TableCell>{row.inqType}</TableCell> : null}
                     <TableCell>
-                      {formatDate(row.updatedAt, 'MMM - DD - YYYY HH:mm')}
+                      {formatDate(row.updatedAt, 'DD/MM/YYYY HH:mm')}
                     </TableCell>
                     <TableCell>
                       {row.status === 'pending' ? 'Pending' : null}
@@ -329,7 +352,11 @@ const Row = (props) => {
                       {row.status === 'resolved' ? 'Resolved' : null}
                       {row.status === 'uploaded' ? 'Uploaded' : null}
                     </TableCell>
-                    <TableCell>
+                    <TableCell
+                      style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                      onMouseEnter={checkPopover}
+                      onMouseLeave={closePopover}
+                    >
                       {row.content}
                     </TableCell>
                   </TableRow>
@@ -359,8 +386,8 @@ const QueueListTable = () => {
         page: searchQueueQuery.currentPageNumber,
         size: searchQueueQuery.pageSize,
         query: {
-          startDate: searchQueueQuery.from,
-          endDate: searchQueueQuery.to,
+          startDate: formatDate(searchQueueQuery.from, 'YYYY-MM-DD'),
+          endDate: formatDate(searchQueueQuery.to, 'YYYY-MM-DD'),
           bkgNos: searchQueueQuery.bookingNo.split(',').filter(bkg => bkg).map(bkg => bkg.trim()),
           blinkStatus: searchQueueQuery.blStatus
         },
@@ -393,7 +420,13 @@ const QueueListTable = () => {
       {(state?.queueListBl.length > 0) ?
         <>
           <div className={classes.container}>
-            <Pagination currentNumber={searchQueueQuery.currentPageNumber} totalPage={searchQueueQuery.totalPageNumber} totalBkgNo={state.totalBkgNo} />
+            <Pagination
+              currentNumber={searchQueueQuery.currentPageNumber}
+              totalPage={searchQueueQuery.totalPageNumber}
+              totalBkgNo={state.totalBkgNo}
+              query={searchQueueQuery}
+              searchQueueQuery={(search) => dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...search }))}
+            />
             <FormControl variant='outlined' className={classes.formControl}>
               <Select
                 className={classes.selectStatus}
@@ -440,17 +473,17 @@ const QueueListTable = () => {
                       {/* <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort('etd')} /> */}
                     </div>
                   </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 150 }}>
+                  <TableCell className={classes.cellHead} style={{ width: 130 }}>
                     <div className={classes.lineColumn}>
                       <span>Customer Status</span>
                     </div>
                   </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 150 }}>
+                  <TableCell className={classes.cellHead} style={{ width: 130 }}>
                     <div className={classes.lineColumn}>
                       <span>Onshore Status</span>
                     </div>
                   </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 110 }}>
+                  <TableCell className={classes.cellHead} style={{ width: 150 }}>
                     <div className={classes.lineColumn}>
                       <span>BLink Status</span>
                       {/* <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort('status')} /> */}

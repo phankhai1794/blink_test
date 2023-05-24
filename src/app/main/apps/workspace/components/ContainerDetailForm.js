@@ -29,8 +29,9 @@ import {
   TextField
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import styled from 'styled-components';
 import { formatContainerNo, NumberFormat } from '@shared';
+
+import EllipsisPopper from '../shared-components/EllipsisPopper';
 
 import AmendmentPopup from './AmendmentPopup';
 
@@ -49,63 +50,6 @@ const isArray = (value) => {
   return Array.isArray(value) ? value.join(', ') : value;
 }
 
-const StyledPopper = styled(Popper)`&&{
-  z-index: 1301;
-  max-width: 400px;
-  padding: 15px;
-  background: white;
-  border-radius: 8px;
-
-  &[x-placement*="right"] {
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
-  }
-
-  &[x-placement*="left"] {
-    box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.15);
-  }
-
-  &[x-placement*="right"] .arrow{
-    left: 0;
-    margin-left: -0.9em;
-
-    &:before {
-      left: 3px;
-      border-color: transparent white transparent transparent;
-      box-shadow: -1px 1px 1px rgba(0, 0, 0, 0.15);
-    }
-  }
-
-  &[x-placement*="left"] .arrow{
-    right: 0;
-    margin-right: -0.9em;
-
-    &:before {
-      right: 3px;
-      border-color: transparent transparent transparent white;
-      box-shadow: 1px -1px 1px rgba(0, 0, 0, 0.15);
-    }
-  }
-
-  .arrow {
-    position: absolute;
-    font-size: 10px;
-    width: 3em;
-    height: 3em;
-
-    &:before {
-      content: "";
-      margin: auto;
-      background: white;
-      margin-top: 5px;
-      position: absolute;
-      display: block;
-      width: 10px;
-      height: 10px;
-      border-style: solid;
-      transform: rotate(45deg)
-    }
-  }
-}`;
 
 const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM, setAddContent }) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
@@ -140,7 +84,6 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const CDTitle = CONTAINER_LIST.cd
   const CMTitle = user.role === 'Guest' ? [CONTAINER_NUMBER, ...CONTAINER_LIST.cm].filter(item => ![HS_CODE, HTS_CODE, NCM_CODE].includes(item)) : [CONTAINER_NUMBER, ...CONTAINER_LIST.cm]
   const type = (container === CONTAINER_DETAIL) ? CDTitle : CMTitle;
-  const open = Boolean(anchorEl);
 
   const sortValues = (vals) => {
     let valuesSorted = [];
@@ -303,27 +246,10 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           isInqCDCM={isInqCDCM}
         />
       </Drawer>
-      <StyledPopper
-        anchorEl={anchorEl}
-        open={open}
-        placement="right"
-        modifiers={{
-          flip: {
-            enabled: true,
-          },
-          preventOverflow: {
-            enabled: true,
-            boundariesElement: 'scrollParent',
-          },
-          arrow: {
-            enabled: true,
-            element: arrowRef,
-          },
-        }}
-      >
+      <EllipsisPopper anchorEl={anchorEl} arrowRef={arrowRef}>
         <div className='arrow' ref={handleArrorRef} />
         <span style={{ color: '#515E6A', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{popover.text}</span>
-      </StyledPopper>
+      </EllipsisPopper>
 
       <div style={{ maxWidth: 880, overflowX: 'auto' }}>
         <Table className='amend_table' aria-label="simple table" >
