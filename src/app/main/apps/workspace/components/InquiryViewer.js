@@ -2687,6 +2687,7 @@ const InquiryViewer = (props) => {
                     `${renderContent(question.content)}`}
                   splitView={false}
                   hideLineNumbers
+                  showDiffOnly={false}
                   styles={{ contentText: { fontFamily: 'Montserrat' } }}
                   compareMethod={DiffMethod.WORDS}
                 />
