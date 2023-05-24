@@ -508,7 +508,8 @@ const AttachmentList = (props) => {
               ext: `.${ext}`,
               name: file[0].name,
               field: optionsAttachmentList[attachmentIndex].field,
-              inquiryId: optionsAttachmentList[attachmentIndex].inquiryId
+              inquiryId: optionsAttachmentList[attachmentIndex].inquiryId,
+              creator: userType
             };
             setAttachmentFiles(optionsAttachmentList);
           }).catch((error) => {
