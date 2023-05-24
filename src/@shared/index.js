@@ -46,11 +46,15 @@ export const filterMetadata = (data) => {
   })
   data['inqType'].forEach(({ id, name, field }) => {
     dict['inq_type'][name] = id;
-    dict['inq_type_options'].push({
-      label: name,
-      value: id,
-      field
-    });
+    // Check if inq type has template 
+    const filterInqType = data.template.filter(({ type }) => type === id)
+    if (filterInqType.some(({ content }) => content.length > 0)) {
+      dict['inq_type_options'].push({
+        label: name,
+        value: id,
+        field
+      });
+    }
   })
   data['ansType'].forEach(({ id, name }) => {
     dict['ans_type'][name] = id;
