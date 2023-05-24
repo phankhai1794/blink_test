@@ -92,7 +92,7 @@ function Layout1(props) {
     <div id="fuse-layout" className={clsx(classes.root, config.mode, 'scroll-' + config.scroll)}>
       <div className="flex flex-1 flex-col overflow-hidden relative">
         <div className={classes.wrapper}>
-          {config.navbar.display && <NavbarWrapperLayout1 />}
+          {/* {config.navbar.display && <NavbarWrapperLayout1 />} */}
 
           <div className={classes.contentWrapper} id={'content-wrapper'}>
             {openPreviewFiles && <PDFViewer inquiry={currentInqPreview} />}

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
-import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 import NavigateBefore from '@material-ui/icons/NavigateBefore';
 import NavigateNext from '@material-ui/icons/NavigateNext';
 
@@ -79,46 +77,35 @@ const usePagination = (
 
 };
 const Pagination = (props) => {
+  const { currentNumber, totalPage, totalBkgNo, query, searchQueueQuery } = props;
   const classes = useStyles();
-  const dispatch = useDispatch();
-  const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
 
-  const [state, setState] = useState({ currentNumber: props.currentNumber, totalPage: props.totalPage, totalPageNumber: Math.ceil(props.totalBkgNo / searchQueueQuery.pageSize) })
+  const [state, setState] = useState({ currentNumber, totalPage, totalPageNumber: Math.ceil(totalBkgNo / query.pageSize) });
 
   useEffect(() => {
-    setState({ currentNumber: props.currentNumber, totalPage: props.totalPage, totalPageNumber: Math.ceil(props.totalBkgNo / searchQueueQuery.pageSize) })
+    setState({ currentNumber, totalPage, totalPageNumber: Math.ceil(totalBkgNo / query.pageSize) });
   }, [props]);
 
   const handleSelectPage = (page) => {
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: page }));
+    searchQueueQuery({ currentPageNumber: page });
     setState({ ...state, currentNumber: page });
-  }
-
-  const handleClickStart = () => {
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: 1 }));
-    setState({ ...state, currentNumber: 1 });
-  }
-
-  const handleClickEnd = () => {
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: state.totalPageNumber }));
-    setState({ ...state, currentNumber: state.totalPageNumber });
   }
 
   const handlePrevious = () => {
     if (state.currentNumber > 1) {
-      dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: state.currentNumber - 1 }));
+      searchQueueQuery({ currentPageNumber: state.currentNumber - 1 });
       setState({ ...state, currentNumber: state.currentNumber - 1 });
     }
   }
 
   const handleNext = () => {
     if (state.currentNumber < state.totalPageNumber) {
-      dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, currentPageNumber: state.currentNumber + 1 }));
+      searchQueueQuery({ currentPageNumber: state.currentNumber + 1 });
       setState({ ...state, currentNumber: state.currentNumber + 1 });
     }
   }
 
-  const paginationRange = usePagination(props.totalBkgNo, searchQueueQuery.pageSize, 2, state.currentNumber);
+  const paginationRange = usePagination(totalBkgNo, query.pageSize, 2, state.currentNumber);
 
   return (
     <>

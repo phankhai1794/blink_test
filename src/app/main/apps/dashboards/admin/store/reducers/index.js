@@ -1,12 +1,16 @@
 import { mapperBlinkStatus } from '@shared/keyword';
+import { subMonths } from 'date-fns';
+import { formatDate } from '@shared';
 
 import * as Actions from '../actions';
 
+const end = new Date();
+const start = subMonths(end, 1);
 const initialState = {
   searchQueueQuery: {
     bookingNo: '',
-    from: '',
-    to: '',
+    from: formatDate(start, 'YYYY-MM-DD'),
+    to: formatDate(end, 'YYYY-MM-DD'),
     blStatus: Object.keys(mapperBlinkStatus),
     currentPageNumber: 1,
     pageSize: 10,

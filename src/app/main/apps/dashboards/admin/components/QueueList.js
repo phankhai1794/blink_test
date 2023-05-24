@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Button, FormControl, InputLabel, OutlinedInput, InputAdornment, Paper, Select, MenuItem, Input, Checkbox, ListItemText, Chip, Grid } from '@material-ui/core';
@@ -6,15 +6,14 @@ import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 import SearchIcon from '@material-ui/icons/Search';
 import { formatDate } from '@shared';
 import clsx from 'clsx';
-import DateFnsUtils from '@date-io/date-fns';
-import {
-  MuiPickersUtilsProvider,
-  KeyboardDatePicker,
-} from '@material-ui/pickers';
-import moment from "moment";
 import { mapperBlinkStatus } from '@shared/keyword'
+import { DateRangePicker } from 'react-date-range';
+import { subMonths, addDays, subDays } from 'date-fns';
 
 import QueueListTable from './QueueListTable';
+import "react-date-range/dist/styles.css"; // main css file
+import "react-date-range/dist/theme/default.css"; // theme css file
+
 const useStyles = makeStyles((theme) => ({
   headerPopup: {
     borderBottom: '1px solid #8A97A3',
@@ -93,24 +92,8 @@ const useStyles = makeStyles((theme) => ({
   },
   menuItemSelected: {
     backgroundColor: '#FDF2F2 !important',
-  },
-  grid: {
-    '& .MuiGrid-grid-xs-4': {
-      flexBasis: '30%',
-      maxWidth: '30%'
-    },
-    '& .MuiGrid-grid-xs-2': {
-      flexBasis: '16%',
-      maxWidth: '16%'
-    },
-    '& .MuiGrid-grid-xs-1': {
-      flexBasis: '13%',
-      maxWidth: '13%'
-    }
   }
 }));
-
-const WEEK_NUMBER = 7;
 
 const QueueList = () => {
   return (
@@ -123,19 +106,16 @@ const QueueList = () => {
 const blStatusOption = Object.values(mapperBlinkStatus);
 
 const SearchLayout = (props) => {
+  const end = new Date();
+  const start = subMonths(end, 1);
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [state, setState] = useState({ bookingNo: '', from: '', to: '', blStatus: Object.keys(mapperBlinkStatus), isSelectedAll: false });
+  const [state, setState] = useState({ bookingNo: '', from: start, to: end, blStatus: Object.keys(mapperBlinkStatus), isSelectedAll: false });
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
+  const [startingDate, setStartingDate] = useState('');
   const [selectedStatus, setSelectedStatus] = useState([...blStatusOption, 'All']);
-
-  useEffect(() => {
-    let currentDate = new Date();
-    let sevenDayBefore = formatDate(currentDate.setDate(currentDate.getDate() - WEEK_NUMBER), 'YYYY-MM-DD');
-    setState({ ...state, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD') })
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD') }));
-  }, [])
-
+  const [isPickerOpen, setPickerOpen] = useState(false);
+  const pickerRef = useRef(null);
 
   const handleSelectStatus = (event) => {
     let values = event.target.value;
@@ -172,18 +152,50 @@ const SearchLayout = (props) => {
   }
 
   const handleReset = (e) => {
-    let currentDate = new Date();
-    let sevenDayBefore = formatDate(currentDate.setDate(currentDate.getDate() - WEEK_NUMBER), 'YYYY-MM-DD');
-    let query = { bookingNo: '', currentPageNumber: 1, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD'), blStatus: Object.keys(mapperBlinkStatus), sortField: '' };
+    let query = { bookingNo: '', currentPageNumber: 1, from: start, to: end, blStatus: Object.keys(mapperBlinkStatus), sortField: '' };
 
-    setState({ ...query, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD') })
+    setState({ ...query, from: start, to: end });
     setSelectedStatus([...blStatusOption, 'All']);
     dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...query }));
   }
 
+  const handleClickOutside = (event) => {
+    if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+      setPickerOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleDateChange = (ranges) => {
+    const { startDate, endDate } = ranges.selection;
+    const maxEndDate = addDays(startDate, 30);
+    const minStartDate = subDays(endDate, 30);
+    if (startDate.getTime() === endDate.getTime()) setStartingDate(endDate);
+    // If the selected end date is beyond the maximum, adjust it
+    if (startDate < startingDate) {
+      handleChange({
+        from: startDate < minStartDate ? minStartDate : startDate,
+        to: endDate
+      });
+    }
+    else {
+      handleChange({
+        from: startDate,
+        to: endDate > maxEndDate ? maxEndDate : endDate
+      });
+    }
+  }
+
   return (
     <Paper className={classes.paper}>
-      <Grid container spacing={1} className={classes.grid}>
+      <Grid container spacing={1}>
         {/* Booking Number */}
         <Grid item xs={4}>
           <FormControl fullWidth variant='outlined'>
@@ -206,37 +218,35 @@ const SearchLayout = (props) => {
         {/* From */}
         <Grid item xs={2}>
           <FormControl fullWidth variant='outlined'>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                label="From"
-                disableToolbar
-                variant="inline"
-                format="MMM - dd - yyyy"
-                value={state.from}
-                onChange={(date) => handleChange({ from: moment(date).format("YYYY-MM-DD") })}
-              />
-            </MuiPickersUtilsProvider>
-          </FormControl>
-        </Grid>
-        {/* To */}
-        <Grid item xs={2}>
-          <FormControl fullWidth variant='outlined'>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                label="To"
-                disableToolbar
-                variant="inline"
-                format="MMM - dd - yyyy"
-                value={state.to}
-                onChange={(date) => handleChange({ to: moment(date).format("YYYY-MM-DD") })}
-              />
-            </MuiPickersUtilsProvider>
+            <InputLabel>
+              <span>From - To</span>
+            </InputLabel>
+            <OutlinedInput
+              value={`${formatDate(state.from, 'DD/MM/YYYY')} - ${formatDate(state.to, 'DD/MM/YYYY')}`}
+              onClick={() => setPickerOpen(true)}
+              inputProps={{
+                readOnly: true
+              }}
+              labelWidth={65}
+            />
+            {isPickerOpen &&
+              <div ref={pickerRef} >
+                <DateRangePicker
+                  ranges={[
+                    {
+                      startDate: state.from,
+                      endDate: state.to,
+                      key: 'selection',
+                    }
+                  ]}
+                  onChange={handleDateChange}
+                />
+              </div>
+            }
           </FormControl>
         </Grid>
         {/* BL Status */}
-        <Grid item xs={3}>
+        <Grid item xs={4}>
           <FormControl fullWidth variant='outlined'>
             <InputLabel htmlFor='selected-status'>BLink Status</InputLabel>
             <OutlinedInput
@@ -272,11 +282,11 @@ const SearchLayout = (props) => {
                   ))}
                 </Select>
               }
-              labelWidth={60}
+              labelWidth={80}
             />
           </FormControl>
         </Grid>
-        <Grid item xs={1} style={{ margin: 'auto' }}>
+        <Grid item xs={2} style={{ margin: 'auto' }}>
           <Button
             className={clsx(classes.btn, classes.btnSearch)}
             onClick={handleSearch}>
