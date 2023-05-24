@@ -6,7 +6,8 @@ import {
   CONTAINER_LIST,
   DATED,
   DATE_CARGO,
-  DATE_LADEN
+  DATE_LADEN,
+  OTHERS
 } from '@shared/keyword';
 
 export const combineCDCM = (metadataFields) => {
@@ -46,11 +47,15 @@ export const filterMetadata = (data) => {
   })
   data['inqType'].forEach(({ id, name, field }) => {
     dict['inq_type'][name] = id;
-    dict['inq_type_options'].push({
-      label: name,
-      value: id,
-      field
-    });
+    // Check if inq type has template 
+    const filterInqType = data.template.filter(({ type }) => type === id)
+    if (name === OTHERS || filterInqType.some(({ content }) => content.length > 0)) {
+      dict['inq_type_options'].push({
+        label: name,
+        value: id,
+        field
+      });
+    }
   })
   data['ansType'].forEach(({ id, name }) => {
     dict['ans_type'][name] = id;
