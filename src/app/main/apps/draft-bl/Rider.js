@@ -53,12 +53,12 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage }) =>
       let data = {
         mark: getValueField(SHIPPING_MARK)
           .split("\n")
-          .map(line => lineBreakAtBoundary(line, MAX_CHARS.mark))[0].split("\n"),
+          .map(line => lineBreakAtBoundary(line, MAX_CHARS.mark)),
         package: `${drfMD[TOTAL_PACKAGE]}\n${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`
           .split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)),
         description: getValueField(DESCRIPTION_OF_GOODS)
           .split("\n")
-          .map(line => lineBreakAtBoundary(line, MAX_CHARS.description))[0].split("\n")
+          .map(line => lineBreakAtBoundary(line, MAX_CHARS.description))
       };
 
       ['mark', 'package', 'description'].forEach(key => {
