@@ -758,7 +758,7 @@ const AttachmentList = (props) => {
                             }}
                             options={fieldType}
                             maxMenuHeight={200}
-                            menuPosition={'fixed'}
+                            // menuPosition={'fixed'}
                             menuShouldBlockScroll={true}
                           />
                         </div>
