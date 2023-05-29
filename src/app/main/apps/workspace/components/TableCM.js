@@ -210,9 +210,11 @@ const TableCM = (props) => {
 
   const onMouseLeave = (e) => setIsHovering(false);
 
-  const onClick = (e) => {
-    if (!isEmpty) {
-      const currentInq = inquiries.find((q) => q.field === id);
+  const onClick = (e, id) => {
+    e.stopPropagation()
+    // Check field is empty , id can be either Container Manifest or DoG
+    const currentInq = inquiries.find((q) => q.field === id);
+    if (currentInq) {
       dispatch(InquiryActions.setOneInq(currentInq));
     } else if (allowAddInquiry) {
       dispatch(InquiryActions.addQuestion(id));
@@ -318,7 +320,7 @@ const TableCM = (props) => {
       )}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onClick={onClick}>
+      onClick={(e) => onClick(e, id)}>
       <Grid style={{ height: 20, padding: '5px 5px 0 5px', textAlign: 'right' }}>
         {checkDisplayIcon()}
         {isHovering && allowAddInquiry && isEmpty && (
@@ -367,7 +369,7 @@ const TableCM = (props) => {
                 {`${NumberFormat(drfMD[TOTAL_PACKAGE], 0)} ${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`}
               </BLField>
             </Grid>
-            <Grid item xs={4}>
+            <Grid onClick={(e) => onClick(e, getField(DESCRIPTION_OF_GOODS))} item xs={4}>
               <BLField multiline={true}>{getValueField(DESCRIPTION_OF_GOODS)}</BLField>
             </Grid>
             <Grid item xs={2}>
