@@ -2315,9 +2315,18 @@ const InquiryViewer = (props) => {
   const renderContent = (content) => {
     let result = content || '';
     if (result && isDateTime && ['AME_DRF', 'AME_SENT', 'AME_ORG', 'REOPEN_Q', 'REOPEN_A', 'COMPL', 'RESOLVED', 'UPLOADED'].includes(question.state)) {
-      result = formatDate(result, 'DD MMM YYYY')
+      result = formatDate(result, 'DD MMM YYYY');
     }
     return result;
+  }
+
+  const getNewValueDiffViewer = (content) => {
+    if (content !== null && isJsonText(content)) {
+      const { name, address } = JSON.parse(content);
+      if (name !== NO_CONTENT_AMENDMENT || address) return `${name}\n${address}`;
+      else return '';
+    }
+    return `${renderContent(content)}` === NO_CONTENT_AMENDMENT ? '' : `${renderContent(content)}`;
   }
 
   // Separate Shipper/Consignee/Notify
@@ -2660,38 +2669,36 @@ const InquiryViewer = (props) => {
                     disableInput={disableCDCMInquiry}
                   />
               ) :
-              (!['AME_DRF','AME_SENT','RESOLVED','COMPL'].includes(question.state) ?
-                <Typography
-                  // className={viewDropDown !== question.id ? classes.hideText : ''}
-                  variant="h5"
-                  id={question.id}
-                  style={{
-                    wordBreak: 'break-word',
-                    fontFamily: 'Montserrat',
-                    fontSize: 15,
-                    fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(question.state) && question.process === 'pending') ||
-                      (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
-                    color: '#132535',
-                    whiteSpace: 'pre-wrap'
-                  }}>
-                  {/* Check is amendment JSON */}
-                  {((question.content !== null) && isJsonText(question.content)) ?
-                    `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
-                    `${renderContent(question.content)}`
-                  }
-                </Typography> :
-                <ReactDiffViewer
-                  oldValue={orgContent[question.field]}
-                  newValue={((question.content !== null) && isJsonText(question.content)) ?
-                    `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
-                    `${renderContent(question.content)}`}
-                  splitView={false}
-                  hideLineNumbers
-                  showDiffOnly={false}
-                  styles={{ contentText: { fontFamily: 'Montserrat' } }}
-                  compareMethod={DiffMethod.WORDS}
-                />
-              )
+                (!['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL'].includes(question.state) ?
+                  <Typography
+                    // className={viewDropDown !== question.id ? classes.hideText : ''}
+                    variant="h5"
+                    id={question.id}
+                    style={{
+                      wordBreak: 'break-word',
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                      fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(question.state) && question.process === 'pending') ||
+                        (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
+                      color: '#132535',
+                      whiteSpace: 'pre-wrap'
+                    }}>
+                    {/* Check is amendment JSON */}
+                    {((question.content !== null) && isJsonText(question.content)) ?
+                      `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
+                      `${renderContent(question.content)}`
+                    }
+                  </Typography> :
+                  <ReactDiffViewer
+                    oldValue={renderContent(orgContent[question.field])}
+                    newValue={getNewValueDiffViewer(question.content)}
+                    splitView={false}
+                    hideLineNumbers
+                    showDiffOnly={false}
+                    styles={{ contentText: { fontFamily: 'Montserrat' } }}
+                    compareMethod={DiffMethod.WORDS}
+                  />
+                )
             }
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
@@ -2733,7 +2740,7 @@ const InquiryViewer = (props) => {
                 ![
                   'COMPL', 'REOPEN_A', 'REOPEN_Q', 'UPLOADED', ...(((user.role === 'Admin' || user.role === 'Guest') && !disableCDCMInquiry) ? [] : ['OPEN', 'INQ_SENT'])
                 ].includes(question.state)
-                  || (user.role === 'Guest' && ['INQ_SENT'].includes(question.state))
+                || (user.role === 'Guest' && ['INQ_SENT'].includes(question.state))
               )
               && containerCheck.includes(question.field)
               && (
@@ -2745,7 +2752,6 @@ const InquiryViewer = (props) => {
                   disableInput={disableCDCMInquiry}
                 />
               )}
-            
             <>
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={6}>
@@ -2804,7 +2810,7 @@ const InquiryViewer = (props) => {
                     onClick={() => handleViewMore(question.id)}>
                     {viewDropDown === question.id && ( // TODO
                       <>
-                            Show Less
+                        Show Less
                         <ArrowDropUp />
                       </>
                     )}
