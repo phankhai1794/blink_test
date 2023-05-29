@@ -1,18 +1,32 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
-import { Button, FormControl, InputLabel, OutlinedInput, InputAdornment, Paper, Select, MenuItem, Input, Checkbox, ListItemText, Chip, Grid } from '@material-ui/core';
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  InputAdornment,
+  Paper,
+  Select,
+  MenuItem,
+  Input,
+  Checkbox,
+  ListItemText,
+  Chip,
+  Grid
+} from '@material-ui/core';
 import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 import SearchIcon from '@material-ui/icons/Search';
 import { formatDate } from '@shared';
 import clsx from 'clsx';
-import { mapperBlinkStatus } from '@shared/keyword'
+import { mapperBlinkStatus } from '@shared/keyword';
 import { DateRangePicker } from 'react-date-range';
 import { subMonths, addDays, subDays } from 'date-fns';
 
 import QueueListTable from './QueueListTable';
-import "react-date-range/dist/styles.css"; // main css file
-import "react-date-range/dist/theme/default.css"; // theme css file
+import 'react-date-range/dist/styles.css'; // main css file
+import 'react-date-range/dist/theme/default.css'; // theme css file
 
 const useStyles = makeStyles((theme) => ({
   headerPopup: {
@@ -21,8 +35,8 @@ const useStyles = makeStyles((theme) => ({
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      fontFamily: 'Montserrat',
-    },
+      fontFamily: 'Montserrat'
+    }
   },
   bodyPopup: {
     backgroundColor: '#FFF9F9'
@@ -40,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: 'Montserrat'
   },
   closeBtn: {
-    cursor: 'pointer',
+    cursor: 'pointer'
   },
   popupContent: {
     '& .MuiDialog-paper': {
@@ -54,20 +68,20 @@ const useStyles = makeStyles((theme) => ({
     padding: '24px',
     '& span': {
       fontFamily: 'Montserrat',
-      fontSize: '13px',
+      fontSize: '13px'
     },
     '& input': {
       fontFamily: 'Montserrat',
-      fontSize: '14px',
-    },
+      fontSize: '14px'
+    }
   },
   searchBox: {
-    height: '40px',
+    height: '40px'
   },
   btnReset: {
     textTransform: 'none',
     fontFamily: 'Montserrat',
-    color: '#BD0F72',
+    color: '#BD0F72'
   },
   selectStatus: {
     // minWidth: '285px',
@@ -83,15 +97,15 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: '#E2E6EA',
     borderRadius: '4px',
     height: '24px',
-    margin: 2,
+    margin: 2
   },
   menuItem: {
     '&:hover': {
-      backgroundColor: '#FDF2F2',
-    },
+      backgroundColor: '#FDF2F2'
+    }
   },
   menuItemSelected: {
-    backgroundColor: '#FDF2F2 !important',
+    backgroundColor: '#FDF2F2 !important'
   }
 }));
 
@@ -110,7 +124,13 @@ const SearchLayout = (props) => {
   const start = subMonths(end, 1);
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [state, setState] = useState({ bookingNo: '', from: start, to: end, blStatus: Object.keys(mapperBlinkStatus), isSelectedAll: false });
+  const initialState = {
+    bookingNo: '',
+    from: start,
+    to: end,
+    blStatus: Object.keys(mapperBlinkStatus)
+  };
+  const [state, setState] = useState(initialState);
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
   const [startingDate, setStartingDate] = useState('');
   const [selectedStatus, setSelectedStatus] = useState([...blStatusOption, 'All']);
@@ -120,28 +140,30 @@ const SearchLayout = (props) => {
   const handleSelectStatus = (event) => {
     let values = event.target.value;
     const arrStatus = [];
-    if ((values.indexOf('All') !== -1) && (selectedStatus.indexOf('All') === -1)) {
+    if (values.indexOf('All') !== -1 && selectedStatus.indexOf('All') === -1) {
       setSelectedStatus([...blStatusOption, 'All']);
-      setState({ ...state, blStatus: Object.keys(mapperBlinkStatus) })
-    } else if ((values.indexOf('All') === -1) && (selectedStatus.indexOf('All') !== -1)) {
+      setState({ ...state, blStatus: Object.keys(mapperBlinkStatus) });
+    } else if (values.indexOf('All') === -1 && selectedStatus.indexOf('All') !== -1) {
       setSelectedStatus([]);
-      setState({ ...state, blStatus: '' })
+      setState({ ...state, blStatus: '' });
     } else {
       const arrSelected = [];
-      values.forEach(item => {
+      values.forEach((item) => {
         if (item !== 'All') {
-          arrStatus.push(Object.keys(mapperBlinkStatus).find(key => mapperBlinkStatus[key] === item));
+          arrStatus.push(
+            Object.keys(mapperBlinkStatus).find((key) => mapperBlinkStatus[key] === item)
+          );
           arrSelected.push(item);
         }
       });
       setSelectedStatus(arrSelected);
-      setState({ ...state, blStatus: arrStatus })
+      setState({ ...state, blStatus: arrStatus });
     }
   };
 
   const handleChange = (query) => {
     setState({ ...state, ...query });
-  }
+  };
 
   const handleSearch = () => {
     let blStatus = state.blStatus;
@@ -149,15 +171,14 @@ const SearchLayout = (props) => {
       blStatus = blStatus.splice(blStatus.indexOf(), 1);
     }
     dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...state }));
-  }
+  };
 
-  const handleReset = (e) => {
-    let query = { bookingNo: '', currentPageNumber: 1, from: start, to: end, blStatus: Object.keys(mapperBlinkStatus), sortField: '' };
-
-    setState({ ...query, from: start, to: end });
+  const handleReset = () => {
+    const query = { ...initialState, currentPageNumber: 1, sortField: ['lastUpdated', 'DESC'] };
+    setState(initialState);
     setSelectedStatus([...blStatusOption, 'All']);
     dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...query }));
-  }
+  };
 
   const handleClickOutside = (event) => {
     if (pickerRef.current && !pickerRef.current.contains(event.target)) {
@@ -184,21 +205,20 @@ const SearchLayout = (props) => {
         from: startDate < minStartDate ? minStartDate : startDate,
         to: endDate
       });
-    }
-    else {
+    } else {
       handleChange({
         from: startDate,
         to: endDate > maxEndDate ? maxEndDate : endDate
       });
     }
-  }
+  };
 
   return (
     <Paper className={classes.paper}>
       <Grid container spacing={1}>
         {/* Booking Number */}
         <Grid item xs={4}>
-          <FormControl fullWidth variant='outlined'>
+          <FormControl fullWidth variant="outlined">
             <InputLabel>
               <span>Booking Number</span>
             </InputLabel>
@@ -206,49 +226,56 @@ const SearchLayout = (props) => {
               value={state.bookingNo}
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
-                  handleSearch()
+                  handleSearch();
                 }
               }}
               onChange={(e) => handleChange({ bookingNo: e.target.value })}
-              startAdornment={<InputAdornment className={classes.searchBox} position='start' >{''}</InputAdornment>}
+              startAdornment={
+                <InputAdornment className={classes.searchBox} position="start">
+                  {''}
+                </InputAdornment>
+              }
               labelWidth={110}
             />
           </FormControl>
         </Grid>
         {/* From */}
         <Grid item xs={2}>
-          <FormControl fullWidth variant='outlined'>
+          <FormControl fullWidth variant="outlined">
             <InputLabel>
               <span>From - To</span>
             </InputLabel>
             <OutlinedInput
-              value={`${formatDate(state.from, 'DD/MM/YYYY')} - ${formatDate(state.to, 'DD/MM/YYYY')}`}
+              value={`${formatDate(state.from, 'DD/MM/YYYY')} - ${formatDate(
+                state.to,
+                'DD/MM/YYYY'
+              )}`}
               onClick={() => setPickerOpen(true)}
               inputProps={{
                 readOnly: true
               }}
               labelWidth={65}
             />
-            {isPickerOpen &&
-              <div ref={pickerRef} >
+            {isPickerOpen && (
+              <div ref={pickerRef}>
                 <DateRangePicker
                   ranges={[
                     {
                       startDate: state.from,
                       endDate: state.to,
-                      key: 'selection',
+                      key: 'selection'
                     }
                   ]}
                   onChange={handleDateChange}
                 />
               </div>
-            }
+            )}
           </FormControl>
         </Grid>
         {/* BL Status */}
         <Grid item xs={4}>
-          <FormControl fullWidth variant='outlined'>
-            <InputLabel htmlFor='selected-status'>BLink Status</InputLabel>
+          <FormControl fullWidth variant="outlined">
+            <InputLabel htmlFor="selected-status">BLink Status</InputLabel>
             <OutlinedInput
               onChange={(e) => handleChange({ blStatus: e.target.value })}
               inputProps={{
@@ -261,22 +288,30 @@ const SearchLayout = (props) => {
                   value={selectedStatus}
                   onChange={handleSelectStatus}
                   input={<Input style={{ width: '100%' }} />}
-                  renderValue={(selected) =>
+                  renderValue={(selected) => (
                     <div className={classes.chips}>
-                      {selected.map((value) => (
-                        (value !== 'All') && <Chip key={value} label={value} className={classes.chip} />
-                      ))}
-                    </div>}
-                  disableUnderline
-                >
-                  <MenuItem key={'All'} value={'All'} classes={{ selected: classes.menuItemSelected }}>
-                    {/* <Checkbox checked={selectedStatus.indexOf('All') > -1} onChange={(_e, checked) => handleCheckAll(checked)} /> */}
-                    <Checkbox checked={selectedStatus.indexOf('All') > -1} color='primary' />
+                      {selected.map(
+                        (value) =>
+                          value !== 'All' && (
+                            <Chip key={value} label={value} className={classes.chip} />
+                          )
+                      )}
+                    </div>
+                  )}
+                  disableUnderline>
+                  <MenuItem
+                    key={'All'}
+                    value={'All'}
+                    classes={{ selected: classes.menuItemSelected }}>
+                    <Checkbox checked={selectedStatus.indexOf('All') > -1} color="primary" />
                     <ListItemText primary={'All'} />
                   </MenuItem>
                   {blStatusOption.map((status) => (
-                    <MenuItem key={status} classes={{ selected: classes.menuItemSelected }} value={status}>
-                      <Checkbox checked={selectedStatus.indexOf(status) > -1} color='primary' />
+                    <MenuItem
+                      key={status}
+                      classes={{ selected: classes.menuItemSelected }}
+                      value={status}>
+                      <Checkbox checked={selectedStatus.indexOf(status) > -1} color="primary" />
                       <ListItemText primary={status} />
                     </MenuItem>
                   ))}
@@ -287,25 +322,23 @@ const SearchLayout = (props) => {
           </FormControl>
         </Grid>
         <Grid item xs={2} style={{ margin: 'auto' }}>
-          <Button
-            className={clsx(classes.btn, classes.btnSearch)}
-            onClick={handleSearch}>
+          <Button className={clsx(classes.btn, classes.btnSearch)} onClick={handleSearch}>
             <SearchIcon />
             <span>Search</span>
           </Button>
           <Button
             className={classes.btnReset}
-            variant='text'
+            variant="text"
             style={{ backgroundColor: 'transparent' }}
             onClick={handleReset}>
-            <span className='underline'>
+            <span className="underline">
               <span>Reset</span>
             </span>
           </Button>
         </Grid>
       </Grid>
     </Paper>
-  )
-}
+  );
+};
 
 export default QueueList;

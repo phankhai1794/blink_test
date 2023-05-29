@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import NavigateBefore from '@material-ui/icons/NavigateBefore';
 import NavigateNext from '@material-ui/icons/NavigateNext';
@@ -18,63 +18,52 @@ const range = (start, end) => {
 };
 
 const usePagination = (
-  totalCount,
-  pageSize,
-  siblingCount = 1,
+  totalPageCount,
   currentPage
 ) => {
+  const paginationRange = useMemo(() => {
+    /*
+      If the number of pages is less than the page numbers we want to show in our
+      paginationComponent, we return the range [1..totalPageCount]
+    */
+    if (totalPageCount < 10) {
+      return range(1, totalPageCount);
+    }
 
-  const totalPageCount = Math.ceil(totalCount / pageSize);
+    /*
+      We do not want to show dots if there is only one position left 
+      after/before the left/right page count as that would lead to a change if our Pagination
+      component size which we do not want
+    */
+    const shouldShowLeftDots = currentPage - 1 >= 5;
+    const shouldShowRightDots = currentPage < totalPageCount - 4;
 
-  // Pages count is determined as siblingCount + firstPage + lastPage + currentPage + 2*DOTS
-  const totalPageNumbers = siblingCount + 5;
+    const firstPageIndex = 1;
+    const lastPageIndex = totalPageCount;
 
-  /*
-    If the number of pages is less than the page numbers we want to show in our
-    paginationComponent, we return the range [1..totalPageCount]
-  */
-  if (totalPageNumbers >= totalPageCount) {
-    return range(1, totalPageCount);
-  }
+    if (!shouldShowLeftDots && shouldShowRightDots) {
+      let leftItemCount = 6;
+      let leftRange = range(1, leftItemCount);
 
-  const leftSiblingIndex = Math.max(currentPage - siblingCount, 1);
-  const rightSiblingIndex = Math.min(
-    currentPage + siblingCount,
-    totalPageCount
-  );
+      return [...leftRange, DOTS, totalPageCount];
+    }
 
-  /*
-    We do not want to show dots if there is only one position left 
-    after/before the left/right page count as that would lead to a change if our Pagination
-    component size which we do not want
-  */
-  const shouldShowLeftDots = leftSiblingIndex > 2;
-  const shouldShowRightDots = rightSiblingIndex < totalPageCount - 2;
+    if (shouldShowLeftDots && !shouldShowRightDots) {
+      let rightItemCount = 5;
+      let rightRange = range(
+        totalPageCount - rightItemCount,
+        totalPageCount
+      );
+      return [firstPageIndex, DOTS, ...rightRange];
+    }
 
-  const firstPageIndex = 1;
-  const lastPageIndex = totalPageCount;
+    if (shouldShowLeftDots && shouldShowRightDots) {
+      let middleRange = range(currentPage - 2, currentPage + 2);
+      return [firstPageIndex, DOTS, ...middleRange, DOTS, lastPageIndex];
+    }
+  }, [totalPageCount, currentPage]);
 
-  if (!shouldShowLeftDots && shouldShowRightDots) {
-    let leftItemCount = 3 + 2 * siblingCount;
-    let leftRange = range(1, leftItemCount);
-
-    return [...leftRange, DOTS, totalPageCount];
-  }
-
-  if (shouldShowLeftDots && !shouldShowRightDots) {
-    let rightItemCount = 3 + 2 * siblingCount;
-    let rightRange = range(
-      totalPageCount - rightItemCount + 1,
-      totalPageCount
-    );
-    return [firstPageIndex, DOTS, ...rightRange];
-  }
-
-  if (shouldShowLeftDots && shouldShowRightDots) {
-    let middleRange = range(leftSiblingIndex, rightSiblingIndex);
-    return [firstPageIndex, DOTS, ...middleRange, DOTS, lastPageIndex];
-  }
-
+  return paginationRange;
 };
 const Pagination = (props) => {
   const { currentNumber, totalPage, totalBkgNo, query, searchQueueQuery } = props;
@@ -105,13 +94,13 @@ const Pagination = (props) => {
     }
   }
 
-  const paginationRange = usePagination(totalBkgNo, query.pageSize, 2, state.currentNumber);
+  const paginationRange = usePagination(state.totalPageNumber, state.currentNumber);
 
   return (
     <>
       {/* <a key={'start'} onClick={() => handleClickStart()} style={{ fontSize: '17px' }}>&laquo;</a> */}
       <a key={'previous'} onClick={() => handlePrevious()}><NavigateBefore style={{ fontSize: '15px' }} /></a>
-      {paginationRange.map(pageNumber => {
+      {paginationRange?.map(pageNumber => {
         if (pageNumber === DOTS) {
           return <div style={{ margin: 'auto 0', textAlign: 'center', width: 40 }}>&#8230;</div>;
         }

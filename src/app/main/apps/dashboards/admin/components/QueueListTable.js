@@ -207,6 +207,15 @@ const StickyTableCell = withStyles((theme) => ({
   }
 }))(TableCell);
 
+const sortDates = (array) => {
+  return array.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+}
+
+const isDateStringValid = (str) => {
+  const date = new Date(str);
+  return isNaN(date) ? str : formatDate(date, 'DD/MM/YYYY');
+};
+
 const Row = (props) => {
   const { row, index, open, setOpen } = props;
   const classes = useStyles();
@@ -336,7 +345,11 @@ const Row = (props) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {(tab ? [...Apending, ...Areply, ...Aresolved, ...Auploaded] : [...Ipending, ...Ireply, ...Iresolved, ...Iuploaded]).map((row, index) => (
+                {sortDates(
+                  tab
+                    ? [...Apending, ...Areply, ...Aresolved, ...Auploaded]
+                    : [...Ipending, ...Ireply, ...Iresolved, ...Iuploaded]
+                ).map((row, index) => (
                   <TableRow style={{ height: 50 }} key={index}>
                     <TableCell component="th" scope="row">
                       {index + 1}
@@ -357,7 +370,7 @@ const Row = (props) => {
                       onMouseEnter={checkPopover}
                       onMouseLeave={closePopover}
                     >
-                      {row.content}
+                      {isDateStringValid(row.content)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -391,7 +404,7 @@ const QueueListTable = () => {
           bkgNos: searchQueueQuery.bookingNo.split(',').filter(bkg => bkg).map(bkg => bkg.trim()),
           blinkStatus: searchQueueQuery.blStatus
         },
-        sort: searchQueueQuery.sortField || []
+        sort: searchQueueQuery.sortField
       }).then(({ total, data }) =>
         setState({ ...state, queueListBl: data, totalBkgNo: total })
       )
