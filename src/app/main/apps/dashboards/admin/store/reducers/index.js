@@ -15,7 +15,7 @@ const initialState = {
     currentPageNumber: 1,
     pageSize: 10,
     totalPageNumber: 5,
-    sortField: ''
+    sortField: ['lastUpdated', 'DESC']
   }
 }
 
