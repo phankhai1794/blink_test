@@ -29,8 +29,8 @@ const lightThemeColor = '#FDF2F2';
 const whiteColor = '#FFFFFF';
 const blackColor = '#132535';
 const drfViews = [
-  { label: "M&D View", value: "MD" },
-  { label: "C/M View", value: "CM" }
+  { label: "Mark and Description View", value: "MD" },
+  { label: "Container Manifest View", value: "CM" }
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -95,7 +95,7 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   selectView: {
-    width: 124,
+    // width: 124,
     '& fieldset': {
       border: `1px solid ${themeColor} !important`,
       borderRadius: '8px'
