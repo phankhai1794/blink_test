@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Tooltip, Chip } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Tooltip, Chip, Icon } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { getQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
@@ -148,6 +148,10 @@ const useStyles = makeStyles({
   },
   iconColor: {
     color: '#FFFF'
+  },
+  resolvedColor: {
+    backgroundColor: '#EBF7F2',
+    color: '#36B37E',
   }
 });
 
@@ -160,7 +164,14 @@ const QueueListTable = () => {
 
   useEffect(() => {
     const handleGetQueueList = async (search) => {
-      const { total, dataResult } = await getQueueList(search.currentPageNumber, search.pageSize, `bkgNo=${search.bookingNo}&startDate=${search.from}&endDate=${search.to}&status=${search.blStatus}&field=${search.sortField}`);
+      const query = {
+        bkgNo: search.bookingNo ? search.bookingNo.split(',').map(bkg => bkg.trim()) : [],
+        startDate: search.from,
+        endDate: search.to,
+        status: search.blStatus,
+        field: search.sortField
+      };
+      const { total, dataResult } = await getQueueList(search.currentPageNumber, search.pageSize, query);
       setState({ ...state, queueListBl: dataResult, totalBkgNo: total })
     }
     handleGetQueueList(searchQueueQuery);
@@ -302,9 +313,32 @@ const QueueListTable = () => {
                     </div>
                   </TableCell>
                   <TableCell >
-                    {row?.countAll ?
-                      <span className={classes.labelResolved}>{`${row.countResolved}/${row.countAll} Resolved`}</span> : ''
-                    }
+                    <div className={classes.label}>
+                      {row.countPendingInq ?
+                        <Chip
+                          label={`${row.countInqResolved}/${row.countAllInq}`}
+                          className={clsx(classes.chip, classes.resolvedColor)}
+                          icon={
+                            <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
+                              help
+                            </Icon>
+                          }
+                        /> :
+                        null
+                      }
+                      {row.countPendingAme ?
+                        <Chip
+                          label={`${row.countAmeResolved}/${row.countAllAme}`}
+                          className={clsx(classes.chip, classes.resolvedColor)}
+                          icon={
+                            <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
+                              edit
+                            </Icon>
+                          }
+                        /> :
+                        null
+                      }
+                    </div>
                   </TableCell>
                   <TableCell />
                 </TableRow>
@@ -330,4 +364,3 @@ const QueueListTable = () => {
 }
 
 export default QueueListTable;
-
