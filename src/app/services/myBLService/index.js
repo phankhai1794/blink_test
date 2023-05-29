@@ -32,7 +32,7 @@ export async function validateTextInput(data) {
 }
 
 export async function getQueueList(page, size, search) {
-  const response = await axios().get(`${PATH}/queue/list/${page}/${size}/${search}`);
+  const response = await axios().post(`${PATH}/queue/list/${page}/${size}`, { search });
   return response.data;
 }
 
