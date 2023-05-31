@@ -304,6 +304,10 @@ const TableCM = (props) => {
 
   useEffect(() => {
     let defaultId = getField(CONTAINER_DETAIL);
+    if (inquiries && inquiries.length && user.role === 'Guest') {
+      const filterInq = inquiries.filter(inq => [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)].includes(inq.field) && inq.process === 'pending');
+      if (!filterInq.length) defaultId = getField(CONTAINER_MANIFEST);
+    }
     const descriptionId = getField(DESCRIPTION_OF_GOODS);
     if (drfView === 'MD' && inquiries.length && inquiries.filter(inq => inq.field === descriptionId).length) {
       defaultId = descriptionId;
