@@ -39,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
 const Inquiry = (props) => {
   const [receiver, setReceiver] = useState(props?.receiver);
   const dispatch = useDispatch();
+  const user = useSelector(({ user }) => user);
   const classes = useStyles();
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
@@ -65,10 +66,20 @@ const Inquiry = (props) => {
 
   useEffect(() => {
     let inquiriesSet = [...inquiries];
-    inquiriesSet = inquiriesSet.filter((q, index) => (q.field === currentField && q.process === 'pending')
+    inquiriesSet = inquiriesSet.filter((q) => (q.field === currentField && q.process === 'pending')
         || (q.process === 'draft'
             && ((containerCheck.includes(q.field) && containerCheck.includes(currentField)) || (q.field === currentField && !containerCheck.includes(q.field))))
     );
+    if (user.role === 'Admin') {
+      const filterInqDrf = inquiries.filter(inq =>
+        containerCheck.includes(inq.field) && inq.process === 'draft');
+      const filterInqPending = inquiries.filter(inq => containerCheck.includes(inq.field) && inq.process === 'pending');
+      if (filterInqDrf.length && !filterInqPending.length) {
+        inquiriesSet = inquiriesSet.filter((q) => (q.process === 'draft'
+            && q.field === currentField
+        ));
+      }
+    }
     setReceiver(null);
     const inqSort = inquiriesSet.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     inqSort.forEach(inq => {

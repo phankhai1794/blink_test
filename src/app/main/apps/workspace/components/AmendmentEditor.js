@@ -443,7 +443,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     if (containerCheck.includes(currentField)) getCurField = currentAmendField;
     const filterCurrentField = fieldType.find(f => f.value === getCurField);
     const findAme = inquiries.filter(({ field, process }) => field === currentField && process === 'draft');
-    if (findAme.length) {
+    if (findAme.length || !filterCurrentField) {
       setFieldValueSelect();
       setFieldValue();
       setValueSeparate();

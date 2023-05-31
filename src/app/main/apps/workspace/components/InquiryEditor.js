@@ -676,12 +676,11 @@ const InquiryEditor = (props) => {
             createdAt: new Date(),
           })
         }
+        if (containerCheck.includes(op.field)) {
+          contentTrim.field = containerCheck[0]
+        }
         return contentTrim;
       });
-      const contentCDCM = {
-        cdContent: { field: containerCheck[0], content: getDataCD },
-        cmContent: { field: containerCheck[1], content: getDataCM },
-      }
       axios
         .all(uploads.map((endpoint) => uploadFile(endpoint).catch((err) => handleError(dispatch, err))))
         .then((media) => {
