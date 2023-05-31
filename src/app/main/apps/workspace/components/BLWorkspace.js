@@ -346,10 +346,18 @@ const BLWorkspace = (props) => {
     else if (openPreviewListSubmit) return 'Preview List';
   }
 
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
   const popupOpen = (inquiry, curField) => {
     let labelInquiry = curField && curField.label;
     if (curField && ['containerDetail', 'containerManifest'].includes(curField.keyword)) {
       labelInquiry = 'Container Detail - Container Manifest';
+    }
+    let labelAmendment = '';
+    if (currentField) {
+      labelAmendment = metadata?.field_options.find((f) => f.value === currentField)?.label;
+      if (containerCheck.includes(currentField)) {
+        labelAmendment = 'Container Detail - Container Manifest';
+      }
     }
     switch (inquiry.field) {
     case 'INQUIRY_LIST':
@@ -421,7 +429,7 @@ const BLWorkspace = (props) => {
         nums: [],
         toggleForm: (status) => dispatch(FormActions.toggleCreateAmendment(status)),
         fabTitle: 'Amendment Form',
-        title: metadata?.field_options.find((f) => f.value === currentField)?.label,
+        title: labelAmendment,
         field: 'AMENDMENT_FORM',
         child: <AmendmentEditor getUpdatedAt={() => { }} />
       };

@@ -303,7 +303,11 @@ const TableCM = (props) => {
   }, [metadata, id, inquiries, listCommentDraft]);
 
   useEffect(() => {
+    console.log(inquiries)
     let defaultId = getField(CONTAINER_DETAIL);
+    // if (inquiries && inquiries.length) {
+    //
+    // }
     const descriptionId = getField(DESCRIPTION_OF_GOODS);
     if (drfView === 'MD' && inquiries.length && inquiries.filter(inq => inq.field === descriptionId).length) {
       defaultId = descriptionId;
