@@ -245,6 +245,18 @@ const InquiryEditor = (props) => {
     if (valueType?.value) {
       const filter = metadata.template.find(({ field, type }) => type === valueType.value && fieldValue.keyword === field);
       setTemplateList(filter?.content || []);
+      let filterField = metadata.inq_type_options.find(({ value }) => value === valueType.value).field;
+      filterField = metadata.field_options
+        .filter(({ value, display, keyword }) => (
+          display
+          && filterField.includes(value)
+          && metadata.template.some((temp) => (
+            temp.field === keyword
+            && temp.type === valueType.value
+            && temp.content[0]
+          ))
+        ));
+      setFieldType(filterField);
     }
 
     setPrevField(currentEditInq.field);
