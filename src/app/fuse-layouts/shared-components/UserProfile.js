@@ -54,7 +54,18 @@ function UserProfile(props) {
           alt="User photo">
           {!user.photoURL ? user.displayName.charAt(0).toUpperCase() : ''}
         </Avatar>
-        <Typography component="span" className="normal-case font-600 ml-8 flex">
+        <Typography
+          component="span"
+          className="normal-case font-600 ml-8 flex"
+          style={{
+            fontFamily: 'Montserrat',
+            fontStyle: 'normal',
+            fontWeight: 600,
+            fontSize: 14,
+            lineHeight: 17,
+            color: '#515E6A',
+          }}
+        >
           {user.displayName}
         </Typography>
         <Icon className="text-16 ml-4 hidden sm:flex" variant="action">

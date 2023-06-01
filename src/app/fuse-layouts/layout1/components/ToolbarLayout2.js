@@ -1,11 +1,11 @@
 import history from '@history';
 import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { FuseChipSelect } from '@fuse';
 import React, { useState } from 'react';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector } from 'react-redux';
-import { AppBar, Toolbar } from '@material-ui/core';
+import { AppBar, Toolbar, Avatar } from '@material-ui/core';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
   separator: {
@@ -14,10 +14,15 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.divider
   },
   fitAvatar: {
-    // zoom out to show full logo in avatar
+    // zoom out to show full logo
     '& > img': {
       objectFit: 'contain'
     }
+  },
+  logo: {
+    width: '105.81px',
+    height: 50,
+    borderRadius: 0
   },
 }));
 
@@ -46,38 +51,16 @@ function ToolbarLayout2(props) {
 
   return (
     <ThemeProvider theme={toolbarTheme}>
-      <AppBar id="fuse-toolbar" className="flex relative z-10" color="primary">
+      <AppBar id="fuse-toolbar" className="flex relative z-10" color="inherit">
         <Toolbar className="p-0" style={{ justifyContent: 'end' }}>
-          <div >
-            {/* <FuseChipSelect
-              customStyle={{
-                control: {
-                  minWidth: 250,
-                  borderRadius: 9,
-                  backgroundColor: 'white'
-                }
-              }}
-              value={country}
-              onChange={changeCountry}
-              placeholder="Select Country"
-              textFieldProps={{
-                variant: 'outlined'
-              }}
-              options={countries}
-              formatOptionLabel={(option) =>
-                <>
-                  <img
-                    loading="lazy"
-                    width="20"
-                    src={`https://flagcdn.com/w20/${option.value.toLowerCase()}.png`}
-                    srcSet={`https://flagcdn.com/w40/${option.value.toLowerCase()}.png 2x`}
-                    alt=""
-                  />
-                  <span style={{ marginLeft: "10px" }}>
-                    {option.label}
-                  </span>
-                </>}
-            /> */}
+          <div>
+            <div style={{ paddingLeft: '50px', position: 'absolute', left: 0, top: 6 }} className={classes.iconWrapper}>
+              <Avatar
+                src="assets/images/logos/one_ocean_network-logo.png"
+                className={clsx(classes.logo, classes.fitAvatar)}
+                alt="one-logo"
+              />
+            </div>
             <PermissionProvider
               action={PERMISSION.VIEW_SHOW_USER_MENU}
               extraCondition={!pathname.includes('/guest')}>
