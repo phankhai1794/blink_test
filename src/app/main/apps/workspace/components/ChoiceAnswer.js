@@ -29,7 +29,6 @@ const ChoiceAnswer = (props) => {
   
   const dispatch = useDispatch();
   const classes = useStyles();
-  const [otherIsSelected, setOtherIsSelected] = useState(false)
   const [otherOptionText, setOtherOptionText] = useState();
 
   const initSelectedChoice = () => {
@@ -56,7 +55,6 @@ const ChoiceAnswer = (props) => {
     const optionsInquires = [...questions];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     const isOther = question.answerObj[question.answerObj.length - 1].id === choice ? otherOptionText : null;
-    setOtherIsSelected(question.answerObj[question.answerObj.length - 1].id === choice)
     const selectedObj = {
       inquiry: question.id,
       answer: choice,
@@ -72,7 +70,6 @@ const ChoiceAnswer = (props) => {
 
   useEffect(() => {
     const lastChoice = question.answerObj[question.answerObj.length - 1].content
-    setOtherIsSelected(lastChoice !== 'Other')
     setOtherOptionText(lastChoice !== 'Other' ? lastChoice : null)
     if (allowUpdateChoiceAnswer) {
       setPermission(true);
@@ -126,7 +123,7 @@ const ChoiceAnswer = (props) => {
           }
           )}
         </RadioGroup>
-        {otherIsSelected && !disable &&
+        {selectedChoice === question.answerObj[question.answerObj.length - 1].id && !disable &&
           <TextField
             className={classes.input}
             fullWidth
