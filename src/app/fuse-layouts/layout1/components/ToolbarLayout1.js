@@ -12,8 +12,6 @@ import clsx from 'clsx';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppBar, Toolbar, Avatar, Badge, Button, Hidden, TextField, MenuItem } from '@material-ui/core';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-import DescriptionIcon from '@material-ui/icons/Description';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 import { loadComment } from 'app/services/inquiryService';
 import { getCommentDraftBl } from 'app/services/draftblService';
@@ -29,8 +27,8 @@ const lightThemeColor = '#FDF2F2';
 const whiteColor = '#FFFFFF';
 const blackColor = '#132535';
 const drfViews = [
-  { label: "Mark and Description View", value: "MD" },
-  { label: "Container Manifest View", value: "CM" }
+  { label: "Mark and Description", value: "MD" },
+  { label: "Container Manifest", value: "CM" }
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -67,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
   buttonSubmit: {
     padding: '10px 28.5px',
     color: whiteColor,
-    fontSize: 16,
+    fontSize: 14,
     borderRadius: 8,
     lineHeight: '20px',
     backgroundColor: themeColor,
@@ -121,7 +119,7 @@ const useStyles = makeStyles((theme) => ({
   menuItem: {
     background: whiteColor,
     color: blackColor,
-    fontSize: 15,
+    fontSize: 14,
     '&:hover': {
       background: `${lightThemeColor} !important`,
       color: themeColor,
@@ -131,8 +129,26 @@ const useStyles = makeStyles((theme) => ({
   menuItemSelected: {
     background: `${lightThemeColor} !important`,
     color: themeColor,
-    fontSize: 15,
-    fontWeight: 600
+    fontSize: 14,
+    fontWeight: 600,
+    fontFamily: 'Montserrat',
+  },
+  titleButton: {
+    position: 'relative',
+    fontFamily: 'Montserrat',
+    fontStyle: 'normal',
+    fontWeight: 600,
+    fontSize: 14,
+    lineHeight: 17,
+    color: '#515E6A',
+    left: 14
+  },
+  dratTypeText: {
+    fontFamily: 'Montserrat',
+    fontStyle: 'normal',
+    fontWeight: 600,
+    fontSize: 14,
+    left: 14
   }
 }));
 
@@ -152,6 +168,7 @@ function ToolbarLayout1(props) {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
   const drfView = useSelector(({ draftBL }) => draftBL.drfView);
+  const userType = useSelector(({ user }) => user.userType);
 
   const [open, setOpen] = useState(false);
   const [attachmentLength, setAttachmentLength] = useState(0);
@@ -394,6 +411,12 @@ function ToolbarLayout1(props) {
     setOpen(false);
   };
 
+  const showQueueList = () => {
+    userType === 'ADMIN' ?
+      window.open('/apps/admin') :
+      dispatch(InquiryActions.openQueueList(true));
+  }
+
   const confirmBlDraft = () => {
     if (inquiries.some((inq) => !['RESOLVED', 'UPLOADED', 'COMPL'].includes(inq.state))) {
       dispatch(AppActions.showMessage({ message: "It's unable to confirm BL at this time. There are still unresolved inquiries/amendments waiting for Offshore finalization", variant: 'warning' }));
@@ -437,15 +460,19 @@ function ToolbarLayout1(props) {
 
             <div className="flex flex-1" style={{ marginLeft: 35 }}>
               <div style={{ paddingRight: '32px' }} className={classes.iconWrapper}>
-                <Avatar
-                  src="assets/images/logos/one_ocean_network-logo.png"
-                  className={clsx(classes.logo, classes.fitAvatar)}
-                  alt="one-logo"
-                // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
-                //   component: Link,
-                //   to: '/'
-                // })}
-                />
+                <Button variant="text" size="medium">
+                  <Avatar
+                    src="assets/images/logos/one_ocean_network-logo.png"
+                    className={clsx(classes.logo, classes.fitAvatar)}
+                    alt="one-logo"
+                    onClick={() => showQueueList()}
+                  // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+                  //   component: Link,
+                  //   to: '/'
+                  // })}
+                  />
+                </Button>
+
               </div>
 
               <PermissionProvider
@@ -457,9 +484,9 @@ function ToolbarLayout1(props) {
                   className={clsx('h-64', classes.button)}
                   onClick={openAllInquiry}>
                   <Badge color="primary" badgeContent={inquiryLength}>
-                    <NotificationsIcon />
+                    <img src="assets/images/icons/inquiryIcon.svg" />
                   </Badge>
-                  <span className="pl-12">Inquiries List</span>
+                  <span className={classes.titleButton}>Inquiries List</span>
                 </Button>
               </PermissionProvider>
 
@@ -472,28 +499,33 @@ function ToolbarLayout1(props) {
                     className={clsx('h-64', classes.button)}
                     onClick={openAmendmentsList}>
                     <Badge color="primary" badgeContent={amendmentsLength}>
-                      <NotificationsIcon />
+                      <img src="assets/images/icons/amendIcon.svg" />
+                      <img src="assets/images/icons/penIcon.svg" style={{ position: 'absolute', bottom: 0, left: 8 }} />
                     </Badge>
-                    <span className="pl-12">Amendments List</span>
+                    <span className={classes.titleButton}>Amendments List</span>
                   </Button>
                 )}
 
               <PermissionProvider
                 action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
                 extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
-                <Button
-                  variant="text"
-                  size="medium"
-                  className={clsx('h-64', classes.button)}
-                  onClick={openAttachment}>
-                  <Badge color="primary" badgeContent={attachmentLength} id="no-att">
-                    <DescriptionIcon />
-                  </Badge>
-                  <span className="pl-12">Attachments List</span>
-                </Button>
+                {attachmentLength > 0 &&
+                  <Button
+                    variant="text"
+                    size="medium"
+                    className={clsx('h-64', classes.button)}
+                    onClick={openAttachment}>
+                    <Badge color="primary" badgeContent={attachmentLength} id="no-att">
+                      <img src="assets/images/icons/attachmentIcon.svg" />
+                    </Badge>
+                    <span className={classes.titleButton}>Attachments List</span>
+                  </Button>
+                }
+
               </PermissionProvider>
             </div>
 
+            <PreviewDraftBL />
             <div className="flex" style={{ marginRight: 35, alignItems: 'center' }}>
               <TextField
                 id="view"
@@ -517,14 +549,12 @@ function ToolbarLayout1(props) {
                     key={view.value}
                     value={view.value}
                     className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
-                    {view.label}
+                    <span className={classes.dratTypeText}>{view.label}</span>
                   </MenuItem>
                 ))}
               </TextField>
 
               <BtnQueueList />
-
-              <PreviewDraftBL />
 
               <PermissionProvider
                 action={PERMISSION.VIEW_EDIT_DRAFT_BL}
@@ -549,9 +579,9 @@ function ToolbarLayout1(props) {
                 <div>
                   <Button
                     style={{
-                      width: '120px',
-                      height: '30px',
-                      borderRadius: '20px'
+                      width: '100px',
+                      height: '40px',
+                      borderRadius: '8px'
                     }}
                     disabled={inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED', 'AME_SENT', 'ANS_SENT', 'REP_A_SENT'].includes(inq.state)).length === inquiries.length}
                     color="primary"
@@ -559,7 +589,8 @@ function ToolbarLayout1(props) {
                     size="medium"
                     className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
-                    <span className="pl-4">E-mail</span>
+                    <img src="assets/images/icons/email.svg" style={{ position: 'relative', right: 4 }} />
+                    <span>E-mail</span>
                   </Button>
                 </div>
               </PermissionProvider>
@@ -577,8 +608,10 @@ function ToolbarLayout1(props) {
                 <Button
                   variant="contained"
                   className={clsx(classes.button, classes.buttonSubmit)}
+                  style={{ width: 127 }}
                   disabled={!enableSubmitInq}
                   onClick={onSubmit}>
+                  <img src="assets/images/icons/submitIcon.svg" style={{ position: 'relative', right: 5 }} />
                   Submit
                 </Button>
               </PermissionProvider>

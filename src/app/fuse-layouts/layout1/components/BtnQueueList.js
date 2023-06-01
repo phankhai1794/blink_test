@@ -50,6 +50,7 @@ const BtnQueueList = () => {
               variant='contained'
               className={classes.btn}
               onClick={() => showQueueList()}
+              style={{ minHeight: 40, marginRight: 0 }}
             >
               <FormatListBulleted className={classes.startIconBtn} />
               BL Status
