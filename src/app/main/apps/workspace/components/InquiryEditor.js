@@ -848,9 +848,7 @@ const InquiryEditor = (props) => {
         setDisabled(false);
         return;
       }
-      if (ansTypeChoice === currentEditInq.ansType &&
-        currentEditInq.answerObj[currentEditInq.answerObj.length - 1]?.content !== 'Other'
-      ) {
+      if (ansTypeChoice === currentEditInq.ansType) {
         currentEditInq.answerObj.push({
           id: null,
           content: 'Other',
