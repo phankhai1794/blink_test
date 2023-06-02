@@ -94,7 +94,7 @@ const SendInquiryForm = (props) => {
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-
+  const pathName = window.location.pathname;
   const success = useSelector(({ workspace }) => workspace.mailReducer.success);
   const error = useSelector(({ workspace }) => workspace.mailReducer.error);
   const suggestMails = useSelector(({ workspace }) => workspace.mailReducer.suggestMails);
@@ -234,7 +234,7 @@ const SendInquiryForm = (props) => {
 
       subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
-      content = `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion.\n \nPending issue(s):'}\n${msg2}`;
+      content = pathName.includes('/guest') ? '' :`Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion.\n \nPending issue(s):'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setOnshoreValue({
         ...onshoreValue,
@@ -249,7 +249,7 @@ const SendInquiryForm = (props) => {
 
       const [msg1, msg2, header, subj] = convertToList(inqCustomer, 'customer');
       subject = `[${subj}]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
-      content = `Dear Customer,\n \n${msg1 || `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`}\n${msg2} `;
+      content = pathName.includes('/guest') ? '' : `Dear Customer,\n \n${msg1 || `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`}\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({
         ...customerValue,
@@ -258,6 +258,10 @@ const SendInquiryForm = (props) => {
         html: initiateContentState(content),
         header
       });
+    }
+    // subject = "nguyen ngoc binh"  
+    if(pathName.includes('/guest')) {
+      subject = `Fwd: ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
     }
     setForm({ ...form, subject, content: bodyHtml, toOnshore, toCustomer });
     handleEditorState(content);
@@ -450,7 +454,7 @@ const SendInquiryForm = (props) => {
   return (
     <>
       <Form
-        title={'New Mail'}
+        title={pathName.includes('/guest') ? 'Forward Mail' : 'New Mail'}
         open={openEmail}
         toggleForm={(status) => dispatch(FormActions.toggleOpenEmail(status))}
         openFab={false}

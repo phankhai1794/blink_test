@@ -601,7 +601,18 @@ function ToolbarLayout1(props) {
                 <History />
                 {openTrans && transId && <RestoreVersion />}
               </PermissionProvider>  */}
-
+              {pathname.includes('/guest') && 
+                <div>
+                  <Button
+                    //color="primary"
+                    variant="contained"
+                    className={clsx(classes.button, classes.buttonSubmit)}
+                    // className={clsx('h-64', classes.button)}
+                    onClick={openEmail}>
+                    <span className="pl-4">Forward</span>
+                  </Button>
+                </div>
+              }
               <PermissionProvider
                 action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
                 extraCondition={!pathname.includes('/draft-bl')}>
