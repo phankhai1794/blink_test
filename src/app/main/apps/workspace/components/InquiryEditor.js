@@ -4,19 +4,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { combineCDCM, getLabelById, toFindDuplicates } from '@shared';
 import { handleError } from '@shared/handleError';
 import {
-  Button,
+  Button, Checkbox, Chip,
   Collapse,
   Divider,
   FormControl,
   FormControlLabel,
   FormHelperText,
   Grid,
-  Icon,
+  Icon, InputLabel,
   ListItem,
-  ListItemText,
+  ListItemText, MenuItem,
   Popover,
   Radio,
-  RadioGroup
+  RadioGroup, Select
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -53,6 +53,11 @@ const useStyles = makeStyles((theme) => ({
     height: '25px',
     width: '25px',
     backgroundColor: 'silver'
+  },
+  formControl: {
+    '& .MuiFormGroup-root': {
+      flexDirection: 'row'
+    }
   },
   icon: {
     border: '1px solid #BAC3CB',
@@ -129,8 +134,72 @@ const useStyles = makeStyles((theme) => ({
   },
   radioRoot: {
     padding: 0
+  },
+  contentCDCM: {
+    '& .popover-temp': {
+      position: 'absolute !important',
+      width: '100%',
+      height: '100%',
+    },
+    '& .form-control-cdcm': {
+      overflow: 'visible !important'
+    }
+  },
+  menuListCDCM: {
+    width: 400,
+    maxHeight: 350,
+    left: '47rem !important',
+    top: '4rem !important'
+  },
+  formInqType: {
+    '& .MuiFormControl-root': {
+      width: 295,
+    },
+    '& .MuiInputBase-root': {
+      border: '1px solid #BD0F72',
+      borderRadius: 9
+    },
+    '& label + .MuiInput-formControl': {
+      marginTop: 0
+    },
+    '& .MuiInput-underline:hover:not(.Mui-disabled):before': {
+      borderBottom: '0',
+    },
+    '& .MuiInputLabel-shrink': {
+      transform: 'translate(0, 24px) scale(1)'
+    },
+    '& .MuiSelect-selectMenu': {
+      height: '76%'
+    },
+    '& #demo-mutiple-checkbox-label': {
+      left: 11,
+      color: '#BD0F72',
+      overflow: 'hidden',
+      fontSize: 16,
+      top: -7,
+    },
+    '& .MuiSelect-root': {
+      height: 46
+    },
+    '& .MuiInput-underline:after': {
+      borderBottom: '0',
+    },
+    '& .MuiInput-underline:before': {
+      borderBottom: '0',
+    }
   }
 }));
+
+const ITEM_HEIGHT = 100;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+}
 
 // Main Component
 const InquiryEditor = (props) => {
@@ -177,9 +246,22 @@ const InquiryEditor = (props) => {
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
   const fieldDefault = metadata.field_options.filter(field => field.display && field.keyword !== 'containerManifest')
   const [fieldType, setFieldType] = useState(fieldDefault);
-  const [valueType, setValueType] = useState(
-    metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0]
-  );
+
+  const getValType = () => {
+    const types = currentEditInq.inqGroup && currentEditInq.inqGroup.length && currentEditInq.inqGroup.map(inq => inq.inqType);
+    if (containerCheck.includes(currentEditInq.field)) {
+      if (types) {
+        types.push(currentEditInq.inqType);
+        return metadata.inq_type_options.filter((v) => types.includes(v.value))
+      }
+      return metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value);
+    } else {
+      return metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0] || [];
+    }
+  }
+
+  const [valueType, setValueType] = useState(getValType());
+  const [contentsInqCDCM, setContentsInqCDCM] = useState([]);
   const [valueAnsType, setValueAnsType] = useState(
     optionsAnsType.filter((ansType) => ansType.value === currentEditInq.ansType)
   );
@@ -202,8 +284,6 @@ const InquiryEditor = (props) => {
   const [content, setContent] = useState(currentEditInq.content || '');
   const [openCD, setOpenCD] = useState(false);
   const [openCM, setOpenCM] = useState(false);
-  const [getDataCD, setDataCD] = useState({});
-  const [getDataCM, setDataCM] = useState({});
   const userType = useSelector(({ user }) => user.role?.toUpperCase());
 
   const handleClick = (event) => {
@@ -213,6 +293,26 @@ const InquiryEditor = (props) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleShowTemplateCDCM = (type) => {
+    const objCdCm = [...contentsInqCDCM];
+    if (objCdCm && objCdCm.length) {
+      objCdCm.forEach(o => {
+        if (o.type === type) o.showTemplate = true;
+      })
+    }
+    setContentsInqCDCM(objCdCm)
+  }
+
+  const handleCloseTemplateCDCM = () => {
+    const objCdCm = [...contentsInqCDCM];
+    if (objCdCm && objCdCm.length) {
+      objCdCm.forEach(o => {
+        o.showTemplate = false;
+      })
+    }
+    setContentsInqCDCM(objCdCm)
+  }
 
   const formatTemplate = (content) => {
     let parts = content.split(/(\[.*\])|(\(insert[^)]*\))|(\([lL]ist[^)]*\))/).filter(e => e);
@@ -232,6 +332,44 @@ const InquiryEditor = (props) => {
     dispatch(InquiryActions.setEditInq(inq));
   };
 
+  const handleChangeCDCM = (e, type) => {
+    const index = e.target.value;
+    const objCdCm = [...contentsInqCDCM];
+    if (objCdCm && objCdCm.length) {
+      objCdCm.forEach(o => {
+        if (o.type === type && o.content.length > 1) {
+          o.contentShow = o.content[index];
+          o.templateIndex = index;
+        }
+      })
+    }
+    setContentsInqCDCM(objCdCm)
+  }
+
+  const handleNameChangeCDCM = (e,valEdited) => {
+    const inqCDCM = [...contentsInqCDCM];
+    if (inqCDCM && inqCDCM.length) {
+      inqCDCM.forEach(inq => {
+        if (inq.type === valEdited.type) {
+          inq.contentShow = e.currentTarget.textContent;
+        }
+      })
+    }
+    setContentsInqCDCM(inqCDCM)
+  }
+
+  const handleReceiverChangeCDCM = (e, type) => {
+    const inqCDCM = [...contentsInqCDCM];
+    if (inqCDCM && inqCDCM.length) {
+      inqCDCM.forEach(inq => {
+        if (inq.type === type) {
+          inq.receiver = e.target.value;
+        }
+      })
+    }
+    setContentsInqCDCM(inqCDCM)
+  }
+
   const styles = (width) => {
     return {
       control: {
@@ -240,6 +378,55 @@ const InquiryEditor = (props) => {
       }
     };
   };
+
+  const initContentType = (contentArr) => {
+    const currInq = {...currentEditInq};
+    if (containerCheck.includes(currInq.field)) {
+      const valResult = [...valueType]
+      if (valResult.length && !currInq.id) {
+        valResult.forEach(v => {
+          const filter = metadata.template.find(({ field, type }) => {
+            return type === v.value && ['containerDetail', 'containerManifest'].includes(field) && v.value !== 'select-all';
+          });
+          if (filter) {
+            filter.showTemplate = false;
+            filter.templateIndex = '0';
+            filter.contentShow = filter.content[0];
+            filter.receiver = `customer-${v.value}`;
+            contentArr.push(filter);
+          }
+        });
+      } else if (currInq.id) {
+        const filter = metadata.template.find(({ field, type }) => {
+          return type === currInq.inqType && ['containerDetail', 'containerManifest'].includes(field);
+        });
+        contentArr.push({
+          id: currInq.id,
+          showTemplate: false,
+          content: filter ? filter.content : '',
+          contentShow: currInq ? currInq.content : '',
+          receiver: `${currInq.receiver}-${currInq.inqType}`,
+          type: currInq.inqType,
+        });
+        if (currInq.inqGroup.length) {
+          currInq.inqGroup.forEach(cur => {
+            const filter = metadata.template.find(({ field, type }) => {
+              return type === cur.inqType && ['containerDetail', 'containerManifest'].includes(field);
+            });
+            contentArr.push({
+              id: cur.id,
+              showTemplate: false,
+              content: filter ? filter.content : '',
+              contentShow: cur ? cur.content : '',
+              receiver: `${cur.receiver}-${cur.inqType}`,
+              type: cur.inqType
+            })
+          })
+        }
+      }
+      setContentsInqCDCM(contentArr);
+    }
+  }
 
   useEffect(() => {
     if (valueType?.value) {
@@ -258,8 +445,17 @@ const InquiryEditor = (props) => {
         ));
       setFieldType(filterField);
     }
-
     setPrevField(currentEditInq.field);
+
+    const contentArr = [];
+    initContentType(contentArr);
+
+    const inq = { ...currentEditInq };
+    if (containerCheck.includes(inq.field) && optionsAnsType) {
+      inq.ansType = metadata.ans_type.paragraph
+      setValueAnsType(optionsAnsType);
+      dispatch(InquiryActions.setEditInq(inq));
+    }
   }, []);
 
   useEffect(() => {
@@ -296,35 +492,87 @@ const InquiryEditor = (props) => {
     }
   }, [fieldValue]);
 
+  const isAllSelected = containerCheck.includes(currentEditInq.field)
+      && Array.isArray(inqTypeOption)
+      && Array.isArray(valueType)
+      && inqTypeOption.length
+      && inqTypeOption.length === valueType.length;
   const handleTypeChange = (e) => {
     const inq = { ...currentEditInq };
-    inq.inqType = e.value;
-    // if (e.__isNew__) inq.isNew = e.__isNew__;
-    const filter = metadata.template.find(({ field, type }) => {
-      let getTemplate = type === e.value && fieldValue?.keyword === field;
-      if ([containerCheck[0], containerCheck[1]].includes(fieldValue?.value)) {
-        getTemplate = type === e.value && ['containerDetail', 'containerManifest'].includes(field)
+    if (containerCheck.includes(inq.field)) {
+      let valResult = e.target.value;
+      const inqCdCm = [...contentsInqCDCM];
+      // list content display
+      if (valResult.length) {
+        if (valResult[valResult.length - 1].value === 'select-all') {
+          valResult = valResult.filter(inq => inq.value !== 'select-all');
+          if (inqTypeOption.length === valueType.length) {
+            valResult = [];
+          } else {
+            valResult = inqTypeOption
+          }
+          setValueType(inqTypeOption.length === valueType.length ? [] : inqTypeOption);
+        } else {
+          setValueType(valResult)
+        }
+      } else {
+        setValueType(valResult)
       }
-      return getTemplate;
-    });
-    dispatch(InquiryActions.validate({ ...valid, inqType: true }));
-    if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
-      inq.content = contentEdited;
-    } else {
-      inq.content = filter?.content[0] || MSG_INQUIRY_CONTENT;
-      setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
+      const contentArr = [];
+      valResult.forEach(v => {
+        const findByIdType = inqCdCm.find(inq => v.value === inq.type);
+        if (!findByIdType) {
+          const filter = metadata.template.find(({ field, type }) => {
+            return type === v.value && ['containerDetail', 'containerManifest'].includes(field);
+          });
+          if (filter) {
+            filter.showTemplate = false;
+            filter.templateIndex = '0';
+            filter.contentShow = filter.content[0];
+            filter.receiver = `customer-${v.value}`;
+            contentArr.push(filter);
+          }
+        } else if (findByIdType) {
+          contentArr.push(findByIdType);
+        }
+      });
+      setContentsInqCDCM(contentArr);
+      inq.inqType = valResult.length ? valResult : '';
     }
-    let filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field
-    filterField = metadata.field_options.filter(({ value, display, keyword }) => display && filterField.includes(value)
-      && metadata.template.some((temp) => (temp.field === keyword && temp.type === e.value && temp.content[0]))
-    )
-    setFieldType(filterField);
+    else {
+      inq.inqType = e.value;
+      // if (e.__isNew__) inq.isNew = e.__isNew__;
+      const filter = metadata.template.find(({ field, type }) => {
+        let getTemplate = type === e.value && fieldValue?.keyword === field;
+        if ([containerCheck[0], containerCheck[1]].includes(fieldValue?.field)) {
+          getTemplate = type === e.value && ['containerDetail', 'containerManifest'].includes(field)
+        }
+        return getTemplate;
+      });
+      dispatch(InquiryActions.validate({ ...valid, inqType: true }));
+      if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
+        inq.content = contentEdited;
+      } else {
+        inq.content = filter?.content[0] || MSG_INQUIRY_CONTENT;
+        setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
+      }
+      let filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field
+      filterField = metadata.field_options.filter(({ value, display, keyword }) => display && filterField.includes(value)
+        && metadata.template.some((temp) => (temp.field === keyword && temp.type === e.value && temp.content[0]))
+      )
+      setFieldType(filterField);
+      const keyWord = filterField.map(f => f.keyword);
+      if (keyWord.includes('containerManifest') || keyWord.includes('containerDetail')) {
+        setValueType([e]);
+      } else {
+        setValueType(e);
+      }
 
-    setValueType(e);
-    setTemplateList(filter?.content || []);
-    setTemplate('0');
+      setTemplateList(filter?.content || []);
+      setTemplate('0');
+      dispatch(FormActions.setEnableSaveInquiriesList(false));
+    }
     dispatch(InquiryActions.setEditInq(inq));
-    dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   const handleFieldChange = (e) => {
@@ -415,6 +663,7 @@ const InquiryEditor = (props) => {
       inqType: inq.inqType,
       ansType: inq.ansType,
       receiver: inq.receiver,
+      groupId: inq.groupId || '',
       state: ['ANS_DRF'].includes(inq.state) ? 'INQ_SENT' : inq.state
     };
   };
@@ -436,12 +685,39 @@ const InquiryEditor = (props) => {
       );
     }
     if (listInqOfField.length) {
-      const checkDuplicate = Boolean(
+      let checkDuplicate = Boolean(
         listInqOfField.filter(
           (inq) =>
             inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0]
         ).length
       );
+      if (containerCheck.includes(currentEditInq.field)) {
+        // checkDuplicate
+        const listInqType = listInqOfField.map(l => {
+          return {
+            inqType: l.inqType,
+            receiver: l.receiver[0]
+          }
+        });
+        listInqOfField.forEach(l => {
+          if (l.inqGroup && l.inqGroup.length) {
+            listInqType.push({
+              inqType: l.inqType,
+              receiver: l.receiver[0]
+            })
+          }
+        });
+        if (contentsInqCDCM.length) {
+          contentsInqCDCM.forEach(l => {
+            const receiverCurr = l.receiver.split('-')[0];
+            listInqType.forEach(linq => {
+              if (linq.inqType === l.type && receiverCurr === linq.receiver) {
+                checkDuplicate = true
+              }
+            })
+          });
+        }
+      }
       if (checkDuplicate) {
         dispatch(
           FormActions.openConfirmPopup({
@@ -456,7 +732,7 @@ const InquiryEditor = (props) => {
     return false;
   };
 
-  const onSave = async () => {
+  const onSave = async (isCdCm) => {
     setDisabled(true);
     const inquiriesOp = [...inquiries];
     let check = true;
@@ -561,7 +837,7 @@ const InquiryEditor = (props) => {
         }
       }
 
-      if (checkInqChanged(inquiry, currentEditInq, ansTypeChoice === currentEditInq.ansType)) {
+      if (checkInqChanged(inquiry, currentEditInq, ansTypeChoice === currentEditInq.ansType) && !containerCheck.includes(currentEditInq.field)) {
         dispatch(
           FormActions.openConfirmPopup({
             openConfirmPopup: true,
@@ -610,7 +886,7 @@ const InquiryEditor = (props) => {
         JSON.stringify(inq(currentEditInq)) !== JSON.stringify(inq(inquiry)) ||
         JSON.stringify(currentEditInq.answerObj) !== JSON.stringify(inquiry.answerObj) ||
         mediaCreate.length ||
-        mediaDelete.length
+        mediaDelete.length || isCdCm
       ) {
         const optionsMinimize = [...listMinimize];
         const index = optionsMinimize.findIndex((e) => e.id === inquiry.id);
@@ -621,15 +897,59 @@ const InquiryEditor = (props) => {
 
         const update = await updateInquiry(inquiry.id, {
           inq: inq(currentEditInq),
+          inqCdCm: contentsInqCDCM,
+          blId: myBL.id,
           ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
           files: { mediaCreate, mediaDelete }
         }).catch(err => handleError(dispatch, err));
-        if (update.data.length && editedIndex !== -1) {
-          inquiriesOp[editedIndex].answerObj = [
-            ...currentEditInq.answerObj,
-            ...update.data
-          ].filter((inq) => inq.id);
+
+        if (!isCdCm) {
+          if (update.data.length && editedIndex !== -1) {
+            inquiriesOp[editedIndex].answerObj = [
+              ...currentEditInq.answerObj,
+              ...update.data
+            ].filter((inq) => inq.id);
+          }
+          //
+          const dataDate = await getUpdatedAtAnswer(inquiry.id).catch(err => handleError(dispatch, err));
+          inquiriesOp[editedIndex].createdAt = dataDate.data;
+        } else if (isCdCm) {
+          const { data } = update;
+          if (data.length) {
+            data.forEach(d => {
+              if (d.id === inquiriesOp[editedIndex].id) {
+                inquiriesOp[editedIndex].content = d.content;
+                inquiriesOp[editedIndex].inqType = d.inqType;
+                inquiriesOp[editedIndex].receiver = d.receiver;
+                inquiriesOp[editedIndex].groupId = d.groupId;
+                inquiriesOp[editedIndex].inqGroup = d.inqGroup || [];
+              } else {
+                const object = {
+                  ...d,
+                  id: d.id,
+                  ansType: d.ansType,
+                  content: d.content,
+                  createdAt: d.createdAt,
+                  createdBy: d.createdBy,
+                  field: d.field,
+                  receiver: d.receiver,
+                  groupId: d.groupId,
+                  process: 'pending',
+                  mediaFile: [],
+                  mediaFilesAnswer: [],
+                  answerObj: [],
+                  inqGroup: d.inqGroup || [],
+                  inqType: d.inqType,
+                  state: d.state,
+                  updatedAt: d.updatedAt,
+                  updatedBy: d.updatedBy
+                }
+                inquiriesOp.push(object);
+              }
+            })
+          }
         }
+
         if (prevField !== currentEditInq.field) {
           const hasInq = inquiriesOp.filter((inq) => inq.field === prevField);
           if (!hasInq.length) {
@@ -637,9 +957,7 @@ const InquiryEditor = (props) => {
             dispatch(FormActions.toggleCreateInquiry(false));
           }
         }
-        //
-        const dataDate = await getUpdatedAtAnswer(inquiry.id).catch(err => handleError(dispatch, err));
-        inquiriesOp[editedIndex].createdAt = dataDate.data;
+
         inquiriesOp[editedIndex].showIconAttachAnswerFile = false;
         dispatch(InquiryActions.setEditInq());
         dispatch(InquiryActions.setInquiries(inquiriesOp));
@@ -674,25 +992,39 @@ const InquiryEditor = (props) => {
           uploads.push(formData);
         });
       }
-      const question = [{ ...currentEditInq }];
-      const inqContentTrim = question.map((op) => {
-        let contentTrim = { ...op, content: op.content.trim() };
-        const ansTypeChoice = metadata.ans_type['choice'];
-        if (ansTypeChoice === op.ansType) {
-          op.answerObj.forEach((ans) => {
-            ans.content = ans.content.trim();
-          });
-          op.answerObj.push({
-            id: null,
-            content: 'Other',
-            createdAt: new Date(),
+      let inqContentTrim = [];
+      if (isCdCm) {
+        if (contentsInqCDCM.length) {
+          contentsInqCDCM.forEach(c => {
+            inqContentTrim.push({
+              content: c.contentShow,
+              field: containerCheck[0],
+              inqType: c.type,
+              ansType: metadata.ans_type['paragraph'],
+              receiver: [`${c.receiver.split('-')[0]}`],
+              answerObj: [],
+              mediaFile: currentEditInq.mediaFile
+            })
           })
         }
-        if (containerCheck.includes(op.field)) {
-          contentTrim.field = containerCheck[0]
-        }
-        return contentTrim;
-      });
+      } else {
+        const question = [{ ...currentEditInq }];
+        inqContentTrim = question.map((op) => {
+          let contentTrim = { ...op, content: op.content.trim() };
+          const ansTypeChoice = metadata.ans_type['choice'];
+          if (ansTypeChoice === op.ansType) {
+            op.answerObj.forEach((ans) => {
+              ans.content = ans.content.trim();
+            });
+            op.answerObj.push({
+              id: null,
+              content: 'Other',
+              createdAt: new Date(),
+            })
+          }
+          return contentTrim;
+        });
+      }
       axios
         .all(uploads.map((endpoint) => uploadFile(endpoint).catch((err) => handleError(dispatch, err))))
         .then((media) => {
@@ -701,20 +1033,33 @@ const InquiryEditor = (props) => {
             const mediaFileList = file.response.map((item) => item);
             mediaList = [...mediaList, ...mediaFileList];
           });
-          saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id })
+          saveInquiry({ question: inqContentTrim, media: mediaList, blId: myBL.id, isCdCm })
             .then((res) => {
               const mediaFile = [];
               mediaList.forEach(({ id, name, ext }) => mediaFile.push({ id, name, ext, creator: userType }));
               const inqResponse = res.inqResponse || {};
-              inqResponse.creator = {
-                userName: user.displayName || '',
-                avatar: user.photoURL || ''
-              };
-              inqResponse.mediaFile = mediaFile;
               const optionsMinimize = [...listMinimize];
               const optionsInquires = [...inquiries];
-              optionsInquires.push(inqResponse);
-              optionsMinimize.push(inqResponse);
+              if (isCdCm && Array.isArray(inqResponse)) {
+                inqResponse.forEach(inq => {
+                  inq.creator = {
+                    userName: user.displayName || '',
+                    avatar: user.photoURL || ''
+                  };
+                  inq.mediaFile = mediaFile;
+                  inq.process = 'pending';
+                  optionsInquires.push(inq);
+                  optionsMinimize.push(inq);
+                })
+              } else {
+                inqResponse.creator = {
+                  userName: user.displayName || '',
+                  avatar: user.photoURL || ''
+                };
+                inqResponse.mediaFile = mediaFile;
+                optionsInquires.push(inqResponse);
+                optionsMinimize.push(inqResponse);
+              }
               if (optionsInquires.length === 1) {
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BC", "")) // Draft of Inquiry Created (BC)
               }
@@ -750,10 +1095,6 @@ const InquiryEditor = (props) => {
     noClick: true
   });
 
-  const handleClickCollapse = (isCD) => {
-    isCD ? setOpenCD(!openCD) : setOpenCM(!openCM);
-  };
-
   return (
     <div style={{ position: 'relative' }} onPaste={onPaste} {...getRootProps({})}>
       {isDragActive && <div className='dropzone'>Drop files here</div>}
@@ -766,23 +1107,24 @@ const InquiryEditor = (props) => {
           </div>
 
           <FormControl className={classes.checkedIcon}>
-            <RadioGroup
-              aria-label="receiver"
-              name="receiver"
-              value={currentEditInq.receiver[0]}
-              onChange={(e) => handleReceiverChange(e)}>
-              <FormControlLabel
-                value="customer"
-                control={<Radio color={'primary'} />}
-                label="Customer"
-              />
-              <FormControlLabel
-                value="onshore"
-                control={<Radio color={'primary'} />}
-                label="Onshore"
-              />
-            </RadioGroup>
-
+            {containerCheck.includes(currentEditInq.field) ? `` : (
+              <RadioGroup
+                aria-label="receiver"
+                name="receiver"
+                value={currentEditInq.receiver[0]}
+                onChange={(e) => handleReceiverChange(e)}>
+                <FormControlLabel
+                  value="customer"
+                  control={<Radio color={'primary'} />}
+                  label="Customer"
+                />
+                <FormControlLabel
+                  value="onshore"
+                  control={<Radio color={'primary'} />}
+                  label="Onshore"
+                />
+              </RadioGroup>
+            )}
             <AttachFile filepaste={filepaste} dropfiles={dropfiles} />
           </FormControl>
         </div>
@@ -811,25 +1153,70 @@ const InquiryEditor = (props) => {
                 </FormControl>
               </Grid>
               <Grid item xs={4}>
-                <FormControl error={!valid.inqType}>
-                  <FuseChipSelect
-                    value={valueType}
-                    customStyle={styles(fullscreen ? 330 : 295)}
-                    isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
-                    onChange={handleTypeChange}
-                    placeholder="Type of Question"
-                    textFieldProps={{
-                      variant: 'outlined'
-                    }}
-                    options={inqTypeOption}
-                    errorStyle={valid.inqType}
-                  />
-                  <div style={{ height: '20px' }}>
-                    {!valid.inqType && (
-                      <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
-                    )}
+                {containerCheck.includes(currentEditInq.field) ? (
+                  <div className={classes.formInqType}>
+                    <FormControl error={!valid.inqType}>
+                      <InputLabel id="demo-mutiple-checkbox-label">Type of Question</InputLabel>
+                      <Select
+                        labelId="demo-mutiple-checkbox-label"
+                        id="demo-mutiple-checkbox"
+                        multiple
+                        value={valueType}
+                        onChange={(e) => handleTypeChange(e)}
+                        inputProps={{
+                          style: { width: '100%' }
+                        }}
+                        renderValue={(selected) =>
+                          <div>
+                            {selected.map((value) => value.value !== 'select-all' && (
+                              <Chip key={value.type} label={value.label} />
+                            ))}
+                          </div>}
+                        MenuProps={MenuProps}
+                      >
+                        <MenuItem key={'select-all'} value={{label: 'Select All',
+                          value: 'select-all'}}>
+                          <Checkbox checked={isAllSelected} />
+                          <ListItemText primary={'Select All'}/>
+                        </MenuItem>
+                        {inqTypeOption.map((name) => {
+                          const mapType = valueType.map(v => v.value);
+                          return (
+                            <MenuItem key={name.value} value={name}>
+                              <Checkbox checked={mapType.includes(name.value)} />
+                              <ListItemText primary={name.label}/>
+                            </MenuItem>
+                          )
+                        })}
+                      </Select>
+                      <div style={{ height: '20px' }}>
+                        {!valid.inqType && (
+                          <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+                        )}
+                      </div>
+                    </FormControl>
                   </div>
-                </FormControl>
+                ) : (
+                  <FormControl error={!valid.inqType}>
+                    <FuseChipSelect
+                      value={valueType}
+                      customStyle={styles(fullscreen ? 330 : 295)}
+                      isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
+                      onChange={handleTypeChange}
+                      placeholder="Type of Question"
+                      textFieldProps={{
+                        variant: 'outlined'
+                      }}
+                      options={inqTypeOption}
+                      errorStyle={valid.inqType}
+                    />
+                    <div style={{ height: '20px' }}>
+                      {!valid.inqType && (
+                        <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+                      )}
+                    </div>
+                  </FormControl>
+                )}
               </Grid>
               <Grid item xs={4}>
                 <FormControl error={!valid.ansType}>
@@ -891,14 +1278,94 @@ const InquiryEditor = (props) => {
                 ))}
               </RadioGroup>
             </Popover>
-            <div className="mt-32 mx-8" style={{ minHeight: 32 }}>
-              <ContentEditable
-                html={content} // innerHTML of the editable div
-                disabled={false} // use true to disable editing
-                onChange={handleNameChange} // handle innerHTML change
-                style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
-              />
-            </div>
+            {containerCheck.includes(currentEditInq.field) ? (
+              <>
+                {contentsInqCDCM.length ? (
+                  contentsInqCDCM.map((val, index) => (
+                    <div key={val.type} className={classes.contentCDCM}>
+                      <div className="mt-24 mx-8 form-control-cdcm" style={{ display: 'flex', justifyContent: 'flex-end', position: 'relative' }} id={'content-temp-' + val.type}>
+                        <FormControl className={classes.formControl}>
+                          <RadioGroup
+                            aria-label={"receiver-" + val.type}
+                            name={"receiver-" + val.type}
+                            value={val.receiver}
+                            onChange={(e) => handleReceiverChangeCDCM(e, val.type)}>
+                            <FormControlLabel
+                              value={"customer-" + val.type}
+                              control={<Radio color={'primary'} />}
+                              label="Customer"
+                            />
+                            <FormControlLabel
+                              value={"onshore-" + val.type}
+                              control={<Radio color={'primary'} />}
+                              label="Onshore"
+                            />
+                          </RadioGroup>
+                        </FormControl>
+                        {val.content && val.content.length > 1 ? (
+                          <Button
+                            style={{ float: 'right', color: '#515F6B', fontWeight: 500, textTransform: 'none' }}
+                            onClick={() => handleShowTemplateCDCM(val.type)}
+                          >
+                              Template
+                            <Icon>{val.showTemplate ? 'arrow_drop_up' : 'arrow_drop_down'}</Icon>
+                          </Button>
+                        ) : ``}
+                        <Popover
+                          id={val.type}
+                          className={'popover-temp'}
+                          anchorEl={val.showTemplate}
+                          open={val.showTemplate}
+                          onClose={() => handleCloseTemplateCDCM()}
+                          classes={{ paper: classes.menuListCDCM }}
+                          container={() => document.getElementById('content-temp-' + val.type)}
+                        >
+                          <RadioGroup value={val.templateIndex} onChange={(e) => handleChangeCDCM(e, val.type)}>
+                            {val.content && val.content.length > 1 && val.content.map((temp, index) => (
+                              <>
+                                <FormControlLabel
+                                  classes={{ root: classes.formRadio, label: classes.radioLabel }}
+                                  value={index.toString()}
+                                  control={<Radio color={'primary'} classes={{ root: classes.radioRoot }} style={{ position: 'absolute' }} />}
+                                  label={temp}
+                                />
+                              </>
+                            ))}
+                          </RadioGroup>
+                        </Popover>
+                      </div>
+                      <div className="mt-24 mx-8" style={{ minHeight: 32 }}>
+                        <ContentEditable
+                          html={val.contentShow} // innerHTML of the editable div
+                          disabled={false} // use true to disable editing
+                          onChange={(e) => handleNameChangeCDCM(e, val)} // handle innerHTML change
+                          style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
+                        />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="mt-32 mx-8" style={{ minHeight: 32 }}>
+                    <ContentEditable
+                      html={currentEditInq.content} // innerHTML of the editable div
+                      disabled={false} // use true to disable editing
+                      onChange={handleNameChange} // handle innerHTML change
+                      style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="mt-32 mx-8" style={{ minHeight: 32 }}>
+                <ContentEditable
+                  html={content} // innerHTML of the editable div
+                  disabled={false} // use true to disable editing
+                  onChange={handleNameChange} // handle innerHTML change
+                  style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
+                />
+              </div>
+            )}
+
             {currentEditInq.ansType === metadata.ans_type.choice && (
               <div className="mt-16">
                 <ChoiceAnswerEditor />
@@ -965,7 +1432,7 @@ const InquiryEditor = (props) => {
                   variant="contained"
                   color="primary"
                   disabled={isDisabled}
-                  onClick={() => onSave()}
+                  onClick={() => onSave(containerCheck.includes(currentEditInq.field))}
                   classes={{ root: classes.button }}>
                   Save
                 </Button>

@@ -171,16 +171,6 @@ const Inquiry = (props) => {
     resetActionInquiry(q, true);
   };
 
-  const checkCommentDraft = (amendment, conditionStates) => {
-    let result = true;
-    if (amendment?.process === 'draft') {
-      const lst = listCommentDraft.filter(comment => comment.field === amendment.field);
-      if (lst.length === 1) result = false; // has only 1 customer's amendment
-      else result = Boolean(lst.filter(comment => conditionStates.includes(comment.state)).length);
-    }
-    return result;
-  }
-
   useEffect(() => {
     if (currentAmendment !== undefined && inputAddAmendmentEndRef.current) {
       inputAddAmendmentEndRef.current.scrollIntoView({ behavior: "smooth" })

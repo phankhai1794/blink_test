@@ -6,6 +6,7 @@ import Select from 'react-select';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/styles';
 import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
+import Checkbox from "@material-ui/core/Checkbox";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,7 +41,8 @@ const useStyles = makeStyles((theme) => ({
       },
       '& $valueContainer': {
         paddingLeft: 12,
-        paddingTop: 2
+        paddingTop: 2,
+        overflow: 'hidden'
       }
     },
     '& $fieldset': {
