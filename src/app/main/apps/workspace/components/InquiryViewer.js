@@ -101,7 +101,7 @@ import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
 import ErrorOutlineOutlined from '@material-ui/icons/ErrorOutlineOutlined';
 import { useDropzone } from 'react-dropzone';
-import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
+import Diff from "../shared-components/react-diff";
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -2689,15 +2689,7 @@ const InquiryViewer = (props) => {
                       `${renderContent(question.content)}`
                     }
                   </Typography> :
-                  <ReactDiffViewer
-                    oldValue={renderContent(orgContent[question.field])}
-                    newValue={getNewValueDiffViewer(question.content)}
-                    splitView={false}
-                    hideLineNumbers
-                    showDiffOnly={false}
-                    styles={{ contentText: { fontFamily: 'Montserrat' } }}
-                    compareMethod={DiffMethod.WORDS}
-                  />
+                  <Diff inputA={renderContent(orgContent[question.field])} inputB={getNewValueDiffViewer(question.content)} type="words" />
                 )
             }
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
