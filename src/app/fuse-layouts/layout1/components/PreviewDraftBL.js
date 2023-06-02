@@ -3,15 +3,25 @@ import history from '@history';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
-import { Tooltip } from '@material-ui/core';
+import { Button, Tooltip } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   iconDraftBL: {
     width: 40,
     height: 40,
-    marginLeft: 10,
     cursor: 'pointer'
-  }
+  },
+  btn: {
+    textTransform: 'none',
+    color: '#FFFF',
+    backgroundColor: '#BD0F73',
+    margin: '0px 8px',
+    borderRadius: '8px',
+    fontFamily: 'Montserrat',
+    '&:hover': {
+      backgroundColor: '#BD0F73'
+    }
+  },
 }));
 
 const PreviewDraftBL = () => {
@@ -41,25 +51,29 @@ const PreviewDraftBL = () => {
             action={PERMISSION.VIEW_PREVIEW_DRAFT_BL}
             extraCondition={pathname.includes('/workspace') || (pathname.includes('/guest') && !myBL.state.includes('DRF_'))}>
             <Tooltip title="Preview Draft B/L">
-              <img
-                src="assets/images/icons/preview-draft.svg"
-                alt="Draft BL Icon"
-                className={classes.iconDraftBL}
+              <Button
+                variant='contained'
                 onClick={previewDraftBL}
-              />
+                className={classes.btn}
+                style={{ height: 40, marginRight: 0 }}>
+                <img src="assets/images/icons/preview-draft.svg" alt="Draft BL Icon" className={classes.iconDraftBL} />
+                Preview
+              </Button>
             </Tooltip>
           </PermissionProvider>
 
           <PermissionProvider
             action={PERMISSION.VIEW_REDIRECT_DRAFT_BL}
             extraCondition={pathname.includes('/guest') && myBL.state.includes('DRF_') && userType === 'CUSTOMER'}>
-            <Tooltip title="Redirect to Draft B/L">
-              <img
-                src="assets/images/icons/preview-draft.svg"
-                alt="Draft BL Icon"
-                className={classes.iconDraftBL}
+            <Tooltip title="Preview Draft B/L">
+              <Button
+                variant='contained'
                 onClick={redirectDraftBL}
-              />
+                className={classes.btn}
+                style={{ height: 40, marginRight: 0 }}>
+                <img src="assets/images/icons/preview-draft.svg" alt="Draft BL Icon" className={classes.iconDraftBL} />
+                Preview
+              </Button>
             </Tooltip>
           </PermissionProvider>
         </>
