@@ -4,7 +4,7 @@ import {
   FormControl,
   RadioGroup,
   FormControlLabel,
-  OutlinedInput
+  TextField
 } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from "@shared/permission";
@@ -26,6 +26,7 @@ const ChoiceAnswer = (props) => {
   let questionIsEmpty = question === undefined;
   let prevChoiceArray = question.answerObj?.filter(choice => choice.confirmed) || [];
   const [isPermission, setPermission] = useState(false);
+  
   const dispatch = useDispatch();
   const classes = useStyles();
   const [otherOptionText, setOtherOptionText] = useState();
@@ -61,13 +62,15 @@ const ChoiceAnswer = (props) => {
       isOther
     };
     //
-    
+
     optionsInquires[editedIndex].selectChoice = selectedObj;
     dispatch(InquiryActions.setInquiries(optionsInquires));
     //
   };
 
   useEffect(() => {
+    const lastChoice = question.answerObj[question.answerObj.length - 1].content
+    setOtherOptionText(lastChoice !== 'Other' ? lastChoice : null)
     if (allowUpdateChoiceAnswer) {
       setPermission(true);
     } else {
@@ -90,42 +93,47 @@ const ChoiceAnswer = (props) => {
 
   return (
     <>
-      <FormControl>
+      <FormControl fullWidth>
         <RadioGroup
           aria-labelledby="demo-controlled-radio-buttons-group"
           name="controlled-radio-buttons-group"
           onChange={(e) => handleChange(e.target.value, otherOptionText)}
         >
-          {question.answerObj?.map((choice, index) => (
-            <div key={index} style={{ marginTop: '0.5rem' }}>
-              <FormControlLabel
-                disabled={!isPermission || disable}
-                checked={!disableChecked && selectedChoice === choice.id}
-                value={choice.id}
-                control={<Radio color={'primary'} />}
-                label={
-                  <span style={{
-                    fontSize: '1.7rem',
-                    whiteSpace: 'pre',
-                    textDecorationLine: ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && 'line-through',
-                    fontStyle: (!['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT'].includes(question.state) || (['ANS_DRF'].includes(question.state) && user.role === 'Guest')) && 'italic',
-                  }}>{choice.content}</span>
-                }
-              />
-              {question.answerObj.length - 1 === index && !disable &&
-                <OutlinedInput
-                  className={classes.input}
-                  disabled={disable}
-                  value={otherOptionText}
-                  onChange={(e) => {
-                    setOtherOptionText(e.target.value)
-                    handleChange(choice.id, e.target.value)
-                  }}
-                />
-              }
-            </div>
-          ))}
+          {question.answerObj?.map((choice, index) => {
+            const lastElement = question.answerObj.length - 1 === index
+            if ((lastElement && choice.content !== 'Other') || !lastElement || user.role === 'Guest') {
+              return (
+                <div key={index} style={{ marginTop: '0.5rem' }}>
+                  <FormControlLabel
+                    disabled={!isPermission || disable}
+                    checked={!disableChecked && selectedChoice === choice.id}
+                    value={choice.id}
+                    control={<Radio color={'primary'} />}
+                    label={
+                      <span style={{
+                        fontSize: '1.7rem',
+                        whiteSpace: 'pre',
+                        textDecorationLine: ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && 'line-through',
+                        fontStyle: (!['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT'].includes(question.state) || (['ANS_DRF'].includes(question.state) && user.role === 'Guest')) && 'italic',
+                      }}>{lastElement && !disable ? 'Other' : choice.content}</span>
+                    }
+                  />
+                </div>)
+            }
+          }
+          )}
         </RadioGroup>
+        {selectedChoice === question.answerObj[question.answerObj.length - 1].id && !disable &&
+          <TextField
+            className={classes.input}
+            fullWidth
+            value={otherOptionText}
+            onChange={(e) => {
+              setOtherOptionText(e.target.value)
+              handleChange(question.answerObj[question.answerObj.length - 1].id, e.target.value)
+            }}
+          />
+        }
       </FormControl>
     </>
   );
