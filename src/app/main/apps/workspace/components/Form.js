@@ -374,6 +374,7 @@ export default function Form(props) {
   };
 
   const handleChange = (_, newValue) => {
+    dispatch(InquiryActions.setEditInq());
     props.tabChange(newValue);
   };
 

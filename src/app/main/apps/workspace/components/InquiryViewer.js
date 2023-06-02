@@ -118,6 +118,7 @@ import Comment from './Comment';
 import TagsComponent from './TagsComponent';
 import ContainerDetailForm from './ContainerDetailForm';
 import ContainerDetailInquiry from "./ContainerDetailInquiry";
+import InquiryWithGroup from "./InquiryWithGroup";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -2688,6 +2689,17 @@ const InquiryViewer = (props) => {
                       `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
                       `${renderContent(question.content)}`
                     }
+                    {(['OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(question.state) &&
+                        question.inqGroup &&
+                        question.inqGroup.length &&
+                        question.process === 'pending') ?
+                      question.inqGroup.map(q => {
+                        return (
+                          <div key={q.id}>
+                            <InquiryWithGroup inqGroup={q} role={user.role} />
+                          </div>
+                        )
+                      }) : ``}
                   </Typography> :
                   <ReactDiffViewer
                     oldValue={renderContent(orgContent[question.field])}
