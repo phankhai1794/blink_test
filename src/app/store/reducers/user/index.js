@@ -7,8 +7,7 @@ const initialState = {
   photoURL: '',
   email: '',
   permissions: [],
-  userProcessingBy: [],
-  kickBy: ""
+  userProcessingBy: []
 };
 
 const user = function (state = initialState, action) {
@@ -20,9 +19,6 @@ const user = function (state = initialState, action) {
     return { ...initialState };
   }
   case Actions.SET_USER_PROCESSING_BY: {
-    return { ...state, ...action.state };
-  }
-  case Actions.KICK_FORCE: {
     return { ...state, ...action.state };
   }
   default: {

@@ -66,7 +66,6 @@ import TableCM from './TableCM';
 import ListNotification from './ListNotification';
 import SubmitAnswerNotification from "./SubmitAnswerNotification";
 import QueueList from './QueueList';
-import WarningMessage from "./WarningMessage";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -140,8 +139,6 @@ const BLWorkspace = (props) => {
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
   const drfView = useSelector(({ draftBL }) => draftBL.drfView);
-  const [isWarningKicked, setIsWarningKicked] = useState(false);
-  const [openWarningKicked, setOpenWarningKicked] = useState(false);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -163,7 +160,7 @@ const BLWorkspace = (props) => {
   };
 
   socket.on('msg_processing', async (data) => {
-    const { processingBy, kickBy } = data;
+    const { processingBy } = data;
     const userInfo = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
 
     if (userInfo?.displayName && processingBy.length) {
@@ -174,13 +171,6 @@ const BLWorkspace = (props) => {
         dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
       } else {
         permissions = await getPermissionByRole('Viewer');
-        dispatch(AppActions.setUser({ ...user, permissions }));
-
-        // Display popup has been kicked
-        if (!isWarningKicked && kickBy) {
-          dispatch(AppActions.kickForce({ kickBy }));
-          setIsWarningKicked(true);
-        }
         if (userInfo.displayName === processingBy[processingBy.length - 1]) {
           dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: processingBy[0] }));
         }
@@ -188,10 +178,6 @@ const BLWorkspace = (props) => {
       sessionStorage.setItem('permissions', JSON.stringify(permissions));
     }
   });
-
-  useEffect(() => {
-    if (isWarningKicked) setOpenWarningKicked(true);
-  }, [isWarningKicked]);
 
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
@@ -540,12 +526,6 @@ const BLWorkspace = (props) => {
         <>
           {openQueueList && <QueueList />}
           <ListNotification />
-          {openWarningKicked &&
-            <WarningMessage
-              open={openWarningKicked}
-              setOpen={setOpenWarningKicked}
-            />
-          }
           <SubmitAnswerNotification
             open={
               openNotification ||
@@ -554,14 +534,6 @@ const BLWorkspace = (props) => {
               openNotificationBLWarning.status ||
               openNotificationSubmitPreview
             }
-            kickForce={{
-              status: openNotificationBLWarning.status,
-              processingBy: {
-                userName: openNotificationBLWarning.userName,
-                userType: user.userType,
-              },
-              kickBy: user.displayName
-            }}
             msg={renderMsgNoti()}
             msg2={renderMsgNoti2()}
             iconType={renderIconType()}
