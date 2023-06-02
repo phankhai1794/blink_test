@@ -82,7 +82,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: 8
   },
   buttonComfirm: {
-    fontSize: 16,
+    fontSize: 14,
     padding: '5px 16px',
     color: whiteColor,
     background: themeColor,
@@ -141,7 +141,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 14,
     lineHeight: 17,
     color: '#515E6A',
-    left: 14
+    paddingLeft: 10
   },
   dratTypeText: {
     fontFamily: 'Montserrat',
@@ -525,36 +525,36 @@ function ToolbarLayout1(props) {
               </PermissionProvider>
             </div>
 
-            <PreviewDraftBL />
             <div className="flex" style={{ marginRight: 35, alignItems: 'center' }}>
-              <TextField
-                id="view"
-                name="view"
-                select
-                value={drfView}
-                onChange={(e) => handleSelectView(e)}
-                variant="outlined"
-                className={clsx(classes.button, classes.selectView)}
-                InputProps={{
-                  className: classes.selectViewProps
-                }}
-                SelectProps={{
-                  MenuProps: {
-                    anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                    getContentAnchorEl: null
-                  }
-                }}>
-                {drfViews.map(view => (
-                  <MenuItem
-                    key={view.value}
-                    value={view.value}
-                    className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
-                    <span className={classes.dratTypeText}>{view.label}</span>
-                  </MenuItem>
-                ))}
-              </TextField>
+              {!pathname.includes('/draft') &&
+                <TextField
+                  id="view"
+                  name="view"
+                  select
+                  value={drfView}
+                  onChange={(e) => handleSelectView(e)}
+                  variant="outlined"
+                  className={clsx(classes.button, classes.selectView)}
+                  InputProps={{
+                    className: classes.selectViewProps
+                  }}
+                  SelectProps={{
+                    MenuProps: {
+                      anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                      getContentAnchorEl: null
+                    }
+                  }}>
+                  {drfViews.map(view => (
+                    <MenuItem
+                      key={view.value}
+                      value={view.value}
+                      className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
+                      <span className={classes.dratTypeText} style={{ paddingRight: 10 }}>{view.label}</span>
+                    </MenuItem>
+                  ))}
+                </TextField>}
 
-              <BtnQueueList />
+              {!pathname.includes('/draft') && <BtnQueueList />}
 
               <PermissionProvider
                 action={PERMISSION.VIEW_EDIT_DRAFT_BL}
@@ -562,13 +562,16 @@ function ToolbarLayout1(props) {
                 <Button
                   className={clsx(classes.button, classes.buttonEditDraftBL)}
                   onClick={redirectWorkspace}>
-                  Amendment
+                  <img src="assets/images/icons/amendIconPink.svg" />
+                  <img src="assets/images/icons/penIconPink.svg" style={{ position: 'relative', top: 5, right: 8 }} />
+                  <span claseeName={classes.dratTypeText}>Amendment</span>
                 </Button>
                 <Button
                   variant="contained"
                   className={clsx(classes.button, classes.buttonComfirm)}
                   onClick={confirmBlDraft}>
-                  Confirm
+                  <img src="assets/images/icons/confirm.svg" style={{ position: 'relative', right: 2 }} />
+                  <span claseeName={classes.dratTypeText}>Confirm</span>
                 </Button>
                 <DialogConfirm open={open} handleClose={handleClose} />
               </PermissionProvider>
@@ -590,7 +593,7 @@ function ToolbarLayout1(props) {
                     className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
                     <img src="assets/images/icons/email.svg" style={{ position: 'relative', right: 4 }} />
-                    <span>E-mail</span>
+                    <span>Email</span>
                   </Button>
                 </div>
               </PermissionProvider>
@@ -601,7 +604,10 @@ function ToolbarLayout1(props) {
                 <History />
                 {openTrans && transId && <RestoreVersion />}
               </PermissionProvider>  */}
-              {pathname.includes('/guest') && 
+              <PermissionProvider
+                action={PERMISSION.MAIL_SEND_MAIL}
+                extraCondition={pathname.includes('/guest')}
+              >
                 <div>
                   <Button
                     //color="primary"
@@ -609,10 +615,12 @@ function ToolbarLayout1(props) {
                     className={clsx(classes.button, classes.buttonSubmit)}
                     // className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
+                    <img src="assets/images/icons/forwardMail.svg" style={{ position: 'relative', right: 4 }} />
                     <span className="pl-4">Forward</span>
                   </Button>
                 </div>
-              }
+              </PermissionProvider>
+
               <PermissionProvider
                 action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
                 extraCondition={!pathname.includes('/draft-bl')}>
@@ -626,6 +634,8 @@ function ToolbarLayout1(props) {
                   Submit
                 </Button>
               </PermissionProvider>
+
+              <PreviewDraftBL />
 
               <PermissionProvider
                 action={PERMISSION.VIEW_SHOW_USER_MENU}
