@@ -346,7 +346,7 @@ const InquiryEditor = (props) => {
     setContentsInqCDCM(objCdCm)
   }
 
-  const handleNameChangeCDCM = (e,valEdited) => {
+  const handleNameChangeCDCM = (e, valEdited) => {
     const inqCDCM = [...contentsInqCDCM];
     if (inqCDCM && inqCDCM.length) {
       inqCDCM.forEach(inq => {
@@ -380,7 +380,7 @@ const InquiryEditor = (props) => {
   };
 
   const initContentType = (contentArr) => {
-    const currInq = {...currentEditInq};
+    const currInq = { ...currentEditInq };
     if (containerCheck.includes(currInq.field)) {
       const valResult = [...valueType]
       if (valResult.length && !currInq.id) {
@@ -493,10 +493,10 @@ const InquiryEditor = (props) => {
   }, [fieldValue]);
 
   const isAllSelected = containerCheck.includes(currentEditInq.field)
-      && Array.isArray(inqTypeOption)
-      && Array.isArray(valueType)
-      && inqTypeOption.length
-      && inqTypeOption.length === valueType.length;
+    && Array.isArray(inqTypeOption)
+    && Array.isArray(valueType)
+    && inqTypeOption.length
+    && inqTypeOption.length === valueType.length;
   const handleTypeChange = (e) => {
     const inq = { ...currentEditInq };
     if (containerCheck.includes(inq.field)) {
@@ -836,8 +836,16 @@ const InquiryEditor = (props) => {
           // break;
         }
       }
-
-      if (checkInqChanged(inquiry, currentEditInq, ansTypeChoice === currentEditInq.ansType) && !containerCheck.includes(currentEditInq.field)) {
+      const editInquiry = JSON.parse(JSON.stringify({ ...currentEditInq }))
+      
+      if (ansTypeChoice === editInquiry.ansType) {
+        editInquiry.answerObj.push({
+          id: null,
+          content: 'Other',
+          createdAt: new Date(),
+        })
+      }
+      if (checkInqChanged(inquiry, editInquiry, ansTypeChoice === editInquiry.ansType) && !containerCheck.includes(editInquiry.field)) {
         dispatch(
           FormActions.openConfirmPopup({
             openConfirmPopup: true,
@@ -848,30 +856,23 @@ const InquiryEditor = (props) => {
         setDisabled(false);
         return;
       }
-      if (ansTypeChoice === currentEditInq.ansType) {
-        currentEditInq.answerObj.push({
-          id: null,
-          content: 'Other',
-          createdAt: new Date(),
-        })
-      }
-      const ansCreate = currentEditInq.answerObj.filter(
+      const ansCreate = editInquiry.answerObj.filter(
         ({ id: id1 }) => !inquiry.answerObj.some(({ id: id2 }) => id2 === id1)
       );
 
       const ansDelete = inquiry.answerObj.filter(
-        ({ id: id1 }) => !currentEditInq.answerObj.some(({ id: id2 }) => id2 === id1)
+        ({ id: id1 }) => !editInquiry.answerObj.some(({ id: id2 }) => id2 === id1)
       );
       //
-      const ansUpdate = currentEditInq.answerObj.filter(({ id: id1, content: c1 }) =>
+      const ansUpdate = editInquiry.answerObj.filter(({ id: id1, content: c1 }) =>
         inquiry.answerObj.some(({ id: id2, content: c2 }) => id2 === id1 && c1 !== c2)
       );
-      const ansCreated = currentEditInq.answerObj.filter((ans) => ans.id);
-      const mediaCreate = currentEditInq.mediaFile.filter(
+      const ansCreated = editInquiry.answerObj.filter((ans) => ans.id);
+      const mediaCreate = editInquiry.mediaFile.filter(
         ({ id: id1 }) => !inquiry.mediaFile.some(({ id: id2 }) => id2 === id1)
       );
       const mediaDelete = inquiry.mediaFile.filter(
-        ({ id: id1 }) => !currentEditInq.mediaFile.some(({ id: id2 }) => id2 === id1)
+        ({ id: id1 }) => !editInquiry.mediaFile.some(({ id: id2 }) => id2 === id1)
       );
 
       for (const f in mediaCreate) {
@@ -881,20 +882,20 @@ const InquiryEditor = (props) => {
       }
       // Edit INQUIRY
       if (
-        JSON.stringify(inq(currentEditInq)) !== JSON.stringify(inq(inquiry)) ||
-        JSON.stringify(currentEditInq.answerObj) !== JSON.stringify(inquiry.answerObj) ||
+        JSON.stringify(inq(editInquiry)) !== JSON.stringify(inq(inquiry)) ||
+        JSON.stringify(editInquiry.answerObj) !== JSON.stringify(inquiry.answerObj) ||
         mediaCreate.length ||
         mediaDelete.length || isCdCm
       ) {
         const optionsMinimize = [...listMinimize];
         const index = optionsMinimize.findIndex((e) => e.id === inquiry.id);
-        optionsMinimize[index].field = currentEditInq.field;
+        optionsMinimize[index].field = editInquiry.field;
         dispatch(InquiryActions.setListMinimize(optionsMinimize));
         const editedIndex = inquiriesOp.findIndex((inq) => inq.id === inquiry.id);
-        inquiriesOp[editedIndex] = currentEditInq;
+        inquiriesOp[editedIndex] = editInquiry;
 
         const update = await updateInquiry(inquiry.id, {
-          inq: inq(currentEditInq),
+          inq: inq(editInquiry),
           inqCdCm: contentsInqCDCM,
           blId: myBL.id,
           ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
@@ -904,7 +905,7 @@ const InquiryEditor = (props) => {
         if (!isCdCm) {
           if (update.data.length && editedIndex !== -1) {
             inquiriesOp[editedIndex].answerObj = [
-              ...currentEditInq.answerObj,
+              ...editInquiry.answerObj,
               ...update.data
             ].filter((inq) => inq.id);
           }
@@ -1006,7 +1007,7 @@ const InquiryEditor = (props) => {
           })
         }
       } else {
-        const question = [{ ...currentEditInq }];
+        const question = JSON.parse(JSON.stringify([{ ...currentEditInq }]));
         inqContentTrim = question.map((op) => {
           let contentTrim = { ...op, content: op.content.trim() };
           const ansTypeChoice = metadata.ans_type['choice'];
@@ -1172,17 +1173,19 @@ const InquiryEditor = (props) => {
                           </div>}
                         MenuProps={MenuProps}
                       >
-                        <MenuItem key={'select-all'} value={{label: 'Select All',
-                          value: 'select-all'}}>
+                        <MenuItem key={'select-all'} value={{
+                          label: 'Select All',
+                          value: 'select-all'
+                        }}>
                           <Checkbox checked={isAllSelected} />
-                          <ListItemText primary={'Select All'}/>
+                          <ListItemText primary={'Select All'} />
                         </MenuItem>
                         {inqTypeOption.map((name) => {
                           const mapType = valueType.map(v => v.value);
                           return (
                             <MenuItem key={name.value} value={name}>
                               <Checkbox checked={mapType.includes(name.value)} />
-                              <ListItemText primary={name.label}/>
+                              <ListItemText primary={name.label} />
                             </MenuItem>
                           )
                         })}
