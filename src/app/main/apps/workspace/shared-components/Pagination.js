@@ -26,41 +26,41 @@ const usePagination = (
       If the number of pages is less than the page numbers we want to show in our
       paginationComponent, we return the range [1..totalPageCount]
     */
-    if (totalPageCount < 10) {
+    if (totalPageCount < 5) {
       return range(1, totalPageCount);
     }
-
     /*
       We do not want to show dots if there is only one position left 
       after/before the left/right page count as that would lead to a change if our Pagination
       component size which we do not want
     */
-    const shouldShowLeftDots = currentPage - 1 >= 5;
-    const shouldShowRightDots = currentPage < totalPageCount - 4;
+    const shouldShowLeftDots = currentPage - 1 >= 4;
+    const shouldShowRightDots = currentPage < totalPageCount - 3;
 
     const firstPageIndex = 1;
     const lastPageIndex = totalPageCount;
 
     if (!shouldShowLeftDots && shouldShowRightDots) {
-      let leftItemCount = 6;
+      let leftItemCount = currentPage + 1;
       let leftRange = range(1, leftItemCount);
 
       return [...leftRange, DOTS, totalPageCount];
     }
 
     if (shouldShowLeftDots && !shouldShowRightDots) {
-      let rightItemCount = 5;
       let rightRange = range(
-        totalPageCount - rightItemCount,
+        currentPage - 1,
         totalPageCount
       );
       return [firstPageIndex, DOTS, ...rightRange];
     }
 
     if (shouldShowLeftDots && shouldShowRightDots) {
-      let middleRange = range(currentPage - 2, currentPage + 2);
+      let middleRange = range(currentPage - 1, currentPage + 1);
       return [firstPageIndex, DOTS, ...middleRange, DOTS, lastPageIndex];
     }
+
+    return range(1, totalPageCount);
   }, [totalPageCount, currentPage]);
 
   return paginationRange;

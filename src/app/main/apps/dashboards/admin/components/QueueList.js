@@ -14,14 +14,15 @@ import {
   Checkbox,
   ListItemText,
   Chip,
-  Grid
+  Grid,
+  Icon
 } from '@material-ui/core';
 import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 import SearchIcon from '@material-ui/icons/Search';
 import { formatDate } from '@shared';
 import clsx from 'clsx';
 import { mapperBlinkStatus } from '@shared/keyword';
-import { DateRangePicker } from 'react-date-range';
+import { DateRangePicker, defaultStaticRanges } from 'react-date-range';
 import { subMonths, addDays, subDays } from 'date-fns';
 
 import QueueListTable from './QueueListTable';
@@ -106,6 +107,20 @@ const useStyles = makeStyles((theme) => ({
   },
   menuItemSelected: {
     backgroundColor: '#FDF2F2 !important'
+  },
+  grid: {
+    '& .MuiGrid-grid-xs-4': {
+      flexBasis: '33%',
+      maxWidth: '33%'
+    },
+    '& .MuiGrid-grid-xs-3': {
+      flexBasis: '23%',
+      maxWidth: '23%'
+    },
+    '& .MuiGrid-grid-xs-1': {
+      flexBasis: '11%',
+      maxWidth: '11%'
+    }
   }
 }));
 
@@ -135,6 +150,7 @@ const SearchLayout = (props) => {
   const [startingDate, setStartingDate] = useState('');
   const [selectedStatus, setSelectedStatus] = useState([...blStatusOption, 'All']);
   const [isPickerOpen, setPickerOpen] = useState(false);
+  const [labelDate, setLabelDate] = useState();
   const pickerRef = useRef(null);
 
   const handleSelectStatus = (event) => {
@@ -194,18 +210,31 @@ const SearchLayout = (props) => {
     };
   }, []);
 
+  const getLabelDate = (startDate, endDate) => {
+    return defaultStaticRanges.find(
+      (date) =>
+        formatDate(date.range().startDate, 'MMM DD YYYY') === formatDate(startDate, 'MMM DD YYYY') &&
+        formatDate(date.range().endDate, 'MMM DD YYYY') === formatDate(endDate, 'MMM DD YYYY')
+    )?.label;
+  };
+
   const handleDateChange = (ranges) => {
     const { startDate, endDate } = ranges.selection;
     const maxEndDate = addDays(startDate, 30);
     const minStartDate = subDays(endDate, 30);
     if (startDate.getTime() === endDate.getTime()) setStartingDate(endDate);
+
     // If the selected end date is beyond the maximum, adjust it
     if (startDate < startingDate) {
+      const temp = startDate < minStartDate ? minStartDate : startDate;
+      setLabelDate(getLabelDate(temp, endDate));
       handleChange({
-        from: startDate < minStartDate ? minStartDate : startDate,
+        from: temp,
         to: endDate
       });
     } else {
+      const temp = endDate > maxEndDate ? maxEndDate : endDate;
+      setLabelDate(getLabelDate(startDate, temp));
       handleChange({
         from: startDate,
         to: endDate > maxEndDate ? maxEndDate : endDate
@@ -213,9 +242,23 @@ const SearchLayout = (props) => {
     }
   };
 
+  const onPaste = (e) => {
+    e.preventDefault();
+    const removeDuplicate = [
+      ...new Set(
+        e.clipboardData
+          .getData('text')
+          .split(/\n/) // split new line
+          .map((str) => str.trim()) // trim space
+          .filter(str => str) // filter empty string
+      )
+    ].join(", ");
+    handleChange({ bookingNo: removeDuplicate })
+  }
+
   return (
     <Paper className={classes.paper}>
-      <Grid container spacing={1}>
+      <Grid container spacing={1} className={classes.grid}>
         {/* Booking Number */}
         <Grid item xs={4}>
           <FormControl fullWidth variant="outlined">
@@ -230,6 +273,7 @@ const SearchLayout = (props) => {
                 }
               }}
               onChange={(e) => handleChange({ bookingNo: e.target.value })}
+              onPaste={onPaste}
               startAdornment={
                 <InputAdornment className={classes.searchBox} position="start">
                   {''}
@@ -240,21 +284,24 @@ const SearchLayout = (props) => {
           </FormControl>
         </Grid>
         {/* From */}
-        <Grid item xs={2}>
+        <Grid item xs={3}>
           <FormControl fullWidth variant="outlined">
             <InputLabel>
-              <span>From - To</span>
+              <span>Date</span>
             </InputLabel>
             <OutlinedInput
-              value={`${formatDate(state.from, 'DD/MM/YYYY')} - ${formatDate(
-                state.to,
-                'DD/MM/YYYY'
-              )}`}
+              value={
+                labelDate ||
+                `${formatDate(state.from, 'MMM DD YYYY')} - ${formatDate(state.to, 'MMM DD YYYY')}`
+              }
+              endAdornment={
+                <Icon>calendar_today</Icon>
+              }
               onClick={() => setPickerOpen(true)}
               inputProps={{
                 readOnly: true
               }}
-              labelWidth={65}
+              labelWidth={30}
             />
             {isPickerOpen && (
               <div ref={pickerRef}>
@@ -321,7 +368,7 @@ const SearchLayout = (props) => {
             />
           </FormControl>
         </Grid>
-        <Grid item xs={2} style={{ margin: 'auto' }}>
+        <Grid item xs={1} style={{ margin: 'auto' }}>
           <Button className={clsx(classes.btn, classes.btnSearch)} onClick={handleSearch}>
             <SearchIcon />
             <span>Search</span>

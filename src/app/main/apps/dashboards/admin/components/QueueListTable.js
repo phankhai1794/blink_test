@@ -21,7 +21,8 @@ const useStyles = makeStyles({
     border: '1px solid #E2E6EA',
     backgroundColor: 'white',
     padding: '0 12px',
-    borderRadius: 4
+    borderRadius: 4,
+    fontFamily: 'Montserrat',
   },
   table: {
     tableLayout: 'fixed',
@@ -210,7 +211,7 @@ const sortDates = (array) => {
 
 const isDateStringValid = (str) => {
   const date = new Date(str);
-  return isNaN(date) ? str : formatDate(date, 'DD/MM/YYYY');
+  return isNaN(date) ? str : formatDate(date, 'MMM DD YYYY');
 };
 
 const Row = (props) => {
@@ -272,8 +273,8 @@ const Row = (props) => {
             <a href={`/apps/workspace/${row.bkgNo}?usrId=admin&cntr=VN`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bkgNo}</span></a>
           </TableCell>
         </StickyTableCell>
-        <TableCell className={classes.cellBody} >{formatDate(row.lastUpdated, 'DD/MM/YYYY HH:mm')}</TableCell>
-        <TableCell className={classes.cellBody}>{row.etd && formatDate(row.etd, 'DD/MM/YYYY HH:mm')}</TableCell>
+        <TableCell className={classes.cellBody} >{formatDate(row.lastUpdated, 'MMM DD YYYY HH:mm')}</TableCell>
+        <TableCell className={classes.cellBody}>{row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}</TableCell>
         <TableCell className={classes.cellBody} ><span style={{ textTransform: 'capitalize' }}>{row.status.customer}</span></TableCell>
         <TableCell className={classes.cellBody} ><span style={{ textTransform: 'capitalize' }}>{row.status.onshore}</span></TableCell>
         <TableCell className={classes.cellBody}>{mapperBlinkStatus[row.status.bl]}</TableCell>
@@ -354,7 +355,7 @@ const Row = (props) => {
                     <TableCell>{row.field}</TableCell>
                     {!tab ? <TableCell>{row.inqType}</TableCell> : null}
                     <TableCell>
-                      {formatDate(row.updatedAt, 'DD/MM/YYYY HH:mm')}
+                      {formatDate(row.updatedAt, 'MMM DD YYYY HH:mm')}
                     </TableCell>
                     <TableCell>
                       {row.status === 'pending' ? 'Pending' : null}
@@ -445,8 +446,8 @@ const QueueListTable = () => {
                 disableUnderline
               >
                 {
-                  [5, 10, 15].map(val =>
-                    <MenuItem key={val} classes={{ selected: classes.menuItemSelected }} value={val}>
+                  [10, 20, 50].map(val =>
+                    <MenuItem key={val} style={{ fontFamily: 'Montserrat' }} value={val}>
                       Show {val} items
                     </MenuItem>
 
