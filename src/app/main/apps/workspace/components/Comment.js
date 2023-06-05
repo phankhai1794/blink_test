@@ -98,12 +98,12 @@ const Comment = (props) => {
   const contentUI = ({ userName, createdAt, avatar, content, title, media, answersMedia, id, type, reply }) => {
     let dataCD = [];
     let dataCM = [];
-    if (isJsonText(reply.content) && containerCheck.includes(reply.field) && reply.type === 'ANS_CD_CM') {
+    if (reply.content && isJsonText(reply.content) && containerCheck.includes(reply.field) && reply.type === 'ANS_CD_CM') {
       const parseJs = JSON.parse(reply.content);
       dataCD = parseJs?.[getField(CONTAINER_DETAIL)];
       dataCM = parseJs?.[getField(CONTAINER_MANIFEST)];
     }
-    if (content.indexOf(getField(CONTAINER_DETAIL)) !== -1) {
+    if (content && content.indexOf(getField(CONTAINER_DETAIL)) !== -1) {
       const parseJs = JSON.parse(content);
       dataCD = parseJs[getField(CONTAINER_DETAIL)];
       dataCM = parseJs[getField(CONTAINER_MANIFEST)];
