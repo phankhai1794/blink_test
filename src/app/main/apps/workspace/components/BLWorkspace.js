@@ -31,7 +31,7 @@ import {
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import _ from 'lodash';
 import { Chip, Divider, Grid } from '@material-ui/core';
@@ -41,8 +41,6 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { getBlInfo } from 'app/services/myBLService';
-import { getPermissionByRole } from 'app/services/authService';
-import { SocketContext } from 'app/AppContext';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -145,7 +143,6 @@ const BLWorkspace = (props) => {
   );
   const enableSend = useSelector(({ workspace }) => workspace.inquiryReducer.enableSend);
   const currentField = useSelector(({ workspace }) => workspace.inquiryReducer.currentField);
-  const socket = useContext(SocketContext);
   const openQueueList = useSelector(({ workspace }) => workspace.inquiryReducer.openQueueList);
 
   const getField = (keyword) => {
@@ -158,26 +155,6 @@ const BLWorkspace = (props) => {
     }
     return content[getField(keyword)] || '';
   };
-
-  socket.on('msg_processing', async (data) => {
-    const { processingBy } = data;
-    const userInfo = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
-
-    if (userInfo?.displayName && processingBy.length) {
-      console.log('processingBy: ', processingBy);
-      let permissions = [];
-      if (userInfo.displayName === processingBy[0]) { // if to be the first user
-        permissions = await getPermissionByRole(userInfo.role);
-        dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-      } else {
-        permissions = await getPermissionByRole('Viewer');
-        if (userInfo.displayName === processingBy[processingBy.length - 1]) {
-          dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: processingBy[0] }));
-        }
-      }
-      sessionStorage.setItem('permissions', JSON.stringify(permissions));
-    }
-  });
 
   useEffect(() => {
     setInqCustomer(checkNewInquiry(metadata, inquiries, 'customer') || []);
@@ -232,20 +209,6 @@ const BLWorkspace = (props) => {
     return () => window.removeEventListener('beforeunload', unloadCallback);
   }, [isLoadingTrans]);
 
-
-  const checkBLSameRequest = async (bl) => {
-    const userInfo = JSON.parse(localStorage.getItem('USER'));
-    if (bl && userInfo) {
-      socket.emit('user_processing_in', {
-        mybl: bl,
-        type: 'warning_duplicate',
-        userName: userInfo.displayName,
-        role: userInfo.role,
-        userType: userInfo.userType
-      });
-    }
-  };
-
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(DraftActions.setProcess(props.process));
@@ -254,11 +217,9 @@ const BLWorkspace = (props) => {
     const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) {
       dispatch(Actions.initBL(bkgNo));
-      checkBLSameRequest(bkgNo);
     }
     else if (props.myBL) {
-      dispatch(FormActions.increaseLoading())
-      checkBLSameRequest(props.myBL?.id);
+      dispatch(FormActions.increaseLoading());
       getBlInfo(props.myBL?.id).then(res => {
         const { id, state, bkgNo } = res.myBL;
         dispatch(InquiryActions.setMyBL({ id, state, bkgNo }));
@@ -266,31 +227,7 @@ const BLWorkspace = (props) => {
       });
     }
 
-    return () => {
-      dispatch(FormActions.resetLoading());
-      const userInfo = JSON.parse(localStorage.getItem('USER'));
-      if (userInfo) {
-        socket.emit('user_processing_out', {
-          mybl: bkgNo,
-          type: 'warning_duplicate',
-          userName: userInfo.displayName,
-          role: userInfo.role,
-          userType: userInfo.userType
-        });
-      }
-
-      if (userInfo && userInfo.role === 'Admin') {
-        getPermissionByRole('Admin').then(data => {
-          const assignPermissionViewer = {
-            ...userInfo,
-            permissions: data
-          };
-          localStorage.setItem('USER', JSON.stringify(assignPermissionViewer));
-        }).catch(err => {
-          console.log(err)
-        })
-      }
-    }
+    return () => dispatch(FormActions.resetLoading());
   }, []);
 
   const expandRef = useRef();

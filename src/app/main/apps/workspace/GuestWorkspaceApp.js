@@ -9,14 +9,6 @@ function GuestWorkspaceApp() {
   const bl = new URLSearchParams(window.location.search).get('bl');
   const pageLayout = useRef(null);
 
-  (() => {
-    window.onpageshow = function (event) {
-      if (event.persisted) {
-        window.location.reload();
-      }
-    };
-  })();
-
   return (
     <OtpCheck>
       <div className="flex flex-col flex-1 w-full">
