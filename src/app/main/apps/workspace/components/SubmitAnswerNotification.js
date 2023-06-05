@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { useSelector } from 'react-redux';
 import { Button, Dialog, makeStyles, IconButton, Icon } from "@material-ui/core";
 import MuiDialogContent from "@material-ui/core/DialogContent";
+import { SocketContext } from 'app/AppContext';
 
 const mainColor = '#BD0F72';
 const darkColor = '#132535';
@@ -51,12 +53,21 @@ const useStyles = makeStyles((theme) => ({
     textTransform: 'none',
     fontFamily: 'Montserrat',
     fontSize: 16,
-    fontWeight: 600
+    fontWeight: 600,
+    margin: '0px 5px'
   }
 }))
 
 const SubmitAnswerNotification = ({ msg, msg2 = 'Thank you!', iconType, open, handleClose }) => {
   const classes = useStyles();
+  const socket = useContext(SocketContext);
+
+  const conflictWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning.status);
+
+  const handleKick = () => {
+    socket.emit("kick_user");
+    handleClose();
+  }
 
   return (
     <Dialog open={open} onClose={handleClose} classes={{ root: classes.dialog }}>
@@ -80,6 +91,13 @@ const SubmitAnswerNotification = ({ msg, msg2 = 'Thank you!', iconType, open, ha
         <span className={classes.secondSentence}>{msg2}</span>
       </MuiDialogContent>
       <div className={classes.container}>
+        {conflictWarning &&
+          <Button
+            className={classes.button}
+            onClick={() => handleKick()}>
+            Kick
+          </Button>
+        }
         <Button
           className={classes.button}
           onClick={handleClose}>

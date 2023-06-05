@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import _ from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles, Button, Dialog, Divider } from '@material-ui/core';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -7,6 +8,9 @@ import CloseIcon from '@material-ui/icons/Close';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import { getInquiryById } from 'app/services/inquiryService';
 import { getBlInfo } from 'app/services/myBLService';
+import { SocketContext } from 'app/AppContext';
+import { getPermissionByRole } from 'app/services/authService';
+import * as AppAction from 'app/store/actions';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -58,6 +62,8 @@ const useStyles = makeStyles((theme) => ({
 const BLProcessNotification = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const socket = useContext(SocketContext);
+
   const [open, setOpen] = useState(false);
 
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
@@ -89,7 +95,42 @@ const BLProcessNotification = () => {
   };
 
   useEffect(() => {
-    if (myBL.id) checkBLProcess();
+    if (myBL.id) {
+      checkBLProcess();
+
+      // User connection
+      const user = JSON.parse(localStorage.getItem('USER'));
+      socket.emit(
+        'user_connect',
+        {
+          mybl: user.userType === "ADMIN" ? myBL.bkgNo : myBL.id,
+          userName: user.displayName,
+          userType: user.userType
+        }
+      );
+
+      // Receive the users accessing BL
+      socket.on('users_accessing', async ({ usersAccessing }) => {
+        console.log("usersAccessing: ", usersAccessing);
+
+        const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
+        if (userLocal.displayName && usersAccessing.length) {
+          let permissions = await getPermissionByRole('Viewer');
+          dispatch(AppAction.setUser({ ...userLocal, permissions }));
+
+          if (userLocal.displayName === usersAccessing[0]) { // if to be the first user
+            permissions = await getPermissionByRole(userLocal.role);
+          } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1]) { // if to be the last user
+            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0] }));
+          }
+
+          setTimeout(() => {
+            dispatch(AppAction.setUser({ ...userLocal, permissions }));
+          }, 500);
+          sessionStorage.setItem('permissions', JSON.stringify(permissions));
+        }
+      });
+    }
   }, [myBL]);
 
   return (

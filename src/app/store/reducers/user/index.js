@@ -6,8 +6,7 @@ const initialState = {
   displayName: '',
   photoURL: '',
   email: '',
-  permissions: [],
-  userProcessingBy: []
+  permissions: []
 };
 
 const user = function (state = initialState, action) {
@@ -17,9 +16,6 @@ const user = function (state = initialState, action) {
   }
   case Actions.REMOVE_USER: {
     return { ...initialState };
-  }
-  case Actions.SET_USER_PROCESSING_BY: {
-    return { ...state, ...action.state };
   }
   default: {
     return state;
