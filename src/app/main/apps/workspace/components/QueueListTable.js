@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Tooltip, Chip, Icon } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Tooltip, Chip, Icon, FormControl, Select, MenuItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { getQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
@@ -12,18 +12,21 @@ import EditIcon from '@material-ui/icons/Edit';
 import ReplyIcon from '@material-ui/icons/Reply';
 
 const useStyles = makeStyles({
+  root: {
+    width: "100%",
+    overflowX: 'auto',
+  },
   container: {
     display: 'flex',
-    justifyContent: 'center',
-    paddingTop: '16px',
-    paddingBottom: '16px',
+    justifyContent: 'end',
+    margin: 10,
     '& a': {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       borderRadius: '10px',
-      width: '40px',
-      height: '43px',
+      width: '34px',
+      height: '34px',
       border: '1px solid #E2E6EA',
       backgroundColor: '#FFFFFF',
       color: '#132535',
@@ -130,29 +133,36 @@ const useStyles = makeStyles({
   chip: {
     color: '#FFFF',
     borderRadius: '4px',
-    height: '24px',
-    width: '53px',
+    height: 26,
+    width: 56,
     margin: 2,
   },
   inquiryColor: {
-    backgroundColor: '#DC2626',
+    backgroundColor: '#FDF2F2',
+    color: '#DC2626'
   },
   amendmentColor: {
-    backgroundColor: '#ECC083',
+    backgroundColor: '#FEF4E6',
+    color: '#F39200'
   },
   replyColor: {
-    backgroundColor: '#2F80ED'
+    backgroundColor: '#EAF2FD',
+    color: '#2F80ED'
   },
   sizeIcon: {
     fontSize: '18px',
   },
-  iconColor: {
-    color: '#FFFF'
-  },
   resolvedColor: {
     backgroundColor: '#EBF7F2',
     color: '#36B37E',
-  }
+  },
+  selectStatus: {
+    margin: 'auto',
+    border: '1px solid #E2E6EA',
+    backgroundColor: 'white',
+    padding: '0 12px',
+    borderRadius: 4
+  },
 });
 
 const QueueListTable = () => {
@@ -211,8 +221,15 @@ const QueueListTable = () => {
     dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, sortField: tempQuery }));
   };
 
+  const showItems = (e) => {
+    searchQueueQuery.currentPageNumber > Math.ceil(state.totalBkgNo / e.target.value) ?
+      dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, pageSize: e.target.value, currentPageNumber: Math.ceil(state.totalBkgNo / e.target.value) }))
+      :
+      dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, pageSize: e.target.value }))
+  }
+
   return (
-    <div style={{ padding: '22px', height: '675px' }}>
+    <div style={{ padding: '20px', height: '695px' }}>
       {/* TODO: TBU */}
       {/* <div className={classes.searchContainer}>
         <Button
@@ -225,139 +242,163 @@ const QueueListTable = () => {
         </Button>
       </div> */}
       {(state?.queueListBl.length > 0) ?
-        <div component={Paper}>
-          <Table className={classes.table} aria-label='simple table'>
-            <TableHead className={classes.headerColor}>
-              <TableRow>
-                <TableCell>
-                  <div className={classes.lineColumn}>
-                    <span>No.</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className={classes.lineColumn}>
-                    <span>Booking Number</span>
-                    <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`bkgNo&order=${state.sortBkgNo}`, 'bkgNo')} />
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className={classes.lineColumn}>
-                    <span>Last Updated</span>
-                    <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`latestDate&order=${state.sortLatestDate}`, 'latestDate')} />
-                  </div>
-                </TableCell>
-                {/* <TableCell>
-                  <div className={classes.lineColumn}>
-                    <span>ETD</span>
-                    <img src='/assets/images/icons/Icon-sort.svg' />
-                  </div>
-                </TableCell> */}
-                <TableCell>
-                  <div className={classes.lineColumn}>
-                    <span>Status</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className={classes.lineColumn}>
-                    <span>Unresolved</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div>
-                    <span>Resolved</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {/* TBU */}
-                  {/* <Tooltip title='Add a column'>
-                    <ControlPoint className={classes.btnAddColumn} fontSize='small' onClick={handleAddColumn} />
-                  </Tooltip> */}
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {state?.queueListBl.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell component='th' scope='row'>
-                    {/* TODO: No. function */}
-                    {index + 1}
-                  </TableCell>
-                  <TableCell component='th' scope='row'>
-                    <a href={`/guest?bl=${row.id}`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bookingNo}</span></a>
-                  </TableCell>
-                  <TableCell >{formatDate(row.latestDate, 'MMM - DD - YYYY HH:mm')}</TableCell>
-                  {/* <TableCell ><span>{row.etd}</span></TableCell> */}
-                  <TableCell ><span style={{ textTransform: 'capitalize' }}>{row?.status.toLowerCase()}</span></TableCell>
-                  <TableCell >
-                    <div className={classes.label}>
-                      <Tooltip title={'Inquiry'} placement='bottom-end'>
-                        <div className={classes.chips}>
-                          <Chip label={row.countPendingInq} className={clsx(classes.chip, classes.inquiryColor)} icon={<HelpIcon className={clsx(classes.sizeIcon, classes.iconColor)} />} />
-                        </div>
-                      </Tooltip>
-                      <Tooltip title={'Amendment'} placement='bottom-end'>
-                        <div className={classes.chips}>
-                          <Chip label={row.countPendingAme} className={clsx(classes.chip, classes.amendmentColor)} icon={<EditIcon className={clsx(classes.sizeIcon, classes.iconColor)} />} />
-                        </div>
-                      </Tooltip>
-                      <Tooltip title={'New Replies'} placement='bottom-end'>
-                        <div className={classes.chips}>
-                          <Chip label={row.countNewReply} className={clsx(classes.chip, classes.replyColor)} icon={<ReplyIcon className={clsx(classes.sizeIcon, classes.iconColor)} />} />
-                        </div>
-                      </Tooltip>
-                      {/* <div style={{ minWidth: '75px' }}>
-                        {row?.countNewReply ?
-                          <span className={classes.labelReplies}>{`${row.countNewReply} New Replies`}</span> : <span />
-                        }
-                      </div> */}
-                    </div>
-                  </TableCell>
-                  <TableCell >
-                    <div className={classes.label}>
-                      {row.countPendingInq ?
-                        <Chip
-                          label={`${row.countInqResolved}/${row.countAllInq}`}
-                          className={clsx(classes.chip, classes.resolvedColor)}
-                          icon={
-                            <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
-                              help
-                            </Icon>
-                          }
-                        /> :
-                        null
-                      }
-                      {row.countPendingAme ?
-                        <Chip
-                          label={`${row.countAmeResolved}/${row.countAllAme}`}
-                          className={clsx(classes.chip, classes.resolvedColor)}
-                          icon={
-                            <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
-                              edit
-                            </Icon>
-                          }
-                        /> :
-                        null
-                      }
-                    </div>
-                  </TableCell>
-                  <TableCell />
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <>
           <div className={classes.container}>
-            <div className={classes.pagination}>
-              <Pagination
-                currentNumber={searchQueueQuery.currentPageNumber}
-                totalPage={searchQueueQuery.totalPageNumber}
-                totalBkgNo={state.totalBkgNo}
-                query={searchQueueQuery}
-                searchQueueQuery={(search) => dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...search }))}
-              />
-            </div>
+            <Pagination
+              currentNumber={searchQueueQuery.currentPageNumber}
+              totalPage={searchQueueQuery.totalPageNumber}
+              totalBkgNo={state.totalBkgNo}
+              query={searchQueueQuery}
+              searchQueueQuery={(search) => dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...search }))}
+            />
+            <FormControl variant='outlined' className={classes.formControl}>
+              <Select
+                className={classes.selectStatus}
+                value={searchQueueQuery.pageSize}
+                onChange={showItems}
+                disableUnderline
+              >
+                {
+                  [5, 10, 15].map(val =>
+                    <MenuItem key={val} classes={{ selected: classes.menuItemSelected }} value={val}>
+                      Show {val} items
+                    </MenuItem>
+
+                  )}
+              </Select>
+            </FormControl>
           </div>
+          <div style={{ width: '100%', overflowX: 'auto', maxHeight: '90%' }}>
+            <Table className={classes.table} aria-label='simple table'>
+              <TableHead className={classes.headerColor} style={{ backgroundColor: '#FDF2F2', position: 'sticky', top: 0, zIndex: 2 }}>
+                <TableRow>
+                  <TableCell >
+                    <div className={classes.lineColumn}>
+                      <span>No.</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className={classes.lineColumn}>
+                      <span>Booking Number</span>
+                      <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`bkgNo&order=${state.sortBkgNo}`, 'bkgNo')} />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className={classes.lineColumn}>
+                      <span>Last Updated</span>
+                      <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`latestDate&order=${state.sortLatestDate}`, 'latestDate')} />
+                    </div>
+                  </TableCell>
+                  {/* <TableCell>
+                    <div className={classes.lineColumn}>
+                      <span>ETD</span>
+                      <img src='/assets/images/icons/Icon-sort.svg' />
+                    </div>
+                  </TableCell> */}
+                  <TableCell>
+                    <div className={classes.lineColumn}>
+                      <span>Status</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className={classes.lineColumn}>
+                      <span>Unresolved</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      <span>Resolved</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {/* TBU */}
+                    {/* <Tooltip title='Add a column'>
+                      <ControlPoint className={classes.btnAddColumn} fontSize='small' onClick={handleAddColumn} />
+                    </Tooltip> */}
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {state?.queueListBl.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell component='th' scope='row'>
+                      {/* TODO: No. function */}
+                      {index + (searchQueueQuery.currentPageNumber - 1) * searchQueueQuery.pageSize + 1}
+                    </TableCell>
+                    <TableCell component='th' scope='row'>
+                      <a href={`/guest?bl=${row.id}`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bookingNo}</span></a>
+                    </TableCell>
+                    <TableCell >{formatDate(row.latestDate, 'MMM - DD - YYYY HH:mm')}</TableCell>
+                    {/* <TableCell ><span>{row.etd}</span></TableCell> */}
+                    <TableCell ><span style={{ textTransform: 'capitalize' }}>{row?.status.toLowerCase()}</span></TableCell>
+                    <TableCell >
+                      <div className={classes.label}>
+                        <Tooltip title={'Inquiries'} placement='bottom-end'>
+                          <div className={classes.chips}>
+                            <Chip label={row.countPendingInq} className={clsx(classes.chip, classes.inquiryColor)} icon={<HelpIcon className={clsx(classes.sizeIcon, classes.inquiryColor)} />} />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title={'Amendments'} placement='bottom-end'>
+                          <div className={classes.chips}>
+                            <Chip label={row.countPendingAme} className={clsx(classes.chip, classes.amendmentColor)} icon={<EditIcon className={clsx(classes.sizeIcon, classes.amendmentColor)} />} />
+                          </div>
+                        </Tooltip>
+                        <Tooltip title={'New Replies'} placement='bottom-end'>
+                          <div className={classes.chips}>
+                            <Chip label={row.countNewReply} className={clsx(classes.chip, classes.replyColor)} icon={<ReplyIcon className={clsx(classes.sizeIcon, classes.replyColor)} />} />
+                          </div>
+                        </Tooltip>
+                        {/* <div style={{ minWidth: '75px' }}>
+                          {row?.countNewReply ?
+                            <span className={classes.labelReplies}>{`${row.countNewReply} New Replies`}</span> : <span />
+                          }
+                        </div> */}
+                      </div>
+                    </TableCell>
+                    <TableCell >
+                      <div className={classes.label}>
+                        {row.countPendingInq ?
+                          <Chip
+                            label={`${row.countInqResolved}/${row.countAllInq}`}
+                            className={clsx(classes.chip, classes.resolvedColor)}
+                            icon={
+                              <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
+                                help
+                              </Icon>
+                            }
+                          /> :
+                          null
+                        }
+                        {row.countPendingAme ?
+                          <Chip
+                            label={`${row.countAmeResolved}/${row.countAllAme}`}
+                            className={clsx(classes.chip, classes.resolvedColor)}
+                            icon={
+                              <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
+                                edit
+                              </Icon>
+                            }
+                          /> :
+                          null
+                        }
+                      </div>
+                    </TableCell>
+                    <TableCell />
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
+        :
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin: 'auto', color: '#515F6B' }}>
+          <img
+            src="assets/images/icons/noData.svg"
+            alt="No data"
+          />
+          <span style={{ fontWeight: 600, fontSize: 24, margin: '10px 0' }}>No data found</span>
+          <span>Please try another search, keywords or filters.</span>
         </div>
-        : <span>No data!</span>
       }
     </div>
   )

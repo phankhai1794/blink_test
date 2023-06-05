@@ -129,9 +129,6 @@ const useStyles = makeStyles({
   sizeIcon: {
     fontSize: '18px',
   },
-  iconColor: {
-    color: '#FFFF'
-  },
   cellHead: {
     padding: '0 10px',
     height: 50

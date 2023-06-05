@@ -29,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
       alignItems: 'center',
       fontFamily: 'Montserrat',
     },
+    padding: '10px 24px',
   },
   bodyPopup: {
     backgroundColor: '#FFF9F9'
@@ -122,8 +123,7 @@ const QueueList = () => {
         TransitionComponent={Transition}
         keepMounted
         onClose={handleClose}
-        fullWidth
-        maxWidth={'xl'}
+        fullScreen
         scroll='paper'
       >
         {/* Header popup */}
