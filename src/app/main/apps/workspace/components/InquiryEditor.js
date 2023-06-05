@@ -561,6 +561,7 @@ const InquiryEditor = (props) => {
         && metadata.template.some((temp) => (temp.field === keyword && temp.type === e.value && temp.content[0]))
       )
       setFieldType(filterField);
+      // case filter CD CM to BL Data Field
       const keyWord = filterField.map(f => f.keyword);
       if (keyWord.includes('containerManifest') || keyWord.includes('containerDetail')) {
         setValueType([e]);
@@ -585,6 +586,32 @@ const InquiryEditor = (props) => {
     } else {
       inq.content = filter?.content[0] || MSG_INQUIRY_CONTENT;
       setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
+    }
+
+    if (containerCheck.includes(inq.field) && inq.inqType) {
+      const inqCdCm = [...contentsInqCDCM];
+      const contentArr = [];
+      const findByIdType = inqCdCm.find(cdcm => inq.inqType === cdcm.type);
+      if (!findByIdType) {
+        const filter = metadata.template.find(({ field, type }) => {
+          return type === inq.inqType && ['containerDetail', 'containerManifest'].includes(field);
+        });
+        if (filter) {
+          filter.showTemplate = false;
+          filter.templateIndex = '0';
+          filter.contentShow = filter.content[0];
+          filter.receiver = `customer-${inq.inqType}`;
+          contentArr.push(filter);
+        }
+      } else if (findByIdType) {
+        contentArr.push(findByIdType);
+      }
+      setContentsInqCDCM(contentArr);
+      inq.ansType = metadata.ans_type.paragraph
+      setValueAnsType({
+        label: 'Onshore/Customer Input',
+        value: metadata.ans_type.paragraph
+      });
     }
 
     setTemplateList(filter?.content || []);
@@ -1155,7 +1182,7 @@ const InquiryEditor = (props) => {
                 {containerCheck.includes(currentEditInq.field) ? (
                   <div className={classes.formInqType}>
                     <FormControl error={!valid.inqType}>
-                      <InputLabel id="demo-mutiple-checkbox-label">Type of Question</InputLabel>
+                      {valueType.length === 0 ? <InputLabel id="demo-mutiple-checkbox-label">Type of Question</InputLabel> : ``}
                       <Select
                         labelId="demo-mutiple-checkbox-label"
                         id="demo-mutiple-checkbox"

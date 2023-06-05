@@ -69,7 +69,7 @@ const ChoiceAnswer = (props) => {
   };
 
   useEffect(() => {
-    const lastChoice = question.answerObj[question.answerObj.length - 1].content
+    const lastChoice = question.answerObj?.[question.answerObj.length - 1].content
     setOtherOptionText(lastChoice !== 'Other' ? lastChoice : null)
     if (allowUpdateChoiceAnswer) {
       setPermission(true);
@@ -123,7 +123,7 @@ const ChoiceAnswer = (props) => {
           }
           )}
         </RadioGroup>
-        {selectedChoice === question.answerObj[question.answerObj.length - 1].id && !disable &&
+        {selectedChoice === question.answerObj?.[question.answerObj.length - 1].id && !disable &&
           <TextField
             className={classes.input}
             fullWidth
