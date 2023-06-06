@@ -95,7 +95,7 @@ const SubmitAnswerNotification = ({ msg, msg2 = 'Thank you!', iconType, open, ha
           <Button
             className={classes.button}
             onClick={() => handleKick()}>
-            Kick
+            Force Out
           </Button>
         }
         <Button
