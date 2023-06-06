@@ -330,22 +330,22 @@ const QueueListTable = () => {
                     </TableCell>
                     <TableCell >{formatDate(row.latestDate, 'MMM - DD - YYYY HH:mm')}</TableCell>
                     {/* <TableCell ><span>{row.etd}</span></TableCell> */}
-                    <TableCell ><span style={{ textTransform: 'capitalize' }}>{row?.status.toLowerCase()}</span></TableCell>
+                    <TableCell ><span style={{ textTransform: 'capitalize' }}>{row?.status ? row?.status.replace('_', ' ').toLowerCase() : ''}</span></TableCell>
                     <TableCell >
                       <div className={classes.label}>
                         <Tooltip title={'Inquiries'} placement='bottom-end'>
                           <div className={classes.chips}>
-                            <Chip label={row.countPendingInq} className={clsx(classes.chip, classes.inquiryColor)} icon={<HelpIcon className={clsx(classes.sizeIcon, classes.inquiryColor)} />} />
+                            {row.countPendingInq ? <Chip label={row.countPendingInq} className={clsx(classes.chip, classes.inquiryColor)} icon={<HelpIcon className={clsx(classes.sizeIcon, classes.inquiryColor)} />} /> : ''}
                           </div>
                         </Tooltip>
                         <Tooltip title={'Amendments'} placement='bottom-end'>
                           <div className={classes.chips}>
-                            <Chip label={row.countPendingAme} className={clsx(classes.chip, classes.amendmentColor)} icon={<EditIcon className={clsx(classes.sizeIcon, classes.amendmentColor)} />} />
+                            {row.countPendingAme ? <Chip label={row.countPendingAme} className={clsx(classes.chip, classes.amendmentColor)} icon={<EditIcon className={clsx(classes.sizeIcon, classes.amendmentColor)} />} /> : ''}
                           </div>
                         </Tooltip>
                         <Tooltip title={'New Replies'} placement='bottom-end'>
                           <div className={classes.chips}>
-                            <Chip label={row.countNewReply} className={clsx(classes.chip, classes.replyColor)} icon={<ReplyIcon className={clsx(classes.sizeIcon, classes.replyColor)} />} />
+                            {row.countNewReply ? <Chip label={row.countNewReply} className={clsx(classes.chip, classes.replyColor)} icon={<ReplyIcon className={clsx(classes.sizeIcon, classes.replyColor)} />} /> : ''}
                           </div>
                         </Tooltip>
                         {/* <div style={{ minWidth: '75px' }}>
@@ -357,30 +357,24 @@ const QueueListTable = () => {
                     </TableCell>
                     <TableCell >
                       <div className={classes.label}>
-                        {row.countPendingInq ?
-                          <Chip
-                            label={`${row.countInqResolved}/${row.countAllInq}`}
-                            className={clsx(classes.chip, classes.resolvedColor)}
-                            icon={
-                              <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
-                                help
-                              </Icon>
-                            }
-                          /> :
-                          null
-                        }
-                        {row.countPendingAme ?
-                          <Chip
-                            label={`${row.countAmeResolved}/${row.countAllAme}`}
-                            className={clsx(classes.chip, classes.resolvedColor)}
-                            icon={
-                              <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
-                                edit
-                              </Icon>
-                            }
-                          /> :
-                          null
-                        }
+                        <Chip
+                          label={`${row.countInqResolved}/${row.countAllInq}`}
+                          className={clsx(classes.chip, classes.resolvedColor)}
+                          icon={
+                            <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
+                              help
+                            </Icon>
+                          }
+                        />
+                        <Chip
+                          label={`${row.countAmeResolved}/${row.countAllAme}`}
+                          className={clsx(classes.chip, classes.resolvedColor)}
+                          icon={
+                            <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
+                              edit
+                            </Icon>
+                          }
+                        />
                       </div>
                     </TableCell>
                     <TableCell />
