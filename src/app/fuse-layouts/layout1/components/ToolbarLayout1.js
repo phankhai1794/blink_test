@@ -419,7 +419,7 @@ function ToolbarLayout1(props) {
 
   const confirmBlDraft = () => {
     if (inquiries.some((inq) => !['RESOLVED', 'UPLOADED', 'COMPL'].includes(inq.state))) {
-      dispatch(AppActions.showMessage({ message: "It's unable to confirm BL at this time. There are still unresolved inquiries/amendments waiting for Offshore finalization", variant: 'warning' }));
+      dispatch(AppActions.showMessage({ message: "Unable to confirm, still has pending inquiry/amendment", variant: 'warning' }));
     } else setOpen(true);
   };
 
