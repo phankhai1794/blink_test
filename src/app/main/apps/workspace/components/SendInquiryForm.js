@@ -234,7 +234,7 @@ const SendInquiryForm = (props) => {
 
       subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
-      content = pathName.includes('/guest') ? '' :`Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion.\n \nPending issue(s):'}\n${msg2}`;
+      content = pathName.includes('/guest') ? '' : `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion.\n \nPending issue(s):'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setOnshoreValue({
         ...onshoreValue,
@@ -260,7 +260,7 @@ const SendInquiryForm = (props) => {
       });
     }
     // subject = "nguyen ngoc binh"  
-    if(pathName.includes('/guest')) {
+    if (pathName.includes('/guest')) {
       subject = `Fwd: ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
     }
     setForm({ ...form, subject, content: bodyHtml, toOnshore, toCustomer });
@@ -305,6 +305,15 @@ const SendInquiryForm = (props) => {
       dispatch({
         type: mailActions.SENDMAIL_NONE
       });
+      if (!hasCustomer && !hasOnshore) {
+        dispatch(FormActions.toggleOpenEmail(false));
+      }
+      if (hasOnshore) {
+        setTabValue('onshore');
+      }
+      if (hasCustomer) {
+        setTabValue('customer');
+      }
       dispatch(Actions.showMessage({ message: 'Your inquiries have been sent successfully', variant: 'success' }));
     } else if (error) {
       handleError(dispatch, error);
