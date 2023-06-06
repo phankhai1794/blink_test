@@ -26,7 +26,7 @@ const ChoiceAnswer = (props) => {
   let questionIsEmpty = question === undefined;
   let prevChoiceArray = question.answerObj?.filter(choice => choice.confirmed) || [];
   const [isPermission, setPermission] = useState(false);
-  
+
   const dispatch = useDispatch();
   const classes = useStyles();
   const [otherOptionText, setOtherOptionText] = useState();
@@ -54,18 +54,21 @@ const ChoiceAnswer = (props) => {
     setSelectedChoice(choice);
     const optionsInquires = [...questions];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
-    const isOther = question.answerObj[question.answerObj.length - 1].id === choice ? otherOptionText : null;
+    const lastOptionId = question.answerObj[question.answerObj.length - 1].id;
+    const isLast = lastOptionId === choice;
     const selectedObj = {
       inquiry: question.id,
       answer: choice,
       confirmed: true,
-      isOther
+      isOther: isLast ? otherOptionText : null,
+      isLast,
+      lastOptionId
     };
-    //
+
+    if (!isLast) setOtherOptionText();
 
     optionsInquires[editedIndex].selectChoice = selectedObj;
     dispatch(InquiryActions.setInquiries(optionsInquires));
-    //
   };
 
   useEffect(() => {

@@ -13,10 +13,10 @@ import { Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
-import {CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT} from '@shared/keyword';
+import { isJsonText } from "@shared";
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT } from '@shared/keyword';
 
 import * as InquiryActions from '../store/actions/inquiry';
-import {isJsonText} from "../../../../../@shared";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -245,15 +245,22 @@ const InquiryAnswer = (props) => {
     }
     //
     await addTransactionAnswer({ inquiryId: question.id, contentCDCM, ansType: question.ansType }).catch(err => handleError(dispatch, err));
+
     if (question.selectChoice) {
+      if (question.selectChoice.isLast && !question.selectChoice.isOther) {
+        dispatch(AppAction.showMessage({ message: 'Option not empty!', variant: 'error' }));
+        setDisableSave(false)
+        return;
+      }
       responseSelectChoice = await updateInquiryChoice(question.selectChoice).catch(err => handleError(dispatch, err));
     } else if (question.paragraphAnswer) {
       let answerId;
       if (question.answerObj) {
         if (question.answerObj.length) {
-          if (containerCheck.includes(question.field)
-              && isJsonText(question.answerObj[0].content)
-              && question.answerObj.length > 1
+          if (
+            containerCheck.includes(question.field)
+            && isJsonText(question.answerObj[0].content)
+            && question.answerObj.length > 1
           ) {
             answerId = question.answerObj[1].id;
           } else if (question.answerObj.length) {
