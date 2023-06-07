@@ -180,23 +180,6 @@ const TableCM = (props) => {
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
 
-  // Sort CMs based on contNo
-  let cmSorted = [];
-  let cms = [...containerManifest];
-  const contsNo = [
-    ...new Set((containerDetail || []).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
-  ];
-  if (contsNo.length) {
-    contsNo.forEach((contNo) => {
-      cmSorted = [
-        ...cmSorted,
-        ...cms.filter((cm) => contNo === cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
-      ];
-      cms = cms.filter((cm) => contNo !== cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
-    });
-  }
-  cmSorted = [...cmSorted, ...cms];
-
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
   };
@@ -394,8 +377,8 @@ const TableCM = (props) => {
               </BLField>
             </Grid>
           </Grid>
-        ) : cmSorted?.length > 0 ? (
-          cmSorted.map((cm, index) => (
+        ) : containerManifest?.length > 0 ? (
+          containerManifest.map((cm, index) => (
             <Grid container spacing={2} className="px-8 py-2" key={index}>
               <Grid item xs={1} className={clsx(classes['grid-xs-1'])}>
                 <BLField multiline={true}>{cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>

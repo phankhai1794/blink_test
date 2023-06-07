@@ -122,7 +122,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const TableCD = (props) => {
-  const { id, containerDetail } = props;
+  const { id, containerDetail, containerManifest } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
 
@@ -143,6 +143,23 @@ const TableCD = (props) => {
 
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
+
+  // Sort CDs based on CM's seq
+  let cdSorted = [];
+  let cds = [...containerDetail];
+  const contsNo = [
+    ...new Set((containerManifest || []).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
+  ];
+  if (contsNo.length) {
+    contsNo.forEach((contNo) => {
+      cdSorted = [
+        ...cdSorted,
+        ...cds.filter((cm) => contNo === cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
+      ];
+      cds = cds.filter((cm) => contNo !== cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+    });
+  }
+  cdSorted = [...cdSorted, ...cds];
 
   const onMouseEnter = (e) => setIsHovering(true);
 
@@ -285,8 +302,8 @@ const TableCD = (props) => {
           <Grid container item xs={1}>
             <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '30px' }}>MEASUREMENT</Label>
           </Grid>
-          {containerDetail?.length > 0 ? (
-            containerDetail.map((cd, index) => (
+          {cdSorted?.length > 0 ? (
+            cdSorted.map((cd, index) => (
               <Grid container spacing={2} className="px-8 py-2" key={index}>
                 <Grid item xs={2}>
                   <BLField>
