@@ -732,6 +732,7 @@ const BLWorkspace = (props) => {
               </Grid>
               <TableCD
                 containerDetail={getValueField(CONTAINER_DETAIL)}
+                containerManifest={getValueField(CONTAINER_MANIFEST)}
                 id={getField(CONTAINER_DETAIL)}
               />
             </Grid>
