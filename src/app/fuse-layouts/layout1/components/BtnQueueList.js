@@ -19,7 +19,11 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   startIconBtn: {
-    padding: '0px 10px 0px 0px'
+    position: 'relative',
+    width: 14,
+    height: 14,
+    top: 1,
+    right: 3
   }
 }));
 
@@ -36,7 +40,7 @@ const BtnQueueList = () => {
       window.open('/apps/admin') :
       dispatch(InquiryActions.openQueueList(true));
   }
-
+  
   return (
     <>
       {myBL?.state &&
@@ -50,10 +54,10 @@ const BtnQueueList = () => {
               variant='contained'
               className={classes.btn}
               onClick={() => showQueueList()}
-              style={{ minHeight: 40, marginRight: 0 }}
+              style={{ minHeight: 30, marginRight: 0, fontSize: 12, minWidth: 30, whiteSpace: 'nowrap', width: 90, height: 30 }}
             >
               <FormatListBulleted className={classes.startIconBtn} />
-              BL Status
+              <span>BL Status</span>
             </Button>
           </Tooltip>
           {/* </PermissionProvider> */}
