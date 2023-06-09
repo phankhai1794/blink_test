@@ -44,8 +44,8 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   logo: {
-    width: '105.81px',
-    height: '50px',
+    width: 70,
+    height: 50,
     borderRadius: 0
   },
   iconWrapper: {
@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
   buttonSubmit: {
     padding: '10px 28.5px',
     color: whiteColor,
-    fontSize: 14,
+    fontSize: 12,
     borderRadius: 8,
     lineHeight: '20px',
     backgroundColor: themeColor,
@@ -82,7 +82,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: 8
   },
   buttonComfirm: {
-    fontSize: 14,
+    fontSize: 12,
     padding: '5px 16px',
     color: whiteColor,
     background: themeColor,
@@ -99,11 +99,16 @@ const useStyles = makeStyles((theme) => ({
       borderRadius: '8px'
     },
     '& div > div': {
-      paddingTop: 5,
-      paddingBottom: 5.5
+      marginBottom: -12,
+      left: 0,
+      bottom: 7,
+      position: 'relative'
     },
     '& div > svg': {
-      color: themeColor
+      color: themeColor,
+      position: 'absolute',
+      top: 10,
+      right: 8
     },
     '&:hover fieldset': {
       borderColor: `${themeColor} !important`
@@ -113,23 +118,24 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   selectViewProps: {
-    color: themeColor,
+    color: 'themeColor',
     fontWeight: 600
   },
   menuItem: {
     background: whiteColor,
     color: blackColor,
-    fontSize: 14,
+    minWidth: 10,
+    fontSize: 12,
     '&:hover': {
       background: `${lightThemeColor} !important`,
       color: themeColor,
       fontWeight: 600
-    }
+    },
   },
   menuItemSelected: {
     background: `${lightThemeColor} !important`,
     color: themeColor,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 600,
     fontFamily: 'Montserrat',
   },
@@ -138,8 +144,7 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: 'Montserrat',
     fontStyle: 'normal',
     fontWeight: 600,
-    fontSize: 14,
-    lineHeight: 17,
+    fontSize: 12,
     color: '#515E6A',
     paddingLeft: 10
   },
@@ -147,9 +152,10 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: 'Montserrat',
     fontStyle: 'normal',
     fontWeight: 600,
-    fontSize: 14,
-    left: 14
-  }
+    fontSize: 12,
+    position: 'relative',
+    color: themeColor,
+  },
 }));
 
 function ToolbarLayout1(props) {
@@ -459,7 +465,7 @@ function ToolbarLayout1(props) {
             )}
 
             <div className="flex flex-1" style={{ marginLeft: 35 }}>
-              <div style={{ paddingRight: '32px' }} className={classes.iconWrapper}>
+              <div className={classes.iconWrapper}>
                 <Button variant="text" size="medium">
                   <Avatar
                     src="assets/images/logos/one_ocean_network-logo.png"
@@ -525,7 +531,7 @@ function ToolbarLayout1(props) {
               </PermissionProvider>
             </div>
 
-            <div className="flex" style={{ marginRight: 35, alignItems: 'center' }}>
+            <div className="flex" style={{alignItems: 'center' }}>
               {!pathname.includes('/draft') &&
                 <TextField
                   id="view"
@@ -541,17 +547,25 @@ function ToolbarLayout1(props) {
                   SelectProps={{
                     MenuProps: {
                       anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                      getContentAnchorEl: null
+                      getContentAnchorEl: null,
+                      PaperProps: {
+                        style: {
+                          minWidth: 0,
+                          position: 'absolute',
+                          top: '-100px'
+                          
+                        }}
                     }
                   }}>
-                  {drfViews.map(view => (
-                    <MenuItem
-                      key={view.value}
-                      value={view.value}
-                      className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
-                      <span className={classes.dratTypeText} style={{ paddingRight: 10 }}>{view.label}</span>
-                    </MenuItem>
-                  ))}
+                 
+                    {drfViews.map(view => (
+                      <MenuItem
+                        key={view.value}
+                        value={view.value}
+                        className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
+                        <span className={classes.dratTypeText}>{view.label}</span>
+                      </MenuItem>
+                    ))}
                 </TextField>}
 
               {!pathname.includes('/draft') && <BtnQueueList />}
@@ -561,16 +575,18 @@ function ToolbarLayout1(props) {
                 extraCondition={pathname.includes('/draft-bl') || pathname.includes('/workspace')}>
                 <Button
                   className={clsx(classes.button, classes.buttonEditDraftBL)}
+                  style={{ width: 110, fontSize: 12, height: 30 }}
                   onClick={redirectWorkspace}>
-                  <img src="assets/images/icons/amendIconPink.svg" />
-                  <img src="assets/images/icons/penIconPink.svg" style={{ position: 'relative', top: 5, right: 8 }} />
+                  <img src="assets/images/icons/amendIconPink.svg" style={{width: 12, height: 12, position: 'relative', left: 5}} />
+                  <img src="assets/images/icons/penIconPink.svg" style={{ position: 'relative', top: 5, width: 8 }} />
                   <span claseeName={classes.dratTypeText}>Amendment</span>
                 </Button>
                 <Button
                   variant="contained"
                   className={clsx(classes.button, classes.buttonComfirm)}
+                  style={{ width: 85, height: 30 }}
                   onClick={confirmBlDraft}>
-                  <img src="assets/images/icons/confirm.svg" style={{ position: 'relative', right: 2 }} />
+                  <img src="assets/images/icons/confirm.svg" style={{ position: 'relative', right: 2, width: 11, height: 11 }} />
                   <span claseeName={classes.dratTypeText}>Confirm</span>
                 </Button>
                 <DialogConfirm open={open} handleClose={handleClose} />
@@ -582,9 +598,10 @@ function ToolbarLayout1(props) {
                 <div>
                   <Button
                     style={{
-                      width: '100px',
-                      height: '40px',
-                      borderRadius: '8px'
+                      width: 80,
+                      height: 30,
+                      borderRadius: '8px',
+                      fontSize: '12px'
                     }}
                     disabled={inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED', 'AME_SENT', 'ANS_SENT', 'REP_A_SENT'].includes(inq.state)).length === inquiries.length}
                     color="primary"
@@ -592,7 +609,7 @@ function ToolbarLayout1(props) {
                     size="medium"
                     className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
-                    <img src="assets/images/icons/email.svg" style={{ position: 'relative', right: 4 }} />
+                    <img src="assets/images/icons/email.svg" style={{ position: 'relative', right: 3, width: 12, height: 12, top: 1}} />
                     <span>Email</span>
                   </Button>
                 </div>
@@ -613,9 +630,10 @@ function ToolbarLayout1(props) {
                     //color="primary"
                     variant="contained"
                     className={clsx(classes.button, classes.buttonSubmit)}
+                    style={{width:80, height: 30}}
                     // className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
-                    <img src="assets/images/icons/forwardMail.svg" style={{ position: 'relative', right: 4 }} />
+                    <img src="assets/images/icons/forwardMail.svg" style={{ position: 'relative', width: 10, height: 10  }} />
                     <span className="pl-4">Forward</span>
                   </Button>
                 </div>
@@ -627,10 +645,10 @@ function ToolbarLayout1(props) {
                 <Button
                   variant="contained"
                   className={clsx(classes.button, classes.buttonSubmit)}
-                  style={{ width: 127 }}
+                  style={{ width: 80, height: 30 }}
                   disabled={!enableSubmitInq}
                   onClick={onSubmit}>
-                  <img src="assets/images/icons/submitIcon.svg" style={{ position: 'relative', right: 5 }} />
+                  <img src="assets/images/icons/submitIcon.svg" style={{ position: 'relative', width: 12, height: 12, right: 3 }} />
                   Submit
                 </Button>
               </PermissionProvider>
