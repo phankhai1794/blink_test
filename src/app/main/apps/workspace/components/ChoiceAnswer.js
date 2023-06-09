@@ -104,9 +104,9 @@ const ChoiceAnswer = (props) => {
         >
           {question.answerObj?.map((choice, index) => {
             const lastElement = question.answerObj.length - 1 === index
-            if ((lastElement && choice.content !== 'Other') || !lastElement || user.role === 'Guest') {
+            if ((lastElement && choice.content) || !lastElement || user.role === 'Guest') {
               return (
-                <div key={index} style={{ marginTop: '0.5rem' }}>
+                <div key={index} style={{ marginTop: '0.5rem', display: 'flex' }}>
                   <FormControlLabel
                     disabled={!isPermission || disable}
                     checked={!disableChecked && selectedChoice === choice.id}
@@ -118,25 +118,25 @@ const ChoiceAnswer = (props) => {
                         whiteSpace: 'pre',
                         textDecorationLine: ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && 'line-through',
                         fontStyle: (!['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT'].includes(question.state) || (['ANS_DRF'].includes(question.state) && user.role === 'Guest')) && 'italic',
-                      }}>{lastElement && !disable ? 'Other' : choice.content}</span>
+                      }}>{lastElement && !disable ? 'Other:' : (lastElement ? `Other: ${choice.content}` : choice.content)}</span>
                     }
                   />
-                </div>)
+                  {lastElement && !disable &&
+                    <TextField
+                      className={classes.input}
+                      fullWidth
+                      value={otherOptionText}
+                      onChange={(e) => {
+                        setOtherOptionText(e.target.value)
+                        handleChange(question.answerObj[question.answerObj.length - 1].id, e.target.value)
+                      }}
+                    />
+                  }
+                </div>
+              )
             }
-          }
-          )}
+          })}
         </RadioGroup>
-        {selectedChoice === question.answerObj?.[question.answerObj.length - 1].id && !disable &&
-          <TextField
-            className={classes.input}
-            fullWidth
-            value={otherOptionText}
-            onChange={(e) => {
-              setOtherOptionText(e.target.value)
-              handleChange(question.answerObj[question.answerObj.length - 1].id, e.target.value)
-            }}
-          />
-        }
       </FormControl>
     </>
   );
