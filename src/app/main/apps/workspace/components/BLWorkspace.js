@@ -28,6 +28,7 @@ import {
   FREIGHT_TERM,
   DESCRIPTION_OF_GOODS,
   NO_CONTENT_AMENDMENT,
+  SHIPPING_MARK
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
@@ -593,6 +594,12 @@ const BLWorkspace = (props) => {
                   <Label>ALSO NOTIFY</Label>
                   <BLField id={getField(ALSO_NOTIFY)} multiline={true} rows={5}>
                     {getValueField(ALSO_NOTIFY)}
+                  </BLField>
+                </Grid>
+                <Grid item>
+                  <Label>SHIPPING MARK</Label>
+                  <BLField id={getField(SHIPPING_MARK)} multiline={true} rows={5}>
+                    {getValueField(SHIPPING_MARK)}
                   </BLField>
                 </Grid>
                 {(drfView === 'CM') ?
