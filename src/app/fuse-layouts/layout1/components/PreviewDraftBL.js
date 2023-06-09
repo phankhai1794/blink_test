@@ -7,8 +7,8 @@ import { Button, Tooltip } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   iconDraftBL: {
-    width: 40,
-    height: 40,
+    width: 20,
+    height: 20,
     cursor: 'pointer'
   },
   btn: {
@@ -55,7 +55,7 @@ const PreviewDraftBL = () => {
                 variant='contained'
                 onClick={previewDraftBL}
                 className={classes.btn}
-                style={{ height: 40, marginRight: 0 }}>
+                style={{ height: 30, marginRight: 0, width: 90, fontSize: 12 }}>
                 <img src="assets/images/icons/preview-draft.svg" alt="Draft BL Icon" className={classes.iconDraftBL} />
                 Preview
               </Button>
@@ -70,7 +70,7 @@ const PreviewDraftBL = () => {
                 variant='contained'
                 onClick={redirectDraftBL}
                 className={classes.btn}
-                style={{ height: 40, marginRight: 0 }}>
+                style={{ height: 30, marginRight: 0, width: 90, fontSize: 12 }}>
                 <img src="assets/images/icons/preview-draft.svg" alt="Draft BL Icon" className={classes.iconDraftBL} />
                 Preview
               </Button>

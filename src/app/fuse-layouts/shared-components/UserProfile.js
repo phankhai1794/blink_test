@@ -49,7 +49,7 @@ function UserProfile(props) {
       <Button className="h-64" onClick={handleClick} style={{ marginLeft: 2 }}>
         <Avatar
           className={classes.fitAvatar}
-          style={{ background: cyan[400] }}
+          style={{ background: cyan[400], height: 25, width: 25 }}
           src={user.photoURL ? user.photoURL : ''}
           alt="User photo">
           {!user.photoURL ? user.displayName.charAt(0).toUpperCase() : ''}
@@ -62,6 +62,7 @@ function UserProfile(props) {
             fontStyle: 'normal',
             fontWeight: 600,
             fontSize: 14,
+            fontSize: 12,
             lineHeight: 17,
             color: '#515E6A',
           }}
