@@ -329,6 +329,7 @@ const InquiryViewer = (props) => {
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const [isValidDate, setIsValidDate] = useState(false);
   const [disableCDCMInquiry, setDisableCDCM] = useState(true);
+  const [disableCDCMAmendment, setDisableCDCMAmendment] = useState(true);
   const [getDataCD, setDataCD] = useState([]);
   const [getDataCM, setDataCM] = useState([]);
 
@@ -664,7 +665,16 @@ const InquiryViewer = (props) => {
           // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
           const lastest = { ...question };
           if (res.length > 0) {
-            const { content: contentField, mediaFile } = res[res.length - 1].content;
+            let getRes = res;
+            const filterRepAmend = res.filter(r => r.state.includes('REP_AME_'));
+            // filter latest reply amendment
+            if (filterRepAmend.length) {
+              const getRepAmend = filterRepAmend[filterRepAmend.length - 1];
+              getRes = res.filter(r => r.id !== getRepAmend.id);
+            }
+            const getLatest = getRes[getRes.length - 1];
+            const { content: contentField, mediaFile } = getLatest.content;
+            setDisableCDCMAmendment(true);
             const lastestComment = res[res.length - 1];
             if (lastestComment.state === 'RESOLVED') {
               setInqAnsId(lastestComment.id);
@@ -685,6 +695,12 @@ const InquiryViewer = (props) => {
             if (containerCheck.includes(question.field)) {
               const lastestContentCDCM = res.filter(r => r.state.includes('AME_') || r.state.includes('REOPEN_'));
               lastest.contentCDCM = lastestContentCDCM[lastestContentCDCM.length - 1].content.content;
+              if (filterRepAmend.length) {
+                lastest.contentReplyCDCM = filterRepAmend[filterRepAmend.length - 1].content.content;
+              } else {
+                lastest.contentReplyCDCM = lastestContentCDCM[lastestContentCDCM.length - 1].content.content;
+              }
+              lastest.isShowTableToReply = res.some(r => ['REP_DRF', 'REP_SENT'].includes(r.state));
             }
 
             if (Object.keys(lastestComment).length > 0) {
@@ -794,7 +810,7 @@ const InquiryViewer = (props) => {
               state: 'AME_ORG'
             }];
 
-            res.map(r => {
+            getRes.map(r => {
               const { content, mediaFile } = r.content;
               comments.push({
                 id: r.id,
@@ -1286,6 +1302,14 @@ const InquiryViewer = (props) => {
     }
   }, [isResolve])
 
+  useEffect(() => {
+    if (user.role === 'Admin') {
+      setDisableCDCMAmendment(true);
+    } else if (user.role === 'Guest') {
+      setDisableCDCMAmendment(disableCDCMAmendment);
+    }
+  }, [disableCDCMAmendment]);
+
   const removeQuestion = (question) => {
     setIndexQuestionRemove(inquiries.findIndex((q) => q.field === question.field && q.inqType === question.inqType));
     if (tempReply.answer) {
@@ -1340,6 +1364,11 @@ const InquiryViewer = (props) => {
     } else {
       setDisableCDCM(false);
       setIsResolve(true);
+    }
+    if (containerCheck.includes(question.field)) {
+      setShowViewAll(false);
+      setInqHasComment(false);
+      question.isShowTableToReply = false;
     }
   };
 
@@ -1815,6 +1844,95 @@ const InquiryViewer = (props) => {
     }
   };
 
+  const autoUpdateCDCM = (contentCDCM) => {
+    // Auto Update CD CM
+    if (containerCheck.includes(question.field)) {
+      //CASE 1-1 CD CM
+      if (contentCDCM.length === 1 && content[question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0]].length === 1) {
+        let fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
+        let arr = content[fieldCdCM]
+        if (arr.length > 0) {
+          arr[0][getType(CONTAINER_NUMBER)] = contentCDCM[0][getType(CONTAINER_NUMBER)];
+          if (question.field === getField(CONTAINER_DETAIL)) {
+            CONTAINER_LIST.cdNumber.map((key, index) => {
+              arr[0][getType(CONTAINER_LIST.cmNumber[index])] = contentCDCM[0][getType(key)];
+            });
+            CONTAINER_LIST.cdUnit.map((key, index) => {
+              arr[0][getType(CONTAINER_LIST.cmUnit[index])] = contentCDCM[0][getType(key)];
+            });
+          } else {
+            CONTAINER_LIST.cmNumber.map((key, index) => {
+              arr[0][getType(CONTAINER_LIST.cdNumber[index])] = contentCDCM[0][getType(key)];
+            });
+            CONTAINER_LIST.cmUnit.map((key, index) => {
+              arr[0][getType(CONTAINER_LIST.cdUnit[index])] = contentCDCM[0][getType(key)];
+            });
+          }
+          content[fieldCdCM] = arr;
+          saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
+        }
+      }
+      // MULTIPLE CASE CD CM
+      else {
+        let contsNoChange = {}
+        const contsNo = [];
+        const orgContentField = content[question.field];
+        contentCDCM.forEach((obj, index) => {
+          const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
+          const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
+          if (getTypeName === CONTAINER_NUMBER && containerNo !== obj[getType(CONTAINER_NUMBER)]) {
+            contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
+          }
+        })
+        const fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
+        const fieldAutoUpdate = content[fieldCdCM];
+        if (fieldAutoUpdate) {
+          if (question.field === getField(CONTAINER_DETAIL)) {
+            if (fieldAutoUpdate.length) {
+              fieldAutoUpdate.map((item) => {
+                if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
+                  item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
+                }
+              })
+            }
+            content[fieldCdCM] = fieldAutoUpdate;
+            contentCDCM.forEach((cd) => {
+              let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
+                  cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+              ))]
+              if (cmOfCd.length === 1) {
+                CONTAINER_LIST.cdNumber.map((key, index) => {
+                  cmOfCd[0][getType(CONTAINER_LIST.cmNumber[index])] = cd[getType(key)];
+                });
+                CONTAINER_LIST.cdUnit.map((key, index) => {
+                  cmOfCd[0][getType(CONTAINER_LIST.cmUnit[index])] = cd[getType(key)];
+                });
+              }
+            })
+          }
+          if (question.field === getField(CONTAINER_MANIFEST)) {
+            fieldAutoUpdate.forEach((cd) => {
+              let cmOfCd = [...new Set((contentCDCM || []).filter(cm =>
+                  cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+              ))]
+              if (cmOfCd.length > 0) {
+                CONTAINER_LIST.cmNumber.map((key, index) => {
+                  let total = 0;
+                  cmOfCd.map((cm) => {
+                    total += parseNumberValue(cm[getType(key)]);
+                  });
+                  cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
+                });
+              }
+            })
+          }
+          saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
+        }
+        validationCDCMContainerNo(contsNo)
+      }
+    }
+  }
+
   const onSaveReply = async () => {
     setDisableSaveReply(true);
     setPristine()
@@ -1948,7 +2066,9 @@ const InquiryViewer = (props) => {
             content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
             mediaFile: mediaListAmendment
           },
-          mybl: myBL.id
+          contentCDCM: question.contentReplyCDCM,
+          mybl: myBL.id,
+          action: 'reply'
         };
         saveEditedField({ ...reqReply })
           .then((res) => {
@@ -1961,6 +2081,14 @@ const InquiryViewer = (props) => {
               optionsInquires[editedIndex].state = 'AME_DRF';
             } else {
               optionsInquires[editedIndex].state = 'REP_DRF';
+              if (user.role === 'Guest') {
+                const contentCDCM = question.contentReplyCDCM;
+                dispatch(InquiryActions.setContent({
+                  ...content,
+                  [question.field]: contentCDCM
+                }));
+                autoUpdateCDCM(contentCDCM);
+              }
             }
             dispatch(InquiryActions.setInquiries(optionsInquires));
             props.getUpdatedAt();
@@ -1999,6 +2127,7 @@ const InquiryViewer = (props) => {
             content: newContent,
             mediaFile: mediaListAmendment
           },
+          contentCDCM: question.contentReplyCDCM,
           mybl: myBL.id
         };
 
@@ -2009,102 +2138,26 @@ const InquiryViewer = (props) => {
           optionsInquires[editedIndex].mediaFile = mediaListAmendment;
           optionsInquires[editedIndex].createdAt = res.createdAt;
           setDisableSaveReply(false);
+          let contentCDCM;
           if (question.state.includes('AME_')) {
             dispatch(InquiryActions.setContent({
               ...content,
               [res.newAmendment?.field]: newContent
             }));
-            if (containerCheck.includes(question.field)) {
-              //CASE 1-1 CD CM
-              if (tempReply.answer.content.length === 1 && content[question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0]].length === 1) {
-                let fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
-                let arr = content[fieldCdCM]
-                if (arr.length > 0) {
-                  arr[0][getType(CONTAINER_NUMBER)] = tempReply.answer.content[0][getType(CONTAINER_NUMBER)];
-                  if (question.field === getField(CONTAINER_DETAIL)) {
-                    CONTAINER_LIST.cdNumber.map((key, index) => {
-                      arr[0][getType(CONTAINER_LIST.cmNumber[index])] = tempReply.answer.content[0][getType(key)];
-                    });
-                    CONTAINER_LIST.cdUnit.map((key, index) => {
-                      arr[0][getType(CONTAINER_LIST.cmUnit[index])] = tempReply.answer.content[0][getType(key)];
-                    });
-                  } else {
-                    CONTAINER_LIST.cmNumber.map((key, index) => {
-                      arr[0][getType(CONTAINER_LIST.cdNumber[index])] = tempReply.answer.content[0][getType(key)];
-                    });
-                    CONTAINER_LIST.cmUnit.map((key, index) => {
-                      arr[0][getType(CONTAINER_LIST.cdUnit[index])] = tempReply.answer.content[0][getType(key)];
-                    });
-                  }
-                  content[fieldCdCM] = arr;
-                  saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
-                }
-              }
-              // MULTIPLE CASE CD CM
-              else {
-                let contsNoChange = {}
-                const contsNo = [];
-                const orgContentField = content[question.field];
-                const contentField = tempReply.answer.content;
-                contentField.forEach((obj, index) => {
-                  const containerNo = orgContentField[index][getType(CONTAINER_NUMBER)];
-                  const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
-                  if (getTypeName === CONTAINER_NUMBER && containerNo !== obj[getType(CONTAINER_NUMBER)]) {
-                    contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
-                  }
-                })
-                const fieldCdCM = question.field === getField(CONTAINER_DETAIL) ? containerCheck[1] : containerCheck[0];
-                const fieldAutoUpdate = content[fieldCdCM];
-                if (fieldAutoUpdate) {
-                  if (question.field === getField(CONTAINER_DETAIL)) {
-                    if (fieldAutoUpdate.length) {
-                      fieldAutoUpdate.map((item) => {
-                        if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
-                          item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
-                        }
-                      })
-                    }
-                    content[fieldCdCM] = fieldAutoUpdate;
-                    contentField.forEach((cd) => {
-                      let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
-                        cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
-                      ))]
-                      if (cmOfCd.length === 1) {
-                        CONTAINER_LIST.cdNumber.map((key, index) => {
-                          cmOfCd[0][getType(CONTAINER_LIST.cmNumber[index])] = cd[getType(key)];
-                        });
-                        CONTAINER_LIST.cdUnit.map((key, index) => {
-                          cmOfCd[0][getType(CONTAINER_LIST.cmUnit[index])] = cd[getType(key)];
-                        });
-                      }
-                    })
-                  }
-                  if (question.field === getField(CONTAINER_MANIFEST)) {
-                    fieldAutoUpdate.forEach((cd) => {
-                      let cmOfCd = [...new Set((contentField || []).filter(cm =>
-                        cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
-                      ))]
-                      if (cmOfCd.length > 0) {
-                        CONTAINER_LIST.cmNumber.map((key, index) => {
-                          let total = 0;
-                          cmOfCd.map((cm) => {
-                            total += parseNumberValue(cm[getType(key)]);
-                          });
-                          cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
-                        });
-                      }
-                    })
-                  }
-                  saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
-                }
-                validationCDCMContainerNo(contsNo)
-              }
-            }
+            contentCDCM = tempReply.answer.content;
             optionsInquires[editedIndex].state = 'AME_DRF';
           } else {
+            if (user.role === 'Guest') {
+              dispatch(InquiryActions.setContent({
+                ...content,
+                [question.field]: question.contentReplyCDCM
+              }));
+            }
+            contentCDCM = question.contentReplyCDCM;
             optionsInquires[editedIndex].state = 'REP_DRF';
           }
 
+          if (user.role === 'Guest') autoUpdateCDCM(contentCDCM);
           dispatch(InquiryActions.setInquiries(optionsInquires));
           setIsResolveCDCM(false);
           props.getUpdatedAt();
@@ -2118,6 +2171,7 @@ const InquiryViewer = (props) => {
 
   const cancelReply = (q) => {
     setDisableCDCM(true);
+    setDisableCDCMAmendment(true);
     dispatch(InquiryActions.setReply(false));
     setIsReply(false);
     setIsReplyCDCM(false);
@@ -2133,6 +2187,7 @@ const InquiryViewer = (props) => {
     const optionsInquires = [...inquiries];
     if (user.role === 'Guest') {
       setDisableCDCM(false);
+      setDisableCDCMAmendment(false);
     }
     if (['OPEN', 'INQ_SENT'].includes(q.state)) {
       const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
@@ -2164,6 +2219,7 @@ const InquiryViewer = (props) => {
     setShowViewAll(false);
     if (user.role === 'Guest') {
       setDisableCDCM(false);
+      setDisableCDCMAmendment(false);
     }
     if (['ANS_DRF', 'ANS_SENT'].includes(question.state) || (user.role === 'Guest' && ['REP_Q_DRF'].includes(question.state))) {
       optionsInquires[editedIndex].showIconEdit = false;
@@ -2657,8 +2713,9 @@ const InquiryViewer = (props) => {
                               handleChangeContainerDetail(value);
                               setTextResolve(value);
                             }
+                            question.contentReplyCDCM = value;
                           }}
-                          disableInput={!isResolveCDCM && !isReplyCDCM}
+                          disableInput={(user.role === 'Guest') ? disableCDCMAmendment : (!isResolveCDCM && !isReplyCDCM)}
                         />
                     }
                   </> :
@@ -2704,6 +2761,26 @@ const InquiryViewer = (props) => {
                   <Diff inputA={renderContent(orgContent[question.field])} inputB={getNewValueDiffViewer(question.content)} type="words" />
                 )
             }
+            {/*Allow edit table when customer reply amendment*/}
+            {(question.isShowTableToReply
+                && containerCheck.includes(question.field)
+                && question.process === 'draft'
+                && !['RESOLVED', 'REOPEN_A', 'REOPEN_Q'].includes(question.state)
+            ) ? (
+                <div style={{ marginTop: 15 }}>
+                  <ContainerDetailForm
+                      container={question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST}
+                      originalValues={Array.isArray(question.contentReplyCDCM) ? question.contentReplyCDCM : content}
+                      isResolveCDCM={isResolveCDCM}
+                      setEditContent={(value) => {
+                        question.contentReplyCDCM = value;
+                      }}
+                      disableInput={disableCDCMAmendment}
+                  />
+                </div>
+            ) : ``}
+            {/*Allow edit table when reply amendment*/}
+
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'ANS_DRF', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
