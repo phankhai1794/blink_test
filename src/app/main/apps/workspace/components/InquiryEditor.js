@@ -43,7 +43,6 @@ import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import AttachFile from './AttachFile';
 import ContainerDetailForm from "./ContainerDetailForm";
-import clone from 'lodash/clone';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -865,7 +864,7 @@ const InquiryEditor = (props) => {
         }
       }
 
-      const editInquiry = clone(currentEditInq);
+      const editInquiry = JSON.parse(JSON.stringify({ ...currentEditInq }))
       if (ansTypeChoice === editInquiry.ansType) {
         editInquiry.answerObj.push({
           id: null,
