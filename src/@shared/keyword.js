@@ -228,3 +228,7 @@ export const mapperBlinkStatus = {
   BP: "Customer Amendment Reply",
   BS: "BL Amendment Success"
 };
+
+export const BROADCAST = {
+  ACCESS: "BLINK_ACCESS"
+};
