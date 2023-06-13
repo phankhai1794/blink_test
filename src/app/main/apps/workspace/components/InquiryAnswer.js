@@ -248,7 +248,7 @@ const InquiryAnswer = (props) => {
 
     if (question.selectChoice) {
       if (question.selectChoice.isLast && !question.selectChoice.isOther) {
-        dispatch(AppAction.showMessage({ message: 'Option not empty!', variant: 'error' }));
+        dispatch(AppAction.showMessage({ message: 'Information required!', variant: 'error' }));
         setDisableSave(false)
         return;
       }

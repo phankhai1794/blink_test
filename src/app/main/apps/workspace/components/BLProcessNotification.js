@@ -119,7 +119,9 @@ const BLProcessNotification = () => {
           dispatch(AppAction.setUser({ ...userLocal, permissions }));
 
           if (userLocal.displayName === usersAccessing[0]) { // if to be the first user
-            permissions = await getPermissionByRole(userLocal.role);
+            permissions = await getPermissionByRole(userLocal.role);            
+            // close the warning popup if the user is granted permission
+            dispatch(FormActions.toggleOpenBLWarning(false));
           } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1]) { // if to be the last user
             dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0] }));
           }
