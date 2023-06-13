@@ -6,7 +6,7 @@ const initialState = {
   displayName: '',
   photoURL: '',
   email: '',
-  permissions: []
+  permissions: [],
 };
 
 const user = function (state = initialState, action) {

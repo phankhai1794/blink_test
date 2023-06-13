@@ -359,7 +359,6 @@ function ToolbarLayout1(props) {
     if (!user.displayName || !validToken) {
       if (!allowAccess) {
         clearLocalStorage();
-        sessionStorage.removeItem("permissions");
 
         const bl = new URLSearchParams(search).get('bl');
         if (bl) {
@@ -531,7 +530,7 @@ function ToolbarLayout1(props) {
               </PermissionProvider>
             </div>
 
-            <div className="flex" style={{alignItems: 'center' }}>
+            <div className="flex" style={{ alignItems: 'center' }}>
               {!pathname.includes('/draft') &&
                 <TextField
                   id="view"
@@ -553,19 +552,19 @@ function ToolbarLayout1(props) {
                           minWidth: 0,
                           position: 'absolute',
                           top: '-100px'
-                          
-                        }}
+                        }
+                      }
                     }
                   }}>
-                 
-                    {drfViews.map(view => (
-                      <MenuItem
-                        key={view.value}
-                        value={view.value}
-                        className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
-                        <span className={classes.dratTypeText}>{view.label}</span>
-                      </MenuItem>
-                    ))}
+
+                  {drfViews.map(view => (
+                    <MenuItem
+                      key={view.value}
+                      value={view.value}
+                      className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
+                      <span className={classes.dratTypeText}>{view.label}</span>
+                    </MenuItem>
+                  ))}
                 </TextField>}
 
               {!pathname.includes('/draft') && <BtnQueueList />}
@@ -577,7 +576,7 @@ function ToolbarLayout1(props) {
                   className={clsx(classes.button, classes.buttonEditDraftBL)}
                   style={{ width: 110, fontSize: 12, height: 30 }}
                   onClick={redirectWorkspace}>
-                  <img src="assets/images/icons/amendIconPink.svg" style={{width: 12, height: 12, position: 'relative', left: 5}} />
+                  <img src="assets/images/icons/amendIconPink.svg" style={{ width: 12, height: 12, position: 'relative', left: 5 }} />
                   <img src="assets/images/icons/penIconPink.svg" style={{ position: 'relative', top: 5, width: 8 }} />
                   <span claseeName={classes.dratTypeText}>Amendment</span>
                 </Button>
@@ -609,7 +608,7 @@ function ToolbarLayout1(props) {
                     size="medium"
                     className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
-                    <img src="assets/images/icons/email.svg" style={{ position: 'relative', right: 3, width: 12, height: 12, top: 1}} />
+                    <img src="assets/images/icons/email.svg" style={{ position: 'relative', right: 3, width: 12, height: 12, top: 1 }} />
                     <span>Email</span>
                   </Button>
                 </div>
@@ -630,10 +629,10 @@ function ToolbarLayout1(props) {
                     //color="primary"
                     variant="contained"
                     className={clsx(classes.button, classes.buttonSubmit)}
-                    style={{width:80, height: 30}}
+                    style={{ width: 80, height: 30 }}
                     // className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
-                    <img src="assets/images/icons/forwardMail.svg" style={{ position: 'relative', width: 10, height: 10  }} />
+                    <img src="assets/images/icons/forwardMail.svg" style={{ position: 'relative', width: 10, height: 10 }} />
                     <span className="pl-4">Forward</span>
                   </Button>
                 </div>
