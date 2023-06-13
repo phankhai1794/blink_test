@@ -237,8 +237,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           mediaList.push(mediaFileList[0]);
         });
 
-        saveEditedField({ field: fieldReq, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id })
+        saveEditedField({ field: fieldReq, content: { content: contentField, mediaFile: mediaList }, mybl: myBL.id, action: 'reply' })
           .then((res) => {
+            // Auto Update CD/CM
             if ([CONTAINER_DETAIL, CONTAINER_MANIFEST].includes(fieldValueSelect.keyword)) {
               // CASE 1-1 CD CM
               if (contentField.length === 1 && content[fieldValueSelect.keyword === CONTAINER_DETAIL ? containerCheck[1] : containerCheck[0]].length === 1) {
