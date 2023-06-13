@@ -11,6 +11,8 @@ import { getBlInfo } from 'app/services/myBLService';
 import { SocketContext } from 'app/AppContext';
 import { getPermissionByRole } from 'app/services/authService';
 import * as AppAction from 'app/store/actions';
+import { checkBroadCastAccessing } from '@shared';
+import { BROADCAST } from '@shared/keyword';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -63,6 +65,7 @@ const BLProcessNotification = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const socket = useContext(SocketContext);
+  const channel = new BroadcastChannel(BROADCAST.ACCESS);
 
   const [open, setOpen] = useState(false);
 
@@ -98,8 +101,17 @@ const BLProcessNotification = () => {
     if (myBL.id) {
       checkBLProcess();
 
-      // User connection
       const user = JSON.parse(localStorage.getItem('USER'));
+
+      // post a signal
+      channel.postMessage(user.role);
+
+      // receive signal
+      channel.onmessage = (e) => {
+        checkBroadCastAccessing(e.data);
+      };
+
+      // User connection
       socket.emit(
         'user_connect',
         {
@@ -134,6 +146,10 @@ const BLProcessNotification = () => {
       });
     }
   }, [myBL]);
+
+  useEffect(() => {
+    return () => channel.close();
+  }, [])
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md">
