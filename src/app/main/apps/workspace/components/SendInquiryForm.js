@@ -2,7 +2,7 @@ import * as Actions from 'app/store/actions';
 import { checkNewInquiry } from '@shared';
 import { PORT_OF_DISCHARGE, PORT_OF_LOADING, VESSEL_VOYAGE_CODE, PRE_CARRIAGE_CODE } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Icon,
@@ -22,8 +22,10 @@ import { makeStyles, withStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { getMail } from 'app/services/mailService';
 import parse from 'html-react-parser';
+import { SocketContext } from 'app/AppContext';
 
-import * as mailActions from '../store/actions/mail';
+import * as InquiryActions from '../store/actions/inquiry';
+import * as MailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
 
 import InputUI from './MailInputUI';
@@ -89,6 +91,9 @@ const HelperText = withStyles((theme) => ({
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles();
+  const socket = useContext(SocketContext);
+
+  const user = useSelector(({ user }) => user);
   const mybl = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
@@ -102,7 +107,7 @@ const SendInquiryForm = (props) => {
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
   const tags = useSelector(({ workspace }) => workspace.mailReducer.tags);
-  const user = useSelector(({ user }) => user);
+  const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
 
   const initialState = {
     toCustomer: '',
@@ -137,6 +142,10 @@ const SendInquiryForm = (props) => {
   const [customerValue, setCustomerValue] = useState({ subject: '', content: '' });
   const [onshoreValue, setOnshoreValue] = useState({ subject: '', content: '' });
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
+  const syncData = (data, syncOptSite = false) => {
+    socket.emit("sync_data", { data, syncOptSite });
+  };
 
   const getField = (keyword) => {
     return metadata.field?.[keyword] || '';
@@ -212,7 +221,7 @@ const SendInquiryForm = (props) => {
         res.data[0].toOnshore.forEach((onshore) => {
           toOnshore.push(onshore.email);
         });
-      dispatch(mailActions.setTags({ ...tags, toCustomer, toOnshore }));
+      dispatch(MailActions.setTags({ ...tags, toCustomer, toOnshore }));
     }
     toCustomer = toCustomer.join(',');
     toOnshore = toOnshore.join(',');
@@ -269,11 +278,11 @@ const SendInquiryForm = (props) => {
 
   useEffect(() => {
     // call API suggest mail
-    if (!suggestMails.length) dispatch(mailActions.suggestMail(''));
+    if (!suggestMails.length) dispatch(MailActions.suggestMail(''));
     fetchData();
     return () => {
-      dispatch(mailActions.setTags({ toCustomer: [], toOnshore: [], toCustomerCc: [], toOnshoreCc: [], toCustomerBcc: [], toOnshoreBcc: [] }));
-      dispatch(mailActions.inputMail({ toCustomer: '', toOnshore: '', toCustomerCc: '', toOnshoreCc: '', toCustomerBcc: '', toOnshoreBcc: '' }));
+      dispatch(MailActions.setTags({ toCustomer: [], toOnshore: [], toCustomerCc: [], toOnshoreCc: [], toCustomerBcc: [], toOnshoreBcc: [] }));
+      dispatch(MailActions.inputMail({ toCustomer: '', toOnshore: '', toCustomerCc: '', toOnshoreCc: '', toCustomerBcc: '', toOnshoreBcc: '' }));
     }
   }, []);
 
@@ -303,7 +312,7 @@ const SendInquiryForm = (props) => {
   useEffect(() => {
     if (success) {
       dispatch({
-        type: mailActions.SENDMAIL_NONE
+        type: MailActions.SENDMAIL_NONE
       });
       if (!hasCustomer && !hasOnshore) {
         dispatch(FormActions.toggleOpenEmail(false));
@@ -314,11 +323,26 @@ const SendInquiryForm = (props) => {
       if (hasCustomer) {
         setTabValue('customer');
       }
+
+      const cloneInquiries = [...inquiries];
+      cloneInquiries.forEach((q) => {
+        if (q.receiver[0] === tabValue) {
+          if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
+          else if (q.state === 'REP_Q_DRF') q.state = 'REP_Q_SENT'; // inquiry
+          else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
+        }
+      });
+      dispatch(InquiryActions.setInquiries(cloneInquiries));
+      dispatch(InquiryActions.checkSend(false));
+
+      // sync send mail
+      syncData({ inquiries: cloneInquiries, listMinimize }, true);
+
       dispatch(Actions.showMessage({ message: 'Your inquiries have been sent successfully', variant: 'success' }));
     } else if (error) {
       handleError(dispatch, error);
       dispatch({
-        type: mailActions.SENDMAIL_NONE
+        type: MailActions.SENDMAIL_NONE
       });
     }
   }, [success, error]);
@@ -339,9 +363,9 @@ const SendInquiryForm = (props) => {
         formClone.toOnshoreBcc = '';
         header = customerValue.header;
       }
-      dispatch({ type: mailActions.SENDMAIL_LOADING });
+      dispatch({ type: MailActions.SENDMAIL_LOADING });
       dispatch(
-        mailActions.sendMail({
+        MailActions.sendMail({
           myblId: mybl.id,
           bkgNo,
           ...formClone,

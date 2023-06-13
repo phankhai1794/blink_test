@@ -9,12 +9,12 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import { getInquiryById } from 'app/services/inquiryService';
 import { getBlInfo } from 'app/services/myBLService';
 import { SocketContext } from 'app/AppContext';
-import { getPermissionByRole } from 'app/services/authService';
 import * as AppAction from 'app/store/actions';
 import { checkBroadCastAccessing } from '@shared';
 import { BROADCAST } from '@shared/keyword';
 
 import * as Actions from '../store/actions';
+import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 import * as TransActions from '../store/actions/transaction';
 
@@ -111,38 +111,29 @@ const BLProcessNotification = () => {
         checkBroadCastAccessing(e.data);
       };
 
-      // User connection
+      // user connect
+      const mybl = (user.userType === "ADMIN") ? [myBL.bkgNo, myBL.id] : [myBL.id, myBL.bkgNo];
       socket.emit(
         'user_connect',
         {
-          mybl: user.userType === "ADMIN" ? myBL.bkgNo : myBL.id,
+          mybl: mybl[0],
+          optSite: mybl[1], // opposite workspace (offshore or onshore/customer)
           userName: user.displayName,
           userType: user.userType
         }
       );
 
-      // Receive the users accessing BL
+      // Receive the list user accessing
       socket.on('users_accessing', async ({ usersAccessing }) => {
         console.log("usersAccessing: ", usersAccessing);
+      });
 
-        const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
-        if (userLocal.displayName && usersAccessing.length) {
-          let permissions = await getPermissionByRole('Viewer');
-          dispatch(AppAction.setUser({ ...userLocal, permissions }));
-
-          if (userLocal.displayName === usersAccessing[0]) { // if to be the first user
-            permissions = await getPermissionByRole(userLocal.role);            
-            // close the warning popup if the user is granted permission
-            dispatch(FormActions.toggleOpenBLWarning(false));
-          } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1]) { // if to be the last user
-            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0] }));
-          }
-
-          setTimeout(() => {
-            dispatch(AppAction.setUser({ ...userLocal, permissions }));
-          }, 500);
-          sessionStorage.setItem('permissions', JSON.stringify(permissions));
-        }
+      // Receive the message sync state
+      socket.on('sync_state', async (res) => {
+        dispatch(InquiryActions.setInquiries(res.inquiries));
+        if (res.listMinimize) dispatch(InquiryActions.setListMinimize(res.listMinimize));
+        if (res.content) dispatch(InquiryActions.setContent(res.content));
+        if (res.amendments) dispatch(InquiryActions.setListCommentDraft(res.amendments));
       });
     }
   }, [myBL]);
