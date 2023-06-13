@@ -863,12 +863,12 @@ const InquiryEditor = (props) => {
           // break;
         }
       }
+
       const editInquiry = JSON.parse(JSON.stringify({ ...currentEditInq }))
-      
       if (ansTypeChoice === editInquiry.ansType) {
         editInquiry.answerObj.push({
           id: null,
-          content: 'Other',
+          content: '',
           createdAt: new Date(),
         })
       }
@@ -1044,7 +1044,7 @@ const InquiryEditor = (props) => {
             });
             op.answerObj.push({
               id: null,
-              content: 'Other',
+              content: '',
               createdAt: new Date(),
             })
           }
@@ -1335,7 +1335,7 @@ const InquiryEditor = (props) => {
                             style={{ float: 'right', color: '#515F6B', fontWeight: 500, textTransform: 'none' }}
                             onClick={() => handleShowTemplateCDCM(val.type)}
                           >
-                              Template
+                            Template
                             <Icon>{val.showTemplate ? 'arrow_drop_up' : 'arrow_drop_down'}</Icon>
                           </Button>
                         ) : ``}

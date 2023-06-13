@@ -94,7 +94,7 @@ const ChoiceAnswerEditor = (props) => {
   useEffect(() => {
     const inq = { ...currentEditInq };
     const length = inq.answerObj.length
-    if (length && inq.answerObj[length - 1].content === 'Other') {
+    if (length && !inq.answerObj[length - 1].content) {
       inq.answerObj.pop()
       dispatch(InquiryActions.setEditInq(inq));
     }

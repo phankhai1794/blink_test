@@ -144,7 +144,7 @@ const AmendmentPopup = (props) => {
   }, []);
 
   useEffect(() => {
-    const isResolved = inquiries.filter(inq => (inq.field === metadata.field[CONTAINER_DETAIL] && ['COMPL', 'RESOLVED', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A'].includes(inq.state))).length > 0;
+    const isResolved = inquiries.filter(inq => ((inq.field === metadata.field[CONTAINER_DETAIL] || inq.field === metadata.field[CONTAINER_MANIFEST]) && ['COMPL', 'RESOLVED', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A'].includes(inq.state))).length > 0;
     if (isResolved && isEdit && user.role !== 'Guest') {
       const dataResolved = JSON.parse(JSON.stringify(content[metadata.field[(inqType === 'containerDetail') ? CONTAINER_DETAIL : CONTAINER_MANIFEST]]));
       Object.keys(data).forEach(key => {
