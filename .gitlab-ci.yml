@@ -58,12 +58,12 @@ deploy_staging:
 deploy_production:
   stage: production
   only:
-    - "main"
+    - "production"
   when: manual
   allow_failure: false
   environment:
     name: production
-    url: http://blink.one-line.com
+    url: https://blink.one-line.com
   script:
     - echo "${GITLAB_USER_LOGIN} sending Deployment trigger to Production site"
-    - 'curl -f -d "commit_id=${CI_COMMIT_SHA:0:8}&triggerer=${GITLAB_USER_LOGIN}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST http://blink.one-line.com/pipeline/production/portal'
+    - 'curl -f -d "commit_id=${CI_COMMIT_SHA:0:8}&triggerer=${GITLAB_USER_LOGIN}" -H "Authorization: ${DEPLOY_TOKEN}" -X POST https://blink.one-line.com/pipeline/production/portal'
