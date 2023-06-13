@@ -13,7 +13,7 @@ import {
 import Formsy from 'formsy-react';
 import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@material-ui/icons/VisibilityOffOutlined';
-import { COUNTRIES } from '@shared';
+import { COUNTRIES } from '@shared/keyword';
 
 const passwordLength = 4;
 const mainColor = '#BD0F72';
