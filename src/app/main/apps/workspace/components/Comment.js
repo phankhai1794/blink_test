@@ -171,10 +171,22 @@ const Comment = (props) => {
                   disableInput={true}
                 />
               ) : (
-                <div className={clsx((['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(reply.state) || reply.status === 'DELETED') ? 'delete-content' : '', 'content-reply')} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontStyle: ((!['INQ', 'ANS'].includes(type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(reply.state) && reply.process === 'pending') ||
-                            (!['AME_ORG', 'AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(reply.state) && reply.process === 'draft')) && 'italic' }}>
+                <div
+                  className={clsx((['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(reply.state) || reply.status === 'DELETED') ? 'delete-content' : '', 'content-reply')}
+                  style={{
+                    wordBreak: 'break-word',
+                    whiteSpace: 'pre-wrap',
+                    fontStyle: (
+                      (!['INQ', 'ANS'].includes(type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(reply.state) && reply.process === 'pending')
+                      ||
+                      (!['AME_ORG', 'AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(reply.state) && reply.process === 'draft')
+                    ) && 'italic'
+                  }}
+                >
                   {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
-                    <div className={reply.isChangeRecipient ? 'markReopen' : ''}>{(isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG' ].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content}</div> :
+                    <div className={reply.isChangeRecipient ? 'markReopen' : ''}>
+                      {(isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG'].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content}
+                    </div> :
                     (type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>)
                   }
                 </div>
@@ -195,43 +207,27 @@ const Comment = (props) => {
             {media?.length > 0 &&
               media?.map((file, mediaIndex) => (
                 <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                    <ImageAttach
-                      file={file}
-                      files={media}
-                      hiddenRemove={true}
-                      indexInquiry={id}
-                      style={{ margin: '2.5rem' }}
-                      question={question}
-                    />
-                  ) : (
-                    <FileAttach
-                      hiddenRemove={true}
-                      file={file}
-                      files={media}
-                      indexInquiry={id}
-                      question={question} />
-                  )}
+                  <FileAttach
+                    hiddenRemove={true}
+                    file={file}
+                    files={media}
+                    indexInquiry={id}
+                    question={question} />
                 </div>
               ))}
           </div>
-          <div className='attachment-answer'>
+          <div className='attachment-answer' style={{ width: '108%' }}>
             {answersMedia?.length > 0 && (
               <>
                 {answersMedia?.map((file, mediaIndex) => (
                   <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach
-                        file={file}
-                        files={answersMedia}
-                        hiddenRemove={true}
-                        indexInquiry={id}
-                        style={{ margin: '2.5rem' }}
-                        question={question}
-                      />
-                    ) : (
-                      <FileAttach hiddenRemove={true} file={file} files={answersMedia} indexInquiry={id} question={question} />
-                    )}
+                    <FileAttach
+                      hiddenRemove={true}
+                      file={file}
+                      files={answersMedia}
+                      indexInquiry={id}
+                      question={question}
+                    />
                   </div>
                 ))}
               </>

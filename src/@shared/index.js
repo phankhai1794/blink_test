@@ -451,6 +451,17 @@ export const isSameDate = (d1, d2) => {
   )
 }
 
+export const getSrcFileIcon = (file) => {
+  let path = '';
+  const ext = file.ext.toLowerCase();
+
+  if (ext.includes('pdf')) path = 'assets/images/logos/pdf_icon.png';
+  else if (ext.match(/csv|xls|xlsx|excel|sheet/g)) path = '/assets/images/logos/excel_icon.png';
+  else if (ext.match(/doc|msword/g)) path = '/assets/images/logos/word_icon.png';
+
+  return path;
+}
+
 export const checkBroadCastAccessing = (role) => {
   const { pathname, search } = window.location;
   const url = pathname + search;

@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
 import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate } from '@shared';
-import { NO_CONTENT_AMENDMENT , CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
+import { NO_CONTENT_AMENDMENT, CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
@@ -578,11 +578,13 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
       <div className={classes.attachmentFiles}>
         {attachments?.map((file, mediaIndex) => (
           <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-            {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-              <ImageAttach file={file} files={attachments} question={question} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />)
-              : (
-                <FileAttach file={file} files={attachments} question={question} draftBL={true} removeAttachmentDraftBL={() => removeAttachment(mediaIndex)} />
-              )}
+            <FileAttach
+              file={file}
+              files={attachments}
+              question={question}
+              draftBL={true}
+              removeAttachmentDraftBL={() => removeAttachment(mediaIndex)}
+            />
           </div>
         ))}
       </div>
