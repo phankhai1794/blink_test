@@ -36,6 +36,7 @@ const initialState = {
   searchQueueQuery: { bookingNo: '', from: '', to: '', blStatus: 'PENDING,IN_QUEUE', currentPageNumber: 1, pageSize: 10, totalPageNumber: 5, sortField: '' },
   cancelAmePopup: false,
   originValueCancel: {},
+  enableExpandAttachment: []
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -175,6 +176,9 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.ORIGIN_VALUE_CANCEL: {
     return { ...state, originValueCancel: action.state };
+  }
+  case Actions.SET_EXPAND_ATTACHMENT: {
+    return {...state, enableExpandAttachment: action.state}
   }
   default: {
     return state;

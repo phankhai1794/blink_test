@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DescriptionIcon from '@material-ui/icons/Description';
 import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
@@ -6,6 +6,7 @@ import { IconButton, Tooltip } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from "@shared/permission";
 import { getFile } from 'app/services/fileService';
+import { getSrcFileIcon } from '@shared';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
@@ -14,25 +15,20 @@ import PDFViewer from './PDFViewer';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    borderWidth: 1,
-    borderStyle: 'ridge',
-    justifyContent: 'center',
-    height: "100%",
-    width: 165,
-    marginBottom: 10,
-    marginLeft: 10,
-    marginRight: 10,
+    marginLeft: '10px',
+    marginRight: '10px',
+    marginBottom: '10px',
     backgroundColor: '#F5F8FA',
     '&:first-child': {
       marginLeft: 0
     },
     '& img': {
       height: 110,
-      width: 110
+      width: 165
     },
     '& h3': {
       display: 'block',
-      margin: 'auto 1rem',
+      margin: '5px',
       cursor: 'pointer',
       whiteSpace: 'nowrap',
       overflow: 'hidden',
@@ -44,6 +40,26 @@ const useStyles = makeStyles((theme) => ({
   },
   fontSizeLarge: {
     fontSize: 110
+  },
+  overAttachment: {
+    fontSize: '60px',
+    fontFamily: 'Montserrat',
+    color: 'White',
+    fontWeight: '600',
+    lineHeight: '73.14px',
+    position: 'absolute',
+    width: '70px',
+    height: '73px',
+    left: '20%',
+    top: '18%',
+    background: 'none',
+    border: 'none'
+  },
+  backgroupOverFile: {
+    position: 'absolute',
+    background: 'rgba(19, 37, 53, 0.6)',
+    width: 166,
+    height: 141
   }
 }));
 
@@ -65,14 +81,15 @@ const FileAttach = ({
   setIsRemoveFile
 }) => {
   const classes = useStyles();
-  const [attachmentList, currentEditInq] = useSelector(({ workspace }) => [
+  const dispatch = useDispatch();
+
+  const [attachmentList, currentEditInq, enableExpandAttachment] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.attachmentList,
     workspace.inquiryReducer.currentEditInq,
+    workspace.inquiryReducer.enableExpandAttachment,
   ]);
 
-  const dispatch = useDispatch();
-  // const [view, setView] = useState(false);
-  // const [pdfUrl, setPdfUrl] = useState(null);
+  const [srcUrl, setSrcUrl] = useState(file.src || null);
 
   const urlMedia = (fileExt, file) => {
     if (fileExt.toLowerCase().match(/jpeg|jpg|png/g)) {
@@ -84,46 +101,20 @@ const FileAttach = ({
     }
   };
 
-  const downloadFile = () => {
-    // getFile(file.id).then((f) => {
-    //   const link = document.createElement('a');
-    //   link.href = urlMedia(file.ext, f);
-    //   link.setAttribute(
-    //     'download',
-    //     file.name,
-    //   );
-    //   document.body.appendChild(link);
-    //   link.click();
-    //   link.parentNode.removeChild(link);
-    // }).catch((error) => {
-    //   console.error(error);
-    // });
-    const link = document.createElement('a');
-    link.href = file.u;
-    link.setAttribute('download', file.name);
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode.removeChild(link);
-  };
+  useEffect(() => {
+    if (file.id) {
+      getFile(file.id)
+        .then((f) => {
+          setSrcUrl(urlMedia(file.ext, f));
+        })
+        .catch((error) => console.error(error));
+    } else if (file.src) {
+      setSrcUrl(file.src);
+    }
+  }, [file]);
 
-  const previewFile = () => {
+  const previewFile = () =>
     dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file } }));
-    // if (file.id) {
-    //   getFile(file.id).then((f) => {
-    //     setPdfUrl(urlMedia(file.ext, f));
-    //     setView(true);
-    //   }).catch((error) => {
-    //     console.error(error);
-    //   });
-    // } else if (file.src) {
-    //   setPdfUrl(file.src);
-    //   setView(true);
-    // }
-  };
-
-  // const handleClose = () => {
-  //   setView(false)
-  // }
 
   const handleRemoveFile = (id) => {
     const optionsOfQuestion = { ...currentEditInq };
@@ -180,27 +171,56 @@ const FileAttach = ({
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   }
 
-  return (
-    <div className={classes.root}>
-      <div style={{ height: 126, textAlign: 'center' }}>
-        {file.ext.toLowerCase().includes('pdf') ? (
-          <img src={`/assets/images/logos/pdf_icon.png`} onClick={previewFile} onDragStart={(event) => event.preventDefault()}/>
-        ) : file.ext.toLowerCase().match(/csv|xls|xlsx|excel|sheet/g) ? (
-          <img src={`/assets/images/logos/excel_icon.png`} onClick={previewFile} onDragStart={(event) => event.preventDefault()}/>
-        ) : file.ext.toLowerCase().match(/doc|msword/g) ? (
-          <img src={`/assets/images/logos/word_icon.png`} onClick={previewFile} onDragStart={(event) => event.preventDefault()}/>
-        ) : (
-          <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} fontSize='large' onClick={previewFile} />
-        )}
-      </div>
-      {/* <PDFViewer view={view} handleClose={handleClose} pdfUrl={pdfUrl} name={file.name} /> */}
+  const handleExpand = () => {
+    dispatch(InquiryActions.setExpand([...enableExpandAttachment, question.id]));
+  }
 
-      <div style={{ display: 'flex', flexDirection: 'row', height: 30 }}>
+  const srcFile = getSrcFileIcon(file);
+
+  return (
+    <div
+      className={classes.root}
+      style={{ display: (question && !enableExpandAttachment.includes(question.id) && indexMedia > 4) ? 'none' : 'block' }}>
+      {(question && !enableExpandAttachment.includes(question.id) && indexMedia === 4 && files.length > 5) &&
+        <div className={classes.backgroupOverFile}>
+          <button className={classes.overAttachment} onClick={handleExpand} >
+            +{files.length - 4}
+          </button>
+        </div>
+      }
+      <div style={{ border: '1px solid #BAC3CB', borderRadius: '4px 4px 0px 0px', width: '165px', height: '110px' }}>
+        {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+          <img
+            style={{
+              objectFit: 'cover'
+            }}
+            src={srcUrl}
+            onClick={previewFile}
+            onDragStart={(event) => event.preventDefault()}
+          />
+        ) : (
+          srcFile ? (
+            <img src={srcFile} onClick={previewFile} />
+          ) : (
+            <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} onClick={previewFile} onDragStart={(event) => event.preventDefault()} fontSize='large' />
+          )
+        )
+        }
+      </div>
+
+      <div style={{ display: 'flex', width: 165, height: 27, flexDirection: 'row', border: '1px solid #BAC3CB', borderRadius: '0px 0px 4px 4px' }}>
+        {srcFile ?
+          (<img style={{ width: 17, height: 17, padding: '7px 2px' }} src={srcFile} onClick={previewFile} />)
+          : (
+            (file.ext.toLowerCase().match(/jpeg|jpg|png/g) ?
+              <img src={'/assets/images/logos/image_icon.png'} style={{ width: 16, height: 15, padding: '7px 2px' }} />
+              : <DescriptionIcon style={{ width: 17, height: 17, padding: '7px 2px' }} onClick={previewFile} />)
+          )
+        }
         <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
           <h3
-            style={{ width: hiddenRemove ? 180 : 160 }}
-            onClick={previewFile}
-          >
+            style={{ fontSize: '14px', color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }}
+            onClick={previewFile}>
             {file.name}
           </h3>
         </Tooltip>

@@ -9,7 +9,7 @@ import { handleError } from '@shared/handleError';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
-import {CONTAINER_DETAIL, CONTAINER_MANIFEST} from "../../../../../@shared/keyword";
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from "../../../../../@shared/keyword";
 
 import InquiryEditor from './InquiryEditor';
 import InquiryAnswer from './InquiryAnswer';
@@ -66,18 +66,24 @@ const Inquiry = (props) => {
 
   useEffect(() => {
     let inquiriesSet = [...inquiries];
-    inquiriesSet = inquiriesSet.filter((q) => (q.field === currentField && q.process === 'pending')
-        || (q.process === 'draft'
-            && ((containerCheck.includes(q.field) && containerCheck.includes(currentField)) || (q.field === currentField && !containerCheck.includes(q.field))))
-    );
+    inquiriesSet = inquiriesSet.filter((q) => (
+      (q.field === currentField && q.process === 'pending')
+      ||
+      (
+        q.process === 'draft'
+        && (
+          (containerCheck.includes(q.field) && containerCheck.includes(currentField))
+          ||
+          (q.field === currentField && !containerCheck.includes(q.field))
+        )
+      )
+    ));
     if (user.role === 'Admin') {
       const filterInqDrf = inquiries.filter(inq =>
         containerCheck.includes(inq.field) && inq.process === 'draft');
       const filterInqPending = inquiries.filter(inq => containerCheck.includes(inq.field) && inq.process === 'pending');
       if (filterInqDrf.length && !filterInqPending.length) {
-        inquiriesSet = inquiriesSet.filter((q) => (q.process === 'draft'
-            && q.field === currentField
-        ));
+        inquiriesSet = inquiriesSet.filter((q) => (q.process === 'draft' && q.field === currentField));
       }
     }
     setReceiver(null);
@@ -237,11 +243,14 @@ const Inquiry = (props) => {
       }}>
         {listInqsField.map((q, index) => {
           return (
-            <div key={index} className={clsx(classes.boxItem,
-              (['UPLOADED'].includes(q.state)) && 'uploaded',
-              (['COMPL', 'RESOLVED'].includes(q.state)) && 'resolved',
-              ([...sentStatus, ...['REP_DRF']].includes(q.state)) && 'offshoreReply'
-            )}>
+            <div key={index}
+              style={{ width: '100%' }}
+              className={clsx(
+                classes.boxItem,
+                (['UPLOADED'].includes(q.state)) && 'uploaded',
+                (['COMPL', 'RESOLVED'].includes(q.state)) && 'resolved',
+                ([...sentStatus, ...['REP_DRF']].includes(q.state)) && 'offshoreReply'
+              )}>
               <InquiryViewer
                 toggleEdit={() => toggleEdit(index)}
                 currentQuestion={questionIdSaved}

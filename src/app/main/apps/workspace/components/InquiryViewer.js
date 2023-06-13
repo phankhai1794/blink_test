@@ -284,6 +284,7 @@ const InquiryViewer = (props) => {
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+  const expandFileQuestionIds = useSelector(({ workspace }) => workspace.inquiryReducer.enableExpandAttachment);
   const cancelAmePopup = useSelector(({ workspace }) => workspace.inquiryReducer.cancelAmePopup);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
@@ -2167,6 +2168,7 @@ const InquiryViewer = (props) => {
     }
     setIsReply(false);
     setIsReplyCDCM(false);
+    dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id)));
   }
 
   const cancelReply = (q) => {
@@ -2180,6 +2182,7 @@ const InquiryViewer = (props) => {
     reply.mediaFile = [];
     setQuestion(reply);
     setSaveComment(!isSaveComment);
+    dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id)));
   };
 
   const onReply = (q) => {
@@ -2205,6 +2208,7 @@ const InquiryViewer = (props) => {
       dispatch(InquiryActions.setReply(true));
       setQuestion(q => ({ ...q, showIconReply: false, showIconAttachAnswerFile: false, showIconAttachReplyFile: true }));
       setTempReply({})
+      dispatch(InquiryActions.setExpand([...expandFileQuestionIds, question.id]));
     }
   };
 
@@ -2255,6 +2259,7 @@ const InquiryViewer = (props) => {
     setViewDropDown('');
     setInqHasComment(false);
     setIsDateTime(isDateField(metadata, question.field));
+    dispatch(InquiryActions.setExpand([...expandFileQuestionIds, question.id]));
   }
 
   const reOpen = (idInq) => {
@@ -2899,30 +2904,23 @@ const InquiryViewer = (props) => {
                 </Grid>
               )}
 
-              {question.mediaFile?.length > 0 &&
-                !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
-                question.mediaFile?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach
-                        file={file}
-                        files={question.mediaFile}
-                        hiddenRemove={true}
-                        field={question.field}
-                        indexInquiry={index}
-                        style={{ margin: '2.5rem' }}
-                      />
-                    ) : (
+              <div style={{width: '915px'}}>
+                {question.mediaFile?.length > 0 &&
+                  !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
+                  question.mediaFile?.map((file, mediaIndex) => (
+                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
                       <FileAttach
                         hiddenRemove={true}
                         file={file}
                         files={question.mediaFile}
                         field={question.field}
                         indexInquiry={index}
+                        indexMedia={mediaIndex}
+                        question={question}
                       />
-                    )}
-                  </div>
-                ))}
+                    </div>
+                  ))}
+              </div>
             </>
             {
               question.mediaFilesAnswer?.length > 0 &&
@@ -2932,39 +2930,21 @@ const InquiryViewer = (props) => {
                   <h3>Attachment Answer:</h3>}
                 {question.mediaFilesAnswer?.map((file, mediaIndex) => (
                   <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach
-                        file={file}
-                        field={question.field}
-                        style={{ margin: '2.5rem' }}
-                        files={question.mediaFilesAnswer}
-                        indexMedia={mediaIndex}
-                        isAnswer={true}
-                        question={question}
-                        questions={inquiries}
-                        hiddenRemove={!question.showIconAttachAnswerFile}
-                        isRemoveFile={isRemoveFile}
-                        setIsRemoveFile={(val) => {
-                          setIsRemoveFile(val)
-                        }}
-                      />
-                    ) : (
-                      <FileAttach
-                        file={file}
-                        files={question.mediaFilesAnswer}
-                        field={question.field}
-                        indexMedia={mediaIndex}
-                        isAnswer={true}
-                        question={question}
-                        index={index}
-                        questions={inquiries}
-                        hiddenRemove={!question.showIconAttachAnswerFile}
-                        isRemoveFile={isRemoveFile}
-                        setIsRemoveFile={(val) => {
-                          setIsRemoveFile(val)
-                        }}
-                      />
-                    )}
+                    <FileAttach
+                      file={file}
+                      files={question.mediaFilesAnswer}
+                      field={question.field}
+                      indexMedia={mediaIndex}
+                      isAnswer={true}
+                      question={question}
+                      index={index}
+                      questions={inquiries}
+                      hiddenRemove={!question.showIconAttachAnswerFile}
+                      isRemoveFile={isRemoveFile}
+                      setIsRemoveFile={(val) => {
+                        setIsRemoveFile(val)
+                      }}
+                    />
                   </div>
                 ))}
               </>
@@ -3089,42 +3069,28 @@ const InquiryViewer = (props) => {
                             />}
                       </div>
                       }
-                      {tempReply?.mediaFiles?.map((file, mediaIndex) => (
-                        <div
-                          style={{ position: 'relative', display: 'inline-block' }}
-                          key={mediaIndex}>
-                          {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                            <ImageAttach
-                              hiddenRemove={!question.showIconAttachReplyFile}
-                              file={file}
-                              files={tempReply.mediaFiles}
-                              question={question}
-                              field={question.field}
-                              style={{ margin: '2.5rem' }}
-                              indexMedia={mediaIndex}
-                              isReply={true}
-                              templateReply={tempReply}
-                              setTemplateReply={(val) => {
-                                setTempReply(val)
-                              }}
-                            />
-                          ) : (
-                            <FileAttach
-                              hiddenRemove={!question.showIconAttachReplyFile}
-                              file={file}
-                              files={tempReply.mediaFiles}
-                              field={question.field}
-                              question={question}
-                              indexMedia={mediaIndex}
-                              isReply={true}
-                              templateReply={tempReply}
-                              setTemplateReply={(val) => {
-                                setTempReply(val)
-                              }}
-                            />
-                          )}
-                        </div>
-                      ))}
+                      <div className='attachment-reply' style={{width: '900px'}}>
+                        {tempReply?.mediaFiles?.map((file, mediaIndex) => (
+                            <div
+                              style={{ position: 'relative', display: 'inline-block' }}
+                              key={mediaIndex}>
+                                <FileAttach
+                                  hiddenRemove={!question.showIconAttachReplyFile}
+                                  file={file}
+                                  files={tempReply.mediaFiles}
+                                  field={question.field}
+                                  question={question}
+                                  indexMedia={mediaIndex}
+                                  isReply={true}
+                                  isHideFiles={true}
+                                  templateReply={tempReply}
+                                  setTemplateReply={(val) => {
+                                    setTempReply(val)
+                                  }}
+                                />
+                            </div>
+                          ))}
+                      </div>
 
                       <div className="flex">
                         <Button
