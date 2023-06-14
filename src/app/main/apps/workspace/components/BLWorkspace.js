@@ -45,7 +45,6 @@ import { getBlInfo } from 'app/services/myBLService';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
-import * as TransActions from '../store/actions/transaction';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as DraftActions from '../store/actions/draft-bl';
 import * as MailActions from '../store/actions/mail';
@@ -124,7 +123,6 @@ const BLWorkspace = (props) => {
   const [confirmClick, form] = useSelector(({ workspace }) => [workspace.formReducer.confirmClick, workspace.formReducer.form]);
   const [inqCustomer, setInqCustomer] = useState([]);
   const [inqOnshore, setInqOnshore] = useState([]);
-  const isLoadingTrans = useSelector(({ workspace }) => workspace.transReducer.isLoading);
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
@@ -198,17 +196,6 @@ const BLWorkspace = (props) => {
 
     }
   }, [confirmClick, form])
-
-  useEffect(() => {
-    const unloadCallback = (event) => {
-      if (!isLoadingTrans) {
-        dispatch(TransActions.BlTrans(myBL.id, content));
-      }
-      return '';
-    };
-    window.addEventListener('beforeunload', unloadCallback);
-    return () => window.removeEventListener('beforeunload', unloadCallback);
-  }, [isLoadingTrans]);
 
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));

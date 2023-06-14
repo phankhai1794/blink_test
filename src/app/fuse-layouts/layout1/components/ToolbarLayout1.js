@@ -615,12 +615,6 @@ function ToolbarLayout1(props) {
                 </div>
               </PermissionProvider>
 
-              {/* <PermissionProvider
-                action={PERMISSION.VIEW_SHOW_BL_HISTORY}
-                extraCondition={pathname.includes('/workspace')}>
-                <History />
-                {openTrans && transId && <RestoreVersion />}
-              </PermissionProvider>  */}
               <PermissionProvider
                 action={PERMISSION.MAIL_SEND_MAIL}
                 extraCondition={pathname.includes('/guest')}
