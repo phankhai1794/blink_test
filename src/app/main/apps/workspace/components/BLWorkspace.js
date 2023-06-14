@@ -48,7 +48,7 @@ import * as FormActions from '../store/actions/form';
 import * as TransActions from '../store/actions/transaction';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as DraftActions from '../store/actions/draft-bl';
-import * as mailActions from '../store/actions/mail';
+import * as MailActions from '../store/actions/mail';
 
 import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
@@ -193,7 +193,7 @@ const BLWorkspace = (props) => {
       if (inqOnshore.length == 0 && inqCustomer.length == 0) {
         dispatch(AppActions.showMessage({ message: 'No inquiries to Send Mail.', variant: 'error' }));
       } else {
-        dispatch(mailActions.autoSendMail(myBL, inquiries, inqCustomer, inqOnshore, metadata, content, form));
+        dispatch(MailActions.autoSendMail(myBL, inquiries, inqCustomer, inqOnshore, metadata, content, form));
       }
 
     }

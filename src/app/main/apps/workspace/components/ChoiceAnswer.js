@@ -82,8 +82,9 @@ const ChoiceAnswer = (props) => {
   }, []);
 
   useEffect(() => {
-    if (!questionIsEmpty && prevChoiceArray.length > 0) {
-      setSelectedChoice(prevChoiceArray[0].id);
+    if (!questionIsEmpty) {
+      if (prevChoiceArray.length) setSelectedChoice(prevChoiceArray[0].id);
+      else setSelectedChoice('');
     }
   }, [question]);
 

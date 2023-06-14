@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Button } from "@material-ui/core";
 import { useDispatch, useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
@@ -6,10 +6,11 @@ import { submitInquiryAnswer } from 'app/services/inquiryService';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
 import { handleError } from '@shared/handleError';
 import * as Actions from 'app/store/actions';
+import { SocketContext } from 'app/AppContext';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
-
+import {CONTAINER_DETAIL, CONTAINER_MANIFEST} from "../../../../../@shared/keyword";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,6 +57,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PopupConfirmSubmit = (props) => {
+  const dispatch = useDispatch();
+  const classes = useStyles();
+  const socket = useContext(SocketContext);
+
   const [inquiries, myBL, isShowBackground, enableSubmit] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.myBL,
@@ -67,36 +72,46 @@ const PopupConfirmSubmit = (props) => {
     workspace.formReducer.openPreviewListSubmit,
     workspace.formReducer.openAmendmentList
   ]);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
 
   const user = useSelector(({ user }) => user);
 
-  const dispatch = useDispatch();
-  const classes = useStyles();
+  const syncData = (data, syncOptSite = false) => {
+    socket.emit("sync_data", { data, syncOptSite });
+  };
 
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
   const handleConfirm = async () => {
     const inqs = [...inquiries];
     const fields = [];
 
-    const lstInq = inqs.map((item) => {
-      if (
-        (props.field === "INQUIRY_LIST" || props.field === item.field)
-        && item.answerObj
-        && !['OPEN', 'INQ_SENT', 'ANS_SENT', 'AME_SENT', 'COMPL', 'UPLOADED'].includes(item.state)
-      ) {
-        return { inquiryId: item.id, currentState: item.state, field: item.field, process: item.process };
-      }
-      return null;
-    });
-    lstInq.filter(x => x !== null).forEach(item => {
+    const lstInq = inqs
+      .map((item) => {
+        if (
+          (props.field === "INQUIRY_LIST"
+               || (((containerCheck.includes(item.field) && containerCheck.includes(props.field)) || (item.field === props.field && !containerCheck.includes(item.field))
+              )))
+          && item.answerObj
+          && !['OPEN', 'INQ_SENT', 'ANS_SENT', 'AME_SENT', 'COMPL', 'UPLOADED'].includes(item.state)
+        ) {
+          return { inquiryId: item.id, currentState: item.state, field: item.field, process: item.process };
+        }
+        return null;
+      })
+      .filter(x => x !== null);
+    lstInq.forEach(item => {
       if (!fields.includes(item.field)) {
         fields.push(item.field);
       }
     });
-    await submitInquiryAnswer({ lstInq: lstInq.filter(x => x !== null), fields, bl: myBL.id }).catch(err => handleError(dispatch, err));
+    await submitInquiryAnswer({ lstInq, fields, bl: myBL.id }).catch(err => handleError(dispatch, err));
 
-    const inqsDraft = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && ['AME_DRF'].includes(inq.currentState));
-    const inqsReply = lstInq?.filter(inq => inq !== null && inq.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(inq.currentState));
-    const draftReply = lstInq?.filter(inq => inq !== null && inq.process === 'draft' && ['REP_DRF'].includes(inq.currentState));
+    const inqsDraft = lstInq.filter(inq => inq !== null && inq.process === 'draft' && ['AME_DRF'].includes(inq.currentState));
+    const inqsReply = lstInq.filter(inq => inq !== null && inq.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(inq.currentState));
+    const draftReply = lstInq.filter(inq => inq !== null && inq.process === 'draft' && ['REP_DRF'].includes(inq.currentState));
     if (draftReply.length > 0) {
       // BK. Reply from Customer, Onshore
       const inqType = user.userType === 'CUSTOMER' ? "BP" : "BQ"; // BP: Customer Amendment Reply, BO: Offshore Amendment Inquiry
@@ -115,7 +130,7 @@ const PopupConfirmSubmit = (props) => {
       dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "BA", userType));// BA: Customer Amendment Request
     }
 
-    const listIdInq = lstInq.filter(x => x !== null).map((inq) => inq.inquiryId);
+    const listIdInq = lstInq.map((inq) => inq.inquiryId);
     inqs.forEach((item) => {
       if (listIdInq.includes(item.id)) {
         if (item.state === 'ANS_DRF') item.state = 'ANS_SENT';
@@ -124,7 +139,12 @@ const PopupConfirmSubmit = (props) => {
         else if (item.state === 'REP_DRF') item.state = 'REP_SENT';
       }
     });
+
     dispatch(InquiryActions.setInquiries(inqs));
+
+    // sync submit
+    syncData({ inquiries: inqs }, true);
+
     props.handleCheckSubmit();
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
     if (props.field === 'INQUIRY_LIST') {

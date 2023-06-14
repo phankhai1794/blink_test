@@ -1,0 +1,26 @@
+.rdrDateRangePickerWrapper {
+  z-index: 10;
+  top: 120%;
+  position: absolute;
+}
+
+.flag-country:not(:first-child) {
+  margin-left: -10px;
+}
+
+.circle-flag {
+  border-radius: 50%;
+  border: 1px solid #8aaae5;
+}
+
+.circle-flag-default svg {
+  fill: red;
+}
+
+.circle-flag-default {
+  border-radius: 50%;
+}
+
+.circle-flag-default:hover {
+  filter: invert(48%) sepia(78%) saturate(860%) hue-rotate(167deg) brightness(101%) contrast(104%);
+}

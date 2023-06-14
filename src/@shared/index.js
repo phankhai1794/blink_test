@@ -87,97 +87,6 @@ export const draftConfirm = 'DRF_CONF';
 
 export const stateResquest = 'REQUEST';
 
-export const COUNTRIES = [
-  {
-    name: 'United States',
-    value: 'US'
-  },
-  {
-    name: 'Singapore',
-    value: 'SG'
-  },
-  {
-    name: 'Thailand',
-    value: 'TH'
-  },
-  {
-    name: 'Vietnam',
-    value: 'VN'
-  },
-  {
-    name: 'Czechia',
-    value: 'CZ'
-  },
-  {
-    name: 'Denmark',
-    value: 'DK'
-  },
-  {
-    name: 'Finland',
-    value: 'FI'
-  },
-  {
-    name: 'France',
-    value: 'FR'
-  },
-  {
-    name: 'Hungary',
-    value: 'HU'
-  },
-  {
-    name: 'Italy',
-    value: 'IT'
-  },
-  {
-    name: 'Norway',
-    value: 'NO'
-  },
-  {
-    name: 'Poland',
-    value: 'PL'
-  },
-  {
-    name: 'Russian',
-    value: 'RU'
-  },
-  {
-    name: 'Sweden',
-    value: 'SE'
-  },
-  {
-    name: 'Switzerland',
-    value: 'CH'
-  },
-  {
-    name: 'Spain',
-    value: 'ES'
-  },
-  {
-    name: 'Portugal',
-    value: 'PT'
-  },
-  {
-    name: 'Taiwan',
-    value: 'TW'
-  },
-  {
-    name: 'Japan',
-    value: 'JP'
-  },
-  {
-    name: 'New Zealand',
-    value: 'OC_ML'
-  },
-  {
-    name: 'Myanmar',
-    value: 'MM'
-  },
-  {
-    name: 'Montenegro	',
-    value: 'ME'
-  },
-];
-
 export const sentStatus = [
   ...['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'REOPEN_Q', 'REOPEN_A'], // inquiry status
   ...['REP_SENT'] // draft status
@@ -449,6 +358,17 @@ export const isSameDate = (d1, d2) => {
     && t1.getMonth() === t2.getMonth()
     && t1.getDay() === t2.getDay()
   )
+}
+
+export const getSrcFileIcon = (file) => {
+  let path = '';
+  const ext = file.ext.toLowerCase();
+
+  if (ext.includes('pdf')) path = 'assets/images/logos/pdf_icon.png';
+  else if (ext.match(/csv|xls|xlsx|excel|sheet/g)) path = '/assets/images/logos/excel_icon.png';
+  else if (ext.match(/doc|msword/g)) path = '/assets/images/logos/word_icon.png';
+
+  return path;
 }
 
 export const checkBroadCastAccessing = (role) => {
