@@ -118,7 +118,7 @@ const ChoiceAnswer = (props) => {
                         whiteSpace: 'pre',
                         textDecorationLine: ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && 'line-through',
                         fontStyle: (!['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT'].includes(question.state) || (['ANS_DRF'].includes(question.state) && user.role === 'Guest')) && 'italic',
-                      }}>{lastElement && !disable ? 'Other:' : (lastElement ? `Other: ${choice.content}` : choice.content)}</span>
+                      }}>{lastElement && !disable ? 'Other:' : (lastElement ? `Other${choice.content && ':'} ${choice.content}` : choice.content)}</span>
                     }
                   />
                   {lastElement && !disable &&

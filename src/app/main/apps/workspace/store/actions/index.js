@@ -29,7 +29,7 @@ export const initBL = (bkgNo) => async (dispatch) => {
       }
       dispatch(FormActions.decreaseLoading());
     })
-    .catch((err) => console.error(err));
+    .catch((err) => handleError(dispatch, err));
 };
 
 export const loadMetadata = () => async (dispatch) => {

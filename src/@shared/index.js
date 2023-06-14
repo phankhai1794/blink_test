@@ -450,3 +450,19 @@ export const isSameDate = (d1, d2) => {
     && t1.getDay() === t2.getDay()
   )
 }
+
+export const checkBroadCastAccessing = (role) => {
+  const { pathname, search } = window.location;
+  const url = pathname + search;
+
+  const mapper = {
+    Admin: ["/workspace", "/admin"],
+    Guest: ["/guest", "/draft-bl?bl="]
+  }
+
+  if (role) {
+    if (!mapper[role].some(route => url.includes(route))) {
+      window.location.reload();
+    }
+  }
+}

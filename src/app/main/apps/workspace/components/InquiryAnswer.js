@@ -247,7 +247,7 @@ const InquiryAnswer = (props) => {
     await addTransactionAnswer({ inquiryId: question.id, contentCDCM, ansType: question.ansType }).catch(err => handleError(dispatch, err));
 
     if (question.selectChoice) {
-      if (question.selectChoice.isLast && !question.selectChoice.isOther) {
+      if (question.selectChoice.isLast && !question.selectChoice.isOther?.trim()) {
         dispatch(AppAction.showMessage({ message: 'Information required!', variant: 'error' }));
         setDisableSave(false)
         return;
