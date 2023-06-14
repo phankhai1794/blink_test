@@ -76,16 +76,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
       else if (title === currentField) {
         // currentFields = inquiries.filter(inq => inq.field === currentField);
         currentFields = inquiries.filter((q) => (
-            (q.field === currentField && q.process === 'pending')
-            ||
-            (
-                q.process === 'draft'
-                && (
-                    (containerCheck.includes(q.field) && containerCheck.includes(currentField))
-                    ||
-                    (q.field === currentField && !containerCheck.includes(q.field))
-                )
-            )
+            ((containerCheck.includes(q.field) && containerCheck.includes(currentField)) || (q.field === currentField && !containerCheck.includes(q.field)))
         ));
       }
       //
