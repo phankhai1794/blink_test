@@ -4,7 +4,6 @@ import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
-import { clearLocalStorage } from '@shared';
 import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
@@ -359,8 +358,6 @@ function ToolbarLayout1(props) {
   useEffect(() => {
     if (!user.displayName || !validToken) {
       if (!allowAccess) {
-        clearLocalStorage();
-
         const bl = new URLSearchParams(search).get('bl');
         if (bl) {
           window.location.reload();
@@ -455,7 +452,7 @@ function ToolbarLayout1(props) {
 
   return (
     <ThemeProvider theme={toolbarTheme}>
-      {!isLoading && (
+      {(isLoading <= 0) && (
         <AppBar id="fuse-toolbar" className="flex relative z-10" color="inherit">
           <Toolbar className="p-0">
             {config.navbar.display && config.navbar.position === 'left' && (
