@@ -10,6 +10,7 @@ import { SocketContext } from 'app/AppContext';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
+import {CONTAINER_DETAIL, CONTAINER_MANIFEST} from "../../../../../@shared/keyword";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -71,6 +72,7 @@ const PopupConfirmSubmit = (props) => {
     workspace.formReducer.openPreviewListSubmit,
     workspace.formReducer.openAmendmentList
   ]);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
 
   const user = useSelector(({ user }) => user);
 
@@ -78,6 +80,10 @@ const PopupConfirmSubmit = (props) => {
     socket.emit("sync_data", { data, syncOptSite });
   };
 
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
   const handleConfirm = async () => {
     const inqs = [...inquiries];
     const fields = [];
@@ -85,7 +91,9 @@ const PopupConfirmSubmit = (props) => {
     const lstInq = inqs
       .map((item) => {
         if (
-          (props.field === "INQUIRY_LIST" || props.field === item.field)
+          (props.field === "INQUIRY_LIST"
+               || (((containerCheck.includes(item.field) && containerCheck.includes(props.field)) || (item.field === props.field && !containerCheck.includes(item.field))
+              )))
           && item.answerObj
           && !['OPEN', 'INQ_SENT', 'ANS_SENT', 'AME_SENT', 'COMPL', 'UPLOADED'].includes(item.state)
         ) {
