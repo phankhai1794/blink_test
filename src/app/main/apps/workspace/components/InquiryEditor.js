@@ -4,19 +4,22 @@ import { useDispatch, useSelector } from 'react-redux';
 import { combineCDCM, getLabelById, toFindDuplicates } from '@shared';
 import { handleError } from '@shared/handleError';
 import {
-  Button, Checkbox, Chip,
-  Collapse,
+  Button,
+  Checkbox,
+  Chip,
   Divider,
   FormControl,
   FormControlLabel,
   FormHelperText,
   Grid,
-  Icon, InputLabel,
-  ListItem,
-  ListItemText, MenuItem,
+  Icon,
+  InputLabel,
+  ListItemText,
+  MenuItem,
   Popover,
   Radio,
-  RadioGroup, Select
+  RadioGroup,
+  Select
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -29,7 +32,7 @@ import axios from 'axios';
 import { useUnsavedChangesWarning } from 'app/hooks'
 import { useDropzone } from 'react-dropzone';
 import ContentEditable from 'react-contenteditable';
-import { ExpandLess, ExpandMore } from "@material-ui/icons";
+import clone from 'lodash/clone';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -42,7 +45,6 @@ import AttachmentAnswer from './AttachmentAnswer';
 import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import AttachFile from './AttachFile';
-import ContainerDetailForm from "./ContainerDetailForm";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -864,7 +866,7 @@ const InquiryEditor = (props) => {
         }
       }
 
-      const editInquiry = JSON.parse(JSON.stringify({ ...currentEditInq }))
+      const editInquiry = clone(currentEditInq);
       if (ansTypeChoice === editInquiry.ansType) {
         editInquiry.answerObj.push({
           id: null,

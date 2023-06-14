@@ -11,7 +11,7 @@ export const handleError = (dispatch, err) => {
   }
   if (!message) message = err.message || "Your token has expired";
 
-  if (status === 401) {
+  if ([401, 403].includes(status)) {
     dispatch(Actions.checkAuthToken(false));
     dispatch(Actions.checkAllow(false));
   }
