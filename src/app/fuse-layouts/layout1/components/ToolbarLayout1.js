@@ -379,7 +379,8 @@ function ToolbarLayout1(props) {
           displayName: userInfo.displayName,
           photoURL: userInfo.photoURL,
           email: userInfo.email,
-          permissions: userInfo.permissions
+          permissions: userInfo.permissions,
+          countries: userInfo.countries
         };
         dispatch(AppActions.setUser(payload));
       }
@@ -556,7 +557,6 @@ function ToolbarLayout1(props) {
                       }
                     }
                   }}>
-
                   {drfViews.map(view => (
                     <MenuItem
                       key={view.value}

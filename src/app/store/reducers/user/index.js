@@ -7,6 +7,7 @@ const initialState = {
   photoURL: '',
   email: '',
   permissions: [],
+  countries: []
 };
 
 const user = function (state = initialState, action) {

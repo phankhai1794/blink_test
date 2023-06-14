@@ -73,14 +73,15 @@ function Login(props) {
       .then((res) => {
         if (res) {
           const { userData, token, message } = res;
-          const { userType, role, userName, avatar, email, permissions } = userData;
+          const { userType, role, userName, avatar, email, permissions, countries } = userData;
           const userInfo = {
             displayName: userName,
             photoURL: avatar,
             userType,
             role,
             email,
-            permissions
+            permissions,
+            countries
           };
           const payload = { ...user, ...userInfo };
 
