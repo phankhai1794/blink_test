@@ -155,6 +155,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 12,
     position: 'relative',
     color: themeColor,
+    paddingRight: 18
   },
 }));
 
