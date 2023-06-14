@@ -28,9 +28,9 @@ function Error404Page() {
           </Typography>
         </FuseAnimate>
 
-        {/* <Link className="font-medium" to="/apps/dashboards">
-          Go back to main page
-        </Link> */}
+        <Link className="font-medium" style={{ color: 'blue', fontSize: 16 }} to="/apps/admin">
+          Go to dashboard page
+        </Link>
       </div>
     </div>
   );
