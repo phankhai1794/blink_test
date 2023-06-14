@@ -60,7 +60,7 @@ function UserProfile(props) {
             fontFamily: 'Montserrat',
             fontStyle: 'normal',
             fontWeight: 600,
-            fontSize: 14,
+            // fontSize: 14,
             fontSize: 12,
             lineHeight: 17,
             color: '#515E6A',

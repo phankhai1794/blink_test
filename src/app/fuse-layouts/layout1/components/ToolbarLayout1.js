@@ -1,6 +1,6 @@
 import history from '@history';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
-import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
+import User from 'app/fuse-layouts/shared-components/User';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
@@ -165,10 +165,6 @@ function ToolbarLayout1(props) {
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
   const user = useSelector(({ user }) => user);
-  const [allowAccess, validToken] = useSelector(({ header }) => [
-    header.allowAccess,
-    header.validToken
-  ]);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
@@ -354,36 +350,6 @@ function ToolbarLayout1(props) {
       }
     }
   }, [enableSubmit, inquiries]);
-
-  useEffect(() => {
-    if (!user.displayName || !validToken) {
-      if (!allowAccess) {
-        const bl = new URLSearchParams(search).get('bl');
-        if (bl) {
-          window.location.reload();
-          // history.push(`/guest?bl=${bl}`);
-        } else history.push({
-          pathname: '/login',
-          ...(!logout && { cachePath: pathname, cacheSearch: search })
-        });
-      }
-
-      let userInfo = JSON.parse(localStorage.getItem('USER'));
-      if (userInfo) {
-        let payload = {
-          ...user,
-          userType: userInfo.userType,
-          role: userInfo.role,
-          displayName: userInfo.displayName,
-          photoURL: userInfo.photoURL,
-          email: userInfo.email,
-          permissions: userInfo.permissions,
-          countries: userInfo.countries
-        };
-        dispatch(AppActions.setUser(payload));
-      }
-    }
-  }, [user, allowAccess]);
 
   const openAllInquiry = () => {
     dispatch(InquiryActions.setField());
@@ -646,11 +612,7 @@ function ToolbarLayout1(props) {
 
               <PreviewDraftBL />
 
-              <PermissionProvider
-                action={PERMISSION.VIEW_SHOW_USER_MENU}
-                extraCondition={!pathname.includes('/guest')}>
-                <UserProfile classes={classes} history={history} />
-              </PermissionProvider>
+              <User />
             </div>
 
             {config.navbar.display && config.navbar.position === 'right' && (
