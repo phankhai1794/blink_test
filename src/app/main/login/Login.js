@@ -112,11 +112,12 @@ function Login(props) {
   }
 
   useEffect(() => {
-    if (
-      localStorage.getItem('AUTH_TOKEN') &&
-      PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD })
-    )
-      history.push('/');
+    // TODO: verify token by API
+    // if (
+    //   localStorage.getItem('AUTH_TOKEN') &&
+    //   PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD })
+    // )
+    //   history.push('/');
   }, []);
 
   return (
