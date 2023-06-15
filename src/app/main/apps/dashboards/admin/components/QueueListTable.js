@@ -10,6 +10,7 @@ import EllipsisPopper from 'app/main/apps/workspace/shared-components/EllipsisPo
 import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
 import { mapperBlinkStatus } from '@shared/keyword'
+import { handleError } from '@shared/handleError';
 
 const useStyles = makeStyles({
   root: {
@@ -429,9 +430,11 @@ const QueueListTable = () => {
           countries
         },
         sort: searchQueueQuery.sortField
-      }).then(({ total, data }) =>
-        setState({ ...state, queueListBl: data, totalBkgNo: total })
-      )
+      })
+        .then(({ total, data }) =>
+          setState({ ...state, queueListBl: data, totalBkgNo: total })
+        )
+        .catch((err) => handleError(dispatch, err));
   }, [searchQueueQuery]);
 
   const handleSort = (property) => {
