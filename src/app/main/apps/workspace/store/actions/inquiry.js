@@ -65,6 +65,9 @@ export function addAmendment(state = undefined) {
 }
 
 export function setInquiries(state) {
+  // sync data 
+  sessionStorage.setItem('listInq', JSON.stringify({ inquiries: state }));
+
   return {
     type: SET_INQUIRY,
     state

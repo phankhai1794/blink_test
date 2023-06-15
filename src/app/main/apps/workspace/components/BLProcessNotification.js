@@ -9,7 +9,7 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import { getInquiryById } from 'app/services/inquiryService';
 import { getBlInfo } from 'app/services/myBLService';
 import { SocketContext } from 'app/AppContext';
-import { checkBroadCastAccessing } from '@shared';
+import { checkBroadCastAccessing, categorizeInquiriesByUserType } from '@shared';
 import { BROADCAST } from '@shared/keyword';
 
 import * as Actions from '../store/actions';
@@ -127,7 +127,8 @@ const BLProcessNotification = () => {
 
       // Receive the message sync state
       socket.on('sync_state', async (res) => {
-        dispatch(InquiryActions.setInquiries(res.inquiries));
+        const result = categorizeInquiriesByUserType(user.userType, res.inquiries);
+        dispatch(InquiryActions.setInquiries(result));
         if (res.listMinimize) dispatch(InquiryActions.setListMinimize(res.listMinimize));
         if (res.content) dispatch(InquiryActions.setContent(res.content));
         if (res.amendments) dispatch(InquiryActions.setListCommentDraft(res.amendments));

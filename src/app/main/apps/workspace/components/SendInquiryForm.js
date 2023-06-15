@@ -143,7 +143,7 @@ const SendInquiryForm = (props) => {
   const [onshoreValue, setOnshoreValue] = useState({ subject: '', content: '' });
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
-  const syncData = (data, syncOptSite = false) => {
+  const syncData = (data, syncOptSite = "") => {
     socket.emit("sync_data", { data, syncOptSite });
   };
 
@@ -336,7 +336,7 @@ const SendInquiryForm = (props) => {
       dispatch(InquiryActions.checkSend(false));
 
       // sync send mail
-      syncData({ inquiries: cloneInquiries, listMinimize }, true);
+      syncData({ inquiries: cloneInquiries, listMinimize }, tabValue?.toUpperCase() || "");
 
       dispatch(Actions.showMessage({ message: 'Your inquiries have been sent successfully', variant: 'success' }));
     } else if (error) {
