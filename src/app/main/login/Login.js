@@ -99,7 +99,9 @@ function Login(props) {
             prevUrl = `${prevUrl.cachePath + prevUrl.cacheSearch}`;
           } else prevUrl = "/";
 
-          history.push(cachePath ? `${cachePath + cacheSearch}` : prevUrl);
+          let url = prevUrl;
+          if (cachePath && !cachePath.includes("login")) url = `${cachePath + cacheSearch}`;
+          history.push(url);
         }
       })
       .catch((error) => {

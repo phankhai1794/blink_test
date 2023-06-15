@@ -1,6 +1,4 @@
-import history from '@history';
-import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
+import User from 'app/fuse-layouts/shared-components/User';
 import React, { useEffect, useState } from 'react';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
@@ -174,11 +172,7 @@ function ToolbarLayout2(props) {
                 ))}
               </Select>
             )}
-            <PermissionProvider
-              action={PERMISSION.VIEW_SHOW_USER_MENU}
-              extraCondition={!pathname.includes('/guest')}>
-              <UserProfile classes={classes} history={history} />
-            </PermissionProvider>
+            <User />
           </div>
         </Toolbar>
       </AppBar>

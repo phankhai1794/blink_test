@@ -9,14 +9,12 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import { getInquiryById } from 'app/services/inquiryService';
 import { getBlInfo } from 'app/services/myBLService';
 import { SocketContext } from 'app/AppContext';
-import * as AppAction from 'app/store/actions';
 import { checkBroadCastAccessing } from '@shared';
 import { BROADCAST } from '@shared/keyword';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
-import * as TransActions from '../store/actions/transaction';
 
 const mainColor = '#BD0F72';
 const darkColor = '#132535';
@@ -72,7 +70,6 @@ const BLProcessNotification = () => {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   const startBLProcess = () => {
-    dispatch(TransActions.setStatusTransaction('start'));
     dispatch(Actions.loadInquiry(myBL.id));
   };
 
