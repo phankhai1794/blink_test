@@ -49,7 +49,7 @@ function User(props) {
           photoURL: userInfo.photoURL,
           email: userInfo.email,
           permissions: userInfo.permissions,
-          countries: userInfo.countries
+          countries: userInfo.countries || []
         };
         dispatch(AppActions.setUser(payload));
       }
