@@ -81,7 +81,7 @@ function Login(props) {
             role,
             email,
             permissions,
-            countries
+            countries: countries || []
           };
           const payload = { ...user, ...userInfo };
 
