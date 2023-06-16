@@ -246,13 +246,8 @@ const Row = (props) => {
   const handleChange = (_, value) => setTab(value);
 
   const data = (row) => {
-    let { pending, resolved, uploaded } = row;
-    let newReply = row.new;
-    pending = pending.map(a => ({ ...a, status: 'pending' }));
-    resolved = resolved.map(a => ({ ...a, status: 'resolved' }));
-    newReply = newReply.map(a => ({ ...a, status: 'reply' }));
-    uploaded = uploaded.map(a => ({ ...a, status: 'uploaded' }));
-    return [pending, newReply, resolved, uploaded];
+    const { pending, resolved, uploaded } = row;
+    return [pending, row.new, resolved, uploaded];
   }
 
   const [Ipending, Ireply, Iresolved, Iuploaded] = data(row.inquiries);
