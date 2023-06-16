@@ -9,6 +9,8 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import { getInquiryById } from 'app/services/inquiryService';
 import { getBlInfo } from 'app/services/myBLService';
 import { SocketContext } from 'app/AppContext';
+import { getPermissionByRole } from 'app/services/authService';
+import * as AppAction from 'app/store/actions';
 import { checkBroadCastAccessing, categorizeInquiriesByUserType } from '@shared';
 import { BROADCAST } from '@shared/keyword';
 
@@ -123,16 +125,35 @@ const BLProcessNotification = () => {
       // Receive the list user accessing
       socket.on('users_accessing', async ({ usersAccessing }) => {
         console.log("usersAccessing: ", usersAccessing);
+
+        const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
+        if (userLocal.displayName && usersAccessing.length) {
+          let permissions = await getPermissionByRole('Viewer');
+          dispatch(AppAction.setUser({ ...userLocal, permissions }));
+
+          if (userLocal.displayName === usersAccessing[0]) { // if to be the first user
+            permissions = await getPermissionByRole(userLocal.role);            
+            // close the warning popup if the user is granted permission
+            dispatch(FormActions.toggleOpenBLWarning(false));
+          } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1]) { // if to be the last user
+            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0] }));
+          }
+
+          setTimeout(() => {
+            dispatch(AppAction.setUser({ ...userLocal, permissions }));
+          }, 500);
+          sessionStorage.setItem('permissions', JSON.stringify(permissions));
+        }
       });
 
       // Receive the message sync state
-      socket.on('sync_state', async (res) => {
-        const result = categorizeInquiriesByUserType(user.userType, res.inquiries);
-        dispatch(InquiryActions.setInquiries(result));
-        if (res.listMinimize) dispatch(InquiryActions.setListMinimize(res.listMinimize));
-        if (res.content) dispatch(InquiryActions.setContent(res.content));
-        if (res.amendments) dispatch(InquiryActions.setListCommentDraft(res.amendments));
-      });
+      // socket.on('sync_state', async (res) => {
+      //   const result = categorizeInquiriesByUserType(user.userType, res.inquiries);
+      //   dispatch(InquiryActions.setInquiries(result));
+      //   if (res.listMinimize) dispatch(InquiryActions.setListMinimize(res.listMinimize));
+      //   if (res.content) dispatch(InquiryActions.setContent(res.content));
+      //   if (res.amendments) dispatch(InquiryActions.setListCommentDraft(res.amendments));
+      // });
     }
   }, [myBL]);
 

@@ -77,7 +77,7 @@ const PopupConfirmSubmit = (props) => {
   const user = useSelector(({ user }) => user);
 
   const syncData = (data, syncOptSite = "") => {
-    socket.emit("sync_data", { data, syncOptSite });
+    // socket.emit("sync_data", { data, syncOptSite });
   };
 
   const getField = (field) => {
