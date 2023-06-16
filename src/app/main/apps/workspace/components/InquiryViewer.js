@@ -332,6 +332,7 @@ const InquiryViewer = (props) => {
   const [disableCDCMAmendment, setDisableCDCMAmendment] = useState(true);
   const [getDataCD, setDataCD] = useState([]);
   const [getDataCM, setDataCM] = useState([]);
+  const [isResolveAndUpload, setIsResolveAndUpload] = useState(false);
   const socket = useContext(SocketContext);
 
   const syncData = (data, syncOptSite = "") => {
@@ -1345,13 +1346,18 @@ const InquiryViewer = (props) => {
     }
   };
 
-  const onResolve = () => {
+  const onResolve = (hasUpload = false) => {
     if (Array.isArray(question.content)) {
       setIsResolveCDCM(true);
     } else {
       setDisableCDCM(false);
       setIsResolve(true);
     }
+
+    if (fieldsNotSendOPUS.includes(metadata['field_options'].find(f => f.value === question.field).keyword))
+      setIsResolveAndUpload(true);
+    else setIsResolveAndUpload(hasUpload);
+
     if (containerCheck.includes(question.field)) {
       setShowViewAll(false);
       setInqHasComment(false);
@@ -1431,8 +1437,29 @@ const InquiryViewer = (props) => {
     }
   }
 
+  const checkAllItemUpload = (question) => {
+    let result = false;
+    const inqCheck = inquiries.filter(inq => (inq.process === 'pending' && inq.receiver.includes(question.receiver[0])));
+    const ameCheck = inquiries.filter(inq => (inq.process === 'draft' && inq.receiver.includes(question.receiver[0])));
+
+    // Check inquiry
+    if (question.process === 'pending') {
+      // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
+      const inqStillNotResolved = inqCheck.filter(inq => (!['COMPL', 'UPLOADED'].includes(inq.state) && inq.id !== question.id && !(fieldsNotSendOPUS.includes(metadata['field_options'].find(f => f.value === inq.field).keyword) && inq.state === 'COMPL')));
+      result = Boolean(!inqStillNotResolved.length);
+    }
+    // Check amendment
+    if (question.process === 'draft') {
+      // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
+      const ameStillNotUpload = ameCheck.filter(ame => (!['RESOLVED', 'UPLOADED'].includes(ame.state) && ame.id !== question.id && !(fieldsNotSendOPUS.includes(metadata['field_options'].find(f => f.value === ame.field).keyword) && ame.state === 'RESOLVED')));
+      result = Boolean(!ameStillNotUpload.length);
+    }
+    return result;
+  }
+
   const onConfirm = (isWrapText = false) => {
     let contentField = '';
+    let isAllItemUpload = false;
     const contsNoChange = {};
     if (!validationCDCM) {
       setDisableAcceptResolve(false);
@@ -1497,111 +1524,138 @@ const InquiryViewer = (props) => {
       contsNoChange,
       fieldNameContent: (textResolveSeparate.name.trim() === '' && textResolveSeparate.address.trim() === '') ? NO_CONTENT_AMENDMENT : textResolveSeparate.name.toUpperCase().trim(),
       fieldAddressContent: textResolveSeparate.address.toUpperCase().trim() || '',
-      isWrapText
+      isWrapText,
+      hasUpload: isResolveAndUpload
     };
     if (containerCheck.includes(question.field)) {
       setIsResolveCDCM(true);
     }
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
-    const editedAmeIndex = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
+    isResolveAndUpload && dispatch(FormActions.isLoadingProcess(true));
     resolveInquiry(body)
       .then((res) => {
-        if (editedIndex !== -1) {
-          // setQuestion((q) => ({ ...q, state: 'COMPL' }));
-          optionsInquires[editedIndex].state = 'COMPL';
-          optionsInquires[editedIndex].createdAt = res.updatedAt;
-          const receiver = optionsInquires[editedIndex].receiver[0];
-          const process = optionsInquires[editedIndex].process;
-          if (process === 'draft') {
-            const optionsMinimize = [...listMinimize];
-            const index = optionsMinimize.findIndex((e) => e.id === optionsInquires[editedIndex].id);
-            optionsMinimize[index].id = res.id;
-            optionsInquires[editedIndex].id = res.id;
-            dispatch(InquiryActions.setListMinimize(optionsMinimize));
-          }
-          //auto send mail if every inquiry is resolved
-          autoSendMailResolve(optionsInquires, receiver, process);
-        }
-
-        dispatch(InquiryActions.setInquiries(optionsInquires));
-        dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
-
-        props.getUpdatedAt();
-        setIsResolve(false);
-        setIsResolveCDCM(false);
-        setViewDropDown('');
-
-        let newContent = { ...content };
-        if (!isSeparate || isAlsoNotifies) {
-          if (containerCheck.includes(question.field)) {
-            setQuestion((q) => ({ ...q, content: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField }));
-            newContent = { ...res.content };
-          }
-          else newContent = {
-            ...content,
-            [question.field]: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField,
-            [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
-          };
+        if (isResolveAndUpload && res.status === 'F') {
+          setDisableAcceptResolve(false);
+          dispatch(AppAction.showMessage({ message: res.message || res.warning, variant: 'error', icon: 'failed' }));
         } else {
-          const contentWrapText = res?.contentWrapText || '';
-          const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
-          const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
-          // setContent here
-          newContent = {
-            ...content,
-            [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: isWrapText ? (contentWrapText.fieldAddressContentWrap || '') : textResolveSeparate.address.trim(),
-            [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: isWrapText ? (contentWrapText.fieldNameContentWrap || '') : textResolveSeparate.name.trim(),
-            [question.field]: isWrapText ? `${contentWrapText.fieldNameContentWrap}\n${contentWrapText.fieldAddressContentWrap}` : contentField,
-            [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
-          };
-        }
-        dispatch(InquiryActions.setContent(newContent));
-
-        // sync resolve inquiry
-        syncData({ inquiries: optionsInquires, content: newContent }, optionsInquires[editedIndex].receiver?.[0].toUpperCase() || "");
-
-        // change status
-        const filterFieldPendingNotUploadOpus = optionsInquires.filter(op => op.process === 'pending' && listFieldDisableUpload.includes(op.field) && ((op.receiver.length && op.receiver[0]) === (question.receiver.length && question.receiver[0])));
-        const filterFieldDrfNotUploadOpus = optionsInquires.filter(op => op.process === 'draft' && listFieldDisableUpload.includes(op.field) && ((op.receiver.length && op.receiver[0]) === (question.receiver.length && question.receiver[0])));
-        //
-        const mapFieldPending = filterFieldPendingNotUploadOpus.map(f => f.field);
-        const inqsPending = optionsInquires?.filter(inq => inq.process === 'pending' && !mapFieldPending.includes(inq.field) && ((inq.receiver.length && inq.receiver[0]) === (question.receiver.length && question.receiver[0])));
-        //
-        const mapFieldDraft = filterFieldDrfNotUploadOpus.map(f => f.field);
-        const inqsDraft = optionsInquires?.filter(inq => inq.process === 'draft' && !mapFieldDraft.includes(inq.field) && ((inq.receiver.length && inq.receiver[0]) === (question.receiver.length && question.receiver[0])));
-        if (myBL && myBL.bkgNo) {
-          if (
-            question.process === "pending"
-            && (inqsPending.length ? inqsPending.every(q => ['UPLOADED'].includes(q.state)) : true)
-            && filterFieldPendingNotUploadOpus.length
-            && filterFieldPendingNotUploadOpus.every(q => ['COMPL', 'UPLOADED'].includes(q.state))
-          ) {
-            if (question.receiver && question.receiver.length && question.receiver.includes('customer') && (inqsPending.length ? inqsPending.filter(q => q.receiver.includes('customer')).length > 0 : true)) {
-              // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
-              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
+          if (editedIndex !== -1) {
+            // setQuestion((q) => ({ ...q, state: 'COMPL' }));
+            optionsInquires[editedIndex].state = isResolveAndUpload ? 'UPLOADED' : 'COMPL';
+            optionsInquires[editedIndex].createdAt = res.updatedAt;
+            const receiver = optionsInquires[editedIndex].receiver[0];
+            const process = optionsInquires[editedIndex].process;
+            if (process === 'draft') {
+              const optionsMinimize = [...listMinimize];
+              const index = optionsMinimize.findIndex((e) => e.id === optionsInquires[editedIndex].id);
+              optionsMinimize[index].id = res.id;
+              optionsInquires[editedIndex].id = res.id;
+              optionsInquires[editedIndex].state = isResolveAndUpload ? 'UPLOADED' : 'RESOLVED';
+              dispatch(InquiryActions.setListMinimize(optionsMinimize));
             }
-            if (question.receiver && question.receiver.length && question.receiver.includes('onshore') && (inqsPending.length ? inqsPending.filter(q => q.receiver.includes('onshore')).length > 0 : true)) {
-              //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
-              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
+            //auto send mail if every inquiry is resolved
+            autoSendMailResolve(optionsInquires, receiver, process);
+          }
+
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+          dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
+
+          props.getUpdatedAt();
+          setIsResolve(false);
+          setIsResolveCDCM(false);
+          setViewDropDown('');
+
+          let newContent = { ...content };
+          if (!isSeparate || isAlsoNotifies) {
+            if (containerCheck.includes(question.field)) {
+              setQuestion((q) => ({ ...q, content: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField }));
+              newContent = { ...res.content };
             }
-          } else if (
-            question.process === 'draft'
-            && (inqsDraft.length ? inqsDraft.every(q => ['UPLOADED'].includes(q.state)) : true)
-            && filterFieldDrfNotUploadOpus.length
-            && filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state))
-          ) {
-            // BL Amendment Success (BS), Upload all to Opus.
-            dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
+            else newContent = {
+              ...content,
+              [question.field]: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField,
+              [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
+            };
+          } else {
+            const contentWrapText = res?.contentWrapText || '';
+            const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
+            const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
+            // setContent here
+            newContent = {
+              ...content,
+              [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: isWrapText ? (contentWrapText.fieldAddressContentWrap || '') : textResolveSeparate.address.trim(),
+              [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: isWrapText ? (contentWrapText.fieldNameContentWrap || '') : textResolveSeparate.name.trim(),
+              [question.field]: isWrapText ? `${contentWrapText.fieldNameContentWrap}\n${contentWrapText.fieldAddressContentWrap}` : contentField,
+              [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
+            };
+          }
+          dispatch(InquiryActions.setContent(newContent));
+
+          // sync resolve inquiry
+          syncData({ inquiries: optionsInquires, content: newContent }, optionsInquires[editedIndex].receiver?.[0].toUpperCase() || "");
+
+          // Case click btn: Resolve & Upload
+          isAllItemUpload = checkAllItemUpload(question);
+          if (isAllItemUpload && question.process === 'pending') {
+            // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
+            dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BR', question.receiver.includes('customer') ? 'RO' : 'RW'));
+          }
+          if (isAllItemUpload && question.process === 'draft') {
+            // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
+            dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BS', ''));
+          }
+
+          if (myBL && myBL.bkgNo) {
+            if (res.fieldsChangesState?.length) {
+              res.fieldsChangesState.forEach(item => {
+                if (item.process === 'pending') {
+                  let inqIndex = optionsInquires.findIndex(inq => inq.id === item.id);
+                  optionsInquires[inqIndex].state = 'UPLOADED';
+                } else {
+                  let amendIndex = optionsInquires.findIndex(inq => ((inq.field === item.id) && (inq.process === 'draft')));
+                  optionsInquires[amendIndex].state = 'UPLOADED';
+                }
+              });
+            }
+            dispatch(InquiryActions.setInquiries(optionsInquires));
+            dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
+            props.getUpdatedAt();
+            setIsResolve(false);
+            setIsResolveCDCM(false);
+            setViewDropDown('');
+            if (!isSeparate || isAlsoNotifies) {
+              if (containerCheck.includes(question.field)) {
+                setQuestion((q) => ({ ...q, content: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField }));
+                dispatch(InquiryActions.setContent({ ...res.content }));
+              }
+              else dispatch(InquiryActions.setContent({
+                ...content,
+                [question.field]: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField,
+                [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
+              }));
+            } else {
+              const contentWrapText = res?.contentWrapText || '';
+              const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
+              const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
+              // setContent here
+              dispatch(InquiryActions.setContent({
+                ...content,
+                [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: isWrapText ? (contentWrapText.fieldAddressContentWrap || '') : textResolveSeparate.address.trim(),
+                [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: isWrapText ? (contentWrapText.fieldNameContentWrap || '') : textResolveSeparate.name.trim(),
+                [question.field]: isWrapText ? `${contentWrapText.fieldNameContentWrap}\n${contentWrapText.fieldAddressContentWrap}` : contentField,
+                [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
+              }));
+            }
+            // setSaveComment(!isSaveComment);
+            setStateReplyDraft(false);
+            setDisableAcceptResolve(false);
+            setDisableReopen(false);
+            if (isResolveAndUpload) dispatch(AppAction.showMessage({ message: 'Upload to OPUS successfully', variant: 'success' }));
           }
         }
-
-        // setSaveComment(!isSaveComment);
-        setStateReplyDraft(false);
-        setDisableAcceptResolve(false);
-        setDisableReopen(false);
       })
-      .catch((error) => handleError(dispatch, error));
+      .catch((error) => handleError(dispatch, error))
+      .finally(() => dispatch(FormActions.isLoadingProcess(false)));
   };
 
   const onUpload = () => {
@@ -2914,7 +2968,7 @@ const InquiryViewer = (props) => {
                 </Grid>
               )}
 
-              <div style={{width: '915px'}}>
+              <div style={{ width: '915px' }}>
                 {question.mediaFile?.length > 0 &&
                   !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
                   question.mediaFile?.map((file, mediaIndex) => (
@@ -3079,27 +3133,27 @@ const InquiryViewer = (props) => {
                             />}
                       </div>
                       }
-                      <div className='attachment-reply' style={{width: '900px'}}>
+                      <div className='attachment-reply' style={{ width: '900px' }}>
                         {tempReply?.mediaFiles?.map((file, mediaIndex) => (
-                            <div
-                              style={{ position: 'relative', display: 'inline-block' }}
-                              key={mediaIndex}>
-                                <FileAttach
-                                  hiddenRemove={!question.showIconAttachReplyFile}
-                                  file={file}
-                                  files={tempReply.mediaFiles}
-                                  field={question.field}
-                                  question={question}
-                                  indexMedia={mediaIndex}
-                                  isReply={true}
-                                  isHideFiles={true}
-                                  templateReply={tempReply}
-                                  setTemplateReply={(val) => {
-                                    setTempReply(val)
-                                  }}
-                                />
-                            </div>
-                          ))}
+                          <div
+                            style={{ position: 'relative', display: 'inline-block' }}
+                            key={mediaIndex}>
+                            <FileAttach
+                              hiddenRemove={!question.showIconAttachReplyFile}
+                              file={file}
+                              files={tempReply.mediaFiles}
+                              field={question.field}
+                              question={question}
+                              indexMedia={mediaIndex}
+                              isReply={true}
+                              isHideFiles={true}
+                              templateReply={tempReply}
+                              setTemplateReply={(val) => {
+                                setTempReply(val)
+                              }}
+                            />
+                          </div>
+                        ))}
                       </div>
 
                       <div className="flex">
@@ -3150,10 +3204,19 @@ const InquiryViewer = (props) => {
                         <Button
                           variant="contained"
                           color="primary"
-                          onClick={onResolve}
+                          onClick={() => onResolve()}
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Resolve
                         </Button>
+                        {!listFieldDisableUpload.includes(question.field) ?
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => onResolve(true)}
+                            classes={{ root: clsx(classes.button) }}>
+                            Resolve & Upload
+                          </Button> : ''
+                        }
                       </PermissionProvider>
                       {/*//*/}
                       {renderBtnReply()}
