@@ -386,3 +386,20 @@ export const checkBroadCastAccessing = (role) => {
     }
   }
 }
+
+export const categorizeInquiriesByUserType = (userType, inqs) => {
+  let syncInq = [...inqs];
+
+  if (userType === "ADMIN") {
+    let listInq = JSON.parse(sessionStorage.getItem("listInq")).inquiries;
+    syncInq.forEach(q => {
+      let idx = listInq.findIndex((inq => inq.id === q.id));
+      listInq[idx] = { ...listInq[idx], ...q };
+    });
+    syncInq = [...listInq];
+  } else {
+    syncInq = syncInq.filter(inq => inq.receiver[0].toUpperCase() === userType);
+  }
+
+  return syncInq;
+}

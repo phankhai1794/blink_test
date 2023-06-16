@@ -335,7 +335,7 @@ const InquiryViewer = (props) => {
   const [getDataCM, setDataCM] = useState([]);
   const socket = useContext(SocketContext);
 
-  const syncData = (data, syncOptSite = false) => {
+  const syncData = (data, syncOptSite = "") => {
     socket.emit("sync_data", { data, syncOptSite });
   };
 
@@ -445,6 +445,8 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     setQuestion(props.question);
+
+    // sync state - refresh after syncing data
     props.getUpdatedAt && props.getUpdatedAt();
   }, [props.question]);
 
@@ -1591,7 +1593,7 @@ const InquiryViewer = (props) => {
         dispatch(InquiryActions.setContent(newContent));
 
         // sync resolve inquiry
-        syncData({ inquiries: optionsInquires, content: newContent }, true);
+        syncData({ inquiries: optionsInquires, content: newContent }, optionsInquires[editedIndex].receiver?.[0].toUpperCase() || "");
 
         // change status
         const filterFieldPendingNotUploadOpus = optionsInquires.filter(op => op.process === 'pending' && listFieldDisableUpload.includes(op.field) && ((op.receiver.length && op.receiver[0]) === (question.receiver.length && question.receiver[0])));
@@ -1660,28 +1662,28 @@ const InquiryViewer = (props) => {
             });
           }
           // Update list inquiry
-          let editedInqIndex = optionsInquires.findIndex(inq => question.id === inq.id);
-          if (optionsInquires[editedInqIndex]?.process === 'pending') {
-            optionsInquires[editedInqIndex].state = 'UPLOADED';
+          let editedIdx = optionsInquires.findIndex(inq => question.id === inq.id);
+          if (optionsInquires[editedIdx]?.process === 'pending') {
+            optionsInquires[editedIdx].state = 'UPLOADED';
             dispatch(InquiryActions.setInquiries(optionsInquires));
           } else {
             // Update list amendment
-            let editedAmeIndex = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
-            if (editedAmeIndex !== -1) {
-              optionsInquires[editedAmeIndex].state = 'UPLOADED';
+            editedIdx = optionsInquires.findIndex(inq => (question.field === inq.field && inq.process === 'draft'));
+            if (editedIdx !== -1) {
+              optionsInquires[editedIdx].state = 'UPLOADED';
               dispatch(InquiryActions.setInquiries(optionsInquires));
 
               const optionAmendment = [...listCommentDraft];
-              editedAmeIndex = optionAmendment.findIndex(ame => question.id === ame.id);
-              if (optionAmendment[editedAmeIndex]) {
-                optionAmendment[editedAmeIndex].state = 'UPLOADED';
+              editedIdx = optionAmendment.findIndex(ame => question.id === ame.id);
+              if (optionAmendment[editedIdx]) {
+                optionAmendment[editedIdx].state = 'UPLOADED';
                 dispatch(InquiryActions.setListCommentDraft(optionAmendment));
               }
             }
           }
 
           // sync upload inquiry
-          syncData({ inquiries: optionsInquires }, true);
+          syncData({ inquiries: optionsInquires }, optionsInquires[editedIdx].receiver?.[0].toUpperCase() || "");
 
           // Set new Content when EBL has new data
           if (res?.newData) {
@@ -2303,24 +2305,25 @@ const InquiryViewer = (props) => {
       .then((res) => {
         const optionsInquires = [...inquiries];
         if (res) {
+          let idx = -1;
           if (question.process === 'draft') {
             const optionAmendment = [...listCommentDraft.filter(({ id }) => id !== question.id)];
             dispatch(InquiryActions.setListCommentDraft(optionAmendment));
 
-            const indexAmenment = optionsInquires.findIndex(inq => (inq.field === question.field && inq.process === 'draft'))
-            // optionsInquires[indexAmenment].state = res?.prevState;
-            optionsInquires[indexAmenment].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
-            optionsInquires[indexAmenment].createdAt = res.updatedAt;
+            idx = optionsInquires.findIndex(inq => (inq.field === question.field && inq.process === 'draft'))
+            // optionsInquires[idx].state = res?.prevState;
+            optionsInquires[idx].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
+            optionsInquires[idx].createdAt = res.updatedAt;
           } else {
-            const indexInq = optionsInquires.findIndex(inq => inq.id === idInq)
-            // optionsInquires[indexInq].state = res?.prevState;
-            optionsInquires[indexInq].createdAt = res.updatedAt;
-            optionsInquires[indexInq].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
+            idx = optionsInquires.findIndex(inq => inq.id === idInq)
+            // optionsInquires[idx].state = res?.prevState;
+            optionsInquires[idx].createdAt = res.updatedAt;
+            optionsInquires[idx].state = user.role === 'Admin' ? 'REOPEN_Q' : 'REOPEN_A';
           }
           dispatch(InquiryActions.setInquiries(optionsInquires));
 
           // sync reopen inquiry
-          syncData({ inquiries: optionsInquires }, true);
+          syncData({ inquiries: optionsInquires }, optionsInquires[idx].receiver?.[0].toUpperCase() || "");
 
           props.getUpdatedAt();
           setViewDropDown('');
