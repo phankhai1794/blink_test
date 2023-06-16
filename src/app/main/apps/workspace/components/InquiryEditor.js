@@ -291,8 +291,8 @@ const InquiryEditor = (props) => {
   const [openCM, setOpenCM] = useState(false);
   const userType = useSelector(({ user }) => user.role?.toUpperCase());
 
-  const syncData = (data, syncOptSite = false) => {
-    socket.emit("sync_data", { data, syncOptSite });
+  const syncData = (data, syncOptSite = "") => {
+    // socket.emit("sync_data", { data, syncOptSite });
   };
 
   const handleClick = (event) => {

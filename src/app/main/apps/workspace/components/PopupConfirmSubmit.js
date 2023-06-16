@@ -76,8 +76,8 @@ const PopupConfirmSubmit = (props) => {
 
   const user = useSelector(({ user }) => user);
 
-  const syncData = (data, syncOptSite = false) => {
-    socket.emit("sync_data", { data, syncOptSite });
+  const syncData = (data, syncOptSite = "") => {
+    // socket.emit("sync_data", { data, syncOptSite });
   };
 
   const getField = (field) => {
@@ -143,7 +143,7 @@ const PopupConfirmSubmit = (props) => {
     dispatch(InquiryActions.setInquiries(inqs));
 
     // sync submit
-    syncData({ inquiries: inqs }, true);
+    syncData({ inquiries: inqs }, "ADMIN");
 
     props.handleCheckSubmit();
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));

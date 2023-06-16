@@ -112,8 +112,8 @@ const InquiryAnswer = (props) => {
   const editedIndex = optionsInquires.findIndex(inq1 => question.id === inq1.id);
   let currentAnswer = optionsInquires[editedIndex];
 
-  const syncData = (data, syncOptSite = false) => {
-    socket.emit("sync_data", { data, syncOptSite });
+  const syncData = (data, syncOptSite = "") => {
+    // socket.emit("sync_data", { data, syncOptSite });
   };
 
   const getField = (field) => {
