@@ -325,7 +325,6 @@ const InquiryViewer = (props) => {
   const [isDeleteAnswer, setDeleteAnswer] = useState({ status: false, content: '' });
   const [getContentCDCMInquiry, setContentCDCMInquiry] = useState({});
   const [listFieldDisableUpload, setListFieldDisableUpload] = useState([]);
-  const [listFieldTypeDisableUpload, setListFieldTypeDisableUpload] = useState([]);
   const [isDateTime, setIsDateTime] = useState(false);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const [isValidDate, setIsValidDate] = useState(false);
@@ -366,46 +365,14 @@ const InquiryViewer = (props) => {
     RD_TERMS
   ];
 
-  const fieldTypesNotSendOPUS = [
-    HS_HTS_NCM_Code,
-    EVENT_DATE,
-    TOTAL_CONTAINERS,
-    HAZ_REF_OOG,
-    EQUIPMENT_SUB,
-    CONTAINER_INF_MISMATCH,
-    CONTAINER_STATUS_INQ,
-    TOTAL_CONTAINERS_PER_TP_SZ,
-    SPECIAL_CARGO_DETAIL,
-    MISSING_GATE_IN_EVENTS,
-    MISMATCH_DRAIN,
-    VOLUME_DIFFRENCE,
-    CTNR_NOT_LINK_IN_BOOKING,
-    MISSING_PACKAGING_GROUP,
-    MISSING_TEMPERATURE,
-    VENTILATION_MISMATCH,
-    MISSING_PACKAGE_INFORMATION,
-    MISSING_MISMATCH_UN,
-    MISSING_MISMATCH_IMDG,
-    VOLUME_DIFFERENCE,
-    SPECIAL_CARGO,
-    CM_CUSTOMS_DESCRIPTION
-  ]
-
   const isDisableBtnUpload = () => {
     const listField = [];
-    const listFieldType = [];
     metadata['field_options'].forEach(item => {
       if (fieldsNotSendOPUS.includes(item.keyword)) {
         listField.push(item.value);
       }
     });
-    fieldTypesNotSendOPUS.forEach(item => {
-      if (metadata['inq_type'][item]) {
-        listFieldType.push(metadata['inq_type'][item]);
-      }
-    });
     setListFieldDisableUpload(listField);
-    setListFieldTypeDisableUpload(listFieldType);
   }
 
   const isDateTimeField = () => {
@@ -2546,7 +2513,7 @@ const InquiryViewer = (props) => {
                       <div style={{ marginRight: 15 }}>
                         <span className={classes.labelStatus}>{question.state === 'UPLOADED' ? 'Uploaded' : 'Resolved'}</span>
                       </div>
-                      {(listFieldDisableUpload.includes(question.field) || listFieldTypeDisableUpload.includes(question.inqType)) ?
+                      {listFieldDisableUpload.includes(question.field) ?
                         <div className={classes.btnBlockFields}>
                           Upload to OPUS
                           {
@@ -2559,7 +2526,7 @@ const InquiryViewer = (props) => {
                           }
                         </div>
                         : <Button
-                          disabled={question.state === 'UPLOADED' || listFieldDisableUpload.includes(question.field) || listFieldTypeDisableUpload.includes(question.inqType)}
+                          disabled={question.state === 'UPLOADED' || listFieldDisableUpload.includes(question.field)}
                           variant="contained"
                           color="primary"
                           onClick={onUpload}
