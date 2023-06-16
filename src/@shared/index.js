@@ -303,7 +303,8 @@ export const getTotalValueMDView = (drfView, containerDetail, getType) => {
     CONTAINER_LIST.totalUnit.forEach((totalKey, index) => {
       const units = [];
       containerDetail.forEach((cd) => {
-        units.push(cd[getType(CONTAINER_LIST.cdUnit[index])])
+        const unit = cd[getType(CONTAINER_LIST.cdUnit[index])];
+        if (unit) units.push(unit);
       })
       if ([... new Set(units)].length === 1) {
         drfMD[totalKey] = units[0].toString();
