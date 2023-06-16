@@ -2195,7 +2195,6 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].state = 'REP_DRF';
           }
 
-          // if (user.role === 'Guest') autoUpdateCDCM(contentCDCM);
           dispatch(InquiryActions.setInquiries(optionsInquires));
           setIsResolveCDCM(false);
           props.getUpdatedAt();
