@@ -128,7 +128,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function JWTLoginTab({ onLogged, country }) {
-  const defaultCountry = country && COUNTRIES.filter(c => c.value === country).length ? country : COUNTRIES[0].value;
+  const defaultCountry = [];
 
   const classes = useStyles();
   const [isFormValid, setIsFormValid] = useState(false);

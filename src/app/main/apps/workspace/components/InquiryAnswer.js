@@ -113,7 +113,7 @@ const InquiryAnswer = (props) => {
   let currentAnswer = optionsInquires[editedIndex];
 
   const syncData = (data, syncOptSite = "") => {
-    socket.emit("sync_data", { data, syncOptSite });
+    // socket.emit("sync_data", { data, syncOptSite });
   };
 
   const getField = (field) => {

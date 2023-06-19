@@ -194,6 +194,8 @@ export const RATING_DETAIL = 'ratingDetail';
 
 export const REMARKS = 'remarks';
 
+export const ETD = 'etd';
+
 export const CONTAINER_LIST = {
   cd: [CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT],
   cm: [CM_MARK, HS_CODE, HTS_CODE, NCM_CODE, CM_DESCRIPTION, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT],
@@ -232,28 +234,3 @@ export const mapperBlinkStatus = {
 export const BROADCAST = {
   ACCESS: "BLINK_ACCESS"
 };
-
-export const COUNTRIES = [
-  { value: 'CH', label: 'Switzerland' },
-  { value: 'CZ', label: 'Czech Republic' },
-  { value: 'DK', label: 'Denmark' },
-  { value: 'ES', label: 'Spain' },
-  { value: 'FI', label: 'Finland' },
-  { value: 'FR', label: 'France', },
-  { value: 'HU', label: 'Hungary' },
-  { value: 'IT', label: 'Italy' },
-  { value: 'JP', label: 'Japan' },
-  { value: 'ME', label: 'Montenegro' },
-  { value: 'MM', label: 'Myanmar' },
-  { value: 'NO', label: 'Norway' },
-  { value: 'OC_ML', label: 'New Zealand' },
-  { value: 'PL', label: 'Poland' },
-  { value: 'PT', label: 'Portugal' },
-  { value: 'RU', label: 'Russian Federation' },
-  { value: 'SE', label: 'Sweden' },
-  { value: 'SG', label: 'Singapore' },
-  { value: 'TH', label: 'Thailand' },
-  { value: 'TW', label: 'Taiwan, Republic of China' },
-  { value: 'US', label: 'United States' },
-  { value: 'VN', label: 'Vietnam' },
-];

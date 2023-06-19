@@ -54,7 +54,7 @@ const BLField = ({ multiline = false, children }) => {
       onMouseOver={onMouseOver}
       onMouseLeave={() => setIsLongText(false)}
     >
-      <ArrowTooltip isLongText={isLongText} title={Array.isArray(children) ? children.join('\n') : children} placement='right'>
+      <ArrowTooltip isLongText={isLongText} title={Array.isArray(children) ? children.join('\n') : (children || '')} placement='right'>
         <TextField
           value={children || ''}
           variant="outlined"
