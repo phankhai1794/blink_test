@@ -779,7 +779,7 @@ const InquiryViewer = (props) => {
             // push new lastestComment if not already exist
             !listCommentDraft.find(ele => ele.id === lastestComment.id) && dispatch(InquiryActions.setListCommentDraft([...listCommentDraft, ...[lastestComment]]));
 
-            const comments = [{
+            let comments = [{
               creator: { userName: user.displayName, avatar: null },
               updater: { userName: user.displayName, avatar: null },
               createdAt: res[0].createdAt,
@@ -821,6 +821,7 @@ const InquiryViewer = (props) => {
               }
               comments.splice(comments.length - 1, 0, markReopen);
             }
+            comments = comments.filter(c => c.content !== '');
             setComment(comments);
             setInqHasComment(true);
           }
@@ -2217,7 +2218,6 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].state = 'REP_DRF';
           }
 
-          if (user.role === 'Guest') autoUpdateCDCM(contentCDCM);
           dispatch(InquiryActions.setInquiries(optionsInquires));
           setIsResolveCDCM(false);
           props.getUpdatedAt();
