@@ -352,12 +352,12 @@ export const formatNumber = (num) => {
 }
 
 export const isSameDate = (d1, d2) => {
-  const t1 = new Date(d1);
-  const t2 = new Date(d2);
+  const t1 = d1 ? new Date(d1) : new Date();
+  const t2 = d2 ? new Date(d2) : new Date();
   return (
     t1.getFullYear() === t2.getFullYear()
     && t1.getMonth() === t2.getMonth()
-    && t1.getDay() === t2.getDay()
+    && t1.getDate() === t2.getDate()
   )
 }
 

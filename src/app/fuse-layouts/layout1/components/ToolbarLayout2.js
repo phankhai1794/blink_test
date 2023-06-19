@@ -1,18 +1,12 @@
 import User from 'app/fuse-layouts/shared-components/User';
+import { getUserCountry } from 'app/services/countryService';
 import React, { useEffect, useState } from 'react';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  AppBar,
-  Toolbar,
-  Avatar,
-  Select,
-  MenuItem,
-  Checkbox,
-} from '@material-ui/core';
+import { AppBar, Toolbar, Avatar, Select, MenuItem, Checkbox } from '@material-ui/core';
 import clsx from 'clsx';
-import { COUNTRIES } from '@shared/keyword';
 import * as Actions from 'app/main/apps/dashboards/admin/store/actions';
+import { handleError } from '@shared/handleError';
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -71,17 +65,20 @@ function ToolbarLayout2(props) {
   const dispatch = useDispatch();
 
   const user = useSelector(({ user }) => user);
-  const countries = COUNTRIES.filter((country) => user.countries.includes(country.value));
-  const countryOption = countries.map((c) => c.value);
+  const [countries, setCountries] = useState([]);
+  const countryOption = user.countries;
   const [selectedStatus, setSelectedStatus] = useState([...countryOption, 'All']);
 
   useEffect(() => {
-    dispatch(Actions.filterCountry(countries.map((c) => c.value)));
+    dispatch(Actions.filterCountry(countryOption));
+    getUserCountry()
+      .then(({ data }) => setCountries(data.userCountry))
+      .catch((err) => handleError(dispatch, err));
   }, []);
 
   const handleSelectStatus = (event) => {
     let values = event.target.value;
-    if (values.includes('plus')) values.shift()
+    if (values.includes('plus')) values.shift();
     const arrStatus = [];
     if (values.indexOf('All') !== -1 && selectedStatus.indexOf('All') === -1) {
       setSelectedStatus([...countryOption, 'All']);
@@ -93,7 +90,7 @@ function ToolbarLayout2(props) {
       const arrSelected = [];
       values.forEach((item) => {
         if (item !== 'All') {
-          arrStatus.push(COUNTRIES.find((key) => key.value === item).value);
+          arrStatus.push(countries.find((key) => key.value === item).value);
           arrSelected.push(item);
         }
       });
@@ -135,7 +132,9 @@ function ToolbarLayout2(props) {
                         value !== 'All' && (
                           <span className="flag-country">
                             <img
-                              className={selectedStatus.length ? "circle-flag" : "circle-flag-default"}
+                              className={
+                                selectedStatus.length ? 'circle-flag' : 'circle-flag-default'
+                              }
                               width="25"
                               height="25"
                               src={flagUrl(value)}
@@ -167,7 +166,9 @@ function ToolbarLayout2(props) {
                       src={flagUrl(value)}
                       alt=""
                     />
-                    <span style={{ fontFamily: 'Montserrat', fontSize: '14px', marginLeft: 5 }}>{label}</span>
+                    <span style={{ fontFamily: 'Montserrat', fontSize: '14px', marginLeft: 5 }}>
+                      {label}
+                    </span>
                   </MenuItem>
                 ))}
               </Select>
