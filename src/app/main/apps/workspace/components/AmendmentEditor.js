@@ -21,7 +21,6 @@ import * as AppAction from "../../../../store/actions";
 import DateTimePickers from '../shared-components/DateTimePickers';
 
 import UserInfo from './UserInfo';
-import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import AttachFileAmendment from './AttachFileAmendment';
 import ContainerDetailForm from './ContainerDetailForm';
@@ -408,7 +407,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             error={validateField(field, fieldValue).isError}
             helperText={
               validateField(field, fieldValue).errorType.split('\n').map((line, idx) => (
-                <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14 }}>{line}</span>
+                <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
               ))
             }
           />
@@ -460,7 +459,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const validateField = (field, value) => {
     let response = { isError: false, errorType: "" };
     const fieldId = field || fieldValueSelect?.value;
-    if (Object.keys(metadata.field).find(key => metadata.field[key] === fieldId) === BL_TYPE) {
+    if (isChange && fieldValueSelect && fieldValueSelect.keyword === BL_TYPE) {
       response = validateBLType(value);
     }
     return response;
@@ -589,7 +588,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         ))}
       </div>
 
-
       <div style={{ marginTop: 20 }}>
         <Button
           className={classes.btn}
@@ -609,6 +607,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     (isValidDate ||
                       (
                         (fieldValue && fieldValueSelect && isSameDate(fieldValue, content[fieldValueSelect.value]) && attachments.length === 0)
+                        ||
+                        (!fieldValue && fieldValueSelect && isSameDate('', content[fieldValueSelect.value]) && attachments.length === 0)
                       )
                     )
                     : (
@@ -616,7 +616,14 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       ||
                       (fieldValueSelect && !content[fieldValueSelect.value] && (!fieldValue || fieldValue.trim() === '') && attachments.length === 0)
                       ||
-                      (fieldValueSelect && content[fieldValueSelect.value] && typeof content[fieldValueSelect.value] === 'string' && content[fieldValueSelect.value].trim() === '' && attachments.length === 0)
+                      (
+                        (!fieldValue || fieldValue.trim() === '')
+                        && fieldValueSelect
+                        && content[fieldValueSelect.value]
+                        && typeof content[fieldValueSelect.value] === 'string'
+                        && content[fieldValueSelect.value].trim() === ''
+                        && attachments.length === 0
+                      )
                     ))
                 )
               )))
