@@ -408,6 +408,7 @@ export const categorizeInquiriesByUserType = (from, userType, bl, inqs) => {
         else if (bl.state.includes("DRF_")) inquiries.push(sInq); // push new amendment
       }
       syncInqs = [...inquiries];
+      sessionStorage.setItem("listInq", JSON.stringify(syncInqs));
     }
   }
   // receiver is ONSHORE/CUSTOMER & receive data from ADMIN

@@ -134,7 +134,17 @@ const BLProcessNotification = () => {
         const result = categorizeInquiriesByUserType(from, user.userType, myBL, inquiries);
         dispatch(InquiryActions.setInquiries(result));
 
-        if (listMinimize) dispatch(InquiryActions.setListMinimize(listMinimize));
+        if (listMinimize) {
+          if (from === "ADMIN") dispatch(InquiryActions.setListMinimize(listMinimize));
+          else {
+            let listMin = JSON.parse(sessionStorage.getItem("listMinimize"));
+            // merge two array objects while removing duplicates
+            listMin = listMin.concat(listMinimize).filter((item, idx, self) => {
+              return idx === self.findIndex(el => el.id === item.id);
+            });
+            dispatch(InquiryActions.setListMinimize(listMin));
+          }
+        }
 
         if (content) dispatch(InquiryActions.setContent(content));
 
