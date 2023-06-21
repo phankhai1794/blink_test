@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
 import { Button, Typography, FormHelperText, FormControl, TextField } from "@material-ui/core";
@@ -14,6 +14,7 @@ import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
 import { useUnsavedChangesWarning } from 'app/hooks'
 import { useDropzone } from 'react-dropzone';
+import { SocketContext } from 'app/AppContext';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -88,6 +89,8 @@ const useStyles = makeStyles((theme) => ({
 const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const socket = useContext(SocketContext);
+
   const user = useSelector(({ user }) => user);
   const [metadata, content, myBL, inquiries, enableSubmit] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.metadata,
@@ -116,6 +119,10 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const [isChange, setChange] = useState(false);
   const [isDateTime, setIsDateTime] = useState(false);
   const [isValidDate, setIsValidDate] = useState(false);
+
+  const syncData = (data, syncOptSite = false) => {
+    socket.emit("sync_data", { data, syncOptSite });
+  };
 
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
@@ -342,16 +349,20 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
               dispatch(InquiryActions.setListMinimize(optionsMinimize));
             }
 
+            let newContent = { ...content, [fieldReq]: contentField };
+            dispatch(InquiryActions.setContent(newContent));
             dispatch(InquiryActions.setInquiries(optionsInquires));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             getUpdatedAt();
             setDisableSave(false);
-            dispatch(InquiryActions.setContent({ ...content, [fieldReq]: contentField }));
             dispatch(FormActions.toggleCreateAmendment(false));
             dispatch(FormActions.toggleAmendmentsList(true));
             dispatch(InquiryActions.addAmendment());
             dispatch(InquiryActions.setOneInq({}));
-            setPristine()
+            setPristine();
+
+            // sync create amendment
+            syncData({ inquiries: optionsInquires, listMinimize: optionsMinimize, content: newContent });
           }).catch((err) => handleError(dispatch, err));
       })
       .catch((err) => handleError(dispatch, err))

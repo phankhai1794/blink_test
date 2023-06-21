@@ -29,8 +29,6 @@ function User(props) {
   useEffect(() => {
     if (!user.displayName || !validToken) {
       if (!allowAccess) {
-        sessionStorage.removeItem("permissions");
-
         const bl = new URLSearchParams(search).get('bl');
         if (bl) {
           window.location.reload();

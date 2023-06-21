@@ -336,7 +336,7 @@ const InquiryViewer = (props) => {
   const socket = useContext(SocketContext);
 
   const syncData = (data, syncOptSite = "") => {
-    // socket.emit("sync_data", { data, syncOptSite });
+    socket.emit("sync_data", { data, syncOptSite });
   };
 
   const getField = (field) => {
@@ -1018,6 +1018,7 @@ const InquiryViewer = (props) => {
           let cloneListCommentDraft = listCommentDraft.filter(({ id }) => id !== replyRemove.id);
           dispatch(InquiryActions.setListCommentDraft(cloneListCommentDraft));
           if (res) {
+            let newContent = {};
             setEditOriginalAmendment(res.isEditOriginalAmendment);
             setViewDropDown('');
             setDisableSaveReply(false);
@@ -1030,7 +1031,7 @@ const InquiryViewer = (props) => {
             const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
               if (removeIndex !== -1) {
-                dispatch(InquiryActions.setContent({ ...content, [question.field]: contentInqResolved[question.field] }));
+                newContent = { ...content, [question.field]: contentInqResolved[question.field] };
                 optionsOfQuestion.splice(removeIndex, 1);
               }
               // remove all cd cm amendment
@@ -1038,7 +1039,7 @@ const InquiryViewer = (props) => {
                 getBlInfo(myBL.id).then((res) => {
                   if (res) {
                     const { content } = res.myBL;
-                    dispatch(InquiryActions.setContent({ ...content, [containerCheck[0]]: content[containerCheck[0]], [containerCheck[1]]: content[containerCheck[1]] }));
+                    newContent = { ...content, [containerCheck[0]]: content[containerCheck[0]], [containerCheck[1]]: content[containerCheck[1]] }
                   }
                 })
               } else {
@@ -1048,7 +1049,7 @@ const InquiryViewer = (props) => {
                   if (question.field === idCM) {
                     // response drfAnswersTrans cd content
                     const response = res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[idCD];
-                    dispatch(InquiryActions.setContent({ ...content, [idCD]: response }));
+                    newContent = { ...content, [idCD]: response };
                     // map cd -> cm
                     let cm = content[containerCheck[1]]
                     if (cm) {
@@ -1065,7 +1066,7 @@ const InquiryViewer = (props) => {
                   } else if (question.field === idCD) {
                     // response drfAnswersTrans cm content
                     const response = res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[idCM];
-                    dispatch(InquiryActions.setContent({ ...content, [idCM]: response }));
+                    newContent = { ...content, [idCM]: response };
                     // map cm -> cd
                     let cd = content[containerCheck[0]]
                     if (cd) {
@@ -1161,7 +1162,7 @@ const InquiryViewer = (props) => {
                 }
                 if (res.emptyCDorCMAmendment) {
                   if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
-                  dispatch(InquiryActions.setContent({ ...content, [question.field]: res.drfAnswersTrans }));
+                  newContent = { ...content, [question.field]: res.drfAnswersTrans };
                   if (field !== 'INQUIRY_LIST') {
                     if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
                   } else {
@@ -1176,9 +1177,14 @@ const InquiryViewer = (props) => {
               }
             }
             setReplyRemove();
+
+            dispatch(InquiryActions.setContent(newContent));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             dispatch(InquiryActions.addAmendment());
             props.getUpdatedAt();
+
+            // sync delete amendment
+            syncData({ inquiries: optionsOfQuestion, content: newContent });
           }
           // setSaveComment(!isSaveComment);
         }).catch((error) => handleError(dispatch, error));
@@ -1567,13 +1573,18 @@ const InquiryViewer = (props) => {
           setViewDropDown('');
 
           let newContent = { ...content };
+          // sync content amendment
+          if (optionsInquires[editedIndex].receiver?.[0].toUpperCase() === "ONSHORE") {
+            newContent = JSON.parse(sessionStorage.getItem("content"));
+          }
+
           if (!isSeparate || isAlsoNotifies) {
             if (containerCheck.includes(question.field)) {
               setQuestion((q) => ({ ...q, content: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField }));
               newContent = { ...res.content };
             }
             else newContent = {
-              ...content,
+              ...newContent,
               [question.field]: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField,
               [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
             };
@@ -1583,7 +1594,7 @@ const InquiryViewer = (props) => {
             const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
             // setContent here
             newContent = {
-              ...content,
+              ...newContent,
               [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: isWrapText ? (contentWrapText.fieldAddressContentWrap || '') : textResolveSeparate.address.trim(),
               [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: isWrapText ? (contentWrapText.fieldNameContentWrap || '') : textResolveSeparate.name.trim(),
               [question.field]: isWrapText ? `${contentWrapText.fieldNameContentWrap}\n${contentWrapText.fieldAddressContentWrap}` : contentField,
@@ -1592,8 +1603,16 @@ const InquiryViewer = (props) => {
           }
           dispatch(InquiryActions.setContent(newContent));
 
-          // sync resolve inquiry
-          syncData({ inquiries: optionsInquires, content: newContent }, optionsInquires[editedIndex].receiver?.[0].toUpperCase() || "");
+          // sync content amendment
+          // save onshore's content into sessionStorage
+          if (optionsInquires[editedIndex].receiver?.[0].toUpperCase() === "ONSHORE") {
+            sessionStorage.setItem('content', JSON.stringify(newContent));
+          }
+          // sync resolve inquiry / amendment
+          syncData(
+            { inquiries: optionsInquires, content: newContent, listMinimize },
+            optionsInquires[editedIndex].receiver?.[0].toUpperCase() || "CUSTOMER" // if receiver is undefined -> customer amendment
+          );
 
           // Case click btn: Resolve & Upload
           isAllItemUpload = checkAllItemUpload(question);
@@ -1683,6 +1702,8 @@ const InquiryViewer = (props) => {
             });
           }
           // Update list inquiry
+          let optionAmendment = [];
+          let newContent = { ...content };
           let editedIdx = optionsInquires.findIndex(inq => question.id === inq.id);
           if (optionsInquires[editedIdx]?.process === 'pending') {
             optionsInquires[editedIdx].state = 'UPLOADED';
@@ -1694,7 +1715,7 @@ const InquiryViewer = (props) => {
               optionsInquires[editedIdx].state = 'UPLOADED';
               dispatch(InquiryActions.setInquiries(optionsInquires));
 
-              const optionAmendment = [...listCommentDraft];
+              optionAmendment = [...listCommentDraft];
               editedIdx = optionAmendment.findIndex(ame => question.id === ame.id);
               if (optionAmendment[editedIdx]) {
                 optionAmendment[editedIdx].state = 'UPLOADED';
@@ -1703,13 +1724,8 @@ const InquiryViewer = (props) => {
             }
           }
 
-          // sync upload inquiry
-          syncData({ inquiries: optionsInquires }, optionsInquires[editedIdx].receiver?.[0].toUpperCase() || "");
-
           // Set new Content when EBL has new data
-          if (res?.newData) {
-            dispatch(InquiryActions.setContent({ ...content, ...res.newData }));
-          }
+          if (res?.newData) newContent = { ...newContent, ...res.newData };
           if (res.warning) {
             // dispatch(FormActions.toggleWarningUploadOpus({ status: true, message: res.warning, icon: 'warning' }));
             dispatch(AppAction.showMessage({ message: res.warning, variant: 'warning' }));
@@ -1754,6 +1770,13 @@ const InquiryViewer = (props) => {
             }
           }
 
+          dispatch(InquiryActions.setContent(newContent));
+
+          // sync upload inquiry / amendment
+          syncData(
+            { inquiries: optionsInquires },
+            optionsInquires[editedIdx].receiver?.[0].toUpperCase() || "CUSTOMER"
+          );
         }
         props.getUpdatedAt();
         setViewDropDown('');
@@ -2192,37 +2215,44 @@ const InquiryViewer = (props) => {
           mybl: myBL.id
         };
 
-        updateDraftBLReply({ ...reqReply }, tempReply.answer?.id).then((res) => {
-          if (res) {
-            dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
-          }
-          optionsInquires[editedIndex].mediaFile = mediaListAmendment;
-          optionsInquires[editedIndex].createdAt = res.createdAt;
-          setDisableSaveReply(false);
-          let contentCDCM;
-          if (question.state.includes('AME_')) {
-            dispatch(InquiryActions.setContent({
-              ...content,
-              [res.newAmendment?.field]: newContent
-            }));
-            contentCDCM = tempReply.answer.content;
-            optionsInquires[editedIndex].state = 'AME_DRF';
-          } else {
-            if (user.role === 'Guest') {
-              dispatch(InquiryActions.setContent({
-                ...content,
-                [question.field]: question.contentReplyCDCM
-              }));
-            }
-            contentCDCM = question.contentReplyCDCM;
-            optionsInquires[editedIndex].state = 'REP_DRF';
-          }
+        updateDraftBLReply({ ...reqReply }, tempReply.answer?.id)
+          .then((res) => {
+            if (res) dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
 
-          dispatch(InquiryActions.setInquiries(optionsInquires));
-          setIsResolveCDCM(false);
-          props.getUpdatedAt();
-          dispatch(InquiryActions.checkSubmit(!enableSubmit));
-        }).catch((err) => handleError(dispatch, err));
+            let contentCDCM;
+            let newDrfRepContent = { ...content };
+            optionsInquires[editedIndex].mediaFile = mediaListAmendment;
+            optionsInquires[editedIndex].createdAt = res.createdAt;
+            setDisableSaveReply(false);
+
+            if (question.state.includes('AME_')) {
+              newDrfRepContent = { ...content, [res.newAmendment?.field]: newContent }
+              contentCDCM = tempReply.answer.content;
+              optionsInquires[editedIndex].state = 'AME_DRF';
+            } else {
+              if (user.role === 'Guest') {
+                newDrfRepContent = { ...content, [question.field]: question.contentReplyCDCM };
+              }
+              contentCDCM = question.contentReplyCDCM;
+              optionsInquires[editedIndex].state = 'REP_DRF';
+            }
+
+            setIsResolveCDCM(false);
+            dispatch(InquiryActions.setInquiries(optionsInquires));
+            dispatch(InquiryActions.checkSubmit(!enableSubmit));
+            // dispatch(InquiryActions.setContent(newDrfRepContent)); // field data is null after setContent -> need to discuss
+            props.getUpdatedAt();
+
+            // sync edit amendment
+            syncData(
+              {
+                inquiries: optionsInquires,
+                // ...(Object.keys(newDrfRepContent).length && { content: newDrfRepContent })
+              },
+              optionsInquires[editedIndex].state === 'REP_DRF' ? (user.userType === "ADMIN" ? "CUSTOMER" : "ADMIN") : ""
+            );
+          })
+          .catch((err) => handleError(dispatch, err));
       }
     }
     setIsReply(false);
@@ -2343,8 +2373,11 @@ const InquiryViewer = (props) => {
           }
           dispatch(InquiryActions.setInquiries(optionsInquires));
 
-          // sync reopen inquiry
-          syncData({ inquiries: optionsInquires }, optionsInquires[idx].receiver?.[0].toUpperCase() || "");
+          // sync reopen inquiry / amendment
+          syncData(
+            { inquiries: optionsInquires },
+            (user.userType === "ADMIN" ? optionsInquires[idx].receiver?.[0].toUpperCase() : "ADMIN") || ""
+          );
 
           props.getUpdatedAt();
           setViewDropDown('');
