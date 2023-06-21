@@ -171,10 +171,8 @@ const OtpCheck = ({ children }) => {
 
   const catchError = (error) => {
     console.error(error);
-    if (![401, 403].includes(error.response?.data?.error.status)) {
-      const { message } = error.response.data.error || error.message;
-      dispatch(Actions.showMessage({ message, variant: 'error' }));
-    }
+    const { message } = error.response.data.error || error.message;
+    if (message !== "Forbidden") dispatch(Actions.showMessage({ message, variant: 'error' }));
   }
 
   const handleChangeMail = (e) => {

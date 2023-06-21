@@ -298,10 +298,6 @@ const TableCM = (props) => {
         if (filterInqDrf.length && !filterInqPending.length) defaultId = getField(CONTAINER_MANIFEST);
       }
     }
-    const descriptionId = getField(DESCRIPTION_OF_GOODS);
-    if (drfView === 'MD' && inquiries.length && inquiries.filter(inq => inq.field === descriptionId).length) {
-      defaultId = descriptionId;
-    }
     setId(defaultId);
   }, [drfView, inquiries]);
 
@@ -363,7 +359,7 @@ const TableCM = (props) => {
                 {`${NumberFormat(drfMD[TOTAL_PACKAGE], 0)} ${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`}
               </BLField>
             </Grid>
-            <Grid onClick={(e) => onClick(e, getField(DESCRIPTION_OF_GOODS))} item xs={4}>
+            <Grid item xs={4}>
               <BLField multiline={true}>{getValueField(DESCRIPTION_OF_GOODS)}</BLField>
             </Grid>
             <Grid item xs={2}>

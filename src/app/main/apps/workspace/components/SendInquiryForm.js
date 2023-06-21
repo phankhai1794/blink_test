@@ -1,8 +1,8 @@
 import * as Actions from 'app/store/actions';
 import { checkNewInquiry } from '@shared';
-import { PORT_OF_DISCHARGE, PORT_OF_LOADING, VESSEL_VOYAGE_CODE, PRE_CARRIAGE_CODE } from '@shared/keyword';
+import { PORT_OF_DISCHARGE, PORT_OF_LOADING, VESSEL_VOYAGE_CODE, PRE_CARRIAGE_CODE, ETD } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Icon,
@@ -22,8 +22,10 @@ import { makeStyles, withStyles } from '@material-ui/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { getMail } from 'app/services/mailService';
 import parse from 'html-react-parser';
+import { SocketContext } from 'app/AppContext';
 
-import * as mailActions from '../store/actions/mail';
+import * as InquiryActions from '../store/actions/inquiry';
+import * as MailActions from '../store/actions/mail';
 import * as FormActions from '../store/actions/form';
 
 import InputUI from './MailInputUI';
@@ -89,6 +91,9 @@ const HelperText = withStyles((theme) => ({
 const SendInquiryForm = (props) => {
   const dispatch = useDispatch();
   const classes = useStyles();
+  const socket = useContext(SocketContext);
+
+  const user = useSelector(({ user }) => user);
   const mybl = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
@@ -102,7 +107,7 @@ const SendInquiryForm = (props) => {
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
   const tags = useSelector(({ workspace }) => workspace.mailReducer.tags);
-  const user = useSelector(({ user }) => user);
+  const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
 
   const initialState = {
     toCustomer: '',
@@ -138,6 +143,10 @@ const SendInquiryForm = (props) => {
   const [onshoreValue, setOnshoreValue] = useState({ subject: '', content: '' });
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
+  const syncData = (data, syncOptSite = "") => {
+    // socket.emit("sync_data", { data, syncOptSite });
+  };
+
   const getField = (keyword) => {
     return metadata.field?.[keyword] || '';
   };
@@ -148,6 +157,8 @@ const SendInquiryForm = (props) => {
   const vvdCode = getValueField(PRE_CARRIAGE_CODE) || getValueField(VESSEL_VOYAGE_CODE);
   const pod = getValueField(PORT_OF_DISCHARGE);
   const pol = getValueField(PORT_OF_LOADING)
+  const etd = getValueField(ETD);
+
   const bkgNo = mybl.bkgNo;
 
   const initiateContentState = (content) => {
@@ -212,7 +223,7 @@ const SendInquiryForm = (props) => {
         res.data[0].toOnshore.forEach((onshore) => {
           toOnshore.push(onshore.email);
         });
-      dispatch(mailActions.setTags({ ...tags, toCustomer, toOnshore }));
+      dispatch(MailActions.setTags({ ...tags, toCustomer, toOnshore }));
     }
     toCustomer = toCustomer.join(',');
     toOnshore = toOnshore.join(',');
@@ -232,7 +243,7 @@ const SendInquiryForm = (props) => {
     if (hasOnshore || (!hasOnshore && inqOnshore.length)) {
       setTabValue('onshore');
 
-      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
+      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
       content = pathName.includes('/guest') ? '' : `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion.\n \nPending issue(s):'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
@@ -248,7 +259,7 @@ const SendInquiryForm = (props) => {
       setTabValue('customer');
 
       const [msg1, msg2, header, subj] = convertToList(inqCustomer, 'customer');
-      subject = `[${subj}]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
+      subject = `[${subj}]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
       content = pathName.includes('/guest') ? '' : `Dear Customer,\n \n${msg1 || `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`}\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({
@@ -259,9 +270,8 @@ const SendInquiryForm = (props) => {
         header
       });
     }
-    // subject = "nguyen ngoc binh"  
     if (pathName.includes('/guest')) {
-      subject = `Fwd: ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol})`;
+      subject = `Fwd: ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
     }
     setForm({ ...form, subject, content: bodyHtml, toOnshore, toCustomer });
     handleEditorState(content);
@@ -269,11 +279,11 @@ const SendInquiryForm = (props) => {
 
   useEffect(() => {
     // call API suggest mail
-    if (!suggestMails.length) dispatch(mailActions.suggestMail(''));
+    if (!suggestMails.length) dispatch(MailActions.suggestMail(''));
     fetchData();
     return () => {
-      dispatch(mailActions.setTags({ toCustomer: [], toOnshore: [], toCustomerCc: [], toOnshoreCc: [], toCustomerBcc: [], toOnshoreBcc: [] }));
-      dispatch(mailActions.inputMail({ toCustomer: '', toOnshore: '', toCustomerCc: '', toOnshoreCc: '', toCustomerBcc: '', toOnshoreBcc: '' }));
+      dispatch(MailActions.setTags({ toCustomer: [], toOnshore: [], toCustomerCc: [], toOnshoreCc: [], toCustomerBcc: [], toOnshoreBcc: [] }));
+      dispatch(MailActions.inputMail({ toCustomer: '', toOnshore: '', toCustomerCc: '', toOnshoreCc: '', toCustomerBcc: '', toOnshoreBcc: '' }));
     }
   }, []);
 
@@ -303,7 +313,7 @@ const SendInquiryForm = (props) => {
   useEffect(() => {
     if (success) {
       dispatch({
-        type: mailActions.SENDMAIL_NONE
+        type: MailActions.SENDMAIL_NONE
       });
       if (!hasCustomer && !hasOnshore) {
         dispatch(FormActions.toggleOpenEmail(false));
@@ -314,11 +324,26 @@ const SendInquiryForm = (props) => {
       if (hasCustomer) {
         setTabValue('customer');
       }
+
+      const cloneInquiries = [...inquiries];
+      cloneInquiries.forEach((q) => {
+        if (q.receiver[0] === tabValue) {
+          if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
+          else if (q.state === 'REP_Q_DRF') q.state = 'REP_Q_SENT'; // inquiry
+          else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
+        }
+      });
+      dispatch(InquiryActions.setInquiries(cloneInquiries));
+      dispatch(InquiryActions.checkSend(false));
+
+      // sync send mail
+      syncData({ inquiries: cloneInquiries, listMinimize }, tabValue?.toUpperCase() || "");
+
       dispatch(Actions.showMessage({ message: 'Your inquiries have been sent successfully', variant: 'success' }));
     } else if (error) {
       handleError(dispatch, error);
       dispatch({
-        type: mailActions.SENDMAIL_NONE
+        type: MailActions.SENDMAIL_NONE
       });
     }
   }, [success, error]);
@@ -339,9 +364,9 @@ const SendInquiryForm = (props) => {
         formClone.toOnshoreBcc = '';
         header = customerValue.header;
       }
-      dispatch({ type: mailActions.SENDMAIL_LOADING });
+      dispatch({ type: MailActions.SENDMAIL_LOADING });
       dispatch(
-        mailActions.sendMail({
+        MailActions.sendMail({
           myblId: mybl.id,
           bkgNo,
           ...formClone,
@@ -379,10 +404,13 @@ const SendInquiryForm = (props) => {
         dispatch(
           Actions.showMessage({ message: 'EMAIL ADDRESS DOES NOT EXIST', variant: 'error' })
         );
-    } else if (tabValue === 'onshore' && [...tags['toOnshore'], ...tags['toOnshoreCc'], ...tags['toOnshoreBcc']].some(
+    } else if (tabValue === 'onshore' && !pathName.includes('/guest') && [...tags['toOnshore'], ...tags['toOnshoreCc'], ...tags['toOnshoreBcc']].some(
       (mail) => !/.*@one-line.com/.test(mail)
     )) {
       dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
+    } else if (tabValue === 'customer' && !pathName.includes('/guest') && [...tags['toCustomer'], ...tags['toCustomerCc'], ...tags['toCustomerBcc']].some(
+      (mail) => /.*@one-line.com/.test(mail))) {
+      dispatch(Actions.showMessage({ message: 'ONE email address is not allowed', variant: 'error' }));
     } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
       return;
     } else {

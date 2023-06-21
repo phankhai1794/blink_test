@@ -45,10 +45,9 @@ import { getBlInfo } from 'app/services/myBLService';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
-import * as TransActions from '../store/actions/transaction';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as DraftActions from '../store/actions/draft-bl';
-import * as mailActions from '../store/actions/mail';
+import * as MailActions from '../store/actions/mail';
 
 import Inquiry from './Inquiry';
 import AllInquiry from './AllInquiry';
@@ -124,7 +123,6 @@ const BLWorkspace = (props) => {
   const [confirmClick, form] = useSelector(({ workspace }) => [workspace.formReducer.confirmClick, workspace.formReducer.form]);
   const [inqCustomer, setInqCustomer] = useState([]);
   const [inqOnshore, setInqOnshore] = useState([]);
-  const isLoadingTrans = useSelector(({ workspace }) => workspace.transReducer.isLoading);
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
@@ -193,22 +191,11 @@ const BLWorkspace = (props) => {
       if (inqOnshore.length == 0 && inqCustomer.length == 0) {
         dispatch(AppActions.showMessage({ message: 'No inquiries to Send Mail.', variant: 'error' }));
       } else {
-        dispatch(mailActions.autoSendMail(myBL, inquiries, inqCustomer, inqOnshore, metadata, content, form));
+        dispatch(MailActions.autoSendMail(myBL, inquiries, inqCustomer, inqOnshore, metadata, content, form));
       }
 
     }
   }, [confirmClick, form])
-
-  useEffect(() => {
-    const unloadCallback = (event) => {
-      if (!isLoadingTrans) {
-        dispatch(TransActions.BlTrans(myBL.id, content));
-      }
-      return '';
-    };
-    window.addEventListener('beforeunload', unloadCallback);
-    return () => window.removeEventListener('beforeunload', unloadCallback);
-  }, [isLoadingTrans]);
 
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
@@ -602,33 +589,12 @@ const BLWorkspace = (props) => {
                     {getValueField(SHIPPING_MARK)}
                   </BLField>
                 </Grid>
-                {(drfView === 'CM') ?
-                  <Grid item>
-                    <Label>DESCRIPTION OF GOODS</Label>
-                    <BLField id={getField(DESCRIPTION_OF_GOODS)} multiline={true} rows={8}>
-                      {getValueField(DESCRIPTION_OF_GOODS)}
-                    </BLField>
-                  </Grid>
-                  :
-                  <Grid container style={{ marginTop: 53 }}>
-                    <Grid item xs={6} className={classes.leftPanel}>
-                      <Grid item>
-                        <Label>PORT OF LOADING</Label>
-                        <BLField id={getField(PORT_OF_LOADING)}>
-                          {getValueField(PORT_OF_LOADING)}
-                        </BLField>
-                      </Grid>
-                    </Grid>
-                    <Grid item xs={6} className={classes.rightPanel}>
-                      <Grid item>
-                        <Label>PORT OF DISCHARGE</Label>
-                        <BLField id={getField(PORT_OF_DISCHARGE)}>
-                          {getValueField(PORT_OF_DISCHARGE)}
-                        </BLField>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                }
+                <Grid item>
+                  <Label>DESCRIPTION OF GOODS</Label>
+                  <BLField id={getField(DESCRIPTION_OF_GOODS)} multiline={true} rows={8}>
+                    {getValueField(DESCRIPTION_OF_GOODS)}
+                  </BLField>
+                </Grid>
               </Grid>
               <Grid item xs={6} className={classes.rightPanel}>
                 <Grid container>
@@ -701,25 +667,24 @@ const BLWorkspace = (props) => {
                     </BLField>
                   </Grid>
                 </Grid>
-                {(drfView === 'CM') &&
-                  <Grid container>
-                    <Grid item xs={6} className={classes.leftPanel}>
-                      <Grid item>
-                        <Label>PORT OF LOADING</Label>
-                        <BLField id={getField(PORT_OF_LOADING)}>
-                          {getValueField(PORT_OF_LOADING)}
-                        </BLField>
-                      </Grid>
+                <Grid container>
+                  <Grid item xs={6} className={classes.leftPanel}>
+                    <Grid item>
+                      <Label>PORT OF LOADING</Label>
+                      <BLField id={getField(PORT_OF_LOADING)}>
+                        {getValueField(PORT_OF_LOADING)}
+                      </BLField>
                     </Grid>
-                    <Grid item xs={6} className={classes.rightPanel}>
-                      <Grid item>
-                        <Label>PORT OF DISCHARGE</Label>
-                        <BLField id={getField(PORT_OF_DISCHARGE)}>
-                          {getValueField(PORT_OF_DISCHARGE)}
-                        </BLField>
-                      </Grid>
+                  </Grid>
+                  <Grid item xs={6} className={classes.rightPanel}>
+                    <Grid item>
+                      <Label>PORT OF DISCHARGE</Label>
+                      <BLField id={getField(PORT_OF_DISCHARGE)}>
+                        {getValueField(PORT_OF_DISCHARGE)}
+                      </BLField>
                     </Grid>
-                  </Grid>}
+                  </Grid>
+                </Grid>
                 <Grid item xs={6} className={classes.leftPanel}>
                   <Label>PLACE OF DELIVERY</Label>
                   <BLField id={getField(PLACE_OF_DELIVERY)}>
@@ -812,12 +777,6 @@ const BLWorkspace = (props) => {
                     </Grid>
                   </Grid>
                   <Grid item xs={6} className={classes.leftPanel}>
-                    <Grid item>
-                      <Label>COMMODITY CODE</Label>
-                      <BLField id={getField(COMMODITY_CODE)}>
-                        {getValueField(COMMODITY_CODE)}
-                      </BLField>
-                    </Grid>
                     <Grid item>
                       <Label>DATED</Label>
                       <BLField id={getField(DATED)}>

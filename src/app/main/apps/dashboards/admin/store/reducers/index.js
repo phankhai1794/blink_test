@@ -15,14 +15,19 @@ const initialState = {
     currentPageNumber: 1,
     pageSize: 10,
     totalPageNumber: 5,
-    sortField: ['lastUpdated', 'DESC']
-  }
+    sortField: ['lastUpdated', 'DESC'],
+    countries: null
+  },
+  countries: ''
 }
 
 const dashboardReducer = function (state = initialState, action) {
   switch (action.type) {
   case Actions.SEARCH_QUEUE_QUERY: {
     return { ...state, searchQueueQuery: action.state };
+  }
+  case Actions.FILTER_COUNTRY: {
+    return { ...state, countries: action.state };
   }
   default: {
     return state;

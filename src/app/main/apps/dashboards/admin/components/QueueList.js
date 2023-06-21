@@ -351,7 +351,7 @@ const SearchLayout = (props) => {
                     value={'All'}
                     classes={{ selected: classes.menuItemSelected }}>
                     <Checkbox checked={selectedStatus.indexOf('All') > -1} color="primary" />
-                    <ListItemText primary={'All'} />
+                    <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>All</span>
                   </MenuItem>
                   {blStatusOption.map((status) => (
                     <MenuItem
@@ -359,7 +359,7 @@ const SearchLayout = (props) => {
                       classes={{ selected: classes.menuItemSelected }}
                       value={status}>
                       <Checkbox checked={selectedStatus.indexOf(status) > -1} color="primary" />
-                      <ListItemText primary={status} />
+                      <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>{status}</span>
                     </MenuItem>
                   ))}
                 </Select>

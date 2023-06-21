@@ -1,5 +1,5 @@
 import { FuseChipSelect } from '@fuse';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { combineCDCM, getLabelById, toFindDuplicates } from '@shared';
 import { handleError } from '@shared/handleError';
@@ -33,6 +33,7 @@ import { useUnsavedChangesWarning } from 'app/hooks'
 import { useDropzone } from 'react-dropzone';
 import ContentEditable from 'react-contenteditable';
 import clone from 'lodash/clone';
+import { SocketContext } from 'app/AppContext';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -210,6 +211,8 @@ const InquiryEditor = (props) => {
   const classes = useStyles();
   const { onCancel } = props;
   const scrollTopPopup = useRef(null);
+  const socket = useContext(SocketContext);
+
   const [metadata, valid, inquiries, currentEditInq, myBL, listMinimize, enableSubmit] = useSelector(
     ({ workspace }) => [
       workspace.inquiryReducer.metadata,
@@ -287,6 +290,10 @@ const InquiryEditor = (props) => {
   const [openCD, setOpenCD] = useState(false);
   const [openCM, setOpenCM] = useState(false);
   const userType = useSelector(({ user }) => user.role?.toUpperCase());
+
+  const syncData = (data, syncOptSite = "") => {
+    // socket.emit("sync_data", { data, syncOptSite });
+  };
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -990,6 +997,9 @@ const InquiryEditor = (props) => {
         dispatch(InquiryActions.setEditInq());
         dispatch(InquiryActions.setInquiries(inquiriesOp));
 
+        // sync update inquiry
+        syncData({ inquiries: inquiriesOp });
+
         props.getUpdatedAt();
         setDisabled(false);
         // setSave();
@@ -1103,6 +1113,9 @@ const InquiryEditor = (props) => {
               dispatch(InquiryActions.setOneInq());
               props.getUpdatedAt();
               setDisabled(false);
+
+              // sync create inquiry
+              syncData({ inquiries: optionsInquires, listMinimize: optionsMinimize });
             })
             .catch((error) => handleError(dispatch, error));
         })
@@ -1413,16 +1426,17 @@ const InquiryEditor = (props) => {
               />
             )}
             <Divider className="mt-12" />
-            <div style={{ width: '80%' }}>
+            <div style={{ width: '102%' }}>
               {currentEditInq.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
               {currentEditInq.mediaFile?.length > 0 &&
                 currentEditInq.mediaFile?.map((file, mediaIndex) => (
                   <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach file={file} files={currentEditInq.mediaFile} field={currentEditInq.field} />
-                    ) : (
-                      <FileAttach file={file} files={currentEditInq.mediaFile} field={currentEditInq.field} />
-                    )}
+                    <FileAttach
+                      file={file}
+                      files={currentEditInq.mediaFile}
+                      field={currentEditInq.field}
+                      question={currentEditInq}
+                    />
                   </div>
                 ))}
             </div>
@@ -1433,24 +1447,13 @@ const InquiryEditor = (props) => {
                   {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
                   {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
                     <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                      {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                        <ImageAttach
-                          file={file}
-                          files={currentEditInq.mediaFilesAnswer}
-                          field={currentEditInq.field}
-                          question={currentEditInq}
-                          style={{ margin: '2.5rem' }}
-                          isAnswer={true}
-                        />
-                      ) : (
-                        <FileAttach
-                          file={file}
-                          files={currentEditInq.mediaFilesAnswer}
-                          field={currentEditInq.field}
-                          isAnswer={true}
-                          question={currentEditInq}
-                        />
-                      )}
+                      <FileAttach
+                        file={file}
+                        files={currentEditInq.mediaFilesAnswer}
+                        field={currentEditInq.field}
+                        isAnswer={true}
+                        question={currentEditInq}
+                      />
                     </div>
                   ))}
                 </>
