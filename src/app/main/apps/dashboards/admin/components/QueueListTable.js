@@ -10,6 +10,7 @@ import EllipsisPopper from 'app/main/apps/workspace/shared-components/EllipsisPo
 import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
 import { mapperBlinkStatus } from '@shared/keyword'
+import { handleError } from '@shared/handleError';
 
 const useStyles = makeStyles({
   root: {
@@ -73,9 +74,9 @@ const useStyles = makeStyles({
   },
   link: {
     color: '#333333',
-    textDecoration: 'none',
+    textDecoration: 'none !important',
     '&:hover': {
-      color: '#BD0F72',
+      color: '#BD0F72 !important',
       fontWeight: '600',
     }
   },
@@ -214,6 +215,25 @@ const isDateStringValid = (str) => {
   return isNaN(date) ? str : formatDate(date, 'MMM DD YYYY');
 };
 
+const InqStatus = {
+  "OPEN": "Inquired",
+  "INQ_SENT": "Inquired",
+  "ANS_DRF": "",
+  "ANS_SENT": "New Reply",
+  "REP_Q_DRF": "Replied",
+  "REP_Q_SENT": "Replied",
+  "REP_A_DRF": "",
+  "REP_A_SENT": "New Reply",
+  "COMPL": "Resolved",
+  "REOPEN_Q": "Reopen",
+  "REOPEN_A": "",
+  "UPLOADED": "Uploaded",
+  "AME_DRF": "",
+  "AME_SENT": "New Amendment",
+  "REP_SENT": "Replied",
+  "RESOLVED": "Resolved"
+}
+
 const Row = (props) => {
   const { row, index, open, setOpen } = props;
   const classes = useStyles();
@@ -226,13 +246,8 @@ const Row = (props) => {
   const handleChange = (_, value) => setTab(value);
 
   const data = (row) => {
-    let { pending, resolved, uploaded } = row;
-    let newReply = row.new;
-    pending = pending.map(a => ({ ...a, status: 'pending' }));
-    resolved = resolved.map(a => ({ ...a, status: 'resolved' }));
-    newReply = newReply.map(a => ({ ...a, status: 'reply' }));
-    uploaded = uploaded.map(a => ({ ...a, status: 'uploaded' }));
-    return [pending, newReply, resolved, uploaded];
+    const { pending, resolved, uploaded } = row;
+    return [pending, row.new, resolved, uploaded];
   }
 
   const [Ipending, Ireply, Iresolved, Iuploaded] = data(row.inquiries);
@@ -270,7 +285,7 @@ const Row = (props) => {
             >
               <Icon>  {open ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}</Icon>
             </IconButton>
-            <a href={`/apps/workspace/${row.bkgNo}?usrId=admin&cntr=VN`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bkgNo}</span></a>
+            <a href={`/apps/workspace/${row.bkgNo}?usrId=admin&cntr=${row.country}`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bkgNo}</span></a>
           </TableCell>
         </StickyTableCell>
         <TableCell className={classes.cellBody} >{formatDate(row.lastUpdated, 'MMM DD YYYY HH:mm')}</TableCell>
@@ -358,10 +373,7 @@ const Row = (props) => {
                       {formatDate(row.updatedAt, 'MMM DD YYYY HH:mm')}
                     </TableCell>
                     <TableCell>
-                      {row.status === 'pending' ? 'Pending' : null}
-                      {row.status === 'reply' ? 'New Reply' : null}
-                      {row.status === 'resolved' ? 'Resolved' : null}
-                      {row.status === 'uploaded' ? 'Uploaded' : null}
+                      {InqStatus[row.state]}
                     </TableCell>
                     <TableCell
                       style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
@@ -387,12 +399,21 @@ const QueueListTable = () => {
 
   const [state, setState] = useState({ queueListBl: [], totalBkgNo: 1, sortBkgNo: 'asc', sortLatestDate: 'asc', sortStatus: 'asc' });
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
+  const countries = useSelector(({ dashboard }) => dashboard.countries);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('bkgNo');
   const [openDetailIndex, setOpenDetailIndex] = useState();
 
   useEffect(() => {
-    if (searchQueueQuery.from && searchQueueQuery.to)
+    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, countries }));
+  }, [countries]);
+
+  useEffect(() => {
+    return () => dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, countries: null }));
+  }, []);
+
+  useEffect(() => {
+    if (searchQueueQuery.countries)
       getOffshoreQueueList({
         page: searchQueueQuery.currentPageNumber,
         size: searchQueueQuery.pageSize,
@@ -400,12 +421,15 @@ const QueueListTable = () => {
           startDate: formatDate(searchQueueQuery.from, 'YYYY-MM-DD'),
           endDate: formatDate(searchQueueQuery.to, 'YYYY-MM-DD'),
           bkgNos: searchQueueQuery.bookingNo.split(',').filter(bkg => bkg).map(bkg => bkg.trim()),
-          blinkStatus: searchQueueQuery.blStatus
+          blinkStatus: searchQueueQuery.blStatus,
+          countries
         },
         sort: searchQueueQuery.sortField
-      }).then(({ total, data }) =>
-        setState({ ...state, queueListBl: data, totalBkgNo: total })
-      )
+      })
+        .then(({ total, data }) =>
+          setState({ ...state, queueListBl: data, totalBkgNo: total })
+        )
+        .catch((err) => handleError(dispatch, err));
   }, [searchQueueQuery]);
 
   const handleSort = (property) => {

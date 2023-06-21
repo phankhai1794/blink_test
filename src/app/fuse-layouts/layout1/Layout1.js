@@ -1,6 +1,5 @@
 import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense } from '@fuse';
 import AppContext from 'app/AppContext';
-import Transaction from 'app/main/transactions/Transaction';
 import React, { useContext } from 'react';
 import clsx from 'clsx';
 import { renderRoutes } from 'react-router-config';
@@ -84,7 +83,6 @@ function Layout1(props) {
   const appContext = useContext(AppContext);
   const { routes } = appContext;
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
-  const openTrans = useSelector(({ workspace }) => workspace.formReducer.openTrans);
   const currentInqPreview = useSelector(({ workspace }) => workspace.formReducer.currentInqPreview);
   const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
   const isLoadingProcess = useSelector(({ workspace }) => workspace.formReducer.isLoadingProcess);
@@ -105,7 +103,6 @@ function Layout1(props) {
               {props.children}
             </FuseScrollbars>
           </div>
-          {openTrans && <Transaction />}
         </div>
         {/* <SettingsPanel /> */}
       </div>

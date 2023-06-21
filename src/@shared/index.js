@@ -87,97 +87,6 @@ export const draftConfirm = 'DRF_CONF';
 
 export const stateResquest = 'REQUEST';
 
-export const COUNTRIES = [
-  {
-    name: 'United States',
-    value: 'US'
-  },
-  {
-    name: 'Singapore',
-    value: 'SG'
-  },
-  {
-    name: 'Thailand',
-    value: 'TH'
-  },
-  {
-    name: 'Vietnam',
-    value: 'VN'
-  },
-  {
-    name: 'Czechia',
-    value: 'CZ'
-  },
-  {
-    name: 'Denmark',
-    value: 'DK'
-  },
-  {
-    name: 'Finland',
-    value: 'FI'
-  },
-  {
-    name: 'France',
-    value: 'FR'
-  },
-  {
-    name: 'Hungary',
-    value: 'HU'
-  },
-  {
-    name: 'Italy',
-    value: 'IT'
-  },
-  {
-    name: 'Norway',
-    value: 'NO'
-  },
-  {
-    name: 'Poland',
-    value: 'PL'
-  },
-  {
-    name: 'Russian',
-    value: 'RU'
-  },
-  {
-    name: 'Sweden',
-    value: 'SE'
-  },
-  {
-    name: 'Switzerland',
-    value: 'CH'
-  },
-  {
-    name: 'Spain',
-    value: 'ES'
-  },
-  {
-    name: 'Portugal',
-    value: 'PT'
-  },
-  {
-    name: 'Taiwan',
-    value: 'TW'
-  },
-  {
-    name: 'Japan',
-    value: 'JP'
-  },
-  {
-    name: 'New Zealand',
-    value: 'OC_ML'
-  },
-  {
-    name: 'Myanmar',
-    value: 'MM'
-  },
-  {
-    name: 'Montenegro	',
-    value: 'ME'
-  },
-];
-
 export const sentStatus = [
   ...['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'REOPEN_Q', 'REOPEN_A'], // inquiry status
   ...['REP_SENT'] // draft status
@@ -394,7 +303,8 @@ export const getTotalValueMDView = (drfView, containerDetail, getType) => {
     CONTAINER_LIST.totalUnit.forEach((totalKey, index) => {
       const units = [];
       containerDetail.forEach((cd) => {
-        units.push(cd[getType(CONTAINER_LIST.cdUnit[index])])
+        const unit = cd[getType(CONTAINER_LIST.cdUnit[index])];
+        if (unit) units.push(unit);
       })
       if ([... new Set(units)].length === 1) {
         drfMD[totalKey] = units[0].toString();
@@ -442,13 +352,24 @@ export const formatNumber = (num) => {
 }
 
 export const isSameDate = (d1, d2) => {
-  const t1 = new Date(d1);
-  const t2 = new Date(d2);
+  const t1 = d1 ? new Date(d1) : new Date();
+  const t2 = d2 ? new Date(d2) : new Date();
   return (
     t1.getFullYear() === t2.getFullYear()
     && t1.getMonth() === t2.getMonth()
-    && t1.getDay() === t2.getDay()
+    && t1.getDate() === t2.getDate()
   )
+}
+
+export const getSrcFileIcon = (file) => {
+  let path = '';
+  const ext = file.ext.toLowerCase();
+
+  if (ext.includes('pdf')) path = 'assets/images/logos/pdf_icon.png';
+  else if (ext.match(/csv|xls|xlsx|excel|sheet/g)) path = '/assets/images/logos/excel_icon.png';
+  else if (ext.match(/doc|msword/g)) path = '/assets/images/logos/word_icon.png';
+
+  return path;
 }
 
 export const checkBroadCastAccessing = (role) => {
@@ -465,4 +386,21 @@ export const checkBroadCastAccessing = (role) => {
       window.location.reload();
     }
   }
+}
+
+export const categorizeInquiriesByUserType = (userType, inqs) => {
+  let syncInq = [...inqs];
+
+  if (userType === "ADMIN") {
+    let listInq = JSON.parse(sessionStorage.getItem("listInq")).inquiries;
+    syncInq.forEach(q => {
+      let idx = listInq.findIndex((inq => inq.id === q.id));
+      listInq[idx] = { ...listInq[idx], ...q };
+    });
+    syncInq = [...listInq];
+  } else {
+    syncInq = syncInq.filter(inq => inq.receiver[0].toUpperCase() === userType);
+  }
+
+  return syncInq;
 }

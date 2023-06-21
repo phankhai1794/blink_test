@@ -8,6 +8,7 @@ import * as AppActions from 'app/store/actions';
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 import { setLastField } from '../store/actions/inquiry';
+import {CONTAINER_DETAIL, CONTAINER_MANIFEST} from "../../../../../@shared/keyword";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -58,8 +59,13 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
   const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const [isSubmit, setIsSubmit] = useState(true);
 
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
   useEffect(() => {
     if (userInfo.role !== 'Admin') {
       let currentFields = [];
@@ -68,7 +74,10 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
         currentFields = inquiries;
       } // inquiry detail
       else if (title === currentField) {
-        currentFields = inquiries.filter(inq => inq.field === currentField);
+        // currentFields = inquiries.filter(inq => inq.field === currentField);
+        currentFields = inquiries.filter((q) => (
+            ((containerCheck.includes(q.field) && containerCheck.includes(currentField)) || (q.field === currentField && !containerCheck.includes(q.field)))
+        ));
       }
       //
       const inquiriesPendingProcess = currentFields.filter(op => op.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(op.state));

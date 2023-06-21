@@ -73,14 +73,15 @@ function Login(props) {
       .then((res) => {
         if (res) {
           const { userData, token, message } = res;
-          const { userType, role, userName, avatar, email, permissions } = userData;
+          const { userType, role, userName, avatar, email, permissions, countries } = userData;
           const userInfo = {
             displayName: userName,
             photoURL: avatar,
             userType,
             role,
             email,
-            permissions
+            permissions,
+            countries: countries || []
           };
           const payload = { ...user, ...userInfo };
 
@@ -98,7 +99,9 @@ function Login(props) {
             prevUrl = `${prevUrl.cachePath + prevUrl.cacheSearch}`;
           } else prevUrl = "/";
 
-          history.push(cachePath ? `${cachePath + cacheSearch}` : prevUrl);
+          let url = prevUrl;
+          if (cachePath && !cachePath.includes("login")) url = `${cachePath + cacheSearch}`;
+          history.push(url);
         }
       })
       .catch((error) => {
@@ -109,11 +112,12 @@ function Login(props) {
   }
 
   useEffect(() => {
-    if (
-      localStorage.getItem('AUTH_TOKEN') &&
-      PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD })
-    )
-      history.push('/');
+    // TODO: verify token by API
+    // if (
+    //   localStorage.getItem('AUTH_TOKEN') &&
+    //   PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD })
+    // )
+    //   history.push('/');
   }, []);
 
   return (

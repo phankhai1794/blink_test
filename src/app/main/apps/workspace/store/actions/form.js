@@ -9,7 +9,6 @@ export const TOGGLE_AMENDMENTS_LIST = 'TOGGLE_AMENDMENTS_LIST';
 export const OPEN_NOTIFICATION_AMENDMENT_LIST = 'OPEN_NOTIFICATION_AMENDMENT_LIST';
 export const TOGGLE_PREVIEW_SUBMIT_LIST = 'TOGGLE_PREVIEW_SUBMIT_LIST';
 export const RELOAD = 'RELOAD';
-export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 export const OPEN_EMAIL = 'OPEN_EMAIL';
 export const OPEN_INQUIRY_REVIEW = 'OPEN_INQUIRY_REVIEW';
 export const OPEN_NOTIFICATION_ATTACHMENT_LIST = 'OPEN_NOTIFICATION_ATTACHMENT_LIST';
@@ -101,12 +100,6 @@ export function toggleAttachment(state) {
 export function toggleReload() {
   return {
     type: RELOAD
-  };
-}
-
-export function openTrans() {
-  return {
-    type: OPEN_TRANSACTION
   };
 }
 

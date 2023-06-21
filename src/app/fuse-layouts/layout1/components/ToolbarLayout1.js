@@ -1,10 +1,9 @@
 import history from '@history';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
-import UserProfile from 'app/fuse-layouts/shared-components/UserProfile';
+import User from 'app/fuse-layouts/shared-components/User';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
-import { clearLocalStorage } from '@shared';
 import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
@@ -155,6 +154,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 12,
     position: 'relative',
     color: themeColor,
+    paddingRight: 18
   },
 }));
 
@@ -165,10 +165,6 @@ function ToolbarLayout1(props) {
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
   const user = useSelector(({ user }) => user);
-  const [allowAccess, validToken] = useSelector(({ header }) => [
-    header.allowAccess,
-    header.validToken
-  ]);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
@@ -355,38 +351,6 @@ function ToolbarLayout1(props) {
     }
   }, [enableSubmit, inquiries]);
 
-  useEffect(() => {
-    if (!user.displayName || !validToken) {
-      if (!allowAccess) {
-        clearLocalStorage();
-        sessionStorage.removeItem("permissions");
-
-        const bl = new URLSearchParams(search).get('bl');
-        if (bl) {
-          window.location.reload();
-          // history.push(`/guest?bl=${bl}`);
-        } else history.push({
-          pathname: '/login',
-          ...(!logout && { cachePath: pathname, cacheSearch: search })
-        });
-      }
-
-      let userInfo = JSON.parse(localStorage.getItem('USER'));
-      if (userInfo) {
-        let payload = {
-          ...user,
-          userType: userInfo.userType,
-          role: userInfo.role,
-          displayName: userInfo.displayName,
-          photoURL: userInfo.photoURL,
-          email: userInfo.email,
-          permissions: userInfo.permissions
-        };
-        dispatch(AppActions.setUser(payload));
-      }
-    }
-  }, [user, allowAccess]);
-
   const openAllInquiry = () => {
     dispatch(InquiryActions.setField());
     if (inquiries.filter((inq) => inq.process === 'pending').length) {
@@ -454,7 +418,7 @@ function ToolbarLayout1(props) {
 
   return (
     <ThemeProvider theme={toolbarTheme}>
-      {!isLoading && (
+      {(isLoading <= 0) && (
         <AppBar id="fuse-toolbar" className="flex relative z-10" color="inherit">
           <Toolbar className="p-0">
             {config.navbar.display && config.navbar.position === 'left' && (
@@ -531,7 +495,7 @@ function ToolbarLayout1(props) {
               </PermissionProvider>
             </div>
 
-            <div className="flex" style={{alignItems: 'center' }}>
+            <div className="flex" style={{ alignItems: 'center' }}>
               {!pathname.includes('/draft') &&
                 <TextField
                   id="view"
@@ -553,19 +517,18 @@ function ToolbarLayout1(props) {
                           minWidth: 0,
                           position: 'absolute',
                           top: '-100px'
-                          
-                        }}
+                        }
+                      }
                     }
                   }}>
-                 
-                    {drfViews.map(view => (
-                      <MenuItem
-                        key={view.value}
-                        value={view.value}
-                        className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
-                        <span className={classes.dratTypeText}>{view.label}</span>
-                      </MenuItem>
-                    ))}
+                  {drfViews.map(view => (
+                    <MenuItem
+                      key={view.value}
+                      value={view.value}
+                      className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
+                      <span className={classes.dratTypeText}>{view.label}</span>
+                    </MenuItem>
+                  ))}
                 </TextField>}
 
               {!pathname.includes('/draft') && <BtnQueueList />}
@@ -577,7 +540,7 @@ function ToolbarLayout1(props) {
                   className={clsx(classes.button, classes.buttonEditDraftBL)}
                   style={{ width: 110, fontSize: 12, height: 30 }}
                   onClick={redirectWorkspace}>
-                  <img src="assets/images/icons/amendIconPink.svg" style={{width: 12, height: 12, position: 'relative', left: 5}} />
+                  <img src="assets/images/icons/amendIconPink.svg" style={{ width: 12, height: 12, position: 'relative', left: 5 }} />
                   <img src="assets/images/icons/penIconPink.svg" style={{ position: 'relative', top: 5, width: 8 }} />
                   <span claseeName={classes.dratTypeText}>Amendment</span>
                 </Button>
@@ -609,18 +572,12 @@ function ToolbarLayout1(props) {
                     size="medium"
                     className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
-                    <img src="assets/images/icons/email.svg" style={{ position: 'relative', right: 3, width: 12, height: 12, top: 1}} />
+                    <img src="assets/images/icons/email.svg" style={{ position: 'relative', right: 3, width: 12, height: 12, top: 1 }} />
                     <span>Email</span>
                   </Button>
                 </div>
               </PermissionProvider>
 
-              {/* <PermissionProvider
-                action={PERMISSION.VIEW_SHOW_BL_HISTORY}
-                extraCondition={pathname.includes('/workspace')}>
-                <History />
-                {openTrans && transId && <RestoreVersion />}
-              </PermissionProvider>  */}
               <PermissionProvider
                 action={PERMISSION.MAIL_SEND_MAIL}
                 extraCondition={pathname.includes('/guest')}
@@ -630,10 +587,10 @@ function ToolbarLayout1(props) {
                     //color="primary"
                     variant="contained"
                     className={clsx(classes.button, classes.buttonSubmit)}
-                    style={{width:80, height: 30}}
+                    style={{ width: 80, height: 30 }}
                     // className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
-                    <img src="assets/images/icons/forwardMail.svg" style={{ position: 'relative', width: 10, height: 10  }} />
+                    <img src="assets/images/icons/forwardMail.svg" style={{ position: 'relative', width: 10, height: 10 }} />
                     <span className="pl-4">Forward</span>
                   </Button>
                 </div>
@@ -655,11 +612,7 @@ function ToolbarLayout1(props) {
 
               <PreviewDraftBL />
 
-              <PermissionProvider
-                action={PERMISSION.VIEW_SHOW_USER_MENU}
-                extraCondition={!pathname.includes('/guest')}>
-                <UserProfile classes={classes} history={history} />
-              </PermissionProvider>
+              <User />
             </div>
 
             {config.navbar.display && config.navbar.position === 'right' && (

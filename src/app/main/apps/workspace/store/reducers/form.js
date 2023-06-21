@@ -7,7 +7,6 @@ const initialState = {
   showSaveInquiry: false,
   showAddInquiry: true,
   openAttachment: false,
-  openTrans: false,
   openEmail: false,
   openInqReview: false,
   openNotificationInquiryList: false,
@@ -73,9 +72,6 @@ const formReducer = function (state = initialState, action) {
       openPreviewListSubmit: false,
       openAmendmentList: false,
     };
-  }
-  case Actions.OPEN_TRANSACTION: {
-    return { ...state, openTrans: !state.openTrans };
   }
   case Actions.OPEN_EMAIL: {
     return { ...state, openEmail: action.state };
