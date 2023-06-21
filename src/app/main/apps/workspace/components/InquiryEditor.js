@@ -540,15 +540,6 @@ const InquiryEditor = (props) => {
             filter.contentShow = filter.content[0];
             filter.receiver = `customer-${v.value}`;
             contentArr.push(filter);
-          } else if (v.label === OTHERS) {
-            contentArr.push({
-              showTemplate: false,
-              templateIndex: '0',
-              content: [currentEditInq.content],
-              contentShow: currentEditInq.content,
-              receiver: `customer-${v.value}`,
-              type: v.value,
-            });
           }
         } else if (findByIdType) {
           contentArr.push(findByIdType);
@@ -958,7 +949,6 @@ const InquiryEditor = (props) => {
           const dataDate = await getUpdatedAtAnswer(inquiry.id).catch(err => handleError(dispatch, err));
           inquiriesOp[editedIndex].createdAt = dataDate.data;
         } else if (isCdCm) {
-          const optionsMinimize = [...listMinimize];
           const { data } = update;
           if (data.length) {
             data.forEach(d => {
@@ -990,11 +980,9 @@ const InquiryEditor = (props) => {
                   updatedBy: d.updatedBy
                 }
                 inquiriesOp.push(object);
-                optionsMinimize.push(object);
               }
             })
           }
-          dispatch(InquiryActions.setListMinimize(optionsMinimize));
         }
 
         if (prevField !== currentEditInq.field) {
