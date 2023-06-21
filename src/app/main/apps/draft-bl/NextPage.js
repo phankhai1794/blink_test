@@ -97,9 +97,9 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
   const [metadata, myBL, content] = useSelector(({ draftBL }) => [
     draftBL.metadata,
     draftBL.myBL,
-    draftBL.content,
+    draftBL.content
   ]);
-  
+
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
   };
