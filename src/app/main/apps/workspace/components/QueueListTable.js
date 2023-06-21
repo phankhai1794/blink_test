@@ -272,7 +272,7 @@ const QueueListTable = () => {
             <Table className={classes.table} aria-label='simple table'>
               <TableHead className={classes.headerColor} style={{ backgroundColor: '#FDF2F2', position: 'sticky', top: 0, zIndex: 2 }}>
                 <TableRow>
-                  <TableCell >
+                  <TableCell>
                     <div className={classes.lineColumn}>
                       <span>No.</span>
                     </div>
@@ -289,15 +289,19 @@ const QueueListTable = () => {
                       <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`latestDate&order=${state.sortLatestDate}`, 'latestDate')} />
                     </div>
                   </TableCell>
-                  {/* <TableCell>
+                  <TableCell>
                     <div className={classes.lineColumn}>
                       <span>ETD</span>
-                      <img src='/assets/images/icons/Icon-sort.svg' />
                     </div>
-                  </TableCell> */}
+                  </TableCell>
                   <TableCell>
                     <div className={classes.lineColumn}>
                       <span>Status</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className={classes.lineColumn}>
+                      <span>VVD</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -333,11 +337,12 @@ const QueueListTable = () => {
                     <TableCell component='th' scope='row'>
                       <a href={`/guest?bl=${row.id}`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bookingNo}</span></a>
                     </TableCell>
-                    <TableCell >{formatDate(row.latestDate, 'MMM - DD - YYYY HH:mm')}</TableCell>
-                    {/* <TableCell ><span>{row.etd}</span></TableCell> */}
-                    <TableCell ><span style={{ textTransform: 'capitalize' }}>{row?.status ? row?.status.replace('_', ' ').toLowerCase() : ''}</span></TableCell>
+                    <TableCell>{formatDate(row.latestDate, 'MMM DD YYYY HH:mm')}</TableCell>
+                    <TableCell><span>{row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}</span></TableCell>
+                    <TableCell><span style={{ textTransform: 'capitalize' }}>{row?.status ? row?.status.replace('_', ' ').toLowerCase() : ''}</span></TableCell>
+                    <TableCell><span>{row.vvd}</span></TableCell>
                     {/* Inquiries */}
-                    <TableCell >
+                    <TableCell>
                       <div className={classes.label}>
                         <Tooltip title={'Inquiries'} placement='bottom-end'>
                           <div className={classes.chips}>
@@ -352,7 +357,7 @@ const QueueListTable = () => {
                       </div>
                     </TableCell>
                     {/* Amendments */}
-                    <TableCell >
+                    <TableCell>
                       <div className={classes.label}>
                         <Tooltip title={'Amendments'} placement='bottom-end'>
                           <div className={classes.chips}>
@@ -366,7 +371,7 @@ const QueueListTable = () => {
                         </Tooltip>
                       </div>
                     </TableCell>
-                    <TableCell >
+                    <TableCell>
                       <div className={classes.label}>
                         {row?.countAllInq ?
                           <Chip
