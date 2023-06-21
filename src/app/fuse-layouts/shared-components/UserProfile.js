@@ -33,7 +33,6 @@ function UserProfile(props) {
 
   const handleLogOut = () => {
     clearLocalStorage();
-    sessionStorage.removeItem("permissions");
     socket.emit('user_logout');
     dispatch(AppActions.removeUser());
     dispatch(AppActions.checkAllow(false));
