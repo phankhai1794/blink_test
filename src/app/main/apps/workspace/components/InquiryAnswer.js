@@ -113,7 +113,7 @@ const InquiryAnswer = (props) => {
   let currentAnswer = optionsInquires[editedIndex];
 
   const syncData = (data, syncOptSite = "") => {
-    // socket.emit("sync_data", { data, syncOptSite });
+    socket.emit("sync_data", { data, syncOptSite });
   };
 
   const getField = (field) => {
@@ -323,7 +323,10 @@ const InquiryAnswer = (props) => {
     }
 
     // sync create/edit answer inquiry
-    syncData({ inquiries: optionsInquires });
+    syncData(
+      { inquiries: optionsInquires },
+      optionsInquires[editedIndex].state === "ANS_SENT" ? "ADMIN" : ""
+    );
 
     dispatch(InquiryActions.setEditInq(null));
   };
@@ -335,34 +338,30 @@ const InquiryAnswer = (props) => {
   return (
     <div className='changeToEditor'>
       <div className="flex">
-
-        <div className="flex">
-          <Button
-            variant="contained"
-            color="primary"
-            disabled={
-              (
-                !currentAnswer?.paragraphAnswer?.content?.trim()
-                && !currentAnswer.selectChoice
-                && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)
-              )
-              ||
-              isDisableSave
-            }
-            onClick={() => onSave()}
-            classes={{ root: classes.button }}>
-            Save
-          </Button>
-          <Button
-            variant="contained"
-            classes={{ root: clsx(classes.button, 'reply') }}
-            color="primary"
-            onClick={onCancel}>
-            Cancel
-          </Button>
-        </div>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={
+            (
+              !currentAnswer?.paragraphAnswer?.content?.trim()
+              && !currentAnswer.selectChoice
+              && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)
+            )
+            ||
+            isDisableSave
+          }
+          onClick={() => onSave()}
+          classes={{ root: classes.button }}>
+          Save
+        </Button>
+        <Button
+          variant="contained"
+          classes={{ root: clsx(classes.button, 'reply') }}
+          color="primary"
+          onClick={onCancel}>
+          Cancel
+        </Button>
       </div>
-
     </div>
   );
 };

@@ -125,41 +125,21 @@ const BLProcessNotification = () => {
       // Receive the list user accessing
       socket.on('users_accessing', async ({ usersAccessing }) => {
         console.log("usersAccessing: ", usersAccessing);
-
-        if (
-          user.userType === "ADMIN"
-          ||
-          (user.userType === "CUSTOMER" && myBL.state.includes("DRF_"))
-        ) {
-          const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
-          if (userLocal.displayName && usersAccessing.length) {
-            let permissions = await getPermissionByRole('Viewer');
-            dispatch(AppAction.setUser({ ...userLocal, permissions }));
-
-            if (userLocal.displayName === usersAccessing[0]) { // if to be the first user
-              permissions = await getPermissionByRole(userLocal.role);
-              // close the warning popup if the user is granted permission
-              dispatch(FormActions.toggleOpenBLWarning(false));
-            } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1]) { // if to be the last user
-              dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0] }));
-            }
-
-            setTimeout(() => {
-              dispatch(AppAction.setUser({ ...userLocal, permissions }));
-            }, 500);
-            sessionStorage.setItem('permissions', JSON.stringify(permissions));
-          }
-        }
       });
 
       // Receive the message sync state
-      // socket.on('sync_state', async (res) => {
-      //   const result = categorizeInquiriesByUserType(user.userType, res.inquiries);
-      //   dispatch(InquiryActions.setInquiries(result));
-      //   if (res.listMinimize) dispatch(InquiryActions.setListMinimize(res.listMinimize));
-      //   if (res.content) dispatch(InquiryActions.setContent(res.content));
-      //   if (res.amendments) dispatch(InquiryActions.setListCommentDraft(res.amendments));
-      // });
+      socket.on('sync_state', async ({ from, data }) => {
+        const { inquiries, listMinimize, content, amendments } = data;
+
+        const result = categorizeInquiriesByUserType(from, user.userType, myBL, inquiries);
+        dispatch(InquiryActions.setInquiries(result));
+
+        if (listMinimize) dispatch(InquiryActions.setListMinimize(listMinimize));
+
+        if (content) dispatch(InquiryActions.setContent(content));
+
+        if (amendments) dispatch(InquiryActions.setListCommentDraft(amendments));
+      });
     }
   }, [myBL]);
 

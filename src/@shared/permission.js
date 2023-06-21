@@ -46,8 +46,6 @@ export const PermissionProvider = ({
   const user = localStorage.getItem('USER');
   if (!user) return null;
 
-  const permissionsSession = sessionStorage.getItem('permissions') || '';
-  const permissions = permissionsSession.length ? JSON.parse(permissionsSession) : JSON.parse(user).permissions;
-  const isAllowed = (permissions || []).filter((p) => `${p.controller}_${p.action}` === action && p.enable).length > 0;
+  const isAllowed = (JSON.parse(user).permissions || []).filter((p) => `${p.controller}_${p.action}` === action && p.enable).length > 0;
   return isAllowed && extraCondition ? (children ? children : true) : fallback;
 };
