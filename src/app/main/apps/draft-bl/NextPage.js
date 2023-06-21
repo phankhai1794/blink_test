@@ -94,13 +94,12 @@ const useStyles = makeStyles((theme) => ({
 
 const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage }) => {
   const classes = useStyles();
-  const [metadata, myBL, content, drfView] = useSelector(({ draftBL }) => [
+  const [metadata, myBL, content] = useSelector(({ draftBL }) => [
     draftBL.metadata,
     draftBL.myBL,
     draftBL.content,
-    draftBL.drfView
   ]);
-  console.log(drfView)
+  
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
   };
