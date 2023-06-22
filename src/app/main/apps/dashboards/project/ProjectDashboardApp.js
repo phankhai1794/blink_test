@@ -56,7 +56,6 @@ function ProjectDashboardApp(props) {
     );
 
     console.log("Current commit: ", process.env.REACT_APP_VERSION_ID);
-    console.log("demo deploy >>>>>>>>>>>>>>>>>>>>>>>>>>");
 
     return () => {
       dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.navbar.display', false)));
