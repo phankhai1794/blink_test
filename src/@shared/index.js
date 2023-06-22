@@ -418,3 +418,15 @@ export const categorizeInquiriesByUserType = (from, userType, bl, inqs) => {
 
   return syncInqs;
 }
+
+export const findSumFromArray = (arr) => {
+  let newDict = {};
+
+  arr.filter(item => item).forEach(item => {
+    if (!newDict[item.currencyCode]) {
+      newDict[item.currencyCode] = item.prepaidValue;
+    } else newDict[item.currencyCode] += item.prepaidValue;
+  });
+
+  return newDict;
+}
