@@ -286,6 +286,7 @@ const InquiryViewer = (props) => {
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const expandFileQuestionIds = useSelector(({ workspace }) => workspace.inquiryReducer.enableExpandAttachment);
   const cancelAmePopup = useSelector(({ workspace }) => workspace.inquiryReducer.cancelAmePopup);
+  const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
   const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
   const [question, setQuestion] = useState(props.question);
@@ -2297,7 +2298,6 @@ const InquiryViewer = (props) => {
       dispatch(InquiryActions.setReply(true));
       setQuestion(q => ({ ...q, showIconReply: false, showIconAttachAnswerFile: false, showIconAttachReplyFile: true }));
       setTempReply({})
-      dispatch(InquiryActions.setExpand([...expandFileQuestionIds, question.id]));
     }
   };
 
@@ -3001,7 +3001,10 @@ const InquiryViewer = (props) => {
                 </Grid>
               )}
 
-              <div style={{ width: '915px' }}>
+              <div
+                style={{ width: fullscreen ? 1230 : 890 }}
+                onMouseLeave={() => { dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
+              >
                 {question.mediaFile?.length > 0 &&
                   !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
                   question.mediaFile?.map((file, mediaIndex) => (
@@ -3025,25 +3028,30 @@ const InquiryViewer = (props) => {
                 {question.mediaFilesAnswer?.length > 0 &&
                   !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
                   <h3>Attachment Answer:</h3>}
-                {question.mediaFilesAnswer?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                    <FileAttach
-                      file={file}
-                      files={question.mediaFilesAnswer}
-                      field={question.field}
-                      indexMedia={mediaIndex}
-                      isAnswer={true}
-                      question={question}
-                      index={index}
-                      questions={inquiries}
-                      hiddenRemove={!question.showIconAttachAnswerFile}
-                      isRemoveFile={isRemoveFile}
-                      setIsRemoveFile={(val) => {
-                        setIsRemoveFile(val)
-                      }}
-                    />
-                  </div>
-                ))}
+                <div
+                  style={{ width: 885 }}
+                  onMouseLeave={() => { question.showIconEdit && dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
+                >
+                  {question.mediaFilesAnswer?.map((file, mediaIndex) => (
+                    <div key={mediaIndex} style={{ position: 'relative', display: 'inline-block' }}>
+                      <FileAttach
+                        file={file}
+                        files={question.mediaFilesAnswer}
+                        field={question.field}
+                        indexMedia={mediaIndex}
+                        isAnswer={true}
+                        question={question}
+                        index={index}
+                        questions={inquiries}
+                        hiddenRemove={!question.showIconAttachAnswerFile}
+                        isRemoveFile={isRemoveFile}
+                        setIsRemoveFile={(val) => {
+                          setIsRemoveFile(val)
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
               </>
             }
           </div>
@@ -3166,7 +3174,11 @@ const InquiryViewer = (props) => {
                             />}
                       </div>
                       }
-                      <div className='attachment-reply' style={{ width: '900px' }}>
+                      <div
+                        className='attachment-reply'
+                        style={{ width: 900 }}
+                        onMouseLeave={() => { question.showIconEdit && dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
+                      >
                         {tempReply?.mediaFiles?.map((file, mediaIndex) => (
                           <div
                             style={{ position: 'relative', display: 'inline-block' }}
