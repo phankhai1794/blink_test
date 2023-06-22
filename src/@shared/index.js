@@ -192,7 +192,7 @@ export function isJsonText(str) {
 }
 
 export function formatDate(time, formatType) {
-  return moment(time).format(formatType).toUpperCase();
+  return moment(time).format(formatType);
 }
 
 // Format Dummy Container Data
