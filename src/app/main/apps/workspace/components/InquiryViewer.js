@@ -310,6 +310,7 @@ const InquiryViewer = (props) => {
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
   const openConfirmPopup = useSelector(({ workspace }) => workspace.formReducer.openConfirmPopup);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
+  const oldDataCdCmInq = useSelector(({ workspace }) => workspace.inquiryReducer.oldDataCdCmInq);
   const [isSaveComment, setSaveComment] = useState(false);
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
   const [submitLabel, setSubmitLabel] = useState(false);
@@ -317,6 +318,7 @@ const InquiryViewer = (props) => {
   const [isUploadFile, setIsUploadFile] = useState(false);
   const [isRemoveFile, setIsRemoveFile] = useState(false);
   const [disableSaveReply, setDisableSaveReply] = useState(false);
+  const [isDisableSaveCdCm, setDisableSaveCdCm] = useState(true);
   const [disableAcceptResolve, setDisableAcceptResolve] = useState(false);
   const [disableReopen, setDisableReopen] = useState(false);
   const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
@@ -333,6 +335,7 @@ const InquiryViewer = (props) => {
   const [disableCDCMAmendment, setDisableCDCMAmendment] = useState(true);
   const [getDataCD, setDataCD] = useState([]);
   const [getDataCM, setDataCM] = useState([]);
+  const [isHasEditCdCm, setHasEditCdCm] = useState(false);
   const [isResolveAndUpload, setIsResolveAndUpload] = useState(false);
   const socket = useContext(SocketContext);
 
@@ -437,28 +440,54 @@ const InquiryViewer = (props) => {
             // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
             // console.log(res)
             let filterCDCM = res;
-            if (containerCheck.includes(res[0].field)) {
+            let objCdCmData;
+            const filterOffshoreSent = filterCDCM[filterCDCM.length - 1];
+            const latestCdCmData = filterCDCM.find(el => el.type === 'ANS_CD_CM');
+            // console.log('filterOffshoreSent', filterOffshoreSent)
+            if (containerCheck.includes(question.field)) {
               setDisableCDCM(true);
               const cloneContent = JSON.parse(JSON.stringify(contentInqResolved));
-              if (isJsonText(res[0].content) && res[0].type === 'ANS_CD_CM') {
-                setContentCDCMInquiry({ ansId: res[0].id });
-                const parseJs = JSON.parse(res[0].content);
+              if (latestCdCmData && isJsonText(latestCdCmData.content) && latestCdCmData.type === 'ANS_CD_CM') {
+                setContentCDCMInquiry({ ansId: latestCdCmData.id });
+                const parseJs = JSON.parse(latestCdCmData.content);
                 setDataCD(parseJs?.[getField(CONTAINER_DETAIL)]);
                 setDataCM(parseJs?.[getField(CONTAINER_MANIFEST)]);
+                //
+                objCdCmData = parseJs;
+                lastest.dataCdInq = parseJs?.[getField(CONTAINER_DETAIL)]
+                lastest.dataCmInq = parseJs?.[getField(CONTAINER_MANIFEST)]
+                if (latestCdCmData.state === 'REP_A_DRF') {
+                  setHasEditCdCm(true);
+                }
                 filterCDCM = res.filter((r, i) => i !== 0);
               } else {
                 setDataCD(cloneContent?.[getField(CONTAINER_DETAIL)]);
                 setDataCM(cloneContent?.[getField(CONTAINER_MANIFEST)]);
+                //
+                objCdCmData = {
+                  [getField(CONTAINER_DETAIL)]: cloneContent?.[getField(CONTAINER_DETAIL)],
+                  [getField(CONTAINER_MANIFEST)]: cloneContent?.[getField(CONTAINER_MANIFEST)],
+                }
               }
             }
             // filter comment
-            const filterOffshoreSent = filterCDCM[filterCDCM.length - 1];
             if (containerCheck.includes(question.field)) {
               if (['REOPEN_A', 'REOPEN_Q', 'COMPL', 'UPLOADED'].includes(filterOffshoreSent.state)) {
                 const parseJs = JSON.parse(filterOffshoreSent.content);
                 setDataCD(parseJs?.[getField(CONTAINER_DETAIL)]);
                 setDataCM(parseJs?.[getField(CONTAINER_MANIFEST)]);
               }
+
+              let contentOld = '';
+              if (filterOffshoreSent.type === 'ANS' && filterOffshoreSent.answerObj && filterOffshoreSent.answerObj.length) {
+                contentOld = filterOffshoreSent.answerObj[0].content
+              } else if (filterOffshoreSent.type === 'REP') {
+                contentOld = filterOffshoreSent.content;
+              }
+              lastest.oldData = {
+                cdCmDataOld: objCdCmData,
+                contentOld
+              };
             }
             if (filterOffshoreSent.type === 'REP' && filterOffshoreSent.state === 'COMPL') {
               setInqAnsId(filterOffshoreSent.id);
@@ -468,6 +497,7 @@ const InquiryViewer = (props) => {
             lastest.mediaFilesAnswer = filterOffshoreSent.answersMedia;
             lastest.answerObj = filterOffshoreSent.answerObj;
             lastest.content = filterOffshoreSent.content;
+            lastest.type = filterOffshoreSent.type;
             lastest.status = filterOffshoreSent.status;
             lastest.sentAt = filterOffshoreSent.sentAt;
             lastest.name = "";
@@ -509,6 +539,7 @@ const InquiryViewer = (props) => {
                   setShowLabelSent(true);
                   setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
                   setStateReplyDraft(true);
+                  lastest.showIconReply = false;
                 } else if (filterOffshoreSent.state === 'REP_Q_DRF') {
                   setStateReplyDraft(true);
                   setShowLabelSent(false);
@@ -532,7 +563,8 @@ const InquiryViewer = (props) => {
                     setShowLabelSent(true);
                   }
                 }
-              } else {
+              }
+              else {
                 if (filterOffshoreSent.state === 'REP_A_DRF') {
                   setStateReplyDraft(true);
                   setSubmitLabel(false);
@@ -2010,6 +2042,41 @@ const InquiryViewer = (props) => {
     }
   }
 
+  const isEditedReplyCDCM = () => {
+    let contentCDCM = {};
+    if (containerCheck.includes(question.field)) {
+      if (user.role === 'Guest') {
+        contentCDCM = {
+          [getField(CONTAINER_DETAIL)]: getDataCD,
+          [getField(CONTAINER_MANIFEST)]: getDataCM
+        };
+        if (Object.keys(oldDataCdCmInq).length) {
+          if (JSON.stringify(oldDataCdCmInq.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
+            setDisableSaveCdCm(false);
+          }
+        } else {
+          setDisableSaveCdCm(true);
+        }
+      }
+      if ((question.type === 'REP' || (user.role === 'Admin' && question.state ===  'ANS_SENT'))
+          && Object.keys(tempReply).length
+          && question.oldData
+          && Object.keys(question.oldData).length) {
+        if (tempReply.answer.content === '') {
+          setDisableSaveCdCm(true);
+        } else if (question.oldData.contentOld !== tempReply.answer.content) {
+          setDisableSaveCdCm(false);
+        } else {
+          setDisableSaveCdCm(true);
+        }
+      }
+    }
+  }
+
+  useEffect(() => {
+    isEditedReplyCDCM();
+  }, [getDataCD, getDataCM, tempReply]);
+
   const onSaveReply = async () => {
     setDisableSaveReply(true);
     setPristine()
@@ -2047,23 +2114,42 @@ const InquiryViewer = (props) => {
       // Add
       if (!tempReply.answer?.id) {
         let answerCDCM = {};
+        let contentReply;
+        let replyType;
+        let inqAns;
         if (containerCheck.includes(question.field) && user.role === 'Guest') {
           const contentCDCM = {
             [getField(CONTAINER_DETAIL)]: getDataCD,
             [getField(CONTAINER_MANIFEST)]: getDataCM
           };
           answerCDCM.content = JSON.stringify(contentCDCM);
-          answerCDCM.type = tempReply.answer.type;
+          answerCDCM.type = metadata.ans_type['paragraph'];
+          if (!Object.keys(tempReply).length) {
+            replyType = metadata.ans_type['paragraph'];
+            inqAns = {
+              inquiry: question.id,
+              confirm: false,
+              type: 'REP'
+            }
+            contentReply = ''
+          }
         }
+        if (Object.keys(tempReply).length) {
+          replyType = tempReply?.answer.type;
+          inqAns = tempReply?.inqAns;
+          contentReply = ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT);
+        }
+
         const reqReply = {
-          inqAns: tempReply.inqAns,
+          inqAns,
           answer: {
-            content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
-            type: tempReply.answer.type
+            content: contentReply,
+            type: replyType
           },
           answerCDCM,
           mediaFiles: mediaListId
         };
+        console.log('reqReply', reqReply)
         saveReply({ ...reqReply })
           .then((res) => {
             //
@@ -2096,6 +2182,7 @@ const InquiryViewer = (props) => {
           }).catch((error) => handleError(dispatch, error));
       } else {
         let answerCDCM = {};
+        let contentReply;
         if (containerCheck.includes(question.field) && Object.keys(getContentCDCMInquiry).length && user.role === 'Guest') {
           const contentCDCM = {
             [getField(CONTAINER_DETAIL)]: getDataCD,
@@ -2103,10 +2190,15 @@ const InquiryViewer = (props) => {
           };
           answerCDCM.content = JSON.stringify(contentCDCM);
           answerCDCM.ansCDCMId = getContentCDCMInquiry.ansId;
+          if (Object.keys(tempReply).length) {
+            contentReply = ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim()) : (tempReply.answer.content)
+          }
+        } else {
+          contentReply = ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT);
         }
         // Edit
         const reqReply = {
-          content: ['string'].includes(typeof tempReply.answer.content) ? (tempReply.answer.content.trim() || ONLY_ATT) : (tempReply.answer.content || ONLY_ATT),
+          content: contentReply,
           mediaFiles: mediaListId.map(media => media.id),
           answerCDCM,
           mediaRest
@@ -2282,6 +2374,17 @@ const InquiryViewer = (props) => {
       setDisableCDCM(false);
       setDisableCDCMAmendment(false);
     }
+    if (containerCheck.includes(q.field)) {
+      if (Object.keys(q.oldData).length) {
+        dispatch(InquiryActions.setOldDataCdCm(q.oldData));
+      }
+      if (q.dataCdInq && Object.keys(q.dataCdInq).length) {
+        dispatch(InquiryActions.setDataCdInq(q.dataCdInq));
+      }
+      if (q.dataCmInq && Object.keys(q.dataCmInq).length) {
+        dispatch(InquiryActions.setDataCmInq(q.dataCmInq));
+      }
+    }
     if (['OPEN', 'INQ_SENT'].includes(q.state)) {
       const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
       //
@@ -2314,7 +2417,18 @@ const InquiryViewer = (props) => {
       setDisableCDCM(false);
       setDisableCDCMAmendment(false);
     }
-    if (['ANS_DRF', 'ANS_SENT'].includes(question.state) || (user.role === 'Guest' && ['REP_Q_DRF'].includes(question.state))) {
+    if (containerCheck.includes(q.field)) {
+      if (Object.keys(q.oldData).length) {
+        dispatch(InquiryActions.setOldDataCdCm(q.oldData));
+      }
+      if (q.dataCdInq && Object.keys(q.dataCdInq).length) {
+        dispatch(InquiryActions.setDataCdInq(q.dataCdInq));
+      }
+      if (q.dataCmInq && Object.keys(q.dataCmInq).length) {
+        dispatch(InquiryActions.setDataCmInq(q.dataCmInq));
+      }
+    }
+    if (['ANS_DRF', 'ANS_SENT'].includes(question.state) || (user.role === 'Guest' && ['REP_Q_DRF'].includes(question.state)) || (isHasEditCdCm && question.type !== 'REP')) {
       optionsInquires[editedIndex].showIconEdit = false;
       optionsInquires[editedIndex].showIconReply = false;
       optionsInquires[editedIndex].showIconAttachReplyFile = false;
@@ -2822,8 +2936,12 @@ const InquiryViewer = (props) => {
                     }
                   </> :
                   <ContainerDetailInquiry
-                    setDataCD={(value) => setDataCD(value)}
-                    setDataCM={(value) => setDataCM(value)}
+                    setDataCD={(value) => {
+                      setDataCD(value)
+                    }}
+                    setDataCM={(value) => {
+                      setDataCM(value)
+                    }}
                     getDataCD={getDataCD}
                     getDataCM={getDataCM}
                     disableInput={disableCDCMInquiry}
@@ -2844,11 +2962,9 @@ const InquiryViewer = (props) => {
                       whiteSpace: 'pre-wrap'
                     }}>
                     {/* Check is amendment JSON */}
-                    {((question.content !== null) && isJsonText(question.content)) ?
-                      `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` :
-                      `${renderContent(question.content)}`
-                    }
-                    {(['OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(question.state) &&
+                    {((question.content !== null && isJsonText(question.content)) ? `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` : `${renderContent(question.content)}`
+                    )}
+                    {((['OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT', 'REP_A_DRF'].includes(question.state) && question.type !== 'REP') &&
                       question.inqGroup &&
                       question.inqGroup.length &&
                       question.process === 'pending') ?
@@ -2928,8 +3044,12 @@ const InquiryViewer = (props) => {
               && containerCheck.includes(question.field)
               && (
                 <ContainerDetailInquiry
-                  setDataCD={(value) => setDataCD(value)}
-                  setDataCM={(value) => setDataCM(value)}
+                  setDataCD={(value) => {
+                    setDataCD(value)
+                  }}
+                  setDataCM={(value) => {
+                    setDataCM(value)
+                  }}
                   getDataCD={getDataCD}
                   getDataCM={getDataCM}
                   disableInput={disableCDCMInquiry}
@@ -3227,7 +3347,8 @@ const InquiryViewer = (props) => {
                                   )
                               ))
                             )
-                            || ((!question.state.includes("AME_DRF") && (!question.state.includes("AME_SENT") || user.role !== 'Guest')) && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0))
+                            || (!containerCheck.includes(question.field) ?
+                                ((!question.state.includes("AME_DRF") && (!question.state.includes("AME_SENT") || user.role !== 'Guest')) && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0)) : isDisableSaveCdCm)
                             || disableSaveReply
                             || isValidDate
                           }

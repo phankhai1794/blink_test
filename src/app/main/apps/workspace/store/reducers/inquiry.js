@@ -10,6 +10,7 @@ const initialState = {
   content: {},
   getDataCDInq: [],
   getDataCMInq: [],
+  oldDataCdCmInq: {},
   currentEditInq: null,
   currentAmendment: undefined,
   displayCmt: false,
@@ -170,6 +171,9 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SET_DATA_CD_INQ: {
     return { ...state, getDataCDInq: action.state };
+  }
+  case Actions.SET_OLD_DATA_CD_CM_INQ: {
+    return { ...state, oldDataCdCmInq: action.state };
   }
   case Actions.SET_CANCEL_AME_POPUP: {
     return { ...state, cancelAmePopup: action.state };
