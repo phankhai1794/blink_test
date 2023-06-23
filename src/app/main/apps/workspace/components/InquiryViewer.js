@@ -1394,9 +1394,7 @@ const InquiryViewer = (props) => {
       setIsResolve(true);
     }
 
-    if (fieldsNotSendOPUS.includes(metadata['field_options'].find(f => f.value === question.field).keyword))
-      setIsResolveAndUpload(true);
-    else setIsResolveAndUpload(hasUpload);
+    setIsResolveAndUpload(hasUpload);
 
     if (containerCheck.includes(question.field)) {
       setShowViewAll(false);
