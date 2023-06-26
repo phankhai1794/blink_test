@@ -12,7 +12,6 @@ import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, va
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
-import { useUnsavedChangesWarning } from 'app/hooks';
 import { sendmailResolve } from 'app/services/mailService';
 import {
   CONSIGNEE,
@@ -274,7 +273,6 @@ const InquiryViewer = (props) => {
   const classes = useStyles();
   const [filepaste, setFilepaste] = useState('');
   const [dropfiles, setDropfiles] = useState([]);
-  const [_, setDirty, setPristine] = useUnsavedChangesWarning();
 
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
@@ -422,14 +420,14 @@ const InquiryViewer = (props) => {
       if (['INQ', 'ANS'].includes(question.type) && ['INQ_SENT', 'REOPEN_A', 'REOPEN_Q'].includes(question.state)) {
         onReply(question)
         setAllowEdit(true);
-        dispatch(FormActions.eventClickContNo({status: false, questionId: ''}));
+        dispatch(FormActions.eventClickContNo({ status: false, questionId: '' }));
       } else if (!['COMPL', 'UPLOADED'].includes(question.state)) {
         if (['INQ', 'ANS', 'REP'].includes(question.type)) {
           const optionsInquires = [...inquiries];
           const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
           const currentEditInq = optionsInquires[editedIndex];
           if (question.answerObj && question.answerObj.length && ['INQ', 'ANS'].includes(question.type)) {
-            currentEditInq.paragraphAnswer = {content: question.answerObj[0].content, inquiry: question.id}
+            currentEditInq.paragraphAnswer = { content: question.answerObj[0].content, inquiry: question.id };
             dispatch(InquiryActions.setInquiries(optionsInquires));
           } else if (['REP'].includes(question.type) && question.state !== 'REP_Q_SENT') {
             const reqReply = {
@@ -449,7 +447,7 @@ const InquiryViewer = (props) => {
         }
         handleEdit(question)
         setAllowEdit(true);
-        dispatch(FormActions.eventClickContNo({status: false, questionId: ''}));
+        dispatch(FormActions.eventClickContNo({ status: false, questionId: '' }));
       }
     }
   }, [eventClickContNo, eventClickContNo.status])
@@ -1866,7 +1864,7 @@ const InquiryViewer = (props) => {
     setDisableCDCM(true);
     dispatch(InquiryActions.setCancelAmePopup(!cancelAmePopup));
     // setTempReply({});
-    setPristine()
+    dispatch(FormActions.setDirtyReload({ inputReply: false }));
   };
 
   const inputText = (e, isDate = false) => {
@@ -1882,11 +1880,11 @@ const InquiryViewer = (props) => {
     } else {
       setTextResolve(e.target.value);
     }
-    setDirty()
+    dispatch(FormActions.setDirtyReload({ inputReply: true }));
   };
 
   const inputTextSeparate = (e, type) => {
-    setDirty()
+    dispatch(FormActions.setDirtyReload({ inputReply: true }));
     !validateInput?.isValid && dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     setTextResolveSeparate(Object.assign({}, textResolveSeparate, { [type]: e.target.value }));
   };
@@ -1924,7 +1922,7 @@ const InquiryViewer = (props) => {
       }
     };
     setTempReply({ ...tempReply, ...reqReply });
-    setDirty()
+    dispatch(FormActions.setDirtyReload({ inputReply: true }));
   };
 
   const getType = (type) => {
@@ -2088,14 +2086,28 @@ const InquiryViewer = (props) => {
           [getField(CONTAINER_MANIFEST)]: getDataCM
         };
         // check edited content cd cm
-        if (question.oldData && Object.keys(question.oldData).length && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)) {
+        if (
+          question.oldData
+          && Object.keys(question.oldData).length
+          && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
+        ) {
+          setDisableSaveCdCm(true);
+        }
+        // check edited content cd cm
+        if (
+          question.oldData
+          && Object.keys(question.oldData).length
+          && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
+        ) {
           setDisableSaveCdCm(true);
         }
         // check empty content input
-        if ((Object.keys(tempReply).length
-            && question.oldData
-            && Object.keys(question.oldData).length)
-            && question.oldData.contentOld === tempReply.answer.content) {
+        if (
+          Object.keys(tempReply).length
+          && question.oldData
+          && Object.keys(question.oldData).length
+          && question.oldData.contentOld === tempReply.answer.content
+        ) {
           setDisableSaveCdCm(true);
         }
         if (tempReply && Object.keys(tempReply).length && tempReply.answer.content === '') {
@@ -2106,18 +2118,21 @@ const InquiryViewer = (props) => {
             setDisableSaveCdCm(false);
           }
         }
-        if (Object.keys(tempReply).length
-            && question.oldData
-            && Object.keys(question.oldData).length) {
+        if (
+          Object.keys(tempReply).length
+          && question.oldData
+          && Object.keys(question.oldData).length
+        ) {
           if (question.oldData.contentOld !== tempReply.answer.content) {
             setDisableSaveCdCm(false);
           }
         }
       }
-      else if ((question.type === 'REP' || (user.role === 'Admin' && question.state ===  'ANS_SENT'))
-          && Object.keys(tempReply).length
-          && question.oldData
-          && Object.keys(question.oldData).length) {
+      else if (
+        (question.type === 'REP' || (user.role === 'Admin' && question.state === 'ANS_SENT'))
+        && Object.keys(tempReply).length
+        && question.oldData
+        && Object.keys(question.oldData).length) {
         if (tempReply.answer.content === '') {
           setDisableSaveCdCm(true);
         } else if (question.oldData.contentOld !== tempReply.answer.content) {
@@ -2135,7 +2150,7 @@ const InquiryViewer = (props) => {
 
   const onSaveReply = async () => {
     setDisableSaveReply(true);
-    setPristine()
+    dispatch(FormActions.setDirtyReload({ inputReply: false }))
     const mediaListId = [];
     let mediaListAmendment = [];
     const mediaRest = [];
@@ -2409,6 +2424,7 @@ const InquiryViewer = (props) => {
   }
 
   const cancelReply = (q) => {
+    dispatch(FormActions.setDirtyReload({ inputReply: false }));
     setDisableCDCM(true);
     setDisableCDCMAmendment(true);
     dispatch(InquiryActions.setReply(false));
@@ -3270,7 +3286,7 @@ const InquiryViewer = (props) => {
                         }
                         color="primary"
                         onClick={() => {
-                          setPristine()
+                          dispatch(FormActions.setDirtyReload({ inputReply: false }));
                           setDisableAcceptResolve(true);
                           !validateInput?.isValid ? onConfirm() : handleValidateInput('RESOLVE', onConfirm)
                         }}
@@ -3283,8 +3299,8 @@ const InquiryViewer = (props) => {
                           variant="contained"
                           color="primary"
                           onClick={() => {
-                            setPristine()
-                            !validateInput?.isValid ? onConfirm(true) : handleValidateInput('RESOLVE', onConfirm, true)
+                            dispatch(FormActions.setDirtyReload({ inputReply: false }));
+                            !validateInput?.isValid ? onConfirm(true) : handleValidateInput('RESOLVE', onConfirm, true);
                           }}
                           classes={{ root: clsx(classes.button) }}>
                           Accept & Wrap Text
@@ -3404,10 +3420,21 @@ const InquiryViewer = (props) => {
                                   )
                               ))
                             )
-                            || (!containerCheck.includes(question.field) ?
-                                ((!question.state.includes("AME_DRF") && (!question.state.includes("AME_SENT") || user.role !== 'Guest')) && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content) && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0)) : isDisableSaveCdCm)
-                            || disableSaveReply
-                            || isValidDate
+                            ||
+                            (
+                              !containerCheck.includes(question.field) ?
+                                (
+                                  !question.state.includes("AME_DRF")
+                                  && (!question.state.includes("AME_SENT") || user.role !== 'Guest')
+                                  && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content)
+                                  && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0)
+                                ) :
+                                isDisableSaveCdCm
+                            )
+                            ||
+                            disableSaveReply
+                            ||
+                            isValidDate
                           }
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
@@ -3458,6 +3485,7 @@ const InquiryViewer = (props) => {
 
 export const ContainerDetailFormOldVersion = ({ container, originalValues, question, setTextResolve, disableInput = false, validation, setDirty }) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Invalid number' }
@@ -3515,7 +3543,7 @@ export const ContainerDetailFormOldVersion = ({ container, originalValues, quest
 
     setValues(temp);
     setTextResolve(temp);
-    setDirty()
+    dispatch(FormActions.setDirtyReload({ inputReply: true }));
   };
 
   useEffect(() => {

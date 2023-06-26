@@ -29,7 +29,6 @@ import { getUpdatedAtAnswer, saveInquiry, updateInquiry } from 'app/services/inq
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
-import { useUnsavedChangesWarning } from 'app/hooks'
 import { useDropzone } from 'react-dropzone';
 import ContentEditable from 'react-contenteditable';
 import clone from 'lodash/clone';
@@ -282,7 +281,6 @@ const InquiryEditor = (props) => {
   const [contentEdited, setContentEdited] = useState(valueType?.label);
   const [isDisabled, setDisabled] = useState(false);
   const [prevField, setPrevField] = useState('');
-  const [_, setDirty, setPristine] = useUnsavedChangesWarning();
   const [anchorEl, setAnchorEl] = useState(null);
   const [templateList, setTemplateList] = useState([]);
   const [template, setTemplate] = useState(valueType?.value || '0');
@@ -438,6 +436,7 @@ const InquiryEditor = (props) => {
   }
 
   useEffect(() => {
+    dispatch(FormActions.setDirtyReload({ createInq: true }))
     if (valueType?.value) {
       const filter = metadata.template.find(({ field, type }) => type === valueType.value && fieldValue.keyword === field);
       setTemplateList(filter?.content || []);
@@ -465,6 +464,7 @@ const InquiryEditor = (props) => {
       setValueAnsType(optionsAnsType);
       dispatch(InquiryActions.setEditInq(inq));
     }
+    return () => dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false, createInq: false }))
   }, []);
 
   useEffect(() => {
@@ -687,7 +687,7 @@ const InquiryEditor = (props) => {
     dispatch(InquiryActions.validate({ ...valid, content: inq.content }));
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
-    setDirty()
+    dispatch(FormActions.setDirtyReload({ inputInquiryEditor: true }))
   };
 
   const handleAnswerTypeChange = (e) => {
@@ -1133,7 +1133,7 @@ const InquiryEditor = (props) => {
         })
         .catch((error) => handleError(dispatch, error));
     }
-    setPristine()
+    dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false }))
   };
 
   const onPaste = (e) => {

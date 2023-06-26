@@ -15,7 +15,7 @@ import {
   CM_MEASUREMENT
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
-import {useDispatch, useSelector} from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Icon,
   IconButton,
@@ -32,9 +32,9 @@ import { makeStyles } from '@material-ui/styles';
 import { formatContainerNo, NumberFormat } from '@shared';
 
 import EllipsisPopper from '../shared-components/EllipsisPopper';
+import * as FormActions from '../store/actions/form';
 
 import AmendmentPopup from './AmendmentPopup';
-import * as FormActions from "../store/actions/form";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -67,6 +67,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const user = useSelector(({ user }) => user);
   const originValueCancel = useSelector(({ workspace }) => workspace.inquiryReducer.originValueCancel);
   const classes = useStyles();
+  const dispatch = useDispatch();
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -89,10 +90,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const [anchorEl, setAnchorEl] = useState(null);
   const [arrowRef, setArrowRef] = useState(null);
   const [isSave, setSaveCDCM] = useState(false);
-  const dispatch = useDispatch();
 
-  const CDTitle = CONTAINER_LIST.cd
-  const CMTitle = user.role === 'Guest' ? [CONTAINER_NUMBER, ...CONTAINER_LIST.cm].filter(item => ![HS_CODE, HTS_CODE, NCM_CODE].includes(item)) : [CONTAINER_NUMBER, ...CONTAINER_LIST.cm]
+  const CDTitle = CONTAINER_LIST.cd;
+  const CMTitle = user.role === 'Guest' ? [CONTAINER_NUMBER, ...CONTAINER_LIST.cm].filter(item => ![HS_CODE, HTS_CODE, NCM_CODE].includes(item)) : [CONTAINER_NUMBER, ...CONTAINER_LIST.cm];
   const type = (container === CONTAINER_DETAIL) ? CDTitle : CMTitle;
 
   const sortValues = (vals) => {
@@ -218,6 +218,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
       setValueEdit(valueEdit);
     }
     handleEdit(false);
+    dispatch(FormActions.setDirtyReload({ inputAmendment: false }));
   }
 
   const checkPopover = (e, value) => {
