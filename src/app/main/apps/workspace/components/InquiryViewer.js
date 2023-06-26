@@ -311,6 +311,7 @@ const InquiryViewer = (props) => {
   const openConfirmPopup = useSelector(({ workspace }) => workspace.formReducer.openConfirmPopup);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
   const oldDataCdCmInq = useSelector(({ workspace }) => workspace.inquiryReducer.oldDataCdCmInq);
+  const eventClickContNo = useSelector(({ workspace }) => workspace.formReducer.eventClickContNo);
   const [isSaveComment, setSaveComment] = useState(false);
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
   const [submitLabel, setSubmitLabel] = useState(false);
@@ -332,6 +333,7 @@ const InquiryViewer = (props) => {
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const [isValidDate, setIsValidDate] = useState(false);
   const [disableCDCMInquiry, setDisableCDCM] = useState(true);
+  const [isAllowEdit, setAllowEdit] = useState(false);
   const [disableCDCMAmendment, setDisableCDCMAmendment] = useState(true);
   const [getDataCD, setDataCD] = useState([]);
   const [getDataCM, setDataCM] = useState([]);
@@ -416,6 +418,43 @@ const InquiryViewer = (props) => {
   }, [inqViewerFocus])
 
   useEffect(() => {
+    if (eventClickContNo.status && eventClickContNo.questionId === question.id && user.role === 'Guest') {
+      if (['INQ', 'ANS'].includes(question.type) && ['INQ_SENT', 'REOPEN_A', 'REOPEN_Q'].includes(question.state)) {
+        onReply(question)
+        setAllowEdit(true);
+        dispatch(FormActions.eventClickContNo({status: false, questionId: ''}));
+      } else if (!['COMPL', 'UPLOADED'].includes(question.state)) {
+        if (['INQ', 'ANS', 'REP'].includes(question.type)) {
+          const optionsInquires = [...inquiries];
+          const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
+          const currentEditInq = optionsInquires[editedIndex];
+          if (question.answerObj && question.answerObj.length && ['INQ', 'ANS'].includes(question.type)) {
+            currentEditInq.paragraphAnswer = {content: question.answerObj[0].content, inquiry: question.id}
+            dispatch(InquiryActions.setInquiries(optionsInquires));
+          } else if (['REP'].includes(question.type) && question.state !== 'REP_Q_SENT') {
+            const reqReply = {
+              inqAns: {
+                inquiry: question.id,
+                confirm: false,
+                type: 'REP'
+              },
+              answer: {
+                id: question.answerId,
+                content: question.content,
+                type: metadata.ans_type['paragraph']
+              }
+            };
+            setTempReply({ ...tempReply, ...reqReply, mediaFiles: question.mediaFile || [] });
+          }
+        }
+        handleEdit(question)
+        setAllowEdit(true);
+        dispatch(FormActions.eventClickContNo({status: false, questionId: ''}));
+      }
+    }
+  }, [eventClickContNo, eventClickContNo.status])
+
+  useEffect(() => {
     setQuestion(props.question);
 
     // sync state - refresh after syncing data
@@ -442,8 +481,7 @@ const InquiryViewer = (props) => {
             let filterCDCM = res;
             let objCdCmData;
             const filterOffshoreSent = filterCDCM[filterCDCM.length - 1];
-            const latestCdCmData = filterCDCM.find(el => el.type === 'ANS_CD_CM');
-            // console.log('filterOffshoreSent', filterOffshoreSent)
+            const latestCdCmData = [...res].reverse().find(el => el.type === 'ANS_CD_CM');
             if (containerCheck.includes(question.field)) {
               setDisableCDCM(true);
               const cloneContent = JSON.parse(JSON.stringify(contentInqResolved));
@@ -483,6 +521,7 @@ const InquiryViewer = (props) => {
                 contentOld = filterOffshoreSent.answerObj[0].content
               } else if (filterOffshoreSent.type === 'REP') {
                 contentOld = filterOffshoreSent.content;
+                lastest.answerId = filterOffshoreSent.id;
               }
               lastest.oldData = {
                 cdCmDataOld: objCdCmData,
@@ -2048,29 +2087,29 @@ const InquiryViewer = (props) => {
           [getField(CONTAINER_DETAIL)]: getDataCD,
           [getField(CONTAINER_MANIFEST)]: getDataCM
         };
-        if (Object.keys(oldDataCdCmInq).length) {
-          if (JSON.stringify(oldDataCdCmInq.cdCmDataOld) === JSON.stringify(contentCDCM)) {
-            setDisableSaveCdCm(true);
-          }
+        // check edited content cd cm
+        if (question.oldData && Object.keys(question.oldData).length && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)) {
+          setDisableSaveCdCm(true);
         }
+        // check empty content input
         if ((Object.keys(tempReply).length
             && question.oldData
-            && Object.keys(question.oldData).length)) {
-          if (question.oldData.contentOld === tempReply.answer.content) {
-            setDisableSaveCdCm(true);
-          }
+            && Object.keys(question.oldData).length)
+            && question.oldData.contentOld === tempReply.answer.content) {
+          setDisableSaveCdCm(true);
         }
-        if (Object.keys(oldDataCdCmInq).length) {
-          if (JSON.stringify(oldDataCdCmInq.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
+        if (tempReply && Object.keys(tempReply).length && tempReply.answer.content === '') {
+          setDisableSaveCdCm(true);
+        }
+        if (question.oldData && Object.keys(question.oldData).length) {
+          if (JSON.stringify(question.oldData.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
             setDisableSaveCdCm(false);
           }
         }
         if (Object.keys(tempReply).length
             && question.oldData
             && Object.keys(question.oldData).length) {
-          if (tempReply.answer.content === '') {
-            setDisableSaveCdCm(true);
-          } else if (question.oldData.contentOld !== tempReply.answer.content) {
+          if (question.oldData.contentOld !== tempReply.answer.content) {
             setDisableSaveCdCm(false);
           }
         }
@@ -2092,7 +2131,7 @@ const InquiryViewer = (props) => {
 
   useEffect(() => {
     isEditedReplyCDCM();
-  }, [getDataCD, getDataCM, tempReply]);
+  }, [getDataCD, getDataCM, tempReply, question.oldData]);
 
   const onSaveReply = async () => {
     setDisableSaveReply(true);
@@ -2166,7 +2205,6 @@ const InquiryViewer = (props) => {
           answerCDCM,
           mediaFiles: mediaListId
         };
-        console.log('reqReply', reqReply)
         saveReply({ ...reqReply })
           .then((res) => {
             //
@@ -2334,14 +2372,14 @@ const InquiryViewer = (props) => {
             optionsInquires[editedIndex].mediaFile = mediaListAmendment;
             optionsInquires[editedIndex].createdAt = res.createdAt;
             setDisableSaveReply(false);
-
+            const fieldUpdate = containerCheck[0] === question.field ? containerCheck[1] : containerCheck[0];
             if (question.state.includes('AME_')) {
-              newDrfRepContent = { ...content, [res.newAmendment?.field]: newContent }
+              newDrfRepContent = { ...content, [res.newAmendment?.field]: newContent, [fieldUpdate]: res.contentIsMap }
               contentCDCM = tempReply.answer.content;
               optionsInquires[editedIndex].state = 'AME_DRF';
             } else {
               if (user.role === 'Guest') {
-                newDrfRepContent = { ...content, [question.field]: question.contentReplyCDCM };
+                newDrfRepContent = { ...content, [question.field]: question.contentReplyCDCM, [fieldUpdate]: res.contentIsMap };
               }
               contentCDCM = question.contentReplyCDCM;
               optionsInquires[editedIndex].state = 'REP_DRF';
@@ -2350,7 +2388,7 @@ const InquiryViewer = (props) => {
             setIsResolveCDCM(false);
             dispatch(InquiryActions.setInquiries(optionsInquires));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
-            // dispatch(InquiryActions.setContent(newDrfRepContent)); // field data is null after setContent -> need to discuss
+            dispatch(InquiryActions.setContent(newDrfRepContent)); // field data is null after setContent -> need to discuss
             props.getUpdatedAt();
 
             // sync edit amendment
@@ -2376,6 +2414,7 @@ const InquiryViewer = (props) => {
     dispatch(InquiryActions.setReply(false));
     setIsReply(false);
     setIsReplyCDCM(false);
+    setAllowEdit(false);
     const reply = { ...question };
     reply.mediaFilesAnswer = reply.mediaFile;
     reply.mediaFile = [];
@@ -2468,7 +2507,9 @@ const InquiryViewer = (props) => {
       dispatch(InquiryActions.setReply(true));
       setIsReply(true);
       setIsResolve(false);
-      reply.content = '';
+      if (!containerCheck.includes(reply.field)) {
+        reply.content = '';
+      }
       reply.mediaFilesAnswer = [];
       reply.mediaFile = [];
       reply.showIconAttachReplyFile = true;
@@ -2949,19 +2990,18 @@ const InquiryViewer = (props) => {
                             question.contentReplyCDCM = value;
                           }}
                           disableInput={(user.role === 'Guest') ? disableCDCMAmendment : (!isResolveCDCM && !isReplyCDCM)}
+                          currentQuestion={question}
                         />
                     }
                   </> :
                   <ContainerDetailInquiry
-                    setDataCD={(value) => {
-                      setDataCD(value)
-                    }}
-                    setDataCM={(value) => {
-                      setDataCM(value)
-                    }}
+                    setDataCD={(value) => setDataCD(value)}
+                    setDataCM={(value) => setDataCM(value)}
                     getDataCD={getDataCD}
                     getDataCM={getDataCM}
                     disableInput={disableCDCMInquiry}
+                    isAllowEdit={isAllowEdit}
+                    currentQuestion={question}
                   />
               ) :
                 (!['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL'].includes(question.state) ?
@@ -3011,6 +3051,7 @@ const InquiryViewer = (props) => {
                     question.contentReplyCDCM = value;
                   }}
                   disableInput={disableCDCMAmendment}
+                  currentQuestion={question}
                 />
               </div>
             ) : ``}
@@ -3061,15 +3102,13 @@ const InquiryViewer = (props) => {
               && containerCheck.includes(question.field)
               && (
                 <ContainerDetailInquiry
-                  setDataCD={(value) => {
-                    setDataCD(value)
-                  }}
-                  setDataCM={(value) => {
-                    setDataCM(value)
-                  }}
+                  setDataCD={(value) => setDataCD(value)}
+                  setDataCM={(value) => setDataCM(value)}
                   getDataCD={getDataCD}
                   getDataCM={getDataCM}
                   disableInput={disableCDCMInquiry}
+                  isAllowEdit={isAllowEdit}
+                  currentQuestion={question}
                 />
               )}
             <>
@@ -3208,6 +3247,7 @@ const InquiryViewer = (props) => {
                         }}
                         originalValues={Array.isArray(question.content) ? question.content : question.contentCDCM}
                         setTextResolve={setTextResolve}
+                        currentQuestion={question}
                       />
                     }
                   </>
