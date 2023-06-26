@@ -1088,7 +1088,7 @@ const InquiryViewer = (props) => {
           let cloneListCommentDraft = listCommentDraft.filter(({ id }) => id !== replyRemove.id);
           dispatch(InquiryActions.setListCommentDraft(cloneListCommentDraft));
           if (res) {
-            let newContent = {};
+            let newContent = { ...content };
             setEditOriginalAmendment(res.isEditOriginalAmendment);
             setViewDropDown('');
             setDisableSaveReply(false);
@@ -1642,7 +1642,7 @@ const InquiryViewer = (props) => {
 
           let newContent = { ...content };
           // sync content amendment
-          if (optionsInquires[editedIndex].receiver?.[0].toUpperCase() === "ONSHORE") {
+          if (optionsInquires[editedIndex]?.receiver?.[0].toUpperCase() === "ONSHORE") {
             newContent = JSON.parse(sessionStorage.getItem("content"));
           }
 
@@ -1673,13 +1673,13 @@ const InquiryViewer = (props) => {
 
           // sync content amendment
           // save onshore's content into sessionStorage
-          if (optionsInquires[editedIndex].receiver?.[0].toUpperCase() === "ONSHORE") {
+          if (optionsInquires[editedIndex]?.receiver?.[0].toUpperCase() === "ONSHORE") {
             sessionStorage.setItem('content', JSON.stringify(newContent));
           }
           // sync resolve inquiry / amendment
           syncData(
             { inquiries: optionsInquires, content: newContent, listMinimize },
-            optionsInquires[editedIndex].receiver?.[0].toUpperCase() || "CUSTOMER" // if receiver is undefined -> customer amendment
+            optionsInquires[editedIndex]?.receiver?.[0].toUpperCase() || "CUSTOMER" // if receiver is undefined -> customer amendment
           );
 
           // Case click btn: Resolve & Upload
@@ -1843,7 +1843,7 @@ const InquiryViewer = (props) => {
           // sync upload inquiry / amendment
           syncData(
             { inquiries: optionsInquires },
-            optionsInquires[editedIdx].receiver?.[0].toUpperCase() || "CUSTOMER"
+            optionsInquires[editedIdx]?.receiver?.[0].toUpperCase() || "CUSTOMER"
           );
         }
         props.getUpdatedAt();
