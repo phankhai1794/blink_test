@@ -5,9 +5,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import {CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT} from '@shared/keyword'
 import clsx from "clsx";
-import { useUnsavedChangesWarning } from 'app/hooks';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
 
 import UserInfo from './UserInfo';
 
@@ -51,7 +51,6 @@ const ParagraphAnswer = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
   });
   const dispatch = useDispatch();
-  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
 
   const [paragraphText, setParagraphText] = useState(question.answerObj && question.answerObj.length ? question.answerObj[0]?.content : '');
@@ -75,7 +74,7 @@ const ParagraphAnswer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     optionsInquires[editedIndex].paragraphAnswer = body;
     dispatch(InquiryActions.setInquiries(optionsInquires));
-    setDirty();
+    dispatch(FormActions.setDirtyReload({ inputParagraphAnswer: true }));
   };
 
   useEffect(() => {
@@ -93,7 +92,7 @@ const ParagraphAnswer = (props) => {
       } else if (currentQuestion.answerObj && currentQuestion.answerObj.length) {
         setParagraphText(currentQuestion.answerObj[0].content);
       }
-      setPristine();
+      dispatch(FormActions.setDirtyReload({ inputParagraphAnswer: false }));
     }
   }, [saveStatus, currentQuestion]);
 

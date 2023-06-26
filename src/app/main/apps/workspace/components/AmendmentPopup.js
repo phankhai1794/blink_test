@@ -33,13 +33,13 @@ import {
   mapUnit,
   CONTAINER_MANIFEST
 } from '@shared/keyword';
-import { useUnsavedChangesWarning } from 'app/hooks'
 import { packageUnits, weightUnits, measurementUnits, containerTypeUnit } from '@shared/units';
 import ClearIcon from '@material-ui/icons/Clear';
 import WindowedSelect from "react-windowed-select";
 import { formatContainerNo, formatNumber } from '@shared';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
 
 const useStyles = makeStyles((theme) => ({
   selectRoot: {
@@ -126,7 +126,6 @@ const AmendmentPopup = (props) => {
   const classes = useStyles();
   const dispatch = useDispatch();
 
-  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
@@ -186,14 +185,14 @@ const AmendmentPopup = (props) => {
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
     onClose('save');
-    setPristine()
+    dispatch(FormActions.setDirtyReload({ inputAmendment: false }));
     if (isInqCDCM) setSave();
   };
 
   const show = (value) => user.role === 'Admin';
 
   const handleChange = (field, value) => {
-    setDirty();
+    dispatch(FormActions.setDirtyReload({ inputAmendment: true }));
     let val = value;
     const id = field.id;
     if ([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(field.title) && !isNaN(value)) {
@@ -301,8 +300,8 @@ const AmendmentPopup = (props) => {
               value={inputSeal}
               onKeyDown={(e) => onKeyDown(e, value)}
               onChange={(e) => {
-                setInputSeal(e.target.value)
-                setDirty()
+                setInputSeal(e.target.value);
+                dispatch(FormActions.setDirtyReload({ inputAmendment: true }));
               }}
               onBlur={() => onAddition(value)}
             />

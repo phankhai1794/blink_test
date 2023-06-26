@@ -316,17 +316,6 @@ export default function Form(props) {
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
   };
-  const onUnload = (e) => {
-    e.preventDefault();
-    e.returnValue = '';
-  }
-
-  useEffect(() => {
-    if (currentEditInq || currentFieldAmend || reply) {
-      window.addEventListener("beforeunload", onUnload);
-    }
-    return () => window.removeEventListener("beforeunload", onUnload);
-  }, [currentEditInq, currentFieldAmend, reply])
 
   const handleClick = () => {
     if (!currentEditInq) {
