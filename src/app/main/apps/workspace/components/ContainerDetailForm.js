@@ -15,7 +15,7 @@ import {
   CM_MEASUREMENT
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   Icon,
   IconButton,
@@ -34,6 +34,7 @@ import { formatContainerNo, NumberFormat } from '@shared';
 import EllipsisPopper from '../shared-components/EllipsisPopper';
 
 import AmendmentPopup from './AmendmentPopup';
+import * as FormActions from "../store/actions/form";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -44,6 +45,14 @@ const useStyles = makeStyles(() => ({
     width: 250,
     padding: 15,
     boxShadow: '2px 2px 4px rgba(0, 0, 0, 0.15)'
+  },
+  actionCdCmStyle: {
+    '& .handleContNo': {
+      cursor: 'pointer'
+    },
+    '& .handleContNo:hover': {
+      color: '#BD0F72'
+    }
   }
 }))
 const isArray = (value) => {
@@ -51,7 +60,7 @@ const isArray = (value) => {
 }
 
 
-const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM, setAddContent }) => {
+const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM, setAddContent, setEventClickContNo, isAllowEdit, currentQuestion }) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
@@ -80,6 +89,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const [anchorEl, setAnchorEl] = useState(null);
   const [arrowRef, setArrowRef] = useState(null);
   const [isSave, setSaveCDCM] = useState(false);
+  const dispatch = useDispatch();
 
   const CDTitle = CONTAINER_LIST.cd
   const CMTitle = user.role === 'Guest' ? [CONTAINER_NUMBER, ...CONTAINER_LIST.cm].filter(item => ![HS_CODE, HTS_CODE, NCM_CODE].includes(item)) : [CONTAINER_NUMBER, ...CONTAINER_LIST.cm]
@@ -225,6 +235,15 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
   const handleArrorRef = (node) => setArrowRef(node);
 
+  const handleClickConNo = (vindex) => {
+    dispatch(FormActions.eventClickContNo({
+      status: true,
+      questionId: currentQuestion ? currentQuestion.id : ''
+    }));
+    setRowIndex(vindex)
+    handleEdit(true);
+  }
+
   return (
     <>
       <Drawer
@@ -238,7 +257,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           inqType={container}
           containerDetail={getValueField(CONTAINER_DETAIL)}
           data={valueEdit[rowIndex]}
-          isEdit={!disableInput}
+          isEdit={!disableInput || isAllowEdit}
           setSave={() => setSaveCDCM(true)}
           updateData={(value) => setValues(value)}
           updateEdit={(value) => setValueEdit(value)}
@@ -251,7 +270,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
         <span style={{ color: '#515E6A', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{popover.text}</span>
       </EllipsisPopper>
 
-      <div style={{ maxWidth: 880, overflowX: 'auto' }}>
+      <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
         <Table className='amend_table' aria-label="simple table" >
           <TableHead>
             <TableRow>
@@ -279,8 +298,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                       onMouseLeave={closePopover}
                     >
                       {i === 0 ?
-                        <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }} >
-                          <span>{value}</span>
+                        <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }} className={classes.actionCdCmStyle}>
+                          <span className={'handleContNo'} onClick={() => handleClickConNo(vindex)}>{value}</span>
                           <IconButton onClick={() => {
                             setRowIndex(vindex)
                             handleEdit(true);
