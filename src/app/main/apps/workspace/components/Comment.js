@@ -16,6 +16,7 @@ import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from "./ParagraphAnswer";
 import { ContainerDetailFormOldVersion } from './InquiryViewer';
 import ContainerDetailInquiry from "./ContainerDetailInquiry";
+import InquiryWithGroup from "./InquiryWithGroup";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -67,11 +68,12 @@ const useStyles = makeStyles(() => ({
 }));
 
 const Comment = (props) => {
-  const { question, comment, isDateTime } = props;
-  const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length - 1) : []);
+  const { question, comment, isDateTime, currentQuestion } = props;
+  const [comments, setComments] = useState(comment?.length ? comment : [])
+  const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
   const [anchorEl, setAnchorEl] = useState(null);
-  const classes = useStyles();
   const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
+  const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
 
   const user = useSelector(({ user }) => user);
@@ -97,7 +99,7 @@ const Comment = (props) => {
   const contentUI = ({ userName, createdAt, avatar, content, title, media, answersMedia, id, type, reply }) => {
     let dataCD = [];
     let dataCM = [];
-    if (reply.content && isJsonText(reply.content) && containerCheck.includes(reply.field) && reply.type === 'ANS_CD_CM') {
+    if (reply.content && isJsonText(reply.content) && containerCheck.includes(currentQuestion.field) && (reply.type === 'ANS_CD_CM' || ['COMPL', 'UPLOADED'].includes(reply.state))) {
       const parseJs = JSON.parse(reply.content);
       dataCD = parseJs?.[getField(CONTAINER_DETAIL)];
       dataCM = parseJs?.[getField(CONTAINER_MANIFEST)];
@@ -168,11 +170,12 @@ const Comment = (props) => {
               ) : <span className={'markReopen'}>Marked as reopened</span>
             ) :
             (
-              (containerCheck.includes(question.field) && (dataCD.length && dataCM.length)) ? (
+              (containerCheck.includes(question.field) && (dataCD && dataCM && dataCD.length && dataCM.length)) ? (
                 <ContainerDetailInquiry
                   getDataCD={dataCD}
                   getDataCM={dataCM}
                   disableInput={true}
+                  currentQuestion={currentQuestion}
                 />
               ) : (
                 <div
@@ -199,6 +202,18 @@ const Comment = (props) => {
                 </div>
               )
             )
+          }
+
+          {containerCheck.includes(currentQuestion.field)
+            && currentQuestion.inqGroup && currentQuestion.inqGroup.length
+            && ['ANS', 'INQ'].includes(reply.type)
+              ? currentQuestion.inqGroup.map(q => {
+              return (
+                <div key={q.id}>
+                  <InquiryWithGroup inqGroup={q} role={user.role} />
+                </div>
+              )
+            }) : ``
           }
 
           {<div style={{ display: 'block', margin: '1rem 0rem' }}>
