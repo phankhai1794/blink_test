@@ -6,6 +6,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { CONTAINER_MANIFEST, CONTAINER_DETAIL } from '@shared/keyword';
 import clsx from "clsx";
 
+import Diff from "../shared-components/react-diff";
+
 import ContainerDetailForm from './ContainerDetailForm';
 import UserInfo from './UserInfo';
 import ImageAttach from './ImageAttach';
@@ -67,12 +69,9 @@ const useStyles = makeStyles(() => ({
 const Comment = (props) => {
   const { question, comment, isDateTime } = props;
   const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length - 1) : []);
-  const [value, setValue] = useState('');
-  const [key, setKey] = useState();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [edit, setEdit] = useState('');
   const classes = useStyles();
-  const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
+  const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
 
   const user = useSelector(({ user }) => user);
@@ -108,6 +107,11 @@ const Comment = (props) => {
       dataCD = parseJs[getField(CONTAINER_DETAIL)];
       dataCM = parseJs[getField(CONTAINER_MANIFEST)];
     }
+
+    const renderContent = () => {
+      return (isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG'].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content
+    }
+
     return (
       <div key={id}>
         <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
@@ -185,7 +189,10 @@ const Comment = (props) => {
                 >
                   {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
                     <div className={reply.isChangeRecipient ? 'markReopen' : ''}>
-                      {(isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG'].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content}
+                      {['RESOLVED', 'COMPL'].includes(reply.state) ?
+                        <Diff inputA={orgContent[question.field]} inputB={renderContent()} type="lines" /> :
+                        renderContent()
+                      }
                     </div> :
                     (type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>)
                   }

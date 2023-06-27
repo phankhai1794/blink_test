@@ -12,7 +12,8 @@ import {
   CONTAINER_WEIGHT,
   CONTAINER_MEASUREMENT,
   CM_WEIGHT,
-  CM_MEASUREMENT
+  CM_MEASUREMENT,
+  CM_DESCRIPTION
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,14 +26,14 @@ import {
   TableHead,
   TableRow,
   Drawer,
-  Popper,
-  TextField
+  Popover
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { formatContainerNo, NumberFormat } from '@shared';
 
 import EllipsisPopper from '../shared-components/EllipsisPopper';
 import * as FormActions from '../store/actions/form';
+import Diff from "../shared-components/react-diff";
 
 import AmendmentPopup from './AmendmentPopup';
 
@@ -53,7 +54,13 @@ const useStyles = makeStyles(() => ({
     '& .handleContNo:hover': {
       color: '#BD0F72'
     }
-  }
+  },
+  iconHistory: {
+    cursor: 'pointer',
+    '&:hover': {
+      color: '#BD0F72'
+    }
+  },
 }))
 const isArray = (value) => {
   return Array.isArray(value) ? value.join(', ') : value;
@@ -87,7 +94,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const [rowIndex, setRowIndex] = useState(0);
   const [valueEdit, setValueEdit] = useState(originalData);
   const [popover, setPopover] = useState({ open: false, text: '' });
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [historyValue, setHistoryValue] = useState({ originalValue: '', value: '' })
+  const [anchorElHover, setAnchorElHover] = useState(null);
+  const [anchorElHistory, setAnchorElHistory] = useState(null);
   const [arrowRef, setArrowRef] = useState(null);
   const [isSave, setSaveCDCM] = useState(false);
 
@@ -181,7 +190,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     return total === 0 ? '' : NumberFormat(total, minFrac) + ` ${values[0][getType(mapUnit[name])] || ''}`;
   };
 
-  const combineValueUnit = (name, row) => {
+  const renderContent = (name, row) => {
     if (row) {
       let value = isArray(row[getType(name)]);
       if (value) {
@@ -205,8 +214,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const isValueChange = (key, index, row) => {
-    const originalValue = combineValueUnit(key, contentInqResolved[getField(container)]?.[index]);
-    return originalValue !== combineValueUnit(key, row) ? '#FEF4E6' : '';
+    const originalValue = renderContent(key, contentInqResolved[getField(container)]?.[index]);
+    return originalValue !== renderContent(key, row);
   }
 
   // TODO
@@ -224,13 +233,13 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const checkPopover = (e, value) => {
     const overflow = e.target.scrollWidth > e.target.clientWidth;
     if (overflow) {
-      setAnchorEl(e.currentTarget);
+      setAnchorElHover(e.currentTarget);
       setPopover({ open: true, text: value });
     }
   }
 
   const closePopover = () => {
-    setAnchorEl(null);
+    setAnchorElHover(null);
     setPopover({ open: false, text: '' });
   }
 
@@ -243,6 +252,18 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     }));
     setRowIndex(vindex)
     handleEdit(true);
+  }
+
+  const openHistory = (e, key, index, row) => {
+    setAnchorElHistory(e.currentTarget)
+    setHistoryValue({
+      originalValue: renderContent(key, contentInqResolved[getField(container)]?.[index]),
+      value: renderContent(key, row)
+    })
+  }
+
+  const closeHistory = () => {
+    setAnchorElHistory(null);
   }
 
   return (
@@ -266,12 +287,31 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           isInqCDCM={isInqCDCM}
         />
       </Drawer>
-      <EllipsisPopper anchorEl={anchorEl} arrowRef={arrowRef}>
+      <EllipsisPopper anchorEl={anchorElHover} arrowRef={arrowRef}>
         <div className='arrow' ref={handleArrorRef} />
         <span style={{ color: '#515E6A', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{popover.text}</span>
       </EllipsisPopper>
 
-      <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
+      <Popover
+        PaperProps={{
+          style: { width: 400, padding: '0px 20px' }
+        }}
+        open={Boolean(anchorElHistory)}
+        anchorEl={anchorElHistory}
+        onClose={closeHistory}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+      >
+        <Diff inputA={historyValue.originalValue} inputB={historyValue.value} type="lines" />
+      </Popover>
+
+      <div style={{ maxWidth: '100̀%', overflowX: 'auto' }}>
         <Table className='amend_table' aria-label="simple table" >
           <TableHead>
             <TableRow>
@@ -294,8 +334,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                     <TableCell
                       key={i}
                       className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'}
-                      style={{ backgroundColor: isValueChange(cell, vindex, row) }}
-                      onMouseEnter={(e) => checkPopover(e, combineValueUnit(cell, row))}
+                      style={{ backgroundColor: isValueChange(cell, vindex, row) ? '#FEF4E6' : '' }}
+                      onMouseEnter={(e) => checkPopover(e, renderContent(cell, row))}
                       onMouseLeave={closePopover}
                     >
                       {i === 0 ?
@@ -309,7 +349,20 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                               {disableInput ? 'visibility' : 'edit_mode'}
                             </Icon>
                           </IconButton>
-                        </div> : combineValueUnit(cell, row)
+                        </div> :
+                        <>
+                          {cell === CM_DESCRIPTION && isValueChange(cell, vindex, row) ?
+                            <div
+                              onMouseEnter={(e) => checkPopover(e, renderContent(cell, row))}
+                              onMouseLeave={closePopover}
+                              style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}
+                            >
+                              <span style={{ width: 160, textOverflow: 'ellipsis', overflow: 'hidden' }}>{renderContent(cell, row)}</span>
+                              {isValueChange(cell, vindex, row) && <Icon classes={{ root: classes.iconHistory }} onClick={(e) => openHistory(e, cell, vindex, row)}>history</Icon>}
+                            </div>
+                            : renderContent(cell, row)
+                          }
+                        </>
                       }
                     </TableCell>
                   )

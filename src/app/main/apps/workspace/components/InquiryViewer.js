@@ -3049,7 +3049,11 @@ const InquiryViewer = (props) => {
                         )
                       }) : ``}
                   </Typography> :
-                  <Diff inputA={renderContent(orgContent[question.field])} inputB={getNewValueDiffViewer(question.content)} type="words" />
+                  <Diff
+                    inputA={renderContent(orgContent[question.field])}
+                    inputB={getNewValueDiffViewer(question.content)}
+                    type="lines"
+                  />
                 )
             }
             {/*Allow edit table when customer reply amendment*/}
