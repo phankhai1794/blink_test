@@ -671,12 +671,12 @@ const InquiryViewer = (props) => {
                 listComments.splice(getIndexLatestCdCm , 1);
               }
               listComments.splice(0 , 1);
-              listComments = listComments.filter(l => {
-                if (l.type === 'ANS' && l.answerObj && l.answerObj.length) {
-                  return l.answerObj[0].content !== ''
-                }
-                return l.content !== undefined && l.content !== ''
-              })
+              // listComments = listComments.filter(l => {
+              //   if (l.type === 'ANS' && l.answerObj && l.answerObj.length) {
+              //     return l.answerObj[0].content !== ''
+              //   }
+              //   return l.content !== undefined && l.content !== ''
+              // })
             }
             if (filterCDCM.length === 1) {
               // setShowViewAll(false);
@@ -2503,7 +2503,7 @@ const InquiryViewer = (props) => {
       setDisableCDCMAmendment(false);
     }
     if (containerCheck.includes(q.field)) {
-      if (Object.keys(q.oldData).length) {
+      if (q.oldData && Object.keys(q.oldData).length) {
         dispatch(InquiryActions.setOldDataCdCm(q.oldData));
       }
       if (q.dataCdInq && Object.keys(q.dataCdInq).length) {
