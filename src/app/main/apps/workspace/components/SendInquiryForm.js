@@ -144,7 +144,7 @@ const SendInquiryForm = (props) => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const syncData = (data, syncOptSite = "") => {
-    // socket.emit("sync_data", { data, syncOptSite });
+    socket.emit("sync_data", { data, syncOptSite });
   };
 
   const getField = (keyword) => {

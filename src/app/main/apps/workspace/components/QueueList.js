@@ -230,7 +230,7 @@ const SearchLayout = (props) => {
             </InputLabel>
             <OutlinedInput
               value={state.bookingNo}
-              onChange={(e) => handleChange({ bookingNo: e.target.value })}
+              onChange={(e) => handleChange({ bookingNo: e.target.value.replace(/\s+|;+/g, ',') })}
               startAdornment={<InputAdornment className={classes.searchBox} position='start' >{''}</InputAdornment>}
               labelWidth={110}
             />

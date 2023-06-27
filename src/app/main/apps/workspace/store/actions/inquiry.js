@@ -65,8 +65,9 @@ export function addAmendment(state = undefined) {
 }
 
 export function setInquiries(state) {
-  // sync data 
-  sessionStorage.setItem('listInq', JSON.stringify({ inquiries: state }));
+  // sync inquiries
+  // storing inquiries include onshore & customer inquiries, amendments
+  sessionStorage.setItem('listInq', JSON.stringify(state));
 
   return {
     type: SET_INQUIRY,
@@ -187,6 +188,10 @@ export function setListInqMinimize(state) {
 }
 
 export function setListMinimize(state) {
+  // sync listMinimize
+  // storing listMinimize ADMIN site
+  sessionStorage.setItem('listMinimize', JSON.stringify(state));
+
   return {
     type: SET_LIST_MINIMIZE,
     state: state

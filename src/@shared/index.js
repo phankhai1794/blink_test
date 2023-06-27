@@ -192,7 +192,7 @@ export function isJsonText(str) {
 }
 
 export function formatDate(time, formatType) {
-  return moment(time).format(formatType).toUpperCase();
+  return moment(time).format(formatType);
 }
 
 // Format Dummy Container Data
@@ -388,19 +388,45 @@ export const checkBroadCastAccessing = (role) => {
   }
 }
 
-export const categorizeInquiriesByUserType = (userType, inqs) => {
-  let syncInq = [...inqs];
+export const categorizeInquiriesByUserType = (from, userType, bl, inqs) => {
+  // default: receiver is ONSHORE/CUSTOMER and receive data from ONSHORE/CUSTOMER
+  let syncInqs = [...inqs];
 
+  // receiver is ADMIN
   if (userType === "ADMIN") {
-    let listInq = JSON.parse(sessionStorage.getItem("listInq")).inquiries;
-    syncInq.forEach(q => {
-      let idx = listInq.findIndex((inq => inq.id === q.id));
-      listInq[idx] = { ...listInq[idx], ...q };
-    });
-    syncInq = [...listInq];
-  } else {
-    syncInq = syncInq.filter(inq => inq.receiver[0].toUpperCase() === userType);
+    // receive data from ADMIN
+    if (from === "ADMIN") {
+      sessionStorage.setItem("listInq", JSON.stringify(syncInqs));
+    }
+    // receive data from ONSHORE/CUSTOMER
+    else {
+      let inquiries = JSON.parse(sessionStorage.getItem("listInq"));
+      for (let i = 0; i < syncInqs.length; i++) {
+        const sInq = syncInqs[i];
+        const idx = inquiries.findIndex((inq => inq.id === sInq.id));
+        if (idx !== -1) inquiries[idx] = { ...inquiries[idx], ...sInq };
+        else if (bl.state.includes("DRF_")) inquiries.push(sInq); // push new amendment
+      }
+      syncInqs = [...inquiries];
+      sessionStorage.setItem("listInq", JSON.stringify(syncInqs));
+    }
+  }
+  // receiver is ONSHORE/CUSTOMER & receive data from ADMIN
+  else if (from === "ADMIN") {
+    syncInqs = syncInqs.filter(inq => inq.receiver[0].toUpperCase() === userType);
   }
 
-  return syncInq;
+  return syncInqs;
+}
+
+export const findSumFromArray = (arr) => {
+  let newDict = {};
+
+  arr.filter(item => item).forEach(item => {
+    if (!newDict[item.currencyCode]) {
+      newDict[item.currencyCode] = item.prepaidValue;
+    } else newDict[item.currencyCode] += item.prepaidValue;
+  });
+
+  return newDict;
 }
