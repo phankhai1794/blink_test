@@ -65,6 +65,7 @@ const useStyles = makeStyles((theme) => ({
     '& input': {
       fontFamily: 'Montserrat',
       fontSize: '14px',
+      textTransform: 'uppercase'
     },
   },
   searchBox: {
@@ -260,10 +261,14 @@ const SearchLayout = (props) => {
 
   const handelSearch = (e) => {
     let blStatus = state.blStatus;
+    let bookingNo = state.bookingNo;
     if (state.blStatus.indexOf() !== -1) {
       blStatus = blStatus.splice(blStatus.indexOf(), 1);
     }
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...state }));
+    if (bookingNo) {
+      bookingNo = bookingNo.toUpperCase();
+    }
+    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...state, bookingNo }));
   }
 
   const handelReset = (e) => {
