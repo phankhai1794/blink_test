@@ -4,13 +4,15 @@ var jsdiff = require('diff');
 var fnMap = {
   chars: jsdiff.diffChars,
   words: jsdiff.diffWords,
+  lines: jsdiff.diffLines,
   sentences: jsdiff.diffSentences,
   json: jsdiff.diffJson
 };
 
 const Diff = (props) => {
-  var diff = fnMap[props.type](props.inputA, props.inputB);
-  var result = diff.map(function (part, index) {
+  var diff = fnMap[props.type](props.inputA, props.inputB, { newlineIsToken: true });
+
+  var result = diff.map((part, index) => {
     var spanStyle = {
       backgroundColor: part.added ? 'lightgreen' : part.removed ? 'salmon' : null
     };
