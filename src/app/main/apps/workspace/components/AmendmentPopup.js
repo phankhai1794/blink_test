@@ -122,7 +122,7 @@ const StyledChip = withStyles(theme => ({
 }))(Chip);
 
 const AmendmentPopup = (props) => {
-  const { onClose, inqType, isEdit, data, index, updateData, updateEdit, containerDetail, setSave, isInqCDCM } = props;
+  const { onClose, inqType, isEdit, data, dataValues, dataEdited, index, updateData, updateEdit, containerDetail, setSave, isInqCDCM } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
 
@@ -191,12 +191,66 @@ const AmendmentPopup = (props) => {
 
   const show = (value) => user.role === 'Admin';
 
+  const [isFormated, setIsFormated] = useState(false);
+  const autoCountContainerNo = () => {
+    const containersNo = [];
+    let autoCountContNo;
+    if (dataValues && dataValues.length) {
+      dataValues.forEach((d) => {
+        containersNo.unshift(d?.[getType(CONTAINER_NUMBER)]);
+      })
+    }
+    const contNoUpdated = [];
+    if (containersNo.length) {
+      containersNo.forEach(c => {
+        if (c.toUpperCase().match(/CONT-NO: \d+$/g)) {
+          contNoUpdated.push(c);
+        }
+      });
+      if (contNoUpdated.length) {
+        const splitContNo = contNoUpdated[0].split(':');
+        const latestNum = splitContNo.length > 0 ? splitContNo[splitContNo.length - 1] : null;
+        let getBiggestContNo = latestNum;
+        const containerNos = [];
+        contNoUpdated.forEach(c => {
+          const splitContNo = c.split(':');
+          const latestNum = splitContNo.length > 0 ? splitContNo[splitContNo.length - 1] : null;
+          if (latestNum !== null) containerNos.push(latestNum.trim());
+        })
+        if (containerNos.length) {
+          containerNos.forEach(c => {
+            if (getBiggestContNo < c) getBiggestContNo = c;
+          })
+        }
+        if (getBiggestContNo !== null && !isNaN(getBiggestContNo)) {
+          autoCountContNo = (parseInt(getBiggestContNo) + 1);
+        }
+      }
+    }
+    return autoCountContNo;
+  }
+
   const handleChange = (field, value) => {
     dispatch(FormActions.setDirtyReload({ inputAmendment: true }));
     let val = value;
     const id = field.id;
     if ([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(field.title) && !isNaN(value)) {
       val = formatNumber(value);
+    }
+    if (field.title === CONTAINER_NUMBER) {
+      const count = autoCountContainerNo();
+      if (val === '') {
+        setIsFormated(false)
+      }
+      else if (dataEdited[index][getType(CONTAINER_NUMBER)].toUpperCase().match((/CONT-NO: \d+$/g))) {
+        setIsFormated(true)
+      }
+      else if (count
+          && !isFormated
+          && val.toUpperCase().match(/(CONT-NO)/g)) {
+        val = val + ': ' + count.toString();
+        setIsFormated(true)
+      }
     }
     updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [id]: val } : row)));
   };

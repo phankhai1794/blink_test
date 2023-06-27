@@ -279,6 +279,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           inqType={container}
           containerDetail={getValueField(CONTAINER_DETAIL)}
           data={valueEdit[rowIndex]}
+          dataValues={values}
+          dataEdited={valueEdit}
           isEdit={!disableInput || isAllowEdit}
           setSave={() => setSaveCDCM(true)}
           updateData={(value) => setValues(value)}
