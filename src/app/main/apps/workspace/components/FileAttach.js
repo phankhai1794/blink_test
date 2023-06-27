@@ -59,7 +59,8 @@ const useStyles = makeStyles((theme) => ({
     position: 'absolute',
     background: 'rgba(19, 37, 53, 0.6)',
     width: 166,
-    height: 141
+    height: 141,
+    zIndex: 11
   }
 }));
 
@@ -88,6 +89,7 @@ const FileAttach = ({
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.enableExpandAttachment,
   ]);
+  const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
 
   const [srcUrl, setSrcUrl] = useState(file.src || null);
 
@@ -177,14 +179,16 @@ const FileAttach = ({
 
   const srcFile = getSrcFileIcon(file);
 
+  const indexNumberExpand = fullscreen ? 5 : 4;
+
   return (
     <div
       className={classes.root}
-      style={{ display: (question && !enableExpandAttachment.includes(question.id) && indexMedia > 4) ? 'none' : 'block' }}>
-      {(question && !enableExpandAttachment.includes(question.id) && indexMedia === 4 && files.length > 5) &&
+      style={{ display: (question && !enableExpandAttachment.includes(question.id) && indexMedia > indexNumberExpand) ? 'none' : 'block' }}>
+      {(question && !enableExpandAttachment.includes(question.id) && indexMedia === indexNumberExpand && files.length > indexNumberExpand + 1) &&
         <div className={classes.backgroupOverFile}>
           <button className={classes.overAttachment} onClick={handleExpand} >
-            +{files.length - 4}
+            +{files.length - indexNumberExpand}
           </button>
         </div>
       }
@@ -192,7 +196,11 @@ const FileAttach = ({
         {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
           <img
             style={{
-              objectFit: 'cover'
+              position: 'relative',
+              top: 0,
+              left: 0,
+              height: '100%',
+              width: '100%'
             }}
             src={srcUrl}
             onClick={previewFile}
@@ -200,9 +208,30 @@ const FileAttach = ({
           />
         ) : (
           srcFile ? (
-            <img src={srcFile} onClick={previewFile} />
+            <img
+              style={{
+                position: 'relative',
+                top: '14%',
+                left: '14%',
+                height: '75%',
+                width: '75%'
+              }}
+              src={srcFile} onClick={previewFile}
+            />
           ) : (
-            <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} onClick={previewFile} onDragStart={(event) => event.preventDefault()} fontSize='large' />
+            <DescriptionIcon
+              fontSize='large'
+              classes={{ fontSizeLarge: classes.fontSizeLarge }}
+              style={{
+                position: 'relative',
+                top: '14%',
+                left: '14%',
+                height: '75%',
+                width: '75%'
+              }}
+              onClick={previewFile}
+              onDragStart={(event) => event.preventDefault()}
+            />
           )
         )
         }

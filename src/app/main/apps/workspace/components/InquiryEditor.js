@@ -292,7 +292,7 @@ const InquiryEditor = (props) => {
   const userType = useSelector(({ user }) => user.role?.toUpperCase());
 
   const syncData = (data, syncOptSite = "") => {
-    // socket.emit("sync_data", { data, syncOptSite });
+    socket.emit("sync_data", { data, syncOptSite });
   };
 
   const handleClick = (event) => {
@@ -1009,7 +1009,7 @@ const InquiryEditor = (props) => {
         dispatch(InquiryActions.setEditInq());
         dispatch(InquiryActions.setInquiries(inquiriesOp));
 
-        // sync update inquiry
+        // sync edit inquiry
         syncData({ inquiries: inquiriesOp });
 
         props.getUpdatedAt();

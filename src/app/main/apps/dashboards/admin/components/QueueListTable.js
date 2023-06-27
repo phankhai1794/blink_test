@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, TableBody, TableCell, TableHead, TableRow, IconButton, Icon, Collapse, Tabs, Tab, Select, MenuItem, FormControl, Chip } from '@material-ui/core';
+import { Table, TableBody, TableCell, TableHead, TableRow, IconButton, Icon, Collapse, Tabs, Tab, Select, MenuItem, FormControl, Chip, Menu, Button, Tooltip } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { getOffshoreQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
@@ -33,11 +33,11 @@ const useStyles = makeStyles({
       fontFamily: 'Montserrat',
     }
   },
-  searchContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginBottom: '20px',
+  iconAdd: {
+    cursor: 'pointer',
+    '&:hover': {
+      color: '#BD0F72'
+    }
   },
   headerColor: {
     '& .MuiTableCell-head ': {
@@ -49,6 +49,9 @@ const useStyles = makeStyles({
     paddingRight: '12px'
   },
   btnDownload: {
+    marginLeft: 10,
+    fontSize: 16,
+    fontWeight: 600,
     textTransform: 'none',
     fontFamily: 'Montserrat',
     color: '#BD0F72',
@@ -235,7 +238,7 @@ const InqStatus = {
 }
 
 const Row = (props) => {
-  const { row, index, open, setOpen } = props;
+  const { row, index, open, setOpen, columns } = props;
   const classes = useStyles();
 
   const [tab, setTab] = useState(0);
@@ -289,29 +292,90 @@ const Row = (props) => {
           </TableCell>
         </StickyTableCell>
         <TableCell className={classes.cellBody} >{formatDate(row.lastUpdated, 'MMM DD YYYY HH:mm')}</TableCell>
-        <TableCell className={classes.cellBody}>{row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}</TableCell>
-        <TableCell className={classes.cellBody} ><span style={{ textTransform: 'capitalize' }}>{row.status.customer}</span></TableCell>
-        <TableCell className={classes.cellBody} ><span style={{ textTransform: 'capitalize' }}>{row.status.onshore}</span></TableCell>
-        <TableCell className={classes.cellBody}>{mapperBlinkStatus[row.status.bl]}</TableCell>
-        <TableCell className={classes.cellBody} style={{ minWidth: 150 }}><span style={{ textTransform: 'capitalize' }}>{row?.vvd}</span></TableCell>
-        <TableCell className={classes.cellBody} style={{ minWidth: 200 }}>
-          <div className={classes.label}>
-            {Ipending.length ? <Chip label={Ipending.length} className={clsx(classes.chip, classes.inquiryColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.inquiryColor)}>help </Icon>} /> : null}
-            {Ireply.length ? <Chip label={Ireply.length} className={clsx(classes.chip, classes.replyColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.replyColor)}> reply </Icon>} /> : null}
-          </div>
-        </TableCell>
-        <TableCell className={classes.cellBody} style={{ minWidth: 200 }}>
-          <div className={classes.label}>
-            {Apending.length ? <Chip label={Apending.length} className={clsx(classes.chip, classes.amendmentColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.amendmentColor)}> edit </Icon>} /> : null}
-            {Areply.length ? <Chip label={Areply.length} className={clsx(classes.chip, classes.replyColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.replyColor)}> reply </Icon>} /> : null}
-          </div>
-        </TableCell>
-        <TableCell className={classes.cellBody}>
-          <div className={classes.label}>
-            {countAllInquiry ? <Chip label={`${Iresolved.length + Iuploaded.length}/${countAllInquiry}`} className={clsx(classes.chip, classes.resolvedColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}> help </Icon>} /> : null}
-            {countAllAmend ? <Chip label={`${Aresolved.length + Auploaded.length}/${countAllAmend}`} className={clsx(classes.chip, classes.resolvedColor)} icon={<Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}> edit </Icon>} /> : null}
-          </div>
-        </TableCell>
+        {columns.etd && <TableCell className={classes.cellBody}>{row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}</TableCell>}
+        {columns.shipperN && <TableCell className={classes.cellBody}>{row.shipperName}</TableCell>}
+        {columns.pol && <TableCell className={classes.cellBody}>{row.pol}</TableCell>}
+        {columns.pod && <TableCell className={classes.cellBody}>{row.pod}</TableCell>}
+        {columns.customerS && <TableCell className={classes.cellBody} ><span style={{ textTransform: 'capitalize' }}>{row.status.customer}</span></TableCell>}
+        {columns.onshoreS && <TableCell className={classes.cellBody} ><span style={{ textTransform: 'capitalize' }}>{row.status.onshore}</span></TableCell>}
+        {columns.blinkS && <TableCell className={classes.cellBody}>{mapperBlinkStatus[row.status.bl]}</TableCell>}
+        {columns.vvd && <TableCell className={classes.cellBody} style={{ minWidth: 150 }}><span style={{ textTransform: 'capitalize' }}>{row?.vvd}</span></TableCell>}
+        {columns.inquiry &&
+          <TableCell className={classes.cellBody} style={{ minWidth: 200 }}>
+            <div className={classes.label}>
+              {Ipending.length + Ireply.length ?
+                <Chip
+                  label={Ipending.length + Ireply.length}
+                  className={clsx(classes.chip, classes.inquiryColor)}
+                  icon={
+                    <Tooltip title="Inquiries">
+                      <Icon className={clsx(classes.sizeIcon, classes.inquiryColor)}>help</Icon>
+                    </Tooltip>
+                  }
+                /> : null}
+              {Ireply.length ?
+                <Chip
+                  label={Ireply.length}
+                  className={clsx(classes.chip, classes.replyColor)}
+                  icon={
+                    <Tooltip title="New replies">
+                      <Icon className={clsx(classes.sizeIcon, classes.replyColor)}> reply </Icon>
+                    </Tooltip>
+                  }
+                /> : null}
+            </div>
+          </TableCell>
+        }
+        {columns.amendment &&
+          <TableCell className={classes.cellBody} style={{ minWidth: 200 }}>
+            <div className={classes.label}>
+              {Apending.length + Areply.length ?
+                <Chip
+                  label={Apending.length + Areply.length}
+                  className={clsx(classes.chip, classes.amendmentColor)}
+                  icon={
+                    <Tooltip title="Amendments">
+                      <Icon className={clsx(classes.sizeIcon, classes.amendmentColor)}> edit </Icon>
+                    </Tooltip>
+                  }
+                /> : null}
+              {Areply.length ?
+                <Chip
+                  label={Areply.length}
+                  className={clsx(classes.chip, classes.replyColor)}
+                  icon={
+                    <Tooltip title="New replies">
+                      <Icon className={clsx(classes.sizeIcon, classes.replyColor)}> reply </Icon>
+                    </Tooltip>
+                  } /> : null}
+            </div>
+          </TableCell>
+        }
+        {columns.resolve &&
+          <TableCell className={classes.cellBody}>
+            <div className={classes.label}>
+              {countAllInquiry ?
+                <Chip
+                  label={`${Iresolved.length + Iuploaded.length}/${countAllInquiry}`}
+                  className={clsx(classes.chip, classes.resolvedColor)}
+                  icon={
+                    <Tooltip title="Inquiries">
+                      <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}> help </Icon>
+                    </Tooltip>
+                  } /> : null}
+              {countAllAmend ?
+                <Chip
+                  label={`${Aresolved.length + Auploaded.length}/${countAllAmend}`}
+                  className={clsx(classes.chip, classes.resolvedColor)}
+                  icon={
+                    <Tooltip title="Amendments">
+                      <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}> edit </Icon>
+                    </Tooltip>
+                  } /> : null}
+            </div>
+          </TableCell>
+        }
+        <TableCell className={classes.cellBody}></TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0, border: open ? '8px solid #F5F8FA' : '' }} colSpan='100%'>
@@ -393,6 +457,42 @@ const Row = (props) => {
   )
 }
 
+const AddColumn = ({ columns, handleShowColumn }) => {
+  const items = [
+    { label: "Last Updated", value: 'lastUpdate', show: columns['lastUpdate'] },
+    { label: "ETD", value: 'etd', show: columns['etd'] },
+    { label: "Customer Status", value: 'customerS', show: columns['customerS'] },
+    { label: "Onshore Status", value: 'onshoreS', show: columns['onshoreS'] },
+    { label: "BLink Status", value: 'blinkS', show: columns['blinkS'] },
+    { label: "Shipper Name", value: 'shipperN', show: columns['shipperN'] },
+    { label: "VVD", value: 'vvd', show: columns['vvd'] },
+    { label: "POL", value: 'pol', show: columns['pol'] },
+    { label: "POD", value: 'pod', show: columns['pod'] },
+    { label: "Unresolved Inquiry", value: 'inquiry', show: columns['inquiry'] },
+    { label: "Unresolved Amendment", value: 'amendment', show: columns['amendment'] },
+    { label: "Resolved", value: 'resolve', show: columns['resolve'] },
+  ]
+
+  const handleClick = (value, display) => {
+    handleShowColumn({ [value]: !display })
+  }
+
+  return (
+    <>
+      <span style={{ color: '#BD0F72', fontSize: 14, fontWeight: 600, fontFamily: 'Montserrat', padding: 14 }}> SHOW FIELDS</span>
+      {items.map((item, index) =>
+        <MenuItem key={index} onClick={() => handleClick(item.value, item.show)}>
+          <div className='w-full flex justify-between'>
+            <span style={{ fontFamily: 'Montserrat', fontSize: 14 }}> {item.label} </span>
+            {item.show && <Icon color='primary'>check</Icon>}
+          </div>
+        </MenuItem>
+
+      )}
+    </>
+  )
+}
+
 const QueueListTable = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -403,6 +503,22 @@ const QueueListTable = () => {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('bkgNo');
   const [openDetailIndex, setOpenDetailIndex] = useState();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [columns, setColumns] = useState({
+    lastUpdate: true, etd: true, shipperN: false, customerS: true, onshoreS: true, blinkS: true, vvd: true, pol: false, pod: false, inquiry: true, amendment: true, resolve: true
+  })
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleShowColumn = (value) => {
+    setColumns({ ...columns, ...value })
+  }
 
   useEffect(() => {
     dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, countries }));
@@ -478,6 +594,14 @@ const QueueListTable = () => {
                   )}
               </Select>
             </FormControl>
+            {/* <Button
+              variant='text'
+              className={classes.btnDownload}
+              onClick={handleDownload}
+            >
+              <img src='/assets/images/icons/icon-download.svg' style={{ paddingRight: '10px' }} />
+              <span>Download</span>
+            </Button> */}
           </div>
           <div style={{ width: '100%', overflowX: 'auto' }}>
             <Table className={classes.table} aria-label='simple table'>
@@ -496,60 +620,103 @@ const QueueListTable = () => {
                       </div>
                     </TableCell>
                   </StickyTableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 160 }}>
-                    <div className={classes.lineColumn}>
-                      <span>Last Updated</span>
-                      <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort('lastUpdated')} />
-                    </div>
-                  </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 160 }}>
-                    <div className={classes.lineColumn}>
-                      <span>ETD</span>
-                      {/* <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort('etd')} /> */}
-                    </div>
-                  </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 130 }}>
-                    <div className={classes.lineColumn}>
-                      <span>Customer Status</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 130 }}>
-                    <div className={classes.lineColumn}>
-                      <span>Onshore Status</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 150 }}>
-                    <div className={classes.lineColumn}>
-                      <span>BLink Status</span>
-                      {/* <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort('status')} /> */}
-                    </div>
-                  </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 200 }}>
-                    <div className={classes.lineColumn}>
-                      <span>VVD</span>
-                      {/* <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort('vvd')} /> */}
-                    </div>
-                  </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 170 }}>
-                    <div className={classes.lineColumn}>
-                      <span>Unresolved Inquiry</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 190 }}>
-                    <div className={classes.lineColumn}>
-                      <span>Unresolved Amendment</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className={classes.cellHead} style={{ width: 150 }}>
-                    <div>
-                      <span>Resolved</span>
-                    </div>
+                  {columns.lastUpdate &&
+                    <TableCell className={classes.cellHead} style={{ width: 160 }}>
+                      <div className={classes.lineColumn}>
+                        <span>Last Updated</span>
+                        <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort('lastUpdated')} />
+                      </div>
+                    </TableCell>
+                  }
+                  {columns.etd &&
+                    <TableCell className={classes.cellHead} style={{ width: 160 }}>
+                      <div className={classes.lineColumn}>
+                        <span>ETD</span>
+                      </div>
+                    </TableCell>
+                  }
+                  {columns.shipperN &&
+                    <TableCell className={classes.cellHead} style={{ width: 180 }}>
+                      <div className={classes.lineColumn}>
+                        <span>Shipper Name</span>
+                      </div>
+                    </TableCell>
+                  }
+                  {columns.pol &&
+                    <TableCell className={classes.cellHead} style={{ width: 160 }}>
+                      <div className={classes.lineColumn}>
+                        <span>POL</span>
+                      </div>
+                    </TableCell>
+                  }
+                  {columns.pod &&
+                    <TableCell className={classes.cellHead} style={{ width: 160 }}>
+                      <div className={classes.lineColumn}>
+                        <span>POD</span>
+                      </div>
+                    </TableCell>
+                  }
+                  {columns.customerS &&
+                    <TableCell className={classes.cellHead} style={{ width: 130 }}>
+                      <div className={classes.lineColumn}>
+                        <span>Customer Status</span>
+                      </div>
+                    </TableCell>
+                  }
+                  {columns.onshoreS &&
+                    <TableCell className={classes.cellHead} style={{ width: 130 }}>
+                      <div className={classes.lineColumn}>
+                        <span>Onshore Status</span>
+                      </div>
+                    </TableCell>
+                  }
+                  {columns.blinkS &&
+                    <TableCell className={classes.cellHead} style={{ width: 150 }}>
+                      <div className={classes.lineColumn}>
+                        <span>BLink Status</span>
+                      </div>
+                    </TableCell>
+                  }
+                  {columns.vvd &&
+                    <TableCell className={classes.cellHead} style={{ width: 130 }}>
+                      <div className={classes.lineColumn}>
+                        <span>VVD</span>
+                        {/* <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort('vvd')} /> */}
+                      </div>
+                    </TableCell>
+                  }
+                  {columns.inquiry &&
+                    <TableCell className={classes.cellHead} style={{ width: 170 }}>
+                      <div className={classes.lineColumn}>
+                        <span>Unresolved Inquiry</span>
+                      </div>
+                    </TableCell>
+                  }
+                  {columns.amendment &&
+                    <TableCell className={classes.cellHead} style={{ width: 190 }}>
+                      <div className={classes.lineColumn}>
+                        <span>Unresolved Amendment</span>
+                      </div>
+                    </TableCell>
+                  }
+                  {columns.resolve &&
+                    <TableCell className={classes.cellHead} style={{ width: 150 }}>
+                      <div>
+                        <span>Resolved</span>
+                      </div>
+                    </TableCell>
+                  }
+                  <TableCell className={classes.cellHead} style={{ width: 50 }}>
+                    <Tooltip title="Add Column">
+                      <Icon classes={{ root: classes.iconAdd }} onClick={handleClick}>control_point</Icon>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody style={{ backgroundColor: 'white' }}>
                 {state?.queueListBl.map((row, index) => (
                   <Row
+                    columns={columns}
                     key={index}
                     row={row}
                     index={index + (searchQueueQuery.currentPageNumber - 1) * searchQueueQuery.pageSize}
@@ -560,6 +727,19 @@ const QueueListTable = () => {
               </TableBody>
             </Table>
           </div>
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            PaperProps={{
+              style: {
+                width: 270,
+              },
+            }}
+            onClose={handleClose}
+          >
+            <AddColumn columns={columns} handleShowColumn={handleShowColumn} />
+          </Menu >
         </>
         :
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin: 'auto', color: '#515F6B' }}>
