@@ -20,12 +20,19 @@ const useStyles = makeStyles((theme) => ({
       },
       '& .MuiSvgIcon-root': {
         position: 'absolute'
+      },
+      '& .MuiListItem-gutters': {
+        paddingLeft: 0,
+        paddingRight: 0
+      },
+      '& .MuiTypography-body1': {
+        fontFamily: 'Montserrat',
       }
     }
   }
 }))
 
-const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, disableInput}) => {
+const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, disableInput, isAllowEdit, currentQuestion}) => {
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -161,6 +168,8 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
             isPendingProcess={true}
             disableInput={disableEdit}
             isInqCDCM={true}
+            isAllowEdit={isAllowEdit}
+            currentQuestion={currentQuestion}
           />
         </ListItem>
       </Collapse>
@@ -183,6 +192,8 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
             isPendingProcess={true}
             disableInput={disableEdit}
             isInqCDCM={true}
+            isAllowEdit={isAllowEdit}
+            currentQuestion={currentQuestion}
           />
         </ListItem>
       </Collapse>

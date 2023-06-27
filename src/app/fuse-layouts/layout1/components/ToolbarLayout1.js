@@ -185,11 +185,10 @@ function ToolbarLayout1(props) {
   }
 
   useEffect(() => {
-    if (inquiries.some((inq) => ['OPEN', 'REP_Q_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state))) {
-      window.addEventListener("beforeunload", onUnload);
-    }
-    return () => window.removeEventListener("beforeunload", onUnload);
-  }, [inquiries])
+    dispatch(FormActions.setDirtyReload({
+      sendMail: inquiries.some((inq) => ['OPEN', 'REP_Q_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state))
+    }));
+  }, [inquiries]);
 
   useEffect(() => {
     const countInquiry = inquiries.filter((inq) => inq.process === 'pending' && !['COMPL', 'UPLOADED'].includes(inq.state))

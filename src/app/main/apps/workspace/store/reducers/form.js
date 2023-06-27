@@ -8,6 +8,7 @@ const initialState = {
   showAddInquiry: true,
   openAttachment: false,
   openEmail: false,
+  eventClickContNo: { status: false, questionId: '' },
   openInqReview: false,
   openNotificationInquiryList: false,
   openNotificationAttachmentList: false,
@@ -35,6 +36,7 @@ const initialState = {
   currentInqPreview: {},
   currentFilePreview: {},
   isLoadingProcess: false,
+  dirtyReload: {}
 };
 
 const formReducer = function (state = initialState, action) {
@@ -147,6 +149,12 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.CURRENT_FILE_PREVIEW: {
     return { ...state, currentFilePreview: action.state };
+  }
+  case Actions.EVENT_CLICK_CONT_NO: {
+    return { ...state, eventClickContNo: action.state };
+  }
+  case Actions.SET_DIRTY_RELOAD: {
+    return { ...state, dirtyReload: { ...state.dirtyReload, ...action.state } };
   }
   default: {
     return state;

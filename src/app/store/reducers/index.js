@@ -8,6 +8,7 @@ import dashboard from 'app/main/apps/dashboards/admin/store/reducers';
 import user from './user';
 import header from './header';
 import fuse from './fuse';
+import broadcast from './broadcast';
 
 const createReducer = (asyncReducers) =>
   combineReducers({
@@ -15,6 +16,7 @@ const createReducer = (asyncReducers) =>
     fuse,
     header,
     user,
+    broadcast,
     dashboard,
     workspace,
     listBlReducer,

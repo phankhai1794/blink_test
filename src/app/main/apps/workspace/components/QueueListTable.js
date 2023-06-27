@@ -176,8 +176,8 @@ const QueueListTable = () => {
     const handleGetQueueList = async (search) => {
       const query = {
         bkgNo: search.bookingNo ? search.bookingNo.split(',').map(bkg => bkg.trim()) : [],
-        startDate: search.from,
-        endDate: search.to,
+        startDate: search.from ? formatDate(search.from, 'YYYY-MM-DD') : '',
+        endDate: search.to ? formatDate(search.to, 'YYYY-MM-DD') : '',
         status: search.blStatus,
         field: search.sortField
       };

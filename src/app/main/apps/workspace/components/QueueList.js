@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
-import { Button, FormControl, InputLabel, OutlinedInput, InputAdornment, Paper, Select, MenuItem, Input, Checkbox, ListItemText, Chip, Grid } from '@material-ui/core';
+import { Button, FormControl, InputLabel, OutlinedInput, InputAdornment, Paper, Select, MenuItem, Input, Checkbox, ListItemText, Chip, Grid, Icon } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -11,14 +11,12 @@ import CloseIcon from '@material-ui/icons/Close';
 import SearchIcon from '@material-ui/icons/Search';
 import { formatDate } from '@shared';
 import clsx from 'clsx';
-import DateFnsUtils from '@date-io/date-fns';
-import {
-  MuiPickersUtilsProvider,
-  KeyboardDatePicker,
-} from '@material-ui/pickers';
-import moment from "moment";
+import { DateRangePicker, defaultStaticRanges } from 'react-date-range';
+import { subMonths, addDays, subDays } from 'date-fns';
 
 import QueueListTable from './QueueListTable';
+import 'react-date-range/dist/styles.css'; // main css file
+import 'react-date-range/dist/theme/default.css'; // theme css file
 
 const useStyles = makeStyles((theme) => ({
   headerPopup: {
@@ -100,13 +98,26 @@ const useStyles = makeStyles((theme) => ({
   },
   menuItemSelected: {
     backgroundColor: '#FDF2F2 !important',
+  },
+  grid: {
+    '& .MuiGrid-grid-xs-4': {
+      flexBasis: '33%',
+      maxWidth: '33%'
+    },
+    '& .MuiGrid-grid-xs-3': {
+      flexBasis: '23%',
+      maxWidth: '23%'
+    },
+    '& .MuiGrid-grid-xs-1': {
+      flexBasis: '11%',
+      maxWidth: '11%'
+    }
   }
 }));
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />;
 });
-const WEEK_NUMBER = 7;
 
 const QueueList = () => {
   const classes = useStyles();
@@ -152,24 +163,73 @@ const TableContent = (props) => {
 }
 
 const SearchLayout = (props) => {
+  const end = new Date();
+  const start = subMonths(end, 1);
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [state, setState] = useState({ bookingNo: '', from: '', to: '', blStatus: 'PENDING,IN_QUEUE', isSelectedAll: false })
+  const [state, setState] = useState({ bookingNo: '', from: start, to: end, blStatus: 'PENDING,IN_QUEUE', isSelectedAll: false })
   const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
   const [selectedStatus, setSelectedStatus] = React.useState(['In Queue', 'Pending']);
-
-  useEffect(() => {
-    let currentDate = new Date();
-    let sevenDayBefore = formatDate(currentDate.setDate(currentDate.getDate() - WEEK_NUMBER), 'YYYY-MM-DD');
-    setState({ ...state, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD') })
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD') }));
-  }, [])
+  const [startingDate, setStartingDate] = useState('');
+  const [isPickerOpen, setPickerOpen] = useState(false);
+  const [labelDate, setLabelDate] = useState();
+  const pickerRef = useRef(null);
 
   const blStatusOption = [
     'In Queue',
     'Pending',
     'Completed',
   ];
+
+  const handleChange = (query) => setState({ ...state, ...query });
+
+  const getLabelDate = (startDate, endDate) => {
+    return defaultStaticRanges.find(
+      (date) =>
+        formatDate(date.range().startDate, 'MMM DD YYYY') === formatDate(startDate, 'MMM DD YYYY') &&
+        formatDate(date.range().endDate, 'MMM DD YYYY') === formatDate(endDate, 'MMM DD YYYY')
+    )?.label;
+  };
+
+
+  const handleDateChange = (ranges) => {
+    const { startDate, endDate } = ranges.selection;
+    const maxEndDate = addDays(startDate, 30);
+    const minStartDate = subDays(endDate, 30);
+    if (startDate.getTime() === endDate.getTime()) setStartingDate(endDate);
+
+    // If the selected end date is beyond the maximum, adjust it
+    if (startDate < startingDate) {
+      const temp = startDate < minStartDate ? minStartDate : startDate;
+      setLabelDate(getLabelDate(temp, endDate));
+      handleChange({
+        from: temp,
+        to: endDate
+      });
+    } else {
+      const temp = endDate > maxEndDate ? maxEndDate : endDate;
+      setLabelDate(getLabelDate(startDate, temp));
+      handleChange({
+        from: startDate,
+        to: endDate > maxEndDate ? maxEndDate : endDate
+      });
+    }
+  };
+
+  const handleClickOutside = (event) => {
+    if (pickerRef.current && !pickerRef.current.contains(event.target)) {
+      setPickerOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
 
   const handleSelectStatus = (event) => {
     let values = event.target.value;
@@ -197,9 +257,6 @@ const SearchLayout = (props) => {
       setState({ ...state, blStatus: arrStatus.join(',') })
     }
   };
-  const handleChange = (query) => {
-    setState({ ...state, ...query });
-  }
 
   const handelSearch = (e) => {
     let blStatus = state.blStatus;
@@ -210,18 +267,16 @@ const SearchLayout = (props) => {
   }
 
   const handelReset = (e) => {
-    let currentDate = new Date();
-    let sevenDayBefore = formatDate(currentDate.setDate(currentDate.getDate() - WEEK_NUMBER), 'YYYY-MM-DD');
-    let query = { bookingNo: '', currentPageNumber: 1, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD'), blStatus: 'PENDING,IN_QUEUE', sortField: '' };
+    let query = { bookingNo: '', currentPageNumber: 1, from: start, to: end, blStatus: 'PENDING,IN_QUEUE', sortField: '' };
 
-    setState({ ...query, from: sevenDayBefore, to: formatDate(new Date(), 'YYYY-MM-DD') })
+    setState({ ...query });
     setSelectedStatus(['In Queue', 'Pending']);
     dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...query }));
   }
 
   return (
     <Paper className={classes.paper}>
-      <Grid container spacing={1} >
+      <Grid container spacing={1} className={classes.grid}>
         {/* Booking Number */}
         <Grid item xs={4}>
           <FormControl fullWidth variant='outlined'>
@@ -233,43 +288,52 @@ const SearchLayout = (props) => {
               onChange={(e) => handleChange({ bookingNo: e.target.value.replace(/\s+|;+/g, ',') })}
               startAdornment={<InputAdornment className={classes.searchBox} position='start' >{''}</InputAdornment>}
               labelWidth={110}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handelSearch();
+                }
+              }}
             />
           </FormControl>
         </Grid>
-        {/* From */}
-        <Grid item xs={2}>
-          <FormControl fullWidth variant='outlined'>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                label="From"
-                disableToolbar
-                variant="inline"
-                format="MMM - dd - yyyy"
-                value={state.from}
-                onChange={(date) => handleChange({ from: moment(date).format("YYYY-MM-DD") })}
-              />
-            </MuiPickersUtilsProvider>
-          </FormControl>
-        </Grid>
-        {/* To */}
-        <Grid item xs={2}>
-          <FormControl fullWidth variant='outlined'>
-            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-              <KeyboardDatePicker
-                inputVariant="outlined"
-                label="To"
-                disableToolbar
-                variant="inline"
-                format="MMM - dd - yyyy"
-                value={state.to}
-                onChange={(date) => handleChange({ to: moment(date).format("YYYY-MM-DD") })}
-              />
-            </MuiPickersUtilsProvider>
+        {/* From - To */}
+        <Grid item xs={3}>
+          <FormControl fullWidth variant="outlined">
+            <InputLabel>
+              <span>Date</span>
+            </InputLabel>
+            <OutlinedInput
+              value={
+                labelDate ||
+                `${formatDate(state.from, 'MMM DD YYYY')} - ${formatDate(state.to, 'MMM DD YYYY')}`
+              }
+              endAdornment={
+                <Icon>calendar_today</Icon>
+              }
+              onClick={() => setPickerOpen(true)}
+              inputProps={{
+                readOnly: true
+              }}
+              labelWidth={30}
+            />
+            {isPickerOpen && (
+              <div ref={pickerRef}>
+                <DateRangePicker
+                  ranges={[
+                    {
+                      startDate: state.from,
+                      endDate: state.to,
+                      key: 'selection'
+                    }
+                  ]}
+                  onChange={handleDateChange}
+                />
+              </div>
+            )}
           </FormControl>
         </Grid>
         {/* BL Status */}
-        <Grid item xs={2}>
+        <Grid item xs={4}>
           <FormControl fullWidth variant='outlined'>
             <InputLabel htmlFor='selected-status'>BL Status</InputLabel>
             <OutlinedInput
@@ -309,7 +373,7 @@ const SearchLayout = (props) => {
             />
           </FormControl>
         </Grid>
-        <Grid item xs={2} style={{ margin: 'auto' }}>
+        <Grid item xs={1} style={{ margin: 'auto' }} wrap-xs-nowrap>
           <Button
             className={clsx(classes.btn, classes.btnSearch)}
             onClick={handelSearch}>

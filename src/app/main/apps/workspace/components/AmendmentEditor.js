@@ -12,7 +12,6 @@ import { handleError } from '@shared/handleError';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
-import { useUnsavedChangesWarning } from 'app/hooks'
 import { useDropzone } from 'react-dropzone';
 import { SocketContext } from 'app/AppContext';
 
@@ -99,7 +98,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.enableSubmit,
   ]);
-  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
   const [filepaste, setFilepaste] = useState('');
   const [dropfiles, setDropfiles] = useState([]);
   const currentField = useSelector(({ draftBL }) => draftBL.currentField);
@@ -141,7 +139,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   };
 
   const handleChange = (e, isDate = false) => {
-    setDirty();
+    dispatch(FormActions.setDirtyReload({ createAme: true }));
     if (isDate) {
       if (!isNaN(e?.getTime())) {
         setFieldValue(e.toISOString());
@@ -157,21 +155,21 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   }
 
   const inputTextSeparate = (e, type) => {
-    setDirty();
+    dispatch(FormActions.setDirtyReload({ createAme: true }));
     setFieldValueSeparate(Object.assign({}, fieldValueSeparate, { [type]: e.target.value }));
     setChange(true);
   };
 
-  const handleValidateInput = async (confirm = null) => {
-    setDisableSave(true);
-    let textInput = fieldValue || '';
-    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo }).catch(err => handleError(dispatch, err));
-    if (isWarning) {
-      dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
-    } else {
-      confirm && confirm();
-    }
-  }
+  // const handleValidateInput = async (confirm = null) => {
+  //   setDisableSave(true);
+  //   let textInput = fieldValue || '';
+  //   const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo }).catch(err => handleError(dispatch, err));
+  //   if (isWarning) {
+  //     dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
+  //   } else {
+  //     confirm && confirm();
+  //   }
+  // }
 
   const validationCDCM = (contsNo) => {
     const warningLeast1CM = [];
@@ -359,7 +357,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             dispatch(FormActions.toggleAmendmentsList(true));
             dispatch(InquiryActions.addAmendment());
             dispatch(InquiryActions.setOneInq({}));
-            setPristine();
+            dispatch(FormActions.setDirtyReload({ createAme: false }));
 
             // sync create amendment
             syncData({ inquiries: optionsInquires, listMinimize: optionsMinimize, content: newContent });
@@ -475,6 +473,10 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     }
     return response;
   }
+
+  useEffect(() => {
+    return () => dispatch(FormActions.setDirtyReload({ createAme: false }));
+  }, [])
 
   useEffect(() => {
     if (!openAmendmentList) {
