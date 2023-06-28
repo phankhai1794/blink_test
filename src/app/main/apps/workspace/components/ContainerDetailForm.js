@@ -342,7 +342,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                     >
                       {i === 0 ?
                         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }} className={classes.actionCdCmStyle}>
-                          <span className={'handleContNo'} onClick={() => handleClickConNo(vindex)}>{value}</span>
+                          {currentQuestion.process === 'pending' ? (
+                            <span className={'handleContNo'} onClick={() => handleClickConNo(vindex)}>{value}</span>
+                          ) : <span >{value}</span>}
                           <IconButton onClick={() => {
                             setRowIndex(vindex)
                             handleEdit(true);
@@ -368,8 +370,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                       }
                     </TableCell>
                   )
-                }
-                )}
+                })}
               </TableRow>
             ))}
             <TableRow>
