@@ -301,6 +301,15 @@ const InquiryEditor = (props) => {
     setAnchorEl(null);
   };
 
+  // auto create 2 choice for BL Type
+  const autoCreateChoiceBLType = () => {
+    const inq = { ...currentEditInq };
+    const timeB = new Date();
+    const timeW = new Date(timeB.getTime() + 1);
+    inq.answerObj.push({ id: null, content: 'B', createdAt: timeB }, { id: null, content: 'W', createdAt: timeW });
+    dispatch(InquiryActions.setEditInq(inq));
+  }
+
   const handleShowTemplateCDCM = (type) => {
     const objCdCm = [...contentsInqCDCM];
     if (objCdCm && objCdCm.length) {
@@ -632,6 +641,8 @@ const InquiryEditor = (props) => {
       });
     }
 
+    if (e.keyword === 'blType' && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
+
     setTemplateList(filter?.content || []);
     setTemplate('0');
     dispatch(InquiryActions.validate({ ...valid, field: true }));
@@ -696,6 +707,8 @@ const InquiryEditor = (props) => {
     if (e.value !== metadata.ans_type.choice) {
       inq.answerObj = [];
     }
+    if (fieldValue?.keyword === 'blType' && e.label === 'Option Selection') autoCreateChoiceBLType();
+
     dispatch(InquiryActions.validate({ ...valid, ansType: true }));
     setValueAnsType(optionsAnsType.filter((ansType) => ansType.value === e.value));
     dispatch(InquiryActions.setEditInq(inq));
