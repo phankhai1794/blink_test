@@ -1365,7 +1365,7 @@ const InquiryViewer = (props) => {
       })
     } else {
       if (containerCheck.includes(question.field)) {
-        const answer = JSON.parse(JSON.stringify(content[question.field])) || '';
+        const answer = content[question.field] && JSON.parse(JSON.stringify(content[question.field])) || '';
         const ansResolved = getAnswerResolve();
         if (ansResolved) {
           answer.forEach((ans) => {
@@ -2093,65 +2093,76 @@ const InquiryViewer = (props) => {
   const isEditedReplyCDCM = () => {
     let contentCDCM = {};
     if (containerCheck.includes(question.field)) {
-      if (user.role === 'Guest') {
-        contentCDCM = {
-          [getField(CONTAINER_DETAIL)]: getDataCD,
-          [getField(CONTAINER_MANIFEST)]: getDataCM
-        };
-        // check edited content cd cm
-        if (
-          question.oldData
-          && Object.keys(question.oldData).length
-          && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
-        ) {
-          setDisableSaveCdCm(true);
-        }
-        // check edited content cd cm
-        if (
-          question.oldData
-          && Object.keys(question.oldData).length
-          && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
-        ) {
-          setDisableSaveCdCm(true);
-        }
-        // check empty content input
-        if (
-          Object.keys(tempReply).length
-          && question.oldData
-          && Object.keys(question.oldData).length
-          && question.oldData.contentOld === tempReply.answer.content
-        ) {
-          setDisableSaveCdCm(true);
-        }
-        if (tempReply && Object.keys(tempReply).length && tempReply.answer.content === '') {
-          setDisableSaveCdCm(true);
-        }
-        if (question.oldData && Object.keys(question.oldData).length) {
-          if (JSON.stringify(question.oldData.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
-            setDisableSaveCdCm(false);
+      if (question.process === 'pending') {
+        if (user.role === 'Guest') {
+          contentCDCM = {
+            [getField(CONTAINER_DETAIL)]: getDataCD,
+            [getField(CONTAINER_MANIFEST)]: getDataCM
+          };
+          // check edited content cd cm
+          if (
+              question.oldData
+              && Object.keys(question.oldData).length
+              && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
+          ) {
+            setDisableSaveCdCm(true);
+          }
+          // check edited content cd cm
+          if (
+              question.oldData
+              && Object.keys(question.oldData).length
+              && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
+          ) {
+            setDisableSaveCdCm(true);
+          }
+          // check empty content input
+          if (
+              Object.keys(tempReply).length
+              && question.oldData
+              && Object.keys(question.oldData).length
+              && question.oldData.contentOld === tempReply.answer.content
+          ) {
+            setDisableSaveCdCm(true);
+          }
+          if (tempReply && Object.keys(tempReply).length && tempReply.answer.content === '') {
+            setDisableSaveCdCm(true);
+          }
+          if (question.oldData && Object.keys(question.oldData).length) {
+            if (JSON.stringify(question.oldData.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
+              setDisableSaveCdCm(false);
+            }
+          }
+          if (
+              Object.keys(tempReply).length
+              && question.oldData
+              && Object.keys(question.oldData).length
+          ) {
+            if (question.oldData.contentOld !== tempReply.answer.content) {
+              setDisableSaveCdCm(false);
+            }
           }
         }
-        if (
-          Object.keys(tempReply).length
-          && question.oldData
-          && Object.keys(question.oldData).length
-        ) {
-          if (question.oldData.contentOld !== tempReply.answer.content) {
+        else if (
+            (question.type === 'REP' || (user.role === 'Admin' && question.state === 'ANS_SENT'))
+            && Object.keys(tempReply).length
+            && question.oldData
+            && Object.keys(question.oldData).length) {
+          if (tempReply.answer.content === '') {
+            setDisableSaveCdCm(true);
+          } else if (question.oldData.contentOld !== tempReply.answer.content) {
             setDisableSaveCdCm(false);
+          } else {
+            setDisableSaveCdCm(true);
           }
         }
-      }
-      else if (
-        (question.type === 'REP' || (user.role === 'Admin' && question.state === 'ANS_SENT'))
-        && Object.keys(tempReply).length
-        && question.oldData
-        && Object.keys(question.oldData).length) {
-        if (tempReply.answer.content === '') {
-          setDisableSaveCdCm(true);
-        } else if (question.oldData.contentOld !== tempReply.answer.content) {
-          setDisableSaveCdCm(false);
+      } else if (question.process === 'draft') {
+        if (!question.state.includes("AME_DRF")
+            && (!question.state.includes("AME_SENT") || user.role !== 'Guest')
+            && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content)
+            && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0)) {
+          setDisableSaveCdCm(true)
         } else {
-          setDisableSaveCdCm(true);
+          setDisableSaveCdCm(false)
         }
       }
     }
