@@ -2460,7 +2460,7 @@ const InquiryViewer = (props) => {
       setDisableCDCMAmendment(false);
     }
     if (containerCheck.includes(q.field)) {
-      if (Object.keys(q.oldData).length) {
+      if (q.oldData && Object.keys(q.oldData).length) {
         dispatch(InquiryActions.setOldDataCdCm(q.oldData));
       }
       if (q.dataCdInq && Object.keys(q.dataCdInq).length) {
