@@ -9,7 +9,7 @@ import {
   Tooltip
 } from '@material-ui/core';
 import { makeStyles, withStyles } from '@material-ui/styles';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
@@ -132,6 +132,7 @@ const AmendmentPopup = (props) => {
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const user = useSelector(({ user }) => user);
   const [inputSeal, setInputSeal] = useState('');
+  const inputSealRef = useRef();
   const [valueOrigin, setValueOrigin] = useState({});
   const { register, control, handleSubmit, formState: { errors } } = useForm();
   const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Invalid number' }
@@ -279,6 +280,14 @@ const AmendmentPopup = (props) => {
     }
   };
 
+  const onEditSeal = (value, tagValue, index) => {
+    onDelete(value, index)
+    setInputSeal(tagValue)
+    onDelete(value, index);
+    setInputSeal(tagValue);
+    inputSealRef.current.focus();
+  }
+
   const onKeyDown = (e, value) => {
     if (['Enter', 'Tab'].includes(e.key) && inputSeal) {
       e.preventDefault();
@@ -333,15 +342,18 @@ const AmendmentPopup = (props) => {
             <>
               {value.map((tag, i) => (
                 <Tooltip key={i} title={tag} enterDelay={1000}>
-                  <StyledChip
-                    label={tag}
-                    onDelete={() => onDelete(value, i)}
-                    deleteIcon={<ClearIcon fontSize="small" />}
-                  />
+                  <div onDoubleClick={() => onEditSeal(value, tag, i)}>
+                    <StyledChip
+                      label={tag}
+                      onDelete={() => onDelete(value, i)}
+                      deleteIcon={<ClearIcon fontSize="small" />}
+                    />
+                  </div>
                 </Tooltip>
               ))}
             </>
             <input
+              ref={inputSealRef}
               style={{
                 width: 20,
                 minHeight: 26,
