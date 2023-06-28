@@ -9,9 +9,7 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import { getInquiryById } from 'app/services/inquiryService';
 import { getBlInfo } from 'app/services/myBLService';
 import { SocketContext } from 'app/AppContext';
-import * as AppAction from 'app/store/actions';
-import { categorizeInquiriesByUserType, checkBroadCastAccessing } from '@shared';
-import { BROADCAST } from '@shared/keyword';
+import { categorizeInquiriesByUserType } from '@shared';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -64,9 +62,6 @@ const BLProcessNotification = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const socket = useContext(SocketContext);
-  const channel = new BroadcastChannel(BROADCAST.ACCESS);
-  const dirtyReload = useSelector(({ workspace }) => workspace.formReducer.dirtyReload);
-  const bcRole = useSelector(({ broadcast }) => broadcast.role);
 
   const [open, setOpen] = useState(false);
 
@@ -98,34 +93,10 @@ const BLProcessNotification = () => {
   };
 
   useEffect(() => {
-    // detect action close browser
-    // if null, pass else if array has some value true, show popup
-    window.onbeforeunload =
-      dirtyReload && !dirtyReload.forceReload && Object.values(dirtyReload).some((r) => r) && (() => 'Are you sure want to discard changes?');
-
-    return () => {
-      window.onbeforeunload = null;
-    };
-  }, [dirtyReload]);
-
-  useEffect(() => {
-    if (bcRole && dirtyReload.forceReload) checkBroadCastAccessing(bcRole);
-  }, [bcRole, dirtyReload.forceReload]);
-
-  useEffect(() => {
     if (myBL.id) {
       checkBLProcess();
 
       const user = JSON.parse(localStorage.getItem('USER'));
-
-      // post a signal
-      channel.postMessage(user.role);
-
-      // receive signal
-      channel.onmessage = (e) => {
-        dispatch(FormActions.setDirtyReload({ forceReload: true }));
-        dispatch(AppAction.setBroadcast({ role: e.data }));
-      };
 
       // user connect
       const mybl = (user.userType === "ADMIN") ? [myBL.bkgNo, myBL.id] : [myBL.id, myBL.bkgNo];
@@ -169,10 +140,6 @@ const BLProcessNotification = () => {
       });
     }
   }, [myBL]);
-
-  useEffect(() => {
-    return () => channel.close();
-  }, [])
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md">

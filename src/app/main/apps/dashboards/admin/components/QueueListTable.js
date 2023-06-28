@@ -342,26 +342,26 @@ const Row = (props) => {
           <TableCell className={classes.cellBody} style={{ minWidth: 200 }}>
             <div className={classes.label}>
               {Ipending.length ? (
-                <Chip
-                  label={Ipending.length}
-                  className={clsx(classes.chip, classes.inquiryColor)}
-                  icon={
-                    <Tooltip title="Inquiries">
+                <Tooltip title="Inquiries">
+                  <Chip
+                    label={Ipending.length}
+                    className={clsx(classes.chip, classes.inquiryColor)}
+                    icon={
                       <Icon className={clsx(classes.sizeIcon, classes.inquiryColor)}>help</Icon>
-                    </Tooltip>
-                  }
-                />
+                    }
+                  />
+                </Tooltip>
               ) : null}
               {Ireply.length ? (
-                <Chip
-                  label={Ireply.length}
-                  className={clsx(classes.chip, classes.replyColor)}
-                  icon={
-                    <Tooltip title="New replies">
+                <Tooltip title="New replies">
+                  <Chip
+                    label={Ireply.length}
+                    className={clsx(classes.chip, classes.replyColor)}
+                    icon={
                       <Icon className={clsx(classes.sizeIcon, classes.replyColor)}> reply </Icon>
-                    </Tooltip>
-                  }
-                />
+                    }
+                  />
+                </Tooltip>
               ) : null}
             </div>
           </TableCell>
@@ -370,26 +370,26 @@ const Row = (props) => {
           <TableCell className={classes.cellBody} style={{ minWidth: 200 }}>
             <div className={classes.label}>
               {Apending.length ? (
-                <Chip
-                  label={Apending.length}
-                  className={clsx(classes.chip, classes.amendmentColor)}
-                  icon={
-                    <Tooltip title="Amendments">
+                <Tooltip title="Amendments">
+                  <Chip
+                    label={Apending.length}
+                    className={clsx(classes.chip, classes.amendmentColor)}
+                    icon={
                       <Icon className={clsx(classes.sizeIcon, classes.amendmentColor)}> edit </Icon>
-                    </Tooltip>
-                  }
-                />
+                    }
+                  />
+                </Tooltip>
               ) : null}
               {Areply.length ? (
-                <Chip
-                  label={Areply.length}
-                  className={clsx(classes.chip, classes.replyColor)}
-                  icon={
-                    <Tooltip title="New replies">
+                <Tooltip title="New replies">
+                  <Chip
+                    label={Areply.length}
+                    className={clsx(classes.chip, classes.replyColor)}
+                    icon={
                       <Icon className={clsx(classes.sizeIcon, classes.replyColor)}> reply </Icon>
-                    </Tooltip>
-                  }
-                />
+                    }
+                  />
+                </Tooltip>
               ) : null}
             </div>
           </TableCell>
@@ -398,26 +398,26 @@ const Row = (props) => {
           <TableCell className={classes.cellBody}>
             <div className={classes.label}>
               {countAllInquiry ? (
-                <Chip
-                  label={`${Iresolved.length}/${countAllInquiry}`}
-                  className={clsx(classes.chip, classes.resolvedColor)}
-                  icon={
-                    <Tooltip title="Inquiries">
+                <Tooltip title="Inquiries">
+                  <Chip
+                    label={`${Iresolved.length}/${countAllInquiry}`}
+                    className={clsx(classes.chip, classes.resolvedColor)}
+                    icon={
                       <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}> help </Icon>
-                    </Tooltip>
-                  }
-                />
+                    }
+                  />
+                </Tooltip>
               ) : null}
               {countAllAmend ? (
-                <Chip
-                  label={`${Aresolved.length}/${countAllAmend}`}
-                  className={clsx(classes.chip, classes.resolvedColor)}
-                  icon={
-                    <Tooltip title="Amendments">
+                <Tooltip title="Amendments">
+                  <Chip
+                    label={`${Aresolved.length}/${countAllAmend}`}
+                    className={clsx(classes.chip, classes.resolvedColor)}
+                    icon={
                       <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}> edit </Icon>
-                    </Tooltip>
-                  }
-                />
+                    }
+                  />
+                </Tooltip>
               ) : null}
             </div>
           </TableCell>

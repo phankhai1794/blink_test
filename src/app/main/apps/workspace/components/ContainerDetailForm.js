@@ -279,6 +279,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           inqType={container}
           containerDetail={getValueField(CONTAINER_DETAIL)}
           data={valueEdit[rowIndex]}
+          dataValues={values}
+          dataEdited={valueEdit}
           isEdit={!disableInput || isAllowEdit}
           setSave={() => setSaveCDCM(true)}
           updateData={(value) => setValues(value)}
@@ -340,7 +342,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                     >
                       {i === 0 ?
                         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }} className={classes.actionCdCmStyle}>
-                          <span className={'handleContNo'} onClick={() => handleClickConNo(vindex)}>{value}</span>
+                          {currentQuestion && currentQuestion.process === 'pending' ? (
+                            <span className={'handleContNo'} onClick={() => handleClickConNo(vindex)}>{value}</span>
+                          ) : <span >{value}</span>}
                           <IconButton onClick={() => {
                             setRowIndex(vindex)
                             handleEdit(true);
@@ -366,8 +370,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                       }
                     </TableCell>
                   )
-                }
-                )}
+                })}
               </TableRow>
             ))}
             <TableRow>

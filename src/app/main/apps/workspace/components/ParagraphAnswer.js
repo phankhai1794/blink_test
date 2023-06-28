@@ -102,7 +102,7 @@ const ParagraphAnswer = (props) => {
     } else if (!question.answerObj || !question.answerObj.length) {
       setParagraphText('')
     }
-  }, [question]);
+  }, [saveStatus]);
 
   useEffect(() => {
     if (
