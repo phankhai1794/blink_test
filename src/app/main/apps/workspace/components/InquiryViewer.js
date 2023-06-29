@@ -663,14 +663,17 @@ const InquiryViewer = (props) => {
             setQuestion(lastest);
             if (filterCDCM.length > 1) {
               setInqHasComment(true);
-              if ((
+              if (
+                (
                   (['REP_A_DRF', 'REP_A_SENT', 'ANS_DRF', 'ANS_SENT'].includes(filterOffshoreSent.state) && user.role === 'Guest')
-                  || (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state) && user.role === 'Admin')
-                  )
-                  && getIndexLatestCdCm) {
-                listComments.splice(getIndexLatestCdCm , 1);
+                  ||
+                  (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state) && user.role === 'Admin')
+                )
+                && getIndexLatestCdCm
+              ) {
+                listComments.splice(getIndexLatestCdCm, 1);
               }
-              listComments.splice(0 , 1);
+              listComments.splice(0, 1);
               // listComments = listComments.filter(l => {
               //   if (l.type === 'ANS' && l.answerObj && l.answerObj.length) {
               //     return l.answerObj[0].content !== ''
@@ -2102,26 +2105,26 @@ const InquiryViewer = (props) => {
           };
           // check edited content cd cm
           if (
-              question.oldData
-              && Object.keys(question.oldData).length
-              && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
+            question.oldData
+            && Object.keys(question.oldData).length
+            && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
           ) {
             setDisableSaveCdCm(true);
           }
           // check edited content cd cm
           if (
-              question.oldData
-              && Object.keys(question.oldData).length
-              && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
+            question.oldData
+            && Object.keys(question.oldData).length
+            && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
           ) {
             setDisableSaveCdCm(true);
           }
           // check empty content input
           if (
-              Object.keys(tempReply).length
-              && question.oldData
-              && Object.keys(question.oldData).length
-              && question.oldData.contentOld === tempReply.answer.content
+            Object.keys(tempReply).length
+            && question.oldData
+            && Object.keys(question.oldData).length
+            && question.oldData.contentOld === tempReply.answer.content
           ) {
             setDisableSaveCdCm(true);
           }
@@ -2134,9 +2137,9 @@ const InquiryViewer = (props) => {
             }
           }
           if (
-              Object.keys(tempReply).length
-              && question.oldData
-              && Object.keys(question.oldData).length
+            Object.keys(tempReply).length
+            && question.oldData
+            && Object.keys(question.oldData).length
           ) {
             if (question.oldData.contentOld !== tempReply.answer.content) {
               setDisableSaveCdCm(false);
@@ -2144,10 +2147,10 @@ const InquiryViewer = (props) => {
           }
         }
         else if (
-            (question.type === 'REP' || (user.role === 'Admin' && question.state === 'ANS_SENT'))
-            && Object.keys(tempReply).length
-            && question.oldData
-            && Object.keys(question.oldData).length) {
+          (question.type === 'REP' || (user.role === 'Admin' && question.state === 'ANS_SENT'))
+          && Object.keys(tempReply).length
+          && question.oldData
+          && Object.keys(question.oldData).length) {
           if (tempReply.answer.content === '') {
             setDisableSaveCdCm(true);
           } else if (question.oldData.contentOld !== tempReply.answer.content) {
@@ -2158,9 +2161,9 @@ const InquiryViewer = (props) => {
         }
       } else if (question.process === 'draft') {
         if (!question.state.includes("AME_DRF")
-            && (!question.state.includes("AME_SENT") || user.role !== 'Guest')
-            && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content)
-            && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0)) {
+          && (!question.state.includes("AME_SENT") || user.role !== 'Guest')
+          && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content)
+          && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0)) {
           setDisableSaveCdCm(true)
         } else {
           setDisableSaveCdCm(false)
@@ -2764,7 +2767,7 @@ const InquiryViewer = (props) => {
                 }
               </>
               : validateField(field, textResolve).errorType.split('\n').map((line, idx) => (
-                <span key={idx} style={{ display: 'block', lineHeight: '20px', color: isResolve ? 'red': 'rgba(0, 0, 0, 0.54)'}}>{line}</span>
+                <span key={idx} style={{ display: 'block', lineHeight: '20px', color: isResolve ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
               ))
             }
             onBlur={() => handleValidateInput('RESOLVE', onConfirm, true, true)}
@@ -3077,7 +3080,7 @@ const InquiryViewer = (props) => {
                   <Diff
                     inputA={renderContent(orgContent[question.field])}
                     inputB={getNewValueDiffViewer(question.content)}
-                    type="lines"
+                    type="words"
                   />
                 )
             }
@@ -3390,7 +3393,7 @@ const InquiryViewer = (props) => {
                               error={validateField(question.field, tempReply?.answer?.content).isError}
                               helperText={
                                 validateField(question.field, tempReply?.answer?.content).errorType.split('\n').map((line, idx) => (
-                                  <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14,color: isResolve ? 'red': 'rgba(0, 0, 0, 0.54)'}}>{line}</span>
+                                  <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: isResolve ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
                                 ))
                               }
                             />}

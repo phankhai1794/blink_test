@@ -310,7 +310,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           horizontal: 'center',
         }}
       >
-        <Diff inputA={historyValue.originalValue} inputB={historyValue.value} type="lines" />
+        <Diff inputA={historyValue.originalValue} inputB={historyValue.value} type="words" />
       </Popover>
 
       <div style={{ maxWidth: '100̀%', overflowX: 'auto' }}>
