@@ -73,7 +73,8 @@ const useStyles = makeStyles((theme) => ({
     },
     '& input': {
       fontFamily: 'Montserrat',
-      fontSize: '14px'
+      fontSize: '14px',
+      textTransform: 'uppercase'
     }
   },
   searchBox: {

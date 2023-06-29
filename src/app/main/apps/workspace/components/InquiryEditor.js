@@ -306,7 +306,7 @@ const InquiryEditor = (props) => {
     const inq = { ...currentEditInq };
     const timeB = new Date();
     const timeW = new Date(timeB.getTime() + 1);
-    inq.answerObj.push({ id: null, content: 'B', createdAt: timeB }, { id: null, content: 'W', createdAt: timeW });
+    inq.answerObj.push({ id: null, content: 'Original B/L', createdAt: timeB }, { id: null, content: 'Seaway Bill', createdAt: timeW });
     dispatch(InquiryActions.setEditInq(inq));
   }
 
