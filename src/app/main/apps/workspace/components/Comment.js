@@ -193,7 +193,7 @@ const Comment = (props) => {
                   {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
                     <div className={reply.isChangeRecipient ? 'markReopen' : ''}>
                       {['RESOLVED', 'COMPL'].includes(reply.state) ?
-                        <Diff inputA={orgContent[question.field]} inputB={renderContent()} type="lines" /> :
+                        <Diff inputA={isDateTime ? formatDate(orgContent[question.field], 'DD MMM YYYY') : orgContent[question.field]} inputB={renderContent()} type="lines" /> :
                         renderContent()
                       }
                     </div> :
@@ -207,7 +207,7 @@ const Comment = (props) => {
           {containerCheck.includes(currentQuestion.field)
             && currentQuestion.inqGroup && currentQuestion.inqGroup.length
             && ['ANS', 'INQ'].includes(reply.type)
-              ? currentQuestion.inqGroup.map(q => {
+            ? currentQuestion.inqGroup.map(q => {
               return (
                 <div key={q.id}>
                   <InquiryWithGroup inqGroup={q} role={user.role} />
