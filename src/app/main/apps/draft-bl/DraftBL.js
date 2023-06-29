@@ -353,7 +353,7 @@ const DraftPage = (props) => {
               PAGE: <p className={classes.page_Count}>1</p> OF <p className={classes.page_Count}>{totalPage}</p>
             </div>
             <span className={classes.blType}>
-              {getValueField(BL_TYPE) ? getValueField(BL_TYPE) === "W" ? "SEAWAY BILL" : "BILL OF LADING" : ""}
+              {getValueField(BL_TYPE) ? getValueField(BL_TYPE) === "W" ? "SEAWAY BILL" : "ORIGINAL B/L" : ""}
             </span>
           </div>
         </div>

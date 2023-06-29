@@ -2764,7 +2764,7 @@ const InquiryViewer = (props) => {
                 }
               </>
               : validateField(field, textResolve).errorType.split('\n').map((line, idx) => (
-                <span key={idx} style={{ display: 'block', lineHeight: '20px', color: 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+                <span key={idx} style={{ display: 'block', lineHeight: '20px', color: isResolve ? 'red': 'rgba(0, 0, 0, 0.54)'}}>{line}</span>
               ))
             }
             onBlur={() => handleValidateInput('RESOLVE', onConfirm, true, true)}
@@ -3390,7 +3390,7 @@ const InquiryViewer = (props) => {
                               error={validateField(question.field, tempReply?.answer?.content).isError}
                               helperText={
                                 validateField(question.field, tempReply?.answer?.content).errorType.split('\n').map((line, idx) => (
-                                  <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+                                  <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14,color: isResolve ? 'red': 'rgba(0, 0, 0, 0.54)'}}>{line}</span>
                                 ))
                               }
                             />}
