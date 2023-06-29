@@ -174,7 +174,9 @@ const OtpCheck = ({ children }) => {
   const catchError = (error) => {
     console.error(error);
     const { message } = error.response.data.error || error.message;
-    if (message !== "Forbidden") dispatch(Actions.showMessage({ message, variant: 'error' }));
+
+    if (message.includes("not ready yet")) dispatch(Actions.showMessage({ message, variant: 'warning' }));
+    else if (message !== "Forbidden") dispatch(Actions.showMessage({ message, variant: 'error' }));
   }
 
   const handleChangeMail = (e) => {
