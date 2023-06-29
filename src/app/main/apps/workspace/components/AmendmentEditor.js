@@ -589,7 +589,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
       <div className={classes.attachmentFiles}>
         {attachments?.map((file, mediaIndex) => (
-          <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+          <>
             <FileAttach
               file={file}
               files={attachments}
@@ -597,7 +597,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
               draftBL={true}
               removeAttachmentDraftBL={() => removeAttachment(mediaIndex)}
             />
-          </div>
+          </>
         ))}
       </div>
 

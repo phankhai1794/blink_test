@@ -905,6 +905,7 @@ const InquiryViewer = (props) => {
               comments.splice(comments.length - 1, 0, markReopen);
             }
             comments = comments.filter(c => c.content !== '');
+            if (comments.length > 1) comments.splice(comments.length - 1, 1)
             setComment(comments);
             setInqHasComment(true);
           }
@@ -3228,7 +3229,7 @@ const InquiryViewer = (props) => {
                 {question.mediaFile?.length > 0 &&
                   !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
                   question.mediaFile?.map((file, mediaIndex) => (
-                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                    <>
                       <FileAttach
                         hiddenRemove={true}
                         file={file}
@@ -3238,7 +3239,7 @@ const InquiryViewer = (props) => {
                         indexMedia={mediaIndex}
                         question={question}
                       />
-                    </div>
+                    </>
                   ))}
               </div>
             </>
@@ -3253,7 +3254,7 @@ const InquiryViewer = (props) => {
                   onMouseLeave={() => { question.showIconEdit && dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
                 >
                   {question.mediaFilesAnswer?.map((file, mediaIndex) => (
-                    <div key={mediaIndex} style={{ position: 'relative', display: 'inline-block' }}>
+                    <>
                       <FileAttach
                         file={file}
                         files={question.mediaFilesAnswer}
@@ -3269,7 +3270,7 @@ const InquiryViewer = (props) => {
                           setIsRemoveFile(val)
                         }}
                       />
-                    </div>
+                    </>
                   ))}
                 </div>
               </>
@@ -3401,9 +3402,7 @@ const InquiryViewer = (props) => {
                         onMouseLeave={() => { question.showIconEdit && dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
                       >
                         {tempReply?.mediaFiles?.map((file, mediaIndex) => (
-                          <div
-                            style={{ position: 'relative', display: 'inline-block' }}
-                            key={mediaIndex}>
+                          <>
                             <FileAttach
                               hiddenRemove={!question.showIconAttachReplyFile}
                               file={file}
@@ -3418,7 +3417,7 @@ const InquiryViewer = (props) => {
                                 setTempReply(val)
                               }}
                             />
-                          </div>
+                          </>
                         ))}
                       </div>
 

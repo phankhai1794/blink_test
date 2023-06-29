@@ -78,7 +78,7 @@ const Inquiry = (props) => {
         )
       )
     ));
-    if (user.role === 'Admin') {
+    if (user.role === 'Admin' && containerCheck.includes(currentField)) {
       const filterInqDrf = inquiries.filter(inq =>
         containerCheck.includes(inq.field) && inq.process === 'draft');
       const filterInqPending = inquiries.filter(inq => containerCheck.includes(inq.field) && inq.process === 'pending');
