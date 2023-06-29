@@ -1451,18 +1451,18 @@ const InquiryEditor = (props) => {
               />
             )}
             <Divider className="mt-12" />
-            <div style={{ width: '102%' }}>
+            <div className={'attachment'}>
               {currentEditInq.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
               {currentEditInq.mediaFile?.length > 0 &&
                 currentEditInq.mediaFile?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  <>
                     <FileAttach
                       file={file}
                       files={currentEditInq.mediaFile}
                       field={currentEditInq.field}
                       question={currentEditInq}
                     />
-                  </div>
+                  </>
                 ))}
             </div>
 
@@ -1470,8 +1470,8 @@ const InquiryEditor = (props) => {
               {user.role !== 'Admin' && (
                 <>
                   {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-                  {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
-                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  {currentEditInq.mediaFilesAnswer?.map((file) => (
+                    <>
                       <FileAttach
                         file={file}
                         files={currentEditInq.mediaFilesAnswer}
@@ -1479,7 +1479,7 @@ const InquiryEditor = (props) => {
                         isAnswer={true}
                         question={currentEditInq}
                       />
-                    </div>
+                    </>
                   ))}
                 </>
               )}
