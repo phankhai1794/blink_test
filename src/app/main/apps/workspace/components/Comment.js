@@ -193,7 +193,7 @@ const Comment = (props) => {
                   {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
                     <div className={reply.isChangeRecipient ? 'markReopen' : ''}>
                       {['RESOLVED', 'COMPL'].includes(reply.state) ?
-                        <Diff inputA={isDateTime ? formatDate(orgContent[question.field], 'DD MMM YYYY') : orgContent[question.field]} inputB={renderContent()} type="lines" /> :
+                        <Diff inputA={isDateTime ? formatDate(orgContent[question.field], 'DD MMM YYYY') : orgContent[question.field]} inputB={renderContent()} type="chars" /> :
                         renderContent()
                       }
                     </div> :

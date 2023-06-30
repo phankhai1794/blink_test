@@ -3078,7 +3078,7 @@ const InquiryViewer = (props) => {
                   <Diff
                     inputA={renderContent(orgContent[question.field])}
                     inputB={getNewValueDiffViewer(question.content)}
-                    type="words"
+                    type="chars"
                   />
                 )
             }
