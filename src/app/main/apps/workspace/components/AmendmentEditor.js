@@ -416,7 +416,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             error={validateField(field, fieldValue).isError}
             helperText={
               validateField(field, fieldValue).errorType.split('\n').map((line, idx) => (
-                <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+                <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'red' }}>{line}</span>
               ))
             }
           />
@@ -589,7 +589,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
       <div className={classes.attachmentFiles}>
         {attachments?.map((file, mediaIndex) => (
-          <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+          <>
             <FileAttach
               file={file}
               files={attachments}
@@ -597,7 +597,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
               draftBL={true}
               removeAttachmentDraftBL={() => removeAttachment(mediaIndex)}
             />
-          </div>
+          </>
         ))}
       </div>
 

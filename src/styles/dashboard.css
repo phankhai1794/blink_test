@@ -4,13 +4,28 @@
   position: absolute;
 }
 
-.flag-country:not(:first-child) {
+.circle-flag {
+  border-radius: 50%;
+  border: 1px solid #BD0F72;
+}
+
+.circle-flag:not(:first-child) {
   margin-left: -10px;
 }
 
-.circle-flag {
+.circle-flag-plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  border: 1px solid #8aaae5;
+  border: 1px solid #BD0F72;
+  width: 25px;
+  height: 25px;
+  background-color: #FDF2F2;
+  color: #BD0F72;
+  font-size: 12px;
+  font-family: Montserrat;
+  margin-left: -10px;
 }
 
 .circle-flag-default svg {

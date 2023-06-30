@@ -389,7 +389,8 @@ function ToolbarLayout1(props) {
   const confirmBlDraft = () => {
     if (inquiries.some((inq) => !['RESOLVED', 'UPLOADED', 'COMPL'].includes(inq.state))) {
       dispatch(AppActions.showMessage({ message: "Unable to confirm, still has pending inquiry/amendment", variant: 'warning' }));
-    } else setOpen(true);
+    }
+    setOpen(true);
   };
 
   const redirectWorkspace = () => {

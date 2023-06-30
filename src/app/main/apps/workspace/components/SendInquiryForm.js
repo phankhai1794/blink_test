@@ -1,6 +1,6 @@
 import * as Actions from 'app/store/actions';
 import { checkNewInquiry } from '@shared';
-import { PORT_OF_DISCHARGE, PORT_OF_LOADING, VESSEL_VOYAGE_CODE, PRE_CARRIAGE_CODE, ETD } from '@shared/keyword';
+import { PORT_OF_DISCHARGE, PORT_OF_LOADING, VESSEL_VOYAGE_CODE, PRE_CARRIAGE_CODE, ETD, SHIPPER_NAME } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import React, { useState, useEffect, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -158,6 +158,7 @@ const SendInquiryForm = (props) => {
   const pod = getValueField(PORT_OF_DISCHARGE);
   const pol = getValueField(PORT_OF_LOADING)
   const etd = getValueField(ETD);
+  const shipperName = getValueField(SHIPPER_NAME);
 
   const bkgNo = mybl.bkgNo;
 
@@ -243,7 +244,7 @@ const SendInquiryForm = (props) => {
     if (hasOnshore || (!hasOnshore && inqOnshore.length)) {
       setTabValue('onshore');
 
-      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
+      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: ${shipperName} T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
       content = pathName.includes('/guest') ? '' : `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion.\n \nPending issue(s):'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
@@ -259,7 +260,7 @@ const SendInquiryForm = (props) => {
       setTabValue('customer');
 
       const [msg1, msg2, header, subj] = convertToList(inqCustomer, 'customer');
-      subject = `[${subj}]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
+      subject = `[${subj}]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: ${shipperName} T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
       content = pathName.includes('/guest') ? '' : `Dear Customer,\n \n${msg1 || `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`}\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({
@@ -271,7 +272,7 @@ const SendInquiryForm = (props) => {
       });
     }
     if (pathName.includes('/guest')) {
-      subject = `Fwd: ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
+      subject = `Fwd: ${bkgNo}: ${shipperName} T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
     }
     setForm({ ...form, subject, content: bodyHtml, toOnshore, toCustomer });
     handleEditorState(content);

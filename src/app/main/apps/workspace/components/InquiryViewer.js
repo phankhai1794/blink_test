@@ -308,7 +308,6 @@ const InquiryViewer = (props) => {
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
   const openConfirmPopup = useSelector(({ workspace }) => workspace.formReducer.openConfirmPopup);
   const confirmPopupType = useSelector(({ workspace }) => workspace.formReducer.confirmPopupType);
-  const oldDataCdCmInq = useSelector(({ workspace }) => workspace.inquiryReducer.oldDataCdCmInq);
   const eventClickContNo = useSelector(({ workspace }) => workspace.formReducer.eventClickContNo);
   const [isSaveComment, setSaveComment] = useState(false);
   const [checkStateReplyDraft, setStateReplyDraft] = useState(false);
@@ -320,7 +319,6 @@ const InquiryViewer = (props) => {
   const [isDisableSaveCdCm, setDisableSaveCdCm] = useState(true);
   const [disableAcceptResolve, setDisableAcceptResolve] = useState(false);
   const [disableReopen, setDisableReopen] = useState(false);
-  const [isEditOriginalAmendment, setEditOriginalAmendment] = useState(false);
   const inqViewerFocus = useSelector(({ workspace }) => workspace.formReducer.inqViewerFocus);
   const [inqAnsId, setInqAnsId] = useState('');
   const validateInput = useSelector(({ workspace }) => workspace.formReducer.validateInput);
@@ -663,14 +661,16 @@ const InquiryViewer = (props) => {
             setQuestion(lastest);
             if (filterCDCM.length > 1) {
               setInqHasComment(true);
-              if ((
+              if (
+                (
                   (['REP_A_DRF', 'REP_A_SENT', 'ANS_DRF', 'ANS_SENT'].includes(filterOffshoreSent.state) && user.role === 'Guest')
-                  || (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state) && user.role === 'Admin')
-                  )
-                  && getIndexLatestCdCm) {
-                listComments.splice(getIndexLatestCdCm , 1);
+                  ||
+                  (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state) && user.role === 'Admin')
+                ) && getIndexLatestCdCm
+              ) {
+                listComments.splice(getIndexLatestCdCm, 1);
               }
-              listComments.splice(0 , 1);
+              listComments.splice(0, 1);
               // listComments = listComments.filter(l => {
               //   if (l.type === 'ANS' && l.answerObj && l.answerObj.length) {
               //     return l.answerObj[0].content !== ''
@@ -724,7 +724,6 @@ const InquiryViewer = (props) => {
       getCommentDraftBl(myBL.id, question.field)
         .then((res) => {
           if (isUnmounted) return;
-          // setEditOriginalAmendment(res.length === 1);
           // res.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
           const lastest = { ...question };
           if (res.length > 0) {
@@ -854,9 +853,6 @@ const InquiryViewer = (props) => {
                 if (typeof lastest.content === 'string') setTempReply({});
               }
             }
-            if (isEditOriginalAmendment) {
-              dispatch(InquiryActions.setContent({ ...content, [lastest.field]: lastest.content }));
-            }
             setQuestion(lastest);
 
             // push new lastestComment if not already exist
@@ -905,6 +901,7 @@ const InquiryViewer = (props) => {
               comments.splice(comments.length - 1, 0, markReopen);
             }
             comments = comments.filter(c => c.content !== '');
+            if (comments.length > 1) comments.splice(comments.length - 1, 1)
             setComment(comments);
             setInqHasComment(true);
           }
@@ -1102,7 +1099,6 @@ const InquiryViewer = (props) => {
           dispatch(InquiryActions.setListCommentDraft(cloneListCommentDraft));
           if (res) {
             let newContent = { ...content };
-            setEditOriginalAmendment(res.isEditOriginalAmendment);
             setViewDropDown('');
             setDisableSaveReply(false);
             const optionsOfQuestion = [...inquiries];
@@ -1114,15 +1110,14 @@ const InquiryViewer = (props) => {
             const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
             if (res.checkEmpty) {
               if (removeIndex !== -1) {
-                newContent = { ...content, [question.field]: contentInqResolved[question.field] };
+                newContent = { ...newContent, [question.field]: contentInqResolved[question.field] };
                 optionsOfQuestion.splice(removeIndex, 1);
               }
               // remove all cd cm amendment
               if (res.removeAllCDCM) {
                 getBlInfo(myBL.id).then((res) => {
                   if (res) {
-                    const { content } = res.myBL;
-                    newContent = { ...content, [containerCheck[0]]: content[containerCheck[0]], [containerCheck[1]]: content[containerCheck[1]] }
+                    newContent = { ...newContent, [containerCheck[0]]: res.myBL.content[containerCheck[0]], [containerCheck[1]]: res.myBL.content[containerCheck[1]] }
                   }
                 })
               } else {
@@ -1132,7 +1127,7 @@ const InquiryViewer = (props) => {
                   if (question.field === idCM) {
                     // response drfAnswersTrans cd content
                     const response = res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[idCD];
-                    newContent = { ...content, [idCD]: response };
+                    newContent = { ...newContent, [idCD]: response };
                     // map cd -> cm
                     let cm = content[containerCheck[1]]
                     if (cm) {
@@ -1149,7 +1144,7 @@ const InquiryViewer = (props) => {
                   } else if (question.field === idCD) {
                     // response drfAnswersTrans cm content
                     const response = res.drfAnswersTrans.length ? res.drfAnswersTrans : orgContent[idCM];
-                    newContent = { ...content, [idCM]: response };
+                    newContent = { ...newContent, [idCM]: response };
                     // map cm -> cd
                     let cd = content[containerCheck[0]]
                     if (cd) {
@@ -1164,7 +1159,6 @@ const InquiryViewer = (props) => {
                     }
                   }
                 }
-                //
               }
               if (field !== 'INQUIRY_LIST') {
                 if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
@@ -1194,7 +1188,7 @@ const InquiryViewer = (props) => {
               const idCD = metadata.field[CONTAINER_DETAIL];
               const idCM = metadata.field[CONTAINER_MANIFEST];
               if (res.drfAnswersTrans && question.state.includes('AME_')) {
-                if (idCD === question.field) {
+                if (question.field === idCD) {
                   let cm = content[containerCheck[1]]
                   if (cm) {
                     cm[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans[0][getTypeCDCM(CONTAINER_NUMBER)];
@@ -1218,7 +1212,7 @@ const InquiryViewer = (props) => {
                       })
                       .catch((err) => handleError(dispatch, err));
                   }
-                } else if (idCM === question.field) {
+                } else if (question.field === idCM) {
                   let cd = content[containerCheck[0]]
                   if (cd) {
                     cd[0][getTypeCDCM(CONTAINER_NUMBER)] = res.drfAnswersTrans[0][getTypeCDCM(CONTAINER_NUMBER)];
@@ -1242,10 +1236,13 @@ const InquiryViewer = (props) => {
                       })
                       .catch((err) => handleError(dispatch, err));
                   }
+                } else if (res.isEditOriginalAmendment) {
+                  newContent = { ...newContent, [question.field]: res.drfAnswersTrans }
                 }
+
                 if (res.emptyCDorCMAmendment) {
                   if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
-                  newContent = { ...content, [question.field]: res.drfAnswersTrans };
+                  newContent = { ...newContent, [question.field]: res.drfAnswersTrans };
                   if (field !== 'INQUIRY_LIST') {
                     if (!inquiriesByField.length) dispatch(InquiryActions.setOneInq({}));
                   } else {
@@ -1266,7 +1263,7 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.addAmendment());
             props.getUpdatedAt();
 
-            // sync delete amendment
+            // sync delete amendment / reply amendment
             syncData({ inquiries: optionsOfQuestion, content: newContent });
           }
           // setSaveComment(!isSaveComment);
@@ -2101,26 +2098,26 @@ const InquiryViewer = (props) => {
           };
           // check edited content cd cm
           if (
-              question.oldData
-              && Object.keys(question.oldData).length
-              && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
+            question.oldData
+            && Object.keys(question.oldData).length
+            && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
           ) {
             setDisableSaveCdCm(true);
           }
           // check edited content cd cm
           if (
-              question.oldData
-              && Object.keys(question.oldData).length
-              && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
+            question.oldData
+            && Object.keys(question.oldData).length
+            && JSON.stringify(question.oldData.cdCmDataOld) === JSON.stringify(contentCDCM)
           ) {
             setDisableSaveCdCm(true);
           }
           // check empty content input
           if (
-              Object.keys(tempReply).length
-              && question.oldData
-              && Object.keys(question.oldData).length
-              && question.oldData.contentOld === tempReply.answer.content
+            Object.keys(tempReply).length
+            && question.oldData
+            && Object.keys(question.oldData).length
+            && question.oldData.contentOld === tempReply.answer.content
           ) {
             setDisableSaveCdCm(true);
           }
@@ -2133,9 +2130,9 @@ const InquiryViewer = (props) => {
             }
           }
           if (
-              Object.keys(tempReply).length
-              && question.oldData
-              && Object.keys(question.oldData).length
+            Object.keys(tempReply).length
+            && question.oldData
+            && Object.keys(question.oldData).length
           ) {
             if (question.oldData.contentOld !== tempReply.answer.content) {
               setDisableSaveCdCm(false);
@@ -2143,10 +2140,10 @@ const InquiryViewer = (props) => {
           }
         }
         else if (
-            (question.type === 'REP' || (user.role === 'Admin' && question.state === 'ANS_SENT'))
-            && Object.keys(tempReply).length
-            && question.oldData
-            && Object.keys(question.oldData).length) {
+          (question.type === 'REP' || (user.role === 'Admin' && question.state === 'ANS_SENT'))
+          && Object.keys(tempReply).length
+          && question.oldData
+          && Object.keys(question.oldData).length) {
           if (tempReply.answer.content === '') {
             setDisableSaveCdCm(true);
           } else if (question.oldData.contentOld !== tempReply.answer.content) {
@@ -2157,9 +2154,9 @@ const InquiryViewer = (props) => {
         }
       } else if (question.process === 'draft') {
         if (!question.state.includes("AME_DRF")
-            && (!question.state.includes("AME_SENT") || user.role !== 'Guest')
-            && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content)
-            && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0)) {
+          && (!question.state.includes("AME_SENT") || user.role !== 'Guest')
+          && (['string'].includes(typeof tempReply?.answer?.content) ? !tempReply?.answer?.content?.trim() : !tempReply?.answer?.content)
+          && (!tempReply.mediaFiles || tempReply.mediaFiles.length === 0)) {
           setDisableSaveCdCm(true)
         } else {
           setDisableSaveCdCm(false)
@@ -2330,7 +2327,7 @@ const InquiryViewer = (props) => {
           }).catch((error) => handleError(dispatch, error));
       }
     } else {
-      if (!tempReply.answer?.id) { // Create amendment / reply
+      if (!tempReply.answer?.id) { // Create reply amendment
         const reqReply = {
           field: question.field,
           content: {
@@ -2344,7 +2341,7 @@ const InquiryViewer = (props) => {
         saveEditedField({ ...reqReply })
           .then((res) => {
             optionsInquires[editedIndex].createdAt = res.createdAt;
-            if (question.state.includes('AME_')) {
+            if (question.state.includes('AME_DRF')) {
               dispatch(InquiryActions.setContent({
                 ...content,
                 [question.field]: question.content
@@ -2352,7 +2349,7 @@ const InquiryViewer = (props) => {
               optionsInquires[editedIndex].state = 'AME_DRF';
             } else {
               optionsInquires[editedIndex].state = 'REP_DRF';
-              if (user.role === 'Guest') {
+              if (user.role === 'Guest' && containerCheck.includes(question.field)) {
                 const contentCDCM = question.contentReplyCDCM;
                 dispatch(InquiryActions.setContent({
                   ...content,
@@ -2368,6 +2365,9 @@ const InquiryViewer = (props) => {
             dispatch(InquiryActions.setReply(false));
             dispatch(AppAction.showMessage({ message: 'Save Reply successfully', variant: 'success' }));
             dispatch(InquiryActions.setNewAmendment({ oldAmendmentId: question.id, newAmendment: res.newAmendment }));
+
+            // sync create reply amendment
+            syncData({ inquiries: optionsInquires });
           })
           .catch((error) => handleError(dispatch, error));
       }
@@ -2406,37 +2406,39 @@ const InquiryViewer = (props) => {
           .then((res) => {
             if (res) dispatch(InquiryActions.setNewAmendment({ newAmendment: res.newAmendment }));
 
-            let contentCDCM;
-            let newDrfRepContent = { ...content };
             optionsInquires[editedIndex].mediaFile = mediaListAmendment;
             optionsInquires[editedIndex].createdAt = res.createdAt;
             setDisableSaveReply(false);
             const fieldUpdate = containerCheck[0] === question.field ? containerCheck[1] : containerCheck[0];
+
+            let contentCDCM = question.contentReplyCDCM;
+            let newDrfRepContent = { ...content };
             if (question.state.includes('AME_')) {
-              newDrfRepContent = { ...content, [res.newAmendment?.field]: newContent, [fieldUpdate]: res.contentIsMap }
-              contentCDCM = tempReply.answer.content;
-              optionsInquires[editedIndex].state = 'AME_DRF';
-            } else {
-              if (user.role === 'Guest') {
-                newDrfRepContent = { ...content, [question.field]: question.contentReplyCDCM, [fieldUpdate]: res.contentIsMap };
+              if (containerCheck.includes(question.field)) {
+                newDrfRepContent = { ...newDrfRepContent, [res.newAmendment?.field]: newContent, [fieldUpdate]: res.contentIsMap }
+              } else {
+                newDrfRepContent = { ...newDrfRepContent, [res.newAmendment?.field]: newContent }
               }
-              contentCDCM = question.contentReplyCDCM;
-              optionsInquires[editedIndex].state = 'REP_DRF';
+              contentCDCM = tempReply.answer.content;
+            } else if (user.role === 'Guest' && containerCheck.includes(question.field)) {
+              newDrfRepContent = { ...newDrfRepContent, [question.field]: question.contentReplyCDCM, [fieldUpdate]: res.contentIsMap };
             }
 
             setIsResolveCDCM(false);
             dispatch(InquiryActions.setInquiries(optionsInquires));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
-            dispatch(InquiryActions.setContent(newDrfRepContent)); // field data is null after setContent -> need to discuss
+            dispatch(InquiryActions.setContent(newDrfRepContent));
             props.getUpdatedAt();
 
-            // sync edit amendment
+            // sync edit amendment / reply amendment
             syncData(
               {
                 inquiries: optionsInquires,
-                // ...(Object.keys(newDrfRepContent).length && { content: newDrfRepContent })
+                ...(optionsInquires[editedIndex].state.includes('AME_') && { content: newDrfRepContent })
               },
-              optionsInquires[editedIndex].state === 'REP_DRF' ? (user.userType === "ADMIN" ? "CUSTOMER" : "ADMIN") : ""
+              optionsInquires[editedIndex].state === 'REP_SENT' ?
+                (user.userType === "ADMIN" ? "CUSTOMER" : "ADMIN") :
+                (optionsInquires[editedIndex].state === 'AME_SENT' ? "ADMIN" : "")
             );
           })
           .catch((err) => handleError(dispatch, err));
@@ -2763,7 +2765,7 @@ const InquiryViewer = (props) => {
                 }
               </>
               : validateField(field, textResolve).errorType.split('\n').map((line, idx) => (
-                <span key={idx} style={{ display: 'block', lineHeight: '20px', color: 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+                <span key={idx} style={{ display: 'block', lineHeight: '20px', color: isResolve ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
               ))
             }
             onBlur={() => handleValidateInput('RESOLVE', onConfirm, true, true)}
@@ -3076,7 +3078,7 @@ const InquiryViewer = (props) => {
                   <Diff
                     inputA={renderContent(orgContent[question.field])}
                     inputB={getNewValueDiffViewer(question.content)}
-                    type="lines"
+                    type="words"
                   />
                 )
             }
@@ -3228,7 +3230,7 @@ const InquiryViewer = (props) => {
                 {question.mediaFile?.length > 0 &&
                   !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
                   question.mediaFile?.map((file, mediaIndex) => (
-                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                    <>
                       <FileAttach
                         hiddenRemove={true}
                         file={file}
@@ -3238,7 +3240,7 @@ const InquiryViewer = (props) => {
                         indexMedia={mediaIndex}
                         question={question}
                       />
-                    </div>
+                    </>
                   ))}
               </div>
             </>
@@ -3253,7 +3255,7 @@ const InquiryViewer = (props) => {
                   onMouseLeave={() => { question.showIconEdit && dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
                 >
                   {question.mediaFilesAnswer?.map((file, mediaIndex) => (
-                    <div key={mediaIndex} style={{ position: 'relative', display: 'inline-block' }}>
+                    <>
                       <FileAttach
                         file={file}
                         files={question.mediaFilesAnswer}
@@ -3269,7 +3271,7 @@ const InquiryViewer = (props) => {
                           setIsRemoveFile(val)
                         }}
                       />
-                    </div>
+                    </>
                   ))}
                 </div>
               </>
@@ -3389,7 +3391,7 @@ const InquiryViewer = (props) => {
                               error={validateField(question.field, tempReply?.answer?.content).isError}
                               helperText={
                                 validateField(question.field, tempReply?.answer?.content).errorType.split('\n').map((line, idx) => (
-                                  <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+                                  <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: isResolve ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
                                 ))
                               }
                             />}
@@ -3401,9 +3403,7 @@ const InquiryViewer = (props) => {
                         onMouseLeave={() => { question.showIconEdit && dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
                       >
                         {tempReply?.mediaFiles?.map((file, mediaIndex) => (
-                          <div
-                            style={{ position: 'relative', display: 'inline-block' }}
-                            key={mediaIndex}>
+                          <>
                             <FileAttach
                               hiddenRemove={!question.showIconAttachReplyFile}
                               file={file}
@@ -3418,7 +3418,7 @@ const InquiryViewer = (props) => {
                                 setTempReply(val)
                               }}
                             />
-                          </div>
+                          </>
                         ))}
                       </div>
 

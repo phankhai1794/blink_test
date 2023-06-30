@@ -227,30 +227,30 @@ const Comment = (props) => {
 
           <div className="attachment-reply">
             {media?.length > 0 &&
-              media?.map((file, mediaIndex) => (
-                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+              media?.map((file) => (
+                <>
                   <FileAttach
                     hiddenRemove={true}
                     file={file}
                     files={media}
                     indexInquiry={id}
-                    question={question} />
-                </div>
+                    question={reply} />
+                </>
               ))}
           </div>
           <div className='attachment-answer' style={{ width: '108%' }}>
             {answersMedia?.length > 0 && (
               <>
                 {answersMedia?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  <>
                     <FileAttach
                       hiddenRemove={true}
                       file={file}
                       files={answersMedia}
                       indexInquiry={id}
-                      question={question}
+                      question={reply}
                     />
-                  </div>
+                  </>
                 ))}
               </>
             )}

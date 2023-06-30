@@ -308,10 +308,11 @@ const Row = (props) => {
             </a>
           </TableCell>
         </StickyTableCell>
-        {columns.lastUpdate && <TableCell className={classes.cellBody}>
-          {formatDate(row.lastUpdated, 'MMM DD YYYY HH:mm')}
-        </TableCell>
-        }
+        {columns.lastUpdate && (
+          <TableCell className={classes.cellBody}>
+            {formatDate(row.lastUpdated, 'MMM DD YYYY HH:mm')}
+          </TableCell>
+        )}
         {columns.etd && (
           <TableCell className={classes.cellBody}>
             {row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}
@@ -434,7 +435,7 @@ const Row = (props) => {
               style={{ display: 'flex', margin: 0, height: '50px' }}
               value={tab}
               onChange={handleChange}>
-              {countAllInquiry > 0 &&
+              {countAllInquiry > 0 && (
                 <Tab
                   value={0}
                   classes={{ wrapper: classes.iconLabelWrapper }}
@@ -446,8 +447,8 @@ const Row = (props) => {
                     </div>
                   }
                 />
-              }
-              {countAllAmend > 0 &&
+              )}
+              {countAllAmend > 0 && (
                 <Tab
                   value={1}
                   classes={{ wrapper: classes.iconLabelWrapper }}
@@ -459,7 +460,7 @@ const Row = (props) => {
                     </div>
                   }
                 />
-              }
+              )}
             </Tabs>
             <EllipsisPopper anchorEl={anchorEl} ref={arrowRef}>
               <div className="arrow" ref={handleArrorRef} />
@@ -619,7 +620,7 @@ const QueueListTable = () => {
           bkgNos: searchQueueQuery.bookingNo
             .split(',')
             .filter((bkg) => bkg)
-            .map((bkg) => bkg.trim()),
+            .map((bkg) => bkg.trim().toUpperCase()),
           blinkStatus: searchQueueQuery.blStatus,
           countries
         },
