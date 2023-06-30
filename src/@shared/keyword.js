@@ -4,6 +4,8 @@ export const BL_TYPE = 'blType';
 
 export const SHIPPER = 'shipper';
 
+export const SHIPPER_NAME = 'shipperName';
+
 export const CONSIGNEE = 'consignee';
 
 export const NOTIFY = 'notify';

@@ -2,7 +2,7 @@ import { sendmail, getSuggestMail } from 'app/services/mailService';
 import { loadComment } from 'app/services/inquiryService';
 import axios from 'axios';
 import { handleError } from '@shared/handleError';
-import { PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, VESSEL_VOYAGE_CODE, PRE_CARRIAGE_CODE, ETD } from '@shared/keyword';
+import { PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, VESSEL_VOYAGE_CODE, PRE_CARRIAGE_CODE, ETD, SHIPPER_NAME } from '@shared/keyword';
 import * as AppActions from 'app/main/apps/workspace/store/actions';
 
 import * as InquiryActions from '../actions/inquiry';
@@ -138,13 +138,15 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   const pod = getValueField(content, PORT_OF_DISCHARGE)
   const del = getValueField(content, PLACE_OF_DELIVERY)
   const etd = getValueField(ETD);
+  const shipperName = getValueField(SHIPPER_NAME);
+
   const bkgNo = mybl.bkgNo
   dispatch(InquiryActions.setInquiries(cloneInquiries));
 
   if (hasOnshore && form.toOnshore && inqOnshore.length > 0) {
     const formOnshore = { ...form };
     formOnshore['toCustomer'] = '';
-    subjectOns = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + DEL(${del}) + ETD(${etd})`
+    subjectOns = `[Onshore - BL Query]_[${inqOnshore.join(', ')}] ${bkgNo}: ${shipperName} T/VVD(${vvdCode}) + POD(${pod}) + DEL(${del}) + ETD(${etd})`
     contentOns = `Dear Onshore, \n\nWe need your assistance for BL completion.\nPending issue: [${inqOnshore.join(', ')}]`
     dispatch(sendMail({ myblId: mybl.id, bkgNo, ...formOnshore, subject: subjectOns, content: contentOns, inquiries: inquiries }));
   }
@@ -152,7 +154,7 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   if (hasCustomer && form.toCustomer && inqCustomer.length > 0) {
     const formCustomer = { ...form };
     formCustomer['toOnshore'] = '';
-    subjectCus = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + DEL(${del}) + ETD(${etd})`
+    subjectCus = `[Customer BL Query]_[${inqCustomer.join(', ')}] ${bkgNo}: ${shipperName} T/VVD(${vvdCode}) + POD(${pod}) + DEL(${del}) + ETD(${etd})`
     contentCus = `Dear Customer, \n\nWe found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows: [${inqCustomer.join(', ')}]`
     dispatch(sendMail({ myblId: mybl.id, bkgNo, ...formCustomer, subject: subjectCus, content: contentCus, inquiries: inquiries }));
   }
