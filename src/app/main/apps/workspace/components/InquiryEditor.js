@@ -510,11 +510,44 @@ const InquiryEditor = (props) => {
     }
   }, [fieldValue]);
 
-  const isAllSelected = containerCheck.includes(currentEditInq.field)
+  const isAllSelected = (
+    containerCheck.includes(currentEditInq.field)
     && Array.isArray(inqTypeOption)
     && Array.isArray(valueType)
     && inqTypeOption.length
-    && inqTypeOption.length === valueType.length;
+    && inqTypeOption.length === valueType.length
+  );
+
+  const containerFieldValueCheck = (inq) => {
+    if (containerCheck.includes(inq.field) && inq.inqType) {
+      const inqCdCm = [...contentsInqCDCM];
+      const contentArr = [];
+      const findByIdType = inqCdCm.find(cdcm => inq.inqType === cdcm.type);
+
+      if (!findByIdType) {
+        const filter = metadata.template.find(({ field, type }) => {
+          return type === inq.inqType && ['containerDetail', 'containerManifest'].includes(field);
+        });
+        if (filter) {
+          filter.showTemplate = false;
+          filter.templateIndex = '0';
+          filter.contentShow = filter.content[0];
+          filter.receiver = `customer-${inq.inqType}`;
+          contentArr.push(filter);
+        }
+      } else if (findByIdType) {
+        contentArr.push(findByIdType);
+      }
+
+      inq.ansType = metadata.ans_type.paragraph;
+      setContentsInqCDCM(contentArr);
+      setValueAnsType({
+        label: 'Onshore/Customer Input',
+        value: metadata.ans_type.paragraph
+      });
+    }
+  }
+
   const handleTypeChange = (e) => {
     const inq = { ...currentEditInq };
     if (containerCheck.includes(inq.field)) {
@@ -568,25 +601,37 @@ const InquiryEditor = (props) => {
     }
     else {
       inq.inqType = e.value;
-      // if (e.__isNew__) inq.isNew = e.__isNew__;
-      const filter = metadata.template.find(({ field, type }) => {
-        let getTemplate = type === e.value && fieldValue?.keyword === field;
-        if ([containerCheck[0], containerCheck[1]].includes(fieldValue?.field)) {
-          getTemplate = type === e.value && ['containerDetail', 'containerManifest'].includes(field)
+      let keyword = fieldValue;
+      let filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field;
+      filterField = metadata.field_options.filter(({ value, display, keyword }) => (
+        display && filterField.includes(value)
+        && metadata.template.some((temp) => (temp.field === keyword && temp.type === e.value && temp.content[0]))
+      ));
+
+      if (filterField.length === 1) {
+        setFieldValue(filterField[0]);
+        inq.field = filterField[0].value;
+        dispatch(InquiryActions.validate({ ...valid, field: true }));
+        containerFieldValueCheck(inq);
+        if (!keyword) keyword = filterField[0];
+      }
+
+      dispatch(InquiryActions.validate({ ...valid, inqType: true }));
+
+      const filterTemp = metadata.template.find(({ field, type }) => {
+        let getTemplate = type === e.value && keyword?.keyword === field;
+        if ([containerCheck[0], containerCheck[1]].includes(keyword?.field)) {
+          getTemplate = (type === e.value && ['containerDetail', 'containerManifest'].includes(field))
         }
         return getTemplate;
       });
-      dispatch(InquiryActions.validate({ ...valid, inqType: true }));
       if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
         inq.content = contentEdited;
       } else {
-        inq.content = filter?.content[0] || MSG_INQUIRY_CONTENT;
-        setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
+        inq.content = filterTemp?.content[0] || MSG_INQUIRY_CONTENT;
+        setContent(formatTemplate(filterTemp?.content[0] || MSG_INQUIRY_CONTENT));
       }
-      let filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field
-      filterField = metadata.field_options.filter(({ value, display, keyword }) => display && filterField.includes(value)
-        && metadata.template.some((temp) => (temp.field === keyword && temp.type === e.value && temp.content[0]))
-      )
+
       setFieldType(filterField);
       // case filter CD CM to BL Data Field
       const keyWord = filterField.map(f => f.keyword);
@@ -596,7 +641,7 @@ const InquiryEditor = (props) => {
         setValueType(e);
       }
 
-      setTemplateList(filter?.content || []);
+      setTemplateList(filterTemp?.content || []);
       setTemplate('0');
       dispatch(FormActions.setEnableSaveInquiriesList(false));
     }
@@ -615,31 +660,7 @@ const InquiryEditor = (props) => {
       setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
 
-    if (containerCheck.includes(inq.field) && inq.inqType) {
-      const inqCdCm = [...contentsInqCDCM];
-      const contentArr = [];
-      const findByIdType = inqCdCm.find(cdcm => inq.inqType === cdcm.type);
-      if (!findByIdType) {
-        const filter = metadata.template.find(({ field, type }) => {
-          return type === inq.inqType && ['containerDetail', 'containerManifest'].includes(field);
-        });
-        if (filter) {
-          filter.showTemplate = false;
-          filter.templateIndex = '0';
-          filter.contentShow = filter.content[0];
-          filter.receiver = `customer-${inq.inqType}`;
-          contentArr.push(filter);
-        }
-      } else if (findByIdType) {
-        contentArr.push(findByIdType);
-      }
-      setContentsInqCDCM(contentArr);
-      inq.ansType = metadata.ans_type.paragraph
-      setValueAnsType({
-        label: 'Onshore/Customer Input',
-        value: metadata.ans_type.paragraph
-      });
-    }
+    containerFieldValueCheck(inq)
 
     if (e.keyword === 'blType' && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
 
