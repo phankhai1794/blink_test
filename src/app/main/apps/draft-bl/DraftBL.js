@@ -713,7 +713,7 @@ const DraftPage = (props) => {
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       CODE
                     </div>
-                    <div className={classes.content_L} style={{ minHeight: '250px' }}>
+                    {/* <div className={classes.content_L} style={{ minHeight: '250px' }}>
                       {getValueField(RATING_DETAIL) &&
                         <span style={{
                           position: 'relative',
@@ -727,21 +727,21 @@ const DraftPage = (props) => {
                         }}>
                           {getValueField(RATING_DETAIL).code}
                         </span>}
-                    </div>
+                    </div> */}
                   </Grid>
                   <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       TARIFF ITEM
                     </div>
-                    <div className={classes.content_L}>
+                    {/* <div className={classes.content_L}>
                       <span>{getValueField(TARIFF_ITEM)}</span>
-                    </div>
+                    </div> */}
                   </Grid>
                   <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       FREIGHTED AS
                     </div>
-                    <div className={classes.content_L}>
+                    {/* <div className={classes.content_L}>
                       {getValueField(RATING_DETAIL) &&
                         <span style={{
                           position: 'relative',
@@ -755,13 +755,13 @@ const DraftPage = (props) => {
                         }}>
                           {getValueField(RATING_DETAIL).freightedAs}
                         </span>}
-                    </div>
+                    </div> */}
                   </Grid>
                   <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       RATE
                     </div>
-                    <div className={classes.content_L}>
+                    {/* <div className={classes.content_L}>
                       {getValueField(RATING_DETAIL) &&
                         <span style={{
                           position: 'relative',
@@ -775,13 +775,13 @@ const DraftPage = (props) => {
                         }}>
                           {getValueField(RATING_DETAIL).rate}
                         </span>}
-                    </div>
+                    </div> */}
                   </Grid>
                   <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       PREPAID
                     </div>
-                    <div className={classes.content_L} >
+                    {/* <div className={classes.content_L} >
                       {getValueField(RATING_DETAIL) && getValueField(RATING_DETAIL).prepaid.map(item => {
                         if (item.currencyCode) {
                           return (
@@ -809,13 +809,13 @@ const DraftPage = (props) => {
                           return <br></br>
                         }
                       })}
-                    </div>
+                    </div> */}
                   </Grid>
                   <Grid item xs={2} style={{ textAlign: 'center' }}>
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       COLLECT
                     </div>
-                    <div className={classes.content_L}>
+                    {/* <div className={classes.content_L}>
                       {getValueField(RATING_DETAIL) && getValueField(RATING_DETAIL).collect.map(item => {
                         if (item.currencyCode) {
                           return (
@@ -843,12 +843,12 @@ const DraftPage = (props) => {
                           return <br></br>
                         }
                       })}
-                    </div>
+                    </div> */}
                   </Grid>
                 </Grid>
 
                 <Grid container item xs={2} style={{ borderLeft: BORDER }}>
-                  {getValueField(RATING_DETAIL) &&
+                  {/* {getValueField(RATING_DETAIL) &&
                     <span style={{
                       position: 'relative',
                       textTransform: 'none',
@@ -858,13 +858,13 @@ const DraftPage = (props) => {
                       alignItems: 'flex-start',
                       textAlign: 'start',
                       fontFamily: 'Courier, serif',
-                      fontSize: 16.5 /*1.7vw*/,
-                      lineHeight: '1.0',
-                      color: '#4A4A4A',
-                      top: 4,
-                    }}>
-                      {"\n" + getValueField(RATING_DETAIL).exchangeRate}
-                    </span>
+                      fontSize: 16.5 /*1.7vw*/
+                      //lineHeight: '1.0',
+                      //color: '#4A4A4A',
+                      //top: 4,
+                    //}}>
+                     //</Grid> {"\n" + getValueField(RATING_DETAIL).exchangeRate}
+                    //</span> */}
                   }
                 </Grid>
               </Grid>
@@ -914,15 +914,15 @@ const DraftPage = (props) => {
                     TOTAL
                   </div>
                 </div>
-                {getValueField(TOTAL_PREPAID).freightTerm === 'PREPAID' && getValueField(TOTAL_PREPAID).currency !== '' &&
+                {/* {getValueField(TOTAL_PREPAID).freightTerm === 'PREPAID' && getValueField(TOTAL_PREPAID).currency !== '' &&
                   <div className={classes.content_L} style={{ position: 'relative', top: '69.5%', textTransform: 'none', whiteSpace: 'pre-wrap	', wordWrap: 'break-word	', width: 800, float: 'left' }} >
                     {`TOTAL PREPAID IN PAYMENT CURRENT ${getValueField(TOTAL_PREPAID).currency}   ${getValueField(TOTAL_PREPAID).total}    ${getValueField(TOTAL_PREPAID).loc}`}
                   </div>
-                }
+                } */}
               </Grid>
               <Grid item xs={2} style={{ borderRight: BORDER }}>
                 <div className={classes.content_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
-                  {getValueField(RATING_DETAIL) && Object.entries(findSumFromArray(getValueField(RATING_DETAIL).prepaid)).map(([key, value], idx) => {
+                  {/* {getValueField(RATING_DETAIL) && Object.entries(findSumFromArray(getValueField(RATING_DETAIL).prepaid)).map(([key, value], idx) => {
                     return (
                       <div key={idx + key} role='group'>
                         <span style={{ float: 'left' }}>{key}</span>
@@ -930,12 +930,12 @@ const DraftPage = (props) => {
                         <br></br>
                       </div>
                     )
-                  })}
+                  })} */}
                 </div>
               </Grid>
               <Grid item xs={2} style={{ borderRight: BORDER }}>
                 <div className={classes.content_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
-                  {getValueField(RATING_DETAIL) && Object.entries(findSumFromArray(getValueField(RATING_DETAIL).collect)).map(([key, value], idx) => {
+                  {/* {getValueField(RATING_DETAIL) && Object.entries(findSumFromArray(getValueField(RATING_DETAIL).collect)).map(([key, value], idx) => {
                     return (
                       <div key={idx + key} role='group'>
                         <span style={{ float: 'left' }}>{key}</span>
@@ -943,7 +943,7 @@ const DraftPage = (props) => {
                         <br></br>
                       </div>
                     )
-                  })}
+                  })} */}
                 </div>
               </Grid>
             </Grid>
