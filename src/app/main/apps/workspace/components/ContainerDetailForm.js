@@ -246,9 +246,11 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const handleArrorRef = (node) => setArrowRef(node);
 
   const handleClickConNo = (vindex) => {
+    // open popup amendment
     dispatch(FormActions.eventClickContNo({
       status: true,
-      questionId: currentQuestion ? currentQuestion.id : ''
+      questionId: currentQuestion ? currentQuestion.id : '',
+      isHasActionClick: true
     }));
     setRowIndex(vindex)
     handleEdit(true);

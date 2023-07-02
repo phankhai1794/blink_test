@@ -52,6 +52,7 @@ const ParagraphAnswer = (props) => {
   });
   const dispatch = useDispatch();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const eventClickContNo = useSelector(({ workspace }) => workspace.formReducer.eventClickContNo);
 
   const [paragraphText, setParagraphText] = useState(question.answerObj && question.answerObj.length ? question.answerObj[0]?.content : '');
 
@@ -97,12 +98,14 @@ const ParagraphAnswer = (props) => {
   }, [saveStatus, currentQuestion]);
 
   useEffect(() => {
-    if (question.answerObj && question.answerObj.length) {
-      setParagraphText(question.answerObj[0]?.content);
-    } else if (!question.answerObj || !question.answerObj.length) {
-      setParagraphText('')
+    if (eventClickContNo && !eventClickContNo.isHasActionClick) {
+      if (question.answerObj && question.answerObj.length) {
+        setParagraphText(question.answerObj[0]?.content);
+      } else if (!question.answerObj || !question.answerObj.length) {
+        setParagraphText('')
+      }
     }
-  }, [saveStatus]);
+  }, [question, eventClickContNo]);
 
   useEffect(() => {
     if (
