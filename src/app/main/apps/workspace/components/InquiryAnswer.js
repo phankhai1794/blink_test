@@ -18,6 +18,7 @@ import { CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT } from '@shared/keyword'
 import { SocketContext } from 'app/AppContext';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from "../store/actions/form";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -342,6 +343,11 @@ const InquiryAnswer = (props) => {
       optionsInquires[editedIndex].state === "ANS_SENT" ? "ADMIN" : ""
     );
 
+    dispatch(FormActions.eventClickContNo({
+      status: false,
+      questionId: '',
+      isHasActionClick: false
+    }));
     dispatch(InquiryActions.setEditInq(null));
   };
 

@@ -418,7 +418,8 @@ const InquiryViewer = (props) => {
       if ((['INQ', 'ANS'].includes(question.type) && ['INQ_SENT'].includes(question.state)) || ['REOPEN_A', 'REOPEN_Q'].includes(question.state)) {
         onReply(question)
         setAllowEdit(true);
-        dispatch(FormActions.eventClickContNo({ status: false, questionId: '' }));
+        // open popup amendment
+        dispatch(FormActions.eventClickContNo({ status: false, questionId: '', isHasActionClick: true }));
       } else if (!['COMPL', 'UPLOADED'].includes(question.state)) {
         if (['INQ', 'ANS', 'REP'].includes(question.type)) {
           if (['REP'].includes(question.type) && question.state !== 'REP_Q_SENT') {
@@ -439,7 +440,7 @@ const InquiryViewer = (props) => {
         }
         handleEdit(question)
         setAllowEdit(true);
-        dispatch(FormActions.eventClickContNo({ status: false, questionId: '' }));
+        dispatch(FormActions.eventClickContNo({ status: false, questionId: '', isHasActionClick: true }));
       }
     }
   }, [eventClickContNo, eventClickContNo.status])

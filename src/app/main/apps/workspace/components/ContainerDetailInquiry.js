@@ -79,7 +79,7 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
         setIsShowTableCdCM(isChecked)
       }
     }
-  }, []);
+  }, [currentQuestion]);
 
   useEffect(() => {
     if (user.role === 'Admin') {

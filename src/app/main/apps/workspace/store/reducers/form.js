@@ -8,7 +8,7 @@ const initialState = {
   showAddInquiry: true,
   openAttachment: false,
   openEmail: false,
-  eventClickContNo: { status: false, questionId: '' },
+  eventClickContNo: { status: false, questionId: '', isHasActionClick: false },
   openInqReview: false,
   openNotificationInquiryList: false,
   openNotificationAttachmentList: false,
