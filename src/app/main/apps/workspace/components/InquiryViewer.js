@@ -394,7 +394,7 @@ const InquiryViewer = (props) => {
 
   const validateField = (field, value) => {
     let response = { isError: false, errorType: "" };
-    const isAlsoNotify = metadata.field[FORWARDER] === field || metadata.field[ALSO_NOTIFY] === field;
+    const isAlsoNotify = metadata.field[FORWARDER] === field ;
     if (Object.keys(metadata.field).find(key => metadata.field[key] === field) === BL_TYPE) {
       response = validateBLType(value);
     }
@@ -3095,8 +3095,8 @@ const InquiryViewer = (props) => {
                       }) : ``}
                   </Typography> :
                   <Diff
-                    inputA={renderContent(orgContent[question.field])}
-                    inputB={getNewValueDiffViewer(question.content)}
+                    inputA={orgContent[question.field] ? renderContent(orgContent[question.field]) : ''}
+                    inputB={question.content ? getNewValueDiffViewer(question.content) : ''}
                     type="chars"
                   />
                 )
