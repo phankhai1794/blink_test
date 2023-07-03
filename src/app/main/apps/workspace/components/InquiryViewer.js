@@ -671,13 +671,11 @@ const InquiryViewer = (props) => {
               ) {
                 listComments.splice(getIndexLatestCdCm, 1);
               }
-              listComments.splice(0, 1);
-              // listComments = listComments.filter(l => {
-              //   if (l.type === 'ANS' && l.answerObj && l.answerObj.length) {
-              //     return l.answerObj[0].content !== ''
-              //   }
-              //   return l.content !== undefined && l.content !== ''
-              // })
+              if (listComments[0].state === 'COMPL') {
+                listComments.splice(0, 2);
+              } else {
+                listComments.splice(0, 1);
+              }
             }
             if (filterCDCM.length === 1) {
               // setShowViewAll(false);
@@ -729,18 +727,23 @@ const InquiryViewer = (props) => {
           const lastest = { ...question };
           if (res.length > 0) {
             let getRes = res;
+            // console.log('getRes', getRes)
             const filterRepAmend = res.filter(r => r.state.includes('REP_AME_'));
             // filter latest reply amendment
             if (filterRepAmend.length) {
-              const getRepAmend = filterRepAmend[filterRepAmend.length - 1];
+              const getRepAmend = filterRepAmend[0];
               getRes = res.filter(r => r.id !== getRepAmend.id);
             }
-            const getLatest = getRes[getRes.length - 1];
+            const getLatest = getRes[0];
             const { content: contentField, mediaFile } = getLatest.content;
             setDisableCDCMAmendment(true);
-            const lastestComment = res[res.length - 1];
+            const lastestComment = res[0];
+            let inqAnsId = lastestComment.id;
             if (lastestComment.state === 'RESOLVED') {
-              setInqAnsId(lastestComment.id);
+              if (lastestComment.draftAnswerId) {
+                inqAnsId = lastestComment.draftAnswerId;
+              }
+              setInqAnsId(inqAnsId);
             }
             // filter comment
             lastest.mediaFile = mediaFile;
@@ -757,11 +760,11 @@ const InquiryViewer = (props) => {
             lastest.process = 'draft';
             if (containerCheck.includes(question.field)) {
               const lastestContentCDCM = res.filter(r => r.state.includes('AME_') || r.state.includes('REOPEN_'));
-              lastest.contentCDCM = lastestContentCDCM[lastestContentCDCM.length - 1].content.content;
+              lastest.contentCDCM = lastestContentCDCM[0].content.content;
               if (filterRepAmend.length) {
-                lastest.contentReplyCDCM = filterRepAmend[filterRepAmend.length - 1].content.content;
+                lastest.contentReplyCDCM = filterRepAmend[0].content.content;
               } else {
-                lastest.contentReplyCDCM = lastestContentCDCM[lastestContentCDCM.length - 1].content.content;
+                lastest.contentReplyCDCM = lastestContentCDCM[0].content.content;
               }
               lastest.isShowTableToReply = res.some(r => ['REP_DRF', 'REP_SENT'].includes(r.state));
             }
@@ -775,7 +778,7 @@ const InquiryViewer = (props) => {
                   type: 'REP'
                 },
                 answer: {
-                  id: lastestComment.id,
+                  id: inqAnsId,
                   content: contentField,
                   type: metadata.ans_type['paragraph']
                 }
@@ -819,7 +822,8 @@ const InquiryViewer = (props) => {
                   setTempReply({})
                 }
               }
-            } else {
+            }
+            else {
               if (lastestComment.role === 'Guest') {
                 if (['REP_SENT', 'AME_SENT'].includes(lastest.state)) {
                   lastest.showIconReply = false;
@@ -859,16 +863,7 @@ const InquiryViewer = (props) => {
             // push new lastestComment if not already exist
             !listCommentDraft.find(ele => ele.id === lastestComment.id) && dispatch(InquiryActions.setListCommentDraft([...listCommentDraft, ...[lastestComment]]));
 
-            let comments = [{
-              creator: { userName: user.displayName, avatar: null },
-              updater: { userName: user.displayName, avatar: null },
-              createdAt: res[0].createdAt,
-              updatedAt: res[0].createdAt,
-              answersMedia: [],
-              content: orgContent[lastest.field] || '',
-              process: 'draft',
-              state: 'AME_ORG'
-            }];
+            let comments = [];
 
             getRes.map(r => {
               const { content, mediaFile } = r.content;
@@ -899,10 +894,26 @@ const InquiryViewer = (props) => {
                 process: 'pending',
                 state: lastestComment?.state,
               }
-              comments.splice(comments.length - 1, 0, markReopen);
+              comments.splice(0, 0, markReopen);
             }
             comments = comments.filter(c => c.content !== '');
-            if (comments.length > 1) comments.splice(comments.length - 1, 1)
+            if (comments.length > 1) {
+              if (comments[0].state === 'RESOLVED') {
+                comments.splice(0, 2);
+              } else {
+                comments.splice(0, 1);
+              }
+            }
+            comments.unshift({
+              creator: { userName: user.displayName, avatar: null },
+              updater: { userName: user.displayName, avatar: null },
+              createdAt: res[res.length - 1].createdAt,
+              updatedAt: res[res.length - 1].createdAt,
+              answersMedia: [],
+              content: orgContent[lastest.field] || '',
+              process: 'draft',
+              state: 'AME_ORG'
+            })
             setComment(comments);
             setInqHasComment(true);
           }
