@@ -13,6 +13,10 @@ const MainWorkSpace = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    sessionStorage.setItem('prevUrl', JSON.stringify({
+      cachePath: window.location.pathname,
+      cacheSearch: window.location.search
+    }));
     dispatch(
       AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_WORKSPACE }))
     );

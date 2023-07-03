@@ -207,6 +207,7 @@ const OtpCheck = ({ children }) => {
             mail: mail.value,
             requestAt: new Date()
           }));
+          localStorage.setItem("lastEmail", mail.value);
           setStep(1);
         }
       })
