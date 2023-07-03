@@ -9,6 +9,8 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import { getInquiryById } from 'app/services/inquiryService';
 import { getBlInfo } from 'app/services/myBLService';
 import { SocketContext } from 'app/AppContext';
+import { getPermissionByRole } from 'app/services/authService';
+import * as AppAction from 'app/store/actions';
 import { categorizeInquiriesByUserType } from '@shared';
 
 import * as Actions from '../store/actions';
