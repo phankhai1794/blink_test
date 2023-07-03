@@ -591,6 +591,7 @@ const InquiryEditor = (props) => {
               receiver: `customer-${v.value}`,
               type: v.value,
             });
+          }
         } else if (findByIdType) {
           contentArr.push(findByIdType);
         }
