@@ -9,10 +9,7 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import { getInquiryById } from 'app/services/inquiryService';
 import { getBlInfo } from 'app/services/myBLService';
 import { SocketContext } from 'app/AppContext';
-import { getPermissionByRole } from 'app/services/authService';
-import * as AppAction from 'app/store/actions';
-import { checkBroadCastAccessing, categorizeInquiriesByUserType } from '@shared';
-import { BROADCAST } from '@shared/keyword';
+import { categorizeInquiriesByUserType } from '@shared';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -65,7 +62,6 @@ const BLProcessNotification = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const socket = useContext(SocketContext);
-  const channel = new BroadcastChannel(BROADCAST.ACCESS);
 
   const [open, setOpen] = useState(false);
 
@@ -101,14 +97,6 @@ const BLProcessNotification = () => {
       checkBLProcess();
 
       const user = JSON.parse(localStorage.getItem('USER'));
-
-      // post a signal
-      channel.postMessage(user.role);
-
-      // receive signal
-      channel.onmessage = (e) => {
-        checkBroadCastAccessing(e.data);
-      };
 
       // user connect
       const mybl = (user.userType === "ADMIN") ? [myBL.bkgNo, myBL.id] : [myBL.id, myBL.bkgNo];
@@ -177,10 +165,6 @@ const BLProcessNotification = () => {
       });
     }
   }, [myBL]);
-
-  useEffect(() => {
-    return () => channel.close();
-  }, [])
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md">

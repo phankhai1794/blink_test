@@ -146,7 +146,7 @@ export const validateBLType = (input) => {
     response = {
       ...response,
       isError: true,
-      errorType: `The value you entered should be "B" or "W".\n- "B" for Ocean B/L\n- "W" for Seaway Bill`
+      errorType: `The value you entered should be "B" or "W".\n- "B" for Original B/L\n- "W" for Seaway Bill`
     };
   }
   return response;

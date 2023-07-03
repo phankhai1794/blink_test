@@ -1,17 +1,20 @@
-var React = require('react');
+import React from 'react';
+
 var jsdiff = require('diff');
 
 var fnMap = {
   chars: jsdiff.diffChars,
-  words: jsdiff.diffWords,
+  words: jsdiff.diffWordsWithSpace,
+  lines: jsdiff.diffLines,
   sentences: jsdiff.diffSentences,
   json: jsdiff.diffJson
 };
 
 const Diff = (props) => {
-  var diff = fnMap[props.type](props.inputA, props.inputB);
-  var result = diff.map(function (part, index) {
+  var diff = fnMap[props.type](props.inputA, props.inputB, { newlineIsToken: true });
+  var result = diff.map((part, index) => {
     var spanStyle = {
+      // display: /^\n+$/g.test(part.value) ? 'block' : null,
       backgroundColor: part.added ? 'lightgreen' : part.removed ? 'salmon' : null
     };
     return (
@@ -34,4 +37,4 @@ const Diff = (props) => {
   );
 };
 
-export default Diff
+export default React.memo(Diff);

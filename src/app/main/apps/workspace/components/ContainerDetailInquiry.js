@@ -20,24 +20,66 @@ const useStyles = makeStyles((theme) => ({
       },
       '& .MuiSvgIcon-root': {
         position: 'absolute'
+      },
+      '& .MuiListItem-gutters': {
+        paddingLeft: 0,
+        paddingRight: 0
+      },
+      '& .MuiTypography-body1': {
+        fontFamily: 'Montserrat',
       }
     }
   }
 }))
 
-const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, disableInput}) => {
+const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, disableInput, isAllowEdit, currentQuestion}) => {
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
   const [openCD, setOpenCD] = useState(false);
   const [openCM, setOpenCM] = useState(false);
   const [disableEdit, setDisableEdit] = useState(false);
+  const [isShowTableCdCm, setIsShowTableCdCM] = useState([]);
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
 
   const getType = (type) => {
     return metadata.inq_type?.[type] || '';
   };
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
+
+  useEffect(() => {
+    let inqTypes = [];
+    if (currentQuestion && containerCheck.includes(currentQuestion.field)) {
+      inqTypes.push(currentQuestion.inqType);
+      if (currentQuestion.inqGroup && currentQuestion.inqGroup.length) {
+        const inqTypeGroupMap = currentQuestion.inqGroup.map(i => i.inqType);
+        inqTypes = [...inqTypes, ...inqTypeGroupMap];
+      }
+      const getFieldAndTypes = [];
+      metadata.inq_type_options.forEach(t => {
+        if (inqTypes.includes(t.value)) {
+          getFieldAndTypes.push(t);
+        }
+      })
+      if (getFieldAndTypes.length) {
+        const isChecked = [];
+        getFieldAndTypes.forEach(g => {
+          if (g.field && g.field.length) {
+            g.field.forEach(f => {
+              if (containerCheck.includes(f) && !isChecked.includes(f)) {
+                isChecked.push(f);
+              }
+            })
+          }
+        })
+        setIsShowTableCdCM(isChecked)
+      }
+    }
+  }, [currentQuestion]);
 
   useEffect(() => {
     if (user.role === 'Admin') {
@@ -143,49 +185,61 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
 
   return (
     <div style={{ width: '100%', margin: '10px 0 10px 0' }} className={classes.root}>
-      <ListItem button onClick={() => handleClickCollapse(true)} className={classes.collapse}>
-        <ListItemText primary="Container Detail" />
-        {openCD ? <ExpandLess /> : <ExpandMore />}
-      </ListItem>
-      <Collapse in={openCD} timeout="auto" unmountOnExit>
-        <ListItem>
-          <ContainerDetailForm
-            container={CONTAINER_DETAIL}
-            setAddContent={(value) => {
-              autoUpdateCDCM(true, value);
-              setDataCD(value);
-              dispatch(InquiryActions.setDataCdInq(value));
-            }}
-            setEditContent={(value) => {}}
-            originalValues={getDataCD}
-            isPendingProcess={true}
-            disableInput={disableEdit}
-            isInqCDCM={true}
-          />
-        </ListItem>
-      </Collapse>
+      {isShowTableCdCm.includes(containerCheck[0]) && (
+        <>
+          <ListItem button onClick={() => handleClickCollapse(true)} className={classes.collapse}>
+            <ListItemText primary="Container Detail" />
+            {openCD ? <ExpandLess /> : <ExpandMore />}
+          </ListItem>
+          <Collapse in={openCD} timeout="auto" unmountOnExit>
+            <ListItem>
+              <ContainerDetailForm
+                container={CONTAINER_DETAIL}
+                setAddContent={(value) => {
+                  autoUpdateCDCM(true, value);
+                  setDataCD(value);
+                  dispatch(InquiryActions.setDataCdInq(value));
+                }}
+                setEditContent={(value) => {}}
+                originalValues={getDataCD}
+                isPendingProcess={true}
+                disableInput={disableEdit}
+                isInqCDCM={true}
+                isAllowEdit={isAllowEdit}
+                currentQuestion={currentQuestion}
+              />
+            </ListItem>
+          </Collapse>
+        </>
+      )}
 
-      <ListItem button onClick={() => handleClickCollapse(false)}>
-        <ListItemText primary="Container Manifest" />
-        {openCM ? <ExpandLess /> : <ExpandMore />}
-      </ListItem>
-      <Collapse in={openCM} timeout="auto" unmountOnExit>
-        <ListItem>
-          <ContainerDetailForm
-            container={CONTAINER_MANIFEST}
-            setAddContent={(value) => {
-              autoUpdateCDCM(false, value);
-              setDataCM(value);
-              dispatch(InquiryActions.setDataCmInq(value));
-            }}
-            setEditContent={(value) => {}}
-            originalValues={getDataCM}
-            isPendingProcess={true}
-            disableInput={disableEdit}
-            isInqCDCM={true}
-          />
-        </ListItem>
-      </Collapse>
+      {isShowTableCdCm.includes(containerCheck[1]) && (
+        <>
+          <ListItem button onClick={() => handleClickCollapse(false)}>
+            <ListItemText primary="Container Manifest" />
+            {openCM ? <ExpandLess /> : <ExpandMore />}
+          </ListItem>
+          <Collapse in={openCM} timeout="auto" unmountOnExit>
+            <ListItem>
+              <ContainerDetailForm
+                container={CONTAINER_MANIFEST}
+                setAddContent={(value) => {
+                  autoUpdateCDCM(false, value);
+                  setDataCM(value);
+                  dispatch(InquiryActions.setDataCmInq(value));
+                }}
+                setEditContent={(value) => {}}
+                originalValues={getDataCM}
+                isPendingProcess={true}
+                disableInput={disableEdit}
+                isInqCDCM={true}
+                isAllowEdit={isAllowEdit}
+                currentQuestion={currentQuestion}
+              />
+            </ListItem>
+          </Collapse>
+        </>
+      )}
     </div>
   );
 };

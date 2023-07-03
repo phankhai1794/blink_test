@@ -605,7 +605,7 @@ const BLWorkspace = (props) => {
                   <Grid item xs={6} className={classes.rightPanel}>
                     <Label>BL TYPE</Label>
                     <BLField id={getField(BL_TYPE)}>
-                      {['oceanBill', 'B'].includes(getValueField(BL_TYPE)) ? 'BILL OF LADING' : 'SEAWAY BILL'}
+                      {['oceanBill', 'B'].includes(getValueField(BL_TYPE)) ? 'ORIGINAL B/L' : 'SEAWAY BILL'}
                     </BLField>
                   </Grid>
                 </Grid>

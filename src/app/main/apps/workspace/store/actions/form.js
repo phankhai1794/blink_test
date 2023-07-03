@@ -33,6 +33,8 @@ export const RESET_LOADING = 'RESET_LOADING';
 export const PROCESS_LOADING = 'PROCESS_LOADING';
 export const OPEN_WARNING_UPLOAD_OPUS = 'OPEN_WARNING_UPLOAD_OPUS';
 export const CURRENT_FILE_PREVIEW = 'CURRENT_FILE_PREVIEW';
+export const EVENT_CLICK_CONT_NO = 'EVENT_CLICK_CONT_NO';
+export const SET_DIRTY_RELOAD = 'SET_DIRTY_RELOAD';
 
 export function setFullscreen(state) {
   return {
@@ -106,6 +108,13 @@ export function toggleReload() {
 export function inqViewerFocus(state) {
   return {
     type: INQUIRY_VIEWER_FOCUS,
+    state
+  };
+}
+
+export function eventClickContNo(state) {
+  return {
+    type: EVENT_CLICK_CONT_NO,
     state
   };
 }
@@ -273,4 +282,11 @@ export function setCurrentFile(state) {
     type: CURRENT_FILE_PREVIEW,
     state
   };
+}
+
+export function setDirtyReload(state) {
+  return {
+    type: SET_DIRTY_RELOAD,
+    state
+  }
 }

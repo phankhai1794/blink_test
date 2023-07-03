@@ -29,7 +29,6 @@ import { getUpdatedAtAnswer, saveInquiry, updateInquiry } from 'app/services/inq
 import * as AppActions from 'app/store/actions';
 import clsx from 'clsx';
 import axios from 'axios';
-import { useUnsavedChangesWarning } from 'app/hooks'
 import { useDropzone } from 'react-dropzone';
 import ContentEditable from 'react-contenteditable';
 import clone from 'lodash/clone';
@@ -282,7 +281,6 @@ const InquiryEditor = (props) => {
   const [contentEdited, setContentEdited] = useState(valueType?.label);
   const [isDisabled, setDisabled] = useState(false);
   const [prevField, setPrevField] = useState('');
-  const [_, setDirty, setPristine] = useUnsavedChangesWarning();
   const [anchorEl, setAnchorEl] = useState(null);
   const [templateList, setTemplateList] = useState([]);
   const [template, setTemplate] = useState(valueType?.value || '0');
@@ -302,6 +300,15 @@ const InquiryEditor = (props) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  // auto create 2 choice for BL Type
+  const autoCreateChoiceBLType = () => {
+    const inq = { ...currentEditInq };
+    const timeB = new Date();
+    const timeW = new Date(timeB.getTime() + 1);
+    inq.answerObj.push({ id: null, content: 'Original B/L', createdAt: timeB }, { id: null, content: 'Seaway Bill', createdAt: timeW });
+    dispatch(InquiryActions.setEditInq(inq));
+  }
 
   const handleShowTemplateCDCM = (type) => {
     const objCdCm = [...contentsInqCDCM];
@@ -438,6 +445,7 @@ const InquiryEditor = (props) => {
   }
 
   useEffect(() => {
+    dispatch(FormActions.setDirtyReload({ createInq: true }))
     if (valueType?.value) {
       const filter = metadata.template.find(({ field, type }) => type === valueType.value && fieldValue.keyword === field);
       setTemplateList(filter?.content || []);
@@ -465,6 +473,7 @@ const InquiryEditor = (props) => {
       setValueAnsType(optionsAnsType);
       dispatch(InquiryActions.setEditInq(inq));
     }
+    return () => dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false, createInq: false }))
   }, []);
 
   useEffect(() => {
@@ -501,11 +510,44 @@ const InquiryEditor = (props) => {
     }
   }, [fieldValue]);
 
-  const isAllSelected = containerCheck.includes(currentEditInq.field)
+  const isAllSelected = (
+    containerCheck.includes(currentEditInq.field)
     && Array.isArray(inqTypeOption)
     && Array.isArray(valueType)
     && inqTypeOption.length
-    && inqTypeOption.length === valueType.length;
+    && inqTypeOption.length === valueType.length
+  );
+
+  const containerFieldValueCheck = (inq) => {
+    if (containerCheck.includes(inq.field) && inq.inqType) {
+      const inqCdCm = [...contentsInqCDCM];
+      const contentArr = [];
+      const findByIdType = inqCdCm.find(cdcm => inq.inqType === cdcm.type);
+
+      if (!findByIdType) {
+        const filter = metadata.template.find(({ field, type }) => {
+          return type === inq.inqType && ['containerDetail', 'containerManifest'].includes(field);
+        });
+        if (filter) {
+          filter.showTemplate = false;
+          filter.templateIndex = '0';
+          filter.contentShow = filter.content[0];
+          filter.receiver = `customer-${inq.inqType}`;
+          contentArr.push(filter);
+        }
+      } else if (findByIdType) {
+        contentArr.push(findByIdType);
+      }
+
+      inq.ansType = metadata.ans_type.paragraph;
+      setContentsInqCDCM(contentArr);
+      setValueAnsType({
+        label: 'Onshore/Customer Input',
+        value: metadata.ans_type.paragraph
+      });
+    }
+  }
+
   const handleTypeChange = (e) => {
     const inq = { ...currentEditInq };
     if (containerCheck.includes(inq.field)) {
@@ -550,25 +592,37 @@ const InquiryEditor = (props) => {
     }
     else {
       inq.inqType = e.value;
-      // if (e.__isNew__) inq.isNew = e.__isNew__;
-      const filter = metadata.template.find(({ field, type }) => {
-        let getTemplate = type === e.value && fieldValue?.keyword === field;
-        if ([containerCheck[0], containerCheck[1]].includes(fieldValue?.field)) {
-          getTemplate = type === e.value && ['containerDetail', 'containerManifest'].includes(field)
+      let keyword = fieldValue;
+      let filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field;
+      filterField = metadata.field_options.filter(({ value, display, keyword }) => (
+        display && filterField.includes(value)
+        && metadata.template.some((temp) => (temp.field === keyword && temp.type === e.value && temp.content[0]))
+      ));
+
+      if (filterField.length === 1) {
+        setFieldValue(filterField[0]);
+        inq.field = filterField[0].value;
+        dispatch(InquiryActions.validate({ ...valid, field: true }));
+        containerFieldValueCheck(inq);
+        if (!keyword) keyword = filterField[0];
+      }
+
+      dispatch(InquiryActions.validate({ ...valid, inqType: true }));
+
+      const filterTemp = metadata.template.find(({ field, type }) => {
+        let getTemplate = type === e.value && keyword?.keyword === field;
+        if ([containerCheck[0], containerCheck[1]].includes(keyword?.field)) {
+          getTemplate = (type === e.value && ['containerDetail', 'containerManifest'].includes(field))
         }
         return getTemplate;
       });
-      dispatch(InquiryActions.validate({ ...valid, inqType: true }));
       if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
         inq.content = contentEdited;
       } else {
-        inq.content = filter?.content[0] || MSG_INQUIRY_CONTENT;
-        setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
+        inq.content = filterTemp?.content[0] || MSG_INQUIRY_CONTENT;
+        setContent(formatTemplate(filterTemp?.content[0] || MSG_INQUIRY_CONTENT));
       }
-      let filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field
-      filterField = metadata.field_options.filter(({ value, display, keyword }) => display && filterField.includes(value)
-        && metadata.template.some((temp) => (temp.field === keyword && temp.type === e.value && temp.content[0]))
-      )
+
       setFieldType(filterField);
       // case filter CD CM to BL Data Field
       const keyWord = filterField.map(f => f.keyword);
@@ -578,7 +632,7 @@ const InquiryEditor = (props) => {
         setValueType(e);
       }
 
-      setTemplateList(filter?.content || []);
+      setTemplateList(filterTemp?.content || []);
       setTemplate('0');
       dispatch(FormActions.setEnableSaveInquiriesList(false));
     }
@@ -597,31 +651,9 @@ const InquiryEditor = (props) => {
       setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
 
-    if (containerCheck.includes(inq.field) && inq.inqType) {
-      const inqCdCm = [...contentsInqCDCM];
-      const contentArr = [];
-      const findByIdType = inqCdCm.find(cdcm => inq.inqType === cdcm.type);
-      if (!findByIdType) {
-        const filter = metadata.template.find(({ field, type }) => {
-          return type === inq.inqType && ['containerDetail', 'containerManifest'].includes(field);
-        });
-        if (filter) {
-          filter.showTemplate = false;
-          filter.templateIndex = '0';
-          filter.contentShow = filter.content[0];
-          filter.receiver = `customer-${inq.inqType}`;
-          contentArr.push(filter);
-        }
-      } else if (findByIdType) {
-        contentArr.push(findByIdType);
-      }
-      setContentsInqCDCM(contentArr);
-      inq.ansType = metadata.ans_type.paragraph
-      setValueAnsType({
-        label: 'Onshore/Customer Input',
-        value: metadata.ans_type.paragraph
-      });
-    }
+    containerFieldValueCheck(inq)
+
+    if (e.keyword === 'blType' && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
 
     setTemplateList(filter?.content || []);
     setTemplate('0');
@@ -678,7 +710,7 @@ const InquiryEditor = (props) => {
     dispatch(InquiryActions.validate({ ...valid, content: inq.content }));
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
-    setDirty()
+    dispatch(FormActions.setDirtyReload({ inputInquiryEditor: true }))
   };
 
   const handleAnswerTypeChange = (e) => {
@@ -687,6 +719,8 @@ const InquiryEditor = (props) => {
     if (e.value !== metadata.ans_type.choice) {
       inq.answerObj = [];
     }
+    if (fieldValue?.keyword === 'blType' && e.label === 'Option Selection') autoCreateChoiceBLType();
+
     dispatch(InquiryActions.validate({ ...valid, ansType: true }));
     setValueAnsType(optionsAnsType.filter((ansType) => ansType.value === e.value));
     dispatch(InquiryActions.setEditInq(inq));
@@ -1121,7 +1155,7 @@ const InquiryEditor = (props) => {
         })
         .catch((error) => handleError(dispatch, error));
     }
-    setPristine()
+    dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false }))
   };
 
   const onPaste = (e) => {
@@ -1426,18 +1460,18 @@ const InquiryEditor = (props) => {
               />
             )}
             <Divider className="mt-12" />
-            <div style={{ width: '102%' }}>
+            <div className={'attachment'}>
               {currentEditInq.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
               {currentEditInq.mediaFile?.length > 0 &&
                 currentEditInq.mediaFile?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  <>
                     <FileAttach
                       file={file}
                       files={currentEditInq.mediaFile}
                       field={currentEditInq.field}
                       question={currentEditInq}
                     />
-                  </div>
+                  </>
                 ))}
             </div>
 
@@ -1445,8 +1479,8 @@ const InquiryEditor = (props) => {
               {user.role !== 'Admin' && (
                 <>
                   {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-                  {currentEditInq.mediaFilesAnswer?.map((file, mediaIndex) => (
-                    <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  {currentEditInq.mediaFilesAnswer?.map((file) => (
+                    <>
                       <FileAttach
                         file={file}
                         files={currentEditInq.mediaFilesAnswer}
@@ -1454,7 +1488,7 @@ const InquiryEditor = (props) => {
                         isAnswer={true}
                         question={currentEditInq}
                       />
-                    </div>
+                    </>
                   ))}
                 </>
               )}
