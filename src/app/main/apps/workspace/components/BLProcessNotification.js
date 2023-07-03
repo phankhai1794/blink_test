@@ -110,6 +110,11 @@ const BLProcessNotification = () => {
         }
       );
 
+      // save socketId into window console after connecting
+      socket.on('user_socket_id', async (socketId) => {
+        window.socketId = socketId; 
+      });
+
       // Receive the list user accessing
       socket.on('users_accessing', async ({ usersAccessing }) => {
         console.log("usersAccessing: ", usersAccessing);
