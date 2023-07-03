@@ -18,6 +18,7 @@ import { CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT } from '@shared/keyword'
 import { SocketContext } from 'app/AppContext';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from "../store/actions/form";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -95,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
 ));
 
 const InquiryAnswer = (props) => {
-  const { onCancel, setSave, question, getDataCD, getDataCM } = props;
+  const { onCancel, setSave, question } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
 
@@ -104,8 +105,10 @@ const InquiryAnswer = (props) => {
   const metadata = useSelector(({ draftBL }) => draftBL.metadata);
   const getDataCMInq = useSelector(({ workspace }) => workspace.inquiryReducer.getDataCMInq);
   const getDataCDInq = useSelector(({ workspace }) => workspace.inquiryReducer.getDataCDInq);
+  const oldDataCdCmInq = useSelector(({ workspace }) => workspace.inquiryReducer.oldDataCdCmInq);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
   const [isDisableSave, setDisableSave] = useState(false);
+  const [isDisableSaveCdCm, setDisableSaveCdCm] = useState(true);
   const socket = useContext(SocketContext);
 
   const optionsInquires = [...inquiries];
@@ -241,8 +244,20 @@ const InquiryAnswer = (props) => {
         [getField(CONTAINER_DETAIL)]: getDataCDInq.length ? getDataCDInq : contentInqResolved?.[getField(CONTAINER_DETAIL)],
         [getField(CONTAINER_MANIFEST)]: getDataCMInq.length ? getDataCMInq : contentInqResolved?.[getField(CONTAINER_MANIFEST)]
       }
+      if (!question.paragraphAnswer && !question.answerObj.length) {
+        question.answerObj = [];
+        question.paragraphAnswer = {
+          inquiry: question.id,
+          content: ''
+        }
+      } else if (!question.paragraphAnswer && question.answerObj.length) {
+        question.paragraphAnswer = {
+          inquiry: question.id,
+          content: ''
+        }
+      }
     }
-    //
+
     await addTransactionAnswer({ inquiryId: question.id, contentCDCM, ansType: question.ansType }).catch(err => handleError(dispatch, err));
 
     if (question.selectChoice) {
@@ -258,7 +273,7 @@ const InquiryAnswer = (props) => {
         if (question.answerObj.length) {
           if (
             containerCheck.includes(question.field)
-            && isJsonText(question.answerObj[0].content)
+            && (isJsonText(question.answerObj[0].content) || question.ansForType !== 'ANS_CD_CM')
             && question.answerObj.length > 1
           ) {
             answerId = question.answerObj[1].id;
@@ -267,7 +282,7 @@ const InquiryAnswer = (props) => {
           }
         }
         if (answerId) {
-          if (question.paragraphAnswer.content.trim() === '') {
+          if (question.paragraphAnswer.content.trim() === '' && !containerCheck.includes(question.field)) {
             question.paragraphAnswer.content = ONLY_ATT;
           }
           await updateParagraphAnswer(answerId, question.paragraphAnswer).catch(err => handleError(dispatch, err));
@@ -328,6 +343,11 @@ const InquiryAnswer = (props) => {
       optionsInquires[editedIndex].state === "ANS_SENT" ? "ADMIN" : ""
     );
 
+    dispatch(FormActions.eventClickContNo({
+      status: false,
+      questionId: '',
+      isHasActionClick: false
+    }));
     dispatch(InquiryActions.setEditInq(null));
   };
 
@@ -335,32 +355,57 @@ const InquiryAnswer = (props) => {
     if (isDisableSave) setDisableSave(false);
   }, []);
 
+  const isEditedCdCMTable = () => {
+    let contentCDCM = {};
+    if (containerCheck.includes(question.field)) {
+      contentCDCM = {
+        [getField(CONTAINER_DETAIL)]: getDataCDInq.length ? getDataCDInq : contentInqResolved?.[getField(CONTAINER_DETAIL)],
+        [getField(CONTAINER_MANIFEST)]: getDataCMInq.length ? getDataCMInq : contentInqResolved?.[getField(CONTAINER_MANIFEST)]
+      }
+      if  (JSON.stringify(oldDataCdCmInq.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
+        setDisableSaveCdCm(false);
+      } else if (question.paragraphAnswer && oldDataCdCmInq.contentOld !== question.paragraphAnswer.content) {
+        setDisableSaveCdCm(false);
+      } else {
+        setDisableSaveCdCm(true);
+      }
+    }
+  }
+
+  useEffect(() => {
+    isEditedCdCMTable()
+  }, [getDataCDInq, getDataCMInq, question.paragraphAnswer]);
+
   return (
     <div className='changeToEditor'>
       <div className="flex">
-        <Button
-          variant="contained"
-          color="primary"
-          disabled={
-            (
-              !currentAnswer?.paragraphAnswer?.content?.trim()
-              && !currentAnswer.selectChoice
-              && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)
-            )
-            ||
-            isDisableSave
-          }
-          onClick={() => onSave()}
-          classes={{ root: classes.button }}>
-          Save
-        </Button>
-        <Button
-          variant="contained"
-          classes={{ root: clsx(classes.button, 'reply') }}
-          color="primary"
-          onClick={onCancel}>
-          Cancel
-        </Button>
+
+        <div className="flex">
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={
+              (containerCheck.includes(question.field) ? isDisableSaveCdCm :
+              (
+                !currentAnswer?.paragraphAnswer?.content?.trim()
+                && !currentAnswer.selectChoice
+                && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)
+              ))
+              ||
+              isDisableSave
+            }
+            onClick={() => onSave()}
+            classes={{ root: classes.button }}>
+            Save
+          </Button>
+          <Button
+            variant="contained"
+            classes={{ root: clsx(classes.button, 'reply') }}
+            color="primary"
+            onClick={onCancel}>
+            Cancel
+          </Button>
+        </div>
       </div>
     </div>
   );

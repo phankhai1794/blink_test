@@ -110,7 +110,7 @@ const ChoiceAnswer = (props) => {
         >
           {question.answerObj?.map((choice, index) => {
             const lastElement = question.answerObj.length - 1 === index
-            if ((lastElement && choice.content) || !lastElement || user.role === 'Guest') {
+            if ((lastElement && choice.content) || !lastElement || (user.role === 'Guest' && (!selectedChoice || selectedChoice === choice.id || !disable))) {
               return (
                 <div key={index} style={{ marginTop: '0.5rem', display: 'flex' }}>
                   <FormControlLabel

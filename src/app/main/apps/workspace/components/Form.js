@@ -131,7 +131,10 @@ const useStyles = makeStyles(() => ({
     minHeight: 600,
     maxHeight: '80%',
     margin: 0,
-    width: '100%'
+    width: '100%',
+  },
+  dialogFullWidth: {
+    transform: 'translate(-0,0) !important'
   },
   dialogContent: {
     margin: 'auto',
@@ -307,23 +310,12 @@ export default function Form(props) {
           <Paper {...props} id="paper" />
         </Draggable>
     ,
-    [isFullScreen]
+    []
   );
 
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
   };
-  const onUnload = (e) => {
-    e.preventDefault();
-    e.returnValue = '';
-  }
-
-  useEffect(() => {
-    if (currentEditInq || currentFieldAmend || reply) {
-      window.addEventListener("beforeunload", onUnload);
-    }
-    return () => window.removeEventListener("beforeunload", onUnload);
-  }, [currentEditInq, currentFieldAmend, reply])
 
   const handleClick = () => {
     if (!currentEditInq) {
@@ -456,7 +448,7 @@ export default function Form(props) {
         PaperComponent={PaperComponent}
         maxWidth="md"
         container={() => document.getElementById('content-wrapper')}
-        classes={{ paperScrollPaper: isFullScreen ? null : classes.dialogPaper }}>
+        classes={{ paperScrollPaper: isFullScreen ? classes.dialogFullWidth : classes.dialogPaper }}>
         <DialogTitle
           id="draggable-dialog-title"
           style={isFullScreen ? null : { cursor: 'move' }}

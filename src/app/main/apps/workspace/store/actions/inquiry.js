@@ -36,6 +36,7 @@ export const SET_DATA_CM_INQ = 'SET_DATA_CM_INQ';
 export const SET_CANCEL_AME_POPUP = 'SET_CANCEL_AME_POPUP';
 export const ORIGIN_VALUE_CANCEL = 'ORIGIN_VALUE_CANCEL';
 export const SET_EXPAND_ATTACHMENT = 'SET_EXPAND_ATTACHMENT';
+export const SET_OLD_DATA_CD_CM_INQ = 'SET_OLD_DATA_CD_CM_INQ';
 
 export function saveInquiry() {
   return {
@@ -99,6 +100,13 @@ export function setDataCdInq(state) {
 export function setDataCmInq(state) {
   return {
     type: SET_DATA_CM_INQ,
+    state
+  };
+}
+
+export function setOldDataCdCm(state) {
+  return {
+    type: SET_OLD_DATA_CD_CM_INQ,
     state
   };
 }

@@ -164,6 +164,8 @@ const useStyles = makeStyles((theme) => ({
 const OtpCheck = ({ children }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const processUrl = window.location.pathname.includes("draft") ? "draft" : "pending";
+
   const [myBL, setMyBL] = useState({ id: '' });
   const [mail, setMail] = useState({ value: '', isValid: false, isSubmitted: false });
   const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true, resendAfter: 0 });
@@ -172,7 +174,9 @@ const OtpCheck = ({ children }) => {
   const catchError = (error) => {
     console.error(error);
     const { message } = error.response.data.error || error.message;
-    if (message !== "Forbidden") dispatch(Actions.showMessage({ message, variant: 'error' }));
+
+    if (message.includes("not ready yet")) dispatch(Actions.showMessage({ message, variant: 'warning' }));
+    else if (message !== "Forbidden") dispatch(Actions.showMessage({ message, variant: 'error' }));
   }
 
   const handleChangeMail = (e) => {
@@ -194,7 +198,8 @@ const OtpCheck = ({ children }) => {
   const handleCheckMail = () => {
     setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
     setMail({ ...mail, isSubmitted: true });
-    verifyEmail({ email: mail.value, bl: myBL.id })
+
+    verifyEmail({ email: mail.value, bl: myBL.id, processUrl })
       .then((res) => {
         if (res) {
           localStorage.setItem("sentCode", JSON.stringify({
@@ -252,7 +257,7 @@ const OtpCheck = ({ children }) => {
   }
 
   const handleSendCode = () => {
-    verifyGuest({ email: mail.value, bl: myBL.id, otpCode: otpCode.value })
+    verifyGuest({ email: mail.value, bl: myBL.id, otpCode: otpCode.value, processUrl })
       .then((res) => {
         if (res) handleSuccess(res);
       })
@@ -295,7 +300,7 @@ const OtpCheck = ({ children }) => {
           value: email,
           isValid: isEmail(email)
         });
-        isVerified({ bl, userType })
+        isVerified({ bl, userType, processUrl })
           .then(() => {
             setStep(2);
             return;

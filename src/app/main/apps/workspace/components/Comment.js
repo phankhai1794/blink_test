@@ -6,6 +6,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { CONTAINER_MANIFEST, CONTAINER_DETAIL } from '@shared/keyword';
 import clsx from "clsx";
 
+import Diff from "../shared-components/react-diff";
+
 import ContainerDetailForm from './ContainerDetailForm';
 import UserInfo from './UserInfo';
 import ImageAttach from './ImageAttach';
@@ -14,6 +16,7 @@ import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from "./ParagraphAnswer";
 import { ContainerDetailFormOldVersion } from './InquiryViewer';
 import ContainerDetailInquiry from "./ContainerDetailInquiry";
+import InquiryWithGroup from "./InquiryWithGroup";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -65,14 +68,12 @@ const useStyles = makeStyles(() => ({
 }));
 
 const Comment = (props) => {
-  const { question, comment, isDateTime } = props;
-  const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length - 1) : []);
-  const [value, setValue] = useState('');
-  const [key, setKey] = useState();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [edit, setEdit] = useState('');
-  const classes = useStyles();
+  const { question, comment, isDateTime, currentQuestion } = props;
+  const [comments, setComments] = useState(comment?.length ? comment : [])
   const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
+  const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
 
   const user = useSelector(({ user }) => user);
@@ -98,7 +99,7 @@ const Comment = (props) => {
   const contentUI = ({ userName, createdAt, avatar, content, title, media, answersMedia, id, type, reply }) => {
     let dataCD = [];
     let dataCM = [];
-    if (reply.content && isJsonText(reply.content) && containerCheck.includes(reply.field) && reply.type === 'ANS_CD_CM') {
+    if (reply.content && isJsonText(reply.content) && containerCheck.includes(currentQuestion.field) && (reply.type === 'ANS_CD_CM' || ['COMPL', 'UPLOADED'].includes(reply.state))) {
       const parseJs = JSON.parse(reply.content);
       dataCD = parseJs?.[getField(CONTAINER_DETAIL)];
       dataCM = parseJs?.[getField(CONTAINER_MANIFEST)];
@@ -108,6 +109,11 @@ const Comment = (props) => {
       dataCD = parseJs[getField(CONTAINER_DETAIL)];
       dataCM = parseJs[getField(CONTAINER_MANIFEST)];
     }
+
+    const renderContent = () => {
+      return (isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG'].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content
+    }
+
     return (
       <div key={id}>
         <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
@@ -164,11 +170,12 @@ const Comment = (props) => {
               ) : <span className={'markReopen'}>Marked as reopened</span>
             ) :
             (
-              (containerCheck.includes(question.field) && (dataCD.length && dataCM.length)) ? (
+              (containerCheck.includes(question.field) && (dataCD && dataCM && dataCD.length && dataCM.length)) ? (
                 <ContainerDetailInquiry
                   getDataCD={dataCD}
                   getDataCM={dataCM}
                   disableInput={true}
+                  currentQuestion={currentQuestion}
                 />
               ) : (
                 <div
@@ -185,13 +192,28 @@ const Comment = (props) => {
                 >
                   {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
                     <div className={reply.isChangeRecipient ? 'markReopen' : ''}>
-                      {(isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG'].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content}
+                      {['RESOLVED', 'COMPL'].includes(reply.state) ?
+                        <Diff inputA={isDateTime ? formatDate(orgContent[question.field], 'DD MMM YYYY') : orgContent[question.field]} inputB={renderContent()} type="chars" /> :
+                        renderContent()
+                      }
                     </div> :
                     (type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>)
                   }
                 </div>
               )
             )
+          }
+
+          {containerCheck.includes(currentQuestion.field)
+            && currentQuestion.inqGroup && currentQuestion.inqGroup.length
+            && ['ANS', 'INQ'].includes(reply.type)
+            ? currentQuestion.inqGroup.map(q => {
+              return (
+                <div key={q.id}>
+                  <InquiryWithGroup inqGroup={q} role={user.role} />
+                </div>
+              )
+            }) : ``
           }
 
           {<div style={{ display: 'block', margin: '1rem 0rem' }}>
@@ -205,30 +227,30 @@ const Comment = (props) => {
 
           <div className="attachment-reply">
             {media?.length > 0 &&
-              media?.map((file, mediaIndex) => (
-                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+              media?.map((file) => (
+                <>
                   <FileAttach
                     hiddenRemove={true}
                     file={file}
                     files={media}
                     indexInquiry={id}
-                    question={question} />
-                </div>
+                    question={reply} />
+                </>
               ))}
           </div>
           <div className='attachment-answer' style={{ width: '108%' }}>
             {answersMedia?.length > 0 && (
               <>
                 {answersMedia?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+                  <>
                     <FileAttach
                       hiddenRemove={true}
                       file={file}
                       files={answersMedia}
                       indexInquiry={id}
-                      question={question}
+                      question={reply}
                     />
-                  </div>
+                  </>
                 ))}
               </>
             )}

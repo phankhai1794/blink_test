@@ -42,8 +42,7 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 0
   },
   chips: {
-    textOverflow: 'ellipsis',
-    overflow: 'hidden'
+    display: 'flex'
   },
   chip: {
     backgroundColor: '#E2E6EA',
@@ -67,7 +66,7 @@ function ToolbarLayout2(props) {
   const user = useSelector(({ user }) => user);
   const [countries, setCountries] = useState([]);
   const countryOption = user.countries;
-  const [selectedStatus, setSelectedStatus] = useState([...countryOption, 'All']);
+  const [selectedStatus, setSelectedStatus] = useState(countryOption);
 
   useEffect(() => {
     dispatch(Actions.filterCountry(countryOption));
@@ -77,15 +76,17 @@ function ToolbarLayout2(props) {
   }, []);
 
   const handleSelectStatus = (event) => {
+    const arrStatus = [];
     let values = event.target.value;
     if (values.includes('plus')) values.shift();
-    const arrStatus = [];
-    if (values.indexOf('All') !== -1 && selectedStatus.indexOf('All') === -1) {
-      setSelectedStatus([...countryOption, 'All']);
-      dispatch(Actions.filterCountry(countryOption));
-    } else if (values.indexOf('All') === -1 && selectedStatus.indexOf('All') !== -1) {
-      setSelectedStatus([]);
-      dispatch(Actions.filterCountry([]));
+    if (values.indexOf('All') === values.length - 1) {
+      if (values.length > countryOption.length) {
+        setSelectedStatus([]);
+        dispatch(Actions.filterCountry([]));
+      } else {
+        setSelectedStatus([...countryOption]);
+        dispatch(Actions.filterCountry(countryOption));
+      }
     } else {
       const arrSelected = [];
       values.forEach((item) => {
@@ -127,20 +128,17 @@ function ToolbarLayout2(props) {
                 inputProps={{ IconComponent: () => null }}
                 renderValue={(selected) => (
                   <div className={classes.chips}>
-                    {selected.map(
-                      (value) =>
-                        value !== 'All' && (
-                          <span className="flag-country">
-                            <img
-                              className={
-                                selectedStatus.length ? 'circle-flag' : 'circle-flag-default'
-                              }
-                              width="25"
-                              height="25"
-                              src={flagUrl(value)}
-                            />
-                          </span>
-                        )
+                    {selected.slice(0, 4).map((value) => (
+                      <img
+                        key={value}
+                        className={selectedStatus.length ? 'circle-flag' : 'circle-flag-default'}
+                        width="25"
+                        height="25"
+                        src={flagUrl(value)}
+                      />
+                    ))}
+                    {selected.length - 4 > 0 && (
+                      <div className="circle-flag-plus">+{selected.length - 4}</div>
                     )}
                   </div>
                 )}
@@ -149,7 +147,10 @@ function ToolbarLayout2(props) {
                   key={'All'}
                   value={'All'}
                   classes={{ selected: classes.menuItemSelected }}>
-                  <Checkbox checked={selectedStatus.indexOf('All') > -1} color="primary" />
+                  <Checkbox
+                    checked={selectedStatus.length === countryOption.length}
+                    color="primary"
+                  />
                   <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>All</span>
                 </MenuItem>
                 {countries.map(({ label, value }) => (

@@ -9,7 +9,7 @@ import {
   Tooltip
 } from '@material-ui/core';
 import { makeStyles, withStyles } from '@material-ui/styles';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
@@ -33,13 +33,13 @@ import {
   mapUnit,
   CONTAINER_MANIFEST
 } from '@shared/keyword';
-import { useUnsavedChangesWarning } from 'app/hooks'
 import { packageUnits, weightUnits, measurementUnits, containerTypeUnit } from '@shared/units';
 import ClearIcon from '@material-ui/icons/Clear';
 import WindowedSelect from "react-windowed-select";
 import { formatContainerNo, formatNumber } from '@shared';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
 
 const useStyles = makeStyles((theme) => ({
   selectRoot: {
@@ -122,17 +122,17 @@ const StyledChip = withStyles(theme => ({
 }))(Chip);
 
 const AmendmentPopup = (props) => {
-  const { onClose, inqType, isEdit, data, index, updateData, updateEdit, containerDetail, setSave, isInqCDCM } = props;
+  const { onClose, inqType, isEdit, data, dataValues, dataEdited, index, updateData, updateEdit, containerDetail, setSave, isInqCDCM } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
 
-  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const user = useSelector(({ user }) => user);
   const [inputSeal, setInputSeal] = useState('');
+  const inputSealRef = useRef();
   const [valueOrigin, setValueOrigin] = useState({});
   const { register, control, handleSubmit, formState: { errors } } = useForm();
   const regNumber = { value: /^\s*(([1-9]\d{0,2}(,?\d{3})*))(\.\d+)?\s*$/g, message: 'Invalid number' }
@@ -186,18 +186,72 @@ const AmendmentPopup = (props) => {
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
     onClose('save');
-    setPristine()
+    dispatch(FormActions.setDirtyReload({ inputAmendment: false }));
     if (isInqCDCM) setSave();
   };
 
   const show = (value) => user.role === 'Admin';
 
+  const [isFormated, setIsFormated] = useState(false);
+  const autoCountContainerNo = () => {
+    const containersNo = [];
+    let autoCountContNo;
+    if (dataValues && dataValues.length) {
+      dataValues.forEach((d) => {
+        containersNo.unshift(d?.[getType(CONTAINER_NUMBER)]);
+      })
+    }
+    const contNoUpdated = [];
+    if (containersNo.length) {
+      containersNo.forEach(c => {
+        if (c.toUpperCase().match(/CONT-NO: \d+$/g)) {
+          contNoUpdated.push(c);
+        }
+      });
+      if (contNoUpdated.length) {
+        const splitContNo = contNoUpdated[0].split(':');
+        const latestNum = splitContNo.length > 0 ? splitContNo[splitContNo.length - 1] : null;
+        let getBiggestContNo = latestNum;
+        const containerNos = [];
+        contNoUpdated.forEach(c => {
+          const splitContNo = c.split(':');
+          const latestNum = splitContNo.length > 0 ? splitContNo[splitContNo.length - 1] : null;
+          if (latestNum !== null) containerNos.push(latestNum.trim());
+        })
+        if (containerNos.length) {
+          containerNos.forEach(c => {
+            if (getBiggestContNo < c) getBiggestContNo = c;
+          })
+        }
+        if (getBiggestContNo !== null && !isNaN(getBiggestContNo)) {
+          autoCountContNo = (parseInt(getBiggestContNo) + 1);
+        }
+      }
+    }
+    return autoCountContNo;
+  }
+
   const handleChange = (field, value) => {
-    setDirty();
+    dispatch(FormActions.setDirtyReload({ inputAmendment: true }));
     let val = value;
     const id = field.id;
     if ([CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].includes(field.title) && !isNaN(value)) {
       val = formatNumber(value);
+    }
+    if (field.title === CONTAINER_NUMBER) {
+      const count = autoCountContainerNo();
+      if (val === '') {
+        setIsFormated(false)
+      }
+      else if (dataEdited[index][getType(CONTAINER_NUMBER)].toUpperCase().match((/CONT-NO: \d+$/g))) {
+        setIsFormated(true)
+      }
+      else if (count
+          && !isFormated
+          && val.toUpperCase().match(/(CONT-NO)/g)) {
+        val = val + ': ' + count.toString();
+        setIsFormated(true)
+      }
     }
     updateEdit((old) => old.map((row, i) => (index === i ? { ...old[index], [id]: val } : row)));
   };
@@ -225,6 +279,14 @@ const AmendmentPopup = (props) => {
       );
     }
   };
+
+  const onEditSeal = (value, tagValue, index) => {
+    onDelete(value, index)
+    setInputSeal(tagValue)
+    onDelete(value, index);
+    setInputSeal(tagValue);
+    inputSealRef.current.focus();
+  }
 
   const onKeyDown = (e, value) => {
     if (['Enter', 'Tab'].includes(e.key) && inputSeal) {
@@ -280,15 +342,18 @@ const AmendmentPopup = (props) => {
             <>
               {value.map((tag, i) => (
                 <Tooltip key={i} title={tag} enterDelay={1000}>
-                  <StyledChip
-                    label={tag}
-                    onDelete={() => onDelete(value, i)}
-                    deleteIcon={<ClearIcon fontSize="small" />}
-                  />
+                  <div onDoubleClick={() => onEditSeal(value, tag, i)}>
+                    <StyledChip
+                      label={tag}
+                      onDelete={() => onDelete(value, i)}
+                      deleteIcon={<ClearIcon fontSize="small" />}
+                    />
+                  </div>
                 </Tooltip>
               ))}
             </>
             <input
+              ref={inputSealRef}
               style={{
                 width: 20,
                 minHeight: 26,
@@ -301,8 +366,8 @@ const AmendmentPopup = (props) => {
               value={inputSeal}
               onKeyDown={(e) => onKeyDown(e, value)}
               onChange={(e) => {
-                setInputSeal(e.target.value)
-                setDirty()
+                setInputSeal(e.target.value);
+                dispatch(FormActions.setDirtyReload({ inputAmendment: true }));
               }}
               onBlur={() => onAddition(value)}
             />
