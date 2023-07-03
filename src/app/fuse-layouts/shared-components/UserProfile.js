@@ -36,11 +36,6 @@ function UserProfile(props) {
     socket.emit('user_logout');
     dispatch(AppActions.removeUser());
     dispatch(AppActions.checkAllow(false));
-    window.location.logout = true;
-    sessionStorage.setItem('prevUrl', JSON.stringify({
-      cachePath: window.location.pathname,
-      cacheSearch: window.location.search
-    }));
   };
 
   return (
