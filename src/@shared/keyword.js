@@ -2,6 +2,10 @@ export const BOOKING_NO = 'bkgNo';
 
 export const BL_TYPE = 'blType';
 
+export const ORIGINAL_BL = 'Original B/L';
+
+export const SEAWAY_BILL = 'Seaway Bill';
+
 export const SHIPPER = 'shipper';
 
 export const SHIPPER_NAME = 'shipperName';

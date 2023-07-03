@@ -55,6 +55,8 @@ import {
   SERVICE_CONTRACT_NO,
   RD_TERMS, CM_DESCRIPTION,
   FORWARDER,
+  ORIGINAL_BL,
+  SEAWAY_BILL,
   HS_HTS_NCM_Code,
   EVENT_DATE,
   TOTAL_CONTAINERS,
@@ -1467,6 +1469,11 @@ const InquiryViewer = (props) => {
     const data = inquiries.find(({ id }) => question.id === id);
     if (data && data.answerObj?.length) {
       result = (metadata.ans_type.choice === data.ansType) ? data.answerObj?.find(choice => choice.confirmed)?.content : "";
+    }
+    // Change full text BL type text option to value B or W
+    if (question.field === metadata.field[BL_TYPE]) {
+      if (result === ORIGINAL_BL) result = 'B'
+      else if (result === SEAWAY_BILL) result = 'W'
     }
     return result;
   }
