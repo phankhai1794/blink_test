@@ -899,7 +899,7 @@ const InquiryViewer = (props) => {
               comments.splice(0, 0, markReopen);
             }
             comments = comments.filter(c => c.content !== '');
-            if (comments.length > 1) {
+            if (comments.length) {
               if (['UPLOADED', 'RESOLVED'].includes(comments[0].state)) {
                 comments.splice(0, 2);
               } else {
@@ -907,7 +907,9 @@ const InquiryViewer = (props) => {
               }
             }
             setComment(comments);
-            setInqHasComment(true);
+            if (comments.length >= 1) {
+              setInqHasComment(true);
+            }
           }
           setIsLoadedComment(true);
         })
