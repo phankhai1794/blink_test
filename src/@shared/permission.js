@@ -32,6 +32,7 @@ export const PERMISSION = {
   INQUIRY_INQ_ATT_MEDIA: 'inquiry_changesInqAtt',
   INQUIRY_ADD_MEDIA: 'inquiry_addMedia',
   INQUIRY_SUBMIT_INQUIRY_ANSWER: 'inquiry_submitInquiryAnswer',
+  DRAFTBL_UPDATE_DRAFT_BL_REPLY: 'draftbl_updateDraftBLReply',
   DRAFTBL_CONFIRM_DRAFT_BL: 'draftbl_confirmDraftBl',
   DRAFTBL_CREATE_REPLY: 'draftbl_saveEditedField',
   INQUIRY_REOPEN_INQUIRY: 'inquiry_reOpenInquiry',

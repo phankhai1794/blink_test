@@ -525,7 +525,7 @@ const InquiryViewer = (props) => {
                 contentOld
               };
             }
-            if (filterOffshoreSent.type === 'REP' && ['COMPL', 'UPLOADED'] ) {
+            if (filterOffshoreSent.type === 'REP' && ['COMPL', 'UPLOADED']) {
               setInqAnsId(filterOffshoreSent.id);
             }
 
@@ -2965,25 +2965,33 @@ const InquiryViewer = (props) => {
                         </>
                     }
                   </div>
-                  {(((['ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF', 'REP_SENT', 'AME_SENT'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
-                    <>
-                      <Tooltip title={'Edit'}>
-                        <div onClick={() => handleEdit(question)}>
-                          <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+
+                  <PermissionProvider
+                    action={PERMISSION.DRAFTBL_UPDATE_DRAFT_BL_REPLY}
+                    extraCondition={
+                      (
+                        question.showIconEdit
+                        && ['ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF', 'REP_SENT', 'AME_SENT'].includes(question.state)
+                      ) || checkStateReplyDraft
+                    }
+                  >
+                    <Tooltip title={'Edit'}>
+                      <div onClick={() => handleEdit(question)}>
+                        <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                      </div>
+                    </Tooltip>
+                    {(!['REP_Q_DRF', 'REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT', 'ANS_SENT'].includes(question.state) || ['REP_Q_DRF'].includes(question.state) && user.role === 'Admin') && (
+                      <Tooltip title="Delete">
+                        <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
+                          <img
+                            style={{ height: '22px', cursor: 'pointer' }}
+                            src="/assets/images/icons/trash.svg"
+                          />
                         </div>
                       </Tooltip>
-                      {(!['REP_Q_DRF', 'REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT', 'ANS_SENT'].includes(question.state) || ['REP_Q_DRF'].includes(question.state) && user.role === 'Admin') && (
-                        <Tooltip title="Delete">
-                          <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
-                            <img
-                              style={{ height: '22px', cursor: 'pointer' }}
-                              src="/assets/images/icons/trash.svg"
-                            />
-                          </div>
-                        </Tooltip>
-                      )}
-                    </>
-                  )}
+                    )}
+                  </PermissionProvider>
+
                   {question.showIconReply ? (
                     <PermissionProvider
                       action={PERMISSION.INQUIRY_CREATE_REPLY || PERMISSION.DRAFTBL_CREATE_REPLY}
