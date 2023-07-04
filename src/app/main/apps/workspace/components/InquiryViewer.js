@@ -1466,8 +1466,18 @@ const InquiryViewer = (props) => {
 
   const getAnswerResolve = () => {
     let result = "";
+    let isHadResolved = false;
+    if (comment.length) {
+      const mapStates = comment.filter(an => an.state !== null);
+      for (let i = 0; i < mapStates.length; i++) {
+        if (['REOPEN_A', 'REOPEN_Q', 'COMPL', 'UPLOADED', 'RESOLVED'].includes(mapStates[i].state)) {
+          isHadResolved = true;
+          break;
+        }
+      }
+    }
     const data = inquiries.find(({ id }) => question.id === id);
-    if (data && data.answerObj?.length) {
+    if (data && data.answerObj?.length && !isHadResolved) {
       result = (metadata.ans_type.choice === data.ansType) ? data.answerObj?.find(choice => choice.confirmed)?.content : "";
     }
     // Change full text BL type text option to value B or W
