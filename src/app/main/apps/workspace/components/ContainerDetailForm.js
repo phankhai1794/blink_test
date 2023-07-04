@@ -13,7 +13,8 @@ import {
   CONTAINER_MEASUREMENT,
   CM_WEIGHT,
   CM_MEASUREMENT,
-  CM_DESCRIPTION
+  CM_DESCRIPTION,
+  CM_MARK
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -298,7 +299,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
       <Popover
         PaperProps={{
-          style: { width: 400, padding: '0px 20px' }
+          style: { padding: '0px 20px' }
         }}
         open={Boolean(anchorElHistory)}
         anchorEl={anchorElHistory}
@@ -357,7 +358,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                           </IconButton>
                         </div> :
                         <>
-                          {cell === CM_DESCRIPTION && isValueChange(cell, vindex, row) ?
+                          {[CM_DESCRIPTION, CM_MARK].includes(cell) && isValueChange(cell, vindex, row) ?
                             <div
                               onMouseEnter={(e) => checkPopover(e, renderContent(cell, row))}
                               onMouseLeave={closePopover}
