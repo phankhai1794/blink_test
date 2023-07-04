@@ -394,7 +394,7 @@ const InquiryViewer = (props) => {
 
   const validateField = (field, value) => {
     let response = { isError: false, errorType: "" };
-    const isAlsoNotify = metadata.field[FORWARDER] === field ;
+    const isAlsoNotify = metadata.field[FORWARDER] === field || metadata.field[ALSO_NOTIFY] === field;;
     if (Object.keys(metadata.field).find(key => metadata.field[key] === field) === BL_TYPE) {
       response = validateBLType(value);
     }
