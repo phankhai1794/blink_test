@@ -23,7 +23,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { CONTAINER_DETAIL, CONTAINER_MANIFEST, OTHERS } from '@shared/keyword';
+import { ORIGINAL_BL, SEAWAY_BILL, CONTAINER_DETAIL, CONTAINER_MANIFEST, OTHERS } from '@shared/keyword';
 import { uploadFile } from 'app/services/fileService';
 import { getUpdatedAtAnswer, saveInquiry, updateInquiry } from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
@@ -306,7 +306,7 @@ const InquiryEditor = (props) => {
     const inq = { ...currentEditInq };
     const timeB = new Date();
     const timeW = new Date(timeB.getTime() + 1);
-    inq.answerObj.push({ id: null, content: 'Original B/L', createdAt: timeB }, { id: null, content: 'Seaway Bill', createdAt: timeW });
+    inq.answerObj.push({ id: null, content: ORIGINAL_BL, createdAt: timeB }, { id: null, content: SEAWAY_BILL, createdAt: timeW });
     dispatch(InquiryActions.setEditInq(inq));
   }
 
