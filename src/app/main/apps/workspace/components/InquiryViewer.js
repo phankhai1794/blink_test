@@ -525,7 +525,7 @@ const InquiryViewer = (props) => {
                 contentOld
               };
             }
-            if (filterOffshoreSent.type === 'REP' && filterOffshoreSent.state === 'COMPL') {
+            if (filterOffshoreSent.type === 'REP' && ['COMPL', 'UPLOADED'] ) {
               setInqAnsId(filterOffshoreSent.id);
             }
 
@@ -673,7 +673,7 @@ const InquiryViewer = (props) => {
               ) {
                 listComments.splice(getIndexLatestCdCm, 1);
               }
-              if (listComments[0].state === 'COMPL') {
+              if (['UPLOADED', 'COMPL'].includes(listComments[0].state)) {
                 listComments.splice(0, 2);
               } else {
                 listComments.splice(0, 1);
@@ -741,7 +741,7 @@ const InquiryViewer = (props) => {
             setDisableCDCMAmendment(true);
             const lastestComment = res[0];
             let inqAnsId = lastestComment.id;
-            if (lastestComment.state === 'RESOLVED') {
+            if (['RESOLVED', 'UPLOADED'].includes(lastestComment.state)) {
               if (lastestComment.draftAnswerId) {
                 inqAnsId = lastestComment.draftAnswerId;
               }
@@ -848,7 +848,6 @@ const InquiryViewer = (props) => {
               } else if (['REOPEN_A'].includes(lastest.state)) {
                 lastest.showIconReply = true;
                 lastest.showIconEdit = false;
-                setSubmitLabel(false);
                 setStateReplyDraft(false);
               } else if (['REOPEN_Q'].includes(lastest.state)) {
                 lastest.showIconReply = true;
@@ -858,6 +857,7 @@ const InquiryViewer = (props) => {
               if (['REOPEN_A', 'REOPEN_Q'].includes(lastest.state)) {
                 // is CM CD Amendment
                 if (typeof lastest.content === 'string') setTempReply({});
+                setSubmitLabel(false);
               }
             }
             setQuestion(lastest);
@@ -900,22 +900,12 @@ const InquiryViewer = (props) => {
             }
             comments = comments.filter(c => c.content !== '');
             if (comments.length > 1) {
-              if (comments[0].state === 'RESOLVED') {
+              if (['UPLOADED', 'RESOLVED'].includes(comments[0].state)) {
                 comments.splice(0, 2);
               } else {
                 comments.splice(0, 1);
               }
             }
-            comments.unshift({
-              creator: { userName: user.displayName, avatar: null },
-              updater: { userName: user.displayName, avatar: null },
-              createdAt: res[res.length - 1].createdAt,
-              updatedAt: res[res.length - 1].createdAt,
-              answersMedia: [],
-              content: orgContent[lastest.field] || '',
-              process: 'draft',
-              state: 'AME_ORG'
-            })
             setComment(comments);
             setInqHasComment(true);
           }
@@ -1086,10 +1076,8 @@ const InquiryViewer = (props) => {
           const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
           const newMediaFile = comment.at(-2).answersMedia.filter(({ id: id1 }) => !comment.at(-1).answersMedia.some(({ id: id2 }) => id2 === id1));
           const removeMediaFile = comment.at(-1).answersMedia.filter(({ id: id1 }) => !comment.at(-2).answersMedia.some(({ id: id2 }) => id2 === id1)).map(({ id }) => id);
-          optionsInquires[editedIndex].createdAt = res.updatedAt;
           optionsInquires[editedIndex].mediaFile = optionsInquires[editedIndex].mediaFile.filter(inq => !removeMediaFile.includes(inq.id));
           optionsInquires[editedIndex].mediaFile.push(...newMediaFile);
-          dispatch(InquiryActions.setInquiries(optionsInquires));
 
           // Case: Offshore reply customer's amendment first time => delete
           if (comment.length === 3) {
@@ -1134,7 +1122,8 @@ const InquiryViewer = (props) => {
                     newContent = { ...newContent, [containerCheck[0]]: res.myBL.content[containerCheck[0]], [containerCheck[1]]: res.myBL.content[containerCheck[1]] }
                   }
                 })
-              } else {
+              }
+              else {
                 const idCD = metadata.field[CONTAINER_DETAIL];
                 const idCM = metadata.field[CONTAINER_MANIFEST];
                 if (res.drfAnswersTrans) {
@@ -1272,6 +1261,10 @@ const InquiryViewer = (props) => {
             }
             setReplyRemove();
 
+            if (res.updatedAt !== null) {
+              optionsInquires[editedIndex].createdAt = res.updatedAt;
+            }
+            dispatch(InquiryActions.setInquiries(optionsInquires));
             dispatch(InquiryActions.setContent(newContent));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             dispatch(InquiryActions.addAmendment());
