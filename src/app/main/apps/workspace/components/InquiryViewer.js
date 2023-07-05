@@ -1079,10 +1079,13 @@ const InquiryViewer = (props) => {
           // update mediaFile in inquiries
           const optionsInquires = [...inquiries];
           const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
-          const newMediaFile = comment.at(-2).answersMedia.filter(({ id: id1 }) => !comment.at(-1).answersMedia.some(({ id: id2 }) => id2 === id1));
-          const removeMediaFile = comment.at(-1).answersMedia.filter(({ id: id1 }) => !comment.at(-2).answersMedia.some(({ id: id2 }) => id2 === id1)).map(({ id }) => id);
-          optionsInquires[editedIndex].mediaFile = optionsInquires[editedIndex].mediaFile.filter(inq => !removeMediaFile.includes(inq.id));
-          optionsInquires[editedIndex].mediaFile.push(...newMediaFile);
+
+          if (comment.length > 2) {
+            const newMediaFile = comment.at(1).answersMedia.filter(({ id: id1 }) => !comment.at(0).answersMedia.some(({ id: id2 }) => id2 === id1));
+            const removeMediaFile = comment.at(0).answersMedia.filter(({ id: id1 }) => !comment.at(1).answersMedia.some(({ id: id2 }) => id2 === id1)).map(({ id }) => id);
+            optionsInquires[editedIndex].mediaFile = optionsInquires[editedIndex].mediaFile.filter(inq => !removeMediaFile.includes(inq.id));
+            optionsInquires[editedIndex].mediaFile.push(...newMediaFile);
+          }
 
           // Case: Offshore reply customer's amendment first time => delete
           if (comment.length === 3) {
