@@ -382,6 +382,7 @@ const InquiryViewer = (props) => {
 
   const isDateTimeField = () => {
     setIsDateTime(isDateField(metadata, question.field));
+    setIsValidDate(isDateField(metadata, question.field));
   }
 
   const handleViewMore = (id) => {
@@ -1459,6 +1460,7 @@ const InquiryViewer = (props) => {
       setInqHasComment(false);
       question.isShowTableToReply = false;
     }
+    if (question.process === 'draft') setIsValidDate(false);
   };
 
   const getAnswerResolve = () => {
@@ -1906,9 +1908,12 @@ const InquiryViewer = (props) => {
   const inputText = (e, isDate = false) => {
     !validateInput?.isValid && dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     if (isDate) {
+      const originTime = content[question.field] ? formatDate(content[question.field], 'YYYY-MM-DD') : '';
       if (!isNaN(e?.getTime())) {
         setTextResolve(e.toISOString());
-        setIsValidDate(false);
+        if (originTime === formatDate(e?.toISOString(), 'YYYY-MM-DD') && question.process === 'pending')
+          setIsValidDate(true)
+        else setIsValidDate(false);
       } else {
         setTextResolve(e);
         setIsValidDate(true);
@@ -3487,8 +3492,6 @@ const InquiryViewer = (props) => {
                             )
                             ||
                             disableSaveReply
-                            ||
-                            isValidDate
                           }
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
