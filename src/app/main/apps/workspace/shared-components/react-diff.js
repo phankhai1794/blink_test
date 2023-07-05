@@ -12,14 +12,19 @@ var fnMap = {
 
 const Diff = (props) => {
   var diff = fnMap[props.type](props.inputA, props.inputB, { newlineIsToken: true });
+
   var result = diff.map((part, index) => {
+    let value = part.value
+    if (part.added || part.removed) { 
+      value = part.value.replace(/\n/g, '▼\n')
+    }
     var spanStyle = {
       // display: /^\n+$/g.test(part.value) ? 'block' : null,
       backgroundColor: part.added ? 'lightgreen' : part.removed ? 'salmon' : null
     };
     return (
       <span key={index} style={spanStyle}>
-        {part.value}
+        {value}
       </span>
     );
   });

@@ -92,10 +92,6 @@ const Comment = (props) => {
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
-  const checkSystemResolved = (process, key) => {
-    return (process === 'draft' && key === 0) ? true : false;
-  }
-
   const contentUI = ({ userName, createdAt, avatar, content, title, media, answersMedia, id, type, reply }) => {
     let dataCD = [];
     let dataCM = [];
@@ -116,9 +112,9 @@ const Comment = (props) => {
 
     return (
       <div key={id}>
-        <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
+        <div className="comment-detail" style={{ padding: '20px' }}>
           <div className="flex justify-between" style={{ alignItems: 'self-start' }}>
-            <UserInfo name={checkSystemResolved(question?.process, id) ? 'System' : userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
+            <UserInfo name={userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
 
             {['COMPL', 'RESOLVED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Resolved</span></div>)}
             {['UPLOADED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Uploaded</span></div>)}
