@@ -909,6 +909,8 @@ const InquiryViewer = (props) => {
             setComment(comments);
             if (comments.length >= 1) {
               setInqHasComment(true);
+            } else {
+              setInqHasComment(false);
             }
           }
           setIsLoadedComment(true);
