@@ -1114,6 +1114,9 @@ const InquiryViewer = (props) => {
               removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
             }
             const inquiriesByField = optionsOfQuestion.filter(inq => inq.field === question.field && inq.process === 'pending');
+            if (res.updatedAt !== null) {
+              optionsInquires[editedIndex].createdAt = res.updatedAt;
+            }
             if (res.checkEmpty) {
               if (removeIndex !== -1) {
                 newContent = { ...newContent, [question.field]: contentInqResolved[question.field] };
@@ -1178,7 +1181,8 @@ const InquiryViewer = (props) => {
                 }
               }
               dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-            } else {
+            }
+            else {
               if (res.checkReplyEmpty) {
                 if (removeIndex !== -1) {
                   if (comment.length) {
@@ -1265,10 +1269,6 @@ const InquiryViewer = (props) => {
             }
             setReplyRemove();
 
-            if (res.updatedAt !== null) {
-              optionsInquires[editedIndex].createdAt = res.updatedAt;
-            }
-            dispatch(InquiryActions.setInquiries(optionsInquires));
             dispatch(InquiryActions.setContent(newContent));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             dispatch(InquiryActions.addAmendment());
