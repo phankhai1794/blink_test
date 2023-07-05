@@ -16,7 +16,7 @@ const Diff = (props) => {
   var result = diff.map((part, index) => {
     let value = part.value
     if (part.added || part.removed) { 
-      value = part.value.replace(/\n/g, '▼\n')
+      value = part.value.replace(/\n/g, '↩\n')
     }
     var spanStyle = {
       // display: /^\n+$/g.test(part.value) ? 'block' : null,
