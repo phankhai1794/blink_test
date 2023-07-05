@@ -159,7 +159,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ToolbarLayout1(props) {
-  const { pathname, search, logout } = window.location;
+  const { pathname, search } = window.location;
   const dispatch = useDispatch();
   const classes = useStyles(props);
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
@@ -377,8 +377,10 @@ function ToolbarLayout1(props) {
   };
 
   const showQueueList = () => {
+    const country = new URLSearchParams(search).get('cntr');
+    const param = country ? `?cntr=${country}` : "";
     userType === 'ADMIN' ?
-      window.open('/apps/admin') :
+      window.open(`/apps/admin${param}`) :
       dispatch(InquiryActions.openQueueList(true));
   }
 
