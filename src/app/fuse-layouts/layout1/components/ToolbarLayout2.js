@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
 const flagUrl = (value) => `assets/images/flags/${value.toLowerCase()}.svg`;
 
 function ToolbarLayout2(props) {
-  const { pathname } = window.location;
+  const { pathname, search } = window.location;
   const classes = useStyles(props);
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
   const dispatch = useDispatch();
@@ -66,10 +66,21 @@ function ToolbarLayout2(props) {
   const user = useSelector(({ user }) => user);
   const [countries, setCountries] = useState([]);
   const countryOption = user.countries;
-  const [selectedStatus, setSelectedStatus] = useState(countryOption);
+  const [selectedStatus, setSelectedStatus] = useState([]);
 
   useEffect(() => {
-    dispatch(Actions.filterCountry(countryOption));
+    // auto select only 1 default country when access to BLINK via OPUS
+    let result = [...countryOption];
+    if (search) {
+      const cntr = new URLSearchParams(search).get('cntr');
+      if (cntr && countryOption.includes(cntr)) result = [cntr];
+
+      // Remove search param from url
+      window.history.pushState({}, '', `/apps/admin`);
+    }
+    setSelectedStatus(result);
+    dispatch(Actions.filterCountry(result));
+
     getUserCountry()
       .then(({ data }) => setCountries(data.userCountry))
       .catch((err) => handleError(dispatch, err));
