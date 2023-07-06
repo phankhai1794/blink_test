@@ -817,6 +817,7 @@ const InquiryEditor = (props) => {
     let check = true;
     const ansTypeChoice = metadata.ans_type['choice'];
     let validate = {};
+
     if (
       !currentEditInq.inqType ||
       !currentEditInq.field ||
@@ -836,7 +837,7 @@ const InquiryEditor = (props) => {
       if (ansTypeChoice === currentEditInq.ansType) {
         // check empty a field
         if (currentEditInq.answerObj.length > 0) {
-          const checkOptionEmpty = currentEditInq.answerObj.filter((item) => !item.content);
+          const checkOptionEmpty = currentEditInq.answerObj.filter((item) => !item.content.trim());
           if (checkOptionEmpty.length > 0) {
             validate = { ...validate, answerContent: false };
           } else {
