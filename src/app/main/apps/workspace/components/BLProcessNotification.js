@@ -119,7 +119,7 @@ const BLProcessNotification = () => {
 
       // Receive the list user accessing
       socket.on('users_accessing', async ({ usersAccessing }) => {
-        console.log("usersAccessing: ", usersAccessing);
+        window.usersAccessing = usersAccessing; 
 
         const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
         if (userLocal.displayName && usersAccessing.length) {

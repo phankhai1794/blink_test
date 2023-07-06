@@ -1,7 +1,8 @@
 import * as Actions from '../../actions';
 
 const initialState = {
-  role: ""
+  role: "",
+  type: ""
 };
 
 const user = function (state = initialState, action) {
