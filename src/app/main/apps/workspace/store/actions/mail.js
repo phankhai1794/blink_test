@@ -121,27 +121,30 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   const getValueField = (content, keyword) => {
     return content[getField(keyword)] || ''
   };
+
   const cloneInquiries = [...inquiries];
   cloneInquiries.forEach(q => {
     if (q.state === 'OPEN') q.state = 'INQ_SENT'; // inquiry
     else if (q.state === 'REP_Q_DRF') q.state = 'REP_Q_SENT'; // inquiry
     else if (q.state === 'REP_DRF') q.state = 'REP_SENT'; // amendment
   });
+  dispatch(InquiryActions.setInquiries(cloneInquiries));
 
-  let subjectOns = ''
-  let contentOns = ''
-  let subjectCus = ''
-  let contentCus = ''
-  const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer')
-  const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore')
+  let subjectOns = '';
+  let contentOns = '';
+  let subjectCus = '';
+  let contentCus = '';
+  const hasCustomer = inquiries.some(inq => inq.receiver[0] === 'customer');
+  const hasOnshore = inquiries.some(inq => inq.receiver[0] === 'onshore');
+
+  const bkgNo = mybl.bkgNo;
   const vvdCode = getValueField(PRE_CARRIAGE_CODE) || getValueField(content, VESSEL_VOYAGE_CODE)
   const pod = getValueField(content, PORT_OF_DISCHARGE)
   const del = getValueField(content, PLACE_OF_DELIVERY)
   const etd = getValueField(ETD);
-  const shipperName = getValueField(SHIPPER_NAME);
+  let shipperName = getValueField(SHIPPER_NAME);
+  shipperName = shipperName?.trim() ? `${shipperName} +` : '';
 
-  const bkgNo = mybl.bkgNo
-  dispatch(InquiryActions.setInquiries(cloneInquiries));
 
   if (hasOnshore && form.toOnshore && inqOnshore.length > 0) {
     const formOnshore = { ...form };

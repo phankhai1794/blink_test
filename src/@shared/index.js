@@ -192,7 +192,7 @@ export function isJsonText(str) {
 }
 
 export function formatDate(time, formatType) {
-  return moment(time).format(formatType);
+  return time ? moment(time).format(formatType) : '';
 }
 
 // Format Dummy Container Data
@@ -280,9 +280,9 @@ export const compareObject = (a, b) => {
 }
 
 export const clearLocalStorage = () => {
-  let user = JSON.parse(localStorage.getItem("USER"));
+  const lastEmail = localStorage.getItem("lastEmail");
   localStorage.clear();
-  if (user) localStorage.setItem("lastEmail", user.email);
+  localStorage.setItem("lastEmail", lastEmail);
 }
 
 export const parseNumberValue = (value) => {

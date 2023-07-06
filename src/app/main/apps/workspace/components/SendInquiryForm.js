@@ -153,14 +153,14 @@ const SendInquiryForm = (props) => {
   const getValueField = (keyword) => {
     return content[getField(keyword)] || '';
   };
-
+  
+  const bkgNo = mybl.bkgNo;
   const vvdCode = getValueField(PRE_CARRIAGE_CODE) || getValueField(VESSEL_VOYAGE_CODE);
   const pod = getValueField(PORT_OF_DISCHARGE);
   const pol = getValueField(PORT_OF_LOADING)
   const etd = getValueField(ETD);
-  const shipperName = getValueField(SHIPPER_NAME);
-
-  const bkgNo = mybl.bkgNo;
+  let shipperName = getValueField(SHIPPER_NAME);
+  shipperName = shipperName?.trim() ? `${shipperName} +` : '';
 
   const initiateContentState = (content) => {
     return EditorState.createWithContent(ContentState.createFromText(content));

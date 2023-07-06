@@ -159,7 +159,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ToolbarLayout1(props) {
-  const { pathname, search, logout } = window.location;
+  const { pathname, search } = window.location;
   const dispatch = useDispatch();
   const classes = useStyles(props);
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
@@ -178,11 +178,7 @@ function ToolbarLayout1(props) {
   const [inquiryLength, setInquiryLength] = useState();
 
   const enableSubmitInq = inquiries.some((inq) => ['ANS_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
-
-  const onUnload = (e) => {
-    e.preventDefault();
-    e.returnValue = '';
-  }
+  const msgConfirmDrf = inquiries.some((inq) => !['RESOLVED', 'UPLOADED', 'COMPL'].includes(inq.state)) ? 'Still has pending inquiry/amendment \n' : '';
 
   useEffect(() => {
     dispatch(FormActions.setDirtyReload({
@@ -381,17 +377,14 @@ function ToolbarLayout1(props) {
   };
 
   const showQueueList = () => {
+    const country = new URLSearchParams(search).get('cntr');
+    const param = country ? `?cntr=${country}` : "";
     userType === 'ADMIN' ?
-      window.open('/apps/admin') :
+      window.open(`/apps/admin${param}`) :
       dispatch(InquiryActions.openQueueList(true));
   }
 
-  const confirmBlDraft = () => {
-    if (inquiries.some((inq) => !['RESOLVED', 'UPLOADED', 'COMPL'].includes(inq.state))) {
-      dispatch(AppActions.showMessage({ message: "Unable to confirm, still has pending inquiry/amendment", variant: 'warning' }));
-    }
-    setOpen(true);
-  };
+  const confirmBlDraft = () => setOpen(true);
 
   const redirectWorkspace = () => {
     const bl = new URLSearchParams(search).get('bl');
@@ -552,7 +545,7 @@ function ToolbarLayout1(props) {
                   <img src="assets/images/icons/confirm.svg" style={{ position: 'relative', right: 2, width: 11, height: 11 }} />
                   <span claseeName={classes.dratTypeText}>Confirm</span>
                 </Button>
-                <DialogConfirm open={open} handleClose={handleClose} />
+                <DialogConfirm open={open} handleClose={handleClose} msg={msgConfirmDrf} />
               </PermissionProvider>
 
               <PermissionProvider
