@@ -526,7 +526,7 @@ const InquiryViewer = (props) => {
                 contentOld
               };
             }
-            if (filterOffshoreSent.type === 'REP' && ['COMPL', 'UPLOADED'] ) {
+            if (filterOffshoreSent.type === 'REP' && ['COMPL', 'UPLOADED']) {
               setInqAnsId(filterOffshoreSent.id);
             }
 
@@ -1079,10 +1079,13 @@ const InquiryViewer = (props) => {
           // update mediaFile in inquiries
           const optionsInquires = [...inquiries];
           const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
-          const newMediaFile = comment.at(-2).answersMedia.filter(({ id: id1 }) => !comment.at(-1).answersMedia.some(({ id: id2 }) => id2 === id1));
-          const removeMediaFile = comment.at(-1).answersMedia.filter(({ id: id1 }) => !comment.at(-2).answersMedia.some(({ id: id2 }) => id2 === id1)).map(({ id }) => id);
-          optionsInquires[editedIndex].mediaFile = optionsInquires[editedIndex].mediaFile.filter(inq => !removeMediaFile.includes(inq.id));
-          optionsInquires[editedIndex].mediaFile.push(...newMediaFile);
+
+          if (comment.length > 2) {
+            const newMediaFile = comment.at(1).answersMedia.filter(({ id: id1 }) => !comment.at(0).answersMedia.some(({ id: id2 }) => id2 === id1));
+            const removeMediaFile = comment.at(0).answersMedia.filter(({ id: id1 }) => !comment.at(1).answersMedia.some(({ id: id2 }) => id2 === id1)).map(({ id }) => id);
+            optionsInquires[editedIndex].mediaFile = optionsInquires[editedIndex].mediaFile.filter(inq => !removeMediaFile.includes(inq.id));
+            optionsInquires[editedIndex].mediaFile.push(...newMediaFile);
+          }
 
           // Case: Offshore reply customer's amendment first time => delete
           if (comment.length === 3) {
@@ -2972,25 +2975,33 @@ const InquiryViewer = (props) => {
                         </>
                     }
                   </div>
-                  {(((['ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF', 'REP_SENT', 'AME_SENT'].includes(question.state)) && question.showIconEdit) || checkStateReplyDraft) && (
-                    <>
-                      <Tooltip title={'Edit'}>
-                        <div onClick={() => handleEdit(question)}>
-                          <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+
+                  <PermissionProvider
+                    action={PERMISSION.DRAFTBL_UPDATE_DRAFT_BL_REPLY}
+                    extraCondition={
+                      (
+                        question.showIconEdit
+                        && ['ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_Q_DRF', 'REP_SENT', 'AME_SENT'].includes(question.state)
+                      ) || checkStateReplyDraft
+                    }
+                  >
+                    <Tooltip title={'Edit'}>
+                      <div onClick={() => handleEdit(question)}>
+                        <img style={{ width: 20, cursor: 'pointer' }} src="/assets/images/icons/edit.svg" />
+                      </div>
+                    </Tooltip>
+                    {(!['REP_Q_DRF', 'REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT', 'ANS_SENT'].includes(question.state) || ['REP_Q_DRF'].includes(question.state) && user.role === 'Admin') && (
+                      <Tooltip title="Delete">
+                        <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
+                          <img
+                            style={{ height: '22px', cursor: 'pointer' }}
+                            src="/assets/images/icons/trash.svg"
+                          />
                         </div>
                       </Tooltip>
-                      {(!['REP_Q_DRF', 'REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT', 'ANS_SENT'].includes(question.state) || ['REP_Q_DRF'].includes(question.state) && user.role === 'Admin') && (
-                        <Tooltip title="Delete">
-                          <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
-                            <img
-                              style={{ height: '22px', cursor: 'pointer' }}
-                              src="/assets/images/icons/trash.svg"
-                            />
-                          </div>
-                        </Tooltip>
-                      )}
-                    </>
-                  )}
+                    )}
+                  </PermissionProvider>
+
                   {question.showIconReply ? (
                     <PermissionProvider
                       action={PERMISSION.INQUIRY_CREATE_REPLY || PERMISSION.DRAFTBL_CREATE_REPLY}
