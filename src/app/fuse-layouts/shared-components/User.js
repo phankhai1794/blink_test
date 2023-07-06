@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 function User(props) {
-  const { pathname, search, logout } = window.location;
+  const { pathname, search } = window.location;
   const classes = useStyles();;
   const dispatch = useDispatch();
   const user = useSelector(({ user }) => user);
@@ -30,13 +30,8 @@ function User(props) {
     if (!user.displayName || !validToken) {
       if (!allowAccess) {
         const bl = new URLSearchParams(search).get('bl');
-        if (bl) {
-          window.location.reload();
-          // history.push(`/guest?bl=${bl}`);
-        } else history.push({
-          pathname: '/login',
-          ...(!logout && { cachePath: pathname, cacheSearch: search })
-        });
+        if (bl) window.location.reload(); // history.push(`/guest?bl=${bl}`);
+        else history.push('/login');
       }
 
       let userInfo = JSON.parse(localStorage.getItem('USER'));
@@ -54,7 +49,7 @@ function User(props) {
         dispatch(AppActions.setUser(payload));
       }
     }
-  }, [user, allowAccess]);
+  }, [user.displayName, allowAccess]);
 
   return (
     <PermissionProvider

@@ -9,6 +9,8 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import { getInquiryById } from 'app/services/inquiryService';
 import { getBlInfo } from 'app/services/myBLService';
 import { SocketContext } from 'app/AppContext';
+import { getPermissionByRole } from 'app/services/authService';
+import * as AppAction from 'app/store/actions';
 import { categorizeInquiriesByUserType } from '@shared';
 
 import * as Actions from '../store/actions';
@@ -110,9 +112,32 @@ const BLProcessNotification = () => {
         }
       );
 
+      // save socketId into window console after connecting
+      socket.on('user_socket_id', async (socketId) => {
+        window.socketId = socketId; 
+      });
+
       // Receive the list user accessing
       socket.on('users_accessing', async ({ usersAccessing }) => {
         console.log("usersAccessing: ", usersAccessing);
+
+        const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
+        if (userLocal.displayName && usersAccessing.length) {
+          let permissions = await getPermissionByRole('Viewer');
+          dispatch(AppAction.setUser({ ...userLocal, permissions }));
+
+          if (userLocal.displayName === usersAccessing[0].userName) { // if to be the first user
+            permissions = await getPermissionByRole(userLocal.role);
+            dispatch(FormActions.toggleOpenBLWarning(false));
+          } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1].userName) { // if to be the last user
+            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0].userName }));
+          }
+
+          setTimeout(() => {
+            dispatch(AppAction.setUser({ ...userLocal, permissions }));
+          }, 500);
+          sessionStorage.setItem('permissions', JSON.stringify(permissions));
+        }
       });
 
       // Receive the message sync state

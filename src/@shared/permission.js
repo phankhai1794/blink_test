@@ -32,6 +32,7 @@ export const PERMISSION = {
   INQUIRY_INQ_ATT_MEDIA: 'inquiry_changesInqAtt',
   INQUIRY_ADD_MEDIA: 'inquiry_addMedia',
   INQUIRY_SUBMIT_INQUIRY_ANSWER: 'inquiry_submitInquiryAnswer',
+  DRAFTBL_UPDATE_DRAFT_BL_REPLY: 'draftbl_updateDraftBLReply',
   DRAFTBL_CONFIRM_DRAFT_BL: 'draftbl_confirmDraftBl',
   DRAFTBL_CREATE_REPLY: 'draftbl_saveEditedField',
   INQUIRY_REOPEN_INQUIRY: 'inquiry_reOpenInquiry',
@@ -46,6 +47,8 @@ export const PermissionProvider = ({
   const user = localStorage.getItem('USER');
   if (!user) return null;
 
-  const isAllowed = (JSON.parse(user).permissions || []).filter((p) => `${p.controller}_${p.action}` === action && p.enable).length > 0;
+  const permissionsSession = sessionStorage.getItem('permissions') || '';
+  const permissions = permissionsSession.length ? JSON.parse(permissionsSession) : JSON.parse(user).permissions;
+  const isAllowed = (permissions || []).filter((p) => `${p.controller}_${p.action}` === action && p.enable).length > 0;
   return isAllowed && extraCondition ? (children ? children : true) : fallback;
 };

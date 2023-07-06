@@ -25,13 +25,13 @@ export default function DateTimePickers(props) {
         minDate={'1000-01-01'}
         maxDate={'3000-01-01'}
         id='mui-pickers-date'
-        label='Date'
         format='dd/MM/yyyy'
-        value={time || new Date()}
+        value={time || ''}
         onChange={onChange}
         KeyboardButtonProps={{
           'aria-label': 'change date'
         }}
+        helperText= ''
       />
     </MuiPickersUtilsProvider>
   );
