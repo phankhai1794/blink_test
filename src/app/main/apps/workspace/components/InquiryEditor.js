@@ -600,7 +600,12 @@ const InquiryEditor = (props) => {
         }
       });
       setContentsInqCDCM(contentArr);
+      setValueAnsType({
+        label: 'Onshore/Customer Input',
+        value: metadata.ans_type.paragraph
+      });
       inq.inqType = valResult.length ? valResult : '';
+      inq.ansType = metadata.ans_type.paragraph;
     }
     else {
       inq.inqType = e.value;
@@ -1333,7 +1338,7 @@ const InquiryEditor = (props) => {
                 </FormControl>
               </Grid>
             </Grid>
-            {templateList.length > 1 &&
+            {!containerCheck.includes(currentEditInq.field) && templateList.length > 1 &&
               <Button
                 style={{ float: 'right', color: '#515F6B', fontWeight: 500, textTransform: 'none' }}
                 onClick={handleClick}
