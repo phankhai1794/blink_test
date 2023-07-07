@@ -378,7 +378,7 @@ const SearchLayout = (props) => {
             />
           </FormControl>
         </Grid>
-        <Grid item xs={1} style={{ margin: 'auto' }} wrap-xs-nowrap>
+        <Grid item xs={1} style={{ margin: 'auto' }}>
           <Button
             className={clsx(classes.btn, classes.btnSearch)}
             onClick={handelSearch}>

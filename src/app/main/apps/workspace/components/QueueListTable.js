@@ -69,6 +69,7 @@ const useStyles = makeStyles({
   headerColor: {
     backgroundColor: '#FDF2F2',
     '& .MuiTableCell-head ': {
+      fontSize: 14,
       color: '#333333'
     },
   },
@@ -96,12 +97,14 @@ const useStyles = makeStyles({
       width: '24px',
       height: '14px',
       cursor: 'pointer',
-      marginRight: '22px',
     },
     '& span': {
       textWrap: 'nowrap',
       paddingRight: '10px'
     }
+  },
+  lineMinWidth: {
+    minWidth: '180px',
   },
   link: {
     color: '#333333',
@@ -174,6 +177,8 @@ const useStyles = makeStyles({
     height: 50
   },
   cellSticky: {
+    display: 'flex',
+    alignItems: 'center',
     borderBottom: 0
   },
 });
@@ -207,11 +212,13 @@ const AddColumn = (columns, handleShowColumn) => {
     { label: 'Unresolved Inquiry', value: 'inquiry', show: columns['inquiry'] },
     { label: 'Unresolved Amendment', value: 'amendment', show: columns['amendment'] },
     { label: 'Resolved', value: 'resolve', show: columns['resolve'] },
-    { label: 'Lane', value: 'lane', show: columns['lane'] },
+    // { label: 'Lane', value: 'lane', show: columns['lane'] },
     { label: 'VVD', value: 'vvd', show: columns['vvd'] },
-    { label: 'POL & POD', value: 'polAndPod', show: columns['polAndPod'] },
-    { label: 'BDR', value: 'bdr', show: columns['bdr'] },
-    { label: 'Pending Ageing', value: 'pendingAgeing', show: columns['pendingAgeing'] },
+    { label: 'POL', value: 'pol', show: columns['pol'] },
+    { label: 'POD', value: 'pod', show: columns['pod'] },
+    { label: 'DEL', value: 'del', show: columns['del'] },
+    // { label: 'BDR', value: 'bdr', show: columns['bdr'] },
+    // { label: 'Pending Ageing', value: 'pendingAgeing', show: columns['pendingAgeing'] },
     { label: 'ETA', value: 'eta', show: columns['eta'] },
     { label: 'Shipper Name', value: 'shipperN', show: columns['shipperN'] },
   ];
@@ -260,11 +267,13 @@ const QueueListTable = () => {
     inquiry: true,
     amendment: true,
     resolve: true,
-    lane: false,
+    // lane: false,
     vvd: true,
-    polAndPod: false,
-    bdr: false,
-    pendingAgeing: false,
+    pol: false,
+    pod: false,
+    del: false,
+    // bdr: false,
+    // pendingAgeing: false,
     eta: false,
     shipperN: false,
   };
@@ -377,62 +386,72 @@ const QueueListTable = () => {
             <Table className={classes.table} aria-label='simple table'>
               <TableHead className={classes.headerColor} style={{ backgroundColor: '#FDF2F2', position: 'sticky', top: 0, zIndex: 2 }}>
                 <TableRow>
-                  <StickyTableCell>
-                    <TableCell className={clsx(classes.cellBody, classes.cellSticky)} scope="row">
+                  <StickyTableCell style={{ display: 'flex' , paddingRight: '18px'}}>
+                    <div className={clsx(classes.cellBody, classes.cellSticky)}>
                       <div className={classes.lineColumn}>
                         <span>No.</span>
                       </div>
-                    </TableCell>
-                    <TableCell className={clsx(classes.cellBody, classes.cellSticky)} scope="row">
+                    </div>
+                    <div className={clsx(classes.cellBody, classes.cellSticky)}>
                       <div className={classes.lineColumn}>
                         <span>Booking Number</span>
                         <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`bkgNo&order=${state.sortBkgNo}`, 'bkgNo')} />
                       </div>
-                    </TableCell>
+                    </div>
                   </StickyTableCell>
                   {columns.lastUpdate && <TableCell>
-                    <div className={classes.lineColumn}>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                       <span>Last Updated</span>
                       <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`latestDate&order=${state.sortLatestDate}`, 'latestDate')} />
                     </div>
                   </TableCell>}
                   {columns.etd && <TableCell>
-                    <div className={classes.lineColumn} style={{ minWidth: '150px'}}>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                       <span>ETD</span>
                     </div>
                   </TableCell>}
                   {columns.eta && <TableCell>
-                    <div className={classes.lineColumn} style={{ minWidth: '150px'}}>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                       <span>ETA</span>
                     </div>
                   </TableCell>}
                   {columns.status && <TableCell>
-                    <div className={classes.lineColumn}>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                       <span>Status</span>
                     </div>
                   </TableCell>}
                   {columns.vvd && <TableCell>
-                    <div className={classes.lineColumn}>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                       <span>VVD</span>
                     </div>
                   </TableCell>}
                   {columns.shipperN && <TableCell>
-                    <div className={classes.lineColumn} style={{ minWidth: '150px'}}>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                       <span>Shipper Name</span>
                     </div>
                   </TableCell>}
-                  {columns.polAndPod && <TableCell>
-                    <div className={classes.lineColumn} style={{ minWidth: '150px'}}>
-                      <span>POL / POD</span>
+                  {columns.pol && <TableCell>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
+                      <span>POL</span>
+                    </div>
+                  </TableCell>}
+                  {columns.pod && <TableCell>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
+                      <span>POD</span>
+                    </div>
+                  </TableCell>}
+                  {columns.del && <TableCell>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
+                      <span>DEL</span>
                     </div>
                   </TableCell>}
                   {columns.inquiry && <TableCell>
-                    <div className={classes.lineColumn}>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                       <span>Unresolved Inquiry</span>
                     </div>
                   </TableCell>}
                   {columns.amendment && <TableCell>
-                    <div className={classes.lineColumn}>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                       <span>Unresolved Amendment</span>
                     </div>
                   </TableCell>}
@@ -453,14 +472,13 @@ const QueueListTable = () => {
               <TableBody>
                 {state?.queueListBl.map((row, index) => (
                   <TableRow key={index}>
-                    <StickyTableCell>
-                      <TableCell className={clsx(classes.cellSticky)} component='th' scope='row'>
-                        {/* TODO: No. function */}
+                    <StickyTableCell className='flex'>
+                      <div className={clsx(classes.cellBody, classes.cellSticky)} component='th' scope='row'>
                         {index + (searchQueueQuery.currentPageNumber - 1) * searchQueueQuery.pageSize + 1}
-                      </TableCell>
-                      <TableCell className={clsx(classes.cellSticky)} component='th' scope='row'>
+                      </div>
+                      <div className={clsx(classes.cellBody, classes.cellSticky)} component='th' scope='row'>
                         <a href={`/guest?bl=${row.id}`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bookingNo}</span></a>
-                      </TableCell>
+                      </div>
                     </StickyTableCell>
                     {columns.lastUpdate && <TableCell>{formatDate(row.latestDate, 'MMM DD YYYY HH:mm')}</TableCell>}
                     {columns.etd && <TableCell><span>{row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}</span></TableCell>}
@@ -468,7 +486,9 @@ const QueueListTable = () => {
                     {columns.status && <TableCell><span style={{ textTransform: 'capitalize' }}>{row?.status ? row?.status.replace('_', ' ').toLowerCase() : ''}</span></TableCell>}
                     {columns.vvd && <TableCell><span>{row.vvd}</span></TableCell>}
                     {columns.shipperN && <TableCell><span>{row.shipperName}</span></TableCell>}
-                    {columns.polAndPod && <TableCell><span>{`${row.pol} / ${row.pod}`}</span></TableCell>}
+                    {columns.pol && <TableCell><span>{row.pol}</span></TableCell>}
+                    {columns.pod && <TableCell><span>{row.pod}</span></TableCell>}
+                    {columns.del && <TableCell><span>{row.del}</span></TableCell>}
                     {/* Inquiries */}
                     {columns.inquiry && <TableCell>
                       <div className={classes.label}>
@@ -502,6 +522,7 @@ const QueueListTable = () => {
                     {columns.resolve && <TableCell>
                       <div className={classes.label}>
                         {row?.countAllInq ?
+                        <Tooltip title={'Inquiries'} placement='bottom-end'>
                           <Chip
                             label={`${row.countInqResolved}/${row.countAllInq}`}
                             className={clsx(classes.chip, classes.resolvedColor)}
@@ -511,8 +532,10 @@ const QueueListTable = () => {
                               </Icon>
                             }
                           />
+                        </Tooltip>
                           : ''}
                         {row.countAllAme ?
+                        <Tooltip title={'Amendments'} placement='bottom-end'>
                           <Chip
                             label={`${row.countAmeResolved}/${row.countAllAme}`}
                             className={clsx(classes.chip, classes.resolvedColor)}
@@ -522,6 +545,7 @@ const QueueListTable = () => {
                               </Icon>
                             }
                           />
+                        </Tooltip>
                           : ''}
                       </div>
                     </TableCell>}
