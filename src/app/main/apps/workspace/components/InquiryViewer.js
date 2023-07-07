@@ -3088,7 +3088,7 @@ const InquiryViewer = (props) => {
                     currentQuestion={question}
                   />
               ) :
-                (!['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL'].includes(question.state) ?
+                (!['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) ?
                   <Typography
                     // className={viewDropDown !== question.id ? classes.hideText : ''}
                     variant="h5"
