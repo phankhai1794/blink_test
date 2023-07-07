@@ -232,13 +232,7 @@ const BLField = ({
   const onCopyClick = (e, text) => {
     e.stopPropagation();
     copyTextToClipboard(text)
-      .then(() => {
-        // If successful, update the isCopied state value
-        dispatch(AppAction.showMessage({ message: 'Copy to clipboard !', variant: 'info', autoHideDuration: 2000 }));
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    dispatch(AppAction.showMessage({ message: 'Copy to clipboard !', variant: 'info', autoHideDuration: 2000 }));
   };
 
   const onClick = (e) => {
