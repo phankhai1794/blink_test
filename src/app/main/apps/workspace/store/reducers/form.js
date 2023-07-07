@@ -69,10 +69,12 @@ const formReducer = function (state = initialState, action) {
   case Actions.RELOAD: {
     return {
       ...state,
+      openEmail: false,
       openDialog: false,
       openAllInquiry: false,
       openAttachment: false,
       openPreviewListSubmit: false,
+      openAmendmentForm: false,
       openAmendmentList: false,
     };
   }

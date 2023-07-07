@@ -350,7 +350,7 @@ export default function Form(props) {
     if (field === 'ATTACHMENT_LIST') dispatch(FormActions.toggleReload());
 
     dispatch(FormActions.toggleSaveInquiry(false));
-    dispatch(InquiryActions.setOneInq({}));
+    dispatch(InquiryActions.setOneInq({})); // close popup inquiry detail
 
     const currentInq = listMinimize.find((q) => q.field === field);
     if (currentInq?.id && listInqMinimize.includes(currentInq.id)) {
