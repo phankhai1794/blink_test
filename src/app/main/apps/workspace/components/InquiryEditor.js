@@ -1,7 +1,7 @@
 import { FuseChipSelect } from '@fuse';
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { combineCDCM, getLabelById, toFindDuplicates } from '@shared';
+import { combineCDCM, getLabelById, toFindDuplicates, generateFileName } from '@shared';
 import { handleError } from '@shared/handleError';
 import {
   Button,
@@ -718,6 +718,7 @@ const InquiryEditor = (props) => {
 
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
+    setContent(filepaste ? inq.content : e.target.value);
     inq.content = e.currentTarget.textContent;
     setContent(e.target.value);
     setFieldEdited(inq.field);
@@ -1181,8 +1182,12 @@ const InquiryEditor = (props) => {
 
   const onPaste = (e) => {
     if (e.clipboardData.files.length) {
-      const fileObject = e.clipboardData.files[0];
-      setFilepaste(fileObject);
+      let fileObject = e.clipboardData.files[0];
+      const newFileName = generateFileName(fileObject.name, currentEditInq.mediaFile.map(fItem => { return fItem.name}))
+      const myRenamedFile = new File([fileObject], newFileName, {
+        type: "image/png"
+      });
+      setFilepaste(myRenamedFile);
     }
   }
 
