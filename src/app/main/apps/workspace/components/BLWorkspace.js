@@ -2,7 +2,6 @@ import { checkNewInquiry, formatDate, isJsonText, NUMBER_INQ_BOTTOM } from '@sha
 import { FuseLoading } from '@fuse';
 import {
   BL_TYPE,
-  COMMODITY_CODE,
   CONSIGNEE,
   CONTAINER_DETAIL,
   CONTAINER_MANIFEST,
@@ -462,13 +461,6 @@ const BLWorkspace = (props) => {
             msg={renderMsgNoti()}
             msg2={renderMsgNoti2()}
             iconType={renderIconType()}
-            handleClose={() => {
-              dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false));
-              dispatch(FormActions.toggleOpenNotificationDeleteReply(false));
-              dispatch(FormActions.toggleOpenNotificationDeleteAmendment(false));
-              dispatch(FormActions.toggleOpenBLWarning(false));
-              dispatch(FormActions.toggleOpenNotificationPreviewSubmit(false));
-            }}
           />
           <div className={clsx('max-w-5xl', classes.root)}>
             <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
