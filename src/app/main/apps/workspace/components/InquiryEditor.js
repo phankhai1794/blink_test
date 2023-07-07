@@ -223,8 +223,9 @@ const InquiryEditor = (props) => {
       workspace.inquiryReducer.enableSubmit,
     ]
   );
-  const user = useSelector(({ user }) => user);
+  const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs )
 
+  const user = useSelector(({ user }) => user);
   const getField = (field) => {
     return metadata.field?.[field] || '';
   };
@@ -473,6 +474,7 @@ const InquiryEditor = (props) => {
       setValueAnsType(optionsAnsType);
       dispatch(InquiryActions.setEditInq(inq));
     }
+    currentEditInq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];  
     return () => dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false, createInq: false }))
   }, []);
 
@@ -570,6 +572,7 @@ const InquiryEditor = (props) => {
         setValueType(valResult)
       }
       const contentArr = [];
+      const currentTab = currentTabs === 0 ? 'customer' : 'onshore';
       valResult.forEach(v => {
         const findByIdType = inqCdCm.find(inq => v.value === inq.type);
         if (!findByIdType) {
@@ -580,7 +583,7 @@ const InquiryEditor = (props) => {
             filter.showTemplate = false;
             filter.templateIndex = '0';
             filter.contentShow = filter.content[0];
-            filter.receiver = `customer-${v.value}`;
+            filter.receiver = `${currentTab}-${v.value}`;
             contentArr.push(filter);
           } else if (v.label === OTHERS) {
             contentArr.push({
@@ -588,7 +591,7 @@ const InquiryEditor = (props) => {
               templateIndex: '0',
               content: [currentEditInq.content],
               contentShow: currentEditInq.content,
-              receiver: `customer-${v.value}`,
+              receiver: `${currentTab}-${v.value}`,
               type: v.value,
             });
           }
