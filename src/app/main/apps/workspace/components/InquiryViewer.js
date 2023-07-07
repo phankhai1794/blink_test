@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileName  } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -962,6 +962,8 @@ const InquiryViewer = (props) => {
         }
       })
       setQuestion(quest);
+      setFilepaste('');
+      setDropfiles([]);
       setSaveComment(!isSaveComment);
     }
   }
@@ -1080,7 +1082,7 @@ const InquiryViewer = (props) => {
           const optionsInquires = [...inquiries];
           const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
 
-          if (comment.length > 2) {
+          if(comment.length > 2) {
             const newMediaFile = comment.at(1).answersMedia.filter(({ id: id1 }) => !comment.at(0).answersMedia.some(({ id: id2 }) => id2 === id1));
             const removeMediaFile = comment.at(0).answersMedia.filter(({ id: id1 }) => !comment.at(1).answersMedia.some(({ id: id2 }) => id2 === id1)).map(({ id }) => id);
             optionsInquires[editedIndex].mediaFile = optionsInquires[editedIndex].mediaFile.filter(inq => !removeMediaFile.includes(inq.id));
@@ -1344,6 +1346,8 @@ const InquiryViewer = (props) => {
             syncData({ inquiries: optionsOfQuestion });
 
             setReplyRemove();
+            setFilepaste('');
+            setDropfiles([]);
             setDisableSaveReply(false);
             props.getUpdatedAt();
             setViewDropDown('');
@@ -2495,6 +2499,8 @@ const InquiryViewer = (props) => {
     reply.mediaFilesAnswer = reply.mediaFile;
     reply.mediaFile = [];
     setQuestion(reply);
+    setFilepaste('');
+    setDropfiles([]);
     setSaveComment(!isSaveComment);
     dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id)));
   };
@@ -2544,6 +2550,7 @@ const InquiryViewer = (props) => {
     const reply = { ...question };
     reply.showIconEdit = false;
     reply.showIconReply = false;
+    setFilepaste('');
     setShowViewAll(false);
     if (user.role === 'Guest') {
       setDisableCDCM(false);
@@ -2780,7 +2787,7 @@ const InquiryViewer = (props) => {
             onChange={inputText}
             variant='outlined'
             inputProps={{ style: { textTransform: 'uppercase' } }}
-            error={!validateInput?.isValid || validateField(field, textResolve).isError || isAlsoNotify ? validateAlsoNotify(textResolve).isError : false}
+            error={!validateInput?.isValid || (validateField(field, textResolve).isError && (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest'))) || (isAlsoNotify ? validateAlsoNotify(textResolve).isError : false)}
             helperText={!validateInput?.isValid ?
               <>
                 {(validateInput?.prohibitedInfo?.countries.length > 0) &&
@@ -2799,7 +2806,7 @@ const InquiryViewer = (props) => {
                 }
               </>
               : validateField(field, textResolve).errorType.split('\n').map((line, idx) => (
-                <span key={idx} style={{ display: 'block', lineHeight: '20px', color: isResolve ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+                <span key={idx} style={{ display: 'block', lineHeight: '20px', color: (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')) ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
               ))
             }
             onBlur={() => handleValidateInput('RESOLVE', onConfirm, true, true)}
@@ -2811,7 +2818,25 @@ const InquiryViewer = (props) => {
   const onPaste = (e) => {
     if ((isReply || question.showIconAttachAnswerFile) && e.clipboardData.files.length) {
       const fileObject = e.clipboardData.files[0];
-      setFilepaste(fileObject);
+      // generate new file name
+      if(['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest' ) { // case create ans/ edit anns
+        if(question.mediaFilesAnswer && question.mediaFilesAnswer.length >0) {
+          const newFileName = generateFileName(fileObject.name, question.mediaFilesAnswer.map(fItem => { return fItem.name}));
+          const myRenamedFile = new File([fileObject], newFileName, {
+            type: "image/png"
+          });
+        setFilepaste(myRenamedFile);
+        } else setFilepaste(fileObject);
+      } else {
+        //other case
+        if(tempReply.mediaFiles && tempReply.mediaFiles.length > 0 ) {
+          const newFileName = generateFileName(fileObject.name, tempReply.mediaFiles.map(fItem => { return fItem.name}));
+          const myRenamedFile = new File([fileObject], newFileName, {
+            type: "image/png"
+          });
+          setFilepaste(myRenamedFile);
+        } else setFilepaste(fileObject);
+      }
     }
   }
 
@@ -3433,10 +3458,10 @@ const InquiryViewer = (props) => {
                               onChange={handleChangeContentReply}
                               variant='outlined'
                               placeholder='Reply...'
-                              error={validateField(question.field, tempReply?.answer?.content).isError}
+                              error={validateField(question.field, tempReply?.answer?.content).isError && (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest'))}
                               helperText={
-                                validateField(question.field, tempReply?.answer?.content).errorType.split('\n').map((line, idx) => (
-                                  <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: isResolve ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+                                !isAlsoNotifies && validateField(question.field, tempReply?.answer?.content).errorType.split('\n').map((line, idx) => (
+                                  <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')) ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
                                 ))
                               }
                             />}
