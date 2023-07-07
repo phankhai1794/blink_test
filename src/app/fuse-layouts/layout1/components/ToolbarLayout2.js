@@ -90,7 +90,7 @@ function ToolbarLayout2(props) {
     const arrStatus = [];
     let values = event.target.value;
     if (values.includes('plus')) values.shift();
-    if (values.indexOf('All') === values.length - 1) {
+    if (values.includes('All') && values.indexOf('All') === values.length - 1) {
       if (values.length > countryOption.length) {
         setSelectedStatus([]);
         dispatch(Actions.filterCountry([]));
