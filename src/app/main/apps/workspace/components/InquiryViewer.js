@@ -3270,8 +3270,9 @@ const InquiryViewer = (props) => {
                 onMouseLeave={() => { dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
               >
                 {question.mediaFile?.length > 0 &&
-                  !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
-                  question.mediaFile?.map((file, mediaIndex) => (
+                (!['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)
+                    || (['REP_Q_DRF'].includes(question.state) && user.role === 'Admin'))
+                    && question.mediaFile?.map((file, mediaIndex) => (
                     <>
                       <FileAttach
                         hiddenRemove={true}
@@ -3290,8 +3291,8 @@ const InquiryViewer = (props) => {
               question.mediaFilesAnswer?.length > 0 &&
               <>
                 {question.mediaFilesAnswer?.length > 0 &&
-                  !['ANS_DRF', 'ANS_SENT'].includes(question.state) &&
-                  <h3>Attachment Answer:</h3>}
+                !['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)
+                  && <h3>Attachment Answer:</h3>}
                 <div
                   style={{ width: 885 }}
                   onMouseLeave={() => { question.showIconEdit && dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
@@ -3370,8 +3371,10 @@ const InquiryViewer = (props) => {
                         <Button
                           variant="contained"
                           color="primary"
+                          disabled={disableAcceptResolve}
                           onClick={() => {
                             dispatch(FormActions.setDirtyReload({ inputReply: false }));
+                            setDisableAcceptResolve(true);
                             !validateInput?.isValid ? onConfirm(true) : handleValidateInput('RESOLVE', onConfirm, true);
                           }}
                           classes={{ root: clsx(classes.button) }}>
