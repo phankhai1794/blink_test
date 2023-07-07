@@ -262,6 +262,7 @@ export default function Form(props) {
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
   const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
+  const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs);
   const currentAmendment = useSelector(
     ({ workspace }) => workspace.inquiryReducer.currentAmendment
   );
@@ -368,6 +369,7 @@ export default function Form(props) {
   const handleChange = (_, newValue) => {
     dispatch(InquiryActions.setEditInq());
     props.tabChange(newValue);
+    dispatch(FormActions.setTabs(newValue))
   };
 
   useEffect(() => {
@@ -429,6 +431,16 @@ export default function Form(props) {
       dispatch(InquiryActions.addAmendment());
     }
   }, [open]);
+
+  useEffect(()=> {
+    props.tabChange(currentTabs);
+  }, [currentTabs])
+
+  useEffect(() => {
+    if(openAllInquiry && nums && nums.length && nums[0] === 0 && nums[1] !== 0){
+      dispatch(FormActions.setTabs(1))
+    }
+  }, [openAllInquiry])
 
   return (
     <div>
