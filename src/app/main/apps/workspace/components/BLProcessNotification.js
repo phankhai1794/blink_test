@@ -123,16 +123,13 @@ const BLProcessNotification = () => {
 
         const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
         if (userLocal.displayName && usersAccessing.length) {
-          let permissions = await getPermissionByRole('Viewer');
-          dispatch(AppAction.setUser({ ...userLocal, permissions }));
-
           if (userLocal.displayName === usersAccessing[0].userName) { // if to be the first user
-            permissions = await getPermissionByRole(userLocal.role);
             dispatch(FormActions.toggleOpenBLWarning(false));
           } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1].userName) { // if to be the last user
             dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0].userName }));
           }
 
+          const permissions = await getPermissionByRole(userLocal.role);
           setTimeout(() => {
             dispatch(AppAction.setUser({ ...userLocal, permissions }));
           }, 500);
