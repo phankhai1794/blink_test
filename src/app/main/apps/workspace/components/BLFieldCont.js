@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
-import { TextField, makeStyles } from '@material-ui/core';
+import { TextField, Icon, makeStyles } from '@material-ui/core';
+import { copyTextToClipboard } from '@shared';
+import * as AppAction from 'app/store/actions';
+import { useDispatch } from 'react-redux';
 
 import ArrowTooltip from '../shared-components/ArrowTooltip';
 
@@ -42,17 +45,37 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BLField = ({ multiline = false, children }) => {
+  const dispatch = useDispatch()
   const classes = useStyles();
   const [isLongText, setIsLongText] = useState(false);
+  const [anchorElCopy, setAnchorElCopy] = useState(null);
+
   const onMouseOver = (e) => {
     const { scrollWidth, clientWidth, scrollHeight, clientHeight } = e.target;
+    setAnchorElCopy(e.currentTarget);
     setIsLongText(Boolean(scrollWidth > clientWidth || scrollHeight > clientHeight));
   };
 
+  const onMouseLeave = () => {
+    setAnchorElCopy(null);
+    setIsLongText(false)
+  }
+
+  const onCopyClick = (e, text) => {
+    e.stopPropagation();
+    copyTextToClipboard(text)
+      .then(() => {
+        // If successful, update the isCopied state value
+        dispatch(AppAction.showMessage({ message: 'Copy to clipboard !', variant: 'info', autoHideDuration: 2000 }));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
   return (
     <div
       onMouseOver={onMouseOver}
-      onMouseLeave={() => setIsLongText(false)}
+      onMouseLeave={onMouseLeave}
     >
       <ArrowTooltip isLongText={isLongText} title={Array.isArray(children) ? children.join('\n') : (children || '')} placement='right'>
         <TextField
@@ -68,6 +91,17 @@ const BLField = ({ multiline = false, children }) => {
               root: classes.root,
               input: classes.input,
             },
+            endAdornment:
+              <>
+                {anchorElCopy && children && (
+                  <Icon
+                    style={{ position: 'absolute', right: 5, bottom: 5, cursor: 'pointer', fontSize: 18 }}
+                    onClick={(e) => onCopyClick(e, children)}
+                  >
+                    file_copy
+                  </Icon>
+                )}
+              </>
           }}
         />
       </ArrowTooltip>

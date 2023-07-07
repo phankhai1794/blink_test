@@ -5,7 +5,7 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 import AttachFile from '@material-ui/icons/AttachFile';
 import { useDispatch, useSelector } from 'react-redux';
-import { TextField, InputAdornment, makeStyles } from '@material-ui/core';
+import { TextField, InputAdornment, makeStyles, Icon } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
@@ -13,6 +13,8 @@ import ReplyIcon from '@material-ui/icons/Reply';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import { checkClassName, checkColorStatus } from '@shared/colorStatus';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import { copyTextToClipboard } from '@shared';
+import * as AppAction from 'app/store/actions';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -42,42 +44,42 @@ const useStyles = makeStyles((theme) => ({
       borderColor: gray,
       backgroundColor: white,
       borderRadius: '8px',
-      zIndex: '-1',
+      zIndex: '-1'
     },
     '&:hover fieldset': {
-      borderColor: `${pink} !important`,
+      borderColor: `${pink} !important`
     },
     '&:focus-within fieldset': {
-      border: `1px solid ${pink} !important`,
+      border: `1px solid ${pink} !important`
     }
   },
   hasInquiry: {
     '& fieldset': {
-      backgroundColor: lightPink,
+      backgroundColor: lightPink
     }
   },
   hasAnswer: {
     '& fieldset': {
       backgroundColor: lightBlue,
-      borderColor: `${blue} !important`,
+      borderColor: `${blue} !important`
     },
     '&:hover fieldset': {
-      borderColor: `${blue} !important`,
+      borderColor: `${blue} !important`
     },
     '&:focus-within fieldset': {
-      border: `1px solid ${blue} !important`,
+      border: `1px solid ${blue} !important`
     }
   },
   hasResolved: {
     '& fieldset': {
       backgroundColor: '#EBF7F2',
-      borderColor: `${green} !important`,
+      borderColor: `${green} !important`
     }
   },
   hasUploaded: {
     '& fieldset': {
       backgroundColor: '#E6EDF0',
-      borderColor: `${darkBlue} !important`,
+      borderColor: `${darkBlue} !important`
     }
   },
   input: {
@@ -87,14 +89,14 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: '22px',
     fontWeight: '500',
     textOverflow: 'ellipsis',
-    overflow: 'auto',
+    overflow: 'auto'
   },
   notchedOutlineNotChecked: {
-    borderColor: `${red} !important`,
+    borderColor: `${red} !important`
   },
   adornment: {
     padding: '10px 10px 10px 0',
-    margin: 0,
+    margin: 0
   },
   adornmentMultiline: {
     alignItems: 'flex-end',
@@ -109,57 +111,68 @@ const useStyles = makeStyles((theme) => ({
   },
   adornmentRow_2: {
     height: '4em',
-    maxHeight: '4em',
+    maxHeight: '4em'
   },
   adornmentRow_3: {
     height: '6em',
-    maxHeight: '6em',
+    maxHeight: '6em'
   },
   adornmentRow_4: {
     height: '8em',
-    maxHeight: '8em',
+    maxHeight: '8em'
   },
   adornmentRow_5: {
     height: '10.7em',
-    maxHeight: '10.7em',
+    maxHeight: '10.7em'
   },
   sizeIcon: {
-    fontSize: '20px',
+    fontSize: '20px'
   },
   colorAddIcon: {
-    color: `${pink} !important`,
+    color: `${pink} !important`
   },
   colorHasInqIcon: {
-    color: `${red} !important`,
+    color: `${red} !important`
   },
   colorHasAnswer: {
-    color: `${blue} !important`,
+    color: `${blue} !important`
   },
   colorHasResolved: {
-    color: `${green} !important`,
+    color: `${green} !important`
   },
   colorHasUploaded: {
-    color: `${darkBlue} !important`,
+    color: `${darkBlue} !important`
   },
   locked: {
     '& fieldset': {
-      backgroundColor: lightGray,
+      backgroundColor: lightGray
     }
   },
   colorLockIcon: {
-    color: darkGray,
+    color: darkGray
   },
   attachIcon: {
-    transform: 'rotate(45deg)',
+    transform: 'rotate(45deg)'
   },
   iconSvg: {
     width: 17,
     marginBottom: 1.5,
-    paddingLeft: 3,
-  },
+    paddingLeft: 3
+  }
 }));
 
-const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, readOnly, disableClick, disableIcon }) => {
+const BLField = ({
+  children,
+  width,
+  multiline,
+  rows,
+  selectedChoice,
+  id,
+  lock,
+  readOnly,
+  disableClick,
+  disableIcon
+}) => {
   const classes = useStyles();
   const dispatch = useDispatch();
 
@@ -168,7 +181,9 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
-  const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
+  const listCommentDraft = useSelector(
+    ({ workspace }) => workspace.inquiryReducer.listCommentDraft
+  );
   const valid = useSelector(({ workspace }) => workspace.inquiryReducer.validation);
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -180,6 +195,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
   const [isResolved, setIsResolved] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const [isLongText, setIsLongText] = useState(false);
+  const [anchorElCopy, setAnchorElCopy] = useState(false);
 
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
@@ -188,12 +204,13 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
     const { currentTarget, target } = e;
     const { scrollWidth, clientWidth, scrollHeight, clientHeight } = target;
     if (isEmpty) setAnchorEl(currentTarget);
-
+    setAnchorElCopy(currentTarget);
     setIsLongText(Boolean((scrollWidth > clientWidth) && !rows) || (Boolean((scrollHeight > clientHeight) && rows)));
   };
 
   const onMouseLeave = (e) => {
     if (e.currentTarget !== null) setAnchorEl(null);
+    setAnchorElCopy(null);
     setIsLongText(false);
   };
 
@@ -212,9 +229,28 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
     return true;
   };
 
+  const onCopyClick = (e, text) => {
+    e.stopPropagation();
+    copyTextToClipboard(text)
+      .then(() => {
+        // If successful, update the isCopied state value
+        dispatch(AppAction.showMessage({ message: 'Copy to clipboard !', variant: 'info', autoHideDuration: 2000 }));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
   const onClick = (e) => {
     dispatch(
-      InquiryActions.validate({ inqType: true, field: true, receiver: true, ansType: true, content: true, answerContent: true })
+      InquiryActions.validate({
+        inqType: true,
+        field: true,
+        receiver: true,
+        ansType: true,
+        content: true,
+        answerContent: true
+      })
     );
     if (!disableClick) {
       if (isEmpty && allowAddInquiry) {
@@ -235,12 +271,12 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
             }
           }
           dispatch(FormActions.toggleCreateInquiry(true));
-        }
-        else if (
-          allowCreateAmendment
-          && myBL?.state?.includes('DRF_')
-          && user.userType === 'CUSTOMER' // Allow only customer to create amendment
-        ) dispatch(FormActions.toggleCreateAmendment(true));
+        } else if (
+          allowCreateAmendment &&
+          myBL?.state?.includes('DRF_') &&
+          user.userType === 'CUSTOMER' // Allow only customer to create amendment
+        )
+          dispatch(FormActions.toggleCreateAmendment(true));
       }
       dispatch(InquiryActions.setField(e.currentTarget.id));
       setAnchorEl(e.currentTarget.id);
@@ -258,41 +294,39 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
         classes
       );
 
-      const attachIcon = <>
-        {hasAttachment && (
-          <AttachFile
-            className={clsx(
-              classes.sizeIcon,
-              classes.attachIcon,
-              iconColor
-            )}
-          />
-        )}
-      </>
+      const attachIcon = (
+        <>
+          {hasAttachment && (
+            <AttachFile className={clsx(classes.sizeIcon, classes.attachIcon, iconColor)} />
+          )}
+        </>
+      );
 
       if (lock) {
-        return <>
+        return (
           <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
-        </>
+        );
       }
-      return <>
-        {attachIcon}
-        {hasInquiry && <HelpIcon className={clsx(classes.sizeIcon, iconColor)} />}
-        {hasAmendment && <img src='/assets/images/icons/icon-amendment.svg' className={classes.iconSvg} />}
-        {hasAnswer && <ReplyIcon className={clsx(classes.sizeIcon, iconColor)} />}
-        {isResolved && <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)} />}
-        {isUploaded && <img src='/assets/images/icons/icon-uploaded.svg' className={classes.iconSvg} />}
-      </>
+      return (
+        <>
+          {attachIcon}
+          {hasInquiry && <HelpIcon className={clsx(classes.sizeIcon, iconColor)} />}
+          {hasAmendment && (
+            <img src="/assets/images/icons/icon-amendment.svg" className={classes.iconSvg} />
+          )}
+          {hasAnswer && <ReplyIcon className={clsx(classes.sizeIcon, iconColor)} />}
+          {isResolved && <CheckCircleIcon className={clsx(classes.sizeIcon, iconColor)} />}
+          {isUploaded && (
+            <img src="/assets/images/icons/icon-uploaded.svg" className={classes.iconSvg} />
+          )}
+        </>
+      );
     }
-  }
+  };
 
   const setColorStatus = () => {
     if (!disableIcon) {
-      const colorStatusObj = checkColorStatus(
-        id,
-        user,
-        inquiries,
-      );
+      const colorStatusObj = checkColorStatus(id, user, inquiries);
 
       setIsEmpty(colorStatusObj.isEmpty);
       setHasInquiry(colorStatusObj.hasInquiry);
@@ -302,7 +336,7 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
       setIsResolved(colorStatusObj.isResolved);
       setIsUploaded(colorStatusObj.isUploaded);
     }
-  }
+  };
 
   useEffect(() => {
     setColorStatus();
@@ -327,9 +361,9 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
     const lastline = lines.slice(-1)[0];
     const listT = lastline.match(/\w+/g);
     let count = 0;
-    listT.forEach(item => {
+    listT.forEach((item) => {
       count += item.length;
-    })
+    });
     finalChidren = finalChidren.slice(0, -3) + ' '.repeat((35 - count) * 3 + 3) + isContinue;
   }
 
@@ -383,6 +417,14 @@ const BLField = ({ children, width, multiline, rows, selectedChoice, id, lock, r
                         {isContinue}
                       </div>
                     }
+                    {anchorElCopy && anchorElCopy.id === id && (selectedChoice || finalChidren) && (
+                      <Icon
+                        style={{ cursor: 'pointer', fontSize: 18 }}
+                        onClick={(e) => onCopyClick(e, selectedChoice || finalChidren)}
+                      >
+                        file_copy
+                      </Icon>
+                    )}
                     {checkDisplayIcon()}
                     {anchorEl && anchorEl.id === id && allowAddInquiry && (
                       <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
