@@ -372,7 +372,12 @@ export const getSrcFileIcon = (file) => {
   return path;
 }
 
-export const checkBroadCastAccessing = (role) => {
+export const checkBroadCastReload = (role, type) => {
+  /**
+   * role: Admin | Guest
+   * type: access | logout
+   */
+
   const { pathname, search } = window.location;
   const url = pathname + search;
 
@@ -381,10 +386,16 @@ export const checkBroadCastAccessing = (role) => {
     Guest: ["/guest", "/draft-bl?bl="]
   }
 
-  if (role) {
-    if (!mapper[role].some(route => url.includes(route))) {
-      window.location.reload();
-    }
+  if (
+    role
+    &&
+    (
+      (type === "access" && !mapper[role].some(route => url.includes(route)))
+      ||
+      (type === "logout" && mapper[role].some(route => url.includes(route)))
+    )
+  ) {
+    window.location.reload();
   }
 }
 

@@ -7,7 +7,7 @@ import { makeStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import * as AppAction from 'app/store/actions';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
-import { checkBroadCastAccessing } from '@shared';
+import { checkBroadCastReload } from '@shared';
 import { BROADCAST } from '@shared/keyword';
 
 import Loading from "../shared-components/Loading";
@@ -94,19 +94,19 @@ function Layout1(props) {
 
   const userRole = useSelector(({ user }) => user.role);
   const dirtyReload = useSelector(({ workspace }) => workspace.formReducer.dirtyReload);
-  const bcRole = useSelector(({ broadcast }) => broadcast.role);
+  const bcData = useSelector(({ broadcast }) => broadcast);
 
   const channel = new BroadcastChannel(BROADCAST.ACCESS);
 
   useEffect(() => {
     if (userRole) {
       // post a signal
-      channel.postMessage(userRole);
+      channel.postMessage({ role: userRole, type: "access" });
 
       // receive signal
-      channel.onmessage = (e) => {
+      channel.onmessage = ({ data }) => {
         dispatch(FormActions.setDirtyReload({ forceReload: true }));
-        dispatch(AppAction.setBroadcast({ role: e.data }));
+        dispatch(AppAction.setBroadcast({ role: data.role, type: data.type }));
       };
     }
   }, [userRole]);
@@ -122,8 +122,8 @@ function Layout1(props) {
   }, [dirtyReload]);
 
   useEffect(() => {
-    if (bcRole && dirtyReload.forceReload) checkBroadCastAccessing(bcRole);
-  }, [bcRole, dirtyReload.forceReload]);
+    if (bcData.role && dirtyReload.forceReload) checkBroadCastReload(bcData.role, bcData.type);
+  }, [bcData, dirtyReload.forceReload]);
 
   useEffect(() => {
     return () => channel.close();

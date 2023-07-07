@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import { clearLocalStorage } from '@shared';
 import * as AppActions from 'app/store/actions';
 import { SocketContext } from 'app/AppContext';
+import { BROADCAST } from '@shared/keyword';
 
 function UserProfile(props) {
   const { classes } = props;
@@ -22,17 +23,15 @@ function UserProfile(props) {
   const [open, setOpen] = useState(null);
   const user = useSelector(({ user }) => user);
   const socket = useContext(SocketContext);
+  const channel = new BroadcastChannel(BROADCAST.ACCESS);
 
-  const handleClick = (event) => {
-    setOpen(event.currentTarget);
-  };
+  const handleClick = ({ currentTarget }) => setOpen(currentTarget);
 
-  const handleClose = () => {
-    setOpen(null);
-  };
+  const handleClose = () => setOpen(null);
 
   const handleLogOut = () => {
     clearLocalStorage();
+    channel.postMessage({ role: user.role, type: "logout" });
     socket.emit('user_logout');
     dispatch(AppActions.removeUser());
     dispatch(AppActions.checkAllow(false));
