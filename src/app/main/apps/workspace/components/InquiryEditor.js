@@ -1,7 +1,7 @@
 import { FuseChipSelect } from '@fuse';
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { combineCDCM, getLabelById, toFindDuplicates } from '@shared';
+import { combineCDCM, getLabelById, toFindDuplicates, generateFileName } from '@shared';
 import { handleError } from '@shared/handleError';
 import {
   Button,
@@ -223,8 +223,9 @@ const InquiryEditor = (props) => {
       workspace.inquiryReducer.enableSubmit,
     ]
   );
-  const user = useSelector(({ user }) => user);
+  const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs )
 
+  const user = useSelector(({ user }) => user);
   const getField = (field) => {
     return metadata.field?.[field] || '';
   };
@@ -473,6 +474,7 @@ const InquiryEditor = (props) => {
       setValueAnsType(optionsAnsType);
       dispatch(InquiryActions.setEditInq(inq));
     }
+    currentEditInq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];  
     return () => dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false, createInq: false }))
   }, []);
 
@@ -570,6 +572,7 @@ const InquiryEditor = (props) => {
         setValueType(valResult)
       }
       const contentArr = [];
+      const currentTab = currentTabs === 0 ? 'customer' : 'onshore';
       valResult.forEach(v => {
         const findByIdType = inqCdCm.find(inq => v.value === inq.type);
         if (!findByIdType) {
@@ -580,7 +583,7 @@ const InquiryEditor = (props) => {
             filter.showTemplate = false;
             filter.templateIndex = '0';
             filter.contentShow = filter.content[0];
-            filter.receiver = `customer-${v.value}`;
+            filter.receiver = `${currentTab}-${v.value}`;
             contentArr.push(filter);
           } else if (v.label === OTHERS) {
             contentArr.push({
@@ -588,7 +591,7 @@ const InquiryEditor = (props) => {
               templateIndex: '0',
               content: [currentEditInq.content],
               contentShow: currentEditInq.content,
-              receiver: `customer-${v.value}`,
+              receiver: `${currentTab}-${v.value}`,
               type: v.value,
             });
           }
@@ -597,7 +600,12 @@ const InquiryEditor = (props) => {
         }
       });
       setContentsInqCDCM(contentArr);
+      setValueAnsType({
+        label: 'Onshore/Customer Input',
+        value: metadata.ans_type.paragraph
+      });
       inq.inqType = valResult.length ? valResult : '';
+      inq.ansType = metadata.ans_type.paragraph;
     }
     else {
       inq.inqType = e.value;
@@ -710,6 +718,7 @@ const InquiryEditor = (props) => {
 
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
+    setContent(filepaste ? inq.content : e.target.value);
     inq.content = e.currentTarget.textContent;
     setContent(e.target.value);
     setFieldEdited(inq.field);
@@ -817,6 +826,7 @@ const InquiryEditor = (props) => {
     let check = true;
     const ansTypeChoice = metadata.ans_type['choice'];
     let validate = {};
+
     if (
       !currentEditInq.inqType ||
       !currentEditInq.field ||
@@ -836,7 +846,7 @@ const InquiryEditor = (props) => {
       if (ansTypeChoice === currentEditInq.ansType) {
         // check empty a field
         if (currentEditInq.answerObj.length > 0) {
-          const checkOptionEmpty = currentEditInq.answerObj.filter((item) => !item.content);
+          const checkOptionEmpty = currentEditInq.answerObj.filter((item) => !item.content.trim());
           if (checkOptionEmpty.length > 0) {
             validate = { ...validate, answerContent: false };
           } else {
@@ -1172,8 +1182,12 @@ const InquiryEditor = (props) => {
 
   const onPaste = (e) => {
     if (e.clipboardData.files.length) {
-      const fileObject = e.clipboardData.files[0];
-      setFilepaste(fileObject);
+      let fileObject = e.clipboardData.files[0];
+      const newFileName = generateFileName(fileObject.name, currentEditInq.mediaFile.map(fItem => { return fItem.name}))
+      const myRenamedFile = new File([fileObject], newFileName, {
+        type: "image/png"
+      });
+      setFilepaste(myRenamedFile);
     }
   }
 
@@ -1329,7 +1343,7 @@ const InquiryEditor = (props) => {
                 </FormControl>
               </Grid>
             </Grid>
-            {templateList.length > 1 &&
+            {!containerCheck.includes(currentEditInq.field) && templateList.length > 1 &&
               <Button
                 style={{ float: 'right', color: '#515F6B', fontWeight: 500, textTransform: 'none' }}
                 onClick={handleClick}

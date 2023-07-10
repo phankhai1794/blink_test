@@ -45,7 +45,6 @@ const useStyles = makeStyles({
   },
   table: {
     width: 'fit-content',
-    tableLayout: 'fixed',
     borderCollapse: 'separate !important',
     '& th, td': {
       fontFamily: 'Montserrat'
@@ -91,7 +90,14 @@ const useStyles = makeStyles({
       height: '14px',
       cursor: 'pointer',
       marginRight: '22px'
+    },
+    '& span': {
+      textWrap: 'nowrap',
+      paddingRight: '5px'
     }
+  },
+  lineMinWidth: {
+    minWidth: '180px',
   },
   link: {
     color: '#333333',
@@ -161,6 +167,8 @@ const useStyles = makeStyles({
     height: 50
   },
   cellSticky: {
+    display: 'flex',
+    alignItems: 'center',
     borderBottom: 0
   },
   iconLabelWrapper: {
@@ -283,17 +291,11 @@ const Row = (props) => {
   return (
     <>
       <TableRow>
-        <StickyTableCell>
-          <TableCell
-            className={clsx(classes.cellBody, classes.cellSticky)}
-            component="th"
-            scope="row">
+        <StickyTableCell style={{ display: 'flex', padding: '17px' }}>
+          <div className={clsx(classes.cellBody, classes.cellSticky)} component="th" scope="row">
             {index + 1}
-          </TableCell>
-          <TableCell
-            className={clsx(classes.cellBody, classes.cellSticky)}
-            component="th"
-            scope="row">
+          </div>
+          <div className={clsx(classes.cellBody, classes.cellSticky)} component="th" scope="row">
             {countAllInquiry + countAllAmend ? (
               <IconButton style={{ padding: 0 }} onClick={setOpen} aria-label="Delete">
                 <Icon> {open ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}</Icon>
@@ -306,7 +308,7 @@ const Row = (props) => {
               rel="noreferrer">
               <span>{row.bkgNo}</span>
             </a>
-          </TableCell>
+          </div>
         </StickyTableCell>
         {columns.lastUpdate && (
           <TableCell className={classes.cellBody}>
@@ -699,13 +701,13 @@ const QueueListTable = () => {
                 className={classes.headerColor}
                 style={{ backgroundColor: '#FDF2F2', position: 'sticky', top: 0, zIndex: 2 }}>
                 <TableRow>
-                  <StickyTableCell>
-                    <TableCell className={clsx(classes.cellHead, classes.cellSticky)}>
+                  <StickyTableCell style={{ display: 'flex', padding: '17px'}}>
+                    <div className={clsx(classes.cellHead, classes.cellSticky)}>
                       <div className={classes.lineColumn}>
                         <span>No.</span>
                       </div>
-                    </TableCell>
-                    <TableCell
+                    </div>
+                    <div
                       className={clsx(classes.cellHead, classes.cellSticky)}
                       style={{ width: 200, padding: 0 }}>
                       <div className={classes.lineColumn}>
@@ -715,11 +717,11 @@ const QueueListTable = () => {
                           onClick={() => handleSort('bkgNo')}
                         />
                       </div>
-                    </TableCell>
+                    </div>
                   </StickyTableCell>
                   {columns.lastUpdate && (
-                    <TableCell className={classes.cellHead} style={{ width: 160 }}>
-                      <div className={classes.lineColumn}>
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Last Updated</span>
                         <img
                           src="/assets/images/icons/Icon-sort.svg"
@@ -729,72 +731,72 @@ const QueueListTable = () => {
                     </TableCell>
                   )}
                   {columns.etd && (
-                    <TableCell className={classes.cellHead} style={{ width: 160 }}>
-                      <div className={classes.lineColumn}>
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>ETD</span>
                       </div>
                     </TableCell>
                   )}
                   {columns.shipperN && (
-                    <TableCell className={classes.cellHead} style={{ width: 180 }}>
-                      <div className={classes.lineColumn}>
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Shipper Name</span>
                       </div>
                     </TableCell>
                   )}
                   {columns.pol && (
-                    <TableCell className={classes.cellHead} style={{ width: 160 }}>
-                      <div className={classes.lineColumn}>
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>POL</span>
                       </div>
                     </TableCell>
                   )}
                   {columns.pod && (
-                    <TableCell className={classes.cellHead} style={{ width: 160 }}>
-                      <div className={classes.lineColumn}>
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>POD</span>
                       </div>
                     </TableCell>
                   )}
                   {columns.customerS && (
-                    <TableCell className={classes.cellHead} style={{ width: 130 }}>
-                      <div className={classes.lineColumn}>
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Customer Status</span>
                       </div>
                     </TableCell>
                   )}
                   {columns.onshoreS && (
-                    <TableCell className={classes.cellHead} style={{ width: 130 }}>
-                      <div className={classes.lineColumn}>
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Onshore Status</span>
                       </div>
                     </TableCell>
                   )}
                   {columns.blinkS && (
-                    <TableCell className={classes.cellHead} style={{ width: 150 }}>
-                      <div className={classes.lineColumn}>
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>BLink Status</span>
                       </div>
                     </TableCell>
                   )}
                   {columns.vvd && (
-                    <TableCell className={classes.cellHead} style={{ width: 130 }}>
-                      <div className={classes.lineColumn}>
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>VVD</span>
                         {/* <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort('vvd')} /> */}
                       </div>
                     </TableCell>
                   )}
                   {columns.inquiry && (
-                    <TableCell className={classes.cellHead} style={{ width: 170 }}>
-                      <div className={classes.lineColumn}>
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Unresolved Inquiry</span>
                       </div>
                     </TableCell>
                   )}
                   {columns.amendment && (
-                    <TableCell className={classes.cellHead} style={{ width: 190 }}>
-                      <div className={classes.lineColumn}>
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Unresolved Amendment</span>
                       </div>
                     </TableCell>

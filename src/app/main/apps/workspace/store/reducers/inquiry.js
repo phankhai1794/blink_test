@@ -176,7 +176,7 @@ const inquiryReducer = function (state = initialState, action) {
     return { ...state, objectNewAmendment: { ...state.objectNewAmendment, ...action.state } };
   }
   case Actions.OPEN_QUEUE_LIST: {
-    return { ...state, openQueueList: action.state };
+    return { ...state, openQueueList: action.state, searchQueueQuery: initialState.searchQueueQuery };
   }
   case Actions.SEARCH_QUEUE_QUERY: {
     return { ...state, searchQueueQuery: action.state };

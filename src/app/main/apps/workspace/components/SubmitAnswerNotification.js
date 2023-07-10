@@ -1,8 +1,13 @@
 import React, { useContext } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Button, Dialog, makeStyles, IconButton, Icon } from "@material-ui/core";
 import MuiDialogContent from "@material-ui/core/DialogContent";
 import { SocketContext } from 'app/AppContext';
+import { getPermissionByRole } from 'app/services/authService';
+import * as AppActions from 'app/store/actions';
+
+import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
 
 const mainColor = '#BD0F72';
 const darkColor = '#132535';
@@ -58,15 +63,38 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const SubmitAnswerNotification = ({ msg, msg2 = 'Thank you!', iconType, open, handleClose }) => {
+const SubmitAnswerNotification = ({ msg, msg2 = 'Thank you!', iconType, open }) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
   const socket = useContext(SocketContext);
 
   const conflictWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning.status);
 
-  const handleKick = () => {
-    socket.emit("kick_user");
-    handleClose();
+  const handleClose = async () => {
+    const { usersAccessing } = window;
+    const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
+
+    if (userLocal.displayName && usersAccessing.length) {
+      let permissions = await getPermissionByRole(userLocal.role);
+      if (userLocal.displayName === usersAccessing[usersAccessing.length - 1].userName) { // if to be the last user
+        permissions = await getPermissionByRole('Viewer');
+      }
+
+      setTimeout(() => {
+        dispatch(AppActions.setUser({ ...userLocal, permissions }));
+      }, 500);
+      sessionStorage.setItem('permissions', JSON.stringify(permissions));
+    }
+
+    dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false));
+    dispatch(FormActions.toggleOpenNotificationDeleteReply(false));
+    dispatch(FormActions.toggleOpenNotificationDeleteAmendment(false));
+    dispatch(FormActions.toggleOpenBLWarning(false));
+    dispatch(FormActions.toggleOpenNotificationPreviewSubmit(false));
+    dispatch(FormActions.toggleReload());
+    dispatch(InquiryActions.setField());
+    dispatch(InquiryActions.setOneInq({}));
+    dispatch(InquiryActions.setEditInq(null)); // close popup inq detail
   }
 
   return (
@@ -94,7 +122,10 @@ const SubmitAnswerNotification = ({ msg, msg2 = 'Thank you!', iconType, open, ha
         {conflictWarning &&
           <Button
             className={classes.button}
-            onClick={() => handleKick()}>
+            onClick={() => {
+              socket.emit("kick_user");
+              dispatch(FormActions.toggleOpenBLWarning(false));
+            }}>
             Force Out
           </Button>
         }

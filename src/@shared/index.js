@@ -372,7 +372,12 @@ export const getSrcFileIcon = (file) => {
   return path;
 }
 
-export const checkBroadCastAccessing = (role) => {
+export const checkBroadCastReload = (role, type) => {
+  /**
+   * role: Admin | Guest
+   * type: access | logout
+   */
+
   const { pathname, search } = window.location;
   const url = pathname + search;
 
@@ -381,10 +386,16 @@ export const checkBroadCastAccessing = (role) => {
     Guest: ["/guest", "/draft-bl?bl="]
   }
 
-  if (role) {
-    if (!mapper[role].some(route => url.includes(route))) {
-      window.location.reload();
-    }
+  if (
+    role
+    &&
+    (
+      (type === "access" && !mapper[role].some(route => url.includes(route)))
+      ||
+      (type === "logout" && mapper[role].some(route => url.includes(route)))
+    )
+  ) {
+    window.location.reload();
   }
 }
 
@@ -429,4 +440,36 @@ export const findSumFromArray = (arr) => {
   });
 
   return newDict;
+}
+
+export const generateFileName = (fileName, fileList) => {
+  const extFileNameIndex = fileName.split(".").slice(-1)[0].length + 1;
+  const name = fileName.slice(0, -extFileNameIndex);
+  const ext = fileName.slice(-extFileNameIndex,)
+  if (fileList.includes(fileName)) {
+    let sameFileNameList = fileList.map(f => {
+      const indexExt = f.split(".").slice(-1)[0].length + 1;
+      const curName = f.slice(0, -indexExt);
+      if (curName.match(`${name}\\(\\d+\\)`)) {
+        const number = curName.search(/\(\d+\)$/g)
+        const newFileName = name + `(${parseInt(curName.slice(number + 1, -1)) + 1})` + ext;
+        return newFileName;
+      } else return name + '(1)' + ext;
+    })
+    if (sameFileNameList) {
+      sameFileNameList = sameFileNameList.sort((a, b) => (a > b ? 1 : -1)).filter(fName => !fileList.includes(fName));
+      return sameFileNameList[0];
+    } else {
+      return name + (1) + ext;
+    }
+  } else return fileName;
+}
+
+export const copyTextToClipboard = async (text) => {
+  var textField = document.createElement('textarea')
+  textField.value = text
+  document.body.appendChild(textField)
+  textField.select()
+  document.execCommand('copy')
+  textField.remove()
 }

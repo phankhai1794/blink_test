@@ -100,22 +100,6 @@ const ChoiceAnswerEditor = (props) => {
     }
   }, [])
 
-  const checkOptionsEmpty = () => {
-    const inq = { ...currentEditInq };
-    //check at least has one option
-    if (inq.answerObj.length > 0) {
-      // check empty option
-      const checkEmpty = inq.answerObj.filter((item) => !item.content);
-      if (checkEmpty.length > 0) {
-        dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
-      } else {
-        dispatch(InquiryActions.validate({ ...valid, answerContent: true }));
-      }
-    } else {
-      dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
-    }
-  };
-
   const handleAddChoice = () => {
     const inq = { ...currentEditInq };
     inq.answerObj.push({
@@ -124,7 +108,6 @@ const ChoiceAnswerEditor = (props) => {
       createdAt: new Date()
     });
     dispatch(InquiryActions.setEditInq(inq));
-    checkOptionsEmpty();
     dispatch(FormActions.setEnableSaveInquiriesList(false));
     setAddChoice(true);
   };
@@ -133,7 +116,6 @@ const ChoiceAnswerEditor = (props) => {
     const inq = { ...currentEditInq };
     inq.answerObj.splice(id, 1);
     dispatch(InquiryActions.setEditInq(inq));
-    checkOptionsEmpty();
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
@@ -141,7 +123,6 @@ const ChoiceAnswerEditor = (props) => {
     const inq = { ...currentEditInq };
     inq.answerObj[id].content = e.target.value;
     dispatch(InquiryActions.setEditInq(inq));
-    checkOptionsEmpty();
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 

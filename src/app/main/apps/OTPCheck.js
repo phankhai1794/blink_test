@@ -176,7 +176,7 @@ const OtpCheck = ({ children }) => {
     const { message } = error.response.data.error || error.message;
 
     if (message.includes("not ready yet")) dispatch(Actions.showMessage({ message, variant: 'warning' }));
-    else if (["forbidden", "invalid token"].includes(message?.toLowerCase())) dispatch(Actions.showMessage({ message, variant: 'error' }));
+    else if (!["forbidden", "invalid token"].includes(message?.toLowerCase())) dispatch(Actions.showMessage({ message, variant: 'error' }));
   }
 
   const handleChangeMail = (e) => {
