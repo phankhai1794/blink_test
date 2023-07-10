@@ -13,7 +13,7 @@ import {
 import Formsy from 'formsy-react';
 import VisibilityOutlinedIcon from '@material-ui/icons/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@material-ui/icons/VisibilityOffOutlined';
-import { COUNTRIES } from '@shared';
+import { COUNTRIES } from '@shared/keyword';
 
 const passwordLength = 4;
 const mainColor = '#BD0F72';
@@ -128,7 +128,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function JWTLoginTab({ onLogged, country }) {
-  const defaultCountry = country && COUNTRIES.filter(c => c.value === country).length ? country : COUNTRIES[0].value;
+  const defaultCountry = [];
 
   const classes = useStyles();
   const [isFormValid, setIsFormValid] = useState(false);

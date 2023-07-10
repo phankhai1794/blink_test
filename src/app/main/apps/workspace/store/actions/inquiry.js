@@ -35,6 +35,8 @@ export const SET_DATA_CD_INQ = 'SET_DATA_CD_INQ';
 export const SET_DATA_CM_INQ = 'SET_DATA_CM_INQ';
 export const SET_CANCEL_AME_POPUP = 'SET_CANCEL_AME_POPUP';
 export const ORIGIN_VALUE_CANCEL = 'ORIGIN_VALUE_CANCEL';
+export const SET_EXPAND_ATTACHMENT = 'SET_EXPAND_ATTACHMENT';
+export const SET_OLD_DATA_CD_CM_INQ = 'SET_OLD_DATA_CD_CM_INQ';
 
 export function saveInquiry() {
   return {
@@ -64,6 +66,10 @@ export function addAmendment(state = undefined) {
 }
 
 export function setInquiries(state) {
+  // sync inquiries
+  // storing inquiries include onshore & customer inquiries, amendments
+  sessionStorage.setItem('listInq', JSON.stringify(state));
+
   return {
     type: SET_INQUIRY,
     state
@@ -94,6 +100,13 @@ export function setDataCdInq(state) {
 export function setDataCmInq(state) {
   return {
     type: SET_DATA_CM_INQ,
+    state
+  };
+}
+
+export function setOldDataCdCm(state) {
+  return {
+    type: SET_OLD_DATA_CD_CM_INQ,
     state
   };
 }
@@ -183,6 +196,10 @@ export function setListInqMinimize(state) {
 }
 
 export function setListMinimize(state) {
+  // sync listMinimize
+  // storing listMinimize ADMIN site
+  sessionStorage.setItem('listMinimize', JSON.stringify(state));
+
   return {
     type: SET_LIST_MINIMIZE,
     state: state
@@ -277,4 +294,11 @@ export function setOriginValueCancel(state) {
     type: ORIGIN_VALUE_CANCEL,
     state: state
   };
+}
+
+export function setExpand(state) {
+  return {
+    type: SET_EXPAND_ATTACHMENT,
+    state: state
+  }
 }

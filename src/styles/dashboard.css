@@ -1,0 +1,41 @@
+.rdrDateRangePickerWrapper {
+  z-index: 10;
+  top: 120%;
+  position: absolute;
+}
+
+.circle-flag {
+  border-radius: 50%;
+  border: 1px solid #BD0F72;
+}
+
+.circle-flag:not(:first-child) {
+  margin-left: -10px;
+}
+
+.circle-flag-plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid #BD0F72;
+  width: 25px;
+  height: 25px;
+  background-color: #FDF2F2;
+  color: #BD0F72;
+  font-size: 12px;
+  font-family: Montserrat;
+  margin-left: -10px;
+}
+
+.circle-flag-default svg {
+  fill: red;
+}
+
+.circle-flag-default {
+  border-radius: 50%;
+}
+
+.circle-flag-default:hover {
+  filter: invert(48%) sepia(78%) saturate(860%) hue-rotate(167deg) brightness(101%) contrast(104%);
+}

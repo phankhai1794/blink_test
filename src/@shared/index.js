@@ -87,97 +87,6 @@ export const draftConfirm = 'DRF_CONF';
 
 export const stateResquest = 'REQUEST';
 
-export const COUNTRIES = [
-  {
-    name: 'United States',
-    value: 'US'
-  },
-  {
-    name: 'Singapore',
-    value: 'SG'
-  },
-  {
-    name: 'Thailand',
-    value: 'TH'
-  },
-  {
-    name: 'Vietnam',
-    value: 'VN'
-  },
-  {
-    name: 'Czechia',
-    value: 'CZ'
-  },
-  {
-    name: 'Denmark',
-    value: 'DK'
-  },
-  {
-    name: 'Finland',
-    value: 'FI'
-  },
-  {
-    name: 'France',
-    value: 'FR'
-  },
-  {
-    name: 'Hungary',
-    value: 'HU'
-  },
-  {
-    name: 'Italy',
-    value: 'IT'
-  },
-  {
-    name: 'Norway',
-    value: 'NO'
-  },
-  {
-    name: 'Poland',
-    value: 'PL'
-  },
-  {
-    name: 'Russian',
-    value: 'RU'
-  },
-  {
-    name: 'Sweden',
-    value: 'SE'
-  },
-  {
-    name: 'Switzerland',
-    value: 'CH'
-  },
-  {
-    name: 'Spain',
-    value: 'ES'
-  },
-  {
-    name: 'Portugal',
-    value: 'PT'
-  },
-  {
-    name: 'Taiwan',
-    value: 'TW'
-  },
-  {
-    name: 'Japan',
-    value: 'JP'
-  },
-  {
-    name: 'New Zealand',
-    value: 'OC_ML'
-  },
-  {
-    name: 'Myanmar',
-    value: 'MM'
-  },
-  {
-    name: 'Montenegro	',
-    value: 'ME'
-  },
-];
-
 export const sentStatus = [
   ...['ANS_SENT', 'REP_Q_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REP_A_SENT', 'REOPEN_Q', 'REOPEN_A'], // inquiry status
   ...['REP_SENT'] // draft status
@@ -237,7 +146,7 @@ export const validateBLType = (input) => {
     response = {
       ...response,
       isError: true,
-      errorType: `The value you entered should be "B" or "W".\n- "B" for Ocean B/L\n- "W" for Seaway Bill`
+      errorType: `The value you entered should be "B" or "W".\n- "B" for Original B/L\n- "W" for Seaway Bill`
     };
   }
   return response;
@@ -283,7 +192,7 @@ export function isJsonText(str) {
 }
 
 export function formatDate(time, formatType) {
-  return moment(time).format(formatType).toUpperCase();
+  return time ? moment(time).format(formatType) : '';
 }
 
 // Format Dummy Container Data
@@ -371,9 +280,9 @@ export const compareObject = (a, b) => {
 }
 
 export const clearLocalStorage = () => {
-  let user = JSON.parse(localStorage.getItem("USER"));
+  const lastEmail = localStorage.getItem("lastEmail");
   localStorage.clear();
-  if (user) localStorage.setItem("lastEmail", user.email);
+  localStorage.setItem("lastEmail", lastEmail);
 }
 
 export const parseNumberValue = (value) => {
@@ -394,7 +303,8 @@ export const getTotalValueMDView = (drfView, containerDetail, getType) => {
     CONTAINER_LIST.totalUnit.forEach((totalKey, index) => {
       const units = [];
       containerDetail.forEach((cd) => {
-        units.push(cd[getType(CONTAINER_LIST.cdUnit[index])])
+        const unit = cd[getType(CONTAINER_LIST.cdUnit[index])];
+        if (unit) units.push(unit);
       })
       if ([... new Set(units)].length === 1) {
         drfMD[totalKey] = units[0].toString();
@@ -442,11 +352,124 @@ export const formatNumber = (num) => {
 }
 
 export const isSameDate = (d1, d2) => {
-  const t1 = new Date(d1);
-  const t2 = new Date(d2);
+  const t1 = d1 ? new Date(d1) : new Date();
+  const t2 = d2 ? new Date(d2) : new Date();
   return (
     t1.getFullYear() === t2.getFullYear()
     && t1.getMonth() === t2.getMonth()
-    && t1.getDay() === t2.getDay()
+    && t1.getDate() === t2.getDate()
   )
+}
+
+export const getSrcFileIcon = (file) => {
+  let path = '';
+  const ext = file.ext.toLowerCase();
+
+  if (ext.includes('pdf')) path = 'assets/images/logos/pdf_icon.png';
+  else if (ext.match(/csv|xls|xlsx|excel|sheet/g)) path = '/assets/images/logos/excel_icon.png';
+  else if (ext.match(/doc|msword/g)) path = '/assets/images/logos/word_icon.png';
+
+  return path;
+}
+
+export const checkBroadCastReload = (role, type) => {
+  /**
+   * role: Admin | Guest
+   * type: access | logout
+   */
+
+  const { pathname, search } = window.location;
+  const url = pathname + search;
+
+  const mapper = {
+    Admin: ["/workspace", "/admin"],
+    Guest: ["/guest", "/draft-bl?bl="]
+  }
+
+  if (
+    role
+    &&
+    (
+      (type === "access" && !mapper[role].some(route => url.includes(route)))
+      ||
+      (type === "logout" && mapper[role].some(route => url.includes(route)))
+    )
+  ) {
+    window.location.reload();
+  }
+}
+
+export const categorizeInquiriesByUserType = (from, userType, bl, inqs) => {
+  // default: receiver is ONSHORE/CUSTOMER and receive data from ONSHORE/CUSTOMER
+  let syncInqs = [...inqs];
+
+  // receiver is ADMIN
+  if (userType === "ADMIN") {
+    // receive data from ADMIN
+    if (from === "ADMIN") {
+      sessionStorage.setItem("listInq", JSON.stringify(syncInqs));
+    }
+    // receive data from ONSHORE/CUSTOMER
+    else {
+      let inquiries = JSON.parse(sessionStorage.getItem("listInq"));
+      for (let i = 0; i < syncInqs.length; i++) {
+        const sInq = syncInqs[i];
+        const idx = inquiries.findIndex((inq => inq.id === sInq.id));
+        if (idx !== -1) inquiries[idx] = { ...inquiries[idx], ...sInq };
+        else if (bl.state.includes("DRF_")) inquiries.push(sInq); // push new amendment
+      }
+      syncInqs = [...inquiries];
+      sessionStorage.setItem("listInq", JSON.stringify(syncInqs));
+    }
+  }
+  // receiver is ONSHORE/CUSTOMER & receive data from ADMIN
+  else if (from === "ADMIN") {
+    syncInqs = syncInqs.filter(inq => inq.receiver[0].toUpperCase() === userType);
+  }
+
+  return syncInqs;
+}
+
+export const findSumFromArray = (arr) => {
+  let newDict = {};
+
+  arr.filter(item => item).forEach(item => {
+    if (!newDict[item.currencyCode]) {
+      newDict[item.currencyCode] = item.prepaidValue;
+    } else newDict[item.currencyCode] += item.prepaidValue;
+  });
+
+  return newDict;
+}
+
+export const generateFileName = (fileName, fileList) => {
+  const extFileNameIndex = fileName.split(".").slice(-1)[0].length + 1;
+  const name = fileName.slice(0, -extFileNameIndex);
+  const ext = fileName.slice(-extFileNameIndex,)
+  if (fileList.includes(fileName)) {
+    let sameFileNameList = fileList.map(f => {
+      const indexExt = f.split(".").slice(-1)[0].length + 1;
+      const curName = f.slice(0, -indexExt);
+      if (curName.match(`${name}\\(\\d+\\)`)) {
+        const number = curName.search(/\(\d+\)$/g)
+        const newFileName = name + `(${parseInt(curName.slice(number + 1, -1)) + 1})` + ext;
+        return newFileName;
+      } else return name + '(1)' + ext;
+    })
+    if (sameFileNameList) {
+      sameFileNameList = sameFileNameList.sort((a, b) => (a > b ? 1 : -1)).filter(fName => !fileList.includes(fName));
+      return sameFileNameList[0];
+    } else {
+      return name + (1) + ext;
+    }
+  } else return fileName;
+}
+
+export const copyTextToClipboard = async (text) => {
+  var textField = document.createElement('textarea')
+  textField.value = text
+  document.body.appendChild(textField)
+  textField.select()
+  document.execCommand('copy')
+  textField.remove()
 }

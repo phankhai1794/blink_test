@@ -1,6 +1,12 @@
+import { subMonths } from 'date-fns';
+import { formatDate } from '@shared';
+
 import * as Actions from '../actions/inquiry';
 
 export const MSG_INQUIRY_CONTENT = 'We found discrepancy in the information between SI and OPUS booking details';
+
+const end = new Date();
+const start = subMonths(end, 1);
 
 const initialState = {
   myBL: {},
@@ -10,6 +16,7 @@ const initialState = {
   content: {},
   getDataCDInq: [],
   getDataCMInq: [],
+  oldDataCdCmInq: {},
   currentEditInq: null,
   currentAmendment: undefined,
   displayCmt: false,
@@ -33,9 +40,19 @@ const initialState = {
   listCommentDraft: [],
   objectNewAmendment: { oldAmendmentId: null, newAmendment: null },
   openQueueList: false,
-  searchQueueQuery: { bookingNo: '', from: '', to: '', blStatus: 'PENDING,IN_QUEUE', currentPageNumber: 1, pageSize: 10, totalPageNumber: 5, sortField: '' },
+  searchQueueQuery: {
+    bookingNo: '',
+    from: formatDate(start, 'YYYY-MM-DD'),
+    to: formatDate(end, 'YYYY-MM-DD'),
+    blStatus: 'PENDING,IN_QUEUE',
+    currentPageNumber: 1,
+    pageSize: 10,
+    totalPageNumber: 5,
+    sortField: ''
+  },
   cancelAmePopup: false,
   originValueCancel: {},
+  enableExpandAttachment: []
 };
 
 const inquiryReducer = function (state = initialState, action) {
@@ -159,7 +176,7 @@ const inquiryReducer = function (state = initialState, action) {
     return { ...state, objectNewAmendment: { ...state.objectNewAmendment, ...action.state } };
   }
   case Actions.OPEN_QUEUE_LIST: {
-    return { ...state, openQueueList: action.state };
+    return { ...state, openQueueList: action.state, searchQueueQuery: initialState.searchQueueQuery };
   }
   case Actions.SEARCH_QUEUE_QUERY: {
     return { ...state, searchQueueQuery: action.state };
@@ -170,11 +187,17 @@ const inquiryReducer = function (state = initialState, action) {
   case Actions.SET_DATA_CD_INQ: {
     return { ...state, getDataCDInq: action.state };
   }
+  case Actions.SET_OLD_DATA_CD_CM_INQ: {
+    return { ...state, oldDataCdCmInq: action.state };
+  }
   case Actions.SET_CANCEL_AME_POPUP: {
     return { ...state, cancelAmePopup: action.state };
   }
   case Actions.ORIGIN_VALUE_CANCEL: {
     return { ...state, originValueCancel: action.state };
+  }
+  case Actions.SET_EXPAND_ATTACHMENT: {
+    return { ...state, enableExpandAttachment: action.state }
   }
   default: {
     return state;

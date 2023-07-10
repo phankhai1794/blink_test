@@ -19,11 +19,11 @@ const routeConfigs = [
 
 const routes = [
   ...FuseUtils.generateRoutesFromConfigs(routeConfigs),
-  // {
-  //   path: '/',
-  //   exact: true,
-  //   component: () => <Redirect to="/apps/dashboards/" />
-  // },
+  {
+    path: '/',
+    exact: true,
+    component: () => <Redirect to="/apps/admin" />
+  },
   {
     component: () => <Redirect to="/pages/errors/error-404" />
   }

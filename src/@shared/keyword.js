@@ -2,7 +2,13 @@ export const BOOKING_NO = 'bkgNo';
 
 export const BL_TYPE = 'blType';
 
+export const ORIGINAL_BL = 'Original B/L';
+
+export const SEAWAY_BILL = 'Seaway Bill';
+
 export const SHIPPER = 'shipper';
+
+export const SHIPPER_NAME = 'shipperName';
 
 export const CONSIGNEE = 'consignee';
 
@@ -194,6 +200,8 @@ export const RATING_DETAIL = 'ratingDetail';
 
 export const REMARKS = 'remarks';
 
+export const ETD = 'etd';
+
 export const CONTAINER_LIST = {
   cd: [CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_TYPE, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT],
   cm: [CM_MARK, HS_CODE, HTS_CODE, NCM_CODE, CM_DESCRIPTION, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT],
@@ -227,4 +235,8 @@ export const mapperBlinkStatus = {
   BQ: "Offshore Amendment Inquiry",
   BP: "Customer Amendment Reply",
   BS: "BL Amendment Success"
+};
+
+export const BROADCAST = {
+  ACCESS: "BLINK_ACCESS"
 };

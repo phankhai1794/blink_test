@@ -6,6 +6,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { CONTAINER_MANIFEST, CONTAINER_DETAIL } from '@shared/keyword';
 import clsx from "clsx";
 
+import Diff from "../shared-components/react-diff";
+
 import ContainerDetailForm from './ContainerDetailForm';
 import UserInfo from './UserInfo';
 import ImageAttach from './ImageAttach';
@@ -14,6 +16,7 @@ import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from "./ParagraphAnswer";
 import { ContainerDetailFormOldVersion } from './InquiryViewer';
 import ContainerDetailInquiry from "./ContainerDetailInquiry";
+import InquiryWithGroup from "./InquiryWithGroup";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -65,14 +68,12 @@ const useStyles = makeStyles(() => ({
 }));
 
 const Comment = (props) => {
-  const { question, comment, isDateTime } = props;
-  const [comments, setComments] = useState(comment?.length > 1 ? comment.slice(0, comment.length - 1) : []);
-  const [value, setValue] = useState('');
-  const [key, setKey] = useState();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [edit, setEdit] = useState('');
-  const classes = useStyles();
+  const { question, comment, isDateTime, currentQuestion } = props;
+  const [comments, setComments] = useState(comment?.length ? comment : [])
   const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
+  const classes = useStyles();
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
 
   const user = useSelector(({ user }) => user);
@@ -91,14 +92,10 @@ const Comment = (props) => {
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
-  const checkSystemResolved = (process, key) => {
-    return (process === 'draft' && key === 0) ? true : false;
-  }
-
   const contentUI = ({ userName, createdAt, avatar, content, title, media, answersMedia, id, type, reply }) => {
     let dataCD = [];
     let dataCM = [];
-    if (reply.content && isJsonText(reply.content) && containerCheck.includes(reply.field) && reply.type === 'ANS_CD_CM') {
+    if (reply.content && isJsonText(reply.content) && containerCheck.includes(currentQuestion.field) && (reply.type === 'ANS_CD_CM' || ['COMPL', 'UPLOADED'].includes(reply.state))) {
       const parseJs = JSON.parse(reply.content);
       dataCD = parseJs?.[getField(CONTAINER_DETAIL)];
       dataCM = parseJs?.[getField(CONTAINER_MANIFEST)];
@@ -108,11 +105,16 @@ const Comment = (props) => {
       dataCD = parseJs[getField(CONTAINER_DETAIL)];
       dataCM = parseJs[getField(CONTAINER_MANIFEST)];
     }
+
+    const renderContent = () => {
+      return (isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG'].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content
+    }
+
     return (
       <div key={id}>
-        <div className="comment-detail" style={{ padding: '20px', backgroundColor: `${checkSystemResolved(question?.process, id) && '#FDF2F2'}` }}>
+        <div className="comment-detail" style={{ padding: '20px' }}>
           <div className="flex justify-between" style={{ alignItems: 'self-start' }}>
-            <UserInfo name={checkSystemResolved(question?.process, id) ? 'System' : userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
+            <UserInfo name={userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
 
             {['COMPL', 'RESOLVED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Resolved</span></div>)}
             {['UPLOADED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Uploaded</span></div>)}
@@ -164,22 +166,50 @@ const Comment = (props) => {
               ) : <span className={'markReopen'}>Marked as reopened</span>
             ) :
             (
-              (containerCheck.includes(question.field) && (dataCD.length && dataCM.length)) ? (
+              (containerCheck.includes(question.field) && (dataCD && dataCM && dataCD.length && dataCM.length)) ? (
                 <ContainerDetailInquiry
                   getDataCD={dataCD}
                   getDataCM={dataCM}
                   disableInput={true}
+                  currentQuestion={currentQuestion}
                 />
               ) : (
-                <div className={clsx((['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(reply.state) || reply.status === 'DELETED') ? 'delete-content' : '', 'content-reply')} style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', fontStyle: ((!['INQ', 'ANS'].includes(type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(reply.state) && reply.process === 'pending') ||
-                            (!['AME_ORG', 'AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(reply.state) && reply.process === 'draft')) && 'italic' }}>
+                <div
+                  className={clsx((['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(reply.state) || reply.status === 'DELETED') ? 'delete-content' : '', 'content-reply')}
+                  style={{
+                    wordBreak: 'break-word',
+                    whiteSpace: 'pre-wrap',
+                    fontStyle: (
+                      (!['INQ', 'ANS'].includes(type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(reply.state) && reply.process === 'pending')
+                      ||
+                      (!['AME_ORG', 'AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(reply.state) && reply.process === 'draft')
+                    ) && 'italic'
+                  }}
+                >
                   {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
-                    <div className={reply.isChangeRecipient ? 'markReopen' : ''}>{(isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG' ].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content}</div> :
+                    <div className={reply.isChangeRecipient ? 'markReopen' : ''}>
+                      {['RESOLVED', 'COMPL', 'UPLOADED'].includes(reply.state) ?
+                        <Diff inputA={isDateTime ? formatDate(orgContent[question.field], 'DD MMM YYYY') : (orgContent[question.field] || '')} inputB={renderContent() || ''} type="chars" /> :
+                        renderContent()
+                      }
+                    </div> :
                     (type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>)
                   }
                 </div>
               )
             )
+          }
+
+          {containerCheck.includes(currentQuestion.field)
+            && currentQuestion.inqGroup && currentQuestion.inqGroup.length
+            && ['ANS', 'INQ'].includes(reply.type)
+            ? currentQuestion.inqGroup.map(q => {
+              return (
+                <div key={q.id}>
+                  <InquiryWithGroup inqGroup={q} role={user.role} />
+                </div>
+              )
+            }) : ``
           }
 
           {<div style={{ display: 'block', margin: '1rem 0rem' }}>
@@ -193,46 +223,30 @@ const Comment = (props) => {
 
           <div className="attachment-reply">
             {media?.length > 0 &&
-              media?.map((file, mediaIndex) => (
-                <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                  {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                    <ImageAttach
-                      file={file}
-                      files={media}
-                      hiddenRemove={true}
-                      indexInquiry={id}
-                      style={{ margin: '2.5rem' }}
-                      question={question}
-                    />
-                  ) : (
-                    <FileAttach
-                      hiddenRemove={true}
-                      file={file}
-                      files={media}
-                      indexInquiry={id}
-                      question={question} />
-                  )}
-                </div>
+              media?.map((file) => (
+                <>
+                  <FileAttach
+                    hiddenRemove={true}
+                    file={file}
+                    files={media}
+                    indexInquiry={id}
+                    question={reply} />
+                </>
               ))}
           </div>
-          <div className='attachment-answer'>
+          <div className='attachment-answer' style={{ width: '108%' }}>
             {answersMedia?.length > 0 && (
               <>
                 {answersMedia?.map((file, mediaIndex) => (
-                  <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
-                    {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-                      <ImageAttach
-                        file={file}
-                        files={answersMedia}
-                        hiddenRemove={true}
-                        indexInquiry={id}
-                        style={{ margin: '2.5rem' }}
-                        question={question}
-                      />
-                    ) : (
-                      <FileAttach hiddenRemove={true} file={file} files={answersMedia} indexInquiry={id} question={question} />
-                    )}
-                  </div>
+                  <>
+                    <FileAttach
+                      hiddenRemove={true}
+                      file={file}
+                      files={answersMedia}
+                      indexInquiry={id}
+                      question={reply}
+                    />
+                  </>
                 ))}
               </>
             )}

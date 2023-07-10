@@ -353,7 +353,7 @@ const AllInquiry = (props) => {
                   />
                 </div>
               ) : (
-                <Card key={index} elevation={0} style={{ padding: '1rem ' }}>
+                <Card key={index} elevation={0} style={{ padding: '1rem ', width: '100%' }}>
                   <div
                     className={clsx(
                       classes.boxItem,

@@ -9,7 +9,6 @@ export const TOGGLE_AMENDMENTS_LIST = 'TOGGLE_AMENDMENTS_LIST';
 export const OPEN_NOTIFICATION_AMENDMENT_LIST = 'OPEN_NOTIFICATION_AMENDMENT_LIST';
 export const TOGGLE_PREVIEW_SUBMIT_LIST = 'TOGGLE_PREVIEW_SUBMIT_LIST';
 export const RELOAD = 'RELOAD';
-export const OPEN_TRANSACTION = 'OPEN_TRANSACTION';
 export const OPEN_EMAIL = 'OPEN_EMAIL';
 export const OPEN_INQUIRY_REVIEW = 'OPEN_INQUIRY_REVIEW';
 export const OPEN_NOTIFICATION_ATTACHMENT_LIST = 'OPEN_NOTIFICATION_ATTACHMENT_LIST';
@@ -34,6 +33,9 @@ export const RESET_LOADING = 'RESET_LOADING';
 export const PROCESS_LOADING = 'PROCESS_LOADING';
 export const OPEN_WARNING_UPLOAD_OPUS = 'OPEN_WARNING_UPLOAD_OPUS';
 export const CURRENT_FILE_PREVIEW = 'CURRENT_FILE_PREVIEW';
+export const EVENT_CLICK_CONT_NO = 'EVENT_CLICK_CONT_NO';
+export const SET_DIRTY_RELOAD = 'SET_DIRTY_RELOAD';
+export const SET_TAB = 'SET_TAB';
 
 export function setFullscreen(state) {
   return {
@@ -104,15 +106,16 @@ export function toggleReload() {
   };
 }
 
-export function openTrans() {
-  return {
-    type: OPEN_TRANSACTION
-  };
-}
-
 export function inqViewerFocus(state) {
   return {
     type: INQUIRY_VIEWER_FOCUS,
+    state
+  };
+}
+
+export function eventClickContNo(state) {
+  return {
+    type: EVENT_CLICK_CONT_NO,
     state
   };
 }
@@ -278,6 +281,20 @@ export function toggleOpenPreviewFiles(state) {
 export function setCurrentFile(state) {
   return {
     type: CURRENT_FILE_PREVIEW,
+    state
+  };
+}
+
+export function setDirtyReload(state) {
+  return {
+    type: SET_DIRTY_RELOAD,
+    state
+  }
+}
+
+export function setTabs(state) {
+  return {
+    type: SET_TAB,
     state
   };
 }

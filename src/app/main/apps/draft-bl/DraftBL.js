@@ -8,7 +8,7 @@ import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
-import { isJsonText, formatDate, MAX_CHARS, MAX_ROWS_CD, lineBreakAtBoundary, checkMaxRows, getTotalValueMDView, formatNoneContNo } from '@shared';
+import { isJsonText, formatDate, MAX_CHARS, MAX_ROWS_CD, lineBreakAtBoundary, checkMaxRows, getTotalValueMDView, formatNoneContNo, findSumFromArray } from '@shared';
 import { packageUnitsJson } from '@shared/units';
 
 import * as Actions from './store/actions';
@@ -353,7 +353,7 @@ const DraftPage = (props) => {
               PAGE: <p className={classes.page_Count}>1</p> OF <p className={classes.page_Count}>{totalPage}</p>
             </div>
             <span className={classes.blType}>
-              {getValueField(BL_TYPE) ? getValueField(BL_TYPE) === "W" ? "SEAWAY BILL" : "BILL OF LADING" : ""}
+              {getValueField(BL_TYPE) ? getValueField(BL_TYPE) === "W" ? "SEAWAY BILL" : "ORIGINAL B/L" : ""}
             </span>
           </div>
         </div>
@@ -713,53 +713,160 @@ const DraftPage = (props) => {
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       CODE
                     </div>
-                    <div className={classes.content_L} style={{ minHeight: '250px' }}>
-                      <span>{getValueField(CODE)}</span>
-                    </div>
+                    {/* <div className={classes.content_L} style={{ minHeight: '250px' }}>
+                      {getValueField(RATING_DETAIL) &&
+                        <span style={{
+                          position: 'relative',
+                          textTransform: 'none',
+                          whiteSpace: 'pre-wrap	',
+                          wordWrap: 'break-word	',
+                          display: 'flex',
+                          alignItems: 'flex-end',
+                          textAlign: 'start',
+                          width: 360
+                        }}>
+                          {getValueField(RATING_DETAIL).code}
+                        </span>}
+                    </div> */}
                   </Grid>
                   <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       TARIFF ITEM
                     </div>
-                    <div className={classes.content_L}>
+                    {/* <div className={classes.content_L}>
                       <span>{getValueField(TARIFF_ITEM)}</span>
-                    </div>
+                    </div> */}
                   </Grid>
                   <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       FREIGHTED AS
                     </div>
-                    <div className={classes.content_L}>
-                      <span>{getValueField(FREIGHTED_AS)}</span>
-                    </div>
+                    {/* <div className={classes.content_L}>
+                      {getValueField(RATING_DETAIL) &&
+                        <span style={{
+                          position: 'relative',
+                          textTransform: 'none',
+                          whiteSpace: 'pre-wrap	',
+                          wordWrap: 'break-word	',
+                          display: 'flex',
+                          alignItems: 'flex-end',
+                          textAlign: 'end',
+                          justifyContent: 'flex-end',
+                        }}>
+                          {getValueField(RATING_DETAIL).freightedAs}
+                        </span>}
+                    </div> */}
                   </Grid>
                   <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       RATE
                     </div>
-                    <div className={classes.content_L}>
-                      <span>{getValueField(RATE)}</span>
-                    </div>
+                    {/* <div className={classes.content_L}>
+                      {getValueField(RATING_DETAIL) &&
+                        <span style={{
+                          position: 'relative',
+                          textTransform: 'none',
+                          whiteSpace: 'pre-wrap	',
+                          wordWrap: 'break-word	',
+                          display: 'flex',
+                          alignItems: 'flex-end',
+                          textAlign: 'center',
+                          justifyContent: 'space-around',
+                        }}>
+                          {getValueField(RATING_DETAIL).rate}
+                        </span>}
+                    </div> */}
                   </Grid>
                   <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       PREPAID
                     </div>
-                    <div className={classes.content_L}>
-                      <span>{getValueField(PREPAID)}</span>
-                    </div>
+                    {/* <div className={classes.content_L} >
+                      {getValueField(RATING_DETAIL) && getValueField(RATING_DETAIL).prepaid.map(item => {
+                        if (item.currencyCode) {
+                          return (
+                            <div role='group'>
+                              <span style={{
+                                position: 'relative',
+                                textTransform: 'none',
+                                display: 'inline-block',
+                                float: 'left'
+                              }}>
+                                {item.currencyCode}
+                              </span>
+                              <span style={{
+                                position: 'relative',
+                                textTransform: 'none',
+                                display: 'inline-block',
+                                float: 'right'
+                              }}>
+                                {item.prepaidValue.toFixed(2)}
+                              </span>
+                              <br></br>
+                            </div>
+                          )
+                        } else {
+                          return <br></br>
+                        }
+                      })}
+                    </div> */}
                   </Grid>
                   <Grid item xs={2} style={{ textAlign: 'center' }}>
                     <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
                       COLLECT
                     </div>
-                    <div className={classes.content_L}>
-                      <span>{getValueField(COLLECT)}</span>
-                    </div>
+                    {/* <div className={classes.content_L}>
+                      {getValueField(RATING_DETAIL) && getValueField(RATING_DETAIL).collect.map(item => {
+                        if (item.currencyCode) {
+                          return (
+                            <div role='group'>
+                              <span style={{
+                                position: 'relative',
+                                textTransform: 'none',
+                                display: 'inline-block',
+                                float: 'left'
+                              }}>
+                                {item.currencyCode}
+                              </span>
+                              <span style={{
+                                position: 'relative',
+                                textTransform: 'none',
+                                display: 'inline-block',
+                                float: 'right'
+                              }}>
+                                {item.prepaidValue.toFixed(2)}
+                              </span>
+                              <br></br>
+                            </div>
+                          )
+                        } else {
+                          return <br></br>
+                        }
+                      })}
+                    </div> */}
                   </Grid>
                 </Grid>
 
-                <Grid container item xs={2} style={{ borderLeft: BORDER }}></Grid>
+                <Grid container item xs={2} style={{ borderLeft: BORDER }}>
+                  {/* {getValueField(RATING_DETAIL) &&
+                    <span style={{
+                      position: 'relative',
+                      textTransform: 'none',
+                      whiteSpace: 'pre-wrap	',
+                      wordWrap: 'break-word	',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      textAlign: 'start',
+                      fontFamily: 'Courier, serif',
+                      fontSize: 16.5 /*1.7vw*/
+                      //lineHeight: '1.0',
+                      //color: '#4A4A4A',
+                      //top: 4,
+                    //}}>
+                     //</Grid> {"\n" + getValueField(RATING_DETAIL).exchangeRate}
+                    //</span> */}
+                  }
+                </Grid>
               </Grid>
             </Grid>
 
@@ -798,21 +905,45 @@ const DraftPage = (props) => {
           <Grid container item xs={10}>
             <Grid container item xs={10}>
               <Grid item xs={8} style={{ minHeight: '100px', borderRight: BORDER }} >
-                <div className={classes.tittle_M} >
-                  {'The printed terms and conditions on this Bill are available at its website at www.one-line.com'}
+                <div>
+                  <div className={classes.tittle_M} style={{ width: 400, float: 'left' }}>
+                    {'The printed terms and conditions on this Bill are available at its website at www.one-line.com'}
+                  </div>
+
+                  <div className={classes.tittle_M} style={{ float: 'right', paddingRight: 10 }} >
+                    TOTAL
+                  </div>
                 </div>
-                {getValueField(TOTAL_PREPAID).freightTerm === 'PREPAID' && getValueField(TOTAL_PREPAID).currency !== '' &&
-                  <div className={classes.content_L} style={{ position: 'relative', top: '69.5%', textTransform: 'none',whiteSpace: 'pre-wrap	',wordWrap: 'break-word	', width: 800, float: 'left'}} >
+                {/* {getValueField(TOTAL_PREPAID).freightTerm === 'PREPAID' && getValueField(TOTAL_PREPAID).currency !== '' &&
+                  <div className={classes.content_L} style={{ position: 'relative', top: '69.5%', textTransform: 'none', whiteSpace: 'pre-wrap	', wordWrap: 'break-word	', width: 800, float: 'left' }} >
                     {`TOTAL PREPAID IN PAYMENT CURRENT ${getValueField(TOTAL_PREPAID).currency}   ${getValueField(TOTAL_PREPAID).total}    ${getValueField(TOTAL_PREPAID).loc}`}
                   </div>
-                }
+                } */}
               </Grid>
               <Grid item xs={2} style={{ borderRight: BORDER }}>
-                <div className={classes.tittle_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
+                <div className={classes.content_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
+                  {/* {getValueField(RATING_DETAIL) && Object.entries(findSumFromArray(getValueField(RATING_DETAIL).prepaid)).map(([key, value], idx) => {
+                    return (
+                      <div key={idx + key} role='group'>
+                        <span style={{ float: 'left' }}>{key}</span>
+                        <span style={{ float: 'right' }}>{value.toFixed(2)}</span>
+                        <br></br>
+                      </div>
+                    )
+                  })} */}
                 </div>
               </Grid>
               <Grid item xs={2} style={{ borderRight: BORDER }}>
-                <div className={classes.tittle_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
+                <div className={classes.content_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
+                  {/* {getValueField(RATING_DETAIL) && Object.entries(findSumFromArray(getValueField(RATING_DETAIL).collect)).map(([key, value], idx) => {
+                    return (
+                      <div key={idx + key} role='group'>
+                        <span style={{ float: 'left' }}>{key}</span>
+                        <span style={{ float: 'right' }}>{value.toFixed(2)}</span>
+                        <br></br>
+                      </div>
+                    )
+                  })} */}
                 </div>
               </Grid>
             </Grid>

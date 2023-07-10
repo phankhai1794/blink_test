@@ -3,11 +3,12 @@ import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { ONLY_ATT } from '@shared/keyword'
+import {CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT} from '@shared/keyword'
 import clsx from "clsx";
-import { useUnsavedChangesWarning } from 'app/hooks';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from '../store/actions/form';
+import {isJsonText} from "../../../../../@shared";
 
 import UserInfo from './UserInfo';
 
@@ -51,12 +52,19 @@ const ParagraphAnswer = (props) => {
     action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
   });
   const dispatch = useDispatch();
-  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const eventClickContNo = useSelector(({ workspace }) => workspace.formReducer.eventClickContNo);
 
   const [paragraphText, setParagraphText] = useState(question.answerObj && question.answerObj.length ? question.answerObj[0]?.content : '');
 
   const classes = useStyles(question);
   const [isPermission, setPermission] = useState(false);
+
+  const getField = (field) => {
+    return metadata.field?.[field] || '';
+  };
+
+  const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
   const handleChangeInput = (e) => {
     setParagraphText(e.target.value);
@@ -68,7 +76,7 @@ const ParagraphAnswer = (props) => {
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     optionsInquires[editedIndex].paragraphAnswer = body;
     dispatch(InquiryActions.setInquiries(optionsInquires));
-    setDirty();
+    dispatch(FormActions.setDirtyReload({ inputParagraphAnswer: true }));
   };
 
   useEffect(() => {
@@ -84,19 +92,36 @@ const ParagraphAnswer = (props) => {
       if (!currentQuestion.answerObj.length) {
         setParagraphText('');
       } else if (currentQuestion.answerObj && currentQuestion.answerObj.length) {
-        setParagraphText(currentQuestion.answerObj[0].content);
+        let contentAnswer = currentQuestion.answerObj[0].content;
+        if(containerCheck.includes(currentQuestion.field)
+            && (isJsonText(currentQuestion.answerObj[0].content) || currentQuestion.ansForType !== 'ANS_CD_CM')
+            && currentQuestion.answerObj.length > 1
+        ) {
+          contentAnswer = currentQuestion.answerObj[1].content;
+          const body = {
+            inquiry: question.id,
+            content: contentAnswer
+          };
+          const optionsInquires = [...questions];
+          const editedIndex = optionsInquires.findIndex(inq => currentQuestion.id === inq.id);
+          optionsInquires[editedIndex].paragraphAnswer = body;
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+        }
+        setParagraphText(contentAnswer);
       }
-      setPristine();
+      dispatch(FormActions.setDirtyReload({ inputParagraphAnswer: false }));
     }
   }, [saveStatus, currentQuestion]);
 
   useEffect(() => {
-    if (question.answerObj && question.answerObj.length) {
-      setParagraphText(question.answerObj[0]?.content);
-    } else if (!question.answerObj || !question.answerObj.length) {
-      setParagraphText('')
+    if (eventClickContNo && !eventClickContNo.isHasActionClick) {
+      if (question.answerObj && question.answerObj.length) {
+        setParagraphText(question.answerObj[0]?.content);
+      } else if (!question.answerObj || !question.answerObj.length) {
+        setParagraphText('')
+      }
     }
-  }, [question]);
+  }, [question, eventClickContNo]);
 
   useEffect(() => {
     if (
@@ -106,7 +131,7 @@ const ParagraphAnswer = (props) => {
       (
         (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) ||
         (question.answersMedia && question.answersMedia.length > 0)
-      )
+      ) && !containerCheck.includes(question.field)
     ) setParagraphText(ONLY_ATT);
   }, [saveStatus, question]);
 

@@ -29,7 +29,7 @@ export const initBL = (bkgNo) => async (dispatch) => {
       }
       dispatch(FormActions.decreaseLoading());
     })
-    .catch((err) => console.error(err));
+    .catch((err) => handleError(dispatch, err));
 };
 
 export const loadMetadata = () => async (dispatch) => {
@@ -46,6 +46,7 @@ export const loadMetadata = () => async (dispatch) => {
 export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
   try {
     dispatch(FormActions.increaseLoading());
+
     const [blResponse, contentRespone] = [
       await getBlInfo(myBL_Id),
       await getCustomerAmendment(myBL_Id)
@@ -53,10 +54,17 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
     const { orgContent, content } = blResponse?.myBL;
     const { contentAmendmentRs } = contentRespone;
     const cloneContent = { ...content };
-    dispatch(setContentInqResolved(content));
+
     dispatch(setOrgContent(orgContent));
+    dispatch(setContentInqResolved(content));
+
+    // sync content amendment
+    // storing content without amendments
+    sessionStorage.setItem('content', JSON.stringify(content));
+
     contentAmendmentRs?.length && contentAmendmentRs.forEach((a) => (cloneContent[a.field] = a.content));
     dispatch(setContent(cloneContent));
+
     dispatch(FormActions.decreaseLoading());
   } catch (err) {
     handleError(dispatch, err);

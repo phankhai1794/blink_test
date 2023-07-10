@@ -29,18 +29,20 @@ const useStyles = makeStyles((theme) => ({
 
 
 const BtnQueueList = () => {
-  const { pathname } = window.location;
+  const { pathname, search } = window.location;
   const classes = useStyles();
   const dispatch = useDispatch();
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const userType = useSelector(({ user }) => user.userType);
 
   const showQueueList = () => {
+    const country = new URLSearchParams(search).get('cntr');
+    const param = country ? `?cntr=${country}` : "";
     userType === 'ADMIN' ?
-      window.open('/apps/admin') :
+      window.open(`/apps/admin${param}`) :
       dispatch(InquiryActions.openQueueList(true));
   }
-  
+
   return (
     <>
       {myBL?.state &&

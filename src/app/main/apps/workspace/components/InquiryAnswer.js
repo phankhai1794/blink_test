@@ -7,7 +7,7 @@ import {
 } from 'app/services/inquiryService';
 import { handleError } from '@shared/handleError';
 import { uploadFile } from 'app/services/fileService';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -15,8 +15,10 @@ import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
 import { isJsonText } from "@shared";
 import { CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT } from '@shared/keyword';
+import { SocketContext } from 'app/AppContext';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from "../store/actions/form";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -94,33 +96,33 @@ const useStyles = makeStyles((theme) => ({
 ));
 
 const InquiryAnswer = (props) => {
-  const { onCancel, setSave, question, getDataCD, getDataCM } = props;
+  const { onCancel, setSave, question } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
+
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
-  const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const metadata = useSelector(({ draftBL }) => draftBL.metadata);
   const getDataCMInq = useSelector(({ workspace }) => workspace.inquiryReducer.getDataCMInq);
   const getDataCDInq = useSelector(({ workspace }) => workspace.inquiryReducer.getDataCDInq);
+  const oldDataCdCmInq = useSelector(({ workspace }) => workspace.inquiryReducer.oldDataCdCmInq);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
   const [isDisableSave, setDisableSave] = useState(false);
-  const inq = (inq) => {
-    return {
-      content: inq.content,
-      field: inq.field,
-      inqType: inq.inqType,
-      ansType: inq.ansType,
-      receiver: inq.receiver
-    };
-  };
+  const [isDisableSaveCdCm, setDisableSaveCdCm] = useState(true);
+  const socket = useContext(SocketContext);
+
   const optionsInquires = [...inquiries];
   const editedIndex = optionsInquires.findIndex(inq1 => question.id === inq1.id);
   let currentAnswer = optionsInquires[editedIndex];
 
+  const syncData = (data, syncOptSite = "") => {
+    socket.emit("sync_data", { data, syncOptSite });
+  };
+
   const getField = (field) => {
     return metadata.field?.[field] || '';
   };
+
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
   const saveAttachmentAnswer = async (currentEditInq, responseSelectChoice) => {
@@ -242,12 +244,24 @@ const InquiryAnswer = (props) => {
         [getField(CONTAINER_DETAIL)]: getDataCDInq.length ? getDataCDInq : contentInqResolved?.[getField(CONTAINER_DETAIL)],
         [getField(CONTAINER_MANIFEST)]: getDataCMInq.length ? getDataCMInq : contentInqResolved?.[getField(CONTAINER_MANIFEST)]
       }
+      if (!question.paragraphAnswer && !question.answerObj.length) {
+        question.answerObj = [];
+        question.paragraphAnswer = {
+          inquiry: question.id,
+          content: ''
+        }
+      } else if (!question.paragraphAnswer && question.answerObj.length) {
+        question.paragraphAnswer = {
+          inquiry: question.id,
+          content: ''
+        }
+      }
     }
-    //
+
     await addTransactionAnswer({ inquiryId: question.id, contentCDCM, ansType: question.ansType }).catch(err => handleError(dispatch, err));
 
     if (question.selectChoice) {
-      if (question.selectChoice.isLast && !question.selectChoice.isOther) {
+      if (question.selectChoice.isLast && !question.selectChoice.isOther?.trim()) {
         dispatch(AppAction.showMessage({ message: 'Information required!', variant: 'error' }));
         setDisableSave(false)
         return;
@@ -259,7 +273,7 @@ const InquiryAnswer = (props) => {
         if (question.answerObj.length) {
           if (
             containerCheck.includes(question.field)
-            && isJsonText(question.answerObj[0].content)
+            && (isJsonText(question.answerObj[0].content) || question.ansForType !== 'ANS_CD_CM')
             && question.answerObj.length > 1
           ) {
             answerId = question.answerObj[1].id;
@@ -268,7 +282,7 @@ const InquiryAnswer = (props) => {
           }
         }
         if (answerId) {
-          if (question.paragraphAnswer.content.trim() === '') {
+          if (question.paragraphAnswer.content.trim() === '' && !containerCheck.includes(question.field)) {
             question.paragraphAnswer.content = ONLY_ATT;
           }
           await updateParagraphAnswer(answerId, question.paragraphAnswer).catch(err => handleError(dispatch, err));
@@ -308,7 +322,15 @@ const InquiryAnswer = (props) => {
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
       } else if (question.paragraphAnswer) {
         if (question.answerObj.length) {
-          optionsInquires[editedIndex].answerObj[0].content = question.paragraphAnswer.content;
+          if (
+            containerCheck.includes(question.field)
+              && (isJsonText(question.answerObj[0].content) || question.ansForType !== 'ANS_CD_CM')
+              && question.answerObj.length > 1
+          ) {
+            optionsInquires[editedIndex].answerObj[1].content = question.paragraphAnswer.content;
+          } else {
+            optionsInquires[editedIndex].answerObj[0].content = question.paragraphAnswer.content;
+          }
         }
         if (optionsInquires[editedIndex].state === 'INQ_SENT') {
           optionsInquires[editedIndex].state = 'ANS_DRF';
@@ -322,12 +344,45 @@ const InquiryAnswer = (props) => {
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
       }
     }
+
+    // sync create/edit answer inquiry
+    syncData(
+      { inquiries: optionsInquires },
+      optionsInquires[editedIndex].state === "ANS_SENT" ? "ADMIN" : ""
+    );
+
+    dispatch(FormActions.eventClickContNo({
+      status: false,
+      questionId: '',
+      isHasActionClick: false
+    }));
     dispatch(InquiryActions.setEditInq(null));
   };
 
   useEffect(() => {
     if (isDisableSave) setDisableSave(false);
   }, []);
+
+  const isEditedCdCMTable = () => {
+    let contentCDCM = {};
+    if (containerCheck.includes(question.field)) {
+      contentCDCM = {
+        [getField(CONTAINER_DETAIL)]: getDataCDInq.length ? getDataCDInq : contentInqResolved?.[getField(CONTAINER_DETAIL)],
+        [getField(CONTAINER_MANIFEST)]: getDataCMInq.length ? getDataCMInq : contentInqResolved?.[getField(CONTAINER_MANIFEST)]
+      }
+      if (JSON.stringify(oldDataCdCmInq.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
+        setDisableSaveCdCm(false);
+      } else if (question.paragraphAnswer && oldDataCdCmInq.contentOld !== question.paragraphAnswer.content) {
+        setDisableSaveCdCm(false);
+      } else {
+        setDisableSaveCdCm(true);
+      }
+    }
+  }
+
+  useEffect(() => {
+    isEditedCdCMTable()
+  }, [getDataCDInq, getDataCMInq, question.paragraphAnswer]);
 
   return (
     <div className='changeToEditor'>
@@ -338,11 +393,12 @@ const InquiryAnswer = (props) => {
             variant="contained"
             color="primary"
             disabled={
-              (
-                !currentAnswer?.paragraphAnswer?.content?.trim()
+              (containerCheck.includes(question.field) ? isDisableSaveCdCm :
+                (
+                  !currentAnswer?.paragraphAnswer?.content?.trim()
                 && !currentAnswer.selectChoice
                 && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)
-              )
+                ))
               ||
               isDisableSave
             }
@@ -359,7 +415,6 @@ const InquiryAnswer = (props) => {
           </Button>
         </div>
       </div>
-
     </div>
   );
 };

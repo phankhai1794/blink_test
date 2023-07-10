@@ -13,6 +13,10 @@ const MainWorkSpace = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    sessionStorage.setItem('prevUrl', JSON.stringify({
+      cachePath: window.location.pathname,
+      cacheSearch: window.location.search
+    }));
     dispatch(
       AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_WORKSPACE }))
     );
@@ -32,8 +36,8 @@ const MainWorkSpace = () => {
         innerScroll
       />
     </div>
-  )
-}
+  );
+};
 
 function WorkspaceApp() {
   const [validUrl, setValidUrl] = useState(false);
@@ -49,7 +53,7 @@ function WorkspaceApp() {
 
     if (bkgNo && usrId && cntr) {
       try {
-        const result = await validateBkgNo(bkgNo);
+        const result = await validateBkgNo(bkgNo, cntr, { countries: JSON.parse(localStorage.getItem('USER'))?.countries });
         if (result) {
           redirect404 = false;
           setValidUrl(true);
@@ -60,17 +64,13 @@ function WorkspaceApp() {
     }
 
     if (redirect404) history.push('/pages/errors/error-404');
-  }
+  };
 
   useEffect(() => {
     OPUSValidation();
   }, []);
 
-  return (
-    <>
-      {validUrl && validToken && <MainWorkSpace />}
-    </>
-  );
+  return <>{validUrl && validToken && <MainWorkSpace />}</>;
 }
 
 export default WorkspaceApp;

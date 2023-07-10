@@ -1,16 +1,18 @@
 import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense } from '@fuse';
 import AppContext from 'app/AppContext';
-import Transaction from 'app/main/transactions/Transaction';
-import React, { useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import clsx from 'clsx';
 import { renderRoutes } from 'react-router-config';
 import { makeStyles } from '@material-ui/styles';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import * as AppAction from 'app/store/actions';
+import * as FormActions from 'app/main/apps/workspace/store/actions/form';
+import { checkBroadCastReload } from '@shared';
+import { BROADCAST } from '@shared/keyword';
 
 import Loading from "../shared-components/Loading";
 import PDFViewer from "../../main/apps/workspace/components/PDFViewer";
 
-import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
 import ToolbarLayout1 from './components/ToolbarLayout1';
 import ToolbarLayout2 from './components/ToolbarLayout2';
 
@@ -81,13 +83,52 @@ const useStyles = makeStyles((theme) => ({
 
 function Layout1(props) {
   const classes = useStyles(props);
+  const dispatch = useDispatch();
   const appContext = useContext(AppContext);
   const { routes } = appContext;
+
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
-  const openTrans = useSelector(({ workspace }) => workspace.formReducer.openTrans);
   const currentInqPreview = useSelector(({ workspace }) => workspace.formReducer.currentInqPreview);
   const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
   const isLoadingProcess = useSelector(({ workspace }) => workspace.formReducer.isLoadingProcess);
+
+  const userRole = useSelector(({ user }) => user.role);
+  const dirtyReload = useSelector(({ workspace }) => workspace.formReducer.dirtyReload);
+  const bcData = useSelector(({ broadcast }) => broadcast);
+
+  const channel = new BroadcastChannel(BROADCAST.ACCESS);
+
+  useEffect(() => {
+    if (userRole) {
+      // post a signal
+      channel.postMessage({ role: userRole, type: "access" });
+
+      // receive signal
+      channel.onmessage = ({ data }) => {
+        dispatch(FormActions.setDirtyReload({ forceReload: true }));
+        dispatch(AppAction.setBroadcast({ role: data.role, type: data.type }));
+      };
+    }
+  }, [userRole]);
+
+  useEffect(() => {
+    // detect action close browser
+    window.onbeforeunload =
+      dirtyReload && !dirtyReload.forceReload && Object.values(dirtyReload).some((r) => r) && (() => 'Are you sure want to discard changes?');
+
+    return () => {
+      window.onbeforeunload = null;
+    };
+  }, [dirtyReload]);
+
+  useEffect(() => {
+    if (bcData.role && dirtyReload.forceReload) checkBroadCastReload(bcData.role, bcData.type);
+  }, [bcData, dirtyReload.forceReload]);
+
+  useEffect(() => {
+    return () => channel.close();
+  }, []);
+
   return (
     <div id="fuse-layout" className={clsx(classes.root, config.mode, 'scroll-' + config.scroll)}>
       <div className="flex flex-1 flex-col overflow-hidden relative">
@@ -105,7 +146,6 @@ function Layout1(props) {
               {props.children}
             </FuseScrollbars>
           </div>
-          {openTrans && <Transaction />}
         </div>
         {/* <SettingsPanel /> */}
       </div>

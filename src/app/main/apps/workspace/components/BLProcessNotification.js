@@ -11,10 +11,11 @@ import { getBlInfo } from 'app/services/myBLService';
 import { SocketContext } from 'app/AppContext';
 import { getPermissionByRole } from 'app/services/authService';
 import * as AppAction from 'app/store/actions';
+import { categorizeInquiriesByUserType } from '@shared';
 
 import * as Actions from '../store/actions';
+import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
-import * as TransActions from '../store/actions/transaction';
 
 const mainColor = '#BD0F72';
 const darkColor = '#132535';
@@ -69,7 +70,6 @@ const BLProcessNotification = () => {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   const startBLProcess = () => {
-    dispatch(TransActions.setStatusTransaction('start'));
     dispatch(Actions.loadInquiry(myBL.id));
   };
 
@@ -98,39 +98,67 @@ const BLProcessNotification = () => {
     if (myBL.id) {
       checkBLProcess();
 
-      // User connection
       const user = JSON.parse(localStorage.getItem('USER'));
+
+      // user connect
+      const mybl = (user.userType === "ADMIN") ? [myBL.bkgNo, myBL.id] : [myBL.id, myBL.bkgNo];
       socket.emit(
         'user_connect',
         {
-          mybl: user.userType === "ADMIN" ? myBL.bkgNo : myBL.id,
+          mybl: mybl[0],
+          optSite: mybl[1], // opposite workspace (offshore or onshore/customer)
           userName: user.displayName,
           userType: user.userType
         }
       );
 
-      // Receive the users accessing BL
+      // save socketId into window console after connecting
+      socket.on('user_socket_id', async (socketId) => {
+        window.socketId = socketId; 
+      });
+
+      // Receive the list user accessing
       socket.on('users_accessing', async ({ usersAccessing }) => {
-        console.log("usersAccessing: ", usersAccessing);
+        window.usersAccessing = usersAccessing; 
 
         const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
         if (userLocal.displayName && usersAccessing.length) {
-          let permissions = await getPermissionByRole('Viewer');
-          dispatch(AppAction.setUser({ ...userLocal, permissions }));
-
-          if (userLocal.displayName === usersAccessing[0]) { // if to be the first user
-            permissions = await getPermissionByRole(userLocal.role);            
-            // close the warning popup if the user is granted permission
+          if (userLocal.displayName === usersAccessing[0].userName) { // if to be the first user
             dispatch(FormActions.toggleOpenBLWarning(false));
-          } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1]) { // if to be the last user
-            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0] }));
+          } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1].userName) { // if to be the last user
+            dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0].userName }));
           }
 
+          const permissions = await getPermissionByRole(userLocal.role);
           setTimeout(() => {
             dispatch(AppAction.setUser({ ...userLocal, permissions }));
           }, 500);
           sessionStorage.setItem('permissions', JSON.stringify(permissions));
         }
+      });
+
+      // Receive the message sync state
+      socket.on('sync_state', async ({ from, data }) => {
+        const { inquiries, listMinimize, content, amendments } = data;
+
+        const result = categorizeInquiriesByUserType(from, user.userType, myBL, inquiries);
+        dispatch(InquiryActions.setInquiries(result));
+
+        if (listMinimize) {
+          if (from === "ADMIN") dispatch(InquiryActions.setListMinimize(listMinimize));
+          else {
+            let listMin = JSON.parse(sessionStorage.getItem("listMinimize"));
+            // merge two array objects while removing duplicates
+            listMin = listMin.concat(listMinimize).filter((item, idx, self) => {
+              return idx === self.findIndex(el => el.id === item.id);
+            });
+            dispatch(InquiryActions.setListMinimize(listMin));
+          }
+        }
+
+        if (content) dispatch(InquiryActions.setContent(content));
+
+        if (amendments) dispatch(InquiryActions.setListCommentDraft(amendments));
       });
     }
   }, [myBL]);

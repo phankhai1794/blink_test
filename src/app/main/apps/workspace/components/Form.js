@@ -131,7 +131,10 @@ const useStyles = makeStyles(() => ({
     minHeight: 600,
     maxHeight: '80%',
     margin: 0,
-    width: '100%'
+    width: '100%',
+  },
+  dialogFullWidth: {
+    transform: 'translate(-0,0) !important'
   },
   dialogContent: {
     margin: 'auto',
@@ -259,6 +262,7 @@ export default function Form(props) {
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
   const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
+  const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs);
   const currentAmendment = useSelector(
     ({ workspace }) => workspace.inquiryReducer.currentAmendment
   );
@@ -307,23 +311,12 @@ export default function Form(props) {
           <Paper {...props} id="paper" />
         </Draggable>
     ,
-    [isFullScreen]
+    []
   );
 
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
   };
-  const onUnload = (e) => {
-    e.preventDefault();
-    e.returnValue = '';
-  }
-
-  useEffect(() => {
-    if (currentEditInq || currentFieldAmend || reply) {
-      window.addEventListener("beforeunload", onUnload);
-    }
-    return () => window.removeEventListener("beforeunload", onUnload);
-  }, [currentEditInq, currentFieldAmend, reply])
 
   const handleClick = () => {
     if (!currentEditInq) {
@@ -357,7 +350,7 @@ export default function Form(props) {
     if (field === 'ATTACHMENT_LIST') dispatch(FormActions.toggleReload());
 
     dispatch(FormActions.toggleSaveInquiry(false));
-    dispatch(InquiryActions.setOneInq({}));
+    dispatch(InquiryActions.setOneInq({})); // close popup inquiry detail
 
     const currentInq = listMinimize.find((q) => q.field === field);
     if (currentInq?.id && listInqMinimize.includes(currentInq.id)) {
@@ -376,6 +369,7 @@ export default function Form(props) {
   const handleChange = (_, newValue) => {
     dispatch(InquiryActions.setEditInq());
     props.tabChange(newValue);
+    dispatch(FormActions.setTabs(newValue))
   };
 
   useEffect(() => {
@@ -438,6 +432,16 @@ export default function Form(props) {
     }
   }, [open]);
 
+  useEffect(()=> {
+    props.tabChange(currentTabs);
+  }, [currentTabs])
+
+  useEffect(() => {
+    if(openAllInquiry && nums && nums.length && nums[0] === 0 && nums[1] !== 0){
+      dispatch(FormActions.setTabs(1))
+    }
+  }, [openAllInquiry])
+
   return (
     <div>
       {openFab && (
@@ -456,7 +460,7 @@ export default function Form(props) {
         PaperComponent={PaperComponent}
         maxWidth="md"
         container={() => document.getElementById('content-wrapper')}
-        classes={{ paperScrollPaper: isFullScreen ? null : classes.dialogPaper }}>
+        classes={{ paperScrollPaper: isFullScreen ? classes.dialogFullWidth : classes.dialogPaper }}>
         <DialogTitle
           id="draggable-dialog-title"
           style={isFullScreen ? null : { cursor: 'move' }}
