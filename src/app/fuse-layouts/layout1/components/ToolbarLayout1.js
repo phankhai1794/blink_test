@@ -571,7 +571,7 @@ function ToolbarLayout1(props) {
                 </div>
               </PermissionProvider>
 
-              <PermissionProvider
+              {/* <PermissionProvider
                 action={PERMISSION.MAIL_SEND_MAIL}
                 extraCondition={pathname.includes('/guest')}
               >
@@ -587,7 +587,7 @@ function ToolbarLayout1(props) {
                     <span className="pl-4">Forward</span>
                   </Button>
                 </div>
-              </PermissionProvider>
+              </PermissionProvider> */}
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
