@@ -2345,6 +2345,7 @@ const InquiryViewer = (props) => {
             }
             optionsInquires[editedIndex].process = 'pending';
             optionsInquires[editedIndex].createdAt = res.updatedAt;
+            if (mediaListAmendment.length) optionsInquires[editedIndex].mediaFilesAnswer.push(...mediaListAmendment);
             dispatch(InquiryActions.setInquiries(optionsInquires));
 
             // sync edit comment inquiry
