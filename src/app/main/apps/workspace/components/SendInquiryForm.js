@@ -153,7 +153,7 @@ const SendInquiryForm = (props) => {
   const getValueField = (keyword) => {
     return content[getField(keyword)] || '';
   };
-  
+
   const bkgNo = mybl.bkgNo;
   const vvdCode = getValueField(PRE_CARRIAGE_CODE) || getValueField(VESSEL_VOYAGE_CODE);
   const pod = getValueField(PORT_OF_DISCHARGE);
@@ -405,12 +405,21 @@ const SendInquiryForm = (props) => {
         dispatch(
           Actions.showMessage({ message: 'EMAIL ADDRESS DOES NOT EXIST', variant: 'error' })
         );
-    } else if (tabValue === 'onshore' && !pathName.includes('/guest') && [...tags['toOnshore'], ...tags['toOnshoreCc'], ...tags['toOnshoreBcc']].some(
-      (mail) => !/.*@one-line.com/.test(mail)
-    )) {
+    } else if (
+      tabValue === 'onshore'
+      && !pathName.includes('/guest')
+      && [...tags['toOnshore'], ...tags['toOnshoreCc'], ...tags['toOnshoreBcc']].some(
+        (mail) => !/.*@one-line.com/.test(mail) && !/.*@googlegroups.com/.test(mail)
+      )
+    ) {
       dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
-    } else if (tabValue === 'customer' && !pathName.includes('/guest') && [...tags['toCustomer'], ...tags['toCustomerCc'], ...tags['toCustomerBcc']].some(
-      (mail) => /.*@one-line.com/.test(mail))) {
+    } else if (
+      tabValue === 'customer'
+      && !pathName.includes('/guest')
+      && [...tags['toCustomer'], ...tags['toCustomerCc'], ...tags['toCustomerBcc']].some(
+        (mail) => /.*@one-line.com/.test(mail) || /.*@googlegroups.com/.test(mail)
+      )
+    ) {
       dispatch(Actions.showMessage({ message: 'ONE email address is not allowed', variant: 'error' }));
     } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
       return;
