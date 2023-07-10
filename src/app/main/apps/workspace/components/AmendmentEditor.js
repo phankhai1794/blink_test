@@ -6,7 +6,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
-import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate } from '@shared';
+import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate, generateFileName  } from '@shared';
 import { NO_CONTENT_AMENDMENT, CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import { FuseChipSelect } from '@fuse';
@@ -508,7 +508,11 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const onPaste = (e) => {
     if (e.clipboardData.files.length) {
       const fileObject = e.clipboardData.files[0];
-      setFilepaste(fileObject);
+      const newFileName = generateFileName(fileObject.name, attachments.map(fItem => { return fItem.name}))
+      const myRenamedFile = new File([fileObject], newFileName, {
+        type: "image/png"
+      });
+      setFilepaste(myRenamedFile);
     }
   }
 

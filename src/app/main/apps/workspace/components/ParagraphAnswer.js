@@ -8,6 +8,7 @@ import clsx from "clsx";
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
+import {isJsonText} from "../../../../../@shared";
 
 import UserInfo from './UserInfo';
 
@@ -91,7 +92,22 @@ const ParagraphAnswer = (props) => {
       if (!currentQuestion.answerObj.length) {
         setParagraphText('');
       } else if (currentQuestion.answerObj && currentQuestion.answerObj.length) {
-        setParagraphText(currentQuestion.answerObj[0].content);
+        let contentAnswer = currentQuestion.answerObj[0].content;
+        if(containerCheck.includes(currentQuestion.field)
+            && (isJsonText(currentQuestion.answerObj[0].content) || currentQuestion.ansForType !== 'ANS_CD_CM')
+            && currentQuestion.answerObj.length > 1
+        ) {
+          contentAnswer = currentQuestion.answerObj[1].content;
+          const body = {
+            inquiry: question.id,
+            content: contentAnswer
+          };
+          const optionsInquires = [...questions];
+          const editedIndex = optionsInquires.findIndex(inq => currentQuestion.id === inq.id);
+          optionsInquires[editedIndex].paragraphAnswer = body;
+          dispatch(InquiryActions.setInquiries(optionsInquires));
+        }
+        setParagraphText(contentAnswer);
       }
       dispatch(FormActions.setDirtyReload({ inputParagraphAnswer: false }));
     }

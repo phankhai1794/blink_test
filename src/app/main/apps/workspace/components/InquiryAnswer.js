@@ -322,7 +322,15 @@ const InquiryAnswer = (props) => {
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
       } else if (question.paragraphAnswer) {
         if (question.answerObj.length) {
-          optionsInquires[editedIndex].answerObj[0].content = question.paragraphAnswer.content;
+          if (
+            containerCheck.includes(question.field)
+              && (isJsonText(question.answerObj[0].content) || question.ansForType !== 'ANS_CD_CM')
+              && question.answerObj.length > 1
+          ) {
+            optionsInquires[editedIndex].answerObj[1].content = question.paragraphAnswer.content;
+          } else {
+            optionsInquires[editedIndex].answerObj[0].content = question.paragraphAnswer.content;
+          }
         }
         if (optionsInquires[editedIndex].state === 'INQ_SENT') {
           optionsInquires[editedIndex].state = 'ANS_DRF';
@@ -362,7 +370,7 @@ const InquiryAnswer = (props) => {
         [getField(CONTAINER_DETAIL)]: getDataCDInq.length ? getDataCDInq : contentInqResolved?.[getField(CONTAINER_DETAIL)],
         [getField(CONTAINER_MANIFEST)]: getDataCMInq.length ? getDataCMInq : contentInqResolved?.[getField(CONTAINER_MANIFEST)]
       }
-      if  (JSON.stringify(oldDataCdCmInq.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
+      if (JSON.stringify(oldDataCdCmInq.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
         setDisableSaveCdCm(false);
       } else if (question.paragraphAnswer && oldDataCdCmInq.contentOld !== question.paragraphAnswer.content) {
         setDisableSaveCdCm(false);
@@ -386,11 +394,11 @@ const InquiryAnswer = (props) => {
             color="primary"
             disabled={
               (containerCheck.includes(question.field) ? isDisableSaveCdCm :
-              (
-                !currentAnswer?.paragraphAnswer?.content?.trim()
+                (
+                  !currentAnswer?.paragraphAnswer?.content?.trim()
                 && !currentAnswer.selectChoice
                 && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)
-              ))
+                ))
               ||
               isDisableSave
             }

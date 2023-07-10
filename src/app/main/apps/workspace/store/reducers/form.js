@@ -36,7 +36,8 @@ const initialState = {
   currentInqPreview: {},
   currentFilePreview: {},
   isLoadingProcess: false,
-  dirtyReload: {}
+  dirtyReload: {},
+  tabs: 0,
 };
 
 const formReducer = function (state = initialState, action) {
@@ -68,10 +69,12 @@ const formReducer = function (state = initialState, action) {
   case Actions.RELOAD: {
     return {
       ...state,
+      openEmail: false,
       openDialog: false,
       openAllInquiry: false,
       openAttachment: false,
       openPreviewListSubmit: false,
+      openAmendmentForm: false,
       openAmendmentList: false,
     };
   }
@@ -155,6 +158,9 @@ const formReducer = function (state = initialState, action) {
   }
   case Actions.SET_DIRTY_RELOAD: {
     return { ...state, dirtyReload: { ...state.dirtyReload, ...action.state } };
+  }
+  case Actions.SET_TAB: {
+    return {...state, tabs: action.state};
   }
   default: {
     return state;
