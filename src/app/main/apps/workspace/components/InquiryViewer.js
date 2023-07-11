@@ -1192,7 +1192,7 @@ const InquiryViewer = (props) => {
               if (res.checkReplyEmpty) {
                 if (removeIndex !== -1) {
                   if (comment.length) {
-                    const revertHistory = comment.filter(c => c.state !== 'REP_DRF_DELETED').at(-2)
+                    const revertHistory = comment.filter(c => c.state !== 'REP_DRF_DELETED').at(0)
                     optionsOfQuestion[removeIndex].creator = revertHistory && { ...revertHistory.creator, accountRole: revertHistory.creator.accountRole.name }
                     optionsOfQuestion[removeIndex].state = revertHistory && revertHistory.state;
                   } else {
@@ -2345,6 +2345,7 @@ const InquiryViewer = (props) => {
             }
             optionsInquires[editedIndex].process = 'pending';
             optionsInquires[editedIndex].createdAt = res.updatedAt;
+            if (mediaListAmendment.length) optionsInquires[editedIndex].mediaFilesAnswer.push(...mediaListAmendment);
             dispatch(InquiryActions.setInquiries(optionsInquires));
 
             // sync edit comment inquiry
