@@ -222,10 +222,10 @@ const FileAttach = ({
   }
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block', width: 150, marginRight: 12 }}>
+    <div style={{ position: 'relative', display: (question && !enableExpandAttachment.includes(question.id) && indexMedia > indexNumberExpand) ? 'none' : 'inline-block', width: 150, marginRight: 12 }}>
       <div
-          className={classes.root}
-          style={{ display: (question && !enableExpandAttachment.includes(question.id) && indexMedia > indexNumberExpand) ? 'none' : 'block' }}>
+        className={classes.root}
+        style={{ display: (question && !enableExpandAttachment.includes(question.id) && indexMedia > indexNumberExpand) ? 'none' : 'block' }}>
         {(question && !enableExpandAttachment.includes(question.id) && indexMedia === indexNumberExpand && files.length > indexNumberExpand + 1) &&
         <div className={classes.backgroupOverFile}>
           <button className={classes.overAttachment} onClick={handleExpand} >
@@ -234,45 +234,45 @@ const FileAttach = ({
         </div>}
         <div style={{ width: '100%', height: '98px', position: 'relative' }}>
           {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-              <img
-                  style={{
-                    position: 'relative',
-                    top: 0,
-                    left: 0,
-                    height: '100%',
-                    width: '100%'
-                  }}
-                  src={srcUrl}
-                  onClick={previewFile}
-                  onDragStart={(event) => event.preventDefault()}
-              />
+            <img
+              style={{
+                position: 'relative',
+                top: 0,
+                left: 0,
+                height: '100%',
+                width: '100%'
+              }}
+              src={srcUrl}
+              onClick={previewFile}
+              onDragStart={(event) => event.preventDefault()}
+            />
           ) : (
-              srcFile ? (
-                  <img
-                      style={{
-                        position: 'relative',
-                        top: '14%',
-                        left: '24%',
-                        height: '75%',
-                        width: '52%'
-                      }}
-                      src={srcFile} onClick={previewFile}
-                  />
-              ) : (
-                  <DescriptionIcon
-                      fontSize='large'
-                      classes={{ fontSizeLarge: classes.fontSizeLarge }}
-                      style={{
-                        position: 'relative',
-                        top: '14%',
-                        left: '14%',
-                        height: '75%',
-                        width: '75%'
-                      }}
-                      onClick={previewFile}
-                      onDragStart={(event) => event.preventDefault()}
-                  />
-              )
+            srcFile ? (
+              <img
+                style={{
+                  position: 'relative',
+                  top: '14%',
+                  left: '24%',
+                  height: '75%',
+                  width: '52%'
+                }}
+                src={srcFile} onClick={previewFile}
+              />
+            ) : (
+              <DescriptionIcon
+                fontSize='large'
+                classes={{ fontSizeLarge: classes.fontSizeLarge }}
+                style={{
+                  position: 'relative',
+                  top: '14%',
+                  left: '14%',
+                  height: '75%',
+                  width: '75%'
+                }}
+                onClick={previewFile}
+                onDragStart={(event) => event.preventDefault()}
+              />
+            )
           )}
         </div>
 
@@ -288,41 +288,41 @@ const FileAttach = ({
             {/*}*/}
             <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
               <h3
-                  style={{ fontSize: '12px', color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }}
-                  onClick={previewFile}>
+                style={{ fontSize: '12px', color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }}
+                onClick={previewFile}>
                 {file.name}
               </h3>
             </Tooltip>
 
             {isAnswer && (
-                !hiddenRemove && (
-                    <PermissionProvider
-                        action={PERMISSION.INQUIRY_ANSWER_ATTACHMENT}>
-                      <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
-                        <CloseIcon />
-                      </IconButton>
-                    </PermissionProvider>
-                )
+              !hiddenRemove && (
+                <PermissionProvider
+                  action={PERMISSION.INQUIRY_ANSWER_ATTACHMENT}>
+                  <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                    <CloseIcon />
+                  </IconButton>
+                </PermissionProvider>
+              )
             )}
             {isReply && (
-                !hiddenRemove && (
-                    <PermissionProvider
-                        action={PERMISSION.INQUIRY_UPDATE_REPLY}>
-                      <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
-                        <CloseIcon />
-                      </IconButton>
-                    </PermissionProvider>
-                )
+              !hiddenRemove && (
+                <PermissionProvider
+                  action={PERMISSION.INQUIRY_UPDATE_REPLY}>
+                  <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                    <CloseIcon />
+                  </IconButton>
+                </PermissionProvider>
+              )
             )}
             {!isAnswer && !isReply && (
-                !hiddenRemove && (
-                    <PermissionProvider
-                        action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
-                      <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
-                        <CloseIcon />
-                      </IconButton>
-                    </PermissionProvider>
-                )
+              !hiddenRemove && (
+                <PermissionProvider
+                  action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
+                  <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                    <CloseIcon />
+                  </IconButton>
+                </PermissionProvider>
+              )
             )}
             {draftBL &&
             <IconButton onClick={removeAttachmentDraftBL} style={{ padding: 2 }}>
@@ -333,17 +333,17 @@ const FileAttach = ({
 
           <div className={'createdAt-image'}>
             {file && file.id ? (
-                <>
-                  {question.creator && <div>{question.creator?.userName}</div>}
+              <>
+                {question.creator && <div>{question.creator?.userName}</div>}
 
-                  {(question.createdAt || question.updatedAt) &&
+                {(question.createdAt || question.updatedAt) &&
                   <div>{displayTimeAttachment(question.createdAt || question.updatedAt)}</div>}
-                </>
+              </>
             ) : (
-                <>
-                  {user && <div>{user.displayName}</div>}
-                  <div>New Attachment</div>
-                </>
+              <>
+                {user && <div>{user.displayName}</div>}
+                <div>New Attachment</div>
+              </>
             )}
 
           </div>
