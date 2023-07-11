@@ -237,7 +237,13 @@ const InquiryAnswer = (props) => {
         inquiry: question.attachmentAnswer.inquiry,
         content: ONLY_ATT
       }
+    } else if (!question.paragraphAnswer && !containerCheck.includes(question.field) && question.answerObj.length) {
+      question.paragraphAnswer = {
+        inquiry: question.id,
+        content: question.answerObj[0].content
+      }
     }
+
     let contentCDCM = {};
     if (containerCheck.includes(question.field)) {
       contentCDCM = {
