@@ -113,11 +113,17 @@ const BLProcessNotification = () => {
       );
 
       // save socketId into window console after connecting
-      socket.on('user_socket_id', async (socketId) => {
+      socket.on('user_socket_id', (socketId) => {
         window.socketId = socketId;
       });
 
-      // Receive the list user accessing
+      // receive a list of accessed onshores/customers
+      socket.on('users_allowed_access', (data) => {
+        if (!data.includes(user.email))
+          window.location.reload();
+      });
+
+      // receive a list users accessing
       socket.on('users_accessing', async ({ usersAccessing }) => {
         window.usersAccessing = usersAccessing;
 
@@ -143,7 +149,7 @@ const BLProcessNotification = () => {
         }
       });
 
-      // Receive the message sync state
+      // receive the message sync state
       socket.on('sync_state', async ({ from, data }) => {
         const { inquiries, listMinimize, content, amendments } = data;
 
