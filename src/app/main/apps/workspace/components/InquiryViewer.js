@@ -732,11 +732,6 @@ const InquiryViewer = (props) => {
             let getRes = res;
             // console.log('getRes', getRes)
             const filterRepAmend = res.filter(r => r.state.includes('REP_AME_'));
-            // filter latest reply amendment
-            if (filterRepAmend.length) {
-              const getRepAmend = filterRepAmend[0];
-              getRes = res.filter(r => r.id !== getRepAmend.id);
-            }
             const getLatest = getRes[0];
             const { content: contentField, mediaFile } = getLatest.content;
             setDisableCDCMAmendment(true);
@@ -747,6 +742,14 @@ const InquiryViewer = (props) => {
                 inqAnsId = lastestComment.draftAnswerId;
               }
               setInqAnsId(inqAnsId);
+            }
+            // filter latest reply amendment
+            if (filterRepAmend.length) {
+              const getRepAmend = filterRepAmend[0];
+              if ((['REP_DRF', 'REP_SENT'].includes(lastestComment.state) && lastestComment.role === 'Guest' && user.role === 'Guest')
+                  || ['REP_SENT'].includes(lastestComment.state) && lastestComment.role === 'Guest' && user.role === 'Admin') {
+                getRes = res.filter(r => r.id !== getRepAmend.id);
+              }
             }
             // filter comment
             lastest.mediaFile = mediaFile;

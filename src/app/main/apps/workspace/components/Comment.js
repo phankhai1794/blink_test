@@ -111,10 +111,11 @@ const Comment = (props) => {
     }
 
     const renderCommentStyles = () => {
-      if (containerCheck.includes(question.field) && ['REP_A_DRF', 'ANS_DRF', 'REP_A_SENT', 'ANS_SENT'].includes(reply.state)) {
-        if (reply.type !== 'ANS_CD_CM') {
+      if (containerCheck.includes(question.field) && ['REP_A_DRF', 'ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_AME_DRF', 'REP_AME_SENT'].includes(reply.state)) {
+        if ((question.process === 'pending' && reply.type !== 'ANS_CD_CM')
+        || (question.process === 'draft' && !['REP_AME_DRF', 'REP_AME_SENT'].includes(reply.state))) {
           return { paddingBottom: '0' }
-        } else if (reply.type === 'ANS_CD_CM') {
+        } else if (reply.type === 'ANS_CD_CM' || ['REP_AME_DRF', 'REP_AME_SENT'].includes(reply.state)) {
           return { paddingTop: '0' }
         }
       }
@@ -124,20 +125,21 @@ const Comment = (props) => {
       <div key={id}>
         <div className="comment-detail" style={{ padding: '20px', ...renderCommentStyles() }}>
           {containerCheck.includes(question.field) ? (
-            reply.type !== 'ANS_CD_CM' ? (
-              <div className="flex justify-between" style={{ alignItems: 'self-start' }}>
-                <UserInfo name={userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
+            ((question.process === 'pending' && reply.type !== 'ANS_CD_CM')
+                || (question.process === 'draft' && !['REP_AME_DRF', 'REP_AME_SENT'].includes(reply.state))) ? (
+                <div className="flex justify-between" style={{ alignItems: 'self-start' }}>
+                  <UserInfo name={userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
 
-                {['COMPL', 'RESOLVED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Resolved</span></div>)}
-                {['UPLOADED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Uploaded</span></div>)}
-                {reply.sentAt && (
-                  <div className={classes.timeSent}>
-                    <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />
-                    <span className={classes.labelText}>{displayTime(reply.sentAt)}</span>
-                  </div>
-                )}
-              </div>
-            ) : ``
+                  {['COMPL', 'RESOLVED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Resolved</span></div>)}
+                  {['UPLOADED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Uploaded</span></div>)}
+                  {reply.sentAt && (
+                    <div className={classes.timeSent}>
+                      <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />
+                      <span className={classes.labelText}>{displayTime(reply.sentAt)}</span>
+                    </div>
+                  )}
+                </div>
+              ) : ``
           ) : <div className="flex justify-between" style={{ alignItems: 'self-start' }}>
             <UserInfo name={userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
 
@@ -253,7 +255,7 @@ const Comment = (props) => {
         </div>
 
         {containerCheck.includes(question.field) ? (
-          reply.type === 'ANS_CD_CM' ? (
+          (reply.type === 'ANS_CD_CM' || ['REP_AME_DRF', 'REP_AME_SENT'].includes(reply.state)) ? (
             <Divider
               variant="fullWidth"
               style={{ height: 1, color: '#E2E6EA', opacity: 0.6 }}
