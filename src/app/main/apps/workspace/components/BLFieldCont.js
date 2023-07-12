@@ -44,11 +44,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const BLField = ({ multiline = false, children }) => {
+const BLField = ({ multiline = false, children: _children }) => {
   const dispatch = useDispatch()
   const classes = useStyles();
   const [isLongText, setIsLongText] = useState(false);
   const [anchorElCopy, setAnchorElCopy] = useState(null);
+  const children = Array.isArray(_children) ? _children.join(',') : _children?.trim();
 
   const onMouseOver = (e) => {
     const { scrollWidth, clientWidth, scrollHeight, clientHeight } = e.target;
@@ -71,7 +72,7 @@ const BLField = ({ multiline = false, children }) => {
       onMouseOver={onMouseOver}
       onMouseLeave={onMouseLeave}
     >
-      <ArrowTooltip isLongText={isLongText} title={Array.isArray(children) ? children.join('\n') : (children || '')} placement='right'>
+      <ArrowTooltip isLongText={isLongText} title={children} placement='right'>
         <TextField
           value={children || ''}
           variant="outlined"
