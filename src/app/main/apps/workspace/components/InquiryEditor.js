@@ -824,6 +824,15 @@ const InquiryEditor = (props) => {
     return false;
   };
 
+  const dispatchSetTab = (condition, contents, receiver) => {
+    if (condition) {
+      if (contents.every(item => (item.receiver.includes("onshore")))) dispatch(FormActions.setTabs(1));
+      if (contents.every(item => (item.receiver.includes("customer")))) dispatch(FormActions.setTabs(0));
+    } else {
+      dispatch(FormActions.setTabs(receiver === 'customer' ? 0 : 1));
+    }
+  }
+
   const onSave = async (isCdCm) => {
     setDisabled(true);
     const inquiriesOp = [...inquiries];
@@ -1061,6 +1070,8 @@ const InquiryEditor = (props) => {
         dispatch(InquiryActions.setEditInq());
         dispatch(InquiryActions.setInquiries(inquiriesOp));
 
+        dispatchSetTab(isCdCm, contentsInqCDCM, inquiriesOp[editedIndex].receiver[0]);
+
         // sync edit inquiry
         syncData({ inquiries: inquiriesOp });
 
@@ -1123,10 +1134,7 @@ const InquiryEditor = (props) => {
               content: '',
               createdAt: new Date(),
             })
-          }
-          else {
-            contentTrim.answerObj = []
-          } 
+          } else contentTrim.answerObj = [];
           return contentTrim;
         });
       }
@@ -1179,6 +1187,8 @@ const InquiryEditor = (props) => {
               dispatch(FormActions.toggleCreateInquiry(false));
               dispatch(InquiryActions.setOneInq());
               props.getUpdatedAt();
+
+              dispatchSetTab(isCdCm, inqContentTrim, inqContentTrim[0].receiver[0]);
               setDisabled(false);
 
               // sync create inquiry
@@ -1194,7 +1204,7 @@ const InquiryEditor = (props) => {
   const onPaste = (e) => {
     if (e.clipboardData.files.length) {
       let fileObject = e.clipboardData.files[0];
-      const newFileName = generateFileName(fileObject.name, currentEditInq.mediaFile.map(fItem => { return fItem.name}))
+      const newFileName = generateFileName(fileObject.name, currentEditInq.mediaFile.map(fItem => { return fItem.name }));
       const myRenamedFile = new File([fileObject], newFileName, {
         type: "image/png"
       });
