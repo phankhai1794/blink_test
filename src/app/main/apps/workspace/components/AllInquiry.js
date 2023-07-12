@@ -191,7 +191,7 @@ const AllInquiry = (props) => {
       inquiriesSet = inquiriesSet.filter(inq => inq.process === 'draft');
       if (!inquiriesSet.length) dispatch(InquiryActions.addAmendment(null));
     } else if (openInquiryReview) {
-      inquiriesSet = inquiriesSet.filter(inq => inq.state === 'OPEN' || inq.state === 'REP_Q_DRF' || (inq.process === 'draft' && inq.state === 'REP_DRF'));
+      inquiriesSet = inquiriesSet.filter(inq => ['OPEN', 'REP_Q_DRF', 'REOPEN_A', 'REOPEN_Q'].includes(inq.state) || (inq.process === 'draft' && inq.state === 'REP_DRF'));
     } else if (openPreviewListSubmit) {
       inquiriesSet = inquiriesSet.filter(inq => ['ANS_DRF', 'REP_A_DRF', 'REP_DRF', 'AME_DRF'].includes(inq.state));
       if (!inquiriesSet.length) dispatch(FormActions.togglePreviewSubmitList(false));
