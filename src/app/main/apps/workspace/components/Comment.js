@@ -110,10 +110,35 @@ const Comment = (props) => {
       return (isDateTime && ['COMPL', 'RESOLVED', 'AME_DRF', 'AME_SENT', 'AME_ORG'].includes(reply.state)) ? formatDate(content, 'DD MMM YYYY') : content
     }
 
+    const renderCommentStyles = () => {
+      if (containerCheck.includes(question.field) && ['REP_A_DRF', 'ANS_DRF', 'REP_A_SENT', 'ANS_SENT'].includes(reply.state)) {
+        if (reply.type !== 'ANS_CD_CM') {
+          return { paddingBottom: '0' }
+        } else if (reply.type === 'ANS_CD_CM') {
+          return { paddingTop: '0' }
+        }
+      }
+    }
+
     return (
       <div key={id}>
-        <div className="comment-detail" style={{ padding: '20px' }}>
-          <div className="flex justify-between" style={{ alignItems: 'self-start' }}>
+        <div className="comment-detail" style={{ padding: '20px', ...renderCommentStyles() }}>
+          {containerCheck.includes(question.field) ? (
+            reply.type !== 'ANS_CD_CM' ? (
+              <div className="flex justify-between" style={{ alignItems: 'self-start' }}>
+                <UserInfo name={userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
+
+                {['COMPL', 'RESOLVED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Resolved</span></div>)}
+                {['UPLOADED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Uploaded</span></div>)}
+                {reply.sentAt && (
+                  <div className={classes.timeSent}>
+                    <img alt={'vectorIcon'} src={`/assets/images/icons/vector2.svg`} />
+                    <span className={classes.labelText}>{displayTime(reply.sentAt)}</span>
+                  </div>
+                )}
+              </div>
+            ) : ``
+          ) : <div className="flex justify-between" style={{ alignItems: 'self-start' }}>
             <UserInfo name={userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
 
             {['COMPL', 'RESOLVED'].includes(reply.state) && (<div><span className={classes.labelStatus}>Resolved</span></div>)}
@@ -124,33 +149,7 @@ const Comment = (props) => {
                 <span className={classes.labelText}>{displayTime(reply.sentAt)}</span>
               </div>
             )}
-            {/*{user.displayName === userName && key === id && (*/}
-            {/*  <>*/}
-            {/*    <IconButton onClick={handleClick}>*/}
-            {/*      <MoreVertIcon />*/}
-            {/*    </IconButton>*/}
-            {/*    <Menu*/}
-            {/*      id="customized-menu"*/}
-            {/*      anchorEl={anchorEl}*/}
-            {/*      open={open}*/}
-            {/*      onClose={handleClose}*/}
-            {/*      keepMounted>*/}
-            {/*      <MenuItem onClick={() => onEdit(id)}>*/}
-            {/*        <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>*/}
-            {/*          <EditIcon fontSize="small" />*/}
-            {/*        </ListItemIcon>*/}
-            {/*        <ListItemText primary="Edit" />*/}
-            {/*      </MenuItem>*/}
-            {/*      <MenuItem onClick={() => onDelete(key)}>*/}
-            {/*        <ListItemIcon style={{ minWidth: '0px', marginRight: '1rem' }}>*/}
-            {/*          <DeleteIcon fontSize="small" />*/}
-            {/*        </ListItemIcon>*/}
-            {/*        <ListItemText primary="Delete" />*/}
-            {/*      </MenuItem>*/}
-            {/*    </Menu>*/}
-            {/*  </>*/}
-            {/*)}*/}
-          </div>
+          </div>}
 
           {(content instanceof Array || isJson(content)) && containerCheck.includes(question.field) && question.process === 'draft' ?
             (!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
@@ -252,10 +251,18 @@ const Comment = (props) => {
             )}
           </div>
         </div>
-        <Divider
+
+        {containerCheck.includes(question.field) ? (
+          reply.type === 'ANS_CD_CM' ? (
+            <Divider
+              variant="fullWidth"
+              style={{ height: 1, color: '#E2E6EA', opacity: 0.6 }}
+            />
+          ) : ``
+        ) : <Divider
           variant="fullWidth"
           style={{ height: 1, color: '#E2E6EA', opacity: 0.6 }}
-        />
+        />}
       </div>
     );
   };
