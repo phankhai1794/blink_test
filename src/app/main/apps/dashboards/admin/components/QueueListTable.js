@@ -17,7 +17,8 @@ import {
   Chip,
   Menu,
   Button,
-  Tooltip
+  Tooltip,
+  Paper
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { getOffshoreQueueList } from 'app/services/myBLService';
@@ -211,6 +212,14 @@ const useStyles = makeStyles({
       margin: '5px',
       cursor: 'pointer'
     }
+  },
+  paper: {
+    maxHeight: 400,
+    maxWidth: 400,
+    overflow: "auto",
+    padding: 15,
+    color: '#515E6A',
+    whiteSpace: 'pre-line'
   }
 });
 
@@ -284,9 +293,13 @@ const Row = (props) => {
   };
 
   const closePopover = () => {
-    setAnchorEl(null);
+    // setAnchorEl(null);
     setPopover({ open: false });
   };
+
+  const handlePopoverMouseEnter = () => setPopover({ ...popover, open: true });
+
+  const handlePopoverMouseLeave = () => setPopover({ open: false });
 
   return (
     <>
@@ -464,9 +477,24 @@ const Row = (props) => {
                 />
               )}
             </Tabs>
-            <EllipsisPopper anchorEl={anchorEl} ref={arrowRef}>
-              <div className="arrow" ref={handleArrorRef} />
-              <span style={{ color: '#515E6A' }}>{popover.text}</span>
+            <EllipsisPopper
+              open={popover.open}
+              anchorEl={anchorEl}
+              arrow={true}
+              flip={true}
+              transition
+              placement={'left'}
+              disablePortal={false}
+              preventOverflow={'scrollParent'}>
+              {({ TransitionProps, placement, arrow }) => (
+                <div
+                  onMouseEnter={handlePopoverMouseEnter}
+                  onMouseLeave={handlePopoverMouseLeave}
+                >
+                  {arrow}
+                  <Paper className={classes.paper}>{popover.text}</Paper>
+                </div>
+              )}
             </EllipsisPopper>
             <Table size="small" aria-label="purchases" style={{ marginTop: 15 }}>
               <TableHead className={classes.headerColor}>
@@ -701,7 +729,7 @@ const QueueListTable = () => {
                 className={classes.headerColor}
                 style={{ backgroundColor: '#FDF2F2', position: 'sticky', top: 0, zIndex: 2 }}>
                 <TableRow>
-                  <StickyTableCell style={{ display: 'flex', padding: '17px'}}>
+                  <StickyTableCell style={{ display: 'flex', padding: 17 }}>
                     <div className={clsx(classes.cellHead, classes.cellSticky)}>
                       <div className={classes.lineColumn}>
                         <span>No.</span>

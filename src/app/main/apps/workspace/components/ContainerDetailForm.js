@@ -27,7 +27,8 @@ import {
   TableHead,
   TableRow,
   Drawer,
-  Popover
+  Popover,
+  Paper
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { formatContainerNo, NumberFormat } from '@shared';
@@ -39,9 +40,16 @@ import Diff from "../shared-components/react-diff";
 import AmendmentPopup from './AmendmentPopup';
 
 const useStyles = makeStyles(() => ({
-  paper: {
+  drawer: {
     width: 450,
     backgroundColor: '#FDF2F2'
+  },
+  paper: {
+    maxHeight: 400,
+    maxWidth: 400,
+    overflow: "auto",
+    padding: 15,
+    color: '#515E6A'
   },
   popover: {
     width: 250,
@@ -272,7 +280,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   return (
     <>
       <Drawer
-        classes={{ paper: classes.paper }}
+        classes={{ paper: classes.drawer }}
         anchor='right'
         open={openEdit}
         onClose={() => handleClose('cancel')}
@@ -292,9 +300,22 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           isInqCDCM={isInqCDCM}
         />
       </Drawer>
-      <EllipsisPopper anchorEl={anchorElHover} arrowRef={arrowRef}>
-        <div className='arrow' ref={handleArrorRef} />
-        <span style={{ color: '#515E6A', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{popover.text}</span>
+
+      <EllipsisPopper
+        open={Boolean(anchorElHover)}
+        anchorEl={anchorElHover}
+        arrow={true}
+        flip={true}
+        transition
+        placement={'left'}
+        disablePortal={false}
+        preventOverflow={'scrollParent'}>
+        {({ TransitionProps, placement, arrow }) => (
+          <>
+            {arrow}
+            <Paper className={classes.paper}>{popover.text}</Paper>
+          </>
+        )}
       </EllipsisPopper>
 
       <Popover
