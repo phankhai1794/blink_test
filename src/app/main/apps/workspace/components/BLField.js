@@ -166,7 +166,6 @@ const BLField = ({
   width,
   multiline,
   rows,
-  selectedChoice,
   id,
   lock,
   readOnly,
@@ -370,9 +369,9 @@ const BLField = ({
         onMouseLeave={onMouseLeave}
         onClick={onClick}>
         <ThemeProvider theme={theme}>
-          <ArrowTooltip isLongText={isLongText} title={selectedChoice || _.isArray(children) ? children.join(", ") : children || ''} placement='right'>
+          <ArrowTooltip isLongText={isLongText} title={_.isArray(children) ? children.join(", ") : children || ''} placement='right'>
             <TextField
-              value={selectedChoice || finalChidren || ''}
+              value={finalChidren || ''}
               variant="outlined"
               fullWidth={true}
               multiline={multiline}
@@ -411,10 +410,10 @@ const BLField = ({
                         {isContinue}
                       </div>
                     }
-                    {anchorElCopy && anchorElCopy.id === id && (selectedChoice || finalChidren) && (
+                    {anchorElCopy && anchorElCopy.id === id && finalChidren?.trim() && (
                       <Icon
                         style={{ cursor: 'pointer', fontSize: 18 }}
-                        onClick={(e) => onCopyClick(e, selectedChoice || finalChidren)}
+                        onClick={(e) => onCopyClick(e, finalChidren)}
                       >
                         file_copy
                       </Icon>

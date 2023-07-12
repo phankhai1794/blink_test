@@ -87,7 +87,7 @@ const BLField = ({ multiline = false, children }) => {
             },
             endAdornment:
               <>
-                {anchorElCopy && children && (
+                {anchorElCopy && children?.trim() && (
                   <Icon
                     style={{ position: 'absolute', right: 5, bottom: 5, cursor: 'pointer', fontSize: 18 }}
                     onClick={(e) => onCopyClick(e, children)}
