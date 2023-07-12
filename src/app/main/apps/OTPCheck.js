@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
+import _ from 'lodash';
 import { Box, Card, CardContent, Typography, TextField, Button } from '@material-ui/core';
 import { FuseAnimate } from '@fuse';
 import Formsy from 'formsy-react';
@@ -169,7 +170,7 @@ const OtpCheck = ({ children }) => {
 
   const user = localStorage.getItem("USER");
   const permissions = user ? JSON.parse(user)?.permissions : [];
-  const canConfirmDraftBL = permissions.filter(p => `${p.controller}_${p.action}` === PERMISSION.DRAFTBL_CONFIRM_DRAFT_BL && p.enable).length > 0;
+  const [canConfirmDraftBL, setCanConfirmDraftBL] = useState(permissions.filter(p => `${p.controller}_${p.action}` === PERMISSION.DRAFTBL_CONFIRM_DRAFT_BL && p.enable).length > 0);
 
   const [myBL, setMyBL] = useState({ id: '' });
   const [mail, setMail] = useState({ value: '', isValid: false, isSubmitted: false });
@@ -316,6 +317,9 @@ const OtpCheck = ({ children }) => {
             }
           } catch (error) {
             catchError(error);
+            setCanConfirmDraftBL(false);
+            dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', false)));
+
             // check request code delay time
             let sentCode = localStorage.getItem('sentCode');
             if (sentCode) {
