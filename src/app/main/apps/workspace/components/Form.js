@@ -323,7 +323,7 @@ export default function Form(props) {
       if (inquiries.length + 1 === metadata.field_options.length) {
         dispatch(FormActions.toggleAddInquiry(false));
       }
-      dispatch(InquiryActions.addQuestion(currentField));
+      dispatch(InquiryActions.addQuestion(openAllInquiry ? null : currentField));
     }
   };
 
