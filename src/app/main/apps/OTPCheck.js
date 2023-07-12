@@ -11,6 +11,7 @@ import { isEmail } from 'validator';
 import { verifyEmail, verifyGuest, isVerified, decodeAuthParam, requestCode } from 'app/services/authService';
 import * as Actions from 'app/store/actions';
 import history from '@history';
+import { PERMISSION } from '@shared/permission';
 
 const otpLength = 6;
 const timeCodeMailDelay = 15; // second
@@ -165,6 +166,10 @@ const OtpCheck = ({ children }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const processUrl = window.location.pathname.includes("draft") ? "draft" : "pending";
+
+  const user = localStorage.getItem("USER");
+  const permissions = user ? JSON.parse(user)?.permissions : [];
+  const canConfirmDraftBL = permissions.filter(p => `${p.controller}_${p.action}` === PERMISSION.DRAFTBL_CONFIRM_DRAFT_BL && p.enable).length > 0;
 
   const [myBL, setMyBL] = useState({ id: '' });
   const [mail, setMail] = useState({ value: '', isValid: false, isSubmitted: false });
@@ -354,7 +359,7 @@ const OtpCheck = ({ children }) => {
 
   return (
     <>
-      {step === 2 || history.location.state?.skipVerification ? <>{children}</> : (
+      {step === 2 || (history.location.state?.skipVerification && canConfirmDraftBL) ? <>{children}</> : (
         <div
           className={clsx(
             classes.root,
