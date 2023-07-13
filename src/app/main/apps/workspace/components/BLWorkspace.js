@@ -113,6 +113,7 @@ const BLWorkspace = (props) => {
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
@@ -500,6 +501,7 @@ const BLWorkspace = (props) => {
                     const popupObj = popupOpen(inquiry, field);
                     return (
                       <Form
+                        isPreviewFile={openPreviewFiles}
                         user={props.user}
                         tabs={popupObj.tabs || null}
                         nums={popupObj.nums || null}
