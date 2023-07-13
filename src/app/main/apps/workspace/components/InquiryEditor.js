@@ -769,7 +769,12 @@ const InquiryEditor = (props) => {
   };
 
   const checkDuplicateInq = () => {
-    const listInqOfField = [...inquiries.filter((inq) => inq.field === currentEditInq.field)];
+    const listInqOfField = [...inquiries.filter((inq) => {
+      if (containerCheck.includes(inq.field)) {
+        return containerCheck.includes(currentEditInq.field)
+      }
+      return inq.field === currentEditInq.field
+    })];
     if (currentEditInq.id) {
       listInqOfField.splice(
         listInqOfField.findIndex((inq) => inq.id === currentEditInq.id),
