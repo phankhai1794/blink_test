@@ -3313,6 +3313,7 @@ const InquiryViewer = (props) => {
                         indexInquiry={index}
                         indexMedia={mediaIndex}
                         question={question}
+                        isEdit={false}
                       />
                     </>
                   ))}
@@ -3337,6 +3338,7 @@ const InquiryViewer = (props) => {
                         indexMedia={mediaIndex}
                         isAnswer={true}
                         question={question}
+                        isEdit={false}
                         index={index}
                         questions={inquiries}
                         hiddenRemove={!question.showIconAttachAnswerFile}
@@ -3490,6 +3492,7 @@ const InquiryViewer = (props) => {
                               isReply={true}
                               isHideFiles={true}
                               templateReply={tempReply}
+                              isEdit={true}
                               setTemplateReply={(val) => {
                                 setTempReply(val)
                               }}

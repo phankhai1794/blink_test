@@ -97,6 +97,7 @@ const SendInquiryForm = (props) => {
   const mybl = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
+  const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const pathName = window.location.pathname;
@@ -506,6 +507,7 @@ const SendInquiryForm = (props) => {
         toggleForm={(status) => dispatch(FormActions.toggleOpenEmail(status))}
         openFab={false}
         field={props.field}
+        isPreviewFile={openPreviewFiles}
         style={previewValue === 'email' && { backgroundColor: '#fdf2f2' }}
         customActions={
           <ActionUI

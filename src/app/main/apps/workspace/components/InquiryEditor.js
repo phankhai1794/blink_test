@@ -1522,6 +1522,7 @@ const InquiryEditor = (props) => {
                       files={currentEditInq.mediaFile}
                       field={currentEditInq.field}
                       question={currentEditInq}
+                      isEdit={true}
                     />
                   </>
                 ))}
@@ -1539,6 +1540,7 @@ const InquiryEditor = (props) => {
                         field={currentEditInq.field}
                         isAnswer={true}
                         question={currentEditInq}
+                        isEdit={true}
                       />
                     </>
                   ))}

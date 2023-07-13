@@ -37,7 +37,9 @@ const initialState = {
   currentFilePreview: {},
   isLoadingProcess: false,
   dirtyReload: {},
+  scrollInquiry: '',
   tabs: 0,
+  fileRemoveIndex: -1,
 };
 
 const formReducer = function (state = initialState, action) {
@@ -159,8 +161,14 @@ const formReducer = function (state = initialState, action) {
   case Actions.SET_DIRTY_RELOAD: {
     return { ...state, dirtyReload: { ...state.dirtyReload, ...action.state } };
   }
+  case Actions.SCROLL_INQ: {
+    return {...state, scrollInquiry: action.state}
+  }
   case Actions.SET_TAB: {
-    return {...state, tabs: action.state};
+    return {...state, tabs: action.state}
+  }
+  case Actions.FILE_REMOVE_INDEX: {
+    return {...state, fileRemoveIndex: action.state}
   }
   default: {
     return state;

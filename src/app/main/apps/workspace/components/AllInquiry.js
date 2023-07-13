@@ -170,9 +170,14 @@ const AllInquiry = (props) => {
     workspace.inquiryReducer.isShowBackground,
     workspace.inquiryReducer.currentAmendment,
   ]);
-  const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
-  const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
-  const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
+  const [openAllInquiry, openAmendmentList, openPreviewListSubmit, openPreviewFiles, currentFilePreview, scrollInquiry ] = useSelector(({ workspace }) => [
+    workspace.formReducer.openAllInquiry,
+    workspace.formReducer.openAmendmentList,
+    workspace.formReducer.openPreviewListSubmit,
+    workspace.formReducer.openPreviewFiles,
+    workspace.formReducer.currentFilePreview,
+    workspace.formReducer.scrollInquiry,
+  ]);
   const [inquiries, setInquiries] = useState([]);
   const [getStateReplyDraft, setStateReplyDraft] = useState(false);
   const [questionIdSaved, setQuestionIdSaved] = useState();
@@ -180,6 +185,7 @@ const AllInquiry = (props) => {
   const [isUpdateReply, setUpdateReply] = useState(false);
   const inputAddAmendmentEndRef = useRef(null);
   const scrollTopPopup = useRef(null);
+  const scrollFilePosition = useRef(null);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
 
   useEffect(() => {
@@ -205,7 +211,7 @@ const AllInquiry = (props) => {
       setSaveAnswer(!isSaveAnswer)
       setUpdateReply(false);
     }
-    if (scrollTopPopup.current) {
+    if (scrollTopPopup.current &&!scrollInquiry) {
       scrollTopPopup.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [isUpdateReply]);
@@ -301,6 +307,14 @@ const AllInquiry = (props) => {
     return '';
   }
 
+  const scrollFunction = () => {
+    const a = document.getElementById(scrollInquiry);
+    if(a) {
+      a.scrollIntoView(true);
+      dispatch(FormActions.setScrollInquiry());
+    }
+  }
+  
   return (
     <>
       {openInquiryReview && !inquiries.length &&
@@ -362,10 +376,10 @@ const AllInquiry = (props) => {
                       ([...sentStatus, ...['REP_DRF']].includes(q.state)) && 'offshoreReply'
                     )}>
                     <div style={{ marginBottom: '12px' }}>
-                      <Typography color="primary" variant="h5" className={classes.inqTitle}>
+                      <Typography color="primary" variant="h5" className={classes.inqTitle} id={q.id}>
                         {getLabel(q.field)}
                       </Typography>
-
+                      {(q.id === scrollInquiry) && scrollFunction()}         
                       <InquiryViewer
                         user={props.user}
                         question={q}
@@ -393,7 +407,7 @@ const AllInquiry = (props) => {
           inquiries.map((q, index) => {
             CURRENT_NUMBER += 1;
             return (
-              <div key={index}>
+              <div key={index} id={q.id}>
                 <div
                   className={clsx(
                     classes.boxItem,
@@ -402,7 +416,7 @@ const AllInquiry = (props) => {
                     ([...sentStatus, ...['REP_DRF']].includes(q.state)) && 'offshoreReply'
                   )}>
                   <div style={{ marginBottom: '12px' }}>
-                    <Typography color="primary" variant="h5" className={classes.inqTitle}>
+                    <Typography color="primary" variant="h5" className={classes.inqTitle} id={q.id}>
                       {getLabel(q.field)}
                     </Typography>
 
@@ -422,6 +436,7 @@ const AllInquiry = (props) => {
                       }}
                       isAllInq={true}
                     />
+                    {(q.id === scrollInquiry) && scrollFunction()}  
                     {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                       <InquiryAnswer
                         onCancel={() => handleCancel(q)}
