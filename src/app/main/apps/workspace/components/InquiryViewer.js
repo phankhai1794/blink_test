@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileName  } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileName } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -1082,7 +1082,7 @@ const InquiryViewer = (props) => {
           const optionsInquires = [...inquiries];
           const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
 
-          if(comment.length > 2) {
+          if (comment.length > 2) {
             const newMediaFile = comment.at(1).answersMedia.filter(({ id: id1 }) => !comment.at(0).answersMedia.some(({ id: id2 }) => id2 === id1));
             const removeMediaFile = comment.at(0).answersMedia.filter(({ id: id1 }) => !comment.at(1).answersMedia.some(({ id: id2 }) => id2 === id1)).map(({ id }) => id);
             optionsInquires[editedIndex].mediaFile = optionsInquires[editedIndex].mediaFile.filter(inq => !removeMediaFile.includes(inq.id));
@@ -2820,18 +2820,18 @@ const InquiryViewer = (props) => {
     if ((isReply || question.showIconAttachAnswerFile) && e.clipboardData.files.length) {
       const fileObject = e.clipboardData.files[0];
       // generate new file name
-      if(['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest' ) { // case create ans/ edit anns
-        if(question.mediaFilesAnswer && question.mediaFilesAnswer.length >0) {
-          const newFileName = generateFileName(fileObject.name, question.mediaFilesAnswer.map(fItem => { return fItem.name}));
+      if (['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest') { // case create ans/ edit anns
+        if (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) {
+          const newFileName = generateFileName(fileObject.name, question.mediaFilesAnswer.map(fItem => { return fItem.name }));
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
-        setFilepaste(myRenamedFile);
+          setFilepaste(myRenamedFile);
         } else setFilepaste(fileObject);
       } else {
         //other case
-        if(tempReply.mediaFiles && tempReply.mediaFiles.length > 0 ) {
-          const newFileName = generateFileName(fileObject.name, tempReply.mediaFiles.map(fItem => { return fItem.name}));
+        if (tempReply.mediaFiles && tempReply.mediaFiles.length > 0) {
+          const newFileName = generateFileName(fileObject.name, tempReply.mediaFiles.map(fItem => { return fItem.name }));
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
@@ -3114,7 +3114,12 @@ const InquiryViewer = (props) => {
                     currentQuestion={question}
                   />
               ) :
-                (!['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) ?
+                (['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) || (question.process === 'draft' && question.state === 'REOPEN_Q') ?
+                  <Diff
+                    inputA={orgContent[question.field] ? renderContent(orgContent[question.field]) : ''}
+                    inputB={question.content ? getNewValueDiffViewer(question.content) : ''}
+                    type="chars"
+                  /> :
                   <Typography
                     // className={viewDropDown !== question.id ? classes.hideText : ''}
                     variant="h5"
@@ -3142,12 +3147,7 @@ const InquiryViewer = (props) => {
                           </div>
                         )
                       }) : ``}
-                  </Typography> :
-                  <Diff
-                    inputA={orgContent[question.field] ? renderContent(orgContent[question.field]) : ''}
-                    inputB={question.content ? getNewValueDiffViewer(question.content) : ''}
-                    type="chars"
-                  />
+                  </Typography>
                 )
             }
             {/*Allow edit table when customer reply amendment*/}
@@ -3295,10 +3295,15 @@ const InquiryViewer = (props) => {
                 style={{ width: fullscreen ? 1230 : 890 }}
                 onMouseLeave={() => { dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
               >
-                {question.mediaFile?.length > 0 &&
-                (!['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)
-                    || (['REP_Q_DRF'].includes(question.state) && user.role === 'Admin'))
-                    && question.mediaFile?.map((file, mediaIndex) => (
+                {
+                  question.mediaFile?.length > 0
+                  &&
+                  (
+                    !['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)
+                    ||
+                    (['REP_Q_DRF'].includes(question.state) && user.role === 'Admin')
+                  )
+                  && question.mediaFile?.map((file, mediaIndex) => (
                     <>
                       <FileAttach
                         hiddenRemove={true}
@@ -3308,6 +3313,7 @@ const InquiryViewer = (props) => {
                         indexInquiry={index}
                         indexMedia={mediaIndex}
                         question={question}
+                        isEdit={false}
                       />
                     </>
                   ))}
@@ -3317,7 +3323,7 @@ const InquiryViewer = (props) => {
               question.mediaFilesAnswer?.length > 0 &&
               <>
                 {question.mediaFilesAnswer?.length > 0 &&
-                !['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)
+                  !['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)
                   && <h3>Attachment Answer:</h3>}
                 <div
                   style={{ width: 885 }}
@@ -3332,6 +3338,7 @@ const InquiryViewer = (props) => {
                         indexMedia={mediaIndex}
                         isAnswer={true}
                         question={question}
+                        isEdit={false}
                         index={index}
                         questions={inquiries}
                         hiddenRemove={!question.showIconAttachAnswerFile}
@@ -3485,6 +3492,7 @@ const InquiryViewer = (props) => {
                               isReply={true}
                               isHideFiles={true}
                               templateReply={tempReply}
+                              isEdit={true}
                               setTemplateReply={(val) => {
                                 setTempReply(val)
                               }}

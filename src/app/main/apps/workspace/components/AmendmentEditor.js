@@ -600,6 +600,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
               question={question}
               draftBL={true}
               removeAttachmentDraftBL={() => removeAttachment(mediaIndex)}
+              isEdit={true}
             />
           </>
         ))}

@@ -5,7 +5,7 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 import AttachFile from '@material-ui/icons/AttachFile';
 import { useDispatch, useSelector } from 'react-redux';
-import { TextField, InputAdornment, makeStyles, Icon } from '@material-ui/core';
+import { TextField, InputAdornment, makeStyles, Icon, Paper, Fade } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
@@ -15,10 +15,11 @@ import { checkClassName, checkColorStatus } from '@shared/colorStatus';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { copyTextToClipboard } from '@shared';
 import * as AppAction from 'app/store/actions';
+import EllipsisPopper from 'app/main/apps/workspace/shared-components/EllipsisPopper';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
-import ArrowTooltip from '../shared-components/ArrowTooltip';
+
 const theme = createMuiTheme({
   typography: {
     fontFamily: 'Montserrat'
@@ -158,6 +159,22 @@ const useStyles = makeStyles((theme) => ({
     width: 17,
     marginBottom: 1.5,
     paddingLeft: 3
+  },
+  paper: {
+    maxHeight: 400,
+    maxWidth: 400,
+    overflow: "auto",
+    padding: 15,
+    color: '#515E6A',
+    whiteSpace: 'pre-line'
+  },
+  popper: {
+    '&[x-placement*="right"]': {
+      left: '10px !important'
+    },
+    '&[x-placement*="left"]': {
+      right: '10px !important'
+    }
   }
 }));
 
@@ -166,7 +183,6 @@ const BLField = ({
   width,
   multiline,
   rows,
-  selectedChoice,
   id,
   lock,
   readOnly,
@@ -194,8 +210,8 @@ const BLField = ({
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
-  const [isLongText, setIsLongText] = useState(false);
   const [anchorElCopy, setAnchorElCopy] = useState(false);
+  const [popover, setPopover] = useState({ open: false, text: '' });
 
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
@@ -205,14 +221,20 @@ const BLField = ({
     const { scrollWidth, clientWidth, scrollHeight, clientHeight } = target;
     if (isEmpty) setAnchorEl(currentTarget);
     setAnchorElCopy(currentTarget);
-    setIsLongText(Boolean((scrollWidth > clientWidth) && !rows) || (Boolean((scrollHeight > clientHeight) && rows)));
+    if (Boolean((scrollWidth > clientWidth) && !rows) || (Boolean((scrollHeight > clientHeight) && rows))) {
+      setPopover({ open: true, text: e.target.textContent });
+    }
   };
 
   const onMouseLeave = (e) => {
     if (e.currentTarget !== null) setAnchorEl(null);
     setAnchorElCopy(null);
-    setIsLongText(false);
+    setPopover({ open: false });
   };
+
+  const handlePopoverMouseEnter = () => setPopover({ ...popover, open: true });
+
+  const handlePopoverMouseLeave = () => setPopover({ open: false });
 
   const checkValidate = (question) => {
     if (!question.inqType || !question.receiver.length) {
@@ -363,6 +385,27 @@ const BLField = ({
 
   return (
     <>
+      <EllipsisPopper
+        open={popover.open}
+        anchorEl={anchorEl}
+        arrow={true}
+        // className={classes.popper}
+        flip={true}
+        transition
+        placement={'left'}
+        disablePortal={false}
+        preventOverflow={'scrollParent'}>
+        {({ TransitionProps, placement, arrow }) => (
+          <div
+            onMouseEnter={handlePopoverMouseEnter}
+            onMouseLeave={handlePopoverMouseLeave}
+          >
+            {arrow}
+            <Paper className={classes.paper}>{popover.text}</Paper>
+          </div>
+        )}
+      </EllipsisPopper>
+
       <div
         id={id}
         style={{ width }}
@@ -370,69 +413,67 @@ const BLField = ({
         onMouseLeave={onMouseLeave}
         onClick={onClick}>
         <ThemeProvider theme={theme}>
-          <ArrowTooltip isLongText={isLongText} title={selectedChoice || _.isArray(children) ? children.join(", ") : children || ''} placement='right'>
-            <TextField
-              value={selectedChoice || finalChidren || ''}
-              variant="outlined"
-              fullWidth={true}
-              multiline={multiline}
-              rows={rows}
-              className={clsx(
-                classes.root,
-                lock ? classes.locked : checkClassName(
-                  hasInquiry,
-                  hasAmendment,
-                  hasAnswer,
-                  isResolved,
-                  isUploaded,
-                  classes
-                ).className
-              )}
-              InputProps={{
-                readOnly: readOnly || true,
-                endAdornment: ((!rows || rows < 6 || rows === 8) ? (
-                  <InputAdornment
-                    position="end"
-                    className={clsx(
-                      classes.adornment,
-                      multiline ? (rows === 8 ? classes.adornmentMultilineDoG : classes.adornmentMultiline) : '',
-                      rows ? classes[`adornmentRow_${rows}`] : ''
-                    )}>
-                    {isContinue && [3, 4, 5].includes(lines.length) &&
-                      <div style={{
-                        fontSize: '15px',
-                        color: darkGray,
-                        lineHeight: '22px',
-                        fontWeight: '500',
-                        position: 'absolute',
-                        right: '83px',
-                        bottom: lines.length === 5 ? '8px' : (lines.length === 4 ? '30px' : '53px')
-                      }}>
-                        {isContinue}
-                      </div>
-                    }
-                    {anchorElCopy && anchorElCopy.id === id && (selectedChoice || finalChidren) && (
-                      <Icon
-                        style={{ cursor: 'pointer', fontSize: 18 }}
-                        onClick={(e) => onCopyClick(e, selectedChoice || finalChidren)}
-                      >
-                        file_copy
-                      </Icon>
-                    )}
-                    {checkDisplayIcon()}
-                    {anchorEl && anchorEl.id === id && allowAddInquiry && (
-                      <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
-                    )}
-                  </InputAdornment>
-                ) : <></>),
-                classes: {
-                  root: classes.root,
-                  input: classes.input,
-                  notchedOutline: isEmpty ? '' : classes.notchedOutlineNotChecked
-                },
-              }}
-            />
-          </ArrowTooltip>
+          <TextField
+            value={finalChidren || ''}
+            variant="outlined"
+            fullWidth={true}
+            multiline={multiline}
+            rows={rows}
+            className={clsx(
+              classes.root,
+              lock ? classes.locked : checkClassName(
+                hasInquiry,
+                hasAmendment,
+                hasAnswer,
+                isResolved,
+                isUploaded,
+                classes
+              ).className
+            )}
+            InputProps={{
+              readOnly: readOnly || true,
+              endAdornment: ((!rows || rows < 6 || rows === 8) ? (
+                <InputAdornment
+                  position="end"
+                  className={clsx(
+                    classes.adornment,
+                    multiline ? (rows === 8 ? classes.adornmentMultilineDoG : classes.adornmentMultiline) : '',
+                    rows ? classes[`adornmentRow_${rows}`] : ''
+                  )}>
+                  {isContinue && [3, 4, 5].includes(lines.length) &&
+                    <div style={{
+                      fontSize: '15px',
+                      color: darkGray,
+                      lineHeight: '22px',
+                      fontWeight: '500',
+                      position: 'absolute',
+                      right: '83px',
+                      bottom: lines.length === 5 ? '8px' : (lines.length === 4 ? '30px' : '53px')
+                    }}>
+                      {isContinue}
+                    </div>
+                  }
+                  {anchorElCopy && anchorElCopy.id === id && children?.trim() && (
+                    <Icon
+                      style={{ cursor: 'pointer', fontSize: 18 }}
+                      onClick={(e) => onCopyClick(e, children?.trim())}
+                    >
+                      file_copy
+                    </Icon>
+                  )}
+                  {checkDisplayIcon()}
+                  {anchorEl && anchorEl.id === id && allowAddInquiry && (
+                    <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
+                  )}
+                </InputAdornment>
+              ) : <></>),
+              classes: {
+                root: classes.root,
+                input: classes.input,
+                notchedOutline: isEmpty ? '' : classes.notchedOutlineNotChecked
+              },
+            }}
+          />
         </ThemeProvider>
       </div>
     </>
