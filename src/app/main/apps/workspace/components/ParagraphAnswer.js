@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import clsx from "clsx";
 import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
+import { isJsonText, validateBLType } from "@shared";
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import {CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT} from '@shared/keyword'
-import clsx from "clsx";
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT, BL_TYPE } from '@shared/keyword'
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
-import {isJsonText} from "../../../../../@shared";
 
 import UserInfo from './UserInfo';
 
@@ -66,6 +66,12 @@ const ParagraphAnswer = (props) => {
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
+  const validateField = (field, value) => {
+    let response = { isError: false, errorType: "" };
+    if (field === getField(BL_TYPE)) response = validateBLType(value);
+    return response;
+  }
+
   const handleChangeInput = (e) => {
     setParagraphText(e.target.value);
     const body = {
@@ -93,9 +99,10 @@ const ParagraphAnswer = (props) => {
         setParagraphText('');
       } else if (currentQuestion.answerObj && currentQuestion.answerObj.length) {
         let contentAnswer = currentQuestion.answerObj[0].content;
-        if(containerCheck.includes(currentQuestion.field)
-            && (isJsonText(currentQuestion.answerObj[0].content) || currentQuestion.ansForType !== 'ANS_CD_CM')
-            && currentQuestion.answerObj.length > 1
+        if (
+          containerCheck.includes(currentQuestion.field)
+          && currentQuestion.answerObj.length > 1
+          && (isJsonText(currentQuestion.answerObj[0].content) || currentQuestion.ansForType !== 'ANS_CD_CM')
         ) {
           contentAnswer = currentQuestion.answerObj[1].content;
           const body = {
@@ -170,6 +177,11 @@ const ParagraphAnswer = (props) => {
           multiline
           value={paragraphText}
           onChange={handleChangeInput}
+          helperText={
+            !question.showIconReply && validateField(question.field, question.content).errorType.split('\n').map((line, idx) => (
+              <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+            ))
+          }
         />
       </div>
       {question.selectedChoice && (
