@@ -367,7 +367,8 @@ const InquiryViewer = (props) => {
     FREIGHTED_AS,
     RATE,
     SERVICE_CONTRACT_NO,
-    RD_TERMS
+    RD_TERMS,
+    BL_TYPE
   ];
 
   const isDisableBtnUpload = () => {
