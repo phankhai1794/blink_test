@@ -40,16 +40,6 @@ const initialState = {
   listCommentDraft: [],
   objectNewAmendment: { oldAmendmentId: null, newAmendment: null },
   openQueueList: false,
-  searchQueueQuery: {
-    bookingNo: '',
-    from: formatDate(start, 'YYYY-MM-DD'),
-    to: formatDate(end, 'YYYY-MM-DD'),
-    blStatus: 'PENDING,IN_QUEUE',
-    currentPageNumber: 1,
-    pageSize: 10,
-    totalPageNumber: 5,
-    sortField: ''
-  },
   cancelAmePopup: false,
   originValueCancel: {},
   enableExpandAttachment: []
@@ -177,9 +167,6 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.OPEN_QUEUE_LIST: {
     return { ...state, openQueueList: action.state, searchQueueQuery: initialState.searchQueueQuery };
-  }
-  case Actions.SEARCH_QUEUE_QUERY: {
-    return { ...state, searchQueueQuery: action.state };
   }
   case Actions.SET_DATA_CM_INQ: {
     return { ...state, getDataCMInq: action.state };
