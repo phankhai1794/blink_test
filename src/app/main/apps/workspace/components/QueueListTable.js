@@ -5,12 +5,13 @@ import { makeStyles } from '@material-ui/styles';
 import { getQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
 import Pagination from '../shared-components/Pagination';
-import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
+import * as DashboardActions from 'app/main/apps/workspace/store/actions/dashboard';
 import clsx from 'clsx';
 import HelpIcon from '@material-ui/icons/Help';
 import EditIcon from '@material-ui/icons/Edit';
 import ReplyIcon from '@material-ui/icons/Reply';
 import { withStyles } from '@material-ui/core/styles';
+import { handleError } from '@shared/handleError';
 
 const useStyles = makeStyles({
   root: {
@@ -257,7 +258,8 @@ const QueueListTable = () => {
   const dispatch = useDispatch();
 
   const [state, setState] = useState({ queueListBl: [], totalBkgNo: 1, sortBkgNo: 'asc', sortLatestDate: 'asc', sortStatus: 'asc' })
-  const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
+  const page = useSelector(({ workspace }) => workspace.dashboardReducer.page);
+  const searchQueueQuery = useSelector(({ workspace }) => workspace.dashboardReducer.searchQueueQuery);
   const [anchorEl, setAnchorEl] = useState(null);
   const initColumns = {
     lastUpdate: true,
@@ -279,25 +281,38 @@ const QueueListTable = () => {
   };
   const [columns, setColumns] = useState(initColumns);
 
+  const handleGetQueueList = (page, size) => {
+    getQueueList(
+      page,
+      size,
+      {
+        bkgNo: searchQueueQuery.bookingNo ? searchQueueQuery.bookingNo.split(',').map(bkg => bkg.trim()) : [],
+        startDate: searchQueueQuery.from ? formatDate(searchQueueQuery.from, 'YYYY-MM-DD') : '',
+        endDate: searchQueueQuery.to ? formatDate(searchQueueQuery.to, 'YYYY-MM-DD') : '',
+        status: searchQueueQuery.blStatus,
+        field: searchQueueQuery.sortField
+      },
+    )
+      .then(({ total, dataResult }) => {
+        dispatch(DashboardActions.setPage(page > Math.ceil(total / size) ? 1 : page, size))
+        setState({ ...state, queueListBl: dataResult, totalBkgNo: total })
+      })
+      .catch((err) => handleError(dispatch, err));
+  };
+
   useEffect(() => {
-    const handleGetQueueList = async (search) => {
-      const query = {
-        bkgNo: search.bookingNo ? search.bookingNo.split(',').map(bkg => bkg.trim()) : [],
-        startDate: search.from ? formatDate(search.from, 'YYYY-MM-DD') : '',
-        endDate: search.to ? formatDate(search.to, 'YYYY-MM-DD') : '',
-        status: search.blStatus,
-        field: search.sortField
-      };
-      const { total, dataResult } = await getQueueList(search.currentPageNumber, search.pageSize, query);
-      setState({ ...state, queueListBl: dataResult, totalBkgNo: total })
-    }
-    handleGetQueueList(searchQueueQuery);
+    handleGetQueueList(page.currentPageNumber, page.pageSize);
   }, [searchQueueQuery]);
 
   // TODO: Download - TBU
   const handleDownload = () => {
     alert('Download Success!')
   };
+
+  const setPage = (page, size) => {
+    dispatch(DashboardActions.setPage(page, size))
+    handleGetQueueList(page, size)
+  }
 
   const handleSort = (query, column) => {
     let tempQuery = query;
@@ -320,14 +335,11 @@ const QueueListTable = () => {
         setState({ ...state, sortBkgNo: 'asc', sortLatestDate: 'asc', sortStatus: 'asc' });
         break;
     }
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, sortField: tempQuery }));
+    dispatch(DashboardActions.searchQueueQuery({ ...searchQueueQuery, sortField: tempQuery }));
   };
 
   const showItems = (e) => {
-    searchQueueQuery.currentPageNumber > Math.ceil(state.totalBkgNo / e.target.value) ?
-      dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, pageSize: e.target.value, currentPageNumber: Math.ceil(state.totalBkgNo / e.target.value) }))
-      :
-      dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, pageSize: e.target.value }))
+    setPage(Math.min(Math.ceil(state.totalBkgNo / e.target.value), page.currentPageNumber), e.target.value)
   }
 
   const handleClick = (event) => {
@@ -359,16 +371,14 @@ const QueueListTable = () => {
         <>
           <div className={classes.container}>
             <Pagination
-              currentNumber={searchQueueQuery.currentPageNumber}
-              totalPage={searchQueueQuery.totalPageNumber}
+              page={page}
               totalBkgNo={state.totalBkgNo}
-              query={searchQueueQuery}
-              searchQueueQuery={(search) => dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...search }))}
+              setPage={setPage}
             />
             <FormControl variant='outlined' className={classes.formControl}>
               <Select
                 className={classes.selectStatus}
-                value={searchQueueQuery.pageSize}
+                value={page.pageSize}
                 onChange={showItems}
                 disableUnderline
               >
@@ -386,7 +396,7 @@ const QueueListTable = () => {
             <Table className={classes.table} aria-label='simple table'>
               <TableHead className={classes.headerColor} style={{ backgroundColor: '#FDF2F2', position: 'sticky', top: 0, zIndex: 2 }}>
                 <TableRow>
-                  <StickyTableCell style={{ display: 'flex' , paddingRight: '18px'}}>
+                  <StickyTableCell style={{ display: 'flex', paddingRight: '18px' }}>
                     <div className={clsx(classes.cellBody, classes.cellSticky)}>
                       <div className={classes.lineColumn}>
                         <span>No.</span>
@@ -474,7 +484,7 @@ const QueueListTable = () => {
                   <TableRow key={index}>
                     <StickyTableCell className='flex'>
                       <div className={clsx(classes.cellBody, classes.cellSticky)} component='th' scope='row'>
-                        {index + (searchQueueQuery.currentPageNumber - 1) * searchQueueQuery.pageSize + 1}
+                        {index + (page.currentPageNumber - 1) * page.pageSize + 1}
                       </div>
                       <div className={clsx(classes.cellBody, classes.cellSticky)} component='th' scope='row'>
                         <a href={`/guest?bl=${row.id}`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bookingNo}</span></a>
@@ -522,30 +532,30 @@ const QueueListTable = () => {
                     {columns.resolve && <TableCell>
                       <div className={classes.label}>
                         {row?.countAllInq ?
-                        <Tooltip title={'Inquiries'} placement='bottom-end'>
-                          <Chip
-                            label={`${row.countInqResolved}/${row.countAllInq}`}
-                            className={clsx(classes.chip, classes.resolvedColor)}
-                            icon={
-                              <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
-                                help
-                              </Icon>
-                            }
-                          />
-                        </Tooltip>
+                          <Tooltip title={'Inquiries'} placement='bottom-end'>
+                            <Chip
+                              label={`${row.countInqResolved}/${row.countAllInq}`}
+                              className={clsx(classes.chip, classes.resolvedColor)}
+                              icon={
+                                <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
+                                  help
+                                </Icon>
+                              }
+                            />
+                          </Tooltip>
                           : ''}
                         {row.countAllAme ?
-                        <Tooltip title={'Amendments'} placement='bottom-end'>
-                          <Chip
-                            label={`${row.countAmeResolved}/${row.countAllAme}`}
-                            className={clsx(classes.chip, classes.resolvedColor)}
-                            icon={
-                              <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
-                                edit
-                              </Icon>
-                            }
-                          />
-                        </Tooltip>
+                          <Tooltip title={'Amendments'} placement='bottom-end'>
+                            <Chip
+                              label={`${row.countAmeResolved}/${row.countAllAme}`}
+                              className={clsx(classes.chip, classes.resolvedColor)}
+                              icon={
+                                <Icon className={clsx(classes.sizeIcon, classes.resolvedColor)}>
+                                  edit
+                                </Icon>
+                              }
+                            />
+                          </Tooltip>
                           : ''}
                       </div>
                     </TableCell>}
@@ -564,7 +574,7 @@ const QueueListTable = () => {
                 }
               }}
               onClose={handleClose}>
-                {AddColumn(columns, handleShowColumn)}
+              {AddColumn(columns, handleShowColumn)}
             </Menu>
           </div>
         </>

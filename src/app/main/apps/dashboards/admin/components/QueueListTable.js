@@ -23,13 +23,14 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import { getOffshoreQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
-import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 import Pagination from 'app/main/apps/workspace/shared-components/Pagination';
 import EllipsisPopper from 'app/main/apps/workspace/shared-components/EllipsisPopper';
 import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
 import { mapperBlinkStatus } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
+
+import * as Actions from '../store/actions';
 
 const useStyles = makeStyles({
   root: {
@@ -98,7 +99,7 @@ const useStyles = makeStyles({
     }
   },
   lineMinWidth: {
-    minWidth: '180px',
+    minWidth: '180px'
   },
   link: {
     color: '#333333',
@@ -598,6 +599,7 @@ const QueueListTable = () => {
     sortStatus: 'asc'
   });
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
+  const page = useSelector(({ dashboard }) => dashboard.page);
   const countries = useSelector(({ dashboard }) => dashboard.countries);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('bkgNo');
@@ -630,34 +632,45 @@ const QueueListTable = () => {
     setColumns({ ...columns, ...value });
   };
 
+  const fetchData = (page, size) => {
+    getOffshoreQueueList({
+      page,
+      size,
+      query: {
+        startDate: formatDate(searchQueueQuery.from, 'YYYY-MM-DD'),
+        endDate: formatDate(searchQueueQuery.to, 'YYYY-MM-DD'),
+        bkgNos: searchQueueQuery.bookingNo
+          .split(',')
+          .filter((bkg) => bkg)
+          .map((bkg) => bkg.trim().toUpperCase()),
+        blinkStatus: searchQueueQuery.blStatus,
+        countries
+      },
+      sort: searchQueueQuery.sortField
+    })
+      .then(({ total, data }) => {
+        dispatch(Actions.setPage(page > Math.ceil(total / size) ? 1 : page, size))
+        setState({ ...state, queueListBl: data, totalBkgNo: total })
+      })
+      .catch((err) => handleError(dispatch, err));
+  };
+
+  const setPage = (page, size) => {
+    dispatch(Actions.setPage(page, size))
+    fetchData(page, size)
+  }
+
   useEffect(() => {
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, countries }));
+    dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, countries }));
   }, [countries]);
 
   useEffect(() => {
     return () =>
-      dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, countries: null }));
+      dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, countries: null }));
   }, []);
 
   useEffect(() => {
-    if (searchQueueQuery.countries)
-      getOffshoreQueueList({
-        page: searchQueueQuery.currentPageNumber,
-        size: searchQueueQuery.pageSize,
-        query: {
-          startDate: formatDate(searchQueueQuery.from, 'YYYY-MM-DD'),
-          endDate: formatDate(searchQueueQuery.to, 'YYYY-MM-DD'),
-          bkgNos: searchQueueQuery.bookingNo
-            .split(',')
-            .filter((bkg) => bkg)
-            .map((bkg) => bkg.trim().toUpperCase()),
-          blinkStatus: searchQueueQuery.blStatus,
-          countries
-        },
-        sort: searchQueueQuery.sortField
-      })
-        .then(({ total, data }) => setState({ ...state, queueListBl: data, totalBkgNo: total }))
-        .catch((err) => handleError(dispatch, err));
+    if (searchQueueQuery.countries) fetchData(page.currentPageNumber, page.pageSize)
   }, [searchQueueQuery]);
 
   const handleSort = (property) => {
@@ -665,7 +678,7 @@ const QueueListTable = () => {
     setOrder(isAsc);
     setOrderBy(property);
     dispatch(
-      InquiryActions.searchQueueQuery({ ...searchQueueQuery, sortField: [property, isAsc] })
+      Actions.searchQueueQuery({ ...searchQueueQuery, sortField: [property, isAsc] })
     );
   };
 
@@ -674,17 +687,7 @@ const QueueListTable = () => {
   };
 
   const showItems = (e) => {
-    searchQueueQuery.currentPageNumber > Math.ceil(state.totalBkgNo / e.target.value)
-      ? dispatch(
-        InquiryActions.searchQueueQuery({
-          ...searchQueueQuery,
-          pageSize: e.target.value,
-          currentPageNumber: Math.ceil(state.totalBkgNo / e.target.value)
-        })
-      )
-      : dispatch(
-        InquiryActions.searchQueueQuery({ ...searchQueueQuery, pageSize: e.target.value })
-      );
+    setPage(Math.min(Math.ceil(state.totalBkgNo / e.target.value), page.currentPageNumber), e.target.value)
   };
 
   return (
@@ -693,18 +696,14 @@ const QueueListTable = () => {
         <>
           <div className={classes.container}>
             <Pagination
-              currentNumber={searchQueueQuery.currentPageNumber}
-              totalPage={searchQueueQuery.totalPageNumber}
+              page={page}
               totalBkgNo={state.totalBkgNo}
-              query={searchQueueQuery}
-              searchQueueQuery={(search) =>
-                dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...search }))
-              }
+              setPage={setPage}
             />
             <FormControl variant="outlined" className={classes.formControl}>
               <Select
                 className={classes.selectStatus}
-                value={searchQueueQuery.pageSize}
+                value={page.pageSize}
                 onChange={showItems}
                 disableUnderline>
                 {[10, 20, 50].map((val) => (
@@ -852,7 +851,7 @@ const QueueListTable = () => {
                     key={index}
                     row={row}
                     index={
-                      index + (searchQueueQuery.currentPageNumber - 1) * searchQueueQuery.pageSize
+                      index + (page.currentPageNumber - 1) * page.pageSize
                     }
                     open={openDetailIndex === index}
                     setOpen={() => openDetails(index)}
