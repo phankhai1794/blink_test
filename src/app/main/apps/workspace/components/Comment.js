@@ -231,6 +231,7 @@ const Comment = (props) => {
                     file={file}
                     files={media}
                     indexInquiry={id}
+                    isEdit={false}
                     question={reply} />
                 </>
               ))}
@@ -246,6 +247,7 @@ const Comment = (props) => {
                       files={answersMedia}
                       indexInquiry={id}
                       question={reply}
+                      isEdit={false}
                     />
                   </>
                 ))}

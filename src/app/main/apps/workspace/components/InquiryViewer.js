@@ -367,7 +367,8 @@ const InquiryViewer = (props) => {
     FREIGHTED_AS,
     RATE,
     SERVICE_CONTRACT_NO,
-    RD_TERMS
+    RD_TERMS,
+    BL_TYPE
   ];
 
   const isDisableBtnUpload = () => {
@@ -3316,6 +3317,7 @@ const InquiryViewer = (props) => {
                         indexInquiry={index}
                         indexMedia={mediaIndex}
                         question={question}
+                        isEdit={false}
                       />
                     </>
                   ))}
@@ -3340,6 +3342,7 @@ const InquiryViewer = (props) => {
                         indexMedia={mediaIndex}
                         isAnswer={true}
                         question={question}
+                        isEdit={false}
                         index={index}
                         questions={inquiries}
                         hiddenRemove={!question.showIconAttachAnswerFile}
@@ -3493,6 +3496,7 @@ const InquiryViewer = (props) => {
                               isReply={true}
                               isHideFiles={true}
                               templateReply={tempReply}
+                              isEdit={true}
                               setTemplateReply={(val) => {
                                 setTempReply(val)
                               }}

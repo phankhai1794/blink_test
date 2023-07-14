@@ -769,7 +769,12 @@ const InquiryEditor = (props) => {
   };
 
   const checkDuplicateInq = () => {
-    const listInqOfField = [...inquiries.filter((inq) => inq.field === currentEditInq.field)];
+    const listInqOfField = [...inquiries.filter((inq) => {
+      if (containerCheck.includes(inq.field)) {
+        return containerCheck.includes(currentEditInq.field)
+      }
+      return inq.field === currentEditInq.field
+    })];
     if (currentEditInq.id) {
       listInqOfField.splice(
         listInqOfField.findIndex((inq) => inq.id === currentEditInq.id),
@@ -1517,6 +1522,7 @@ const InquiryEditor = (props) => {
                       files={currentEditInq.mediaFile}
                       field={currentEditInq.field}
                       question={currentEditInq}
+                      isEdit={true}
                     />
                   </>
                 ))}
@@ -1534,6 +1540,7 @@ const InquiryEditor = (props) => {
                         field={currentEditInq.field}
                         isAnswer={true}
                         question={currentEditInq}
+                        isEdit={true}
                       />
                     </>
                   ))}

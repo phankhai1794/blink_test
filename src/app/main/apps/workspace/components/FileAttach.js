@@ -107,7 +107,8 @@ const FileAttach = ({
   draftBL = false,
   removeAttachmentDraftBL,
   isRemoveFile,
-  setIsRemoveFile
+  setIsRemoveFile,
+  isEdit
 }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -143,8 +144,18 @@ const FileAttach = ({
     }
   }, [file]);
 
-  const previewFile = () =>
-    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file } }));
+  const previewFile = () => {
+    const formatFiles = files.map(itemMedia => {
+      return {
+        ...itemMedia,
+        creator: question.creator,
+        field: question.field,
+        inqType: question.inqType,
+        inquiryId: question.id,
+      }
+    })
+    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: formatFiles, file, isEdit: isEdit } }));
+  }
 
   const handleRemoveFile = (id) => {
     const optionsOfQuestion = { ...currentEditInq };

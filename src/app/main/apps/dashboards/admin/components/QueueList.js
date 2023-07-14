@@ -17,13 +17,14 @@ import {
   Grid,
   Icon
 } from '@material-ui/core';
-import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 import SearchIcon from '@material-ui/icons/Search';
 import { formatDate } from '@shared';
 import clsx from 'clsx';
 import { mapperBlinkStatus } from '@shared/keyword';
 import { DateRangePicker, defaultStaticRanges } from 'react-date-range';
 import { subMonths, addDays, subDays } from 'date-fns';
+
+import * as Actions from '../store/actions';
 
 import QueueListTable from './QueueListTable';
 import 'react-date-range/dist/styles.css'; // main css file
@@ -187,14 +188,16 @@ const SearchLayout = (props) => {
     if (state.blStatus.indexOf() !== -1) {
       blStatus = blStatus.splice(blStatus.indexOf(), 1);
     }
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...state }));
+    dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...state }));
   };
 
   const handleReset = () => {
-    const query = { ...initialState, currentPageNumber: 1, sortField: ['lastUpdated', 'DESC'] };
+    const query = { ...initialState, sortField: ['lastUpdated', 'DESC'] };
     setState(initialState);
+    dispatch(Actions.setPage(1, 10));
+
     setSelectedStatus([...blStatusOption, 'All']);
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...query }));
+    dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...query }));
   };
 
   const handleClickOutside = (event) => {

@@ -187,7 +187,8 @@ const AttachmentList = (props) => {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const userType = useSelector(({ user }) => user.role?.toUpperCase());
-
+  const fileRemoveIndex = useSelector(({ workspace }) => workspace.formReducer.fileRemoveIndex);
+  
   const styles = (validationAttachment, width) => {
     return {
       control: {
@@ -537,6 +538,19 @@ const AttachmentList = (props) => {
     const optionsInquiries = [...inquiries];
     // update attachment list
     const listIdMedia = [];
+
+    if(fileRemoveIndex !== -1){
+      if (optionsAttachmentList[fileRemoveIndex].id !== null) {
+        let draftAnsId = '';
+        listCommentDraft.forEach(draftItem => {
+          if (draftItem.field === optionsAttachmentList[fileRemoveIndex].field && draftItem.content.mediaFile.length > 0) {
+            const tempMedia = draftItem.content.mediaFile.filter(f => f.id === optionsAttachmentList[fileRemoveIndex].id);
+            if (tempMedia.length > 0) draftAnsId = draftItem.draftAnswerId || draftItem.id;
+          }
+        })
+        listIdMedia.push({ ...optionsAttachmentList[fileRemoveIndex], "draftId": draftAnsId || optionsAttachmentList[fileRemoveIndex].inquiryId });
+      }
+    }
     selectedIndexFile.forEach(val => {
       if (optionsAttachmentList[val].id !== null) {
         let draftAnsId = '';
@@ -555,7 +569,7 @@ const AttachmentList = (props) => {
         let mediaOther = [];
         let mediaRemove = [];
         optionsAttachmentList.forEach((op, i) => {
-          if (!selectedIndexFile.includes(i)) {
+          if (!selectedIndexFile.includes(i) && fileRemoveIndex !== i) {
             mediaOther = [...mediaOther, op];
           } else mediaRemove = [...mediaRemove, op.id];
         });
@@ -624,6 +638,13 @@ const AttachmentList = (props) => {
     attachmentFiles.forEach((media, index) => userType === media.creator.toUpperCase() && mediaIndex.push(index));
     setSelectedIndexFile(selectedIndexFile.length === attachmentFiles.length ? [] : mediaIndex);
   };
+
+  useEffect(() =>{
+    if(fileRemoveIndex != -1){
+      dispatch(FormActions.setFileRemoveIndex(-1));
+      handleConfirm();
+    }
+  }, [fileRemoveIndex])
 
   return (
     <>
@@ -856,30 +877,13 @@ const ImageAttachList = ({ file, files }) => {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const currentInqPreview = useSelector(({ workspace }) => workspace.formReducer.currentInqPreview);
   const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
-  const images = [file.src];
-  const openImageViewer = () => {
-    setIsViewerOpen(true);
-  };
 
   const closeImageViewer = () => {
     setIsViewerOpen(false);
   };
 
   const downloadFile = () => {
-    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file } }));
-    // getFile(file.id).then((f) => {
-    //   const link = document.createElement('a');
-    //   link.href = urlMedia(file.ext, f);
-    //   link.setAttribute(
-    //     'download',
-    //     file.name,
-    //   );
-    //   document.body.appendChild(link);
-    //   link.click();
-    //   link.parentNode.removeChild(link);
-    // }).catch((error) => {
-    //   console.error(error);
-    // });
+    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file , isEdit: file.inquiryId ? false : true } }));
   }
 
   return (
@@ -891,18 +895,6 @@ const ImageAttachList = ({ file, files }) => {
         </span>
       </Tooltip>
       {isViewerOpen && openPreviewFiles && <PDFViewer inquiry={currentInqPreview} />}
-      {/* {isViewerOpen && (
-        <ImageViewer
-          src={images}
-          currentIndex={0}
-          onClose={closeImageViewer}
-          disableScroll={false}
-          backgroundStyle={{
-            backgroundColor: "rgba(0,0,0,0.9)"
-          }}
-          closeOnClickOutside={true}
-        />
-      )} */}
     </div>
   );
 };
@@ -937,31 +929,8 @@ const FileAttachList = ({ file, files }) => {
   const currentInqPreview = useSelector(({ workspace }) => workspace.formReducer.currentInqPreview);
   const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
 
-  const downloadFile = () => {
-    getFile(file.id).then((f) => {
-      const link = document.createElement('a');
-      link.href = urlMedia(file.ext, f);
-      link.setAttribute(
-        'download',
-        file.name,
-      );
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-    }).catch((error) => handleError(dispatch, error));
-  }
-  const handleClose = () => {
-    setView(false)
-  }
-
   const previewPDF = () => {
-    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file } }));
-    // getFile(file.id).then((f) => {
-    //   setPdfUrl(urlMedia(file.ext, f));
-    //   setView(true)
-    // }).catch((error) => {
-    //   console.error(error);
-    // });
+    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file, isEdit: file.inquiryId ? false : true } }));
   }
 
   return (
@@ -982,7 +951,7 @@ const FileAttachList = ({ file, files }) => {
         </Tooltip>
         :
         <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
-          <span className={classes.fileName} onClick={downloadFile}>{file.name}</span>
+          <span className={classes.fileName} onClick={previewPDF}>{file.name}</span>
         </Tooltip>
       }
     </div>

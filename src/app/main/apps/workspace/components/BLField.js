@@ -453,10 +453,10 @@ const BLField = ({
                       {isContinue}
                     </div>
                   }
-                  {anchorElCopy && anchorElCopy.id === id && finalChidren && (
+                  {anchorElCopy && anchorElCopy.id === id && children?.trim() && (
                     <Icon
                       style={{ cursor: 'pointer', fontSize: 18 }}
-                      onClick={(e) => onCopyClick(e, finalChidren)}
+                      onClick={(e) => onCopyClick(e, children?.trim())}
                     >
                       file_copy
                     </Icon>

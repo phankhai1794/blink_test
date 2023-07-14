@@ -7,6 +7,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
 import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
+import * as DashboardActions from 'app/main/apps/workspace/store/actions/dashboard';
 import CloseIcon from '@material-ui/icons/Close';
 import SearchIcon from '@material-ui/icons/Search';
 import { formatDate } from '@shared';
@@ -268,15 +269,16 @@ const SearchLayout = (props) => {
     if (bookingNo) {
       bookingNo = bookingNo.toUpperCase();
     }
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...state, bookingNo }));
+    dispatch(DashboardActions.searchQueueQuery({ ...searchQueueQuery, ...state, bookingNo }));
   }
 
   const handelReset = (e) => {
-    let query = { bookingNo: '', currentPageNumber: 1, from: start, to: end, blStatus: 'PENDING,IN_QUEUE', sortField: '' };
+    let query = { bookingNo: '', from: start, to: end, blStatus: 'PENDING,IN_QUEUE', sortField: '' };
+    dispatch(DashboardActions.setPage(1, 10));
 
     setState({ ...query });
     setSelectedStatus(['In Queue', 'Pending']);
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...query }));
+    dispatch(DashboardActions.searchQueueQuery({ ...searchQueueQuery, ...query }));
   }
 
   return (
