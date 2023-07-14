@@ -732,7 +732,7 @@ const InquiryViewer = (props) => {
           if (res.length > 0) {
             let getRes = res;
             // console.log('getRes', getRes)
-            const filterRepAmend = res.filter(r => r.state.includes('REP_AME_'));
+            const filterRepAmend = res.filter(r => r.state.includes('REP_AME_') && !['REP_DRF_DELETED', 'REP_AME_DRF_DELETED'].includes(r.state));
             const getLatest = getRes[0];
             const { content: contentField, mediaFile } = getLatest.content;
             setDisableCDCMAmendment(true);
@@ -766,7 +766,7 @@ const InquiryViewer = (props) => {
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
             if (containerCheck.includes(question.field)) {
-              const lastestContentCDCM = res.filter(r => r.state.includes('AME_') || r.state.includes('REOPEN_'));
+              const lastestContentCDCM = res.filter(r => (r.state.includes('AME_') || r.state.includes('REOPEN_')) && !['REP_AME_DRF_DELETED', 'REP_AME_SENT_DELETED'].includes(r.state));
               lastest.contentCDCM = lastestContentCDCM[0].content.content;
               if (filterRepAmend.length) {
                 lastest.contentReplyCDCM = filterRepAmend[0].content.content;
@@ -1257,7 +1257,9 @@ const InquiryViewer = (props) => {
                       })
                       .catch((err) => handleError(dispatch, err));
                   }
-                } else if (res.isEditOriginalAmendment) {
+                }
+
+                if (res.isEditOriginalAmendment) {
                   newContent = { ...newContent, [question.field]: res.drfAnswersTrans }
                 }
 

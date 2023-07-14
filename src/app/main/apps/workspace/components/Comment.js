@@ -111,11 +111,11 @@ const Comment = (props) => {
     }
 
     const renderCommentStyles = () => {
-      if (containerCheck.includes(question.field) && ['REP_A_DRF', 'ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_AME_DRF', 'REP_AME_SENT', 'ANS_DRF_DELETED', 'REP_A_DRF_DELETED', 'ANS_SENT_DELETED', 'REP_A_SENT_DELETED'].includes(reply.state)) {
+      if (containerCheck.includes(question.field) && ['REP_A_DRF', 'ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_AME_DRF', 'REP_AME_SENT', 'ANS_DRF_DELETED', 'REP_A_DRF_DELETED', 'ANS_SENT_DELETED', 'REP_A_SENT_DELETED', 'REP_AME_DRF_DELETED', 'REP_AME_SENT_DELETED'].includes(reply.state)) {
         if ((question.process === 'pending' && reply.type !== 'ANS_CD_CM')
-        || (question.process === 'draft' && !['REP_AME_DRF', 'REP_AME_SENT'].includes(reply.state))) {
+        || (question.process === 'draft' && !['REP_AME_DRF', 'REP_AME_SENT', 'REP_AME_DRF_DELETED', 'REP_AME_SENT_DELETED'].includes(reply.state))) {
           return { paddingBottom: '0' }
-        } else if (reply.type === 'ANS_CD_CM' || ['REP_AME_DRF', 'REP_AME_SENT'].includes(reply.state)) {
+        } else if (reply.type === 'ANS_CD_CM' || ['REP_AME_DRF', 'REP_AME_SENT', 'REP_AME_DRF_DELETED', 'REP_AME_SENT_DELETED'].includes(reply.state)) {
           return { paddingTop: '0' }
         }
       }
@@ -126,7 +126,7 @@ const Comment = (props) => {
         <div className="comment-detail" style={{ padding: '20px', ...renderCommentStyles() }}>
           {containerCheck.includes(question.field) ? (
             ((question.process === 'pending' && reply.type !== 'ANS_CD_CM')
-                || (question.process === 'draft' && !['REP_AME_DRF', 'REP_AME_SENT'].includes(reply.state))) ? (
+                || (question.process === 'draft' && !['REP_AME_DRF', 'REP_AME_SENT', 'REP_AME_DRF_DELETED'].includes(reply.state))) ? (
                 <div className="flex justify-between" style={{ alignItems: 'self-start' }}>
                   <UserInfo name={userName} time={displayTime(createdAt)} avatar={avatar} state={reply.state} status={reply.status} />
 
