@@ -159,7 +159,8 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
           disabled={!canEdit || disable}
           InputProps={{
             style: {
-              fontSize: '14px',
+              fontWeight: 'bold',
+              fontSize: '17px',
               fontFamily: 'Montserrat',
               fontStyle: !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT'].includes(question.state) && 'italic'
             },
