@@ -3160,7 +3160,7 @@ const InquiryViewer = (props) => {
             {(question.isShowTableToReply
               && containerCheck.includes(question.field)
               && question.process === 'draft'
-              && !['RESOLVED', 'REOPEN_A', 'REOPEN_Q'].includes(question.state)
+              && !['RESOLVED', 'REOPEN_A', 'REOPEN_Q', 'AME_SENT'].includes(question.state)
             ) ? (
               <div style={{ marginTop: 15 }}>
                 <ContainerDetailForm
