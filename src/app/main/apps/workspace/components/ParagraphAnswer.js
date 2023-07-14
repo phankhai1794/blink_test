@@ -46,19 +46,16 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ParagraphAnswer = (props) => {
-  const { questions, question, disable = false, saveStatus, currentQuestion, isDeleteAnswer, setDeleteAnswer } = props;
-  const allowUpdateParagraphAnswer = PermissionProvider({
-    action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
-  });
+const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, currentQuestion, isDeleteAnswer, setDeleteAnswer }) => {
+  const classes = useStyles(question);
   const dispatch = useDispatch();
+
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const eventClickContNo = useSelector(({ workspace }) => workspace.formReducer.eventClickContNo);
 
-  const [paragraphText, setParagraphText] = useState(question.answerObj && question.answerObj.length ? question.answerObj[0]?.content : '');
+  const [paragraphText, setParagraphText] = useState(question.answerObj?.[0]?.content || '');
 
-  const classes = useStyles(question);
-  const [isPermission, setPermission] = useState(false);
+  const canEdit = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH }) && !['REP_A_SENT', 'COMPL'].includes(question.state);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
@@ -84,14 +81,6 @@ const ParagraphAnswer = (props) => {
     dispatch(InquiryActions.setInquiries(optionsInquires));
     dispatch(FormActions.setDirtyReload({ inputParagraphAnswer: true }));
   };
-
-  useEffect(() => {
-    if (allowUpdateParagraphAnswer && allowUpdateParagraphAnswer && !['REP_A_SENT', 'COMPL'].includes(question.state)) {
-      setPermission(true);
-    } else {
-      setPermission(false);
-    }
-  }, []);
 
   useEffect(() => {
     if (currentQuestion && currentQuestion.id === question.id) {
@@ -151,19 +140,27 @@ const ParagraphAnswer = (props) => {
 
   return (
     <div>
-      <div className={clsx("flex", !disable && classes.inputText, ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && classes.deleteContent)}>
+      <div
+        className={clsx(
+          "flex",
+          !disable && classes.inputText,
+          ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state)
+          && classes.deleteContent
+        )}
+      >
         <TextField
           style={{
             border: 'none',
-            display: !isPermission ? (!paragraphText ? 'none' : '') : '',
+            display: !canEdit ? (!paragraphText ? 'none' : '') : '',
           }}
           fullWidth
-          placeholder={isPermission ? 'Typing...' : ''}
+          placeholder={canEdit ? 'Typing...' : ''}
           classes={{ root: classes.root }}
-          disabled={!isPermission || disable}
+          disabled={!canEdit || disable}
           InputProps={{
             style: {
-              fontSize: '14px',
+              fontWeight: 'bold',
+              fontSize: '17px',
               fontFamily: 'Montserrat',
               fontStyle: !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT'].includes(question.state) && 'italic'
             },
