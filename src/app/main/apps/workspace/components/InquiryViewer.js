@@ -2946,7 +2946,10 @@ const InquiryViewer = (props) => {
                                 </div>
                               </Tooltip>
                             </PermissionProvider>
-                            {!['REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT'].includes(question.state) && (
+                            <PermissionProvider
+                              action={PERMISSION.INQURIY_DELETE_COMMENT}
+                              extraCondition={!['REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT'].includes(question.state)}
+                            >
                               <Tooltip title="Delete">
                                 <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                                   <img
@@ -2955,7 +2958,7 @@ const InquiryViewer = (props) => {
                                   />
                                 </div>
                               </Tooltip>
-                            )}
+                            </PermissionProvider>
                           </>
                         )}
                       </>

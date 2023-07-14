@@ -798,9 +798,11 @@ const InquiryEditor = (props) => {
         });
         listInqOfField.forEach(l => {
           if (l.inqGroup && l.inqGroup.length) {
-            listInqType.push({
-              inqType: l.inqType,
-              receiver: l.receiver[0]
+            l.inqGroup.forEach(inqG => {
+              listInqType.push({
+                inqType: inqG.inqType,
+                receiver: inqG.receiver[0]
+              })
             })
           }
         });
