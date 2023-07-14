@@ -31,7 +31,7 @@ import clsx from 'clsx';
 import axios from 'axios';
 import { useDropzone } from 'react-dropzone';
 import ContentEditable from 'react-contenteditable';
-import clone from 'lodash/clone';
+import cloneDeep from 'lodash/cloneDeep';
 import { SocketContext } from 'app/AppContext';
 
 import * as Actions from '../store/actions';
@@ -223,7 +223,7 @@ const InquiryEditor = (props) => {
       workspace.inquiryReducer.enableSubmit,
     ]
   );
-  const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs )
+  const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs)
 
   const user = useSelector(({ user }) => user);
   const getField = (field) => {
@@ -288,6 +288,7 @@ const InquiryEditor = (props) => {
   const [content, setContent] = useState(currentEditInq.content || '');
   const [openCD, setOpenCD] = useState(false);
   const [openCM, setOpenCM] = useState(false);
+  const [keepTrack, setTrack] = useState({ blCreateChoice: false })
   const userType = useSelector(({ user }) => user.role?.toUpperCase());
 
   const syncData = (data, syncOptSite = "") => {
@@ -304,11 +305,16 @@ const InquiryEditor = (props) => {
 
   // auto create 2 choice for BL Type
   const autoCreateChoiceBLType = () => {
-    const inq = { ...currentEditInq };
-    const timeB = new Date();
-    const timeW = new Date(timeB.getTime() + 1);
-    inq.answerObj.push({ id: null, content: ORIGINAL_BL, createdAt: timeB }, { id: null, content: SEAWAY_BILL, createdAt: timeW });
-    dispatch(InquiryActions.setEditInq(inq));
+    const inquiriesOp = [...inquiries];
+    const isEdit = inquiriesOp.find((q) => q.id === currentEditInq.id)
+    if (!isEdit && !keepTrack.blCreateChoice) {
+      const inq = { ...currentEditInq };
+      const timeB = new Date();
+      const timeW = new Date(timeB.getTime() + 1);
+      inq.answerObj.push({ id: null, content: ORIGINAL_BL, createdAt: timeB }, { id: null, content: SEAWAY_BILL, createdAt: timeW });
+      dispatch(InquiryActions.setEditInq(inq));
+      setTrack({ ...keepTrack, blCreateChoice: true })
+    }
   }
 
   const handleShowTemplateCDCM = (type) => {
@@ -474,7 +480,7 @@ const InquiryEditor = (props) => {
       setValueAnsType(optionsAnsType);
       dispatch(InquiryActions.setEditInq(inq));
     }
-    currentEditInq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];  
+    currentEditInq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];
     return () => dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false, createInq: false }))
   }, []);
 
@@ -734,9 +740,7 @@ const InquiryEditor = (props) => {
   const handleAnswerTypeChange = (e) => {
     const inq = { ...currentEditInq };
     inq.ansType = e.value;
-    if (e.value !== metadata.ans_type.choice) {
-      inq.answerObj = [];
-    }
+
     if (fieldValue?.keyword === 'blType' && e.label === 'Option Selection') autoCreateChoiceBLType();
 
     dispatch(InquiryActions.validate({ ...valid, ansType: true }));
@@ -765,7 +769,12 @@ const InquiryEditor = (props) => {
   };
 
   const checkDuplicateInq = () => {
-    const listInqOfField = [...inquiries.filter((inq) => inq.field === currentEditInq.field)];
+    const listInqOfField = [...inquiries.filter((inq) => {
+      if (containerCheck.includes(inq.field)) {
+        return containerCheck.includes(currentEditInq.field)
+      }
+      return inq.field === currentEditInq.field
+    })];
     if (currentEditInq.id) {
       listInqOfField.splice(
         listInqOfField.findIndex((inq) => inq.id === currentEditInq.id),
@@ -819,6 +828,15 @@ const InquiryEditor = (props) => {
     }
     return false;
   };
+
+  const dispatchSetTab = (condition, contents, receiver) => {
+    if (condition) {
+      if (contents.every(item => (item.receiver.includes("onshore")))) dispatch(FormActions.setTabs(1));
+      if (contents.every(item => (item.receiver.includes("customer")))) dispatch(FormActions.setTabs(0));
+    } else {
+      dispatch(FormActions.setTabs(receiver === 'customer' ? 0 : 1));
+    }
+  }
 
   const onSave = async (isCdCm) => {
     setDisabled(true);
@@ -926,13 +944,17 @@ const InquiryEditor = (props) => {
         }
       }
 
-      const editInquiry = clone(currentEditInq);
+      const editInquiry = cloneDeep(currentEditInq);
+
       if (ansTypeChoice === editInquiry.ansType) {
         editInquiry.answerObj.push({
           id: null,
           content: '',
           createdAt: new Date(),
         })
+      }
+      else {
+        editInquiry.answerObj = []
       }
       if (checkInqChanged(inquiry, editInquiry, ansTypeChoice === editInquiry.ansType) && !containerCheck.includes(editInquiry.field)) {
         dispatch(
@@ -1053,6 +1075,8 @@ const InquiryEditor = (props) => {
         dispatch(InquiryActions.setEditInq());
         dispatch(InquiryActions.setInquiries(inquiriesOp));
 
+        dispatchSetTab(isCdCm, contentsInqCDCM, inquiriesOp[editedIndex].receiver[0]);
+
         // sync edit inquiry
         syncData({ inquiries: inquiriesOp });
 
@@ -1115,7 +1139,7 @@ const InquiryEditor = (props) => {
               content: '',
               createdAt: new Date(),
             })
-          }
+          } else contentTrim.answerObj = [];
           return contentTrim;
         });
       }
@@ -1168,6 +1192,8 @@ const InquiryEditor = (props) => {
               dispatch(FormActions.toggleCreateInquiry(false));
               dispatch(InquiryActions.setOneInq());
               props.getUpdatedAt();
+
+              dispatchSetTab(isCdCm, inqContentTrim, inqContentTrim[0].receiver[0]);
               setDisabled(false);
 
               // sync create inquiry
@@ -1183,7 +1209,7 @@ const InquiryEditor = (props) => {
   const onPaste = (e) => {
     if (e.clipboardData.files.length) {
       let fileObject = e.clipboardData.files[0];
-      const newFileName = generateFileName(fileObject.name, currentEditInq.mediaFile.map(fItem => { return fItem.name}))
+      const newFileName = generateFileName(fileObject.name, currentEditInq.mediaFile.map(fItem => { return fItem.name }));
       const myRenamedFile = new File([fileObject], newFileName, {
         type: "image/png"
       });
@@ -1496,6 +1522,7 @@ const InquiryEditor = (props) => {
                       files={currentEditInq.mediaFile}
                       field={currentEditInq.field}
                       question={currentEditInq}
+                      isEdit={true}
                     />
                   </>
                 ))}
@@ -1513,6 +1540,7 @@ const InquiryEditor = (props) => {
                         field={currentEditInq.field}
                         isAnswer={true}
                         question={currentEditInq}
+                        isEdit={true}
                       />
                     </>
                   ))}

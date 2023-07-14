@@ -101,8 +101,7 @@ function DialogConfirm(props) {
             onClick={() => {
               handleClose();
               history.push(`/guest?bl=${myBL.id}`, { skipVerification: true });
-            }
-            }
+            }}
             className='normal-case'>
             <span>No</span>
           </Button>
