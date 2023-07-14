@@ -140,7 +140,7 @@ function Layout1(props) {
             {isLoadingProcess && <Loading />}
             {config.toolbar.display && (config.toolbar.layout === 'layout2' ? <ToolbarLayout2 /> : <ToolbarLayout1 />)}
 
-            <FuseScrollbars className={classes.content} scrollToTopOnChildChange>
+            <FuseScrollbars className={classes.content}>
               <FuseDialog />
               <FuseSuspense>{renderRoutes(routes)}</FuseSuspense>
               {props.children}
