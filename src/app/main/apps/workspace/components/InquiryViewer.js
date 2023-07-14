@@ -481,7 +481,7 @@ const InquiryViewer = (props) => {
               const cloneContent = JSON.parse(JSON.stringify(contentInqResolved));
               const latestCdCmData = [...res].find((el, i) => {
                 getIndexLatestCdCm = i;
-                return el.type === 'ANS_CD_CM'
+                return el.type === 'ANS_CD_CM' && el.status !== 'DELETED'
               });
               if (latestCdCmData && isJsonText(latestCdCmData.content) && latestCdCmData.type === 'ANS_CD_CM') {
                 setContentCDCMInquiry({ ansId: latestCdCmData.id });

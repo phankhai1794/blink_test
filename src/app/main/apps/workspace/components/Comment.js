@@ -111,7 +111,7 @@ const Comment = (props) => {
     }
 
     const renderCommentStyles = () => {
-      if (containerCheck.includes(question.field) && ['REP_A_DRF', 'ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_AME_DRF', 'REP_AME_SENT'].includes(reply.state)) {
+      if (containerCheck.includes(question.field) && ['REP_A_DRF', 'ANS_DRF', 'REP_A_SENT', 'ANS_SENT', 'REP_AME_DRF', 'REP_AME_SENT', 'ANS_DRF_DELETED', 'REP_A_DRF_DELETED', 'ANS_SENT_DELETED', 'REP_A_SENT_DELETED'].includes(reply.state)) {
         if ((question.process === 'pending' && reply.type !== 'ANS_CD_CM')
         || (question.process === 'draft' && !['REP_AME_DRF', 'REP_AME_SENT'].includes(reply.state))) {
           return { paddingBottom: '0' }
@@ -207,7 +207,7 @@ const Comment = (props) => {
             ? currentQuestion.inqGroup.map(q => {
               return (
                 <div key={q.id}>
-                  <InquiryWithGroup inqGroup={q} role={user.role} />
+                  <InquiryWithGroup inqGroup={q} role={user.role} statusDelete={reply.status === 'DELETED'} />
                 </div>
               )
             }) : ``
