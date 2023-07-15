@@ -55,6 +55,7 @@ function ProjectDashboardApp(props) {
       AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }))
     );
 
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>")
     console.log("Current commit: ", process.env.REACT_APP_VERSION_ID);
 
     return () => {
