@@ -32,6 +32,8 @@ import { handleError } from '@shared/handleError';
 
 import * as Actions from '../store/actions';
 
+import { setLocalStorageItem } from './';
+
 const useStyles = makeStyles({
   root: {
     width: '100%',
@@ -590,7 +592,6 @@ const AddColumn = (columns, handleShowColumn) => {
 const QueueListTable = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
-
   const [state, setState] = useState({
     queueListBl: [],
     totalBkgNo: 1,
@@ -605,20 +606,7 @@ const QueueListTable = () => {
   const [orderBy, setOrderBy] = useState('bkgNo');
   const [openDetailIndex, setOpenDetailIndex] = useState();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [columns, setColumns] = useState({
-    lastUpdate: true,
-    etd: true,
-    shipperN: false,
-    customerS: true,
-    onshoreS: true,
-    blinkS: true,
-    vvd: true,
-    pol: false,
-    pod: false,
-    inquiry: true,
-    amendment: true,
-    resolve: true
-  });
+  const columns = useSelector(({ dashboard }) => dashboard.columns);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -629,7 +617,8 @@ const QueueListTable = () => {
   };
 
   const handleShowColumn = (value) => {
-    setColumns({ ...columns, ...value });
+    dispatch(Actions.setColumn({ ...columns, ...value }));
+    setLocalStorageItem('columns', { ...columns, ...value });
   };
 
   const fetchData = (page, size) => {
@@ -677,6 +666,7 @@ const QueueListTable = () => {
     const isAsc = orderBy === property && order === 'asc' ? 'desc' : 'asc';
     setOrder(isAsc);
     setOrderBy(property);
+    setLocalStorageItem('sortField', [property, isAsc]);
     dispatch(
       Actions.searchQueueQuery({ ...searchQueueQuery, sortField: [property, isAsc] })
     );
@@ -686,8 +676,10 @@ const QueueListTable = () => {
     setOpenDetailIndex(index !== openDetailIndex ? index : null);
   };
 
-  const showItems = (e) => {
-    setPage(Math.min(Math.ceil(state.totalBkgNo / e.target.value), page.currentPageNumber), e.target.value)
+  const showItems = ({ target }) => {
+    const { value } = target;
+    setPage(Math.min(Math.ceil(state.totalBkgNo / value), page.currentPageNumber), value);
+    setLocalStorageItem('pageSize', value);
   };
 
   return (
