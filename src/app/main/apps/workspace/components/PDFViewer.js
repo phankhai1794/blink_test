@@ -136,7 +136,7 @@ const useStyles = makeStyles((theme) => ({
       width: '100%',
       position: 'fixed',
       zIndex: 500,
-      background: '#132535',
+      background: '#1325357d',
       opacity: 0.8,
     },
     '& .closePreviewTop': {
@@ -655,7 +655,7 @@ const PDFViewer = (props) => {
                   left: '19rem',
                   width: '60px',
                   height: '60px',
-                  color: state.currentFileNo === 0 ? '#999999' : '#d3d3d3',
+                  color: state.currentFileNo === 0 ? '#999999' : 'white',
                   zIndex: 9000,
                   cursor: 'pointer'
                 }}
@@ -667,7 +667,7 @@ const PDFViewer = (props) => {
                   right: '19rem',
                   width: '60px',
                   height: '60px',
-                  color: state.currentFileNo >= state.documents.length - 1 ? '#999999' : '#d3d3d3',
+                  color: state.currentFileNo >= state.documents.length - 1 ? '#999999' : 'white',
                   transform: 'scaleX(-1)',
                   zIndex: 9000,
                   cursor: 'pointer'
@@ -772,7 +772,7 @@ const PDFViewer = (props) => {
       <DocViewer
         pluginRenderers={DocViewerRenderers}
         documents={allFileUrl}
-        initialActiveDocument={allFileUrl.length && inquiry.file && allFileUrl.find(f => f.fileId === inquiry.file.id)}
+        initialActiveDocument={allFileUrl.length && inquiry.file && allFileUrl.find(f => (f.filedId ? (f.fileId === inquiry.file.id) : (f.fileName === inquiry.file.name)))}
         config={{
           header: {
             overrideComponent: MyHeader
