@@ -633,6 +633,7 @@ const InquiryViewer = (props) => {
                 }
                 if (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state)) {
                   setSubmitLabel(true);
+                  setStateReplyDraft(false);
                   lastest.showIconAttachReplyFile = false;
                   lastest.showIconAttachAnswerFile = false;
                   lastest.showIconEdit = true;
