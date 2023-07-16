@@ -2579,6 +2579,14 @@ const InquiryViewer = (props) => {
       optionsInquires[editedIndex].showIconReply = false;
       optionsInquires[editedIndex].showIconAttachReplyFile = false;
       optionsInquires[editedIndex].showIconAttachAnswerFile = true;
+      // set default value cd cm
+      if (containerCheck.includes(reply.field)
+          && (isJsonText(reply.answerObj[0].content) || reply.ansForType !== 'ANS_CD_CM')) {
+        optionsInquires[editedIndex].paragraphAnswer = {
+          inquiry: reply.id,
+          content: reply.answerObj[0].content || '',
+        }
+      }
       optionsInquires[editedIndex].selectChoice = '';
       dispatch(InquiryActions.setInquiries(optionsInquires));
       reply.showIconAttachReplyFile = false;
