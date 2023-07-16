@@ -33,8 +33,8 @@ export const loadMetadata = () => (dispatch) => {
 export const loadContent = (bl) => async (dispatch) => {
   if (bl) {
     const [blResponse, contentRespone] = [
-      await getBlInfo(bl),
-      await getCustomerAmendment(bl)
+      await getBlInfo(bl).catch(err => handleError(dispatch, err)),
+      await getCustomerAmendment(bl).catch(err => handleError(dispatch, err))
     ];
     const { id, bkgNo, state, content } = blResponse?.myBL;
     const { contentAmendmentRs } = contentRespone;
@@ -166,8 +166,8 @@ export function setAmendmentField(state) {
 // As same as app > main > apps > workspace > store > actions > index.js > loadInquiry()
 export const setInquiries = (bl) => async (dispatch) => {
   const [resInq, resDraft] = [
-    await getInquiryById(bl),
-    await getFieldContent(bl)
+    await getInquiryById(bl).catch(err => handleError(dispatch, err)),
+    await getFieldContent(bl).catch(err => handleError(dispatch, err))
   ];
 
   resInq.forEach((res) => (res.process = 'pending'));
