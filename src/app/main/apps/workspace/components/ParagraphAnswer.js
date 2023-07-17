@@ -51,6 +51,7 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
   const dispatch = useDispatch();
 
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const user = useSelector(({ user }) => user);
   const eventClickContNo = useSelector(({ workspace }) => workspace.formReducer.eventClickContNo);
 
   const [paragraphText, setParagraphText] = useState(question.answerObj?.[0]?.content || '');
@@ -175,7 +176,7 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
           value={paragraphText}
           onChange={handleChangeInput}
           helperText={
-            !question.showIconReply && validateField(question.field, question.content).errorType.split('\n').map((line, idx) => (
+            user.role === "Guest" && !question.showIconReply && !question.showIconEdit && validateField(question.field, question.content).errorType.split('\n').map((line, idx) => (
               <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
             ))
           }

@@ -524,7 +524,12 @@ function ToolbarLayout1(props) {
                   ))}
                 </TextField>}
 
-              {!pathname.includes('/draft') && <BtnQueueList />}
+              <PermissionProvider
+                action={PERMISSION.MYBL_GET_QUEUE_LIST}
+                extraCondition={!pathname.includes('/draft')}
+              >
+                <BtnQueueList />
+              </PermissionProvider>
 
               <PermissionProvider
                 action={PERMISSION.VIEW_EDIT_DRAFT_BL}

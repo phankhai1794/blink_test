@@ -10,6 +10,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import { getInquiryById } from 'app/services/inquiryService';
+import { handleError } from '@shared/handleError';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -259,7 +260,7 @@ const AllInquiry = (props) => {
       optionsInquires[editedIndex].selectChoice = '';
     } else if (isCancel && isAnswered) {
       optionsInquires[editedIndex].selectChoice = '';
-      const [resInq] = [await getInquiryById(myBL.id)];
+      const resInq = await getInquiryById(myBL.id).catch(err => handleError(dispatch, err));
       resInq.forEach(ans => {
         //reset data click cancel
         if (optionsInquires[editedIndex].id === ans.id) {

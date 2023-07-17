@@ -58,8 +58,9 @@ const useStyles = makeStyles((theme) => ({
 const flagUrl = (value) => `assets/images/flags/${value.toLowerCase()}.svg`;
 
 function ToolbarLayout2(props) {
-  const { pathname, search } = window.location;
+  const { search } = window.location;
   const classes = useStyles(props);
+  const fcountry = JSON.parse(localStorage.getItem('fcountry') || '""');
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
   const dispatch = useDispatch();
 
@@ -70,7 +71,7 @@ function ToolbarLayout2(props) {
 
   useEffect(() => {
     // auto select only 1 default country when access to BLINK via OPUS
-    let result = [...countryOption];
+    let result = fcountry || [...countryOption];
     if (search) {
       const cntr = new URLSearchParams(search).get('cntr');
       if (cntr && countryOption.includes(cntr)) result = [cntr];
@@ -94,9 +95,11 @@ function ToolbarLayout2(props) {
       if (values.length > countryOption.length) {
         setSelectedStatus([]);
         dispatch(Actions.filterCountry([]));
+        localStorage.setItem('fcountry', JSON.stringify([]));
       } else {
         setSelectedStatus([...countryOption]);
         dispatch(Actions.filterCountry(countryOption));
+        localStorage.setItem('fcountry', JSON.stringify(countryOption));
       }
     } else {
       const arrSelected = [];
@@ -108,6 +111,7 @@ function ToolbarLayout2(props) {
       });
       setSelectedStatus(arrSelected);
       dispatch(Actions.filterCountry(arrStatus));
+      localStorage.setItem('fcountry', JSON.stringify(arrSelected));
     }
   };
 
