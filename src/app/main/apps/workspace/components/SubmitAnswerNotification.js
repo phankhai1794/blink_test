@@ -76,9 +76,8 @@ const SubmitAnswerNotification = ({ msg, msg2 = 'Thank you!', iconType, open }) 
 
     if (userLocal.displayName && usersAccessing.length) {
       let permissions = await getPermissionByRole(userLocal.role);
-      if (userLocal.displayName === usersAccessing[usersAccessing.length - 1].userName) { // if to be the last user
+      if (userLocal.displayName !== usersAccessing[0].userName) // if not to be the first user
         permissions = await getPermissionByRole('Viewer');
-      }
 
       setTimeout(() => {
         dispatch(AppActions.setUser({ ...userLocal, permissions }));

@@ -339,7 +339,8 @@ const OtpCheck = ({ children }) => {
 
       // refill email when code expires
       let lastEmail = localStorage.getItem('lastEmail');
-      if (lastEmail) setMail({ ...mail, value: lastEmail, isValid: isEmail(lastEmail) });
+      if (lastEmail && !["null", "undefined"].includes(lastEmail))
+        setMail({ ...mail, value: lastEmail, isValid: isEmail(lastEmail) });
     }
 
     init();
