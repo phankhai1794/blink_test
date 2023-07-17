@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const InquiryWithGroup = ({ inqGroup, role }) => {
+const InquiryWithGroup = ({ inqGroup, role, statusDelete }) => {
   const classes = useStyles();
 
   return (
@@ -26,7 +26,7 @@ const InquiryWithGroup = ({ inqGroup, role }) => {
       {/*{role === 'Admin' ? (*/}
       {/*  <FormControlLabel classes={{ label: classes.labelDisabled }} control={<Radio checked disabled style={{ color: '#132535' }} />} label={inqGroup.receiver.includes('customer') ? "Customer" : "Onshore"} />*/}
       {/*) : ``}*/}
-      <div style={{ padding: role === 'Admin' ? '10px 0px' : '16px 0px' }}>{inqGroup.content}</div>
+      <div style={{ padding: role === 'Admin' ? '10px 0px' : '16px 0px', textDecorationLine: statusDelete ? 'line-through' : '' }}>{inqGroup.content}</div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { getLabelById } from '@shared';
 import * as Actions from 'app/store/actions';
+import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 
 export const handleError = (dispatch, err) => {
   console.error(err);
@@ -16,6 +17,8 @@ export const handleError = (dispatch, err) => {
     dispatch(Actions.checkAllow(false));
   }
   else dispatch(Actions.showMessage({ message, variant: 'error' }));
+
+  dispatch(FormActions.resetLoading());
   return [status, message];
 };
 
