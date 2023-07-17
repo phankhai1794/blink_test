@@ -246,7 +246,7 @@ export default function Form(props) {
     tabSelected,
     isPreviewFile
   } = props;
-  
+
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
@@ -272,7 +272,7 @@ export default function Form(props) {
     workspace.formReducer.tabs,
     workspace.formReducer.openPreviewFiles
   ]);
- 
+
   const currentAmendment = useSelector(
     ({ workspace }) => workspace.inquiryReducer.currentAmendment
   );
@@ -376,7 +376,8 @@ export default function Form(props) {
     dispatch(DraftBLActions.setCurrentField());
   };
 
-  const handleChange = (_, newValue) => {dispatch(InquiryActions.setEditInq());
+  const handleChange = (_, newValue) => {
+    dispatch(InquiryActions.setEditInq());
     props.tabChange(newValue);
     dispatch(FormActions.setTabs(newValue))
   };
@@ -387,9 +388,9 @@ export default function Form(props) {
       return inq.process === 'pending' && inq.receiver.includes('onshore')
         && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')
     }).length;
-    if (countOnshore !== 0 && tabSelected === 1) {
-      setNumber = 1;
-    }props.tabChange(setNumber);
+
+    if (countOnshore !== 0 && tabSelected === 1) setNumber = 1;
+    props.tabChange(setNumber);
   }, [enableSubmit, openAllInquiry]);
 
   const openMinimize = () => {
@@ -440,19 +441,22 @@ export default function Form(props) {
     }
   }, [open]);
 
-  useEffect(()=> {
-    if(scrollInquiry) {
+  useEffect(() => {
+    if (scrollInquiry) {
       props.tabChange(currentTabs);
     }
   }, [scrollInquiry])
-  
-  useEffect(()=> {
+
+  useEffect(() => {
     props.tabChange(currentTabs);
   }, [currentTabs])
 
   useEffect(() => {
-    if(openAllInquiry && nums && nums.length && nums[0] === 0 && nums[1] !== 0){
-      dispatch(FormActions.setTabs(1))
+    if (openAllInquiry && nums && nums.length) {
+      if (nums[0] !== 0 && nums[1] === 0)
+        dispatch(FormActions.setTabs(0));
+      else if (nums[0] === 0 && nums[1] !== 0)
+        dispatch(FormActions.setTabs(1));
     }
   }, [openAllInquiry])
 
@@ -474,7 +478,7 @@ export default function Form(props) {
         PaperComponent={PaperComponent}
         maxWidth="md"
         container={() => document.getElementById('content-wrapper')}
-        classes={{ paperScrollPaper: isPreviewFile ? classes.hideDialog : (isFullScreen ? classes.dialogFullWidth : classes.dialogPaper )}}>
+        classes={{ paperScrollPaper: isPreviewFile ? classes.hideDialog : (isFullScreen ? classes.dialogFullWidth : classes.dialogPaper) }}>
         <DialogTitle
           id="draggable-dialog-title"
           style={isFullScreen ? null : { cursor: 'move' }}
