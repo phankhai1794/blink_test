@@ -482,7 +482,7 @@ const InquiryViewer = (props) => {
               const cloneContent = JSON.parse(JSON.stringify(contentInqResolved));
               const latestCdCmData = [...res].find((el, i) => {
                 getIndexLatestCdCm = i;
-                return el.type === 'ANS_CD_CM'
+                return el.type === 'ANS_CD_CM' && el.status !== 'DELETED'
               });
               if (latestCdCmData && isJsonText(latestCdCmData.content) && latestCdCmData.type === 'ANS_CD_CM') {
                 setContentCDCMInquiry({ ansId: latestCdCmData.id });
@@ -633,6 +633,7 @@ const InquiryViewer = (props) => {
                 }
                 if (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state)) {
                   setSubmitLabel(true);
+                  setStateReplyDraft(false);
                   lastest.showIconAttachReplyFile = false;
                   lastest.showIconAttachAnswerFile = false;
                   lastest.showIconEdit = true;
@@ -732,12 +733,7 @@ const InquiryViewer = (props) => {
           if (res.length > 0) {
             let getRes = res;
             // console.log('getRes', getRes)
-            const filterRepAmend = res.filter(r => r.state.includes('REP_AME_'));
-            // filter latest reply amendment
-            if (filterRepAmend.length) {
-              const getRepAmend = filterRepAmend[0];
-              getRes = res.filter(r => r.id !== getRepAmend.id);
-            }
+            const filterRepAmend = res.filter(r => r.state.includes('REP_AME_') && !['REP_DRF_DELETED', 'REP_AME_DRF_DELETED'].includes(r.state));
             const getLatest = getRes[0];
             const { content: contentField, mediaFile } = getLatest.content;
             setDisableCDCMAmendment(true);
@@ -748,6 +744,14 @@ const InquiryViewer = (props) => {
                 inqAnsId = lastestComment.draftAnswerId;
               }
               setInqAnsId(inqAnsId);
+            }
+            // filter latest reply amendment
+            if (filterRepAmend.length) {
+              const getRepAmend = filterRepAmend[0];
+              if ((['REP_DRF', 'REP_SENT'].includes(lastestComment.state) && lastestComment.role === 'Guest' && user.role === 'Guest')
+                  || ['REP_SENT'].includes(lastestComment.state) && lastestComment.role === 'Guest' && user.role === 'Admin') {
+                getRes = res.filter(r => r.id !== getRepAmend.id);
+              }
             }
             // filter comment
             lastest.mediaFile = mediaFile;
@@ -763,7 +767,7 @@ const InquiryViewer = (props) => {
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
             if (containerCheck.includes(question.field)) {
-              const lastestContentCDCM = res.filter(r => r.state.includes('AME_') || r.state.includes('REOPEN_'));
+              const lastestContentCDCM = res.filter(r => (r.state.includes('AME_') || r.state.includes('REOPEN_')) && !['REP_AME_DRF_DELETED', 'REP_AME_SENT_DELETED'].includes(r.state));
               lastest.contentCDCM = lastestContentCDCM[0].content.content;
               if (filterRepAmend.length) {
                 lastest.contentReplyCDCM = filterRepAmend[0].content.content;
@@ -1254,7 +1258,9 @@ const InquiryViewer = (props) => {
                       })
                       .catch((err) => handleError(dispatch, err));
                   }
-                } else if (res.isEditOriginalAmendment) {
+                }
+
+                if (res.isEditOriginalAmendment) {
                   newContent = { ...newContent, [question.field]: res.drfAnswersTrans }
                 }
 
@@ -2574,6 +2580,14 @@ const InquiryViewer = (props) => {
       optionsInquires[editedIndex].showIconReply = false;
       optionsInquires[editedIndex].showIconAttachReplyFile = false;
       optionsInquires[editedIndex].showIconAttachAnswerFile = true;
+      // set default value cd cm
+      if (containerCheck.includes(reply.field)
+          && (isJsonText(reply.answerObj[0].content) || reply.ansForType !== 'ANS_CD_CM')) {
+        optionsInquires[editedIndex].paragraphAnswer = {
+          inquiry: reply.id,
+          content: reply.answerObj[0].content || '',
+        }
+      }
       optionsInquires[editedIndex].selectChoice = '';
       dispatch(InquiryActions.setInquiries(optionsInquires));
       reply.showIconAttachReplyFile = false;
@@ -3158,7 +3172,7 @@ const InquiryViewer = (props) => {
             {(question.isShowTableToReply
               && containerCheck.includes(question.field)
               && question.process === 'draft'
-              && !['RESOLVED', 'REOPEN_A', 'REOPEN_Q'].includes(question.state)
+              && !['RESOLVED', 'REOPEN_A', 'REOPEN_Q', 'AME_SENT'].includes(question.state)
             ) ? (
               <div style={{ marginTop: 15 }}>
                 <ContainerDetailForm
