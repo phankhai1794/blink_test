@@ -122,21 +122,20 @@ export const validatePartiesContent = (partiesContent, type) => {
   return { isError, errorType }
 }
 
-export const validateAlsoNotify = (content) => {
-  const MAX_LENGTH = 35;
-  const ErrorMessage = 'The maximum number of lines is 5. No more than 35 characters per each line.';
+export const validateGroupOneTextBox = (content, isDoG = false) => {
+  const MAX_LENGTH = isDoG ? 33 : 35;
+  const ErrorMessage = `${!isDoG ? 'The maximum number of lines is 5. ' : ''}No more than ${MAX_LENGTH} characters per each line.`;
   let isError = false, errorType = "";
   const textInput = content;
   const arrTextInput = typeof textInput === 'string' ? textInput.split('\n') : [];
   arrTextInput.forEach(text => {
     if (text.length > MAX_LENGTH) isError = true;
   })
-  if (arrTextInput.length > 5) {
-    isError = true;
-  };
+
+  if (arrTextInput.length > 5 && !isDoG) isError = true;
   isError && (errorType = ErrorMessage);
 
-  return { isError, errorType }
+  return { isError, errorType };
 }
 
 export const validateBLType = (input) => {
