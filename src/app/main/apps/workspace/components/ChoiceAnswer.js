@@ -65,8 +65,6 @@ const ChoiceAnswer = (props) => {
       lastOptionId
     };
 
-    if (!isLast) setOtherOptionText();
-
     optionsInquires[editedIndex].selectChoice = selectedObj;
     dispatch(InquiryActions.setInquiries(optionsInquires));
   };
