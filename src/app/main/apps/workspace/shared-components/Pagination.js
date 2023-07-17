@@ -66,49 +66,49 @@ const usePagination = (
   return paginationRange;
 };
 const Pagination = (props) => {
-  const { currentNumber, totalPage, totalBkgNo, query, searchQueueQuery } = props;
+  const { page, totalBkgNo, setPage } = props;
   const classes = useStyles();
 
-  const [state, setState] = useState({ currentNumber, totalPage, totalPageNumber: Math.ceil(totalBkgNo / query.pageSize) });
+  const [state, setState] = useState({ page: page.currentPageNumber, totalPageNumber: Math.ceil(totalBkgNo / page.pageSize) });
 
   useEffect(() => {
-    setState({ currentNumber, totalPage, totalPageNumber: Math.ceil(totalBkgNo / query.pageSize) });
+    setState({ page: page.currentPageNumber, totalPageNumber: Math.ceil(totalBkgNo / page.pageSize) });
   }, [props]);
 
-  const handleSelectPage = (page) => {
-    searchQueueQuery({ currentPageNumber: page });
-    setState({ ...state, currentNumber: page });
+  const handleSelectPage = (currentPage) => {
+    setPage(currentPage, page.pageSize)
+    setState({ ...state, page: currentPage });
   }
 
   const handlePrevious = () => {
-    if (state.currentNumber > 1) {
-      searchQueueQuery({ currentPageNumber: state.currentNumber - 1 });
-      setState({ ...state, currentNumber: state.currentNumber - 1 });
+    if (state.page > 1) {
+      setPage(state.page - 1, page.pageSize)
+      setState({ ...state, page: state.page - 1 });
     }
   }
 
   const handleNext = () => {
-    if (state.currentNumber < state.totalPageNumber) {
-      searchQueueQuery({ currentPageNumber: state.currentNumber + 1 });
-      setState({ ...state, currentNumber: state.currentNumber + 1 });
+    if (state.page < state.totalPageNumber) {
+      setPage(state.page + 1, page.pageSize)
+      setState({ ...state, page: state.page + 1 });
     }
   }
 
-  const paginationRange = usePagination(state.totalPageNumber, state.currentNumber);
+  const paginationRange = usePagination(state.totalPageNumber, state.page);
 
   return (
     <>
       {/* <a key={'start'} onClick={() => handleClickStart()} style={{ fontSize: '17px' }}>&laquo;</a> */}
       <a key={'previous'} onClick={() => handlePrevious()}><NavigateBefore style={{ fontSize: '15px' }} /></a>
-      {paginationRange?.map(pageNumber => {
+      {paginationRange?.map((pageNumber, index) => {
         if (pageNumber === DOTS) {
-          return <div style={{ margin: 'auto 0', textAlign: 'center', width: 40 }}>&#8230;</div>;
+          return <div key={`pa-${index}`} style={{ margin: 'auto 0', textAlign: 'center', width: 40 }}>&#8230;</div>;
         }
 
         return (
           <a
             key={pageNumber + 1}
-            className={(state.currentNumber === pageNumber) ? classes.pageSelected : ''}
+            className={(state.page === pageNumber) ? classes.pageSelected : ''}
             onClick={() => handleSelectPage(pageNumber)}
           >
             {pageNumber}

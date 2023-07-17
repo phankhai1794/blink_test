@@ -11,8 +11,8 @@ import { getBlInfo } from 'app/services/myBLService';
 import { SocketContext } from 'app/AppContext';
 import { getPermissionByRole } from 'app/services/authService';
 import * as AppAction from 'app/store/actions';
-import { checkBroadCastAccessing, categorizeInquiriesByUserType } from '@shared';
-import { BROADCAST } from '@shared/keyword';
+import { categorizeInquiriesByUserType } from '@shared';
+import { handleError } from '@shared/handleError';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -65,7 +65,6 @@ const BLProcessNotification = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const socket = useContext(SocketContext);
-  const channel = new BroadcastChannel(BROADCAST.ACCESS);
 
   const [open, setOpen] = useState(false);
 
@@ -78,8 +77,8 @@ const BLProcessNotification = () => {
   const checkBLProcess = async () => {
     dispatch(FormActions.increaseLoading());
     const [lengthInq, lengthContent] = [
-      await getInquiryById(myBL.id).then((res) => res.length),
-      await getBlInfo(myBL.id).then((res) => Object.keys(res.myBL.content).length)
+      await getInquiryById(myBL.id).then((res) => res.length).catch(err => handleError(dispatch, err)),
+      await getBlInfo(myBL.id).then((res) => Object.keys(res.myBL.content).length).catch(err => handleError(dispatch, err))
     ];
     dispatch(FormActions.decreaseLoading());
     if (!lengthInq && !lengthContent) setOpen(true);
@@ -102,14 +101,6 @@ const BLProcessNotification = () => {
 
       const user = JSON.parse(localStorage.getItem('USER'));
 
-      // post a signal
-      channel.postMessage(user.role);
-
-      // receive signal
-      channel.onmessage = (e) => {
-        checkBroadCastAccessing(e.data);
-      };
-
       // user connect
       const mybl = (user.userType === "ADMIN") ? [myBL.bkgNo, myBL.id] : [myBL.id, myBL.bkgNo];
       socket.emit(
@@ -122,9 +113,20 @@ const BLProcessNotification = () => {
         }
       );
 
-      // Receive the list user accessing
+      // save socketId into window console after connecting
+      socket.on('user_socket_id', (socketId) => {
+        window.socketId = socketId;
+      });
+
+      // receive a list of accessed onshores/customers
+      socket.on('users_allowed_access', (data) => {
+        if (!data.includes(user.email))
+          window.location.reload();
+      });
+
+      // receive a list users accessing
       socket.on('users_accessing', async ({ usersAccessing }) => {
-        console.log("usersAccessing: ", usersAccessing);
+        window.usersAccessing = usersAccessing;
 
         if (
           user.userType === "ADMIN"
@@ -133,17 +135,13 @@ const BLProcessNotification = () => {
         ) {
           const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
           if (userLocal.displayName && usersAccessing.length) {
-            let permissions = await getPermissionByRole('Viewer');
-            dispatch(AppAction.setUser({ ...userLocal, permissions }));
-
-            if (userLocal.displayName === usersAccessing[0]) { // if to be the first user
-              permissions = await getPermissionByRole(userLocal.role);
-              // close the warning popup if the user is granted permission
+            if (userLocal.displayName === usersAccessing[0].userName) { // if to be the first user
               dispatch(FormActions.toggleOpenBLWarning(false));
-            } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1]) { // if to be the last user
-              dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0] }));
+            } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1].userName) { // if to be the last user
+              dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0].userName }));
             }
 
+            const permissions = await getPermissionByRole(userLocal.role).catch(err => handleError(dispatch, err));
             setTimeout(() => {
               dispatch(AppAction.setUser({ ...userLocal, permissions }));
             }, 500);
@@ -152,20 +150,31 @@ const BLProcessNotification = () => {
         }
       });
 
-      // Receive the message sync state
-      // socket.on('sync_state', async (res) => {
-      //   const result = categorizeInquiriesByUserType(user.userType, res.inquiries);
-      //   dispatch(InquiryActions.setInquiries(result));
-      //   if (res.listMinimize) dispatch(InquiryActions.setListMinimize(res.listMinimize));
-      //   if (res.content) dispatch(InquiryActions.setContent(res.content));
-      //   if (res.amendments) dispatch(InquiryActions.setListCommentDraft(res.amendments));
-      // });
+      // receive the message sync state
+      socket.on('sync_state', async ({ from, data }) => {
+        const { inquiries, listMinimize, content, amendments } = data;
+
+        const result = categorizeInquiriesByUserType(from, user.userType, myBL, inquiries);
+        dispatch(InquiryActions.setInquiries(result));
+
+        if (listMinimize) {
+          if (from === "ADMIN") dispatch(InquiryActions.setListMinimize(listMinimize));
+          else {
+            let listMin = JSON.parse(sessionStorage.getItem("listMinimize"));
+            // merge two array objects while removing duplicates
+            listMin = listMin.concat(listMinimize).filter((item, idx, self) => {
+              return idx === self.findIndex(el => el.id === item.id);
+            });
+            dispatch(InquiryActions.setListMinimize(listMin));
+          }
+        }
+
+        if (content) dispatch(InquiryActions.setContent(content));
+
+        if (amendments) dispatch(InquiryActions.setListCommentDraft(amendments));
+      });
     }
   }, [myBL]);
-
-  useEffect(() => {
-    return () => channel.close();
-  }, [])
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md">

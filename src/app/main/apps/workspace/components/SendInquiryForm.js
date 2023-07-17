@@ -1,6 +1,6 @@
 import * as Actions from 'app/store/actions';
 import { checkNewInquiry } from '@shared';
-import { PORT_OF_DISCHARGE, PORT_OF_LOADING, VESSEL_VOYAGE_CODE, PRE_CARRIAGE_CODE, ETD } from '@shared/keyword';
+import { PORT_OF_DISCHARGE, PORT_OF_LOADING, VESSEL_VOYAGE_CODE, PRE_CARRIAGE_CODE, ETD, SHIPPER_NAME } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import React, { useState, useEffect, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -97,6 +97,7 @@ const SendInquiryForm = (props) => {
   const mybl = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
+  const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const pathName = window.location.pathname;
@@ -144,7 +145,7 @@ const SendInquiryForm = (props) => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const syncData = (data, syncOptSite = "") => {
-    // socket.emit("sync_data", { data, syncOptSite });
+    socket.emit("sync_data", { data, syncOptSite });
   };
 
   const getField = (keyword) => {
@@ -154,12 +155,13 @@ const SendInquiryForm = (props) => {
     return content[getField(keyword)] || '';
   };
 
+  const bkgNo = mybl.bkgNo;
   const vvdCode = getValueField(PRE_CARRIAGE_CODE) || getValueField(VESSEL_VOYAGE_CODE);
   const pod = getValueField(PORT_OF_DISCHARGE);
   const pol = getValueField(PORT_OF_LOADING)
   const etd = getValueField(ETD);
-
-  const bkgNo = mybl.bkgNo;
+  let shipperName = getValueField(SHIPPER_NAME);
+  shipperName = shipperName?.trim() ? `${shipperName} +` : '';
 
   const initiateContentState = (content) => {
     return EditorState.createWithContent(ContentState.createFromText(content));
@@ -185,6 +187,7 @@ const SendInquiryForm = (props) => {
     let header = 'New Reply';
     let subject = 'Customer BL Query';
     let msg = '';
+
     if ((newInq.length && newRep.length) || (newInq.length && newAmeRep.length)) {
       const countInq = newInq.length > 1;
       const countRep = [...new Set([...newRep, ...newAmeRep])].length > 1;
@@ -196,13 +199,13 @@ const SendInquiryForm = (props) => {
         header,
         'NEW REPLY'
       ];
-    } else if (newInq.length) {
-      header = 'New Inquiry';
     } else if (newRep.length) {
       msg = 'Thank you very much for your response to our inquiries. However, there are still some pending issues that need to be clarified in the following BL fields:';
     } else if (newAmeRep.length) {
       msg = 'Thank you very much for checking BL draft. Your amendment requests are in progress; however, there are still some pending issues that need to be clarified in the following BL fields:';
       subject = 'BL Amendment Request';
+    } else if (newInq.length || array.length) {
+      header = 'New Inquiry';
     }
     return [msg, array.map((a) => `- ${a}`).join('\n'), header, subject];
   };
@@ -243,7 +246,7 @@ const SendInquiryForm = (props) => {
     if (hasOnshore || (!hasOnshore && inqOnshore.length)) {
       setTabValue('onshore');
 
-      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
+      subject = `[Onshore - BL Query]_[${inqOnshore.length > 1 ? 'MULTIPLE INQUIRIES' : inqOnshore[0]}] ${bkgNo}: ${shipperName} T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
       const [msg1, msg2, header] = convertToList(inqOnshore, 'onshore');
       content = pathName.includes('/guest') ? '' : `Dear Onshore,\n \n${msg1 || 'We need your assistance for BL completion.\n \nPending issue(s):'}\n${msg2}`;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
@@ -259,7 +262,7 @@ const SendInquiryForm = (props) => {
       setTabValue('customer');
 
       const [msg1, msg2, header, subj] = convertToList(inqCustomer, 'customer');
-      subject = `[${subj}]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
+      subject = `[${subj}]_[${inqCustomer.length > 1 ? 'MULTIPLE INQUIRIES' : inqCustomer[0]}] ${bkgNo}: ${shipperName} T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
       content = pathName.includes('/guest') ? '' : `Dear Customer,\n \n${msg1 || `We found discrepancy between SI and OPUS booking details or missing/ incomplete information on some BL's fields as follows:`}\n${msg2} `;
       bodyHtml = draftToHtml(convertToRaw(ContentState.createFromText(content)));
       setCustomerValue({
@@ -271,7 +274,7 @@ const SendInquiryForm = (props) => {
       });
     }
     if (pathName.includes('/guest')) {
-      subject = `Fwd: ${bkgNo}: T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
+      subject = `Fwd: ${bkgNo}: ${shipperName} T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
     }
     setForm({ ...form, subject, content: bodyHtml, toOnshore, toCustomer });
     handleEditorState(content);
@@ -351,6 +354,11 @@ const SendInquiryForm = (props) => {
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'sendMail') {
       const cloneInquiries = [...inquiries];
+      const resend = Boolean(
+        (tabValue === 'customer' && !hasCustomer && inqCustomer.length)
+        ||
+        (tabValue === 'onshore' && !hasOnshore && inqOnshore.length)
+      );
       const formClone = JSON.parse(JSON.stringify(form));
       let header = '';
       if (tabValue === 'onshore') {
@@ -373,7 +381,8 @@ const SendInquiryForm = (props) => {
           inquiries: cloneInquiries,
           user: user,
           header,
-          tab: tabValue
+          tab: tabValue,
+          resend
         })
       );
       dispatch(
@@ -404,12 +413,21 @@ const SendInquiryForm = (props) => {
         dispatch(
           Actions.showMessage({ message: 'EMAIL ADDRESS DOES NOT EXIST', variant: 'error' })
         );
-    } else if (tabValue === 'onshore' && !pathName.includes('/guest') && [...tags['toOnshore'], ...tags['toOnshoreCc'], ...tags['toOnshoreBcc']].some(
-      (mail) => !/.*@one-line.com/.test(mail)
-    )) {
+    } else if (
+      tabValue === 'onshore'
+      && !pathName.includes('/guest')
+      && [...tags['toOnshore'], ...tags['toOnshoreCc'], ...tags['toOnshoreBcc']].some(
+        (mail) => !/.*@one-line.com/.test(mail) && !/.*@googlegroups.com/.test(mail)
+      )
+    ) {
       dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
-    } else if (tabValue === 'customer' && !pathName.includes('/guest') && [...tags['toCustomer'], ...tags['toCustomerCc'], ...tags['toCustomerBcc']].some(
-      (mail) => /.*@one-line.com/.test(mail))) {
+    } else if (
+      tabValue === 'customer'
+      && !pathName.includes('/guest')
+      && [...tags['toCustomer'], ...tags['toCustomerCc'], ...tags['toCustomerBcc']].some(
+        (mail) => /.*@one-line.com/.test(mail) || /.*@googlegroups.com/.test(mail)
+      )
+    ) {
       dispatch(Actions.showMessage({ message: 'ONE email address is not allowed', variant: 'error' }));
     } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
       return;
@@ -496,6 +514,7 @@ const SendInquiryForm = (props) => {
         toggleForm={(status) => dispatch(FormActions.toggleOpenEmail(status))}
         openFab={false}
         field={props.field}
+        isPreviewFile={openPreviewFiles}
         style={previewValue === 'email' && { backgroundColor: '#fdf2f2' }}
         customActions={
           <ActionUI

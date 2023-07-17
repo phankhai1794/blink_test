@@ -46,17 +46,25 @@ export const loadMetadata = () => async (dispatch) => {
 export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
   try {
     dispatch(FormActions.increaseLoading());
+
     const [blResponse, contentRespone] = [
-      await getBlInfo(myBL_Id),
-      await getCustomerAmendment(myBL_Id)
+      await getBlInfo(myBL_Id).catch((err) => handleError(dispatch, err)),
+      await getCustomerAmendment(myBL_Id).catch((err) => handleError(dispatch, err))
     ];
     const { orgContent, content } = blResponse?.myBL;
     const { contentAmendmentRs } = contentRespone;
     const cloneContent = { ...content };
-    dispatch(setContentInqResolved(content));
+
     dispatch(setOrgContent(orgContent));
+    dispatch(setContentInqResolved(content));
+
+    // sync content amendment
+    // storing content without amendments
+    sessionStorage.setItem('content', JSON.stringify(content));
+
     contentAmendmentRs?.length && contentAmendmentRs.forEach((a) => (cloneContent[a.field] = a.content));
     dispatch(setContent(cloneContent));
+
     dispatch(FormActions.decreaseLoading());
   } catch (err) {
     handleError(dispatch, err);
@@ -87,7 +95,10 @@ export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnCd) => async (dispatch) 
 export const loadInquiry = (myBL_Id) => async (dispatch) => {
   try {
     dispatch(FormActions.increaseLoading());
-    const [resInq, resDraft] = [await getInquiryById(myBL_Id), await getFieldContent(myBL_Id)];
+    const [resInq, resDraft] = [
+      await getInquiryById(myBL_Id).catch(err => handleError(dispatch, err)),
+      await getFieldContent(myBL_Id).catch(err => handleError(dispatch, err))
+    ];
 
     resInq.forEach((res) => (res.process = 'pending'));
     resDraft.forEach((res) => (res.process = 'draft'));

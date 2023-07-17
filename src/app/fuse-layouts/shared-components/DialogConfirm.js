@@ -11,16 +11,16 @@ import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import history from '@history';
 
 function DialogConfirm(props) {
-  const { handleClose, open } = props;
+  const { handleClose, open, msg } = props;
   const user = useSelector(({ user }) => user);
   const myBL = useSelector(({ draftBL }) => draftBL.myBL);
   const dispatch = useDispatch();
 
   return (
     <Dialog onClose={handleClose} onClick={handleClose} aria-labelledby="customized-dialog-title" open={open} maxWidth="md" style={{ fontSize: '16px', fontFamily: 'Montserrat' }}>
-      <DialogContent style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '485px', height: '141px' }}>
-        <DialogContent id="alert-dialog-title" className='text-center font-bold' style={{ marginTop: '30px' }}>
-          <span style={{ color: '#bd1874' }}>Do you want to confirm the draft?</span>
+      <DialogContent style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '485px' }}>
+        <DialogContent id="alert-dialog-title" className='text-center font-bold' style={{ marginTop: '15px', whiteSpace: 'pre' }}>
+          <span style={{ color: '#bd1874' }}>{msg + 'Do you want to confirm the draft?'}</span>
         </DialogContent>
         <DialogActions style={{ marginBottom: '30px', padding: 0 }}>
           <Button
@@ -101,8 +101,7 @@ function DialogConfirm(props) {
             onClick={() => {
               handleClose();
               history.push(`/guest?bl=${myBL.id}`, { skipVerification: true });
-            }
-            }
+            }}
             className='normal-case'>
             <span>No</span>
           </Button>

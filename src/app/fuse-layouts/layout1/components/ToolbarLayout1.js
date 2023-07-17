@@ -159,7 +159,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ToolbarLayout1(props) {
-  const { pathname, search, logout } = window.location;
+  const { pathname, search } = window.location;
   const dispatch = useDispatch();
   const classes = useStyles(props);
   const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
@@ -178,18 +178,13 @@ function ToolbarLayout1(props) {
   const [inquiryLength, setInquiryLength] = useState();
 
   const enableSubmitInq = inquiries.some((inq) => ['ANS_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
-
-  const onUnload = (e) => {
-    e.preventDefault();
-    e.returnValue = '';
-  }
+  const msgConfirmDrf = inquiries.some((inq) => !['RESOLVED', 'UPLOADED', 'COMPL'].includes(inq.state)) ? 'Still has pending inquiry/amendment \n' : '';
 
   useEffect(() => {
-    if (inquiries.some((inq) => ['OPEN', 'REP_Q_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state))) {
-      window.addEventListener("beforeunload", onUnload);
-    }
-    return () => window.removeEventListener("beforeunload", onUnload);
-  }, [inquiries])
+    dispatch(FormActions.setDirtyReload({
+      sendMail: inquiries.some((inq) => ['OPEN', 'REP_Q_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state))
+    }));
+  }, [inquiries]);
 
   useEffect(() => {
     const countInquiry = inquiries.filter((inq) => inq.process === 'pending' && !['COMPL', 'UPLOADED'].includes(inq.state))
@@ -382,16 +377,14 @@ function ToolbarLayout1(props) {
   };
 
   const showQueueList = () => {
+    const country = new URLSearchParams(search).get('cntr');
+    const param = country ? `?cntr=${country}` : "";
     userType === 'ADMIN' ?
-      window.open('/apps/admin') :
+      window.open(`/apps/admin${param}`) :
       dispatch(InquiryActions.openQueueList(true));
   }
 
-  const confirmBlDraft = () => {
-    if (inquiries.some((inq) => !['RESOLVED', 'UPLOADED', 'COMPL'].includes(inq.state))) {
-      dispatch(AppActions.showMessage({ message: "Unable to confirm, still has pending inquiry/amendment", variant: 'warning' }));
-    } else setOpen(true);
-  };
+  const confirmBlDraft = () => setOpen(true);
 
   const redirectWorkspace = () => {
     const bl = new URLSearchParams(search).get('bl');
@@ -531,7 +524,12 @@ function ToolbarLayout1(props) {
                   ))}
                 </TextField>}
 
-              {!pathname.includes('/draft') && <BtnQueueList />}
+              <PermissionProvider
+                action={PERMISSION.MYBL_GET_QUEUE_LIST}
+                extraCondition={!pathname.includes('/draft')}
+              >
+                <BtnQueueList />
+              </PermissionProvider>
 
               <PermissionProvider
                 action={PERMISSION.VIEW_EDIT_DRAFT_BL}
@@ -552,7 +550,7 @@ function ToolbarLayout1(props) {
                   <img src="assets/images/icons/confirm.svg" style={{ position: 'relative', right: 2, width: 11, height: 11 }} />
                   <span claseeName={classes.dratTypeText}>Confirm</span>
                 </Button>
-                <DialogConfirm open={open} handleClose={handleClose} />
+                <DialogConfirm open={open} handleClose={handleClose} msg={msgConfirmDrf} />
               </PermissionProvider>
 
               <PermissionProvider
@@ -578,7 +576,7 @@ function ToolbarLayout1(props) {
                 </div>
               </PermissionProvider>
 
-              <PermissionProvider
+              {/* <PermissionProvider
                 action={PERMISSION.MAIL_SEND_MAIL}
                 extraCondition={pathname.includes('/guest')}
               >
@@ -594,7 +592,7 @@ function ToolbarLayout1(props) {
                     <span className="pl-4">Forward</span>
                   </Button>
                 </div>
-              </PermissionProvider>
+              </PermissionProvider> */}
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}

@@ -10,7 +10,7 @@ import { SocketContext } from 'app/AppContext';
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
-import {CONTAINER_DETAIL, CONTAINER_MANIFEST} from "../../../../../@shared/keyword";
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST } from "../../../../../@shared/keyword";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -73,11 +73,13 @@ const PopupConfirmSubmit = (props) => {
     workspace.formReducer.openAmendmentList
   ]);
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+  const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
 
   const user = useSelector(({ user }) => user);
 
   const syncData = (data, syncOptSite = "") => {
-    // socket.emit("sync_data", { data, syncOptSite });
+    socket.emit("sync_data", { data, syncOptSite });
   };
 
   const getField = (field) => {
@@ -91,9 +93,13 @@ const PopupConfirmSubmit = (props) => {
     const lstInq = inqs
       .map((item) => {
         if (
-          (props.field === "INQUIRY_LIST"
-               || (((containerCheck.includes(item.field) && containerCheck.includes(props.field)) || (item.field === props.field && !containerCheck.includes(item.field))
-              )))
+          (
+            props.field === "INQUIRY_LIST"
+            ||
+            (containerCheck.includes(item.field) && containerCheck.includes(props.field))
+            ||
+            (item.field === props.field && !containerCheck.includes(item.field))
+          )
           && item.answerObj
           && !['OPEN', 'INQ_SENT', 'ANS_SENT', 'AME_SENT', 'COMPL', 'UPLOADED'].includes(item.state)
         ) {
@@ -143,7 +149,17 @@ const PopupConfirmSubmit = (props) => {
     dispatch(InquiryActions.setInquiries(inqs));
 
     // sync submit
-    syncData({ inquiries: inqs }, "ADMIN");
+    syncData(
+      {
+        inquiries: inqs,
+        ...(
+          myBL.state.includes("DRF_")
+          && user.userType === "CUSTOMER"
+          && { content, listMinimize }
+        )
+      },
+      "ADMIN"
+    );
 
     props.handleCheckSubmit();
     dispatch(InquiryActions.setShowBackgroundAttachmentList(false));

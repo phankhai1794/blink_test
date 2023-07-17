@@ -131,7 +131,13 @@ const useStyles = makeStyles(() => ({
     minHeight: 600,
     maxHeight: '80%',
     margin: 0,
-    width: '100%'
+    width: '100%',
+  },
+  hideDialog: {
+    display: 'none'
+  },
+  dialogFullWidth: {
+    transform: 'translate(-0,0) !important'
   },
   dialogContent: {
     margin: 'auto',
@@ -237,9 +243,10 @@ export default function Form(props) {
     popoverfooter,
     showBtnSend,
     nums,
-    tabSelected
+    tabSelected,
+    isPreviewFile
   } = props;
-
+  
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const currentEditInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentEditInq);
@@ -256,14 +263,20 @@ export default function Form(props) {
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
   );
 
-  const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
-  const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
-  const openInqReview = useSelector(({ workspace }) => workspace.formReducer.openInqReview);
+  const [openAllInquiry, openPreviewListSubmit, openInqReview, scrollInquiry, openAmendmentList, currentTabs, openPreviewFiles] = useSelector(({ workspace }) => [
+    workspace.formReducer.openAllInquiry,
+    workspace.formReducer.openPreviewListSubmit,
+    workspace.formReducer.openInqReview,
+    workspace.formReducer.scrollInquiry,
+    workspace.formReducer.openAmendmentList,
+    workspace.formReducer.tabs,
+    workspace.formReducer.openPreviewFiles
+  ]);
+ 
   const currentAmendment = useSelector(
     ({ workspace }) => workspace.inquiryReducer.currentAmendment
   );
   const isLoading = useSelector(({ workspace }) => workspace.mailReducer.isLoading);
-  const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
 
   const [openFab, setOpenFab] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -307,30 +320,19 @@ export default function Form(props) {
           <Paper {...props} id="paper" />
         </Draggable>
     ,
-    [isFullScreen]
+    []
   );
 
   const toggleFullScreen = (open) => {
     setIsFullScreen(open);
   };
-  const onUnload = (e) => {
-    e.preventDefault();
-    e.returnValue = '';
-  }
-
-  useEffect(() => {
-    if (currentEditInq || currentFieldAmend || reply) {
-      window.addEventListener("beforeunload", onUnload);
-    }
-    return () => window.removeEventListener("beforeunload", onUnload);
-  }, [currentEditInq, currentFieldAmend, reply])
 
   const handleClick = () => {
     if (!currentEditInq) {
       if (inquiries.length + 1 === metadata.field_options.length) {
         dispatch(FormActions.toggleAddInquiry(false));
       }
-      dispatch(InquiryActions.addQuestion(currentField));
+      dispatch(InquiryActions.addQuestion(openAllInquiry ? null : currentField));
     }
   };
 
@@ -353,11 +355,12 @@ export default function Form(props) {
     sortListClose(listMinimize, field);
     dispatch(InquiryActions.setReply(false));
     dispatch(InquiryActions.setEditInq(null));
+    dispatch(FormActions.setScrollInquiry(''))
 
     if (field === 'ATTACHMENT_LIST') dispatch(FormActions.toggleReload());
 
     dispatch(FormActions.toggleSaveInquiry(false));
-    dispatch(InquiryActions.setOneInq({}));
+    dispatch(InquiryActions.setOneInq({})); // close popup inquiry detail
 
     const currentInq = listMinimize.find((q) => q.field === field);
     if (currentInq?.id && listInqMinimize.includes(currentInq.id)) {
@@ -373,9 +376,9 @@ export default function Form(props) {
     dispatch(DraftBLActions.setCurrentField());
   };
 
-  const handleChange = (_, newValue) => {
-    dispatch(InquiryActions.setEditInq());
+  const handleChange = (_, newValue) => {dispatch(InquiryActions.setEditInq());
     props.tabChange(newValue);
+    dispatch(FormActions.setTabs(newValue))
   };
 
   useEffect(() => {
@@ -386,8 +389,7 @@ export default function Form(props) {
     }).length;
     if (countOnshore !== 0 && tabSelected === 1) {
       setNumber = 1;
-    }
-    props.tabChange(setNumber);
+    }props.tabChange(setNumber);
   }, [enableSubmit, openAllInquiry]);
 
   const openMinimize = () => {
@@ -438,6 +440,22 @@ export default function Form(props) {
     }
   }, [open]);
 
+  useEffect(()=> {
+    if(scrollInquiry) {
+      props.tabChange(currentTabs);
+    }
+  }, [scrollInquiry])
+  
+  useEffect(()=> {
+    props.tabChange(currentTabs);
+  }, [currentTabs])
+
+  useEffect(() => {
+    if(openAllInquiry && nums && nums.length && nums[0] === 0 && nums[1] !== 0){
+      dispatch(FormActions.setTabs(1))
+    }
+  }, [openAllInquiry])
+
   return (
     <div>
       {openFab && (
@@ -456,7 +474,7 @@ export default function Form(props) {
         PaperComponent={PaperComponent}
         maxWidth="md"
         container={() => document.getElementById('content-wrapper')}
-        classes={{ paperScrollPaper: isFullScreen ? null : classes.dialogPaper }}>
+        classes={{ paperScrollPaper: isPreviewFile ? classes.hideDialog : (isFullScreen ? classes.dialogFullWidth : classes.dialogPaper )}}>
         <DialogTitle
           id="draggable-dialog-title"
           style={isFullScreen ? null : { cursor: 'move' }}

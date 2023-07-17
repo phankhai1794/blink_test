@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
 import { Button, Typography, FormHelperText, FormControl, TextField } from "@material-ui/core";
@@ -6,14 +6,14 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
-import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate } from '@shared';
+import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate, generateFileName  } from '@shared';
 import { NO_CONTENT_AMENDMENT, CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import { validateTextInput } from 'app/services/myBLService';
-import { useUnsavedChangesWarning } from 'app/hooks'
 import { useDropzone } from 'react-dropzone';
+import { SocketContext } from 'app/AppContext';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -88,6 +88,8 @@ const useStyles = makeStyles((theme) => ({
 const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const socket = useContext(SocketContext);
+
   const user = useSelector(({ user }) => user);
   const [metadata, content, myBL, inquiries, enableSubmit] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.metadata,
@@ -96,7 +98,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     workspace.inquiryReducer.inquiries,
     workspace.inquiryReducer.enableSubmit,
   ]);
-  const [Prompt, setDirty, setPristine] = useUnsavedChangesWarning();
   const [filepaste, setFilepaste] = useState('');
   const [dropfiles, setDropfiles] = useState([]);
   const currentField = useSelector(({ draftBL }) => draftBL.currentField);
@@ -117,6 +118,10 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const [isDateTime, setIsDateTime] = useState(false);
   const [isValidDate, setIsValidDate] = useState(false);
 
+  const syncData = (data, syncOptSite = false) => {
+    socket.emit("sync_data", { data, syncOptSite });
+  };
+
   const getAttachment = (value) => setAttachments([...attachments, ...value]);
 
   const removeAttachment = (index) => {
@@ -134,7 +139,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   };
 
   const handleChange = (e, isDate = false) => {
-    setDirty();
+    dispatch(FormActions.setDirtyReload({ createAme: true }));
     if (isDate) {
       if (!isNaN(e?.getTime())) {
         setFieldValue(e.toISOString());
@@ -150,21 +155,21 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   }
 
   const inputTextSeparate = (e, type) => {
-    setDirty();
+    dispatch(FormActions.setDirtyReload({ createAme: true }));
     setFieldValueSeparate(Object.assign({}, fieldValueSeparate, { [type]: e.target.value }));
     setChange(true);
   };
 
-  const handleValidateInput = async (confirm = null) => {
-    setDisableSave(true);
-    let textInput = fieldValue || '';
-    const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo }).catch(err => handleError(dispatch, err));
-    if (isWarning) {
-      dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
-    } else {
-      confirm && confirm();
-    }
-  }
+  // const handleValidateInput = async (confirm = null) => {
+  //   setDisableSave(true);
+  //   let textInput = fieldValue || '';
+  //   const { isWarning, prohibitedInfo } = await validateTextInput({ textInput, dest: myBL.bkgNo }).catch(err => handleError(dispatch, err));
+  //   if (isWarning) {
+  //     dispatch(FormActions.validateInput({ isValid: false, prohibitedInfo, handleConfirm: confirm }));
+  //   } else {
+  //     confirm && confirm();
+  //   }
+  // }
 
   const validationCDCM = (contsNo) => {
     const warningLeast1CM = [];
@@ -342,16 +347,20 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
               dispatch(InquiryActions.setListMinimize(optionsMinimize));
             }
 
+            let newContent = { ...content, [fieldReq]: contentField };
+            dispatch(InquiryActions.setContent(newContent));
             dispatch(InquiryActions.setInquiries(optionsInquires));
             dispatch(InquiryActions.checkSubmit(!enableSubmit));
             getUpdatedAt();
             setDisableSave(false);
-            dispatch(InquiryActions.setContent({ ...content, [fieldReq]: contentField }));
             dispatch(FormActions.toggleCreateAmendment(false));
             dispatch(FormActions.toggleAmendmentsList(true));
             dispatch(InquiryActions.addAmendment());
             dispatch(InquiryActions.setOneInq({}));
-            setPristine()
+            dispatch(FormActions.setDirtyReload({ createAme: false }));
+
+            // sync create amendment
+            syncData({ inquiries: optionsInquires, listMinimize: optionsMinimize, content: newContent });
           }).catch((err) => handleError(dispatch, err));
       })
       .catch((err) => handleError(dispatch, err))
@@ -407,7 +416,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             error={validateField(field, fieldValue).isError}
             helperText={
               validateField(field, fieldValue).errorType.split('\n').map((line, idx) => (
-                <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+                <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'red' }}>{line}</span>
               ))
             }
           />
@@ -466,6 +475,10 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   }
 
   useEffect(() => {
+    return () => dispatch(FormActions.setDirtyReload({ createAme: false }));
+  }, [])
+
+  useEffect(() => {
     if (!openAmendmentList) {
       let contentField = content[currentField];
       if (containerCheck.includes(currentField)) {
@@ -495,7 +508,11 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const onPaste = (e) => {
     if (e.clipboardData.files.length) {
       const fileObject = e.clipboardData.files[0];
-      setFilepaste(fileObject);
+      const newFileName = generateFileName(fileObject.name, attachments.map(fItem => { return fItem.name}))
+      const myRenamedFile = new File([fileObject], newFileName, {
+        type: "image/png"
+      });
+      setFilepaste(myRenamedFile);
     }
   }
 
@@ -576,15 +593,16 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
       <div className={classes.attachmentFiles}>
         {attachments?.map((file, mediaIndex) => (
-          <div style={{ position: 'relative', display: 'inline-block' }} key={mediaIndex}>
+          <>
             <FileAttach
               file={file}
               files={attachments}
               question={question}
               draftBL={true}
               removeAttachmentDraftBL={() => removeAttachment(mediaIndex)}
+              isEdit={true}
             />
-          </div>
+          </>
         ))}
       </div>
 

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import DescriptionIcon from '@material-ui/icons/Description';
 import { makeStyles } from '@material-ui/styles';
 import CloseIcon from '@material-ui/icons/Close';
-import { IconButton, Tooltip } from '@material-ui/core';
+import {Avatar, IconButton, Tooltip} from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { PERMISSION, PermissionProvider } from "@shared/permission";
 import { getFile } from 'app/services/fileService';
 import { getSrcFileIcon } from '@shared';
+import {cyan} from "@material-ui/core/colors";
 
 import * as InquiryActions from "../store/actions/inquiry";
 import * as FormActions from "../store/actions/form";
@@ -18,7 +19,9 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: '10px',
     marginRight: '10px',
     marginBottom: '10px',
+    width: '100%',
     backgroundColor: '#F5F8FA',
+    border: '1px solid #BAC3CB',
     '&:first-child': {
       marginLeft: 0
     },
@@ -48,18 +51,44 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: '600',
     lineHeight: '73.14px',
     position: 'absolute',
-    width: '70px',
+    width: '100%',
     height: '73px',
-    left: '20%',
-    top: '18%',
+    left: '50%',
+    top: '50%',
+    transform: 'translate(-50%, -50%)',
     background: 'none',
     border: 'none'
   },
   backgroupOverFile: {
     position: 'absolute',
     background: 'rgba(19, 37, 53, 0.6)',
-    width: 166,
-    height: 141
+    width: 150,
+    height: '93%',
+    zIndex: 11
+  },
+  fileInfo: {
+    width: '100%',
+    height: 'auto',
+    flexDirection: 'row',
+    '& .createdAt-image': {
+      color: '#343434ad',
+      fontSize: 12,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
+    }
+  },
+  avatarStyle: {
+    position: 'absolute',
+    display: 'flex',
+    justifyContent: 'center',
+    bottom: '-21px',
+    left: '68px',
+    alignItems: 'center',
+    '& .MuiAvatar-root': {
+      width: 30,
+      height: 30,
+    }
   }
 }));
 
@@ -78,7 +107,8 @@ const FileAttach = ({
   draftBL = false,
   removeAttachmentDraftBL,
   isRemoveFile,
-  setIsRemoveFile
+  setIsRemoveFile,
+  isEdit
 }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -88,7 +118,8 @@ const FileAttach = ({
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.enableExpandAttachment,
   ]);
-
+  const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
+  const user = useSelector(({ user }) => user);
   const [srcUrl, setSrcUrl] = useState(file.src || null);
 
   const urlMedia = (fileExt, file) => {
@@ -113,8 +144,18 @@ const FileAttach = ({
     }
   }, [file]);
 
-  const previewFile = () =>
-    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: files, file } }));
+  const previewFile = () => {
+    const formatFiles = files.map(itemMedia => {
+      return {
+        ...itemMedia,
+        creator: question.creator,
+        field: question.field,
+        inqType: question.inqType,
+        inquiryId: question.id,
+      }
+    })
+    dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: true, currentInqPreview: { files: formatFiles, file, isEdit: isEdit } }));
+  }
 
   const handleRemoveFile = (id) => {
     const optionsOfQuestion = { ...currentEditInq };
@@ -177,88 +218,148 @@ const FileAttach = ({
 
   const srcFile = getSrcFileIcon(file);
 
+  const indexNumberExpand = fullscreen ? 5 : 4;
+
+  const displayTimeAttachment = (time) => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    let inputTime = new Date(time);
+
+    let month = months[inputTime.getMonth()];
+    let day = inputTime.getDate();
+    let hour = inputTime.getHours()
+    let minute = inputTime.getMinutes()
+    let year = inputTime.getFullYear()
+    minute = minute.toString().length === 1 ? `0${minute}` : minute
+    return `${month} ${day} ${year} at ${hour}:${minute}`
+  }
+
   return (
-    <div
-      className={classes.root}
-      style={{ display: (question && !enableExpandAttachment.includes(question.id) && indexMedia > 4) ? 'none' : 'block' }}>
-      {(question && !enableExpandAttachment.includes(question.id) && indexMedia === 4 && files.length > 5) &&
+    <div style={{ position: 'relative', display: (question && !enableExpandAttachment.includes(question.id) && indexMedia > indexNumberExpand) ? 'none' : 'inline-block', width: 150, marginRight: 12 }}>
+      <div
+        className={classes.root}
+        style={{ display: (question && !enableExpandAttachment.includes(question.id) && indexMedia > indexNumberExpand) ? 'none' : 'block' }}>
+        {(question && !enableExpandAttachment.includes(question.id) && indexMedia === indexNumberExpand && files.length > indexNumberExpand + 1) &&
         <div className={classes.backgroupOverFile}>
           <button className={classes.overAttachment} onClick={handleExpand} >
-            +{files.length - 4}
+            +{files.length - indexNumberExpand}
           </button>
-        </div>
-      }
-      <div style={{ border: '1px solid #BAC3CB', borderRadius: '4px 4px 0px 0px', width: '165px', height: '110px' }}>
-        {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
-          <img
-            style={{
-              objectFit: 'cover'
-            }}
-            src={srcUrl}
-            onClick={previewFile}
-            onDragStart={(event) => event.preventDefault()}
-          />
-        ) : (
-          srcFile ? (
-            <img src={srcFile} onClick={previewFile} />
+        </div>}
+        <div style={{ width: '100%', height: '98px', position: 'relative' }}>
+          {file.ext.toLowerCase().match(/jpeg|jpg|png/g) ? (
+            <img
+              style={{
+                position: 'relative',
+                top: 0,
+                left: 0,
+                height: '100%',
+                width: '100%'
+              }}
+              src={srcUrl}
+              onClick={previewFile}
+              onDragStart={(event) => event.preventDefault()}
+            />
           ) : (
-            <DescriptionIcon classes={{ fontSizeLarge: classes.fontSizeLarge }} onClick={previewFile} onDragStart={(event) => event.preventDefault()} fontSize='large' />
-          )
-        )
-        }
-      </div>
+            srcFile ? (
+              <img
+                style={{
+                  position: 'relative',
+                  top: '14%',
+                  left: '24%',
+                  height: '75%',
+                  width: '52%'
+                }}
+                src={srcFile} onClick={previewFile}
+              />
+            ) : (
+              <DescriptionIcon
+                fontSize='large'
+                classes={{ fontSizeLarge: classes.fontSizeLarge }}
+                style={{
+                  position: 'relative',
+                  top: '14%',
+                  left: '14%',
+                  height: '75%',
+                  width: '75%'
+                }}
+                onClick={previewFile}
+                onDragStart={(event) => event.preventDefault()}
+              />
+            )
+          )}
+        </div>
 
-      <div style={{ display: 'flex', width: 165, height: 27, flexDirection: 'row', border: '1px solid #BAC3CB', borderRadius: '0px 0px 4px 4px' }}>
-        {srcFile ?
-          (<img style={{ width: 17, height: 17, padding: '7px 2px' }} src={srcFile} onClick={previewFile} />)
-          : (
-            (file.ext.toLowerCase().match(/jpeg|jpg|png/g) ?
-              <img src={'/assets/images/logos/image_icon.png'} style={{ width: 16, height: 15, padding: '7px 2px' }} />
-              : <DescriptionIcon style={{ width: 17, height: 17, padding: '7px 2px' }} onClick={previewFile} />)
-          )
-        }
-        <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
-          <h3
-            style={{ fontSize: '14px', color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }}
-            onClick={previewFile}>
-            {file.name}
-          </h3>
-        </Tooltip>
-        {isAnswer && (
-          !hiddenRemove && (
-            <PermissionProvider
-              action={PERMISSION.INQUIRY_ANSWER_ATTACHMENT}>
-              <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
-                <CloseIcon />
-              </IconButton>
-            </PermissionProvider>
-          )
-        )}
-        {isReply && (
-          !hiddenRemove && (
-            <PermissionProvider
-              action={PERMISSION.INQUIRY_UPDATE_REPLY}>
-              <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
-                <CloseIcon />
-              </IconButton>
-            </PermissionProvider>
-          )
-        )}
-        {!isAnswer && !isReply && (
-          !hiddenRemove && (
-            <PermissionProvider
-              action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
-              <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
-                <CloseIcon />
-              </IconButton>
-            </PermissionProvider>
-          )
-        )}
-        {draftBL &&
-          <IconButton onClick={removeAttachmentDraftBL} style={{ padding: 2 }}>
-            <CloseIcon />
-          </IconButton>
-        }
+        <div className={classes.fileInfo}>
+          <div style={{ display: 'flex', height: 28 }}>
+            {/*{srcFile ?*/}
+            {/*  (<img style={{ width: 17, height: 17, padding: '7px 2px' }} src={srcFile} onClick={previewFile} />)*/}
+            {/*  : (*/}
+            {/*    (file.ext.toLowerCase().match(/jpeg|jpg|png/g) ?*/}
+            {/*      <img src={'/assets/images/logos/image_icon.png'} style={{ width: 16, height: 15, padding: '7px 2px' }} />*/}
+            {/*      : <DescriptionIcon style={{ width: 17, height: 17, padding: '7px 2px' }} onClick={previewFile} />)*/}
+            {/*  )*/}
+            {/*}*/}
+            <Tooltip title={<span style={{ wordBreak: 'break-word' }}>{file.name}</span>}>
+              <h3
+                style={{ fontSize: '12px', color: '#515F6B', width: hiddenRemove ? '100%' : '80%' }}
+                onClick={previewFile}>
+                {file.name}
+              </h3>
+            </Tooltip>
+
+            {isAnswer && (
+              !hiddenRemove && (
+                <PermissionProvider
+                  action={PERMISSION.INQUIRY_ANSWER_ATTACHMENT}>
+                  <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                    <CloseIcon />
+                  </IconButton>
+                </PermissionProvider>
+              )
+            )}
+            {isReply && (
+              !hiddenRemove && (
+                <PermissionProvider
+                  action={PERMISSION.INQUIRY_UPDATE_REPLY}>
+                  <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                    <CloseIcon />
+                  </IconButton>
+                </PermissionProvider>
+              )
+            )}
+            {!isAnswer && !isReply && (
+              !hiddenRemove && (
+                <PermissionProvider
+                  action={PERMISSION.INQUIRY_UPDATE_INQUIRY}>
+                  <IconButton onClick={() => handleRemoveFile(file)} style={{ padding: 2 }}>
+                    <CloseIcon />
+                  </IconButton>
+                </PermissionProvider>
+              )
+            )}
+            {draftBL &&
+            <IconButton onClick={removeAttachmentDraftBL} style={{ padding: 2 }}>
+              <CloseIcon />
+            </IconButton>
+            }
+          </div>
+
+          <div className={'createdAt-image'}>
+            {file && file.id ? (
+              <>
+                {question.creator && <div>{question.creator?.userName}</div>}
+
+                {(question.createdAt || question.updatedAt) &&
+                  <div>{displayTimeAttachment(question.createdAt || question.updatedAt)}</div>}
+              </>
+            ) : (
+              <>
+                {user && <div>{user.displayName}</div>}
+                <div>New Attachment</div>
+              </>
+            )}
+
+          </div>
+        </div>
       </div>
     </div>
   );

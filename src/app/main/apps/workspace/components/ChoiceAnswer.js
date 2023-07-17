@@ -72,8 +72,8 @@ const ChoiceAnswer = (props) => {
   };
 
   useEffect(() => {
-    const lastChoice = question.answerObj?.[question.answerObj.length - 1].content
-    setOtherOptionText(lastChoice !== 'Other' ? lastChoice : null)
+    const lastChoice = question.answerObj?.[question.answerObj.length - 1].content;
+    setOtherOptionText(lastChoice || null);
     if (allowUpdateChoiceAnswer) {
       setPermission(true);
     } else {
@@ -83,7 +83,12 @@ const ChoiceAnswer = (props) => {
 
   useEffect(() => {
     if (!questionIsEmpty) {
-      if (prevChoiceArray.length) setSelectedChoice(prevChoiceArray[0].id);
+      if (prevChoiceArray.length) {
+        setSelectedChoice(prevChoiceArray[0].id);
+
+        const lastChoice = question.answerObj?.[question.answerObj.length - 1].content;
+        setOtherOptionText(lastChoice || null);
+      }
       else setSelectedChoice('');
     }
   }, [question]);
@@ -105,7 +110,7 @@ const ChoiceAnswer = (props) => {
         >
           {question.answerObj?.map((choice, index) => {
             const lastElement = question.answerObj.length - 1 === index
-            if ((lastElement && choice.content) || !lastElement || user.role === 'Guest') {
+            if ((lastElement && choice.content) || !lastElement || (user.role === 'Guest' && (!selectedChoice || selectedChoice === choice.id || !disable))) {
               return (
                 <div key={index} style={{ marginTop: '0.5rem', display: 'flex' }}>
                   <FormControlLabel

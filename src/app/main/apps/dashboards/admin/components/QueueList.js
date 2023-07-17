@@ -17,7 +17,6 @@ import {
   Grid,
   Icon
 } from '@material-ui/core';
-import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 import SearchIcon from '@material-ui/icons/Search';
 import { formatDate } from '@shared';
 import clsx from 'clsx';
@@ -25,7 +24,11 @@ import { mapperBlinkStatus } from '@shared/keyword';
 import { DateRangePicker, defaultStaticRanges } from 'react-date-range';
 import { subMonths, addDays, subDays } from 'date-fns';
 
+import * as Actions from '../store/actions';
+
 import QueueListTable from './QueueListTable';
+
+import { setLocalStorageItem } from './';
 import 'react-date-range/dist/styles.css'; // main css file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 
@@ -73,7 +76,8 @@ const useStyles = makeStyles((theme) => ({
     },
     '& input': {
       fontFamily: 'Montserrat',
-      fontSize: '14px'
+      fontSize: '14px',
+      textTransform: 'uppercase'
     }
   },
   searchBox: {
@@ -132,48 +136,40 @@ const QueueList = () => {
     </>
   );
 };
-const blStatusOption = Object.values(mapperBlinkStatus);
+const blStatusOption = Object.keys(mapperBlinkStatus);
 
 const SearchLayout = (props) => {
   const end = new Date();
   const start = subMonths(end, 1);
   const classes = useStyles();
   const dispatch = useDispatch();
+  const settings = JSON.parse(localStorage.getItem('dashboard') || '{}');
   const initialState = {
     bookingNo: '',
     from: start,
     to: end,
-    blStatus: Object.keys(mapperBlinkStatus)
+    blStatus: blStatusOption,
   };
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState({ ...initialState, blStatus: settings.blStatus || blStatusOption });
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
   const [startingDate, setStartingDate] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState([...blStatusOption, 'All']);
   const [isPickerOpen, setPickerOpen] = useState(false);
   const [labelDate, setLabelDate] = useState();
   const pickerRef = useRef(null);
 
   const handleSelectStatus = (event) => {
     let values = event.target.value;
-    const arrStatus = [];
-    if (values.indexOf('All') !== -1 && selectedStatus.indexOf('All') === -1) {
-      setSelectedStatus([...blStatusOption, 'All']);
-      setState({ ...state, blStatus: Object.keys(mapperBlinkStatus) });
-    } else if (values.indexOf('All') === -1 && selectedStatus.indexOf('All') !== -1) {
-      setSelectedStatus([]);
-      setState({ ...state, blStatus: '' });
+    if (values.indexOf('All') !== -1 && values.indexOf('All') === values.length - 1) {
+      if (values.length < blStatusOption.length) {
+        setState({ ...state, blStatus: blStatusOption });
+        setLocalStorageItem('blStatus', blStatusOption);
+      } else {
+        setState({ ...state, blStatus: [] });
+        setLocalStorageItem('blStatus', []);
+      }
     } else {
-      const arrSelected = [];
-      values.forEach((item) => {
-        if (item !== 'All') {
-          arrStatus.push(
-            Object.keys(mapperBlinkStatus).find((key) => mapperBlinkStatus[key] === item)
-          );
-          arrSelected.push(item);
-        }
-      });
-      setSelectedStatus(arrSelected);
-      setState({ ...state, blStatus: arrStatus });
+      setState({ ...state, blStatus: values });
+      setLocalStorageItem('blStatus', values);
     }
   };
 
@@ -186,14 +182,32 @@ const SearchLayout = (props) => {
     if (state.blStatus.indexOf() !== -1) {
       blStatus = blStatus.splice(blStatus.indexOf(), 1);
     }
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...state }));
+    dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...state }));
   };
 
   const handleReset = () => {
-    const query = { ...initialState, currentPageNumber: 1, sortField: ['lastUpdated', 'DESC'] };
     setState(initialState);
-    setSelectedStatus([...blStatusOption, 'All']);
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...query }));
+
+    dispatch(Actions.setPage(1, 10));
+    dispatch(Actions.setColumn({
+      lastUpdate: true,
+      etd: true,
+      shipperN: false,
+      customerS: true,
+      onshoreS: true,
+      blinkS: true,
+      vvd: true,
+      pol: false,
+      pod: false,
+      inquiry: true,
+      amendment: true,
+      resolve: true
+    }));
+
+    const query = { ...initialState, sortField: ['lastUpdated', 'DESC'] };
+    dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...query }));
+
+    localStorage.removeItem("dashboard");
   };
 
   const handleClickOutside = (event) => {
@@ -332,16 +346,14 @@ const SearchLayout = (props) => {
                 <Select
                   className={classes.selectStatus}
                   multiple
-                  value={selectedStatus}
+                  value={state.blStatus}
                   onChange={handleSelectStatus}
                   input={<Input style={{ width: '100%' }} />}
                   renderValue={(selected) => (
                     <div className={classes.chips}>
                       {selected.map(
                         (value) =>
-                          value !== 'All' && (
-                            <Chip key={value} label={value} className={classes.chip} />
-                          )
+                          <Chip key={value} label={mapperBlinkStatus[value]} className={classes.chip} />
                       )}
                     </div>
                   )}
@@ -350,7 +362,7 @@ const SearchLayout = (props) => {
                     key={'All'}
                     value={'All'}
                     classes={{ selected: classes.menuItemSelected }}>
-                    <Checkbox checked={selectedStatus.indexOf('All') > -1} color="primary" />
+                    <Checkbox checked={state.blStatus.length === blStatusOption.length} color="primary" />
                     <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>All</span>
                   </MenuItem>
                   {blStatusOption.map((status) => (
@@ -358,8 +370,8 @@ const SearchLayout = (props) => {
                       key={status}
                       classes={{ selected: classes.menuItemSelected }}
                       value={status}>
-                      <Checkbox checked={selectedStatus.indexOf(status) > -1} color="primary" />
-                      <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>{status}</span>
+                      <Checkbox checked={state.blStatus.indexOf(status) > -1} color="primary" />
+                      <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>{mapperBlinkStatus[status]}</span>
                     </MenuItem>
                   ))}
                 </Select>

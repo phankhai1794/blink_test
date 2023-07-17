@@ -78,7 +78,7 @@ const Inquiry = (props) => {
         )
       )
     ));
-    if (user.role === 'Admin') {
+    if (user.role === 'Admin' && containerCheck.includes(currentField)) {
       const filterInqDrf = inquiries.filter(inq =>
         containerCheck.includes(inq.field) && inq.process === 'draft');
       const filterInqPending = inquiries.filter(inq => containerCheck.includes(inq.field) && inq.process === 'pending');
@@ -147,7 +147,7 @@ const Inquiry = (props) => {
       optionsInquires[editedIndex].selectChoice = '';
     } else if (isCancel && isAnswered) {
       optionsInquires[editedIndex].selectChoice = '';
-      const [resInq] = [await getInquiryById(myBL.id)];
+      const resInq = await getInquiryById(myBL.id).catch(err => handleError(dispatch, err));
       resInq.forEach(ans => {
         //reset data click cancel
         if (optionsInquires[editedIndex].id === ans.id) {

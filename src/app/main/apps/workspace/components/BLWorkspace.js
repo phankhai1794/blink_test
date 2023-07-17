@@ -2,7 +2,6 @@ import { checkNewInquiry, formatDate, isJsonText, NUMBER_INQ_BOTTOM } from '@sha
 import { FuseLoading } from '@fuse';
 import {
   BL_TYPE,
-  COMMODITY_CODE,
   CONSIGNEE,
   CONTAINER_DETAIL,
   CONTAINER_MANIFEST,
@@ -114,6 +113,7 @@ const BLWorkspace = (props) => {
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
@@ -462,13 +462,6 @@ const BLWorkspace = (props) => {
             msg={renderMsgNoti()}
             msg2={renderMsgNoti2()}
             iconType={renderIconType()}
-            handleClose={() => {
-              dispatch(FormActions.toggleOpenNotificationSubmitAnswer(false));
-              dispatch(FormActions.toggleOpenNotificationDeleteReply(false));
-              dispatch(FormActions.toggleOpenNotificationDeleteAmendment(false));
-              dispatch(FormActions.toggleOpenBLWarning(false));
-              dispatch(FormActions.toggleOpenNotificationPreviewSubmit(false));
-            }}
           />
           <div className={clsx('max-w-5xl', classes.root)}>
             <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
@@ -508,6 +501,7 @@ const BLWorkspace = (props) => {
                     const popupObj = popupOpen(inquiry, field);
                     return (
                       <Form
+                        isPreviewFile={openPreviewFiles}
                         user={props.user}
                         tabs={popupObj.tabs || null}
                         nums={popupObj.nums || null}
@@ -605,7 +599,7 @@ const BLWorkspace = (props) => {
                   <Grid item xs={6} className={classes.rightPanel}>
                     <Label>BL TYPE</Label>
                     <BLField id={getField(BL_TYPE)}>
-                      {['oceanBill', 'B'].includes(getValueField(BL_TYPE)) ? 'BILL OF LADING' : 'SEAWAY BILL'}
+                      {['oceanBill', 'B'].includes(getValueField(BL_TYPE)) ? 'ORIGINAL B/L' : 'SEAWAY BILL'}
                     </BLField>
                   </Grid>
                 </Grid>

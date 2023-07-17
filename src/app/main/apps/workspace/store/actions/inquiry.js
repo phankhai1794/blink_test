@@ -29,13 +29,13 @@ export const CHECK_SEND = 'CHECK_SEND';
 export const SET_LIST_COMMENT_DRAFT = 'SET_LIST_COMMENT_DRAFT';
 export const SET_NEW_AMENDMENT = 'SET_NEW_AMENDMENT';
 export const OPEN_QUEUE_LIST = 'OPEN_QUEUE_LIST';
-export const SEARCH_QUEUE_QUERY = 'SEARCH_QUEUE_QUERY';
 export const SET_CONTENT_INQ_RESOLVED = 'SET_CONTENT_INQ_RESOLVED';
 export const SET_DATA_CD_INQ = 'SET_DATA_CD_INQ';
 export const SET_DATA_CM_INQ = 'SET_DATA_CM_INQ';
 export const SET_CANCEL_AME_POPUP = 'SET_CANCEL_AME_POPUP';
 export const ORIGIN_VALUE_CANCEL = 'ORIGIN_VALUE_CANCEL';
 export const SET_EXPAND_ATTACHMENT = 'SET_EXPAND_ATTACHMENT';
+export const SET_OLD_DATA_CD_CM_INQ = 'SET_OLD_DATA_CD_CM_INQ';
 
 export function saveInquiry() {
   return {
@@ -65,8 +65,9 @@ export function addAmendment(state = undefined) {
 }
 
 export function setInquiries(state) {
-  // sync data 
-  sessionStorage.setItem('listInq', JSON.stringify({ inquiries: state }));
+  // sync inquiries
+  // storing inquiries include onshore & customer inquiries, amendments
+  sessionStorage.setItem('listInq', JSON.stringify(state));
 
   return {
     type: SET_INQUIRY,
@@ -98,6 +99,13 @@ export function setDataCdInq(state) {
 export function setDataCmInq(state) {
   return {
     type: SET_DATA_CM_INQ,
+    state
+  };
+}
+
+export function setOldDataCdCm(state) {
+  return {
+    type: SET_OLD_DATA_CD_CM_INQ,
     state
   };
 }
@@ -187,6 +195,10 @@ export function setListInqMinimize(state) {
 }
 
 export function setListMinimize(state) {
+  // sync listMinimize
+  // storing listMinimize ADMIN site
+  sessionStorage.setItem('listMinimize', JSON.stringify(state));
+
   return {
     type: SET_LIST_MINIMIZE,
     state: state
@@ -258,13 +270,6 @@ export function setNewAmendment(state) {
 export function openQueueList(state) {
   return {
     type: OPEN_QUEUE_LIST,
-    state: state
-  };
-}
-
-export function searchQueueQuery(state) {
-  return {
-    type: SEARCH_QUEUE_QUERY,
     state: state
   };
 }

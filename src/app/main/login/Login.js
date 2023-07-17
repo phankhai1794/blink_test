@@ -95,13 +95,10 @@ function Login(props) {
           let prevUrl = sessionStorage.getItem('prevUrl');
           if (prevUrl) {
             prevUrl = JSON.parse(prevUrl);
-            sessionStorage.removeItem("prevUrl");
             prevUrl = `${prevUrl.cachePath + prevUrl.cacheSearch}`;
           } else prevUrl = "/";
 
-          let url = prevUrl;
-          if (cachePath && !cachePath.includes("login")) url = `${cachePath + cacheSearch}`;
-          history.push(url);
+          history.push(prevUrl);
         }
       })
       .catch((error) => {

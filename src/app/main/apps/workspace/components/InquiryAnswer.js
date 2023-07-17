@@ -18,6 +18,7 @@ import { CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT } from '@shared/keyword'
 import { SocketContext } from 'app/AppContext';
 
 import * as InquiryActions from '../store/actions/inquiry';
+import * as FormActions from "../store/actions/form";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -95,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
 ));
 
 const InquiryAnswer = (props) => {
-  const { onCancel, setSave, question, getDataCD, getDataCM } = props;
+  const { onCancel, setSave, question } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
 
@@ -104,8 +105,10 @@ const InquiryAnswer = (props) => {
   const metadata = useSelector(({ draftBL }) => draftBL.metadata);
   const getDataCMInq = useSelector(({ workspace }) => workspace.inquiryReducer.getDataCMInq);
   const getDataCDInq = useSelector(({ workspace }) => workspace.inquiryReducer.getDataCDInq);
+  const oldDataCdCmInq = useSelector(({ workspace }) => workspace.inquiryReducer.oldDataCdCmInq);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
   const [isDisableSave, setDisableSave] = useState(false);
+  const [isDisableSaveCdCm, setDisableSaveCdCm] = useState(true);
   const socket = useContext(SocketContext);
 
   const optionsInquires = [...inquiries];
@@ -113,7 +116,7 @@ const InquiryAnswer = (props) => {
   let currentAnswer = optionsInquires[editedIndex];
 
   const syncData = (data, syncOptSite = "") => {
-    // socket.emit("sync_data", { data, syncOptSite });
+    socket.emit("sync_data", { data, syncOptSite });
   };
 
   const getField = (field) => {
@@ -234,15 +237,33 @@ const InquiryAnswer = (props) => {
         inquiry: question.attachmentAnswer.inquiry,
         content: ONLY_ATT
       }
+    } else if (!question.paragraphAnswer && !containerCheck.includes(question.field) && question.answerObj.length) {
+      question.paragraphAnswer = {
+        inquiry: question.id,
+        content: question.answerObj[0].content
+      }
     }
+
     let contentCDCM = {};
     if (containerCheck.includes(question.field)) {
       contentCDCM = {
         [getField(CONTAINER_DETAIL)]: getDataCDInq.length ? getDataCDInq : contentInqResolved?.[getField(CONTAINER_DETAIL)],
         [getField(CONTAINER_MANIFEST)]: getDataCMInq.length ? getDataCMInq : contentInqResolved?.[getField(CONTAINER_MANIFEST)]
       }
+      if (!question.paragraphAnswer && !question.answerObj.length) {
+        question.answerObj = [];
+        question.paragraphAnswer = {
+          inquiry: question.id,
+          content: ''
+        }
+      } else if (!question.paragraphAnswer && question.answerObj.length) {
+        question.paragraphAnswer = {
+          inquiry: question.id,
+          content: ''
+        }
+      }
     }
-    //
+
     await addTransactionAnswer({ inquiryId: question.id, contentCDCM, ansType: question.ansType }).catch(err => handleError(dispatch, err));
 
     if (question.selectChoice) {
@@ -258,7 +279,7 @@ const InquiryAnswer = (props) => {
         if (question.answerObj.length) {
           if (
             containerCheck.includes(question.field)
-            && isJsonText(question.answerObj[0].content)
+            && (isJsonText(question.answerObj[0].content) || question.ansForType !== 'ANS_CD_CM')
             && question.answerObj.length > 1
           ) {
             answerId = question.answerObj[1].id;
@@ -267,7 +288,7 @@ const InquiryAnswer = (props) => {
           }
         }
         if (answerId) {
-          if (question.paragraphAnswer.content.trim() === '') {
+          if (question.paragraphAnswer.content.trim() === '' && !containerCheck.includes(question.field)) {
             question.paragraphAnswer.content = ONLY_ATT;
           }
           await updateParagraphAnswer(answerId, question.paragraphAnswer).catch(err => handleError(dispatch, err));
@@ -307,7 +328,15 @@ const InquiryAnswer = (props) => {
         dispatch(AppAction.showMessage({ message: 'Save inquiry successfully', variant: 'success' }));
       } else if (question.paragraphAnswer) {
         if (question.answerObj.length) {
-          optionsInquires[editedIndex].answerObj[0].content = question.paragraphAnswer.content;
+          if (
+            containerCheck.includes(question.field)
+              && (isJsonText(question.answerObj[0].content) || question.ansForType !== 'ANS_CD_CM')
+              && question.answerObj.length > 1
+          ) {
+            optionsInquires[editedIndex].answerObj[1].content = question.paragraphAnswer.content;
+          } else {
+            optionsInquires[editedIndex].answerObj[0].content = question.paragraphAnswer.content;
+          }
         }
         if (optionsInquires[editedIndex].state === 'INQ_SENT') {
           optionsInquires[editedIndex].state = 'ANS_DRF';
@@ -323,14 +352,43 @@ const InquiryAnswer = (props) => {
     }
 
     // sync create/edit answer inquiry
-    syncData({ inquiries: optionsInquires });
+    syncData(
+      { inquiries: optionsInquires },
+      optionsInquires[editedIndex].state === "ANS_SENT" ? "ADMIN" : ""
+    );
 
+    dispatch(FormActions.eventClickContNo({
+      status: false,
+      questionId: '',
+      isHasActionClick: false
+    }));
     dispatch(InquiryActions.setEditInq(null));
   };
 
   useEffect(() => {
     if (isDisableSave) setDisableSave(false);
   }, []);
+
+  const isEditedCdCMTable = () => {
+    let contentCDCM = {};
+    if (containerCheck.includes(question.field)) {
+      contentCDCM = {
+        [getField(CONTAINER_DETAIL)]: getDataCDInq.length ? getDataCDInq : contentInqResolved?.[getField(CONTAINER_DETAIL)],
+        [getField(CONTAINER_MANIFEST)]: getDataCMInq.length ? getDataCMInq : contentInqResolved?.[getField(CONTAINER_MANIFEST)]
+      }
+      if (JSON.stringify(oldDataCdCmInq.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
+        setDisableSaveCdCm(false);
+      } else if (question.paragraphAnswer && oldDataCdCmInq.contentOld !== question.paragraphAnswer.content) {
+        setDisableSaveCdCm(false);
+      } else {
+        setDisableSaveCdCm(true);
+      }
+    }
+  }
+
+  useEffect(() => {
+    isEditedCdCMTable()
+  }, [getDataCDInq, getDataCMInq, question.paragraphAnswer]);
 
   return (
     <div className='changeToEditor'>
@@ -341,11 +399,12 @@ const InquiryAnswer = (props) => {
             variant="contained"
             color="primary"
             disabled={
-              (
-                !currentAnswer?.paragraphAnswer?.content?.trim()
+              (containerCheck.includes(question.field) ? isDisableSaveCdCm :
+                (
+                  !currentAnswer?.paragraphAnswer?.content?.trim()
                 && !currentAnswer.selectChoice
                 && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)
-              )
+                ))
               ||
               isDisableSave
             }
@@ -362,7 +421,6 @@ const InquiryAnswer = (props) => {
           </Button>
         </div>
       </div>
-
     </div>
   );
 };

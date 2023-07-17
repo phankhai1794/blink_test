@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
-import { TextField, makeStyles } from '@material-ui/core';
-
-import ArrowTooltip from '../shared-components/ArrowTooltip';
+import { TextField, Icon, makeStyles, Paper } from '@material-ui/core';
+import { copyTextToClipboard } from '@shared';
+import * as AppAction from 'app/store/actions';
+import { useDispatch } from 'react-redux';
+import EllipsisPopper from 'app/main/apps/workspace/shared-components/EllipsisPopper';
 
 const white = '#FFFFFF';
 const gray = '#BAC3CB';
@@ -39,22 +41,73 @@ const useStyles = makeStyles((theme) => ({
   notchedOutlineNotChecked: {
     borderColor: `${red} !important`,
   },
+  paper: {
+    maxHeight: 400,
+    maxWidth: 400,
+    overflow: "auto",
+    padding: 15,
+    color: '#515E6A',
+    whiteSpace: 'pre-line'
+  }
 }));
 
-const BLField = ({ multiline = false, children }) => {
+const BLField = ({ multiline = false, children: _children }) => {
+  const dispatch = useDispatch()
   const classes = useStyles();
-  const [isLongText, setIsLongText] = useState(false);
+  const [anchorElCopy, setAnchorElCopy] = useState(null);
+  const children = Array.isArray(_children) ? _children.join(',') : _children?.trim();
+  const [popover, setPopover] = useState({ open: false, text: '' });
+  const [anchorEl, setAnchorEl] = useState(null);
+
   const onMouseOver = (e) => {
     const { scrollWidth, clientWidth, scrollHeight, clientHeight } = e.target;
-    setIsLongText(Boolean(scrollWidth > clientWidth || scrollHeight > clientHeight));
+    setAnchorElCopy(e.currentTarget);
+    setAnchorEl(e.currentTarget);
+    if (scrollWidth > clientWidth || scrollHeight > clientHeight) {
+      setPopover({ open: true, text: e.target.textContent });
+    }
+  };
+
+  const onMouseLeave = () => {
+    setAnchorElCopy(null);
+    setAnchorEl(null);
+    setPopover({ open: false });
+  }
+
+  const handlePopoverMouseEnter = () => setPopover({ ...popover, open: true });
+
+  const handlePopoverMouseLeave = () => setPopover({ open: false });
+
+  const onCopyClick = (e, text) => {
+    e.stopPropagation();
+    copyTextToClipboard(text)
+    dispatch(AppAction.showMessage({ message: 'Copy to clipboard !', variant: 'info', autoHideDuration: 2000 }));
   };
 
   return (
-    <div
-      onMouseOver={onMouseOver}
-      onMouseLeave={() => setIsLongText(false)}
-    >
-      <ArrowTooltip isLongText={isLongText} title={Array.isArray(children) ? children.join('\n') : (children || '')} placement='right'>
+    <>
+      <EllipsisPopper
+        open={popover.open}
+        anchorEl={anchorEl}
+        arrow={true}
+        // className={classes.popper}
+        flip={true}
+        transition
+        placement={'left'}
+        disablePortal={false}
+        preventOverflow={'scrollParent'}>
+        {({ TransitionProps, placement, arrow }) => (
+          <div
+            onMouseEnter={handlePopoverMouseEnter}
+            onMouseLeave={handlePopoverMouseLeave}
+          >
+            {arrow}
+            <Paper className={classes.paper}>{popover.text}</Paper>
+          </div>
+        )}
+      </EllipsisPopper>
+
+      <div onMouseOver={onMouseOver} onMouseLeave={onMouseLeave}>
         <TextField
           value={children || ''}
           variant="outlined"
@@ -68,10 +121,21 @@ const BLField = ({ multiline = false, children }) => {
               root: classes.root,
               input: classes.input,
             },
+            endAdornment:
+              <>
+                {anchorElCopy && children && (
+                  <Icon
+                    style={{ position: 'absolute', right: 5, bottom: 5, cursor: 'pointer', fontSize: 18 }}
+                    onClick={(e) => onCopyClick(e, children)}
+                  >
+                    file_copy
+                  </Icon>
+                )}
+              </>
           }}
         />
-      </ArrowTooltip>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -6,16 +6,30 @@ import * as Actions from '../actions';
 
 const end = new Date();
 const start = subMonths(end, 1);
+const settings = JSON.parse(localStorage.getItem('dashboard') || '{}');
+
 const initialState = {
+  page: { currentPageNumber: 1, pageSize: settings.pageSize || 10 },
+  columns: settings.columns || {
+    lastUpdate: true,
+    etd: true,
+    shipperN: false,
+    customerS: true,
+    onshoreS: true,
+    blinkS: true,
+    vvd: true,
+    pol: false,
+    pod: false,
+    inquiry: true,
+    amendment: true,
+    resolve: true
+  },
   searchQueueQuery: {
     bookingNo: '',
     from: formatDate(start, 'YYYY-MM-DD'),
     to: formatDate(end, 'YYYY-MM-DD'),
-    blStatus: Object.keys(mapperBlinkStatus),
-    currentPageNumber: 1,
-    pageSize: 10,
-    totalPageNumber: 5,
-    sortField: ['lastUpdated', 'DESC'],
+    blStatus: settings.blStatus || Object.keys(mapperBlinkStatus),
+    sortField: settings.sortField || ['lastUpdated', 'DESC'],
     countries: null
   },
   countries: ''
@@ -28,6 +42,12 @@ const dashboardReducer = function (state = initialState, action) {
   }
   case Actions.FILTER_COUNTRY: {
     return { ...state, countries: action.state };
+  }
+  case Actions.SET_PAGE: {
+    return { ...state, page: { currentPageNumber: action.page, pageSize: action.size } };
+  }
+  case Actions.SET_COLUMN: {
+    return { ...state, columns: action.state };
   }
   default: {
     return state;
