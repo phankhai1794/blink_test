@@ -282,6 +282,7 @@ const InquiryViewer = (props) => {
   const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
+  const contentAnsLatestCdCm = useSelector(({ workspace }) => workspace.inquiryReducer.contentAnsLatestCdCm);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const expandFileQuestionIds = useSelector(({ workspace }) => workspace.inquiryReducer.enableExpandAttachment);
@@ -476,10 +477,10 @@ const InquiryViewer = (props) => {
             let filterCDCM = res;
             let objCdCmData;
             let getIndexLatestCdCm;
-            const filterOffshoreSent = filterCDCM[0];
+            const filterOffshoreSent = filterCDCM.filter(f => f.type !== 'ANS_CD_CM')[0];
             if (containerCheck.includes(question.field)) {
               setDisableCDCM(true);
-              const cloneContent = JSON.parse(JSON.stringify(contentInqResolved));
+              const cloneContent = JSON.parse(JSON.stringify(contentAnsLatestCdCm));
               const latestCdCmData = [...res].find((el, i) => {
                 getIndexLatestCdCm = i;
                 return el.type === 'ANS_CD_CM' && el.status !== 'DELETED'
