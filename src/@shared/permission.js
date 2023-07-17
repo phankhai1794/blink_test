@@ -37,6 +37,7 @@ export const PERMISSION = {
   DRAFTBL_CONFIRM_DRAFT_BL: 'draftbl_confirmDraftBl',
   DRAFTBL_CREATE_REPLY: 'draftbl_saveEditedField',
   MAIL_SEND_MAIL: 'mail_sendMail',
+  MYBL_GET_QUEUE_LIST: 'mybl_getQueueList'
 };
 
 export const PermissionProvider = ({
