@@ -51,13 +51,12 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
       await getBlInfo(myBL_Id).catch((err) => handleError(dispatch, err)),
       await getCustomerAmendment(myBL_Id).catch((err) => handleError(dispatch, err))
     ];
-    const { orgContent, content, contentAnsCdCmLatest } = blResponse?.myBL;
+    const { orgContent, content } = blResponse?.myBL;
     const { contentAmendmentRs } = contentRespone;
     const cloneContent = { ...content };
 
     dispatch(setOrgContent(orgContent));
     dispatch(setContentInqResolved(content));
-    dispatch(setContentCdCmLatest(contentAnsCdCmLatest));
 
     // sync content amendment
     // storing content without amendments

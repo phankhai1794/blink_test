@@ -1466,6 +1466,39 @@ const InquiryViewer = (props) => {
     }
   };
 
+  const combineCdCmResolveAndAns = () => {
+    const cloneContent = JSON.parse(JSON.stringify(content));
+    // content customer answer or reply cd cm
+    console.log(cloneContent)
+    let contentCd = [];
+    let contentCm = [];
+    if (question.dataCdInq && question.dataCdInq.length) {
+      contentCd = question.dataCdInq;
+    }
+    if (question.dataCmInq && question.dataCmInq.length) {
+      contentCm = question.dataCmInq;
+    }
+    // content resolve inquiry cd cm
+    let contentResolveCd = [];
+    let contentResolveCm = [];
+    if (cloneContent?.[getField(CONTAINER_DETAIL)].length) {
+      contentResolveCd = cloneContent?.[getField(CONTAINER_DETAIL)];
+    }
+    if (cloneContent?.[getField(CONTAINER_MANIFEST)].length) {
+      contentResolveCm = cloneContent?.[getField(CONTAINER_MANIFEST)];
+    }
+    console.log('contentCd', contentCd)
+    // console.log('contentCm', contentCm)
+    // console.log('contentResolveCd', contentResolveCd)
+    // console.log('contentResolveCm', contentResolveCm)
+    // CASE 1-1 CD CM
+    if (contentResolveCd.length === 1 && contentResolveCm.length === 1 && contentCd.length === 1 && contentCm.length === 1) {
+      Object.keys(contentResolveCd).forEach(key => {
+        console.log('key', key)
+      })
+    }
+  }
+
   const onResolve = (hasUpload = false) => {
     if (Array.isArray(question.content)) {
       setIsResolveCDCM(true);
@@ -1480,6 +1513,8 @@ const InquiryViewer = (props) => {
       setShowViewAll(false);
       setInqHasComment(false);
       question.isShowTableToReply = false;
+      //
+      combineCdCmResolveAndAns();
     }
     if (question.process === 'draft') setIsValidDate(false);
   };
