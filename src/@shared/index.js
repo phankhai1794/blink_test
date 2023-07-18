@@ -281,8 +281,12 @@ export const compareObject = (a, b) => {
 
 export const clearLocalStorage = () => {
   const lastEmail = localStorage.getItem("lastEmail");
+  const dashboard = localStorage.getItem("dashboard");
+
   localStorage.clear();
-  localStorage.setItem("lastEmail", lastEmail);
+
+  if (lastEmail) localStorage.setItem("lastEmail", lastEmail);
+  if (dashboard) localStorage.setItem("dashboard", dashboard);
 }
 
 export const parseNumberValue = (value) => {

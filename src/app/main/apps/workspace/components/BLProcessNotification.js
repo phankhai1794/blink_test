@@ -12,6 +12,7 @@ import { SocketContext } from 'app/AppContext';
 import { getPermissionByRole } from 'app/services/authService';
 import * as AppAction from 'app/store/actions';
 import { categorizeInquiriesByUserType } from '@shared';
+import { handleError } from '@shared/handleError';
 
 import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -76,8 +77,8 @@ const BLProcessNotification = () => {
   const checkBLProcess = async () => {
     dispatch(FormActions.increaseLoading());
     const [lengthInq, lengthContent] = [
-      await getInquiryById(myBL.id).then((res) => res.length),
-      await getBlInfo(myBL.id).then((res) => Object.keys(res.myBL.content).length)
+      await getInquiryById(myBL.id).then((res) => res.length).catch(err => handleError(dispatch, err)),
+      await getBlInfo(myBL.id).then((res) => Object.keys(res.myBL.content).length).catch(err => handleError(dispatch, err))
     ];
     dispatch(FormActions.decreaseLoading());
     if (!lengthInq && !lengthContent) setOpen(true);
@@ -140,7 +141,7 @@ const BLProcessNotification = () => {
               dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0].userName }));
             }
 
-            const permissions = await getPermissionByRole(userLocal.role);
+            const permissions = await getPermissionByRole(userLocal.role).catch(err => handleError(dispatch, err));
             setTimeout(() => {
               dispatch(AppAction.setUser({ ...userLocal, permissions }));
             }, 500);
