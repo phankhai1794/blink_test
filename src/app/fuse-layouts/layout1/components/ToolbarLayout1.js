@@ -388,7 +388,10 @@ function ToolbarLayout1(props) {
 
   const redirectWorkspace = () => {
     const bl = new URLSearchParams(search).get('bl');
-    if (bl) history.push(`/guest?bl=${bl}`, { skipVerification: true });
+    if (bl) {
+      dispatch(InquiryActions.setMyBL({})); // reset BL to re-init socket every redirect page
+      history.push(`/guest?bl=${bl}`, { skipVerification: true });
+    }
   };
 
   const showMessageReply = () => {
