@@ -121,7 +121,6 @@ const PreProcess = ({ bl, children }) => {
               dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0].userName }));
             }
 
-            console.log(">>>>>>>>>>>>");
             const permissions = await getPermissionByRole(userLocal.role).catch(err => handleError(dispatch, err));
             setTimeout(() => {
               dispatch(AppAction.setUser({ ...userLocal, permissions }));
