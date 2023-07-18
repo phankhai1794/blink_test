@@ -141,7 +141,7 @@ const BLProcessNotification = () => {
               dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0].userName }));
             }
 
-            const permissions = await getPermissionByRole(userLocal.role);
+            const permissions = await getPermissionByRole(userLocal.role).catch(err => handleError(dispatch, err));
             setTimeout(() => {
               dispatch(AppAction.setUser({ ...userLocal, permissions }));
             }, 500);

@@ -5,17 +5,34 @@ import * as Actions from '../actions/dashboard';
 
 const end = new Date();
 const start = subMonths(end, 1);
+const settings = JSON.parse(localStorage.getItem('cdboard') || '{}');
 
 const initialState = {
-  page: { currentPageNumber: 1, pageSize: 10 },
+  page: { currentPageNumber: 1, pageSize: settings.pageSize || 10 },
+  columns: settings.columns || {
+    lastUpdate: true,
+    etd: true,
+    status: true,
+    inquiry: true,
+    amendment: true,
+    resolve: true,
+    // lane: false,
+    vvd: true,
+    pol: false,
+    pod: false,
+    del: false,
+    // bdr: false,
+    // pendingAgeing: false,
+    eta: false,
+    shipperN: false,
+  },
   searchQueueQuery: {
     bookingNo: '',
     from: formatDate(start, 'YYYY-MM-DD'),
     to: formatDate(end, 'YYYY-MM-DD'),
-    blStatus: 'PENDING,IN_QUEUE',
-    sortField: ''
+    blStatus: settings.blStatus || 'PENDING,IN_QUEUE',
+    sortField: settings.sortField || ''
   },
-
 };
 
 const dashboardReducer = function (state = initialState, action) {
@@ -25,6 +42,9 @@ const dashboardReducer = function (state = initialState, action) {
   }
   case Actions.SET_PAGE: {
     return { ...state, page: { currentPageNumber: action.page, pageSize: action.size } };
+  }
+  case Actions.SET_COLUMN: {
+    return { ...state, columns: action.state };
   }
   default: {
     return state;

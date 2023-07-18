@@ -1,3 +1,4 @@
+// TODO: combine with setLocalStorageItem at '/src/app/main/apps/workspace/shared-components/function.js'
 export const setLocalStorageItem = (key, value) => {
   try {
     const storedData = JSON.parse(localStorage.getItem('dashboard')); // Retrieve existing data from localStorage

@@ -15,6 +15,8 @@ import clsx from 'clsx';
 import { DateRangePicker, defaultStaticRanges } from 'react-date-range';
 import { subMonths, addDays, subDays } from 'date-fns';
 
+import { setLocalStorageItem } from '../shared-components/function';
+
 import QueueListTable from './QueueListTable';
 import 'react-date-range/dist/styles.css'; // main css file
 import 'react-date-range/dist/theme/default.css'; // theme css file
@@ -163,25 +165,31 @@ const TableContent = (props) => {
     </Paper>
   )
 }
+const mapperBlinkStatus = {
+  'IN_QUEUE': 'In Queue',
+  'PENDING': 'Pending',
+  'COMPLETED': 'Completed',
+};
+const blStatusOption = Object.keys(mapperBlinkStatus);
 
 const SearchLayout = (props) => {
   const end = new Date();
   const start = subMonths(end, 1);
+  const settings = JSON.parse(localStorage.getItem('cdboard') || '{}');
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [state, setState] = useState({ bookingNo: '', from: start, to: end, blStatus: 'PENDING,IN_QUEUE', isSelectedAll: false })
+  const initialState = {
+    bookingNo: '',
+    from: start,
+    to: end,
+    blStatus: ['IN_QUEUE', 'PENDING'],
+  };
+  const [state, setState] = useState({ ...initialState, blStatus: settings.blStatus || ['IN_QUEUE', 'PENDING'] })
   const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
-  const [selectedStatus, setSelectedStatus] = React.useState(['In Queue', 'Pending']);
   const [startingDate, setStartingDate] = useState('');
   const [isPickerOpen, setPickerOpen] = useState(false);
   const [labelDate, setLabelDate] = useState();
   const pickerRef = useRef(null);
-
-  const blStatusOption = [
-    'In Queue',
-    'Pending',
-    'Completed',
-  ];
 
   const handleChange = (query) => setState({ ...state, ...query });
 
@@ -235,33 +243,22 @@ const SearchLayout = (props) => {
 
   const handleSelectStatus = (event) => {
     let values = event.target.value;
-    const blStatus = {
-      'In Queue': 'IN_QUEUE',
-      'Pending': 'PENDING',
-      'Completed': 'COMPLETED',
-    };
-    const arrStatus = [];
-    if ((values.indexOf('All') !== -1) && (selectedStatus.indexOf('All') === -1)) {
-      setSelectedStatus([...blStatusOption, 'All']);
-      setState({ ...state, blStatus: 'IN_QUEUE,PENDING,COMPLETED' })
-    } else if ((values.indexOf('All') === -1) && (selectedStatus.indexOf('All') !== -1)) {
-      setSelectedStatus([]);
-      setState({ ...state, blStatus: '' })
+    if (values.indexOf('All') !== -1 && values.indexOf('All') === (values.length - 1)) {
+      if (values.length <= blStatusOption.length) {
+        setState({ ...state, blStatus: blStatusOption });
+        setLocalStorageItem('blStatus', blStatusOption);
+      } else {
+        setState({ ...state, blStatus: [] });
+        setLocalStorageItem('blStatus', []);
+      }
     } else {
-      const arrSelected = [];
-      values.forEach(item => {
-        if (item !== 'All') {
-          arrStatus.push(blStatus[item]);
-          arrSelected.push(item);
-        }
-      });
-      setSelectedStatus(arrSelected);
-      setState({ ...state, blStatus: arrStatus.join(',') })
+      setState({ ...state, blStatus: values });
+      setLocalStorageItem('blStatus', values);
     }
   };
 
   const handelSearch = (e) => {
-    let blStatus = state.blStatus;
+    let blStatus = state.blStatus.join(',');
     let bookingNo = state.bookingNo;
     if (state.blStatus.indexOf() !== -1) {
       blStatus = blStatus.splice(blStatus.indexOf(), 1);
@@ -275,10 +272,24 @@ const SearchLayout = (props) => {
   const handelReset = (e) => {
     let query = { bookingNo: '', from: start, to: end, blStatus: 'PENDING,IN_QUEUE', sortField: '' };
     dispatch(DashboardActions.setPage(1, 10));
-
-    setState({ ...query });
-    setSelectedStatus(['In Queue', 'Pending']);
+    dispatch(DashboardActions.setColumn({
+      lastUpdate: true,
+      etd: true,
+      status: true,
+      inquiry: true,
+      amendment: true,
+      resolve: true,
+      vvd: true,
+      pol: false,
+      pod: false,
+      del: false,
+      eta: false,
+      shipperN: false,
+    }));
     dispatch(DashboardActions.searchQueueQuery({ ...searchQueueQuery, ...query }));
+
+    setState({ ...query, blStatus: ['PENDING', 'IN_QUEUE'] });
+    localStorage.removeItem("cdboard");
   }
 
   return (
@@ -352,26 +363,26 @@ const SearchLayout = (props) => {
                 <Select
                   className={classes.selectStatus}
                   multiple
-                  value={selectedStatus}
+                  value={state.blStatus}
                   onChange={handleSelectStatus}
                   input={<Input style={{ width: '100%' }} />}
                   renderValue={(selected) =>
                     <div className={classes.chips}>
-                      {selected.map((value) => (
-                        (value !== 'All') && <Chip key={value} label={value} className={classes.chip} />
-                      ))}
+                      {selected.map((value) =>
+                        <Chip key={value} label={mapperBlinkStatus[value]} className={classes.chip} />
+                      )}
                     </div>}
                   disableUnderline
                 >
                   <MenuItem key={'All'} value={'All'} classes={{ selected: classes.menuItemSelected }}>
                     {/* <Checkbox checked={selectedStatus.indexOf('All') > -1} onChange={(_e, checked) => handleCheckAll(checked)} /> */}
-                    <Checkbox checked={selectedStatus.indexOf('All') > -1} color='primary' />
+                    <Checkbox checked={state.blStatus.length === blStatusOption.length} color='primary' />
                     <ListItemText primary={'All'} />
                   </MenuItem>
                   {blStatusOption.map((status) => (
                     <MenuItem key={status} classes={{ selected: classes.menuItemSelected }} value={status}>
-                      <Checkbox checked={selectedStatus.indexOf(status) > -1} color='primary' />
-                      <ListItemText primary={status} />
+                      <Checkbox checked={state.blStatus.indexOf(status) > -1} color='primary' />
+                      <ListItemText primary={mapperBlinkStatus[status]} />
                     </MenuItem>
                   ))}
                 </Select>

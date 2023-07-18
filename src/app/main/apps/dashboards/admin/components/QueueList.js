@@ -160,7 +160,7 @@ const SearchLayout = (props) => {
   const handleSelectStatus = (event) => {
     let values = event.target.value;
     if (values.indexOf('All') !== -1 && values.indexOf('All') === values.length - 1) {
-      if (values.length < blStatusOption.length) {
+      if (values.length <= blStatusOption.length) {
         setState({ ...state, blStatus: blStatusOption });
         setLocalStorageItem('blStatus', blStatusOption);
       } else {

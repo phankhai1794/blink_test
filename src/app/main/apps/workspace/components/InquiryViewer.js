@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileName } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateGroupOneTextBox, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileName } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -305,7 +305,7 @@ const InquiryViewer = (props) => {
   const [validationCDCM, setValidationCDCM] = useState(true);
   const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY, FORWARDER].map(key => metadata.field?.[key]).includes(question.field));
+  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
@@ -397,12 +397,12 @@ const InquiryViewer = (props) => {
 
   const validateField = (field, value) => {
     let response = { isError: false, errorType: "" };
-    const isAlsoNotify = metadata.field[FORWARDER] === field || metadata.field[ALSO_NOTIFY] === field;;
+    const isFieldMaxFineLine = metadata.field[FORWARDER] === field || metadata.field[ALSO_NOTIFY] === field || metadata.field[DESCRIPTION_OF_GOODS] === field;
     if (Object.keys(metadata.field).find(key => metadata.field[key] === field) === BL_TYPE) {
       response = validateBLType(value);
     }
-    if (isAlsoNotify) {
-      response = validateAlsoNotify(value);
+    if (isFieldMaxFineLine) {
+      response = validateGroupOneTextBox(value, metadata.field[DESCRIPTION_OF_GOODS] === field);
     }
     return response;
   }
@@ -461,7 +461,7 @@ const InquiryViewer = (props) => {
     let isUnmounted = false;
     setTempReply({});
     setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-    setIsAlsoNotifies([ALSO_NOTIFY, FORWARDER].map(key => metadata.field?.[key]).includes(question.field));
+    setIsAlsoNotifies([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS].map(key => metadata.field?.[key]).includes(question.field));
     setIsResolve(false);
     setIsResolveCDCM(false);
     setIsReply(false);
@@ -749,10 +749,16 @@ const InquiryViewer = (props) => {
             // filter latest reply amendment
             if (filterRepAmend.length) {
               const getRepAmend = filterRepAmend[0];
-              if ((['REP_DRF', 'REP_SENT'].includes(lastestComment.state) && lastestComment.role === 'Guest' && user.role === 'Guest')
-                  || ['REP_SENT'].includes(lastestComment.state) && lastestComment.role === 'Guest' && user.role === 'Admin') {
+              if (
+                lastestComment.role === 'Guest'
+                &&
+                (
+                  (user.role === 'Guest' && ['REP_DRF', 'REP_SENT'].includes(lastestComment.state))
+                  ||
+                  (user.role === 'Admin' && ['REP_SENT'].includes(lastestComment.state))
+                )
+              )
                 getRes = res.filter(r => r.id !== getRepAmend.id);
-              }
             }
             // filter comment
             lastest.mediaFile = mediaFile;
@@ -2582,8 +2588,11 @@ const InquiryViewer = (props) => {
       optionsInquires[editedIndex].showIconAttachReplyFile = false;
       optionsInquires[editedIndex].showIconAttachAnswerFile = true;
       // set default value cd cm
-      if (containerCheck.includes(reply.field)
-          && (isJsonText(reply.answerObj[0].content) || reply.ansForType !== 'ANS_CD_CM')) {
+      if (
+        containerCheck.includes(reply.field)
+        &&
+        (isJsonText(reply.answerObj[0].content) || reply.ansForType !== 'ANS_CD_CM')
+      ) {
         optionsInquires[editedIndex].paragraphAnswer = {
           inquiry: reply.id,
           content: reply.answerObj[0].content || '',
@@ -2804,7 +2813,21 @@ const InquiryViewer = (props) => {
             onChange={inputText}
             variant='outlined'
             inputProps={{ style: { textTransform: 'uppercase' } }}
-            error={!validateInput?.isValid || (validateField(field, textResolve).isError && (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest'))) || (isAlsoNotify ? validateAlsoNotify(textResolve).isError : false)}
+            error={
+              !validateInput?.isValid
+              ||
+              (
+                validateField(field, textResolve).isError
+                &&
+                (
+                  isResolve
+                  ||
+                  (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')
+                )
+              )
+              ||
+              (isAlsoNotify ? validateGroupOneTextBox(textResolve).isError : false)
+            }
             helperText={!validateInput?.isValid ?
               <>
                 {(validateInput?.prohibitedInfo?.countries.length > 0) &&

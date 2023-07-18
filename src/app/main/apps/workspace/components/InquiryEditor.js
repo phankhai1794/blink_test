@@ -23,7 +23,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { ORIGINAL_BL, SEAWAY_BILL, CONTAINER_DETAIL, CONTAINER_MANIFEST, OTHERS } from '@shared/keyword';
+import { ORIGINAL_BL, SEAWAY_BILL, CONTAINER_DETAIL, CONTAINER_MANIFEST, BL_TYPE, OTHERS } from '@shared/keyword';
 import { uploadFile } from 'app/services/fileService';
 import { getUpdatedAtAnswer, saveInquiry, updateInquiry } from 'app/services/inquiryService';
 import * as AppActions from 'app/store/actions';
@@ -231,19 +231,24 @@ const InquiryEditor = (props) => {
   };
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
-  const optionsAnsType = !containerCheck.includes(currentEditInq.field) ? [
-    {
+  const optionsAnsType = getField(BL_TYPE) === currentEditInq.field ?
+    [{
       label: 'Option Selection',
       value: metadata.ans_type.choice
-    },
-    {
+    }] :
+    !containerCheck.includes(currentEditInq.field) ? [
+      {
+        label: 'Option Selection',
+        value: metadata.ans_type.choice
+      },
+      {
+        label: 'Onshore/Customer Input',
+        value: metadata.ans_type.paragraph
+      }
+    ] : [{
       label: 'Onshore/Customer Input',
       value: metadata.ans_type.paragraph
-    }
-  ] : [{
-    label: 'Onshore/Customer Input',
-    value: metadata.ans_type.paragraph
-  }];
+    }];
 
   const allowCreateAttachmentAnswer = PermissionProvider({
     action: PERMISSION.INQUIRY_ANSWER_ATTACHMENT
@@ -480,7 +485,14 @@ const InquiryEditor = (props) => {
       setValueAnsType(optionsAnsType);
       dispatch(InquiryActions.setEditInq(inq));
     }
-    currentEditInq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];
+
+    if (inquiries.every((i) => i.receiver.includes('onshore'))) {
+      inq.receiver = ['onshore'];
+    } else if (inquiries.every((i) => i.receiver.includes('customer'))) {
+      inq.receiver = ['customer'];
+    } else inq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];
+    if (!containerCheck.includes(inq.field)) dispatch(InquiryActions.setEditInq(inq));
+
     return () => dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false, createInq: false }))
   }, []);
 
@@ -627,7 +639,17 @@ const InquiryEditor = (props) => {
         inq.field = filterField[0].value;
         dispatch(InquiryActions.validate({ ...valid, field: true }));
         containerFieldValueCheck(inq);
-        if (!keyword) keyword = filterField[0];
+        if (!keyword) {
+          keyword = filterField[0];
+        }
+      }
+      if (keyword.keyword === BL_TYPE) {
+        autoCreateChoiceBLType()
+        inq.ansType = metadata.ans_type.choice
+        setValueAnsType({
+          label: 'Option Selection',
+          value: metadata.ans_type.choice
+        });
       }
 
       dispatch(InquiryActions.validate({ ...valid, inqType: true }));
@@ -676,7 +698,7 @@ const InquiryEditor = (props) => {
 
     containerFieldValueCheck(inq)
 
-    if (e.keyword === 'blType' && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
+    if (e.keyword === BL_TYPE && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
 
     setTemplateList(filter?.content || []);
     setTemplate('0');
@@ -741,7 +763,7 @@ const InquiryEditor = (props) => {
     const inq = { ...currentEditInq };
     inq.ansType = e.value;
 
-    if (fieldValue?.keyword === 'blType' && e.label === 'Option Selection') autoCreateChoiceBLType();
+    if (fieldValue?.keyword === BL_TYPE && e.label === 'Option Selection') autoCreateChoiceBLType();
 
     dispatch(InquiryActions.validate({ ...valid, ansType: true }));
     setValueAnsType(optionsAnsType.filter((ansType) => ansType.value === e.value));
