@@ -228,11 +228,11 @@ const DraftPage = (props) => {
       } else {
         dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
         dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL })));
-        dispatch(Actions.setInquiries(props.myBL?.id));
+        dispatch(Actions.setInquiries(props.bl));
       }
 
       dispatch(Actions.loadMetadata());
-      dispatch(Actions.loadContent(props.myBL?.id));
+      dispatch(Actions.loadContent(props.bl));
     }
   }, []);
 
@@ -859,11 +859,11 @@ const DraftPage = (props) => {
                       textAlign: 'start',
                       fontFamily: 'Courier, serif',
                       fontSize: 16.5 /*1.7vw*/
-                      //lineHeight: '1.0',
-                      //color: '#4A4A4A',
-                      //top: 4,
+                    //lineHeight: '1.0',
+                    //color: '#4A4A4A',
+                    //top: 4,
                     //}}>
-                     //</Grid> {"\n" + getValueField(RATING_DETAIL).exchangeRate}
+                    //</Grid> {"\n" + getValueField(RATING_DETAIL).exchangeRate}
                     //</span> */}
                   }
                 </Grid>

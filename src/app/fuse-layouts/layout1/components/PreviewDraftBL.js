@@ -1,9 +1,11 @@
 import React from 'react';
 import history from '@history';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Button, Tooltip } from '@material-ui/core';
+import { PERMISSION, PermissionProvider } from '@shared/permission';
+import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
+
 
 const useStyles = makeStyles((theme) => ({
   iconDraftBL: {
@@ -27,6 +29,8 @@ const useStyles = makeStyles((theme) => ({
 const PreviewDraftBL = () => {
   const { pathname } = window.location;
   const classes = useStyles();
+  const dispatch = useDispatch();
+
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const userType = useSelector(({ user }) => user.userType);
 
@@ -40,7 +44,10 @@ const PreviewDraftBL = () => {
 
   const redirectDraftBL = () => {
     const bl = myBL.id || window.location.pathname.split('/')[3];
-    if (bl) history.push(`/draft-bl?bl=${bl}`, { skipVerification: true });
+    if (bl) {
+      dispatch(InquiryActions.setMyBL({})); // reset BL to re-init socket every redirect page
+      history.push(`/draft-bl?bl=${bl}`, { skipVerification: true });
+    }
   };
 
   return (

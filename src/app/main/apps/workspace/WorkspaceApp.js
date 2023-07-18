@@ -6,6 +6,8 @@ import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { validateBkgNo } from 'app/services/opusService';
 
+import PreProcess from '../PreProcess';
+
 import BLWorkspace from './components/BLWorkspace';
 
 const MainWorkSpace = () => {
@@ -30,7 +32,11 @@ const MainWorkSpace = () => {
           content: 'flex flex-col h-full',
           leftSidebar: 'w-256 border-0'
         }}
-        content={<BLWorkspace user="workspace" />}
+        content={
+          <PreProcess>
+            <BLWorkspace user="workspace" />
+          </PreProcess>
+        }
         sidebarInner
         ref={pageLayout}
         innerScroll

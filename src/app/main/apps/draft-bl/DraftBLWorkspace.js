@@ -6,6 +6,7 @@ import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import OtpCheck from '../OTPCheck';
+import PreProcess from '../PreProcess';
 
 import DraftBL from './DraftBL';
 
@@ -26,8 +27,9 @@ function DraftBLWorkspace() {
 
   return (
     <>
-      {
-        isPreviewing ? <DraftBL myBL={{ id: bl }} user="guest" /> : <OtpCheck>
+      {isPreviewing ?
+        <DraftBL bl={bl} user="guest" /> :
+        <OtpCheck>
           <div className="flex flex-col flex-1 w-full">
             <FusePageSimple
               classes={{
@@ -35,7 +37,11 @@ function DraftBLWorkspace() {
                 content: 'flex flex-col h-full',
                 leftSidebar: 'w-256 border-0'
               }}
-              content={<DraftBL myBL={{ id: bl }} user="guest" />}
+              content={
+                <PreProcess bl={bl}>
+                  <DraftBL bl={bl} user="guest" />
+                </PreProcess>
+              }
               sidebarInner
               ref={pageLayout}
               innerScroll

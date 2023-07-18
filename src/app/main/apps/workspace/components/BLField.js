@@ -387,7 +387,7 @@ const BLField = ({
     <>
       <EllipsisPopper
         open={popover.open}
-        anchorEl={anchorEl}
+        anchorEl={anchorElCopy}
         arrow={true}
         // className={classes.popper}
         flip={true}
