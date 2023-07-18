@@ -480,7 +480,7 @@ const InquiryViewer = (props) => {
             const filterOffshoreSent = filterCDCM.filter(f => f.type !== 'ANS_CD_CM')[0];
             if (containerCheck.includes(question.field)) {
               setDisableCDCM(true);
-              const cloneContent = JSON.parse(JSON.stringify(contentAnsLatestCdCm));
+              const cloneContent = JSON.parse(JSON.stringify(contentInqResolved));
               const latestCdCmData = [...res].find((el, i) => {
                 getIndexLatestCdCm = i;
                 return el.type === 'ANS_CD_CM' && el.status !== 'DELETED'
@@ -1466,10 +1466,106 @@ const InquiryViewer = (props) => {
     }
   };
 
+  const isChangeCdCmContent = (contentOrgCd, contentOrgCm, contentAnsCd, contentAnsCm, caseOneOne) => {
+    let typeChangeCD = {};
+    let typeChangeCM = {};
+    if (caseOneOne) {
+      if (contentOrgCd.length && contentAnsCd.length) {
+        CONTAINER_LIST.cdMap.forEach(cd => {
+          if (contentOrgCd[0][getType(cd)].toString() !== contentAnsCd[0][getType(cd)].toString()) {
+            // init object
+            const keyChange = '0';
+            if (!typeChangeCD[keyChange]) {
+              typeChangeCD = {
+                [keyChange]: [
+                  {key: getType(cd), val: contentAnsCd[0][getType(cd)].toString()},
+                ]
+              }
+            } else {
+              typeChangeCD[keyChange].push(
+                  {key: getType(cd), val: contentAnsCd[0][getType(cd)].toString()},
+              )
+            }
+          }
+        })
+      }
+      if (contentOrgCm.length && contentAnsCm.length) {
+        CONTAINER_LIST.cmMap.forEach(cm => {
+          if (contentOrgCm[0][getType(cm)].toString() !== contentAnsCm[0][getType(cm)].toString()) {
+            // init object
+            const keyChange = '0';
+            if (!typeChangeCM[keyChange]) {
+              typeChangeCM = {
+                [keyChange]: [
+                  {key: getType(cm), val: contentAnsCm[0][getType(cm)].toString()},
+                ]
+              }
+            } else {
+              typeChangeCM[keyChange].push(
+                  {key: getType(cm), val: contentAnsCm[0][getType(cm)].toString()},
+              )
+            }
+          }
+        })
+      }
+    } else {
+      if (contentOrgCd.length && contentAnsCd.length) {
+        CONTAINER_LIST.cdMap.forEach(cd => {
+          contentOrgCd.forEach((org, index) => {
+            if (org[getType(cd)].toString() !== contentAnsCd[index][getType(cd)].toString()) {
+              const keyChange = index;
+              if (!typeChangeCD[keyChange]) {
+                Object.assign(typeChangeCD, {
+                  [keyChange]: [
+                    {key: getType(cd), val: contentAnsCd[index][getType(cd)].toString()},
+                  ]
+                });
+              } else {
+                typeChangeCD[keyChange].push(
+                    {key: getType(cd), val: contentAnsCd[index][getType(cd)].toString()},
+                )
+              }
+            }
+          })
+        })
+      }
+      if (contentOrgCm.length && contentAnsCm.length) {
+        CONTAINER_LIST.cmMap.forEach(cm => {
+          contentOrgCm.forEach((org, index) => {
+            if (org[getType(cm)].toString() !== contentAnsCm[index][getType(cm)].toString()) {
+              const keyChange = index;
+              if (!typeChangeCM[keyChange]) {
+                Object.assign(typeChangeCM, {
+                  [keyChange]: [
+                    {key: getType(cm), val: contentAnsCm[index][getType(cm)].toString()},
+                  ]
+                });
+              } else {
+                typeChangeCM[keyChange].push(
+                  {key: getType(cm), val: contentAnsCm[index][getType(cm)].toString()},
+                )
+              }
+            }
+          })
+        })
+      }
+    }
+    return {typeChangeCD, typeChangeCM};
+  }
+
   const combineCdCmResolveAndAns = () => {
     const cloneContent = JSON.parse(JSON.stringify(content));
+    const cloneOrgContent = JSON.parse(JSON.stringify(orgContent));
+    // content original cd cm
+    let contentOrgCd = [];
+    let contentOrgCm = [];
+    if (cloneOrgContent?.[getField(CONTAINER_DETAIL)].length) {
+      contentOrgCd = cloneOrgContent?.[getField(CONTAINER_DETAIL)];
+    }
+    if (cloneOrgContent?.[getField(CONTAINER_MANIFEST)].length) {
+      contentOrgCm = cloneOrgContent?.[getField(CONTAINER_MANIFEST)];
+    }
     // content customer answer or reply cd cm
-    console.log(cloneContent)
     let contentCd = [];
     let contentCm = [];
     if (question.dataCdInq && question.dataCdInq.length) {
@@ -1487,16 +1583,43 @@ const InquiryViewer = (props) => {
     if (cloneContent?.[getField(CONTAINER_MANIFEST)].length) {
       contentResolveCm = cloneContent?.[getField(CONTAINER_MANIFEST)];
     }
-    console.log('contentCd', contentCd)
-    // console.log('contentCm', contentCm)
-    // console.log('contentResolveCd', contentResolveCd)
-    // console.log('contentResolveCm', contentResolveCm)
+    let typeChanged;
     // CASE 1-1 CD CM
     if (contentResolveCd.length === 1 && contentResolveCm.length === 1 && contentCd.length === 1 && contentCm.length === 1) {
-      Object.keys(contentResolveCd).forEach(key => {
-        console.log('key', key)
-      })
+      typeChanged = isChangeCdCmContent(contentOrgCd, contentOrgCm, contentCd, contentCm, true);
+    } else if (contentResolveCd.length && contentResolveCm.length && contentCd.length && contentCm.length) {
+      // CASE n-n 1-n CD CM
+      typeChanged = isChangeCdCmContent(contentOrgCd, contentOrgCm, contentCd, contentCm, false);
     }
+    if (typeChanged && Object.keys(typeChanged.typeChangeCD).length) {
+      contentResolveCd.forEach((contRes, index) => {
+        const getValIndex = typeChanged.typeChangeCD[index];
+        if (getValIndex && getValIndex.length) {
+          getValIndex.forEach(valIndex => {
+            if (valIndex.key === getType(CONTAINER_SEAL)) {
+              contRes[valIndex.key] = valIndex.val.split(',')
+            }
+            else if (contRes?.[valIndex.key]) {
+              contRes[valIndex.key] = valIndex.val
+            }
+          })
+        }
+      });
+    }
+    if (typeChanged && Object.keys(typeChanged.typeChangeCM).length) {
+      contentResolveCm.forEach((contRes, index) => {
+        const getValIndex = typeChanged.typeChangeCM[index];
+        if (getValIndex && getValIndex.length) {
+          getValIndex.forEach(valIndex => {
+            if (contRes?.[valIndex.key]) {
+              contRes[valIndex.key] = valIndex.val
+            }
+          })
+        }
+      });
+    }
+    setDataCD(contentResolveCd)
+    setDataCM(contentResolveCm)
   }
 
   const onResolve = (hasUpload = false) => {
