@@ -485,7 +485,14 @@ const InquiryEditor = (props) => {
       setValueAnsType(optionsAnsType);
       dispatch(InquiryActions.setEditInq(inq));
     }
-    currentEditInq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];
+
+    if (inquiries.every((i) => i.receiver.includes('onshore'))) {
+      inq.receiver = ['onshore'];
+    } else if (inquiries.every((i) => i.receiver.includes('customer'))) {
+      inq.receiver = ['customer'];
+    } else inq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];
+    if (!containerCheck.includes(inq.field)) dispatch(InquiryActions.setEditInq(inq));
+
     return () => dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false, createInq: false }))
   }, []);
 

@@ -12,6 +12,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import ReplyIcon from '@material-ui/icons/Reply';
 import { withStyles } from '@material-ui/core/styles';
 import { handleError } from '@shared/handleError';
+import { setLocalStorageItem } from '../shared-components/function';
 
 const useStyles = makeStyles({
   root: {
@@ -261,25 +262,7 @@ const QueueListTable = () => {
   const page = useSelector(({ workspace }) => workspace.dashboardReducer.page);
   const searchQueueQuery = useSelector(({ workspace }) => workspace.dashboardReducer.searchQueueQuery);
   const [anchorEl, setAnchorEl] = useState(null);
-  const initColumns = {
-    lastUpdate: true,
-    etd: true,
-    status: true,
-    status: true,
-    inquiry: true,
-    amendment: true,
-    resolve: true,
-    // lane: false,
-    vvd: true,
-    pol: false,
-    pod: false,
-    del: false,
-    // bdr: false,
-    // pendingAgeing: false,
-    eta: false,
-    shipperN: false,
-  };
-  const [columns, setColumns] = useState(initColumns);
+  const columns = useSelector(({ workspace }) => workspace.dashboardReducer.columns);
 
   const handleGetQueueList = (page, size) => {
     getQueueList(
@@ -305,9 +288,9 @@ const QueueListTable = () => {
   }, [searchQueueQuery]);
 
   // TODO: Download - TBU
-  const handleDownload = () => {
-    alert('Download Success!')
-  };
+  // const handleDownload = () => {
+  //   alert('Download Success!')
+  // };
 
   const setPage = (page, size) => {
     dispatch(DashboardActions.setPage(page, size))
@@ -336,10 +319,13 @@ const QueueListTable = () => {
         break;
     }
     dispatch(DashboardActions.searchQueueQuery({ ...searchQueueQuery, sortField: tempQuery }));
+    setLocalStorageItem('sortField', tempQuery);
   };
 
-  const showItems = (e) => {
-    setPage(Math.min(Math.ceil(state.totalBkgNo / e.target.value), page.currentPageNumber), e.target.value)
+  const showItems = ({ target }) => {
+    const { value } = target;
+    setPage(Math.min(Math.ceil(state.totalBkgNo / value), page.currentPageNumber), value)
+    setLocalStorageItem('pageSize', value);
   }
 
   const handleClick = (event) => {
@@ -351,7 +337,8 @@ const QueueListTable = () => {
   };
 
   const handleShowColumn = (value) => {
-    setColumns({ ...columns, ...value });
+    dispatch(DashboardActions.setColumn({ ...columns, ...value }));
+    setLocalStorageItem('columns', { ...columns, ...value });
   };
 
   return (
