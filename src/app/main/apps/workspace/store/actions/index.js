@@ -14,7 +14,7 @@ import {
   setInquiries,
   saveMetadata,
   setListCommentDraft,
-  setContentInqResolved, setContentCdCmLatest
+  setContentInqResolved
 } from './inquiry';
 import * as InquiryActions from './inquiry';
 import * as FormActions from './form';

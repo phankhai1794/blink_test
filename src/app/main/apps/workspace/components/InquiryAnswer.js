@@ -264,8 +264,7 @@ const InquiryAnswer = (props) => {
       }
     }
 
-    const listIdInq = optionsInquires.filter(op => op.process === 'pending').map(op => op.id);
-    await addTransactionAnswer({ listIdInq, inquiryId: question.id, contentCDCM, ansType: question.ansType }).catch(err => handleError(dispatch, err));
+    await addTransactionAnswer({ inquiryId: question.id, contentCDCM, ansType: question.ansType }).catch(err => handleError(dispatch, err));
 
     if (question.selectChoice) {
       if (question.selectChoice.isLast && !question.selectChoice.isOther?.trim()) {

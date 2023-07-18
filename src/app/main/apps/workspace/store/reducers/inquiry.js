@@ -12,7 +12,6 @@ const initialState = {
   myBL: {},
   metadata: {},
   orgContent: {},
-  contentAnsLatestCdCm: {},
   contentInqResolved: {},
   content: {},
   getDataCDInq: [],
@@ -114,9 +113,6 @@ const inquiryReducer = function (state = initialState, action) {
   }
   case Actions.SET_ORG_CONTENT: {
     return { ...state, orgContent: action.state };
-  }
-  case Actions.SET_CONTENT_LATEST_CD_CM: {
-    return { ...state, contentAnsLatestCdCm: action.state };
   }
   case Actions.SET_CONTENT: {
     return { ...state, content: action.state };

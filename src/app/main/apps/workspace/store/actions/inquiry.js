@@ -9,7 +9,6 @@ export const DISPLAY_COMMENT = 'DISPLAY_COMMENT';
 export const SET_MYBL = 'SET_MYBL';
 export const SAVE_METADATA = 'SAVE_METADATA';
 export const SET_ORG_CONTENT = 'SET_ORG_CONTENT';
-export const SET_CONTENT_LATEST_CD_CM = 'SET_CONTENT_LATEST_CD_CM';
 export const SET_CONTENT = 'SET_CONTENT';
 export const VALIDATE = 'VALIDATE';
 export const SET_CURRENT_FIELD = 'SET_CURRENT_FIELD';
@@ -128,13 +127,6 @@ export function saveMetadata(state) {
 export function setOrgContent(state) {
   return {
     type: SET_ORG_CONTENT,
-    state
-  };
-}
-
-export function setContentCdCmLatest(state) {
-  return {
-    type: SET_CONTENT_LATEST_CD_CM,
     state
   };
 }

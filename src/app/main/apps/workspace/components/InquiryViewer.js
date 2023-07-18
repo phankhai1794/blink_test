@@ -282,7 +282,6 @@ const InquiryViewer = (props) => {
   const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
-  const contentAnsLatestCdCm = useSelector(({ workspace }) => workspace.inquiryReducer.contentAnsLatestCdCm);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const expandFileQuestionIds = useSelector(({ workspace }) => workspace.inquiryReducer.enableExpandAttachment);
