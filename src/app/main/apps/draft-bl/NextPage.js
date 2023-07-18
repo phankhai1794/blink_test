@@ -274,13 +274,14 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
                 -----------------------------------------------------------------------------------------------------------------------------------------
               </span>
               <br />
-              <div>
+              { getValueField(ALSO_NOTIFY) && <div>
                 <span>ALSO NOTIFY</span>
                 <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950}}>
                   {getValueField(ALSO_NOTIFY)}
                 </span>
                 <br />
               </div>
+              }
               <span>
                 OCEAN FREIGHT PREPAID
               </span>

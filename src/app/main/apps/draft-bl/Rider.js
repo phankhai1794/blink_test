@@ -45,7 +45,7 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage }) =>
   }, []);
 
   useEffect(() => {
-    let arr = [[]];
+    let arr = [];
     let filledLines = cdSplitted.length ? (cdSplitted[cdSplitted.length - 1].length + 1) : 0; // +1 dashline
 
     if (drfView === "MD") {
