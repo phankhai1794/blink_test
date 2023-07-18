@@ -3155,7 +3155,7 @@ const InquiryViewer = (props) => {
                     currentQuestion={question}
                   />
               ) :
-                (['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) || (question.process === 'draft' && question.state === 'REOPEN_Q') ?
+                (['RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) || (question.process === 'draft' && question.state === 'REOPEN_Q') || (['AME_DRF', 'AME_SENT'].includes(question.state) && !isReply) ?
                   <Diff
                     inputA={orgContent[question.field] ? renderContent(orgContent[question.field]) : ''}
                     inputB={question.content ? getNewValueDiffViewer(question.content) : ''}
