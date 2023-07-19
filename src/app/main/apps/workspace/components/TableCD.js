@@ -10,7 +10,7 @@ import {
   CONTAINER_MEASUREMENT_UNIT
 } from '@shared/keyword';
 import { NumberFormat } from '@shared';
-import { packageUnitsJson } from '@shared/units';
+import { packageUnitsJson, containerTypeUnit } from '@shared/units';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useSelector, useDispatch } from 'react-redux';
@@ -317,7 +317,7 @@ const TableCD = (props) => {
                 </Grid>
                 <Grid item xs={2}>
                   <BLField>
-                    {cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]}
+                    {cd?.[metadata?.inq_type?.[CONTAINER_TYPE]] ? containerTypeUnit.find(contType => contType.value === cd?.[metadata?.inq_type?.[CONTAINER_TYPE]]).label : ''}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>

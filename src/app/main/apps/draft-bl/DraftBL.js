@@ -9,7 +9,7 @@ import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
 import { isJsonText, formatDate, MAX_CHARS, MAX_ROWS_CD, lineBreakAtBoundary, getMaxRows, getTotalValueMDView, formatNoneContNo, findSumFromArray } from '@shared';
-import { packageUnitsJson } from '@shared/units';
+import { packageUnitsJson, containerTypeUnit } from '@shared/units';
 
 import * as Actions from './store/actions';
 import Rider from './Rider';
@@ -663,7 +663,7 @@ const DraftPage = (props) => {
                     {containersDetail &&
                       containersDetail.map((cd, idx) => (
                         (idx < MAX_ROWS_CD) && <span key={idx} style={{ whiteSpace: 'pre', lineHeight: '20px' }}>
-                          {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                          {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
                           <br />
                         </span>
                       ))
