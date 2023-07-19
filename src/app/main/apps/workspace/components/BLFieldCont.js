@@ -64,7 +64,7 @@ const BLField = ({ multiline = false, children: _children }) => {
     setAnchorElCopy(e.currentTarget);
     setAnchorEl(e.currentTarget);
     if (scrollWidth > clientWidth || scrollHeight > clientHeight) {
-      setPopover({ open: true, text: e.target.textContent });
+      setPopover({ open: true, text: children });
     }
   };
 

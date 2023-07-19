@@ -222,7 +222,7 @@ const BLField = ({
     if (isEmpty) setAnchorEl(currentTarget);
     setAnchorElCopy(currentTarget);
     if (Boolean((scrollWidth > clientWidth) && !rows) || (Boolean((scrollHeight > clientHeight) && rows))) {
-      setPopover({ open: true, text: e.target.textContent });
+      setPopover({ open: true, text: children });
     }
   };
 

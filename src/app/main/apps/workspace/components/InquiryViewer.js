@@ -3320,7 +3320,7 @@ const InquiryViewer = (props) => {
                     currentQuestion={question}
                   />
               ) :
-                (['RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) || (question.process === 'draft' && question.state === 'REOPEN_Q') || (['AME_DRF', 'AME_SENT'].includes(question.state) && !isReply) ?
+                (['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) || (question.process === 'draft' && question.state === 'REOPEN_Q') ?
                   <Diff
                     inputA={orgContent[question.field] ? renderContent(orgContent[question.field]) : ''}
                     inputB={question.content ? getNewValueDiffViewer(question.content) : ''}
@@ -3460,7 +3460,7 @@ const InquiryViewer = (props) => {
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
-                extraCondition={['COMPL', 'RESOLVED', 'UPLOADED'].includes(question.state)}
+                extraCondition={['COMPL', 'RESOLVED', 'UPLOADED'].includes(question.state) && user.role === 'Admin'}
               >
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <Button

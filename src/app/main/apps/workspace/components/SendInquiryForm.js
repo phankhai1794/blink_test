@@ -424,11 +424,11 @@ const SendInquiryForm = (props) => {
     } else if (
       tabValue === 'customer'
       && !pathName.includes('/guest')
-      && [...tags['toCustomer'], ...tags['toCustomerCc'], ...tags['toCustomerBcc']].some(
-        (mail) => /.*@one-line.com/.test(mail) || /.*@googlegroups.com/.test(mail)
+      && [...tags['toCustomer']].some(
+        (mail) => /.*@one-line.com/.test(mail)
       )
     ) {
-      dispatch(Actions.showMessage({ message: 'ONE email address is not allowed', variant: 'error' }));
+      dispatch(Actions.showMessage({ message: 'Please provide the email address of your customer', variant: 'error' }));
     } else if (!isRecipientValid() || !form.subject || !isBodyValid()) {
       return;
     } else {
