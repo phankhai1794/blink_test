@@ -80,6 +80,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
+  const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const user = useSelector(({ user }) => user);
   const originValueCancel = useSelector(({ workspace }) => workspace.inquiryReducer.originValueCancel);
   const classes = useStyles();
@@ -223,7 +224,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const isValueChange = (key, index, row) => {
-    const originalValue = renderContent(key, contentInqResolved[getField(container)]?.[index]);
+    const originalValue = renderContent(key, orgContent[getField(container)]?.[index]);
     return originalValue !== renderContent(key, row);
   }
 
