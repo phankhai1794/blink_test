@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, currentQuestion, isDeleteAnswer, setDeleteAnswer }) => {
+const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, currentQuestion, isDeleteAnswer, setDeleteAnswer, onPasteAnswer }) => {
   const classes = useStyles(question);
   const dispatch = useDispatch();
 
@@ -175,6 +175,7 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
           multiline
           value={paragraphText}
           onChange={handleChangeInput}
+          onPaste={onPasteAnswer}
           helperText={
             user.role === "Guest" && !question.showIconReply && !question.showIconEdit && validateField(question.field, question.content).errorType.split('\n').map((line, idx) => (
               <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}>{line}</span>

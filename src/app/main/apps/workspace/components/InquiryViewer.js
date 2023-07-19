@@ -3019,36 +3019,9 @@ const InquiryViewer = (props) => {
     }
   }
 
-  const onPasteA = (e) => {
+  const onPaste = (e) => {
     if ((isReply || question.showIconAttachAnswerFile) && e.clipboardData.files.length) {
       const fileObject = e.clipboardData.files[0];
-      // generate new file name
-      if (['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest') { // case create ans/ edit anns
-        if (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) {
-          const newFileName = generateFileName(fileObject.name, question.mediaFilesAnswer.map(fItem => { return fItem.name }));
-          const myRenamedFile = new File([fileObject], newFileName, {
-            type: "image/png"
-          });
-          setFilepaste(myRenamedFile);
-        } else setFilepaste(fileObject);
-      } else {
-        //other case
-        if (tempReply.mediaFiles && tempReply.mediaFiles.length > 0) {
-          const newFileName = generateFileName(fileObject.name, tempReply.mediaFiles.map(fItem => { return fItem.name }));
-          const myRenamedFile = new File([fileObject], newFileName, {
-            type: "image/png"
-          });
-          setFilepaste(myRenamedFile);
-        } else setFilepaste(fileObject);
-      }
-    }
-  }
-
-  const onPaste = (e) => {
-    const clipboardData = e.clipboardData || window.clipboardData; // Support for older browsers
-    console.log(clipboardData)
-    if ((isReply || question.showIconAttachAnswerFile) && clipboardData.files.length) {
-      const fileObject = clipboardData.files[0];
       // generate new file name
       if (['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest') { // case create ans/ edit anns
         if (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) {
@@ -3082,7 +3055,6 @@ const InquiryViewer = (props) => {
         <div
           style={{ position: 'relative' }}
           onClick={() => dispatch(FormActions.inqViewerFocus(question.id))}
-          onPaste={onPaste}
           {...getRootProps({})}>
           {(isReply || question.showIconAttachAnswerFile) && isDragActive && <div className='dropzone'>Drop files here</div>}
           <div>
@@ -3430,6 +3402,7 @@ const InquiryViewer = (props) => {
                     saveStatus={isSaved}
                     currentQuestion={currentQuestion}
                     isDeleteAnswer={isDeleteAnswer}
+                    onPasteAnswer={onPaste}
                     setDeleteAnswer={() => {
                       setDeleteAnswer({ status: false, content: '' });
                     }}
@@ -3697,6 +3670,7 @@ const InquiryViewer = (props) => {
                                 classes: { input: classes.placeholder }
                               }}
                               onChange={handleChangeContentReply}
+                              onPaste={onPaste}
                               variant='outlined'
                               placeholder='Reply...'
                               error={validateField(question.field, tempReply?.answer?.content).isError && (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest'))}
