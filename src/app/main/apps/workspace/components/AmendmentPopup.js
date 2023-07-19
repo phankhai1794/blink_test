@@ -304,8 +304,8 @@ const AmendmentPopup = (props) => {
     const type = inqType === CONTAINER_DETAIL ? CDTitle : CMTitle;
     const field = type.find((f) => f.title === title);
     // TODO: Case for Dummy ContainerNo
-    const isUpperCase = field.title !== CONTAINER_NUMBER;
-
+    const isContNo = field.title === CONTAINER_NUMBER;
+    const lock = !isEdit || isContNo
     return (
       <TextField
         {...prop}
@@ -314,14 +314,14 @@ const AmendmentPopup = (props) => {
         error={Boolean(errors[title])}
         helperText={errors[title]?.message}
         autoComplete="off"
-        className={clsx(classes.textField, !isEdit && classes.lock)}
-        value={!isUpperCase ? formatContainerNo(field.value) : field.value}
+        className={clsx(classes.textField, lock && classes.lock)}
+        value={isContNo ? formatContainerNo(field.value) : field.value}
         onChange={(e) => handleChange(field, e.target.value)}
         InputProps={{
-          disabled: !isEdit,
-          endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
+          disabled: lock,
+          endAdornment: <>{lock && <Icon>lock</Icon>}</>
         }}
-        inputProps={{ style: { textTransform: isUpperCase ? 'uppercase' : 'none' } }}
+        inputProps={{ style: { textTransform: !isContNo ? 'uppercase' : 'none' } }}
       />
     );
   };
