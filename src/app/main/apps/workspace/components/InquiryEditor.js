@@ -223,7 +223,8 @@ const InquiryEditor = (props) => {
       workspace.inquiryReducer.enableSubmit,
     ]
   );
-  const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs)
+  const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs);
+  const [allPasteFiles, setAllPasteFile] = useState([]);
 
   const user = useSelector(({ user }) => user);
   const getField = (field) => {
@@ -752,9 +753,10 @@ const InquiryEditor = (props) => {
 
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
-    setContent(filepaste ? inq.content : e.target.value);
+    // setContent(filepaste ? inq.content : e.target.value);
+    setContent(filepaste ? e.target.value.replace(/<img.*>\n?/,'') : e.target.value);    
+
     inq.content = e.currentTarget.textContent;
-    setContent(e.target.value);
     setFieldEdited(inq.field);
     setNameTypeEdited(inq.inqType);
     setContentEdited(inq.content);
@@ -1243,7 +1245,10 @@ const InquiryEditor = (props) => {
       const myRenamedFile = new File([fileObject], newFileName, {
         type: "image/png"
       });
-      setFilepaste(myRenamedFile);
+      if(!allPasteFiles.includes(newFileName)) {
+        setFilepaste(myRenamedFile);
+        setAllPasteFile([...allPasteFiles, newFileName])
+      }
     }
   }
 
