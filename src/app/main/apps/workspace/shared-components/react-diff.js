@@ -12,16 +12,13 @@ var fnMap = {
 
 const Diff = (props) => {
   var diff = fnMap[props.type](props.inputA, props.inputB, { newlineIsToken: true });
-  var emptyA = false
-  var emptyB = false
-  if (!props.inputA) emptyA = true
-  if (!props.inputB) emptyB = true
+
   var result = diff.map((part, index) => {
     let value = part.value
-    if (part.added && !emptyA) { 
+    if (part.added) { 
       value = part.value.replace(/\n/g, '↩\n')
     }
-    if (part.removed && !emptyB) { 
+    if (part.removed) { 
       value = part.value.replace(/\n/g, '↩')
     }
     var spanStyle = {
