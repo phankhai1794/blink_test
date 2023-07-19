@@ -274,7 +274,7 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
                 -----------------------------------------------------------------------------------------------------------------------------------------
               </span>
               <br />
-              { getValueField(ALSO_NOTIFY) && <div>
+              { getValueField(ALSO_NOTIFY) && getValueField(ALSO_NOTIFY).trim() !== '' && <div>
                 <span>ALSO NOTIFY</span>
                 <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950}}>
                   {getValueField(ALSO_NOTIFY)}

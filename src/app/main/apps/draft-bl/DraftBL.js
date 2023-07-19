@@ -8,7 +8,7 @@ import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
-import { isJsonText, formatDate, MAX_CHARS, MAX_ROWS_CD, lineBreakAtBoundary, checkMaxRows, getTotalValueMDView, formatNoneContNo, findSumFromArray } from '@shared';
+import { isJsonText, formatDate, MAX_CHARS, MAX_ROWS_CD, lineBreakAtBoundary, getMaxRows, getTotalValueMDView, formatNoneContNo, findSumFromArray } from '@shared';
 import { packageUnitsJson } from '@shared/units';
 
 import * as Actions from './store/actions';
@@ -191,6 +191,7 @@ const DraftPage = (props) => {
   const dispatch = useDispatch();
   const [containersDetail, setContainersDetail] = useState([]);
   const [containersManifest, setContainersManifest] = useState([]);
+  const [maxRows, setMaxRows] = useState(0);
   const [metadata, myBL, content, drfView] = useSelector(({ draftBL }) => [
     draftBL.metadata,
     draftBL.myBL,
@@ -198,6 +199,7 @@ const DraftPage = (props) => {
     draftBL.drfView
   ]);
   const [isInBound, setIsInBound] = useState({ MD: true, CM: true });
+  const [isInsertRider, setInsertRider] = useState(false);
   const [totalPage, setTotalPage] = useState(1);
 
   const getField = (field) => {
@@ -259,26 +261,32 @@ const DraftPage = (props) => {
         cmPackage += `${cm[getInqType(CM_PACKAGE)]}\n${getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}`.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)).join("\n");
         cmDescription += lineBreakAtBoundary(cm[getInqType(CM_DESCRIPTION)], MAX_CHARS.description) + "\n";
       });
+      const maxRowsMD = getMaxRows(
+        containersDetail.length + 1, // 1 more dash line
+        totalMark,
+        totalPackage,
+        totalDescription
+      );
+      const maxRowsCM = getMaxRows(
+        containersDetail.length + containersManifest.length + 1, // 1 more dash line
+        cmMark.trim().replace(/^\s+|\s+$/g, ''),
+        cmPackage.trim().replace(/^\s+|\s+$/g, ''),
+        cmDescription.trim().replace(/^\s+|\s+$/g, '')
+      )
 
       setIsInBound({
-        MD: checkMaxRows(
-          containersDetail.length + 1, // 1 more dash line
-          totalMark,
-          totalPackage,
-          totalDescription
-        ),
-        CM: checkMaxRows(
-          containersDetail.length + containersManifest.length + 1, // 1 more dash line
-          cmMark.trim().replace(/^\s+|\s+$/g, ''),
-          cmPackage.trim().replace(/^\s+|\s+$/g, ''),
-          cmDescription.trim().replace(/^\s+|\s+$/g, '')
-        )
+        MD: maxRowsMD <= MAX_ROWS_CD,
+        CM: maxRowsCM <= MAX_ROWS_CD
       });
+      setMaxRows(drfView === "CM" ? maxRowsCM : maxRowsMD)
+      const maxRiderInfo = getValueField(ALSO_NOTIFY).trim().split("\n").length + getValueField(REMARKS).trim().split("\n").length + 1;
+      if((drfView === "CM" && maxRiderInfo + maxRowsCM > MAX_ROWS_CD) || (drfView === "MD" && maxRiderInfo + maxRowsMD > MAX_ROWS_CD)) setInsertRider(true)
+      
     }
   }, [containersDetail, containersManifest]);
-  
+  console.log(getValueField(REMARKS))
   const renderAlsoRemark = () => (
-    <>
+    <div style={{position: 'relative', top: `${(maxRows-1)*9}px`}}>
       <br></br>
       { getValueField(ALSO_NOTIFY) && 
         <div>
@@ -309,16 +317,15 @@ const DraftPage = (props) => {
       <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950}}>
         {getValueField(REMARKS)}
       </span>
-    </>
+    </div>
   )
-   
   const renderMDCMTable = () => {
     if (drfView === "CM" && isInBound[drfView] && containersManifest.length) {
       return containersManifest.map((cm, index) => (
         <Grid container item key={index} className={classes.content_L}>
           <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
             {cm[getInqType(CM_MARK)]}
-            {renderAlsoRemark()}
+            {!isInsertRider && renderAlsoRemark()}
           </Grid>
           <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
             <Grid item style={{ textAlign: 'end' }}>
@@ -343,7 +350,7 @@ const DraftPage = (props) => {
       return <Grid container item className={classes.content_L}>
         <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 5, whiteSpace: 'pre-wrap' }}>
           {getValueField(SHIPPING_MARK)}
-          {renderAlsoRemark()}
+          {!isInsertRider && renderAlsoRemark()}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 5 }}>
           <Grid item style={{ textAlign: 'end' }}>
@@ -1007,6 +1014,16 @@ const DraftPage = (props) => {
           containersDetail={containersDetail}
           containersManifest={containersManifest}
           setTotalPage={setTotalPage}
+        />
+      }
+
+      {isInsertRider && isInBound[drfView] &&
+        <Rider
+          drfMD={drfMD}
+          containersDetail={[]}
+          containersManifest={[]}
+          setTotalPage={setTotalPage}
+          isOnlyRiderInfo={true}
         />
       }
     </div >
