@@ -284,7 +284,6 @@ const DraftPage = (props) => {
       
     }
   }, [containersDetail, containersManifest]);
-  console.log(getValueField(REMARKS))
   const renderAlsoRemark = () => (
     <div style={{position: 'relative', top: `${(maxRows-1)*9}px`}}>
       <br></br>

@@ -124,7 +124,6 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage, isOn
     setCmSplitted(arr);
     setTotalPage(arr.length + 1);
   }, [cdSplitted, drfView]);
-  console.log(cmSplitted, isOnlyRiderInfo)
   return (
     isOnlyRiderInfo ? (
       <NextPage
