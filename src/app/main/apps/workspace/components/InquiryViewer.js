@@ -1564,15 +1564,6 @@ const InquiryViewer = (props) => {
     if (cloneOrgContent?.[getField(CONTAINER_MANIFEST)].length) {
       contentOrgCm = cloneOrgContent?.[getField(CONTAINER_MANIFEST)];
     }
-    // content customer answer or reply cd cm
-    let contentCd = [];
-    let contentCm = [];
-    if (question.dataCdInq && question.dataCdInq.length) {
-      contentCd = question.dataCdInq;
-    }
-    if (question.dataCmInq && question.dataCmInq.length) {
-      contentCm = question.dataCmInq;
-    }
     // content resolve inquiry cd cm
     let contentResolveCd = [];
     let contentResolveCm = [];
@@ -1581,6 +1572,22 @@ const InquiryViewer = (props) => {
     }
     if (cloneContent?.[getField(CONTAINER_MANIFEST)].length) {
       contentResolveCm = cloneContent?.[getField(CONTAINER_MANIFEST)];
+    }
+    // content customer answer or reply cd cm
+    let contentCd = [];
+    let contentCm = [];
+
+    let stateFilRepADrf = [];
+    if (comment.length > 0) {
+      stateFilRepADrf = comment.filter(c => !['REP_Q_DRF', 'REP_Q_SENT'].includes(c.state));
+    }
+    if (['REP_A_SENT', 'ANS_SENT'].includes(question.state) || (stateFilRepADrf.length && stateFilRepADrf[0].state === 'REP_A_SENT')) {
+      if (question.dataCdInq && question.dataCdInq.length) {
+        contentCd = question.dataCdInq;
+      }
+      if (question.dataCmInq && question.dataCmInq.length) {
+        contentCm = question.dataCmInq;
+      }
     }
     let typeChanged;
     // CASE 1-1 CD CM
