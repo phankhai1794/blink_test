@@ -390,6 +390,7 @@ export default function Form(props) {
     }).length;
 
     if (countOnshore !== 0 && tabSelected === 1) setNumber = 1;
+    dispatch(FormActions.setTabs(setNumber));
     props.tabChange(setNumber);
   }, [enableSubmit, openAllInquiry]);
 
