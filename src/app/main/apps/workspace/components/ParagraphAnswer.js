@@ -22,6 +22,9 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiInputBase-input': {
       width: '93%'
     },
+    '& .MuiInputBase-input.Mui-disabled': {
+      color: 'rgb(81, 95, 107)'
+    }
   },
   inputText: {
     '& .MuiInputBase-input': {
