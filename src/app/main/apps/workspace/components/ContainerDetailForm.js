@@ -14,7 +14,8 @@ import {
   CM_WEIGHT,
   CM_MEASUREMENT,
   CM_DESCRIPTION,
-  CM_MARK
+  CM_MARK,
+  CONTAINER_TYPE
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -32,6 +33,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { formatContainerNo, NumberFormat } from '@shared';
+import { containerTypeUnit } from '@shared/units';
 
 import EllipsisPopper from '../shared-components/EllipsisPopper';
 import * as FormActions from '../store/actions/form';
@@ -91,6 +93,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   };
 
   const getType = (type) => {
+    
     return metadata.inq_type?.[type] || '';
   };
 
@@ -203,6 +206,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const renderContent = (name, row) => {
     if (row) {
       let value = isArray(row[getType(name)]);
+      if (name === CONTAINER_TYPE) {
+        value = containerTypeUnit.find(contType => contType.value === value).label;
+      }
       if (value) {
         let minFrac = -1;
         if ([CM_MEASUREMENT, CM_WEIGHT, CONTAINER_MEASUREMENT, CONTAINER_WEIGHT].includes(name)) minFrac = 3;

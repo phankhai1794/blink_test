@@ -445,7 +445,7 @@ const AmendmentPopup = (props) => {
             fullWidth={true}
             variant="outlined"
             className={clsx(classes.textField, !isEdit && classes.lock)}
-            value={field.value}
+            value={field.value ? containerTypeUnit.find(contType => contType.value === field.value)?.label : ''}
             InputProps={{
               disabled: !isEdit,
               endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
