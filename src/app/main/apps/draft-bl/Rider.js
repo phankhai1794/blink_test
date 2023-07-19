@@ -121,6 +121,7 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage }) =>
       });
     }
 
+    arr = arr.filter(item => item.length > 0);
     setCmSplitted(arr);
     setTotalPage(arr.length + 1);
   }, [cdSplitted, drfView]);
