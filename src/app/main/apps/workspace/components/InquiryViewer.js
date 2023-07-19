@@ -3019,9 +3019,36 @@ const InquiryViewer = (props) => {
     }
   }
 
-  const onPaste = (e) => {
+  const onPasteA = (e) => {
     if ((isReply || question.showIconAttachAnswerFile) && e.clipboardData.files.length) {
       const fileObject = e.clipboardData.files[0];
+      // generate new file name
+      if (['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest') { // case create ans/ edit anns
+        if (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) {
+          const newFileName = generateFileName(fileObject.name, question.mediaFilesAnswer.map(fItem => { return fItem.name }));
+          const myRenamedFile = new File([fileObject], newFileName, {
+            type: "image/png"
+          });
+          setFilepaste(myRenamedFile);
+        } else setFilepaste(fileObject);
+      } else {
+        //other case
+        if (tempReply.mediaFiles && tempReply.mediaFiles.length > 0) {
+          const newFileName = generateFileName(fileObject.name, tempReply.mediaFiles.map(fItem => { return fItem.name }));
+          const myRenamedFile = new File([fileObject], newFileName, {
+            type: "image/png"
+          });
+          setFilepaste(myRenamedFile);
+        } else setFilepaste(fileObject);
+      }
+    }
+  }
+
+  const onPaste = (e) => {
+    const clipboardData = e.clipboardData || window.clipboardData; // Support for older browsers
+    console.log(clipboardData)
+    if ((isReply || question.showIconAttachAnswerFile) && clipboardData.files.length) {
+      const fileObject = clipboardData.files[0];
       // generate new file name
       if (['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest') { // case create ans/ edit anns
         if (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) {
