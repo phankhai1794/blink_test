@@ -409,6 +409,7 @@ const InquiryEditor = (props) => {
 
   const initContentType = (contentArr) => {
     const currInq = { ...currentEditInq };
+    const currentTab = currentTabs === 0 ? 'customer' : 'onshore';
     if (containerCheck.includes(currInq.field)) {
       const valResult = [...valueType]
       if (valResult.length && !currInq.id) {
@@ -420,7 +421,7 @@ const InquiryEditor = (props) => {
             filter.showTemplate = false;
             filter.templateIndex = '0';
             filter.contentShow = filter.content[0];
-            filter.receiver = `customer-${v.value}`;
+            filter.receiver = `${currentTab}-${v.value}`;
             contentArr.push(filter);
           }
         });
@@ -485,7 +486,19 @@ const InquiryEditor = (props) => {
       setValueAnsType(optionsAnsType);
       dispatch(InquiryActions.setEditInq(inq));
     }
-    currentEditInq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];
+
+    if(inquiries.length > 0) {
+      if (inquiries.every((i) => i.receiver.includes('onshore'))) {
+        inq.receiver = ['onshore'];
+      } else if (inquiries.every((i) => i.receiver.includes('customer'))) {
+        inq.receiver = ['customer'];
+      } else {
+        inq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];
+      }
+    } else inq.receiver = ['customer']
+    
+  if (!containerCheck.includes(inq.field)) dispatch(InquiryActions.setEditInq(inq));
+
     return () => dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false, createInq: false }))
   }, []);
 
@@ -536,7 +549,7 @@ const InquiryEditor = (props) => {
       const inqCdCm = [...contentsInqCDCM];
       const contentArr = [];
       const findByIdType = inqCdCm.find(cdcm => inq.inqType === cdcm.type);
-
+      const currentTab = currentTabs === 0 ? 'customer' : 'onshore';
       if (!findByIdType) {
         const filter = metadata.template.find(({ field, type }) => {
           return type === inq.inqType && ['containerDetail', 'containerManifest'].includes(field);
@@ -545,7 +558,7 @@ const InquiryEditor = (props) => {
           filter.showTemplate = false;
           filter.templateIndex = '0';
           filter.contentShow = filter.content[0];
-          filter.receiver = `customer-${inq.inqType}`;
+          filter.receiver = `${currentTab}-${inq.inqType}`;
           contentArr.push(filter);
         }
       } else if (findByIdType) {

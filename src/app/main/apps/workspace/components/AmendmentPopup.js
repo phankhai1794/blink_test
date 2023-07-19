@@ -146,10 +146,10 @@ const AmendmentPopup = (props) => {
   useEffect(() => {
     const isResolved = inquiries.filter(inq => ((inq.field === metadata.field[CONTAINER_DETAIL] || inq.field === metadata.field[CONTAINER_MANIFEST]) && ['COMPL', 'RESOLVED', 'UPLOADED', 'REOPEN_Q', 'REOPEN_A'].includes(inq.state))).length > 0;
     if (isResolved && isEdit && user.role !== 'Guest') {
-      const dataResolved = JSON.parse(JSON.stringify(content[metadata.field[(inqType === 'containerDetail') ? CONTAINER_DETAIL : CONTAINER_MANIFEST]]));
-      Object.keys(data).forEach(key => {
-        data[key] = dataResolved[index][key];
-      })
+      // const dataResolved = JSON.parse(JSON.stringify(content[metadata.field[(inqType === 'containerDetail') ? CONTAINER_DETAIL : CONTAINER_MANIFEST]]));
+      // Object.keys(data).forEach(key => {
+      //   data[key] = dataResolved[index][key];
+      // })
     }
   }, []);
 
@@ -304,8 +304,8 @@ const AmendmentPopup = (props) => {
     const type = inqType === CONTAINER_DETAIL ? CDTitle : CMTitle;
     const field = type.find((f) => f.title === title);
     // TODO: Case for Dummy ContainerNo
-    const isUpperCase = field.title !== CONTAINER_NUMBER;
-
+    const isContNo = field.title === CONTAINER_NUMBER;
+    const lock = !isEdit || isContNo
     return (
       <TextField
         {...prop}
@@ -314,14 +314,14 @@ const AmendmentPopup = (props) => {
         error={Boolean(errors[title])}
         helperText={errors[title]?.message}
         autoComplete="off"
-        className={clsx(classes.textField, !isEdit && classes.lock)}
-        value={!isUpperCase ? formatContainerNo(field.value) : field.value}
+        className={clsx(classes.textField, lock && classes.lock)}
+        value={isContNo ? formatContainerNo(field.value) : field.value}
         onChange={(e) => handleChange(field, e.target.value)}
         InputProps={{
-          disabled: !isEdit,
-          endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
+          disabled: lock,
+          endAdornment: <>{lock && <Icon>lock</Icon>}</>
         }}
-        inputProps={{ style: { textTransform: isUpperCase ? 'uppercase' : 'none' } }}
+        inputProps={{ style: { textTransform: !isContNo ? 'uppercase' : 'none' } }}
       />
     );
   };
