@@ -106,7 +106,7 @@ const PreProcess = ({ bl, children }) => {
       // receive a list users accessing
       socket.on('users_accessing', async ({ usersAccessing }) => {
         window.usersAccessing = usersAccessing;
-        
+
         if (
           user.userType === "ADMIN"
           ||
@@ -114,14 +114,25 @@ const PreProcess = ({ bl, children }) => {
         ) {
           const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
           if (userLocal.displayName && usersAccessing.length) {
-
+            let permissions = await getPermissionByRole(userLocal.role).catch(err => handleError(dispatch, err));
             if (userLocal.displayName === usersAccessing[0].userName) { // if to be the first user
               dispatch(FormActions.toggleOpenBLWarning(false));
             } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1].userName) { // if to be the last user
-              dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0].userName }));
+              const { pathname, search } = window.location;
+              const rdrFrmWs = new URLSearchParams(search).get('rdrFrmWs');
+              if (!rdrFrmWs)
+                dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0].userName }));
+              else {
+                permissions = await getPermissionByRole('Viewer').catch(err => handleError(dispatch, err));
+                setTimeout(() => {
+                  const bl = new URLSearchParams(search).get('bl');
+                  const url = new URL(window.location);
+                  url.searchParams.set('bl', bl);
+                  window.history.pushState({}, '', `${pathname}?bl=${bl}`);
+                }, 200);
+              }
             }
 
-            const permissions = await getPermissionByRole(userLocal.role).catch(err => handleError(dispatch, err));
             setTimeout(() => {
               dispatch(AppAction.setUser({ ...userLocal, permissions }));
             }, 500);

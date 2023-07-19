@@ -46,7 +46,7 @@ const PreviewDraftBL = () => {
     const bl = myBL.id || window.location.pathname.split('/')[3];
     if (bl) {
       dispatch(InquiryActions.setMyBL({})); // reset BL to re-init socket every redirect page
-      history.push(`/draft-bl?bl=${bl}`, { skipVerification: true });
+      history.push(`/draft-bl?bl=${bl}&rdrFrmWs=true`, { skipVerification: true }); // rdrFrmWs: redirect from workspace
     }
   };
 
