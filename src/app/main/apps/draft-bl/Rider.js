@@ -8,7 +8,7 @@ import NextPage from './NextPage';
 
 const MAX_ROW_NEXT_PAGE = 63;
 
-const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage }) => {
+const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage, isOnlyRiderInfo }) => {
 
   const [cdSplitted, setCdSplitted] = useState([]);
   const [cmSplitted, setCmSplitted] = useState([]);
@@ -47,7 +47,6 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage }) =>
   useEffect(() => {
     let arr = [[]];
     let filledLines = cdSplitted.length ? (cdSplitted[cdSplitted.length - 1].length + 1) : 0; // +1 dashline
-
     if (drfView === "MD") {
       let result = { mark: [[]], package: [[]], description: [[]] };
       let data = {
@@ -125,19 +124,29 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage }) =>
     setCmSplitted(arr);
     setTotalPage(arr.length + 1);
   }, [cdSplitted, drfView]);
-
+  console.log(cmSplitted, isOnlyRiderInfo)
   return (
-    <>
-      {cmSplitted.map((cmList, idx) => (
-        <NextPage
-          key={idx}
-          containersDetail={cdSplitted[idx] || []}
-          containersManifest={cmList}
-          currentPage={idx + 2} // currentPage start from 2
-          totalPage={cmSplitted.length + 1} // + first page
-        />
-      ))}
-    </>
+    isOnlyRiderInfo ? (
+      <NextPage
+        key={2}
+        containersDetail={ []}
+        containersManifest={[]}
+        currentPage={2} // currentPage start from 2
+        totalPage={2} // + first page
+      />
+    ) : 
+      <>
+        {cmSplitted.map((cmList, idx) => (
+          <NextPage
+            key={idx}
+            containersDetail={cdSplitted[idx] || []}
+            containersManifest={cmList}
+            currentPage={idx + 2} // currentPage start from 2
+            totalPage={cmSplitted.length + 1} // + first page
+          />
+        ))}
+      </>
+
   );
 };
 
