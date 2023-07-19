@@ -248,13 +248,13 @@ export const lineBreakAtBoundary = (string, boundary) => {
   return newString.trim();
 }
 
-export const checkMaxRows = (containerLength, mark, packages, description) => {
+export const getMaxRows = (containerLength, mark, packages, description) => {
   const maxLength = Math.max(
     mark.trim().split("\n").length,
     packages.trim().split("\n").length,
     description.trim().split("\n").length
   );
-  return (containerLength + maxLength) <= MAX_ROWS_CD; // max num of lines
+  return containerLength + maxLength // max num of lines
 }
 
 export const compareObject = (a, b) => {
