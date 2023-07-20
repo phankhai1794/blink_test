@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { FusePageSimple } from '@fuse';
 
 import OtpCheck from '../OTPCheck';
+import PreProcess from '../PreProcess';
 
 import BLWorkspace from './components/BLWorkspace';
 
@@ -18,7 +19,11 @@ function GuestWorkspaceApp() {
             content: 'flex flex-col h-full',
             leftSidebar: 'w-256 border-0'
           }}
-          content={<BLWorkspace myBL={{ id: bl }} user="guest" process="pending" />}
+          content={
+            <PreProcess bl={bl}>
+              <BLWorkspace user="guest" process="pending" />
+            </PreProcess>
+          }
           sidebarInner
           ref={pageLayout}
           innerScroll

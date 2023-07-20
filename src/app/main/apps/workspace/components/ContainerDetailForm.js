@@ -14,7 +14,8 @@ import {
   CM_WEIGHT,
   CM_MEASUREMENT,
   CM_DESCRIPTION,
-  CM_MARK
+  CM_MARK,
+  CONTAINER_TYPE
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,10 +28,12 @@ import {
   TableHead,
   TableRow,
   Drawer,
-  Popover
+  Popover,
+  Paper
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { formatContainerNo, NumberFormat } from '@shared';
+import { containerTypeUnit } from '@shared/units';
 
 import EllipsisPopper from '../shared-components/EllipsisPopper';
 import * as FormActions from '../store/actions/form';
@@ -39,9 +42,16 @@ import Diff from "../shared-components/react-diff";
 import AmendmentPopup from './AmendmentPopup';
 
 const useStyles = makeStyles(() => ({
-  paper: {
+  drawer: {
     width: 450,
     backgroundColor: '#FDF2F2'
+  },
+  paper: {
+    maxHeight: 400,
+    maxWidth: 400,
+    overflow: "auto",
+    padding: 15,
+    color: '#515E6A'
   },
   popover: {
     width: 250,
@@ -72,6 +82,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
+  const orgContent = useSelector(({ workspace }) => workspace.inquiryReducer.orgContent);
   const user = useSelector(({ user }) => user);
   const originValueCancel = useSelector(({ workspace }) => workspace.inquiryReducer.originValueCancel);
   const classes = useStyles();
@@ -82,6 +93,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   };
 
   const getType = (type) => {
+    
     return metadata.inq_type?.[type] || '';
   };
 
@@ -194,6 +206,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const renderContent = (name, row) => {
     if (row) {
       let value = isArray(row[getType(name)]);
+      if (name === CONTAINER_TYPE) {
+        value = containerTypeUnit.find(contType => contType.value === value).label;
+      }
       if (value) {
         let minFrac = -1;
         if ([CM_MEASUREMENT, CM_WEIGHT, CONTAINER_MEASUREMENT, CONTAINER_WEIGHT].includes(name)) minFrac = 3;
@@ -215,7 +230,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const isValueChange = (key, index, row) => {
-    const originalValue = renderContent(key, contentInqResolved[getField(container)]?.[index]);
+    const originalValue = renderContent(key, orgContent[getField(container)]?.[index]);
     return originalValue !== renderContent(key, row);
   }
 
@@ -272,7 +287,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   return (
     <>
       <Drawer
-        classes={{ paper: classes.paper }}
+        classes={{ paper: classes.drawer }}
         anchor='right'
         open={openEdit}
         onClose={() => handleClose('cancel')}
@@ -292,9 +307,22 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           isInqCDCM={isInqCDCM}
         />
       </Drawer>
-      <EllipsisPopper anchorEl={anchorElHover} arrowRef={arrowRef}>
-        <div className='arrow' ref={handleArrorRef} />
-        <span style={{ color: '#515E6A', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{popover.text}</span>
+
+      <EllipsisPopper
+        open={Boolean(anchorElHover)}
+        anchorEl={anchorElHover}
+        arrow={true}
+        flip={true}
+        transition
+        placement={'left'}
+        disablePortal={false}
+        preventOverflow={'scrollParent'}>
+        {({ TransitionProps, placement, arrow }) => (
+          <>
+            {arrow}
+            <Paper className={classes.paper}>{popover.text}</Paper>
+          </>
+        )}
       </EllipsisPopper>
 
       <Popover

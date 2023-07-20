@@ -52,9 +52,7 @@ function User(props) {
   }, [user.displayName, allowAccess]);
 
   return (
-    <PermissionProvider
-      action={PERMISSION.VIEW_SHOW_USER_MENU}
-      extraCondition={!pathname.includes('/guest')}>
+    <PermissionProvider action={PERMISSION.VIEW_SHOW_USER_MENU}>
       <UserProfile classes={classes} />
     </PermissionProvider>
   );

@@ -40,7 +40,6 @@ import { makeStyles } from '@material-ui/styles';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { getBlInfo } from 'app/services/myBLService';
 
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
@@ -61,7 +60,6 @@ import { SendInquiryForm } from './SendInquiryForm';
 import TableCD from './TableCD';
 import TableCM from './TableCM';
 import ListNotification from './ListNotification';
-import SubmitAnswerNotification from "./SubmitAnswerNotification";
 import QueueList from './QueueList';
 
 const useStyles = makeStyles((theme) => ({
@@ -113,6 +111,7 @@ const BLWorkspace = (props) => {
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
+  const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
   const openAttachment = useSelector(({ workspace }) => workspace.formReducer.openAttachment);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const openAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openAmendmentList);
@@ -125,16 +124,10 @@ const BLWorkspace = (props) => {
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
-  const openNotification = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitAnswer);
-  const openNotificationReply = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteReply);
-  const openNotificationBLWarning = useSelector(({ workspace }) => workspace.formReducer.openNotificationBLWarning);
-  const openNotificationSubmitPreview = useSelector(({ workspace }) => workspace.formReducer.openNotificationSubmitPreview);
   const openPreviewListSubmit = useSelector(({ workspace }) => workspace.formReducer.openPreviewListSubmit);
-  const openNotificationAmendment = useSelector(({ workspace }) => workspace.formReducer.openNotificationDeleteAmendment);
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
-  const drfView = useSelector(({ draftBL }) => draftBL.drfView);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -200,19 +193,6 @@ const BLWorkspace = (props) => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(DraftActions.setProcess(props.process));
     dispatch(Actions.loadMetadata());
-
-    const bkgNo = window.location.pathname.split('/')[3];
-    if (bkgNo) {
-      dispatch(Actions.initBL(bkgNo));
-    }
-    else if (props.myBL) {
-      dispatch(FormActions.increaseLoading());
-      getBlInfo(props.myBL?.id).then(res => {
-        const { id, state, bkgNo } = res.myBL;
-        dispatch(InquiryActions.setMyBL({ id, state, bkgNo }));
-        dispatch(FormActions.decreaseLoading())
-      });
-    }
 
     return () => dispatch(FormActions.resetLoading());
   }, []);
@@ -404,45 +384,6 @@ const BLWorkspace = (props) => {
     setIsExpand(false);
   };
 
-  const renderMsgNoti = () => {
-    if (openNotification) {
-      return 'Your answer has been submitted successfully.'
-    } else if (openNotificationReply) {
-      return 'Your reply has been deleted.'
-    } else if (openNotificationAmendment) {
-      return 'Your amendment has been deleted.'
-    } else if (openNotificationBLWarning.status) {
-      return (
-        <>
-          <img style={{ verticalAlign: 'middle', paddingBottom: 2, paddingLeft: 5, paddingRight: 5, }} src={`/assets/images/icons/warning.svg`} />
-          <span>{`The BL is opening by [${openNotificationBLWarning.userName}].`}</span>
-        </>
-      )
-    } else if (openNotificationSubmitPreview) {
-      return (
-        // not used, change to toast
-        <>
-          <div>Your inquiries and amendments</div>
-          <div>have been sent successfully.</div>
-        </>
-      )
-    }
-  };
-
-  const renderMsgNoti2 = () => {
-    if (openNotificationBLWarning.status) {
-      return `Please wait for ${openNotificationBLWarning.userName} complete his/her work!`
-    };
-    return 'Thank you!'
-  };
-
-  const renderIconType = () => {
-    if (openNotification || openNotificationReply || openNotificationAmendment || openNotificationSubmitPreview) {
-      return <img src={`/assets/images/icons/vector.svg`} />;
-    }
-    return null
-  }
-
   return (
     <>
       <BLProcessNotification />
@@ -450,18 +391,6 @@ const BLWorkspace = (props) => {
         <>
           {openQueueList && <QueueList />}
           <ListNotification />
-          <SubmitAnswerNotification
-            open={
-              openNotification ||
-              openNotificationReply ||
-              openNotificationAmendment ||
-              openNotificationBLWarning.status ||
-              openNotificationSubmitPreview
-            }
-            msg={renderMsgNoti()}
-            msg2={renderMsgNoti2()}
-            iconType={renderIconType()}
-          />
           <div className={clsx('max-w-5xl', classes.root)}>
             <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
               {isExpand && (
@@ -500,6 +429,7 @@ const BLWorkspace = (props) => {
                     const popupObj = popupOpen(inquiry, field);
                     return (
                       <Form
+                        isPreviewFile={openPreviewFiles}
                         user={props.user}
                         tabs={popupObj.tabs || null}
                         nums={popupObj.nums || null}

@@ -388,7 +388,10 @@ function ToolbarLayout1(props) {
 
   const redirectWorkspace = () => {
     const bl = new URLSearchParams(search).get('bl');
-    if (bl) history.push(`/guest?bl=${bl}`, { skipVerification: true });
+    if (bl) {
+      dispatch(InquiryActions.setMyBL({})); // reset BL to re-init socket every redirect page
+      history.push(`/guest?bl=${bl}`, { skipVerification: true });
+    }
   };
 
   const showMessageReply = () => {
@@ -524,7 +527,12 @@ function ToolbarLayout1(props) {
                   ))}
                 </TextField>}
 
-              {!pathname.includes('/draft') && <BtnQueueList />}
+              <PermissionProvider
+                action={PERMISSION.MYBL_GET_QUEUE_LIST}
+                extraCondition={!pathname.includes('/draft')}
+              >
+                <BtnQueueList />
+              </PermissionProvider>
 
               <PermissionProvider
                 action={PERMISSION.VIEW_EDIT_DRAFT_BL}

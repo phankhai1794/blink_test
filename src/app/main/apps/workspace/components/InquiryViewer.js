@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateAlsoNotify, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileName  } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateGroupOneTextBox, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileName } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -304,7 +304,7 @@ const InquiryViewer = (props) => {
   const [validationCDCM, setValidationCDCM] = useState(true);
   const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY, FORWARDER].map(key => metadata.field?.[key]).includes(question.field));
+  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
@@ -337,6 +337,7 @@ const InquiryViewer = (props) => {
   const [getDataCM, setDataCM] = useState([]);
   const [isHasEditCdCm, setHasEditCdCm] = useState(false);
   const [isResolveAndUpload, setIsResolveAndUpload] = useState(false);
+  const [allPasteFiles, setAllPasteFile] = useState([]);
   const socket = useContext(SocketContext);
 
   const syncData = (data, syncOptSite = "") => {
@@ -367,7 +368,8 @@ const InquiryViewer = (props) => {
     FREIGHTED_AS,
     RATE,
     SERVICE_CONTRACT_NO,
-    RD_TERMS
+    RD_TERMS,
+    BL_TYPE
   ];
 
   const isDisableBtnUpload = () => {
@@ -395,12 +397,12 @@ const InquiryViewer = (props) => {
 
   const validateField = (field, value) => {
     let response = { isError: false, errorType: "" };
-    const isAlsoNotify = metadata.field[FORWARDER] === field || metadata.field[ALSO_NOTIFY] === field;;
+    const isFieldMaxFineLine = metadata.field[FORWARDER] === field || metadata.field[ALSO_NOTIFY] === field || metadata.field[DESCRIPTION_OF_GOODS] === field;
     if (Object.keys(metadata.field).find(key => metadata.field[key] === field) === BL_TYPE) {
       response = validateBLType(value);
     }
-    if (isAlsoNotify) {
-      response = validateAlsoNotify(value);
+    if (isFieldMaxFineLine) {
+      response = validateGroupOneTextBox(value, metadata.field[DESCRIPTION_OF_GOODS] === field);
     }
     return response;
   }
@@ -459,7 +461,7 @@ const InquiryViewer = (props) => {
     let isUnmounted = false;
     setTempReply({});
     setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-    setIsAlsoNotifies([ALSO_NOTIFY, FORWARDER].map(key => metadata.field?.[key]).includes(question.field));
+    setIsAlsoNotifies([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS].map(key => metadata.field?.[key]).includes(question.field));
     setIsResolve(false);
     setIsResolveCDCM(false);
     setIsReply(false);
@@ -475,13 +477,13 @@ const InquiryViewer = (props) => {
             let filterCDCM = res;
             let objCdCmData;
             let getIndexLatestCdCm;
-            const filterOffshoreSent = filterCDCM[0];
+            const filterOffshoreSent = filterCDCM.filter(f => f.type !== 'ANS_CD_CM')[0];
             if (containerCheck.includes(question.field)) {
               setDisableCDCM(true);
               const cloneContent = JSON.parse(JSON.stringify(contentInqResolved));
               const latestCdCmData = [...res].find((el, i) => {
                 getIndexLatestCdCm = i;
-                return el.type === 'ANS_CD_CM'
+                return el.type === 'ANS_CD_CM' && el.status !== 'DELETED'
               });
               if (latestCdCmData && isJsonText(latestCdCmData.content) && latestCdCmData.type === 'ANS_CD_CM') {
                 setContentCDCMInquiry({ ansId: latestCdCmData.id });
@@ -632,6 +634,7 @@ const InquiryViewer = (props) => {
                 }
                 if (['REP_A_SENT', 'ANS_SENT'].includes(filterOffshoreSent.state)) {
                   setSubmitLabel(true);
+                  setStateReplyDraft(false);
                   lastest.showIconAttachReplyFile = false;
                   lastest.showIconAttachAnswerFile = false;
                   lastest.showIconEdit = true;
@@ -731,12 +734,7 @@ const InquiryViewer = (props) => {
           if (res.length > 0) {
             let getRes = res;
             // console.log('getRes', getRes)
-            const filterRepAmend = res.filter(r => r.state.includes('REP_AME_'));
-            // filter latest reply amendment
-            if (filterRepAmend.length) {
-              const getRepAmend = filterRepAmend[0];
-              getRes = res.filter(r => r.id !== getRepAmend.id);
-            }
+            const filterRepAmend = res.filter(r => r.state.includes('REP_AME_') && !['REP_DRF_DELETED', 'REP_AME_DRF_DELETED'].includes(r.state));
             const getLatest = getRes[0];
             const { content: contentField, mediaFile } = getLatest.content;
             setDisableCDCMAmendment(true);
@@ -747,6 +745,20 @@ const InquiryViewer = (props) => {
                 inqAnsId = lastestComment.draftAnswerId;
               }
               setInqAnsId(inqAnsId);
+            }
+            // filter latest reply amendment
+            if (filterRepAmend.length) {
+              const getRepAmend = filterRepAmend[0];
+              if (
+                lastestComment.role === 'Guest'
+                &&
+                (
+                  (user.role === 'Guest' && ['REP_DRF', 'REP_SENT'].includes(lastestComment.state))
+                  ||
+                  (user.role === 'Admin' && ['REP_SENT'].includes(lastestComment.state))
+                )
+              )
+                getRes = res.filter(r => r.id !== getRepAmend.id);
             }
             // filter comment
             lastest.mediaFile = mediaFile;
@@ -762,7 +774,7 @@ const InquiryViewer = (props) => {
             lastest.creator = lastestComment.creator;
             lastest.process = 'draft';
             if (containerCheck.includes(question.field)) {
-              const lastestContentCDCM = res.filter(r => r.state.includes('AME_') || r.state.includes('REOPEN_'));
+              const lastestContentCDCM = res.filter(r => (r.state.includes('AME_') || r.state.includes('REOPEN_')) && !['REP_AME_DRF_DELETED', 'REP_AME_SENT_DELETED'].includes(r.state));
               lastest.contentCDCM = lastestContentCDCM[0].content.content;
               if (filterRepAmend.length) {
                 lastest.contentReplyCDCM = filterRepAmend[0].content.content;
@@ -1082,7 +1094,7 @@ const InquiryViewer = (props) => {
           const optionsInquires = [...inquiries];
           const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
 
-          if(comment.length > 2) {
+          if (comment.length > 2) {
             const newMediaFile = comment.at(1).answersMedia.filter(({ id: id1 }) => !comment.at(0).answersMedia.some(({ id: id2 }) => id2 === id1));
             const removeMediaFile = comment.at(0).answersMedia.filter(({ id: id1 }) => !comment.at(1).answersMedia.some(({ id: id2 }) => id2 === id1)).map(({ id }) => id);
             optionsInquires[editedIndex].mediaFile = optionsInquires[editedIndex].mediaFile.filter(inq => !removeMediaFile.includes(inq.id));
@@ -1192,7 +1204,7 @@ const InquiryViewer = (props) => {
               if (res.checkReplyEmpty) {
                 if (removeIndex !== -1) {
                   if (comment.length) {
-                    const revertHistory = comment.filter(c => c.state !== 'REP_DRF_DELETED').at(-2)
+                    const revertHistory = comment.filter(c => c.state !== 'REP_DRF_DELETED').at(0)
                     optionsOfQuestion[removeIndex].creator = revertHistory && { ...revertHistory.creator, accountRole: revertHistory.creator.accountRole.name }
                     optionsOfQuestion[removeIndex].state = revertHistory && revertHistory.state;
                   } else {
@@ -1253,7 +1265,9 @@ const InquiryViewer = (props) => {
                       })
                       .catch((err) => handleError(dispatch, err));
                   }
-                } else if (res.isEditOriginalAmendment) {
+                }
+
+                if (res.isEditOriginalAmendment) {
                   newContent = { ...newContent, [question.field]: res.drfAnswersTrans }
                 }
 
@@ -1452,6 +1466,169 @@ const InquiryViewer = (props) => {
     }
   };
 
+  const isChangeCdCmContent = (contentOrgCd, contentOrgCm, contentAnsCd, contentAnsCm, caseOneOne) => {
+    let typeChangeCD = {};
+    let typeChangeCM = {};
+    if (caseOneOne) {
+      if (contentOrgCd.length && contentAnsCd.length) {
+        CONTAINER_LIST.cdMap.forEach(cd => {
+          if (contentOrgCd[0][getType(cd)].toString() !== contentAnsCd[0][getType(cd)].toString()) {
+            // init object
+            const keyChange = '0';
+            if (!typeChangeCD[keyChange]) {
+              typeChangeCD = {
+                [keyChange]: [
+                  {key: getType(cd), val: contentAnsCd[0][getType(cd)].toString()},
+                ]
+              }
+            } else {
+              typeChangeCD[keyChange].push(
+                  {key: getType(cd), val: contentAnsCd[0][getType(cd)].toString()},
+              )
+            }
+          }
+        })
+      }
+      if (contentOrgCm.length && contentAnsCm.length) {
+        CONTAINER_LIST.cmMap.forEach(cm => {
+          if (contentOrgCm[0][getType(cm)].toString() !== contentAnsCm[0][getType(cm)].toString()) {
+            // init object
+            const keyChange = '0';
+            if (!typeChangeCM[keyChange]) {
+              typeChangeCM = {
+                [keyChange]: [
+                  {key: getType(cm), val: contentAnsCm[0][getType(cm)].toString()},
+                ]
+              }
+            } else {
+              typeChangeCM[keyChange].push(
+                  {key: getType(cm), val: contentAnsCm[0][getType(cm)].toString()},
+              )
+            }
+          }
+        })
+      }
+    } else {
+      if (contentOrgCd.length && contentAnsCd.length) {
+        CONTAINER_LIST.cdMap.forEach(cd => {
+          contentOrgCd.forEach((org, index) => {
+            if (org[getType(cd)].toString() !== contentAnsCd[index][getType(cd)].toString()) {
+              const keyChange = index;
+              if (!typeChangeCD[keyChange]) {
+                Object.assign(typeChangeCD, {
+                  [keyChange]: [
+                    {key: getType(cd), val: contentAnsCd[index][getType(cd)].toString()},
+                  ]
+                });
+              } else {
+                typeChangeCD[keyChange].push(
+                    {key: getType(cd), val: contentAnsCd[index][getType(cd)].toString()},
+                )
+              }
+            }
+          })
+        })
+      }
+      if (contentOrgCm.length && contentAnsCm.length) {
+        CONTAINER_LIST.cmMap.forEach(cm => {
+          contentOrgCm.forEach((org, index) => {
+            if (org[getType(cm)].toString() !== contentAnsCm[index][getType(cm)].toString()) {
+              const keyChange = index;
+              if (!typeChangeCM[keyChange]) {
+                Object.assign(typeChangeCM, {
+                  [keyChange]: [
+                    {key: getType(cm), val: contentAnsCm[index][getType(cm)].toString()},
+                  ]
+                });
+              } else {
+                typeChangeCM[keyChange].push(
+                  {key: getType(cm), val: contentAnsCm[index][getType(cm)].toString()},
+                )
+              }
+            }
+          })
+        })
+      }
+    }
+    return {typeChangeCD, typeChangeCM};
+  }
+
+  const combineCdCmResolveAndAns = () => {
+    const cloneContent = JSON.parse(JSON.stringify(content));
+    const cloneOrgContent = JSON.parse(JSON.stringify(orgContent));
+    // content original cd cm
+    let contentOrgCd = [];
+    let contentOrgCm = [];
+    if (cloneOrgContent?.[getField(CONTAINER_DETAIL)].length) {
+      contentOrgCd = cloneOrgContent?.[getField(CONTAINER_DETAIL)];
+    }
+    if (cloneOrgContent?.[getField(CONTAINER_MANIFEST)].length) {
+      contentOrgCm = cloneOrgContent?.[getField(CONTAINER_MANIFEST)];
+    }
+    // content resolve inquiry cd cm
+    let contentResolveCd = [];
+    let contentResolveCm = [];
+    if (cloneContent?.[getField(CONTAINER_DETAIL)].length) {
+      contentResolveCd = cloneContent?.[getField(CONTAINER_DETAIL)];
+    }
+    if (cloneContent?.[getField(CONTAINER_MANIFEST)].length) {
+      contentResolveCm = cloneContent?.[getField(CONTAINER_MANIFEST)];
+    }
+    // content customer answer or reply cd cm
+    let contentCd = [];
+    let contentCm = [];
+
+    let stateFilRepADrf = [];
+    if (comment.length > 0) {
+      stateFilRepADrf = comment.filter(c => !['REP_Q_DRF', 'REP_Q_SENT'].includes(c.state));
+    }
+    if (['REP_A_SENT', 'ANS_SENT'].includes(question.state) || (stateFilRepADrf.length && stateFilRepADrf[0].state === 'REP_A_SENT')) {
+      if (question.dataCdInq && question.dataCdInq.length) {
+        contentCd = question.dataCdInq;
+      }
+      if (question.dataCmInq && question.dataCmInq.length) {
+        contentCm = question.dataCmInq;
+      }
+    }
+    let typeChanged;
+    // CASE 1-1 CD CM
+    if (contentResolveCd.length === 1 && contentResolveCm.length === 1 && contentCd.length === 1 && contentCm.length === 1) {
+      typeChanged = isChangeCdCmContent(contentOrgCd, contentOrgCm, contentCd, contentCm, true);
+    } else if (contentResolveCd.length && contentResolveCm.length && contentCd.length && contentCm.length) {
+      // CASE n-n 1-n CD CM
+      typeChanged = isChangeCdCmContent(contentOrgCd, contentOrgCm, contentCd, contentCm, false);
+    }
+    if (typeChanged && Object.keys(typeChanged.typeChangeCD).length) {
+      contentResolveCd.forEach((contRes, index) => {
+        const getValIndex = typeChanged.typeChangeCD[index];
+        if (getValIndex && getValIndex.length) {
+          getValIndex.forEach(valIndex => {
+            if (valIndex.key === getType(CONTAINER_SEAL)) {
+              contRes[valIndex.key] = valIndex.val.split(',')
+            }
+            else if (contRes?.[valIndex.key]) {
+              contRes[valIndex.key] = valIndex.val
+            }
+          })
+        }
+      });
+    }
+    if (typeChanged && Object.keys(typeChanged.typeChangeCM).length) {
+      contentResolveCm.forEach((contRes, index) => {
+        const getValIndex = typeChanged.typeChangeCM[index];
+        if (getValIndex && getValIndex.length) {
+          getValIndex.forEach(valIndex => {
+            if (contRes?.[valIndex.key]) {
+              contRes[valIndex.key] = valIndex.val
+            }
+          })
+        }
+      });
+    }
+    setDataCD(contentResolveCd)
+    setDataCM(contentResolveCm)
+  }
+
   const onResolve = (hasUpload = false) => {
     if (Array.isArray(question.content)) {
       setIsResolveCDCM(true);
@@ -1466,6 +1643,8 @@ const InquiryViewer = (props) => {
       setShowViewAll(false);
       setInqHasComment(false);
       question.isShowTableToReply = false;
+      //
+      combineCdCmResolveAndAns();
     }
     if (question.process === 'draft') setIsValidDate(false);
   };
@@ -2345,6 +2524,7 @@ const InquiryViewer = (props) => {
             }
             optionsInquires[editedIndex].process = 'pending';
             optionsInquires[editedIndex].createdAt = res.updatedAt;
+            if (mediaListAmendment.length) optionsInquires[editedIndex].mediaFilesAnswer.push(...mediaListAmendment);
             dispatch(InquiryActions.setInquiries(optionsInquires));
 
             // sync edit comment inquiry
@@ -2572,6 +2752,17 @@ const InquiryViewer = (props) => {
       optionsInquires[editedIndex].showIconReply = false;
       optionsInquires[editedIndex].showIconAttachReplyFile = false;
       optionsInquires[editedIndex].showIconAttachAnswerFile = true;
+      // set default value cd cm
+      if (
+        containerCheck.includes(reply.field)
+        &&
+        (isJsonText(reply.answerObj[0].content) || reply.ansForType !== 'ANS_CD_CM')
+      ) {
+        optionsInquires[editedIndex].paragraphAnswer = {
+          inquiry: reply.id,
+          content: reply.answerObj[0].content || '',
+        }
+      }
       optionsInquires[editedIndex].selectChoice = '';
       dispatch(InquiryActions.setInquiries(optionsInquires));
       reply.showIconAttachReplyFile = false;
@@ -2787,7 +2978,21 @@ const InquiryViewer = (props) => {
             onChange={inputText}
             variant='outlined'
             inputProps={{ style: { textTransform: 'uppercase' } }}
-            error={!validateInput?.isValid || (validateField(field, textResolve).isError && (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest'))) || (isAlsoNotify ? validateAlsoNotify(textResolve).isError : false)}
+            error={
+              !validateInput?.isValid
+              ||
+              (
+                validateField(field, textResolve).isError
+                &&
+                (
+                  isResolve
+                  ||
+                  (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')
+                )
+              )
+              ||
+              (isAlsoNotify ? validateGroupOneTextBox(textResolve).isError : false)
+            }
             helperText={!validateInput?.isValid ?
               <>
                 {(validateInput?.prohibitedInfo?.countries.length > 0) &&
@@ -2819,23 +3024,40 @@ const InquiryViewer = (props) => {
     if ((isReply || question.showIconAttachAnswerFile) && e.clipboardData.files.length) {
       const fileObject = e.clipboardData.files[0];
       // generate new file name
-      if(['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest' ) { // case create ans/ edit anns
-        if(question.mediaFilesAnswer && question.mediaFilesAnswer.length >0) {
-          const newFileName = generateFileName(fileObject.name, question.mediaFilesAnswer.map(fItem => { return fItem.name}));
+      if (['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest') { // case create ans/ edit anns
+        if (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) {
+          const newFileName = generateFileName(fileObject.name, question.mediaFilesAnswer.map(fItem => { return fItem.name }));
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
-        setFilepaste(myRenamedFile);
-        } else setFilepaste(fileObject);
+          
+          if(!allPasteFiles.includes(newFileName)) {
+            setFilepaste(myRenamedFile);
+            setAllPasteFile([...allPasteFiles, newFileName])
+          }
+        } else {
+          if(!allPasteFiles.includes(fileObject.name)) {
+            setFilepaste(fileObject);
+            setAllPasteFile([...allPasteFiles, fileObject.name])
+          }
+        }
       } else {
         //other case
-        if(tempReply.mediaFiles && tempReply.mediaFiles.length > 0 ) {
-          const newFileName = generateFileName(fileObject.name, tempReply.mediaFiles.map(fItem => { return fItem.name}));
+        if (tempReply.mediaFiles && tempReply.mediaFiles.length > 0) {
+          const newFileName = generateFileName(fileObject.name, tempReply.mediaFiles.map(fItem => { return fItem.name }));
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
-          setFilepaste(myRenamedFile);
-        } else setFilepaste(fileObject);
+          if(!allPasteFiles.includes(newFileName)) {
+            setFilepaste(myRenamedFile);
+            setAllPasteFile([...allPasteFiles, newFileName])
+          }
+        } else {
+          if(!allPasteFiles.includes(fileObject.name)) {
+            setFilepaste(fileObject);
+            setAllPasteFile([...allPasteFiles, fileObject.name])
+          }
+        }
       }
     }
   }
@@ -2939,7 +3161,10 @@ const InquiryViewer = (props) => {
                                 </div>
                               </Tooltip>
                             </PermissionProvider>
-                            {!['REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT'].includes(question.state) && (
+                            <PermissionProvider
+                              action={PERMISSION.INQURIY_DELETE_COMMENT}
+                              extraCondition={!['REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT'].includes(question.state)}
+                            >
                               <Tooltip title="Delete">
                                 <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
                                   <img
@@ -2948,7 +3173,7 @@ const InquiryViewer = (props) => {
                                   />
                                 </div>
                               </Tooltip>
-                            )}
+                            </PermissionProvider>
                           </>
                         )}
                       </>
@@ -3113,7 +3338,12 @@ const InquiryViewer = (props) => {
                     currentQuestion={question}
                   />
               ) :
-                (!['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) ?
+                (['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) || (question.process === 'draft' && question.state === 'REOPEN_Q') ?
+                  <Diff
+                    inputA={orgContent[question.field] ? renderContent(orgContent[question.field]) : ''}
+                    inputB={question.content ? getNewValueDiffViewer(question.content) : ''}
+                    type="chars"
+                  /> :
                   <Typography
                     // className={viewDropDown !== question.id ? classes.hideText : ''}
                     variant="h5"
@@ -3141,19 +3371,14 @@ const InquiryViewer = (props) => {
                           </div>
                         )
                       }) : ``}
-                  </Typography> :
-                  <Diff
-                    inputA={orgContent[question.field] ? renderContent(orgContent[question.field]) : ''}
-                    inputB={question.content ? getNewValueDiffViewer(question.content) : ''}
-                    type="chars"
-                  />
+                  </Typography>
                 )
             }
             {/*Allow edit table when customer reply amendment*/}
             {(question.isShowTableToReply
               && containerCheck.includes(question.field)
               && question.process === 'draft'
-              && !['RESOLVED', 'REOPEN_A', 'REOPEN_Q'].includes(question.state)
+              && !['RESOLVED', 'REOPEN_A', 'REOPEN_Q', 'AME_SENT'].includes(question.state)
             ) ? (
               <div style={{ marginTop: 15 }}>
                 <ContainerDetailForm
@@ -3253,7 +3478,7 @@ const InquiryViewer = (props) => {
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
-                extraCondition={['COMPL', 'RESOLVED', 'UPLOADED'].includes(question.state)}
+                extraCondition={['COMPL', 'RESOLVED', 'UPLOADED'].includes(question.state) && user.role === 'Admin'}
               >
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <Button
@@ -3294,10 +3519,15 @@ const InquiryViewer = (props) => {
                 style={{ width: fullscreen ? 1230 : 890 }}
                 onMouseLeave={() => { dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
               >
-                {question.mediaFile?.length > 0 &&
-                (!['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)
-                    || (['REP_Q_DRF'].includes(question.state) && user.role === 'Admin'))
-                    && question.mediaFile?.map((file, mediaIndex) => (
+                {
+                  question.mediaFile?.length > 0
+                  &&
+                  (
+                    !['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)
+                    ||
+                    (['REP_Q_DRF'].includes(question.state) && user.role === 'Admin')
+                  )
+                  && question.mediaFile?.map((file, mediaIndex) => (
                     <>
                       <FileAttach
                         hiddenRemove={true}
@@ -3307,6 +3537,7 @@ const InquiryViewer = (props) => {
                         indexInquiry={index}
                         indexMedia={mediaIndex}
                         question={question}
+                        isEdit={false}
                       />
                     </>
                   ))}
@@ -3316,7 +3547,7 @@ const InquiryViewer = (props) => {
               question.mediaFilesAnswer?.length > 0 &&
               <>
                 {question.mediaFilesAnswer?.length > 0 &&
-                !['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)
+                  !['ANS_DRF', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)
                   && <h3>Attachment Answer:</h3>}
                 <div
                   style={{ width: 885 }}
@@ -3331,6 +3562,7 @@ const InquiryViewer = (props) => {
                         indexMedia={mediaIndex}
                         isAnswer={true}
                         question={question}
+                        isEdit={false}
                         index={index}
                         questions={inquiries}
                         hiddenRemove={!question.showIconAttachAnswerFile}
@@ -3484,6 +3716,7 @@ const InquiryViewer = (props) => {
                               isReply={true}
                               isHideFiles={true}
                               templateReply={tempReply}
+                              isEdit={true}
                               setTemplateReply={(val) => {
                                 setTempReply(val)
                               }}

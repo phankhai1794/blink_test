@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import clsx from "clsx";
 import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
+import { isJsonText, validateBLType } from "@shared";
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import {CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT} from '@shared/keyword'
-import clsx from "clsx";
+import { CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT, BL_TYPE } from '@shared/keyword'
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
-import {isJsonText} from "../../../../../@shared";
 
 import UserInfo from './UserInfo';
 
@@ -22,6 +22,9 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiInputBase-input': {
       width: '93%'
     },
+    '& .MuiInputBase-input.Mui-disabled': {
+      color: 'rgb(81, 95, 107)'
+    }
   },
   inputText: {
     '& .MuiInputBase-input': {
@@ -46,25 +49,29 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ParagraphAnswer = (props) => {
-  const { questions, question, disable = false, saveStatus, currentQuestion, isDeleteAnswer, setDeleteAnswer } = props;
-  const allowUpdateParagraphAnswer = PermissionProvider({
-    action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH
-  });
+const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, currentQuestion, isDeleteAnswer, setDeleteAnswer }) => {
+  const classes = useStyles(question);
   const dispatch = useDispatch();
+
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  const user = useSelector(({ user }) => user);
   const eventClickContNo = useSelector(({ workspace }) => workspace.formReducer.eventClickContNo);
 
-  const [paragraphText, setParagraphText] = useState(question.answerObj && question.answerObj.length ? question.answerObj[0]?.content : '');
+  const [paragraphText, setParagraphText] = useState(question.answerObj?.[0]?.content || '');
 
-  const classes = useStyles(question);
-  const [isPermission, setPermission] = useState(false);
+  const canEdit = PermissionProvider({ action: PERMISSION.INQUIRY_ANSWER_UPDATE_PARAGRAPH }) && !['REP_A_SENT', 'COMPL'].includes(question.state);
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
   };
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
+
+  const validateField = (field, value) => {
+    let response = { isError: false, errorType: "" };
+    if (field === getField(BL_TYPE)) response = validateBLType(value);
+    return response;
+  }
 
   const handleChangeInput = (e) => {
     setParagraphText(e.target.value);
@@ -80,22 +87,15 @@ const ParagraphAnswer = (props) => {
   };
 
   useEffect(() => {
-    if (allowUpdateParagraphAnswer && allowUpdateParagraphAnswer && !['REP_A_SENT', 'COMPL'].includes(question.state)) {
-      setPermission(true);
-    } else {
-      setPermission(false);
-    }
-  }, []);
-
-  useEffect(() => {
     if (currentQuestion && currentQuestion.id === question.id) {
       if (!currentQuestion.answerObj.length) {
         setParagraphText('');
       } else if (currentQuestion.answerObj && currentQuestion.answerObj.length) {
         let contentAnswer = currentQuestion.answerObj[0].content;
-        if(containerCheck.includes(currentQuestion.field)
-            && (isJsonText(currentQuestion.answerObj[0].content) || currentQuestion.ansForType !== 'ANS_CD_CM')
-            && currentQuestion.answerObj.length > 1
+        if (
+          containerCheck.includes(currentQuestion.field)
+          && currentQuestion.answerObj.length > 1
+          && (isJsonText(currentQuestion.answerObj[0].content) || currentQuestion.ansForType !== 'ANS_CD_CM')
         ) {
           contentAnswer = currentQuestion.answerObj[1].content;
           const body = {
@@ -144,19 +144,27 @@ const ParagraphAnswer = (props) => {
 
   return (
     <div>
-      <div className={clsx("flex", !disable && classes.inputText, ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state) && classes.deleteContent)}>
+      <div
+        className={clsx(
+          "flex",
+          !disable && classes.inputText,
+          ['ANS_DRF_DELETED', 'ANS_SENT_DELETED'].includes(question.state)
+          && classes.deleteContent
+        )}
+      >
         <TextField
           style={{
             border: 'none',
-            display: !isPermission ? (!paragraphText ? 'none' : '') : '',
+            display: !canEdit ? (!paragraphText ? 'none' : '') : '',
           }}
           fullWidth
-          placeholder={isPermission ? 'Typing...' : ''}
+          placeholder={canEdit ? 'Typing...' : ''}
           classes={{ root: classes.root }}
-          disabled={!isPermission || disable}
+          disabled={!canEdit || disable}
           InputProps={{
             style: {
-              fontSize: '14px',
+              fontWeight: 'bold',
+              fontSize: '17px',
               fontFamily: 'Montserrat',
               fontStyle: !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT'].includes(question.state) && 'italic'
             },
@@ -170,6 +178,11 @@ const ParagraphAnswer = (props) => {
           multiline
           value={paragraphText}
           onChange={handleChangeInput}
+          helperText={
+            user.role === "Guest" && !question.showIconReply && !question.showIconEdit && validateField(question.field, question.content).errorType.split('\n').map((line, idx) => (
+              <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+            ))
+          }
         />
       </div>
       {question.selectedChoice && (

@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import history from '@history';
 import _ from 'lodash';
-import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDER, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, BOOKING_NO, BL_TYPE, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT, RD_TERMS, NO_CONTENT_AMENDMENT, TOTAL_PREPAID, RATING_DETAIL } from '@shared/keyword';
+import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDER, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, BOOKING_NO, BL_TYPE, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT, RD_TERMS, NO_CONTENT_AMENDMENT, TOTAL_PREPAID, RATING_DETAIL, ALSO_NOTIFY, REMARKS } from '@shared/keyword';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
-import { isJsonText, formatDate, MAX_CHARS, MAX_ROWS_CD, lineBreakAtBoundary, checkMaxRows, getTotalValueMDView, formatNoneContNo, findSumFromArray } from '@shared';
-import { packageUnitsJson } from '@shared/units';
+import { isJsonText, formatDate, MAX_CHARS, MAX_ROWS_CD, lineBreakAtBoundary, getMaxRows, getTotalValueMDView, formatNoneContNo, findSumFromArray } from '@shared';
+import { packageUnitsJson, containerTypeUnit } from '@shared/units';
 
 import * as Actions from './store/actions';
 import Rider from './Rider';
@@ -191,6 +191,7 @@ const DraftPage = (props) => {
   const dispatch = useDispatch();
   const [containersDetail, setContainersDetail] = useState([]);
   const [containersManifest, setContainersManifest] = useState([]);
+  const [maxRows, setMaxRows] = useState(0);
   const [metadata, myBL, content, drfView] = useSelector(({ draftBL }) => [
     draftBL.metadata,
     draftBL.myBL,
@@ -198,6 +199,7 @@ const DraftPage = (props) => {
     draftBL.drfView
   ]);
   const [isInBound, setIsInBound] = useState({ MD: true, CM: true });
+  const [isInsertRider, setInsertRider] = useState(false);
   const [totalPage, setTotalPage] = useState(1);
 
   const getField = (field) => {
@@ -228,11 +230,11 @@ const DraftPage = (props) => {
       } else {
         dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
         dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL })));
-        dispatch(Actions.setInquiries(props.myBL?.id));
+        dispatch(Actions.setInquiries(props.bl));
       }
 
       dispatch(Actions.loadMetadata());
-      dispatch(Actions.loadContent(props.myBL?.id));
+      dispatch(Actions.loadContent(props.bl));
     }
   }, []);
 
@@ -259,30 +261,71 @@ const DraftPage = (props) => {
         cmPackage += `${cm[getInqType(CM_PACKAGE)]}\n${getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}`.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)).join("\n");
         cmDescription += lineBreakAtBoundary(cm[getInqType(CM_DESCRIPTION)], MAX_CHARS.description) + "\n";
       });
+      const maxRowsMD = getMaxRows(
+        containersDetail.length + 1, // 1 more dash line
+        totalMark,
+        totalPackage,
+        totalDescription
+      );
+      const maxRowsCM = getMaxRows(
+        containersDetail.length + containersManifest.length + 1, // 1 more dash line
+        cmMark.trim().replace(/^\s+|\s+$/g, ''),
+        cmPackage.trim().replace(/^\s+|\s+$/g, ''),
+        cmDescription.trim().replace(/^\s+|\s+$/g, '')
+      )
 
       setIsInBound({
-        MD: checkMaxRows(
-          containersDetail.length + 1, // 1 more dash line
-          totalMark,
-          totalPackage,
-          totalDescription
-        ),
-        CM: checkMaxRows(
-          containersDetail.length + containersManifest.length + 1, // 1 more dash line
-          cmMark.trim().replace(/^\s+|\s+$/g, ''),
-          cmPackage.trim().replace(/^\s+|\s+$/g, ''),
-          cmDescription.trim().replace(/^\s+|\s+$/g, '')
-        )
+        MD: maxRowsMD <= MAX_ROWS_CD,
+        CM: maxRowsCM <= MAX_ROWS_CD
       });
+      setMaxRows(drfView === "CM" ? maxRowsCM : maxRowsMD);
+
+      const maxRiderInfo = getValueField(ALSO_NOTIFY).trim().split("\n").length + getValueField(REMARKS).trim().split("\n").length + 1;
+      if ((drfView === "CM" && maxRiderInfo + maxRowsCM > MAX_ROWS_CD) || (drfView === "MD" && maxRiderInfo + maxRowsMD > MAX_ROWS_CD)) setInsertRider(true)
     }
   }, [containersDetail, containersManifest]);
 
+  const renderAlsoRemark = () => (
+    <div style={{ position: 'relative', top: `${(maxRows - 1) * 9}px` }}>
+      <br></br>
+      {getValueField(ALSO_NOTIFY) &&
+        <div>
+          <br></br>
+          <span className={classes.description_payment_dash} style={{ width: 'max-content', display: 'flow-root' }}>
+            -----------------------------------------------------------------------------------------------------------------------------------------
+          </span>
+          <span>ALSO NOTIFY</span>
+          <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
+            {getValueField(ALSO_NOTIFY)}
+          </span>
+          <br />
+        </div>
+      }
+      {
+        !getValueField(ALSO_NOTIFY) &&
+        <div>
+          <br></br>
+          <span className={classes.description_payment_dash} style={{ width: 'max-content', display: 'flow-root' }}>
+            -----------------------------------------------------------------------------------------------------------------------------------------
+          </span>
+        </div>
+      }
+      <span>
+        OCEAN FREIGHT PREPAID
+      </span>
+      <br></br>
+      <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
+        {getValueField(REMARKS)}
+      </span>
+    </div>
+  )
   const renderMDCMTable = () => {
     if (drfView === "CM" && isInBound[drfView] && containersManifest.length) {
       return containersManifest.map((cm, index) => (
         <Grid container item key={index} className={classes.content_L}>
           <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
             {cm[getInqType(CM_MARK)]}
+            {!isInsertRider && renderAlsoRemark()}
           </Grid>
           <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
             <Grid item style={{ textAlign: 'end' }}>
@@ -307,6 +350,7 @@ const DraftPage = (props) => {
       return <Grid container item className={classes.content_L}>
         <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 5, whiteSpace: 'pre-wrap' }}>
           {getValueField(SHIPPING_MARK)}
+          {!isInsertRider && renderAlsoRemark()}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 5 }}>
           <Grid item style={{ textAlign: 'end' }}>
@@ -619,7 +663,7 @@ const DraftPage = (props) => {
                     {containersDetail &&
                       containersDetail.map((cd, idx) => (
                         (idx < MAX_ROWS_CD) && <span key={idx} style={{ whiteSpace: 'pre', lineHeight: '20px' }}>
-                          {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] || ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                          {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
                           <br />
                         </span>
                       ))
@@ -859,11 +903,11 @@ const DraftPage = (props) => {
                       textAlign: 'start',
                       fontFamily: 'Courier, serif',
                       fontSize: 16.5 /*1.7vw*/
-                      //lineHeight: '1.0',
-                      //color: '#4A4A4A',
-                      //top: 4,
+                    //lineHeight: '1.0',
+                    //color: '#4A4A4A',
+                    //top: 4,
                     //}}>
-                     //</Grid> {"\n" + getValueField(RATING_DETAIL).exchangeRate}
+                    //</Grid> {"\n" + getValueField(RATING_DETAIL).exchangeRate}
                     //</span> */}
                   }
                 </Grid>
@@ -970,6 +1014,16 @@ const DraftPage = (props) => {
           containersDetail={containersDetail}
           containersManifest={containersManifest}
           setTotalPage={setTotalPage}
+        />
+      }
+
+      {isInsertRider && isInBound[drfView] &&
+        <Rider
+          drfMD={drfMD}
+          containersDetail={[]}
+          containersManifest={[]}
+          setTotalPage={setTotalPage}
+          isOnlyRiderInfo={true}
         />
       }
     </div >

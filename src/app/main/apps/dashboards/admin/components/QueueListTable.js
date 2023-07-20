@@ -17,18 +17,22 @@ import {
   Chip,
   Menu,
   Button,
-  Tooltip
+  Tooltip,
+  Paper
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { getOffshoreQueueList } from 'app/services/myBLService';
 import { formatDate } from '@shared';
-import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 import Pagination from 'app/main/apps/workspace/shared-components/Pagination';
 import EllipsisPopper from 'app/main/apps/workspace/shared-components/EllipsisPopper';
 import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
 import { mapperBlinkStatus } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
+
+import * as Actions from '../store/actions';
+
+import { setLocalStorageItem } from './';
 
 const useStyles = makeStyles({
   root: {
@@ -97,7 +101,7 @@ const useStyles = makeStyles({
     }
   },
   lineMinWidth: {
-    minWidth: '180px',
+    minWidth: '180px'
   },
   link: {
     color: '#333333',
@@ -211,6 +215,14 @@ const useStyles = makeStyles({
       margin: '5px',
       cursor: 'pointer'
     }
+  },
+  paper: {
+    maxHeight: 400,
+    maxWidth: 400,
+    overflow: "auto",
+    padding: 15,
+    color: '#515E6A',
+    whiteSpace: 'pre-line'
   }
 });
 
@@ -284,9 +296,13 @@ const Row = (props) => {
   };
 
   const closePopover = () => {
-    setAnchorEl(null);
+    // setAnchorEl(null);
     setPopover({ open: false });
   };
+
+  const handlePopoverMouseEnter = () => setPopover({ ...popover, open: true });
+
+  const handlePopoverMouseLeave = () => setPopover({ open: false });
 
   return (
     <>
@@ -464,9 +480,24 @@ const Row = (props) => {
                 />
               )}
             </Tabs>
-            <EllipsisPopper anchorEl={anchorEl} ref={arrowRef}>
-              <div className="arrow" ref={handleArrorRef} />
-              <span style={{ color: '#515E6A' }}>{popover.text}</span>
+            <EllipsisPopper
+              open={popover.open}
+              anchorEl={anchorEl}
+              arrow={true}
+              flip={true}
+              transition
+              placement={'left'}
+              disablePortal={false}
+              preventOverflow={'scrollParent'}>
+              {({ TransitionProps, placement, arrow }) => (
+                <div
+                  onMouseEnter={handlePopoverMouseEnter}
+                  onMouseLeave={handlePopoverMouseLeave}
+                >
+                  {arrow}
+                  <Paper className={classes.paper}>{popover.text}</Paper>
+                </div>
+              )}
             </EllipsisPopper>
             <Table size="small" aria-label="purchases" style={{ marginTop: 15 }}>
               <TableHead className={classes.headerColor}>
@@ -561,7 +592,6 @@ const AddColumn = (columns, handleShowColumn) => {
 const QueueListTable = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
-
   const [state, setState] = useState({
     queueListBl: [],
     totalBkgNo: 1,
@@ -570,25 +600,13 @@ const QueueListTable = () => {
     sortStatus: 'asc'
   });
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
+  const page = useSelector(({ dashboard }) => dashboard.page);
   const countries = useSelector(({ dashboard }) => dashboard.countries);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('bkgNo');
   const [openDetailIndex, setOpenDetailIndex] = useState();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [columns, setColumns] = useState({
-    lastUpdate: true,
-    etd: true,
-    shipperN: false,
-    customerS: true,
-    onshoreS: true,
-    blinkS: true,
-    vvd: true,
-    pol: false,
-    pod: false,
-    inquiry: true,
-    amendment: true,
-    resolve: true
-  });
+  const columns = useSelector(({ dashboard }) => dashboard.columns);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -599,45 +617,58 @@ const QueueListTable = () => {
   };
 
   const handleShowColumn = (value) => {
-    setColumns({ ...columns, ...value });
+    dispatch(Actions.setColumn({ ...columns, ...value }));
+    setLocalStorageItem('columns', { ...columns, ...value });
   };
 
+  const fetchData = (page, size) => {
+    getOffshoreQueueList({
+      page,
+      size,
+      query: {
+        startDate: formatDate(searchQueueQuery.from, 'YYYY-MM-DD'),
+        endDate: formatDate(searchQueueQuery.to, 'YYYY-MM-DD'),
+        bkgNos: searchQueueQuery.bookingNo
+          .split(',')
+          .filter((bkg) => bkg)
+          .map((bkg) => bkg.trim().toUpperCase()),
+        blinkStatus: searchQueueQuery.blStatus,
+        countries
+      },
+      sort: searchQueueQuery.sortField
+    })
+      .then(({ total, data }) => {
+        dispatch(Actions.setPage(page > Math.ceil(total / size) ? 1 : page, size))
+        setState({ ...state, queueListBl: data, totalBkgNo: total })
+      })
+      .catch((err) => handleError(dispatch, err));
+  };
+
+  const setPage = (page, size) => {
+    dispatch(Actions.setPage(page, size))
+    fetchData(page, size)
+  }
+
   useEffect(() => {
-    dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, countries }));
+    dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, countries }));
   }, [countries]);
 
   useEffect(() => {
     return () =>
-      dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, countries: null }));
+      dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, countries: null }));
   }, []);
 
   useEffect(() => {
-    if (searchQueueQuery.countries)
-      getOffshoreQueueList({
-        page: searchQueueQuery.currentPageNumber,
-        size: searchQueueQuery.pageSize,
-        query: {
-          startDate: formatDate(searchQueueQuery.from, 'YYYY-MM-DD'),
-          endDate: formatDate(searchQueueQuery.to, 'YYYY-MM-DD'),
-          bkgNos: searchQueueQuery.bookingNo
-            .split(',')
-            .filter((bkg) => bkg)
-            .map((bkg) => bkg.trim().toUpperCase()),
-          blinkStatus: searchQueueQuery.blStatus,
-          countries
-        },
-        sort: searchQueueQuery.sortField
-      })
-        .then(({ total, data }) => setState({ ...state, queueListBl: data, totalBkgNo: total }))
-        .catch((err) => handleError(dispatch, err));
+    if (searchQueueQuery.countries) fetchData(page.currentPageNumber, page.pageSize)
   }, [searchQueueQuery]);
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === 'asc' ? 'desc' : 'asc';
     setOrder(isAsc);
     setOrderBy(property);
+    setLocalStorageItem('sortField', [property, isAsc]);
     dispatch(
-      InquiryActions.searchQueueQuery({ ...searchQueueQuery, sortField: [property, isAsc] })
+      Actions.searchQueueQuery({ ...searchQueueQuery, sortField: [property, isAsc] })
     );
   };
 
@@ -645,18 +676,10 @@ const QueueListTable = () => {
     setOpenDetailIndex(index !== openDetailIndex ? index : null);
   };
 
-  const showItems = (e) => {
-    searchQueueQuery.currentPageNumber > Math.ceil(state.totalBkgNo / e.target.value)
-      ? dispatch(
-        InquiryActions.searchQueueQuery({
-          ...searchQueueQuery,
-          pageSize: e.target.value,
-          currentPageNumber: Math.ceil(state.totalBkgNo / e.target.value)
-        })
-      )
-      : dispatch(
-        InquiryActions.searchQueueQuery({ ...searchQueueQuery, pageSize: e.target.value })
-      );
+  const showItems = ({ target }) => {
+    const { value } = target;
+    setPage(Math.min(Math.ceil(state.totalBkgNo / value), page.currentPageNumber), value);
+    setLocalStorageItem('pageSize', value);
   };
 
   return (
@@ -665,18 +688,14 @@ const QueueListTable = () => {
         <>
           <div className={classes.container}>
             <Pagination
-              currentNumber={searchQueueQuery.currentPageNumber}
-              totalPage={searchQueueQuery.totalPageNumber}
+              page={page}
               totalBkgNo={state.totalBkgNo}
-              query={searchQueueQuery}
-              searchQueueQuery={(search) =>
-                dispatch(InquiryActions.searchQueueQuery({ ...searchQueueQuery, ...search }))
-              }
+              setPage={setPage}
             />
             <FormControl variant="outlined" className={classes.formControl}>
               <Select
                 className={classes.selectStatus}
-                value={searchQueueQuery.pageSize}
+                value={page.pageSize}
                 onChange={showItems}
                 disableUnderline>
                 {[10, 20, 50].map((val) => (
@@ -701,7 +720,7 @@ const QueueListTable = () => {
                 className={classes.headerColor}
                 style={{ backgroundColor: '#FDF2F2', position: 'sticky', top: 0, zIndex: 2 }}>
                 <TableRow>
-                  <StickyTableCell style={{ display: 'flex', padding: '17px'}}>
+                  <StickyTableCell style={{ display: 'flex', padding: 17 }}>
                     <div className={clsx(classes.cellHead, classes.cellSticky)}>
                       <div className={classes.lineColumn}>
                         <span>No.</span>
@@ -824,7 +843,7 @@ const QueueListTable = () => {
                     key={index}
                     row={row}
                     index={
-                      index + (searchQueueQuery.currentPageNumber - 1) * searchQueueQuery.pageSize
+                      index + (page.currentPageNumber - 1) * page.pageSize
                     }
                     open={openDetailIndex === index}
                     setOpen={() => openDetails(index)}

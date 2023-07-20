@@ -41,7 +41,7 @@ export const checkColorStatus = (
     const statusReply = [...sentStatus, ...['REP_DRF']];
 
     // check has attachment
-    if (inq.mediaFile?.length) colorStatusObj.hasAttachment = true;
+    if (inq.mediaFile?.length || inq.mediaFilesAnswer?.length || (inq.hasAttachment)) colorStatusObj.hasAttachment = true;
 
     // check has reply/answer
     if (statusReply.includes(inq.state)) colorStatusObj.hasAnswer = true;

@@ -5,6 +5,7 @@ import MuiDialogContent from "@material-ui/core/DialogContent";
 import { SocketContext } from 'app/AppContext';
 import { getPermissionByRole } from 'app/services/authService';
 import * as AppActions from 'app/store/actions';
+import { handleError } from '@shared/handleError';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -75,10 +76,9 @@ const SubmitAnswerNotification = ({ msg, msg2 = 'Thank you!', iconType, open }) 
     const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
 
     if (userLocal.displayName && usersAccessing.length) {
-      let permissions = await getPermissionByRole(userLocal.role);
-      if (userLocal.displayName === usersAccessing[usersAccessing.length - 1].userName) { // if to be the last user
-        permissions = await getPermissionByRole('Viewer');
-      }
+      let permissions = await getPermissionByRole(userLocal.role).catch(err => handleError(dispatch, err));
+      if (userLocal.displayName !== usersAccessing[0].userName) // if not to be the first user
+        permissions = await getPermissionByRole('Viewer').catch(err => handleError(dispatch, err));
 
       setTimeout(() => {
         dispatch(AppActions.setUser({ ...userLocal, permissions }));

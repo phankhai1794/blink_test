@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
+import _ from 'lodash';
 import { Box, Card, CardContent, Typography, TextField, Button } from '@material-ui/core';
 import { FuseAnimate } from '@fuse';
 import Formsy from 'formsy-react';
@@ -11,6 +12,7 @@ import { isEmail } from 'validator';
 import { verifyEmail, verifyGuest, isVerified, decodeAuthParam, requestCode } from 'app/services/authService';
 import * as Actions from 'app/store/actions';
 import history from '@history';
+import { PERMISSION } from '@shared/permission';
 
 const otpLength = 6;
 const timeCodeMailDelay = 15; // second
@@ -166,6 +168,10 @@ const OtpCheck = ({ children }) => {
   const dispatch = useDispatch();
   const processUrl = window.location.pathname.includes("draft") ? "draft" : "pending";
 
+  const user = localStorage.getItem("USER");
+  const permissions = user ? (JSON.parse(user)?.permissions || []) : [];
+  const [canConfirmDraftBL, setCanConfirmDraftBL] = useState(permissions.filter(p => `${p.controller}_${p.action}` === PERMISSION.DRAFTBL_CONFIRM_DRAFT_BL && p.enable).length > 0);
+
   const [myBL, setMyBL] = useState({ id: '' });
   const [mail, setMail] = useState({ value: '', isValid: false, isSubmitted: false });
   const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true, resendAfter: 0 });
@@ -190,9 +196,9 @@ const OtpCheck = ({ children }) => {
   const validateTimeSendCode = ({ bl, requestAt }) => {
     let isValidTime = true;
     const blId = new URLSearchParams(window.location.search).get('bl');
-    const secondsAfterSent = Math.abs(new Date() - new Date(requestAt)) / 1000;
-    if (blId === bl && secondsAfterSent < timeCodeMailDelay) isValidTime = false;
-    return [isValidTime, secondsAfterSent];
+    const secondsLeft = Math.abs(new Date() - new Date(requestAt)) / 1000;
+    if (blId === bl && secondsLeft < timeCodeMailDelay) isValidTime = false;
+    return [isValidTime, secondsLeft];
   }
 
   const handleCheckMail = () => {
@@ -268,65 +274,76 @@ const OtpCheck = ({ children }) => {
   };
 
   useEffect(() => {
-    const { search } = window.location;
-    const bl = new URLSearchParams(search).get('bl');
-    if (bl) setMyBL({ ...myBL, id: bl });
+    const init = async () => {
+      const { search } = window.location;
+      const bl = new URLSearchParams(search).get('bl');
+      if (bl) setMyBL({ ...myBL, id: bl });
 
-    const auth = new URLSearchParams(search).get('auth');
-    if (bl && auth) { // verify token on url
-      decodeAuthParam(auth)
-        .then((res) => {
+      const auth = new URLSearchParams(search).get('auth');
+      if (bl && auth) { // verify token on url
+        try {
+          const res = await decodeAuthParam(auth);
+          if (res) {
+            setMail({
+              ...mail,
+              value: res.email,
+              isValid: isEmail(res.email)
+            });
+            // Remove token from url
+            const url = new URL(window.location);
+            url.searchParams.set('bl', bl);
+            window.history.pushState({}, '', `/guest?bl=${bl}`);
+          }
+        } catch (error) {
+          catchError(error);
+        }
+      }
+
+      // verify token in localStorage
+      let userInfo = localStorage.getItem('USER');
+      if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
+        const { email, userType } = JSON.parse(userInfo);
+        if (email) {
           setMail({
             ...mail,
-            value: res.email,
-            isValid: isEmail(res.email)
+            value: email,
+            isValid: isEmail(email)
           });
-          // Remove token from url
-          const url = new URL(window.location);
-          url.searchParams.set('bl', bl);
-          window.history.pushState({}, '', `/guest?bl=${bl}`);
-        })
-        .catch((error) => {
-          catchError(error);
-        });
-    }
-
-    // verify token in localStorage
-    let userInfo = localStorage.getItem('USER');
-    if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
-      const { email, userType } = JSON.parse(userInfo);
-      if (email) {
-        setMail({
-          ...mail,
-          value: email,
-          isValid: isEmail(email)
-        });
-        isVerified({ bl, userType, processUrl })
-          .then(() => {
-            setStep(2);
-            return;
-          })
-          .catch((error) => {
+          try {
+            const res = await isVerified({ bl, userType, processUrl })
+            if (res) {
+              setStep(2);
+              return;
+            }
+          } catch (error) {
             catchError(error);
-          });
+            setCanConfirmDraftBL(false);
+            dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', false)));
+
+            // check request code delay time
+            let sentCode = localStorage.getItem('sentCode');
+            if (sentCode) {
+              sentCode = JSON.parse(sentCode);
+              if (sentCode.bl === bl) {
+                const [__, secondsLeft] = validateTimeSendCode(sentCode);
+                if (secondsLeft <= timeCodeMailDelay) {
+                  setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay - parseInt(secondsLeft) });
+                  setMail({ ...mail, value: sentCode.mail, isValid: isEmail(sentCode.mail) });
+                  setStep(1);
+                } else setStep(0);
+              }
+            } else setStep(0);
+          }
+        }
       }
+
+      // refill email when code expires
+      let lastEmail = localStorage.getItem('lastEmail');
+      if (lastEmail && !["null", "undefined"].includes(lastEmail))
+        setMail({ ...mail, value: lastEmail, isValid: isEmail(lastEmail) });
     }
 
-    // check request code delay time
-    let sentCode = localStorage.getItem('sentCode');
-    if (sentCode) {
-      sentCode = JSON.parse(sentCode);
-      if (sentCode.bl === bl) {
-        const [__, secondsAfterSent] = validateTimeSendCode(sentCode);
-        setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay - parseInt(secondsAfterSent) });
-        setMail({ ...mail, value: sentCode.mail, isValid: isEmail(sentCode.mail) });
-        setStep(1);
-      }
-    }
-
-    // refill email when code expires
-    let lastEmail = localStorage.getItem('lastEmail');
-    if (lastEmail) setMail({ ...mail, value: lastEmail, isValid: isEmail(lastEmail) });
+    init();
   }, []);
 
   useEffect(() => {
@@ -347,7 +364,7 @@ const OtpCheck = ({ children }) => {
 
   return (
     <>
-      {step === 2 || history.location.state?.skipVerification ? <>{children}</> : (
+      {step === 2 || (history.location.state?.skipVerification && canConfirmDraftBL) ? <>{children}</> : (
         <div
           className={clsx(
             classes.root,

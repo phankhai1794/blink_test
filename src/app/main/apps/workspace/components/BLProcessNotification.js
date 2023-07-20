@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import _ from 'lodash';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles, Button, Dialog, Divider } from '@material-ui/core';
@@ -8,13 +8,9 @@ import CloseIcon from '@material-ui/icons/Close';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import { getInquiryById } from 'app/services/inquiryService';
 import { getBlInfo } from 'app/services/myBLService';
-import { SocketContext } from 'app/AppContext';
-import { getPermissionByRole } from 'app/services/authService';
-import * as AppAction from 'app/store/actions';
-import { categorizeInquiriesByUserType } from '@shared';
+import { handleError } from '@shared/handleError';
 
 import * as Actions from '../store/actions';
-import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 
 const mainColor = '#BD0F72';
@@ -63,7 +59,6 @@ const useStyles = makeStyles((theme) => ({
 const BLProcessNotification = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const socket = useContext(SocketContext);
 
   const [open, setOpen] = useState(false);
 
@@ -76,8 +71,8 @@ const BLProcessNotification = () => {
   const checkBLProcess = async () => {
     dispatch(FormActions.increaseLoading());
     const [lengthInq, lengthContent] = [
-      await getInquiryById(myBL.id).then((res) => res.length),
-      await getBlInfo(myBL.id).then((res) => Object.keys(res.myBL.content).length)
+      await getInquiryById(myBL.id).then((res) => res.length).catch(err => handleError(dispatch, err)),
+      await getBlInfo(myBL.id).then((res) => Object.keys(res.myBL.content).length).catch(err => handleError(dispatch, err))
     ];
     dispatch(FormActions.decreaseLoading());
     if (!lengthInq && !lengthContent) setOpen(true);
@@ -95,78 +90,7 @@ const BLProcessNotification = () => {
   };
 
   useEffect(() => {
-    if (myBL.id) {
-      checkBLProcess();
-
-      const user = JSON.parse(localStorage.getItem('USER'));
-
-      // user connect
-      const mybl = (user.userType === "ADMIN") ? [myBL.bkgNo, myBL.id] : [myBL.id, myBL.bkgNo];
-      socket.emit(
-        'user_connect',
-        {
-          mybl: mybl[0],
-          optSite: mybl[1], // opposite workspace (offshore or onshore/customer)
-          userName: user.displayName,
-          userType: user.userType
-        }
-      );
-
-      // save socketId into window console after connecting
-      socket.on('user_socket_id', async (socketId) => {
-        window.socketId = socketId;
-      });
-
-      // Receive the list user accessing
-      socket.on('users_accessing', async ({ usersAccessing }) => {
-        window.usersAccessing = usersAccessing;
-
-        if (
-          user.userType === "ADMIN"
-          ||
-          (user.userType === "CUSTOMER" && myBL.state.includes("DRF_"))
-        ) {
-          const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
-          if (userLocal.displayName && usersAccessing.length) {
-            if (userLocal.displayName === usersAccessing[0].userName) { // if to be the first user
-              dispatch(FormActions.toggleOpenBLWarning(false));
-            } else if (userLocal.displayName === usersAccessing[usersAccessing.length - 1].userName) { // if to be the last user
-              dispatch(FormActions.toggleOpenBLWarning({ status: true, userName: usersAccessing[0].userName }));
-            }
-
-            const permissions = await getPermissionByRole(userLocal.role);
-            setTimeout(() => {
-              dispatch(AppAction.setUser({ ...userLocal, permissions }));
-            }, 500);
-            sessionStorage.setItem('permissions', JSON.stringify(permissions));
-          }
-        }
-      });
-
-      // Receive the message sync state
-      socket.on('sync_state', async ({ from, data }) => {
-        const { inquiries, listMinimize, content, amendments } = data;
-
-        const result = categorizeInquiriesByUserType(from, user.userType, myBL, inquiries);
-        dispatch(InquiryActions.setInquiries(result));
-
-        if (listMinimize) {
-          if (from === "ADMIN") dispatch(InquiryActions.setListMinimize(listMinimize));
-          else {
-            let listMin = JSON.parse(sessionStorage.getItem("listMinimize"));
-            // merge two array objects while removing duplicates
-            listMin = listMin.concat(listMinimize).filter((item, idx, self) => {
-              return idx === self.findIndex(el => el.id === item.id);
-            });
-            dispatch(InquiryActions.setListMinimize(listMin));
-          }
-        }
-
-        if (content) dispatch(InquiryActions.setContent(content));
-
-        if (amendments) dispatch(InquiryActions.setListCommentDraft(amendments));
-      });
-    }
+    if (myBL.id) checkBLProcess();
   }, [myBL]);
 
   return (
