@@ -278,42 +278,43 @@ const DraftPage = (props) => {
         MD: maxRowsMD <= MAX_ROWS_CD,
         CM: maxRowsCM <= MAX_ROWS_CD
       });
-      setMaxRows(drfView === "CM" ? maxRowsCM : maxRowsMD)
+      setMaxRows(drfView === "CM" ? maxRowsCM : maxRowsMD);
+
       const maxRiderInfo = getValueField(ALSO_NOTIFY).trim().split("\n").length + getValueField(REMARKS).trim().split("\n").length + 1;
-      if((drfView === "CM" && maxRiderInfo + maxRowsCM > MAX_ROWS_CD) || (drfView === "MD" && maxRiderInfo + maxRowsMD > MAX_ROWS_CD)) setInsertRider(true)
-      
+      if ((drfView === "CM" && maxRiderInfo + maxRowsCM > MAX_ROWS_CD) || (drfView === "MD" && maxRiderInfo + maxRowsMD > MAX_ROWS_CD)) setInsertRider(true)
     }
   }, [containersDetail, containersManifest]);
+
   const renderAlsoRemark = () => (
-    <div style={{position: 'relative', top: `${(maxRows-1)*9}px`}}>
+    <div style={{ position: 'relative', top: `${(maxRows - 1) * 9}px` }}>
       <br></br>
-      { getValueField(ALSO_NOTIFY) && 
+      {getValueField(ALSO_NOTIFY) &&
         <div>
           <br></br>
-          <span className={classes.description_payment_dash} style={{width: 'max-content', display: 'flow-root'}}>
-              -----------------------------------------------------------------------------------------------------------------------------------------
+          <span className={classes.description_payment_dash} style={{ width: 'max-content', display: 'flow-root' }}>
+            -----------------------------------------------------------------------------------------------------------------------------------------
           </span>
           <span>ALSO NOTIFY</span>
-          <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950}}>
+          <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
             {getValueField(ALSO_NOTIFY)}
           </span>
           <br />
         </div>
       }
       {
-        !getValueField(ALSO_NOTIFY) && 
-          <div>
-            <br></br>
-            <span className={classes.description_payment_dash} style={{width: 'max-content', display: 'flow-root'}}>
+        !getValueField(ALSO_NOTIFY) &&
+        <div>
+          <br></br>
+          <span className={classes.description_payment_dash} style={{ width: 'max-content', display: 'flow-root' }}>
             -----------------------------------------------------------------------------------------------------------------------------------------
-            </span>
-          </div>  
+          </span>
+        </div>
       }
       <span>
         OCEAN FREIGHT PREPAID
       </span>
       <br></br>
-      <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950}}>
+      <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
         {getValueField(REMARKS)}
       </span>
     </div>
