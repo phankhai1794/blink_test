@@ -256,6 +256,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const isValueChange = (key, index, row) => {
+    if (container === CONTAINER_MANIFEST) {
+      orgContent[getField(CONTAINER_MANIFEST)] = sortValues(orgContent[getField(CONTAINER_MANIFEST)])
+    }
     const originalValue = renderContent(key, orgContent[getField(container)]?.[index]);
     return originalValue !== renderContent(key, row);
   }
