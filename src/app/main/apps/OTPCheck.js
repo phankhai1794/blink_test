@@ -169,7 +169,7 @@ const OtpCheck = ({ children }) => {
   const processUrl = window.location.pathname.includes("draft") ? "draft" : "pending";
 
   const user = localStorage.getItem("USER");
-  const permissions = user ? JSON.parse(user)?.permissions : [];
+  const permissions = user ? (JSON.parse(user)?.permissions || []) : [];
   const [canConfirmDraftBL, setCanConfirmDraftBL] = useState(permissions.filter(p => `${p.controller}_${p.action}` === PERMISSION.DRAFTBL_CONFIRM_DRAFT_BL && p.enable).length > 0);
 
   const [myBL, setMyBL] = useState({ id: '' });
