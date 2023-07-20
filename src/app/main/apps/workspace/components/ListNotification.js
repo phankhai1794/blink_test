@@ -62,7 +62,7 @@ const ListNotification = () => {
   const openNotificationAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openNotificationAmendmentList);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const user = useSelector(({ user }) => user);
-  const [isExistingMedia, setExistingMedia] = useState(false);
+  const [isEmptyMedia, setIsEmptyMedia] = useState(false);
 
   useEffect(() => {
     let isExistMedia = false;
@@ -72,9 +72,7 @@ const ListNotification = () => {
         return;
       }
     });
-    if (!isExistMedia) {
-      setExistingMedia(true)
-    }
+    setIsEmptyMedia(!isExistMedia);
   }, []);
 
   const handleClose = () => {
@@ -136,9 +134,9 @@ const ListNotification = () => {
         (
           (openNotificationInquiryList && inquiries.filter(inq => inq.process === 'pending').length === 0 && user.userType !== 'CUSTOMER')
           ||
-          (openNotificationAttachmentList && inquiries.length > 0 && isExistingMedia)
+          (openNotificationAttachmentList && inquiries.length > 0 && isEmptyMedia)
           ||
-          (openNotificationAmendmentList && user.userType === 'CUSTOMER')
+          (openNotificationAmendmentList && user.role === 'Guest' && user.userType === 'CUSTOMER')
         ) && (
           <div className={classes.container}>
             <Button
