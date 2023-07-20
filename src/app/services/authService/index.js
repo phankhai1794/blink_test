@@ -26,6 +26,11 @@ export async function isVerified(data) {
   return response.data;
 }
 
+export async function encodeAuthParam() {
+  const response = await axios().get(`${PATH}/encode-auth-param`);
+  return response.data;
+}
+
 export async function decodeAuthParam(auth) {
   const response = await axios().get(`${PATH}/decode-auth-param/${auth}`);
   return response.data;
@@ -36,8 +41,8 @@ export async function forgotPassword(data) {
   return response.data;
 }
 
-export async function putUserPassword(header, payload) {
-  const response = await axios(header).put(`${PATH}/update-password`, payload);
+export async function putUserPassword(data) {
+  const response = await axios().put(`${PATH}/update-password`, data);
   return response;
 }
 
