@@ -512,7 +512,7 @@ const AmendmentPopup = (props) => {
             show(value) && (
               <>
                 <p style={{ fontWeight: 600 }}>{title}</p>
-                {CustomTextField({ fullWidth: true, title: title })}
+                {CustomTextField({ fullWidth: true, title: title, ...register(title, { required: false, pattern: regInteger }) })}
               </>
             )
           );
