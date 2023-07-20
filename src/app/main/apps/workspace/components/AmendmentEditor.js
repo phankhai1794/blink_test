@@ -117,6 +117,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const [isChange, setChange] = useState(false);
   const [isDateTime, setIsDateTime] = useState(false);
   const [isValidDate, setIsValidDate] = useState(false);
+  const [allPasteFiles, setAllPasteFile] = useState([]);
 
   const syncData = (data, syncOptSite = false) => {
     socket.emit("sync_data", { data, syncOptSite });
@@ -512,7 +513,10 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
       const myRenamedFile = new File([fileObject], newFileName, {
         type: "image/png"
       });
-      setFilepaste(myRenamedFile);
+      if(!allPasteFiles.includes(newFileName)) {
+        setFilepaste(myRenamedFile);
+        setAllPasteFile([...allPasteFiles, newFileName]);
+      }
     }
   }
 
