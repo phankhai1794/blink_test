@@ -337,6 +337,7 @@ const InquiryViewer = (props) => {
   const [getDataCM, setDataCM] = useState([]);
   const [isHasEditCdCm, setHasEditCdCm] = useState(false);
   const [isResolveAndUpload, setIsResolveAndUpload] = useState(false);
+  const [allPasteFiles, setAllPasteFile] = useState([]);
   const socket = useContext(SocketContext);
 
   const syncData = (data, syncOptSite = "") => {
@@ -3029,8 +3030,17 @@ const InquiryViewer = (props) => {
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
-          setFilepaste(myRenamedFile);
-        } else setFilepaste(fileObject);
+          
+          if(!allPasteFiles.includes(newFileName)) {
+            setFilepaste(myRenamedFile);
+            setAllPasteFile([...allPasteFiles, newFileName])
+          }
+        } else {
+          if(!allPasteFiles.includes(fileObject.name)) {
+            setFilepaste(fileObject);
+            setAllPasteFile([...allPasteFiles, fileObject.name])
+          }
+        }
       } else {
         //other case
         if (tempReply.mediaFiles && tempReply.mediaFiles.length > 0) {
@@ -3038,8 +3048,16 @@ const InquiryViewer = (props) => {
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
-          setFilepaste(myRenamedFile);
-        } else setFilepaste(fileObject);
+          if(!allPasteFiles.includes(newFileName)) {
+            setFilepaste(myRenamedFile);
+            setAllPasteFile([...allPasteFiles, newFileName])
+          }
+        } else {
+          if(!allPasteFiles.includes(fileObject.name)) {
+            setFilepaste(fileObject);
+            setAllPasteFile([...allPasteFiles, fileObject.name])
+          }
+        }
       }
     }
   }
