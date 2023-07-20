@@ -256,7 +256,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const isValueChange = (key, index, row) => {
-    const originalValue = renderContent(key, orgContent[getField(container)]?.[index]);
+    const originalValue = renderContent(key, sortValues(orgContent[getField(container)])?.[index]);
     return originalValue !== renderContent(key, row);
   }
 
