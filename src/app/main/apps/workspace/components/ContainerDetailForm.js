@@ -114,7 +114,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const [isSave, setSaveCDCM] = useState(false);
 
   const CDTitle = CONTAINER_LIST.cd;
-  const CMTitle = user.role === 'Guest' ? [CONTAINER_NUMBER, ...CONTAINER_LIST.cm].filter(item => ![HS_CODE, HTS_CODE, NCM_CODE].includes(item)) : [CONTAINER_NUMBER, ...CONTAINER_LIST.cm];
+  const CMTitle = [CONTAINER_NUMBER, ...CONTAINER_LIST.cm];
   const type = (container === CONTAINER_DETAIL) ? CDTitle : CMTitle;
 
   const sortValues = (vals) => {
