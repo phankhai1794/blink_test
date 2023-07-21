@@ -3478,7 +3478,7 @@ const InquiryViewer = (props) => {
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_REOPEN_INQUIRY}
-                extraCondition={['COMPL', 'RESOLVED', 'UPLOADED'].includes(question.state) && user.role === 'Admin'}
+                extraCondition={['COMPL', 'RESOLVED', 'UPLOADED'].includes(question.state)}
               >
                 <div className='flex' style={{ alignItems: 'center' }}>
                   <Button
