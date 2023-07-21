@@ -388,7 +388,8 @@ export const checkBroadCastReload = (role, type) => {
 
   const mapper = {
     Admin: ["/workspace", "/admin"],
-    Guest: ["/guest", "/draft-bl?bl="]
+    Guest: ["/guest", "/draft-bl?bl="],
+    Viewer: ["/guest", "/draft-bl?bl="]
   }
 
   if (
