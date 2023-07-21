@@ -218,7 +218,7 @@ function ToolbarLayout1(props) {
         };
       });
 
-      getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
+      // getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
     });
 
     const amendment = optionInquiries.filter((op) => op.process === 'draft');
@@ -229,55 +229,24 @@ function ToolbarLayout1(props) {
         .all(inquiriesPendingProcess.map((q) => loadComment(q.id).catch(err => handleError(dispatch, err)))) // TODO: refactor
         .then((res) => {
           if (res) {
-            let commentList = [];
             // get attachments file in comment reply/answer
-            res.map((r) => {
-              commentList = [...commentList, ...r];
-              r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-              const curInq = inquiriesPendingProcess[countLoadComment];
-              let commentIdList = [];
-              r.forEach((itemRes) => {
-                if (!commentIdList.includes(itemRes.id)) {
-                  commentIdList.push(itemRes.id);
-                  if (itemRes.mediaFile.length > 0) {
-                    const mediaTemp = [
-                      ...curInq.mediaFile,
-                      ...curInq.mediaFilesAnswer,
-                      ...itemRes.mediaFile
-                    ];
-                    const attachmentTemp = mediaTemp.map((f) => {
-                      return {
-                        ...f,
-                        field: curInq.field,
-                        inquiryId: curInq.id,
-                        inqType: curInq.inqType
-                      };
-                    });
-                    if (attachmentTemp.length > 0) {
-                      attachmentTemp.forEach((att) => {
-                        const tempAttList = getAttachmentFiles.filter(
-                          (attItem) =>
-                            attItem.name === att.name &&
-                            attItem.field === att.field &&
-                            attItem.inqType === att.inqType
-                        );
-                        if (tempAttList.length === 0) getAttachmentFiles.push(att);
-                      });
-                    }
-                  }
-                }
-              });
-
-              countLoadComment += 1;
-              if (
-                inquiriesPendingProcess &&
-                amendment &&
-                countLoadComment === inquiriesPendingProcess.length &&
-                countAmendment === amendment.length
-              ) {
-                setAttachmentLength(getAttachmentFiles.length);
-              }
+            let attachFileCount = [];
+            let collectAttachment = [];
+            // console.log(res)
+            res.forEach((r) => {
+              collectAttachment = [...collectAttachment, ...r];
             });
+            if (collectAttachment.length) {
+              collectAttachment = collectAttachment.filter(col => col.latestReply);
+              collectAttachment.forEach(col => {
+                if (col.type === 'ANS') {
+                  attachFileCount = [...attachFileCount, ...col.answersMedia];
+                } else {
+                  attachFileCount = [...attachFileCount, ...col.mediaFile];
+                }
+              })
+            }
+            setAttachmentLength(attachFileCount.length);
           }
         })
         .catch((err) => {
