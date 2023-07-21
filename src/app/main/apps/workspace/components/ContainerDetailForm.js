@@ -187,8 +187,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const checkUnitPackage = () => {
     const arrTypeCD = [];
     const arrTypeCM = [];
-    if (valueEdit && valueEdit.length) {
-      valueEdit.forEach(ori => {
+    if (values && values.length) {
+      values.forEach(ori => {
         const packageCdUnit = ori[getType(CONTAINER_PACKAGE_UNIT)];
         const packageCmUnit = ori[getType(CM_PACKAGE_UNIT)];
         if (packageCdUnit && !arrTypeCD.includes(packageCdUnit)) {
