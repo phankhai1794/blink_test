@@ -497,8 +497,8 @@ const InquiryEditor = (props) => {
         inq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];
       }
     } else inq.receiver = ['customer']
-    
-  if (!containerCheck.includes(inq.field)) dispatch(InquiryActions.setEditInq(inq));
+
+    if (!containerCheck.includes(inq.field)) dispatch(InquiryActions.setEditInq(inq));
 
     return () => dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false, createInq: false }))
   }, []);
@@ -523,6 +523,13 @@ const InquiryEditor = (props) => {
         }
         return getDataField && getTemplate
       }).sort((a, b) => a.label.localeCompare(b.label));
+      const inq = { ...currentEditInq };
+      if (!filter.some(f => f.value === inq.inqType)) {
+        inq.inqType = '';
+        dispatch(InquiryActions.setEditInq(inq));
+        setValueType([]);
+      }
+      setFieldType(fieldDefault);
       setInqTypeOption(filter);
       if (fieldValue.value === containerCheck[0]) {
         setOpenCM(false);
@@ -636,7 +643,7 @@ const InquiryEditor = (props) => {
       inq.inqType = e.value;
       let keyword = fieldValue;
       let filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field;
-      filterField = metadata.field_options.filter(({ value, display, keyword }) => (
+      filterField = e.label === OTHERS ? fieldDefault : metadata.field_options.filter(({ value, display, keyword }) => (
         display && filterField.includes(value)
         && metadata.template.some((temp) => (temp.field === keyword && temp.type === e.value && temp.content[0]))
       ));
@@ -650,7 +657,7 @@ const InquiryEditor = (props) => {
           keyword = filterField[0];
         }
       }
-      if (keyword.keyword === BL_TYPE) {
+      if (keyword?.keyword === BL_TYPE) {
         autoCreateChoiceBLType()
         inq.ansType = metadata.ans_type.choice
         setValueAnsType({
@@ -675,7 +682,7 @@ const InquiryEditor = (props) => {
         setContent(formatTemplate(filterTemp?.content[0] || MSG_INQUIRY_CONTENT));
       }
 
-      setFieldType(filterField);
+      if (!keyword) setFieldType(filterField);
       // case filter CD CM to BL Data Field
       const keyWord = filterField.map(f => f.keyword);
       if (keyWord.includes('containerManifest') || keyWord.includes('containerDetail')) {
@@ -754,7 +761,7 @@ const InquiryEditor = (props) => {
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
     // setContent(filepaste ? inq.content : e.target.value);
-    setContent(filepaste ? e.target.value.replace(/<img.*>\n?/,'') : e.target.value);    
+    setContent(filepaste ? e.target.value.replace(/<img.*>\n?/, '') : e.target.value);
 
     inq.content = e.currentTarget.textContent;
     setFieldEdited(inq.field);
@@ -1242,10 +1249,13 @@ const InquiryEditor = (props) => {
     if (e.clipboardData.files.length) {
       let fileObject = e.clipboardData.files[0];
       const newFileName = generateFileName(fileObject.name, currentEditInq.mediaFile.map(fItem => { return fItem.name }));
-      const myRenamedFile = new File([fileObject], newFileName, {
+      const myRenamedFile = new File(
+        [fileObject],
+        newFileName, {
         type: "image/png"
-      });
-      if(!allPasteFiles.includes(newFileName)) {
+      }
+      );
+      if (!allPasteFiles.includes(newFileName)) {
         setFilepaste(myRenamedFile);
         setAllPasteFile([...allPasteFiles, newFileName])
       }
