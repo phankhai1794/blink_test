@@ -174,6 +174,7 @@ function ToolbarLayout1(props) {
 
   const [open, setOpen] = useState(false);
   const [attachmentLength, setAttachmentLength] = useState(0);
+  const [attachAmendLength, setAttachAmendLength] = useState(0);
   const [amendmentsLength, setAmendmentLength] = useState();
   const [inquiryLength, setInquiryLength] = useState();
 
@@ -258,54 +259,22 @@ function ToolbarLayout1(props) {
           .all(amendment.map((q) => getCommentDraftBl(myBL.id, q.field))) // TODO: refactor
           .then((res) => {
             if (res) {
-              let commentList = [];
-              // check and add attachment of amendment/answer to Att List
-              res.map((r) => {
-                commentList = [...commentList, ...r];
-                const curInq = amendment[countAmendment];
-                r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-                let commentDraftIdList = [];
-                r.forEach((itemRes) => {
-                  if (!commentDraftIdList.includes(itemRes.id)) {
-                    commentDraftIdList.push(itemRes.id);
-                    const mediaTemp = [
-                      ...curInq.mediaFile,
-                      ...curInq.mediaFilesAnswer,
-                      ...itemRes.content.mediaFile
-                    ];
-                    const attachmentAmendmentTemp = mediaTemp.map((f) => {
-                      return {
-                        ...f,
-                        field: curInq.field,
-                        inquiryId: curInq.id,
-                        inqType: curInq.inqType
-                      };
-                    });
-                    if (attachmentAmendmentTemp.length > 0) {
-                      attachmentAmendmentTemp.forEach((attAmendment) => {
-                        const fileNameList = getAttachmentFiles.map((item) => {
-                          if (item.inqType === curInq.inqType) return item.name;
-                        });
-                        if (
-                          attAmendment &&
-                          !curInq.inqType &&
-                          !fileNameList.includes(attAmendment.name)
-                        )
-                          getAttachmentFiles.push(attAmendment);
-                      });
-                    }
-                  }
-                });
-                countAmendment += 1;
-                if (
-                  inquiriesPendingProcess &&
-                  amendment &&
-                  countLoadComment === inquiriesPendingProcess.length &&
-                  countAmendment === amendment.length
-                ) {
-                  setAttachmentLength(getAttachmentFiles.length);
-                }
+              // get attachments file in comment reply/answer
+              let attachFileCount = [];
+              let collectAttachment = [];
+              // console.log(res)
+              res.forEach((r) => {
+                collectAttachment = [...collectAttachment, ...r];
               });
+              if (collectAttachment.length) {
+                collectAttachment = collectAttachment.filter(col => col.latestReply);
+                collectAttachment.forEach(col => {
+                  if (col.content && col.content.mediaFile.length) {
+                    attachFileCount = [...col.content.mediaFile];
+                  }
+                })
+              }
+              setAttachAmendLength(attachFileCount.length);
             }
           })
           .catch((err) => {
@@ -444,13 +413,13 @@ function ToolbarLayout1(props) {
               <PermissionProvider
                 action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
                 extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
-                {attachmentLength > 0 &&
+                {(attachmentLength > 0 || attachAmendLength > 0) &&
                   <Button
                     variant="text"
                     size="medium"
                     className={clsx('h-64', classes.button)}
                     onClick={openAttachment}>
-                    <Badge color="primary" badgeContent={attachmentLength} id="no-att">
+                    <Badge color="primary" badgeContent={attachmentLength + attachAmendLength} id="no-att">
                       <img src="assets/images/icons/attachmentIcon.svg" />
                     </Badge>
                     <span className={classes.titleButton}>Attachments List</span>
