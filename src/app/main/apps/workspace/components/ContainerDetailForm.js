@@ -15,7 +15,7 @@ import {
   CM_MEASUREMENT,
   CM_DESCRIPTION,
   CM_MARK,
-  CONTAINER_TYPE
+  CONTAINER_TYPE, CONTAINER_PACKAGE_UNIT, CM_PACKAGE_UNIT
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -184,6 +184,22 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     }
   }, [isSave])
 
+  const checkUnitPackage = () => {
+    const arrTypeCD = [];
+    const arrTypeCM = [];
+    if (values && values.length) {
+      values.forEach(ori => {
+        const packageCdUnit = ori[getType(CONTAINER_PACKAGE_UNIT)];
+        const packageCmUnit = ori[getType(CM_PACKAGE_UNIT)];
+        if (packageCdUnit && !arrTypeCD.includes(packageCdUnit)) {
+          arrTypeCD.push(packageCdUnit);
+        } else if (packageCmUnit && !arrTypeCM.includes(packageCmUnit)) {
+          arrTypeCM.push(packageCmUnit);
+        }
+      })
+    }
+    return {arrTypeCD, arrTypeCM};
+  }
 
   const getTotals = (data, name) => {
     if (!Object.keys(mapUnit).includes(name)) return ''
@@ -198,9 +214,19 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
       }
     });
     let minFrac = -1;
+    let arrayCdTypes = [];
+    let arrayCmTypes = [];
     if ([CM_MEASUREMENT, CM_WEIGHT, CONTAINER_MEASUREMENT, CONTAINER_WEIGHT].includes(name)) minFrac = 3;
-    else if ([CM_PACKAGE, CONTAINER_PACKAGE].includes(name)) minFrac = 0;
-    return total === 0 ? '' : NumberFormat(total, minFrac) + ` ${values[0][getType(mapUnit[name])] || ''}`;
+    else if ([CM_PACKAGE, CONTAINER_PACKAGE].includes(name)) {
+      if (name === CONTAINER_PACKAGE) arrayCdTypes = checkUnitPackage().arrTypeCD;
+      if (name === CM_PACKAGE) arrayCmTypes = checkUnitPackage().arrTypeCM;
+      minFrac = 0;
+    }
+    let valueType = values[0][getType(mapUnit[name])] || '';
+    if (arrayCdTypes.length > 1 || arrayCmTypes.length > 1) {
+      valueType = 'PK';
+    }
+    return total === 0 ? '' : NumberFormat(total, minFrac) + ` ${valueType}`;
   };
 
   const renderContent = (name, row) => {
@@ -230,7 +256,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   }
 
   const isValueChange = (key, index, row) => {
-    const originalValue = renderContent(key, orgContent[getField(container)]?.[index]);
+    const originalValue = renderContent(key, sortValues(orgContent[getField(container)])?.[index]);
     return originalValue !== renderContent(key, row);
   }
 
