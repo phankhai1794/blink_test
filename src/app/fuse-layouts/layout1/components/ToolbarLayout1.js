@@ -262,15 +262,15 @@ function ToolbarLayout1(props) {
               // get attachments file in comment reply/answer
               let attachFileCount = [];
               let collectAttachment = [];
-              // console.log(res)
               res.forEach((r) => {
                 collectAttachment = [...collectAttachment, ...r];
               });
               if (collectAttachment.length) {
                 collectAttachment = collectAttachment.filter(col => col.latestReply);
                 collectAttachment.forEach(col => {
-                  if (col.content && col.content.mediaFile.length) {
-                    attachFileCount = [...col.content.mediaFile];
+                  const {mediaFile} = col.content;
+                  if (col.content && mediaFile.length) {
+                    attachFileCount = [...attachFileCount, ...mediaFile];
                   }
                 })
               }
