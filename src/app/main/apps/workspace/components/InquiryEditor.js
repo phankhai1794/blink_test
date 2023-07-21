@@ -42,7 +42,6 @@ import { MSG_INQUIRY_CONTENT } from '../store/reducers/inquiry';
 import ChoiceAnswerEditor from './ChoiceAnswerEditor';
 import ParagraphAnswerEditor from './ParagraphAnswerEditor';
 import AttachmentAnswer from './AttachmentAnswer';
-import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import AttachFile from './AttachFile';
 
@@ -224,6 +223,7 @@ const InquiryEditor = (props) => {
     ]
   );
   const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs);
+  const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const [allPasteFiles, setAllPasteFile] = useState([]);
 
   const user = useSelector(({ user }) => user);
@@ -410,7 +410,7 @@ const InquiryEditor = (props) => {
 
   const initContentType = (contentArr) => {
     const currInq = { ...currentEditInq };
-    const currentTab = currentTabs === 0 ? 'customer' : 'onshore';
+    const currentTab = (openAllInquiry && currentTabs === 1) ? 'onshore' : 'customer';
     if (containerCheck.includes(currInq.field)) {
       const valResult = [...valueType]
       if (valResult.length && !currInq.id) {
@@ -488,7 +488,7 @@ const InquiryEditor = (props) => {
       dispatch(InquiryActions.setEditInq(inq));
     }
 
-    if(inquiries.length > 0) {
+    if (openAllInquiry && inquiries.length > 0) {
       if (inquiries.every((i) => i.receiver.includes('onshore'))) {
         inq.receiver = ['onshore'];
       } else if (inquiries.every((i) => i.receiver.includes('customer'))) {
@@ -550,7 +550,7 @@ const InquiryEditor = (props) => {
       const inqCdCm = [...contentsInqCDCM];
       const contentArr = [];
       const findByIdType = inqCdCm.find(cdcm => inq.inqType === cdcm.type);
-      const currentTab = currentTabs === 0 ? 'customer' : 'onshore';
+      const currentTab = (openAllInquiry && currentTabs === 1) ? 'onshore' : 'customer';
       if (!findByIdType) {
         const filter = metadata.template.find(({ field, type }) => {
           return type === inq.inqType && ['containerDetail', 'containerManifest'].includes(field);
@@ -597,7 +597,7 @@ const InquiryEditor = (props) => {
         setValueType(valResult)
       }
       const contentArr = [];
-      const currentTab = currentTabs === 0 ? 'customer' : 'onshore';
+      const currentTab = (openAllInquiry && currentTabs === 1) ? 'onshore' : 'customer';
       valResult.forEach(v => {
         const findByIdType = inqCdCm.find(inq => v.value === inq.type);
         if (!findByIdType) {
