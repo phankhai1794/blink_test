@@ -1618,7 +1618,7 @@ const InquiryViewer = (props) => {
         const getValIndex = typeChanged.typeChangeCM[index];
         if (getValIndex && getValIndex.length) {
           getValIndex.forEach(valIndex => {
-            if (contRes?.[valIndex.key]) {
+            if (contRes?.[valIndex.key] || contRes?.[valIndex.key] === '') {
               contRes[valIndex.key] = valIndex.val
             }
           })
