@@ -199,6 +199,108 @@ const AttachmentList = (props) => {
     };
   };
 
+  const fetchData = async (url, q) => {
+    try {
+      const response = await url;
+      let reponseMap = [];
+      if (response && response.length) {
+        reponseMap = response.map(r => {
+          return {
+            ...r,
+            inquiryId: q.id,
+            inqType: q.inqType,
+            field: q.field,
+            process: q.process
+          }
+        })
+      }
+      return reponseMap;
+    } catch (error) {
+      console.error(`Error fetching data from ${url}: ${error.message}`);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    let combineFieldType = [];
+    let optionInquiries = [...inquiries];
+    optionInquiries.forEach((e) => {
+      const fieldOptions = metadata.field_options.find(ops => ops.value === e.field);
+      const inqType = metadata.inq_type_options.find(ops => ops.value === e.inqType);
+      combineFieldType = [
+        ...combineFieldType,
+        {
+          label: inqType?.label ? `${fieldOptions?.label} - ${inqType?.label}` : `${fieldOptions?.label} - AMENDMENT`,
+          value: { fieldId: fieldOptions?.value, inqId: e.id, inqType: e.inqType }
+        }
+      ];
+    });
+
+    axios.all(optionInquiries.map(q => {
+      if (q.process === 'pending') return fetchData(loadComment(q.id), q);
+      if (q.process === 'draft') return fetchData(getCommentDraftBl(myBL.id, q.field), q);
+    })) // TODO: refactor
+      .then(res => {
+        if (res) {
+          if (res.length) {
+            let attachFileCount = [];
+            let collectAttachment = [];
+            console.log(res)
+            res.forEach((r, index) => {
+              collectAttachment = [...collectAttachment, ...r];
+            });
+            if (collectAttachment.length) {
+              collectAttachment = collectAttachment.filter(col => col.latestReply);
+              collectAttachment.forEach(col => {
+                if (col.process === 'pending') {
+                  let mediaMap = [];
+                  if (col.type === 'ANS') {
+                    mediaMap = [...mediaMap, ...col.answersMedia];
+                  } else {
+                    mediaMap = [...mediaMap, ...col.mediaFile];
+                  }
+                  if (mediaMap.length) {
+                    mediaMap = mediaMap.map(q => {
+                      return {
+                        ...q,
+                        inquiryId: col.inquiryId,
+                        inqType: col.inqType,
+                        field: col.field,
+                        process: col.process
+                      }
+                    })
+                  }
+                  attachFileCount = [...attachFileCount, ...mediaMap];
+                } else if (col.process === 'draft') {
+                  const {mediaFile} = col.content;
+                  if (col.content && mediaFile.length) {
+                    const mediaMap = mediaFile.map(q => {
+                      return {
+                        ...q,
+                        inquiryId: col.inquiryId,
+                        inqType: col.inqType,
+                        field: col.field,
+                        process: col.process
+                      }
+                    })
+                    attachFileCount = [...attachFileCount, ...mediaMap];
+                  }
+                }
+              })
+            }
+            attachFileCount.sort((a, b) => a.field.localeCompare(b.field));
+            combineFieldType.sort((a, b) => a.label.localeCompare(b.label));
+            setAttachmentFiles(attachFileCount);
+            setFieldType(combineFieldType);
+            dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
+            setIsLoading(false);
+          }
+        }
+      }).catch(err => {
+        console.error(err)
+      });
+  }, []);
+
   useEffect(() => {
     if (document.getElementsByClassName('attachmentList')[0].childElementCount > 0) {
       document.querySelectorAll('#no-att span')[0].textContent = document.getElementsByClassName('attachmentList')[0].childElementCount;
@@ -233,145 +335,6 @@ const AttachmentList = (props) => {
       }
     }
   }, [props.newFileAttachment]);
-
-  useEffect(() => {
-    // Need to refactor this logic
-    let getAttachmentFiles = [];
-    let combineFieldType = [];
-    inquiries.forEach((e) => {
-      const mediaFile = e.mediaFile.map((f) => {
-        return {
-          ...f,
-          field: e.field,
-          inquiryId: e.id,
-          inqType: e.inqType,
-          creator: f.creator?.accountRole?.type || f.creator || userType
-        };
-      });
-      const mediaAnswer = e.mediaFilesAnswer.map((f) => {
-        return {
-          ...f,
-          field: e.field,
-          inquiryId: e.id,
-          inqType: e.inqType,
-          creator: f.creator?.accountRole?.type || userType
-        };
-
-      })
-      getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
-
-      const fieldOptions = metadata.field_options.find(ops => ops.value === e.field);
-      const inqType = metadata.inq_type_options.find(ops => ops.value === e.inqType);
-      combineFieldType = [
-        ...combineFieldType,
-        {
-          label: inqType?.label ? `${fieldOptions?.label} - ${inqType?.label}` : `${fieldOptions?.label} - AMENDMENT`,
-          value: { fieldId: fieldOptions?.value, inqId: e.id, inqType: e.inqType }
-        }
-      ];
-    });
-
-    const inquiriesPendingProcess = inquiries.filter(op => op.process === 'pending');
-    const amendment = inquiries.filter(op => op.process === 'draft');
-
-    let countLoadComment = 0;
-    let countAmendment = 0;
-    axios.all(inquiriesPendingProcess.map(q => loadComment(q.id).catch(err => handleError(dispatch, err)))) // TODO: refactor
-      .then(res => {
-        if (res) {
-          let commentList = [];
-          let commentIdList = [];
-          // get attachments file in comment reply/answer
-          res.map(r => {
-            commentList = [...commentList, ...r];
-            r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-            const curInq = inquiriesPendingProcess[countLoadComment];
-            r.forEach((itemRes) => {
-              if (!commentIdList.includes(itemRes.id)) {
-                commentIdList.push(itemRes.id);
-                if (itemRes.mediaFile.length > 0) {
-                  const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ...itemRes.mediaFile];
-                  const attachmentTemp = mediaTemp.map((f) => {
-                    return {
-                      ...f,
-                      field: curInq.field,
-                      inquiryId: curInq.id,
-                      inqType: curInq.inqType,
-                    }
-                  })
-                  if (attachmentTemp.length > 0) {
-                    attachmentTemp.forEach(att => {
-                      const tempAttList = getAttachmentFiles.filter(attItem =>
-                        (attItem.name === att.name && attItem.field === att.field && attItem.inqType === att.inqType)
-                      );
-                      if (tempAttList.length === 0) getAttachmentFiles.push(att);
-                    })
-                  }
-                }
-              }
-            })
-
-            countLoadComment += 1
-            if (inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)) {
-              getAttachmentFiles.sort((a, b) => a.field.localeCompare(b.field));
-              combineFieldType.sort((a, b) => a.label.localeCompare(b.label));
-              setAttachmentFiles(getAttachmentFiles);
-              setFieldType(combineFieldType);
-              dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-              setIsLoading(false);
-            }
-          });
-        }
-      }).catch(err => {
-        console.error(err)
-      });
-
-    axios.all(amendment.map(q => getCommentDraftBl(myBL.id, q.field))) // TODO: refactor
-      .then((res) => {
-        if (res) {
-          let commentList = [];
-          let commentDraftIdList = [];
-          // check and add attachment of amendment/answer to Att List
-          res.map(r => {
-            commentList = [...commentList, ...r];
-            const curInq = amendment[countAmendment];
-            r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-            r.forEach((itemRes) => {
-              if (!commentDraftIdList.includes(itemRes.id)) {
-                commentDraftIdList.push(itemRes.id);
-                const mediaTemp = [...curInq.mediaFile, ...curInq.mediaFilesAnswer, ...itemRes.content.mediaFile];
-                const attachmentAmendmentTemp = mediaTemp.map((f) => {
-                  return {
-                    ...f,
-                    field: curInq.field,
-                    inquiryId: curInq.id,
-                    inqType: curInq.inqType,
-                    creator: itemRes.role
-                  }
-                })
-                if (attachmentAmendmentTemp.length > 0) {
-                  attachmentAmendmentTemp.forEach(attAmendment => {
-                    const fileNameList = getAttachmentFiles.map((item) => {
-                      if (item.inqType === curInq.inqType) return item.name
-                    })
-                    if (attAmendment && !curInq.inqType && !fileNameList.includes(attAmendment.name)) getAttachmentFiles.push(attAmendment);
-                  })
-                }
-              }
-            })
-            countAmendment += 1;
-            if (inquiriesPendingProcess && amendment && (countLoadComment === inquiriesPendingProcess.length) && (countAmendment === amendment.length)) {
-              getAttachmentFiles.sort((a, b) => a.field.localeCompare(b.field));
-              combineFieldType.sort((a, b) => a.label.localeCompare(b.label));
-              setAttachmentFiles(getAttachmentFiles);
-              setFieldType(combineFieldType);
-              dispatch(InquiryActions.setShowBackgroundAttachmentList(false));
-              setIsLoading(false);
-            }
-          });
-        }
-      }).catch(err => handleError(dispatch, err));
-  }, []);
 
   const handleFieldChange = (e, index) => {
     let optionsAttachmentList = [...attachmentFiles];

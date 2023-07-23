@@ -174,7 +174,6 @@ function ToolbarLayout1(props) {
 
   const [open, setOpen] = useState(false);
   const [attachmentLength, setAttachmentLength] = useState(0);
-  const [attachAmendLength, setAttachAmendLength] = useState(0);
   const [amendmentsLength, setAmendmentLength] = useState();
   const [inquiryLength, setInquiryLength] = useState();
 
@@ -222,65 +221,86 @@ function ToolbarLayout1(props) {
       // getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
     });
 
-    const amendment = optionInquiries.filter((op) => op.process === 'draft');
-    if (pathname.includes('/guest') || pathname.includes('/workspace')) {
-      let countLoadComment = 0;
-      let countAmendment = 0;
-      axios
-        .all(inquiriesPendingProcess.map((q) => loadComment(q.id).catch(err => handleError(dispatch, err)))) // TODO: refactor
-        .then((res) => {
-          if (res) {
-            // get attachments file in comment reply/answer
-            let attachFileCount = [];
-            let collectAttachment = [];
-            // console.log(res)
-            res.forEach((r) => {
-              collectAttachment = [...collectAttachment, ...r];
-            });
-            if (collectAttachment.length) {
-              collectAttachment = collectAttachment.filter(col => col.latestReply);
-              collectAttachment.forEach(col => {
-                if (col.type === 'ANS') {
-                  attachFileCount = [...attachFileCount, ...col.answersMedia];
-                } else {
-                  attachFileCount = [...attachFileCount, ...col.mediaFile];
-                }
-              })
+    const fetchData = async (url, q) => {
+      try {
+        const response = await url;
+        let reponseMap = [];
+        if (response && response.length) {
+          reponseMap = response.map(r => {
+            return {
+              ...r,
+              inquiryId: q.id,
+              inqType: q.inqType,
+              field: q.field,
+              process: q.process
             }
-            setAttachmentLength(attachFileCount.length);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+          })
+        }
+        return reponseMap;
+      } catch (error) {
+        console.error(`Error fetching data from ${url}: ${error.message}`);
+        return null;
+      }
+    };
 
-      if (amendment.length) {
-        axios
-          .all(amendment.map((q) => getCommentDraftBl(myBL.id, q.field))) // TODO: refactor
-          .then((res) => {
-            if (res) {
-              // get attachments file in comment reply/answer
+    if (pathname.includes('/guest') || pathname.includes('/workspace')) {
+      axios.all(optionInquiries.map(q => {
+        if (q.process === 'pending') return fetchData(loadComment(q.id), q);
+        if (q.process === 'draft') return fetchData(getCommentDraftBl(myBL.id, q.field), q);
+      })) // TODO: refactor
+        .then(res => {
+          if (res) {
+            if (res.length) {
               let attachFileCount = [];
               let collectAttachment = [];
-              res.forEach((r) => {
+              res.forEach((r, index) => {
                 collectAttachment = [...collectAttachment, ...r];
               });
               if (collectAttachment.length) {
                 collectAttachment = collectAttachment.filter(col => col.latestReply);
                 collectAttachment.forEach(col => {
-                  const {mediaFile} = col.content;
-                  if (col.content && mediaFile.length) {
-                    attachFileCount = [...attachFileCount, ...mediaFile];
+                  if (col.process === 'pending') {
+                    let mediaMap = [];
+                    if (col.type === 'ANS') {
+                      mediaMap = [...mediaMap, ...col.answersMedia];
+                    } else {
+                      mediaMap = [...mediaMap, ...col.mediaFile];
+                    }
+                    if (mediaMap.length) {
+                      mediaMap = mediaMap.map(q => {
+                        return {
+                          ...q,
+                          inquiryId: col.id,
+                          inqType: col.inqType,
+                          field: col.field,
+                          process: col.process
+                        }
+                      })
+                    }
+                    attachFileCount = [...attachFileCount, ...mediaMap];
+                  } else if (col.process === 'draft') {
+                    const {mediaFile} = col.content;
+                    if (col.content && mediaFile.length) {
+                      const mediaMap = mediaFile.map(q => {
+                        return {
+                          ...q,
+                          inquiryId: col.id,
+                          inqType: col.inqType,
+                          field: col.field,
+                          process: col.process
+                        }
+                      })
+                      attachFileCount = [...attachFileCount, ...mediaMap];
+                    }
                   }
                 })
               }
-              setAttachAmendLength(attachFileCount.length);
+              setAttachmentLength(attachFileCount.length);
             }
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      }
+          }
+        }).catch(err => {
+          console.error(err)
+        });
     }
   }, [enableSubmit, inquiries]);
 
@@ -413,13 +433,13 @@ function ToolbarLayout1(props) {
               <PermissionProvider
                 action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
                 extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
-                {(attachmentLength > 0 || attachAmendLength > 0) &&
+                {(attachmentLength > 0) &&
                   <Button
                     variant="text"
                     size="medium"
                     className={clsx('h-64', classes.button)}
                     onClick={openAttachment}>
-                    <Badge color="primary" badgeContent={attachmentLength + attachAmendLength} id="no-att">
+                    <Badge color="primary" badgeContent={attachmentLength} id="no-att">
                       <img src="assets/images/icons/attachmentIcon.svg" />
                     </Badge>
                     <span className={classes.titleButton}>Attachments List</span>
