@@ -25,9 +25,9 @@ const initialState = {
     resolve: true
   },
   searchQueueQuery: {
-    bookingNo: '',
-    from: formatDate(start, 'YYYY-MM-DD'),
-    to: formatDate(end, 'YYYY-MM-DD'),
+    bookingNo: settings.bookingNo || '',
+    from: settings.from || formatDate(start, 'YYYY-MM-DD'),
+    to: settings.to || formatDate(end, 'YYYY-MM-DD'),
     blStatus: settings.blStatus || Object.keys(mapperBlinkStatus),
     sortField: settings.sortField || ['lastUpdated', 'DESC'],
     countries: null

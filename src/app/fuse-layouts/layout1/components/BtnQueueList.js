@@ -5,6 +5,7 @@ import { makeStyles } from '@material-ui/styles';
 import { Tooltip, Button } from '@material-ui/core';
 import FormatListBulleted from '@material-ui/icons/FormatListBulleted';
 import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
+import { setLocalStorageItem } from 'app/main/apps/dashboards/admin/components';
 
 const useStyles = makeStyles((theme) => ({
   btn: {
@@ -41,6 +42,9 @@ const BtnQueueList = () => {
     userType === 'ADMIN' ?
       window.open(`/apps/admin${param}`) :
       dispatch(InquiryActions.openQueueList(true));
+    setLocalStorageItem('from', null);
+    setLocalStorageItem('to', null);
+    setLocalStorageItem('bookingNo', null);
   }
 
   return (
