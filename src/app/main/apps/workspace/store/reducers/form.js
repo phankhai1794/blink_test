@@ -78,6 +78,9 @@ const formReducer = function (state = initialState, action) {
       openPreviewListSubmit: false,
       openAmendmentForm: false,
       openAmendmentList: false,
+      openNotificationAttachmentList: false,
+      openNotificationInquiryList: false,
+      openNotificationAmendmentList: false
     };
   }
   case Actions.OPEN_EMAIL: {
