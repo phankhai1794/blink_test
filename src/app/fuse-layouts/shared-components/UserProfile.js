@@ -1,5 +1,4 @@
 import React, { useContext, useState } from 'react';
-import history from '@history';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Button,
@@ -16,9 +15,7 @@ import { Link } from 'react-router-dom';
 import { clearLocalStorage } from '@shared';
 import * as AppActions from 'app/store/actions';
 import { SocketContext } from 'app/AppContext';
-import { encodeAuthParam } from 'app/services/authService';
 import { BROADCAST } from '@shared/keyword';
-import { handleError } from '@shared/handleError';
 
 function UserProfile(props) {
   const { classes } = props;
@@ -31,11 +28,6 @@ function UserProfile(props) {
   const handleClick = ({ currentTarget }) => setOpen(currentTarget);
 
   const handleClose = () => setOpen(null);
-
-  const handleChangePassword = async () => {
-    const { auth } = await encodeAuthParam().catch(err => handleError(dispatch, err));
-    history.push(`/change-password?auth=${auth}`);
-  };
 
   const handleLogOut = () => {
     clearLocalStorage();
@@ -88,14 +80,7 @@ function UserProfile(props) {
         classes={{
           paper: 'py-8'
         }}>
-        <MenuItem component={Link} onClick={() => handleChangePassword()}>
-          <ListItemIcon className="min-w-40">
-            <Icon>vpn_key</Icon>
-          </ListItemIcon>
-          <ListItemText className="pl-0" primary="Change Password" />
-        </MenuItem>
-
-        <MenuItem component={Link} onClick={() => handleLogOut()}>
+        <MenuItem component={Link} to="#" onClick={() => handleLogOut()}>
           <ListItemIcon className="min-w-40">
             <Icon>exit_to_app</Icon>
           </ListItemIcon>
