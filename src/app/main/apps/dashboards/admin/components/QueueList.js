@@ -150,7 +150,12 @@ const SearchLayout = (props) => {
     to: end,
     blStatus: blStatusOption,
   };
-  const [state, setState] = useState({ ...initialState, blStatus: settings.blStatus || blStatusOption });
+  const [state, setState] = useState({
+    bookingNo: settings.bookingNo || '',
+    from: settings.from || start,
+    to: settings.to || end,
+    blStatus: settings.blStatus || blStatusOption
+  });
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
   const [startingDate, setStartingDate] = useState('');
   const [isPickerOpen, setPickerOpen] = useState(false);
@@ -178,10 +183,7 @@ const SearchLayout = (props) => {
   };
 
   const handleSearch = () => {
-    let blStatus = state.blStatus;
-    if (state.blStatus.indexOf() !== -1) {
-      blStatus = blStatus.splice(blStatus.indexOf(), 1);
-    }
+    setLocalStorageItem('bookingNo', state.bookingNo);
     dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...state }));
   };
 
@@ -239,21 +241,19 @@ const SearchLayout = (props) => {
     if (startDate.getTime() === endDate.getTime()) setStartingDate(endDate);
 
     // If the selected end date is beyond the maximum, adjust it
+    let from = '';
+    let to = '';
     if (startDate < startingDate) {
-      const temp = startDate < minStartDate ? minStartDate : startDate;
-      setLabelDate(getLabelDate(temp, endDate));
-      handleChange({
-        from: temp,
-        to: endDate
-      });
+      from = startDate < minStartDate ? minStartDate : startDate;
+      to = endDate
     } else {
-      const temp = endDate > maxEndDate ? maxEndDate : endDate;
-      setLabelDate(getLabelDate(startDate, temp));
-      handleChange({
-        from: startDate,
-        to: endDate > maxEndDate ? maxEndDate : endDate
-      });
+      from = startDate;
+      to = endDate > maxEndDate ? maxEndDate : endDate;
     }
+    handleChange({ from, to });
+    setLabelDate(getLabelDate(from, to));
+    setLocalStorageItem('from', from);
+    setLocalStorageItem('to', to);
   };
 
   const onPaste = (e) => {
@@ -267,7 +267,7 @@ const SearchLayout = (props) => {
           .filter(str => str) // filter empty string
       )
     ].join(", ");
-    handleChange({ bookingNo: removeDuplicate })
+    handleChange({ bookingNo: removeDuplicate });
   }
 
   return (
