@@ -286,7 +286,7 @@ const DraftPage = (props) => {
   }, [containersDetail, containersManifest]);
 
   const renderAlsoRemark = () => (
-    <div style={{ position: 'relative', top: `${(maxRows - 1) * 9}px` }}>
+    <div style={{ position: 'alsolute', top: `100%` }}>
       <br></br>
       {getValueField(ALSO_NOTIFY) &&
         <div>
@@ -687,10 +687,12 @@ const DraftPage = (props) => {
               </Grid>
             </Grid>
           </Grid>
-
-          <Grid container justify="center">
-            <span className={classes.tittle_break_line}>** TO BE CONTINUED ON ATTACHED LIST **</span>
-          </Grid>
+          {
+            totalPage > 1 && <Grid container justify="center">
+              <span className={classes.tittle_break_line}>** TO BE CONTINUED ON ATTACHED LIST **</span>
+            </Grid>
+          }
+         
 
           <Grid container style={{ display: 'flex', alignItems: 'center', paddingTop: '12px', paddingBottom: '12px' }}>
             <span className={classes.note}>Declared Cargo Value US $</span>

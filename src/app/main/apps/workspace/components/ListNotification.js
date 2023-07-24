@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { Button, Dialog, Divider, makeStyles } from "@material-ui/core";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import MuiDialogContent from "@material-ui/core/DialogContent";
+import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from "../store/actions/inquiry";
@@ -51,6 +52,18 @@ const useStyles = makeStyles((theme) => ({
   container: {
     textAlign: 'center',
     paddingBottom: 30
+  },
+  button: {
+    width: 171,
+    height: 40,
+    color: '#FFFFFF',
+    backgroundColor: mainColor,
+    borderRadius: 8,
+    padding: '10px 13px',
+    textTransform: 'none',
+    fontFamily: 'Montserrat',
+    fontSize: 16,
+    fontWeight: 600
   }
 }))
 
@@ -62,18 +75,6 @@ const ListNotification = () => {
   const openNotificationAmendmentList = useSelector(({ workspace }) => workspace.formReducer.openNotificationAmendmentList);
   const inquiries = useSelector(({ workspace }) => workspace.inquiryReducer.inquiries);
   const user = useSelector(({ user }) => user);
-  const [isEmptyMedia, setIsEmptyMedia] = useState(false);
-
-  useEffect(() => {
-    let isExistMedia = false;
-    inquiries.forEach(inq => {
-      if (inq.mediaFile.length > 0) {
-        isExistMedia = true;
-        return;
-      }
-    });
-    setIsEmptyMedia(!isExistMedia);
-  }, []);
 
   const handleClose = () => {
     dispatch(FormActions.toggleOpenNotificationAttachmentList(false));
@@ -81,21 +82,22 @@ const ListNotification = () => {
     dispatch(FormActions.toggleOpenNotificationAmendmentList(false));
   };
 
-  const handleAddAttachment = () => {
-    if (openNotificationAmendmentList) {
-      dispatch(InquiryActions.addAmendment(null));
-      dispatch(FormActions.toggleAmendmentsList(true));
-    } else {
-      const isEmptyInquiry = inquiries.filter(inq => inq.process === 'pending');
-      if (!isEmptyInquiry.length) {
-        dispatch(FormActions.toggleCreateInquiry(true));
-        dispatch(InquiryActions.addQuestion());
-      } else {
-        dispatch(FormActions.toggleAllInquiry(true));
-      }
-    }
+  const addAmendment = () => {
+    dispatch(InquiryActions.addAmendment(null));
+    dispatch(FormActions.toggleAmendmentsList(true));
     handleClose();
   };
+
+  const addInquiry = () => {
+    const isEmptyInquiry = inquiries.filter(inq => inq.process === 'pending');
+    if (!isEmptyInquiry.length) {
+      dispatch(FormActions.toggleCreateInquiry(true));
+      dispatch(InquiryActions.addQuestion());
+    } else {
+      dispatch(FormActions.toggleAllInquiry(true));
+    }
+    handleClose();
+  }
 
   let [label, pluralLabel] = ['', ''];
   if (openNotificationInquiryList) {
@@ -130,34 +132,31 @@ const ListNotification = () => {
         <span className={classes.secondSentence}>Please add {label} for missing information.</span>
       </MuiDialogContent>
 
-      {
-        (
-          (openNotificationInquiryList && inquiries.filter(inq => inq.process === 'pending').length === 0 && user.userType !== 'CUSTOMER')
-          ||
-          (openNotificationAttachmentList && inquiries.length > 0 && isEmptyMedia)
-          ||
-          (openNotificationAmendmentList && user.role === 'Guest' && user.userType === 'CUSTOMER')
-        ) && (
-          <div className={classes.container}>
-            <Button
-              style={{
-                width: 171,
-                height: 40,
-                color: '#FFFFFF',
-                backgroundColor: mainColor,
-                borderRadius: 8,
-                padding: '10px 13px',
-                textTransform: 'none',
-                fontFamily: 'Montserrat',
-                fontSize: 16,
-                fontWeight: 600
-              }}
-              onClick={handleAddAttachment}>
-              Add {label}
-            </Button>
-          </div>
-        )
-      }
+      <PermissionProvider
+        action={PERMISSION.INQUIRY_CREATE_INQUIRY}
+        extraCondition={openNotificationInquiryList && inquiries.filter(inq => inq.process === 'pending').length === 0}
+      >
+        <div className={classes.container}>
+          <Button
+            className={classes.button}
+            onClick={addInquiry}>
+            Add {label}
+          </Button>
+        </div>
+      </PermissionProvider>
+
+      <PermissionProvider
+        action={PERMISSION.VIEW_CREATE_AMENDMENT}
+        extraCondition={openNotificationAmendmentList && user.role === 'Guest' && user.userType === 'CUSTOMER'}
+      >
+        <div className={classes.container}>
+          <Button
+            className={classes.button}
+            onClick={addAmendment}>
+            Add {label}
+          </Button>
+        </div>
+      </PermissionProvider>
     </Dialog>
   );
 };
