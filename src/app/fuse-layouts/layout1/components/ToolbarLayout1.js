@@ -194,155 +194,90 @@ function ToolbarLayout1(props) {
     setAmendmentLength(countAmend.length);
   }, [inquiries]);
 
+  const fetchData = async (url, q) => {
+    try {
+      const response = await url;
+      let reponseMap = [];
+      if (response && response.length) {
+        reponseMap = response.map(r => {
+          return {
+            ...r,
+            inquiryId: q.id,
+            inqType: q.inqType,
+            field: q.field,
+            process: q.process
+          }
+        })
+      }
+      return reponseMap;
+    } catch (error) {
+      console.error(`Error fetching data from ${url}: ${error.message}`);
+      return null;
+    }
+  };
+
   useEffect(() => {
     dispatch(InquiryActions.checkSend(false));
     let optionInquiries = [...inquiries];
-    let getAttachmentFiles = [];
 
-    const inquiriesPendingProcess = optionInquiries.filter((op) => op.process === 'pending');
-    inquiries.forEach((e) => {
-      const mediaFile = e.mediaFile.map((f) => {
-        return {
-          ...f,
-          field: e.field,
-          inquiryId: e.id,
-          inqType: e.inqType
-        };
-      });
-      const mediaAnswer = e.mediaFilesAnswer.map((f) => {
-        return {
-          ...f,
-          field: e.field,
-          inquiryId: e.id,
-          inqType: e.inqType
-        };
-      });
-
-      getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
-    });
-
-    const amendment = optionInquiries.filter((op) => op.process === 'draft');
     if (pathname.includes('/guest') || pathname.includes('/workspace')) {
-      let countLoadComment = 0;
-      let countAmendment = 0;
-      axios
-        .all(inquiriesPendingProcess.map((q) => loadComment(q.id).catch(err => handleError(dispatch, err)))) // TODO: refactor
-        .then((res) => {
+      axios.all(optionInquiries.map(q => {
+        if (q.process === 'pending') return fetchData(loadComment(q.id), q);
+        if (q.process === 'draft') return fetchData(getCommentDraftBl(myBL.id, q.field), q);
+      })) // TODO: refactor
+        .then(res => {
           if (res) {
-            let commentList = [];
-            // get attachments file in comment reply/answer
-            res.map((r) => {
-              commentList = [...commentList, ...r];
-              r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-              const curInq = inquiriesPendingProcess[countLoadComment];
-              let commentIdList = [];
-              r.forEach((itemRes) => {
-                if (!commentIdList.includes(itemRes.id)) {
-                  commentIdList.push(itemRes.id);
-                  if (itemRes.mediaFile.length > 0) {
-                    const mediaTemp = [
-                      ...curInq.mediaFile,
-                      ...curInq.mediaFilesAnswer,
-                      ...itemRes.mediaFile
-                    ];
-                    const attachmentTemp = mediaTemp.map((f) => {
-                      return {
-                        ...f,
-                        field: curInq.field,
-                        inquiryId: curInq.id,
-                        inqType: curInq.inqType
-                      };
-                    });
-                    if (attachmentTemp.length > 0) {
-                      attachmentTemp.forEach((att) => {
-                        const tempAttList = getAttachmentFiles.filter(
-                          (attItem) =>
-                            attItem.name === att.name &&
-                            attItem.field === att.field &&
-                            attItem.inqType === att.inqType
-                        );
-                        if (tempAttList.length === 0) getAttachmentFiles.push(att);
-                      });
+            if (res.length) {
+              let attachFileCount = [];
+              let collectAttachment = [];
+              res.forEach((r, index) => {
+                collectAttachment = [...collectAttachment, ...r];
+              });
+              if (collectAttachment.length) {
+                collectAttachment = collectAttachment.filter(col => col.latestReply);
+                collectAttachment.forEach(col => {
+                  if (col.process === 'pending') {
+                    let mediaMap = [];
+                    if (col.type === 'ANS') {
+                      mediaMap = [...mediaMap, ...col.answersMedia];
+                    } else {
+                      mediaMap = [...mediaMap, ...col.mediaFile];
+                    }
+                    if (mediaMap.length) {
+                      mediaMap = mediaMap.map(q => {
+                        return {
+                          ...q,
+                          inquiryId: col.id,
+                          inqType: col.inqType,
+                          field: col.field,
+                          process: col.process
+                        }
+                      })
+                    }
+                    attachFileCount = [...attachFileCount, ...mediaMap];
+                  } else if (col.process === 'draft') {
+                    const {mediaFile} = col.content;
+                    if (col.content && mediaFile.length) {
+                      const mediaMap = mediaFile.map(q => {
+                        return {
+                          ...q,
+                          inquiryId: col.id,
+                          inqType: col.inqType,
+                          field: col.field,
+                          process: col.process
+                        }
+                      })
+                      attachFileCount = [...attachFileCount, ...mediaMap];
                     }
                   }
-                }
-              });
-
-              countLoadComment += 1;
-              if (
-                inquiriesPendingProcess &&
-                amendment &&
-                countLoadComment === inquiriesPendingProcess.length &&
-                countAmendment === amendment.length
-              ) {
-                setAttachmentLength(getAttachmentFiles.length);
+                })
               }
-            });
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-
-      if (amendment.length) {
-        axios
-          .all(amendment.map((q) => getCommentDraftBl(myBL.id, q.field))) // TODO: refactor
-          .then((res) => {
-            if (res) {
-              let commentList = [];
-              // check and add attachment of amendment/answer to Att List
-              res.map((r) => {
-                commentList = [...commentList, ...r];
-                const curInq = amendment[countAmendment];
-                r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-                let commentDraftIdList = [];
-                r.forEach((itemRes) => {
-                  if (!commentDraftIdList.includes(itemRes.id)) {
-                    commentDraftIdList.push(itemRes.id);
-                    const mediaTemp = [
-                      ...curInq.mediaFile,
-                      ...curInq.mediaFilesAnswer,
-                      ...itemRes.content.mediaFile
-                    ];
-                    const attachmentAmendmentTemp = mediaTemp.map((f) => {
-                      return {
-                        ...f,
-                        field: curInq.field,
-                        inquiryId: curInq.id,
-                        inqType: curInq.inqType
-                      };
-                    });
-                    if (attachmentAmendmentTemp.length > 0) {
-                      attachmentAmendmentTemp.forEach((attAmendment) => {
-                        const fileNameList = getAttachmentFiles.map((item) => {
-                          if (item.inqType === curInq.inqType) return item.name;
-                        });
-                        if (
-                          attAmendment &&
-                          !curInq.inqType &&
-                          !fileNameList.includes(attAmendment.name)
-                        )
-                          getAttachmentFiles.push(attAmendment);
-                      });
-                    }
-                  }
-                });
-                countAmendment += 1;
-                if (
-                  inquiriesPendingProcess &&
-                  amendment &&
-                  countLoadComment === inquiriesPendingProcess.length &&
-                  countAmendment === amendment.length
-                ) {
-                  setAttachmentLength(getAttachmentFiles.length);
-                }
-              });
+              setAttachmentLength(attachFileCount.length);
             }
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      }
+          }
+        }).catch(err => {
+          console.error(err)
+        });
     }
   }, [enableSubmit, inquiries]);
 
@@ -475,7 +410,7 @@ function ToolbarLayout1(props) {
               <PermissionProvider
                 action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
                 extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
-                {attachmentLength > 0 &&
+                {(attachmentLength > 0) &&
                   <Button
                     variant="text"
                     size="medium"
