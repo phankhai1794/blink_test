@@ -1,5 +1,4 @@
 import React from 'react';
-import history from '@history';
 import {
   Button,
   Dialog,
@@ -9,7 +8,6 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import * as Actions from 'app/store/actions';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
-import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 
 function DialogConfirm(props) {
   const { handleClose, open, msg } = props;
@@ -101,8 +99,7 @@ function DialogConfirm(props) {
             variant="contained"
             onClick={() => {
               handleClose();
-              dispatch(InquiryActions.setMyBL({})); // reset BL to re-init socket every redirect page
-              history.push(`/guest?bl=${myBL.id}`, { skipVerification: true });
+              dispatch(DraftBLActions.setPreviewingDraftBL(false));
             }}
             className='normal-case'>
             <span>No</span>
