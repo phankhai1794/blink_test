@@ -10,7 +10,6 @@ const settings = JSON.parse(localStorage.getItem('cdboard') || '{}');
 const initialState = {
   page: { currentPageNumber: 1, pageSize: settings.pageSize || 10 },
   columns: settings.columns || {
-    lastUpdate: true,
     etd: true,
     status: true,
     inquiry: true,

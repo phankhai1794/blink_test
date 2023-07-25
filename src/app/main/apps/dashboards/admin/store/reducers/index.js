@@ -11,7 +11,6 @@ const settings = JSON.parse(localStorage.getItem('dashboard') || '{}');
 const initialState = {
   page: { currentPageNumber: 1, pageSize: settings.pageSize || 10 },
   columns: settings.columns || {
-    lastUpdate: true,
     etd: true,
     shipperN: false,
     customerS: true,

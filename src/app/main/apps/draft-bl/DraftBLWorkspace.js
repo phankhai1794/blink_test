@@ -1,14 +1,24 @@
 import React, { useEffect, useRef } from 'react';
 import history from '@history';
 import { FusePageSimple } from '@fuse';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 
 import OtpCheck from '../OTPCheck';
 import PreProcess from '../PreProcess';
+import BLWorkspace from '../workspace/components/BLWorkspace';
 
 import DraftBL from './DraftBL';
+
+function Coordinator({ bl }) {
+  const isPreviewingDraftPage = useSelector(({ draftBL }) => draftBL.isPreviewingDraftPage);
+  return (
+    <>
+      {isPreviewingDraftPage ? <DraftBL bl={bl} /> : <BLWorkspace user="guest" />}
+    </>
+  );
+}
 
 function DraftBLWorkspace() {
   const dispatch = useDispatch();
@@ -28,7 +38,7 @@ function DraftBLWorkspace() {
   return (
     <>
       {isPreviewing ?
-        <DraftBL bl={bl} user="guest" /> :
+        <DraftBL bl={bl} /> :
         <OtpCheck>
           <div className="flex flex-col flex-1 w-full">
             <FusePageSimple
@@ -39,7 +49,7 @@ function DraftBLWorkspace() {
               }}
               content={
                 <PreProcess bl={bl}>
-                  <DraftBL bl={bl} user="guest" />
+                  <Coordinator bl={bl} />
                 </PreProcess>
               }
               sidebarInner
