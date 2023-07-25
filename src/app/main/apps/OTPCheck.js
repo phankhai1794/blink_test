@@ -260,7 +260,11 @@ const OtpCheck = ({ children }) => {
     // Auto save user data into redux store at ToolbarLayout1.js
 
     dispatch(Actions.hideMessage());
-    setStep(2);
+
+    const { pathname, search } = window.location;
+    const bl = new URLSearchParams(search).get('bl');
+    if (res.draft && pathname.includes("guest")) history.push(`/draft-bl?bl=${bl}`);
+    else setStep(2);
   }
 
   const handleSendCode = () => {
@@ -275,7 +279,7 @@ const OtpCheck = ({ children }) => {
 
   useEffect(() => {
     const init = async () => {
-      const { search } = window.location;
+      const { pathname, search } = window.location;
       const bl = new URLSearchParams(search).get('bl');
       if (bl) setMyBL({ ...myBL, id: bl });
 
@@ -312,7 +316,9 @@ const OtpCheck = ({ children }) => {
           try {
             const res = await isVerified({ bl, userType, processUrl })
             if (res) {
-              setStep(2);
+              if (res.draft && pathname.includes("guest")) history.push(`/draft-bl?bl=${bl}`);
+              else if (!res.draft && pathname.includes("draft")) history.push(`/guest?bl=${bl}`);
+              else setStep(2);
               return;
             }
           } catch (error) {

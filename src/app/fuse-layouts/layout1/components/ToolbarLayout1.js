@@ -10,10 +10,11 @@ import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
-import { AppBar, Toolbar, Avatar, Badge, Button, Hidden, TextField, MenuItem } from '@material-ui/core';
+import { AppBar, Toolbar, Avatar, Badge, Button, Hidden, TextField, MenuItem, Tooltip, Icon, IconButton } from '@material-ui/core';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 import { loadComment } from 'app/services/inquiryService';
 import { getCommentDraftBl } from 'app/services/draftblService';
+import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import axios from 'axios';
 
 import * as InquiryActions from '../../../main/apps/workspace/store/actions/inquiry';
@@ -170,15 +171,30 @@ function ToolbarLayout1(props) {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
   const drfView = useSelector(({ draftBL }) => draftBL.drfView);
-  const userType = useSelector(({ user }) => user.userType);
+  const isPreviewingDraftPage = useSelector(({ draftBL }) => draftBL.isPreviewingDraftPage);
 
   const [open, setOpen] = useState(false);
   const [attachmentLength, setAttachmentLength] = useState(0);
   const [amendmentsLength, setAmendmentLength] = useState();
   const [inquiryLength, setInquiryLength] = useState();
+  const [showBack, setShowBack] = useState(true);
 
   const enableSubmitInq = inquiries.some((inq) => ['ANS_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
   const msgConfirmDrf = inquiries.some((inq) => !['RESOLVED', 'UPLOADED', 'COMPL'].includes(inq.state)) ? 'Still has pending inquiry/amendment \n' : '';
+
+  useEffect(() => {
+    // check display button back (draft process)
+    if (isPreviewingDraftPage) {
+      const btnBack = new URLSearchParams(search).get('btn-back');
+      if (btnBack) {
+        setShowBack(true);
+        const bl = new URLSearchParams(search).get('bl');
+        const url = new URL(window.location);
+        url.searchParams.set('bl', bl);
+        window.history.pushState({}, '', `${pathname}?bl=${bl}`);
+      } else setShowBack(false);
+    } else setShowBack(false);
+  }, [isPreviewingDraftPage]);
 
   useEffect(() => {
     dispatch(FormActions.setDirtyReload({
@@ -314,20 +330,12 @@ function ToolbarLayout1(props) {
   const showQueueList = () => {
     const country = new URLSearchParams(search).get('cntr');
     const param = country ? `?cntr=${country}` : "";
-    userType === 'ADMIN' ?
+    user?.userType === 'ADMIN' ?
       window.open(`/apps/admin${param}`) :
       dispatch(InquiryActions.openQueueList(true));
   }
 
   const confirmBlDraft = () => setOpen(true);
-
-  const redirectWorkspace = () => {
-    const bl = new URLSearchParams(search).get('bl');
-    if (bl) {
-      dispatch(InquiryActions.setMyBL({})); // reset BL to re-init socket every redirect page
-      history.push(`/guest?bl=${bl}`, { skipVerification: true });
-    }
-  };
 
   const showMessageReply = () => {
     return inquiries.some((inq) => ['INQ_SENT', 'REP_Q_SENT'].includes(inq.state) || inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Admin');
@@ -361,24 +369,36 @@ function ToolbarLayout1(props) {
 
             <div className="flex flex-1" style={{ marginLeft: 35 }}>
               <div className={classes.iconWrapper}>
-                <Button variant="text" size="medium">
-                  <Avatar
-                    src="assets/images/logos/one_ocean_network-logo.png"
-                    className={clsx(classes.logo, classes.fitAvatar)}
-                    alt="one-logo"
-                    onClick={() => showQueueList()}
-                  // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
-                  //   component: Link,
-                  //   to: '/'
-                  // })}
-                  />
-                </Button>
-
+                {
+                  (
+                    showBack
+                    && pathname.includes('/draft-bl')
+                    && !PermissionProvider({ action: PERMISSION.VIEW_ACCESS_EDIT_DRAFT_BL })
+                  ) ?
+                    <Tooltip title="Back" onClick={() => dispatch(DraftBLActions.setPreviewingDraftBL(false))}>
+                      <IconButton component="span">
+                        <KeyboardBackspaceIcon />
+                      </IconButton>
+                    </Tooltip> :
+                    <Button variant="text" size="medium">
+                      <Avatar
+                        src="assets/images/logos/one_ocean_network-logo.png"
+                        className={clsx(classes.logo, classes.fitAvatar)}
+                        alt="one-logo"
+                        onClick={() => showQueueList()}
+                      // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+                      //   component: Link,
+                      //   to: '/'
+                      // })}
+                      />
+                    </Button>
+                }
               </div>
 
               <PermissionProvider
                 action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
-                extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
+                extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage}
+              >
                 <Button
                   variant="text"
                   size="medium"
@@ -391,9 +411,11 @@ function ToolbarLayout1(props) {
                 </Button>
               </PermissionProvider>
 
-              {myBL?.state?.includes('DRF_') &&
-                user?.userType !== 'ONSHORE' &&
-                ['/workspace', '/guest'].some((el) => pathname.includes(el)) && (
+              {
+                myBL?.state?.includes('DRF_')
+                && user?.userType !== 'ONSHORE'
+                && (['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage)
+                && (
                   <Button
                     variant="text"
                     size="medium"
@@ -405,29 +427,32 @@ function ToolbarLayout1(props) {
                     </Badge>
                     <span className={classes.titleButton}>Amendments List</span>
                   </Button>
-                )}
+                )
+              }
 
               <PermissionProvider
                 action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
-                extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
-                {(attachmentLength > 0) &&
-                  <Button
-                    variant="text"
-                    size="medium"
-                    className={clsx('h-64', classes.button)}
-                    onClick={openAttachment}>
-                    <Badge color="primary" badgeContent={attachmentLength} id="no-att">
-                      <img src="assets/images/icons/attachmentIcon.svg" />
-                    </Badge>
-                    <span className={classes.titleButton}>Attachments List</span>
-                  </Button>
+                extraCondition={
+                  attachmentLength > 0
+                  && (['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage)
                 }
-
+              >
+                <Button
+                  variant="text"
+                  size="medium"
+                  className={clsx('h-64', classes.button)}
+                  onClick={openAttachment}>
+                  <Badge color="primary" badgeContent={attachmentLength} id="no-att">
+                    <img src="assets/images/icons/attachmentIcon.svg" />
+                  </Badge>
+                  <span className={classes.titleButton}>Attachments List</span>
+                </Button>
               </PermissionProvider>
             </div>
 
             <div className="flex" style={{ alignItems: 'center' }}>
-              {!pathname.includes('/draft') &&
+              {
+                (['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage) &&
                 <TextField
                   id="view"
                   name="view"
@@ -460,22 +485,24 @@ function ToolbarLayout1(props) {
                       <span className={classes.dratTypeText}>{view.label}</span>
                     </MenuItem>
                   ))}
-                </TextField>}
+                </TextField>
+              }
 
               <PermissionProvider
                 action={PERMISSION.MYBL_GET_QUEUE_LIST}
-                extraCondition={!pathname.includes('/draft')}
+                extraCondition={!pathname.includes('/draft') || !isPreviewingDraftPage}
               >
                 <BtnQueueList />
               </PermissionProvider>
 
               <PermissionProvider
                 action={PERMISSION.VIEW_EDIT_DRAFT_BL}
-                extraCondition={pathname.includes('/draft-bl') || pathname.includes('/workspace')}>
+                extraCondition={pathname.includes('/draft-bl') && isPreviewingDraftPage}
+              >
                 <Button
                   className={clsx(classes.button, classes.buttonEditDraftBL)}
                   style={{ width: 110, fontSize: 12, height: 30 }}
-                  onClick={redirectWorkspace}>
+                  onClick={() => dispatch(DraftBLActions.setPreviewingDraftBL(false))}>
                   <img src="assets/images/icons/amendIconPink.svg" style={{ width: 12, height: 12, position: 'relative', left: 5 }} />
                   <img src="assets/images/icons/penIconPink.svg" style={{ position: 'relative', top: 5, width: 8 }} />
                   <span claseeName={classes.dratTypeText}>Amendment</span>
@@ -534,7 +561,7 @@ function ToolbarLayout1(props) {
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
-                extraCondition={!pathname.includes('/draft-bl')}>
+                extraCondition={pathname.includes('/guest') || !isPreviewingDraftPage}>
                 <Button
                   variant="contained"
                   className={clsx(classes.button, classes.buttonSubmit)}
