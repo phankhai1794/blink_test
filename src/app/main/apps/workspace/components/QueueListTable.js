@@ -28,8 +28,8 @@ const useStyles = makeStyles({
       justifyContent: 'center',
       alignItems: 'center',
       borderRadius: '10px',
-      width: '34px',
-      height: '34px',
+      width: '32px',
+      height: '32px',
       border: '1px solid #E2E6EA',
       backgroundColor: '#FFFFFF',
       color: '#132535',
@@ -46,7 +46,7 @@ const useStyles = makeStyles({
     bottom: '-10px',
   },
   table: {
-    width: 'fit-content',
+    // width: 'fit-content',
     '& span': {
       fontFamily: 'Montserrat',
     },
@@ -172,7 +172,8 @@ const useStyles = makeStyles({
     border: '1px solid #E2E6EA',
     backgroundColor: 'white',
     padding: '0 12px',
-    borderRadius: 4
+    borderRadius: 4,
+    fontSize: 14
   },
   cellBody: {
     padding: '0 10px',
@@ -192,7 +193,7 @@ const StickyTableCell = withStyles((theme) => ({
     position: 'sticky',
     zIndex: 2,
     boxShadow: 'rgba(100, 100, 111, 0.2) 5px 0 5px -1px',
-    width: 220,
+    minWidth: 220,
     padding: 10
   },
   body: {
@@ -201,14 +202,13 @@ const StickyTableCell = withStyles((theme) => ({
     position: 'sticky',
     zIndex: 1,
     boxShadow: 'rgba(100, 100, 111, 0.2) 5px 0 5px -1px',
-    width: 220,
+    minWidth: 220,
     padding: 14
   }
 }))(TableCell);
 
 const AddColumn = (columns, handleShowColumn) => {
   const items = [
-    { label: 'Last Updated', value: 'lastUpdate', show: columns['lastUpdate'] },
     { label: 'ETD', value: 'etd', show: columns['etd'] },
     { label: 'Status', value: 'status', show: columns['status'] },
     { label: 'Unresolved Inquiry', value: 'inquiry', show: columns['inquiry'] },
@@ -389,19 +389,19 @@ const QueueListTable = () => {
                         <span>No.</span>
                       </div>
                     </div>
-                    <div className={clsx(classes.cellBody, classes.cellSticky)}>
-                      <div className={classes.lineColumn}>
+                    <div className={clsx(classes.cellBody, classes.cellSticky)} style={{ width: '100%' }}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)} style={{ width: '100%' }}>
                         <span>Booking Number</span>
                         <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`bkgNo&order=${state.sortBkgNo}`, 'bkgNo')} />
                       </div>
                     </div>
                   </StickyTableCell>
-                  {columns.lastUpdate && <TableCell>
+                  <TableCell>
                     <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                       <span>Last Updated</span>
                       <img src='/assets/images/icons/Icon-sort.svg' onClick={() => handleSort(`latestDate&order=${state.sortLatestDate}`, 'latestDate')} />
                     </div>
-                  </TableCell>}
+                  </TableCell>
                   {columns.etd && <TableCell>
                     <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                       <span>ETD</span>
@@ -477,7 +477,7 @@ const QueueListTable = () => {
                         <a href={`/guest?bl=${row.id}`} target='_blank' className={classes.link} rel="noreferrer"><span>{row.bookingNo}</span></a>
                       </div>
                     </StickyTableCell>
-                    {columns.lastUpdate && <TableCell>{formatDate(row.latestDate, 'MMM DD YYYY HH:mm')}</TableCell>}
+                    <TableCell>{formatDate(row.latestDate, 'MMM DD YYYY HH:mm')}</TableCell>
                     {columns.etd && <TableCell><span>{row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}</span></TableCell>}
                     {columns.eta && <TableCell><span>{row.eta && formatDate(row.eta, 'MMM DD YYYY HH:mm')}</span></TableCell>}
                     {columns.status && <TableCell><span style={{ textTransform: 'capitalize' }}>{row?.status ? row?.status.replace('_', ' ').toLowerCase() : ''}</span></TableCell>}

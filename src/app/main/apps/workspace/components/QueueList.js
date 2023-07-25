@@ -63,12 +63,10 @@ const useStyles = makeStyles((theme) => ({
     padding: '24px',
     '& span': {
       fontFamily: 'Montserrat',
-      fontSize: '13px',
     },
     '& input': {
       fontFamily: 'Montserrat',
       fontSize: '14px',
-      textTransform: 'uppercase'
     },
   },
   searchBox: {
@@ -276,7 +274,6 @@ const SearchLayout = (props) => {
     let query = { ...initialState, blStatus: 'PENDING,IN_QUEUE', sortField: '' };
     dispatch(DashboardActions.setPage(1, 10));
     dispatch(DashboardActions.setColumn({
-      lastUpdate: true,
       etd: true,
       status: true,
       inquiry: true,
@@ -308,7 +305,8 @@ const SearchLayout = (props) => {
               value={state.bookingNo}
               onChange={(e) => handleChange({ bookingNo: e.target.value.replace(/\s+|;+/g, ',') })}
               startAdornment={<InputAdornment className={classes.searchBox} position='start' >{''}</InputAdornment>}
-              labelWidth={110}
+              labelWidth={120}
+              inputProps={{ style: { textTransform: "uppercase" } }}
               onKeyPress={(e) => {
                 if (e.key === 'Enter') handleSearch();
               }}
@@ -327,21 +325,21 @@ const SearchLayout = (props) => {
                 `${formatDate(state.from, 'MMM DD YYYY')} - ${formatDate(state.to, 'MMM DD YYYY')}`
               }
               endAdornment={
-                <Icon>calendar_today</Icon>
+                <Icon fontSize='small'>calendar_today</Icon>
               }
               onClick={() => setPickerOpen(true)}
               inputProps={{
                 readOnly: true
               }}
-              labelWidth={30}
+              labelWidth={35}
             />
             {isPickerOpen && (
               <div ref={pickerRef}>
                 <DateRangePicker
                   ranges={[
                     {
-                      startDate: state.from,
-                      endDate: state.to,
+                      startDate: new Date(state.from),
+                      endDate: new Date(state.to),
                       key: 'selection'
                     }
                   ]}
@@ -354,7 +352,9 @@ const SearchLayout = (props) => {
         {/* BL Status */}
         <Grid item xs={4}>
           <FormControl fullWidth variant='outlined'>
-            <InputLabel htmlFor='selected-status'>BL Status</InputLabel>
+            <InputLabel htmlFor='selected-status'>
+              <span>BL Status</span>
+            </InputLabel>
             <OutlinedInput
               onChange={(e) => handleChange({ blStatus: e.target.value })}
               inputProps={{
@@ -388,7 +388,7 @@ const SearchLayout = (props) => {
                   ))}
                 </Select>
               }
-              labelWidth={60}
+              labelWidth={70}
             />
           </FormControl>
         </Grid>
