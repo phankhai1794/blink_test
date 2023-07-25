@@ -52,4 +52,4 @@ function ProjectDashboardApp(props) {
   );
 }
 
-export default withReducer('projectDashboardApp')(ProjectDashboardApp);
+export default ProjectDashboardApp;
