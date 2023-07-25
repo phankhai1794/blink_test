@@ -212,24 +212,44 @@ const SendInquiryForm = (props) => {
 
   async function fetchData() {
     const status = ['INQ_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REOPEN_Q', 'REOPEN_A'];
-    let toCustomer = [], toOnshore = [];
+    let toCustomer = [], toOnshore = [], toCustomerCc = [], toOnshoreCc = [], toCustomerBcc = [], toOnshoreBcc = []
 
     const res = await getMail(mybl.id);
     if (res.data.length) {
-      // Offshore
+      // Customer
       res.data[0]?.toCustomer?.length &&
         res.data[0].toCustomer.forEach((customer) => {
           toCustomer.push(customer.email);
+        });
+      res.data[0]?.toCustomerCc?.length &&
+        res.data[0].toCustomerCc.forEach((customer) => {
+          toCustomerCc.push(customer.email);
+        });
+      res.data[0]?.toCustomerBcc?.length &&
+        res.data[0].toCustomerBcc.forEach((customer) => {
+          toCustomerBcc.push(customer.email);
         });
       // Onshore
       res.data[0]?.toOnshore?.length &&
         res.data[0].toOnshore.forEach((onshore) => {
           toOnshore.push(onshore.email);
         });
-      dispatch(MailActions.setTags({ ...tags, toCustomer, toOnshore }));
+      res.data[0]?.toOnshoreCc?.length &&
+        res.data[0].toOnshoreCc.forEach((onshore) => {
+          toOnshoreCc.push(onshore.email);
+        });
+      res.data[0]?.toOnshoreBcc?.length &&
+        res.data[0].toOnshoreBcc.forEach((onshore) => {
+          toOnshoreBcc.push(onshore.email);
+        });
+      dispatch(MailActions.setTags({ ...tags, toCustomer, toOnshore, toCustomerCc, toOnshoreCc, toCustomerBcc, toOnshoreBcc }));
     }
     toCustomer = toCustomer.join(',');
     toOnshore = toOnshore.join(',');
+    toCustomerCc = toCustomerCc.join(',');
+    toOnshoreCc = toOnshoreCc.join(',');
+    toCustomerBcc = toCustomerBcc.join(',');
+    toOnshoreBcc = toOnshoreBcc.join(',');
 
     // check inquiries
     let inqOnshore = [], inqCustomer = [];
@@ -276,7 +296,8 @@ const SendInquiryForm = (props) => {
     if (pathName.includes('/guest')) {
       subject = `Fwd: ${bkgNo}: ${shipperName} T/VVD(${vvdCode}) + POD(${pod}) + POL(${pol}) + ETD(${etd})`;
     }
-    setForm({ ...form, subject, content: bodyHtml, toOnshore, toCustomer });
+    setForm({ ...form, subject, content: bodyHtml, toOnshore, toCustomer, toCustomerCc, toOnshoreCc, toCustomerBcc, toOnshoreBcc });
+    dispatch(MailActions.setCc({ isCcCustomer: Boolean(toCustomerCc), isCcOnshore: Boolean(toOnshoreCc), isBccCustomer: Boolean(toCustomerBcc), isBccOnshore: Boolean(toOnshoreBcc) }))
     handleEditorState(content);
   }
 
