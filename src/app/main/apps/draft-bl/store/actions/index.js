@@ -9,8 +9,7 @@ import * as InquiryActions from 'app/main/apps/workspace/store/actions/inquiry';
 export const SET_METADATA = 'SAVE_METADATA';
 export const SET_BL = 'SET_BL';
 export const SET_ORG_CONTENT = 'SET_ORG_CONTENT';
-export const SET_DRAFT_CONTENT = 'SET_DRAFT_CONTENT';
-export const OPEN_POPUP_EDIT = 'OPEN_POPUP_EDIT';
+export const SET_PREVIEWING_DRAFT_BL = 'SET_PREVIEWING_DRAFT_BL';
 export const SET_CURRENT_FIELD = 'SET_CURRENT_FIELD';
 export const SET_CONTENT = 'SET_CONTENT';
 export const SET_SEND_DRAFT_BL = 'SET_SEND_DRAFT_BL';
@@ -46,24 +45,6 @@ export const loadContent = (bl) => async (dispatch) => {
   }
 };
 
-export const loadDraftContent = (bl) => (dispatch) => {
-  getFieldContent(bl)
-    .then((res) => {
-      const data = res.map(({ id, state, content, field, createdAt, creator, mediaFile }) => {
-        return {
-          id,
-          state,
-          field,
-          createdAt,
-          creator,
-          content: { content, mediaFile }
-        }
-      });
-      dispatch(setDraftContent(data));
-    })
-    .catch((err) => console.error(err));
-};
-
 export function setMetadata(state) {
   return {
     type: SET_METADATA,
@@ -85,16 +66,9 @@ export function setOrgContent(state) {
   };
 }
 
-export function setDraftContent(state) {
+export function setPreviewingDraftBL(state) {
   return {
-    type: SET_DRAFT_CONTENT,
-    state
-  };
-}
-
-export function toggleDraftBLEdit(state) {
-  return {
-    type: OPEN_POPUP_EDIT,
+    type: SET_PREVIEWING_DRAFT_BL,
     state
   };
 }

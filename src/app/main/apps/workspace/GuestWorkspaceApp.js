@@ -21,7 +21,7 @@ function GuestWorkspaceApp() {
           }}
           content={
             <PreProcess bl={bl}>
-              <BLWorkspace user="guest" process="pending" />
+              <BLWorkspace user="guest" />
             </PreProcess>
           }
           sidebarInner

@@ -4,9 +4,8 @@ const initialState = {
   metadata: {},
   myBL: {},
   orgContent: {},
-  draftContent: [],
   content: {},
-  openDraftBL: false,
+  isPreviewingDraftPage: true,
   currentField: '',
   currentAmendField: '',
   reload: false,
@@ -30,11 +29,8 @@ const draftBL = function (state = initialState, action) {
   case Actions.SET_CONTENT: {
     return { ...state, content: action.state };
   }
-  case Actions.SET_DRAFT_CONTENT: {
-    return { ...state, draftContent: action.state };
-  }
-  case Actions.OPEN_POPUP_EDIT: {
-    return { ...state, openDraftBL: action.state };
+  case Actions.SET_PREVIEWING_DRAFT_BL: {
+    return { ...state, isPreviewingDraftPage: action.state };
   }
   case Actions.SET_CURRENT_FIELD: {
     return { ...state, currentField: action.state };
