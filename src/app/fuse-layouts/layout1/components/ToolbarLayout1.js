@@ -236,63 +236,65 @@ function ToolbarLayout1(props) {
     dispatch(InquiryActions.checkSend(false));
     let optionInquiries = [...inquiries];
 
-    axios.all(optionInquiries.map(q => {
-      if (q.process === 'pending') return fetchData(loadComment(q.id), q);
-      if (q.process === 'draft') return fetchData(getCommentDraftBl(myBL.id, q.field), q);
-    })) // TODO: refactor
-      .then(res => {
-        if (res) {
-          let attachFileCount = [];
-          let collectAttachment = [];
-          if (res.length) {
-            res.forEach((r, index) => {
-              collectAttachment = [...collectAttachment, ...r];
-            });
-            if (collectAttachment.length) {
-              collectAttachment = collectAttachment.filter(col => col.latestReply);
-              collectAttachment.forEach(col => {
-                if (col.process === 'pending') {
-                  let mediaMap = [];
-                  if (col.type === 'ANS') {
-                    mediaMap = [...mediaMap, ...col.answersMedia];
-                  } else {
-                    mediaMap = [...mediaMap, ...col.mediaFile];
-                  }
-                  if (mediaMap.length) {
-                    mediaMap = mediaMap.map(q => {
-                      return {
-                        ...q,
-                        inquiryId: col.id,
-                        inqType: col.inqType,
-                        field: col.field,
-                        process: col.process
-                      }
-                    })
-                  }
-                  attachFileCount = [...attachFileCount, ...mediaMap];
-                } else if (col.process === 'draft') {
-                  const {mediaFile} = col.content;
-                  if (col.content && mediaFile.length) {
-                    const mediaMap = mediaFile.map(q => {
-                      return {
-                        ...q,
-                        inquiryId: col.id,
-                        inqType: col.inqType,
-                        field: col.field,
-                        process: col.process
-                      }
-                    })
+    if (pathname.includes('/guest') || pathname.includes('/workspace') || !isPreviewingDraftPage) {
+      axios.all(optionInquiries.map(q => {
+        if (q.process === 'pending') return fetchData(loadComment(q.id), q);
+        if (q.process === 'draft') return fetchData(getCommentDraftBl(myBL.id, q.field), q);
+      })) // TODO: refactor
+        .then(res => {
+          if (res) {
+            let attachFileCount = [];
+            let collectAttachment = [];
+            if (res.length) {
+              res.forEach((r, index) => {
+                collectAttachment = [...collectAttachment, ...r];
+              });
+              if (collectAttachment.length) {
+                collectAttachment = collectAttachment.filter(col => col.latestReply);
+                collectAttachment.forEach(col => {
+                  if (col.process === 'pending') {
+                    let mediaMap = [];
+                    if (col.type === 'ANS') {
+                      mediaMap = [...mediaMap, ...col.answersMedia];
+                    } else {
+                      mediaMap = [...mediaMap, ...col.mediaFile];
+                    }
+                    if (mediaMap.length) {
+                      mediaMap = mediaMap.map(q => {
+                        return {
+                          ...q,
+                          inquiryId: col.id,
+                          inqType: col.inqType,
+                          field: col.field,
+                          process: col.process
+                        }
+                      })
+                    }
                     attachFileCount = [...attachFileCount, ...mediaMap];
+                  } else if (col.process === 'draft') {
+                    const {mediaFile} = col.content;
+                    if (col.content && mediaFile.length) {
+                      const mediaMap = mediaFile.map(q => {
+                        return {
+                          ...q,
+                          inquiryId: col.id,
+                          inqType: col.inqType,
+                          field: col.field,
+                          process: col.process
+                        }
+                      })
+                      attachFileCount = [...attachFileCount, ...mediaMap];
+                    }
                   }
-                }
-              })
+                })
+              }
             }
+            setAttachmentLength(attachFileCount.length);
           }
-          setAttachmentLength(attachFileCount.length);
-        }
-      }).catch(err => {
-        console.error(err)
-      });
+        }).catch(err => {
+          console.error(err)
+        });
+    }
   }, [enableSubmit, inquiries]);
 
   const openAllInquiry = () => {
