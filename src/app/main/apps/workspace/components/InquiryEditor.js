@@ -819,12 +819,7 @@ const InquiryEditor = (props) => {
       );
     }
     if (listInqOfField.length) {
-      let checkDuplicate = Boolean(
-        listInqOfField.filter(
-          (inq) =>
-            inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0]
-        ).length
-      );
+      let checkDuplicate = false;
       if (containerCheck.includes(currentEditInq.field)) {
         // checkDuplicate
         const listInqType = listInqOfField.map(l => {
@@ -853,6 +848,13 @@ const InquiryEditor = (props) => {
             })
           });
         }
+      } else {
+        checkDuplicate = Boolean(
+          listInqOfField.filter(
+            (inq) =>
+              inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0]
+          ).length
+        );
       }
       if (checkDuplicate) {
         dispatch(

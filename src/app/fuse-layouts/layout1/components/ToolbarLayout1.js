@@ -243,9 +243,9 @@ function ToolbarLayout1(props) {
       })) // TODO: refactor
         .then(res => {
           if (res) {
+            let attachFileCount = [];
+            let collectAttachment = [];
             if (res.length) {
-              let attachFileCount = [];
-              let collectAttachment = [];
               res.forEach((r, index) => {
                 collectAttachment = [...collectAttachment, ...r];
               });
@@ -288,8 +288,8 @@ function ToolbarLayout1(props) {
                   }
                 })
               }
-              setAttachmentLength(attachFileCount.length);
             }
+            setAttachmentLength(attachFileCount.length);
           }
         }).catch(err => {
           console.error(err)
