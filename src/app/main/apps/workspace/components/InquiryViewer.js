@@ -638,6 +638,7 @@ const InquiryViewer = (props) => {
                   lastest.showIconAttachReplyFile = false;
                   lastest.showIconAttachAnswerFile = false;
                   lastest.showIconEdit = true;
+                  lastest.showIconReply = false;
                   //
                   setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
                 }
