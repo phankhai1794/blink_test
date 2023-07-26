@@ -236,7 +236,7 @@ function ToolbarLayout1(props) {
     dispatch(InquiryActions.checkSend(false));
     let optionInquiries = [...inquiries];
 
-    if (pathname.includes('/guest') || pathname.includes('/workspace')) {
+    if (pathname.includes('/guest') || pathname.includes('/workspace') || !isPreviewingDraftPage) {
       axios.all(optionInquiries.map(q => {
         if (q.process === 'pending') return fetchData(loadComment(q.id), q);
         if (q.process === 'draft') return fetchData(getCommentDraftBl(myBL.id, q.field), q);
