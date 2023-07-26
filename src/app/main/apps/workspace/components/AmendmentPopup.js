@@ -180,7 +180,7 @@ const AmendmentPopup = (props) => {
     Object.keys(data).forEach((key) => {
       if (typeof data[key] === 'string')
         data[key] = data[key].toUpperCase().trim();
-      if (typeof data[key] === 'string' && idUnit.includes(key) && !isNaN(data[key])) {
+      if (typeof data[key] === 'string' && idUnit.includes(key) && !isNaN(data[key]) && data[key !== '']) {
         data[key] = parseFloat(data[key]).toFixed(3);
       }
     });
