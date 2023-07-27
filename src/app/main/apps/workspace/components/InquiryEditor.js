@@ -524,6 +524,7 @@ const InquiryEditor = (props) => {
         return getDataField && getTemplate
       }).sort((a, b) => a.label.localeCompare(b.label));
       const inq = { ...currentEditInq };
+      
       if (!filter.some(f => f.value === inq.inqType)) {
         inq.inqType = '';
         dispatch(InquiryActions.setEditInq(inq));
@@ -819,12 +820,7 @@ const InquiryEditor = (props) => {
       );
     }
     if (listInqOfField.length) {
-      let checkDuplicate = Boolean(
-        listInqOfField.filter(
-          (inq) =>
-            inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0]
-        ).length
-      );
+      let checkDuplicate = false;
       if (containerCheck.includes(currentEditInq.field)) {
         // checkDuplicate
         const listInqType = listInqOfField.map(l => {
@@ -853,6 +849,13 @@ const InquiryEditor = (props) => {
             })
           });
         }
+      } else {
+        checkDuplicate = Boolean(
+          listInqOfField.filter(
+            (inq) =>
+              inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0]
+          ).length
+        );
       }
       if (checkDuplicate) {
         dispatch(
@@ -1252,8 +1255,8 @@ const InquiryEditor = (props) => {
       const myRenamedFile = new File(
         [fileObject],
         newFileName, {
-        type: "image/png"
-      }
+          type: "image/png"
+        }
       );
       if (!allPasteFiles.includes(newFileName)) {
         setFilepaste(myRenamedFile);
@@ -1325,7 +1328,7 @@ const InquiryEditor = (props) => {
                 </FormControl>
               </Grid>
               <Grid item xs={4}>
-                {containerCheck.includes(currentEditInq.field) ? (
+                {Array.isArray(valueType) && containerCheck.includes(currentEditInq.field) ? (
                   <div className={classes.formInqType}>
                     <FormControl error={!valid.inqType}>
                       {valueType.length === 0 ? <InputLabel id="demo-mutiple-checkbox-label">Type of Question</InputLabel> : ``}
@@ -1441,14 +1444,13 @@ const InquiryEditor = (props) => {
             >
               <RadioGroup value={template} onChange={handleChange}>
                 {templateList.map((temp, index) => (
-                  <>
-                    <FormControlLabel
-                      classes={{ root: classes.formRadio, label: classes.radioLabel }}
-                      value={index.toString()}
-                      control={<Radio color={'primary'} classes={{ root: classes.radioRoot }} style={{ position: 'absolute' }} />}
-                      label={temp}
-                    />
-                  </>
+                  <FormControlLabel
+                    key={index}
+                    classes={{ root: classes.formRadio, label: classes.radioLabel }}
+                    value={index.toString()}
+                    control={<Radio color={'primary'} classes={{ root: classes.radioRoot }} style={{ position: 'absolute' }} />}
+                    label={temp}
+                  />
                 ))}
               </RadioGroup>
             </Popover>

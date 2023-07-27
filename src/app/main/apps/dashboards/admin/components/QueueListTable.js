@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
@@ -45,10 +45,11 @@ const useStyles = makeStyles({
     backgroundColor: 'white',
     padding: '0 12px',
     borderRadius: 4,
-    fontFamily: 'Montserrat'
+    fontFamily: 'Montserrat',
+    fontSize: 14
   },
   table: {
-    width: 'fit-content',
+    // width: 'fit-content',
     borderCollapse: 'separate !important',
     '& th, td': {
       fontFamily: 'Montserrat'
@@ -206,8 +207,8 @@ const useStyles = makeStyles({
       justifyContent: 'center',
       alignItems: 'center',
       borderRadius: '10px',
-      width: '34px',
-      height: '34px',
+      width: '32px',
+      height: '32px',
       border: '1px solid #E2E6EA',
       backgroundColor: '#FFFFFF',
       color: '#132535',
@@ -233,7 +234,7 @@ const StickyTableCell = withStyles((theme) => ({
     position: 'sticky',
     zIndex: 2,
     boxShadow: 'rgba(100, 100, 111, 0.2) 5px 0 5px -1px',
-    width: 220,
+    minWidth: 220,
     padding: 10
   },
   body: {
@@ -242,7 +243,7 @@ const StickyTableCell = withStyles((theme) => ({
     position: 'sticky',
     zIndex: 1,
     boxShadow: 'rgba(100, 100, 111, 0.2) 5px 0 5px -1px',
-    width: 220,
+    minWidth: 220,
     padding: 14
   }
 }))(TableCell);
@@ -326,11 +327,9 @@ const Row = (props) => {
             </a>
           </div>
         </StickyTableCell>
-        {columns.lastUpdate && (
-          <TableCell className={classes.cellBody}>
-            {formatDate(row.lastUpdated, 'MMM DD YYYY HH:mm')}
-          </TableCell>
-        )}
+        <TableCell className={classes.cellBody}>
+          {formatDate(row.lastUpdated, 'MMM DD YYYY HH:mm')}
+        </TableCell>
         {columns.etd && (
           <TableCell className={classes.cellBody}>
             {row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}
@@ -546,7 +545,6 @@ const Row = (props) => {
 
 const AddColumn = (columns, handleShowColumn) => {
   const items = [
-    { label: 'Last Updated', value: 'lastUpdate', show: columns['lastUpdate'] },
     { label: 'ETD', value: 'etd', show: columns['etd'] },
     { label: 'Customer Status', value: 'customerS', show: columns['customerS'] },
     { label: 'Onshore Status', value: 'onshoreS', show: columns['onshoreS'] },
@@ -728,8 +726,8 @@ const QueueListTable = () => {
                     </div>
                     <div
                       className={clsx(classes.cellHead, classes.cellSticky)}
-                      style={{ width: 200, padding: 0 }}>
-                      <div className={classes.lineColumn}>
+                      style={{ width: '100%', padding: 0 }}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)} style={{ width: '100%' }}>
                         <span>Booking Number</span>
                         <img
                           src="/assets/images/icons/Icon-sort.svg"
@@ -738,17 +736,15 @@ const QueueListTable = () => {
                       </div>
                     </div>
                   </StickyTableCell>
-                  {columns.lastUpdate && (
-                    <TableCell className={classes.cellHead}>
-                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
-                        <span>Last Updated</span>
-                        <img
-                          src="/assets/images/icons/Icon-sort.svg"
-                          onClick={() => handleSort('lastUpdated')}
-                        />
-                      </div>
-                    </TableCell>
-                  )}
+                  <TableCell className={classes.cellHead}>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
+                      <span>Last Updated</span>
+                      <img
+                        src="/assets/images/icons/Icon-sort.svg"
+                        onClick={() => handleSort('lastUpdated')}
+                      />
+                    </div>
+                  </TableCell>
                   {columns.etd && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
