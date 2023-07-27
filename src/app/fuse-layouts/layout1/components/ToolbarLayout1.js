@@ -10,10 +10,11 @@ import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
-import { AppBar, Toolbar, Avatar, Badge, Button, Hidden, TextField, MenuItem } from '@material-ui/core';
+import { AppBar, Toolbar, Avatar, Badge, Button, Hidden, TextField, MenuItem, Tooltip, Icon, IconButton } from '@material-ui/core';
 import DialogConfirm from 'app/fuse-layouts/shared-components/DialogConfirm';
 import { loadComment } from 'app/services/inquiryService';
 import { getCommentDraftBl } from 'app/services/draftblService';
+import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import axios from 'axios';
 
 import * as InquiryActions from '../../../main/apps/workspace/store/actions/inquiry';
@@ -170,15 +171,30 @@ function ToolbarLayout1(props) {
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
   const drfView = useSelector(({ draftBL }) => draftBL.drfView);
-  const userType = useSelector(({ user }) => user.userType);
+  const isPreviewingDraftPage = useSelector(({ draftBL }) => draftBL.isPreviewingDraftPage);
 
   const [open, setOpen] = useState(false);
   const [attachmentLength, setAttachmentLength] = useState(0);
   const [amendmentsLength, setAmendmentLength] = useState();
   const [inquiryLength, setInquiryLength] = useState();
+  const [showBack, setShowBack] = useState(true);
 
   const enableSubmitInq = inquiries.some((inq) => ['ANS_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
   const msgConfirmDrf = inquiries.some((inq) => !['RESOLVED', 'UPLOADED', 'COMPL'].includes(inq.state)) ? 'Still has pending inquiry/amendment \n' : '';
+
+  useEffect(() => {
+    // check display button back (draft process)
+    if (isPreviewingDraftPage) {
+      const btnBack = new URLSearchParams(search).get('btn-back');
+      if (btnBack) {
+        setShowBack(true);
+        const bl = new URLSearchParams(search).get('bl');
+        const url = new URL(window.location);
+        url.searchParams.set('bl', bl);
+        window.history.pushState({}, '', `${pathname}?bl=${bl}`);
+      } else setShowBack(false);
+    } else setShowBack(false);
+  }, [isPreviewingDraftPage]);
 
   useEffect(() => {
     dispatch(FormActions.setDirtyReload({
@@ -194,155 +210,90 @@ function ToolbarLayout1(props) {
     setAmendmentLength(countAmend.length);
   }, [inquiries]);
 
+  const fetchData = async (url, q) => {
+    try {
+      const response = await url;
+      let reponseMap = [];
+      if (response && response.length) {
+        reponseMap = response.map(r => {
+          return {
+            ...r,
+            inquiryId: q.id,
+            inqType: q.inqType,
+            field: q.field,
+            process: q.process
+          }
+        })
+      }
+      return reponseMap;
+    } catch (error) {
+      console.error(`Error fetching data from ${url}: ${error.message}`);
+      return null;
+    }
+  };
+
   useEffect(() => {
     dispatch(InquiryActions.checkSend(false));
     let optionInquiries = [...inquiries];
-    let getAttachmentFiles = [];
 
-    const inquiriesPendingProcess = optionInquiries.filter((op) => op.process === 'pending');
-    inquiries.forEach((e) => {
-      const mediaFile = e.mediaFile.map((f) => {
-        return {
-          ...f,
-          field: e.field,
-          inquiryId: e.id,
-          inqType: e.inqType
-        };
-      });
-      const mediaAnswer = e.mediaFilesAnswer.map((f) => {
-        return {
-          ...f,
-          field: e.field,
-          inquiryId: e.id,
-          inqType: e.inqType
-        };
-      });
-
-      getAttachmentFiles = [...getAttachmentFiles, ...mediaFile, ...mediaAnswer];
-    });
-
-    const amendment = optionInquiries.filter((op) => op.process === 'draft');
-    if (pathname.includes('/guest') || pathname.includes('/workspace')) {
-      let countLoadComment = 0;
-      let countAmendment = 0;
-      axios
-        .all(inquiriesPendingProcess.map((q) => loadComment(q.id).catch(err => handleError(dispatch, err)))) // TODO: refactor
-        .then((res) => {
+    if (pathname.includes('/guest') || pathname.includes('/workspace') || !isPreviewingDraftPage) {
+      axios.all(optionInquiries.map(q => {
+        if (q.process === 'pending') return fetchData(loadComment(q.id), q);
+        if (q.process === 'draft') return fetchData(getCommentDraftBl(myBL.id, q.field), q);
+      })) // TODO: refactor
+        .then(res => {
           if (res) {
-            let commentList = [];
-            // get attachments file in comment reply/answer
-            res.map((r) => {
-              commentList = [...commentList, ...r];
-              r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-              const curInq = inquiriesPendingProcess[countLoadComment];
-              let commentIdList = [];
-              r.forEach((itemRes) => {
-                if (!commentIdList.includes(itemRes.id)) {
-                  commentIdList.push(itemRes.id);
-                  if (itemRes.mediaFile.length > 0) {
-                    const mediaTemp = [
-                      ...curInq.mediaFile,
-                      ...curInq.mediaFilesAnswer,
-                      ...itemRes.mediaFile
-                    ];
-                    const attachmentTemp = mediaTemp.map((f) => {
-                      return {
-                        ...f,
-                        field: curInq.field,
-                        inquiryId: curInq.id,
-                        inqType: curInq.inqType
-                      };
-                    });
-                    if (attachmentTemp.length > 0) {
-                      attachmentTemp.forEach((att) => {
-                        const tempAttList = getAttachmentFiles.filter(
-                          (attItem) =>
-                            attItem.name === att.name &&
-                            attItem.field === att.field &&
-                            attItem.inqType === att.inqType
-                        );
-                        if (tempAttList.length === 0) getAttachmentFiles.push(att);
-                      });
+            let attachFileCount = [];
+            let collectAttachment = [];
+            if (res.length) {
+              res.forEach((r, index) => {
+                collectAttachment = [...collectAttachment, ...r];
+              });
+              if (collectAttachment.length) {
+                collectAttachment = collectAttachment.filter(col => col.latestReply);
+                collectAttachment.forEach(col => {
+                  if (col.process === 'pending') {
+                    let mediaMap = [];
+                    if (col.type === 'ANS') {
+                      mediaMap = [...mediaMap, ...col.answersMedia];
+                    } else {
+                      mediaMap = [...mediaMap, ...col.mediaFile];
+                    }
+                    if (mediaMap.length) {
+                      mediaMap = mediaMap.map(q => {
+                        return {
+                          ...q,
+                          inquiryId: col.id,
+                          inqType: col.inqType,
+                          field: col.field,
+                          process: col.process
+                        }
+                      })
+                    }
+                    attachFileCount = [...attachFileCount, ...mediaMap];
+                  } else if (col.process === 'draft') {
+                    const {mediaFile} = col.content;
+                    if (col.content && mediaFile.length) {
+                      const mediaMap = mediaFile.map(q => {
+                        return {
+                          ...q,
+                          inquiryId: col.id,
+                          inqType: col.inqType,
+                          field: col.field,
+                          process: col.process
+                        }
+                      })
+                      attachFileCount = [...attachFileCount, ...mediaMap];
                     }
                   }
-                }
-              });
-
-              countLoadComment += 1;
-              if (
-                inquiriesPendingProcess &&
-                amendment &&
-                countLoadComment === inquiriesPendingProcess.length &&
-                countAmendment === amendment.length
-              ) {
-                setAttachmentLength(getAttachmentFiles.length);
+                })
               }
-            });
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-
-      if (amendment.length) {
-        axios
-          .all(amendment.map((q) => getCommentDraftBl(myBL.id, q.field))) // TODO: refactor
-          .then((res) => {
-            if (res) {
-              let commentList = [];
-              // check and add attachment of amendment/answer to Att List
-              res.map((r) => {
-                commentList = [...commentList, ...r];
-                const curInq = amendment[countAmendment];
-                r.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-                let commentDraftIdList = [];
-                r.forEach((itemRes) => {
-                  if (!commentDraftIdList.includes(itemRes.id)) {
-                    commentDraftIdList.push(itemRes.id);
-                    const mediaTemp = [
-                      ...curInq.mediaFile,
-                      ...curInq.mediaFilesAnswer,
-                      ...itemRes.content.mediaFile
-                    ];
-                    const attachmentAmendmentTemp = mediaTemp.map((f) => {
-                      return {
-                        ...f,
-                        field: curInq.field,
-                        inquiryId: curInq.id,
-                        inqType: curInq.inqType
-                      };
-                    });
-                    if (attachmentAmendmentTemp.length > 0) {
-                      attachmentAmendmentTemp.forEach((attAmendment) => {
-                        const fileNameList = getAttachmentFiles.map((item) => {
-                          if (item.inqType === curInq.inqType) return item.name;
-                        });
-                        if (
-                          attAmendment &&
-                          !curInq.inqType &&
-                          !fileNameList.includes(attAmendment.name)
-                        )
-                          getAttachmentFiles.push(attAmendment);
-                      });
-                    }
-                  }
-                });
-                countAmendment += 1;
-                if (
-                  inquiriesPendingProcess &&
-                  amendment &&
-                  countLoadComment === inquiriesPendingProcess.length &&
-                  countAmendment === amendment.length
-                ) {
-                  setAttachmentLength(getAttachmentFiles.length);
-                }
-              });
             }
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      }
+            setAttachmentLength(attachFileCount.length);
+          }
+        }).catch(err => {
+          console.error(err)
+        });
     }
   }, [enableSubmit, inquiries]);
 
@@ -379,20 +330,12 @@ function ToolbarLayout1(props) {
   const showQueueList = () => {
     const country = new URLSearchParams(search).get('cntr');
     const param = country ? `?cntr=${country}` : "";
-    userType === 'ADMIN' ?
+    user?.userType === 'ADMIN' ?
       window.open(`/apps/admin${param}`) :
       dispatch(InquiryActions.openQueueList(true));
   }
 
   const confirmBlDraft = () => setOpen(true);
-
-  const redirectWorkspace = () => {
-    const bl = new URLSearchParams(search).get('bl');
-    if (bl) {
-      dispatch(InquiryActions.setMyBL({})); // reset BL to re-init socket every redirect page
-      history.push(`/guest?bl=${bl}`, { skipVerification: true });
-    }
-  };
 
   const showMessageReply = () => {
     return inquiries.some((inq) => ['INQ_SENT', 'REP_Q_SENT'].includes(inq.state) || inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Admin');
@@ -426,24 +369,36 @@ function ToolbarLayout1(props) {
 
             <div className="flex flex-1" style={{ marginLeft: 35 }}>
               <div className={classes.iconWrapper}>
-                <Button variant="text" size="medium">
-                  <Avatar
-                    src="assets/images/logos/one_ocean_network-logo.png"
-                    className={clsx(classes.logo, classes.fitAvatar)}
-                    alt="one-logo"
-                    onClick={() => showQueueList()}
-                  // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
-                  //   component: Link,
-                  //   to: '/'
-                  // })}
-                  />
-                </Button>
-
+                {
+                  (
+                    showBack
+                    && pathname.includes('/draft-bl')
+                    && !PermissionProvider({ action: PERMISSION.VIEW_ACCESS_EDIT_DRAFT_BL })
+                  ) ?
+                    <Tooltip title="Back" onClick={() => dispatch(DraftBLActions.setPreviewingDraftBL(false))}>
+                      <IconButton component="span">
+                        <KeyboardBackspaceIcon />
+                      </IconButton>
+                    </Tooltip> :
+                    <Button variant="text" size="medium">
+                      <Avatar
+                        src="assets/images/logos/one_ocean_network-logo.png"
+                        className={clsx(classes.logo, classes.fitAvatar)}
+                        alt="one-logo"
+                        onClick={() => showQueueList()}
+                      // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+                      //   component: Link,
+                      //   to: '/'
+                      // })}
+                      />
+                    </Button>
+                }
               </div>
 
               <PermissionProvider
                 action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
-                extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
+                extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage}
+              >
                 <Button
                   variant="text"
                   size="medium"
@@ -456,9 +411,11 @@ function ToolbarLayout1(props) {
                 </Button>
               </PermissionProvider>
 
-              {myBL?.state?.includes('DRF_') &&
-                user?.userType !== 'ONSHORE' &&
-                ['/workspace', '/guest'].some((el) => pathname.includes(el)) && (
+              {
+                myBL?.state?.includes('DRF_')
+                && user?.userType !== 'ONSHORE'
+                && (['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage)
+                && (
                   <Button
                     variant="text"
                     size="medium"
@@ -470,29 +427,32 @@ function ToolbarLayout1(props) {
                     </Badge>
                     <span className={classes.titleButton}>Amendments List</span>
                   </Button>
-                )}
+                )
+              }
 
               <PermissionProvider
                 action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
-                extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el))}>
-                {attachmentLength > 0 &&
-                  <Button
-                    variant="text"
-                    size="medium"
-                    className={clsx('h-64', classes.button)}
-                    onClick={openAttachment}>
-                    <Badge color="primary" badgeContent={attachmentLength} id="no-att">
-                      <img src="assets/images/icons/attachmentIcon.svg" />
-                    </Badge>
-                    <span className={classes.titleButton}>Attachments List</span>
-                  </Button>
+                extraCondition={
+                  attachmentLength > 0
+                  && (['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage)
                 }
-
+              >
+                <Button
+                  variant="text"
+                  size="medium"
+                  className={clsx('h-64', classes.button)}
+                  onClick={openAttachment}>
+                  <Badge color="primary" badgeContent={attachmentLength} id="no-att">
+                    <img src="assets/images/icons/attachmentIcon.svg" />
+                  </Badge>
+                  <span className={classes.titleButton}>Attachments List</span>
+                </Button>
               </PermissionProvider>
             </div>
 
             <div className="flex" style={{ alignItems: 'center' }}>
-              {!pathname.includes('/draft') &&
+              {
+                (['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage) &&
                 <TextField
                   id="view"
                   name="view"
@@ -525,22 +485,24 @@ function ToolbarLayout1(props) {
                       <span className={classes.dratTypeText}>{view.label}</span>
                     </MenuItem>
                   ))}
-                </TextField>}
+                </TextField>
+              }
 
               <PermissionProvider
                 action={PERMISSION.MYBL_GET_QUEUE_LIST}
-                extraCondition={!pathname.includes('/draft')}
+                extraCondition={!pathname.includes('/draft') || !isPreviewingDraftPage}
               >
                 <BtnQueueList />
               </PermissionProvider>
 
               <PermissionProvider
                 action={PERMISSION.VIEW_EDIT_DRAFT_BL}
-                extraCondition={pathname.includes('/draft-bl') || pathname.includes('/workspace')}>
+                extraCondition={pathname.includes('/draft-bl') && isPreviewingDraftPage}
+              >
                 <Button
                   className={clsx(classes.button, classes.buttonEditDraftBL)}
                   style={{ width: 110, fontSize: 12, height: 30 }}
-                  onClick={redirectWorkspace}>
+                  onClick={() => dispatch(DraftBLActions.setPreviewingDraftBL(false))}>
                   <img src="assets/images/icons/amendIconPink.svg" style={{ width: 12, height: 12, position: 'relative', left: 5 }} />
                   <img src="assets/images/icons/penIconPink.svg" style={{ position: 'relative', top: 5, width: 8 }} />
                   <span claseeName={classes.dratTypeText}>Amendment</span>
@@ -599,7 +561,7 @@ function ToolbarLayout1(props) {
 
               <PermissionProvider
                 action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
-                extraCondition={!pathname.includes('/draft-bl')}>
+                extraCondition={pathname.includes('/guest') || !isPreviewingDraftPage}>
                 <Button
                   variant="contained"
                   className={clsx(classes.button, classes.buttonSubmit)}

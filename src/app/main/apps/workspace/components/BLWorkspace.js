@@ -44,7 +44,6 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
-import * as DraftActions from '../store/actions/draft-bl';
 import * as MailActions from '../store/actions/mail';
 
 import Inquiry from './Inquiry';
@@ -191,7 +190,6 @@ const BLWorkspace = (props) => {
 
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
-    dispatch(DraftActions.setProcess(props.process));
     dispatch(Actions.loadMetadata());
 
     return () => dispatch(FormActions.resetLoading());

@@ -10,7 +10,6 @@ const settings = JSON.parse(localStorage.getItem('cdboard') || '{}');
 const initialState = {
   page: { currentPageNumber: 1, pageSize: settings.pageSize || 10 },
   columns: settings.columns || {
-    lastUpdate: true,
     etd: true,
     status: true,
     inquiry: true,
@@ -27,9 +26,9 @@ const initialState = {
     shipperN: false,
   },
   searchQueueQuery: {
-    bookingNo: '',
-    from: formatDate(start, 'YYYY-MM-DD'),
-    to: formatDate(end, 'YYYY-MM-DD'),
+    bookingNo: settings.bookingNo || '',
+    from: settings.from || formatDate(start, 'YYYY-MM-DD'),
+    to: settings.to || formatDate(end, 'YYYY-MM-DD'),
     blStatus: settings.blStatus || 'PENDING,IN_QUEUE',
     sortField: settings.sortField || ''
   },

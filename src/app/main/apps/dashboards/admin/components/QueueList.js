@@ -72,12 +72,10 @@ const useStyles = makeStyles((theme) => ({
     padding: '24px',
     '& span': {
       fontFamily: 'Montserrat',
-      fontSize: '13px'
     },
     '& input': {
       fontFamily: 'Montserrat',
       fontSize: '14px',
-      textTransform: 'uppercase'
     }
   },
   searchBox: {
@@ -150,7 +148,12 @@ const SearchLayout = (props) => {
     to: end,
     blStatus: blStatusOption,
   };
-  const [state, setState] = useState({ ...initialState, blStatus: settings.blStatus || blStatusOption });
+  const [state, setState] = useState({
+    bookingNo: settings.bookingNo || '',
+    from: settings.from || start,
+    to: settings.to || end,
+    blStatus: settings.blStatus || blStatusOption
+  });
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
   const [startingDate, setStartingDate] = useState('');
   const [isPickerOpen, setPickerOpen] = useState(false);
@@ -178,10 +181,7 @@ const SearchLayout = (props) => {
   };
 
   const handleSearch = () => {
-    let blStatus = state.blStatus;
-    if (state.blStatus.indexOf() !== -1) {
-      blStatus = blStatus.splice(blStatus.indexOf(), 1);
-    }
+    setLocalStorageItem('bookingNo', state.bookingNo);
     dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...state }));
   };
 
@@ -190,7 +190,6 @@ const SearchLayout = (props) => {
 
     dispatch(Actions.setPage(1, 10));
     dispatch(Actions.setColumn({
-      lastUpdate: true,
       etd: true,
       shipperN: false,
       customerS: true,
@@ -234,26 +233,25 @@ const SearchLayout = (props) => {
 
   const handleDateChange = (ranges) => {
     const { startDate, endDate } = ranges.selection;
+
     const maxEndDate = addDays(startDate, 30);
     const minStartDate = subDays(endDate, 30);
     if (startDate.getTime() === endDate.getTime()) setStartingDate(endDate);
 
     // If the selected end date is beyond the maximum, adjust it
+    let from = '';
+    let to = '';
     if (startDate < startingDate) {
-      const temp = startDate < minStartDate ? minStartDate : startDate;
-      setLabelDate(getLabelDate(temp, endDate));
-      handleChange({
-        from: temp,
-        to: endDate
-      });
+      from = startDate < minStartDate ? minStartDate : startDate;
+      to = endDate
     } else {
-      const temp = endDate > maxEndDate ? maxEndDate : endDate;
-      setLabelDate(getLabelDate(startDate, temp));
-      handleChange({
-        from: startDate,
-        to: endDate > maxEndDate ? maxEndDate : endDate
-      });
+      from = startDate;
+      to = endDate > maxEndDate ? maxEndDate : endDate;
     }
+    handleChange({ from, to });
+    setLabelDate(getLabelDate(from, to));
+    setLocalStorageItem('from', from);
+    setLocalStorageItem('to', to);
   };
 
   const onPaste = (e) => {
@@ -267,7 +265,7 @@ const SearchLayout = (props) => {
           .filter(str => str) // filter empty string
       )
     ].join(", ");
-    handleChange({ bookingNo: removeDuplicate })
+    handleChange({ bookingNo: removeDuplicate });
   }
 
   return (
@@ -286,6 +284,7 @@ const SearchLayout = (props) => {
                   handleSearch();
                 }
               }}
+              inputProps={{ style: { textTransform: "uppercase" } }}
               onChange={(e) => handleChange({ bookingNo: e.target.value })}
               onPaste={onPaste}
               startAdornment={
@@ -293,7 +292,7 @@ const SearchLayout = (props) => {
                   {''}
                 </InputAdornment>
               }
-              labelWidth={110}
+              labelWidth={120}
             />
           </FormControl>
         </Grid>
@@ -309,21 +308,21 @@ const SearchLayout = (props) => {
                 `${formatDate(state.from, 'MMM DD YYYY')} - ${formatDate(state.to, 'MMM DD YYYY')}`
               }
               endAdornment={
-                <Icon>calendar_today</Icon>
+                <Icon fontSize='small'>calendar_today</Icon>
               }
               onClick={() => setPickerOpen(true)}
               inputProps={{
                 readOnly: true
               }}
-              labelWidth={30}
+              labelWidth={35}
             />
             {isPickerOpen && (
               <div ref={pickerRef}>
                 <DateRangePicker
                   ranges={[
                     {
-                      startDate: state.from,
-                      endDate: state.to,
+                      startDate: new Date(state.from),
+                      endDate: new Date(state.to),
                       key: 'selection'
                     }
                   ]}
@@ -336,7 +335,7 @@ const SearchLayout = (props) => {
         {/* BL Status */}
         <Grid item xs={4}>
           <FormControl fullWidth variant="outlined">
-            <InputLabel htmlFor="selected-status">BLink Status</InputLabel>
+            <InputLabel htmlFor="selected-status"><span>BLink Status</span></InputLabel>
             <OutlinedInput
               onChange={(e) => handleChange({ blStatus: e.target.value })}
               inputProps={{
@@ -376,7 +375,7 @@ const SearchLayout = (props) => {
                   ))}
                 </Select>
               }
-              labelWidth={80}
+              labelWidth={90}
             />
           </FormControl>
         </Grid>

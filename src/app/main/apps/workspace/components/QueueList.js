@@ -63,12 +63,10 @@ const useStyles = makeStyles((theme) => ({
     padding: '24px',
     '& span': {
       fontFamily: 'Montserrat',
-      fontSize: '13px',
     },
     '& input': {
       fontFamily: 'Montserrat',
       fontSize: '14px',
-      textTransform: 'uppercase'
     },
   },
   searchBox: {
@@ -184,7 +182,12 @@ const SearchLayout = (props) => {
     to: end,
     blStatus: ['IN_QUEUE', 'PENDING'],
   };
-  const [state, setState] = useState({ ...initialState, blStatus: settings.blStatus || ['IN_QUEUE', 'PENDING'] })
+  const [state, setState] = useState({
+    bookingNo: settings.bookingNo || '',
+    from: settings.from || start,
+    to: settings.to || end,
+    blStatus: settings.blStatus || ['IN_QUEUE', 'PENDING']
+  });
   const searchQueueQuery = useSelector(({ workspace }) => workspace.inquiryReducer.searchQueueQuery);
   const [startingDate, setStartingDate] = useState('');
   const [isPickerOpen, setPickerOpen] = useState(false);
@@ -209,21 +212,19 @@ const SearchLayout = (props) => {
     if (startDate.getTime() === endDate.getTime()) setStartingDate(endDate);
 
     // If the selected end date is beyond the maximum, adjust it
+    let from = '';
+    let to = '';
     if (startDate < startingDate) {
-      const temp = startDate < minStartDate ? minStartDate : startDate;
-      setLabelDate(getLabelDate(temp, endDate));
-      handleChange({
-        from: temp,
-        to: endDate
-      });
+      from = startDate < minStartDate ? minStartDate : startDate;
+      to = endDate;
     } else {
-      const temp = endDate > maxEndDate ? maxEndDate : endDate;
-      setLabelDate(getLabelDate(startDate, temp));
-      handleChange({
-        from: startDate,
-        to: endDate > maxEndDate ? maxEndDate : endDate
-      });
+      from = startDate;
+      to = endDate > maxEndDate ? maxEndDate : endDate;
     }
+    handleChange({ from, to });
+    setLabelDate(getLabelDate(from, to));
+    setLocalStorageItem('from', from);
+    setLocalStorageItem('to', to);
   };
 
   const handleClickOutside = (event) => {
@@ -257,23 +258,22 @@ const SearchLayout = (props) => {
     }
   };
 
-  const handelSearch = (e) => {
+  const handleSearch = (e) => {
     let blStatus = state.blStatus.join(',');
     let bookingNo = state.bookingNo;
     if (state.blStatus.indexOf() !== -1) {
       blStatus = blStatus.splice(blStatus.indexOf(), 1);
     }
-    if (bookingNo) {
-      bookingNo = bookingNo.toUpperCase();
-    }
+    if (bookingNo) bookingNo = bookingNo.toUpperCase();
+
+    setLocalStorageItem('bookingNo', state.bookingNo);
     dispatch(DashboardActions.searchQueueQuery({ ...searchQueueQuery, ...state, bookingNo }));
   }
 
-  const handelReset = (e) => {
-    let query = { bookingNo: '', from: start, to: end, blStatus: 'PENDING,IN_QUEUE', sortField: '' };
+  const handleReset = (e) => {
+    let query = { ...initialState, blStatus: 'PENDING,IN_QUEUE', sortField: '' };
     dispatch(DashboardActions.setPage(1, 10));
     dispatch(DashboardActions.setColumn({
-      lastUpdate: true,
       etd: true,
       status: true,
       inquiry: true,
@@ -288,7 +288,7 @@ const SearchLayout = (props) => {
     }));
     dispatch(DashboardActions.searchQueueQuery({ ...searchQueueQuery, ...query }));
 
-    setState({ ...query, blStatus: ['PENDING', 'IN_QUEUE'] });
+    setState(initialState);
     localStorage.removeItem("cdboard");
   }
 
@@ -305,11 +305,10 @@ const SearchLayout = (props) => {
               value={state.bookingNo}
               onChange={(e) => handleChange({ bookingNo: e.target.value.replace(/\s+|;+/g, ',') })}
               startAdornment={<InputAdornment className={classes.searchBox} position='start' >{''}</InputAdornment>}
-              labelWidth={110}
+              labelWidth={120}
+              inputProps={{ style: { textTransform: "uppercase" } }}
               onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handelSearch();
-                }
+                if (e.key === 'Enter') handleSearch();
               }}
             />
           </FormControl>
@@ -326,21 +325,21 @@ const SearchLayout = (props) => {
                 `${formatDate(state.from, 'MMM DD YYYY')} - ${formatDate(state.to, 'MMM DD YYYY')}`
               }
               endAdornment={
-                <Icon>calendar_today</Icon>
+                <Icon fontSize='small'>calendar_today</Icon>
               }
               onClick={() => setPickerOpen(true)}
               inputProps={{
                 readOnly: true
               }}
-              labelWidth={30}
+              labelWidth={35}
             />
             {isPickerOpen && (
               <div ref={pickerRef}>
                 <DateRangePicker
                   ranges={[
                     {
-                      startDate: state.from,
-                      endDate: state.to,
+                      startDate: new Date(state.from),
+                      endDate: new Date(state.to),
                       key: 'selection'
                     }
                   ]}
@@ -353,7 +352,9 @@ const SearchLayout = (props) => {
         {/* BL Status */}
         <Grid item xs={4}>
           <FormControl fullWidth variant='outlined'>
-            <InputLabel htmlFor='selected-status'>BL Status</InputLabel>
+            <InputLabel htmlFor='selected-status'>
+              <span>BL Status</span>
+            </InputLabel>
             <OutlinedInput
               onChange={(e) => handleChange({ blStatus: e.target.value })}
               inputProps={{
@@ -387,14 +388,14 @@ const SearchLayout = (props) => {
                   ))}
                 </Select>
               }
-              labelWidth={60}
+              labelWidth={70}
             />
           </FormControl>
         </Grid>
         <Grid item xs={1} style={{ margin: 'auto' }}>
           <Button
             className={clsx(classes.btn, classes.btnSearch)}
-            onClick={handelSearch}>
+            onClick={handleSearch}>
             <SearchIcon />
             <span>Search</span>
           </Button>
@@ -402,7 +403,7 @@ const SearchLayout = (props) => {
             className={classes.btnReset}
             variant='text'
             style={{ backgroundColor: 'transparent' }}
-            onClick={handelReset}>
+            onClick={handleReset}>
             <span className='underline'>
               <span>Reset</span>
             </span>

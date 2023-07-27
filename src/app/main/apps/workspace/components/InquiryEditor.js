@@ -42,7 +42,6 @@ import { MSG_INQUIRY_CONTENT } from '../store/reducers/inquiry';
 import ChoiceAnswerEditor from './ChoiceAnswerEditor';
 import ParagraphAnswerEditor from './ParagraphAnswerEditor';
 import AttachmentAnswer from './AttachmentAnswer';
-import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import AttachFile from './AttachFile';
 
@@ -224,6 +223,7 @@ const InquiryEditor = (props) => {
     ]
   );
   const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs);
+  const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
   const [allPasteFiles, setAllPasteFile] = useState([]);
 
   const user = useSelector(({ user }) => user);
@@ -410,7 +410,7 @@ const InquiryEditor = (props) => {
 
   const initContentType = (contentArr) => {
     const currInq = { ...currentEditInq };
-    const currentTab = currentTabs === 0 ? 'customer' : 'onshore';
+    const currentTab = (openAllInquiry && currentTabs === 1) ? 'onshore' : 'customer';
     if (containerCheck.includes(currInq.field)) {
       const valResult = [...valueType]
       if (valResult.length && !currInq.id) {
@@ -488,7 +488,7 @@ const InquiryEditor = (props) => {
       dispatch(InquiryActions.setEditInq(inq));
     }
 
-    if(inquiries.length > 0) {
+    if (openAllInquiry && inquiries.length > 0) {
       if (inquiries.every((i) => i.receiver.includes('onshore'))) {
         inq.receiver = ['onshore'];
       } else if (inquiries.every((i) => i.receiver.includes('customer'))) {
@@ -497,8 +497,8 @@ const InquiryEditor = (props) => {
         inq.receiver = [currentTabs === 0 ? 'customer' : 'onshore'];
       }
     } else inq.receiver = ['customer']
-    
-  if (!containerCheck.includes(inq.field)) dispatch(InquiryActions.setEditInq(inq));
+
+    if (!containerCheck.includes(inq.field)) dispatch(InquiryActions.setEditInq(inq));
 
     return () => dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false, createInq: false }))
   }, []);
@@ -523,6 +523,14 @@ const InquiryEditor = (props) => {
         }
         return getDataField && getTemplate
       }).sort((a, b) => a.label.localeCompare(b.label));
+      const inq = { ...currentEditInq };
+      
+      if (!filter.some(f => f.value === inq.inqType)) {
+        inq.inqType = '';
+        dispatch(InquiryActions.setEditInq(inq));
+        setValueType([]);
+      }
+      setFieldType(fieldDefault);
       setInqTypeOption(filter);
       if (fieldValue.value === containerCheck[0]) {
         setOpenCM(false);
@@ -550,7 +558,7 @@ const InquiryEditor = (props) => {
       const inqCdCm = [...contentsInqCDCM];
       const contentArr = [];
       const findByIdType = inqCdCm.find(cdcm => inq.inqType === cdcm.type);
-      const currentTab = currentTabs === 0 ? 'customer' : 'onshore';
+      const currentTab = (openAllInquiry && currentTabs === 1) ? 'onshore' : 'customer';
       if (!findByIdType) {
         const filter = metadata.template.find(({ field, type }) => {
           return type === inq.inqType && ['containerDetail', 'containerManifest'].includes(field);
@@ -597,7 +605,7 @@ const InquiryEditor = (props) => {
         setValueType(valResult)
       }
       const contentArr = [];
-      const currentTab = currentTabs === 0 ? 'customer' : 'onshore';
+      const currentTab = (openAllInquiry && currentTabs === 1) ? 'onshore' : 'customer';
       valResult.forEach(v => {
         const findByIdType = inqCdCm.find(inq => v.value === inq.type);
         if (!findByIdType) {
@@ -636,7 +644,7 @@ const InquiryEditor = (props) => {
       inq.inqType = e.value;
       let keyword = fieldValue;
       let filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field;
-      filterField = metadata.field_options.filter(({ value, display, keyword }) => (
+      filterField = e.label === OTHERS ? fieldDefault : metadata.field_options.filter(({ value, display, keyword }) => (
         display && filterField.includes(value)
         && metadata.template.some((temp) => (temp.field === keyword && temp.type === e.value && temp.content[0]))
       ));
@@ -650,7 +658,7 @@ const InquiryEditor = (props) => {
           keyword = filterField[0];
         }
       }
-      if (keyword.keyword === BL_TYPE) {
+      if (keyword?.keyword === BL_TYPE) {
         autoCreateChoiceBLType()
         inq.ansType = metadata.ans_type.choice
         setValueAnsType({
@@ -675,7 +683,7 @@ const InquiryEditor = (props) => {
         setContent(formatTemplate(filterTemp?.content[0] || MSG_INQUIRY_CONTENT));
       }
 
-      setFieldType(filterField);
+      if (!keyword) setFieldType(filterField);
       // case filter CD CM to BL Data Field
       const keyWord = filterField.map(f => f.keyword);
       if (keyWord.includes('containerManifest') || keyWord.includes('containerDetail')) {
@@ -754,7 +762,7 @@ const InquiryEditor = (props) => {
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
     // setContent(filepaste ? inq.content : e.target.value);
-    setContent(filepaste ? e.target.value.replace(/<img.*>\n?/,'') : e.target.value);    
+    setContent(filepaste ? e.target.value.replace(/<img.*>\n?/, '') : e.target.value);
 
     inq.content = e.currentTarget.textContent;
     setFieldEdited(inq.field);
@@ -812,12 +820,7 @@ const InquiryEditor = (props) => {
       );
     }
     if (listInqOfField.length) {
-      let checkDuplicate = Boolean(
-        listInqOfField.filter(
-          (inq) =>
-            inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0]
-        ).length
-      );
+      let checkDuplicate = false;
       if (containerCheck.includes(currentEditInq.field)) {
         // checkDuplicate
         const listInqType = listInqOfField.map(l => {
@@ -846,6 +849,13 @@ const InquiryEditor = (props) => {
             })
           });
         }
+      } else {
+        checkDuplicate = Boolean(
+          listInqOfField.filter(
+            (inq) =>
+              inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0]
+          ).length
+        );
       }
       if (checkDuplicate) {
         dispatch(
@@ -1242,10 +1252,13 @@ const InquiryEditor = (props) => {
     if (e.clipboardData.files.length) {
       let fileObject = e.clipboardData.files[0];
       const newFileName = generateFileName(fileObject.name, currentEditInq.mediaFile.map(fItem => { return fItem.name }));
-      const myRenamedFile = new File([fileObject], newFileName, {
-        type: "image/png"
-      });
-      if(!allPasteFiles.includes(newFileName)) {
+      const myRenamedFile = new File(
+        [fileObject],
+        newFileName, {
+          type: "image/png"
+        }
+      );
+      if (!allPasteFiles.includes(newFileName)) {
         setFilepaste(myRenamedFile);
         setAllPasteFile([...allPasteFiles, newFileName])
       }
@@ -1315,7 +1328,7 @@ const InquiryEditor = (props) => {
                 </FormControl>
               </Grid>
               <Grid item xs={4}>
-                {containerCheck.includes(currentEditInq.field) ? (
+                {Array.isArray(valueType) && containerCheck.includes(currentEditInq.field) ? (
                   <div className={classes.formInqType}>
                     <FormControl error={!valid.inqType}>
                       {valueType.length === 0 ? <InputLabel id="demo-mutiple-checkbox-label">Type of Question</InputLabel> : ``}
@@ -1431,14 +1444,13 @@ const InquiryEditor = (props) => {
             >
               <RadioGroup value={template} onChange={handleChange}>
                 {templateList.map((temp, index) => (
-                  <>
-                    <FormControlLabel
-                      classes={{ root: classes.formRadio, label: classes.radioLabel }}
-                      value={index.toString()}
-                      control={<Radio color={'primary'} classes={{ root: classes.radioRoot }} style={{ position: 'absolute' }} />}
-                      label={temp}
-                    />
-                  </>
+                  <FormControlLabel
+                    key={index}
+                    classes={{ root: classes.formRadio, label: classes.radioLabel }}
+                    value={index.toString()}
+                    control={<Radio color={'primary'} classes={{ root: classes.radioRoot }} style={{ position: 'absolute' }} />}
+                    label={temp}
+                  />
                 ))}
               </RadioGroup>
             </Popover>

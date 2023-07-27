@@ -178,7 +178,7 @@ const AmendmentPopup = (props) => {
 
   const onSave = () => {
     Object.keys(data).forEach((key) => {
-      if (typeof data[key] === 'string' && ![getType(HS_CODE), getType(HTS_CODE), getType(NCM_CODE)].includes(key))
+      if (typeof data[key] === 'string')
         data[key] = data[key].toUpperCase().trim();
       if (typeof data[key] === 'string' && idUnit.includes(key) && !isNaN(data[key])) {
         data[key] = parseFloat(data[key]).toFixed(3);
@@ -190,7 +190,7 @@ const AmendmentPopup = (props) => {
     if (isInqCDCM) setSave();
   };
 
-  const show = (value) => user.role === 'Admin';
+  const show = (value) => (user.role === 'Admin' || user.role === 'Guest');
 
   const [isFormated, setIsFormated] = useState(false);
   const autoCountContainerNo = () => {
@@ -445,7 +445,7 @@ const AmendmentPopup = (props) => {
             fullWidth={true}
             variant="outlined"
             className={clsx(classes.textField, !isEdit && classes.lock)}
-            value={field.value ? containerTypeUnit.find(contType => contType.value === field.value)?.label : ''}
+            value={getType(CONTAINER_TYPE) === field.id ? containerTypeUnit.find(contType => contType.value === field.value)?.label : field.value}
             InputProps={{
               disabled: !isEdit,
               endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
@@ -512,7 +512,7 @@ const AmendmentPopup = (props) => {
             show(value) && (
               <>
                 <p style={{ fontWeight: 600 }}>{title}</p>
-                {CustomTextField({ fullWidth: true, title: title })}
+                {CustomTextField({ fullWidth: true, title: title, ...register(title, { required: false, pattern: regInteger }) })}
               </>
             )
           );

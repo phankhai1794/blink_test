@@ -638,6 +638,7 @@ const InquiryViewer = (props) => {
                   lastest.showIconAttachReplyFile = false;
                   lastest.showIconAttachAnswerFile = false;
                   lastest.showIconEdit = true;
+                  lastest.showIconReply = false;
                   //
                   setTempReply({ ...tempReply, ...reqReply, mediaFiles: filterOffshoreSent.mediaFile });
                 }
@@ -1478,12 +1479,12 @@ const InquiryViewer = (props) => {
             if (!typeChangeCD[keyChange]) {
               typeChangeCD = {
                 [keyChange]: [
-                  {key: getType(cd), val: contentAnsCd[0][getType(cd)].toString()},
+                  { key: getType(cd), val: contentAnsCd[0][getType(cd)].toString() },
                 ]
               }
             } else {
               typeChangeCD[keyChange].push(
-                  {key: getType(cd), val: contentAnsCd[0][getType(cd)].toString()},
+                { key: getType(cd), val: contentAnsCd[0][getType(cd)].toString() },
               )
             }
           }
@@ -1497,12 +1498,12 @@ const InquiryViewer = (props) => {
             if (!typeChangeCM[keyChange]) {
               typeChangeCM = {
                 [keyChange]: [
-                  {key: getType(cm), val: contentAnsCm[0][getType(cm)].toString()},
+                  { key: getType(cm), val: contentAnsCm[0][getType(cm)].toString() },
                 ]
               }
             } else {
               typeChangeCM[keyChange].push(
-                  {key: getType(cm), val: contentAnsCm[0][getType(cm)].toString()},
+                { key: getType(cm), val: contentAnsCm[0][getType(cm)].toString() },
               )
             }
           }
@@ -1517,12 +1518,12 @@ const InquiryViewer = (props) => {
               if (!typeChangeCD[keyChange]) {
                 Object.assign(typeChangeCD, {
                   [keyChange]: [
-                    {key: getType(cd), val: contentAnsCd[index][getType(cd)].toString()},
+                    { key: getType(cd), val: contentAnsCd[index][getType(cd)].toString() },
                   ]
                 });
               } else {
                 typeChangeCD[keyChange].push(
-                    {key: getType(cd), val: contentAnsCd[index][getType(cd)].toString()},
+                  { key: getType(cd), val: contentAnsCd[index][getType(cd)].toString() },
                 )
               }
             }
@@ -1537,12 +1538,12 @@ const InquiryViewer = (props) => {
               if (!typeChangeCM[keyChange]) {
                 Object.assign(typeChangeCM, {
                   [keyChange]: [
-                    {key: getType(cm), val: contentAnsCm[index][getType(cm)].toString()},
+                    { key: getType(cm), val: contentAnsCm[index][getType(cm)].toString() },
                   ]
                 });
               } else {
                 typeChangeCM[keyChange].push(
-                  {key: getType(cm), val: contentAnsCm[index][getType(cm)].toString()},
+                  { key: getType(cm), val: contentAnsCm[index][getType(cm)].toString() },
                 )
               }
             }
@@ -1550,7 +1551,7 @@ const InquiryViewer = (props) => {
         })
       }
     }
-    return {typeChangeCD, typeChangeCM};
+    return { typeChangeCD, typeChangeCM };
   }
 
   const combineCdCmResolveAndAns = () => {
@@ -1618,7 +1619,7 @@ const InquiryViewer = (props) => {
         const getValIndex = typeChanged.typeChangeCM[index];
         if (getValIndex && getValIndex.length) {
           getValIndex.forEach(valIndex => {
-            if (contRes?.[valIndex.key]) {
+            if (contRes?.[valIndex.key] || contRes?.[valIndex.key] === '') {
               contRes[valIndex.key] = valIndex.val
             }
           })
@@ -3030,13 +3031,13 @@ const InquiryViewer = (props) => {
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
-          
-          if(!allPasteFiles.includes(newFileName)) {
+
+          if (!allPasteFiles.includes(newFileName)) {
             setFilepaste(myRenamedFile);
             setAllPasteFile([...allPasteFiles, newFileName])
           }
         } else {
-          if(!allPasteFiles.includes(fileObject.name)) {
+          if (!allPasteFiles.includes(fileObject.name)) {
             setFilepaste(fileObject);
             setAllPasteFile([...allPasteFiles, fileObject.name])
           }
@@ -3048,12 +3049,12 @@ const InquiryViewer = (props) => {
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
-          if(!allPasteFiles.includes(newFileName)) {
+          if (!allPasteFiles.includes(newFileName)) {
             setFilepaste(myRenamedFile);
             setAllPasteFile([...allPasteFiles, newFileName])
           }
         } else {
-          if(!allPasteFiles.includes(fileObject.name)) {
+          if (!allPasteFiles.includes(fileObject.name)) {
             setFilepaste(fileObject);
             setAllPasteFile([...allPasteFiles, fileObject.name])
           }
@@ -3338,7 +3339,7 @@ const InquiryViewer = (props) => {
                     currentQuestion={question}
                   />
               ) :
-                (['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) || (question.process === 'draft' && question.state === 'REOPEN_Q') ?
+                (['RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) || (question.process === 'draft' && question.state === 'REOPEN_Q') || (['AME_DRF', 'AME_SENT'].includes(question.state) && !isReply) ?
                   <Diff
                     inputA={orgContent[question.field] ? renderContent(orgContent[question.field]) : ''}
                     inputB={question.content ? getNewValueDiffViewer(question.content) : ''}

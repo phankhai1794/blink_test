@@ -114,7 +114,7 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
   }, [saveStatus, currentQuestion]);
 
   useEffect(() => {
-    if (eventClickContNo && !eventClickContNo.isHasActionClick) {
+    if (eventClickContNo && !eventClickContNo.isHasActionClick && containerCheck.includes(question.field)) {
       if (question.answerObj && question.answerObj.length) {
         setParagraphText(question.answerObj[0]?.content);
       } else if (!question.answerObj || !question.answerObj.length) {
@@ -122,6 +122,16 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
       }
     }
   }, [question, eventClickContNo]);
+
+  useEffect(() => {
+    if (!containerCheck.includes(question.field)) {
+      if (question.answerObj && question.answerObj.length) {
+        setParagraphText(question.answerObj[0]?.content);
+      } else if (!question.answerObj || !question.answerObj.length) {
+        setParagraphText('');
+      }
+    }
+  }, [question]);
 
   useEffect(() => {
     if (
