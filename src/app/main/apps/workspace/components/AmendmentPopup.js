@@ -178,10 +178,10 @@ const AmendmentPopup = (props) => {
 
   const onSave = () => {
     Object.keys(data).forEach((key) => {
-      if (data[key] && typeof data[key] === 'string') {
+      if (typeof data[key] === 'string')
         data[key] = data[key].toUpperCase().trim();
-        if (idUnit.includes(key))
-          data[key] = parseFloat(data[key]).toFixed(3);
+      if (typeof data[key] === 'string' && idUnit.includes(key) && !isNaN(data[key])) {
+        data[key] = parseFloat(data[key]).toFixed(3);
       }
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
@@ -460,7 +460,7 @@ const AmendmentPopup = (props) => {
     const cdUnit = [
       { field: CONTAINER_PACKAGE, title: 'PACKAGE', unit: packageUnits, required: 'This is required', pattern: regInteger },
       { field: CONTAINER_WEIGHT, title: 'WEIGHT', unit: weightUnits, required: 'This is required', pattern: regNumber },
-      { field: CONTAINER_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits, required: 'This is required', pattern: regNumber }
+      { field: CONTAINER_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits, required: false, pattern: regNumber }
     ];
     return (
       <>
@@ -496,7 +496,7 @@ const AmendmentPopup = (props) => {
     const cmUnit = [
       { field: CM_PACKAGE, title: 'PACKAGE', unit: packageUnits, required: 'This is required', pattern: regInteger },
       { field: CM_WEIGHT, title: 'WEIGHT', unit: weightUnits, required: 'This is required', pattern: regNumber },
-      { field: CM_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits, required: 'This is required', pattern: regNumber }
+      { field: CM_MEASUREMENT, title: 'MEASUREMENT', unit: measurementUnits, required: false, pattern: regNumber }
     ];
     return (
       <>
