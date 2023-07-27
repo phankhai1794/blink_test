@@ -178,10 +178,10 @@ const AmendmentPopup = (props) => {
 
   const onSave = () => {
     Object.keys(data).forEach((key) => {
-      if (typeof data[key] === 'string')
+      if (data[key] && typeof data[key] === 'string') {
         data[key] = data[key].toUpperCase().trim();
-      if (typeof data[key] === 'string' && idUnit.includes(key) && !isNaN(data[key]) && data[key !== '']) {
-        data[key] = parseFloat(data[key]).toFixed(3);
+        if (idUnit.includes(key))
+          data[key] = parseFloat(data[key]).toFixed(3);
       }
     });
     updateData((old) => old.map((row, i) => (index === i ? data : row)));
