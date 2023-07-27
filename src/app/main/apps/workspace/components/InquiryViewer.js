@@ -1676,7 +1676,7 @@ const InquiryViewer = (props) => {
 
   const handleValidateInput = async (type, confirm = null, isWrapText = false, isLostFocus = false) => {
     // Check if no CM/CD
-    if (['string'].includes(typeof textResolve)) {
+    if (['string'].includes(typeof textResolve) && !containerCheck.includes(question.field)) {
       let textInput = tempReply?.answer?.content.trim() || '';
       if (isSeparate && !['REPLY'].includes(type)) {
         textInput = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
@@ -1765,24 +1765,12 @@ const InquiryViewer = (props) => {
       setDisableAcceptResolve(false);
       return;
     }
-    if (isSeparate) {
-      if (textResolveSeparate.name.trim() === '' && textResolveSeparate.address.trim() === '') {
-        contentField = NO_CONTENT_AMENDMENT;
-      } else {
-        contentField = `${textResolveSeparate.name.toUpperCase().trim()}\n${textResolveSeparate.address.toUpperCase().trim()}`;
-      }
-    } else if (typeof textResolve === 'string') {
-      contentField = textResolve ? textResolve.toUpperCase().trim() : NO_CONTENT_AMENDMENT;
-    } else {
-      if (containerCheck.includes(question.field) && question.process === 'pending') {
-        const contentCDCM = {
-          [getField(CONTAINER_DETAIL)]: getDataCD,
-          [getField(CONTAINER_MANIFEST)]: getDataCM
-        };
-        contentField = contentCDCM;
-      } else {
-        contentField = textResolve;
-      }
+    if (containerCheck.includes(question.field) && question.process === 'pending') {
+      const contentCDCM = {
+        [getField(CONTAINER_DETAIL)]: getDataCD,
+        [getField(CONTAINER_MANIFEST)]: getDataCM
+      };
+      contentField = contentCDCM;
       if (Array.isArray(contentField)) {
         const orgContentField = content[question.field];
         const contsNo = [];
@@ -1814,6 +1802,16 @@ const InquiryViewer = (props) => {
 
         validationCDCMContainerNo(contsNo);
       }
+    } else if (isSeparate) {
+      if (textResolveSeparate.name.trim() === '' && textResolveSeparate.address.trim() === '') {
+        contentField = NO_CONTENT_AMENDMENT;
+      } else {
+        contentField = `${textResolveSeparate.name.toUpperCase().trim()}\n${textResolveSeparate.address.toUpperCase().trim()}`;
+      }
+    } else if (typeof textResolve === 'string') {
+      contentField = textResolve ? textResolve.toUpperCase().trim() : NO_CONTENT_AMENDMENT;
+    } else {
+      contentField = textResolve;
     }
 
     const body = {
