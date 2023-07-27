@@ -188,6 +188,11 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiInput-underline:before': {
       borderBottom: '0',
     }
+  },
+  disableSelect: {
+    '& .MuiInputBase-root': {
+      borderColor: 'rgba(0, 0, 0, 0.38)',
+    },
   }
 }));
 
@@ -1334,7 +1339,7 @@ const InquiryEditor = (props) => {
               </Grid>
               <Grid item xs={4}>
                 {Array.isArray(valueType) && containerCheck.includes(currentEditInq.field) ? (
-                  <div className={classes.formInqType}>
+                  <div className={clsx(classes.formInqType, ['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state) ? classes.disableSelect : '')}>
                     <FormControl error={!valid.inqType}>
                       {valueType.length === 0 ? <InputLabel id="demo-mutiple-checkbox-label">Type of Question</InputLabel> : ``}
                       <Select
@@ -1346,6 +1351,7 @@ const InquiryEditor = (props) => {
                         inputProps={{
                           style: { width: '100%' }
                         }}
+                        disabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                         renderValue={(selected) =>
                           <div>
                             {selected.map((value) => value.value !== 'select-all' && (
