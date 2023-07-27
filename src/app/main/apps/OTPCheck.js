@@ -163,59 +163,6 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const OTP = ({ classes, handleChange }) => {
-  const [code, setCode] = useState('');
-
-  return (
-    <>
-      <Box style={{ marginTop: 11, marginBottom: 24 }}>
-        <OtpInput
-          value={code}
-          onChange={(e) => {
-            setCode(e);
-            handleChange(e);
-          }}
-          numInputs={otpLength}
-          isInputNum={true}
-          shouldAutoFocus={true}
-          // hasErrored={otpCode.value.length && !otpCode.isValid}
-          // errorStyle={{ border: '1px solid #DC2626' }}
-          inputStyle={{
-            width: 38,
-            height: 38,
-            fontSize: '2rem',
-            borderRadius: 4,
-            padding: 0,
-            margin: 0,
-            border: '1px solid #8D9AA6'
-          }}
-          separator={<span style={{ width: 40 }}></span>}
-        />
-        {/* {Boolean(otpCode.value.length) && !otpCode.isValid && (
-          <span className={classes.helperTextOTP}>
-            <img
-              style={{ width: 13.67, marginRight: 4.17 }}
-              src="/assets/images/icons/error.svg"
-            />
-            Invalid access code provided
-          </span>
-        )} */}
-      </Box>
-
-      <Button
-        type="submit"
-        variant="contained"
-        color="primary"
-        className={classes.btnSubmit}
-        aria-label="Send"
-        disabled={code.length !== otpLength}
-        value="legacy">
-        Send
-      </Button>
-    </>
-  )
-}
-
 const OtpCheck = ({ children }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -227,7 +174,7 @@ const OtpCheck = ({ children }) => {
 
   const [myBL, setMyBL] = useState({ id: '' });
   const [mail, setMail] = useState({ value: '', isValid: false, isSubmitted: false });
-  const [otpCode, setOtpCode] = useState({ value: '', firstTimeInput: true, resendAfter: 0 });
+  const [otpCode, setOtpCode] = useState({ value: '', isValid: false, firstTimeInput: true, resendAfter: 0 });
   const [step, setStep] = useState(0);
 
   const catchError = (error) => {
@@ -294,7 +241,8 @@ const OtpCheck = ({ children }) => {
     }
   }
 
-  const handleChangeCode = (code) => setOtpCode({ ...otpCode, value: code });
+  const handleChangeCode = (code) =>
+    setOtpCode({ ...otpCode, value: code, isValid: Boolean(/^\d+$/.test(code)) });
 
   const handleSuccess = (res) => {
     const { userType, role, userName, avatar, email, permissions } = res.userData;
@@ -489,15 +437,55 @@ const OtpCheck = ({ children }) => {
                           </a>
                           {'.'}
                         </Typography>
-
-                        <OTP classes={classes} handleChange={handleChangeCode} />
-
+                        <Box style={{ marginTop: 11, marginBottom: 24 }}>
+                          <OtpInput
+                            value={otpCode.value}
+                            onChange={handleChangeCode}
+                            numInputs={otpLength}
+                            isInputNum={true}
+                            shouldAutoFocus={true}
+                            hasErrored={otpCode.value.length && !otpCode.isValid}
+                            errorStyle={{ border: '1px solid #DC2626' }}
+                            inputStyle={{
+                              width: 38,
+                              height: 38,
+                              fontSize: '2rem',
+                              borderRadius: 4,
+                              padding: 0,
+                              margin: 0,
+                              border: '1px solid #8D9AA6'
+                            }}
+                            separator={<span style={{ width: 40 }}></span>}
+                          />
+                          {Boolean(otpCode.value.length) && !otpCode.isValid && (
+                            <span className={classes.helperTextOTP}>
+                              <img
+                                style={{ width: 13.67, marginRight: 4.17 }}
+                                src="/assets/images/icons/error.svg"
+                              />
+                              Invalid access code provided
+                            </span>
+                          )}
+                        </Box>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          color="primary"
+                          className={classes.btnSubmit}
+                          aria-label="Send"
+                          disabled={
+                            otpCode.value.length != otpLength ||
+                            (otpCode.value.length == otpLength && !otpCode.isValid)
+                          }
+                          value="legacy">
+                          Send
+                        </Button>
                         <img
                           className={classes.btnBack}
                           src="/assets/images/icons/left-arrow.svg"
                           onClick={() => {
                             setMail({ ...mail, isSubmitted: false });
-                            setOtpCode({ value: '', firstTimeInput: true });
+                            setOtpCode({ value: '', isValid: false, firstTimeInput: true });
                             setStep(0);
                           }}
                         />

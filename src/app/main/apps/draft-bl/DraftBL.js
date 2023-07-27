@@ -288,7 +288,7 @@ const DraftPage = (props) => {
   const renderAlsoRemark = () => (
     <div style={{ position: 'alsolute', top: `100%` }}>
       <br></br>
-      {getValueField(ALSO_NOTIFY)?.trim() ?
+      {getValueField(ALSO_NOTIFY) &&
         <div>
           <br></br>
           <span className={classes.description_payment_dash} style={{ width: 'max-content', display: 'flow-root' }}>
@@ -299,7 +299,10 @@ const DraftPage = (props) => {
             {getValueField(ALSO_NOTIFY)}
           </span>
           <br />
-        </div> :
+        </div>
+      }
+      {
+        !getValueField(ALSO_NOTIFY) &&
         <div>
           <br></br>
           <span className={classes.description_payment_dash} style={{ width: 'max-content', display: 'flow-root' }}>
@@ -308,7 +311,7 @@ const DraftPage = (props) => {
         </div>
       }
       <span>
-        {getValueField(TOTAL_PREPAID).freightTerm ? `OCEAN FREIGHT ${getValueField(TOTAL_PREPAID).freightTerm}` : ""}
+        OCEAN FREIGHT PREPAID
       </span>
       <br></br>
       <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
@@ -684,12 +687,12 @@ const DraftPage = (props) => {
               </Grid>
             </Grid>
           </Grid>
-
-          {totalPage > 1 &&
-            <Grid container justify="center">
+          {
+            totalPage > 1 && <Grid container justify="center">
               <span className={classes.tittle_break_line}>** TO BE CONTINUED ON ATTACHED LIST **</span>
             </Grid>
           }
+         
 
           <Grid container style={{ display: 'flex', alignItems: 'center', paddingTop: '12px', paddingBottom: '12px' }}>
             <span className={classes.note}>Declared Cargo Value US $</span>
