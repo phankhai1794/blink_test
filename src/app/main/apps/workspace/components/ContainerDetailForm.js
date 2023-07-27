@@ -248,7 +248,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
       if (Object.keys(mapUnit).includes(name)) {
         const id = getType(mapUnit[name]);
         const unit = row[id] || '';
-        return `${value} ${unit}`;
+        return value ? `${value} ${unit}` : value;
       }
       return value;
     }
