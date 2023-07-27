@@ -1,11 +1,10 @@
 import React from 'react';
 import { formatNoneContNo } from '@shared';
-import { VESSEL_VOYAGE, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_WEIGHT, TOTAL_MEASUREMENT, REMARKS, ALSO_NOTIFY } from '@shared/keyword';
+import { VESSEL_VOYAGE, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_WEIGHT, TOTAL_MEASUREMENT, REMARKS, ALSO_NOTIFY, TOTAL_PREPAID } from '@shared/keyword';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Grid } from '@material-ui/core';
 import { packageUnitsJson, containerTypeUnit } from '@shared/units';
-import draftBL from './store/reducers';
 
 const BORDER = '1px solid #2929FF';
 const WIDTH_COL_MARK = 220;
@@ -274,19 +273,21 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
                 -----------------------------------------------------------------------------------------------------------------------------------------
               </span>
               <br />
-              { getValueField(ALSO_NOTIFY) && getValueField(ALSO_NOTIFY).trim() !== '' && <div>
-                <span>ALSO NOTIFY</span>
-                <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950}}>
-                  {getValueField(ALSO_NOTIFY)}
-                </span>
-                <br />
-              </div>
+              {getValueField(ALSO_NOTIFY)?.trim() ?
+                <div>
+                  <span>ALSO NOTIFY</span>
+                  <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
+                    {getValueField(ALSO_NOTIFY)}
+                  </span>
+                  <br />
+                </div> :
+                <></>
               }
               <span>
-                OCEAN FREIGHT PREPAID
+                {getValueField(TOTAL_PREPAID).freightTerm ? `OCEAN FREIGHT ${getValueField(TOTAL_PREPAID).freightTerm}` : ""}
               </span>
               <br></br>
-              <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950}}>
+              <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
                 {getValueField(REMARKS)}
               </span>
             </div>
