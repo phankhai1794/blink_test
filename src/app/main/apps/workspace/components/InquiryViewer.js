@@ -1676,7 +1676,7 @@ const InquiryViewer = (props) => {
 
   const handleValidateInput = async (type, confirm = null, isWrapText = false, isLostFocus = false) => {
     // Check if no CM/CD
-    if (['string'].includes(typeof textResolve)) {
+    if (['string'].includes(typeof textResolve) && !containerCheck.includes(question.field)) {
       let textInput = tempReply?.answer?.content.trim() || '';
       if (isSeparate && !['REPLY'].includes(type)) {
         textInput = `${textResolveSeparate.name}\n${textResolveSeparate.address}`;
@@ -1765,24 +1765,12 @@ const InquiryViewer = (props) => {
       setDisableAcceptResolve(false);
       return;
     }
-    if (isSeparate) {
-      if (textResolveSeparate.name.trim() === '' && textResolveSeparate.address.trim() === '') {
-        contentField = NO_CONTENT_AMENDMENT;
-      } else {
-        contentField = `${textResolveSeparate.name.toUpperCase().trim()}\n${textResolveSeparate.address.toUpperCase().trim()}`;
-      }
-    } else if (typeof textResolve === 'string') {
-      contentField = textResolve ? textResolve.toUpperCase().trim() : NO_CONTENT_AMENDMENT;
-    } else {
-      if (containerCheck.includes(question.field) && question.process === 'pending') {
-        const contentCDCM = {
-          [getField(CONTAINER_DETAIL)]: getDataCD,
-          [getField(CONTAINER_MANIFEST)]: getDataCM
-        };
-        contentField = contentCDCM;
-      } else {
-        contentField = textResolve;
-      }
+    if (containerCheck.includes(question.field) && question.process === 'pending') {
+      const contentCDCM = {
+        [getField(CONTAINER_DETAIL)]: getDataCD,
+        [getField(CONTAINER_MANIFEST)]: getDataCM
+      };
+      contentField = contentCDCM;
       if (Array.isArray(contentField)) {
         const orgContentField = content[question.field];
         const contsNo = [];
@@ -1814,6 +1802,16 @@ const InquiryViewer = (props) => {
 
         validationCDCMContainerNo(contsNo);
       }
+    } else if (isSeparate) {
+      if (textResolveSeparate.name.trim() === '' && textResolveSeparate.address.trim() === '') {
+        contentField = NO_CONTENT_AMENDMENT;
+      } else {
+        contentField = `${textResolveSeparate.name.toUpperCase().trim()}\n${textResolveSeparate.address.toUpperCase().trim()}`;
+      }
+    } else if (typeof textResolve === 'string') {
+      contentField = textResolve ? textResolve.toUpperCase().trim() : NO_CONTENT_AMENDMENT;
+    } else {
+      contentField = textResolve;
     }
 
     const body = {
@@ -1857,6 +1855,17 @@ const InquiryViewer = (props) => {
             autoSendMailResolve(optionsInquires, receiver, process);
           }
 
+          if (res.fieldsChangesState?.length) {
+            res.fieldsChangesState.forEach(item => {
+              if (item.process === 'pending') {
+                let inqIndex = optionsInquires.findIndex(inq => inq.id === item.id);
+                optionsInquires[inqIndex].state = 'UPLOADED';
+              } else {
+                let amendIndex = optionsInquires.findIndex(inq => ((inq.field === item.id) && (inq.process === 'draft')));
+                optionsInquires[amendIndex].state = 'UPLOADED';
+              }
+            });
+          }
           dispatch(InquiryActions.setInquiries(optionsInquires));
           dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
 
@@ -1874,7 +1883,7 @@ const InquiryViewer = (props) => {
           if (!isSeparate || isAlsoNotifies) {
             if (containerCheck.includes(question.field)) {
               setQuestion((q) => ({ ...q, content: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField }));
-              newContent = { ...res.content };
+              newContent = { ...newContent, [containerCheck[0]]: res.content[containerCheck[0]], [containerCheck[1]]: res.content[containerCheck[1]] };
             }
             else newContent = {
               ...newContent,
@@ -1919,47 +1928,6 @@ const InquiryViewer = (props) => {
           }
 
           if (myBL && myBL.bkgNo) {
-            if (res.fieldsChangesState?.length) {
-              res.fieldsChangesState.forEach(item => {
-                if (item.process === 'pending') {
-                  let inqIndex = optionsInquires.findIndex(inq => inq.id === item.id);
-                  optionsInquires[inqIndex].state = 'UPLOADED';
-                } else {
-                  let amendIndex = optionsInquires.findIndex(inq => ((inq.field === item.id) && (inq.process === 'draft')));
-                  optionsInquires[amendIndex].state = 'UPLOADED';
-                }
-              });
-            }
-            dispatch(InquiryActions.setInquiries(optionsInquires));
-            dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
-            props.getUpdatedAt();
-            setIsResolve(false);
-            setIsResolveCDCM(false);
-            setViewDropDown('');
-            if (!isSeparate || isAlsoNotifies) {
-              if (containerCheck.includes(question.field)) {
-                setQuestion((q) => ({ ...q, content: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField }));
-                dispatch(InquiryActions.setContent({ ...res.content }));
-              }
-              else dispatch(InquiryActions.setContent({
-                ...content,
-                [question.field]: isAlsoNotifies ? res.contentWrapText.fieldContentWrap : contentField,
-                [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
-              }));
-            } else {
-              const contentWrapText = res?.contentWrapText || '';
-              const arrFields = [SHIPPER, CONSIGNEE, NOTIFY];
-              const fieldIndex = arrFields.findIndex(key => metadata.field[key] === question.field);
-              // setContent here
-              dispatch(InquiryActions.setContent({
-                ...content,
-                [metadata.field?.[`${arrFields[fieldIndex]}Address`]]: isWrapText ? (contentWrapText.fieldAddressContentWrap || '') : textResolveSeparate.address.trim(),
-                [metadata.field?.[`${arrFields[fieldIndex]}Name`]]: isWrapText ? (contentWrapText.fieldNameContentWrap || '') : textResolveSeparate.name.trim(),
-                [question.field]: isWrapText ? `${contentWrapText.fieldNameContentWrap}\n${contentWrapText.fieldAddressContentWrap}` : contentField,
-                [metadata.field[DESCRIPTION_OF_GOODS]]: res.content[metadata.field[DESCRIPTION_OF_GOODS]]
-              }));
-            }
-            // setSaveComment(!isSaveComment);
             setStateReplyDraft(false);
             setDisableAcceptResolve(false);
             setDisableReopen(false);
