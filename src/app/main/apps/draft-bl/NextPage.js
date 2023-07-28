@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatNoneContNo } from '@shared';
-import { VESSEL_VOYAGE, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_WEIGHT, TOTAL_MEASUREMENT, REMARKS, ALSO_NOTIFY, TOTAL_PREPAID } from '@shared/keyword';
+import { VESSEL_VOYAGE, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_WEIGHT, TOTAL_MEASUREMENT, REMARKS, ALSO_NOTIFY, TOTAL_PREPAID, CD_MOVE_TYPE } from '@shared/keyword';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Grid } from '@material-ui/core';
@@ -242,7 +242,7 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
             <div className={classes.content_M} style={{ paddingTop: 5 }}>
               {containersDetail.map((cd, idx) => (
                 <span key={idx} style={{ whiteSpace: 'pre', lineHeight: '20px' }}>
-                  {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                  {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''} /${cd[getInqType(CD_MOVE_TYPE)] || ''}/  ${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
                   <br />
                 </span>
               ))
