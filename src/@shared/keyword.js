@@ -84,6 +84,8 @@ export const CONTAINER_MEASUREMENT_UNIT = 'Container Measurement Unit';
 
 export const CONTAINER_MANIFEST = 'containerManifest';
 
+export const CD_MOVE_TYPE = 'CD Movement Type';
+
 export const CM_MARK = 'C/M Marks & Numbers';
 
 export const CM_PACKAGE = 'C/M Package (Quantity for customs declaration only)';
