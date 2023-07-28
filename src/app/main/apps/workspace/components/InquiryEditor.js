@@ -726,6 +726,11 @@ const InquiryEditor = (props) => {
       setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
 
+    if (containerCheck.includes(e.value) && !Array.isArray(valueType)) {
+      setValueType([valueType]);
+    } else if (!containerCheck.includes(e.value) && Array.isArray(valueType)) {
+      setValueType(valueType[0]);
+    }
     containerFieldValueCheck(inq)
 
     if (e.keyword === BL_TYPE && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
