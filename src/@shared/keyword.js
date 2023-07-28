@@ -84,6 +84,8 @@ export const CONTAINER_MEASUREMENT_UNIT = 'Container Measurement Unit';
 
 export const CONTAINER_MANIFEST = 'containerManifest';
 
+export const CD_MOVE_TYPE = 'CD Movement Type';
+
 export const CM_MARK = 'C/M Marks & Numbers';
 
 export const CM_PACKAGE = 'C/M Package (Quantity for customs declaration only)';
@@ -205,6 +207,8 @@ export const RATING_DETAIL = 'ratingDetail';
 export const REMARKS = 'remarks';
 
 export const ETD = 'etd';
+
+export const BL_COPY = 'blCopy';
 
 export const CONTAINER_LIST = {
   cd: [CONTAINER_NUMBER, CONTAINER_TYPE, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT],

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import history from '@history';
 import _ from 'lodash';
-import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDER, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, BOOKING_NO, BL_TYPE, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT, RD_TERMS, NO_CONTENT_AMENDMENT, TOTAL_PREPAID, RATING_DETAIL, ALSO_NOTIFY, REMARKS } from '@shared/keyword';
+import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDER, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, BOOKING_NO, BL_TYPE, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT, RD_TERMS, NO_CONTENT_AMENDMENT, TOTAL_PREPAID, RATING_DETAIL, ALSO_NOTIFY, REMARKS, CD_MOVE_TYPE, BL_COPY } from '@shared/keyword';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
@@ -379,6 +379,14 @@ const DraftPage = (props) => {
     }
   }
 
+  const getContentBlCopy = (blType, count) => {
+    let text = `[ ${count} ] ORIGINAL BILLS(S) HAVE BEEN SIGNED.`
+    if (blType !== 'W') {
+      text = `[ ${count} ] ORIGINAL BILLS(S) OF LADING HAVE BEEN SIGNED, WHERE DELIVERED AGAINST ONE, THE OTHERS(S) TO BE VOID.`
+    }
+    return text;
+  }
+
   return (
     <div className={classes.wrapper}>
       <div className={classes.layout}>
@@ -660,7 +668,7 @@ const DraftPage = (props) => {
                     {containersDetail &&
                       containersDetail.map((cd, idx) => (
                         (idx < MAX_ROWS_CD) && <span key={idx} style={{ whiteSpace: 'pre', lineHeight: '20px' }}>
-                          {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                          {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''} /${cd[getInqType(CD_MOVE_TYPE)] || ''}/  ${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
                           <br />
                         </span>
                       ))
@@ -708,7 +716,7 @@ const DraftPage = (props) => {
                     borderBottom: BORDER,
                   }}>
                   <div className={classes.tittle_M}>FREIGHT & CHARGES PAYABLE AT / BY:</div>
-                  <div className={classes.content_L} style={{ minHeight: '35px' }}>
+                  <div className={classes.content_L} style={{ minHeight: '35px', whiteSpace: 'pre-wrap' }}>
                     <span>{getValueField(FREIGHT_CHARGES)}</span>
                   </div>
                 </Grid>
@@ -915,7 +923,7 @@ const DraftPage = (props) => {
 
             <Grid container item xs={2} direction='column'>
               <Grid item style={{ borderBottom: BORDER }}>
-                <div className={classes.tittle_M_gray} style={{ minHeight: '150px' }}>[1] ORIGINAL BILLS(S) HAVE BEEN SIGNED</div>
+                <div className={classes.tittle_M_gray} style={{ minHeight: '150px' }}>{getContentBlCopy(getValueField(BL_TYPE), getValueField(BL_COPY))}</div>
               </Grid>
 
               <Grid item style={{ borderBottom: BORDER }}>

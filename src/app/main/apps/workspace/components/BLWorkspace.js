@@ -661,7 +661,7 @@ const BLWorkspace = (props) => {
               <Grid item xs={6} className={classes.leftPanel}>
                 <Grid item>
                   <Label>FREIGHT & CHARGES PAYABLE AT / BY:</Label>
-                  <BLField id={getField(FREIGHT_CHARGES)}>
+                  <BLField id={getField(FREIGHT_CHARGES)} multiline={true}>
                     {getValueField(FREIGHT_CHARGES)}
                   </BLField>
                 </Grid>
