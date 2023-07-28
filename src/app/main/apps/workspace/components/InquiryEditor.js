@@ -575,6 +575,16 @@ const InquiryEditor = (props) => {
           filter.receiver = `${currentTab}-${inq.inqType}`;
           contentArr.push(filter);
         }
+        else if (valueType[0]?.label === OTHERS) {
+          contentArr.push({
+            showTemplate: false,
+            templateIndex: '0',
+            content: [currentEditInq.content],
+            contentShow: currentEditInq.content,
+            receiver: `${currentTab}-${inq.inqType}`,
+            type: inq.inqType,
+          });
+        }
       } else if (findByIdType) {
         contentArr.push(findByIdType);
       }
