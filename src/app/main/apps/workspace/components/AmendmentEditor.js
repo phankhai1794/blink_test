@@ -273,7 +273,12 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       cd[0][getType(CONTAINER_LIST.cdUnit[index])] = contentField[0][getType(key)];
                     });
                     content[containerCheck[0]] = cd;
-                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+
+                    // check is amendment cd sent ?
+                    const isCdSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0] && inq.state === 'AME_SENT');
+                    if (!isCdSent) {
+                      saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+                    }
                   }
                 }
               }
