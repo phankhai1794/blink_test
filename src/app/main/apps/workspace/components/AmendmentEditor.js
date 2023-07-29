@@ -259,7 +259,12 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       cm[0][getType(CONTAINER_LIST.cmUnit[index])] = contentField[0][getType(key)];
                     });
                     content[containerCheck[1]] = cm;
-                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+
+                    // check is amendment cd sent ?
+                    const isCmSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1] && inq.state === 'AME_SENT');
+                    if (!isCmSent || ![...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1])) {
+                      saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+                    }
                   }
                 }
                 else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
@@ -276,7 +281,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
                     // check is amendment cd sent ?
                     const isCdSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0] && inq.state === 'AME_SENT');
-                    if (!isCdSent) {
+                    if (!isCdSent || ![...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0])) {
                       saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                     }
                   }
