@@ -2209,6 +2209,7 @@ const InquiryViewer = (props) => {
             });
           }
           content[fieldCdCM] = arr;
+          console.log('arr', arr)
           saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
         }
       }
@@ -2542,7 +2543,13 @@ const InquiryViewer = (props) => {
                   ...content,
                   [question.field]: contentCDCM
                 }));
-                autoUpdateCDCM(contentCDCM);
+                // Auto update CD CM reply
+                const fieldCheck = question.field === containerCheck[0] ? containerCheck[1] : containerCheck[0];
+                const isCmSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === fieldCheck && (['AME_DRF', 'REP_DRF', 'REP_AME_DRF'].includes(inq.state) || (['REP_SENT', 'REP_AME_SENT'].includes(inq.state) && inq.creator?.accountRole === 'Admin')
+                ));
+                if (isCmSent) {
+                  autoUpdateCDCM(contentCDCM);
+                }
               }
             }
             dispatch(InquiryActions.setInquiries(optionsInquires));
