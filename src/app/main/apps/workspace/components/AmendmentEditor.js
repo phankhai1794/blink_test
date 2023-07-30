@@ -200,6 +200,12 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     }
   }
 
+  const conditionAutoUpdateCDCM = (fieldIdCheck) => {
+    const optionsInquires = [...inquiries];
+    const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === fieldIdCheck && (inq.state === 'AME_SENT' || (inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Guest')));
+    return !isSent || ![...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1]);
+  }
+
   const handleSave = () => {
     setDisableSave(true);
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
@@ -261,10 +267,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     content[containerCheck[1]] = cm;
 
                     // check is amendment cm sent ?
-                    const isCmSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1] && (inq.state === 'AME_SENT' || (inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Guest')));
-                    if (!isCmSent || ![...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1])) {
-                      saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
-                    }
+                    if (!conditionAutoUpdateCDCM(containerCheck[1])) saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                   }
                 }
                 else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
@@ -280,10 +283,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     content[containerCheck[0]] = cd;
 
                     // check is amendment cd sent ?
-                    const isCdSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0] && (inq.state === 'AME_SENT' || (inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Guest')));
-                    if (!isCdSent || ![...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0])) {
-                      saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
-                    }
+                    if (!conditionAutoUpdateCDCM(containerCheck[0])) saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                   }
                 }
               }
@@ -315,7 +315,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     content[fieldCdCM] = fieldAutoUpdate;
                     contentField.forEach((cd) => {
                       let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
-                        cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+                          cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
                       ))]
                       if (cmOfCd.length === 1) {
                         CONTAINER_LIST.cdNumber.map((key, index) => {
@@ -330,7 +330,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                   if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
                     fieldAutoUpdate.forEach((cd) => {
                       let cmOfCd = [...new Set((contentField || []).filter(cm =>
-                        cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+                          cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
                       ))]
                       if (cmOfCd.length > 0) {
                         CONTAINER_LIST.cmNumber.map((key, index) => {
@@ -343,7 +343,16 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                       }
                     })
                   }
-                  saveEditedField({ field: fieldCdCM, content: { content: fieldAutoUpdate, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
+                  // check is amendment cd cm sent ?
+                  if (!conditionAutoUpdateCDCM(fieldCdCM)) {
+                    saveEditedField({
+                      field: fieldCdCM,
+                      content: {content: fieldAutoUpdate, mediaFile: []},
+                      mybl: myBL.id,
+                      autoUpdate: true,
+                      action: 'editAmendment'
+                    });
+                  }
                 }
                 validationCDCM(contsNo);
               }
