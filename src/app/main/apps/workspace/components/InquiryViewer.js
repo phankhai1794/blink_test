@@ -2209,7 +2209,6 @@ const InquiryViewer = (props) => {
             });
           }
           content[fieldCdCM] = arr;
-          console.log('arr', arr)
           saveEditedField({ field: fieldCdCM, content: { content: arr, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'editAmendment' });
         }
       }

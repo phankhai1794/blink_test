@@ -203,7 +203,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const conditionAutoUpdateCDCM = (fieldIdCheck) => {
     const optionsInquires = [...inquiries];
     const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === fieldIdCheck && (inq.state === 'AME_SENT' || (inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Guest')));
-    return !isSent || ![...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1]);
+    return !isSent || ![...optionsInquires].find(inq => inq.process === 'draft' && inq.field === fieldIdCheck);
   }
 
   const handleSave = () => {
@@ -267,7 +267,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     content[containerCheck[1]] = cm;
 
                     // check is amendment cm sent ?
-                    if (!conditionAutoUpdateCDCM(containerCheck[1])) saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+                    if (conditionAutoUpdateCDCM(containerCheck[1])) saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                   }
                 }
                 else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
@@ -283,7 +283,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     content[containerCheck[0]] = cd;
 
                     // check is amendment cd sent ?
-                    if (!conditionAutoUpdateCDCM(containerCheck[0])) saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+                    if (conditionAutoUpdateCDCM(containerCheck[0])) saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                   }
                 }
               }
@@ -344,7 +344,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     })
                   }
                   // check is amendment cd cm sent ?
-                  if (!conditionAutoUpdateCDCM(fieldCdCM)) {
+                  if (conditionAutoUpdateCDCM(fieldCdCM)) {
                     saveEditedField({
                       field: fieldCdCM,
                       content: {content: fieldAutoUpdate, mediaFile: []},
