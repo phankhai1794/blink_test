@@ -260,8 +260,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     });
                     content[containerCheck[1]] = cm;
 
-                    // check is amendment cd sent ?
-                    const isCmSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1] && inq.state === 'AME_SENT');
+                    // check is amendment cm sent ?
+                    const isCmSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1] && (inq.state === 'AME_SENT' || (inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Guest')));
                     if (!isCmSent || ![...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1])) {
                       saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                     }
@@ -280,7 +280,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                     content[containerCheck[0]] = cd;
 
                     // check is amendment cd sent ?
-                    const isCdSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0] && inq.state === 'AME_SENT');
+                    const isCdSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0] && (inq.state === 'AME_SENT' || (inq.state === 'REP_SENT' && inq.creator?.accountRole === 'Guest')));
                     if (!isCdSent || ![...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0])) {
                       saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
                     }
