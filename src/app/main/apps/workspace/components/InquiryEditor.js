@@ -575,6 +575,16 @@ const InquiryEditor = (props) => {
           filter.receiver = `${currentTab}-${inq.inqType}`;
           contentArr.push(filter);
         }
+        else if (valueType[0]?.label === OTHERS) {
+          contentArr.push({
+            showTemplate: false,
+            templateIndex: '0',
+            content: [currentEditInq.content],
+            contentShow: currentEditInq.content,
+            receiver: `${currentTab}-${inq.inqType}`,
+            type: inq.inqType,
+          });
+        }
       } else if (findByIdType) {
         contentArr.push(findByIdType);
       }
@@ -716,6 +726,11 @@ const InquiryEditor = (props) => {
       setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
 
+    if (containerCheck.includes(e.value) && !Array.isArray(valueType)) {
+      setValueType([valueType]);
+    } else if (!containerCheck.includes(e.value) && Array.isArray(valueType)) {
+      setValueType(valueType[0]);
+    }
     containerFieldValueCheck(inq)
 
     if (e.keyword === BL_TYPE && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
@@ -1052,20 +1067,28 @@ const InquiryEditor = (props) => {
         const editedIndex = inquiriesOp.findIndex((inq) => inq.id === inquiry.id);
         inquiriesOp[editedIndex] = editInquiry;
 
+        const currFieldEdit = containerCheck.includes(fieldValue.value);
         const update = await updateInquiry(inquiry.id, {
           inq: inq(editInquiry),
           inqCdCm: contentsInqCDCM,
+          isEditCdCm: currFieldEdit,
           blId: myBL.id,
           ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
           files: { mediaCreate, mediaDelete }
         }).catch(err => handleError(dispatch, err));
 
         if (!isCdCm) {
-          if (update.data.length && editedIndex !== -1) {
-            inquiriesOp[editedIndex].answerObj = [
-              ...editInquiry.answerObj,
-              ...update.data
-            ].filter((inq) => inq.id);
+          if (editedIndex !== -1) {
+            if (update.data.length) {
+              inquiriesOp[editedIndex].answerObj = [
+                ...editInquiry.answerObj,
+                ...update.data
+              ].filter((inq) => inq.id);
+            }
+            inquiriesOp[editedIndex].inqGroup = [];
+            //
+            const dataDate = await getUpdatedAtAnswer(inquiry.id).catch(err => handleError(dispatch, err));
+            inquiriesOp[editedIndex].createdAt = dataDate.data;
           }
           //
           const dataDate = await getUpdatedAtAnswer(inquiry.id).catch(err => handleError(dispatch, err));
