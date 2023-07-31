@@ -28,3 +28,7 @@ yarn-error.log*
 yarn-build.log*
 
 nginx.conf
+
+# 1. chmod +x pull.sh
+# 2. ./pull.sh
+pull.sh
