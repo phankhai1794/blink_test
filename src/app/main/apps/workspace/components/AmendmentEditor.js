@@ -255,35 +255,37 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
               // CASE 1-1 CD CM
               if (contentField.length === 1 && content[fieldValueSelect.keyword === CONTAINER_DETAIL ? containerCheck[1] : containerCheck[0]].length === 1) {
                 if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
-                  let cm = content[containerCheck[1]]
-                  if (cm) {
-                    cm[0][getType(CONTAINER_NUMBER)] = contentField[0][getType(CONTAINER_NUMBER)];
-                    CONTAINER_LIST.cdNumber.map((key, index) => {
-                      cm[0][getType(CONTAINER_LIST.cmNumber[index])] = contentField[0][getType(key)];
-                    });
-                    CONTAINER_LIST.cdUnit.map((key, index) => {
-                      cm[0][getType(CONTAINER_LIST.cmUnit[index])] = contentField[0][getType(key)];
-                    });
-                    content[containerCheck[1]] = cm;
-
-                    // check is amendment cm sent ?
-                    if (conditionAutoUpdateCDCM(containerCheck[1])) saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+                  // check is amendment cm sent ?
+                  if (conditionAutoUpdateCDCM(containerCheck[1])) {
+                    let cm = content[containerCheck[1]]
+                    if (cm) {
+                      cm[0][getType(CONTAINER_NUMBER)] = contentField[0][getType(CONTAINER_NUMBER)];
+                      CONTAINER_LIST.cdNumber.map((key, index) => {
+                        cm[0][getType(CONTAINER_LIST.cmNumber[index])] = contentField[0][getType(key)];
+                      });
+                      CONTAINER_LIST.cdUnit.map((key, index) => {
+                        cm[0][getType(CONTAINER_LIST.cmUnit[index])] = contentField[0][getType(key)];
+                      });
+                      content[containerCheck[1]] = cm;
+                      saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+                    }
                   }
                 }
                 else if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
-                  let cd = content[containerCheck[0]]
-                  if (cd) {
-                    cd[0][getType(CONTAINER_NUMBER)] = contentField[0][getType(CONTAINER_NUMBER)];
-                    CONTAINER_LIST.cmNumber.map((key, index) => {
-                      cd[0][getType(CONTAINER_LIST.cdNumber[index])] = contentField[0][getType(key)];
-                    });
-                    CONTAINER_LIST.cmUnit.map((key, index) => {
-                      cd[0][getType(CONTAINER_LIST.cdUnit[index])] = contentField[0][getType(key)];
-                    });
-                    content[containerCheck[0]] = cd;
+                  if (conditionAutoUpdateCDCM(containerCheck[0])) {
+                    let cd = content[containerCheck[0]]
+                    if (cd) {
+                      cd[0][getType(CONTAINER_NUMBER)] = contentField[0][getType(CONTAINER_NUMBER)];
+                      CONTAINER_LIST.cmNumber.map((key, index) => {
+                        cd[0][getType(CONTAINER_LIST.cdNumber[index])] = contentField[0][getType(key)];
+                      });
+                      CONTAINER_LIST.cmUnit.map((key, index) => {
+                        cd[0][getType(CONTAINER_LIST.cdUnit[index])] = contentField[0][getType(key)];
+                      });
+                      content[containerCheck[0]] = cd;
 
-                    // check is amendment cd sent ?
-                    if (conditionAutoUpdateCDCM(containerCheck[0])) saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+                      saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'createAmendment' });
+                    }
                   }
                 }
               }
@@ -302,49 +304,48 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                 })
 
                 const fieldCdCM = fieldValueSelect.keyword === CONTAINER_DETAIL ? containerCheck[1] : containerCheck[0];
-                const fieldAutoUpdate = [...content[fieldCdCM]];
-                if (fieldAutoUpdate) {
-                  if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
-                    if (fieldAutoUpdate.length) {
-                      fieldAutoUpdate.map((item) => {
-                        if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
-                          item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
+                if (conditionAutoUpdateCDCM(fieldCdCM)) {
+                  const fieldAutoUpdate = [...content[fieldCdCM]];
+                  if (fieldAutoUpdate) {
+                    if (fieldValueSelect.keyword === CONTAINER_DETAIL) {
+                      if (fieldAutoUpdate.length) {
+                        fieldAutoUpdate.map((item) => {
+                          if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
+                            item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
+                          }
+                        })
+                      }
+                      content[fieldCdCM] = fieldAutoUpdate;
+                      contentField.forEach((cd) => {
+                        let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
+                            cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+                        ))]
+                        if (cmOfCd.length === 1) {
+                          CONTAINER_LIST.cdNumber.map((key, index) => {
+                            cmOfCd[0][getType(CONTAINER_LIST.cmNumber[index])] = cd[getType(key)];
+                          });
+                          CONTAINER_LIST.cdUnit.map((key, index) => {
+                            cmOfCd[0][getType(CONTAINER_LIST.cmUnit[index])] = cd[getType(key)];
+                          });
                         }
                       })
                     }
-                    content[fieldCdCM] = fieldAutoUpdate;
-                    contentField.forEach((cd) => {
-                      let cmOfCd = [...new Set((fieldAutoUpdate || []).filter(cm =>
-                          cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
-                      ))]
-                      if (cmOfCd.length === 1) {
-                        CONTAINER_LIST.cdNumber.map((key, index) => {
-                          cmOfCd[0][getType(CONTAINER_LIST.cmNumber[index])] = cd[getType(key)];
-                        });
-                        CONTAINER_LIST.cdUnit.map((key, index) => {
-                          cmOfCd[0][getType(CONTAINER_LIST.cmUnit[index])] = cd[getType(key)];
-                        });
-                      }
-                    })
-                  }
-                  if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
-                    fieldAutoUpdate.forEach((cd) => {
-                      let cmOfCd = [...new Set((contentField || []).filter(cm =>
-                          cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
-                      ))]
-                      if (cmOfCd.length > 0) {
-                        CONTAINER_LIST.cmNumber.map((key, index) => {
-                          let total = 0;
-                          cmOfCd.map((cm) => {
-                            total += parseNumberValue(cm[getType(key)]);
+                    if (fieldValueSelect.keyword === CONTAINER_MANIFEST) {
+                      fieldAutoUpdate.forEach((cd) => {
+                        let cmOfCd = [...new Set((contentField || []).filter(cm =>
+                            cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+                        ))]
+                        if (cmOfCd.length > 0) {
+                          CONTAINER_LIST.cmNumber.map((key, index) => {
+                            let total = 0;
+                            cmOfCd.map((cm) => {
+                              total += parseNumberValue(cm[getType(key)]);
+                            });
+                            cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                           });
-                          cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
-                        });
-                      }
-                    })
-                  }
-                  // check is amendment cd cm sent ?
-                  if (conditionAutoUpdateCDCM(fieldCdCM)) {
+                        }
+                      })
+                    }
                     saveEditedField({
                       field: fieldCdCM,
                       content: {content: fieldAutoUpdate, mediaFile: []},
