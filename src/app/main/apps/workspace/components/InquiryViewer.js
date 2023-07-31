@@ -1168,7 +1168,10 @@ const InquiryViewer = (props) => {
                       CONTAINER_LIST.cdUnit.map((key, index) => {
                         cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                       });
-                      saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                      const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0] && ['AME_SENT', 'REP_SENT', 'REP_AME_SENT', 'RESOLVED', 'UPLOADED'].includes(inq.state)) && user.role === 'guest';
+                      if (!isSent) {
+                        saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                      }
                     }
                   } else if (question.field === idCD) {
                     // response drfAnswersTrans cm content
@@ -1184,7 +1187,10 @@ const InquiryViewer = (props) => {
                       CONTAINER_LIST.cmUnit.map((key, index) => {
                         cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                       });
-                      saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                      const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1] && ['AME_SENT', 'REP_SENT', 'REP_AME_SENT', 'RESOLVED', 'UPLOADED'].includes(inq.state)) && user.role === 'guest';
+                      if (!isSent) {
+                        saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                      }
                     }
                   }
                 }
@@ -2542,7 +2548,13 @@ const InquiryViewer = (props) => {
                   ...content,
                   [question.field]: contentCDCM
                 }));
-                autoUpdateCDCM(contentCDCM);
+                // Auto update CD CM reply
+                const fieldCheck = question.field === containerCheck[0] ? containerCheck[1] : containerCheck[0];
+                const isCmSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === fieldCheck && (['AME_DRF', 'REP_DRF', 'REP_AME_DRF'].includes(inq.state) || (['REP_SENT', 'REP_AME_SENT'].includes(inq.state) && inq.creator?.accountRole === 'Admin')
+                ));
+                if (isCmSent) {
+                  autoUpdateCDCM(contentCDCM);
+                }
               }
             }
             dispatch(InquiryActions.setInquiries(optionsInquires));
