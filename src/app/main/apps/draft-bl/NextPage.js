@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatNoneContNo } from '@shared';
-import { VESSEL_VOYAGE, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_WEIGHT, TOTAL_MEASUREMENT, REMARKS, ALSO_NOTIFY, TOTAL_PREPAID, CD_MOVE_TYPE } from '@shared/keyword';
+import { VESSEL_VOYAGE, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_WEIGHT, TOTAL_MEASUREMENT, REMARKS, ALSO_NOTIFY, TOTAL_PREPAID, CD_MOVE_TYPE, FREIGHT_TERM } from '@shared/keyword';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Grid } from '@material-ui/core';
@@ -284,7 +284,7 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
                 <></>
               }
               <span>
-                {getValueField(TOTAL_PREPAID).freightTerm ? `OCEAN FREIGHT ${getValueField(TOTAL_PREPAID).freightTerm}` : ""}
+                {getValueField(FREIGHT_TERM) ? `OCEAN FREIGHT ${getValueField(FREIGHT_TERM)}` : ""}
               </span>
               <br></br>
               <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
