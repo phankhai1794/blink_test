@@ -92,6 +92,11 @@ const PreProcess = ({ bl, children }) => {
         }
       );
 
+      socket.on('connect_error', (err) => {
+        // reload if server has disconnected
+        window.location.reload();
+      });
+
       // save socketId into window console after connecting
       socket.on('user_socket_id', (socketId) => {
         window.socketId = socketId;
