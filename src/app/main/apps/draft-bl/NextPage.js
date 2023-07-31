@@ -284,7 +284,7 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
                 <></>
               }
               <span>
-                {getValueField(TOTAL_PREPAID).freightTerm ? `OCEAN FREIGHT ${getValueField(TOTAL_PREPAID).freightTerm}` : ""}
+                {getValueField(FREIGHT_TERM) ? `OCEAN FREIGHT ${getValueField(FREIGHT_TERM)}` : ""}
               </span>
               <br></br>
               <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
