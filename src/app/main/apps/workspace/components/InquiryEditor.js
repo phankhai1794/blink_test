@@ -598,6 +598,39 @@ const InquiryEditor = (props) => {
     }
   }
 
+  const mappingValType = (valResult) => {
+    const inqCdCm = [...contentsInqCDCM];
+    const currentTab = (openAllInquiry && currentTabs === 1) ? 'onshore' : 'customer';
+    const contentArr = [];
+    valResult.forEach(v => {
+      const findByIdType = inqCdCm.find(inq => v.value === inq.type);
+      if (!findByIdType) {
+        const filter = metadata.template.find(({ field, type }) => {
+          return type === v.value && ['containerDetail', 'containerManifest'].includes(field);
+        });
+        if (filter) {
+          filter.showTemplate = false;
+          filter.templateIndex = '0';
+          filter.contentShow = filter.content[0];
+          filter.receiver = `${currentTab}-${v.value}`;
+          contentArr.push(filter);
+        } else if (v.label === OTHERS) {
+          contentArr.push({
+            showTemplate: false,
+            templateIndex: '0',
+            content: [currentEditInq.content],
+            contentShow: currentEditInq.content,
+            receiver: `${currentTab}-${v.value}`,
+            type: v.value,
+          });
+        }
+      } else if (findByIdType) {
+        contentArr.push(findByIdType);
+      }
+    });
+    return contentArr;
+  }
+
   const handleTypeChange = (e) => {
     const inq = { ...currentEditInq };
     if (containerCheck.includes(inq.field)) {
@@ -726,13 +759,17 @@ const InquiryEditor = (props) => {
       setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
 
+    containerFieldValueCheck(inq)
+
     if (containerCheck.includes(e.value) && !Array.isArray(valueType)) {
       setValueType([valueType]);
+      if (valueType.label === OTHERS) {
+        const valTypes = mappingValType([valueType]);
+        setContentsInqCDCM(valTypes)
+      }
     } else if (!containerCheck.includes(e.value) && Array.isArray(valueType)) {
       setValueType(valueType[0]);
     }
-    containerFieldValueCheck(inq)
-
     if (e.keyword === BL_TYPE && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
 
     setTemplateList(filter?.content || []);
