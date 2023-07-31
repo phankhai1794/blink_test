@@ -181,7 +181,7 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
           VESSEL VOYAGE: {getValueField(VESSEL_VOYAGE)}
         </Grid>
         <Grid item xs={5}>
-          B/L NO.: {myBL.bkgNo && `ONYE${myBL.bkgNo}`}
+          B/L NO.: {myBL.bkgNo && `ONEY${myBL.bkgNo}`}
         </Grid>
       </Grid>
 
