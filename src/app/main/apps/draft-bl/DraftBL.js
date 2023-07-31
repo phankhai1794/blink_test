@@ -442,7 +442,7 @@ const DraftPage = (props) => {
               <Grid item xs={6}>
                 <div className={classes.tittle_M}>B/L NO.</div>
                 <div className={clsx(classes.content_L, classes.blNo)}>
-                  {myBL.bkgNo && `ONYE${myBL.bkgNo}`}
+                  {myBL.bkgNo && `ONEY${myBL.bkgNo}`}
                 </div>
               </Grid>
             </Grid>
