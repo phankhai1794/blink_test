@@ -188,6 +188,11 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiInput-underline:before': {
       borderBottom: '0',
     }
+  },
+  disableSelect: {
+    '& .MuiInputBase-root': {
+      borderColor: 'rgba(0, 0, 0, 0.38)',
+    },
   }
 }));
 
@@ -570,6 +575,16 @@ const InquiryEditor = (props) => {
           filter.receiver = `${currentTab}-${inq.inqType}`;
           contentArr.push(filter);
         }
+        else if (valueType[0]?.label === OTHERS) {
+          contentArr.push({
+            showTemplate: false,
+            templateIndex: '0',
+            content: [currentEditInq.content],
+            contentShow: currentEditInq.content,
+            receiver: `${currentTab}-${inq.inqType}`,
+            type: inq.inqType,
+          });
+        }
       } else if (findByIdType) {
         contentArr.push(findByIdType);
       }
@@ -711,6 +726,11 @@ const InquiryEditor = (props) => {
       setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
 
+    if (containerCheck.includes(e.value) && !Array.isArray(valueType)) {
+      setValueType([valueType]);
+    } else if (!containerCheck.includes(e.value) && Array.isArray(valueType)) {
+      setValueType(valueType[0]);
+    }
     containerFieldValueCheck(inq)
 
     if (e.keyword === BL_TYPE && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
@@ -1047,20 +1067,28 @@ const InquiryEditor = (props) => {
         const editedIndex = inquiriesOp.findIndex((inq) => inq.id === inquiry.id);
         inquiriesOp[editedIndex] = editInquiry;
 
+        const currFieldEdit = containerCheck.includes(fieldValue.value);
         const update = await updateInquiry(inquiry.id, {
           inq: inq(editInquiry),
           inqCdCm: contentsInqCDCM,
+          isEditCdCm: currFieldEdit,
           blId: myBL.id,
           ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
           files: { mediaCreate, mediaDelete }
         }).catch(err => handleError(dispatch, err));
 
         if (!isCdCm) {
-          if (update.data.length && editedIndex !== -1) {
-            inquiriesOp[editedIndex].answerObj = [
-              ...editInquiry.answerObj,
-              ...update.data
-            ].filter((inq) => inq.id);
+          if (editedIndex !== -1) {
+            if (update.data.length) {
+              inquiriesOp[editedIndex].answerObj = [
+                ...editInquiry.answerObj,
+                ...update.data
+              ].filter((inq) => inq.id);
+            }
+            inquiriesOp[editedIndex].inqGroup = [];
+            //
+            const dataDate = await getUpdatedAtAnswer(inquiry.id).catch(err => handleError(dispatch, err));
+            inquiriesOp[editedIndex].createdAt = dataDate.data;
           }
           //
           const dataDate = await getUpdatedAtAnswer(inquiry.id).catch(err => handleError(dispatch, err));
@@ -1329,7 +1357,7 @@ const InquiryEditor = (props) => {
               </Grid>
               <Grid item xs={4}>
                 {Array.isArray(valueType) && containerCheck.includes(currentEditInq.field) ? (
-                  <div className={classes.formInqType}>
+                  <div className={clsx(classes.formInqType, ['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state) ? classes.disableSelect : '')}>
                     <FormControl error={!valid.inqType}>
                       {valueType.length === 0 ? <InputLabel id="demo-mutiple-checkbox-label">Type of Question</InputLabel> : ``}
                       <Select
@@ -1341,6 +1369,7 @@ const InquiryEditor = (props) => {
                         inputProps={{
                           style: { width: '100%' }
                         }}
+                        disabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                         renderValue={(selected) =>
                           <div>
                             {selected.map((value) => value.value !== 'select-all' && (

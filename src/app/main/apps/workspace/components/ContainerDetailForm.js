@@ -233,7 +233,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
     if (row) {
       let value = isArray(row[getType(name)]);
       if (name === CONTAINER_TYPE) {
-        value = containerTypeUnit.find(contType => contType.value === value).label;
+        const contTypeVal = containerTypeUnit.find(contType => contType.value === value);
+        value = contTypeVal ? contTypeVal.label : '';
       }
       if (value) {
         let minFrac = -1;

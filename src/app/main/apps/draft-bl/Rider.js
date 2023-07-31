@@ -122,18 +122,19 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage, isOn
 
     arr = arr.filter(item => item.length > 0);
     setCmSplitted(arr);
-    setTotalPage(arr.length + 1);
+
+    setTotalPage(isOnlyRiderInfo ? 2 : (arr.length + 1));
   }, [cdSplitted, drfView]);
   return (
     isOnlyRiderInfo ? (
       <NextPage
         key={2}
-        containersDetail={ []}
+        containersDetail={[]}
         containersManifest={[]}
         currentPage={2} // currentPage start from 2
         totalPage={2} // + first page
       />
-    ) : 
+    ) :
       <>
         {cmSplitted.map((cmList, idx) => (
           <NextPage
