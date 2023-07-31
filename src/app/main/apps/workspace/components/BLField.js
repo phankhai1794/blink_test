@@ -163,7 +163,7 @@ const useStyles = makeStyles((theme) => ({
   paper: {
     maxHeight: 400,
     maxWidth: 400,
-    overflow: "auto",
+    overflow: 'auto',
     padding: 15,
     color: '#515E6A',
     whiteSpace: 'pre-line'
@@ -319,9 +319,7 @@ const BLField = ({
       );
 
       if (lock) {
-        return (
-          <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />
-        );
+        return <LockOutlinedIcon className={clsx(classes.sizeIcon, classes.colorLockIcon)} />;
       }
       return (
         <>
@@ -396,10 +394,7 @@ const BLField = ({
         disablePortal={false}
         preventOverflow={'scrollParent'}>
         {({ TransitionProps, placement, arrow }) => (
-          <div
-            onMouseEnter={handlePopoverMouseEnter}
-            onMouseLeave={handlePopoverMouseLeave}
-          >
+          <div onMouseEnter={handlePopoverMouseEnter} onMouseLeave={handlePopoverMouseLeave}>
             {arrow}
             <Paper className={classes.paper}>{popover.text}</Paper>
           </div>
@@ -430,48 +425,58 @@ const BLField = ({
                 classes
               ).className
             )}
+            inputProps={{
+              style: { textTransform: 'uppercase' }
+            }}
             InputProps={{
               readOnly: readOnly || true,
-              endAdornment: ((!rows || rows < 6 || rows === 8) ? (
-                <InputAdornment
-                  position="end"
-                  className={clsx(
-                    classes.adornment,
-                    multiline ? (rows === 8 ? classes.adornmentMultilineDoG : classes.adornmentMultiline) : '',
-                    rows ? classes[`adornmentRow_${rows}`] : ''
-                  )}>
-                  {isContinue && [3, 4, 5].includes(lines.length) &&
-                    <div style={{
-                      fontSize: '15px',
-                      color: darkGray,
-                      lineHeight: '22px',
-                      fontWeight: '500',
-                      position: 'absolute',
-                      right: '83px',
-                      bottom: lines.length === 5 ? '8px' : (lines.length === 4 ? '30px' : '53px')
-                    }}>
-                      {isContinue}
-                    </div>
-                  }
-                  {anchorElCopy && anchorElCopy.id === id && children?.trim() && (
-                    <Icon
-                      style={{ cursor: 'pointer', fontSize: 18 }}
-                      onClick={(e) => onCopyClick(e, children?.trim())}
-                    >
-                      file_copy
-                    </Icon>
-                  )}
-                  {checkDisplayIcon()}
-                  {anchorEl && anchorEl.id === id && allowAddInquiry && (
-                    <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
-                  )}
-                </InputAdornment>
-              ) : <></>),
+              endAdornment:
+                !rows || rows < 6 || rows === 8 ? (
+                  <InputAdornment
+                    position="end"
+                    className={clsx(
+                      classes.adornment,
+                      multiline
+                        ? rows === 8
+                          ? classes.adornmentMultilineDoG
+                          : classes.adornmentMultiline
+                        : '',
+                      rows ? classes[`adornmentRow_${rows}`] : ''
+                    )}>
+                    {isContinue && [3, 4, 5].includes(lines.length) && (
+                      <div
+                        style={{
+                          fontSize: '15px',
+                          color: darkGray,
+                          lineHeight: '22px',
+                          fontWeight: '500',
+                          position: 'absolute',
+                          right: '83px',
+                          bottom: lines.length === 5 ? '8px' : lines.length === 4 ? '30px' : '53px'
+                        }}>
+                        {isContinue}
+                      </div>
+                    )}
+                    {anchorElCopy && anchorElCopy.id === id && children?.trim() && (
+                      <Icon
+                        style={{ cursor: 'pointer', fontSize: 18 }}
+                        onClick={(e) => onCopyClick(e, children?.trim())}>
+                        file_copy
+                      </Icon>
+                    )}
+                    {checkDisplayIcon()}
+                    {anchorEl && anchorEl.id === id && allowAddInquiry && (
+                      <AddCircleIcon className={clsx(classes.sizeIcon, classes.colorAddIcon)} />
+                    )}
+                  </InputAdornment>
+                ) : (
+                  <></>
+                ),
               classes: {
                 root: classes.root,
                 input: classes.input,
                 notchedOutline: isEmpty ? '' : classes.notchedOutlineNotChecked
-              },
+              }
             }}
           />
         </ThemeProvider>
