@@ -343,6 +343,11 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
                             });
                             cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                           });
+                          CONTAINER_LIST.cmUnit.map((key, index) => {
+                            cmOfCd.map((cm) => {
+                              cd[getType(CONTAINER_LIST.cdUnit[index])] = cm[getType(key)];
+                            })
+                          })
                         }
                       })
                     }
