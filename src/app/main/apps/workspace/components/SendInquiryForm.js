@@ -159,7 +159,7 @@ const SendInquiryForm = (props) => {
   const vvdCode = getValueField(PRE_CARRIAGE_CODE) || getValueField(VESSEL_VOYAGE_CODE);
   const pod = getValueField(PORT_OF_DISCHARGE);
   const pol = getValueField(PORT_OF_LOADING)
-  const etd = getValueField(ETD);
+  const etd = getValueField(ETD).slice(0,10);
   let shipperName = getValueField(SHIPPER_NAME);
   shipperName = shipperName?.trim() ? `${shipperName} +` : '';
 
