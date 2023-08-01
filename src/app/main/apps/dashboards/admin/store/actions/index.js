@@ -2,6 +2,7 @@ export const SEARCH_QUEUE_QUERY = 'SEARCH_QUEUE_QUERY';
 export const FILTER_COUNTRY = 'FILTER_COUNTRY';
 export const SET_PAGE = 'SET_PAGE';
 export const SET_COLUMN = 'SET_COLUMN';
+export const SET_RESET = 'SET_RESET';
 
 export function searchQueueQuery(state) {
   return {
@@ -28,6 +29,13 @@ export function setPage(page, size) {
 export function setColumn(state) {
   return {
     type: SET_COLUMN,
+    state
+  };
+}
+
+export function setReset(state) {
+  return {
+    type: SET_RESET,
     state
   };
 }

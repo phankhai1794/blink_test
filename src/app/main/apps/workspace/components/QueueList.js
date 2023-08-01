@@ -272,6 +272,8 @@ const SearchLayout = (props) => {
 
   const handleReset = (e) => {
     let query = { ...initialState, blStatus: 'PENDING,IN_QUEUE', sortField: '' };
+    
+    dispatch(DashboardActions.setReset(true));
     dispatch(DashboardActions.setPage(1, 10));
     dispatch(DashboardActions.setColumn({
       etd: true,
