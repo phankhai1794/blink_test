@@ -668,7 +668,7 @@ const DraftPage = (props) => {
                     {containersDetail &&
                       containersDetail.map((cd, idx) => (
                         (idx < MAX_ROWS_CD) && <span key={idx} style={{ whiteSpace: 'pre', lineHeight: '20px' }}>
-                          {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${NumberFormat(cd[getInqType(CONTAINER_PACKAGE)],0) || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /  ${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}  /  ${NumberFormat(cd[getInqType(CONTAINER_WEIGHT)],3) || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${NumberFormat(cd[getInqType(CONTAINER_MEASUREMENT)],3) || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                          {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${NumberFormat(cd[getInqType(CONTAINER_PACKAGE)],0) || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /${cd[getInqType(CD_MOVE_TYPE)] || ''}/  ${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}  /  ${NumberFormat(cd[getInqType(CONTAINER_WEIGHT)],3) || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${NumberFormat(cd[getInqType(CONTAINER_MEASUREMENT)],3) || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
                           <br />
                         </span>
                       ))
