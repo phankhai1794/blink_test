@@ -113,7 +113,14 @@ const PopupConfirmSubmit = (props) => {
         fields.push(item.field);
       }
     });
-    await submitInquiryAnswer({ lstInq, fields, bl: myBL.id }).catch(err => handleError(dispatch, err));
+    const response = await submitInquiryAnswer({ lstInq, fields, bl: myBL.id }).catch(err => handleError(dispatch, err));
+    if (response && response.responseContentCDCM && Object.keys(response.responseContentCDCM).length) {
+      const {responseContentCDCM} = response;
+      dispatch(InquiryActions.setContent({
+        ...content,
+        [responseContentCDCM.fieldAutoUpdate]: responseContentCDCM.content
+      }));
+    }
 
     const inqsDraft = lstInq.filter(inq => inq !== null && inq.process === 'draft' && ['AME_DRF'].includes(inq.currentState));
     const inqsReply = lstInq.filter(inq => inq !== null && inq.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(inq.currentState));
