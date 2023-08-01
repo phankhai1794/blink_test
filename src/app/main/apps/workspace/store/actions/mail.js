@@ -141,7 +141,7 @@ export const autoSendMail = (mybl, inquiries, inqCustomer, inqOnshore, metadata,
   const vvdCode = getValueField(PRE_CARRIAGE_CODE) || getValueField(content, VESSEL_VOYAGE_CODE)
   const pod = getValueField(content, PORT_OF_DISCHARGE)
   const del = getValueField(content, PLACE_OF_DELIVERY)
-  const etd = getValueField(ETD);
+  const etd = getValueField(ETD).slice(0,10);
   let shipperName = getValueField(SHIPPER_NAME);
   shipperName = shipperName?.trim() ? `${shipperName} +` : '';
 
