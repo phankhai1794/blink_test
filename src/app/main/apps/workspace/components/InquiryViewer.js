@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateGroupOneTextBox, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileName } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateGroupOneTextBox, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileNameTimeFormat } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -337,7 +337,6 @@ const InquiryViewer = (props) => {
   const [getDataCM, setDataCM] = useState([]);
   const [isHasEditCdCm, setHasEditCdCm] = useState(false);
   const [isResolveAndUpload, setIsResolveAndUpload] = useState(false);
-  const [allPasteFiles, setAllPasteFile] = useState([]);
   const socket = useContext(SocketContext);
 
   const syncData = (data, syncOptSite = "") => {
@@ -1168,7 +1167,9 @@ const InquiryViewer = (props) => {
                       CONTAINER_LIST.cdUnit.map((key, index) => {
                         cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                       });
-                      const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0] && ['AME_SENT', 'REP_SENT', 'REP_AME_SENT', 'RESOLVED', 'UPLOADED'].includes(inq.state)) && user.role === 'guest';
+                      const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0] &&
+                          ((['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest') || ['RESOLVED', 'UPLOADED'].includes(inq.state))
+                      );
                       if (!isSent) {
                         saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
                       }
@@ -1187,7 +1188,9 @@ const InquiryViewer = (props) => {
                       CONTAINER_LIST.cmUnit.map((key, index) => {
                         cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                       });
-                      const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1] && ['AME_SENT', 'REP_SENT', 'REP_AME_SENT', 'RESOLVED', 'UPLOADED'].includes(inq.state)) && user.role === 'guest';
+                      const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1] &&
+                          ((['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest') || ['RESOLVED', 'UPLOADED'].includes(inq.state))
+                      );
                       if (!isSent) {
                         saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
                       }
@@ -1235,18 +1238,23 @@ const InquiryViewer = (props) => {
                       cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[1]] = cm;
-                    saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
-                      .then(res => {
-                        if (res && res.removeAmendment) {
-                          const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[1] && inq.process === 'draft');
-                          if (removeAmendment.length) {
-                            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
-                            if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                    const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1] &&
+                        ((['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest') || ['RESOLVED', 'UPLOADED'].includes(inq.state))
+                    );
+                    if (!isSent) {
+                      saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                        .then(res => {
+                          if (res && res.removeAmendment) {
+                            const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[1] && inq.process === 'draft');
+                            if (removeAmendment.length) {
+                              const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+                              if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                            }
+                            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                           }
-                          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-                        }
-                      })
-                      .catch((err) => handleError(dispatch, err));
+                        })
+                        .catch((err) => handleError(dispatch, err));
+                    }
                   }
                 } else if (question.field === idCM) {
                   let cd = content[containerCheck[0]]
@@ -1259,18 +1267,23 @@ const InquiryViewer = (props) => {
                       cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[0]] = cd;
-                    saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
-                      .then(res => {
-                        if (res && res.removeAmendment) {
-                          const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
-                          if (removeAmendment.length) {
-                            const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
-                            if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                    const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0] &&
+                        ((['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest') || ['RESOLVED', 'UPLOADED'].includes(inq.state))
+                    );
+                    if (!isSent) {
+                      saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
+                        .then(res => {
+                          if (res && res.removeAmendment) {
+                            const removeAmendment = optionsOfQuestion.filter(inq => inq.field === containerCheck[0] && inq.process === 'draft');
+                            if (removeAmendment.length) {
+                              const removeIndex = optionsOfQuestion.findIndex(inq => inq.id === removeAmendment[0].id);
+                              if (removeIndex !== -1) optionsOfQuestion.splice(removeIndex, 1);
+                            }
+                            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
                           }
-                          dispatch(InquiryActions.setInquiries(optionsOfQuestion));
-                        }
-                      })
-                      .catch((err) => handleError(dispatch, err));
+                        })
+                        .catch((err) => handleError(dispatch, err));
+                    }
                   }
                 }
 
@@ -2269,6 +2282,11 @@ const InquiryViewer = (props) => {
                   });
                   cd[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
                 });
+                CONTAINER_LIST.cmUnit.map((key, index) => {
+                  cmOfCd.map((cm) => {
+                    cd[getType(CONTAINER_LIST.cdUnit[index])] = cm[getType(key)];
+                  })
+                })
               }
             })
           }
@@ -2550,8 +2568,8 @@ const InquiryViewer = (props) => {
                 }));
                 // Auto update CD CM reply
                 const fieldCheck = question.field === containerCheck[0] ? containerCheck[1] : containerCheck[0];
-                const isCmSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === fieldCheck && (['AME_DRF', 'REP_DRF', 'REP_AME_DRF'].includes(inq.state) || (['REP_SENT', 'REP_AME_SENT'].includes(inq.state) && inq.creator?.accountRole === 'Admin')
-                ));
+                const isCmSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === fieldCheck && (['AME_DRF', 'REP_DRF', 'REP_AME_DRF'].includes(inq.state) || (['REP_SENT', 'REP_AME_SENT'].includes(inq.state) && inq.creator?.accountRole === 'Admin'))
+                ) || ![...optionsInquires].find(inq => inq.process === 'draft' && inq.field === fieldCheck);
                 if (isCmSent) {
                   autoUpdateCDCM(contentCDCM);
                 }
@@ -2614,13 +2632,17 @@ const InquiryViewer = (props) => {
             let newDrfRepContent = { ...content };
             if (question.state.includes('AME_')) {
               if (containerCheck.includes(question.field)) {
-                newDrfRepContent = { ...newDrfRepContent, [res.newAmendment?.field]: newContent, [fieldUpdate]: res.contentIsMap }
+                const isResolvedAmend = optionsInquires.find(inq => inq.process === 'draft' && inq.field === fieldUpdate && ['RESOLVED', 'UPLOADED', 'AME_SENT', 'REP_SENT'].includes(inq.state));
+                const currState = optionsInquires.find(inq => inq.process === 'draft' && inq.field === question.field && ['AME_DRF', 'REP_DRF'].includes(inq.state));
+                newDrfRepContent = { ...newDrfRepContent, [res.newAmendment?.field]: newContent, [fieldUpdate]: isResolvedAmend && currState ? content[fieldUpdate] : res.contentIsMap }
               } else {
                 newDrfRepContent = { ...newDrfRepContent, [res.newAmendment?.field]: newContent }
               }
               contentCDCM = tempReply.answer.content;
             } else if (user.role === 'Guest' && containerCheck.includes(question.field)) {
-              newDrfRepContent = { ...newDrfRepContent, [question.field]: question.contentReplyCDCM, [fieldUpdate]: res.contentIsMap };
+              const isResolved = optionsInquires.find(inq => inq.process === 'draft' && inq.field === fieldUpdate && ['RESOLVED', 'UPLOADED', 'AME_SENT', 'REP_SENT'].includes(inq.state));
+              const currState = optionsInquires.find(inq => inq.process === 'draft' && inq.field === question.field && ['AME_DRF', 'REP_DRF'].includes(inq.state));
+              newDrfRepContent = { ...newDrfRepContent, [question.field]: question.contentReplyCDCM, [fieldUpdate]: isResolved && currState ? content[fieldUpdate] : res.contentIsMap };
             }
 
             setIsResolveCDCM(false);
@@ -3007,40 +3029,24 @@ const InquiryViewer = (props) => {
       // generate new file name
       if (['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest') { // case create ans/ edit anns
         if (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) {
-          const newFileName = generateFileName(fileObject.name, question.mediaFilesAnswer.map(fItem => { return fItem.name }));
+          const newFileName = generateFileNameTimeFormat(fileObject.name);
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
-
-          if (!allPasteFiles.includes(newFileName)) {
-            setFilepaste(myRenamedFile);
-            setAllPasteFile([...allPasteFiles, newFileName])
-          }
-        } else {
-          if (!allPasteFiles.includes(fileObject.name)) {
-            setFilepaste(fileObject);
-            setAllPasteFile([...allPasteFiles, fileObject.name])
-          }
-        }
+          setFilepaste(myRenamedFile);
+        } setFilepaste(fileObject);
       } else {
         //other case
         if (tempReply.mediaFiles && tempReply.mediaFiles.length > 0) {
-          const newFileName = generateFileName(fileObject.name, tempReply.mediaFiles.map(fItem => { return fItem.name }));
+          const newFileName = generateFileNameTimeFormat(fileObject.name);
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
-          if (!allPasteFiles.includes(newFileName)) {
-            setFilepaste(myRenamedFile);
-            setAllPasteFile([...allPasteFiles, newFileName])
-          }
-        } else {
-          if (!allPasteFiles.includes(fileObject.name)) {
-            setFilepaste(fileObject);
-            setAllPasteFile([...allPasteFiles, fileObject.name])
-          }
-        }
+          setFilepaste(myRenamedFile)
+        } else setFilepaste(fileObject);
       }
     }
+   
   }
 
   const { isDragActive, getRootProps } = useDropzone({
