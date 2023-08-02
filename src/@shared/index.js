@@ -471,6 +471,14 @@ export const generateFileName = (fileName, fileList) => {
   } else return fileName;
 }
 
+export const generateFileNameTimeFormat = (fileName) => { 
+  const extFileNameIndex = fileName.split(".").slice(-1)[0].length + 1;
+  const name = fileName.slice(0, -extFileNameIndex);
+  const ext = fileName.slice(-extFileNameIndex,)
+  const now = new Date();
+  return `${name}_${now.getTime()}.${ext}`;
+}
+
 export const copyTextToClipboard = async (text) => {
   var textField = document.createElement('textarea')
   textField.value = text

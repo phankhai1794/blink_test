@@ -6,7 +6,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
-import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate, generateFileName  } from '@shared';
+import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate, generateFileNameTimeFormat  } from '@shared';
 import { NO_CONTENT_AMENDMENT, CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import { FuseChipSelect } from '@fuse';
@@ -117,7 +117,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const [isChange, setChange] = useState(false);
   const [isDateTime, setIsDateTime] = useState(false);
   const [isValidDate, setIsValidDate] = useState(false);
-  const [allPasteFiles, setAllPasteFile] = useState([]);
 
   const syncData = (data, syncOptSite = false) => {
     socket.emit("sync_data", { data, syncOptSite });
@@ -534,14 +533,11 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   const onPaste = (e) => {
     if (e.clipboardData.files.length) {
       const fileObject = e.clipboardData.files[0];
-      const newFileName = generateFileName(fileObject.name, attachments.map(fItem => { return fItem.name}))
+      const newFileName = generateFileNameTimeFormat(fileObject.name)
       const myRenamedFile = new File([fileObject], newFileName, {
         type: "image/png"
       });
-      if(!allPasteFiles.includes(newFileName)) {
-        setFilepaste(myRenamedFile);
-        setAllPasteFile([...allPasteFiles, newFileName]);
-      }
+      setFilepaste(myRenamedFile);
     }
   }
 

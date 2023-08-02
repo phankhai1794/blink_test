@@ -8,7 +8,7 @@ import {
   updateReply,
   uploadOPUS
 } from 'app/services/inquiryService';
-import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateGroupOneTextBox, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileName } from '@shared';
+import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateGroupOneTextBox, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileNameTimeFormat } from '@shared';
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
@@ -337,7 +337,6 @@ const InquiryViewer = (props) => {
   const [getDataCM, setDataCM] = useState([]);
   const [isHasEditCdCm, setHasEditCdCm] = useState(false);
   const [isResolveAndUpload, setIsResolveAndUpload] = useState(false);
-  const [allPasteFiles, setAllPasteFile] = useState([]);
   const socket = useContext(SocketContext);
 
   const syncData = (data, syncOptSite = "") => {
@@ -3030,40 +3029,24 @@ const InquiryViewer = (props) => {
       // generate new file name
       if (['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest') { // case create ans/ edit anns
         if (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) {
-          const newFileName = generateFileName(fileObject.name, question.mediaFilesAnswer.map(fItem => { return fItem.name }));
+          const newFileName = generateFileNameTimeFormat(fileObject.name);
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
-
-          if (!allPasteFiles.includes(newFileName)) {
-            setFilepaste(myRenamedFile);
-            setAllPasteFile([...allPasteFiles, newFileName])
-          }
-        } else {
-          if (!allPasteFiles.includes(fileObject.name)) {
-            setFilepaste(fileObject);
-            setAllPasteFile([...allPasteFiles, fileObject.name])
-          }
-        }
+          setFilepaste(myRenamedFile);
+        } setFilepaste(fileObject);
       } else {
         //other case
         if (tempReply.mediaFiles && tempReply.mediaFiles.length > 0) {
-          const newFileName = generateFileName(fileObject.name, tempReply.mediaFiles.map(fItem => { return fItem.name }));
+          const newFileName = generateFileNameTimeFormat(fileObject.name);
           const myRenamedFile = new File([fileObject], newFileName, {
             type: "image/png"
           });
-          if (!allPasteFiles.includes(newFileName)) {
-            setFilepaste(myRenamedFile);
-            setAllPasteFile([...allPasteFiles, newFileName])
-          }
-        } else {
-          if (!allPasteFiles.includes(fileObject.name)) {
-            setFilepaste(fileObject);
-            setAllPasteFile([...allPasteFiles, fileObject.name])
-          }
-        }
+          setFilepaste(myRenamedFile)
+        } else setFilepaste(fileObject);
       }
     }
+   
   }
 
   const { isDragActive, getRootProps } = useDropzone({

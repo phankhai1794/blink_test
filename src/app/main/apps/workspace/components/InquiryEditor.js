@@ -1,7 +1,7 @@
 import { FuseChipSelect } from '@fuse';
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { combineCDCM, getLabelById, toFindDuplicates, generateFileName } from '@shared';
+import { combineCDCM, getLabelById, toFindDuplicates, generateFileName, generateFileNameTimeFormat } from '@shared';
 import { handleError } from '@shared/handleError';
 import {
   Button,
@@ -229,7 +229,6 @@ const InquiryEditor = (props) => {
   );
   const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
-  const [allPasteFiles, setAllPasteFile] = useState([]);
 
   const user = useSelector(({ user }) => user);
   const getField = (field) => {
@@ -1311,17 +1310,14 @@ const InquiryEditor = (props) => {
   const onPaste = (e) => {
     if (e.clipboardData.files.length) {
       let fileObject = e.clipboardData.files[0];
-      const newFileName = generateFileName(fileObject.name, currentEditInq.mediaFile.map(fItem => { return fItem.name }));
+      const newFileName = generateFileNameTimeFormat(fileObject.name);
       const myRenamedFile = new File(
         [fileObject],
         newFileName, {
           type: "image/png"
         }
       );
-      if (!allPasteFiles.includes(newFileName)) {
-        setFilepaste(myRenamedFile);
-        setAllPasteFile([...allPasteFiles, newFileName])
-      }
+      setFilepaste(myRenamedFile);
     }
   }
 
