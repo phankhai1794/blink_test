@@ -9,6 +9,7 @@ import {
   DATE_LADEN,
   OTHERS
 } from '@shared/keyword';
+import pluralize from 'pluralize'
 
 export const combineCDCM = (metadataFields) => {
   return metadataFields.map(m => {
@@ -92,13 +93,13 @@ export const sentStatus = [
   ...['REP_SENT'] // draft status
 ];
 
-export function NumberFormat(number, minFrac) {
+export function NumberFormat(number, minFrac, isDraftBL = false) {
   if (!number || number.length === 0) return '';
   const formattedNumber = (typeof number === 'string' ? parseFloat(number.replace(",", "")) : number).toLocaleString("en-US", {
     maximumFractionDigits: 3,
     minimumFractionDigits: minFrac
   });
-  return formattedNumber;
+  return isDraftBL ? formattedNumber.replace(/,/g, '') : formattedNumber;
 }
 
 export const validatePartiesContent = (partiesContent, type) => {
@@ -145,7 +146,7 @@ export const validateBLType = (input) => {
     response = {
       ...response,
       isError: true,
-      errorType: `The value you entered should be "B" or "W".\n- "B" for Original B/L\n- "W" for Seaway Bill`
+      errorType: `The value you entered should be "B" or "W".\n- "B" for Original B/L\n- "W" for Sea WayBill`
     };
   }
   return response;
@@ -478,4 +479,10 @@ export const copyTextToClipboard = async (text) => {
   textField.select()
   document.execCommand('copy')
   textField.remove()
+}
+
+export const pluralizeCustomer = (number, word) => {
+  if(number > 1 && word) {
+    return pluralize(word)
+  } else return word;
 }
