@@ -31,7 +31,8 @@ const initialState = {
     sortField: settings.sortField || ['lastUpdated', 'DESC'],
     countries: null
   },
-  countries: ''
+  countries: '',
+  isReset: false
 }
 
 const dashboardReducer = function (state = initialState, action) {
@@ -47,6 +48,9 @@ const dashboardReducer = function (state = initialState, action) {
   }
   case Actions.SET_COLUMN: {
     return { ...state, columns: action.state };
+  }
+  case Actions.SET_RESET: {
+    return { ...state, isReset: action.state };
   }
   default: {
     return state;

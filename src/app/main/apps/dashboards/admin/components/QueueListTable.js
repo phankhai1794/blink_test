@@ -29,6 +29,7 @@ import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
 import { mapperBlinkStatus } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
+import debounce from 'lodash/debounce'
 
 import * as Actions from '../store/actions';
 
@@ -605,6 +606,7 @@ const QueueListTable = () => {
   const [openDetailIndex, setOpenDetailIndex] = useState();
   const [anchorEl, setAnchorEl] = useState(null);
   const columns = useSelector(({ dashboard }) => dashboard.columns);
+  const isReset = useSelector(({ dashboard }) => dashboard.isReset);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -636,6 +638,7 @@ const QueueListTable = () => {
       sort: searchQueueQuery.sortField
     })
       .then(({ total, data }) => {
+        dispatch(Actions.setReset(false))
         dispatch(Actions.setPage(page > Math.ceil(total / size) ? 1 : page, size))
         setState({ ...state, queueListBl: data, totalBkgNo: total })
       })
@@ -643,7 +646,7 @@ const QueueListTable = () => {
   };
 
   const setPage = (page, size) => {
-    dispatch(Actions.setPage(page, size))
+    // dispatch(Actions.setPage(page, size))
     fetchData(page, size)
   }
 
@@ -680,6 +683,8 @@ const QueueListTable = () => {
     setLocalStorageItem('pageSize', value);
   };
 
+  const debouncePage = useCallback(debounce(setPage, 1000))
+
   return (
     <>
       {state?.queueListBl.length > 0 ? (
@@ -687,8 +692,9 @@ const QueueListTable = () => {
           <div className={classes.container}>
             <Pagination
               page={page}
-              totalBkgNo={state.totalBkgNo}
-              setPage={setPage}
+              totalPageNumber={Math.ceil(state.totalBkgNo / page.pageSize)}
+              setPage={debouncePage}
+              isReset={isReset}
             />
             <FormControl variant="outlined" className={classes.formControl}>
               <Select
