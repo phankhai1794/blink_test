@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Button, Tooltip, Chip, Icon, FormControl, Select, MenuItem, Menu } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -13,6 +13,7 @@ import ReplyIcon from '@material-ui/icons/Reply';
 import { withStyles } from '@material-ui/core/styles';
 import { handleError } from '@shared/handleError';
 import { setLocalStorageItem } from '../shared-components/function';
+import debounce from 'lodash/debounce'
 
 const useStyles = makeStyles({
   root: {
@@ -173,6 +174,7 @@ const useStyles = makeStyles({
     backgroundColor: 'white',
     padding: '0 12px',
     borderRadius: 4,
+    fontFamily: 'Montserrat',
     fontSize: 14
   },
   cellBody: {
@@ -263,6 +265,7 @@ const QueueListTable = () => {
   const searchQueueQuery = useSelector(({ workspace }) => workspace.dashboardReducer.searchQueueQuery);
   const [anchorEl, setAnchorEl] = useState(null);
   const columns = useSelector(({ workspace }) => workspace.dashboardReducer.columns);
+  const isReset = useSelector(({ workspace }) => workspace.dashboardReducer.isReset);
 
   const handleGetQueueList = (page, size) => {
     getQueueList(
@@ -277,6 +280,7 @@ const QueueListTable = () => {
       },
     )
       .then(({ total, dataResult }) => {
+        dispatch(DashboardActions.setReset(false))
         dispatch(DashboardActions.setPage(page > Math.ceil(total / size) ? 1 : page, size))
         setState({ ...state, queueListBl: dataResult, totalBkgNo: total })
       })
@@ -293,7 +297,7 @@ const QueueListTable = () => {
   // };
 
   const setPage = (page, size) => {
-    dispatch(DashboardActions.setPage(page, size))
+    // dispatch(DashboardActions.setPage(page, size))
     handleGetQueueList(page, size)
   }
 
@@ -341,6 +345,8 @@ const QueueListTable = () => {
     setLocalStorageItem('columns', { ...columns, ...value });
   };
 
+  const debouncePage = useCallback(debounce(setPage, 1000))
+
   return (
     <div style={{ padding: '20px', height: '695px' }}>
       {/* TODO: TBU */}
@@ -359,8 +365,9 @@ const QueueListTable = () => {
           <div className={classes.container}>
             <Pagination
               page={page}
-              totalBkgNo={state.totalBkgNo}
-              setPage={setPage}
+              totalPageNumber={Math.ceil(state.totalBkgNo / page.pageSize)}
+              setPage={debouncePage}
+              isReset={isReset}
             />
             <FormControl variant='outlined' className={classes.formControl}>
               <Select
@@ -371,7 +378,7 @@ const QueueListTable = () => {
               >
                 {
                   [5, 10, 15].map(val =>
-                    <MenuItem key={val} classes={{ selected: classes.menuItemSelected }} value={val}>
+                    <MenuItem key={val} style={{ fontFamily: 'Montserrat' }} classes={{ selected: classes.menuItemSelected }} value={val}>
                       Show {val} items
                     </MenuItem>
 

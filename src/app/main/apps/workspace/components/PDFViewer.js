@@ -1,4 +1,4 @@
-import React, { useState, useEffect, cloneElement } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@material-ui/core';
 import DocViewer, { DocViewerRenderers } from '@cyntler/react-doc-viewer';
 import { getFile } from 'app/services/fileService';
@@ -381,7 +381,8 @@ const PDFViewer = (props) => {
   const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
   const dispatch = useDispatch();
   const classes = useStyles();
-  
+  const docViewerRef = useRef(null);
+
   const urlMedia = (fileExt, file) => {
     if (fileExt.toLowerCase().match(/jpeg|jpg|png/g)) {
       return URL.createObjectURL(new Blob([file], { type: 'image/jpeg' }));
@@ -761,6 +762,21 @@ const PDFViewer = (props) => {
     dispatch(FormActions.toggleOpenPreviewFiles({ openPreviewFiles: false, currentInqPreview: {} }));
     dispatch(FormActions.setScrollInquiry());
   }
+  
+  const handleKeyPress = (event) => {
+    if (event.key === 'ArrowLeft') {
+      return docViewerRef?.current?.prev();
+    } else if (event.key === 'ArrowRight') {
+      return docViewerRef?.current?.next();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, []);
 
   return (
     <div className={classes.root}>
@@ -770,6 +786,7 @@ const PDFViewer = (props) => {
       <div className={'closePreviewBottom'} onClick={closePreview}></div>
 
       <DocViewer
+        ref={docViewerRef}
         pluginRenderers={DocViewerRenderers}
         documents={allFileUrl}
         initialActiveDocument={allFileUrl.length && inquiry.file && allFileUrl.find(f => (f.filedId ? (f.fileId === inquiry.file.id) : (f.fileName === inquiry.file.name)))}

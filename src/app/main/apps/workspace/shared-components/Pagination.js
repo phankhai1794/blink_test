@@ -6,7 +6,7 @@ import NavigateNext from '@material-ui/icons/NavigateNext';
 const useStyles = makeStyles((theme) => ({
   pageSelected: {
     backgroundColor: '#BD0F72 !important',
-    color: '#FFFFFF !important',
+    color: '#FFFFFF !important'
   }
 }));
 
@@ -17,10 +17,7 @@ const range = (start, end) => {
   return Array.from({ length }, (_, idx) => idx + start);
 };
 
-const usePagination = (
-  totalPageCount,
-  currentPage
-) => {
+const usePagination = (totalPageCount, currentPage) => {
   const paginationRange = useMemo(() => {
     /*
       If the number of pages is less than the page numbers we want to show in our
@@ -48,10 +45,7 @@ const usePagination = (
     }
 
     if (shouldShowLeftDots && !shouldShowRightDots) {
-      let rightRange = range(
-        currentPage - 1,
-        totalPageCount
-      );
+      let rightRange = range(currentPage - 1, totalPageCount);
       return [firstPageIndex, DOTS, ...rightRange];
     }
 
@@ -66,56 +60,69 @@ const usePagination = (
   return paginationRange;
 };
 const Pagination = (props) => {
-  const { page, totalBkgNo, setPage } = props;
+  const { page, totalPageNumber, setPage, isReset } = props;
   const classes = useStyles();
 
-  const [state, setState] = useState({ page: page.currentPageNumber, totalPageNumber: Math.ceil(totalBkgNo / page.pageSize) });
+  const [state, setState] = useState({
+    page: page.currentPageNumber
+  });
 
   useEffect(() => {
-    setState({ page: page.currentPageNumber, totalPageNumber: Math.ceil(totalBkgNo / page.pageSize) });
-  }, [props]);
+    setState({ page: Math.min(totalPageNumber, page.currentPageNumber) });
+  }, [totalPageNumber]);
+
+  useEffect(() => {
+    if (isReset) setState({ page: 1 });
+  }, [isReset]);
 
   const handleSelectPage = (currentPage) => {
-    setPage(currentPage, page.pageSize)
+    setPage(currentPage, page.pageSize);
     setState({ ...state, page: currentPage });
-  }
+  };
 
   const handlePrevious = () => {
     if (state.page > 1) {
-      setPage(state.page - 1, page.pageSize)
+      setPage(state.page - 1, page.pageSize);
       setState({ ...state, page: state.page - 1 });
     }
-  }
+  };
 
   const handleNext = () => {
-    if (state.page < state.totalPageNumber) {
-      setPage(state.page + 1, page.pageSize)
+    if (state.page < totalPageNumber) {
+      setPage(state.page + 1, page.pageSize);
       setState({ ...state, page: state.page + 1 });
     }
-  }
+  };
 
-  const paginationRange = usePagination(state.totalPageNumber, state.page);
+  const paginationRange = usePagination(totalPageNumber, state.page);
 
   return (
     <>
       {/* <a key={'start'} onClick={() => handleClickStart()} style={{ fontSize: '17px' }}>&laquo;</a> */}
-      <a key={'previous'} onClick={() => handlePrevious()}><NavigateBefore style={{ fontSize: '15px' }} /></a>
+      <a key={'previous'} onClick={() => handlePrevious()}>
+        <NavigateBefore style={{ fontSize: '15px' }} />
+      </a>
       {paginationRange?.map((pageNumber, index) => {
         if (pageNumber === DOTS) {
-          return <div key={`pa-${index}`} style={{ margin: 'auto 0', textAlign: 'center', width: 40 }}>&#8230;</div>;
+          return (
+            <div key={`pa-${index}`} style={{ margin: 'auto 0', textAlign: 'center', width: 40 }}>
+              &#8230;
+            </div>
+          );
         }
 
         return (
           <a
             key={pageNumber + 1}
-            className={(state.page === pageNumber) ? classes.pageSelected : ''}
-            onClick={() => handleSelectPage(pageNumber)}
-          >
+            className={state.page === pageNumber ? classes.pageSelected : ''}
+            onClick={() => handleSelectPage(pageNumber)}>
             {pageNumber}
           </a>
         );
       })}
-      <a key={'next'} onClick={() => handleNext()}><NavigateNext style={{ fontSize: '15px' }} /></a>
+      <a key={'next'} onClick={() => handleNext()}>
+        <NavigateNext style={{ fontSize: '15px' }} />
+      </a>
       {/* <a key={'end'} onClick={() => handleClickEnd()} style={{ fontSize: '17px' }}>&raquo;</a> */}
     </>
   );
