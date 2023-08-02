@@ -142,7 +142,7 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
           {
             cm[TOTAL_WEIGHT]
             ||
-            cm[getInqType(CM_WEIGHT)] && `${cm[getInqType(CM_WEIGHT)]} ${cm[getInqType(CM_WEIGHT_UNIT)]}`
+            cm[getInqType(CM_WEIGHT)] && `${cm[getInqType(CM_WEIGHT)]}${cm[getInqType(CM_WEIGHT_UNIT)]}`
             ||
             ""
           }
@@ -151,7 +151,7 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
           {
             cm[TOTAL_MEASUREMENT]
             ||
-            cm[getInqType(CM_MEASUREMENT)] && `${cm[getInqType(CM_MEASUREMENT)]} ${cm[getInqType(CM_MEASUREMENT_UNIT)]}`
+            cm[getInqType(CM_MEASUREMENT)] && `${cm[getInqType(CM_MEASUREMENT)]}${cm[getInqType(CM_MEASUREMENT_UNIT)]}`
             ||
             ""
           }
