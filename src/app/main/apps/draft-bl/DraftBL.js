@@ -692,19 +692,18 @@ const DraftPage = (props) => {
                                   formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)]),
                                   cd[getInqType(CONTAINER_SEAL)].join("\n"),
                                   `${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)], cd[getInqType(CONTAINER_PACKAGE)]) || ''}`,
-                                  cd[getInqType(CD_MOVE_TYPE)],
-                                  cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : '',
-                                  `${cd[getInqType(CONTAINER_WEIGHT)] || ''}${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}`,
-                                  `${cd[getInqType(CONTAINER_MEASUREMENT)] || ''}${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`
+                                  `${cd[getInqType(CD_MOVE_TYPE)]}/${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}/${cd[getInqType(CONTAINER_WEIGHT)] || ''}${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}/${cd[getInqType(CONTAINER_MEASUREMENT)] || ''}${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`
                                 ].map((item, index) => {
                                   return (
-                                    <div style={{position: 'relative', display: 'flex',}}>
-                                      <div style={{position: 'relative', display: 'flex', }}> {item} </div>
-                                      {index != 6 && 
+                                    <div style={{position: 'relative', display: 'flex', }}>
+                                      <div style={{position: 'relative', display: 'flex',  width: index === 1 ? '146px' : 'auto'}}> {item} </div>
+                                      {index != 3 && 
                                               <div style={{position: 'relative',
                                                 display: 'flex',
-                                                paddingRight: index > 2 ? 0 : '45px',
-                                                paddingLeft: index > 2 ? 0 :'45px' }}>
+                                               
+                                                paddingRight: index >= 2 ? 0 : '55px',
+                                                paddingLeft: index > 2 ? 0 :'45px' }}
+                                                >
                                                    /
                                               </div>}
                                     </div>
@@ -977,13 +976,13 @@ const DraftPage = (props) => {
               <Grid item style={{ borderBottom: BORDER }}>
                 <div className={classes.tittle_M}>DATE CARGO RECEIVED</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')}</span>
+                  <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')?.toUpperCase()}</span>
                 </div>
               </Grid>
               <Grid item style={{ borderBottom: BORDER }}>
                 <div className={classes.tittle_M}>DATE LADEN ON BOARD</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')}</span>
+                  <span>{getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')?.toUpperCase()}</span>
                 </div>
               </Grid>
               <Grid item style={{ borderBottom: BORDER }}>
@@ -995,7 +994,7 @@ const DraftPage = (props) => {
               <Grid item>
                 <div className={classes.tittle_M}>DATED</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATED) && formatDate(getValueField(DATED), 'DD MMM YYYY')}</span>
+                  <span>{getValueField(DATED) && formatDate(getValueField(DATED), 'DD MMM YYYY')?.toUpperCase()}</span>
                 </div>
               </Grid>
             </Grid>

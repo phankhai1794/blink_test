@@ -324,7 +324,10 @@ export const getTotalValueMDView = (drfView, containerDetail, getType) => {
       containerDetail.forEach((item) => {
         total += parseNumberValue(item[getType(CONTAINER_LIST.cdNumber[index])]);
       });
-      drfMD[key] = parseFloat(total.toFixed(3));;
+
+      if(key === 'totalPackages') drfMD[key] = NumberFormat(total,0,true);
+      if(key === 'totalWeight' || key === 'totalMeasurement') drfMD[key] = NumberFormat(total,3,true);
+ 
     })
   }
   return drfMD;

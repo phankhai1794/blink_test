@@ -86,8 +86,8 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage, isOn
           [SHIPPING_MARK]: result.mark[0]?.[i] || [],
           [TOTAL_PACKAGE]: result.package[0]?.[i] || [],
           [DESCRIPTION_OF_GOODS]: result.description[0]?.[i] || [],
-          [TOTAL_WEIGHT]: i === 0 ? `${drfMD[TOTAL_WEIGHT]} ${drfMD[TOTAL_WEIGHT_UNIT]}` : "",
-          [TOTAL_MEASUREMENT]: i === 0 ? `${drfMD[TOTAL_MEASUREMENT]} ${drfMD[TOTAL_MEASUREMENT_UNIT]}` : ""
+          [TOTAL_WEIGHT]: i === 0 ? `${drfMD[TOTAL_WEIGHT]}${drfMD[TOTAL_WEIGHT_UNIT]}` : "",
+          [TOTAL_MEASUREMENT]: i === 0 ? `${drfMD[TOTAL_MEASUREMENT]}${drfMD[TOTAL_MEASUREMENT_UNIT]}` : ""
         }];
       }
     } else {
