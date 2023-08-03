@@ -528,7 +528,7 @@ const InquiryEditor = (props) => {
         return getDataField && getTemplate
       }).sort((a, b) => a.label.localeCompare(b.label));
       const inq = { ...currentEditInq };
-      
+
       if (!filter.some(f => f.value === inq.inqType)) {
         inq.inqType = '';
         dispatch(InquiryActions.setEditInq(inq));
@@ -869,7 +869,10 @@ const InquiryEditor = (props) => {
       }
       return inq.field === currentEditInq.field
     })];
-
+    const index = listInqOfField.findIndex((inq) => inq.id === currentEditInq.id)
+    if (currentEditInq.id && index >= 0) {
+      listInqOfField.splice(index, 1);
+    }
     if (listInqOfField.length) {
       let checkDuplicate = false;
       if (containerCheck.includes(currentEditInq.field)) {
@@ -1314,8 +1317,8 @@ const InquiryEditor = (props) => {
       const myRenamedFile = new File(
         [fileObject],
         newFileName, {
-          type: "image/png"
-        }
+        type: "image/png"
+      }
       );
       setFilepaste(myRenamedFile);
     }
