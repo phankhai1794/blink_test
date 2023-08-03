@@ -1939,11 +1939,19 @@ const InquiryViewer = (props) => {
           isAllItemUpload = checkAllItemUpload(question);
           if (isAllItemUpload && question.process === 'pending') {
             // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
-            dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BR', question.receiver.includes('customer') ? 'RO' : 'RW'));
+            let filterPending = optionsInquires.filter(inq => inq.process === 'pending')
+            dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BR', question.receiver.includes('customer') ? 'RO' : 'RW', {
+              idReply: filterPending.length ? filterPending.map(q => q.id) : [],
+              process: 'pending'
+            }));
           }
           if (isAllItemUpload && question.process === 'draft') {
             // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
-            dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BS', ''));
+            let filterDraft = optionsInquires.filter(inq => inq.process === 'draft')
+            dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BS', '', {
+              idReply: filterDraft.length ? filterDraft.map(q => q.id) : [],
+              process: 'draft'
+            }));
           }
 
           if (myBL && myBL.bkgNo) {
@@ -2033,11 +2041,19 @@ const InquiryViewer = (props) => {
             ) {
               if (question.receiver && question.receiver.length && question.receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
                 // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
-                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
+                const filters = inqsPending.filter(q => q.receiver.includes('customer'))
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO", {
+                  idReply: filters.length ? filters.map(q => q.id) : [],
+                  process: 'pending'
+                }))
               }
               if (question.receiver && question.receiver.length && question.receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
                 //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
-                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
+                const filters = inqsPending.filter(q => q.receiver.includes('onshore'))
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW", {
+                  idReply: filters.length ? filters.map(q => q.id) : [],
+                  process: 'pending'
+                }))
               }
             } else if (
               question.process === 'draft'
@@ -2046,7 +2062,10 @@ const InquiryViewer = (props) => {
               && (filterFieldDrfNotUploadOpus.length ? filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state)) : true)
             ) {
               // BL Amendment Success (BS), Upload all to Opus.
-              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
+              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", "", {
+                idReply: inqsDraft.length ? inqsDraft.map(q => q.id) : [],
+                process: 'draft'
+              }))
             }
           }
 

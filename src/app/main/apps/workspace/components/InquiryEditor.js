@@ -869,7 +869,12 @@ const InquiryEditor = (props) => {
       }
       return inq.field === currentEditInq.field
     })];
-
+    if (currentEditInq.id) {
+      listInqOfField.splice(
+        listInqOfField.findIndex((inq) => inq.id === currentEditInq.id),
+        1
+      );
+    }
     if (listInqOfField.length) {
       let checkDuplicate = false;
       if (containerCheck.includes(currentEditInq.field)) {
