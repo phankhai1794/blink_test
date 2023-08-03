@@ -15,10 +15,13 @@ const MainWorkSpace = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    sessionStorage.setItem('prevUrl', JSON.stringify({
-      cachePath: window.location.pathname,
-      cacheSearch: window.location.search
-    }));
+    sessionStorage.setItem(
+      'prevUrl',
+      JSON.stringify({
+        cachePath: window.location.pathname,
+        cacheSearch: window.location.search
+      })
+    );
     dispatch(
       AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_WORKSPACE }))
     );
@@ -56,11 +59,17 @@ function WorkspaceApp() {
     const urlSearchParams = new URLSearchParams(search);
     const usrId = urlSearchParams.get('usrId');
     const cntr = urlSearchParams.get('cntr');
-
+    const user = JSON.parse(localStorage.getItem('USER'));
     if (bkgNo && usrId && cntr) {
       try {
-        const result = await validateBkgNo(bkgNo, cntr, { countries: JSON.parse(localStorage.getItem('USER'))?.countries });
-        if (result) setValidUrl(true);
+        const result = await validateBkgNo(bkgNo, cntr, {
+          countries: user?.countries,
+          office: user?.office
+        });
+        if (result) {
+          redirect404 = false;
+          setValidUrl(true);
+        }
       } catch (error) {
         console.error(error);
         if (error.message === 'Network Error')

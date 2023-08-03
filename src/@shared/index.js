@@ -709,3 +709,4 @@ export const splitDraftData = (
 
   return pages;
 }
+export const uniqueArray = (array) => [...new Set(array)]
