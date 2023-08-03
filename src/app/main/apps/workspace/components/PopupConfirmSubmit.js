@@ -126,7 +126,7 @@ const PopupConfirmSubmit = (props) => {
     const inqsReply = lstInq.filter(inq => inq !== null && inq.process === 'pending' && ['REP_A_DRF', 'ANS_DRF'].includes(inq.currentState));
     const draftReply = lstInq.filter(inq => inq !== null && inq.process === 'draft' && ['REP_DRF'].includes(inq.currentState));
     if (draftReply.length > 0) {
-      const idReply = draftReply.map(d => d.id);
+      const idReply = draftReply.map(d => d.inquiryId);
       // BK. Reply from Customer, Onshore
       const inqType = user.userType === 'CUSTOMER' ? "BP" : "BQ"; // BP: Customer Amendment Reply, BO: Offshore Amendment Inquiry
       const userType = user.userType === 'CUSTOMER' ? "TO" : "RO"; // TO: Return to Customer via BLink, RO: Return to Onshore via BLink
@@ -141,7 +141,7 @@ const PopupConfirmSubmit = (props) => {
     }
 
     if (inqsDraft.length > 0) {
-      const idReply = inqsDraft.map(d => d.id);
+      const idReply = inqsDraft.map(d => d.inquiryId);
       const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
       dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "BA", userType, {idReply, process: 'draft'}));// BA: Customer Amendment Request
     }
