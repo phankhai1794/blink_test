@@ -1083,7 +1083,7 @@ const InquiryViewer = (props) => {
             (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "", {
               idReply: myBL.id,
-              action: 'deleteAll'
+              action: 'deleteAll',
             })) //BX: Delete all inquiries draft
           }
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
