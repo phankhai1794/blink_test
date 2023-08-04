@@ -41,9 +41,9 @@ export const sendMail =
               const idReply = draftReply.map(d => d.id);
               // BQ: Offshore replied on BL Draft
               if (form.toCustomer) //  RO: Return to Customer via BLink
-                dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "RO", {idReply, process: 'draft'}));
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "RO", {idReply, action: 'draft'}));
               if (form.toOnshore) // TO: Return to Onshore via BLink
-                dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "TO", {idReply, process: 'draft'}));
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "TO", {idReply, action: 'draft'}));
             }
 
             if (inqsOpenState.length > 0 || replyInqs.length > 0) {
@@ -55,10 +55,10 @@ export const sendMail =
                 idReply = [...idReply, ...replyInqs];
               }
               if (form.toCustomer) //BI: BL Inquiried,  RO: Return to Customer via BLink.
-                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RO", {idReply, process: 'pending'}
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RO", {idReply, action: 'pending'}
                 ));//Send inquiries to customer
               if (form.toOnshore) //BI: BL Inquiried,  RW: Return to Onshore via BLink
-                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RW", {idReply, process: 'pending'}
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RW", {idReply, action: 'pending'}
                 )); //Send inquiries to Onshore
             }
 

@@ -1285,7 +1285,10 @@ const InquiryEditor = (props) => {
                 optionsMinimize.push(inqResponse);
               }
               if (optionsInquires.length === 1) {
-                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BC", "")) // Draft of Inquiry Created (BC)
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BC", "", {
+                  idReply: myBL.id,
+                  action: 'createInquiry'
+                })) // Draft of Inquiry Created (BC)
               }
               dispatch(InquiryActions.saveInquiry());
               dispatch(InquiryActions.setField());

@@ -1081,7 +1081,10 @@ const InquiryViewer = (props) => {
           const isEmptyInq = optionsOfQuestion.filter(op => op.process === 'pending');
           if (!isEmptyInq.length) {
             (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
-            dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "")) //BX: Delete all inquiries draft
+            dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "", {
+              idReply: myBL.id,
+              action: 'deleteAll'
+            })) //BX: Delete all inquiries draft
           }
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           props.getUpdatedAt();
@@ -1942,7 +1945,7 @@ const InquiryViewer = (props) => {
             let filterPending = optionsInquires.filter(inq => inq.process === 'pending')
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BR', question.receiver.includes('customer') ? 'RO' : 'RW', {
               idReply: filterPending.length ? filterPending.map(q => q.id) : [],
-              process: 'pending'
+              action: 'pending'
             }));
           }
           if (isAllItemUpload && question.process === 'draft') {
@@ -1950,7 +1953,7 @@ const InquiryViewer = (props) => {
             let filterDraft = optionsInquires.filter(inq => inq.process === 'draft')
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BS', '', {
               idReply: filterDraft.length ? filterDraft.map(q => q.id) : [],
-              process: 'draft'
+              action: 'draft'
             }));
           }
 
@@ -2044,7 +2047,7 @@ const InquiryViewer = (props) => {
                 const filters = inqsPending.filter(q => q.receiver.includes('customer'))
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO", {
                   idReply: filters.length ? filters.map(q => q.id) : [],
-                  process: 'pending'
+                  action: 'pending'
                 }))
               }
               if (question.receiver && question.receiver.length && question.receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
@@ -2052,7 +2055,7 @@ const InquiryViewer = (props) => {
                 const filters = inqsPending.filter(q => q.receiver.includes('onshore'))
                 dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW", {
                   idReply: filters.length ? filters.map(q => q.id) : [],
-                  process: 'pending'
+                  action: 'pending'
                 }))
               }
             } else if (
@@ -2064,7 +2067,7 @@ const InquiryViewer = (props) => {
               // BL Amendment Success (BS), Upload all to Opus.
               dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", "", {
                 idReply: inqsDraft.length ? inqsDraft.map(q => q.id) : [],
-                process: 'draft'
+                action: 'draft'
               }))
             }
           }

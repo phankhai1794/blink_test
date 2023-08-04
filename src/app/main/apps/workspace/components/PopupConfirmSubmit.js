@@ -130,20 +130,20 @@ const PopupConfirmSubmit = (props) => {
       // BK. Reply from Customer, Onshore
       const inqType = user.userType === 'CUSTOMER' ? "BP" : "BQ"; // BP: Customer Amendment Reply, BO: Offshore Amendment Inquiry
       const userType = user.userType === 'CUSTOMER' ? "TO" : "RO"; // TO: Return to Customer via BLink, RO: Return to Onshore via BLink
-      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType, {idReply, process: 'draft'}));
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType, {idReply, action: 'draft'}));
     }
     if (inqsReply.length > 0) {
       const idReply = inqsReply.map(d => d.inquiryId);
       // BK. Reply from Customer, Onshore
       const inqType = user.userType === 'CUSTOMER' ? "BK" : "BO"; // BK: Reply from Customer, BO: Reply from Onshore
       const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
-      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType, {idReply, process: 'pending'}));
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, inqType, userType, {idReply, action: 'pending'}));
     }
 
     if (inqsDraft.length > 0) {
       const idReply = inqsDraft.map(d => d.inquiryId);
       const userType = user.userType === 'CUSTOMER' ? "TO" : "TW"; // TO: Return to Customer via BLink, TW: Return to Onshore via BLink
-      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "BA", userType, {idReply, process: 'draft'}));// BA: Customer Amendment Request
+      dispatch(AppActions.updateOpusStatus(myBL.bkgNo, "BA", userType, {idReply, action: 'draft'}));// BA: Customer Amendment Request
     }
 
     const listIdInq = lstInq.map((inq) => inq.inquiryId);
