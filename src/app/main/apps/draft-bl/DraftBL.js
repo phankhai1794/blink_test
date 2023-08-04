@@ -8,7 +8,7 @@ import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
-import { isJsonText, formatDate, MAX_CHARS, MAX_ROWS_CD, lineBreakAtBoundary, getMaxRows, getTotalValueMDView, formatNoneContNo, findSumFromArray, NumberFormat } from '@shared';
+import { isJsonText, formatDate, MAX_CHARS, MAX_ROWS_CD, lineBreakAtBoundary, getMaxRows, getTotalValueMDView, formatNoneContNo, findSumFromArray, NumberFormat, pluralizeCustomer } from '@shared';
 import { packageUnitsJson, containerTypeUnit } from '@shared/units';
 
 import * as Actions from './store/actions';
@@ -217,7 +217,7 @@ const DraftPage = (props) => {
     return metadata ? metadata.inq_type[field] : '';
   };
 
-  const getPackageName = (packageCode) => packageUnitsJson.find(pkg => pkg.code === packageCode)?.description;
+  const getPackageName = (packageCode, packageNumber) => pluralizeCustomer(packageNumber, packageUnitsJson.find(pkg => pkg.code === packageCode)?.description);
 
   const drfMD = getTotalValueMDView(drfView, containersDetail, getInqType);
 
@@ -240,8 +240,25 @@ const DraftPage = (props) => {
 
   useEffect(() => {
     if (Object.keys(content).length && Object.keys(metadata).length) {
-      setContainersDetail(getValueField(CONTAINER_DETAIL));
-      setContainersManifest(getValueField(CONTAINER_MANIFEST));
+      // format CD detail
+      const formatCD = getValueField(CONTAINER_DETAIL).map(cdItem => {
+        let currentRow = {...cdItem};
+        currentRow[getInqType(CONTAINER_PACKAGE)] = NumberFormat(currentRow[getInqType(CONTAINER_PACKAGE)],0,true);
+        currentRow[getInqType(CONTAINER_WEIGHT)] = NumberFormat(currentRow[getInqType(CONTAINER_WEIGHT)],3,true);
+        currentRow[getInqType(CONTAINER_MEASUREMENT)] = NumberFormat(currentRow[getInqType(CONTAINER_MEASUREMENT)],3,true);
+        return currentRow;
+      })
+
+      const formatCM = getValueField(CONTAINER_MANIFEST).map(cmItem => {
+        let currentRow = {...cmItem};
+        currentRow[getInqType(CM_PACKAGE)] = NumberFormat(currentRow[getInqType(CM_PACKAGE)],0,true);
+        currentRow[getInqType(CM_WEIGHT)] = NumberFormat(currentRow[getInqType(CM_WEIGHT)],3,true);
+        currentRow[getInqType(CM_MEASUREMENT)] = NumberFormat(currentRow[getInqType(CM_MEASUREMENT)],3,true);
+        return currentRow;
+      })
+      
+      setContainersDetail(formatCD || []);
+      setContainersManifest(formatCM || []);
     }
   }, [metadata, content]);
 
@@ -249,7 +266,7 @@ const DraftPage = (props) => {
     if (containersDetail.length) {
       // MD view
       let totalMark = getValueField(SHIPPING_MARK).split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.mark)).join("\n");
-      let totalPackage = `${NumberFormat(getValueField(TOTAL_PACKAGE),0)}\n${getPackageName(getValueField(TOTAL_PACKAGE_UNIT))}`.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)).join("\n");
+      let totalPackage = `${NumberFormat(getValueField(TOTAL_PACKAGE),0,true)}\n${pluralizeCustomer(getValueField(TOTAL_PACKAGE),getPackageName(getValueField(TOTAL_PACKAGE_UNIT)))}`.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)).join("\n");
       let totalDescription = getValueField(DESCRIPTION_OF_GOODS).split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.description)).join("\n");
 
       // CM view
@@ -258,7 +275,7 @@ const DraftPage = (props) => {
       let cmDescription = "";
       containersManifest.forEach(cm => {
         cmMark += lineBreakAtBoundary(cm[getInqType(CM_MARK)], MAX_CHARS.mark) + "\n";
-        cmPackage += `${NumberFormat(cm[getInqType(CM_PACKAGE)],0)}\n${getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}`.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)).join("\n");
+        cmPackage += `${cm[getInqType(CM_PACKAGE)]}\n${getPackageName(cm[getInqType(CM_PACKAGE_UNIT)], cm[getInqType(CM_PACKAGE)])}`.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)).join("\n");
         cmDescription += lineBreakAtBoundary(cm[getInqType(CM_DESCRIPTION)], MAX_CHARS.description) + "\n";
       });
       const maxRowsMD = getMaxRows(
@@ -326,9 +343,9 @@ const DraftPage = (props) => {
           </Grid>
           <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
             <Grid item style={{ textAlign: 'end' }}>
-              <span>{NumberFormat(cm[getInqType(CM_PACKAGE)],0)}</span>
+              <span>{cm[getInqType(CM_PACKAGE)]}</span>
               <br />
-              <span>{getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])}</span>
+              <span>{getPackageName(cm[getInqType(CM_PACKAGE_UNIT)], cm[getInqType(CM_PACKAGE)])}</span>
             </Grid>
           </Grid>
           <Grid style={{ width: WIDTH_COL_HM, borderRight: BORDER, boxSizing: 'border-box' }}></Grid>
@@ -336,10 +353,10 @@ const DraftPage = (props) => {
             {cm[getInqType(CM_DESCRIPTION)]}
           </Grid>
           <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            {`${NumberFormat(cm[getInqType(CM_WEIGHT)],3)} ${cm[getInqType(CM_WEIGHT_UNIT)]}`}
+            {`${cm[getInqType(CM_WEIGHT)]}${cm[getInqType(CM_WEIGHT_UNIT)]}`}
           </Grid>
           <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            {`${NumberFormat(cm[getInqType(CM_MEASUREMENT)],3)} ${cm[getInqType(CM_MEASUREMENT_UNIT)]}`}
+            {`${cm[getInqType(CM_MEASUREMENT)]}${cm[getInqType(CM_MEASUREMENT_UNIT)]}`}
           </Grid>
         </Grid>
       ))
@@ -351,9 +368,9 @@ const DraftPage = (props) => {
         </Grid>
         <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 5 }}>
           <Grid item style={{ textAlign: 'end' }}>
-            <span>{NumberFormat(drfMD[TOTAL_PACKAGE],0)}</span>
+            <span>{NumberFormat(drfMD[TOTAL_PACKAGE],0,true)}</span>
             <br />
-            <span>{getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}</span>
+            <span>{getPackageName(drfMD[TOTAL_PACKAGE_UNIT], drfMD[TOTAL_PACKAGE])}</span>
           </Grid>
         </Grid>
         <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }}></Grid>
@@ -361,10 +378,10 @@ const DraftPage = (props) => {
           {getValueField(DESCRIPTION_OF_GOODS)}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 5 }}>
-          {`${NumberFormat(drfMD[TOTAL_WEIGHT],3)} ${drfMD[TOTAL_WEIGHT_UNIT]}`}
+          {`${NumberFormat(drfMD[TOTAL_WEIGHT],3,true)}${drfMD[TOTAL_WEIGHT_UNIT]}`}
         </Grid>
         <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 5 }}>
-          {`${NumberFormat(drfMD[TOTAL_MEASUREMENT],3)} ${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
+          {`${NumberFormat(drfMD[TOTAL_MEASUREMENT],3,true)}${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
         </Grid>
       </Grid>
     } else {
@@ -402,7 +419,7 @@ const DraftPage = (props) => {
               PAGE: <p className={classes.page_Count}>1</p> OF <p className={classes.page_Count}>{totalPage}</p>
             </div>
             <span className={classes.blType}>
-              {getValueField(BL_TYPE) ? getValueField(BL_TYPE) === "W" ? "SEAWAY BILL" : "ORIGINAL B/L" : ""}
+              {getValueField(BL_TYPE) ? getValueField(BL_TYPE) === "W" ? "SEA WAYBILL" : "BILL OF LADING" : ""}
             </span>
           </div>
         </div>
@@ -440,7 +457,7 @@ const DraftPage = (props) => {
                 </div>
               </Grid>
               <Grid item xs={6}>
-                <div className={classes.tittle_M}>B/L NO.</div>
+                <div className={classes.tittle_M}> {getValueField(BL_TYPE) === "W" ? "SEA WAYBILL NO." : "BILL OF LADING NO."}</div>
                 <div className={clsx(classes.content_L, classes.blNo)}>
                   {myBL.bkgNo && `ONEY${myBL.bkgNo}`}
                 </div>
@@ -667,8 +684,38 @@ const DraftPage = (props) => {
                   <div className={classes.content_M} style={{ paddingTop: 5 }}>
                     {containersDetail &&
                       containersDetail.map((cd, idx) => (
-                        (idx < MAX_ROWS_CD) && <span key={idx} style={{ whiteSpace: 'pre', lineHeight: '20px' }}>
-                          {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${NumberFormat(cd[getInqType(CONTAINER_PACKAGE)],0) || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''}  /${cd[getInqType(CD_MOVE_TYPE)] || ''}/  ${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}  /  ${NumberFormat(cd[getInqType(CONTAINER_WEIGHT)],3) || ''} ${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${NumberFormat(cd[getInqType(CONTAINER_MEASUREMENT)],3) || ''} ${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
+                        (idx < MAX_ROWS_CD) && <span key={idx} style={{ whiteSpace: 'pre', display: 'flex' }}>
+                          <div style={{position: 'relative', display: 'flex', }}>
+                            <div style={{position: 'relative', display: 'flex', }}>
+                              {
+                                [
+                                  formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)]),
+                                  cd[getInqType(CONTAINER_SEAL)].join("\n"),
+                                  `${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)], cd[getInqType(CONTAINER_PACKAGE)]) || ''}`,
+                                  `${cd[getInqType(CD_MOVE_TYPE)]}/${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}/${cd[getInqType(CONTAINER_WEIGHT)] || ''}${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}/${cd[getInqType(CONTAINER_MEASUREMENT)] || ''}${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`
+                                ].map((item, index) => {
+                                  return (
+                                    <div style={{position: 'relative', display: 'flex', }}>
+                                      <div style={{position: 'relative', display: 'flex',  width: index === 1 ? '146px' : 'auto'}}> {item} </div>
+                                      {index != 3 && 
+                                              <div style={{position: 'relative',
+                                                display: 'flex',
+                                               
+                                                paddingRight: index >= 2 ? 0 : '55px',
+                                                paddingLeft: index > 2 ? 0 :'45px' }}
+                                                >
+                                                   /
+                                              </div>}
+                                    </div>
+                                  )
+
+                                })
+                              }
+                              
+                            </div>
+
+                          </div>
+              
                           <br />
                         </span>
                       ))
@@ -929,13 +976,13 @@ const DraftPage = (props) => {
               <Grid item style={{ borderBottom: BORDER }}>
                 <div className={classes.tittle_M}>DATE CARGO RECEIVED</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')}</span>
+                  <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')?.toUpperCase()}</span>
                 </div>
               </Grid>
               <Grid item style={{ borderBottom: BORDER }}>
                 <div className={classes.tittle_M}>DATE LADEN ON BOARD</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')}</span>
+                  <span>{getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')?.toUpperCase()}</span>
                 </div>
               </Grid>
               <Grid item style={{ borderBottom: BORDER }}>
@@ -947,7 +994,7 @@ const DraftPage = (props) => {
               <Grid item>
                 <div className={classes.tittle_M}>DATED</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATED) && formatDate(getValueField(DATED), 'DD MMM YYYY')}</span>
+                  <span>{getValueField(DATED) && formatDate(getValueField(DATED), 'DD MMM YYYY')?.toUpperCase()}</span>
                 </div>
               </Grid>
             </Grid>

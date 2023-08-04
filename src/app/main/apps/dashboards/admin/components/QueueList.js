@@ -188,6 +188,7 @@ const SearchLayout = (props) => {
   const handleReset = () => {
     setState(initialState);
 
+    dispatch(Actions.setReset(true));
     dispatch(Actions.setPage(1, 10));
     dispatch(Actions.setColumn({
       etd: true,

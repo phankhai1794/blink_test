@@ -42,6 +42,7 @@ const BtnQueueList = () => {
     userType === 'ADMIN' ?
       window.open(`/apps/admin${param}`) :
       dispatch(InquiryActions.openQueueList(true));
+    localStorage.setItem('fcountry', JSON.stringify([country]));
     setLocalStorageItem('from', null);
     setLocalStorageItem('to', null);
     setLocalStorageItem('bookingNo', null);
