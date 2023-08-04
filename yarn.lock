@@ -1970,10 +1970,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/normalize.css/-/normalize.css-10.1.0.tgz#f0950bba18819512d42f7197e56c518aa491cf18"
   integrity sha512-ij4wRiunFfaJxjB0BdrYHIH8FxBJpOwNPhhAcunlmPdXudL1WQV1qoP9un6JsEBAgQH+7UXyyjh0g7jTxXK6tg==
 
-"@cyntler/react-doc-viewer@^1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@cyntler/react-doc-viewer/-/react-doc-viewer-1.12.0.tgz#8d43f1f89d6f0302589be4f2c0d6d06d3ba2653c"
-  integrity sha512-HPwu1cgsJ0/zeUmzOq7COU4EjVK7KphFrAANr84oycUUFJWFAwX2GaK2CiCyO33XqTmuSUmQuMWbZz5OiEllrA==
+"@cyntler/react-doc-viewer@^1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@cyntler/react-doc-viewer/-/react-doc-viewer-1.13.0.tgz#8685c2112aa76f4e0a4ead054f1c1e1a9ecce03d"
+  integrity sha512-skrgvgpRQw7yhS8VmHP6vkBU9HiWAkvwQYNY1u7JZWOSN6Tro/iKZzrZ8Fv/cOheAnhliHxWbj1TZeMz4b+A9Q==
   dependencies:
     "@types/mustache" "^4.2.2"
     "@types/papaparse" "^5.3.5"
@@ -12008,6 +12008,11 @@ pkg-up@3.1.0, pkg-up@^3.1.0:
   integrity sha512-nDywThFk1i4BQK4twPQ6TA4RT8bDY96yeuCVBWL3ePARCiEKDRSrNGbFIgUJpLp+XeIR65v8ra7WuJOFUBtkMA==
   dependencies:
     find-up "^3.0.0"
+
+pluralize@^8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-8.0.0.tgz#1a6fa16a38d12a1901e0320fa017051c539ce3b1"
+  integrity sha512-Nc3IT5yHzflTfbjgqWcCPpo7DaKy4FnpB0l/zCAW0Tc7jxAiuqSxHasntB3D7887LSrA93kDJ9IXovxJYxyLCA==
 
 pn@^1.1.0:
   version "1.1.0"

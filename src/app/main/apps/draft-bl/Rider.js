@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { MAX_ROWS_CD, MAX_CHARS, lineBreakAtBoundary } from '@shared';
+import { MAX_ROWS_CD, MAX_CHARS, lineBreakAtBoundary, pluralizeCustomer, NumberFormat } from '@shared';
 import { SHIPPING_MARK, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, DESCRIPTION_OF_GOODS, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION } from '@shared/keyword';
 import { packageUnitsJson } from '@shared/units';
 
@@ -27,7 +27,7 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage, isOn
     return metadata ? metadata.inq_type[field] : '';
   };
 
-  const getPackageName = (packageCode) => packageUnitsJson.find(pkg => pkg.code === packageCode)?.description;
+  const getPackageName = (packageCode, packageNumber) => pluralizeCustomer(packageNumber, packageUnitsJson.find(pkg => pkg.code === packageCode)?.description);
 
   useEffect(() => {
     let cd = containersDetail.length > MAX_ROWS_CD ? containersDetail.slice(MAX_ROWS_CD + 1) : [];
@@ -53,7 +53,7 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage, isOn
         mark: getValueField(SHIPPING_MARK)
           .split("\n")
           .map(line => lineBreakAtBoundary(line, MAX_CHARS.mark)),
-        package: `${drfMD[TOTAL_PACKAGE]}\n${getPackageName(drfMD[TOTAL_PACKAGE_UNIT])}`
+        package: `${drfMD[TOTAL_PACKAGE]}\n${getPackageName(drfMD[TOTAL_PACKAGE_UNIT], drfMD[TOTAL_PACKAGE])}`
           .split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)),
         description: getValueField(DESCRIPTION_OF_GOODS)
           .split("\n")
@@ -86,8 +86,8 @@ const Rider = ({ drfMD, containersDetail, containersManifest, setTotalPage, isOn
           [SHIPPING_MARK]: result.mark[0]?.[i] || [],
           [TOTAL_PACKAGE]: result.package[0]?.[i] || [],
           [DESCRIPTION_OF_GOODS]: result.description[0]?.[i] || [],
-          [TOTAL_WEIGHT]: i === 0 ? `${drfMD[TOTAL_WEIGHT]} ${drfMD[TOTAL_WEIGHT_UNIT]}` : "",
-          [TOTAL_MEASUREMENT]: i === 0 ? `${drfMD[TOTAL_MEASUREMENT]} ${drfMD[TOTAL_MEASUREMENT_UNIT]}` : ""
+          [TOTAL_WEIGHT]: i === 0 ? `${drfMD[TOTAL_WEIGHT]}${drfMD[TOTAL_WEIGHT_UNIT]}` : "",
+          [TOTAL_MEASUREMENT]: i === 0 ? `${drfMD[TOTAL_MEASUREMENT]}${drfMD[TOTAL_MEASUREMENT_UNIT]}` : ""
         }];
       }
     } else {

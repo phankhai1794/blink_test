@@ -1,7 +1,7 @@
 import { FuseChipSelect } from '@fuse';
 import React, { useEffect, useRef, useState, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { combineCDCM, getLabelById, toFindDuplicates, generateFileName } from '@shared';
+import { combineCDCM, getLabelById, toFindDuplicates, generateFileName, generateFileNameTimeFormat } from '@shared';
 import { handleError } from '@shared/handleError';
 import {
   Button,
@@ -229,7 +229,6 @@ const InquiryEditor = (props) => {
   );
   const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
-  const [allPasteFiles, setAllPasteFile] = useState([]);
 
   const user = useSelector(({ user }) => user);
   const getField = (field) => {
@@ -529,7 +528,7 @@ const InquiryEditor = (props) => {
         return getDataField && getTemplate
       }).sort((a, b) => a.label.localeCompare(b.label));
       const inq = { ...currentEditInq };
-      
+
       if (!filter.some(f => f.value === inq.inqType)) {
         inq.inqType = '';
         dispatch(InquiryActions.setEditInq(inq));
@@ -596,6 +595,39 @@ const InquiryEditor = (props) => {
         value: metadata.ans_type.paragraph
       });
     }
+  }
+
+  const mappingValType = (valResult) => {
+    const inqCdCm = [...contentsInqCDCM];
+    const currentTab = (openAllInquiry && currentTabs === 1) ? 'onshore' : 'customer';
+    const contentArr = [];
+    valResult.forEach(v => {
+      const findByIdType = inqCdCm.find(inq => v.value === inq.type);
+      if (!findByIdType) {
+        const filter = metadata.template.find(({ field, type }) => {
+          return type === v.value && ['containerDetail', 'containerManifest'].includes(field);
+        });
+        if (filter) {
+          filter.showTemplate = false;
+          filter.templateIndex = '0';
+          filter.contentShow = filter.content[0];
+          filter.receiver = `${currentTab}-${v.value}`;
+          contentArr.push(filter);
+        } else if (v.label === OTHERS) {
+          contentArr.push({
+            showTemplate: false,
+            templateIndex: '0',
+            content: [currentEditInq.content],
+            contentShow: currentEditInq.content,
+            receiver: `${currentTab}-${v.value}`,
+            type: v.value,
+          });
+        }
+      } else if (findByIdType) {
+        contentArr.push(findByIdType);
+      }
+    });
+    return contentArr;
   }
 
   const handleTypeChange = (e) => {
@@ -726,13 +758,17 @@ const InquiryEditor = (props) => {
       setContent(formatTemplate(filter?.content[0] || MSG_INQUIRY_CONTENT));
     }
 
+    containerFieldValueCheck(inq)
+
     if (containerCheck.includes(e.value) && !Array.isArray(valueType)) {
       setValueType([valueType]);
+      if (valueType.label === OTHERS) {
+        const valTypes = mappingValType([valueType]);
+        setContentsInqCDCM(valTypes)
+      }
     } else if (!containerCheck.includes(e.value) && Array.isArray(valueType)) {
       setValueType(valueType[0]);
     }
-    containerFieldValueCheck(inq)
-
     if (e.keyword === BL_TYPE && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
 
     setTemplateList(filter?.content || []);
@@ -833,11 +869,9 @@ const InquiryEditor = (props) => {
       }
       return inq.field === currentEditInq.field
     })];
-    if (currentEditInq.id) {
-      listInqOfField.splice(
-        listInqOfField.findIndex((inq) => inq.id === currentEditInq.id),
-        1
-      );
+    const index = listInqOfField.findIndex((inq) => inq.id === currentEditInq.id)
+    if (currentEditInq.id && index >= 0) {
+      listInqOfField.splice(index, 1);
     }
     if (listInqOfField.length) {
       let checkDuplicate = false;
@@ -1279,17 +1313,14 @@ const InquiryEditor = (props) => {
   const onPaste = (e) => {
     if (e.clipboardData.files.length) {
       let fileObject = e.clipboardData.files[0];
-      const newFileName = generateFileName(fileObject.name, currentEditInq.mediaFile.map(fItem => { return fItem.name }));
+      const newFileName = generateFileNameTimeFormat(fileObject.name);
       const myRenamedFile = new File(
         [fileObject],
         newFileName, {
-          type: "image/png"
-        }
-      );
-      if (!allPasteFiles.includes(newFileName)) {
-        setFilepaste(myRenamedFile);
-        setAllPasteFile([...allPasteFiles, newFileName])
+        type: "image/png"
       }
+      );
+      setFilepaste(myRenamedFile);
     }
   }
 
