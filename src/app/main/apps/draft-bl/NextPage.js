@@ -1,10 +1,12 @@
 import React from 'react';
-import { formatNoneContNo, pluralizeCustomer } from '@shared';
-import { VESSEL_VOYAGE, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_WEIGHT, TOTAL_MEASUREMENT, REMARKS, ALSO_NOTIFY, TOTAL_PREPAID, CD_MOVE_TYPE, FREIGHT_TERM } from '@shared/keyword';
+import { pluralizeCustomer } from '@shared';
+import { VESSEL_VOYAGE } from '@shared/keyword';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import { Grid } from '@material-ui/core';
-import { packageUnitsJson, containerTypeUnit } from '@shared/units';
+import { packageUnitsJson } from '@shared/units';
+
+import Body from './Body';
 
 const BORDER = '1px solid #2929FF';
 const WIDTH_COL_MARK = 220;
@@ -91,7 +93,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage }) => {
+const NextPage = ({ currentPage, totalPage, data }) => {
   const classes = useStyles();
   const [metadata, myBL, content] = useSelector(({ draftBL }) => [
     draftBL.metadata,
@@ -112,53 +114,6 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
   };
 
   const getPackageName = (packageCode, packageNumber) => pluralizeCustomer(packageNumber, packageUnitsJson.find(pkg => pkg.code === packageCode)?.description);
-
-  const renderMDCMTable = () => {
-    return containersManifest.map((cm, index) => (
-      <Grid container item key={index} className={classes.content_L}>
-        <Grid item style={{ whiteSpace: 'pre-wrap', width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-          {cm[SHIPPING_MARK] || cm[getInqType(CM_MARK)] || ""}
-        </Grid>
-        <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-          <Grid item style={{ textAlign: 'end', whiteSpace: 'pre-wrap' }}>
-            {
-              cm[TOTAL_PACKAGE]
-              ||
-              <>
-                <span>{cm[getInqType(CM_PACKAGE)]}</span>
-                <br />
-                <span>{getPackageName(cm[getInqType(CM_PACKAGE_UNIT)], cm[getInqType(CM_PACKAGE)])}</span>
-              </>
-              ||
-              ""
-            }
-          </Grid>
-        </Grid>
-        <Grid style={{ width: WIDTH_COL_HM, borderRight: BORDER, boxSizing: 'border-box' }}></Grid>
-        <Grid item style={{ whiteSpace: 'pre-wrap', width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-          {cm[DESCRIPTION_OF_GOODS] || cm[getInqType(CM_DESCRIPTION)] || ""}
-        </Grid>
-        <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-          {
-            cm[TOTAL_WEIGHT]
-            ||
-            cm[getInqType(CM_WEIGHT)] && `${cm[getInqType(CM_WEIGHT)]}${cm[getInqType(CM_WEIGHT_UNIT)]}`
-            ||
-            ""
-          }
-        </Grid>
-        <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-          {
-            cm[TOTAL_MEASUREMENT]
-            ||
-            cm[getInqType(CM_MEASUREMENT)] && `${cm[getInqType(CM_MEASUREMENT)]}${cm[getInqType(CM_MEASUREMENT_UNIT)]}`
-            ||
-            ""
-          }
-        </Grid>
-      </Grid>
-    ))
-  }
 
   return (
     <div className={classes.layout}>
@@ -236,69 +191,14 @@ const NextPage = ({ containersDetail, containersManifest, currentPage, totalPage
         </Grid>
       </Grid>
 
-      {Boolean(containersDetail.length) &&
-        <Grid container item>
-          <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER }}>
-            <div className={classes.content_M} style={{ paddingTop: 5 }}>
-              {containersDetail.map((cd, idx) => (
-                <span key={idx} style={{ whiteSpace: 'pre', lineHeight: '20px' }}>
-                  {`${formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)])}    / ${cd[getInqType(CONTAINER_SEAL)] || ''}    /  ${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)]) || ''} /${cd[getInqType(CD_MOVE_TYPE)] || ''}/  ${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}  /  ${cd[getInqType(CONTAINER_WEIGHT)] || ''}${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}  /  ${cd[getInqType(CONTAINER_MEASUREMENT)] || ''}${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`}
-                  <br />
-                </span>
-              ))
-              }
-              <span className={classes.description_payment_dash}>
-                -----------------------------------------------------------------------------------------------------------------------------------------
-              </span>
-            </div>
-          </Grid>
-          <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER }} />
-          <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }} />
-          <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER }} />
-          <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }} />
-          <Grid item style={{ width: WIDTH_COL_MEAS }} />
-        </Grid>
-      }
-
-      <Grid container>
-        {renderMDCMTable()}
-      </Grid>
-
-      {/* If is last page */}
-      {(currentPage === totalPage) &&
-        <Grid container item>
-          <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, minHeight: '100vh' }}>
-            <div className={classes.content_M} style={{ paddingTop: 5 }}>
-              <span className={classes.description_payment_dash}>
-                -----------------------------------------------------------------------------------------------------------------------------------------
-              </span>
-              <br />
-              {getValueField(ALSO_NOTIFY)?.trim() ?
-                <div>
-                  <span>ALSO NOTIFY</span>
-                  <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
-                    {getValueField(ALSO_NOTIFY)}
-                  </span>
-                  <br />
-                </div> :
-                <></>
-              }
-              <span>
-                {getValueField(FREIGHT_TERM) ? `OCEAN FREIGHT ${getValueField(FREIGHT_TERM)}` : ""}
-              </span>
-              <br></br>
-              <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
-                {getValueField(REMARKS)}
-              </span>
-            </div>
-          </Grid>
-          <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER }} />
-          <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }} />
-          <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER }} />
-          <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }} />
-          <Grid item style={{ width: WIDTH_COL_MEAS }} />
-        </Grid>
-      }
+      {/* Render CD, CM, ALSO NOTIFY, FREIGHT TERM, REMARKS */}
+      <Body
+        isFirstPage={false}
+        classes={classes}
+        data={data}
+        getInqType={getInqType}
+        getPackageName={getPackageName}
+      />
     </div>
   );
 };
