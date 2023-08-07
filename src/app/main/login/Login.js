@@ -3,7 +3,7 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { Box, Card, CardContent, Typography } from '@material-ui/core';
 import * as Actions from 'app/store/actions';
-import { login } from 'app/services/authService';
+import { verifyToken, login } from 'app/services/authService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
@@ -109,12 +109,15 @@ function Login(props) {
   }
 
   useEffect(() => {
-    // TODO: verify token by API
-    // if (
-    //   localStorage.getItem('AUTH_TOKEN') &&
-    //   PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD })
-    // )
-    //   history.push('/');
+    const token = localStorage.getItem('AUTH_TOKEN');
+    if (token) {
+      verifyToken(token)
+        .then(res => {
+          if (res.status === 200 && PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }))
+            history.push('/');
+        })
+        .catch(err => console.error(err));
+    }
   }, []);
 
   return (
