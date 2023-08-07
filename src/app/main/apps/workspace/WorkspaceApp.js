@@ -66,10 +66,7 @@ function WorkspaceApp() {
           countries: user?.countries,
           office: user?.office
         });
-        if (result) {
-          redirect404 = false;
-          setValidUrl(true);
-        }
+        if (result) setValidUrl(true);
       } catch (error) {
         console.error(error);
         if (error.message === 'Network Error')
