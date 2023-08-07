@@ -1,5 +1,6 @@
 import React, { useEffect, useContext } from 'react';
 import _ from 'lodash';
+import history from '@history';
 import { useDispatch, useSelector } from 'react-redux';
 import { SocketContext } from 'app/AppContext';
 import { getPermissionByRole } from 'app/services/authService';
@@ -74,6 +75,10 @@ const PreProcess = ({ bl, children }) => {
         dispatch(FormActions.decreaseLoading());
       });
     }
+
+    if (!socket.connected) socket.connect();
+
+    return () => socket.disconnect();
   }, []);
 
   useEffect(() => {
@@ -93,8 +98,8 @@ const PreProcess = ({ bl, children }) => {
       );
 
       socket.on('connect_error', (err) => {
-        // reload if server has disconnected
-        window.location.reload();
+        // if server has disconnected
+        history.push('/deploying')
       });
 
       // save socketId into window console after connecting

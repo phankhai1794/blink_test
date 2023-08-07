@@ -21,10 +21,9 @@ const useStyles = makeStyles((theme) => ({
   },
   startIconBtn: {
     position: 'relative',
-    width: 14,
-    height: 14,
-    top: 1,
-    right: 3
+    width: 15,
+    height: 15,
+    display: 'inline-flex'
   }
 }));
 

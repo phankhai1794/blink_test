@@ -102,7 +102,8 @@ const useStyles = makeStyles((theme) => ({
   adornmentMultiline: {
     alignItems: 'flex-end',
     position: 'absolute',
-    right: '0%'
+    right: '0%',
+    bottom: 0
   },
   adornmentMultilineDoG: {
     alignItems: 'flex-end',
