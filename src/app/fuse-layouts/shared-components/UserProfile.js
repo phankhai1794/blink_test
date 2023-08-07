@@ -40,7 +40,7 @@ function UserProfile(props) {
   const handleLogOut = () => {
     clearLocalStorage();
     channel.postMessage({ role: user.role, type: "logout" });
-    socket.emit('user_logout');
+    // socket.emit('user_logout');
     dispatch(AppActions.removeUser());
     dispatch(AppActions.checkAllow(false));
   };

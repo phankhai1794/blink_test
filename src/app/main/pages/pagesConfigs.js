@@ -11,6 +11,7 @@ import { ResetPassword2PageConfig } from './auth/reset-password-2/ResetPassword2
 import { ComingSoonPageConfig } from './coming-soon/ComingSoonPageConfig';
 import { Error404PageConfig } from './errors/404/Error404PageConfig';
 import { Error500PageConfig } from './errors/500/Error500PageConfig';
+import { DeployingConfig } from './errors/deploying/DeployingConfig';
 import { MaintenancePageConfig } from './maintenance/MaintenancePageConfig';
 import { ProfilePageConfig } from './profile/ProfilePageConfig';
 import { ClassicSearchPageConfig } from './search/classic/ClassicSearchPageConfig';
@@ -31,6 +32,7 @@ export const pagesConfigs = [
   ComingSoonPageConfig,
   Error404PageConfig,
   Error500PageConfig,
+  DeployingConfig,
   MaintenancePageConfig,
   ProfilePageConfig,
   ClassicSearchPageConfig,
