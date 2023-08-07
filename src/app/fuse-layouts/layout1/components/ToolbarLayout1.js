@@ -272,7 +272,7 @@ function ToolbarLayout1(props) {
                     }
                     attachFileCount = [...attachFileCount, ...mediaMap];
                   } else if (col.process === 'draft') {
-                    const {mediaFile} = col.content;
+                    const { mediaFile } = col.content;
                     if (col.content && mediaFile.length) {
                       const mediaMap = mediaFile.map(q => {
                         return {
@@ -535,7 +535,7 @@ function ToolbarLayout1(props) {
                     size="medium"
                     className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
-                    <img src="assets/images/icons/email.svg" style={{ position: 'relative', right: 3, width: 12, height: 12, top: 1 }} />
+                    <img src="assets/images/icons/email.svg" style={{ position: 'relative', right: 3, width: 13, display: 'inline-flex' }} />
                     <span>Email</span>
                   </Button>
                 </div>

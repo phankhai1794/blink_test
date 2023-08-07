@@ -601,8 +601,9 @@ export default function Form(props) {
                       fontFamily: 'Montserrat'
                     }}
                     disabled={!enableSend || isLoading || inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED', 'AME_SENT', 'ANS_SENT', 'REP_A_SENT'].includes(inq.state)).length === inquiries.length}
-                    onClick={sendMailClick}>
-                    E-mail
+                    onClick={sendMailClick}
+                  >
+                    Email
                   </Button>
                   {isLoading && (
                     <CircularProgress
