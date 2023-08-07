@@ -24,7 +24,8 @@ import {
   ALSO_NOTIFY,
   FREIGHT_TERM,
   REMARKS,
-  CONTAINER_SEAL
+  CONTAINER_SEAL,
+  FORWARDER
 } from '@shared/keyword';
 import pluralize from 'pluralize'
 
@@ -247,10 +248,15 @@ export const MAX_LINE_DRF_PAGE_2 = 60;
 export const MAX_CHARS = {
   mark: 21,
   package: 14,
-  description: 35
+  description: 35,
+  forwarder: 35
 }
 
 export const lineBreakAtBoundary = (string, boundary) => {
+  /**
+   * Input: string doesn't include the new line character (\n)
+   * Output: string has been wrapped text by bounds
+   */
   let line = "";
   let newString = "";
   const arr = string.split(" ");
@@ -684,9 +690,15 @@ export const splitDraftData = (
   let frTerm = getValueField(FREIGHT_TERM) || "";
   let remark = getValueField(REMARKS)?.trim() || "";
   remark = remark ? remark.split("\n") : [];
+  const forwarding = (getValueField(FORWARDER) || "")
+    .split("\n")
+    .map(line => lineBreakAtBoundary(line, MAX_CHARS.forwarder))
+    .slice(3);
+
   let rows = [
     ...(frTerm ? [`OCEAN FREIGHT ${frTerm}`] : []),
-    ...remark
+    ...remark,
+    ...(forwarding.length ? [...["<"], ...forwarding] : [])
   ];
 
   idx = 0;
