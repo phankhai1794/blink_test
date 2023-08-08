@@ -561,7 +561,7 @@ export const splitDraftData = (
   // break cd into line by line, each line contains only 1 seal 
   [...CD].forEach(cd => {
     const seals = [...cd[getInqType(CONTAINER_SEAL)]];
-    seals.forEach((seal, idx) => {
+    (seals.length ? seals : [""]).forEach((seal, idx) => {
       if (idx === 0)
         contD = [
           ...contD,
