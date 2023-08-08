@@ -133,7 +133,7 @@ const Body = ({ isFirstPage, classes, data, getInqType, getPackageName }) => {
                     <br />
                   </> :
                   <>
-                    <span style={{ width: 950 }}>
+                    <span style={{ width: 950, lineHeight: '20px' }}>
                       {line}
                     </span>
                     <br />
