@@ -1170,9 +1170,15 @@ const InquiryViewer = (props) => {
                       CONTAINER_LIST.cdUnit.map((key, index) => {
                         cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                       });
-                      const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0] &&
-                          ((['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest') || ['RESOLVED', 'UPLOADED'].includes(inq.state))
-                      );
+                      const isSent = [...optionsInquires].find(inq => (
+                        inq.process === 'draft'
+                        && inq.field === containerCheck[0]
+                        && (
+                          (['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest')
+                          ||
+                          ['RESOLVED', 'UPLOADED'].includes(inq.state)
+                        )
+                      ));
                       if (!isSent) {
                         saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
                       }
@@ -1191,9 +1197,15 @@ const InquiryViewer = (props) => {
                       CONTAINER_LIST.cmUnit.map((key, index) => {
                         cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                       });
-                      const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1] &&
-                          ((['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest') || ['RESOLVED', 'UPLOADED'].includes(inq.state))
-                      );
+                      const isSent = [...optionsInquires].find(inq => (
+                        inq.process === 'draft'
+                        && inq.field === containerCheck[1]
+                        && (
+                          (['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest')
+                          ||
+                          ['RESOLVED', 'UPLOADED'].includes(inq.state)
+                        )
+                      ));
                       if (!isSent) {
                         saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
                       }
@@ -1241,9 +1253,15 @@ const InquiryViewer = (props) => {
                       cm[0][getTypeCDCM(CONTAINER_LIST.cmUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[1]] = cm;
-                    const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[1] &&
-                        ((['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest') || ['RESOLVED', 'UPLOADED'].includes(inq.state))
-                    );
+                    const isSent = [...optionsInquires].find(inq => (
+                      inq.process === 'draft'
+                      && inq.field === containerCheck[1]
+                      && (
+                        (['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest')
+                        ||
+                        ['RESOLVED', 'UPLOADED'].includes(inq.state)
+                      )
+                    ));
                     if (!isSent) {
                       saveEditedField({ field: containerCheck[1], content: { content: cm, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
                         .then(res => {
@@ -1270,9 +1288,15 @@ const InquiryViewer = (props) => {
                       cd[0][getTypeCDCM(CONTAINER_LIST.cdUnit[index])] = res.drfAnswersTrans[0][getTypeCDCM(key)];
                     });
                     content[containerCheck[0]] = cd;
-                    const isSent = [...optionsInquires].find(inq => inq.process === 'draft' && inq.field === containerCheck[0] &&
-                        ((['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest') || ['RESOLVED', 'UPLOADED'].includes(inq.state))
-                    );
+                    const isSent = [...optionsInquires].find(inq => (
+                      inq.process === 'draft'
+                      && inq.field === containerCheck[0]
+                      && (
+                        (['AME_SENT', 'REP_SENT', 'REP_AME_SENT'].includes(inq.state) && user.role === 'guest')
+                        ||
+                        ['RESOLVED', 'UPLOADED'].includes(inq.state)
+                      )
+                    ));
                     if (!isSent) {
                       saveEditedField({ field: containerCheck[0], content: { content: cd, mediaFile: [] }, mybl: myBL.id, autoUpdate: true, action: 'deleteAmendment' })
                         .then(res => {
@@ -3046,29 +3070,14 @@ const InquiryViewer = (props) => {
   }
 
   const onPaste = (e) => {
-    if ((isReply || question.showIconAttachAnswerFile) && e.clipboardData.files.length) {
-      const fileObject = e.clipboardData.files[0];
-      // generate new file name
-      if (['ANS_DRF', 'INQ_SENT', 'ANS_SENT'].includes(question.state) && user.role === 'Guest') { // case create ans/ edit anns
-        if (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) {
-          const newFileName = generateFileNameTimeFormat(fileObject.name);
-          const myRenamedFile = new File([fileObject], newFileName, {
-            type: "image/png"
-          });
-          setFilepaste(myRenamedFile);
-        } setFilepaste(fileObject);
-      } else {
-        //other case
-        if (tempReply.mediaFiles && tempReply.mediaFiles.length > 0) {
-          const newFileName = generateFileNameTimeFormat(fileObject.name);
-          const myRenamedFile = new File([fileObject], newFileName, {
-            type: "image/png"
-          });
-          setFilepaste(myRenamedFile)
-        } else setFilepaste(fileObject);
-      }
-    }
-   
+    const fileObject = e.clipboardData.files[0];
+    const newFileName = generateFileNameTimeFormat(fileObject.name);
+    const myRenamedFile = new File(
+      [fileObject],
+      newFileName,
+      { type: "image/png" }
+    );
+    setFilepaste(myRenamedFile);
   }
 
   const { isDragActive, getRootProps } = useDropzone({

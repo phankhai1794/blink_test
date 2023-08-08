@@ -8,11 +8,12 @@ import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
-import { isJsonText, formatDate, MAX_CHARS, MAX_ROWS_CD, lineBreakAtBoundary, getMaxRows, getTotalValueMDView, formatNoneContNo, findSumFromArray, NumberFormat, pluralizeCustomer } from '@shared';
-import { packageUnitsJson, containerTypeUnit } from '@shared/units';
+import { isJsonText, formatDate, NumberFormat, pluralizeCustomer, splitDraftData } from '@shared';
+import { packageUnitsJson } from '@shared/units';
 
 import * as Actions from './store/actions';
 import Rider from './Rider';
+import Body from './Body';
 
 const BORDER = '1px solid #2929FF';
 const BORDER_BOLD = '2px solid #2929FF';
@@ -191,16 +192,20 @@ const DraftPage = (props) => {
   const dispatch = useDispatch();
   const [containersDetail, setContainersDetail] = useState([]);
   const [containersManifest, setContainersManifest] = useState([]);
-  const [maxRows, setMaxRows] = useState(0);
   const [metadata, myBL, content, drfView] = useSelector(({ draftBL }) => [
     draftBL.metadata,
     draftBL.myBL,
     draftBL.content,
     draftBL.drfView
   ]);
-  const [isInBound, setIsInBound] = useState({ MD: true, CM: true });
-  const [isInsertRider, setInsertRider] = useState(false);
-  const [totalPage, setTotalPage] = useState(1);
+  const [pages, setPages] = useState([
+    [ // page 1
+      [], // CD
+      [], // CM
+      [], // also notify
+      [], // freight term, remark
+    ],
+  ]);
 
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
@@ -217,9 +222,7 @@ const DraftPage = (props) => {
     return metadata ? metadata.inq_type[field] : '';
   };
 
-  const getPackageName = (packageCode, packageNumber) => pluralizeCustomer(packageNumber, packageUnitsJson.find(pkg => pkg.code === packageCode)?.description);
-
-  const drfMD = getTotalValueMDView(drfView, containersDetail, getInqType);
+  const getPackageName = (unit, value) => pluralizeCustomer(value, packageUnitsJson.find(pkg => pkg.code === unit)?.description);
 
   useEffect(() => {
     const { pathname, search } = window.location;
@@ -242,159 +245,39 @@ const DraftPage = (props) => {
     if (Object.keys(content).length && Object.keys(metadata).length) {
       // format CD detail
       const formatCD = getValueField(CONTAINER_DETAIL).map(cdItem => {
-        let currentRow = {...cdItem};
-        currentRow[getInqType(CONTAINER_PACKAGE)] = NumberFormat(currentRow[getInqType(CONTAINER_PACKAGE)],0,true);
-        currentRow[getInqType(CONTAINER_WEIGHT)] = NumberFormat(currentRow[getInqType(CONTAINER_WEIGHT)],3,true);
-        currentRow[getInqType(CONTAINER_MEASUREMENT)] = NumberFormat(currentRow[getInqType(CONTAINER_MEASUREMENT)],3,true);
+        let currentRow = { ...cdItem };
+        currentRow[getInqType(CONTAINER_PACKAGE)] = NumberFormat(currentRow[getInqType(CONTAINER_PACKAGE)], 0, true);
+        currentRow[getInqType(CONTAINER_WEIGHT)] = NumberFormat(currentRow[getInqType(CONTAINER_WEIGHT)], 3, true);
+        currentRow[getInqType(CONTAINER_MEASUREMENT)] = NumberFormat(currentRow[getInqType(CONTAINER_MEASUREMENT)], 3, true);
         return currentRow;
       })
 
       const formatCM = getValueField(CONTAINER_MANIFEST).map(cmItem => {
-        let currentRow = {...cmItem};
-        currentRow[getInqType(CM_PACKAGE)] = NumberFormat(currentRow[getInqType(CM_PACKAGE)],0,true);
-        currentRow[getInqType(CM_WEIGHT)] = NumberFormat(currentRow[getInqType(CM_WEIGHT)],3,true);
-        currentRow[getInqType(CM_MEASUREMENT)] = NumberFormat(currentRow[getInqType(CM_MEASUREMENT)],3,true);
+        let currentRow = { ...cmItem };
+        currentRow[getInqType(CM_PACKAGE)] = NumberFormat(currentRow[getInqType(CM_PACKAGE)], 0, true);
+        currentRow[getInqType(CM_WEIGHT)] = NumberFormat(currentRow[getInqType(CM_WEIGHT)], 3, true);
+        currentRow[getInqType(CM_MEASUREMENT)] = NumberFormat(currentRow[getInqType(CM_MEASUREMENT)], 3, true);
         return currentRow;
       })
-      
+
       setContainersDetail(formatCD || []);
       setContainersManifest(formatCM || []);
     }
   }, [metadata, content]);
 
   useEffect(() => {
-    if (containersDetail.length) {
-      // MD view
-      let totalMark = getValueField(SHIPPING_MARK).split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.mark)).join("\n");
-      let totalPackage = `${NumberFormat(getValueField(TOTAL_PACKAGE),0,true)}\n${pluralizeCustomer(getValueField(TOTAL_PACKAGE),getPackageName(getValueField(TOTAL_PACKAGE_UNIT)))}`.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)).join("\n");
-      let totalDescription = getValueField(DESCRIPTION_OF_GOODS).split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.description)).join("\n");
-
-      // CM view
-      let cmMark = "";
-      let cmPackage = "";
-      let cmDescription = "";
-      containersManifest.forEach(cm => {
-        cmMark += lineBreakAtBoundary(cm[getInqType(CM_MARK)], MAX_CHARS.mark) + "\n";
-        cmPackage += `${cm[getInqType(CM_PACKAGE)]}\n${getPackageName(cm[getInqType(CM_PACKAGE_UNIT)], cm[getInqType(CM_PACKAGE)])}`.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.package)).join("\n");
-        cmDescription += lineBreakAtBoundary(cm[getInqType(CM_DESCRIPTION)], MAX_CHARS.description) + "\n";
-      });
-      const maxRowsMD = getMaxRows(
-        containersDetail.length + 1, // 1 more dash line
-        totalMark,
-        totalPackage,
-        totalDescription
+    if (containersDetail.length)
+      setPages(
+        splitDraftData(
+          drfView,
+          containersDetail,
+          containersManifest,
+          getValueField,
+          getInqType,
+          getPackageName
+        )
       );
-      const maxRowsCM = getMaxRows(
-        containersDetail.length + containersManifest.length + 1, // 1 more dash line
-        cmMark.trim().replace(/^\s+|\s+$/g, ''),
-        cmPackage.trim().replace(/^\s+|\s+$/g, ''),
-        cmDescription.trim().replace(/^\s+|\s+$/g, '')
-      )
-
-      setIsInBound({
-        MD: maxRowsMD <= MAX_ROWS_CD,
-        CM: maxRowsCM <= MAX_ROWS_CD
-      });
-      setMaxRows(drfView === "CM" ? maxRowsCM : maxRowsMD);
-
-      const maxRiderInfo = getValueField(ALSO_NOTIFY).trim().split("\n").length + getValueField(REMARKS).trim().split("\n").length + 1;
-      if ((drfView === "CM" && maxRiderInfo + maxRowsCM > MAX_ROWS_CD) || (drfView === "MD" && maxRiderInfo + maxRowsMD > MAX_ROWS_CD)) setInsertRider(true)
-    }
-  }, [containersDetail, containersManifest]);
-
-  const renderAlsoRemark = () => (
-    <div style={{ position: 'alsolute', top: `100%` }}>
-      <br></br>
-      {getValueField(ALSO_NOTIFY)?.trim() ?
-        <div>
-          <br></br>
-          <span className={classes.description_payment_dash} style={{ width: 'max-content', display: 'flow-root' }}>
-            -----------------------------------------------------------------------------------------------------------------------------------------
-          </span>
-          <span>ALSO NOTIFY</span>
-          <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
-            {getValueField(ALSO_NOTIFY)}
-          </span>
-          <br />
-        </div> :
-        <div>
-          <br></br>
-          <span className={classes.description_payment_dash} style={{ width: 'max-content', display: 'flow-root' }}>
-            -----------------------------------------------------------------------------------------------------------------------------------------
-          </span>
-        </div>
-      }
-      <span>
-        {getValueField(FREIGHT_TERM) ? `OCEAN FREIGHT ${getValueField(FREIGHT_TERM)}` : ""}
-      </span>
-      <br></br>
-      <span style={{ position: 'relative', display: 'flex', whiteSpace: 'pre-wrap', wordBreak: 'break-word', width: 950 }}>
-        {getValueField(REMARKS)}
-      </span>
-    </div>
-  )
-  const renderMDCMTable = () => {
-    if (drfView === "CM" && isInBound[drfView] && containersManifest.length) {
-      return containersManifest.map((cm, index) => (
-        <Grid container item key={index} className={classes.content_L}>
-          <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            {cm[getInqType(CM_MARK)]}
-            {!isInsertRider && renderAlsoRemark()}
-          </Grid>
-          <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            <Grid item style={{ textAlign: 'end' }}>
-              <span>{cm[getInqType(CM_PACKAGE)]}</span>
-              <br />
-              <span>{getPackageName(cm[getInqType(CM_PACKAGE_UNIT)], cm[getInqType(CM_PACKAGE)])}</span>
-            </Grid>
-          </Grid>
-          <Grid style={{ width: WIDTH_COL_HM, borderRight: BORDER, boxSizing: 'border-box' }}></Grid>
-          <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            {cm[getInqType(CM_DESCRIPTION)]}
-          </Grid>
-          <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            {`${cm[getInqType(CM_WEIGHT)]}${cm[getInqType(CM_WEIGHT_UNIT)]}`}
-          </Grid>
-          <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 20, ...(index === 0 && { paddingTop: 5 }) }}>
-            {`${cm[getInqType(CM_MEASUREMENT)]}${cm[getInqType(CM_MEASUREMENT_UNIT)]}`}
-          </Grid>
-        </Grid>
-      ))
-    } else if (drfView === "MD" && isInBound[drfView]) {
-      return <Grid container item className={classes.content_L}>
-        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'left', paddingTop: 5, whiteSpace: 'pre-wrap' }}>
-          {getValueField(SHIPPING_MARK)}
-          {!isInsertRider && renderAlsoRemark()}
-        </Grid>
-        <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', paddingTop: 5 }}>
-          <Grid item style={{ textAlign: 'end' }}>
-            <span>{NumberFormat(drfMD[TOTAL_PACKAGE],0,true)}</span>
-            <br />
-            <span>{getPackageName(drfMD[TOTAL_PACKAGE_UNIT], drfMD[TOTAL_PACKAGE])}</span>
-          </Grid>
-        </Grid>
-        <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }}></Grid>
-        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, paddingLeft: 3, paddingTop: 5, whiteSpace: 'pre-wrap' }}>
-          {getValueField(DESCRIPTION_OF_GOODS)}
-        </Grid>
-        <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', paddingTop: 5 }}>
-          {`${NumberFormat(drfMD[TOTAL_WEIGHT],3,true)}${drfMD[TOTAL_WEIGHT_UNIT]}`}
-        </Grid>
-        <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', paddingTop: 5 }}>
-          {`${NumberFormat(drfMD[TOTAL_MEASUREMENT],3,true)}${drfMD[TOTAL_MEASUREMENT_UNIT]}`}
-        </Grid>
-      </Grid>
-    } else {
-      return <Grid container item className={classes.content_L}>
-        <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER, textAlign: 'center', padding: '8px' }} />
-        <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER, textAlign: 'center', padding: '8px' }} />
-        <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER, boxSizing: 'border-box' }} />
-        <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER, padding: '8px' }} />
-        <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER, textAlign: 'end', padding: '8px' }} />
-        <Grid item style={{ width: WIDTH_COL_MEAS, textAlign: 'end', padding: '8px' }} />
-      </Grid>
-    }
-  }
+  }, [containersDetail, containersManifest, drfView]);
 
   const getContentBlCopy = (blType, count) => {
     let text = `[ ${count} ] ORIGINAL BILLS(S) HAVE BEEN SIGNED.`
@@ -416,7 +299,7 @@ const DraftPage = (props) => {
           </div>
           <div style={{ width: '30%', paddingTop: 15 }}>
             <div className={classes.page_Number}>
-              PAGE: <p className={classes.page_Count}>1</p> OF <p className={classes.page_Count}>{totalPage}</p>
+              PAGE: <p className={classes.page_Count}>1</p> OF <p className={classes.page_Count}>{pages.length}</p>
             </div>
             <span className={classes.blType}>
               {getValueField(BL_TYPE) ? getValueField(BL_TYPE) === "W" ? "SEA WAYBILL" : "BILL OF LADING" : ""}
@@ -678,69 +561,17 @@ const DraftPage = (props) => {
               </Grid>
             </Grid>
 
-            <Grid container style={!isInBound[drfView] ? { height: 320 } : {}}>
-              <Grid container item>
-                <Grid item style={{ width: WIDTH_COL_MARK, borderRight: BORDER }}>
-                  <div className={classes.content_M} style={{ paddingTop: 5 }}>
-                    {containersDetail &&
-                      containersDetail.map((cd, idx) => (
-                        (idx < MAX_ROWS_CD) && <span key={idx} style={{ whiteSpace: 'pre', display: 'flex' }}>
-                          <div style={{position: 'relative', display: 'flex', }}>
-                            <div style={{position: 'relative', display: 'flex', }}>
-                              {
-                                [
-                                  formatNoneContNo(cd[getInqType(CONTAINER_NUMBER)]),
-                                  cd[getInqType(CONTAINER_SEAL)].join("\n"),
-                                  `${cd[getInqType(CONTAINER_PACKAGE)] || ''} ${getPackageName(cd[getInqType(CONTAINER_PACKAGE_UNIT)], cd[getInqType(CONTAINER_PACKAGE)]) || ''}`,
-                                  `${cd[getInqType(CD_MOVE_TYPE)]}/${cd[getInqType(CONTAINER_TYPE)] ? containerTypeUnit.find(contType => contType.value === cd[getInqType(CONTAINER_TYPE)]).label : ''}/${cd[getInqType(CONTAINER_WEIGHT)] || ''}${cd[getInqType(CONTAINER_WEIGHT_UNIT)] || ''}/${cd[getInqType(CONTAINER_MEASUREMENT)] || ''}${cd[getInqType(CONTAINER_MEASUREMENT_UNIT)] || ''}`
-                                ].map((item, index) => {
-                                  return (
-                                    <div style={{position: 'relative', display: 'flex', }}>
-                                      <div style={{position: 'relative', display: 'flex',  width: index === 1 ? '146px' : 'auto'}}> {item} </div>
-                                      {index != 3 && 
-                                              <div style={{position: 'relative',
-                                                display: 'flex',
-                                               
-                                                paddingRight: index >= 2 ? 0 : '55px',
-                                                paddingLeft: index > 2 ? 0 :'45px' }}
-                                                >
-                                                   /
-                                              </div>}
-                                    </div>
-                                  )
-
-                                })
-                              }
-                              
-                            </div>
-
-                          </div>
-              
-                          <br />
-                        </span>
-                      ))
-                    }
-                    {containersDetail.length <= MAX_ROWS_CD &&
-                      <span className={classes.description_payment_dash}>
-                        -----------------------------------------------------------------------------------------------------------------------------------------
-                      </span>
-                    }
-                  </div>
-                </Grid>
-                <Grid item style={{ width: WIDTH_COL_PKG, borderRight: BORDER }} />
-                <Grid item style={{ width: WIDTH_COL_HM, borderRight: BORDER }} />
-                <Grid item style={{ width: WIDTH_COL_DOG, borderRight: BORDER }} />
-                <Grid item style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }} />
-                <Grid item style={{ width: WIDTH_COL_MEAS }} />
-              </Grid>
-
-              <Grid container item style={isInBound[drfView] ? { minHeight: 200 } : {}}>
-                {renderMDCMTable()}
-              </Grid>
-            </Grid>
+            {/* Render CD, CM, ALSO NOTIFY, FREIGHT TERM, REMARKS */}
+            <Body
+              isFirstPage={true}
+              classes={classes}
+              data={pages[0]}
+              getInqType={getInqType}
+              getPackageName={getPackageName}
+            />
           </Grid>
 
-          {totalPage > 1 &&
+          {pages.length > 1 &&
             <Grid container justify="center">
               <span className={classes.tittle_break_line}>** TO BE CONTINUED ON ATTACHED LIST **</span>
             </Grid>
@@ -1062,24 +893,7 @@ const DraftPage = (props) => {
         </Grid>
       </div>
 
-      {!isInBound[drfView] &&
-        <Rider
-          drfMD={drfMD}
-          containersDetail={containersDetail}
-          containersManifest={containersManifest}
-          setTotalPage={setTotalPage}
-        />
-      }
-
-      {isInsertRider && isInBound[drfView] &&
-        <Rider
-          drfMD={drfMD}
-          containersDetail={[]}
-          containersManifest={[]}
-          setTotalPage={setTotalPage}
-          isOnlyRiderInfo={true}
-        />
-      }
+      {pages.length > 1 && <Rider pages={pages.splice(1)} />}
     </div >
   );
 };

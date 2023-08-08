@@ -8,9 +8,10 @@ import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 
 const useStyles = makeStyles((theme) => ({
   iconDraftBL: {
-    width: 20,
-    height: 20,
-    cursor: 'pointer'
+    width: 19,
+    height: 19,
+    cursor: 'pointer',
+    display: 'inline-flex'
   },
   btn: {
     textTransform: 'none',

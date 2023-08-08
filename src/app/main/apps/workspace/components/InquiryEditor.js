@@ -228,6 +228,7 @@ const InquiryEditor = (props) => {
     ]
   );
   const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs);
+  const showAddInquiry = useSelector(({ workspace }) => workspace.formReducer.showAddInquiry);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
 
   const user = useSelector(({ user }) => user);
@@ -544,10 +545,18 @@ const InquiryEditor = (props) => {
         setOpenCM(true);
       }
     }
-    if (scrollTopPopup.current) {
-      scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
-    }
   }, [fieldValue]);
+
+  useEffect(() => {
+    if (scrollTopPopup.current) {
+      const a = document.getElementById('newInq');
+      if (a) {
+        a.scrollIntoView(true);
+        dispatch(FormActions.setScrollInquiry());
+      }
+      // scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, showAddInquiry);
 
   const isAllSelected = (
     containerCheck.includes(currentEditInq.field)
@@ -1337,7 +1346,7 @@ const InquiryEditor = (props) => {
       {isDragActive && <div className='dropzone'>Drop files here</div>}
       <>
         <div className="flex justify-between" style={{ padding: '0.5rem', marginRight: '-15px' }}>
-          <div ref={scrollTopPopup} style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
+          <div id="newInq" ref={scrollTopPopup} style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
             {currentEditInq.field
               ? getLabelById(metadata['field_options'], currentEditInq.field)
               : 'New Inquiry'}
