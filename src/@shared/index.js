@@ -422,6 +422,7 @@ export const checkBroadCastReload = (role, type) => {
       (type === "logout" && mapper[role].some(route => url.includes(route)))
     )
   ) {
+    sessionStorage.clear();
     window.location.reload();
   }
 }
