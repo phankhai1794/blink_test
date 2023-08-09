@@ -65,8 +65,10 @@ const PreProcess = ({ bl, children }) => {
 
   useEffect(() => {
     const bkgNo = window.location.pathname.split('/')[3];
-    if (bkgNo) dispatch(Actions.initBL(bkgNo));
-    else if (bl) {
+    if (bkgNo) {
+      dispatch(Actions.initBL(bkgNo));
+      dispatch(Actions.updateOpusStatus(bkgNo, "BC", ""));
+    } else if (bl) {
       dispatch(FormActions.increaseLoading());
       getBlInfo(bl).then(res => {
         const { id, state, bkgNo } = res.myBL;
