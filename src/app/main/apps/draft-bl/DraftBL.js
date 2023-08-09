@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import history from '@history';
 import _ from 'lodash';
-import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDER, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, FREIGHTED_AS, RATE, DATE_CARGO, DATE_LADEN, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, CODE, TARIFF_ITEM, PREPAID, COLLECT, DATED, CONTAINER_NUMBER, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_PACKAGE_UNIT, CONTAINER_TYPE, CONTAINER_WEIGHT, CONTAINER_WEIGHT_UNIT, CONTAINER_MEASUREMENT, CONTAINER_MEASUREMENT_UNIT, CM_MARK, CM_PACKAGE, CM_PACKAGE_UNIT, CM_DESCRIPTION, CM_WEIGHT, CM_WEIGHT_UNIT, CM_MEASUREMENT, CM_MEASUREMENT_UNIT, BOOKING_NO, BL_TYPE, SHIPPING_MARK, DESCRIPTION_OF_GOODS, TOTAL_PACKAGE, TOTAL_PACKAGE_UNIT, TOTAL_WEIGHT, TOTAL_WEIGHT_UNIT, TOTAL_MEASUREMENT, TOTAL_MEASUREMENT_UNIT, RD_TERMS, NO_CONTENT_AMENDMENT, TOTAL_PREPAID, RATING_DETAIL, ALSO_NOTIFY, REMARKS, CD_MOVE_TYPE, BL_COPY, FREIGHT_TERM } from '@shared/keyword';
+import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDER, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, DATE_CARGO, DATE_LADEN, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, TARIFF_ITEM, PREPAID, DATED, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT, BOOKING_NO, BL_TYPE, RD_TERMS, NO_CONTENT_AMENDMENT, TOTAL_PREPAID, RATING_DETAIL, BL_COPY } from '@shared/keyword';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import { Grid } from '@material-ui/core';
-import { isJsonText, formatDate, NumberFormat, pluralizeCustomer, splitDraftData } from '@shared';
+import { isJsonText, formatDate, NumberFormat, pluralizeCustomer, splitDraftData, lineBreakAtBoundary, MAX_CHARS } from '@shared';
 import { packageUnitsJson } from '@shared/units';
 
 import * as Actions from './store/actions';
@@ -410,7 +410,20 @@ const DraftPage = (props) => {
                   FORWARDING AGENT-REFERENCES FMC NO.
                 </div>
                 <span className={clsx(classes.content_L, classes.forwarding)}>
-                  {getValueField(FORWARDER)}
+                  {(getValueField(FORWARDER) || "")
+                    .split("\n")
+                    .map((line, idx) => {
+                      let res = lineBreakAtBoundary(line, MAX_CHARS.forwarder);
+                      if (idx === 2) { // if this is 3rd line
+                        while (res.length <= MAX_CHARS.forwarder + 3) // +3 to show as same as OPUS draft
+                          res += " ";
+                        res += "<"
+                      }
+                      return res;
+                    })
+                    .slice(0, 3)
+                    .join("\n")
+                  }
                 </span>
               </Grid>
               <Grid item style={{ borderTop: BORDER }}>
@@ -807,7 +820,9 @@ const DraftPage = (props) => {
               <Grid item style={{ borderBottom: BORDER }}>
                 <div className={classes.tittle_M}>DATE CARGO RECEIVED</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')?.toUpperCase()}</span>
+                  {/* TODO: Workaround hide in Draft BL -> TBU: show after data correct */}
+                  {/* <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')?.toUpperCase()}</span> */}
+                  <span></span>
                 </div>
               </Grid>
               <Grid item style={{ borderBottom: BORDER }}>
