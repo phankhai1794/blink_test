@@ -258,7 +258,7 @@ const OtpCheck = ({ children }) => {
   const handleCheckMail = () => {
     const email = mail.value?.trim() || "";
     setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
-    setMail({ ...mail, email, isSubmitted: true });
+    setMail({ ...mail, value: email, isSubmitted: true });
 
     verifyEmail({ email, bl: myBL.id, processUrl })
       .then((res) => {
