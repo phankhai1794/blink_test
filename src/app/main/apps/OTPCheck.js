@@ -238,11 +238,12 @@ const OtpCheck = ({ children }) => {
     else if (!["forbidden", "invalid token"].includes(message?.toLowerCase())) dispatch(Actions.showMessage({ message, variant: 'error' }));
   }
 
-  const handleChangeMail = (e) => {
+  const handleChangeMail = ({ target }) => {
+    const { value } = target;
     setMail({
       ...mail,
-      value: e.target.value,
-      isValid: isEmail(e.target.value)
+      value,
+      isValid: isEmail(value?.trim() || "")
     });
   };
 
@@ -255,18 +256,19 @@ const OtpCheck = ({ children }) => {
   }
 
   const handleCheckMail = () => {
+    const email = mail.value?.trim() || "";
     setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
-    setMail({ ...mail, isSubmitted: true });
+    setMail({ ...mail, value: email, isSubmitted: true });
 
-    verifyEmail({ email: mail.value, bl: myBL.id, processUrl })
+    verifyEmail({ email, bl: myBL.id, processUrl })
       .then((res) => {
         if (res) {
           localStorage.setItem("sentCode", JSON.stringify({
             bl: myBL.id,
-            mail: mail.value,
+            mail: email,
             requestAt: new Date()
           }));
-          localStorage.setItem("lastEmail", mail.value);
+          localStorage.setItem("lastEmail", email);
           setStep(1);
         }
       })
