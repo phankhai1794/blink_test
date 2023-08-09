@@ -89,7 +89,7 @@ const ChoiceAnswer = (props) => {
       }
       else setSelectedChoice('');
     }
-  }, [question]);
+  }, [question?.answerObj]);
 
   useEffect(() => {
     if (isDeleteAnswer?.status) {
