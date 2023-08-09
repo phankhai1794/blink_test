@@ -238,11 +238,12 @@ const OtpCheck = ({ children }) => {
     else if (!["forbidden", "invalid token"].includes(message?.toLowerCase())) dispatch(Actions.showMessage({ message, variant: 'error' }));
   }
 
-  const handleChangeMail = (e) => {
+  const handleChangeMail = ({ target }) => {
+    const { value } = target;
     setMail({
       ...mail,
-      value: e.target.value,
-      isValid: isEmail(e.target.value)
+      value,
+      isValid: isEmail(value?.trim() || "")
     });
   };
 
