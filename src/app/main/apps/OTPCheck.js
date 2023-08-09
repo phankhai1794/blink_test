@@ -256,18 +256,19 @@ const OtpCheck = ({ children }) => {
   }
 
   const handleCheckMail = () => {
+    const email = mail.value?.trim() || "";
     setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
-    setMail({ ...mail, isSubmitted: true });
+    setMail({ ...mail, email, isSubmitted: true });
 
-    verifyEmail({ email: mail.value, bl: myBL.id, processUrl })
+    verifyEmail({ email, bl: myBL.id, processUrl })
       .then((res) => {
         if (res) {
           localStorage.setItem("sentCode", JSON.stringify({
             bl: myBL.id,
-            mail: mail.value,
+            mail: email,
             requestAt: new Date()
           }));
-          localStorage.setItem("lastEmail", mail.value);
+          localStorage.setItem("lastEmail", email);
           setStep(1);
         }
       })
