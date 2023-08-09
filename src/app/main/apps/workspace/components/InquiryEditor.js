@@ -228,6 +228,7 @@ const InquiryEditor = (props) => {
     ]
   );
   const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs);
+  const showAddInquiry = useSelector(({ workspace }) => workspace.formReducer.showAddInquiry);
   const openAllInquiry = useSelector(({ workspace }) => workspace.formReducer.openAllInquiry);
 
   const user = useSelector(({ user }) => user);
@@ -544,10 +545,18 @@ const InquiryEditor = (props) => {
         setOpenCM(true);
       }
     }
-    if (scrollTopPopup.current) {
-      scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
-    }
   }, [fieldValue]);
+
+  useEffect(() => {
+    if (scrollTopPopup.current) {
+      const a = document.getElementById('newInq');
+      if (a) {
+        a.scrollIntoView(true);
+        dispatch(FormActions.setScrollInquiry());
+      }
+      // scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, showAddInquiry);
 
   const isAllSelected = (
     containerCheck.includes(currentEditInq.field)
@@ -1282,9 +1291,7 @@ const InquiryEditor = (props) => {
                 optionsInquires.push(inqResponse);
                 optionsMinimize.push(inqResponse);
               }
-              if (optionsInquires.length === 1) {
-                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BC", "")) // Draft of Inquiry Created (BC)
-              }
+
               dispatch(InquiryActions.saveInquiry());
               dispatch(InquiryActions.setField());
               dispatch(InquiryActions.setOpenedInqForm(false));
@@ -1316,9 +1323,8 @@ const InquiryEditor = (props) => {
       const newFileName = generateFileNameTimeFormat(fileObject.name);
       const myRenamedFile = new File(
         [fileObject],
-        newFileName, {
-        type: "image/png"
-      }
+        newFileName,
+        { type: "image/png" }
       );
       setFilepaste(myRenamedFile);
     }
@@ -1334,7 +1340,7 @@ const InquiryEditor = (props) => {
       {isDragActive && <div className='dropzone'>Drop files here</div>}
       <>
         <div className="flex justify-between" style={{ padding: '0.5rem', marginRight: '-15px' }}>
-          <div ref={scrollTopPopup} style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
+          <div id="newInq" ref={scrollTopPopup} style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
             {currentEditInq.field
               ? getLabelById(metadata['field_options'], currentEditInq.field)
               : 'New Inquiry'}
