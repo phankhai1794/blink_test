@@ -820,7 +820,9 @@ const DraftPage = (props) => {
               <Grid item style={{ borderBottom: BORDER }}>
                 <div className={classes.tittle_M}>DATE CARGO RECEIVED</div>
                 <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')?.toUpperCase()}</span>
+                  {/* TODO: Workaround hide in Draft BL -> TBU: show after data correct */}
+                  {/* <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')?.toUpperCase()}</span> */}
+                  <span></span>
                 </div>
               </Grid>
               <Grid item style={{ borderBottom: BORDER }}>
