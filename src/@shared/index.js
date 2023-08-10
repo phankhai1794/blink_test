@@ -246,10 +246,11 @@ export const MAX_LINE_DRF_PAGE_1 = 13; // 12 CD + 1 dash line
 export const MAX_LINE_DRF_PAGE_2 = 60;
 
 export const MAX_CHARS = {
-  mark: 21,
-  package: 14,
-  description: 35,
-  forwarder: 35
+  mark: 16,
+  package: 11,
+  description: 33,
+  forwarder: 35,
+  remark: 116
 }
 
 export const lineBreakAtBoundary = (string, boundary) => {
@@ -619,11 +620,12 @@ export const splitDraftData = (
   }
 
   pageIdx = pages.length - 1; // the last page idx of splitted CD
+  let rmnLines = (pageIdx === 0) ? MAX_LINE_DRF_PAGE_1 : MAX_LINE_DRF_PAGE_2;
   for (let i = 0; i < contM.length; i++) {
     const cm = contM[i];
 
-    // remaining lines - start from CD's length if i = 0 (start splitting CM) else CM's length
-    let rmnLines = ((pageIdx === 0) ? MAX_LINE_DRF_PAGE_1 : MAX_LINE_DRF_PAGE_2) - pages[pageIdx][i > 0 ? i : 0].length;
+    // remaining lines - start from CD's length if i = 0 (start splitting CM)
+    if (i === 0) rmnLines -= pages[pageIdx][0].length;
 
     cm[getInqType(CM_MARK)] = cm[getInqType(CM_MARK)].trim()
       .split("\n")
@@ -644,14 +646,20 @@ export const splitDraftData = (
       if (i) {
         pageIdx += 1;
         pages[pageIdx] = [[], [], [], []];
+        rmnLines = MAX_LINE_DRF_PAGE_2;
       }
       pages[pageIdx][1].push(splCM[i]);
+      rmnLines -= Math.max(
+        splCM[i][getInqType(CM_MARK)]?.length || 0,
+        splCM[i][getInqType(CM_PACKAGE)]?.length || 0,
+        splCM[i][getInqType(CM_DESCRIPTION)]?.length || 0
+      );
     }
   }
 
   // calculate the remaining lines after dividing CMs
   pageIdx = pages.length - 1;
-  let rmnLines = (pageIdx === 0) ? MAX_LINE_DRF_PAGE_1 : MAX_LINE_DRF_PAGE_2; // rmnLines = total lines - (CD lines + CM lines)
+  rmnLines = (pageIdx === 0) ? MAX_LINE_DRF_PAGE_1 : MAX_LINE_DRF_PAGE_2; // rmnLines = total lines - (CD lines + CM lines)
   let lines = pages[pageIdx][0].length;
   pages[pageIdx][1].forEach(cm => {
     const max = Math.max(
@@ -689,8 +697,8 @@ export const splitDraftData = (
   // ...rest
   pageIdx = pages.length - 1;
   let frTerm = getValueField(FREIGHT_TERM) || "";
-  let remark = getValueField(REMARKS)?.trim() || "";
-  remark = remark ? remark.split("\n") : [];
+  let remark = getValueField(REMARKS) || "";
+  remark = remark ? remark.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.remark).split("\n")).flat() : [];
   const forwarding = (getValueField(FORWARDER) || "")
     .split("\n")
     .map(line => lineBreakAtBoundary(line, MAX_CHARS.forwarder))
