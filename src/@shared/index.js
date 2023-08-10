@@ -7,7 +7,25 @@ import {
   DATED,
   DATE_CARGO,
   DATE_LADEN,
-  OTHERS
+  OTHERS,
+  CM_MARK,
+  SHIPPING_MARK,
+  CM_PACKAGE,
+  TOTAL_PACKAGE,
+  CM_PACKAGE_UNIT,
+  DESCRIPTION_OF_GOODS,
+  CM_DESCRIPTION,
+  CM_WEIGHT,
+  TOTAL_WEIGHT,
+  CM_WEIGHT_UNIT,
+  TOTAL_MEASUREMENT,
+  CM_MEASUREMENT,
+  CM_MEASUREMENT_UNIT,
+  ALSO_NOTIFY,
+  FREIGHT_TERM,
+  REMARKS,
+  CONTAINER_SEAL,
+  FORWARDER
 } from '@shared/keyword';
 import pluralize from 'pluralize'
 
@@ -224,15 +242,22 @@ export const isSameFile = (inquiries, tempReply) => {
   return isSame;
 }
 
-export const MAX_ROWS_CD = 13;
+export const MAX_LINE_DRF_PAGE_1 = 13; // 12 CD + 1 dash line
+export const MAX_LINE_DRF_PAGE_2 = 60;
 
 export const MAX_CHARS = {
-  mark: 21,
-  package: 14,
-  description: 35
+  mark: 16,
+  package: 11,
+  description: 33,
+  forwarder: 35,
+  remark: 116
 }
 
 export const lineBreakAtBoundary = (string, boundary) => {
+  /**
+   * Input: string doesn't include the new line character (\n)
+   * Output: string has been wrapped text by bounds
+   */
   let line = "";
   let newString = "";
   const arr = string.split(" ");
@@ -325,9 +350,8 @@ export const getTotalValueMDView = (drfView, containerDetail, getType) => {
         total += parseNumberValue(item[getType(CONTAINER_LIST.cdNumber[index])]);
       });
 
-      if(key === 'totalPackages') drfMD[key] = NumberFormat(total,0,true);
-      if(key === 'totalWeight' || key === 'totalMeasurement') drfMD[key] = NumberFormat(total,3,true);
- 
+      if (key === 'totalPackages') drfMD[key] = NumberFormat(total, 0, true);
+      if (key === 'totalWeight' || key === 'totalMeasurement') drfMD[key] = NumberFormat(total, 3, true);
     })
   }
   return drfMD;
@@ -405,6 +429,7 @@ export const checkBroadCastReload = (role, type) => {
       (type === "logout" && mapper[role].some(route => url.includes(route)))
     )
   ) {
+    sessionStorage.clear();
     window.location.reload();
   }
 }
@@ -475,7 +500,7 @@ export const generateFileName = (fileName, fileList) => {
   } else return fileName;
 }
 
-export const generateFileNameTimeFormat = (fileName) => { 
+export const generateFileNameTimeFormat = (fileName) => {
   const extFileNameIndex = fileName.split(".").slice(-1)[0].length + 1;
   const name = fileName.slice(0, -extFileNameIndex);
   const ext = fileName.slice(-extFileNameIndex,)
@@ -493,7 +518,215 @@ export const copyTextToClipboard = async (text) => {
 }
 
 export const pluralizeCustomer = (number, word) => {
-  if(number > 1 && word) {
+  if (number > 1 && word) {
     return pluralize(word)
   } else return word;
+}
+
+const splitDraftCM = (cm, remainingLines, getInqType) => {
+  const mapper = { mark: CM_MARK, package: CM_PACKAGE, description: CM_DESCRIPTION };
+  const rows = [{ ...cm }];
+
+  let data = {
+    mark: cm[getInqType(CM_MARK)],
+    package: cm[getInqType(CM_PACKAGE)],
+    description: cm[getInqType(CM_DESCRIPTION)],
+  };
+
+  ["mark", "package", "description"].forEach(kw => {
+    let idx = 0;
+    while (data[kw].length) {
+      if (!rows[idx]) {
+        const emptyCM = { ...cm };
+        for (const key in emptyCM) emptyCM[key] = null;
+        rows[idx] = emptyCM;
+      }
+
+      const rmnLines = (idx === 0) ? remainingLines : MAX_LINE_DRF_PAGE_2;
+      rows[idx][getInqType(mapper[kw])] = [...data[kw]].splice(0, rmnLines);
+      data[kw] = data[kw].splice(rmnLines);
+
+      idx += 1;
+    }
+  });
+
+  return rows;
+}
+
+export const splitDraftData = (
+  view,
+  CD,
+  CM,
+  getValueField,
+  getInqType,
+  getPackageName
+) => {
+  const pages = [];
+  let pageIdx = 0;
+
+  // container detail
+  let contD = [];
+  // break cd into line by line, each line contains only 1 seal 
+  [...CD].forEach(cd => {
+    const seals = [...cd[getInqType(CONTAINER_SEAL)]];
+    (seals.length ? seals : [""]).forEach((seal, idx) => {
+      if (idx === 0)
+        contD = [
+          ...contD,
+          ...[{
+            ...cd,
+            [getInqType(CONTAINER_SEAL)]: seal
+          }]
+        ];
+      else
+        contD.push({ autoGenNewLine: true, [getInqType(CONTAINER_SEAL)]: seal });
+    });
+  });
+
+  while (contD.length) {
+    if (!pages[pageIdx]) pages[pageIdx] = [[], [], [], []];
+
+    const rmnLines = (pageIdx === 0) ? MAX_LINE_DRF_PAGE_1 : MAX_LINE_DRF_PAGE_2;
+    pages[pageIdx][0] = [...contD].splice(0, rmnLines);
+    contD = contD.splice(rmnLines);
+
+    // insert dash line
+    if (!contD.length) {
+      if (pages[pageIdx][0].length < rmnLines)
+        pages[pageIdx][0].push({ dashLine: true });
+      else {
+        if (!pages[pageIdx + 1]) pages[pageIdx + 1] = [[], [], [], []];
+        pages[pageIdx + 1][0].push({ dashLine: true });
+      }
+    }
+
+    pageIdx += 1;
+  }
+
+  // container manifest
+  let contM = [...CM];
+  if (view === "MD") {
+    const drfMD = getTotalValueMDView(view, CD, getInqType);
+    contM = [{
+      [getInqType(CM_MARK)]: getValueField(SHIPPING_MARK),
+      [getInqType(CM_DESCRIPTION)]: getValueField(DESCRIPTION_OF_GOODS),
+      [getInqType(CM_PACKAGE)]: drfMD[TOTAL_PACKAGE],
+      [getInqType(CM_PACKAGE_UNIT)]: drfMD[TOTAL_PACKAGE_UNIT],
+      [getInqType(CM_WEIGHT)]: drfMD[TOTAL_WEIGHT],
+      [getInqType(CM_WEIGHT_UNIT)]: drfMD[TOTAL_WEIGHT_UNIT],
+      [getInqType(CM_MEASUREMENT)]: drfMD[TOTAL_MEASUREMENT],
+      [getInqType(CM_MEASUREMENT_UNIT)]: drfMD[TOTAL_MEASUREMENT_UNIT]
+    }]
+  }
+
+  pageIdx = pages.length - 1; // the last page idx of splitted CD
+  let rmnLines = (pageIdx === 0) ? MAX_LINE_DRF_PAGE_1 : MAX_LINE_DRF_PAGE_2;
+  for (let i = 0; i < contM.length; i++) {
+    const cm = contM[i];
+
+    // remaining lines - start from CD's length if i = 0 (start splitting CM)
+    if (i === 0) rmnLines -= pages[pageIdx][0].length;
+
+    cm[getInqType(CM_MARK)] = cm[getInqType(CM_MARK)].trim()
+      .split("\n")
+      .map(line => lineBreakAtBoundary(line, MAX_CHARS.mark).split("\n"))
+      .flat();
+    cm[getInqType(CM_PACKAGE)] = [`${cm[getInqType(CM_PACKAGE)]}`, getPackageName(cm[getInqType(CM_PACKAGE_UNIT)])]
+      .map(line => lineBreakAtBoundary(line, MAX_CHARS.package).split("\n"))
+      .flat();
+    cm[getInqType(CM_DESCRIPTION)] = cm[getInqType(CM_DESCRIPTION)].trim()
+      .split("\n")
+      .map(line => lineBreakAtBoundary(line, MAX_CHARS.description).split("\n"))
+      .flat();
+
+    // splitted container manifest
+    const splCM = splitDraftCM(cm, rmnLines, getInqType);
+    for (let i = 0; i < splCM.length; i++) {
+      // if splCM.length > 1, it means that cm is divided into many pages
+      if (i) {
+        pageIdx += 1;
+        pages[pageIdx] = [[], [], [], []];
+        rmnLines = MAX_LINE_DRF_PAGE_2;
+      }
+      pages[pageIdx][1].push(splCM[i]);
+      rmnLines -= Math.max(
+        splCM[i][getInqType(CM_MARK)]?.length || 0,
+        splCM[i][getInqType(CM_PACKAGE)]?.length || 0,
+        splCM[i][getInqType(CM_DESCRIPTION)]?.length || 0
+      );
+    }
+  }
+
+  // calculate the remaining lines after dividing CMs
+  pageIdx = pages.length - 1;
+  rmnLines = (pageIdx === 0) ? MAX_LINE_DRF_PAGE_1 : MAX_LINE_DRF_PAGE_2; // rmnLines = total lines - (CD lines + CM lines)
+  let lines = pages[pageIdx][0].length;
+  pages[pageIdx][1].forEach(cm => {
+    const max = Math.max(
+      cm[getInqType(CM_MARK)]?.length || 0,
+      cm[getInqType(CM_PACKAGE)]?.length || 0,
+      cm[getInqType(CM_DESCRIPTION)]?.length || 0
+    );
+    lines += max;
+  });
+  rmnLines -= lines;
+
+  // also notify
+  let alsoNotify = getValueField(ALSO_NOTIFY)?.trim();
+  alsoNotify = alsoNotify ? alsoNotify.split("\n") : [];
+
+  let idx = 0;
+  while (alsoNotify.length) {
+    if (!rmnLines) {
+      pageIdx += 1;
+      if (!pages[pageIdx]) pages[pageIdx] = [[], [], [], []];
+      rmnLines = MAX_LINE_DRF_PAGE_2;
+    }
+
+    if (idx === 0) pages[pageIdx][2].push({ dashLine: true });
+    else if (idx === 1) pages[pageIdx][2].push("ALSO NOTIFY");
+    else {
+      pages[pageIdx][2].push(alsoNotify[0]);
+      alsoNotify = alsoNotify.splice(1);
+    }
+
+    idx += 1;
+    rmnLines -= 1;
+  }
+
+  // ...rest
+  pageIdx = pages.length - 1;
+  let frTerm = getValueField(FREIGHT_TERM) || "";
+  let remark = getValueField(REMARKS) || "";
+  remark = remark ? remark.split("\n").map(line => lineBreakAtBoundary(line, MAX_CHARS.remark).split("\n")).flat() : [];
+  const forwarding = (getValueField(FORWARDER) || "")
+    .split("\n")
+    .map(line => lineBreakAtBoundary(line, MAX_CHARS.forwarder))
+    .slice(3);
+
+  let rows = [
+    ...(frTerm ? [`OCEAN FREIGHT ${frTerm}`] : []),
+    ...remark,
+    ...(forwarding.length ? [...["<"], ...forwarding] : [])
+  ];
+
+  idx = 0;
+  while (rows.length) {
+    if (!rmnLines) {
+      pageIdx += 1;
+      if (!pages[pageIdx]) pages[pageIdx] = [[], [], [], []];
+      rmnLines = MAX_LINE_DRF_PAGE_2;
+    }
+
+    if (idx === 0) pages[pageIdx][3].push({ dashLine: true });
+    else {
+      pages[pageIdx][3].push(rows[0]);
+      rows = rows.splice(1);
+    }
+
+    idx += 1;
+    rmnLines -= 1;
+  }
+
+  return pages;
 }

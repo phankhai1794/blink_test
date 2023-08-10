@@ -50,7 +50,7 @@ function WorkspaceApp() {
   const validToken = useSelector(({ header }) => header.validToken);
 
   const OPUSValidation = async () => {
-    let redirect404 = true;
+    let redirectTo = '';
     const { pathname, search } = window.location;
     const bkgNo = pathname.split('/')[3];
     const urlSearchParams = new URLSearchParams(search);
@@ -60,16 +60,17 @@ function WorkspaceApp() {
     if (bkgNo && usrId && cntr) {
       try {
         const result = await validateBkgNo(bkgNo, cntr, { countries: JSON.parse(localStorage.getItem('USER'))?.countries });
-        if (result) {
-          redirect404 = false;
-          setValidUrl(true);
-        }
+        if (result) setValidUrl(true);
       } catch (error) {
         console.error(error);
+        if (error.message === 'Network Error')
+          redirectTo = '/deploying';
+        else if (error.response?.status === 404)
+          redirectTo = '/pages/errors/error-404';
       }
     }
 
-    if (redirect404) history.push('/pages/errors/error-404');
+    if (redirectTo) history.push(redirectTo);
   };
 
   useEffect(() => {

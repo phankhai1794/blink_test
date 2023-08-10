@@ -159,7 +159,7 @@ const SendInquiryForm = (props) => {
   const vvdCode = getValueField(PRE_CARRIAGE_CODE) || getValueField(VESSEL_VOYAGE_CODE);
   const pod = getValueField(PORT_OF_DISCHARGE);
   const pol = getValueField(PORT_OF_LOADING)
-  const etd = getValueField(ETD).slice(0,10);
+  const etd = getValueField(ETD).slice(0, 10);
   let shipperName = getValueField(SHIPPER_NAME);
   shipperName = shipperName?.trim() ? `${shipperName} +` : '';
 
@@ -441,7 +441,7 @@ const SendInquiryForm = (props) => {
         (mail) => !/.*@one-line.com/.test(mail) && !/.*@googlegroups.com/.test(mail)
       )
     ) {
-      dispatch(Actions.showMessage({ message: 'Invalid mail address', variant: 'error' }));
+      dispatch(Actions.showMessage({ message: 'Please provide the one-line email address', variant: 'error' }));
     } else if (
       tabValue === 'customer'
       && !pathName.includes('/guest')
