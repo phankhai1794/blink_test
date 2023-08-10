@@ -11,6 +11,16 @@ import BLWorkspace from '../workspace/components/BLWorkspace';
 
 import DraftBL from './DraftBL';
 
+const DraftBLPreview = ({ bl }) => {
+  useEffect(() => {
+    sessionStorage.clear(); // delete session storage when redirecting from workspace
+  }, []);
+
+  return (
+    <DraftBL bl={bl} />
+  );
+}
+
 function Coordinator({ bl }) {
   const isPreviewingDraftPage = useSelector(({ draftBL }) => draftBL.isPreviewingDraftPage);
   return (
@@ -38,7 +48,7 @@ function DraftBLWorkspace() {
   return (
     <>
       {isPreviewing ?
-        <DraftBL bl={bl} /> :
+        <DraftBLPreview bl={bl} /> :
         <OtpCheck>
           <div className="flex flex-col flex-1 w-full">
             <FusePageSimple
