@@ -331,6 +331,9 @@ const Row = (props) => {
         <TableCell className={classes.cellBody}>
           {formatDate(row.lastUpdated, 'MMM DD YYYY HH:mm')}
         </TableCell>
+        <TableCell className={classes.cellBody}>
+          {formatDate(row.lastUpdatedStatus, 'MMM DD YYYY HH:mm')}
+        </TableCell>
         {columns.etd && (
           <TableCell className={classes.cellBody}>
             {row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}
@@ -551,6 +554,7 @@ const AddColumn = (columns, handleShowColumn) => {
     { label: 'Onshore Status', value: 'onshoreS', show: columns['onshoreS'] },
     { label: 'BLink Status', value: 'blinkS', show: columns['blinkS'] },
     { label: 'Shipper Name', value: 'shipperN', show: columns['shipperN'] },
+    { label: 'Last Updated Status', value: 'lastUpdatedStatus', show: columns['lastUpdatedStatus'] },
     { label: 'VVD', value: 'vvd', show: columns['vvd'] },
     { label: 'POL', value: 'pol', show: columns['pol'] },
     { label: 'POD', value: 'pod', show: columns['pod'] },
@@ -748,6 +752,15 @@ const QueueListTable = () => {
                       <img
                         src="/assets/images/icons/Icon-sort.svg"
                         onClick={() => handleSort('lastUpdated')}
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell className={classes.cellHead}>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
+                      <span>Last Updated Status</span>
+                      <img
+                        src="/assets/images/icons/Icon-sort.svg"
+                        onClick={() => handleSort('lastUpdatedStatus')}
                       />
                     </div>
                   </TableCell>
