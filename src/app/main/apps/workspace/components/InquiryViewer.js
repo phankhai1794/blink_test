@@ -2006,7 +2006,7 @@ const InquiryViewer = (props) => {
               action: 'pending'
             }));
           }
-          if (checkAllInqAmeResolved(question)) {
+          if (question.process === "draft" && checkAllInqAmeResolved(question)) {
             // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
             let filterDraft = optionsInquires.filter(inq => inq.process === 'draft')
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BS', '', {
