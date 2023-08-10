@@ -19,19 +19,6 @@ import {
 import * as InquiryActions from './inquiry';
 import * as FormActions from './form';
 
-export const initBL = (bkgNo) => async (dispatch) => {
-  dispatch(FormActions.increaseLoading());
-  createBL(bkgNo)
-    .then((res) => {
-      if (res) {
-        const { id, state, bkgNo } = res.myBL;
-        dispatch(setMyBL({ id, state, bkgNo }));
-      }
-      dispatch(FormActions.decreaseLoading());
-    })
-    .catch((err) => handleError(dispatch, err));
-};
-
 export const loadMetadata = () => async (dispatch) => {
   dispatch(FormActions.increaseLoading());
   getMetadata()
@@ -91,6 +78,23 @@ export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnCd, transReply) => async
   } catch (err) {
     handleError(dispatch, err);
   }
+};
+
+export const initBL = (bkgNo) => async (dispatch) => {
+  dispatch(FormActions.increaseLoading());
+  createBL(bkgNo)
+    .then((res) => {
+      if (res) {
+        const { id, state, bkgNo } = res.myBL;
+        dispatch(updateOpusStatus(bkgNo, "BC", "", {
+          idReply: id,
+          action: 'initBL'
+        }))
+        dispatch(setMyBL({ id, state, bkgNo }));
+      }
+      dispatch(FormActions.decreaseLoading());
+    })
+    .catch((err) => handleError(dispatch, err));
 };
 
 export const loadInquiry = (myBL_Id) => async (dispatch) => {
