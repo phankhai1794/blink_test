@@ -8,7 +8,7 @@ export const handleError = (dispatch, err) => {
   let status, message;
   if (err.response) {
     status = err.response.status || err.response.data?.error.status;
-    message = err.response.data?.message || err.response.data?.error.message;
+    message = err.response.data?.message || err.response.data?.error?.message;
   }
   if (!message) message = err.message || "Your token has expired";
 
