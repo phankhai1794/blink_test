@@ -554,7 +554,6 @@ const AddColumn = (columns, handleShowColumn) => {
     { label: 'Onshore Status', value: 'onshoreS', show: columns['onshoreS'] },
     { label: 'BLink Status', value: 'blinkS', show: columns['blinkS'] },
     { label: 'Shipper Name', value: 'shipperN', show: columns['shipperN'] },
-    { label: 'Last Updated Status', value: 'lastUpdatedStatus', show: columns['lastUpdatedStatus'] },
     { label: 'VVD', value: 'vvd', show: columns['vvd'] },
     { label: 'POL', value: 'pol', show: columns['pol'] },
     { label: 'POD', value: 'pod', show: columns['pod'] },
