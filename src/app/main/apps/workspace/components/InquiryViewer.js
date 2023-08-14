@@ -1803,6 +1803,40 @@ const InquiryViewer = (props) => {
     return result;
   }
 
+  const checkAllInqAmeResolved = (question) => {
+    let resultInq = false;
+    let resultAme = false;
+
+    const inqCheck = inquiries.filter(inq => (inq.process === 'pending' && inq.receiver.includes(question.receiver[0])));
+    const ameCheck = inquiries.filter(inq => (inq.process === 'draft' && inq.receiver.includes(question.receiver[0])));
+
+    // Check inquiry
+    // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
+    const inqStillNotResolved = inqCheck.filter(inq => (
+      !['COMPL', 'UPLOADED'].includes(inq.state)
+      && inq.id !== question.id
+      && !fieldsNotSendOPUS.includes(
+        metadata['field_options'].find(f => f.value === inq.field).keyword
+        && inq.state === 'COMPL'
+      )
+    ));
+    resultInq = Boolean(!inqStillNotResolved.length);
+
+    // Check amendment
+    // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
+    const ameStillNotUpload = ameCheck.filter(ame => (
+      !['RESOLVED', 'UPLOADED'].includes(ame.state)
+      && ame.id !== question.id
+      && !fieldsNotSendOPUS.includes(
+        metadata['field_options'].find(f => f.value === ame.field).keyword
+        && ame.state === 'RESOLVED'
+      )
+    ));
+    resultAme = Boolean(!ameStillNotUpload.length);
+
+    return resultInq && resultAme;
+  }
+
   const onConfirm = (isWrapText = false) => {
     let contentField = '';
     let isAllItemUpload = false;
