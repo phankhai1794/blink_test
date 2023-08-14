@@ -86,10 +86,6 @@ export const initBL = (bkgNo) => async (dispatch) => {
     .then((res) => {
       if (res) {
         const { id, state, bkgNo } = res.myBL;
-        dispatch(updateOpusStatus(bkgNo, "BC", "", {
-          idReply: id,
-          action: 'initBL'
-        }))
         dispatch(setMyBL({ id, state, bkgNo }));
       }
       dispatch(FormActions.decreaseLoading());
