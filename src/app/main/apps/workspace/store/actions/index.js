@@ -19,19 +19,6 @@ import {
 import * as InquiryActions from './inquiry';
 import * as FormActions from './form';
 
-export const initBL = (bkgNo) => async (dispatch) => {
-  dispatch(FormActions.increaseLoading());
-  createBL(bkgNo)
-    .then((res) => {
-      if (res) {
-        const { id, state, bkgNo } = res.myBL;
-        dispatch(setMyBL({ id, state, bkgNo }));
-      }
-      dispatch(FormActions.decreaseLoading());
-    })
-    .catch((err) => handleError(dispatch, err));
-};
-
 export const loadMetadata = () => async (dispatch) => {
   dispatch(FormActions.increaseLoading());
   getMetadata()
@@ -71,7 +58,7 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
   }
 };
 
-export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnCd) => async (dispatch) => {
+export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnCd, transReply) => async (dispatch) => {
   try {
     const blResponse = await updateBlStatus({
       shineUrl: `${window.location.origin}/apps/workspace/${bkgNo}?usrId=admin&cntr=VN`,
@@ -84,12 +71,26 @@ export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnCd) => async (dispatch) 
       stsDesc: '',
       blinkStsCd: blinkStsCd,
       rtrnCd,
-      shineId: "Blink User"
+      shineId: "Blink User",
+      transReply
     });
     console.log(blResponse);
   } catch (err) {
     handleError(dispatch, err);
   }
+};
+
+export const initBL = (bkgNo) => async (dispatch) => {
+  dispatch(FormActions.increaseLoading());
+  createBL(bkgNo)
+    .then((res) => {
+      if (res) {
+        const { id, state, bkgNo } = res.myBL;
+        dispatch(setMyBL({ id, state, bkgNo }));
+      }
+      dispatch(FormActions.decreaseLoading());
+    })
+    .catch((err) => handleError(dispatch, err));
 };
 
 export const loadInquiry = (myBL_Id) => async (dispatch) => {

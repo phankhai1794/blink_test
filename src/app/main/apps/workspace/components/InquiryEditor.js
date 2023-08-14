@@ -1323,8 +1323,9 @@ const InquiryEditor = (props) => {
       const newFileName = generateFileNameTimeFormat(fileObject.name);
       const myRenamedFile = new File(
         [fileObject],
-        newFileName,
-        { type: "image/png" }
+        newFileName, {
+          type: "image/png"
+        }
       );
       setFilepaste(myRenamedFile);
     }

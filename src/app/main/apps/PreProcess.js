@@ -67,7 +67,6 @@ const PreProcess = ({ bl, children }) => {
     const bkgNo = window.location.pathname.split('/')[3];
     if (bkgNo) {
       dispatch(Actions.initBL(bkgNo));
-      dispatch(Actions.updateOpusStatus(bkgNo, "BC", ""));
     } else if (bl) {
       dispatch(FormActions.increaseLoading());
       getBlInfo(bl).then(res => {

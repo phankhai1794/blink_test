@@ -1081,7 +1081,10 @@ const InquiryViewer = (props) => {
           const isEmptyInq = optionsOfQuestion.filter(op => op.process === 'pending');
           if (!isEmptyInq.length) {
             (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
-            dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "")) //BX: Delete all inquiries draft
+            dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "", {
+              idReply: myBL.id,
+              action: 'deleteAll',
+            })) //BX: Delete all inquiries draft
           }
           dispatch(InquiryActions.checkSubmit(!enableSubmit));
           props.getUpdatedAt();
@@ -1997,11 +2000,19 @@ const InquiryViewer = (props) => {
           isAllItemUpload = checkAllItemUpload(question);
           if (isAllItemUpload && question.process === 'pending') {
             // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
-            dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BR', question.receiver.includes('customer') ? 'RO' : 'RW'));
+            let filterPending = optionsInquires.filter(inq => inq.process === 'pending')
+            dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BR', question.receiver.includes('customer') ? 'RO' : 'RW', {
+              idReply: filterPending.length ? filterPending.map(q => q.id) : [],
+              action: 'pending'
+            }));
           }
-          if (checkAllInqAmeResolved(question)) {
+          if (question.process === "draft" && checkAllInqAmeResolved(question)) {
             // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
-            dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BS', ''));
+            let filterDraft = optionsInquires.filter(inq => inq.process === 'draft')
+            dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BS', '', {
+              idReply: filterDraft.length ? filterDraft.map(q => q.id) : [],
+              action: 'draft'
+            }));
           }
 
           if (myBL && myBL.bkgNo) {
@@ -2091,11 +2102,19 @@ const InquiryViewer = (props) => {
             ) {
               if (question.receiver && question.receiver.length && question.receiver.includes('customer') && inqsPending.filter(q => q.receiver.includes('customer')).length > 0) {
                 // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
-                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO"))
+                const filters = inqsPending.filter(q => q.receiver.includes('customer'))
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RO", {
+                  idReply: filters.length ? filters.map(q => q.id) : [],
+                  action: 'pending'
+                }))
               }
               if (question.receiver && question.receiver.length && question.receiver.includes('onshore') && inqsPending.filter(q => q.receiver.includes('onshore')).length > 0) {
                 //BL Inquired Resolved (BR) , Upload all to Opus.  RW: Return to Onshore via BLink
-                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW"))
+                const filters = inqsPending.filter(q => q.receiver.includes('onshore'))
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BR", "RW", {
+                  idReply: filters.length ? filters.map(q => q.id) : [],
+                  action: 'pending'
+                }))
               }
             } else if (
               question.process === 'draft'
@@ -2104,7 +2123,10 @@ const InquiryViewer = (props) => {
               && (filterFieldDrfNotUploadOpus.length ? filterFieldDrfNotUploadOpus.every(q => ['COMPL', 'RESOLVED', 'UPLOADED'].includes(q.state)) : true)
             ) {
               // BL Amendment Success (BS), Upload all to Opus.
-              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", ""))
+              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BS", "", {
+                idReply: inqsDraft.length ? inqsDraft.map(q => q.id) : [],
+                action: 'draft'
+              }))
             }
           }
 

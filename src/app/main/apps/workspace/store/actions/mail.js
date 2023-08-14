@@ -38,18 +38,28 @@ export const sendMail =
             const inqsOpenState = inquiries.filter(op => op.process === 'pending' && op.state === 'OPEN');
             const draftReply = inquiries.filter(op => op.process === 'draft' && op.state === 'REP_DRF');
             if (draftReply.length > 0) {
+              const idReply = draftReply.map(d => d.id);
               // BQ: Offshore replied on BL Draft
               if (form.toCustomer) //  RO: Return to Customer via BLink
-                dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "RO"));
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "RO", {idReply, action: 'draft'}));
               if (form.toOnshore) // TO: Return to Onshore via BLink
-                dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "TO"));
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BQ", "TO", {idReply, action: 'draft'}));
             }
 
             if (inqsOpenState.length > 0 || replyInqs.length > 0) {
-              if (form.toCustomer) //BI: BL Inquiried,  RO: Return to Customer via BLink. 
-                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RO"));//Send inquiries to customer
+              let idReply = [];
+              if (inqsOpenState.length > 0) {
+                idReply = [...inqsOpenState].map(q => q.id);
+              }
+              if (replyInqs.length > 0) {
+                idReply = [...idReply, ...replyInqs];
+              }
+              if (form.toCustomer) //BI: BL Inquiried,  RO: Return to Customer via BLink.
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RO", {idReply, action: 'pending'}
+                ));//Send inquiries to customer
               if (form.toOnshore) //BI: BL Inquiried,  RW: Return to Onshore via BLink
-                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RW")); //Send inquiries to Onshore
+                dispatch(AppActions.updateOpusStatus(bkgNo, "BI", "RW", {idReply, action: 'pending'}
+                )); //Send inquiries to Onshore
             }
 
             cloneInquiries.forEach((q) => {
