@@ -3,10 +3,20 @@ import { getUserCountry } from 'app/services/countryService';
 import React, { useEffect, useState } from 'react';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { useSelector, useDispatch } from 'react-redux';
-import { AppBar, Toolbar, Avatar, Select, MenuItem, Checkbox } from '@material-ui/core';
+import {
+  AppBar,
+  Toolbar,
+  Avatar,
+  Select,
+  MenuItem,
+  Checkbox,
+  Divider,
+  Icon
+} from '@material-ui/core';
 import clsx from 'clsx';
 import * as Actions from 'app/main/apps/dashboards/admin/store/actions';
 import { handleError } from '@shared/handleError';
+import { uniqueArray } from '@shared';
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -57,17 +67,68 @@ const useStyles = makeStyles((theme) => ({
 
 const flagUrl = (value) => `assets/images/flags/${value.toLowerCase()}.svg`;
 
+const TreeNode = (props) => {
+  const { label, children, val, handleSelectStatus, check } = props;
+
+  const [isExpanded, setIsExpanded] = useState(false);
+  const handleToggle = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  return (
+    <>
+      <div
+        style={{
+          display: 'flex',
+          padding: '8px 16px',
+          alignItems: 'center',
+          width: '100%'
+        }}>
+        <Icon style={{ color: '#BD0F72' }}>{isExpanded ? 'arrow_drop_down' : 'arrow_right'}</Icon>
+        <Checkbox checked={check} onChange={(e) => handleSelectStatus(e, val)} color="primary" />
+        <div style={{ display: 'flex', cursor: 'pointer' }} onClick={handleToggle}>
+          <img
+            loading="lazy"
+            style={{ borderRadius: '50%' }}
+            width="20"
+            height="20"
+            src={flagUrl(val)}
+            alt=""
+          />
+          <span style={{ fontFamily: 'Montserrat', fontSize: '14px', marginLeft: 5 }}>{label}</span>
+        </div>
+      </div>
+
+      {isExpanded && <>{children}</>}
+    </>
+  );
+};
+
 function ToolbarLayout2(props) {
   const { search } = window.location;
   const classes = useStyles(props);
   const fcountry = JSON.parse(localStorage.getItem('fcountry') || '""');
+  const foffice = JSON.parse(localStorage.getItem('foffice') || '""');
   const toolbarTheme = useSelector(({ fuse }) => fuse.settings.toolbarTheme);
+  const office = useSelector(({ dashboard }) => dashboard.office); // for query
+  const filterCountry = useSelector(({ dashboard }) => dashboard.countries);
+
   const dispatch = useDispatch();
 
   const user = useSelector(({ user }) => user);
   const [countries, setCountries] = useState([]);
   const countryOption = user.countries;
-  const [selectedStatus, setSelectedStatus] = useState([]);
+  const _office = user.office;
+
+  const setOffice = (value) => {
+    dispatch(Actions.setOffice(value));
+    localStorage.setItem('foffice', JSON.stringify(value));
+  };
+
+  const setFilterCountry = (value) => {
+    dispatch(Actions.filterCountry(value));
+    localStorage.setItem('fcountry', JSON.stringify(value));
+  };
 
   useEffect(() => {
     // auto select only 1 default country when access to BLINK via OPUS
@@ -79,39 +140,64 @@ function ToolbarLayout2(props) {
       // Remove search param from url
       window.history.pushState({}, '', `/apps/admin`);
     }
-    setSelectedStatus(result);
     dispatch(Actions.filterCountry(result));
 
     getUserCountry()
-      .then(({ data }) => setCountries(data.userCountry))
+      .then(({ data }) => {
+        const tempO = [];
+        const temp = data.userCountry.map((m) => {
+          let office = m.office.filter((item) => _office?.includes(item));
+          office = office.length ? office : m.office;
+          tempO.push(...office);
+          return { ...m, offices: office.sort((a, b) => a.localeCompare(b)) };
+        });
+        if (fcountry?.length && !foffice) {
+          const arr = [];
+          fcountry.forEach((f) => {
+            arr.push(...temp.find((t) => t.value === f).offices);
+          });
+          setOffice(arr);
+        } else setOffice(foffice || tempO);
+        setCountries(temp);
+      })
       .catch((err) => handleError(dispatch, err));
   }, []);
 
-  const handleSelectStatus = (event) => {
-    const arrStatus = [];
-    let values = event.target.value;
-    if (values.includes('plus')) values.shift();
-    if (values.includes('All') && values.indexOf('All') === values.length - 1) {
-      if (values.length > countryOption.length) {
-        setSelectedStatus([]);
-        dispatch(Actions.filterCountry([]));
-        localStorage.setItem('fcountry', JSON.stringify([]));
-      } else {
-        setSelectedStatus([...countryOption]);
-        dispatch(Actions.filterCountry(countryOption));
-        localStorage.setItem('fcountry', JSON.stringify(countryOption));
-      }
+  const selectAll = (event) => {
+    if (office.length === countries.reduce((sum, obj) => sum + obj.offices.length, 0)) {
+      setFilterCountry([]);
+      setOffice([]);
     } else {
-      const arrSelected = [];
-      values.forEach((item) => {
-        if (item !== 'All') {
-          arrStatus.push(countries.find((key) => key.value === item).value);
-          arrSelected.push(item);
-        }
-      });
-      setSelectedStatus(arrSelected);
-      dispatch(Actions.filterCountry(arrStatus));
-      localStorage.setItem('fcountry', JSON.stringify(arrSelected));
+      setFilterCountry(countryOption);
+      setOffice(countries.reduce((arr, obj) => [...arr, ...obj.offices], []));
+    }
+  };
+
+  const handleSelectStatus = (e, country) => {
+    e.stopPropagation();
+    const check = e.target.checked;
+    const temp = countries.find(({ value }) => value === country);
+    if (check) {
+      if (!filterCountry.includes(country)) {
+        setFilterCountry([...filterCountry, country]);
+      }
+      setOffice(uniqueArray([...office, ...temp.offices]));
+    } else {
+      setFilterCountry(filterCountry.filter((c) => c !== country));
+      setOffice(office.filter((o) => !temp.offices.includes(o)));
+    }
+  };
+
+  const handleSelectOffice = (_country, _office) => {
+    if (office.includes(_office)) {
+      const country = countries.find(({ value }) => value === _country);
+      const filter = office.filter((item) => item !== _office);
+      if (!country.offices.some((element) => filter.includes(element)))
+        setFilterCountry(filterCountry.filter((c) => c !== _country));
+      setOffice(filter);
+    } else {
+      if (!filterCountry.includes(_country)) setFilterCountry([...filterCountry, _country]);
+      setOffice([...office, _office]);
     }
   };
 
@@ -138,15 +224,16 @@ function ToolbarLayout2(props) {
               <Select
                 classes={{ select: classes.select }}
                 multiple
-                value={selectedStatus.length ? selectedStatus : ['plus']}
-                onChange={handleSelectStatus}
+                onChange={selectAll}
+                value={filterCountry.length ? filterCountry : ['plus']}
+                MenuProps={{ PaperProps: { style: { minWidth: 220 } } }}
                 inputProps={{ IconComponent: () => null }}
                 renderValue={(selected) => (
                   <div className={classes.chips}>
                     {selected.slice(0, 4).map((value) => (
                       <img
                         key={value}
-                        className={selectedStatus.length ? 'circle-flag' : 'circle-flag-default'}
+                        className={filterCountry.length ? 'circle-flag' : 'circle-flag-default'}
                         width="25"
                         height="25"
                         src={flagUrl(value)}
@@ -158,34 +245,31 @@ function ToolbarLayout2(props) {
                   </div>
                 )}
                 disableUnderline>
-                <MenuItem
-                  key={'All'}
-                  value={'All'}
-                  classes={{ selected: classes.menuItemSelected }}>
+                <MenuItem value="All" classes={{ selected: classes.menuItemSelected }}>
                   <Checkbox
-                    checked={selectedStatus.length === countryOption.length}
+                    checked={
+                      office.length === countries.reduce((sum, obj) => sum + obj.offices.length, 0)
+                    }
                     color="primary"
                   />
                   <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>All</span>
                 </MenuItem>
-                {countries.map(({ label, value }) => (
-                  <MenuItem
-                    key={value}
-                    classes={{ selected: classes.menuItemSelected }}
-                    value={value}>
-                    <Checkbox checked={selectedStatus.indexOf(value) > -1} color="primary" />
-                    <img
-                      loading="lazy"
-                      style={{ borderRadius: '50%' }}
-                      width="20"
-                      height="20"
-                      src={flagUrl(value)}
-                      alt=""
-                    />
-                    <span style={{ fontFamily: 'Montserrat', fontSize: '14px', marginLeft: 5 }}>
-                      {label}
-                    </span>
-                  </MenuItem>
+                <Divider />
+                {countries.map(({ label, value, offices }) => (
+                  <TreeNode
+                    key={label}
+                    label={label}
+                    val={value}
+                    check={offices.every((o) => office.includes(o))}
+                    handleSelectStatus={handleSelectStatus}>
+                    {offices.map((o) => (
+                      <MenuItem key={o} onClick={() => handleSelectOffice(value, o)}>
+                        <Checkbox checked={office.includes(o)} color="primary" />
+                        <span>{o}</span>
+                      </MenuItem>
+                    ))}
+                    <span></span>
+                  </TreeNode>
                 ))}
               </Select>
             )}

@@ -42,6 +42,7 @@ const BtnQueueList = () => {
       window.open(`/apps/admin${param}`) :
       dispatch(InquiryActions.openQueueList(true));
     localStorage.setItem('fcountry', JSON.stringify([country]));
+    localStorage.removeItem('foffice');
     setLocalStorageItem('from', null);
     setLocalStorageItem('to', null);
     setLocalStorageItem('bookingNo', null);
