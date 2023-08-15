@@ -71,7 +71,7 @@ function WorkspaceApp() {
         console.error(error);
         if (error.message === 'Network Error')
           redirectTo = '/deploying';
-        else if (error.response?.status === 404)
+        else if (error.response?.status === 404 || error.response?.status === 403)
           redirectTo = '/pages/errors/error-404';
       }
     }
