@@ -97,6 +97,7 @@ const PopoverFooter = ({ title, user, checkSubmit }) => {
 
   const toggleInquiriresDialog = () => {
     dispatch(InquiryActions.setField());
+    dispatch(InquiryActions.setOneInq({})); // close popup inquiry detail
     dispatch(FormActions.toggleAllInquiry(true));
     dispatch(FormActions.toggleInquiry(true));
     dispatch(FormActions.toggleSaveInquiry(true));
