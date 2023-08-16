@@ -58,7 +58,7 @@ export const loadContent = (myBL_Id, inquiries) => async (dispatch) => {
   }
 };
 
-export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnCd) => async (dispatch) => {
+export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnCd, transReply) => async (dispatch) => {
   try {
     const blResponse = await updateBlStatus({
       shineUrl: `${window.location.origin}/apps/workspace/${bkgNo}?usrId=admin&cntr=VN`,
@@ -71,7 +71,8 @@ export const updateOpusStatus = (bkgNo, blinkStsCd, rtrnCd) => async (dispatch) 
       stsDesc: '',
       blinkStsCd: blinkStsCd,
       rtrnCd,
-      shineId: "Blink User"
+      shineId: "Blink User",
+      transReply
     });
     console.log(blResponse);
   } catch (err) {
