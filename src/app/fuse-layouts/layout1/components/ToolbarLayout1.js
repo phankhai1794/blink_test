@@ -535,8 +535,11 @@ function ToolbarLayout1(props) {
                     size="medium"
                     className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
-                    <img src="assets/images/icons/email.svg" style={{ position: 'relative', right: 3, width: 13, display: 'inline-flex' }} />
-                    <span>Email</span>
+                    <div style={{ textAlign: 'center'}}>
+                      <img src="assets/images/icons/email.svg" style={{width: 13, display: 'inline-block', position: 'relative', right: 2} }/>
+                      <span style={{ display: 'inline-block'}}>Email</span>
+                    </div>
+                    
                   </Button>
                 </div>
               </PermissionProvider>

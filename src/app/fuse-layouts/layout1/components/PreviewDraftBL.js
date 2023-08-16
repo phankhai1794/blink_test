@@ -11,7 +11,10 @@ const useStyles = makeStyles((theme) => ({
     width: 19,
     height: 19,
     cursor: 'pointer',
-    display: 'inline-flex'
+    display: 'inline-block',
+    position: 'absolute',
+    left: 8,
+    top: 6
   },
   btn: {
     textTransform: 'none',
@@ -56,8 +59,10 @@ const PreviewDraftBL = () => {
                 onClick={previewDraftBL}
                 className={classes.btn}
                 style={{ height: 30, marginRight: 0, width: 90, fontSize: 12 }}>
-                <img src="assets/images/icons/preview-draft.svg" alt="Draft BL Icon" className={classes.iconDraftBL} />
-                Preview
+                <div style={{ textAlign: 'center'}}>
+                  <img src="assets/images/icons/preview-draft.svg" alt="Draft BL Icon" className={classes.iconDraftBL} />
+                  <span style={{ display: 'inline-block', position: 'absolute', left: 25, top: 6}}>Preview</span>
+                </div>
               </Button>
             </Tooltip>
           </PermissionProvider>
@@ -83,8 +88,10 @@ const PreviewDraftBL = () => {
                 }}
                 className={classes.btn}
                 style={{ height: 30, marginRight: 0, width: 90, fontSize: 12 }}>
-                <img src="assets/images/icons/preview-draft.svg" alt="Draft BL Icon" className={classes.iconDraftBL} />
-                Preview
+                <div style={{ textAlign: 'center'}}>
+                  <img src="assets/images/icons/preview-draft.svg" alt="Draft BL Icon" className={classes.iconDraftBL} />
+                  <span style={{ display: 'inline-block', position: 'absolute', left: 25, top: 6}}>Preview</span>
+                </div>
               </Button>
             </Tooltip>
           </PermissionProvider>

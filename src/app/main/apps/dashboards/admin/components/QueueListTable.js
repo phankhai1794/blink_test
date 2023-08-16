@@ -601,6 +601,7 @@ const QueueListTable = () => {
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
   const page = useSelector(({ dashboard }) => dashboard.page);
   const countries = useSelector(({ dashboard }) => dashboard.countries);
+  const office = useSelector(({ dashboard }) => dashboard.office);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('bkgNo');
   const [openDetailIndex, setOpenDetailIndex] = useState();
@@ -633,7 +634,8 @@ const QueueListTable = () => {
           .filter((bkg) => bkg)
           .map((bkg) => bkg.trim().toUpperCase()),
         blinkStatus: searchQueueQuery.blStatus,
-        countries
+        countries,
+        office
       },
       sort: searchQueueQuery.sortField
     })
@@ -652,7 +654,7 @@ const QueueListTable = () => {
 
   useEffect(() => {
     dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, countries }));
-  }, [countries]);
+  }, [countries, office]);
 
   useEffect(() => {
     return () =>
