@@ -419,6 +419,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             }}
             onChange={(e) => inputTextSeparate(e, type, field)}
             variant='outlined'
+            autoFocus
+            onPaste={onPaste}
           />
         </div>)
     } else {
@@ -438,6 +440,8 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
             }}
             onChange={handleChange}
             variant='outlined'
+            autoFocus
+            onPaste={onPaste}
             error={validateField(field, fieldValue).isError}
             helperText={
               validateField(field, fieldValue).errorType.split('\n').map((line, idx) => (
@@ -547,7 +551,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   });
 
   return (
-    <div style={{ paddingLeft: 18, borderLeft: `2px solid ${colorInq}`, position: 'relative' }} onPaste={onPaste} {...getRootProps({})}>
+    <div style={{ paddingLeft: 18, borderLeft: `2px solid ${colorInq}`, position: 'relative' }} {...getRootProps({})}>
       {isDragActive && <div className='dropzone'>Drop files here</div>}
       {!openAmendmentList && (
         <p style={{
