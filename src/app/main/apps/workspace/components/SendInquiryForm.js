@@ -124,7 +124,9 @@ const SendInquiryForm = (props) => {
   const [tabValue, setTabValue] = useState('');
   const [previewValue, setPreviewValue] = useState('default');
   const handleChange = (event) => {
-    setPreviewValue(event.target?.value || event);
+    const preVal = event.target?.value || event
+    setPreviewValue(preVal);
+    dispatch(FormActions.toggleOpenInquiryReview(preVal === 'inquiry' ));
   };
   const [formError, setFormError] = useState({ subject: '', content: '' });
   const hasCustomer = inquiries.some(
@@ -503,11 +505,20 @@ const SendInquiryForm = (props) => {
   };
 
   const countInq = (receiver) => {
-    return inquiries.filter(
-      (inq) =>
-        (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')) ||
-        (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
-    ).length;
+    if(previewValue === 'inquiry') {
+      return inquiries.filter(
+        (inq) =>
+          (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF' || inq.state === 'REOPEN_A' || inq.state === 'REOPEN_Q' )) ||
+          (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
+      ).length;
+    } else {
+      return inquiries.filter(
+        (inq) =>
+          (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF' )) ||
+          (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
+      ).length;
+    }
+   
   };
 
   const handleTabSelected = () => {
