@@ -503,11 +503,20 @@ const SendInquiryForm = (props) => {
   };
 
   const countInq = (receiver) => {
-    return inquiries.filter(
-      (inq) =>
-        (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')) ||
-        (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
-    ).length;
+    if(previewValue === 'inquiry') {
+      return inquiries.filter(
+        (inq) =>
+          (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF' || inq.state === 'REOPEN_A' || inq.state === 'REOPEN_Q' )) ||
+          (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
+      ).length;
+    } else {
+      return inquiries.filter(
+        (inq) =>
+          (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF' )) ||
+          (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
+      ).length;
+    }
+   
   };
 
   const handleTabSelected = () => {

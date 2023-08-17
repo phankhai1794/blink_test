@@ -347,7 +347,7 @@ const AllInquiry = (props) => {
         {props.user === 'workspace' ? (
           inquiries.map((q, index) => {
             CURRENT_NUMBER += 1;
-            if (receiver && !q.receiver.includes(receiver) && !openAmendmentList && !openInquiryReview) {
+            if (receiver && !q.receiver.includes(receiver) && !openAmendmentList) {
               return (
                 <div key={index} style={{ display: 'flex' }}></div>
               );
