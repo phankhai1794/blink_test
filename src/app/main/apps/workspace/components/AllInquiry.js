@@ -162,7 +162,6 @@ const useStyles = makeStyles((theme) => ({
 const AllInquiry = (props) => {
   const dispatch = useDispatch();
   const { receiver, openInquiryReview, field } = props;
-  console.log(receiver)
   const classes = useStyles();
   const [isSaved, setSaved] = useState(false);
   const [inquiryCopy, currentEditInq, metadata, isShowBackground, currentAmendment] = useSelector(({ workspace }) => [
@@ -199,9 +198,7 @@ const AllInquiry = (props) => {
       inquiriesSet = inquiriesSet.filter(inq => inq.process === 'draft');
       if (!inquiriesSet.length) dispatch(InquiryActions.addAmendment(null));
     } else if (openInquiryReview) {
-      console.log(inquiriesSet)
       inquiriesSet = inquiriesSet.filter(inq => ['OPEN', 'REP_Q_DRF', 'REOPEN_A', 'REOPEN_Q', 'REP_DRF'].includes(inq.state));
-      console.log(inquiriesSet)
     } else if (openPreviewListSubmit) {
       inquiriesSet = inquiriesSet.filter(inq => ['ANS_DRF', 'REP_A_DRF', 'REP_DRF', 'AME_DRF'].includes(inq.state));
       if (!inquiriesSet.length) dispatch(FormActions.togglePreviewSubmitList(false));
