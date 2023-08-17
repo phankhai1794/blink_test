@@ -124,9 +124,7 @@ const SendInquiryForm = (props) => {
   const [tabValue, setTabValue] = useState('');
   const [previewValue, setPreviewValue] = useState('default');
   const handleChange = (event) => {
-    const preVal = event.target?.value || event
-    setPreviewValue(preVal);
-    dispatch(FormActions.toggleOpenInquiryReview(preVal === 'inquiry' ));
+    setPreviewValue(event.target?.value || event);
   };
   const [formError, setFormError] = useState({ subject: '', content: '' });
   const hasCustomer = inquiries.some(
