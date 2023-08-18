@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import clsx from "clsx";
 import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
@@ -64,6 +64,7 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
   const getField = (field) => {
     return metadata.field?.[field] || '';
   };
+  const textFieldRef = useRef(null);
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
@@ -131,6 +132,7 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
         setParagraphText('');
       }
     }
+    if(textFieldRef.current) textFieldRef.current.focus();
   }, [question]);
 
   useEffect(() => {
@@ -179,6 +181,7 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
               fontStyle: !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT'].includes(question.state) && 'italic'
             },
           }}
+          inputRef={textFieldRef}
           InputLabelProps={{
             style: {
               fontSize: '1.7rem'
@@ -201,6 +204,7 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
           <TextField
             value={question.selectedChoice}
             disabled
+            inputRef={textFieldRef}
             style={{ margin: '1rem 5rem' }}
             multiline
             variant="outlined"
