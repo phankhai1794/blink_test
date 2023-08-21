@@ -32,7 +32,7 @@ const initialState = {
     sortField: settings.sortField || ['lastUpdated', 'DESC'],
     countries: null
   },
-  countries: '',
+  countries: [],
   isReset: false,
   office: foffice || []
 }
