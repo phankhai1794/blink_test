@@ -151,7 +151,6 @@ const useStyles = makeStyles((theme) => ({
   },
   exportFef: {
     minHeight: 79,
-    whiteSpace: 'pre-wrap'
   },
   forwarding: {
     display: 'block',
