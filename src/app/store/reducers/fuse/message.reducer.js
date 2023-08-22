@@ -2,6 +2,7 @@ import * as Actions from '../../actions/fuse/index';
 
 const initialState = {
   state: null,
+  deploying: false,
   options: {
     anchorOrigin: {
       vertical: 'top',
@@ -28,6 +29,12 @@ const message = function (state = initialState, action) {
     return {
       ...state,
       state: null
+    };
+  }
+  case Actions.DEPLOYING: {
+    return {
+      ...state,
+      deploying: action.state
     };
   }
   default: {
