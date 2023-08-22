@@ -326,8 +326,17 @@ const AmendmentPopup = (props) => {
     );
   };
 
+  const getDataCDInq = useSelector(({ workspace }) => workspace.inquiryReducer.getDataCDInq);
   const CustomContainerSeal = (value) => {
     const unlock = inqType === CONTAINER_DETAIL && isEdit;
+    let mapCdSeals = value;
+    if (getDataCDInq && getDataCDInq.length) {
+      getDataCDInq.forEach(a => {
+        if (a[getType(CONTAINER_NUMBER)] === data[getType(CONTAINER_NUMBER)]) {
+          mapCdSeals = a[getType(CONTAINER_SEAL)];
+        }
+      })
+    }
     return (
       <>
         {unlock ? (
@@ -378,7 +387,7 @@ const AmendmentPopup = (props) => {
             multiline
             variant="outlined"
             className={clsx(classes.textField, !unlock && classes.lock)}
-            value={value?.join(', ')}
+            value={mapCdSeals?.join(', ')}
             InputProps={{
               disabled: !unlock,
               endAdornment: <>{!unlock && <Icon style={{ paddingRight: 12 }}>lock</Icon>}</>
