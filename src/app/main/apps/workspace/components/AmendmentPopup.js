@@ -166,7 +166,7 @@ const AmendmentPopup = (props) => {
       title: title,
       value:
         CONTAINER_SEAL === title
-          ? containerDetail.find(
+          ? data[getType(title)] || containerDetail.find(
             (c) => c[getType(CONTAINER_NUMBER)] === data[getType(CONTAINER_NUMBER)]
           )?.[getType(CONTAINER_SEAL)]
           : data[getType(title)],
