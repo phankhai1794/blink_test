@@ -268,14 +268,14 @@ const InquiryAnswer = (props) => {
 
     await addTransactionAnswer({ inquiryId: question.id, contentCDCM, ansType: question.ansType }).catch(err => handleError(dispatch, err));
 
-    if (question.selectChoice) {
+    if (metadata.ans_type['choice'] === question.ansType && question.selectChoice) {
       if (question.selectChoice.isLast && !question.selectChoice.isOther?.trim()) {
         dispatch(AppAction.showMessage({ message: 'Information required!', variant: 'error' }));
         setDisableSave(false)
         return;
       }
       responseSelectChoice = await updateInquiryChoice(question.selectChoice).catch(err => handleError(dispatch, err));
-    } else if (question.paragraphAnswer) {
+    } else if (metadata.ans_type['paragraph'] === question.ansType && question.paragraphAnswer) {
       let answerId;
       if (question.answerObj) {
         if (question.answerObj.length) {
@@ -403,7 +403,8 @@ const InquiryAnswer = (props) => {
             disabled={
               (containerCheck.includes(question.field) ? isDisableSaveCdCm :
                 (
-                  !currentAnswer?.paragraphAnswer?.content?.trim()
+                  ((metadata.ans_type['paragraph'] === currentAnswer.ansType && !currentAnswer?.paragraphAnswer?.content?.trim() || currentAnswer?.paragraphAnswer?.content?.trim() === ONLY_ATT) ||
+                    (metadata.ans_type['choice'] === currentAnswer.ansType && currentAnswer?.answerObj?.filter(choice => choice.confirmed).length === 0))
                 && !currentAnswer.selectChoice
                 && (!currentAnswer.mediaFilesAnswer || currentAnswer.mediaFilesAnswer.length == 0)
                 ))
