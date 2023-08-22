@@ -107,6 +107,7 @@ const InquiryAnswer = (props) => {
   const getDataCDInq = useSelector(({ workspace }) => workspace.inquiryReducer.getDataCDInq);
   const oldDataCdCmInq = useSelector(({ workspace }) => workspace.inquiryReducer.oldDataCdCmInq);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const [isDisableSave, setDisableSave] = useState(false);
   const [isDisableSaveCdCm, setDisableSaveCdCm] = useState(true);
   const socket = useContext(SocketContext);
@@ -139,6 +140,7 @@ const InquiryAnswer = (props) => {
     currentEditInq.mediaFilesAnswer.forEach((mediaFileAns, index) => {
       if (mediaFileAns.id === null) {
         formData.append('files', mediaFileAns.data);
+        formData.append('bkgNo', myBL.bkgNo);
         isHasMedia = true;
       } else {
         mediaRest.push(mediaFileAns.id);

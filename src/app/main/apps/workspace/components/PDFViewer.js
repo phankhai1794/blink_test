@@ -381,6 +381,9 @@ const PDFViewer = (props) => {
   const openPreviewFiles = useSelector(({ workspace }) => workspace.formReducer.openPreviewFiles);
   const dispatch = useDispatch();
   const classes = useStyles();
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
+  const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
+  
   const docViewerRef = useRef(null);
 
   const urlMedia = (fileExt, file) => {
@@ -734,12 +737,12 @@ const PDFViewer = (props) => {
     let fileIds = [];
     if (inquiry && inquiry.files) {
       if (inquiry.files && inquiry.files.length > 0) {
-        inquiry.files.forEach(file => fileIds.push({ id: file.id, ext: file.ext, name: file.name, url: file.src }));
+        inquiry.files.forEach(file => fileIds.push({ id: file.id, ext: file.ext, name: file.name, url: file.src}));
         let listSrcFiles = [];
         fileIds.forEach(async (f, i) => {
           let url = '';
           if (f.id) {
-            const blob = await getFile(f.id).catch((err) => handleError(dispatch, err));
+            const blob = await getFile(myBL.bkgNo, f.id);
             url = urlMedia(f.ext, blob);
           } else url = f.url;
           if (url) {
