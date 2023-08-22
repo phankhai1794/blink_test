@@ -1,10 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import ClearIcon from '@material-ui/icons/Clear';
 import { Chip, Avatar, Link, TextField } from '@material-ui/core';
 import { makeStyles, withStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { matchSorter } from 'match-sorter';
 import { cyan } from '@material-ui/core/colors';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { uniqueArray } from '@shared';
+import copy from 'copy-to-clipboard';
 
 import * as MailActions from '../store/actions/mail';
 
@@ -44,6 +47,7 @@ const InputUI = ({ id, onChanged }) => {
     input: ''
   });
   const [ctrlA, setCtrlA] = useState({ state: false, id: '' });
+  const [selectedChip, setSelectedChip] = useState({});
   const refInput = {
     [`to${id}Cc`]: useRef(null),
     [`to${id}Bcc`]: useRef(null),
@@ -101,24 +105,22 @@ const InputUI = ({ id, onChanged }) => {
       }
     });
     if (result.length) {
-      const newTags = [...new Set([...tags[id], ...result])]
+      const newTags = uniqueArray([...tags[id], ...result]);
       onChanged(id, newTags);
       dispatch(MailActions.setTags({ ...tags, [id]: newTags }));
       dispatch(MailActions.inputMail({ ...inputMail, [id]: temp.join(',') }));
     }
-  }
+  };
 
   const onPaste = (id, e) => {
     e.preventDefault();
-    const removeDuplicate = [
-      ...new Set(
-        e.clipboardData
-          .getData('text')
-          .split(/,|;|\n/)
-          .map((str) => str.trim())
-      )
-    ];
-    splitEmailValid(id, removeDuplicate)
+    const removeDuplicate = uniqueArray(
+      e.clipboardData
+        .getData('text')
+        .split(/,|;|\n/)
+        .map((str) => str.trim())
+    );
+    splitEmailValid(id, removeDuplicate);
   };
   const onDelete = (id, tagIndex) => {
     const newTags = ctrlA.state ? [] : tags[id].filter((_, i) => i !== tagIndex);
@@ -142,9 +144,13 @@ const InputUI = ({ id, onChanged }) => {
       });
     }
     dispatch(MailActions.inputMail({ ...inputMail, [id]: value }));
-
+    // to: show suggestion email customer/onshore
+    // cc, bcc: show suggestion email customer/onshore/offshore
+    const suggestList = !id.toLowerCase().includes('cc')
+      ? suggestMails.filter((m) => m.role !== 'ADMIN')
+      : suggestMails;
     if (index >= 0 && strArr[index].trim().length >= 2) {
-      const filteredSuggestions = matchSorter(suggestMails, strArr[index].trim(), {
+      const filteredSuggestions = matchSorter(suggestList, strArr[index].trim(), {
         keys: ['email'],
         threshold: matchSorter.rankings.CONTAINS
       }).slice(0, 3);
@@ -165,7 +171,7 @@ const InputUI = ({ id, onChanged }) => {
   };
 
   const onAddition = (id, value) => {
-    const newTags = [...new Set([...tags[id], value])];
+    const newTags = uniqueArray([...tags[id], value]);
     dispatch(MailActions.inputMail({ ...inputMail, [id]: state.input || '' }));
     dispatch(MailActions.setTags({ ...tags, [id]: newTags }));
     onChanged(id, newTags);
@@ -223,16 +229,74 @@ const InputUI = ({ id, onChanged }) => {
 
   const onBlur = (id) => {
     const input = inputMail[id].split(/,|;|\n/).map((str) => str.trim());
-    splitEmailValid(id, input)
+    splitEmailValid(id, input);
     setCtrlA({ state: false });
+  };
+
+  const onClickChip = (e, id, tag) => {
+    setSelectedChip({ [id]: e.ctrlKey ? uniqueArray([...(selectedChip[id] || []), tag]) : [tag] });
+  };
+
+  useEffect(() => {
+    const onCopyChip = (event) => {
+      if (event.ctrlKey && event.key === 'c') {
+        copy(Object.values(selectedChip));
+      }
+    };
+    document.addEventListener('keydown', onCopyChip);
+    return () => {
+      document.removeEventListener('keydown', onCopyChip);
+    };
+  }, [selectedChip]);
+
+  const handleBodyClick = useCallback(
+    (e) => {
+      if (!e.target.closest('.mail-chip')) {
+        setSelectedChip({});
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    document.body.addEventListener('click', handleBodyClick);
+    return () => {
+      document.body.removeEventListener('click', handleBodyClick);
+    };
+  }, [handleBodyClick]);
+
+  const onDragEnd = ({ source, destination, draggableId }) => {
+    // dropped nowhere
+    if (!destination) {
+      return;
+    }
+    const sourceId = source.droppableId;
+    const destinationId = destination.droppableId;
+    if (sourceId === destinationId) {
+      return;
+    }
+
+    const value = draggableId.replace(sourceId, '')
+    const sourceTags = tags[sourceId].filter((tag) => tag !== value);
+    const destinationTags = uniqueArray([...tags[destinationId], value]);
+
+    dispatch(
+      MailActions.setTags({
+        ...tags,
+        [sourceId]: sourceTags,
+        [destinationId]: destinationTags
+      })
+    );
+    onChanged(sourceId, sourceTags);
+    onChanged(destinationId, destinationTags);
   };
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (ref.current && !ref.current.contains(event.target)) {
-        onBlur(`to${id}`)
-        onBlur(`to${id}Cc`)
-        onBlur(`to${id}Bcc`)
+        onBlur(`to${id}`);
+        onBlur(`to${id}Cc`);
+        onBlur(`to${id}Bcc`);
         if (isCc && !inputMail[`to${id}Cc`] && !tags[`to${id}Cc`].length) {
           onCc(false);
         }
@@ -267,15 +331,9 @@ const InputUI = ({ id, onChanged }) => {
   };
 
   const toReceiver = (id) => {
-    const temp1 = inputMail[`to${id}`]
-      ? [...tags[`to${id}`], ...inputMail[`to${id}`].split(/,|;/)]
-      : tags[`to${id}`];
-    const temp2 = inputMail[`to${id}Cc`]
-      ? [...tags[`to${id}Cc`], ...inputMail[`to${id}Cc`].split(/,|;/)]
-      : tags[`to${id}Cc`];
-    const temp3 = inputMail[`to${id}Bcc`]
-      ? [...tags[`to${id}Bcc`], ...inputMail[`to${id}Bcc`].split(/,|;/)]
-      : tags[`to${id}Bcc`];
+    const [temp1, temp2, temp3] = [`to${id}`, `to${id}Cc`, `to${id}Bcc`].map((id) =>
+      inputMail[id] ? [...tags[id], ...inputMail[id].split(/,|;/)] : tags[id]
+    );
     const size = temp1.length;
     const ccSize = temp2.length;
     const bccSize = temp3.length;
@@ -332,20 +390,41 @@ const InputUI = ({ id, onChanged }) => {
     return [arg, text];
   };
 
-  const TagsInput = (id, type) => {
+  const TagsInput = (id, type, snapshot) => {
     return (
       <>
-        <div className="flex flex-wrap flex-grow" >
+        <div
+          className="flex flex-wrap flex-grow"
+          style={{ borderLeft: snapshot.isDraggingOver ? '3px solid blue' : '' }}>
           <>
             {tags[id].map((tag, i) => (
-              <Chip
-                className={ctrlA.state && ctrlA.id === id ? 'ctrlA' : ''}
-                classes={{ root: classes.chip }}
-                key={i}
-                label={tag}
-                onDelete={() => onDelete(id, i)}
-                deleteIcon={<ClearIcon />}
-              />
+              <Draggable draggableId={`${id}${tag}`} index={i} key={i}>
+                {(provided, snapshot) => (
+                  <div
+                    className="mail-chip"
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    style={{
+                      ...provided.draggableProps.style,
+                      position: 'static'
+                    }}
+                    onClick={(e) => onClickChip(e, id, tag)}>
+                    <Chip
+                      className={
+                        (ctrlA.state && ctrlA.id === id) || selectedChip[id]?.includes(tag)
+                          ? 'ctrlA'
+                          : ''
+                      }
+                      style={{ background: snapshot.isDragging ? 'lightgreen' : '' }}
+                      classes={{ root: classes.chip }}
+                      label={tag}
+                      onDelete={() => onDelete(id, i)}
+                      deleteIcon={<ClearIcon />}
+                    />
+                  </div>
+                )}
+              </Draggable>
             ))}
           </>
           <TextField
@@ -392,57 +471,86 @@ const InputUI = ({ id, onChanged }) => {
           state.id === id &&
           inputMail[id] &&
           state.filteredSuggestions.length > 0 && (
-          <ul className="suggestions">
-            {state.filteredSuggestions.map(({ email, firstName, lastName, avatar }, index) => {
-              let className = 'suggestion';
-              // Flag the active suggestion with a class
-              if (index === state.activeSuggestion) {
-                className = 'suggestion-active';
-              }
-              return (
-                <div
-                  className={`flex ${className}`}
-                  key={index}
-                  onClick={() => onClickSuggestion(id, email)}>
-                  <Avatar
-                    // className={classes.fitAvatar}
-                    style={{ background: cyan[400] }}
-                    src={avatar ? avatar : 'assets/images/avatars/unnamed.png'}
-                    alt="User photo"
-                  />
-                  <div className="flex flex-col ml-8">
-                    <div>{firstName || lastName ? <>{`${firstName} ${lastName}`}</> : email}</div>
-                    <div style={{ fontSize: 12 }}>{email}</div>
+            <ul className="suggestions">
+              {state.filteredSuggestions.map(({ email, firstName, lastName, avatar }, index) => {
+                let className = 'suggestion';
+                // Flag the active suggestion with a class
+                if (index === state.activeSuggestion) {
+                  className = 'suggestion-active';
+                }
+                return (
+                  <div
+                    className={`flex ${className}`}
+                    key={index}
+                    onClick={() => onClickSuggestion(id, email)}>
+                    <Avatar
+                      // className={classes.fitAvatar}
+                      style={{ background: cyan[400] }}
+                      src={avatar ? avatar : 'assets/images/avatars/unnamed.png'}
+                      alt="User photo"
+                    />
+                    <div className="flex flex-col ml-8">
+                      <div>{firstName || lastName ? <>{`${firstName} ${lastName}`}</> : email}</div>
+                      <div style={{ fontSize: 12 }}>{email}</div>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </ul>
-        )}
+                );
+              })}
+            </ul>
+          )}
       </>
     );
   };
   return (
     <>
       {focus ? (
-        <div ref={ref} onFocus={() => setFocus(true)}>
-          <div className="flex" style={{ position: 'relative' }}>
-            <span className='m-auto mr-8'>To</span>
-            {TagsInput(`to${id}`, `To ${id}`)}
+        <DragDropContext onDragEnd={onDragEnd}>
+          <div ref={ref} onFocus={() => setFocus(true)}>
+            <Droppable droppableId={`to${id}`} direction="horizontal">
+              {(provided, snapshot) => (
+                <div
+                  className="flex"
+                  style={{ position: 'relative' }}
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}>
+                  <span className="m-auto mr-8">To</span>
+                  {TagsInput(`to${id}`, `To ${id}`, snapshot)}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+            {isCc && (
+              <Droppable droppableId={`to${id}Cc`} direction="horizontal">
+                {(provided, snapshot) => (
+                  <div
+                    className="flex m-auto"
+                    style={{ position: 'relative' }}
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}>
+                    <span className="m-auto mr-8">Cc</span>
+                    {TagsInput(`to${id}Cc`, 'Cc', snapshot)}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            )}
+            {isBcc && (
+              <Droppable droppableId={`to${id}Bcc`} direction="horizontal">
+                {(provided, snapshot) => (
+                  <div
+                    className="flex m-auto"
+                    style={{ position: 'relative' }}
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}>
+                    <span className="m-auto mr-8">Bcc</span>
+                    {TagsInput(`to${id}Bcc`, 'Bcc', snapshot)}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            )}
           </div>
-          {isCc &&
-            <div className="flex m-auto" style={{ position: 'relative' }}>
-              <span className='m-auto mr-8'>Cc</span>
-              {TagsInput(`to${id}Cc`, 'Cc')}
-            </div>
-          }
-          {isBcc &&
-            <div className="flex m-auto" style={{ position: 'relative' }}>
-              <span className='m-auto mr-8'>Bcc</span>
-              {TagsInput(`to${id}Bcc`, 'Bcc')}
-            </div>
-          }
-        </div>
+        </DragDropContext>
       ) : (
         <div
           style={{
