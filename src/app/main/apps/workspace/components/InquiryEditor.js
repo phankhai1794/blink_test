@@ -1098,6 +1098,7 @@ const InquiryEditor = (props) => {
 
       for (const f in mediaCreate) {
         const form_data = mediaCreate[f].data;
+        form_data.append('bkgNo', myBL.bkgNo);
         const res = await uploadFile(form_data).catch((err) => handleError(dispatch, err));
         mediaCreate[f].id = res.response[0].id;
       }
@@ -1225,6 +1226,7 @@ const InquiryEditor = (props) => {
         currentEditInq.mediaFile.forEach((file) => {
           const formData = new FormData();
           formData.append('files', file.fileUpload);
+          formData.append('bkgNo', myBL.bkgNo);
           uploads.push(formData);
         });
       }

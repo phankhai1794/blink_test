@@ -2475,6 +2475,7 @@ const InquiryViewer = (props) => {
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
         if (mediaFileAns.id === null) {
           formData.append('files', mediaFileAns.data);
+          formData.append('bkgNo', myBL.bkgNo);
         } else {
           mediaRest.push(mediaFileAns.id);
           mediaListAmendment.push({ id: mediaFileAns.id, ext: mediaFileAns.ext, name: mediaFileAns.name })
