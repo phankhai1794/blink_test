@@ -30,7 +30,6 @@ const initialState = {
     to: settings.to || formatDate(end, 'YYYY-MM-DD'),
     blStatus: settings.blStatus || Object.keys(mapperBlinkStatus),
     sortField: settings.sortField || ['lastUpdated', 'DESC'],
-    countries: null
   },
   countries: [],
   isReset: false,

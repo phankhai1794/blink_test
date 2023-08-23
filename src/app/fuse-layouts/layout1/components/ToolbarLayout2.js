@@ -177,7 +177,7 @@ function ToolbarLayout2(props) {
 
   useEffect(() => {
     // auto select only 1 default country when access to BLINK via OPUS
-    let result = fcountry || [...countryOption];
+    let result = fcountry && fcountry.length ? fcountry : [...countryOption];
     if (search) {
       const cntr = new URLSearchParams(search).get('cntr');
       if (cntr && countryOption.includes(cntr)) result = [cntr];
@@ -200,7 +200,8 @@ function ToolbarLayout2(props) {
         if (fcountry?.length && !foffice) {
           const arr = [];
           fcountry.forEach((f) => {
-            arr.push(...temp.find((t) => t.value === f).offices);
+            const r = temp.find((t) => t.value === f)?.offices;
+            if (r) arr.push(...r);
           });
           setOffice(arr);
           setOfficeOriginal(arr);
@@ -321,29 +322,20 @@ function ToolbarLayout2(props) {
             />
           </div>
           <div className="flex items-center">
-            {countries.length === 1 ? (
-              <img
-                className="circle-flag"
-                width="25"
-                height="25"
-                src={flagUrl(countries[0].value)}
-              />
-            ) : (
-              <div className={classes.chips} style={{ cursor: 'pointer' }} onClick={handleClick}>
-                {filterCountry.slice(0, 4).map((value) => (
-                  <img
-                    key={value}
-                    className={filterCountry.length ? 'circle-flag' : 'circle-flag-default'}
-                    width="25"
-                    height="25"
-                    src={flagUrl(value)}
-                  />
-                ))}
-                {filterCountry.length - 4 > 0 && (
-                  <div className="circle-flag-plus">+{filterCountry.length - 4}</div>
-                )}
-              </div>
-            )}
+            <div className={classes.chips} style={{ cursor: 'pointer' }} onClick={handleClick}>
+              {filterCountry.slice(0, 4).map((value) => (
+                <img
+                  key={value}
+                  className={filterCountry.length ? 'circle-flag' : 'circle-flag-default'}
+                  width="25"
+                  height="25"
+                  src={flagUrl(value)}
+                />
+              ))}
+              {filterCountry.length - 4 > 0 && (
+                <div className="circle-flag-plus">+{filterCountry.length - 4}</div>
+              )}
+            </div>
             <User />
           </div>
           <Menu
@@ -456,7 +448,8 @@ function ToolbarLayout2(props) {
                 variant="contained"
                 classes={{ root: clsx(classes.button) }}
                 color="primary"
-                onClick={() => onApply()}>
+                onClick={() => onApply()}
+                disabled={!officeOriginal.length}>
                 Apply
               </Button>
               <Button
