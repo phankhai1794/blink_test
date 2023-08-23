@@ -122,7 +122,7 @@ const StyledChip = withStyles(theme => ({
 }))(Chip);
 
 const AmendmentPopup = (props) => {
-  const { onClose, inqType, isEdit, data, dataValues, dataEdited, index, updateData, updateEdit, containerDetail, setSave, isInqCDCM } = props;
+  const { onClose, inqType, isEdit, data, dataValues, dataEdited, index, updateData, updateEdit, containerDetail, setSave, isInqCDCM, dataCdGetSeal } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
 
@@ -326,12 +326,12 @@ const AmendmentPopup = (props) => {
     );
   };
 
-  const getDataCDInq = useSelector(({ workspace }) => workspace.inquiryReducer.getDataCDInq);
   const CustomContainerSeal = (value) => {
     const unlock = inqType === CONTAINER_DETAIL && isEdit;
     let mapCdSeals = value;
-    if (getDataCDInq && getDataCDInq.length) {
-      getDataCDInq.forEach(a => {
+    console.log('dataCdGetSeal', dataCdGetSeal)
+    if (dataCdGetSeal && dataCdGetSeal.length) {
+      dataCdGetSeal.forEach(a => {
         if (a[getType(CONTAINER_NUMBER)] === data[getType(CONTAINER_NUMBER)]) {
           mapCdSeals = a[getType(CONTAINER_SEAL)];
         }
