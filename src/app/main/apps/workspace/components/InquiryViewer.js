@@ -978,6 +978,7 @@ const InquiryViewer = (props) => {
       setDropfiles([]);
       setSaveComment(!isSaveComment);
     }
+    if (containerCheck.includes(quest.field)) setAllowEdit(false);
   }
   //
   useEffect(() => {

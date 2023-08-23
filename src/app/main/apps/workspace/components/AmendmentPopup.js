@@ -329,7 +329,6 @@ const AmendmentPopup = (props) => {
   const CustomContainerSeal = (value) => {
     const unlock = inqType === CONTAINER_DETAIL && isEdit;
     let mapCdSeals = value;
-    console.log('dataCdGetSeal', dataCdGetSeal)
     if (dataCdGetSeal && dataCdGetSeal.length) {
       dataCdGetSeal.forEach(a => {
         if (a[getType(CONTAINER_NUMBER)] === data[getType(CONTAINER_NUMBER)]) {
