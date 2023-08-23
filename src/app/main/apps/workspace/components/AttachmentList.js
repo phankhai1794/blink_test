@@ -354,6 +354,7 @@ const AttachmentList = (props) => {
       if (!isExist) {
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('bkgNo', myBL.bkgNo);
         uploadFile(formData).then((media) => {
           // update inquiries
           const res = media.response[0];
@@ -458,6 +459,7 @@ const AttachmentList = (props) => {
         const formData = new FormData();
         formData.append('file', file[0]);
         const findInquiry = optionsOfQuestion.find(op => optionsAttachmentList[attachmentIndex].field === op.field);
+        formData.append('bkgNo', myBL.bkgNo);
         uploadFile(formData).then((media) => {
           // update inquiries
           const res = media.response[0];

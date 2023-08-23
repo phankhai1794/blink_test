@@ -49,6 +49,7 @@ const MainWorkSpace = () => {
 };
 
 function WorkspaceApp() {
+  const dispatch = useDispatch();
   const [validUrl, setValidUrl] = useState(false);
   const validToken = useSelector(({ header }) => header.validToken);
 
@@ -64,13 +65,12 @@ function WorkspaceApp() {
       try {
         const result = await validateBkgNo(bkgNo, cntr, {
           countries: user?.countries,
-          office: user?.office
+          offices: user?.office
         });
         if (result) setValidUrl(true);
       } catch (error) {
         console.error(error);
-        if (error.message === 'Network Error')
-          redirectTo = '/deploying';
+        if (error.message === 'Network Error') dispatch(AppActions.warningDeploying(true));
         else if (error.response?.status === 404 || error.response?.status === 403)
           redirectTo = '/pages/errors/error-404';
       }

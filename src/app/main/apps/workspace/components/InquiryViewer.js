@@ -911,7 +911,9 @@ const InquiryViewer = (props) => {
               }
               comments.splice(0, 0, markReopen);
             }
-            comments = comments.filter(c => c.content !== '');
+            if (containerCheck.includes(question.field)) {
+              comments = comments.filter(c => c.content !== '');
+            }
             if (comments.length) {
               if (['UPLOADED', 'RESOLVED'].includes(comments[0].state)) {
                 comments.splice(0, 2);
@@ -1018,6 +1020,23 @@ const InquiryViewer = (props) => {
     }
     //
     setQuestion({ ...quest, mediaFilesAnswer: currentEditInq.mediaFilesAnswer });
+  }
+
+  const removeFileReply = (val) => {
+    let valReply = val;
+    if (Object.keys(valReply).length) {
+      const contentReply = ['string'].includes(typeof valReply.answer.content) && valReply.answer.content === ONLY_ATT && valReply.mediaFiles.length === 0;
+      if (contentReply) {
+        valReply = {
+          ...valReply,
+          answer: {
+            ...valReply.answer,
+            content: ''
+          }
+        }
+      }
+    }
+    setTempReply(valReply);
   }
 
   useEffect(() => {
@@ -2476,6 +2495,7 @@ const InquiryViewer = (props) => {
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
         if (mediaFileAns.id === null) {
           formData.append('files', mediaFileAns.data);
+          formData.append('bkgNo', myBL.bkgNo);
         } else {
           mediaRest.push(mediaFileAns.id);
           mediaListAmendment.push({ id: mediaFileAns.id, ext: mediaFileAns.ext, name: mediaFileAns.name })
@@ -3780,7 +3800,7 @@ const InquiryViewer = (props) => {
                               templateReply={tempReply}
                               isEdit={true}
                               setTemplateReply={(val) => {
-                                setTempReply(val)
+                                removeFileReply(val)
                               }}
                             />
                           </>
