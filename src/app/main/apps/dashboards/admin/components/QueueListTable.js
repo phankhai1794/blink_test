@@ -29,7 +29,7 @@ import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
 import { mapperBlinkStatus } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
-import debounce from 'lodash/debounce'
+import debounce from 'lodash/debounce';
 
 import * as Actions from '../store/actions';
 
@@ -221,7 +221,7 @@ const useStyles = makeStyles({
   paper: {
     maxHeight: 400,
     maxWidth: 400,
-    overflow: "auto",
+    overflow: 'auto',
     padding: 15,
     color: '#515E6A',
     whiteSpace: 'pre-line'
@@ -490,10 +490,7 @@ const Row = (props) => {
               disablePortal={false}
               preventOverflow={'scrollParent'}>
               {({ TransitionProps, placement, arrow }) => (
-                <div
-                  onMouseEnter={handlePopoverMouseEnter}
-                  onMouseLeave={handlePopoverMouseLeave}
-                >
+                <div onMouseEnter={handlePopoverMouseEnter} onMouseLeave={handlePopoverMouseLeave}>
                   {arrow}
                   <Paper className={classes.paper}>{popover.text}</Paper>
                 </div>
@@ -634,45 +631,33 @@ const QueueListTable = () => {
           .filter((bkg) => bkg)
           .map((bkg) => bkg.trim().toUpperCase()),
         blinkStatus: searchQueueQuery.blStatus,
-        countries,
         office
       },
       sort: searchQueueQuery.sortField
     })
       .then(({ total, data }) => {
-        dispatch(Actions.setReset(false))
-        dispatch(Actions.setPage(page > Math.ceil(total / size) ? 1 : page, size))
-        setState({ ...state, queueListBl: data, totalBkgNo: total })
+        dispatch(Actions.setReset(false));
+        dispatch(Actions.setPage(page > Math.ceil(total / size) ? 1 : page, size));
+        setState({ ...state, queueListBl: data, totalBkgNo: total });
       })
       .catch((err) => handleError(dispatch, err));
   };
 
   const setPage = (page, size) => {
     // dispatch(Actions.setPage(page, size))
-    fetchData(page, size)
-  }
+    fetchData(page, size);
+  };
 
   useEffect(() => {
-    dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, countries }));
-  }, [countries, office]);
-
-  useEffect(() => {
-    return () =>
-      dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, countries: null }));
-  }, []);
-
-  useEffect(() => {
-    if (searchQueueQuery.countries) fetchData(page.currentPageNumber, page.pageSize)
-  }, [searchQueueQuery]);
+     fetchData(page.currentPageNumber, page.pageSize);
+  }, [searchQueueQuery, office]);
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === 'asc' ? 'desc' : 'asc';
     setOrder(isAsc);
     setOrderBy(property);
     setLocalStorageItem('sortField', [property, isAsc]);
-    dispatch(
-      Actions.searchQueueQuery({ ...searchQueueQuery, sortField: [property, isAsc] })
-    );
+    dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, sortField: [property, isAsc] }));
   };
 
   const openDetails = (index) => {
@@ -685,7 +670,7 @@ const QueueListTable = () => {
     setLocalStorageItem('pageSize', value);
   };
 
-  const debouncePage = useCallback(debounce(setPage, 1000))
+  const debouncePage = useCallback(debounce(setPage, 1000));
 
   return (
     <>
@@ -735,7 +720,9 @@ const QueueListTable = () => {
                     <div
                       className={clsx(classes.cellHead, classes.cellSticky)}
                       style={{ width: '100%', padding: 0 }}>
-                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)} style={{ width: '100%' }}>
+                      <div
+                        className={clsx(classes.lineMinWidth, classes.lineColumn)}
+                        style={{ width: '100%' }}>
                         <span>Booking Number</span>
                         <img
                           src="/assets/images/icons/Icon-sort.svg"
@@ -846,9 +833,7 @@ const QueueListTable = () => {
                     columns={columns}
                     key={index}
                     row={row}
-                    index={
-                      index + (page.currentPageNumber - 1) * page.pageSize
-                    }
+                    index={index + (page.currentPageNumber - 1) * page.pageSize}
                     open={openDetailIndex === index}
                     setOpen={() => openDetails(index)}
                   />
