@@ -15,10 +15,13 @@ const MainWorkSpace = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    sessionStorage.setItem('prevUrl', JSON.stringify({
-      cachePath: window.location.pathname,
-      cacheSearch: window.location.search
-    }));
+    sessionStorage.setItem(
+      'prevUrl',
+      JSON.stringify({
+        cachePath: window.location.pathname,
+        cacheSearch: window.location.search
+      })
+    );
     dispatch(
       AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_WORKSPACE }))
     );
@@ -46,6 +49,7 @@ const MainWorkSpace = () => {
 };
 
 function WorkspaceApp() {
+  const dispatch = useDispatch();
   const [validUrl, setValidUrl] = useState(false);
   const validToken = useSelector(({ header }) => header.validToken);
 
@@ -56,16 +60,18 @@ function WorkspaceApp() {
     const urlSearchParams = new URLSearchParams(search);
     const usrId = urlSearchParams.get('usrId');
     const cntr = urlSearchParams.get('cntr');
-
+    const user = JSON.parse(localStorage.getItem('USER'));
     if (bkgNo && usrId && cntr) {
       try {
-        const result = await validateBkgNo(bkgNo, cntr, { countries: JSON.parse(localStorage.getItem('USER'))?.countries });
+        const result = await validateBkgNo(bkgNo, cntr, {
+          countries: user?.countries,
+          offices: user?.office
+        });
         if (result) setValidUrl(true);
       } catch (error) {
         console.error(error);
-        if (error.message === 'Network Error')
-          redirectTo = '/deploying';
-        else if (error.response?.status === 404)
+        if (error.message === 'Network Error') dispatch(AppActions.warningDeploying(true));
+        else if (error.response?.status === 404 || error.response?.status === 403)
           redirectTo = '/pages/errors/error-404';
       }
     }

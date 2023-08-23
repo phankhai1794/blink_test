@@ -3030,6 +3030,8 @@ const InquiryViewer = (props) => {
             className={classes.inputText}
             value={(type === 'name' && textResolveSeparate[type] === NO_CONTENT_AMENDMENT) ? '' : textResolveSeparate[type]}
             multiline
+            autoFocus
+            onPaste={onPaste}
             // rows={['name'].includes(type) ? 2 : 3}
             rows={3}
             rowsMax={10}
@@ -3060,6 +3062,8 @@ const InquiryViewer = (props) => {
             rowsMax={10}
             onChange={inputText}
             variant='outlined'
+            autoFocus
+            onPaste={onPaste}
             inputProps={{ style: { textTransform: 'uppercase' } }}
             error={
               !validateInput?.isValid
@@ -3104,14 +3108,16 @@ const InquiryViewer = (props) => {
   }
 
   const onPaste = (e) => {
-    const fileObject = e.clipboardData.files[0];
-    const newFileName = generateFileNameTimeFormat(fileObject.name);
-    const myRenamedFile = new File(
-      [fileObject],
-      newFileName,
-      { type: "image/png" }
-    );
-    setFilepaste(myRenamedFile);
+    if (e.clipboardData.files.length && e.clipboardData.files[0]) {
+      const fileObject = e.clipboardData.files[0];
+      const newFileName = generateFileNameTimeFormat(fileObject.name);
+      const myRenamedFile = new File(
+        [fileObject],
+        newFileName,
+        { type: "image/png" }
+      );
+      setFilepaste(myRenamedFile);
+      }
   }
 
   const { isDragActive, getRootProps } = useDropzone({
@@ -3125,7 +3131,6 @@ const InquiryViewer = (props) => {
         <div
           style={{ position: 'relative' }}
           onClick={() => dispatch(FormActions.inqViewerFocus(question.id))}
-          onPaste={onPaste}
           {...getRootProps({})}>
           {(isReply || question.showIconAttachAnswerFile) && isDragActive && <div className='dropzone'>Drop files here</div>}
           <div>
@@ -3447,7 +3452,7 @@ const InquiryViewer = (props) => {
             ) : ``}
             {/*Allow edit table when reply amendment*/}
 
-            <div style={{ display: 'block', margin: '1rem 0rem' }}>
+            <div style={{ display: 'block', margin: '1rem 0rem' }} onPaste={onPaste}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'ANS_DRF', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
@@ -3722,6 +3727,8 @@ const InquiryViewer = (props) => {
                                   inputProps={{ style: { textTransform: 'uppercase' } }}
                                   onChange={(e) => handleChangeContentReply(e, type)}
                                   variant='outlined'
+                                  autoFocus
+                                  onPaste={onPaste}
                                 />
                               </div>
                             )
@@ -3740,6 +3747,8 @@ const InquiryViewer = (props) => {
                                 classes: { input: classes.placeholder }
                               }}
                               onChange={handleChangeContentReply}
+                              autoFocus
+                              onPaste={onPaste}
                               variant='outlined'
                               placeholder='Reply...'
                               error={validateField(question.field, tempReply?.answer?.content).isError && (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest'))}

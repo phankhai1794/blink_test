@@ -262,6 +262,7 @@ const InquiryEditor = (props) => {
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
   const fieldDefault = metadata.field_options.filter(field => field.display && field.keyword !== 'containerManifest')
   const [fieldType, setFieldType] = useState(fieldDefault);
+  const boxTextEl = React.createRef();
 
   const getValType = () => {
     const types = currentEditInq.inqGroup && currentEditInq.inqGroup.length && currentEditInq.inqGroup.map(inq => inq.inqType);
@@ -504,7 +505,7 @@ const InquiryEditor = (props) => {
     } else inq.receiver = ['customer']
 
     if (!containerCheck.includes(inq.field)) dispatch(InquiryActions.setEditInq(inq));
-
+    boxTextEl.current.focus();
     return () => dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false, createInq: false }))
   }, []);
 
@@ -557,6 +558,10 @@ const InquiryEditor = (props) => {
       // scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
     }
   }, showAddInquiry);
+
+  useEffect(() => {
+    boxTextEl.current.focus();
+  }, [currentEditInq])
 
   const isAllSelected = (
     containerCheck.includes(currentEditInq.field)
@@ -1318,7 +1323,7 @@ const InquiryEditor = (props) => {
   };
 
   const onPaste = (e) => {
-    if (e.clipboardData.files.length) {
+    if (e.clipboardData.files.length && e.clipboardData.files[0]) {
       let fileObject = e.clipboardData.files[0];
       const newFileName = generateFileNameTimeFormat(fileObject.name);
       const myRenamedFile = new File(
@@ -1337,7 +1342,7 @@ const InquiryEditor = (props) => {
   });
 
   return (
-    <div style={{ position: 'relative' }} onPaste={onPaste} {...getRootProps({})}>
+    <div style={{ position: 'relative' }} {...getRootProps({})}>
       {isDragActive && <div className='dropzone'>Drop files here</div>}
       <>
         <div className="flex justify-between" style={{ padding: '0.5rem', marginRight: '-15px' }}>
@@ -1583,6 +1588,8 @@ const InquiryEditor = (props) => {
                           disabled={false} // use true to disable editing
                           onChange={(e) => handleNameChangeCDCM(e, val)} // handle innerHTML change
                           style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
+                          innerRef={boxTextEl}
+                          onPaste={onPaste}
                         />
                       </div>
                     </div>
@@ -1594,6 +1601,8 @@ const InquiryEditor = (props) => {
                       disabled={false} // use true to disable editing
                       onChange={handleNameChange} // handle innerHTML change
                       style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
+                      innerRef={boxTextEl}
+                      onPaste={onPaste}
                     />
                   </div>
                 )}
@@ -1605,6 +1614,8 @@ const InquiryEditor = (props) => {
                   disabled={false} // use true to disable editing
                   onChange={handleNameChange} // handle innerHTML change
                   style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
+                  innerRef={boxTextEl}
+                  onPaste={onPaste}
                 />
               </div>
             )}
