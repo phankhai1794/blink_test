@@ -4,6 +4,7 @@ import { FusePageSimple } from '@fuse';
 import { useDispatch, useSelector } from 'react-redux';
 import * as AppActions from 'app/store/actions';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
+import { BROADCAST } from '@shared/keyword';
 
 import OtpCheck from '../OTPCheck';
 import PreProcess from '../PreProcess';
@@ -12,22 +13,21 @@ import BLWorkspace from '../workspace/components/BLWorkspace';
 import DraftBL from './DraftBL';
 
 const DraftBLPreview = ({ bl }) => {
+  const channel = new BroadcastChannel(BROADCAST.ACCESS);
+
   useEffect(() => {
     sessionStorage.clear(); // delete session storage when redirecting from workspace
+    channel.onmessage = ({ data }) => {
+      if (data.role !== 'Admin') history.push('/login');
+    };
   }, []);
 
-  return (
-    <DraftBL bl={bl} />
-  );
-}
+  return <DraftBL bl={bl} />;
+};
 
 function Coordinator({ bl }) {
   const isPreviewingDraftPage = useSelector(({ draftBL }) => draftBL.isPreviewingDraftPage);
-  return (
-    <>
-      {isPreviewingDraftPage ? <DraftBL bl={bl} /> : <BLWorkspace user="guest" />}
-    </>
-  );
+  return <>{isPreviewingDraftPage ? <DraftBL bl={bl} /> : <BLWorkspace user="guest" />}</>;
 }
 
 function DraftBLWorkspace() {
@@ -47,8 +47,9 @@ function DraftBLWorkspace() {
 
   return (
     <>
-      {isPreviewing ?
-        <DraftBLPreview bl={bl} /> :
+      {isPreviewing ? (
+        <DraftBLPreview bl={bl} />
+      ) : (
         <OtpCheck>
           <div className="flex flex-col flex-1 w-full">
             <FusePageSimple
@@ -68,7 +69,7 @@ function DraftBLWorkspace() {
             />
           </div>
         </OtpCheck>
-      }
+      )}
     </>
   );
 }

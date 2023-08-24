@@ -23,7 +23,8 @@ const useStyles = makeStyles((theme) => ({
     position: 'relative',
     width: 15,
     height: 15,
-    display: 'inline-flex'
+    display: 'inline-block',
+    top: 3
   }
 }));
 
@@ -42,6 +43,7 @@ const BtnQueueList = () => {
       window.open(`/apps/admin${param}`) :
       dispatch(InquiryActions.openQueueList(true));
     localStorage.setItem('fcountry', JSON.stringify([country]));
+    localStorage.removeItem('foffice');
     setLocalStorageItem('from', null);
     setLocalStorageItem('to', null);
     setLocalStorageItem('bookingNo', null);
@@ -62,8 +64,10 @@ const BtnQueueList = () => {
               onClick={() => showQueueList()}
               style={{ minHeight: 30, marginRight: 0, fontSize: 12, minWidth: 30, whiteSpace: 'nowrap', width: 90, height: 30 }}
             >
-              <FormatListBulleted className={classes.startIconBtn} />
-              <span>BL Status</span>
+              <div style={{textAlign: 'center'}}>
+                <FormatListBulleted className={classes.startIconBtn} />
+                <span style={{display: 'inline-block'}}>BL Status</span>
+              </div>
             </Button>
           </Tooltip>
           {/* </PermissionProvider> */}

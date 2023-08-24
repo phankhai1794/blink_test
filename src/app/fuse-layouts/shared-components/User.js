@@ -44,7 +44,8 @@ function User(props) {
           photoURL: userInfo.photoURL,
           email: userInfo.email,
           permissions: userInfo.permissions,
-          countries: userInfo.countries || []
+          countries: userInfo.countries || [],
+          office: userInfo.office || []
         };
         dispatch(AppActions.setUser(payload));
       }

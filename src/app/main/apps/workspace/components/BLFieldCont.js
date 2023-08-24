@@ -55,7 +55,7 @@ const BLField = ({ multiline = false, children: _children }) => {
   const dispatch = useDispatch()
   const classes = useStyles();
   const [anchorElCopy, setAnchorElCopy] = useState(null);
-  const children = Array.isArray(_children) ? _children.join(',') : _children?.trim();
+  const children = Array.isArray(_children) ? _children.join(',') : _children;
   const [popover, setPopover] = useState({ open: false, text: '' });
   const [anchorEl, setAnchorEl] = useState(null);
 

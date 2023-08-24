@@ -7,6 +7,7 @@ import * as Actions from '../actions';
 const end = new Date();
 const start = subMonths(end, 1);
 const settings = JSON.parse(localStorage.getItem('dashboard') || '{}');
+const foffice = JSON.parse(localStorage.getItem('foffice') || '""');
 
 const initialState = {
   page: { currentPageNumber: 1, pageSize: settings.pageSize || 10 },
@@ -31,8 +32,9 @@ const initialState = {
     sortField: settings.sortField || ['lastUpdated', 'DESC'],
     countries: null
   },
-  countries: '',
-  isReset: false
+  countries: [],
+  isReset: false,
+  office: foffice || []
 }
 
 const dashboardReducer = function (state = initialState, action) {
@@ -51,6 +53,9 @@ const dashboardReducer = function (state = initialState, action) {
   }
   case Actions.SET_RESET: {
     return { ...state, isReset: action.state };
+  }
+  case Actions.SET_OFFICE: {
+    return { ...state, office: action.state };
   }
   default: {
     return state;
