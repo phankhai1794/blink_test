@@ -6,6 +6,7 @@ import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CloseIcon from '@material-ui/icons/Close';
 import { grey } from '@material-ui/core/colors';
 import { styled } from '@material-ui/core/styles';
+import styledC from 'styled-components';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -13,6 +14,13 @@ import * as FormActions from '../store/actions/form';
 const DisabledRadioButtonUncheckedIcon = styled(RadioButtonUncheckedIcon)({
   color: grey['500']
 });
+
+const StyledDiv = styledC.div`
+  color: rgba(0, 0, 0, 0.38);
+  &:hover {
+    border-bottom: 1px dotted black;
+  }
+`;
 
 const inputStyle = makeStyles((theme) => ({
   root: {
@@ -93,12 +101,12 @@ const ChoiceAnswerEditor = (props) => {
   const [isAddChoice, setAddChoice] = useState(false);
   useEffect(() => {
     const inq = { ...currentEditInq };
-    const length = inq.answerObj.length
+    const length = inq.answerObj.length;
     if (length && !inq.answerObj[length - 1].content) {
-      inq.answerObj.pop()
+      inq.answerObj.pop();
       dispatch(InquiryActions.setEditInq(inq));
     }
-  }, [])
+  }, []);
 
   const handleAddChoice = () => {
     const inq = { ...currentEditInq };
@@ -144,13 +152,7 @@ const ChoiceAnswerEditor = (props) => {
         <div style={{ paddingTop: '6px', marginRight: '1rem' }}>
           <DisabledRadioButtonUncheckedIcon />
         </div>
-        <TextField
-          style={{ border: 'none' }}
-          placeholder="Add an option"
-          onClick={handleAddChoice}
-          InputProps={{ classes }}
-          disabled
-        />
+        <StyledDiv onClick={handleAddChoice}>Add an option</StyledDiv>
       </div>
       {!valid.answerContent && <span className={'errorChoice'}>Invalid Option !</span>}
     </div>
