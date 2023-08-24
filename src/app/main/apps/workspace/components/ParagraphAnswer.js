@@ -144,7 +144,13 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
         (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) ||
         (question.answersMedia && question.answersMedia.length > 0)
       ) && !containerCheck.includes(question.field)
-    ) setParagraphText(ONLY_ATT);
+    ) {
+      setParagraphText(ONLY_ATT);
+    } else if (((question.mediaFilesAnswer && question.mediaFilesAnswer.length === 0) ||
+        (question.answersMedia && question.answersMedia.length === 0)) && question.answerObj &&
+        question.answerObj.length > 0 && question.answerObj[0].content === ONLY_ATT) {
+      setParagraphText('')
+    }
   }, [saveStatus, question]);
 
   useEffect(() => {
