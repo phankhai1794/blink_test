@@ -7,8 +7,7 @@ import {
   CONTAINER_DETAIL,
   CONTAINER_LIST,
   CONTAINER_MANIFEST,
-  CONTAINER_NUMBER,
-  CONTAINER_SEAL
+  CONTAINER_NUMBER
 } from '@shared/keyword';
 import { parseNumberValue } from '@shared';
 
@@ -121,7 +120,6 @@ const ContainerDetailInquiry = ({
           CONTAINER_LIST.cdUnit.map((key, index) => {
             contentCM[0][getType(CONTAINER_LIST.cmUnit[index])] = valueUpdated[0][getType(key)];
           });
-          // contentCM[0][getType(CONTAINER_SEAL)] = valueUpdated[0][getType(CONTAINER_SEAL)];
           setDataCM(contentCM);
           dispatch(InquiryActions.setDataCmInq(contentCM));
         }

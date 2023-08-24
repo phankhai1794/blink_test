@@ -166,7 +166,7 @@ const AmendmentPopup = (props) => {
       title: title,
       value:
         CONTAINER_SEAL === title
-          ? data[getType(title)] || containerDetail.find(
+          ? containerDetail.find(
             (c) => c[getType(CONTAINER_NUMBER)] === data[getType(CONTAINER_NUMBER)]
           )?.[getType(CONTAINER_SEAL)]
           : data[getType(title)],
@@ -247,8 +247,8 @@ const AmendmentPopup = (props) => {
         setIsFormated(true)
       }
       else if (count
-          && !isFormated
-          && val.toUpperCase().match(/(CONT-NO)/g)) {
+        && !isFormated
+        && val.toUpperCase().match(/(CONT-NO)/g)) {
         val = val + ': ' + count.toString();
         setIsFormated(true)
       }
