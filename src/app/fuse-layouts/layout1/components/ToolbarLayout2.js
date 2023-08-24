@@ -178,7 +178,9 @@ function ToolbarLayout2(props) {
   useEffect(() => {
     // auto select only 1 default country when access to BLINK via OPUS
     let result = fcountry && fcountry.length ? fcountry : [...countryOption];
+    let isFallback = false;
     if (search) {
+      isFallback = true;
       const cntr = new URLSearchParams(search).get('cntr');
       if (cntr && countryOption.includes(cntr)) result = [cntr];
 
@@ -197,9 +199,9 @@ function ToolbarLayout2(props) {
           tempO.push(...office);
           return { ...m, offices: office.sort((a, b) => a.localeCompare(b)) };
         });
-        if (fcountry?.length && !foffice) {
+        if (isFallback || (result?.length && !foffice)) {
           const arr = [];
-          fcountry.forEach((f) => {
+          result.forEach((f) => {
             const r = temp.find((t) => t.value === f)?.offices;
             if (r) arr.push(...r);
           });
