@@ -1,10 +1,8 @@
-import history from '@history';
 import NavbarMobileToggleButton from 'app/fuse-layouts/shared-components/NavbarMobileToggleButton';
 import User from 'app/fuse-layouts/shared-components/User';
 import * as FormActions from 'app/main/apps/workspace/store/actions/form';
 import * as AppActions from 'app/store/actions';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
-import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
@@ -21,6 +19,7 @@ import * as InquiryActions from '../../../main/apps/workspace/store/actions/inqu
 
 import PreviewDraftBL from './PreviewDraftBL';
 import BtnQueueList from './BtnQueueList';
+import useShowQueueListCallback from './useShowQueueListCallback';
 
 const themeColor = '#BD0F72';
 const lightThemeColor = '#FDF2F2';
@@ -179,6 +178,8 @@ function ToolbarLayout1(props) {
   const [inquiryLength, setInquiryLength] = useState();
   const [showBack, setShowBack] = useState(true);
 
+  const { showQueueList } = useShowQueueListCallback();
+
   const enableSubmitInq = inquiries.some((inq) => ['ANS_DRF', 'REP_A_DRF', 'AME_DRF', 'REP_DRF'].includes(inq.state));
   const msgConfirmDrf = inquiries.some((inq) => !['RESOLVED', 'UPLOADED', 'COMPL'].includes(inq.state)) ? 'Still has pending inquiry/amendment \n' : '';
 
@@ -326,14 +327,6 @@ function ToolbarLayout1(props) {
   const handleClose = () => {
     setOpen(false);
   };
-
-  const showQueueList = () => {
-    const country = new URLSearchParams(search).get('cntr');
-    const param = country ? `?cntr=${country}` : "";
-    user?.userType === 'ADMIN' ?
-      window.open(`/apps/admin${param}`) :
-      dispatch(InquiryActions.openQueueList(true));
-  }
 
   const confirmBlDraft = () => setOpen(true);
 
