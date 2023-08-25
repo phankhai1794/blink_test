@@ -349,8 +349,8 @@ const FileAttach = ({
               <>
                 {question.creator && <div>{question.creator?.userName}</div>}
 
-                {(question.createdAt || question.updatedAt) &&
-                  <div>{displayTimeAttachment(question.createdAt || question.updatedAt)}</div>}
+                {(file.createdAt) &&
+                  <div>{displayTimeAttachment(file.createdAt)}</div>}
               </>
             ) : (
               <>
