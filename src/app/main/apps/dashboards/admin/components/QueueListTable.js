@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
@@ -29,7 +29,7 @@ import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
 import { mapperBlinkStatus } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
-import debounce from 'lodash/debounce'
+import debounce from 'lodash/debounce';
 
 import * as Actions from '../store/actions';
 
@@ -656,9 +656,15 @@ const QueueListTable = () => {
     dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, countries }));
   }, [countries, office]);
 
+  // Cache searchQueueQuery after logout
+  const searchQueueQueryCacheRef = useRef(searchQueueQuery);
+  useEffect(() => {
+    searchQueueQueryCacheRef.current = searchQueueQuery;
+  }, [searchQueueQuery]);
+
   useEffect(() => {
     return () =>
-      dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, countries: null }));
+      dispatch(Actions.searchQueueQuery({ ...searchQueueQueryCacheRef.current, countries: null }));
   }, []);
 
   useEffect(() => {
