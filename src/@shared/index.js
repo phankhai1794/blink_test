@@ -84,7 +84,7 @@ export const filterMetadata = (data) => {
 
 export const validateExtensionFile = (file) => {
   const fileExt = file.name.split('.').pop().toLowerCase();
-  return fileExt.match(/jpe|jpg|png|pdf|csv|xls|sheet|ppt|doc|txt|gif/g);
+  return fileExt.match(/jpe|jpg|png|pdf|csv|xls|sheet|doc|txt/g);
 };
 
 export const checkNewInquiry = (metadata, inquiries, type, status = ['OPEN', 'REP_Q_DRF', 'AME_DRF', 'REP_DRF']) => {
