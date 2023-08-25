@@ -26,7 +26,7 @@ export default function DateTimePickers(props) {
         maxDate={'3000-01-01'}
         id='mui-pickers-date'
         format='dd/MM/yyyy'
-        value={time || ''}
+        value={time || null}
         onChange={onChange}
         KeyboardButtonProps={{
           'aria-label': 'change date'
