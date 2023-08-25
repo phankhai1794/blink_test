@@ -1089,7 +1089,7 @@ const InquiryEditor = (props) => {
       }
 
       if (ansTypeChoice === currentEditInq.ansType) {
-        if (currentEditInq.answerObj.length === 1) {
+        if (contentsInqCDCM.some((_, index1) => currentEditInq.answerObj.filter(({ index }) => index1 === index).length < 2)) {
           dispatch(
             AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
           );
@@ -1509,7 +1509,7 @@ const InquiryEditor = (props) => {
                       {inqTypeOption.map((name) => {
                         const mapType = valueType.map(v => v.value);
                         return (
-                          <MenuItem key={name.value} value={name}>
+                          <MenuItem disabled={Boolean(currentEditInq.id) && currentEditInq.inqType === name.value} key={name.value} value={name}>
                             <Checkbox checked={mapType.includes(name.value)} />
                             <ListItemText primary={name.label} />
                           </MenuItem>
@@ -1589,8 +1589,9 @@ const InquiryEditor = (props) => {
                             handleReceiverChangeCDCM={handleReceiverChangeCDCM}
                           />
                           <AttachFile filepaste={filepaste} dropfiles={dropfiles} typeMedia={2} indexMedia={index} />
-                          <TrashIcon onDelete={() => removeSelectInqType(index)} />
-
+                          {Boolean(currentEditInq.id) && currentEditInq.inqType === val.type ? null :
+                            <TrashIcon onDelete={() => removeSelectInqType(index)} />
+                          }
                         </div>
                       </div>
                       <TemplateComponent
