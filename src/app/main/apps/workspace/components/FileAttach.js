@@ -108,7 +108,8 @@ const FileAttach = ({
   removeAttachmentDraftBL,
   isRemoveFile,
   setIsRemoveFile,
-  isEdit
+  isEdit,
+  indexType
 }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -205,7 +206,7 @@ const FileAttach = ({
     }
     else {
       const indexMedia = optionsOfQuestion.mediaFile.findIndex(
-        (f) => f.name === file.name
+        (f) => f.name === file.name && f.index === indexType
       );
       optionsOfQuestion.mediaFile.splice(indexMedia, 1);
     }
