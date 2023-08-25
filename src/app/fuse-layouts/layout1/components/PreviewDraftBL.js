@@ -8,13 +8,13 @@ import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 
 const useStyles = makeStyles((theme) => ({
   iconDraftBL: {
-    width: 19,
-    height: 19,
+    width: 20,
+    height: 20,
     cursor: 'pointer',
-    display: 'inline-block',
+    display: 'inline-flex',
     position: 'absolute',
     left: 8,
-    top: 6
+    textAlign: 'center'
   },
   btn: {
     textTransform: 'none',
@@ -61,7 +61,7 @@ const PreviewDraftBL = () => {
                 style={{ height: 30, marginRight: 0, width: 90, fontSize: 12 }}>
                 <div style={{ textAlign: 'center'}}>
                   <img src="assets/images/icons/preview-draft.svg" alt="Draft BL Icon" className={classes.iconDraftBL} />
-                  <span style={{ display: 'inline-block', position: 'absolute', left: 25, top: 6}}>Preview</span>
+                  <span style={{ display: 'inline-flex', textAlign: 'center', paddingLeft: 16}}>Preview</span>
                 </div>
               </Button>
             </Tooltip>
@@ -90,7 +90,7 @@ const PreviewDraftBL = () => {
                 style={{ height: 30, marginRight: 0, width: 90, fontSize: 12 }}>
                 <div style={{ textAlign: 'center'}}>
                   <img src="assets/images/icons/preview-draft.svg" alt="Draft BL Icon" className={classes.iconDraftBL} />
-                  <span style={{ display: 'inline-block', position: 'absolute', left: 25, top: 6}}>Preview</span>
+                  <span style={{ display: 'inline-flex', textAlign: 'center', paddingLeft: 16}}>Preview</span>
                 </div>
               </Button>
             </Tooltip>

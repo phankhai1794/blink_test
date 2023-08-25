@@ -980,6 +980,7 @@ const InquiryViewer = (props) => {
       setDropfiles([]);
       setSaveComment(!isSaveComment);
     }
+    if (containerCheck.includes(quest.field)) setAllowEdit(false);
   }
   //
   useEffect(() => {
@@ -1761,7 +1762,7 @@ const InquiryViewer = (props) => {
     }
   }
 
-  const autoSendMailResolve = (inquiries, type, process) => {
+  const autoSendMailResolve = (inquiries, type, process, currentContent) => {
     const check = inquiries.filter(inq => inq.process === process && inq.receiver[0] === type);
     if (check.every(inq => ['COMPL', 'RESOLVED'].includes(inq.state))) {
       const ids = []
@@ -1769,7 +1770,7 @@ const InquiryViewer = (props) => {
         const find = metadata?.field_options.find(field => field.value === inq.field);
         ids.push({ id: inq.id, field: find.label })
       })
-      sendmailResolve({ type: type === 'customer' ? 'Customer' : 'Onshore', myBL, user, content, ids, process })
+      sendmailResolve({ type: type === 'customer' ? 'Customer' : 'Onshore', myBL, user, content: currentContent, ids, process })
         .catch(err => handleError(dispatch, err));
     }
   }
@@ -1951,7 +1952,7 @@ const InquiryViewer = (props) => {
               dispatch(InquiryActions.setListMinimize(optionsMinimize));
             }
             //auto send mail if every inquiry is resolved
-            autoSendMailResolve(optionsInquires, receiver, process);
+            autoSendMailResolve(optionsInquires, receiver, process, res?.content || content);
           }
 
           if (res.fieldsChangesState?.length) {
@@ -2494,6 +2495,7 @@ const InquiryViewer = (props) => {
       tempReply.mediaFiles.forEach((mediaFileAns, index) => {
         if (mediaFileAns.id === null) {
           formData.append('files', mediaFileAns.data);
+          formData.append('bkgNo', myBL.bkgNo);
         } else {
           mediaRest.push(mediaFileAns.id);
           mediaListAmendment.push({ id: mediaFileAns.id, ext: mediaFileAns.ext, name: mediaFileAns.name })

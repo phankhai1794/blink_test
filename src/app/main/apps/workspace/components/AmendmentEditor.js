@@ -227,6 +227,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
         if (!file.id) {
           const formData = new FormData();
           formData.append('files', file.data);
+          formData.append('bkgNo', myBL.bkgNo);
           uploads.push(formData);
         }
       });

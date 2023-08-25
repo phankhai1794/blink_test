@@ -9,7 +9,7 @@ export async function uploadFile(data) {
   return response.data;
 }
 
-export async function getFile(id) {
-  const response = await axios().get(`${PATH}/getFile/${id}`, { responseType: 'blob' });
+export async function getFile(bkgNo, id) {
+  const response = await axios().get(`${PATH}/getFile/${bkgNo}/${id}`, { responseType: 'blob' });
   return response.data;
 }
