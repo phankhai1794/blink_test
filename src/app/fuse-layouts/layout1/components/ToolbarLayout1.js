@@ -529,7 +529,7 @@ function ToolbarLayout1(props) {
                     className={clsx('h-64', classes.button)}
                     onClick={openEmail}>
                     <div style={{ textAlign: 'center'}}>
-                      <img src="assets/images/icons/email.svg" style={{width: 13, display: 'inline-block', position: 'relative', right: 2} }/>
+                      <img src="assets/images/icons/email.svg" style={{width: 13, height: 9, display: 'inline-flex', position: 'relative', right: 2, textAlign: 'center'} }/>
                       <span style={{ display: 'inline-block'}}>Email</span>
                     </div>
                     
