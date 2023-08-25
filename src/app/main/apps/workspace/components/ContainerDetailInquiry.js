@@ -1,14 +1,19 @@
-import React, {useEffect, useState} from 'react';
-import {Collapse, ListItem, ListItemText} from "@material-ui/core";
-import {ExpandLess, ExpandMore} from "@material-ui/icons";
-import {useDispatch, useSelector} from "react-redux";
-import {makeStyles} from "@material-ui/styles";
+import React, { useEffect, useState } from 'react';
+import { Collapse, ListItem, ListItemText } from '@material-ui/core';
+import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { useDispatch, useSelector } from 'react-redux';
+import { makeStyles } from '@material-ui/styles';
+import {
+  CONTAINER_DETAIL,
+  CONTAINER_LIST,
+  CONTAINER_MANIFEST,
+  CONTAINER_NUMBER
+} from '@shared/keyword';
+import { parseNumberValue } from '@shared';
 
-import {CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, CONTAINER_NUMBER} from "../../../../../@shared/keyword";
-import {parseNumberValue} from "../../../../../@shared";
-import * as InquiryActions from "../store/actions/inquiry";
+import * as InquiryActions from '../store/actions/inquiry';
 
-import ContainerDetailForm from "./ContainerDetailForm";
+import ContainerDetailForm from './ContainerDetailForm';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,13 +31,21 @@ const useStyles = makeStyles((theme) => ({
         paddingRight: 0
       },
       '& .MuiTypography-body1': {
-        fontFamily: 'Montserrat',
+        fontFamily: 'Montserrat'
       }
     }
   }
-}))
+}));
 
-const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, disableInput, isAllowEdit, currentQuestion}) => {
+const ContainerDetailInquiry = ({
+  setDataCD,
+  setDataCM,
+  getDataCD,
+  getDataCM,
+  disableInput,
+  isAllowEdit,
+  currentQuestion
+}) => {
   const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -56,27 +69,27 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
     if (currentQuestion && containerCheck.includes(currentQuestion.field)) {
       inqTypes.push(currentQuestion.inqType);
       if (currentQuestion.inqGroup && currentQuestion.inqGroup.length) {
-        const inqTypeGroupMap = currentQuestion.inqGroup.map(i => i.inqType);
+        const inqTypeGroupMap = currentQuestion.inqGroup.map((i) => i.inqType);
         inqTypes = [...inqTypes, ...inqTypeGroupMap];
       }
       const getFieldAndTypes = [];
-      metadata.inq_type_options.forEach(t => {
+      metadata.inq_type_options.forEach((t) => {
         if (inqTypes.includes(t.value)) {
           getFieldAndTypes.push(t);
         }
-      })
+      });
       if (getFieldAndTypes.length) {
         const isChecked = [];
-        getFieldAndTypes.forEach(g => {
+        getFieldAndTypes.forEach((g) => {
           if (g.field && g.field.length) {
-            g.field.forEach(f => {
+            g.field.forEach((f) => {
               if (containerCheck.includes(f) && !isChecked.includes(f)) {
                 isChecked.push(f);
               }
-            })
+            });
           }
-        })
-        setIsShowTableCdCM(isChecked)
+        });
+        setIsShowTableCdCM(isChecked);
       }
     }
   }, [currentQuestion]);
@@ -123,8 +136,7 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
           dispatch(InquiryActions.setDataCdInq(contentCD));
         }
       }
-    }
-    else {
+    } else {
       let contsNoChange = {};
       const contsNo = [];
       const cdContent = getDataCD;
@@ -132,24 +144,32 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
       const fieldCDCM = isEditedCD ? getDataCD : getDataCM;
       valueUpdated.forEach((obj, index) => {
         const containerNo = fieldCDCM[index] && fieldCDCM[index][getType(CONTAINER_NUMBER)];
-        const getTypeName = Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === getType(CONTAINER_NUMBER));
+        const getTypeName = Object.keys(metadata.inq_type).find(
+          (key) => metadata.inq_type[key] === getType(CONTAINER_NUMBER)
+        );
         if (getTypeName === CONTAINER_NUMBER && containerNo !== obj[getType(CONTAINER_NUMBER)]) {
           contsNoChange[containerNo] = obj[getType(CONTAINER_NUMBER)];
           contsNo.push(obj?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
         }
-      })
+      });
       if (isEditedCD) {
         if (cmContent && cmContent.length) {
           // Auto Update container no CM
-          cmContent.map(item => {
+          cmContent.map((item) => {
             if (item[getType(CONTAINER_NUMBER)] in contsNoChange) {
               item[getType(CONTAINER_NUMBER)] = contsNoChange[item[getType(CONTAINER_NUMBER)]];
             }
-          })
-          valueUpdated.forEach(cd => {
-            let cmOfCd = [...new Set((cmContent || []).filter(cm =>
-                cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
-            ))]
+          });
+          valueUpdated.forEach((cd) => {
+            let cmOfCd = [
+              ...new Set(
+                (cmContent || []).filter(
+                  (cm) =>
+                    cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] ===
+                    cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+                )
+              )
+            ];
             if (cmOfCd.length === 1) {
               CONTAINER_LIST.cdNumber.map((key, index) => {
                 cmOfCd[0][getType(CONTAINER_LIST.cmNumber[index])] = cd[getType(key)];
@@ -158,15 +178,21 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
                 cmOfCd[0][getType(CONTAINER_LIST.cmUnit[index])] = cd[getType(key)];
               });
             }
-          })
+          });
           setDataCM(cmContent);
           dispatch(InquiryActions.setDataCmInq(cmContent));
         }
       } else if (!isEditedCD) {
-        cdContent.forEach(cm => {
-          let cmOfCd = [...new Set((valueUpdated || []).filter(cd =>
-              cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
-          ))]
+        cdContent.forEach((cm) => {
+          let cmOfCd = [
+            ...new Set(
+              (valueUpdated || []).filter(
+                (cd) =>
+                  cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] ===
+                  cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]
+              )
+            )
+          ];
           if (cmOfCd.length > 0) {
             CONTAINER_LIST.cmNumber.map((key, index) => {
               let total = 0;
@@ -176,12 +202,12 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
               cm[getType(CONTAINER_LIST.cdNumber[index])] = parseFloat(total.toFixed(3));
             });
           }
-        })
+        });
         setDataCD(cdContent);
         dispatch(InquiryActions.setDataCdInq(cdContent));
       }
     }
-  }
+  };
 
   return (
     <div style={{ width: '100%', margin: '10px 0 10px 0' }} className={classes.root}>
@@ -228,6 +254,7 @@ const ContainerDetailInquiry = ({setDataCD, setDataCM, getDataCD, getDataCM, dis
                   setDataCM(value);
                   dispatch(InquiryActions.setDataCmInq(value));
                 }}
+                dataCdGetSeal={getDataCD}
                 setEditContent={(value) => {}}
                 originalValues={getDataCM}
                 isPendingProcess={true}
