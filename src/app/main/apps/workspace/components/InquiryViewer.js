@@ -79,6 +79,7 @@ import {
   VOLUME_DIFFERENCE,
   SPECIAL_CARGO,
   CM_CUSTOMS_DESCRIPTION,
+  EXPORT_REF,
 } from '@shared/keyword';
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
@@ -396,7 +397,12 @@ const InquiryViewer = (props) => {
 
   const validateField = (field, value) => {
     let response = { isError: false, errorType: "" };
-    const isFieldMaxFineLine = metadata.field[FORWARDER] === field || metadata.field[ALSO_NOTIFY] === field || metadata.field[DESCRIPTION_OF_GOODS] === field;
+    const isFieldMaxFineLine = [
+      metadata.field[FORWARDER],
+      metadata.field[ALSO_NOTIFY],
+      metadata.field[DESCRIPTION_OF_GOODS],
+      metadata.field[EXPORT_REF]
+    ].includes(field);
     if (Object.keys(metadata.field).find(key => metadata.field[key] === field) === BL_TYPE) {
       response = validateBLType(value);
     }
@@ -3071,7 +3077,7 @@ const InquiryViewer = (props) => {
         </div>)
     } else {
       // TODO: Check WrapText for alsoNotify 1,2,3
-      const isAlsoNotify = metadata.field[ALSO_NOTIFY] === field;
+      const isLimitRows = [metadata.field[ALSO_NOTIFY], metadata.field[EXPORT_REF]].includes(field);
       return (
         isDateTime ?
           <DateTimePickers time={textResolve ? formatDate(textResolve, 'YYYY-MM-DD') : ''} onChange={e => inputText(e, true)} /> :
@@ -3099,7 +3105,7 @@ const InquiryViewer = (props) => {
                 )
               )
               ||
-              (isAlsoNotify ? validateGroupOneTextBox(textResolve).isError : false)
+              (isLimitRows ? validateGroupOneTextBox(textResolve).isError : false)
             }
             helperText={!validateInput?.isValid ?
               <>
