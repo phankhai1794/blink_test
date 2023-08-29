@@ -36,6 +36,8 @@ export const VESSEL_VOYAGE = 'vvd';
 
 export const VESSEL_VOYAGE_CODE = 'vvdCode';
 
+export const T_VVD = 'tvvd';
+
 export const PRE_CARRIAGE = 'preVvd';
 
 export const PRE_CARRIAGE_CODE = 'preVvdCode';

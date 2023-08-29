@@ -80,6 +80,7 @@ import {
   SPECIAL_CARGO,
   CM_CUSTOMS_DESCRIPTION,
   EXPORT_REF,
+  T_VVD,
 } from '@shared/keyword';
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
@@ -369,7 +370,8 @@ const InquiryViewer = (props) => {
     RATE,
     SERVICE_CONTRACT_NO,
     RD_TERMS,
-    BL_TYPE
+    BL_TYPE,
+    T_VVD,
   ];
 
   const isDisableBtnUpload = () => {
