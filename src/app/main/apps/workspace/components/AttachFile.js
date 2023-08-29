@@ -10,7 +10,7 @@ import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
 
 const AttachFile = (props) => {
-  const { disabled, isAnswer, isReply, question, questions, setAttachmentReply, isUploadFile, filepaste, dropfiles } = props;
+  const { disabled, isAnswer, isReply, question, questions, setAttachmentReply, isUploadFile, filepaste, dropfiles, typeMedia, indexMedia } = props;
   const dispatch = useDispatch();
   const [currentEditInq, metadata] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.currentEditInq,
@@ -66,7 +66,7 @@ const AttachFile = (props) => {
     const isExist = handleDuplicateAttachment(
       dispatch,
       metadata,
-      currentEditInq.mediaFile,
+      typeMedia === 1 ? currentEditInq.mediaFile : currentEditInq.mediaFile.filter(({ index }) => index === indexMedia),
       files,
       currentEditInq.field,
       currentEditInq.inqType
@@ -83,9 +83,11 @@ const AttachFile = (props) => {
           ext: src.type,
           name: src.name,
           data: formData,
-          fileUpload: src
+          fileUpload: src,
+          index: indexMedia
         });
       });
+      inq.mediaFile.sort((a, b) => a.index - b.index)
       dispatch(InquiryActions.setEditInq(inq));
       dispatch(FormActions.setEnableSaveInquiriesList(false));
     }

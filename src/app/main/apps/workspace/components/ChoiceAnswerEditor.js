@@ -49,7 +49,7 @@ const inputStyle = makeStyles((theme) => ({
 
 // Sub Commporent
 const Choice = (props) => {
-  const { index, value, handleChangeChoice, handleRemoveChoice, isAddChoice } = props;
+  const { index, value, handleChangeChoice, handleRemoveChoice, isAddChoice, indexType } = props;
   const [isHover, setIsHover] = useState(false);
   const [isOnFocus, setIsOnFocus] = useState(false);
   const handleFocus = (e) => {
@@ -75,7 +75,7 @@ const Choice = (props) => {
             style={{ marginLeft: '1rem' }}
             autoFocus={isAddChoice}
             onFocus={handleFocus}
-            onChange={(e) => handleChangeChoice(e, index)}
+            onChange={(e) => handleChangeChoice(e, index, indexType)}
             InputProps={{
               classes
             }}
@@ -91,7 +91,7 @@ const Choice = (props) => {
   );
 };
 const ChoiceAnswerEditor = (props) => {
-  // const { questions, question, index, saveQuestion } = props;
+  const { indexType } = props;
   const classes = inputStyle();
   const dispatch = useDispatch();
   const [valid, currentEditInq] = useSelector(({ workspace }) => [
@@ -112,9 +112,11 @@ const ChoiceAnswerEditor = (props) => {
     const inq = { ...currentEditInq };
     inq.answerObj.push({
       id: null,
-      content: 'Option ' + (inq.answerObj.length + 1),
-      createdAt: new Date()
+      content: 'Option ' + (inq.answerObj.filter(({ index }) => index === indexType).length + 1),
+      createdAt: new Date(),
+      index: indexType,
     });
+    inq.answerObj.sort((a, b) => a.index - b.index)
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
     setAddChoice(true);
@@ -122,21 +124,22 @@ const ChoiceAnswerEditor = (props) => {
 
   const handleRemoveChoice = (id) => {
     const inq = { ...currentEditInq };
-    inq.answerObj.splice(id, 1);
+    const ind = inq.answerObj.findIndex((ans) => ans.index === indexType)
+    inq.answerObj.splice(ind + id, 1);
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
-  const handleChangeChoice = (e, id) => {
+  const handleChangeChoice = (e, id, indexType) => {
     const inq = { ...currentEditInq };
-    inq.answerObj[id].content = e.target.value;
+    inq.answerObj.filter(({ index }) => index === indexType)[id].content = e.target.value;
     dispatch(InquiryActions.setEditInq(inq));
     dispatch(FormActions.setEnableSaveInquiriesList(false));
   };
 
   return (
     <div style={{ paddingTop: '2rem' }} className={classes.root}>
-      {currentEditInq.answerObj.map((value, k) => {
+      {currentEditInq.answerObj.filter(({ index }) => index === indexType).map((value, k) => {
         return (
           <Choice
             key={k}
@@ -145,6 +148,7 @@ const ChoiceAnswerEditor = (props) => {
             handleChangeChoice={handleChangeChoice}
             handleRemoveChoice={handleRemoveChoice}
             isAddChoice={isAddChoice}
+            indexType={indexType}
           />
         );
       })}
