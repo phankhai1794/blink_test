@@ -79,6 +79,8 @@ import {
   VOLUME_DIFFERENCE,
   SPECIAL_CARGO,
   CM_CUSTOMS_DESCRIPTION,
+  EXPORT_REF,
+  T_VVD,
 } from '@shared/keyword';
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
@@ -108,6 +110,7 @@ import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 import * as Actions from '../store/actions';
 import DateTimePickers from '../shared-components/DateTimePickers';
+import { TrashIcon } from '../shared-components';
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
@@ -368,7 +371,8 @@ const InquiryViewer = (props) => {
     RATE,
     SERVICE_CONTRACT_NO,
     RD_TERMS,
-    BL_TYPE
+    BL_TYPE,
+    T_VVD,
   ];
 
   const isDisableBtnUpload = () => {
@@ -396,7 +400,12 @@ const InquiryViewer = (props) => {
 
   const validateField = (field, value) => {
     let response = { isError: false, errorType: "" };
-    const isFieldMaxFineLine = metadata.field[FORWARDER] === field || metadata.field[ALSO_NOTIFY] === field || metadata.field[DESCRIPTION_OF_GOODS] === field;
+    const isFieldMaxFineLine = [
+      metadata.field[FORWARDER],
+      metadata.field[ALSO_NOTIFY],
+      metadata.field[DESCRIPTION_OF_GOODS],
+      metadata.field[EXPORT_REF]
+    ].includes(field);
     if (Object.keys(metadata.field).find(key => metadata.field[key] === field) === BL_TYPE) {
       response = validateBLType(value);
     }
@@ -1527,6 +1536,8 @@ const InquiryViewer = (props) => {
     if (index >= 0) {
       const optionsOfQuestion = [...inquiries];
       const inqEdit = JSON.parse(JSON.stringify(inq));
+      inqEdit.answerObj = inqEdit.answerObj.map((ans) => ({ ...ans, index: 0 }))
+      inqEdit.mediaFile = inqEdit.mediaFile.map((med) => ({ ...med, index: 0 }))
       inqEdit.ansType = optionsOfQuestion[index].ansType;
       dispatch(InquiryActions.setEditInq(inqEdit));
       dispatch(InquiryActions.setField(inq.field));
@@ -3071,7 +3082,7 @@ const InquiryViewer = (props) => {
         </div>)
     } else {
       // TODO: Check WrapText for alsoNotify 1,2,3
-      const isAlsoNotify = metadata.field[ALSO_NOTIFY] === field;
+      const isLimitRows = [metadata.field[ALSO_NOTIFY], metadata.field[EXPORT_REF]].includes(field);
       return (
         isDateTime ?
           <DateTimePickers time={textResolve ? formatDate(textResolve, 'YYYY-MM-DD') : ''} onChange={e => inputText(e, true)} /> :
@@ -3099,7 +3110,7 @@ const InquiryViewer = (props) => {
                 )
               )
               ||
-              (isAlsoNotify ? validateGroupOneTextBox(textResolve).isError : false)
+              (isLimitRows ? validateGroupOneTextBox(textResolve).isError : false)
             }
             helperText={!validateInput?.isValid ?
               <>
@@ -3243,14 +3254,7 @@ const InquiryViewer = (props) => {
                               action={PERMISSION.INQURIY_DELETE_COMMENT}
                               extraCondition={!['REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT'].includes(question.state)}
                             >
-                              <Tooltip title="Delete">
-                                <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
-                                  <img
-                                    style={{ height: '22px', cursor: 'pointer' }}
-                                    src="/assets/images/icons/trash.svg"
-                                  />
-                                </div>
-                              </Tooltip>
+                              <TrashIcon onDelete={() => removeReply(question)} />
                             </PermissionProvider>
                           </>
                         )}
@@ -3275,14 +3279,7 @@ const InquiryViewer = (props) => {
                     action={PERMISSION.INQUIRY_DELETE_INQUIRY}
                     extraCondition={allowDeleteInq}
                   >
-                    <Tooltip title="Delete">
-                      <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion(question)}>
-                        <img
-                          style={{ height: '22px', cursor: 'pointer' }}
-                          src="/assets/images/icons/trash.svg"
-                        />
-                      </div>
-                    </Tooltip>
+                    <TrashIcon onDelete={() => removeQuestion(question)} />
                   </PermissionProvider>
                 </div>
               ) : (
@@ -3319,14 +3316,7 @@ const InquiryViewer = (props) => {
                       </div>
                     </Tooltip>
                     {(!['REP_Q_DRF', 'REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT', 'ANS_SENT'].includes(question.state) || ['REP_Q_DRF'].includes(question.state) && user.role === 'Admin') && (
-                      <Tooltip title="Delete">
-                        <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
-                          <img
-                            style={{ height: '22px', cursor: 'pointer' }}
-                            src="/assets/images/icons/trash.svg"
-                          />
-                        </div>
-                      </Tooltip>
+                      <TrashIcon onDelete={() => removeReply(question)} />
                     )}
                   </PermissionProvider>
 
