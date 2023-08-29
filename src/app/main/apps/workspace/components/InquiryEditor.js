@@ -618,10 +618,6 @@ const InquiryEditor = (props) => {
     }
   }, showAddInquiry);
 
-  useEffect(() => {
-    if (boxTextEl.current) boxTextEl.current.focus();
-  }, [currentEditInq])
-
   const isAllSelected = (
     containerCheck.includes(currentEditInq.field)
     && Array.isArray(inqTypeOption)

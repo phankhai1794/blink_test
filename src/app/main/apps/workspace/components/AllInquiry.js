@@ -291,7 +291,7 @@ const AllInquiry = (props) => {
   };
 
   useEffect(() => {
-    if (currentAmendment !== undefined && inputAddAmendmentEndRef.current) {
+    if (currentAmendment && inputAddAmendmentEndRef.current) {
       inputAddAmendmentEndRef.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [currentAmendment]);
@@ -380,7 +380,7 @@ const AllInquiry = (props) => {
                       <Typography color="primary" variant="h5" className={classes.inqTitle} id={q.id}>
                         {getLabel(q.field)}
                       </Typography>
-                      {(q.id === scrollInquiry) && scrollFunction()}         
+                      {(scrollInquiry && q.id === scrollInquiry) && scrollFunction()}         
                       <InquiryViewer
                         user={props.user}
                         question={q}
@@ -437,7 +437,7 @@ const AllInquiry = (props) => {
                       }}
                       isAllInq={true}
                     />
-                    {(q.id === scrollInquiry) && scrollFunction()}  
+                    {(scrollInquiry && q.id === scrollInquiry) && scrollFunction()}  
                     {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                       <InquiryAnswer
                         onCancel={() => handleCancel(q)}
