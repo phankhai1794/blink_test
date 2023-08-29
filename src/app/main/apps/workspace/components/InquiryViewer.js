@@ -110,6 +110,7 @@ import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 import * as Actions from '../store/actions';
 import DateTimePickers from '../shared-components/DateTimePickers';
+import { TrashIcon } from '../shared-components';
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
@@ -1535,6 +1536,8 @@ const InquiryViewer = (props) => {
     if (index >= 0) {
       const optionsOfQuestion = [...inquiries];
       const inqEdit = JSON.parse(JSON.stringify(inq));
+      inqEdit.answerObj = inqEdit.answerObj.map((ans) => ({ ...ans, index: 0 }))
+      inqEdit.mediaFile = inqEdit.mediaFile.map((med) => ({ ...med, index: 0 }))
       inqEdit.ansType = optionsOfQuestion[index].ansType;
       dispatch(InquiryActions.setEditInq(inqEdit));
       dispatch(InquiryActions.setField(inq.field));
@@ -3251,14 +3254,7 @@ const InquiryViewer = (props) => {
                               action={PERMISSION.INQURIY_DELETE_COMMENT}
                               extraCondition={!['REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT'].includes(question.state)}
                             >
-                              <Tooltip title="Delete">
-                                <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
-                                  <img
-                                    style={{ height: '22px', cursor: 'pointer' }}
-                                    src="/assets/images/icons/trash.svg"
-                                  />
-                                </div>
-                              </Tooltip>
+                              <TrashIcon onDelete={() => removeReply(question)} />
                             </PermissionProvider>
                           </>
                         )}
@@ -3283,14 +3279,7 @@ const InquiryViewer = (props) => {
                     action={PERMISSION.INQUIRY_DELETE_INQUIRY}
                     extraCondition={allowDeleteInq}
                   >
-                    <Tooltip title="Delete">
-                      <div style={{ marginLeft: '10px' }} onClick={() => removeQuestion(question)}>
-                        <img
-                          style={{ height: '22px', cursor: 'pointer' }}
-                          src="/assets/images/icons/trash.svg"
-                        />
-                      </div>
-                    </Tooltip>
+                    <TrashIcon onDelete={() => removeQuestion(question)} />
                   </PermissionProvider>
                 </div>
               ) : (
@@ -3327,14 +3316,7 @@ const InquiryViewer = (props) => {
                       </div>
                     </Tooltip>
                     {(!['REP_Q_DRF', 'REP_SENT', 'AME_SENT', 'REP_Q_SENT', 'REP_A_SENT', 'ANS_SENT'].includes(question.state) || ['REP_Q_DRF'].includes(question.state) && user.role === 'Admin') && (
-                      <Tooltip title="Delete">
-                        <div style={{ marginLeft: '10px' }} onClick={() => removeReply(question)}>
-                          <img
-                            style={{ height: '22px', cursor: 'pointer' }}
-                            src="/assets/images/icons/trash.svg"
-                          />
-                        </div>
-                      </Tooltip>
+                      <TrashIcon onDelete={() => removeReply(question)} />
                     )}
                   </PermissionProvider>
 
