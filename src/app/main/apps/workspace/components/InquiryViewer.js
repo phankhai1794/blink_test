@@ -3804,7 +3804,8 @@ const InquiryViewer = (props) => {
                           onClick={() => onSaveReply()}
                           disabled={
                             ((question.state.includes("AME_DRF") || (question.state.includes("AME_SENT") && user.role === 'Guest')) && (
-                              validateField(question.field, tempReply?.answer?.content).isError
+                              // Case Enable Save when Edit Amendment
+                              (!isReply && validateField(question.field, tempReply?.answer?.content).isError)
                               ||
                               (
                                 [metadata.field[CONTAINER_DETAIL], metadata.field[CONTAINER_MANIFEST]].includes(question.field) ?
