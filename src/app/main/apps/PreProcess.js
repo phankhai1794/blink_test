@@ -113,10 +113,10 @@ const PreProcess = ({ bl, children }) => {
         userType: user.userType
       });
 
-      socket.on('connect_error', (err) => {
-        // if server has disconnected
-        dispatch(AppActions.warningDeploying(true));
-      });
+      // socket.on('connect_error', (err) => {
+      //   // if server has disconnected
+      //   dispatch(AppActions.warningDeploying(true));
+      // });
 
       // save socketId into window console after connecting
       socket.on('user_socket_id', (socketId) => {
