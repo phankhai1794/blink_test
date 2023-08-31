@@ -353,6 +353,9 @@ const Row = (props) => {
         <TableCell className={classes.cellBody}>
           {formatDate(row.lastUpdated, 'MMM DD YYYY HH:mm')}
         </TableCell>
+        <TableCell className={classes.cellBody}>
+          {formatDate(row.lastUpdatedAction, 'MMM DD YYYY HH:mm')}
+        </TableCell>
         {columns.etd && (
           <TableCell className={classes.cellBody}>
             {row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}
@@ -809,6 +812,11 @@ const QueueListTable = () => {
                         src="/assets/images/icons/Icon-sort.svg"
                         onClick={() => handleSort('lastUpdated')}
                       />
+                    </div>
+                  </TableCell>
+                  <TableCell className={classes.cellHead}>
+                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
+                      <span>Latest Status Update</span>
                     </div>
                   </TableCell>
                   {columns.etd && (
