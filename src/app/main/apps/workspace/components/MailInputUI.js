@@ -563,7 +563,9 @@ const InputUI = ({ id, onChanged }) => {
             cursor: 'text',
             padding: '5px 0'
           }}
-          onClick={() => setFocus(true)}>
+          onClick={() => setFocus(true)}
+          onDrop={(e) => e.preventDefault()}
+          >
           {toReceiver(id)[0].length ? (
             toReceiver(id)[0].map((e, i, arr) => (i !== arr.length - 1 ? <>{e}, </> : e))
           ) : (
