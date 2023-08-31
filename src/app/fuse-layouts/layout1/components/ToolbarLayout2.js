@@ -84,7 +84,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const flagUrl = (value) => `assets/images/flags/${value.toLowerCase()}.svg`;
+const flagUrl = (value) => (value ? `assets/images/flags/${value.toLowerCase()}.svg` : '');
 
 const TreeNode = (props) => {
   const { label, children, val, handleSelectStatus, check } = props;
@@ -167,12 +167,20 @@ function ToolbarLayout2(props) {
 
   const setOffice = (value) => {
     dispatch(Actions.setOffice(value));
-    localStorage.setItem('foffice', JSON.stringify(value));
+    if (value) {
+      localStorage.setItem('foffice', JSON.stringify(value));
+    } else {
+      localStorage.removeItem('foffice');
+    }
   };
 
   const setFilterCountry = (value) => {
     dispatch(Actions.filterCountry(value));
-    localStorage.setItem('fcountry', JSON.stringify(value));
+    if (value) {
+      localStorage.setItem('fcountry', JSON.stringify(value));
+    } else {
+      localStorage.removeItem('fcountry');
+    }
   };
 
   useEffect(() => {

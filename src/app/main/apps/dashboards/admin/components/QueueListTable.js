@@ -810,7 +810,7 @@ const QueueListTable = () => {
                   </StickyTableCell>
                   <TableCell className={classes.cellHead}>
                     <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
-                      <span>Last Updated</span>
+                      <span>Latest Status Update</span>
                       <img
                         src="/assets/images/icons/Icon-sort.svg"
                         onClick={() => handleSort('lastUpdated')}
@@ -819,7 +819,7 @@ const QueueListTable = () => {
                   </TableCell>
                   <TableCell className={classes.cellHead}>
                     <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
-                      <span>Latest Status Update</span>
+                      <span>Latest Action Update</span>
                     </div>
                   </TableCell>
                   {columns.etd && (
