@@ -30,7 +30,9 @@ const initialState = {
     from: settings.from || formatDate(start, 'YYYY-MM-DD'),
     to: settings.to || formatDate(end, 'YYYY-MM-DD'),
     blStatus: settings.blStatus || 'PENDING,IN_QUEUE',
-    sortField: settings.sortField || ''
+    sortField: settings.sortField || '',
+    isMe: false,
+    status: ''
   },
   isReset: false
 };

@@ -115,7 +115,6 @@ const useStyles = makeStyles({
   },
   linkOnshore: {
     color: '#BD0F72 !important',
-    textDecoration: 'none !important',
     fontWeight: '600'
   },
   label: {
@@ -684,7 +683,9 @@ const QueueListTable = () => {
             .map((bkg) => bkg.trim().toUpperCase()),
           blinkStatus: searchQueueQuery.blStatus,
           countries,
-          office
+          office,
+          isMe: searchQueueQuery.isMe,
+          status: searchQueueQuery.status,
         },
         sort: searchQueueQuery.sortField
       })

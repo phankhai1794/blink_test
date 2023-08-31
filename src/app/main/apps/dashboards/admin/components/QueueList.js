@@ -18,6 +18,7 @@ import {
   Icon
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { formatDate } from '@shared';
 import clsx from 'clsx';
 import {mapperBlinkStatus, mapperBlinkStatusCustomer} from '@shared/keyword';
@@ -56,6 +57,15 @@ const useStyles = makeStyles((theme) => ({
   btnSearch: {
     color: '#FFFF',
     fontFamily: 'Montserrat'
+  },
+  btnBackGround: {
+    backgroundColor: '#646e779c',
+    '& .MuiButton-label': {
+      color: 'white'
+    },
+    '&:hover': {
+      backgroundColor: '#646e779c'
+    }
   },
   closeBtn: {
     cursor: 'pointer'
@@ -155,7 +165,8 @@ const SearchLayout = (props) => {
     bookingNo: settings.bookingNo || '',
     from: settings.from || start,
     to: settings.to || end,
-    blStatus: settings.blStatus || blStatusOption
+    blStatus: settings.blStatus || blStatusOption,
+    isMe: false,
   });
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
   const [startingDate, setStartingDate] = useState('');
@@ -187,6 +198,14 @@ const SearchLayout = (props) => {
     setLocalStorageItem('bookingNo', state.bookingNo);
     dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...state }));
   };
+
+  const [isMe, setIsMe] = useState(false);
+  const handleToogleMyBl = () => {
+    const getIsMe = !isMe;
+    setIsMe(getIsMe);
+    setState({...state, ...getIsMe});
+    dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, isMe: getIsMe }));
+  }
 
   const handleReset = () => {
     setState(initialState);
@@ -388,6 +407,12 @@ const SearchLayout = (props) => {
             <SearchIcon />
             <span>Search</span>
           </Button>
+          {userType === 'ONSHORE' ? (
+            <Button className={clsx(classes.btn, isMe ? classes.btnBackGround : classes.btnSearch)} onClick={handleToogleMyBl}>
+              <span>My BLs</span>
+              <HighlightOffIcon />
+            </Button>
+          ): ``}
           <Button
             className={classes.btnReset}
             variant="text"
