@@ -1021,7 +1021,7 @@ const InquiryEditor = (props) => {
     let validate = {};
 
     if (
-      !currentEditInq.inqType ||
+      !contentsInqCDCM.length||
       !currentEditInq.field ||
       !currentEditInq.receiver.length ||
       !currentEditInq.ansType.length ||
@@ -1031,7 +1031,7 @@ const InquiryEditor = (props) => {
       validate = {
         ...valid,
         field: Boolean(currentEditInq.field),
-        inqType: Boolean(currentEditInq.inqType),
+        inqType: Boolean(contentsInqCDCM.length),
         receiver: Boolean(currentEditInq.receiver.length),
         ansType: Boolean(currentEditInq.ansType.length),
         content: Boolean(currentEditInq.content)
@@ -1073,7 +1073,7 @@ const InquiryEditor = (props) => {
       dispatch(
         InquiryActions.validate({
           field: Boolean(currentEditInq.field),
-          inqType: Boolean(currentEditInq.inqType),
+          inqType: Boolean(contentsInqCDCM.length),
           receiver: Boolean(currentEditInq.receiver.length),
           ansType: Boolean(currentEditInq.ansType.length),
           content: Boolean(currentEditInq.content),
