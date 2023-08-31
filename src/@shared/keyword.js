@@ -251,6 +251,12 @@ export const mapperBlinkStatus = {
   BS: "BL Amendment Success"
 };
 
+export const mapperBlinkStatusCustomer = {
+  'IN_QUEUE': 'In Queue',
+  'PENDING': 'Pending',
+  'COMPLETED': 'Completed',
+};
+
 export const BROADCAST = {
   ACCESS: "BLINK_ACCESS"
 };

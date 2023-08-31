@@ -20,7 +20,7 @@ import {
 import SearchIcon from '@material-ui/icons/Search';
 import { formatDate } from '@shared';
 import clsx from 'clsx';
-import { mapperBlinkStatus } from '@shared/keyword';
+import {mapperBlinkStatus, mapperBlinkStatusCustomer} from '@shared/keyword';
 import { DateRangePicker, defaultStaticRanges } from 'react-date-range';
 import { subMonths, addDays, subDays } from 'date-fns';
 
@@ -134,14 +134,17 @@ const QueueList = () => {
     </>
   );
 };
-const blStatusOption = Object.keys(mapperBlinkStatus);
 
 const SearchLayout = (props) => {
   const end = new Date();
   const start = subMonths(end, 1);
   const classes = useStyles();
   const dispatch = useDispatch();
+  const userType = useSelector(({ user }) => user.userType);
   const settings = JSON.parse(localStorage.getItem('dashboard') || '{}');
+
+  const getBlinkStatus = userType === 'ONSHORE' ? mapperBlinkStatusCustomer : mapperBlinkStatus;
+  const blStatusOption = Object.keys(getBlinkStatus);
   const initialState = {
     bookingNo: '',
     from: start,
@@ -353,7 +356,7 @@ const SearchLayout = (props) => {
                     <div className={classes.chips}>
                       {selected.map(
                         (value) =>
-                          <Chip key={value} label={mapperBlinkStatus[value]} className={classes.chip} />
+                          <Chip key={value} label={getBlinkStatus[value]} className={classes.chip} />
                       )}
                     </div>
                   )}
@@ -371,7 +374,7 @@ const SearchLayout = (props) => {
                       classes={{ selected: classes.menuItemSelected }}
                       value={status}>
                       <Checkbox checked={state.blStatus.indexOf(status) > -1} color="primary" />
-                      <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>{mapperBlinkStatus[status]}</span>
+                      <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>{getBlinkStatus[status]}</span>
                     </MenuItem>
                   ))}
                 </Select>

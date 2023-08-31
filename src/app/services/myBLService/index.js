@@ -40,3 +40,8 @@ export async function getOffshoreQueueList(data) {
   const response = await axios().post(`${PATH}/get-queue-list/offshore`, data);
   return response.data;
 }
+
+export async function getOnshoreQueueList(data) {
+  const response = await axios().post(`${PATH}/get-queue-list/onshore`, data);
+  return response.data;
+}

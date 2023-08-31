@@ -14,6 +14,7 @@ import { formatDate } from '@shared';
 import clsx from 'clsx';
 import { DateRangePicker, defaultStaticRanges } from 'react-date-range';
 import { subMonths, addDays, subDays } from 'date-fns';
+import QueueListAdmin from 'app/main/apps/dashboards/admin/components/QueueList';
 
 import { setLocalStorageItem } from '../shared-components/function';
 
@@ -125,6 +126,7 @@ const QueueList = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const openQueueList = useSelector(({ workspace }) => workspace.inquiryReducer.openQueueList);
+  const userType = useSelector(({ user }) => user.userType);
 
   const handleClose = () => dispatch(InquiryActions.openQueueList(false));
 
@@ -146,8 +148,14 @@ const QueueList = () => {
         </DialogTitle>
         {/* Body popup */}
         <DialogContent className={classes.bodyPopup}>
-          <SearchLayout />
-          <TableContent />
+          {userType === 'ONSHORE' ? (
+            <QueueListAdmin />
+          ) : (
+            <>
+              <SearchLayout />
+              <TableContent />
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
