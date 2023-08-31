@@ -115,7 +115,11 @@ const useStyles = makeStyles({
   },
   linkOnshore: {
     color: '#BD0F72 !important',
-    fontWeight: '600'
+    fontWeight: '600',
+    textDecoration: 'none',
+    '&:hover': {
+      textDecoration: 'underline !important'
+    }
   },
   label: {
     display: 'flex',
@@ -323,7 +327,7 @@ const Row = (props) => {
     } else {
       if (row.isMyBooking) {
         return <a
-          href={`/apps/workspace/${row.bkgNo}?usrId=admin&cntr=${row.country}`}
+          href={`/guest?bl=${row.id}`}
           target="_blank"
           className={classes.linkOnshore}
           rel="noreferrer">
@@ -693,7 +697,6 @@ const QueueListTable = () => {
         sort: searchQueueQuery.sortField
       })
         .then(({ total, data }) => {
-          console.log(data)
           dispatch(Actions.setReset(false))
           dispatch(Actions.setPage(page > Math.ceil(total / size) ? 1 : page, size))
           setState({ ...state, queueListBl: data, totalBkgNo: total })

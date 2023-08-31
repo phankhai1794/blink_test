@@ -54,6 +54,14 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: '#BD0F73'
     }
   },
+  btnIsMe: {
+    textTransform: 'none',
+    backgroundColor: 'green',
+    borderRadius: '25px',
+    '&:hover': {
+      backgroundColor: 'green'
+    }
+  },
   btnSearch: {
     color: '#FFFF',
     fontFamily: 'Montserrat'
@@ -168,6 +176,7 @@ const SearchLayout = (props) => {
     blStatus: settings.blStatus || blStatusOption,
     isMe: false,
   });
+  const [isMe, setIsMe] = useState(false);
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
   const [startingDate, setStartingDate] = useState('');
   const [isPickerOpen, setPickerOpen] = useState(false);
@@ -199,7 +208,6 @@ const SearchLayout = (props) => {
     dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...state }));
   };
 
-  const [isMe, setIsMe] = useState(false);
   const handleToogleMyBl = () => {
     const getIsMe = !isMe;
     setIsMe(getIsMe);
@@ -408,7 +416,7 @@ const SearchLayout = (props) => {
             <span>Search</span>
           </Button>
           {userType === 'ONSHORE' ? (
-            <Button className={clsx(classes.btn, isMe ? classes.btnBackGround : classes.btnSearch)} onClick={handleToogleMyBl}>
+            <Button className={clsx(classes.btnIsMe, isMe ? classes.btnBackGround : classes.btnSearch)} onClick={handleToogleMyBl}>
               <span>My BLs</span>
               <HighlightOffIcon />
             </Button>
