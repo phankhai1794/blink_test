@@ -29,10 +29,10 @@ const initialState = {
     bookingNo: settings.bookingNo || '',
     from: settings.from || formatDate(start, 'YYYY-MM-DD'),
     to: settings.to || formatDate(end, 'YYYY-MM-DD'),
-    blStatus: settings.blStatus || 'PENDING,IN_QUEUE',
+    // blStatus: settings.blStatus || 'PENDING,IN_QUEUE',
     sortField: settings.sortField || '',
     isMe: false,
-    status: ''
+    status: 'PENDING,IN_QUEUE'
   },
   isReset: false
 };

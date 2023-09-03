@@ -860,14 +860,14 @@ const QueueListTable = () => {
                       </div>
                     </TableCell>
                   )}
-                  {columns.customerS && (
+                  {columns.customerS && userType !== 'ONSHORE' && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Customer Status</span>
                       </div>
                     </TableCell>
                   )}
-                  {columns.onshoreS && (
+                  {columns.onshoreS && userType !== 'ONSHORE' && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Onshore Status</span>
