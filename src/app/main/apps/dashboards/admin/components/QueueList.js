@@ -458,7 +458,7 @@ const SearchLayout = (props) => {
             <span>Search</span>
           </Button>
           {userType === 'ONSHORE' ? (
-            <Button className={clsx(classes.btnIsMe, isMe ? classes.btnBackGround : classes.btnSearch)} onClick={handleToogleMyBl}>
+            <Button className={clsx(classes.btnIsMe, isMe ? classes.btnSearch : classes.btnBackGround)} onClick={handleToogleMyBl}>
               <span>My BLs</span>
               <HighlightOffIcon />
             </Button>
