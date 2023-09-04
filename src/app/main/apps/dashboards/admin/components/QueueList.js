@@ -58,6 +58,7 @@ const useStyles = makeStyles((theme) => ({
     textTransform: 'none',
     backgroundColor: 'green',
     borderRadius: '25px',
+    marginLeft: 10,
     '&:hover': {
       backgroundColor: 'green'
     }
@@ -94,6 +95,12 @@ const useStyles = makeStyles((theme) => ({
     '& input': {
       fontFamily: 'Montserrat',
       fontSize: '14px',
+    },
+    '& .MuiGrid-grid-xs-2': {
+      flexBasis: '21%',
+      // maxWidth: '17%',
+      display: 'flex',
+      // justifyContent: 'space-around'
     }
   },
   searchBox: {
@@ -131,7 +138,7 @@ const useStyles = makeStyles((theme) => ({
   grid: {
     '& .MuiGrid-grid-xs-4': {
       flexBasis: '33%',
-      maxWidth: '33%'
+      maxWidth: '30%'
     },
     '& .MuiGrid-grid-xs-3': {
       flexBasis: '23%',
@@ -141,6 +148,40 @@ const useStyles = makeStyles((theme) => ({
       flexBasis: '11%',
       maxWidth: '11%'
     }
+  },
+  styleSearch: {
+    [theme.breakpoints.down('sm')]: {
+      '& .MuiButton-root': {
+        lineHeight: 0,
+      },
+      '& .MuiButton-label': {
+        fontSize: 12,
+      },
+    },
+    [theme.breakpoints.down('md')]: {
+      '& .MuiButton-root': {
+        lineHeight: 0
+      },
+      '& .MuiButton-label': {
+        fontSize: 12,
+      },
+    },
+    [theme.breakpoints.down('lg')]: {
+      '& .MuiButton-root': {
+        lineHeight: 0
+      },
+      '& .MuiButton-label': {
+        fontSize: 12,
+      },
+    },
+    [theme.breakpoints.down('xl')]: {
+      '& .MuiButton-root': {
+        lineHeight: 0
+      },
+      '& .MuiButton-label': {
+        fontSize: 12,
+      },
+    },
   }
 }));
 
@@ -303,7 +344,7 @@ const SearchLayout = (props) => {
     <Paper className={classes.paper}>
       <Grid container spacing={1} className={classes.grid}>
         {/* Booking Number */}
-        <Grid item xs={4}>
+        <Grid item xs={4} sm={3} md={3} lg={3} xl={3}>
           <FormControl fullWidth variant="outlined">
             <InputLabel>
               <span>Booking Number</span>
@@ -410,7 +451,8 @@ const SearchLayout = (props) => {
             />
           </FormControl>
         </Grid>
-        <Grid item xs={1} style={{ margin: 'auto' }}>
+        {/*Search*/}
+        <Grid item xs={2} style={{ margin: 'auto' }} className={classes.styleSearch}>
           <Button className={clsx(classes.btn, classes.btnSearch)} onClick={handleSearch}>
             <SearchIcon />
             <span>Search</span>
