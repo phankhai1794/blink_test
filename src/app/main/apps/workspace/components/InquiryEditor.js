@@ -1034,7 +1034,7 @@ const InquiryEditor = (props) => {
       validate = {
         ...valid,
         field: Boolean(currentEditInq.field),
-        inqType: Boolean(currentEditInq.inqType),
+        inqType: Boolean(contentsInqCDCM.length),
         receiver: Boolean(currentEditInq.receiver.length),
         ansType: Boolean(currentEditInq.ansType.length),
         content: Boolean(currentEditInq.content)
@@ -1076,7 +1076,7 @@ const InquiryEditor = (props) => {
       dispatch(
         InquiryActions.validate({
           field: Boolean(currentEditInq.field),
-          inqType: Boolean(currentEditInq.inqType),
+          inqType: Boolean(contentsInqCDCM.length),
           receiver: Boolean(currentEditInq.receiver.length),
           ansType: Boolean(currentEditInq.ansType.length),
           content: Boolean(currentEditInq.content),

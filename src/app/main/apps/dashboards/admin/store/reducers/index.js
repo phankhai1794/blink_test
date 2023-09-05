@@ -13,6 +13,7 @@ const initialState = {
   page: { currentPageNumber: 1, pageSize: settings.pageSize || 10 },
   columns: settings.columns || {
     etd: true,
+    status: true,
     shipperN: false,
     customerS: true,
     onshoreS: true,

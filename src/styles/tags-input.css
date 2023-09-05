@@ -12,7 +12,7 @@
 }
 
 .react-tags.is-focused {
-  border-color: #B1B1B1;
+  border-color: #b1b1b1;
 }
 
 .react-tags__selected {
@@ -26,28 +26,28 @@
   padding: 6px 8px;
   border-radius: 4px;
   border-style: none;
-  background:  rgba(0, 0, 0, 0.03);
-  color: #515E6A;
+  background: rgba(0, 0, 0, 0.03);
+  color: #515e6a;
   /* match the font styles */
   font-size: inherit;
   line-height: inherit;
 }
 
 .ctrlA {
-  background:  rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.1);
   color: #4e5a65;
 }
 
 .react-tags__selected-tag .close {
   content: '\2715';
-  color: #AAA;
+  color: #aaa;
   margin-left: 8px;
   cursor: pointer;
 }
 
 .react-tags__selected-tag:hover,
 .react-tags__selected-tag:focus {
-  border-color: #B1B1B1;
+  border-color: #b1b1b1;
 }
 
 .react-tags__search {
@@ -86,11 +86,12 @@
   left: 0;
   width: 100%;
   z-index: 2;
-
 }
 
 ul.suggestions {
   width: 95%;
+  max-height: 350px;
+  overflow-y: scroll;
   margin: 4px -1px;
   padding: 0;
   z-index: 2;
@@ -98,17 +99,19 @@ ul.suggestions {
   list-style: none;
   position: absolute;
   background: white;
-  border: 1px solid #D1D1D1;
+  border: 1px solid #d1d1d1;
   border-radius: 2px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.suggestion, .suggestion-active  {
+.suggestion,
+.suggestion-active {
   border-bottom: 1px solid #ddd;
   padding: 8px 10px;
 }
 
-.suggestion-active, .suggestion:hover {
+.suggestion-active,
+.suggestion:hover {
   cursor: pointer;
   background: #eee;
 }
@@ -122,7 +125,8 @@ ul.suggestions {
   cursor: auto;
 }
 
-.moreTag, .moreTag_invalid {
+.moreTag,
+.moreTag_invalid {
   margin: 0 8px;
   background-color: #f5f5f5;
   box-shadow: inset 0 0 0 1px #dadce0;
@@ -134,4 +138,9 @@ ul.suggestions {
 }
 .invalidEmail {
   border-bottom: 2px dotted #db4437;
+}
+
+[data-rbd-draggable-id] {
+  left: auto !important;
+  top: auto !important;
 }

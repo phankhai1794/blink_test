@@ -3,7 +3,7 @@ import { displayTime, isJsonText, formatDate } from '@shared';
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { CONTAINER_MANIFEST, CONTAINER_DETAIL } from '@shared/keyword';
+import { CONTAINER_MANIFEST, CONTAINER_DETAIL, DESCRIPTION_OF_GOODS, DESCRIPTION_OF_GOODS1, DESCRIPTION_OF_GOODS2 } from '@shared/keyword';
 import clsx from "clsx";
 
 import Diff from "../shared-components/react-diff";
@@ -190,8 +190,17 @@ const Comment = (props) => {
                   {!['REOPEN_A', 'REOPEN_Q'].includes(reply.state) ?
                     <div className={reply.isChangeRecipient ? 'markReopen' : ''}>
                       {['AME_DRF', 'AME_SENT', 'RESOLVED', 'COMPL', 'UPLOADED'].includes(reply.state) ?
-                        <Diff inputA={isDateTime ? formatDate(orgContent[question.field], 'DD MMM YYYY') : (orgContent[question.field] || '')} inputB={renderContent() || ''} type="chars" /> :
-                        renderContent()
+                        <>
+                          {(question?.field === metadata.field[DESCRIPTION_OF_GOODS]) && 
+                            <div style={{ whiteSpace: 'pre-wrap' }}>
+                              {orgContent[metadata.field[DESCRIPTION_OF_GOODS1]] ? 
+                                `${orgContent[metadata.field[DESCRIPTION_OF_GOODS1]]}\n${orgContent[metadata.field[DESCRIPTION_OF_GOODS2]]}`
+                                : orgContent[metadata.field[DESCRIPTION_OF_GOODS2]]}
+                            </div>
+                          }
+                          <Diff inputA={isDateTime ? formatDate(orgContent[question.field], 'DD MMM YYYY') : (orgContent[question.field] || '')} inputB={renderContent() || ''} type="chars" /> 
+                        </>
+                        : renderContent()
                       }
                     </div> :
                     (type === 'INQ' ? content : <span className={'markReopen'}>Marked as reopened</span>)

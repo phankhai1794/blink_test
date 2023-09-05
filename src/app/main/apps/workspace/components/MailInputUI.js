@@ -15,8 +15,7 @@ const useStyles = makeStyles(() => ({
   chip: {
     borderRadius: '4px',
     background: 'rgba(0, 0, 0, 0.03)',
-    height: 26,
-    margin: 'auto 3px'
+    height: 26
   }
 }));
 
@@ -35,6 +34,13 @@ const CustomLink = withStyles({
   }
 })(Link);
 
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
 const InputUI = ({ id, onChanged }) => {
   const dispatch = useDispatch();
   const classes = useStyles();
@@ -153,7 +159,7 @@ const InputUI = ({ id, onChanged }) => {
       const filteredSuggestions = matchSorter(suggestList, strArr[index].trim(), {
         keys: ['email'],
         threshold: matchSorter.rankings.CONTAINS
-      }).slice(0, 3);
+      });
       strArr.splice(index, 1);
       setState({
         activeSuggestion: -1,
@@ -249,21 +255,18 @@ const InputUI = ({ id, onChanged }) => {
     };
   }, [selectedChip]);
 
-  const handleBodyClick = useCallback(
-    (e) => {
-      if (!e.target.closest('.mail-chip')) {
-        setSelectedChip({});
-      }
-    },
-    []
-  );
+  const handleBodyClick =(e) => {
+    if (!e.target.closest('.mail-chip')) {
+      setSelectedChip({});
+    }
+  };
 
   useEffect(() => {
     document.body.addEventListener('click', handleBodyClick);
     return () => {
       document.body.removeEventListener('click', handleBodyClick);
     };
-  }, [handleBodyClick]);
+  }, []);
 
   const onDragEnd = ({ source, destination, draggableId }) => {
     // dropped nowhere
@@ -273,22 +276,35 @@ const InputUI = ({ id, onChanged }) => {
     const sourceId = source.droppableId;
     const destinationId = destination.droppableId;
     if (sourceId === destinationId) {
-      return;
+      if (source.index === destination.index) {
+        return;
+      }
+      const reorderedorder = reorder(tags[sourceId], source.index, destination.index);
+      dispatch(
+        MailActions.setTags({
+          ...tags,
+          [sourceId]: reorderedorder
+        })
+      );
+      onChanged(sourceId, reorderedorder);
+    } else {
+      const value = draggableId.replace(sourceId, '');
+      const sourceTags = [...tags[sourceId]];
+      const destItems = [...tags[destinationId]];
+      const [removed] = sourceTags.splice(source.index, 1);
+      destItems.splice(destination.index, 0, removed);
+      const destinationTags = uniqueArray(destItems);
+
+      dispatch(
+        MailActions.setTags({
+          ...tags,
+          [sourceId]: sourceTags,
+          [destinationId]: destinationTags
+        })
+      );
+      onChanged(sourceId, sourceTags);
+      onChanged(destinationId, destinationTags);
     }
-
-    const value = draggableId.replace(sourceId, '')
-    const sourceTags = tags[sourceId].filter((tag) => tag !== value);
-    const destinationTags = uniqueArray([...tags[destinationId], value]);
-
-    dispatch(
-      MailActions.setTags({
-        ...tags,
-        [sourceId]: sourceTags,
-        [destinationId]: destinationTags
-      })
-    );
-    onChanged(sourceId, sourceTags);
-    onChanged(destinationId, destinationTags);
   };
 
   useEffect(() => {
@@ -394,29 +410,26 @@ const InputUI = ({ id, onChanged }) => {
     return (
       <>
         <div
-          className="flex flex-wrap flex-grow"
-          style={{ borderLeft: snapshot.isDraggingOver ? '3px solid blue' : '' }}>
+          className="flex flex-wrap flex-grow items-center"
+          style={{ borderLeft: snapshot.isDraggingOver ? '3px solid blue' : '', gap: 3 }}>
           <>
             {tags[id].map((tag, i) => (
-              <Draggable draggableId={`${id}${tag}`} index={i} key={i}>
+              <Draggable draggableId={`${id}${tag}`} index={i} key={`${id}${tag}`}>
                 {(provided, snapshot) => (
-                  <div
-                    className="mail-chip"
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    style={{
-                      ...provided.draggableProps.style,
-                      position: 'static'
-                    }}
-                    onClick={(e) => onClickChip(e, id, tag)}>
+                  <div className="mail-chip" onClick={(e) => onClickChip(e, id, tag)}>
                     <Chip
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
                       className={
                         (ctrlA.state && ctrlA.id === id) || selectedChip[id]?.includes(tag)
                           ? 'ctrlA'
                           : ''
                       }
-                      style={{ background: snapshot.isDragging ? 'lightgreen' : '' }}
+                      style={{
+                        ...provided.draggableProps.style,
+                        background: snapshot.isDragging ? 'lightgreen' : ''
+                      }}
                       classes={{ root: classes.chip }}
                       label={tag}
                       onDelete={() => onDelete(id, i)}
@@ -506,49 +519,41 @@ const InputUI = ({ id, onChanged }) => {
       {focus ? (
         <DragDropContext onDragEnd={onDragEnd}>
           <div ref={ref} onFocus={() => setFocus(true)}>
-            <Droppable droppableId={`to${id}`} direction="horizontal">
-              {(provided, snapshot) => (
-                <div
-                  className="flex"
-                  style={{ position: 'relative' }}
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}>
-                  <span className="m-auto mr-8">To</span>
-                  {TagsInput(`to${id}`, `To ${id}`, snapshot)}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-            {isCc && (
-              <Droppable droppableId={`to${id}Cc`} direction="horizontal">
+            <div className="flex items-center relative" style={{ gap: 5 }}>
+              <span>To</span>
+              <Droppable droppableId={`to${id}`} direction="horizontal">
                 {(provided, snapshot) => (
-                  <div
-                    className="flex m-auto"
-                    style={{ position: 'relative' }}
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}>
-                    <span className="m-auto mr-8">Cc</span>
-                    {TagsInput(`to${id}Cc`, 'Cc', snapshot)}
-                    {provided.placeholder}
-                  </div>
+                  <>
+                    <div className="flex-grow" ref={provided.innerRef} {...provided.droppableProps}>
+                      {TagsInput(`to${id}`, `To ${id}`, snapshot)}
+                    </div>
+                  </>
                 )}
               </Droppable>
-            )}
-            {isBcc && (
-              <Droppable droppableId={`to${id}Bcc`} direction="horizontal">
-                {(provided, snapshot) => (
-                  <div
-                    className="flex m-auto"
-                    style={{ position: 'relative' }}
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}>
-                    <span className="m-auto mr-8">Bcc</span>
-                    {TagsInput(`to${id}Bcc`, 'Bcc', snapshot)}
-                    {provided.placeholder}
-                  </div>
+            </div>
+
+            {[
+              { label: 'Cc', value: isCc },
+              { label: 'Bcc', value: isBcc }
+            ].map(({ label, value }) => (
+              <>
+                {value && (
+                  <Droppable droppableId={`to${id}${label}`} direction="horizontal">
+                    {(provided, snapshot) => (
+                      <div className="flex items-center relative" style={{ gap: 5 }}>
+                        <span>{label}</span>
+                        <div
+                          className="flex-grow"
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}>
+                          {TagsInput(`to${id}${label}`, label, snapshot)}
+                        </div>
+                      </div>
+                    )}
+                  </Droppable>
                 )}
-              </Droppable>
-            )}
+              </>
+            ))}
           </div>
         </DragDropContext>
       ) : (
@@ -558,7 +563,9 @@ const InputUI = ({ id, onChanged }) => {
             cursor: 'text',
             padding: '5px 0'
           }}
-          onClick={() => setFocus(true)}>
+          onClick={() => setFocus(true)}
+          onDrop={(e) => e.preventDefault()}
+          >
           {toReceiver(id)[0].length ? (
             toReceiver(id)[0].map((e, i, arr) => (i !== arr.length - 1 ? <>{e}, </> : e))
           ) : (
