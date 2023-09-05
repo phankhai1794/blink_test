@@ -16,7 +16,9 @@ import {
   TOTAL_WEIGHT,
   TOTAL_WEIGHT_UNIT,
   TOTAL_MEASUREMENT,
-  TOTAL_MEASUREMENT_UNIT, CONTAINER_DETAIL
+  TOTAL_MEASUREMENT_UNIT, CONTAINER_DETAIL,
+  DESCRIPTION_OF_GOODS1,
+  DESCRIPTION_OF_GOODS2,
 } from '@shared/keyword';
 import { getTotalValueMDView, NumberFormat } from '@shared';
 import { packageUnitsJson } from '@shared/units';
@@ -164,7 +166,13 @@ const TableCM = (props) => {
   };
 
   const getValueField = (field) => {
-    return content[getField(field)] || '';
+    let result = '';
+    if (field === DESCRIPTION_OF_GOODS) {
+      const line1 = content[getField(DESCRIPTION_OF_GOODS1)] ? `${content[getField(DESCRIPTION_OF_GOODS1)]}\n` : '';
+      const line2 = content[getField(DESCRIPTION_OF_GOODS2)] ? `${content[getField(DESCRIPTION_OF_GOODS2)]}\n` : '';
+      result = `${line1}${line2}${content[getField(field)]}`
+    } else result = content[getField(field)] || '';
+    return result || '';
   };
 
   const [id, setId] = useState(getField(CONTAINER_DETAIL));

@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
 import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate, generateFileNameTimeFormat  } from '@shared';
-import { NO_CONTENT_AMENDMENT, CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN } from '@shared/keyword';
+import { NO_CONTENT_AMENDMENT, CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN, DESCRIPTION_OF_GOODS1, DESCRIPTION_OF_GOODS2, DESCRIPTION_OF_GOODS, } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
@@ -73,6 +73,11 @@ const useStyles = makeStyles((theme) => ({
     },
     '& .MuiInputBase-inputMultiline': {
       resize: 'vertical',
+    },
+    '& .MuiInputLabel-outlined.MuiInputLabel-shrink': {
+      fontWeight: 500,
+      color: '#999999',
+      fontSize: '15px',
     }
   },
   placeholder: {
@@ -399,6 +404,29 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
+
+  const renderDoGLine1Line2 = () => {
+    const descriptionOfGoods1 = metadata.field[DESCRIPTION_OF_GOODS1];
+    const descriptionOfGoods2 = metadata.field[DESCRIPTION_OF_GOODS2];
+    const contentDoG1 = content[descriptionOfGoods1] || '';
+    const contentDoG2 = content[descriptionOfGoods2] || '';
+    return(
+      <>
+        {[contentDoG1, contentDoG2].map((item, index) => 
+          <TextField
+            keu={index}
+            className={classes.inputText}
+            value={item}
+            inputProps={{ style: { textTransform: 'uppercase' } }}
+            variant='outlined'
+            label={(index === 0) ? 'No. of PKG/CNTR' : ''}
+            disabled
+          />
+        )}
+      </>
+    )
+  }
+
   // Separate Shipper/Consignee/Notify 
   const renderSeparateField = (field) => {
     if (isSeparate) {
@@ -425,31 +453,36 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
           />
         </div>)
     } else {
+      const isDoG = metadata.field[DESCRIPTION_OF_GOODS] === field;
+
       return (
         isDateTime ?
           <DateTimePickers time={fieldValue ? formatDate(fieldValue, 'YYYY-MM-DD') : ''} onChange={e => handleChange(e, true)} /> :
-          <TextField
-            placeholder='Typing...'
-            className={classes.inputText}
-            value={fieldValue}
-            multiline
-            rows={3}
-            rowsMax={10}
-            inputProps={{ style: { textTransform: 'uppercase' } }}
-            InputProps={{
-              classes: { input: classes.placeholder }
-            }}
-            onChange={handleChange}
-            variant='outlined'
-            autoFocus
-            onPaste={onPaste}
-            error={validateField(field, fieldValue).isError}
-            helperText={
-              validateField(field, fieldValue).errorType.split('\n').map((line, idx) => (
-                <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'red' }}>{line}</span>
-              ))
-            }
-          />
+          <>
+            {isDoG && renderDoGLine1Line2()}
+            <TextField
+              placeholder='Typing...'
+              className={classes.inputText}
+              value={fieldValue}
+              multiline
+              rows={3}
+              rowsMax={10}
+              inputProps={{ style: { textTransform: 'uppercase' } }}
+              InputProps={{
+                classes: { input: classes.placeholder }
+              }}
+              onChange={handleChange}
+              variant='outlined'
+              autoFocus
+              onPaste={onPaste}
+              error={validateField(field, fieldValue).isError}
+              helperText={
+                validateField(field, fieldValue).errorType.split('\n').map((line, idx) => (
+                  <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: 'red' }}>{line}</span>
+                ))
+              }
+            />
+          </>
       )
     }
   }

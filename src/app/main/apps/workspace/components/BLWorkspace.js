@@ -27,7 +27,9 @@ import {
   FREIGHT_TERM,
   DESCRIPTION_OF_GOODS,
   NO_CONTENT_AMENDMENT,
-  SHIPPING_MARK
+  SHIPPING_MARK,
+  DESCRIPTION_OF_GOODS1,
+  DESCRIPTION_OF_GOODS2,
 } from '@shared/keyword';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import * as AppActions from 'app/store/actions';
@@ -140,10 +142,13 @@ const BLWorkspace = (props) => {
   };
 
   const getValueField = (keyword) => {
-    if (content[getField(keyword)] === NO_CONTENT_AMENDMENT) {
-      return '';
-    }
-    return content[getField(keyword)] || '';
+    let result = '';
+    if (keyword === DESCRIPTION_OF_GOODS) {
+      const line1 = content[getField(DESCRIPTION_OF_GOODS1)] ? `${content[getField(DESCRIPTION_OF_GOODS1)]}\n` : '';
+      const line2 = content[getField(DESCRIPTION_OF_GOODS2)] ? `${content[getField(DESCRIPTION_OF_GOODS2)]}\n` : '';
+      result = `${line1}${line2}${content[getField(keyword)]}`
+    } else result = content[getField(keyword)] || '';
+    return result || '';
   };
 
   useEffect(() => {
