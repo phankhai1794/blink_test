@@ -271,7 +271,7 @@ export const lineBreakAtBoundary = (string, boundary) => {
   }
 
   newString += line;
-  return newString.trim();
+  return newString?.trimEnd() || '';
 }
 
 export const getMaxRows = (containerLength, mark, packages, description) => {
