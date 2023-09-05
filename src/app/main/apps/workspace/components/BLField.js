@@ -167,7 +167,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'auto',
     padding: 15,
     color: '#515E6A',
-    whiteSpace: 'pre-line'
+    whiteSpace: 'pre-wrap'
   },
   popper: {
     '&[x-placement*="right"]': {
