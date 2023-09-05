@@ -21,7 +21,7 @@ import {
   Paper
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import { getOffshoreQueueList } from 'app/services/myBLService';
+import {getOffshoreQueueList, getOnshoreQueueList} from 'app/services/myBLService';
 import { formatDate } from '@shared';
 import Pagination from 'app/main/apps/workspace/shared-components/Pagination';
 import EllipsisPopper from 'app/main/apps/workspace/shared-components/EllipsisPopper';
@@ -111,6 +111,14 @@ const useStyles = makeStyles({
     '&:hover': {
       color: '#BD0F72 !important',
       fontWeight: '600'
+    }
+  },
+  linkOnshore: {
+    color: '#BD0F72 !important',
+    fontWeight: '600',
+    textDecoration: 'none',
+    '&:hover': {
+      textDecoration: 'underline !important'
     }
   },
   label: {
@@ -258,6 +266,7 @@ const Row = (props) => {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
   const [arrowRef, setArrowRef] = useState(null);
+  const userType = useSelector(({ user }) => user.userType);
   const [popover, setPopover] = useState({ open: false, text: '' });
 
   const data = (row, type) => {
@@ -306,6 +315,29 @@ const Row = (props) => {
 
   const handlePopoverMouseLeave = () => setPopover({ open: false });
 
+  const renderBooking = () => {
+    if (userType !== 'ONSHORE') {
+      return <a
+        href={`/apps/workspace/${row.bkgNo}?usrId=admin&cntr=${row.country}`}
+        target="_blank"
+        className={classes.link}
+        rel="noreferrer">
+        <span>{row.bkgNo}</span>
+      </a>
+    } else {
+      if (row.isMyBooking) {
+        return <a
+          href={`/guest?bl=${row.id}`}
+          target="_blank"
+          className={classes.linkOnshore}
+          rel="noreferrer">
+          <span style={{ color: '#BD0F72 !important' }}>{row.bkgNo}</span>
+        </a>
+      }
+      return <span style={{ fontWeight: '600' }}>{row.bkgNo}</span>
+    }
+  }
+
   return (
     <>
       <TableRow>
@@ -319,40 +351,37 @@ const Row = (props) => {
                 <Icon> {open ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}</Icon>
               </IconButton>
             ) : null}
-            <a
-              href={`/apps/workspace/${row.bkgNo}?usrId=admin&cntr=${row.country}`}
-              target="_blank"
-              className={classes.link}
-              rel="noreferrer">
-              <span>{row.bkgNo}</span>
-            </a>
+            {renderBooking()}
           </div>
         </StickyTableCell>
         <TableCell className={classes.cellBody}>
           {formatDate(row.lastUpdated, 'MMM DD YYYY HH:mm')}
         </TableCell>
-        <TableCell className={classes.cellBody}>
-          {formatDate(row.lastUpdatedAction, 'MMM DD YYYY HH:mm')}
-        </TableCell>
+        {userType !== 'ONSHORE' && (
+          <TableCell className={classes.cellBody}>
+            {formatDate(row.lastUpdatedAction, 'MMM DD YYYY HH:mm')}
+          </TableCell>
+        )}
         {columns.etd && (
           <TableCell className={classes.cellBody}>
             {row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}
           </TableCell>
         )}
+        {columns.status && userType === 'ONSHORE' && <TableCell className={classes.cellBody}>{row.statusOnshore}</TableCell>}
         {columns.shipperN && <TableCell className={classes.cellBody}>{row.shipperName}</TableCell>}
         {columns.pol && <TableCell className={classes.cellBody}>{row.pol}</TableCell>}
         {columns.pod && <TableCell className={classes.cellBody}>{row.pod}</TableCell>}
-        {columns.customerS && (
+        {columns.customerS && userType !== 'ONSHORE' && (
           <TableCell className={classes.cellBody}>
             <span style={{ textTransform: 'capitalize' }}>{row.status.customer}</span>
           </TableCell>
         )}
-        {columns.onshoreS && (
+        {columns.onshoreS && userType !== 'ONSHORE' && (
           <TableCell className={classes.cellBody}>
             <span style={{ textTransform: 'capitalize' }}>{row.status.onshore}</span>
           </TableCell>
         )}
-        {columns.blinkS && (
+        {columns.blinkS && userType !== 'ONSHORE' && (
           <TableCell className={classes.cellBody}>{mapperBlinkStatus[row.status.bl]}</TableCell>
         )}
         {columns.vvd && (
@@ -605,6 +634,7 @@ const QueueListTable = () => {
   const page = useSelector(({ dashboard }) => dashboard.page);
   const countries = useSelector(({ dashboard }) => dashboard.countries);
   const office = useSelector(({ dashboard }) => dashboard.office);
+  const userType = useSelector(({ user }) => user.userType);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('bkgNo');
   const [openDetailIndex, setOpenDetailIndex] = useState();
@@ -626,28 +656,54 @@ const QueueListTable = () => {
   };
 
   const fetchData = (page, size) => {
-    getOffshoreQueueList({
-      page,
-      size,
-      query: {
-        startDate: formatDate(searchQueueQuery.from, 'YYYY-MM-DD'),
-        endDate: formatDate(searchQueueQuery.to, 'YYYY-MM-DD'),
-        bkgNos: searchQueueQuery.bookingNo
-          .split(',')
-          .filter((bkg) => bkg)
-          .map((bkg) => bkg.trim().toUpperCase()),
-        blinkStatus: searchQueueQuery.blStatus,
-        countries,
-        office
-      },
-      sort: searchQueueQuery.sortField
-    })
-      .then(({ total, data }) => {
-        dispatch(Actions.setReset(false))
-        dispatch(Actions.setPage(page > Math.ceil(total / size) ? 1 : page, size))
-        setState({ ...state, queueListBl: data, totalBkgNo: total })
+    if (userType !== 'ONSHORE') {
+      getOffshoreQueueList({
+        page,
+        size,
+        query: {
+          startDate: formatDate(searchQueueQuery.from, 'YYYY-MM-DD'),
+          endDate: formatDate(searchQueueQuery.to, 'YYYY-MM-DD'),
+          bkgNos: searchQueueQuery.bookingNo
+            .split(',')
+            .filter((bkg) => bkg)
+            .map((bkg) => bkg.trim().toUpperCase()),
+          blinkStatus: searchQueueQuery.blStatus,
+          countries,
+          office
+        },
+        sort: searchQueueQuery.sortField
       })
-      .catch((err) => handleError(dispatch, err));
+        .then(({ total, data }) => {
+          dispatch(Actions.setReset(false))
+          dispatch(Actions.setPage(page > Math.ceil(total / size) ? 1 : page, size))
+          setState({ ...state, queueListBl: data, totalBkgNo: total })
+        })
+        .catch((err) => handleError(dispatch, err));
+    } else {
+      getOnshoreQueueList({
+        page,
+        size,
+        query: {
+          startDate: formatDate(searchQueueQuery.from, 'YYYY-MM-DD'),
+          endDate: formatDate(searchQueueQuery.to, 'YYYY-MM-DD'),
+          bkgNos: searchQueueQuery.bookingNo
+            .split(',')
+            .filter((bkg) => bkg)
+            .map((bkg) => bkg.trim().toUpperCase()),
+          countries,
+          office,
+          isMe: searchQueueQuery.isMe,
+          status: searchQueueQuery.blStatus,
+        },
+        sort: searchQueueQuery.sortField
+      })
+        .then(({ total, data }) => {
+          dispatch(Actions.setReset(false))
+          dispatch(Actions.setPage(page > Math.ceil(total / size) ? 1 : page, size))
+          setState({ ...state, queueListBl: data, totalBkgNo: total })
+        })
+        .catch((err) => handleError(dispatch, err))
+    }
   };
 
   const setPage = (page, size) => {
@@ -762,11 +818,13 @@ const QueueListTable = () => {
                       />
                     </div>
                   </TableCell>
-                  <TableCell className={classes.cellHead}>
-                    <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
-                      <span>Latest Action Update</span>
-                    </div>
-                  </TableCell>
+                  {userType !== 'ONSHORE' && (
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
+                        <span>Latest Action Update</span>
+                      </div>
+                    </TableCell>
+                  )}
                   {columns.etd && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
@@ -774,42 +832,49 @@ const QueueListTable = () => {
                       </div>
                     </TableCell>
                   )}
-                  {columns.shipperN && (
+                  {columns.status && userType === 'ONSHORE' && (
+                    <TableCell className={classes.cellHead}>
+                      <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
+                        <span>Status</span>
+                      </div>
+                    </TableCell>
+                  )}
+                  {columns.shipperN && userType !== 'ONSHORE' && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Shipper Name</span>
                       </div>
                     </TableCell>
                   )}
-                  {columns.pol && (
+                  {columns.pol && userType !== 'ONSHORE' && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>POL</span>
                       </div>
                     </TableCell>
                   )}
-                  {columns.pod && (
+                  {columns.pod && userType !== 'ONSHORE' && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>POD</span>
                       </div>
                     </TableCell>
                   )}
-                  {columns.customerS && (
+                  {columns.customerS && userType !== 'ONSHORE' && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Customer Status</span>
                       </div>
                     </TableCell>
                   )}
-                  {columns.onshoreS && (
+                  {columns.onshoreS && userType !== 'ONSHORE' && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Onshore Status</span>
                       </div>
                     </TableCell>
                   )}
-                  {columns.blinkS && (
+                  {columns.blinkS && userType !== 'ONSHORE' &&(
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>BLink Status</span>
@@ -846,11 +911,13 @@ const QueueListTable = () => {
                     </TableCell>
                   )}
                   <TableCell className={classes.cellHead} style={{ width: 50 }}>
-                    <Tooltip title="Add Column">
-                      <Icon classes={{ root: classes.iconAdd }} onClick={handleClick}>
-                        control_point
-                      </Icon>
-                    </Tooltip>
+                    {userType !== 'ONSHORE' ? (
+                      <Tooltip title="Add Column">
+                        <Icon classes={{ root: classes.iconAdd }} onClick={handleClick}>
+                            control_point
+                        </Icon>
+                      </Tooltip>
+                    ) : ``}
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -870,18 +937,31 @@ const QueueListTable = () => {
               </TableBody>
             </Table>
           </div>
-          <Menu
-            anchorEl={anchorEl}
-            keepMounted
-            open={Boolean(anchorEl)}
-            PaperProps={{
-              style: {
-                width: 270
-              }
-            }}
-            onClose={handleClose}>
-            {AddColumn(columns, handleShowColumn)}
-          </Menu>
+          {userType === 'ONSHORE' ? `` : (
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              open={Boolean(anchorEl)}
+              PaperProps={{
+                style: {
+                  width: 270
+                }
+              }}
+              onClose={handleClose}>
+              <Menu
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                PaperProps={{
+                  style: {
+                    width: 270
+                  }
+                }}
+                onClose={handleClose}>
+                {AddColumn(columns, handleShowColumn)}
+              </Menu>
+            </Menu>
+          )}
         </>
       ) : (
         <div

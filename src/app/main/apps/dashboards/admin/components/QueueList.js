@@ -18,9 +18,10 @@ import {
   Icon
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { formatDate } from '@shared';
 import clsx from 'clsx';
-import { mapperBlinkStatus } from '@shared/keyword';
+import { mapperBlinkStatus, mapperBlinkStatusCustomer } from '@shared/keyword';
 import { DateRangePicker, defaultStaticRanges } from 'react-date-range';
 import { subMonths, addDays, subDays } from 'date-fns';
 
@@ -53,9 +54,27 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: '#BD0F73'
     }
   },
+  btnIsMe: {
+    textTransform: 'none',
+    backgroundColor: 'green',
+    borderRadius: '25px',
+    marginLeft: 10,
+    '&:hover': {
+      backgroundColor: 'green'
+    }
+  },
   btnSearch: {
     color: '#FFFF',
     fontFamily: 'Montserrat'
+  },
+  btnBackGround: {
+    backgroundColor: '#646e779c',
+    '& .MuiButton-label': {
+      color: 'white'
+    },
+    '&:hover': {
+      backgroundColor: '#646e779c'
+    }
   },
   closeBtn: {
     cursor: 'pointer'
@@ -71,11 +90,17 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     padding: '24px',
     '& span': {
-      fontFamily: 'Montserrat',
+      fontFamily: 'Montserrat'
     },
     '& input': {
       fontFamily: 'Montserrat',
-      fontSize: '14px',
+      fontSize: '14px'
+    },
+    '& .MuiGrid-grid-xs-2': {
+      flexBasis: '21%',
+      // maxWidth: '17%',
+      display: 'flex'
+      // justifyContent: 'space-around'
     }
   },
   searchBox: {
@@ -113,7 +138,7 @@ const useStyles = makeStyles((theme) => ({
   grid: {
     '& .MuiGrid-grid-xs-4': {
       flexBasis: '33%',
-      maxWidth: '33%'
+      maxWidth: '30%'
     },
     '& .MuiGrid-grid-xs-3': {
       flexBasis: '23%',
@@ -122,6 +147,40 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiGrid-grid-xs-1': {
       flexBasis: '11%',
       maxWidth: '11%'
+    }
+  },
+  styleSearch: {
+    [theme.breakpoints.down('sm')]: {
+      '& .MuiButton-root': {
+        lineHeight: 0
+      },
+      '& .MuiButton-label': {
+        fontSize: 12
+      }
+    },
+    [theme.breakpoints.down('md')]: {
+      '& .MuiButton-root': {
+        lineHeight: 0
+      },
+      '& .MuiButton-label': {
+        fontSize: 12
+      }
+    },
+    [theme.breakpoints.down('lg')]: {
+      '& .MuiButton-root': {
+        lineHeight: 0
+      },
+      '& .MuiButton-label': {
+        fontSize: 12
+      }
+    },
+    [theme.breakpoints.down('xl')]: {
+      '& .MuiButton-root': {
+        lineHeight: 0
+      },
+      '& .MuiButton-label': {
+        fontSize: 12
+      }
     }
   }
 }));
@@ -134,26 +193,31 @@ const QueueList = () => {
     </>
   );
 };
-const blStatusOption = Object.keys(mapperBlinkStatus);
 
 const SearchLayout = (props) => {
   const end = new Date();
   const start = subMonths(end, 1);
   const classes = useStyles();
   const dispatch = useDispatch();
+  const userType = useSelector(({ user }) => user.userType);
   const settings = JSON.parse(localStorage.getItem('dashboard') || '{}');
+
+  const getBlinkStatus = userType === 'ONSHORE' ? mapperBlinkStatusCustomer : mapperBlinkStatus;
+  const blStatusOption = Object.keys(getBlinkStatus);
   const initialState = {
     bookingNo: '',
     from: start,
     to: end,
-    blStatus: blStatusOption,
+    blStatus: blStatusOption
   };
   const [state, setState] = useState({
     bookingNo: settings.bookingNo || '',
     from: settings.from || start,
     to: settings.to || end,
-    blStatus: settings.blStatus || blStatusOption
+    blStatus: settings.blStatus || blStatusOption,
+    isMe: false
   });
+  const [isMe, setIsMe] = useState(false);
   const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
   const [startingDate, setStartingDate] = useState('');
   const [isPickerOpen, setPickerOpen] = useState(false);
@@ -185,29 +249,45 @@ const SearchLayout = (props) => {
     dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...state }));
   };
 
+  const handleToogleMyBl = () => {
+    const getIsMe = !isMe;
+    setIsMe(getIsMe);
+    const searchState = {
+      bookingNo: settings.bookingNo || '',
+      from: settings.from || start,
+      to: settings.to || end,
+      blStatus: settings.blStatus || blStatusOption,
+      isMe: getIsMe
+    };
+    setState({ ...searchState });
+    dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...searchState }));
+  };
+
   const handleReset = () => {
     setState(initialState);
 
     dispatch(Actions.setReset(true));
     dispatch(Actions.setPage(1, 10));
-    dispatch(Actions.setColumn({
-      etd: true,
-      shipperN: false,
-      customerS: true,
-      onshoreS: true,
-      blinkS: true,
-      vvd: true,
-      pol: false,
-      pod: false,
-      inquiry: true,
-      amendment: true,
-      resolve: true
-    }));
+    dispatch(
+      Actions.setColumn({
+        etd: true,
+        shipperN: false,
+        customerS: true,
+        onshoreS: true,
+        blinkS: true,
+        vvd: true,
+        pol: false,
+        pod: false,
+        inquiry: true,
+        amendment: true,
+        resolve: true
+      })
+    );
 
     const query = { ...initialState, sortField: ['lastUpdated', 'DESC'] };
     dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...query }));
 
-    localStorage.removeItem("dashboard");
+    localStorage.removeItem('dashboard');
   };
 
   const handleClickOutside = (event) => {
@@ -227,7 +307,8 @@ const SearchLayout = (props) => {
   const getLabelDate = (startDate, endDate) => {
     return defaultStaticRanges.find(
       (date) =>
-        formatDate(date.range().startDate, 'MMM DD YYYY') === formatDate(startDate, 'MMM DD YYYY') &&
+        formatDate(date.range().startDate, 'MMM DD YYYY') ===
+          formatDate(startDate, 'MMM DD YYYY') &&
         formatDate(date.range().endDate, 'MMM DD YYYY') === formatDate(endDate, 'MMM DD YYYY')
     )?.label;
   };
@@ -244,7 +325,7 @@ const SearchLayout = (props) => {
     let to = '';
     if (startDate < startingDate) {
       from = startDate < minStartDate ? minStartDate : startDate;
-      to = endDate
+      to = endDate;
     } else {
       from = startDate;
       to = endDate > maxEndDate ? maxEndDate : endDate;
@@ -263,17 +344,17 @@ const SearchLayout = (props) => {
           .getData('text')
           .split(/\n/) // split new line
           .map((str) => str.trim()) // trim space
-          .filter(str => str) // filter empty string
+          .filter((str) => str) // filter empty string
       )
-    ].join(", ");
+    ].join(', ');
     handleChange({ bookingNo: removeDuplicate });
-  }
+  };
 
   return (
     <Paper className={classes.paper}>
       <Grid container spacing={1} className={classes.grid}>
         {/* Booking Number */}
-        <Grid item xs={4}>
+        <Grid item xs={4} sm={3} md={3} lg={3} xl={3}>
           <FormControl fullWidth variant="outlined">
             <InputLabel>
               <span>Booking Number</span>
@@ -285,7 +366,7 @@ const SearchLayout = (props) => {
                   handleSearch();
                 }
               }}
-              inputProps={{ style: { textTransform: "uppercase" } }}
+              inputProps={{ style: { textTransform: 'uppercase' } }}
               onChange={(e) => handleChange({ bookingNo: e.target.value })}
               onPaste={onPaste}
               startAdornment={
@@ -308,9 +389,7 @@ const SearchLayout = (props) => {
                 labelDate ||
                 `${formatDate(state.from, 'MMM DD YYYY')} - ${formatDate(state.to, 'MMM DD YYYY')}`
               }
-              endAdornment={
-                <Icon fontSize='small'>calendar_today</Icon>
-              }
+              endAdornment={<Icon fontSize="small">calendar_today</Icon>}
               onClick={() => setPickerOpen(true)}
               inputProps={{
                 readOnly: true
@@ -336,7 +415,9 @@ const SearchLayout = (props) => {
         {/* BL Status */}
         <Grid item xs={4}>
           <FormControl fullWidth variant="outlined">
-            <InputLabel htmlFor="selected-status"><span>BLink Status</span></InputLabel>
+            <InputLabel htmlFor="selected-status">
+              <span>BLink Status</span>
+            </InputLabel>
             <OutlinedInput
               onChange={(e) => handleChange({ blStatus: e.target.value })}
               inputProps={{
@@ -351,10 +432,9 @@ const SearchLayout = (props) => {
                   input={<Input style={{ width: '100%' }} />}
                   renderValue={(selected) => (
                     <div className={classes.chips}>
-                      {selected.map(
-                        (value) =>
-                          <Chip key={value} label={mapperBlinkStatus[value]} className={classes.chip} />
-                      )}
+                      {selected.map((value) => (
+                        <Chip key={value} label={getBlinkStatus[value]} className={classes.chip} />
+                      ))}
                     </div>
                   )}
                   disableUnderline>
@@ -362,7 +442,10 @@ const SearchLayout = (props) => {
                     key={'All'}
                     value={'All'}
                     classes={{ selected: classes.menuItemSelected }}>
-                    <Checkbox checked={state.blStatus.length === blStatusOption.length} color="primary" />
+                    <Checkbox
+                      checked={state.blStatus.length === blStatusOption.length}
+                      color="primary"
+                    />
                     <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>All</span>
                   </MenuItem>
                   {blStatusOption.map((status) => (
@@ -371,7 +454,9 @@ const SearchLayout = (props) => {
                       classes={{ selected: classes.menuItemSelected }}
                       value={status}>
                       <Checkbox checked={state.blStatus.indexOf(status) > -1} color="primary" />
-                      <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>{mapperBlinkStatus[status]}</span>
+                      <span style={{ fontFamily: 'Montserrat', fontSize: '14px' }}>
+                        {getBlinkStatus[status]}
+                      </span>
                     </MenuItem>
                   ))}
                 </Select>
@@ -380,11 +465,22 @@ const SearchLayout = (props) => {
             />
           </FormControl>
         </Grid>
-        <Grid item xs={1} style={{ margin: 'auto' }}>
+        {/*Search*/}
+        <Grid item xs={2} style={{ margin: 'auto' }} className={classes.styleSearch}>
           <Button className={clsx(classes.btn, classes.btnSearch)} onClick={handleSearch}>
             <SearchIcon />
             <span>Search</span>
           </Button>
+          {userType === 'ONSHORE' ? (
+            <Button
+              className={clsx(classes.btnIsMe, isMe ? classes.btnSearch : classes.btnBackGround)}
+              onClick={handleToogleMyBl}>
+              <span style={{ paddingRight: 2 }}>MyBLs</span>
+              {isMe ? <HighlightOffIcon /> : ``}
+            </Button>
+          ) : (
+            ``
+          )}
           <Button
             className={classes.btnReset}
             variant="text"
