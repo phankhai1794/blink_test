@@ -122,7 +122,7 @@ const StyledChip = withStyles(theme => ({
 }))(Chip);
 
 const AmendmentPopup = (props) => {
-  const { onClose, inqType, isEdit, data, dataValues, dataEdited, index, updateData, updateEdit, containerDetail, setSave, isInqCDCM } = props;
+  const { onClose, inqType, isEdit, data, dataValues, dataEdited, index, updateData, updateEdit, containerDetail, setSave, isInqCDCM, dataCdGetSeal } = props;
   const classes = useStyles();
   const dispatch = useDispatch();
 
@@ -247,8 +247,8 @@ const AmendmentPopup = (props) => {
         setIsFormated(true)
       }
       else if (count
-          && !isFormated
-          && val.toUpperCase().match(/(CONT-NO)/g)) {
+        && !isFormated
+        && val.toUpperCase().match(/(CONT-NO)/g)) {
         val = val + ': ' + count.toString();
         setIsFormated(true)
       }
@@ -328,6 +328,14 @@ const AmendmentPopup = (props) => {
 
   const CustomContainerSeal = (value) => {
     const unlock = inqType === CONTAINER_DETAIL && isEdit;
+    let mapCdSeals = value;
+    if (dataCdGetSeal && dataCdGetSeal.length) {
+      dataCdGetSeal.forEach(a => {
+        if (a[getType(CONTAINER_NUMBER)] === data[getType(CONTAINER_NUMBER)]) {
+          mapCdSeals = a[getType(CONTAINER_SEAL)];
+        }
+      })
+    }
     return (
       <>
         {unlock ? (
@@ -378,7 +386,7 @@ const AmendmentPopup = (props) => {
             multiline
             variant="outlined"
             className={clsx(classes.textField, !unlock && classes.lock)}
-            value={value?.join(', ')}
+            value={mapCdSeals?.join(', ')}
             InputProps={{
               disabled: !unlock,
               endAdornment: <>{!unlock && <Icon style={{ paddingRight: 12 }}>lock</Icon>}</>

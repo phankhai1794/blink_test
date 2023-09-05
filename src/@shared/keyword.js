@@ -36,6 +36,8 @@ export const VESSEL_VOYAGE = 'vvd';
 
 export const VESSEL_VOYAGE_CODE = 'vvdCode';
 
+export const T_VVD = 'tvvd';
+
 export const PRE_CARRIAGE = 'preVvd';
 
 export const PRE_CARRIAGE_CODE = 'preVvdCode';
@@ -209,6 +211,8 @@ export const REMARKS = 'remarks';
 export const ETD = 'etd';
 
 export const BL_COPY = 'blCopy';
+
+export const TYPE_OF_ONBOARD = 'typeOfOnboard';
 
 export const CONTAINER_LIST = {
   cd: [CONTAINER_NUMBER, CONTAINER_TYPE, CONTAINER_SEAL, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT],

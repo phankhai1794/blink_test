@@ -78,7 +78,7 @@ const isArray = (value) => {
 }
 
 
-const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM, setAddContent, setEventClickContNo, isAllowEdit, currentQuestion }) => {
+const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM, setAddContent, setEventClickContNo, isAllowEdit, currentQuestion, dataCdGetSeal }) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
@@ -324,6 +324,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
           inqType={container}
           containerDetail={getValueField(CONTAINER_DETAIL)}
           data={valueEdit[rowIndex]}
+          dataCdGetSeal={dataCdGetSeal}
           dataValues={values}
           dataEdited={valueEdit}
           isEdit={!disableInput || isAllowEdit}

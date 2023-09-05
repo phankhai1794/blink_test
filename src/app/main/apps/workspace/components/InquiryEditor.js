@@ -38,6 +38,7 @@ import * as Actions from '../store/actions';
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 import { MSG_INQUIRY_CONTENT } from '../store/reducers/inquiry';
+import { TrashIcon } from '../shared-components';
 
 import ChoiceAnswerEditor from './ChoiceAnswerEditor';
 import ParagraphAnswerEditor from './ParagraphAnswerEditor';
@@ -149,8 +150,8 @@ const useStyles = makeStyles((theme) => ({
   menuListCDCM: {
     width: 400,
     maxHeight: 350,
-    left: '47rem !important',
-    top: '4rem !important'
+    // left: '0 !important',
+    // top: '4rem !important'
   },
   formInqType: {
     '& .MuiFormControl-root': {
@@ -205,6 +206,68 @@ const MenuProps = {
       width: 250,
     },
   },
+}
+
+const ReceiverComponent = (props) => {
+  const { classes, val, handleReceiverChangeCDCM } = props
+  return (
+    <FormControl className={classes.formControl}>
+      <RadioGroup
+        aria-label={"receiver-" + val.type}
+        name={"receiver-" + val.type}
+        value={val.receiver}
+        onChange={(e) => handleReceiverChangeCDCM(e, val.type)}>
+        <FormControlLabel
+          value={"customer-" + val.type}
+          control={<Radio color={'primary'} />}
+          label="Customer"
+        />
+        <FormControlLabel
+          value={"onshore-" + val.type}
+          control={<Radio color={'primary'} />}
+          label="Onshore"
+        />
+      </RadioGroup>
+    </FormControl>
+  )
+}
+
+const TemplateComponent = (props) => {
+  const { classes, val, handleShowTemplateCDCM, handleCloseTemplateCDCM, handleChangeCDCM } = props
+  return (
+    <>
+      {val.content && val.content.length > 1 ? (
+        <Button
+          style={{ float: 'right', color: '#515F6B', fontWeight: 500, textTransform: 'none' }}
+          onClick={(e) => handleShowTemplateCDCM(e, val.type)}
+        >
+          Template
+          <Icon>{val.showTemplate ? 'arrow_drop_up' : 'arrow_drop_down'}</Icon>
+        </Button>
+      ) : ``}
+      <Popover
+        id={val.type}
+        // className={'popover-temp'}
+        anchorEl={val.showTemplate}
+        open={Boolean(val.showTemplate)}
+        onClose={() => handleCloseTemplateCDCM()}
+        classes={{ paper: classes.menuListCDCM }}
+      // container={() => document.getElementById('content-temp-' + val.type)}
+      >
+        <RadioGroup value={val.templateIndex} onChange={(e) => handleChangeCDCM(e, val.type)}>
+          {val.content && val.content.length > 1 && val.content.map((temp, index) => (
+            <FormControlLabel
+              key={temp}
+              classes={{ root: classes.formRadio, label: classes.radioLabel }}
+              value={index.toString()}
+              control={<Radio color={'primary'} classes={{ root: classes.radioRoot }} style={{ position: 'absolute' }} />}
+              label={temp}
+            />
+          ))}
+        </RadioGroup>
+      </Popover>
+    </>
+  )
 }
 
 // Main Component
@@ -266,19 +329,17 @@ const InquiryEditor = (props) => {
 
   const getValType = () => {
     const types = currentEditInq.inqGroup && currentEditInq.inqGroup.length && currentEditInq.inqGroup.map(inq => inq.inqType);
-    if (containerCheck.includes(currentEditInq.field)) {
-      if (types) {
-        types.push(currentEditInq.inqType);
-        return metadata.inq_type_options.filter((v) => types.includes(v.value))
-      }
-      return metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value);
-    } else {
-      return metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value)[0] || [];
+    if (types) {
+      types.push(currentEditInq.inqType);
+      return metadata.inq_type_options.filter((v) => types.includes(v.value))
     }
+    return metadata.inq_type_options.filter((v) => currentEditInq.inqType === v.value);
   }
 
   const [valueType, setValueType] = useState(getValType());
   const [contentsInqCDCM, setContentsInqCDCM] = useState([]);
+  const [oldInqCDCM, setOldInqCDCM] = useState([]);
+
   const [valueAnsType, setValueAnsType] = useState(
     optionsAnsType.filter((ansType) => ansType.value === currentEditInq.ansType)
   );
@@ -294,46 +355,38 @@ const InquiryEditor = (props) => {
   const [contentEdited, setContentEdited] = useState(valueType?.label);
   const [isDisabled, setDisabled] = useState(false);
   const [prevField, setPrevField] = useState('');
-  const [anchorEl, setAnchorEl] = useState(null);
   const [templateList, setTemplateList] = useState([]);
   const [template, setTemplate] = useState(valueType?.value || '0');
   const [content, setContent] = useState(currentEditInq.content || '');
   const [openCD, setOpenCD] = useState(false);
   const [openCM, setOpenCM] = useState(false);
-  const [keepTrack, setTrack] = useState({ blCreateChoice: false })
+  const [keepTrack, setTrack] = useState({ blCreateChoice: null })
   const userType = useSelector(({ user }) => user.role?.toUpperCase());
 
   const syncData = (data, syncOptSite = "") => {
     socket.emit("sync_data", { data, syncOptSite });
   };
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   // auto create 2 choice for BL Type
   const autoCreateChoiceBLType = () => {
     const inquiriesOp = [...inquiries];
     const isEdit = inquiriesOp.find((q) => q.id === currentEditInq.id)
-    if (!isEdit && !keepTrack.blCreateChoice) {
+    if (!isEdit && keepTrack.blCreateChoice !== contentsInqCDCM.length) {
       const inq = { ...currentEditInq };
       const timeB = new Date();
       const timeW = new Date(timeB.getTime() + 1);
-      inq.answerObj.push({ id: null, content: ORIGINAL_BL, createdAt: timeB }, { id: null, content: SEAWAY_BILL, createdAt: timeW });
+      inq.answerObj.push({ id: null, content: ORIGINAL_BL, createdAt: timeB, index: contentsInqCDCM.length }, { id: null, content: SEAWAY_BILL, createdAt: timeW, index: contentsInqCDCM.length });
+      inq.answerObj.sort((a, b) => a.index - b.index)
       dispatch(InquiryActions.setEditInq(inq));
-      setTrack({ ...keepTrack, blCreateChoice: true })
+      setTrack({ ...keepTrack, blCreateChoice: contentsInqCDCM.length })
     }
   }
 
-  const handleShowTemplateCDCM = (type) => {
+  const handleShowTemplateCDCM = (e, type) => {
     const objCdCm = [...contentsInqCDCM];
     if (objCdCm && objCdCm.length) {
       objCdCm.forEach(o => {
-        if (o.type === type) o.showTemplate = true;
+        if (o.type === type) o.showTemplate = e.currentTarget;
       })
     }
     setContentsInqCDCM(objCdCm)
@@ -343,7 +396,7 @@ const InquiryEditor = (props) => {
     const objCdCm = [...contentsInqCDCM];
     if (objCdCm && objCdCm.length) {
       objCdCm.forEach(o => {
-        o.showTemplate = false;
+        o.showTemplate = null;
       })
     }
     setContentsInqCDCM(objCdCm)
@@ -396,9 +449,15 @@ const InquiryEditor = (props) => {
   const handleReceiverChangeCDCM = (e, type) => {
     const inqCDCM = [...contentsInqCDCM];
     if (inqCDCM && inqCDCM.length) {
-      inqCDCM.forEach(inq => {
+      inqCDCM.forEach((inq, index) => {
         if (inq.type === type) {
           inq.receiver = e.target.value;
+          if (index === 0) {
+            const optionsOfQuestion = { ...currentEditInq };
+            optionsOfQuestion.receiver = [];
+            optionsOfQuestion.receiver.push(e.target.value.split('-')[0]);
+            dispatch(InquiryActions.setEditInq(optionsOfQuestion));
+          }
         }
       })
     }
@@ -417,51 +476,51 @@ const InquiryEditor = (props) => {
   const initContentType = (contentArr) => {
     const currInq = { ...currentEditInq };
     const currentTab = (openAllInquiry && currentTabs === 1) ? 'onshore' : 'customer';
-    if (containerCheck.includes(currInq.field)) {
-      const valResult = [...valueType]
-      if (valResult.length && !currInq.id) {
-        valResult.forEach(v => {
-          const filter = metadata.template.find(({ field, type }) => {
-            return type === v.value && ['containerDetail', 'containerManifest'].includes(field) && v.value !== 'select-all';
-          });
-          if (filter) {
-            filter.showTemplate = false;
-            filter.templateIndex = '0';
-            filter.contentShow = filter.content[0];
-            filter.receiver = `${currentTab}-${v.value}`;
-            contentArr.push(filter);
-          }
-        });
-      } else if (currInq.id) {
+
+    const valResult = [...valueType]
+    if (valResult.length && !currInq.id) {
+      valResult.forEach(v => {
         const filter = metadata.template.find(({ field, type }) => {
-          return type === currInq.inqType && ['containerDetail', 'containerManifest'].includes(field);
+          return type === v.value && v.value !== 'select-all';
         });
-        contentArr.push({
-          id: currInq.id,
-          showTemplate: false,
-          content: filter ? filter.content : '',
-          contentShow: currInq ? currInq.content : '',
-          receiver: `${currInq.receiver}-${currInq.inqType}`,
-          type: currInq.inqType,
-        });
-        if (currInq.inqGroup.length) {
-          currInq.inqGroup.forEach(cur => {
-            const filter = metadata.template.find(({ field, type }) => {
-              return type === cur.inqType && ['containerDetail', 'containerManifest'].includes(field);
-            });
-            contentArr.push({
-              id: cur.id,
-              showTemplate: false,
-              content: filter ? filter.content : '',
-              contentShow: cur ? cur.content : '',
-              receiver: `${cur.receiver}-${cur.inqType}`,
-              type: cur.inqType
-            })
-          })
+        if (filter) {
+          filter.showTemplate = false;
+          filter.templateIndex = '0';
+          filter.contentShow = filter.content[0];
+          filter.receiver = `${currentTab}-${v.value}`;
+          contentArr.push(filter);
         }
+      });
+    } else if (currInq.id) {
+      const filter = metadata.template.find(({ field, type }) => {
+        return type === currInq.inqType;
+      });
+      contentArr.push({
+        id: currInq.id,
+        showTemplate: false,
+        content: filter ? filter.content : '',
+        contentShow: currInq ? currInq.content : '',
+        receiver: `${currInq.receiver}-${currInq.inqType}`,
+        type: currInq.inqType,
+      });
+      if (currInq.inqGroup.length) {
+        currInq.inqGroup.forEach(cur => {
+          const filter = metadata.template.find(({ field, type }) => {
+            return type === cur.inqType;
+          });
+          contentArr.push({
+            id: cur.id,
+            showTemplate: false,
+            content: filter ? filter.content : '',
+            contentShow: cur ? cur.content : '',
+            receiver: `${cur.receiver}-${cur.inqType}`,
+            type: cur.inqType
+          })
+        })
       }
-      setContentsInqCDCM(contentArr);
     }
+    setOldInqCDCM(contentArr)
+    setContentsInqCDCM(contentArr);
   }
 
   useEffect(() => {
@@ -531,11 +590,11 @@ const InquiryEditor = (props) => {
       }).sort((a, b) => a.label.localeCompare(b.label));
       const inq = { ...currentEditInq };
 
-      if (!filter.some(f => f.value === inq.inqType)) {
-        inq.inqType = '';
-        dispatch(InquiryActions.setEditInq(inq));
-        setValueType([]);
-      }
+      // if (!filter.some(f => f.value === inq.inqType)) {
+      //   inq.inqType = '';
+      //   dispatch(InquiryActions.setEditInq(inq));
+      //   setValueType([]);
+      // }
       setFieldType(fieldDefault);
       setInqTypeOption(filter);
       if (fieldValue.value === containerCheck[0]) {
@@ -558,10 +617,6 @@ const InquiryEditor = (props) => {
       // scrollTopPopup.current.scrollIntoView({ behavior: "smooth" });
     }
   }, showAddInquiry);
-
-  useEffect(() => {
-    boxTextEl.current.focus();
-  }, [currentEditInq])
 
   const isAllSelected = (
     containerCheck.includes(currentEditInq.field)
@@ -611,15 +666,16 @@ const InquiryEditor = (props) => {
     }
   }
 
-  const mappingValType = (valResult) => {
+  const mappingValType = (keyword, valResult) => {
     const inqCdCm = [...contentsInqCDCM];
     const currentTab = (openAllInquiry && currentTabs === 1) ? 'onshore' : 'customer';
     const contentArr = [];
+    const checkCDCM = (a, b) => [CONTAINER_DETAIL, CONTAINER_MANIFEST].includes(a) && [CONTAINER_DETAIL, CONTAINER_MANIFEST].includes(b)
     valResult.forEach(v => {
       const findByIdType = inqCdCm.find(inq => v.value === inq.type);
       if (!findByIdType) {
-        const filter = metadata.template.find(({ field, type }) => {
-          return type === v.value && ['containerDetail', 'containerManifest'].includes(field);
+        const filter = metadata.template.find(({ type, field }) => {
+          return type === v.value && (keyword === field || checkCDCM(keyword, field));
         });
         if (filter) {
           filter.showTemplate = false;
@@ -644,119 +700,134 @@ const InquiryEditor = (props) => {
     return contentArr;
   }
 
-  const handleTypeChange = (e) => {
+  const setRemoveEditInq = (indexToRemove) => {
     const inq = { ...currentEditInq };
-    if (containerCheck.includes(inq.field)) {
-      let valResult = e.target.value;
-      const inqCdCm = [...contentsInqCDCM];
-      // list content display
-      if (valResult.length) {
-        if (valResult[valResult.length - 1].value === 'select-all') {
-          valResult = valResult.filter(inq => inq.value !== 'select-all');
-          if (inqTypeOption.length === valueType.length) {
-            valResult = [];
-          } else {
-            valResult = inqTypeOption
-          }
-          setValueType(inqTypeOption.length === valueType.length ? [] : inqTypeOption);
+    const answerObjTemp = []
+    inq.answerObj.forEach((ans) => {
+      if (ans.index !== indexToRemove) {
+        const obj = { ...ans }
+        obj.index = obj.index > indexToRemove ? obj.index - 1 : obj.index
+        answerObjTemp.push(obj)
+      }
+    })
+    inq.answerObj = answerObjTemp
+    const mediaTemp = []
+    inq.mediaFile.forEach((med) => {
+      if (med.index !== indexToRemove) {
+        const obj = { ...med }
+        obj.index = obj.index > indexToRemove ? obj.index - 1 : obj.index
+        mediaTemp.push(obj)
+      }
+    })
+    inq.mediaFile = mediaTemp
+    if (fieldValue?.keyword === BL_TYPE) {
+      setTrack({ ...keepTrack, blCreateChoice: keepTrack.blCreateChoice - 1 })
+    }
+    return inq;
+  }
+
+  const handleTypeChange = (e) => {
+    let inq = { ...currentEditInq };
+    let valResult = e.target.value;
+
+    // list content display
+    if (valResult.length) {
+      if (valResult[valResult.length - 1].value === 'select-all') {
+        valResult = valResult.filter(inq => inq.value !== 'select-all');
+        if (inqTypeOption.length === valueType.length) {
+          valResult = [];
         } else {
-          setValueType(valResult)
+          valResult = inqTypeOption
         }
+        setValueType(inqTypeOption.length === valueType.length ? [] : inqTypeOption);
       } else {
         setValueType(valResult)
       }
-      const contentArr = [];
-      const currentTab = (openAllInquiry && currentTabs === 1) ? 'onshore' : 'customer';
-      valResult.forEach(v => {
-        const findByIdType = inqCdCm.find(inq => v.value === inq.type);
-        if (!findByIdType) {
-          const filter = metadata.template.find(({ field, type }) => {
-            return type === v.value && ['containerDetail', 'containerManifest'].includes(field);
-          });
-          if (filter) {
-            filter.showTemplate = false;
-            filter.templateIndex = '0';
-            filter.contentShow = filter.content[0];
-            filter.receiver = `${currentTab}-${v.value}`;
-            contentArr.push(filter);
-          } else if (v.label === OTHERS) {
-            contentArr.push({
-              showTemplate: false,
-              templateIndex: '0',
-              content: [currentEditInq.content],
-              contentShow: currentEditInq.content,
-              receiver: `${currentTab}-${v.value}`,
-              type: v.value,
-            });
-          }
-        } else if (findByIdType) {
-          contentArr.push(findByIdType);
-        }
-      });
-      setContentsInqCDCM(contentArr);
-      setValueAnsType({
-        label: 'Onshore/Customer Input',
-        value: metadata.ans_type.paragraph
-      });
-      inq.inqType = valResult.length ? valResult : '';
-      inq.ansType = metadata.ans_type.paragraph;
+    } else {
+      setValueType(valResult)
     }
-    else {
-      inq.inqType = e.value;
-      let keyword = fieldValue;
-      let filterField = metadata.inq_type_options.find(({ value }) => value === e.value).field;
-      filterField = e.label === OTHERS ? fieldDefault : metadata.field_options.filter(({ value, display, keyword }) => (
-        display && filterField.includes(value)
-        && metadata.template.some((temp) => (temp.field === keyword && temp.type === e.value && temp.content[0]))
-      ));
 
+    if (fieldValue) {
+      setContentsInqCDCM(mappingValType(fieldValue.keyword, valResult));
+      if (contentsInqCDCM.length > valResult.length) {
+        const valueSet = new Set(valResult.map(obj => obj['value']));
+        let missingIndexes = 0
+        contentsInqCDCM.forEach((obj, index) => {
+          if (!valueSet.has(obj['type'])) {
+            missingIndexes = index;
+            return;
+          }
+        });
+        inq = setRemoveEditInq(missingIndexes)
+      }
+    }
+    inq.inqType = valResult.length ? valResult[0].value : '';
+    //
+    const arr = e.target.value
+    if (!arr.length) {
+      dispatch(InquiryActions.setEditInq(inq));
+      return;
+    }
+    let keyword = fieldValue;
+
+    if (!fieldValue) {
+      let filterField = inqTypeOption.find(({ value }) => value === arr[arr.length - 1].value).field;
+      filterField = metadata.field_options.filter(({ value, display, keyword }) => (
+        display && filterField.includes(value)
+        && metadata.template.some((temp) => (temp.field === keyword && temp.type === arr[arr.length - 1].value && temp.content[0]))
+      ));
+      let filterInqType = inqTypeOption
+
+      filterField.forEach((field) => filterInqType = filterInqType.filter((data) => {
+        let getDataField = data.field?.includes(field.value);
+        let getTemplate = metadata.template.some((temp) => (
+          temp.field === field.keyword
+          && temp.type === data.value
+          && (temp.content[0]) || data.label === OTHERS)
+        )
+        return getDataField && getTemplate
+      }))
+      setInqTypeOption(filterInqType)
       if (filterField.length === 1) {
         setFieldValue(filterField[0]);
         inq.field = filterField[0].value;
         dispatch(InquiryActions.validate({ ...valid, field: true }));
-        containerFieldValueCheck(inq);
+        setContentsInqCDCM(mappingValType(filterField[0].keyword, valResult));
+        // containerFieldValueCheck(inq);
         if (!keyword) {
           keyword = filterField[0];
         }
       }
-      if (keyword?.keyword === BL_TYPE) {
-        autoCreateChoiceBLType()
-        inq.ansType = metadata.ans_type.choice
-        setValueAnsType({
-          label: 'Option Selection',
-          value: metadata.ans_type.choice
-        });
-      }
-
-      dispatch(InquiryActions.validate({ ...valid, inqType: true }));
-
-      const filterTemp = metadata.template.find(({ field, type }) => {
-        let getTemplate = type === e.value && keyword?.keyword === field;
-        if ([containerCheck[0], containerCheck[1]].includes(keyword?.field)) {
-          getTemplate = (type === e.value && ['containerDetail', 'containerManifest'].includes(field))
-        }
-        return getTemplate;
-      });
-      if (inq.field === fieldEdited && inq.inqType === nameTypeEdited) {
-        inq.content = contentEdited;
-      } else {
-        inq.content = filterTemp?.content[0] || MSG_INQUIRY_CONTENT;
-        setContent(formatTemplate(filterTemp?.content[0] || MSG_INQUIRY_CONTENT));
-      }
-
-      if (!keyword) setFieldType(filterField);
-      // case filter CD CM to BL Data Field
-      const keyWord = filterField.map(f => f.keyword);
-      if (keyWord.includes('containerManifest') || keyWord.includes('containerDetail')) {
-        setValueType([e]);
-      } else {
-        setValueType(e);
-      }
-
-      setTemplateList(filterTemp?.content || []);
-      setTemplate('0');
-      dispatch(FormActions.setEnableSaveInquiriesList(false));
+      setFieldType(filterField);
     }
+
+    if (keyword?.keyword === BL_TYPE) {
+      if (contentsInqCDCM.length < valResult.length) autoCreateChoiceBLType()
+      inq.ansType = metadata.ans_type.choice
+      setValueAnsType({
+        label: 'Option Selection',
+        value: metadata.ans_type.choice
+      });
+    }
+    if (containerCheck.includes(inq.field)) {
+      setValueAnsType({
+        label: 'Onshore/Customer Input',
+        value: metadata.ans_type.paragraph
+      });
+      inq.ansType = metadata.ans_type.paragraph;
+    }
+    // dispatch(InquiryActions.validate({ ...valid, inqType: true }));
+
+    // // case filter CD CM to BL Data Field
+    // const keyWord = filterField.map(f => f.keyword);
+    // if (keyWord.includes('containerManifest') || keyWord.includes('containerDetail')) {
+    //   setValueType([e]);
+    // } else {
+    //   setValueType(e);
+    // }
+
+    // dispatch(FormActions.setEnableSaveInquiriesList(false));
+
     dispatch(InquiryActions.setEditInq(inq));
   };
 
@@ -773,16 +844,17 @@ const InquiryEditor = (props) => {
     }
 
     containerFieldValueCheck(inq)
-
-    if (containerCheck.includes(e.value) && !Array.isArray(valueType)) {
-      setValueType([valueType]);
-      if (valueType.label === OTHERS) {
-        const valTypes = mappingValType([valueType]);
-        setContentsInqCDCM(valTypes)
-      }
-    } else if (!containerCheck.includes(e.value) && Array.isArray(valueType)) {
-      setValueType(valueType[0]);
+    if (fieldValue && e.value !== fieldValue.value) {
+      inq.inqType = ''
+      inq.mediaFile = []
+      inq.answerObj = []
+      setValueType([])
+      setContentsInqCDCM([])
     }
+    else {
+      setContentsInqCDCM(mappingValType(e.keyword, valueType))
+    }
+
     if (e.keyword === BL_TYPE && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
 
     setTemplateList(filter?.content || []);
@@ -797,6 +869,7 @@ const InquiryEditor = (props) => {
     const checkContent = currInq.content.trim().localeCompare(valInput.content.trim());
     const checkField = (currInq.inqType === valInput.inqType && currInq.field === valInput.field);
     const checkAnsType = currInq.ansType === valInput.ansType;
+    const checkNewInq = contentsInqCDCM.length === 1;
     const checkReceiver = currInq.receiver[0] === valInput.receiver[0];
 
     let isSameFile = false;
@@ -824,7 +897,7 @@ const InquiryEditor = (props) => {
       }
     }
 
-    if (!checkField || checkContent !== 0 || !checkAnsType || !checkReceiver || !isSameFile) return false;
+    if (!checkField || checkContent !== 0 || !checkAnsType || !checkReceiver || !isSameFile || !checkNewInq) return false;
 
     return true;
   }
@@ -889,41 +962,33 @@ const InquiryEditor = (props) => {
     }
     if (listInqOfField.length) {
       let checkDuplicate = false;
-      if (containerCheck.includes(currentEditInq.field)) {
-        // checkDuplicate
-        const listInqType = listInqOfField.map(l => {
-          return {
-            inqType: l.inqType,
-            receiver: l.receiver[0]
-          }
-        });
-        listInqOfField.forEach(l => {
-          if (l.inqGroup && l.inqGroup.length) {
-            l.inqGroup.forEach(inqG => {
-              listInqType.push({
-                inqType: inqG.inqType,
-                receiver: inqG.receiver[0]
-              })
-            })
-          }
-        });
-        if (contentsInqCDCM.length) {
-          contentsInqCDCM.forEach(l => {
-            const receiverCurr = l.receiver.split('-')[0];
-            listInqType.forEach(linq => {
-              if (linq.inqType === l.type && receiverCurr === linq.receiver) {
-                checkDuplicate = true
-              }
-            })
-          });
+
+      // checkDuplicate
+      const listInqType = listInqOfField.map(l => {
+        return {
+          inqType: l.inqType,
+          receiver: l.receiver[0]
         }
-      } else {
-        checkDuplicate = Boolean(
-          listInqOfField.filter(
-            (inq) =>
-              inq.inqType === currentEditInq.inqType && inq.receiver[0] === currentEditInq.receiver[0]
-          ).length
-        );
+      });
+      listInqOfField.forEach(l => {
+        if (l.inqGroup && l.inqGroup.length) {
+          l.inqGroup.forEach(inqG => {
+            listInqType.push({
+              inqType: inqG.inqType,
+              receiver: inqG.receiver[0]
+            })
+          })
+        }
+      });
+      if (contentsInqCDCM.length) {
+        contentsInqCDCM.forEach(l => {
+          const receiverCurr = l.receiver.split('-')[0];
+          listInqType.forEach(linq => {
+            if (linq.inqType === l.type && receiverCurr === linq.receiver) {
+              checkDuplicate = true
+            }
+          })
+        });
       }
       if (checkDuplicate) {
         dispatch(
@@ -980,7 +1045,7 @@ const InquiryEditor = (props) => {
           } else {
             validate = { ...validate, answerContent: true };
           }
-          const dupArray = currentEditInq.answerObj.map((ans) => ans.content.trim());
+          const dupArray = currentEditInq.answerObj.map((ans) => `${ans.content.trim()}-${ans.index}`);
           if (toFindDuplicates(dupArray).length) {
             dispatch(
               AppActions.showMessage({
@@ -1030,7 +1095,7 @@ const InquiryEditor = (props) => {
       }
 
       if (ansTypeChoice === currentEditInq.ansType) {
-        if (currentEditInq.answerObj.length === 1) {
+        if (contentsInqCDCM.some((_, index1) => currentEditInq.answerObj.filter(({ index }) => index1 === index).length < 2)) {
           dispatch(
             AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
           );
@@ -1061,6 +1126,7 @@ const InquiryEditor = (props) => {
           id: null,
           content: '',
           createdAt: new Date(),
+          index: 0
         })
       }
       else {
@@ -1098,6 +1164,7 @@ const InquiryEditor = (props) => {
 
       for (const f in mediaCreate) {
         const form_data = mediaCreate[f].data;
+        form_data.append('bkgNo', myBL.bkgNo);
         const res = await uploadFile(form_data).catch((err) => handleError(dispatch, err));
         mediaCreate[f].id = res.response[0].id;
       }
@@ -1106,7 +1173,7 @@ const InquiryEditor = (props) => {
         JSON.stringify(inq(editInquiry)) !== JSON.stringify(inq(inquiry)) ||
         JSON.stringify(editInquiry.answerObj) !== JSON.stringify(inquiry.answerObj) ||
         mediaCreate.length ||
-        mediaDelete.length || isCdCm
+        mediaDelete.length || isCdCm || contentsInqCDCM.length > 1
       ) {
         const optionsMinimize = [...listMinimize];
         const index = optionsMinimize.findIndex((e) => e.id === inquiry.id);
@@ -1116,15 +1183,44 @@ const InquiryEditor = (props) => {
         inquiriesOp[editedIndex] = editInquiry;
 
         const currFieldEdit = containerCheck.includes(fieldValue.value);
+        const question = []
+
+        contentsInqCDCM.slice(1).forEach((op, i) => {
+          if (!op.id) {
+            let contentTrim = {
+              field: currentEditInq.field,
+              ansType: currentEditInq.ansType,
+              receiver: [`${op.receiver.split('-')[0]}`],
+              inqType: op.type,
+              content: op.contentShow.trim(),
+              answerObj: currentEditInq.answerObj.filter(({ index }) => index === i + 1),
+              mediaFile: currentEditInq.mediaFile.filter(({ index }) => index === i + 1)
+            };
+            const ansTypeChoice = metadata.ans_type['choice'];
+            if (ansTypeChoice === contentTrim.ansType) {
+              contentTrim.answerObj.forEach((ans) => {
+                ans.content = ans.content.trim();
+              });
+              contentTrim.answerObj.push({
+                id: null,
+                content: '',
+                createdAt: new Date(),
+                index: i
+              })
+            } else contentTrim.answerObj = [];
+            return question.push(contentTrim);
+          }
+        });
         const update = await updateInquiry(inquiry.id, {
           inq: inq(editInquiry),
           inqCdCm: contentsInqCDCM,
+          oldCdCm: oldInqCDCM,
+          question,
           isEditCdCm: currFieldEdit,
           blId: myBL.id,
           ans: { ansDelete, ansCreate, ansUpdate, ansCreated },
           files: { mediaCreate, mediaDelete }
         }).catch(err => handleError(dispatch, err));
-
         if (!isCdCm) {
           if (editedIndex !== -1) {
             if (update.data.length) {
@@ -1141,6 +1237,7 @@ const InquiryEditor = (props) => {
           //
           const dataDate = await getUpdatedAtAnswer(inquiry.id).catch(err => handleError(dispatch, err));
           inquiriesOp[editedIndex].createdAt = dataDate.data;
+          inquiriesOp.push(...update.newInq)
         } else if (isCdCm) {
           const optionsMinimize = [...listMinimize];
           const { data } = update;
@@ -1212,7 +1309,7 @@ const InquiryEditor = (props) => {
         return;
       }
       if (ansTypeChoice === currentEditInq.ansType) {
-        if (currentEditInq.answerObj.length === 1) {
+        if (contentsInqCDCM.some((_, index1) => currentEditInq.answerObj.filter(({ index }) => index1 === index).length < 2)) {
           dispatch(
             AppActions.showMessage({ message: 'Please add more options!', variant: 'error' })
           );
@@ -1225,6 +1322,7 @@ const InquiryEditor = (props) => {
         currentEditInq.mediaFile.forEach((file) => {
           const formData = new FormData();
           formData.append('files', file.fileUpload);
+          formData.append('bkgNo', myBL.bkgNo);
           uploads.push(formData);
         });
       }
@@ -1244,18 +1342,26 @@ const InquiryEditor = (props) => {
           })
         }
       } else {
-        const question = JSON.parse(JSON.stringify([{ ...currentEditInq }]));
-        inqContentTrim = question.map((op) => {
-          let contentTrim = { ...op, content: op.content.trim() };
+        inqContentTrim = contentsInqCDCM.map((op, i) => {
+          let contentTrim = {
+            field: currentEditInq.field,
+            ansType: currentEditInq.ansType,
+            receiver: [`${op.receiver.split('-')[0]}`],
+            inqType: op.type,
+            content: op.contentShow.trim(),
+            answerObj: currentEditInq.answerObj.filter(({ index }) => index === i),
+            mediaFile: currentEditInq.mediaFile.filter(({ index }) => index === i)
+          };
           const ansTypeChoice = metadata.ans_type['choice'];
-          if (ansTypeChoice === op.ansType) {
-            op.answerObj.forEach((ans) => {
+          if (ansTypeChoice === contentTrim.ansType) {
+            contentTrim.answerObj.forEach((ans) => {
               ans.content = ans.content.trim();
             });
-            op.answerObj.push({
+            contentTrim.answerObj.push({
               id: null,
               content: '',
               createdAt: new Date(),
+              index: i
             })
           } else contentTrim.answerObj = [];
           return contentTrim;
@@ -1276,26 +1382,17 @@ const InquiryEditor = (props) => {
               const inqResponse = res.inqResponse || {};
               const optionsMinimize = [...listMinimize];
               const optionsInquires = [...inquiries];
-              if (isCdCm && Array.isArray(inqResponse)) {
-                inqResponse.forEach(inq => {
-                  inq.creator = {
-                    userName: user.displayName || '',
-                    avatar: user.photoURL || ''
-                  };
-                  inq.mediaFile = mediaFile;
-                  inq.process = 'pending';
-                  optionsInquires.push(inq);
-                  optionsMinimize.push(inq);
-                })
-              } else {
-                inqResponse.creator = {
+
+              inqResponse.forEach(inq => {
+                inq.creator = {
                   userName: user.displayName || '',
                   avatar: user.photoURL || ''
                 };
-                inqResponse.mediaFile = mediaFile;
-                optionsInquires.push(inqResponse);
-                optionsMinimize.push(inqResponse);
-              }
+                inq.mediaFile = mediaFile;
+                inq.process = 'pending';
+                optionsInquires.push(inq);
+                optionsMinimize.push(inq);
+              })
 
               dispatch(InquiryActions.saveInquiry());
               dispatch(InquiryActions.setField());
@@ -1321,16 +1418,13 @@ const InquiryEditor = (props) => {
     }
     dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false }))
   };
-
   const onPaste = (e) => {
     if (e.clipboardData.files.length && e.clipboardData.files[0]) {
       let fileObject = e.clipboardData.files[0];
       const newFileName = generateFileNameTimeFormat(fileObject.name);
       const myRenamedFile = new File(
         [fileObject],
-        newFileName, {
-          type: "image/png"
-        }
+        newFileName, { type: "image/png" }
       );
       setFilepaste(myRenamedFile);
     }
@@ -1340,6 +1434,14 @@ const InquiryEditor = (props) => {
     onDrop: files => setDropfiles(files),
     noClick: true
   });
+
+  const removeSelectInqType = (indexToRemove) => {
+    setContentsInqCDCM(contentsInqCDCM.filter((_, index) => index !== indexToRemove))
+    setValueType(valueType.filter((_, index) => index !== indexToRemove))
+    const inq = setRemoveEditInq(indexToRemove)
+    // inq.inqType = inq.inqType.filter((_, index) => index !== indexToRemove)
+    dispatch(InquiryActions.setEditInq(inq));
+  }
 
   return (
     <div style={{ position: 'relative' }} {...getRootProps({})}>
@@ -1351,28 +1453,10 @@ const InquiryEditor = (props) => {
               ? getLabelById(metadata['field_options'], currentEditInq.field)
               : 'New Inquiry'}
           </div>
-
-          <FormControl className={classes.checkedIcon}>
-            {containerCheck.includes(currentEditInq.field) ? `` : (
-              <RadioGroup
-                aria-label="receiver"
-                name="receiver"
-                value={currentEditInq.receiver[0]}
-                onChange={(e) => handleReceiverChange(e)}>
-                <FormControlLabel
-                  value="customer"
-                  control={<Radio color={'primary'} />}
-                  label="Customer"
-                />
-                <FormControlLabel
-                  value="onshore"
-                  control={<Radio color={'primary'} />}
-                  label="Onshore"
-                />
-              </RadioGroup>
-            )}
-            <AttachFile filepaste={filepaste} dropfiles={dropfiles} />
-          </FormControl>
+          {containerCheck.includes(currentEditInq.field) &&
+            <FormControl className={classes.checkedIcon}>
+              <AttachFile filepaste={filepaste} dropfiles={dropfiles} typeMedia={1} />
+            </FormControl>}
         </div>
         {currentEditInq && (
           <div className={classes.form} style={isDragActive ? { visibility: 'hidden' } : {}}>
@@ -1399,28 +1483,28 @@ const InquiryEditor = (props) => {
                 </FormControl>
               </Grid>
               <Grid item xs={4}>
-                {Array.isArray(valueType) && containerCheck.includes(currentEditInq.field) ? (
-                  <div className={clsx(classes.formInqType, ['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state) ? classes.disableSelect : '')}>
-                    <FormControl error={!valid.inqType}>
-                      {valueType.length === 0 ? <InputLabel id="demo-mutiple-checkbox-label">Type of Question</InputLabel> : ``}
-                      <Select
-                        labelId="demo-mutiple-checkbox-label"
-                        id="demo-mutiple-checkbox"
-                        multiple
-                        value={valueType}
-                        onChange={(e) => handleTypeChange(e)}
-                        inputProps={{
-                          style: { width: '100%' }
-                        }}
-                        disabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
-                        renderValue={(selected) =>
-                          <div>
-                            {selected.map((value) => value.value !== 'select-all' && (
-                              <Chip key={value.type} label={value.label} />
-                            ))}
-                          </div>}
-                        MenuProps={MenuProps}
-                      >
+                <div className={clsx(classes.formInqType, ['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state) ? classes.disableSelect : '')}>
+                  <FormControl error={!valid.inqType}>
+                    {valueType.length === 0 ? <InputLabel id="demo-mutiple-checkbox-label">Type of Question</InputLabel> : ``}
+                    <Select
+                      id="demo-mutiple-checkbox"
+                      multiple
+                      value={valueType}
+                      onChange={(e) => handleTypeChange(e)}
+                      inputProps={{
+                        style: { width: '100%' }
+                      }}
+                      disabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
+                      renderValue={(selected) =>
+                        <div>
+                          {selected.map((value) => value.value !== 'select-all' && (
+                            <Chip key={value.type} label={value.label} />
+                          ))}
+                        </div>}
+                      MenuProps={MenuProps}
+                    >
+                      {/*TODO: Implement Select all Type Inquiry */}
+                      {/* {fieldValue &&
                         <MenuItem key={'select-all'} value={{
                           label: 'Select All',
                           value: 'select-all'
@@ -1428,44 +1512,24 @@ const InquiryEditor = (props) => {
                           <Checkbox checked={isAllSelected} />
                           <ListItemText primary={'Select All'} />
                         </MenuItem>
-                        {inqTypeOption.map((name) => {
-                          const mapType = valueType.map(v => v.value);
-                          return (
-                            <MenuItem key={name.value} value={name}>
-                              <Checkbox checked={mapType.includes(name.value)} />
-                              <ListItemText primary={name.label} />
-                            </MenuItem>
-                          )
-                        })}
-                      </Select>
-                      <div style={{ height: '20px' }}>
-                        {!valid.inqType && (
-                          <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
-                        )}
-                      </div>
-                    </FormControl>
-                  </div>
-                ) : (
-                  <FormControl error={!valid.inqType}>
-                    <FuseChipSelect
-                      value={valueType}
-                      customStyle={styles(fullscreen ? 330 : 295)}
-                      isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
-                      onChange={handleTypeChange}
-                      placeholder="Type of Question"
-                      textFieldProps={{
-                        variant: 'outlined'
-                      }}
-                      options={inqTypeOption}
-                      errorStyle={valid.inqType}
-                    />
+                      } */}
+                      {inqTypeOption.map((name) => {
+                        const mapType = valueType.map(v => v.value);
+                        return (
+                          <MenuItem key={name.value} value={name}>
+                            <Checkbox checked={mapType.includes(name.value)} />
+                            <ListItemText primary={name.label} />
+                          </MenuItem>
+                        )
+                      })}
+                    </Select>
                     <div style={{ height: '20px' }}>
                       {!valid.inqType && (
                         <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
                       )}
                     </div>
                   </FormControl>
-                )}
+                </div>
               </Grid>
               <Grid item xs={4}>
                 <FormControl error={!valid.ansType}>
@@ -1489,98 +1553,25 @@ const InquiryEditor = (props) => {
                 </FormControl>
               </Grid>
             </Grid>
-            {!containerCheck.includes(currentEditInq.field) && templateList.length > 1 &&
-              <Button
-                style={{ float: 'right', color: '#515F6B', fontWeight: 500, textTransform: 'none' }}
-                onClick={handleClick}
-              >
-                Template
-                <Icon>{anchorEl ? 'arrow_drop_up' : 'arrow_drop_down'}</Icon>
-              </Button>
-            }
-            <Popover
-              id="simple-menu"
-              anchorEl={anchorEl}
-              // keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-              classes={{ paper: classes.menuList }}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-            >
-              <RadioGroup value={template} onChange={handleChange}>
-                {templateList.map((temp, index) => (
-                  <FormControlLabel
-                    key={index}
-                    classes={{ root: classes.formRadio, label: classes.radioLabel }}
-                    value={index.toString()}
-                    control={<Radio color={'primary'} classes={{ root: classes.radioRoot }} style={{ position: 'absolute' }} />}
-                    label={temp}
-                  />
-                ))}
-              </RadioGroup>
-            </Popover>
-            {containerCheck.includes(currentEditInq.field) ? (
-              <>
-                {contentsInqCDCM.length ? (
-                  contentsInqCDCM.map((val, index) => (
+            {/* show Template */}
+            <>
+              {contentsInqCDCM.length ? (
+                contentsInqCDCM.map((val, index) => containerCheck.includes(currentEditInq.field) ?
+                  (
                     <div key={val.type} className={classes.contentCDCM}>
                       <div className="mt-24 mx-8 form-control-cdcm" style={{ display: 'flex', justifyContent: 'flex-end', position: 'relative' }} id={'content-temp-' + val.type}>
-                        <FormControl className={classes.formControl}>
-                          <RadioGroup
-                            aria-label={"receiver-" + val.type}
-                            name={"receiver-" + val.type}
-                            value={val.receiver}
-                            onChange={(e) => handleReceiverChangeCDCM(e, val.type)}>
-                            <FormControlLabel
-                              value={"customer-" + val.type}
-                              control={<Radio color={'primary'} />}
-                              label="Customer"
-                            />
-                            <FormControlLabel
-                              value={"onshore-" + val.type}
-                              control={<Radio color={'primary'} />}
-                              label="Onshore"
-                            />
-                          </RadioGroup>
-                        </FormControl>
-                        {val.content && val.content.length > 1 ? (
-                          <Button
-                            style={{ float: 'right', color: '#515F6B', fontWeight: 500, textTransform: 'none' }}
-                            onClick={() => handleShowTemplateCDCM(val.type)}
-                          >
-                            Template
-                            <Icon>{val.showTemplate ? 'arrow_drop_up' : 'arrow_drop_down'}</Icon>
-                          </Button>
-                        ) : ``}
-                        <Popover
-                          id={val.type}
-                          className={'popover-temp'}
-                          anchorEl={val.showTemplate}
-                          open={val.showTemplate}
-                          onClose={() => handleCloseTemplateCDCM()}
-                          classes={{ paper: classes.menuListCDCM }}
-                          container={() => document.getElementById('content-temp-' + val.type)}
-                        >
-                          <RadioGroup value={val.templateIndex} onChange={(e) => handleChangeCDCM(e, val.type)}>
-                            {val.content && val.content.length > 1 && val.content.map((temp, index) => (
-                              <>
-                                <FormControlLabel
-                                  classes={{ root: classes.formRadio, label: classes.radioLabel }}
-                                  value={index.toString()}
-                                  control={<Radio color={'primary'} classes={{ root: classes.radioRoot }} style={{ position: 'absolute' }} />}
-                                  label={temp}
-                                />
-                              </>
-                            ))}
-                          </RadioGroup>
-                        </Popover>
+                        <ReceiverComponent
+                          classes={classes}
+                          val={val}
+                          handleReceiverChangeCDCM={handleReceiverChangeCDCM}
+                        />
+                        <TemplateComponent
+                          classes={classes}
+                          val={val}
+                          handleShowTemplateCDCM={handleShowTemplateCDCM}
+                          handleCloseTemplateCDCM={handleCloseTemplateCDCM}
+                          handleChangeCDCM={handleChangeCDCM}
+                        />
                       </div>
                       <div className="mt-24 mx-8" style={{ minHeight: 32 }}>
                         <ContentEditable
@@ -1593,39 +1584,85 @@ const InquiryEditor = (props) => {
                         />
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="mt-32 mx-8" style={{ minHeight: 32 }}>
-                    <ContentEditable
-                      html={currentEditInq.content} // innerHTML of the editable div
-                      disabled={false} // use true to disable editing
-                      onChange={handleNameChange} // handle innerHTML change
-                      style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
-                      innerRef={boxTextEl}
-                      onPaste={onPaste}
-                    />
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="mt-32 mx-8" style={{ minHeight: 32 }}>
-                <ContentEditable
-                  html={content} // innerHTML of the editable div
-                  disabled={false} // use true to disable editing
-                  onChange={handleNameChange} // handle innerHTML change
-                  style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
-                  innerRef={boxTextEl}
-                  onPaste={onPaste}
-                />
-              </div>
-            )}
+                  ) :
+                  (
+                    <div key={val.type} className={classes.contentCDCM}>
+                      <div style={{ display: 'flex', position: 'relative', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: 18, fontWeight: 600, color: '#BD0F72' }}>{`${index + 1}. ${Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === val.type)}`}</span>
+                        <div className="mx-8 form-control-cdcm" style={{ display: 'flex', justifyContent: 'flex-end', position: 'relative', alignItems: 'center' }} id={'content-temp-' + val.type}>
+                          <ReceiverComponent
+                            classes={classes}
+                            val={val}
+                            handleReceiverChangeCDCM={handleReceiverChangeCDCM}
+                          />
+                          <AttachFile filepaste={filepaste} dropfiles={dropfiles} typeMedia={2} indexMedia={index} />
+                          {Boolean(currentEditInq.id) && currentEditInq.inqType === val.type ? null :
+                            <TrashIcon onDelete={() => removeSelectInqType(index)} />
+                          }
+                        </div>
+                      </div>
+                      <TemplateComponent
+                        classes={classes}
+                        val={val}
+                        handleShowTemplateCDCM={handleShowTemplateCDCM}
+                        handleCloseTemplateCDCM={handleCloseTemplateCDCM}
+                        handleChangeCDCM={handleChangeCDCM}
+                      />
+                      <div className="mt-24 mx-8" style={{ minHeight: 32 }}>
+                        <ContentEditable
+                          html={val.contentShow} // innerHTML of the editable div
+                          disabled={false} // use true to disable editing
+                          onChange={(e) => handleNameChangeCDCM(e, val)} // handle innerHTML change
+                          style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
+                        // innerRef={boxTextEl}
+                        // onPaste={onPaste}
+                        />
+                      </div>
+                      {currentEditInq.ansType === metadata.ans_type.choice && (
+                        <div className="mt-16">
+                          <ChoiceAnswerEditor indexType={index} />
+                        </div>
+                      )}
+                      {currentEditInq.ansType === metadata.ans_type.paragraph && (
+                        <div className="mt-16">
+                          <ParagraphAnswerEditor />
+                        </div>
+                      )}
+                      {currentEditInq.mediaFile?.length > 0 && currentEditInq.mediaFile.filter(m => m.index === index).length > 0 &&
+                        <>
+                          <h3>Attachment Inquiry:</h3>
+                          {currentEditInq.mediaFile.filter(m => m.index === index).map((file) => (
+                            <>
+                              <FileAttach
+                                file={file}
+                                files={currentEditInq.mediaFile}
+                                field={currentEditInq.field}
+                                question={currentEditInq}
+                                isEdit={true}
+                                indexType={index}
+                              />
+                            </>
+                          ))}
+                        </>
+                      }
+                    </div>
+                  )
+                )
+              ) : (
+                <div className="mt-32 mx-8" style={{ minHeight: 32 }}>
+                  <ContentEditable
+                    html={currentEditInq.content} // innerHTML of the editable div
+                    disabled={false} // use true to disable editing
+                    onChange={handleNameChange} // handle innerHTML change
+                    style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
+                    innerRef={boxTextEl}
+                    onPaste={onPaste}
+                  />
+                </div>
+              )}
+            </>
 
-            {currentEditInq.ansType === metadata.ans_type.choice && (
-              <div className="mt-16">
-                <ChoiceAnswerEditor />
-              </div>
-            )}
-            {currentEditInq.ansType === metadata.ans_type.paragraph && (
+            {containerCheck.includes(currentEditInq.field) && currentEditInq.ansType === metadata.ans_type.paragraph && (
               <div className="mt-40">
                 <ParagraphAnswerEditor />
               </div>
@@ -1637,22 +1674,26 @@ const InquiryEditor = (props) => {
               />
             )}
             <Divider className="mt-12" />
-            <div className={'attachment'}>
-              {currentEditInq.mediaFile?.length > 0 && <h3>Attachment Inquiry:</h3>}
-              {currentEditInq.mediaFile?.length > 0 &&
-                currentEditInq.mediaFile?.map((file, mediaIndex) => (
+            {containerCheck.includes(currentEditInq.field) &&
+              <div className={'attachment'}>
+                {currentEditInq.mediaFile?.length > 0 &&
                   <>
-                    <FileAttach
-                      file={file}
-                      files={currentEditInq.mediaFile}
-                      field={currentEditInq.field}
-                      question={currentEditInq}
-                      isEdit={true}
-                    />
+                    <h3>Attachment Inquiry:</h3>
+                    {currentEditInq.mediaFile?.map((file, mediaIndex) => (
+                      <>
+                        <FileAttach
+                          file={file}
+                          files={currentEditInq.mediaFile}
+                          field={currentEditInq.field}
+                          question={currentEditInq}
+                          isEdit={true}
+                        />
+                      </>
+                    ))}
                   </>
-                ))}
-            </div>
-
+                }
+              </div>
+            }
             <>
               {user.role !== 'Admin' && (
                 <>

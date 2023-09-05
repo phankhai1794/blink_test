@@ -214,36 +214,26 @@ const SendInquiryForm = (props) => {
     const status = ['INQ_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REOPEN_Q', 'REOPEN_A'];
     let toCustomer = [], toOnshore = [], toCustomerCc = [], toOnshoreCc = [], toCustomerBcc = [], toOnshoreBcc = []
 
-    const res = await getMail(mybl.id);
-    if (res.data.length) {
-      // Customer
-      res.data[0]?.toCustomer?.length &&
-        res.data[0].toCustomer.forEach((customer) => {
-          toCustomer.push(customer.email);
-        });
-      res.data[0]?.toCustomerCc?.length &&
-        res.data[0].toCustomerCc.forEach((customer) => {
-          toCustomerCc.push(customer.email);
-        });
-      res.data[0]?.toCustomerBcc?.length &&
-        res.data[0].toCustomerBcc.forEach((customer) => {
-          toCustomerBcc.push(customer.email);
-        });
-      // Onshore
-      res.data[0]?.toOnshore?.length &&
-        res.data[0].toOnshore.forEach((onshore) => {
-          toOnshore.push(onshore.email);
-        });
-      res.data[0]?.toOnshoreCc?.length &&
-        res.data[0].toOnshoreCc.forEach((onshore) => {
-          toOnshoreCc.push(onshore.email);
-        });
-      res.data[0]?.toOnshoreBcc?.length &&
-        res.data[0].toOnshoreBcc.forEach((onshore) => {
-          toOnshoreBcc.push(onshore.email);
-        });
-      dispatch(MailActions.setTags({ ...tags, toCustomer, toOnshore, toCustomerCc, toOnshoreCc, toCustomerBcc, toOnshoreBcc }));
-    }
+
+    const res = await getMail(mybl.id).catch((err) => handleError(dispatch, err));
+    ({
+      toCustomer,
+      toCustomerCc,
+      toCustomerBcc,
+      toOnshore,
+      toOnshoreCc,
+      toOnshoreBcc
+    } = res.data);
+
+    dispatch(MailActions.setTags({
+      ...tags,
+      toCustomer,
+      toCustomerCc,
+      toCustomerBcc,
+      toOnshore,
+      toOnshoreCc,
+      toOnshoreBcc
+    }));
     toCustomer = toCustomer.join(',');
     toOnshore = toOnshore.join(',');
     toCustomerCc = toCustomerCc.join(',');

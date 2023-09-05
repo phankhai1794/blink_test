@@ -108,16 +108,18 @@ const FileAttach = ({
   removeAttachmentDraftBL,
   isRemoveFile,
   setIsRemoveFile,
-  isEdit
+  isEdit,
+  indexType
 }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-
+  const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const [attachmentList, currentEditInq, enableExpandAttachment] = useSelector(({ workspace }) => [
     workspace.inquiryReducer.attachmentList,
     workspace.inquiryReducer.currentEditInq,
     workspace.inquiryReducer.enableExpandAttachment,
   ]);
+  
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
   const user = useSelector(({ user }) => user);
   const [srcUrl, setSrcUrl] = useState(file.src || null);
@@ -134,7 +136,7 @@ const FileAttach = ({
 
   useEffect(() => {
     if (file.id) {
-      getFile(file.id)
+      getFile(myBL.bkgNo, file.id)
         .then((f) => {
           setSrcUrl(urlMedia(file.ext, f));
         })
@@ -204,7 +206,7 @@ const FileAttach = ({
     }
     else {
       const indexMedia = optionsOfQuestion.mediaFile.findIndex(
-        (f) => f.name === file.name
+        (f) => f.name === file.name && f.index === indexType
       );
       optionsOfQuestion.mediaFile.splice(indexMedia, 1);
     }
@@ -344,12 +346,12 @@ const FileAttach = ({
           </div>
 
           <div className={'createdAt-image'}>
-            {file && file.id ? (
+            {question && file && file.id ? (
               <>
                 {question.creator && <div>{question.creator?.userName}</div>}
 
-                {(question.createdAt || question.updatedAt) &&
-                  <div>{displayTimeAttachment(question.createdAt || question.updatedAt)}</div>}
+                {(file.createdAt) &&
+                  <div>{displayTimeAttachment(file.createdAt)}</div>}
               </>
             ) : (
               <>

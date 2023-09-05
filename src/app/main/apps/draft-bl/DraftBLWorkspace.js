@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import history from '@history';
 import { FusePageSimple } from '@fuse';
 import { useDispatch, useSelector } from 'react-redux';
@@ -13,16 +13,23 @@ import BLWorkspace from '../workspace/components/BLWorkspace';
 import DraftBL from './DraftBL';
 
 const DraftBLPreview = ({ bl }) => {
+  const [allow, setAllow] = useState(false);
   const channel = new BroadcastChannel(BROADCAST.ACCESS);
 
   useEffect(() => {
-    sessionStorage.clear(); // delete session storage when redirecting from workspace
+    // delete session storage when redirecting from workspace
+    sessionStorage.clear();
+
+    const result = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_WORKSPACE });
+    if (!result) history.push('/login');
+    setAllow(result);
+
     channel.onmessage = ({ data }) => {
-      if (data.role !== 'Admin') history.push('/login');
+      if (data.role !== 'Admin' || data.type === 'logout') history.push('/login');
     };
   }, []);
 
-  return <DraftBL bl={bl} />;
+  return allow ? <DraftBL bl={bl} /> : <></>;
 };
 
 function Coordinator({ bl }) {
