@@ -424,10 +424,15 @@ const InquiryEditor = (props) => {
     const index = e.target.value;
     const objCdCm = [...contentsInqCDCM];
     if (objCdCm && objCdCm.length) {
-      objCdCm.forEach(o => {
+      objCdCm.forEach((o, i) => {
         if (o.type === type && o.content.length > 1) {
           o.contentShow = o.content[index];
           o.templateIndex = index;
+          if (i === 0) {
+            const optionsOfQuestion = { ...currentEditInq };
+            optionsOfQuestion.content = o.content[index];
+            dispatch(InquiryActions.setEditInq(optionsOfQuestion));
+          }
         }
       })
     }
@@ -437,9 +442,14 @@ const InquiryEditor = (props) => {
   const handleNameChangeCDCM = (e, valEdited) => {
     const inqCDCM = [...contentsInqCDCM];
     if (inqCDCM && inqCDCM.length) {
-      inqCDCM.forEach(inq => {
+      inqCDCM.forEach((inq, index) => {
         if (inq.type === valEdited.type) {
           inq.contentShow = e.currentTarget.textContent;
+          if (index === 0) {
+            const optionsOfQuestion = { ...currentEditInq };
+            optionsOfQuestion.content = e.currentTarget.textContent;
+            dispatch(InquiryActions.setEditInq(optionsOfQuestion));
+          }
         }
       })
     }
@@ -766,6 +776,7 @@ const InquiryEditor = (props) => {
     const arr = e.target.value
     if (!arr.length) {
       dispatch(InquiryActions.setEditInq(inq));
+      if (!fieldValue) setInqTypeOption(metadata.inq_type_options)
       return;
     }
     let keyword = fieldValue;
@@ -941,14 +952,6 @@ const InquiryEditor = (props) => {
     };
   };
 
-  const handleReceiverChange = (e) => {
-    const optionsOfQuestion = { ...currentEditInq };
-    optionsOfQuestion.receiver = [];
-    dispatch(InquiryActions.validate({ ...valid, receiver: true }));
-    optionsOfQuestion.receiver.push(e.target.value);
-    dispatch(InquiryActions.setEditInq(optionsOfQuestion));
-  };
-
   const checkDuplicateInq = () => {
     const listInqOfField = [...inquiries.filter((inq) => {
       if (containerCheck.includes(inq.field)) {
@@ -1021,7 +1024,7 @@ const InquiryEditor = (props) => {
     let validate = {};
 
     if (
-      !contentsInqCDCM.length||
+      !contentsInqCDCM.length ||
       !currentEditInq.field ||
       !currentEditInq.receiver.length ||
       !currentEditInq.ansType.length ||
@@ -1177,8 +1180,10 @@ const InquiryEditor = (props) => {
       ) {
         const optionsMinimize = [...listMinimize];
         const index = optionsMinimize.findIndex((e) => e.id === inquiry.id);
-        optionsMinimize[index].field = editInquiry.field;
-        dispatch(InquiryActions.setListMinimize(optionsMinimize));
+        if (index >= 0) {
+          optionsMinimize[index].field = editInquiry.field;
+          dispatch(InquiryActions.setListMinimize(optionsMinimize));
+        }
         const editedIndex = inquiriesOp.findIndex((inq) => inq.id === inquiry.id);
         inquiriesOp[editedIndex] = editInquiry;
 
