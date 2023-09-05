@@ -342,11 +342,28 @@ export default function Form(props) {
     list.splice(list.length, 0, tempInq);
   };
 
+  const resetInquiry = () => {
+    const optionsInquires = [...inquiries];
+    optionsInquires.forEach(op => op.showIconAttachFile = false);
+    optionsInquires.forEach(op => op.showIconReply = false);
+    optionsInquires.forEach(op => op.showIconAttachAnswerFile = false);
+    optionsInquires.forEach(op => {
+      if (['OPEN', 'INQ_SENT', 'REP_SENT'].includes(op.state)) {
+        op.showIconReply = true;
+        op.showIconEditInq = true;
+      } else if (['ANS_DRF', 'ANS_SENT'].includes(op.state)) {
+        op.showIconEdit = true;
+      }
+    });
+    dispatch(InquiryActions.setInquiries(optionsInquires));
+    //
+  }
+
   const handleClose = () => {
     toggleForm(false);
     setOpenFab(false);
-
     if (openAllInquiry) {
+      resetInquiry();
       setTimeout(() => {
         dispatch(FormActions.toggleAllInquiry(false));
       }, 400);
