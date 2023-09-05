@@ -48,6 +48,10 @@ export const RD_TERMS = 'rdTerms';
 
 export const SHIPPING_MARK = 'shippingMark';
 
+export const DESCRIPTION_OF_GOODS1 = 'cargoDescription1';
+
+export const DESCRIPTION_OF_GOODS2 = 'cargoDescription2';
+
 export const DESCRIPTION_OF_GOODS = 'cargoDescription';
 
 export const TOTAL_PACKAGE = 'totalPackages';
