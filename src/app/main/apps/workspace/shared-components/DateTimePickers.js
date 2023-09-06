@@ -25,7 +25,8 @@ export default function DateTimePickers(props) {
         minDate={'1000-01-01'}
         maxDate={'3000-01-01'}
         id='mui-pickers-date'
-        format='dd/MM/yyyy'
+        format='dd MMM yyyy'
+        onKeyDown={(e) => e.preventDefault()}
         value={time || null}
         onChange={onChange}
         KeyboardButtonProps={{
