@@ -348,7 +348,7 @@ const InquiryEditor = (props) => {
     metadataFieldOptions.filter((v) => currentEditInq.field === v.value)[0]
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
-  const [filepaste, setFilepaste] = useState('');
+  const [filepaste, setFilepaste] = useState({ File: '', type: '' });
   const [dropfiles, setDropfiles] = useState([]);
   const [fieldEdited, setFieldEdited] = useState();
   const [nameTypeEdited, setNameTypeEdited] = useState();
@@ -916,7 +916,7 @@ const InquiryEditor = (props) => {
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
     // setContent(filepaste ? inq.content : e.target.value);
-    setContent(filepaste ? e.target.value.replace(/<img.*>\n?/, '') : e.target.value);
+    setContent(filepaste.File ? e.target.value.replace(/<img.*>\n?/, '') : e.target.value);
 
     inq.content = e.currentTarget.textContent;
     setFieldEdited(inq.field);
@@ -1423,17 +1423,14 @@ const InquiryEditor = (props) => {
     }
     dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false }))
   };
-  const onPaste = (e) => {
+  const onPaste = (e, type = '') => {
     if (e.clipboardData.files.length && e.clipboardData.files[0]) {
       let fileObject = e.clipboardData.files[0];
       const newFileName = generateFileNameTimeFormat(fileObject.name);
-      const myRenamedFile = new File(
-        [fileObject],
-        newFileName, { type: "image/png" }
-      );
-      setFilepaste(myRenamedFile);
+      const myRenamedFile = new File([fileObject], newFileName, { type: 'image/png' });
+      setFilepaste({ File: myRenamedFile, type: type || currentEditInq.inqType });
     }
-  }
+  };
 
   const { isDragActive, getRootProps } = useDropzone({
     onDrop: files => setDropfiles(files),
@@ -1460,7 +1457,7 @@ const InquiryEditor = (props) => {
           </div>
           {containerCheck.includes(currentEditInq.field) &&
             <FormControl className={classes.checkedIcon}>
-              <AttachFile filepaste={filepaste} dropfiles={dropfiles} typeMedia={1} />
+              <AttachFile filepaste={filepaste.File} dropfiles={dropfiles} typeMedia={1} />
             </FormControl>}
         </div>
         {currentEditInq && (
@@ -1600,7 +1597,12 @@ const InquiryEditor = (props) => {
                             val={val}
                             handleReceiverChangeCDCM={handleReceiverChangeCDCM}
                           />
-                          <AttachFile filepaste={filepaste} dropfiles={dropfiles} typeMedia={2} indexMedia={index} />
+                          <AttachFile
+                            filepaste={val.type === filepaste.type ? filepaste.File : ''}
+                            dropfiles={dropfiles}
+                            typeMedia={2}
+                            indexMedia={index}
+                          />
                           {Boolean(currentEditInq.id) && currentEditInq.inqType === val.type ? null :
                             <TrashIcon onDelete={() => removeSelectInqType(index)} />
                           }
@@ -1619,8 +1621,8 @@ const InquiryEditor = (props) => {
                           disabled={false} // use true to disable editing
                           onChange={(e) => handleNameChangeCDCM(e, val)} // handle innerHTML change
                           style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
-                        // innerRef={boxTextEl}
-                        // onPaste={onPaste}
+                          innerRef={boxTextEl}
+                          onPaste={(e) => onPaste(e,val.type)}
                         />
                       </div>
                       {currentEditInq.ansType === metadata.ans_type.choice && (
