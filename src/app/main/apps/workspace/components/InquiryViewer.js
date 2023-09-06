@@ -1841,24 +1841,10 @@ const InquiryViewer = (props) => {
     return result;
   }
 
-  const checkAllInqAmeResolved = (question) => {
-    let resultInq = false;
+  const checkAllAmeResolved = (question) => {
     let resultAme = false;
 
-    const inqCheck = inquiries.filter(inq => (inq.process === 'pending' && inq.receiver.includes(question.receiver[0])));
     const ameCheck = inquiries.filter(inq => (inq.process === 'draft' && inq.receiver.includes(question.receiver[0])));
-
-    // Check inquiry
-    // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
-    const inqStillNotResolved = inqCheck.filter(inq => (
-      !['COMPL', 'UPLOADED'].includes(inq.state)
-      && inq.id !== question.id
-      && !fieldsNotSendOPUS.includes(
-        metadata['field_options'].find(f => f.value === inq.field).keyword
-        && inq.state === 'COMPL'
-      )
-    ));
-    resultInq = Boolean(!inqStillNotResolved.length);
 
     // Check amendment
     // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
@@ -1872,7 +1858,7 @@ const InquiryViewer = (props) => {
     ));
     resultAme = Boolean(!ameStillNotUpload.length);
 
-    return resultInq && resultAme;
+    return resultAme;
   }
 
   const onConfirm = (isWrapText = false) => {
@@ -2044,7 +2030,7 @@ const InquiryViewer = (props) => {
               action: 'pending'
             }));
           }
-          if (question.process === "draft" && checkAllInqAmeResolved(question)) {
+          if (question.process === 'draft' && checkAllAmeResolved(question)) {
             // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
             let filterDraft = optionsInquires.filter(inq => inq.process === 'draft')
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BS', '', {
