@@ -27,7 +27,7 @@ import Pagination from 'app/main/apps/workspace/shared-components/Pagination';
 import EllipsisPopper from 'app/main/apps/workspace/shared-components/EllipsisPopper';
 import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
-import { mapperBlinkStatus } from '@shared/keyword';
+import { mapperBlinkStatus, BLANK } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import debounce from 'lodash/debounce';
 
@@ -382,7 +382,7 @@ const Row = (props) => {
           </TableCell>
         )}
         {columns.blinkS && userType !== 'ONSHORE' && (
-          <TableCell className={classes.cellBody}>{mapperBlinkStatus[row.status.bl]}</TableCell>
+          <TableCell className={classes.cellBody}>{mapperBlinkStatus[row.status.bl] === BLANK ? '' : mapperBlinkStatus[row.status.bl]}</TableCell>
         )}
         {columns.vvd && (
           <TableCell className={classes.cellBody} style={{ minWidth: 150 }}>
