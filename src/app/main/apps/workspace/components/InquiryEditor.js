@@ -1405,7 +1405,12 @@ const InquiryEditor = (props) => {
                 optionsInquires.push(inq);
                 optionsMinimize.push(inq);
               })
-
+              if (!inquiriesOp.length) {
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BC', '', {
+                  idReply: myBL.id,
+                  action: 'draftInqCreateInit',
+                })) //BC: B/Ls that are first initiated in the workspace and when users create draft inquiries in BLink (not yet sent to the Customer).
+              }
               dispatch(InquiryActions.saveInquiry());
               dispatch(InquiryActions.setField());
               dispatch(InquiryActions.setOpenedInqForm(false));
