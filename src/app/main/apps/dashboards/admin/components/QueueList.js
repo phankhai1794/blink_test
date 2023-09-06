@@ -15,7 +15,8 @@ import {
   ListItemText,
   Chip,
   Grid,
-  Icon
+  Icon,
+  Switch
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
@@ -150,12 +151,21 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   styleSearch: {
+    '& .MuiSwitch-colorSecondary.Mui-checked': {
+      color: 'white'
+    },
+    '& .MuiSwitch-colorSecondary.Mui-checked + .MuiSwitch-track': {
+      backgroundColor: '#36B37E'
+    },
     [theme.breakpoints.down('sm')]: {
       '& .MuiButton-root': {
         lineHeight: 0
       },
       '& .MuiButton-label': {
-        fontSize: 12
+        fontSize: '10px !important'
+      },
+      '& .MuiSvgIcon-root': {
+        fontSize: '2rem'
       }
     },
     [theme.breakpoints.down('md')]: {
@@ -163,7 +173,10 @@ const useStyles = makeStyles((theme) => ({
         lineHeight: 0
       },
       '& .MuiButton-label': {
-        fontSize: 12
+        fontSize: '10px !important'
+      },
+      '& .MuiSvgIcon-root': {
+        fontSize: '2rem'
       }
     },
     [theme.breakpoints.down('lg')]: {
@@ -171,10 +184,13 @@ const useStyles = makeStyles((theme) => ({
         lineHeight: 0
       },
       '& .MuiButton-label': {
-        fontSize: 12
+        fontSize: '11px !important'
+      },
+      '& .MuiSvgIcon-root': {
+        fontSize: '2rem'
       }
     },
-    [theme.breakpoints.down('xl')]: {
+    [theme.breakpoints.up('xl')]: {
       '& .MuiButton-root': {
         lineHeight: 0
       },
@@ -472,12 +488,10 @@ const SearchLayout = (props) => {
             <span>Search</span>
           </Button>
           {userType === 'ONSHORE' ? (
-            <Button
-              className={clsx(classes.btnIsMe, isMe ? classes.btnSearch : classes.btnBackGround)}
-              onClick={handleToogleMyBl}>
-              <span style={{ paddingRight: 2 }}>MyBLs</span>
-              {isMe ? <HighlightOffIcon /> : ``}
-            </Button>
+            <div style={{ display: 'flex', alignItems: 'center', marginLeft: 10 }}>
+              <span style={{ paddingRight: 1, fontSize: 13, fontWeight: 600 }}>MyBLs</span>
+              <Switch checked={isMe} onChange={handleToogleMyBl} />
+            </div>
           ) : (
             ``
           )}

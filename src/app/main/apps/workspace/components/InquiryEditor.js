@@ -775,29 +775,36 @@ const InquiryEditor = (props) => {
     //
     const arr = e.target.value
     if (!arr.length) {
+      if (!fieldValue) {
+        setFieldType(metadata.field_options);
+      }
+      setInqTypeOption(metadata.inq_type_options)
+      setFieldValue(null);
+      inq.field = ''
       dispatch(InquiryActions.setEditInq(inq));
-      if (!fieldValue) setInqTypeOption(metadata.inq_type_options)
+
       return;
     }
     let keyword = fieldValue;
 
     if (!fieldValue) {
       let filterField = inqTypeOption.find(({ value }) => value === arr[arr.length - 1].value).field;
-      filterField = metadata.field_options.filter(({ value, display, keyword }) => (
+      filterField = arr[arr.length - 1].label === OTHERS ? fieldType : fieldType.filter(({ value, display, keyword }) => (
         display && filterField.includes(value)
         && metadata.template.some((temp) => (temp.field === keyword && temp.type === arr[arr.length - 1].value && temp.content[0]))
       ));
-      let filterInqType = inqTypeOption
 
-      filterField.forEach((field) => filterInqType = filterInqType.filter((data) => {
-        let getDataField = data.field?.includes(field.value);
-        let getTemplate = metadata.template.some((temp) => (
-          temp.field === field.keyword
-          && temp.type === data.value
-          && (temp.content[0]) || data.label === OTHERS)
-        )
-        return getDataField && getTemplate
-      }))
+      let filterInqType = inqTypeOption
+      if (arr.length !== 1 || arr[arr.length - 1].label !== OTHERS)
+        filterField.forEach((field) => filterInqType = filterInqType.filter((data) => {
+          const getDataField = data.field?.includes(field.value);
+          const getTemplate = metadata.template.some((temp) => (
+            temp.field === field.keyword
+            && temp.type === data.value
+            && (temp.content[0]) || data.label === OTHERS)
+          )
+          return getDataField && getTemplate
+        }))
       setInqTypeOption(filterInqType)
       if (filterField.length === 1) {
         setFieldValue(filterField[0]);
