@@ -681,6 +681,7 @@ const InquiryViewer = (props) => {
               }
             });
             // setType(metadata.ans_type.paragraph);
+            console.log('lastest', lastest)
             setQuestion(lastest);
             if (filterCDCM.length > 1) {
               setInqHasComment(true);
@@ -3049,7 +3050,7 @@ const InquiryViewer = (props) => {
     const contentDoG2 = content[descriptionOfGoods2] || '';
     return(
       <>
-        {[contentDoG1, contentDoG2].map((item, index) => 
+        {[contentDoG1, contentDoG2].map((item, index) =>
           <TextField
             keu={index}
             className={classes.inputText}
@@ -3065,7 +3066,7 @@ const InquiryViewer = (props) => {
   }
 
   const contentDoGLine1Line2 = (content) => {
-    return content[metadata.field[DESCRIPTION_OF_GOODS1]] ? 
+    return content[metadata.field[DESCRIPTION_OF_GOODS1]] ?
       `${content[metadata.field[DESCRIPTION_OF_GOODS1]]}\n${content[metadata.field[DESCRIPTION_OF_GOODS2]]}`
     : content[metadata.field[DESCRIPTION_OF_GOODS2]]
   }
@@ -3433,7 +3434,7 @@ const InquiryViewer = (props) => {
               ) :
                 (['RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) || (question.process === 'draft' && question.state === 'REOPEN_Q') || (['AME_DRF', 'AME_SENT'].includes(question.state) && !isReply) ?
                   <>
-                    {(question?.field === metadata.field[DESCRIPTION_OF_GOODS]) && 
+                    {(question?.field === metadata.field[DESCRIPTION_OF_GOODS]) &&
                       <div style={{ whiteSpace: 'pre-wrap' }}>
                         {contentDoGLine1Line2(content)}
                       </div>
@@ -3446,7 +3447,7 @@ const InquiryViewer = (props) => {
                   </>
                   :
                   <>
-                    {(question?.field === metadata.field[DESCRIPTION_OF_GOODS] && ['REOPEN_A', 'REOPEN_Q'].includes(question.state)) && 
+                    {(question?.field === metadata.field[DESCRIPTION_OF_GOODS] && ['REOPEN_A', 'REOPEN_Q'].includes(question.state)) &&
                       <div style={{ whiteSpace: 'pre-wrap' }}>
                         {contentDoGLine1Line2(content)}
                       </div>
@@ -3787,7 +3788,7 @@ const InquiryViewer = (props) => {
                           :
                           (isDateTime && question.state.includes("AME_") && user.role === 'Guest') ?
                             <DateTimePickers time={tempReply?.answer?.content ? formatDate(tempReply?.answer?.content, 'YYYY-MM-DD') : ''} onChange={e => handleChangeContentReply(e, '', true)} />
-                            : 
+                            :
                             <>
 
                               {/* {1 && renderDoGLine1Line2()} */}

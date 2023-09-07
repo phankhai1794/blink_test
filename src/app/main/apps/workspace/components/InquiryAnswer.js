@@ -388,18 +388,18 @@ const InquiryAnswer = (props) => {
     if (cdCmData && Object.keys(cdCmData).length) {
       const cdContent = cdCmData[containerCheck[0]];
       const cmContent = cdCmData[containerCheck[1]];
-      console.log('cdContent', cdContent)
       cdContent.forEach(data => {
         [CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT].forEach((key) => {
-          data[getType(key)] = parseFloat(data[getType(key)]).toFixed(3);
+          if (typeof data[getType(key)] !== 'string')
+            data[getType(key)] = formatNumber(data[getType(key)]);
         })
       })
       cmContent.forEach(data => {
         [CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].forEach((key) => {
-          data[getType(key)] = parseFloat(data[getType(key)]).toFixed(3);
+          if (typeof data[getType(key)] !== 'string')
+            data[getType(key)] = formatNumber(data[getType(key)]);
         })
       })
-      console.log('cdContent', cdContent)
     }
     return cdCmData;
   }
@@ -413,8 +413,8 @@ const InquiryAnswer = (props) => {
       }
       console.log('oldDataCdCmInq.cdCmDataOld', oldDataCdCmInq.cdCmDataOld)
       console.log('contentCDCM', contentCDCM)
-      // formatCdCmContent(oldDataCdCmInq.cdCmDataOld)
-      // formatCdCmContent(contentCDCM)
+      formatCdCmContent(oldDataCdCmInq.cdCmDataOld)
+      formatCdCmContent(contentCDCM)
       if (JSON.stringify(oldDataCdCmInq.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
         setDisableSaveCdCm(false);
       } else if (question.paragraphAnswer && oldDataCdCmInq.contentOld !== question.paragraphAnswer.content) {
@@ -429,7 +429,6 @@ const InquiryAnswer = (props) => {
     isEditedCdCMTable()
   }, [getDataCDInq, getDataCMInq, question.paragraphAnswer]);
 
-  console.log('isDisableSaveCdCm', isDisableSaveCdCm)
   return (
     <div className='changeToEditor'>
       <div className="flex">
