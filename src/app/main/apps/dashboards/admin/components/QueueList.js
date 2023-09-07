@@ -354,6 +354,7 @@ const SearchLayout = (props) => {
 
   const onPaste = (e) => {
     e.preventDefault();
+    const { bookingNo } = state;
     const removeDuplicate = [
       ...new Set(
         e.clipboardData
@@ -363,7 +364,8 @@ const SearchLayout = (props) => {
           .filter((str) => str) // filter empty string
       )
     ].join(', ');
-    handleChange({ bookingNo: removeDuplicate });
+    const bkgSearch = bookingNo + removeDuplicate;
+    handleChange({ bookingNo: bkgSearch });
   };
 
   return (
@@ -383,7 +385,7 @@ const SearchLayout = (props) => {
                 }
               }}
               inputProps={{ style: { textTransform: 'uppercase' } }}
-              onChange={(e) => handleChange({ bookingNo: e.target.value })}
+              onChange={(e) => handleChange({ bookingNo: e.target.value.replace(/\s+|;+/g, ',') })}
               onPaste={onPaste}
               startAdornment={
                 <InputAdornment className={classes.searchBox} position="start">
