@@ -355,17 +355,16 @@ const SearchLayout = (props) => {
   const onPaste = (e) => {
     e.preventDefault();
     const { bookingNo } = state;
-    const removeDuplicate = [
-      ...new Set(
-        e.clipboardData
-          .getData('text')
-          .split(/\n/) // split new line
-          .map((str) => str.trim()) // trim space
-          .filter((str) => str) // filter empty string
-      )
+    const bkgNosPaste = [
+      e.clipboardData
+        .getData('text')
+        .split(/\n/) // split new line
+        .map((str) => str.trim()) // trim space
+        .filter((str) => str) // filter empty string
     ].join(', ');
-    const bkgSearch = bookingNo + removeDuplicate;
-    handleChange({ bookingNo: bkgSearch });
+    const bkgSearch = bookingNo + bkgNosPaste;
+    const bkgNoArr = [...new Set(bkgSearch.split(','))].join(', ');
+    handleChange({ bookingNo: bkgNoArr });
   };
 
   return (
@@ -385,7 +384,7 @@ const SearchLayout = (props) => {
                 }
               }}
               inputProps={{ style: { textTransform: 'uppercase' } }}
-              onChange={(e) => handleChange({ bookingNo: e.target.value.replace(/\s+|;+/g, ',') })}
+              onChange={(e) => handleChange({ bookingNo: e.target.value })}
               onPaste={onPaste}
               startAdornment={
                 <InputAdornment className={classes.searchBox} position="start">
