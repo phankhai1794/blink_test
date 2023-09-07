@@ -681,7 +681,6 @@ const InquiryViewer = (props) => {
               }
             });
             // setType(metadata.ans_type.paragraph);
-            console.log('lastest', lastest)
             setQuestion(lastest);
             if (filterCDCM.length > 1) {
               setInqHasComment(true);

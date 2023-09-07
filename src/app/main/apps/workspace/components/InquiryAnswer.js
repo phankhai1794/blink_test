@@ -13,7 +13,7 @@ import { Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
-import {formatNumber, isJsonText} from "@shared";
+import {isJsonText, NumberFormat} from "@shared";
 import {
   CM_MEASUREMENT,
   CM_PACKAGE, CM_WEIGHT,
@@ -390,18 +390,15 @@ const InquiryAnswer = (props) => {
       const cmContent = cdCmData[containerCheck[1]];
       cdContent.forEach(data => {
         [CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT].forEach((key) => {
-          if (typeof data[getType(key)] !== 'string')
-            data[getType(key)] = formatNumber(data[getType(key)]);
+          data[getType(key)] = NumberFormat(data[getType(key)], 3)
         })
       })
       cmContent.forEach(data => {
         [CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].forEach((key) => {
-          if (typeof data[getType(key)] !== 'string')
-            data[getType(key)] = formatNumber(data[getType(key)]);
+          data[getType(key)] = NumberFormat(data[getType(key)], 3)
         })
       })
     }
-    return cdCmData;
   }
 
   const isEditedCdCMTable = () => {
@@ -411,8 +408,6 @@ const InquiryAnswer = (props) => {
         [getField(CONTAINER_DETAIL)]: getDataCDInq.length ? getDataCDInq : contentInqResolved?.[getField(CONTAINER_DETAIL)],
         [getField(CONTAINER_MANIFEST)]: getDataCMInq.length ? getDataCMInq : contentInqResolved?.[getField(CONTAINER_MANIFEST)]
       }
-      console.log('oldDataCdCmInq.cdCmDataOld', oldDataCdCmInq.cdCmDataOld)
-      console.log('contentCDCM', contentCDCM)
       formatCdCmContent(oldDataCdCmInq.cdCmDataOld)
       formatCdCmContent(contentCDCM)
       if (JSON.stringify(oldDataCdCmInq.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
