@@ -3049,14 +3049,13 @@ const InquiryViewer = (props) => {
     const contentDoG2 = content[descriptionOfGoods2] || '';
     return(
       <>
-        {[contentDoG1, contentDoG2].map((item, index) =>
-          <TextField
+        {[contentDoG1, contentDoG2].map((item, index) => 
+          item && <TextField
             keu={index}
             className={classes.inputText}
             value={item}
-            inputProps={{ style: { textTransform: 'uppercase' } }}
+            inputProps={{ style: { textTransform: 'uppercase', padding: '10px' } }}
             variant='outlined'
-            label={(index === 0) ? 'No. of PKG/CNTR' : ''}
             disabled
           />
         )}
@@ -3114,7 +3113,7 @@ const InquiryViewer = (props) => {
               className={classes.inputText}
               value={`${(textResolve === NO_CONTENT_AMENDMENT) ? '' : textResolve}`}
               multiline
-              rows={3}
+              rows={isDoG ? 5 : 3}
               rowsMax={10}
               onChange={inputText}
               variant='outlined'
@@ -3789,14 +3788,12 @@ const InquiryViewer = (props) => {
                             <DateTimePickers time={tempReply?.answer?.content ? formatDate(tempReply?.answer?.content, 'YYYY-MM-DD') : ''} onChange={e => handleChangeContentReply(e, '', true)} />
                             :
                             <>
-
-                              {/* {1 && renderDoGLine1Line2()} */}
                               {((question?.field === metadata.field[DESCRIPTION_OF_GOODS]) && question?.state.includes("AME_") && user.role === 'Guest') ? renderDoGLine1Line2() : ''}
                               <TextField
                                 className={classes.inputText}
                                 value={tempReply?.answer?.content === NO_CONTENT_AMENDMENT ? '' : (tempReply?.answer?.content || '')}
                                 multiline
-                                rows={3}
+                                rows={(question?.field === metadata.field[DESCRIPTION_OF_GOODS]) ? 5 : 3}
                                 rowsMax={10}
                                 inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
                                 InputProps={{
