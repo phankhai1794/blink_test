@@ -252,7 +252,8 @@ export const mapperBlinkStatus = {
   BA: "Customer Amendment Request",
   BQ: "Offshore Amendment Inquiry",
   BP: "Customer Amendment Reply",
-  BS: "BL Amendment Success"
+  BS: "BL Amendment Success",
+  BF: "BL Amendment Fail"
 };
 
 export const mapperBlinkStatusCustomer = {
@@ -264,3 +265,5 @@ export const mapperBlinkStatusCustomer = {
 export const BROADCAST = {
   ACCESS: "BLINK_ACCESS"
 };
+
+export const BLANK = '<<Blank>>'

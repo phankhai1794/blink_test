@@ -20,7 +20,7 @@ const DraftBLPreview = ({ bl }) => {
     // delete session storage when redirecting from workspace
     sessionStorage.clear();
 
-    const result = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_WORKSPACE });
+    const result = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL });
     if (!result) history.push('/login');
     setAllow(result);
 

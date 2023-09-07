@@ -278,7 +278,32 @@ const TableCM = (props) => {
   };
 
   const setColorStatus = () => {
-    const colorStatusObj = checkColorStatus(id, user, inquiries);
+    const ameSts = ['AME_DRF', 'AME_SENT'];
+    const inqs = [...inquiries].filter(inq => !(
+      inq.field === getField(CONTAINER_DETAIL)
+      && inq.process === 'draft'
+      && ameSts.includes(inq.state)
+    ));
+    let colorStatusObj = checkColorStatus(id, user, inqs);
+    
+    // set icon amendment for CM
+    const data = inqs
+      .filter(inq => [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)].includes(inq.field))
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    if (data.length) {
+      const inq = data[0];
+      if (ameSts.includes(inq.state)) {
+        colorStatusObj = {
+          ...colorStatusObj,
+          isEmpty: false,
+          hasInquiry: false,
+          hasAmendment: true,
+          hasAnswer: false,
+          isResolved: false,
+          isUploaded: false
+        }
+      }
+    }
 
     setIsEmpty(colorStatusObj.isEmpty);
     setHasInquiry(colorStatusObj.hasInquiry);
