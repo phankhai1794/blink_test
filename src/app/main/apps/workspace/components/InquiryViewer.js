@@ -425,7 +425,7 @@ const InquiryViewer = (props) => {
   const setDefaultAction = (val) => {
     const optionsInquires = [...inquiries];
     optionsInquires.forEach(op => {
-      op.showIconAttachAnswerFile = (val.type === 'ANS' || ['INQ_SENT'].includes(val.state)) && op.inqType === val.inqType;
+      op.showIconAttachAnswerFile = (val.type === 'ANS' || ['INQ_SENT'].includes(val.state)) && op.groupId === val.groupId;
     });
     dispatch(InquiryActions.setInquiries(optionsInquires));
     //
