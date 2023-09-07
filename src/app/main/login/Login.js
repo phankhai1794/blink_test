@@ -73,7 +73,8 @@ function Login(props) {
       .then((res) => {
         if (res) {
           const { userData, token, message } = res;
-          const { userType, role, userName, avatar, email, permissions, countries, office } = userData;
+          const { userType, role, userName, avatar, email, permissions, countries, office } =
+            userData;
           const userInfo = {
             displayName: userName,
             photoURL: avatar,
@@ -97,14 +98,14 @@ function Login(props) {
           if (prevUrl) {
             prevUrl = JSON.parse(prevUrl);
             prevUrl = `${prevUrl.cachePath + prevUrl.cacheSearch}`;
-          } else prevUrl = "/";
+          } else prevUrl = '/';
 
           history.push(prevUrl);
         }
       })
       .catch((error) => {
         console.error(error);
-        const { message } = error.response.data.error || error.message;
+        const { message } = error.response?.data?.error || error.message;
         dispatch(Actions.showMessage({ message, variant: 'error' }));
       });
   }
@@ -113,11 +114,14 @@ function Login(props) {
     const token = localStorage.getItem('AUTH_TOKEN');
     if (token) {
       verifyToken(token)
-        .then(res => {
-          if (res.status === 200 && PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }))
+        .then((res) => {
+          if (
+            res.status === 200 &&
+            PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD })
+          )
             history.push('/');
         })
-        .catch(err => console.error(err));
+        .catch((err) => console.error(err));
     }
   }, []);
 
@@ -128,11 +132,7 @@ function Login(props) {
         <FuseAnimate animation={{ translateY: ['0%', '-100%'] }}>
           <Box className={classes.container}>
             <Box className={classes.wrapper}>
-              <img
-                className={classes.logo}
-                src="assets/images/logos/one_logo.svg"
-                alt="logo"
-              />
+              <img className={classes.logo} src="assets/images/logos/one_logo.svg" alt="logo" />
             </Box>
             <Card className={classes.card}>
               <CardContent
@@ -142,7 +142,10 @@ function Login(props) {
                 </Typography>
                 {isLoginTabViewed ? (
                   <>
-                    <JWTLoginTab onLogged={handleLogin} country={new URLSearchParams(cacheSearch).get('cntr')} />
+                    <JWTLoginTab
+                      onLogged={handleLogin}
+                      country={new URLSearchParams(cacheSearch).get('cntr')}
+                    />
                     {/* <div className="flex flex-col items-center justify-center pt-32">
                       <a
                         className="font-medium text-primary"

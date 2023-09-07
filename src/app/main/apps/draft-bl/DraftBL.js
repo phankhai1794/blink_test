@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import history from '@history';
 import _ from 'lodash';
-import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDER, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, DATE_CARGO, DATE_LADEN, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, TARIFF_ITEM, PREPAID, DATED, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT, BOOKING_NO, BL_TYPE, RD_TERMS, NO_CONTENT_AMENDMENT, TOTAL_PREPAID, RATING_DETAIL, BL_COPY, TYPE_OF_ONBOARD } from '@shared/keyword';
+import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDER, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, DATE_CARGO, DATE_LADEN, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, TARIFF_ITEM, PREPAID, DATED, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT, BOOKING_NO, BL_TYPE, RD_TERMS, NO_CONTENT_AMENDMENT, TOTAL_PREPAID, RATING_DETAIL, BL_COPY, TYPE_OF_ONBOARD, DESCRIPTION_OF_GOODS, DESCRIPTION_OF_GOODS1, DESCRIPTION_OF_GOODS2 } from '@shared/keyword';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
@@ -213,10 +213,17 @@ const DraftPage = (props) => {
   };
 
   const getValueField = (field) => {
-    if ((content[getField(field)] === NO_CONTENT_AMENDMENT) || (field === DATE_CARGO && content[getField(TYPE_OF_ONBOARD)] !== 'R') || (field === DATE_LADEN && content[getField(TYPE_OF_ONBOARD)] !== 'L')) {
+    let result = '';
+    if ((field === DATE_CARGO && content[getField(TYPE_OF_ONBOARD)] !== 'R') || (field === DATE_LADEN && content[getField(TYPE_OF_ONBOARD)] !== 'L')) {
       return '';
     }
-    return content[getField(field)] || '';
+    if (field === DESCRIPTION_OF_GOODS) {
+      const line1 = content[getField(DESCRIPTION_OF_GOODS1)] ? `${content[getField(DESCRIPTION_OF_GOODS1)]}\n` : '';
+      const line2 = content[getField(DESCRIPTION_OF_GOODS2)] ? `${content[getField(DESCRIPTION_OF_GOODS2)]}\n` : '';
+      result = `${line1}${line2}${content[getField(field)]}`
+    } else result = content[getField(field)] || '';
+    return result || '';
+
   };
 
   const getInqType = (field) => {

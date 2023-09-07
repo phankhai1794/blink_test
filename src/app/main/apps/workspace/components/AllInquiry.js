@@ -212,8 +212,8 @@ const AllInquiry = (props) => {
       setSaveAnswer(!isSaveAnswer)
       setUpdateReply(false);
     }
-    if (scrollTopPopup.current &&!scrollInquiry) {
-      scrollTopPopup.current.scrollIntoView({ behavior: "smooth" })
+    if (scrollTopPopup.current && !scrollInquiry) {
+      scrollTopPopup.current.scrollIntoView(true);
     }
   }, [isUpdateReply]);
 

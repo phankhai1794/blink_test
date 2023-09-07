@@ -48,6 +48,10 @@ export const RD_TERMS = 'rdTerms';
 
 export const SHIPPING_MARK = 'shippingMark';
 
+export const DESCRIPTION_OF_GOODS1 = 'cargoDescription1';
+
+export const DESCRIPTION_OF_GOODS2 = 'cargoDescription2';
+
 export const DESCRIPTION_OF_GOODS = 'cargoDescription';
 
 export const TOTAL_PACKAGE = 'totalPackages';
@@ -248,9 +252,18 @@ export const mapperBlinkStatus = {
   BA: "Customer Amendment Request",
   BQ: "Offshore Amendment Inquiry",
   BP: "Customer Amendment Reply",
-  BS: "BL Amendment Success"
+  BS: "BL Amendment Success",
+  BF: "BL Amendment Fail"
+};
+
+export const mapperBlinkStatusCustomer = {
+  'IN_QUEUE': 'In Queue',
+  'PENDING': 'Pending',
+  'COMPLETED': 'Completed',
 };
 
 export const BROADCAST = {
   ACCESS: "BLINK_ACCESS"
 };
+
+export const BLANK = '<<Blank>>'

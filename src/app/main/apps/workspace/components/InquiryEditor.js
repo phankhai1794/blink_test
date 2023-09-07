@@ -348,7 +348,7 @@ const InquiryEditor = (props) => {
     metadataFieldOptions.filter((v) => currentEditInq.field === v.value)[0]
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
-  const [filepaste, setFilepaste] = useState('');
+  const [filepaste, setFilepaste] = useState({ File: '', type: '' });
   const [dropfiles, setDropfiles] = useState([]);
   const [fieldEdited, setFieldEdited] = useState();
   const [nameTypeEdited, setNameTypeEdited] = useState();
@@ -775,29 +775,36 @@ const InquiryEditor = (props) => {
     //
     const arr = e.target.value
     if (!arr.length) {
+      if (!fieldValue) {
+        setFieldType(metadata.field_options);
+      }
+      setInqTypeOption(metadata.inq_type_options)
+      setFieldValue(null);
+      inq.field = ''
       dispatch(InquiryActions.setEditInq(inq));
-      if (!fieldValue) setInqTypeOption(metadata.inq_type_options)
+
       return;
     }
     let keyword = fieldValue;
 
     if (!fieldValue) {
       let filterField = inqTypeOption.find(({ value }) => value === arr[arr.length - 1].value).field;
-      filterField = metadata.field_options.filter(({ value, display, keyword }) => (
+      filterField = arr[arr.length - 1].label === OTHERS ? fieldType : fieldType.filter(({ value, display, keyword }) => (
         display && filterField.includes(value)
         && metadata.template.some((temp) => (temp.field === keyword && temp.type === arr[arr.length - 1].value && temp.content[0]))
       ));
-      let filterInqType = inqTypeOption
 
-      filterField.forEach((field) => filterInqType = filterInqType.filter((data) => {
-        let getDataField = data.field?.includes(field.value);
-        let getTemplate = metadata.template.some((temp) => (
-          temp.field === field.keyword
-          && temp.type === data.value
-          && (temp.content[0]) || data.label === OTHERS)
-        )
-        return getDataField && getTemplate
-      }))
+      let filterInqType = inqTypeOption
+      if (arr.length !== 1 || arr[arr.length - 1].label !== OTHERS)
+        filterField.forEach((field) => filterInqType = filterInqType.filter((data) => {
+          const getDataField = data.field?.includes(field.value);
+          const getTemplate = metadata.template.some((temp) => (
+            temp.field === field.keyword
+            && temp.type === data.value
+            && (temp.content[0]) || data.label === OTHERS)
+          )
+          return getDataField && getTemplate
+        }))
       setInqTypeOption(filterInqType)
       if (filterField.length === 1) {
         setFieldValue(filterField[0]);
@@ -916,7 +923,7 @@ const InquiryEditor = (props) => {
   const handleNameChange = (e) => {
     const inq = { ...currentEditInq };
     // setContent(filepaste ? inq.content : e.target.value);
-    setContent(filepaste ? e.target.value.replace(/<img.*>\n?/, '') : e.target.value);
+    setContent(filepaste.File ? e.target.value.replace(/<img.*>\n?/, '') : e.target.value);
 
     inq.content = e.currentTarget.textContent;
     setFieldEdited(inq.field);
@@ -1034,7 +1041,7 @@ const InquiryEditor = (props) => {
       validate = {
         ...valid,
         field: Boolean(currentEditInq.field),
-        inqType: Boolean(currentEditInq.inqType),
+        inqType: Boolean(contentsInqCDCM.length),
         receiver: Boolean(currentEditInq.receiver.length),
         ansType: Boolean(currentEditInq.ansType.length),
         content: Boolean(currentEditInq.content)
@@ -1076,7 +1083,7 @@ const InquiryEditor = (props) => {
       dispatch(
         InquiryActions.validate({
           field: Boolean(currentEditInq.field),
-          inqType: Boolean(currentEditInq.inqType),
+          inqType: Boolean(contentsInqCDCM.length),
           receiver: Boolean(currentEditInq.receiver.length),
           ansType: Boolean(currentEditInq.ansType.length),
           content: Boolean(currentEditInq.content),
@@ -1398,7 +1405,12 @@ const InquiryEditor = (props) => {
                 optionsInquires.push(inq);
                 optionsMinimize.push(inq);
               })
-
+              if (!inquiriesOp.length) {
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BC', '', {
+                  idReply: myBL.id,
+                  action: 'draftInqCreateInit',
+                })) //BC: B/Ls that are first initiated in the workspace and when users create draft inquiries in BLink (not yet sent to the Customer).
+              }
               dispatch(InquiryActions.saveInquiry());
               dispatch(InquiryActions.setField());
               dispatch(InquiryActions.setOpenedInqForm(false));
@@ -1423,17 +1435,14 @@ const InquiryEditor = (props) => {
     }
     dispatch(FormActions.setDirtyReload({ inputInquiryEditor: false }))
   };
-  const onPaste = (e) => {
+  const onPaste = (e, type = '') => {
     if (e.clipboardData.files.length && e.clipboardData.files[0]) {
       let fileObject = e.clipboardData.files[0];
       const newFileName = generateFileNameTimeFormat(fileObject.name);
-      const myRenamedFile = new File(
-        [fileObject],
-        newFileName, { type: "image/png" }
-      );
-      setFilepaste(myRenamedFile);
+      const myRenamedFile = new File([fileObject], newFileName, { type: 'image/png' });
+      setFilepaste({ File: myRenamedFile, type: type || currentEditInq.inqType });
     }
-  }
+  };
 
   const { isDragActive, getRootProps } = useDropzone({
     onDrop: files => setDropfiles(files),
@@ -1460,7 +1469,7 @@ const InquiryEditor = (props) => {
           </div>
           {containerCheck.includes(currentEditInq.field) &&
             <FormControl className={classes.checkedIcon}>
-              <AttachFile filepaste={filepaste} dropfiles={dropfiles} typeMedia={1} />
+              <AttachFile filepaste={filepaste.File} dropfiles={dropfiles} typeMedia={1} />
             </FormControl>}
         </div>
         {currentEditInq && (
@@ -1600,7 +1609,12 @@ const InquiryEditor = (props) => {
                             val={val}
                             handleReceiverChangeCDCM={handleReceiverChangeCDCM}
                           />
-                          <AttachFile filepaste={filepaste} dropfiles={dropfiles} typeMedia={2} indexMedia={index} />
+                          <AttachFile
+                            filepaste={val.type === filepaste.type ? filepaste.File : ''}
+                            dropfiles={dropfiles}
+                            typeMedia={2}
+                            indexMedia={index}
+                          />
                           {Boolean(currentEditInq.id) && currentEditInq.inqType === val.type ? null :
                             <TrashIcon onDelete={() => removeSelectInqType(index)} />
                           }
@@ -1619,8 +1633,8 @@ const InquiryEditor = (props) => {
                           disabled={false} // use true to disable editing
                           onChange={(e) => handleNameChangeCDCM(e, val)} // handle innerHTML change
                           style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
-                        // innerRef={boxTextEl}
-                        // onPaste={onPaste}
+                          innerRef={boxTextEl}
+                          onPaste={(e) => onPaste(e,val.type)}
                         />
                       </div>
                       {currentEditInq.ansType === metadata.ans_type.choice && (

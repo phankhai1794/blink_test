@@ -16,7 +16,9 @@ import {
   TOTAL_WEIGHT,
   TOTAL_WEIGHT_UNIT,
   TOTAL_MEASUREMENT,
-  TOTAL_MEASUREMENT_UNIT, CONTAINER_DETAIL
+  TOTAL_MEASUREMENT_UNIT, CONTAINER_DETAIL,
+  DESCRIPTION_OF_GOODS1,
+  DESCRIPTION_OF_GOODS2,
 } from '@shared/keyword';
 import { getTotalValueMDView, NumberFormat } from '@shared';
 import { packageUnitsJson } from '@shared/units';
@@ -164,7 +166,13 @@ const TableCM = (props) => {
   };
 
   const getValueField = (field) => {
-    return content[getField(field)] || '';
+    let result = '';
+    if (field === DESCRIPTION_OF_GOODS) {
+      const line1 = content[getField(DESCRIPTION_OF_GOODS1)] ? `${content[getField(DESCRIPTION_OF_GOODS1)]}\n` : '';
+      const line2 = content[getField(DESCRIPTION_OF_GOODS2)] ? `${content[getField(DESCRIPTION_OF_GOODS2)]}\n` : '';
+      result = `${line1}${line2}${content[getField(field)]}`
+    } else result = content[getField(field)] || '';
+    return result || '';
   };
 
   const [id, setId] = useState(getField(CONTAINER_DETAIL));
@@ -270,7 +278,32 @@ const TableCM = (props) => {
   };
 
   const setColorStatus = () => {
-    const colorStatusObj = checkColorStatus(id, user, inquiries);
+    const ameSts = ['AME_DRF', 'AME_SENT'];
+    const inqs = [...inquiries].filter(inq => !(
+      inq.field === getField(CONTAINER_DETAIL)
+      && inq.process === 'draft'
+      && ameSts.includes(inq.state)
+    ));
+    let colorStatusObj = checkColorStatus(id, user, inqs);
+    
+    // set icon amendment for CM
+    const data = inqs
+      .filter(inq => [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)].includes(inq.field))
+      .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+    if (data.length) {
+      const inq = data[0];
+      if (ameSts.includes(inq.state)) {
+        colorStatusObj = {
+          ...colorStatusObj,
+          isEmpty: false,
+          hasInquiry: false,
+          hasAmendment: true,
+          hasAnswer: false,
+          isResolved: false,
+          isUploaded: false
+        }
+      }
+    }
 
     setIsEmpty(colorStatusObj.isEmpty);
     setHasInquiry(colorStatusObj.hasInquiry);

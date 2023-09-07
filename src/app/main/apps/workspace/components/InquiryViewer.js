@@ -45,6 +45,8 @@ import {
   DATE_CARGO,
   DATE_LADEN,
   ALSO_NOTIFY,
+  DESCRIPTION_OF_GOODS1,
+  DESCRIPTION_OF_GOODS2,
   DESCRIPTION_OF_GOODS,
   BL_PRINT_COUNT,
   FREIGHT_TERM,
@@ -247,6 +249,11 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiFormHelperText-root': {
       fontFamily: 'Montserrat',
       fontSize: '14px'
+    },
+    '& .MuiInputLabel-outlined.MuiInputLabel-shrink': {
+      fontWeight: 500,
+      color: '#999999',
+      fontSize: '15px',
     }
   },
   placeholder: {
@@ -1834,24 +1841,10 @@ const InquiryViewer = (props) => {
     return result;
   }
 
-  const checkAllInqAmeResolved = (question) => {
-    let resultInq = false;
+  const checkAllAmeResolved = (question) => {
     let resultAme = false;
 
-    const inqCheck = inquiries.filter(inq => (inq.process === 'pending' && inq.receiver.includes(question.receiver[0])));
     const ameCheck = inquiries.filter(inq => (inq.process === 'draft' && inq.receiver.includes(question.receiver[0])));
-
-    // Check inquiry
-    // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
-    const inqStillNotResolved = inqCheck.filter(inq => (
-      !['COMPL', 'UPLOADED'].includes(inq.state)
-      && inq.id !== question.id
-      && !fieldsNotSendOPUS.includes(
-        metadata['field_options'].find(f => f.value === inq.field).keyword
-        && inq.state === 'COMPL'
-      )
-    ));
-    resultInq = Boolean(!inqStillNotResolved.length);
 
     // Check amendment
     // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
@@ -1865,7 +1858,7 @@ const InquiryViewer = (props) => {
     ));
     resultAme = Boolean(!ameStillNotUpload.length);
 
-    return resultInq && resultAme;
+    return resultAme;
   }
 
   const onConfirm = (isWrapText = false) => {
@@ -2037,7 +2030,7 @@ const InquiryViewer = (props) => {
               action: 'pending'
             }));
           }
-          if (question.process === "draft" && checkAllInqAmeResolved(question)) {
+          if (question.process === 'draft' && checkAllAmeResolved(question)) {
             // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
             let filterDraft = optionsInquires.filter(inq => inq.process === 'draft')
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BS', '', {
@@ -3049,6 +3042,34 @@ const InquiryViewer = (props) => {
     return `${renderContent(content)}` === NO_CONTENT_AMENDMENT ? '' : `${renderContent(content)}`;
   }
 
+  const renderDoGLine1Line2 = () => {
+    const descriptionOfGoods1 = metadata.field[DESCRIPTION_OF_GOODS1];
+    const descriptionOfGoods2 = metadata.field[DESCRIPTION_OF_GOODS2];
+    const contentDoG1 = content[descriptionOfGoods1] || '';
+    const contentDoG2 = content[descriptionOfGoods2] || '';
+    return(
+      <>
+        {[contentDoG1, contentDoG2].map((item, index) => 
+          <TextField
+            keu={index}
+            className={classes.inputText}
+            value={item}
+            inputProps={{ style: { textTransform: 'uppercase' } }}
+            variant='outlined'
+            label={(index === 0) ? 'No. of PKG/CNTR' : ''}
+            disabled
+          />
+        )}
+      </>
+    )
+  }
+
+  const contentDoGLine1Line2 = (content) => {
+    return content[metadata.field[DESCRIPTION_OF_GOODS1]] ? 
+      `${content[metadata.field[DESCRIPTION_OF_GOODS1]]}\n${content[metadata.field[DESCRIPTION_OF_GOODS2]]}`
+    : content[metadata.field[DESCRIPTION_OF_GOODS2]]
+  }
+
   // Separate Shipper/Consignee/Notify
   const renderSeparateField = (field) => {
     if (isSeparate) {
@@ -3083,32 +3104,35 @@ const InquiryViewer = (props) => {
     } else {
       // TODO: Check WrapText for alsoNotify 1,2,3
       const isLimitRows = [metadata.field[ALSO_NOTIFY], metadata.field[EXPORT_REF]].includes(field);
+      const isDoG = metadata.field[DESCRIPTION_OF_GOODS] === field;
       return (
         isDateTime ?
           <DateTimePickers time={textResolve ? formatDate(textResolve, 'YYYY-MM-DD') : ''} onChange={e => inputText(e, true)} /> :
-          <TextField
-            className={classes.inputText}
-            value={`${(textResolve === NO_CONTENT_AMENDMENT) ? '' : textResolve}`}
-            multiline
-            rows={3}
-            rowsMax={10}
-            onChange={inputText}
-            variant='outlined'
-            autoFocus
-            onPaste={onPaste}
-            inputProps={{ style: { textTransform: 'uppercase' } }}
-            error={
-              !validateInput?.isValid
-              ||
-              (
-                validateField(field, textResolve).isError
-                &&
+          <>
+            {isDoG && renderDoGLine1Line2()}
+            <TextField
+              className={classes.inputText}
+              value={`${(textResolve === NO_CONTENT_AMENDMENT) ? '' : textResolve}`}
+              multiline
+              rows={3}
+              rowsMax={10}
+              onChange={inputText}
+              variant='outlined'
+              autoFocus
+              onPaste={onPaste}
+              inputProps={{ style: { textTransform: 'uppercase' } }}
+              error={
+                !validateInput?.isValid
+                ||
                 (
-                  isResolve
-                  ||
-                  (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')
+                  validateField(field, textResolve).isError
+                  &&
+                  (
+                    isResolve
+                    ||
+                    (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')
+                  )
                 )
-              )
               ||
               (isLimitRows ? validateGroupOneTextBox(textResolve).isError : false)
             }
@@ -3128,13 +3152,14 @@ const InquiryViewer = (props) => {
                     </span>
                   </>
                 }
-              </>
-              : validateField(field, textResolve).errorType.split('\n').map((line, idx) => (
-                <span key={idx} style={{ display: 'block', lineHeight: '20px', color: (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')) ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
-              ))
-            }
-            onBlur={() => handleValidateInput('RESOLVE', onConfirm, true, true)}
-          />
+                </>
+                : validateField(field, textResolve).errorType.split('\n').map((line, idx) => (
+                  <span key={idx} style={{ display: 'block', lineHeight: '20px', color: (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')) ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+                ))
+              }
+              onBlur={() => handleValidateInput('RESOLVE', onConfirm, true, true)}
+            />
+          </>
       )
     }
   }
@@ -3407,39 +3432,54 @@ const InquiryViewer = (props) => {
                   />
               ) :
                 (['RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) || (question.process === 'draft' && question.state === 'REOPEN_Q') || (['AME_DRF', 'AME_SENT'].includes(question.state) && !isReply) ?
-                  <Diff
-                    inputA={orgContent[question.field] ? renderContent(orgContent[question.field]) : ''}
-                    inputB={question.content ? getNewValueDiffViewer(question.content) : ''}
-                    type="chars"
-                  /> :
-                  <Typography
-                    // className={viewDropDown !== question.id ? classes.hideText : ''}
-                    variant="h5"
-                    id={question.id}
-                    style={{
-                      wordBreak: 'break-word',
-                      fontFamily: 'Montserrat',
-                      fontSize: 15,
-                      fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(question.state) && question.process === 'pending') ||
-                        (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
-                      color: '#132535',
-                      whiteSpace: 'pre-wrap'
-                    }}>
-                    {/* Check is amendment JSON */}
-                    {((question.content !== null && isJsonText(question.content)) ? `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` : `${renderContent(question.content)}`
-                    )}
-                    {((['OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT', 'REP_A_DRF'].includes(question.state) && question.type !== 'REP') &&
-                      question.inqGroup &&
-                      question.inqGroup.length &&
-                      question.process === 'pending') ?
-                      question.inqGroup.map(q => {
-                        return (
-                          <div key={q.id}>
-                            <InquiryWithGroup inqGroup={q} role={user.role} />
-                          </div>
-                        )
-                      }) : ``}
-                  </Typography>
+                  <>
+                    {(question?.field === metadata.field[DESCRIPTION_OF_GOODS]) && 
+                      <div style={{ whiteSpace: 'pre-wrap' }}>
+                        {contentDoGLine1Line2(content)}
+                      </div>
+                    }
+                    <Diff
+                      inputA={orgContent[question.field] ? renderContent(orgContent[question.field]) : ''}
+                      inputB={question.content ? getNewValueDiffViewer(question.content) : ''}
+                      type="chars"
+                    />
+                  </>
+                  :
+                  <>
+                    {(question?.field === metadata.field[DESCRIPTION_OF_GOODS] && ['REOPEN_A', 'REOPEN_Q'].includes(question.state)) && 
+                      <div style={{ whiteSpace: 'pre-wrap' }}>
+                        {contentDoGLine1Line2(content)}
+                      </div>
+                    }
+                    <Typography
+                      // className={viewDropDown !== question.id ? classes.hideText : ''}
+                      variant="h5"
+                      id={question.id}
+                      style={{
+                        wordBreak: 'break-word',
+                        fontFamily: 'Montserrat',
+                        fontSize: 15,
+                        fontStyle: ((!['INQ', 'ANS'].includes(question.type) && !['COMPL', 'REOPEN_Q', 'REOPEN_A', 'UPLOADED', 'OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(question.state) && question.process === 'pending') ||
+                          (!['AME_DRF', 'AME_SENT', 'REOPEN_A', 'REOPEN_Q', 'RESOLVED', 'UPLOADED'].includes(question.state) && question.process === 'draft')) && 'italic',
+                        color: '#132535',
+                        whiteSpace: 'pre-wrap'
+                      }}>
+                      {/* Check is amendment JSON */}
+                      {((question.content !== null && isJsonText(question.content)) ? `${JSON.parse(question.content).name}\n${JSON.parse(question.content).address}` : `${renderContent(question.content)}`
+                      )}
+                      {((['OPEN', 'INQ_SENT', 'ANS_DRF', 'ANS_SENT', 'REP_A_DRF'].includes(question.state) && question.type !== 'REP') &&
+                        question.inqGroup &&
+                        question.inqGroup.length &&
+                        question.process === 'pending') ?
+                        question.inqGroup.map(q => {
+                          return (
+                            <div key={q.id}>
+                              <InquiryWithGroup inqGroup={q} role={user.role} />
+                            </div>
+                          )
+                        }) : ``}
+                    </Typography>
+                  </>
                 )
             }
             {/*Allow edit table when customer reply amendment*/}
@@ -3747,28 +3787,34 @@ const InquiryViewer = (props) => {
                           :
                           (isDateTime && question.state.includes("AME_") && user.role === 'Guest') ?
                             <DateTimePickers time={tempReply?.answer?.content ? formatDate(tempReply?.answer?.content, 'YYYY-MM-DD') : ''} onChange={e => handleChangeContentReply(e, '', true)} />
-                            : <TextField
-                              className={classes.inputText}
-                              value={tempReply?.answer?.content === NO_CONTENT_AMENDMENT ? '' : (tempReply?.answer?.content || '')}
-                              multiline
-                              rows={3}
-                              rowsMax={10}
-                              inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
-                              InputProps={{
-                                classes: { input: classes.placeholder }
-                              }}
-                              onChange={handleChangeContentReply}
-                              autoFocus
-                              onPaste={onPaste}
-                              variant='outlined'
-                              placeholder='Reply...'
-                              error={validateField(question.field, tempReply?.answer?.content).isError && (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest'))}
-                              helperText={
-                                !isAlsoNotifies && validateField(question.field, tempReply?.answer?.content).errorType.split('\n').map((line, idx) => (
-                                  <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')) ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
-                                ))
-                              }
-                            />}
+                            : 
+                            <>
+
+                              {/* {1 && renderDoGLine1Line2()} */}
+                              {((question?.field === metadata.field[DESCRIPTION_OF_GOODS]) && question?.state.includes("AME_") && user.role === 'Guest') ? renderDoGLine1Line2() : ''}
+                              <TextField
+                                className={classes.inputText}
+                                value={tempReply?.answer?.content === NO_CONTENT_AMENDMENT ? '' : (tempReply?.answer?.content || '')}
+                                multiline
+                                rows={3}
+                                rowsMax={10}
+                                inputProps={{ style: question.state.includes("AME_") && user.role === 'Guest' ? { textTransform: 'uppercase' } : {} }}
+                                InputProps={{
+                                  classes: { input: classes.placeholder }
+                                }}
+                                onChange={handleChangeContentReply}
+                                autoFocus
+                                onPaste={onPaste}
+                                variant='outlined'
+                                placeholder='Reply...'
+                                error={validateField(question.field, tempReply?.answer?.content).isError && (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest'))}
+                                helperText={
+                                  !isAlsoNotifies && validateField(question.field, tempReply?.answer?.content).errorType.split('\n').map((line, idx) => (
+                                    <span key={idx} style={{ display: 'block', lineHeight: '20px', fontSize: 14, color: (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')) ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
+                                  ))
+                                }
+                              />
+                            </>}
                       </div>
                       }
                       <div

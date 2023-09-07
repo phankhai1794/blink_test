@@ -14,12 +14,16 @@ import { formatDate } from '@shared';
 import clsx from 'clsx';
 import { DateRangePicker, defaultStaticRanges } from 'react-date-range';
 import { subMonths, addDays, subDays } from 'date-fns';
+import QueueListAdmin from 'app/main/apps/dashboards/admin/components/QueueList';
 
 import { setLocalStorageItem } from '../shared-components/function';
 
 import QueueListTable from './QueueListTable';
+
 import 'react-date-range/dist/styles.css'; // main css file
-import 'react-date-range/dist/theme/default.css'; // theme css file
+import 'react-date-range/dist/theme/default.css';
+import * as Actions from "../../dashboards/admin/store/actions";
+import {mapperBlinkStatusCustomer} from "../../../../../@shared/keyword"; // theme css file
 
 const useStyles = makeStyles((theme) => ({
   headerPopup: {
@@ -125,8 +129,18 @@ const QueueList = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const openQueueList = useSelector(({ workspace }) => workspace.inquiryReducer.openQueueList);
+  const searchQueueQuery = useSelector(({ dashboard }) => dashboard.searchQueueQuery);
+  const userType = useSelector(({ user }) => user.userType);
 
   const handleClose = () => dispatch(InquiryActions.openQueueList(false));
+
+  useEffect(() => {
+    const dashboard = localStorage.getItem("dashboard");
+    const json = JSON.parse(dashboard);
+    if (userType === 'ONSHORE' && !json.blStatus) {
+      dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, blStatus: Object.keys(mapperBlinkStatusCustomer) }));
+    }
+  }, []);
 
   return (
     <div>
@@ -146,8 +160,14 @@ const QueueList = () => {
         </DialogTitle>
         {/* Body popup */}
         <DialogContent className={classes.bodyPopup}>
-          <SearchLayout />
-          <TableContent />
+          {userType === 'ONSHORE' ? (
+            <QueueListAdmin />
+          ) : (
+            <>
+              <SearchLayout />
+              <TableContent />
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
