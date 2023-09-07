@@ -576,12 +576,22 @@ const Row = (props) => {
   );
 };
 
-const AddColumn = (columns, handleShowColumn) => {
-  const items = [
+const AddColumn = (columns, handleShowColumn, userType) => {
+
+  const items = userType !== 'ONSHORE' ? [
     { label: 'ETD', value: 'etd', show: columns['etd'] },
     { label: 'Customer Status', value: 'customerS', show: columns['customerS'] },
     { label: 'Onshore Status', value: 'onshoreS', show: columns['onshoreS'] },
     { label: 'BLink Status', value: 'blinkS', show: columns['blinkS'] },
+    { label: 'Shipper Name', value: 'shipperN', show: columns['shipperN'] },
+    { label: 'VVD', value: 'vvd', show: columns['vvd'] },
+    { label: 'POL', value: 'pol', show: columns['pol'] },
+    { label: 'POD', value: 'pod', show: columns['pod'] },
+    { label: 'Unresolved Inquiry', value: 'inquiry', show: columns['inquiry'] },
+    { label: 'Unresolved Amendment', value: 'amendment', show: columns['amendment'] },
+    { label: 'Resolved', value: 'resolve', show: columns['resolve'] }
+  ] : [
+    { label: 'ETD', value: 'etd', show: columns['etd'] },
     { label: 'Shipper Name', value: 'shipperN', show: columns['shipperN'] },
     { label: 'VVD', value: 'vvd', show: columns['vvd'] },
     { label: 'POL', value: 'pol', show: columns['pol'] },
@@ -839,21 +849,21 @@ const QueueListTable = () => {
                       </div>
                     </TableCell>
                   )}
-                  {columns.shipperN && userType !== 'ONSHORE' && (
+                  {columns.shipperN && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Shipper Name</span>
                       </div>
                     </TableCell>
                   )}
-                  {columns.pol && userType !== 'ONSHORE' && (
+                  {columns.pol && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>POL</span>
                       </div>
                     </TableCell>
                   )}
-                  {columns.pod && userType !== 'ONSHORE' && (
+                  {columns.pod && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>POD</span>
@@ -911,13 +921,11 @@ const QueueListTable = () => {
                     </TableCell>
                   )}
                   <TableCell className={classes.cellHead} style={{ width: 50 }}>
-                    {userType !== 'ONSHORE' ? (
-                      <Tooltip title="Add Column">
-                        <Icon classes={{ root: classes.iconAdd }} onClick={handleClick}>
-                            control_point
-                        </Icon>
-                      </Tooltip>
-                    ) : ``}
+                    <Tooltip title="Add Column">
+                      <Icon classes={{ root: classes.iconAdd }} onClick={handleClick}>
+                        control_point
+                      </Icon>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -937,31 +945,18 @@ const QueueListTable = () => {
               </TableBody>
             </Table>
           </div>
-          {userType === 'ONSHORE' ? `` : (
-            <Menu
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              PaperProps={{
-                style: {
-                  width: 270
-                }
-              }}
-              onClose={handleClose}>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                PaperProps={{
-                  style: {
-                    width: 270
-                  }
-                }}
-                onClose={handleClose}>
-                {AddColumn(columns, handleShowColumn)}
-              </Menu>
-            </Menu>
-          )}
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            PaperProps={{
+              style: {
+                width: 270
+              }
+            }}
+            onClose={handleClose}>
+            {AddColumn(columns, handleShowColumn, userType)}
+          </Menu>
         </>
       ) : (
         <div
