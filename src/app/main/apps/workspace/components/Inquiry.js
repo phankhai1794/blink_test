@@ -57,6 +57,7 @@ const Inquiry = (props) => {
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const [isSaveAnswer, setSaveAnswer] = useState(false);
+  const [inqActing, setInqActing] = useState({val: {}, action: false});
   const scrollTopPopup = useRef(null);
   const inputAddAmendmentEndRef = useRef(null);
   const getField = (field) => {
@@ -95,14 +96,14 @@ const Inquiry = (props) => {
   }, [inquiries]);
 
   useEffect(() => {
-    if (isUpdateReply) {
+    if (isUpdateReply && !inqActing.action) {
       setSaveAnswer(!isSaveAnswer)
       setUpdateReply(false);
     }
     if (scrollTopPopup.current) {
       scrollTopPopup.current.scrollIntoView({ behavior: "smooth" })
     }
-  }, [isUpdateReply]);
+  }, [isUpdateReply, inqActing.action]);
 
   const toggleEdit = (index) => {
     dispatch(FormActions.toggleSaveInquiry(true));
@@ -113,6 +114,7 @@ const Inquiry = (props) => {
     }
   };
   const onCancel = () => {
+    setInqActing({val: {}, action: false});
     if (currentEditInq.id) {
       dispatch(InquiryActions.setEditInq());
     } else {
@@ -198,6 +200,11 @@ const Inquiry = (props) => {
               <>
                 {currentEditInq && <InquiryEditor onCancel={onCancel} getUpdatedAt={() => {
                   setUpdateReply(true)
+                }}
+                setDefaultAction={(currQ) => {
+                  if (currQ) {
+                    setInqActing(currQ);
+                  }
                 }} />}
               </>
             ) : (
@@ -219,7 +226,14 @@ const Inquiry = (props) => {
                     getUpdatedAt={() => {
                       setUpdateReply(true)
                     }}
+                    getStateReplyDraft={(val) => {}}
                     isAllInq={false}
+                    setDefaultAction={(currQ) => {
+                      if (currQ) {
+                        setInqActing(currQ);
+                      }
+                    }}
+                    inqActing={inqActing}
                   />
                 </div>
                 {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}
@@ -232,6 +246,11 @@ const Inquiry = (props) => {
         !currentEditInq.id &&  // Case: Add Inquiry
         <InquiryEditor onCancel={onCancel} getUpdatedAt={() => {
           setUpdateReply(true)
+        }}
+        setDefaultAction={(currQ) => {
+          if (currQ) {
+            setInqActing(currQ);
+          }
         }} />
       }
     </div>
@@ -257,7 +276,7 @@ const Inquiry = (props) => {
                 question={q}
                 user={props.user}
                 isSaved={isSaved}
-                isEdit={q.id === currentEditInq?.id ? q : {}}
+                // isEdit={q.id === currentEditInq?.id ? q : {}}
                 showReceiver={false}
                 getStateReplyDraft={(val) => setStateReplyDraft(val)}
                 isSaveAnswer={isSaveAnswer}
@@ -265,6 +284,10 @@ const Inquiry = (props) => {
                   setUpdateReply(true)
                 }}
                 isAllInq={false}
+                setDefaultAction={(currQ) => {
+                  if (currQ) setInqActing(currQ);
+                }}
+                inqActing={inqActing}
               />
               {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                 <InquiryAnswer
@@ -272,6 +295,11 @@ const Inquiry = (props) => {
                   question={q}
                   getUpdatedAt={() => {
                     setUpdateReply(true)
+                  }}
+                  setDefaultAction={(currQ) => {
+                    if (currQ) {
+                      setInqActing(currQ);
+                    }
                   }}
                 />}
               {listInqsField.length - 1 !== index && <Divider className="mt-16 mb-16" />}

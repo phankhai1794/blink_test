@@ -96,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
 ));
 
 const InquiryAnswer = (props) => {
-  const { onCancel, setSave, question } = props;
+  const { onCancel, setDefaultAction, question } = props;
   const dispatch = useDispatch();
   const classes = useStyles();
 
@@ -229,6 +229,8 @@ const InquiryAnswer = (props) => {
   }
 
   const onSave = async () => {
+    setDefaultAction({val: {}, action: false});
+
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => question.id === inq.id);
     setDisableSave(true)
