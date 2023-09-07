@@ -413,13 +413,12 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     return(
       <>
         {[contentDoG1, contentDoG2].map((item, index) => 
-          <TextField
+          item && <TextField
             keu={index}
             className={classes.inputText}
             value={item}
-            inputProps={{ style: { textTransform: 'uppercase' } }}
+            inputProps={{ style: { textTransform: 'uppercase', padding: '10px' } }}
             variant='outlined'
-            label={(index === 0) ? 'No. of PKG/CNTR' : ''}
             disabled
           />
         )}
@@ -465,7 +464,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
               className={classes.inputText}
               value={fieldValue}
               multiline
-              rows={3}
+              rows={isDoG ? 5 : 3}
               rowsMax={10}
               inputProps={{ style: { textTransform: 'uppercase' } }}
               InputProps={{
