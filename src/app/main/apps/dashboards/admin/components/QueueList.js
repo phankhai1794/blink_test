@@ -300,8 +300,9 @@ const SearchLayout = (props) => {
       })
     );
 
-    const query = { ...initialState, sortField: ['lastUpdated', 'DESC'] };
+    const query = { ...initialState, sortField: ['lastUpdated', 'DESC'], isMe: false };
     dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...query }));
+    if (userType === 'ONSHORE') setIsMe(false)
 
     localStorage.removeItem('dashboard');
   };
@@ -354,16 +355,17 @@ const SearchLayout = (props) => {
 
   const onPaste = (e) => {
     e.preventDefault();
-    const removeDuplicate = [
-      ...new Set(
-        e.clipboardData
-          .getData('text')
-          .split(/\n/) // split new line
-          .map((str) => str.trim()) // trim space
-          .filter((str) => str) // filter empty string
-      )
+    const { bookingNo } = state;
+    const bkgNosPaste = [
+      e.clipboardData
+        .getData('text')
+        .split(/\n/) // split new line
+        .map((str) => str.trim()) // trim space
+        .filter((str) => str) // filter empty string
     ].join(', ');
-    handleChange({ bookingNo: removeDuplicate });
+    const bkgSearch = bookingNo + bkgNosPaste;
+    const bkgNoArr = [...new Set(bkgSearch.split(','))].join();
+    handleChange({ bookingNo: bkgNoArr });
   };
 
   return (
@@ -383,7 +385,7 @@ const SearchLayout = (props) => {
                 }
               }}
               inputProps={{ style: { textTransform: 'uppercase' } }}
-              onChange={(e) => handleChange({ bookingNo: e.target.value })}
+              onChange={(e) => handleChange({ bookingNo: e.target.value.replace(/\s+|;+/g, ',') })}
               onPaste={onPaste}
               startAdornment={
                 <InputAdornment className={classes.searchBox} position="start">
