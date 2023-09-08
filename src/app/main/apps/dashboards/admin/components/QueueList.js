@@ -300,8 +300,9 @@ const SearchLayout = (props) => {
       })
     );
 
-    const query = { ...initialState, sortField: ['lastUpdated', 'DESC'] };
+    const query = { ...initialState, sortField: ['lastUpdated', 'DESC'], isMe: false };
     dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...query }));
+    if (userType === 'ONSHORE') setIsMe(false)
 
     localStorage.removeItem('dashboard');
   };
@@ -363,7 +364,7 @@ const SearchLayout = (props) => {
         .filter((str) => str) // filter empty string
     ].join(', ');
     const bkgSearch = bookingNo + bkgNosPaste;
-    const bkgNoArr = [...new Set(bkgSearch.split(','))].join(', ');
+    const bkgNoArr = [...new Set(bkgSearch.split(','))].join();
     handleChange({ bookingNo: bkgNoArr });
   };
 
@@ -384,7 +385,7 @@ const SearchLayout = (props) => {
                 }
               }}
               inputProps={{ style: { textTransform: 'uppercase' } }}
-              onChange={(e) => handleChange({ bookingNo: e.target.value })}
+              onChange={(e) => handleChange({ bookingNo: e.target.value.replace(/\s+|;+/g, ',') })}
               onPaste={onPaste}
               startAdornment={
                 <InputAdornment className={classes.searchBox} position="start">
