@@ -422,6 +422,103 @@ const InquiryViewer = (props) => {
     return response;
   }
 
+  const setDefaultAction = (val) => {
+    const optionsInquires = [...inquiries];
+    optionsInquires.forEach(op => {
+      op.showIconAttachAnswerFile = (val.type === 'ANS' || ['INQ_SENT'].includes(val.state)) && op.groupId === val.groupId;
+    });
+    dispatch(InquiryActions.setInquiries(optionsInquires));
+    //
+    const getQuestion = {...question};
+    if (getQuestion.groupId === val.groupId) {
+      if (val.state === 'OPEN' && !isResolve && !isResolveCDCM) {
+        dispatch(InquiryActions.setEditInq(val));
+      } else {
+        dispatch(InquiryActions.setEditInq());
+      }
+      if (!['INQ', 'ANS'].includes(val.type)) {
+        getQuestion.content = val.content;
+        setQuestion(getQuestion);
+      }
+    }
+    if (getQuestion.groupId !== val.groupId) {
+      setIsReply(false);
+      setIsReplyCDCM(false);
+      setIsResolve(false);
+      setIsResolveCDCM(false);
+      setStateReplyDraft(false);
+      props.getStateReplyDraft(false);
+      if (['REOPEN_A', 'REOPEN_Q'].includes(getQuestion.state)) {
+        getQuestion.showIconReply = true;
+      }
+      if (user.role === 'Admin') {
+        if (getQuestion.state === 'REP_Q_SENT') {
+          setStateReplyDraft(true);
+          getQuestion.showIconReply = false;
+        } else if (getQuestion.state === 'REP_Q_DRF') {
+          setStateReplyDraft(true);
+          getQuestion.showIconReply = false;
+        }
+        if (['REP_A_SENT', 'ANS_SENT'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+          getQuestion.showIconEdit = false;
+          setStateReplyDraft(false);
+        } else if (['OPEN', 'INQ_SENT'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = false;
+          setStateReplyDraft(false);
+        }
+      }
+      else {
+        if (getQuestion.state === 'REP_A_DRF') {
+          setStateReplyDraft(true);
+          props.getStateReplyDraft(true);
+          //
+        } else if (['REP_Q_SENT'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+          setStateReplyDraft(false);
+          setSubmitLabel(false);
+        } else if (getQuestion.state === 'REP_Q_DRF') {
+          setSubmitLabel(true);
+          getQuestion.showIconEdit = true;
+        } else if (getQuestion.state === 'ANS_DRF') {
+          setSubmitLabel(false);
+          setStateReplyDraft(false);
+          getQuestion.showIconEdit = true;
+        } else if (getQuestion.state === 'INQ_SENT') {
+          setSubmitLabel(false);
+          getQuestion.showIconReply = true;
+          getQuestion.showIconEdit = false;
+          setStateReplyDraft(false);
+        } else if (getQuestion.state === 'COMPL') {
+          setStateReplyDraft(false);
+        }
+        if (['REP_A_SENT', 'ANS_SENT'].includes(getQuestion.state)) {
+          setSubmitLabel(true);
+          setStateReplyDraft(false);
+          getQuestion.showIconEdit = true;
+        }
+      }
+      if (containerCheck.includes(getQuestion.field)) {
+        getQuestion.isShowTableToReply = false;
+        setDisableCDCM(true);
+        if (getQuestion.oldData && Object.keys(getQuestion.oldData).length) {
+          if (getQuestion.oldData.cdCmDataOld && Object.keys(getQuestion.oldData.cdCmDataOld).length) {
+            setDataCD(getQuestion.oldData.cdCmDataOld[containerCheck[0]])
+            setDataCM(getQuestion.oldData.cdCmDataOld[containerCheck[1]])
+          }
+        }
+      }
+      getQuestion.showIconAttachAnswerFile = false;
+      getQuestion.showIconAttachReplyFile = false;
+      setQuestion(getQuestion);
+    }
+  }
+  useEffect(() => {
+    if (props.inqActing && props.inqActing.val && props.inqActing.action) {
+      setDefaultAction(props.inqActing.val);
+    }
+  }, [props.inqActing]);
+
   useEffect(() => {
     if (question.id !== inqViewerFocus) {
       setIsReply(false)
@@ -1098,35 +1195,37 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'removeInq' && replyRemove) {
       const optionsOfQuestion = [...inquiries];
-      const indexInqRemove = optionsOfQuestion.findIndex(inq => replyRemove.inqId === inq.id);
-      deleteInquiry(replyRemove.inqId)
-        .then(() => {
-          if (indexInqRemove !== -1) {
-            const inqDelete = optionsOfQuestion.splice(indexInqRemove, 1)[0];
-            const hidePopupEmpty = !optionsOfQuestion.filter(inq => inq.field === inqDelete.field).length;
-            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+      if (replyRemove.inqId) {
+        const indexInqRemove = optionsOfQuestion.findIndex(inq => replyRemove.inqId === inq.id);
+        deleteInquiry(replyRemove.inqId)
+            .then(() => {
+              if (indexInqRemove !== -1) {
+                const inqDelete = optionsOfQuestion.splice(indexInqRemove, 1)[0];
+                const hidePopupEmpty = !optionsOfQuestion.filter(inq => inq.field === inqDelete.field).length;
+                dispatch(InquiryActions.setInquiries(optionsOfQuestion));
 
-            // sync delete inquiry
-            syncData({ inquiries: optionsOfQuestion });
+                // sync delete inquiry
+                syncData({ inquiries: optionsOfQuestion });
 
-            if (hidePopupEmpty) {
-              dispatch(InquiryActions.setOneInq({}));
-              dispatch(FormActions.toggleCreateInquiry(false));
-            }
-          }
-          const isEmptyInq = optionsOfQuestion.filter(op => op.process === 'pending');
-          if (!isEmptyInq.length) {
-            (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
-            dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "", {
-              idReply: myBL.id,
-              action: 'deleteAll',
-            })) //BX: Delete all inquiries draft
-          }
-          dispatch(InquiryActions.checkSubmit(!enableSubmit));
-          props.getUpdatedAt();
-        })
-        .catch((error) => handleError(dispatch, error));
-    } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove) {
+                if (hidePopupEmpty) {
+                  dispatch(InquiryActions.setOneInq({}));
+                  dispatch(FormActions.toggleCreateInquiry(false));
+                }
+              }
+              const isEmptyInq = optionsOfQuestion.filter(op => op.process === 'pending');
+              if (!isEmptyInq.length) {
+                (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "", {
+                  idReply: myBL.id,
+                  action: 'deleteAll',
+                })) //BX: Delete all inquiries draft
+              }
+              dispatch(InquiryActions.checkSubmit(!enableSubmit));
+              props.getUpdatedAt();
+            })
+            .catch((error) => handleError(dispatch, error));
+      }
+    } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove && replyRemove?.draftId) {
       deleteDraftBLReply(replyRemove?.draftId, replyRemove.field, myBL.id)
         .then((res) => {
           // update mediaFile in inquiries
@@ -1543,6 +1642,7 @@ const InquiryViewer = (props) => {
     if (index >= 0) {
       const optionsOfQuestion = [...inquiries];
       const inqEdit = JSON.parse(JSON.stringify(inq));
+      props.setDefaultAction({val: inqEdit, action: true});
       inqEdit.answerObj = inqEdit.answerObj.map((ans) => ({ ...ans, index: 0 }))
       inqEdit.mediaFile = inqEdit.mediaFile.map((med) => ({ ...med, index: 0 }))
       inqEdit.ansType = optionsOfQuestion[index].ansType;
@@ -1715,6 +1815,7 @@ const InquiryViewer = (props) => {
   }
 
   const onResolve = (hasUpload = false) => {
+    props.setDefaultAction({val: question, action: true});
     if (Array.isArray(question.content)) {
       setIsResolveCDCM(true);
     } else {
@@ -1862,6 +1963,7 @@ const InquiryViewer = (props) => {
   }
 
   const onConfirm = (isWrapText = false) => {
+    props.setDefaultAction({val: {}, action: false});
     let contentField = '';
     let isAllItemUpload = false;
     const contsNoChange = {};
@@ -2173,6 +2275,7 @@ const InquiryViewer = (props) => {
   };
 
   const cancelResolve = () => {
+    props.setDefaultAction({val: {}, action: false});
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
@@ -2484,6 +2587,8 @@ const InquiryViewer = (props) => {
   }, [getDataCD, getDataCM, tempReply, question.oldData]);
 
   const onSaveReply = async () => {
+    props.setDefaultAction({val: {}, action: false});
+
     setDisableSaveReply(true);
     dispatch(FormActions.setDirtyReload({ inputReply: false }))
     const mediaListId = [];
@@ -2795,6 +2900,7 @@ const InquiryViewer = (props) => {
 
   const onReply = (q) => {
     // case: Reply Answer
+    props.setDefaultAction({val: question, action: true});
     const optionsInquires = [...inquiries];
     if (user.role === 'Guest') {
       setDisableCDCM(false);
@@ -2832,6 +2938,7 @@ const InquiryViewer = (props) => {
 
   // TODO
   const handleEdit = (q) => {
+    props.setDefaultAction({val: q, action: true});
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
     // case: Edit Answer
@@ -3064,7 +3171,7 @@ const InquiryViewer = (props) => {
   }
 
   const contentDoGLine1Line2 = (content) => {
-    return content[metadata.field[DESCRIPTION_OF_GOODS1]] ? 
+    return content[metadata.field[DESCRIPTION_OF_GOODS1]] ?
       `${content[metadata.field[DESCRIPTION_OF_GOODS1]]}\n${content[metadata.field[DESCRIPTION_OF_GOODS2]]}`
     : content[metadata.field[DESCRIPTION_OF_GOODS2]]
   }
@@ -3432,7 +3539,7 @@ const InquiryViewer = (props) => {
               ) :
                 (['RESOLVED', 'COMPL', 'UPLOADED'].includes(question.state) || (question.process === 'draft' && question.state === 'REOPEN_Q') || (['AME_DRF', 'AME_SENT'].includes(question.state) && !isReply) ?
                   <>
-                    {(question?.field === metadata.field[DESCRIPTION_OF_GOODS]) && 
+                    {(question?.field === metadata.field[DESCRIPTION_OF_GOODS]) &&
                       <div style={{ whiteSpace: 'pre-wrap' }}>
                         {contentDoGLine1Line2(content)}
                       </div>
@@ -3445,7 +3552,7 @@ const InquiryViewer = (props) => {
                   </>
                   :
                   <>
-                    {(question?.field === metadata.field[DESCRIPTION_OF_GOODS] && ['REOPEN_A', 'REOPEN_Q'].includes(question.state)) && 
+                    {(question?.field === metadata.field[DESCRIPTION_OF_GOODS] && ['REOPEN_A', 'REOPEN_Q'].includes(question.state)) &&
                       <div style={{ whiteSpace: 'pre-wrap' }}>
                         {contentDoGLine1Line2(content)}
                       </div>
@@ -3786,7 +3893,7 @@ const InquiryViewer = (props) => {
                           :
                           (isDateTime && question.state.includes("AME_") && user.role === 'Guest') ?
                             <DateTimePickers time={tempReply?.answer?.content ? formatDate(tempReply?.answer?.content, 'YYYY-MM-DD') : ''} onChange={e => handleChangeContentReply(e, '', true)} />
-                            : 
+                            :
                             <>
                               {((question?.field === metadata.field[DESCRIPTION_OF_GOODS]) && question?.state.includes("AME_") && user.role === 'Guest') ? renderDoGLine1Line2() : ''}
                               <TextField

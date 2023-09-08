@@ -11,7 +11,10 @@ const useStyles = makeStyles((theme) => ({
       color: 'black',
       fontSize: '20px',
       fontWeight: '600'
-    },
+    }
+  },
+  inputTimeDate: {
+    textTransform: 'uppercase'
   }
 }));
 
@@ -24,15 +27,18 @@ export default function DateTimePickers(props) {
         className={classes.label}
         minDate={'1000-01-01'}
         maxDate={'3000-01-01'}
-        id='mui-pickers-date'
-        format='dd MMM yyyy'
+        id="mui-pickers-date"
+        format="dd MMM yyyy"
         onKeyDown={(e) => e.preventDefault()}
         value={time || null}
         onChange={onChange}
         KeyboardButtonProps={{
           'aria-label': 'change date'
         }}
-        helperText= ''
+        inputProps={{
+          className: classes.inputTimeDate
+        }}
+        helperText=""
       />
     </MuiPickersUtilsProvider>
   );

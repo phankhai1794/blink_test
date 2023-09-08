@@ -463,10 +463,23 @@ const AttachmentList = (props) => {
         uploadFile(formData).then((media) => {
           // update inquiries
           const res = media.response[0];
+          let draftAnsId = '';
+          listCommentDraft.forEach((draftItem) => {
+            if (
+              draftItem.field === optionsAttachmentList[attachmentIndex].field &&
+              draftItem.content.mediaFile.length > 0
+            ) {
+              const tempMedia = draftItem.content.mediaFile.filter(
+                (f) => f.id === optionsAttachmentList[attachmentIndex].id
+              );
+              if (tempMedia.length > 0) draftAnsId = draftItem.draftAnswerId || draftItem.id;
+            }
+          });
           const data = {
-            inquiryId: findInquiry.id,
+            inquiryId: draftAnsId || findInquiry.id,
             oldMediaId: optionsAttachmentList[attachmentIndex].id,
             newMediaId: res.id,
+            process: findInquiry.process
           };
           replaceFile(data).then(rt => {
             // update attachment list

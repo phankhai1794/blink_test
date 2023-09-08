@@ -3,23 +3,19 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { combineCDCM, getLabelById, toFindDuplicates, generateFileName, generateFileNameTimeFormat } from '@shared';
 import { handleError } from '@shared/handleError';
+import { components } from 'react-select';
 import {
   Button,
   Checkbox,
-  Chip,
   Divider,
   FormControl,
   FormControlLabel,
   FormHelperText,
   Grid,
   Icon,
-  InputLabel,
-  ListItemText,
-  MenuItem,
   Popover,
   Radio,
   RadioGroup,
-  Select
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
@@ -157,10 +153,6 @@ const useStyles = makeStyles((theme) => ({
     '& .MuiFormControl-root': {
       width: 295,
     },
-    '& .MuiInputBase-root': {
-      border: '1px solid #BD0F72',
-      borderRadius: 9
-    },
     '& label + .MuiInput-formControl': {
       marginTop: 0
     },
@@ -179,9 +171,6 @@ const useStyles = makeStyles((theme) => ({
       overflow: 'hidden',
       fontSize: 16,
       top: -7,
-    },
-    '& .MuiSelect-root': {
-      height: 46
     },
     '& .MuiInput-underline:after': {
       borderBottom: '0',
@@ -669,10 +658,10 @@ const InquiryEditor = (props) => {
 
       inq.ansType = metadata.ans_type.paragraph;
       setContentsInqCDCM(contentArr);
-      setValueAnsType({
+      setValueAnsType([{
         label: 'Onshore/Customer Input',
         value: metadata.ans_type.paragraph
-      });
+      }]);
     }
   }
 
@@ -738,7 +727,7 @@ const InquiryEditor = (props) => {
 
   const handleTypeChange = (e) => {
     let inq = { ...currentEditInq };
-    let valResult = e.target.value;
+    let valResult = e;
 
     // list content display
     if (valResult.length) {
@@ -759,7 +748,11 @@ const InquiryEditor = (props) => {
 
     if (fieldValue) {
       setContentsInqCDCM(mappingValType(fieldValue.keyword, valResult));
-      if (contentsInqCDCM.length > valResult.length) {
+      if (!valResult.length) {
+        inq.answerObj = []
+        inq.mediaFile = []
+      }
+      else if (contentsInqCDCM.length > valResult.length) {
         const valueSet = new Set(valResult.map(obj => obj['value']));
         let missingIndexes = 0
         contentsInqCDCM.forEach((obj, index) => {
@@ -773,7 +766,7 @@ const InquiryEditor = (props) => {
     }
     inq.inqType = valResult.length ? valResult[0].value : '';
     //
-    const arr = e.target.value
+    const arr = e
     if (!arr.length) {
       if (!fieldValue) {
         setFieldType(metadata.field_options);
@@ -822,16 +815,16 @@ const InquiryEditor = (props) => {
     if (keyword?.keyword === BL_TYPE) {
       if (contentsInqCDCM.length < valResult.length) autoCreateChoiceBLType()
       inq.ansType = metadata.ans_type.choice
-      setValueAnsType({
+      setValueAnsType([{
         label: 'Option Selection',
         value: metadata.ans_type.choice
-      });
+      }]);
     }
     if (containerCheck.includes(inq.field)) {
-      setValueAnsType({
+      setValueAnsType([{
         label: 'Onshore/Customer Input',
         value: metadata.ans_type.paragraph
-      });
+      }]);
       inq.ansType = metadata.ans_type.paragraph;
     }
     // dispatch(InquiryActions.validate({ ...valid, inqType: true }));
@@ -1024,6 +1017,8 @@ const InquiryEditor = (props) => {
   }
 
   const onSave = async (isCdCm) => {
+    props.setDefaultAction({val: {}, action: false});
+
     setDisabled(true);
     const inquiriesOp = [...inquiries];
     let check = true;
@@ -1499,44 +1494,56 @@ const InquiryEditor = (props) => {
               <Grid item xs={4}>
                 <div className={clsx(classes.formInqType, ['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state) ? classes.disableSelect : '')}>
                   <FormControl error={!valid.inqType}>
-                    {valueType.length === 0 ? <InputLabel id="demo-mutiple-checkbox-label">Type of Question</InputLabel> : ``}
-                    <Select
-                      id="demo-mutiple-checkbox"
-                      multiple
+                    <FuseChipSelect
+                      isMulti
+                      placeholder="Type of Question"
                       value={valueType}
-                      onChange={(e) => handleTypeChange(e)}
-                      inputProps={{
-                        style: { width: '100%' }
+                      textFieldProps={{
+                        variant: 'outlined'
                       }}
-                      disabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
-                      renderValue={(selected) =>
-                        <div>
-                          {selected.map((value) => value.value !== 'select-all' && (
-                            <Chip key={value.type} label={value.label} />
-                          ))}
-                        </div>}
-                      MenuProps={MenuProps}
-                    >
-                      {/*TODO: Implement Select all Type Inquiry */}
-                      {/* {fieldValue &&
-                        <MenuItem key={'select-all'} value={{
-                          label: 'Select All',
-                          value: 'select-all'
-                        }}>
-                          <Checkbox checked={isAllSelected} />
-                          <ListItemText primary={'Select All'} />
-                        </MenuItem>
-                      } */}
-                      {inqTypeOption.map((name) => {
-                        const mapType = valueType.map(v => v.value);
-                        return (
-                          <MenuItem key={name.value} value={name}>
-                            <Checkbox checked={mapType.includes(name.value)} />
-                            <ListItemText primary={name.label} />
-                          </MenuItem>
-                        )
-                      })}
-                    </Select>
+                      options={inqTypeOption}
+                      hideSelectedOptions={false}
+                      closeMenuOnSelect={false}
+                      onChange={handleTypeChange}
+                      styles={{
+                        clearIndicator: (style) => ({
+                          ...style,
+                          padding: '0 0 0 5px'
+                        }),
+                        option: (styles, { isDisabled, isFocused, isSelected }) => {
+                          return {
+                            ...styles,
+                            fontSize: 15,
+                            cursor: 'pointer',
+                            whiteSpace: 'nowrap',
+                            overflow: "hidden",
+                            backgroundColor: isDisabled
+                              ? undefined
+                              : isSelected
+                                ? "#FDF2F2"
+                                : isFocused
+                                  ? "#FDF2F2"
+                                  : undefined,
+                            fontWeight: isSelected && 600,
+                            color: isSelected ? "#BD0F72" : isFocused
+                              ? "#BD0F72"
+                              : undefined,
+                          }
+                        }
+                      }}
+                      components={{
+                        Option: (props) => (
+                          <components.Option {...props} style={{
+                            backgroundColor: props.isSelected && "#FDF2F2",
+                            color: props.isSelected && "#BD0F72"
+                          }}>
+                            <Checkbox checked={props.isSelected} style={{ color: props.isSelected ? "#BD0F72" : '#BAC3CB' }} />
+                            <span>{props.data.label}</span>
+                          </components.Option>
+                        ),
+                      }}
+                      isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
+                    />
                     <div style={{ height: '20px' }}>
                       {!valid.inqType && (
                         <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
@@ -1615,9 +1622,7 @@ const InquiryEditor = (props) => {
                             typeMedia={2}
                             indexMedia={index}
                           />
-                          {Boolean(currentEditInq.id) && currentEditInq.inqType === val.type ? null :
-                            <TrashIcon onDelete={() => removeSelectInqType(index)} />
-                          }
+                          <TrashIcon onDelete={() => removeSelectInqType(index)} />
                         </div>
                       </div>
                       <TemplateComponent
@@ -1634,7 +1639,7 @@ const InquiryEditor = (props) => {
                           onChange={(e) => handleNameChangeCDCM(e, val)} // handle innerHTML change
                           style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
                           innerRef={boxTextEl}
-                          onPaste={(e) => onPaste(e,val.type)}
+                          onPaste={(e) => onPaste(e, val.type)}
                         />
                       </div>
                       {currentEditInq.ansType === metadata.ans_type.choice && (
@@ -1737,7 +1742,7 @@ const InquiryEditor = (props) => {
                 <Button
                   variant="contained"
                   color="primary"
-                  disabled={isDisabled}
+                  disabled={isDisabled || !fieldValue || !valueType?.length || !valueAnsType?.length}
                   onClick={() => onSave(containerCheck.includes(currentEditInq.field))}
                   classes={{ root: classes.button }}>
                   Save

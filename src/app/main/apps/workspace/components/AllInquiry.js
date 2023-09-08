@@ -184,6 +184,7 @@ const AllInquiry = (props) => {
   const [questionIdSaved, setQuestionIdSaved] = useState();
   const [isSaveAnswer, setSaveAnswer] = useState(false);
   const [isUpdateReply, setUpdateReply] = useState(false);
+  const [inqActing, setInqActing] = useState({val: {}, action: false});
   const inputAddAmendmentEndRef = useRef(null);
   const scrollTopPopup = useRef(null);
   const scrollFilePosition = useRef(null);
@@ -208,14 +209,14 @@ const AllInquiry = (props) => {
   }, [inquiryCopy]);
 
   useEffect(() => {
-    if (isUpdateReply) {
+    if (isUpdateReply && !inqActing.action) {
       setSaveAnswer(!isSaveAnswer)
       setUpdateReply(false);
     }
     if (scrollTopPopup.current && !scrollInquiry) {
       scrollTopPopup.current.scrollIntoView(true);
     }
-  }, [isUpdateReply]);
+  }, [isUpdateReply, inqActing.action]);
 
   let CURRENT_NUMBER = 0;
 
@@ -229,6 +230,7 @@ const AllInquiry = (props) => {
   };
 
   const onCancel = () => {
+    setInqActing({val: {}, action: false});
     if (currentEditInq) {
       dispatch(InquiryActions.setEditInq());
     }
@@ -315,7 +317,7 @@ const AllInquiry = (props) => {
       dispatch(FormActions.setScrollInquiry());
     }
   }
-  
+
   return (
     <>
       {openInquiryReview && !inquiries.length &&
@@ -360,6 +362,11 @@ const AllInquiry = (props) => {
                     getUpdatedAt={() => {
                       setUpdateReply(true)
                     }}
+                    setDefaultAction={(currQ) => {
+                      if (currQ) {
+                        setInqActing(currQ);
+                      }
+                    }}
                   />}
                   <Divider
                     className="my-32"
@@ -380,7 +387,7 @@ const AllInquiry = (props) => {
                       <Typography color="primary" variant="h5" className={classes.inqTitle} id={q.id}>
                         {getLabel(q.field)}
                       </Typography>
-                      {(scrollInquiry && q.id === scrollInquiry) && scrollFunction()}         
+                      {(scrollInquiry && q.id === scrollInquiry) && scrollFunction()}
                       <InquiryViewer
                         user={props.user}
                         question={q}
@@ -392,6 +399,13 @@ const AllInquiry = (props) => {
                           setUpdateReply(true)
                         }}
                         isAllInq={true}
+                        getStateReplyDraft={(val) => {}}
+                        setDefaultAction={(currQ) => {
+                          if (currQ) {
+                            setInqActing(currQ);
+                          }
+                        }}
+                        inqActing={inqActing}
                       />
                     </div>
                   </div>
@@ -436,14 +450,25 @@ const AllInquiry = (props) => {
                         setUpdateReply(true)
                       }}
                       isAllInq={true}
+                      setDefaultAction={(currQ) => {
+                        if (currQ) {
+                          setInqActing(currQ);
+                        }
+                      }}
+                      inqActing={inqActing}
                     />
-                    {(scrollInquiry && q.id === scrollInquiry) && scrollFunction()}  
+                    {(scrollInquiry && q.id === scrollInquiry) && scrollFunction()}
                     {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
                       <InquiryAnswer
                         onCancel={() => handleCancel(q)}
                         question={q}
                         getUpdatedAt={() => {
                           setUpdateReply(true)
+                        }}
+                        setDefaultAction={(currQ) => {
+                          if (currQ) {
+                            setInqActing(currQ);
+                          }
                         }}
                       />}
                   </div>
@@ -461,7 +486,13 @@ const AllInquiry = (props) => {
           !currentEditInq.id &&  // Case: Add Inquiry
           <InquiryEditor onCancel={onCancel} getUpdatedAt={() => {
             setUpdateReply(true)
-          }} />
+          }}
+          setDefaultAction={(currQ) => {
+            if (currQ) {
+              setInqActing(currQ);
+            }
+          }}
+          />
         }
         <div ref={inputAddAmendmentEndRef}>
           {props.user !== 'workspace' && currentAmendment !== undefined && (
