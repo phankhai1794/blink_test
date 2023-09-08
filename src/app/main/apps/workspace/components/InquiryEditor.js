@@ -1017,6 +1017,8 @@ const InquiryEditor = (props) => {
   }
 
   const onSave = async (isCdCm) => {
+    props.setDefaultAction({val: {}, action: false});
+
     setDisabled(true);
     const inquiriesOp = [...inquiries];
     let check = true;
