@@ -13,8 +13,17 @@ import { Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
 import * as AppAction from 'app/store/actions';
 import clsx from 'clsx';
-import { isJsonText } from "@shared";
-import { CONTAINER_DETAIL, CONTAINER_MANIFEST, ONLY_ATT } from '@shared/keyword';
+import {isJsonText, NumberFormat} from "@shared";
+import {
+  CM_MEASUREMENT,
+  CM_PACKAGE, CM_WEIGHT,
+  CONTAINER_DETAIL,
+  CONTAINER_MANIFEST,
+  CONTAINER_MEASUREMENT,
+  CONTAINER_PACKAGE,
+  CONTAINER_WEIGHT,
+  ONLY_ATT
+} from '@shared/keyword';
 import { SocketContext } from 'app/AppContext';
 
 import * as InquiryActions from '../store/actions/inquiry';
@@ -122,6 +131,10 @@ const InquiryAnswer = (props) => {
 
   const getField = (field) => {
     return metadata.field?.[field] || '';
+  };
+
+  const getType = (type) => {
+    return metadata.inq_type?.[type] || '';
   };
 
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
@@ -371,6 +384,23 @@ const InquiryAnswer = (props) => {
     if (isDisableSave) setDisableSave(false);
   }, []);
 
+  const formatCdCmContent = (cdCmData) => {
+    if (cdCmData && Object.keys(cdCmData).length) {
+      const cdContent = cdCmData[containerCheck[0]];
+      const cmContent = cdCmData[containerCheck[1]];
+      cdContent.forEach(data => {
+        [CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT].forEach((key) => {
+          data[getType(key)] = NumberFormat(data[getType(key)], 3)
+        })
+      })
+      cmContent.forEach(data => {
+        [CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT].forEach((key) => {
+          data[getType(key)] = NumberFormat(data[getType(key)], 3)
+        })
+      })
+    }
+  }
+
   const isEditedCdCMTable = () => {
     let contentCDCM = {};
     if (containerCheck.includes(question.field)) {
@@ -378,6 +408,8 @@ const InquiryAnswer = (props) => {
         [getField(CONTAINER_DETAIL)]: getDataCDInq.length ? getDataCDInq : contentInqResolved?.[getField(CONTAINER_DETAIL)],
         [getField(CONTAINER_MANIFEST)]: getDataCMInq.length ? getDataCMInq : contentInqResolved?.[getField(CONTAINER_MANIFEST)]
       }
+      formatCdCmContent(oldDataCdCmInq.cdCmDataOld)
+      formatCdCmContent(contentCDCM)
       if (JSON.stringify(oldDataCdCmInq.cdCmDataOld) !== JSON.stringify(contentCDCM)) {
         setDisableSaveCdCm(false);
       } else if (question.paragraphAnswer && oldDataCdCmInq.contentOld !== question.paragraphAnswer.content) {
