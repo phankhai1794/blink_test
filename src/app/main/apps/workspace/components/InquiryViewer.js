@@ -448,6 +448,9 @@ const InquiryViewer = (props) => {
       setIsResolveCDCM(false);
       setStateReplyDraft(false);
       props.getStateReplyDraft(false);
+      if (['REOPEN_A', 'REOPEN_Q'].includes(getQuestion.state)) {
+        getQuestion.showIconReply = true;
+      }
       if (user.role === 'Admin') {
         if (getQuestion.state === 'REP_Q_SENT') {
           setStateReplyDraft(true);
@@ -1192,35 +1195,37 @@ const InquiryViewer = (props) => {
   useEffect(() => {
     if (confirmClick && confirmPopupType === 'removeInq' && replyRemove) {
       const optionsOfQuestion = [...inquiries];
-      const indexInqRemove = optionsOfQuestion.findIndex(inq => replyRemove.inqId === inq.id);
-      deleteInquiry(replyRemove.inqId)
-        .then(() => {
-          if (indexInqRemove !== -1) {
-            const inqDelete = optionsOfQuestion.splice(indexInqRemove, 1)[0];
-            const hidePopupEmpty = !optionsOfQuestion.filter(inq => inq.field === inqDelete.field).length;
-            dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+      if (replyRemove.inqId) {
+        const indexInqRemove = optionsOfQuestion.findIndex(inq => replyRemove.inqId === inq.id);
+        deleteInquiry(replyRemove.inqId)
+            .then(() => {
+              if (indexInqRemove !== -1) {
+                const inqDelete = optionsOfQuestion.splice(indexInqRemove, 1)[0];
+                const hidePopupEmpty = !optionsOfQuestion.filter(inq => inq.field === inqDelete.field).length;
+                dispatch(InquiryActions.setInquiries(optionsOfQuestion));
 
-            // sync delete inquiry
-            syncData({ inquiries: optionsOfQuestion });
+                // sync delete inquiry
+                syncData({ inquiries: optionsOfQuestion });
 
-            if (hidePopupEmpty) {
-              dispatch(InquiryActions.setOneInq({}));
-              dispatch(FormActions.toggleCreateInquiry(false));
-            }
-          }
-          const isEmptyInq = optionsOfQuestion.filter(op => op.process === 'pending');
-          if (!isEmptyInq.length) {
-            (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
-            dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "", {
-              idReply: myBL.id,
-              action: 'deleteAll',
-            })) //BX: Delete all inquiries draft
-          }
-          dispatch(InquiryActions.checkSubmit(!enableSubmit));
-          props.getUpdatedAt();
-        })
-        .catch((error) => handleError(dispatch, error));
-    } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove) {
+                if (hidePopupEmpty) {
+                  dispatch(InquiryActions.setOneInq({}));
+                  dispatch(FormActions.toggleCreateInquiry(false));
+                }
+              }
+              const isEmptyInq = optionsOfQuestion.filter(op => op.process === 'pending');
+              if (!isEmptyInq.length) {
+                (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
+                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "", {
+                  idReply: myBL.id,
+                  action: 'deleteAll',
+                })) //BX: Delete all inquiries draft
+              }
+              dispatch(InquiryActions.checkSubmit(!enableSubmit));
+              props.getUpdatedAt();
+            })
+            .catch((error) => handleError(dispatch, error));
+      }
+    } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove && replyRemove?.draftId) {
       deleteDraftBLReply(replyRemove?.draftId, replyRemove.field, myBL.id)
         .then((res) => {
           // update mediaFile in inquiries
