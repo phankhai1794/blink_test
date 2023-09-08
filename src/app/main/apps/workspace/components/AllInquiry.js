@@ -486,7 +486,13 @@ const AllInquiry = (props) => {
           !currentEditInq.id &&  // Case: Add Inquiry
           <InquiryEditor onCancel={onCancel} getUpdatedAt={() => {
             setUpdateReply(true)
-          }} />
+          }}
+          setDefaultAction={(currQ) => {
+            if (currQ) {
+              setInqActing(currQ);
+            }
+          }}
+          />
         }
         <div ref={inputAddAmendmentEndRef}>
           {props.user !== 'workspace' && currentAmendment !== undefined && (
