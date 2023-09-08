@@ -112,6 +112,7 @@ const useStyles = makeStyles((theme) => ({
     background: '#ffffff',
     color: '#132535',
     fontSize: 15,
+    fontFamily: 'Montserrat',
     '&:hover': {
       background: `#FDF2F2 !important`,
       color: '#BD0F72',
@@ -256,20 +257,22 @@ function Menu(props) {
   );
 }
 
-const components = {
-  Control,
-  Menu,
-  MultiValue,
-  NoOptionsMessage,
-  Option,
-  Placeholder,
-  SingleValue,
-  ValueContainer,
-  IndicatorSeparator: () => null,
-  DropdownIndicator: () => <ArrowDropDown />,
-};
-
 function FuseChipSelect(props) {
+  const components = {
+    Control,
+    Menu,
+    MultiValue,
+    NoOptionsMessage,
+    Option,
+    Placeholder,
+    SingleValue,
+    ValueContainer,
+    IndicatorSeparator: () => null,
+    DropdownIndicator: () => <ArrowDropDown />,
+  };
+
+  if (props.components?.Option) components.Option = props.components.Option
+
   return props.variant === 'fixed' ? (
     <Select classNamePrefix="fuse-chip-select" {...props} components={components} />
   ) : (
