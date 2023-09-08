@@ -422,26 +422,8 @@ const InquiryViewer = (props) => {
     return response;
   }
 
-  const setDefaultAction = (val) => {
-    const optionsInquires = [...inquiries];
-    optionsInquires.forEach(op => {
-      op.showIconAttachAnswerFile = (val.type === 'ANS' || ['INQ_SENT'].includes(val.state)) && op.groupId === val.groupId;
-    });
-    dispatch(InquiryActions.setInquiries(optionsInquires));
-    //
-    const getQuestion = {...question};
-    if (getQuestion.groupId === val.groupId) {
-      if (val.state === 'OPEN' && !isResolve && !isResolveCDCM) {
-        dispatch(InquiryActions.setEditInq(val));
-      } else {
-        dispatch(InquiryActions.setEditInq());
-      }
-      if (!['INQ', 'ANS'].includes(val.type)) {
-        getQuestion.content = val.content;
-        setQuestion(getQuestion);
-      }
-    }
-    if (getQuestion.groupId !== val.groupId) {
+  const checkSetActionCurrentState = (getQuestion) => {
+    if (getQuestion.process === 'pending') {
       setIsReply(false);
       setIsReplyCDCM(false);
       setIsResolve(false);
@@ -510,7 +492,111 @@ const InquiryViewer = (props) => {
       }
       getQuestion.showIconAttachAnswerFile = false;
       getQuestion.showIconAttachReplyFile = false;
-      setQuestion(getQuestion);
+    } else {
+      if (getQuestion.state === 'RESOLVED') {
+        setStateReplyDraft(false);
+        setDisableReopen(false);
+        setIsReplyCDCM(false);
+        setIsResolveCDCM(false);
+      }
+
+      if (user.role === 'Admin') {
+        if (getQuestion.role === 'Guest') {
+          if (['REP_SENT', 'AME_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = true;
+            setStateReplyDraft(false);
+            setTempReply({});
+          }
+        } else {
+          if (['REP_DRF'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = false;
+            setShowLabelSent(false);
+          } else if (['REP_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = false;
+            setShowLabelSent(true);
+          }
+        }
+        if (['REOPEN_A'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+          setStateReplyDraft(false);
+        } else if (['REOPEN_Q'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+          setStateReplyDraft(false);
+        }
+        if (['REOPEN_A', 'REOPEN_Q'].includes(getQuestion.state)) {
+          if (typeof getQuestion.content === 'string') {
+            setTempReply({})
+          }
+        }
+      }
+      else {
+        getQuestion.showIconEdit = true;
+        setStateReplyDraft(false);
+        if (getQuestion.role === 'Guest') {
+          if (['REP_SENT', 'AME_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = false;
+            setSubmitLabel(true);
+          } else if (['AME_DRF', 'REP_DRF'].includes(getQuestion.state)) {
+            setSubmitLabel(false);
+          }
+        } else {
+          if (['REP_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = true;
+            getQuestion.showIconEdit = false;
+            setSubmitLabel(false);
+            setStateReplyDraft(false);
+            setTempReply({});
+          }
+        }
+        if (['UPLOADED'].includes(getQuestion.state)) {
+          setStateReplyDraft(false);
+        } else if (['REOPEN_A'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+          getQuestion.showIconEdit = false;
+          setStateReplyDraft(false);
+        } else if (['REOPEN_Q'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+          getQuestion.showIconEdit = false;
+          setStateReplyDraft(false);
+        }
+        if (['REOPEN_A', 'REOPEN_Q'].includes(getQuestion.state)) {
+          // is CM CD Amendment
+          if (typeof getQuestion.content === 'string') setTempReply({});
+          setSubmitLabel(false);
+        }
+      }
+    }
+    return getQuestion
+  }
+
+  const setDefaultAction = (val) => {
+    const optionsInquires = [...inquiries];
+    optionsInquires.forEach(op => {
+      op.showIconAttachAnswerFile = (val.type === 'ANS' || ['INQ_SENT'].includes(val.state)) && op.groupId === val.groupId;
+    });
+    dispatch(InquiryActions.setInquiries(optionsInquires));
+    //
+    const getQuestion = {...question};
+    if (getQuestion.process === 'pending' ? getQuestion.groupId === val.groupId : getQuestion.field === val.field) {
+      if (val.state === 'OPEN' && !isResolve && !isResolveCDCM) {
+        dispatch(InquiryActions.setEditInq(val));
+      } else {
+        dispatch(InquiryActions.setEditInq());
+      }
+      if (!['INQ', 'ANS'].includes(val.type)) {
+        getQuestion.content = val.content;
+        setQuestion(getQuestion);
+      }
+    }
+    if (getQuestion.process === 'pending' ? getQuestion.groupId !== val.groupId : getQuestion.field !== val.field) {
+      setIsReply(false);
+      setIsReplyCDCM(false);
+      setIsResolve(false);
+      setIsResolveCDCM(false);
+      setStateReplyDraft(false);
+      props.getStateReplyDraft(false);
+      const currStateQuestion = checkSetActionCurrentState(getQuestion);
+      setQuestion(currStateQuestion);
     }
   }
   useEffect(() => {
@@ -885,6 +971,7 @@ const InquiryViewer = (props) => {
             lastest.sentAt = lastestComment.sentAt;
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
+            lastest.role = lastestComment.role;
             lastest.process = 'draft';
             if (containerCheck.includes(question.field)) {
               const lastestContentCDCM = res.filter(r => (r.state.includes('AME_') || r.state.includes('REOPEN_')) && !['REP_AME_DRF_DELETED', 'REP_AME_SENT_DELETED'].includes(r.state));
@@ -969,7 +1056,6 @@ const InquiryViewer = (props) => {
                 }
               }
               if (['UPLOADED'].includes(lastest.state)) {
-                setStateReplyDraft(false);
                 setStateReplyDraft(false);
               } else if (['REOPEN_A'].includes(lastest.state)) {
                 lastest.showIconReply = true;
