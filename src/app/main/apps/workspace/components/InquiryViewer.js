@@ -578,7 +578,7 @@ const InquiryViewer = (props) => {
     dispatch(InquiryActions.setInquiries(optionsInquires));
     //
     const getQuestion = {...question};
-    if (getQuestion.process === 'pending' ? getQuestion.groupId === val.groupId : getQuestion.field === val.field) {
+    if (getQuestion.process === 'pending' ? getQuestion.groupId === val.groupId : getQuestion.id === val.id) {
       if (val.state === 'OPEN' && !isResolve && !isResolveCDCM) {
         dispatch(InquiryActions.setEditInq(val));
       } else {
@@ -589,7 +589,7 @@ const InquiryViewer = (props) => {
         setQuestion(getQuestion);
       }
     }
-    if (getQuestion.process === 'pending' ? getQuestion.groupId !== val.groupId : getQuestion.field !== val.field) {
+    if (getQuestion.process === 'pending' ? getQuestion.groupId !== val.groupId : getQuestion.id !== val.id) {
       const currStateQuestion = checkSetActionCurrentState(getQuestion);
       setQuestion(currStateQuestion);
     }
