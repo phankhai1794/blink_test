@@ -3094,6 +3094,7 @@ const InquiryViewer = (props) => {
   }
 
   const reOpen = (idInq) => {
+    props.setDefaultAction({val: {}, action: false});
     reOpenInquiry(idInq)
       .then((res) => {
         const optionsInquires = [...inquiries];
