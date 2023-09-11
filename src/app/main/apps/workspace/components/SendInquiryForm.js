@@ -211,9 +211,8 @@ const SendInquiryForm = (props) => {
   };
 
   async function fetchData() {
-    const status = ['INQ_SENT', 'REP_Q_SENT', 'REP_A_DRF', 'REOPEN_Q', 'REOPEN_A'];
+    const status = ['INQ_SENT', 'ANS_DRF', 'REP_Q_SENT', 'REP_A_DRF', 'REOPEN_Q', 'REOPEN_A'];
     let toCustomer = [], toOnshore = [], toCustomerCc = [], toOnshoreCc = [], toCustomerBcc = [], toOnshoreBcc = []
-
 
     const res = await getMail(mybl.id).catch((err) => handleError(dispatch, err));
     ({
