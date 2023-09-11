@@ -569,7 +569,7 @@ function ToolbarLayout1(props) {
                 </Button>
               </PermissionProvider>
 
-              <PreviewDraftBL />
+              {/* <PreviewDraftBL /> */}
 
               <User />
             </div>
