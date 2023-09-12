@@ -196,7 +196,21 @@ const MenuProps = {
     },
   },
 }
+const Dropzone = (props) => {
+  const { index, children, setDropfiles } = props
 
+  const { isDragActive, getRootProps } = useDropzone({
+    onDrop: files => setDropfiles((list) => ({ ...list, [index]: files })),
+    noClick: true
+  });
+  return (
+    <div style={{ position: 'relative' }} {...getRootProps({})}>
+      {isDragActive && <div className='dropzone'>Drop files here</div>}
+      {children}
+    </div>
+
+  )
+}
 const ReceiverComponent = (props) => {
   const { classes, val, handleReceiverChangeCDCM } = props
   return (
@@ -338,7 +352,7 @@ const InquiryEditor = (props) => {
   );
   const [inqTypeOption, setInqTypeOption] = useState(metadata.inq_type_options);
   const [filepaste, setFilepaste] = useState({ File: '', type: '' });
-  const [dropfiles, setDropfiles] = useState([]);
+  const [dropfiles, setDropfiles] = useState({});
   const [fieldEdited, setFieldEdited] = useState();
   const [nameTypeEdited, setNameTypeEdited] = useState();
   const [contentEdited, setContentEdited] = useState(valueType?.label);
@@ -587,13 +601,7 @@ const InquiryEditor = (props) => {
         }
         return getDataField && getTemplate
       }).sort((a, b) => a.label.localeCompare(b.label));
-      const inq = { ...currentEditInq };
 
-      // if (!filter.some(f => f.value === inq.inqType)) {
-      //   inq.inqType = '';
-      //   dispatch(InquiryActions.setEditInq(inq));
-      //   setValueType([]);
-      // }
       setFieldType(fieldDefault);
       setInqTypeOption(filter);
       if (fieldValue.value === containerCheck[0]) {
@@ -769,7 +777,7 @@ const InquiryEditor = (props) => {
     const arr = e
     if (!arr.length) {
       if (!fieldValue) {
-        setFieldType(metadata.field_options);
+        setFieldType(fieldDefault);
       }
       setInqTypeOption(metadata.inq_type_options)
       setFieldValue(null);
@@ -781,11 +789,14 @@ const InquiryEditor = (props) => {
     let keyword = fieldValue;
 
     if (!fieldValue) {
-      let filterField = inqTypeOption.find(({ value }) => value === arr[arr.length - 1].value).field;
-      filterField = arr[arr.length - 1].label === OTHERS ? fieldType : fieldType.filter(({ value, display, keyword }) => (
-        display && filterField.includes(value)
-        && metadata.template.some((temp) => (temp.field === keyword && temp.type === arr[arr.length - 1].value && temp.content[0]))
-      ));
+      let filter = inqTypeOption.find(({ value }) => value === arr[arr.length - 1].value).field;
+      if (filter.length === 1 && containerCheck.includes(filter[0])) {
+        filter = containerCheck
+      }
+      const filterField = arr[arr.length - 1].label === OTHERS ? fieldType : fieldType.filter(({ value, display, keyword: k }) =>
+        display && filter.includes(value)
+        && metadata.template.some((temp) => ((temp.field === k || [CONTAINER_DETAIL, CONTAINER_MANIFEST].includes(temp.field)) && temp.type === arr[arr.length - 1].value && temp.content[0]))
+      );
 
       let filterInqType = inqTypeOption
       if (arr.length !== 1 || arr[arr.length - 1].label !== OTHERS)
@@ -827,15 +838,6 @@ const InquiryEditor = (props) => {
       }]);
       inq.ansType = metadata.ans_type.paragraph;
     }
-    // dispatch(InquiryActions.validate({ ...valid, inqType: true }));
-
-    // // case filter CD CM to BL Data Field
-    // const keyWord = filterField.map(f => f.keyword);
-    // if (keyWord.includes('containerManifest') || keyWord.includes('containerDetail')) {
-    //   setValueType([e]);
-    // } else {
-    //   setValueType(e);
-    // }
 
     // dispatch(FormActions.setEnableSaveInquiriesList(false));
 
@@ -1017,7 +1019,7 @@ const InquiryEditor = (props) => {
   }
 
   const onSave = async (isCdCm) => {
-    props.setDefaultAction({val: {}, action: false});
+    props.setDefaultAction({ val: {}, action: false });
 
     setDisabled(true);
     const inquiriesOp = [...inquiries];
@@ -1439,11 +1441,6 @@ const InquiryEditor = (props) => {
     }
   };
 
-  const { isDragActive, getRootProps } = useDropzone({
-    onDrop: files => setDropfiles(files),
-    noClick: true
-  });
-
   const removeSelectInqType = (indexToRemove) => {
     setContentsInqCDCM(contentsInqCDCM.filter((_, index) => index !== indexToRemove))
     setValueType(valueType.filter((_, index) => index !== indexToRemove))
@@ -1451,284 +1448,315 @@ const InquiryEditor = (props) => {
     // inq.inqType = inq.inqType.filter((_, index) => index !== indexToRemove)
     dispatch(InquiryActions.setEditInq(inq));
   }
-
+  // style={isDragActive ? { visibility: 'hidden' } : {}}
   return (
-    <div style={{ position: 'relative' }} {...getRootProps({})}>
-      {isDragActive && <div className='dropzone'>Drop files here</div>}
-      <>
-        <div className="flex justify-between" style={{ padding: '0.5rem', marginRight: '-15px' }}>
-          <div id="newInq" ref={scrollTopPopup} style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
-            {currentEditInq.field
-              ? getLabelById(metadata['field_options'], currentEditInq.field)
-              : 'New Inquiry'}
-          </div>
-          {containerCheck.includes(currentEditInq.field) &&
-            <FormControl className={classes.checkedIcon}>
-              <AttachFile filepaste={filepaste.File} dropfiles={dropfiles} typeMedia={1} />
-            </FormControl>}
+    <>
+      <div className="flex justify-between" style={{ padding: '0.5rem', marginRight: '-15px' }}>
+        <div
+          id="newInq"
+          ref={scrollTopPopup}
+          style={{ fontSize: '22px', fontWeight: 'bold', color: '#BD0F72' }}>
+          {currentEditInq.field
+            ? getLabelById(metadata['field_options'], currentEditInq.field)
+            : 'New Inquiry'}
         </div>
-        {currentEditInq && (
-          <div className={classes.form} style={isDragActive ? { visibility: 'hidden' } : {}}>
-            <Grid container spacing={4}>
-              <Grid item xs={4}>
-                <FormControl error={!valid.field}>
+        {containerCheck.includes(currentEditInq.field) && (
+          <FormControl className={classes.checkedIcon}>
+            <AttachFile filepaste={filepaste.File} dropfiles={dropfiles[0]} typeMedia={1} />
+          </FormControl>
+        )}
+      </div>
+      {currentEditInq && (
+        <div className={classes.form}>
+          <Grid container spacing={4}>
+            <Grid item xs={4}>
+              <FormControl error={!valid.field}>
+                <FuseChipSelect
+                  customStyle={styles(fullscreen ? 320 : 295)}
+                  value={fieldValue}
+                  isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
+                  onChange={handleFieldChange}
+                  placeholder="BL Data Field"
+                  textFieldProps={{
+                    variant: 'outlined'
+                  }}
+                  options={fieldType}
+                  errorStyle={valid.field}
+                />
+                <div style={{ height: '20px' }}>
+                  {!valid.field && (
+                    <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+                  )}
+                </div>
+              </FormControl>
+            </Grid>
+            <Grid item xs={4}>
+              <div
+                className={clsx(
+                  classes.formInqType,
+                  ['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)
+                    ? classes.disableSelect
+                    : ''
+                )}>
+                <FormControl error={!valid.inqType}>
                   <FuseChipSelect
-                    customStyle={styles(fullscreen ? 320 : 295)}
-                    value={fieldValue}
-                    isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
-                    onChange={handleFieldChange}
-                    placeholder="BL Data Field"
+                    isMulti
+                    placeholder="Type of Question"
+                    value={valueType}
                     textFieldProps={{
                       variant: 'outlined'
                     }}
-                    options={fieldType}
-                    errorStyle={valid.field}
+                    options={inqTypeOption}
+                    hideSelectedOptions={false}
+                    closeMenuOnSelect={false}
+                    onChange={handleTypeChange}
+                    styles={{
+                      clearIndicator: (style) => ({
+                        ...style,
+                        padding: '0 0 0 5px'
+                      }),
+                      option: (styles, { isDisabled, isFocused, isSelected }) => {
+                        return {
+                          ...styles,
+                          fontSize: 15,
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          backgroundColor: isDisabled
+                            ? undefined
+                            : isSelected
+                              ? '#FDF2F2'
+                              : isFocused
+                                ? '#FDF2F2'
+                                : undefined,
+                          fontWeight: isSelected && 600,
+                          color: isSelected ? '#BD0F72' : isFocused ? '#BD0F72' : undefined
+                        };
+                      }
+                    }}
+                    components={{
+                      Option: (props) => (
+                        <components.Option
+                          {...props}
+                          style={{
+                            backgroundColor: props.isSelected && '#FDF2F2',
+                            color: props.isSelected && '#BD0F72'
+                          }}>
+                          <Checkbox
+                            checked={props.isSelected}
+                            style={{ color: props.isSelected ? '#BD0F72' : '#BAC3CB' }}
+                          />
+                          <span>{props.data.label}</span>
+                        </components.Option>
+                      )
+                    }}
+                    isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
                   />
                   <div style={{ height: '20px' }}>
-                    {!valid.field && (
-                      <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+                    {!valid.inqType && (
+                      <FormHelperText style={{ marginLeft: '4px' }}>
+                        This is required!
+                      </FormHelperText>
                     )}
                   </div>
                 </FormControl>
-              </Grid>
-              <Grid item xs={4}>
-                <div className={clsx(classes.formInqType, ['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state) ? classes.disableSelect : '')}>
-                  <FormControl error={!valid.inqType}>
-                    <FuseChipSelect
-                      isMulti
-                      placeholder="Type of Question"
-                      value={valueType}
-                      textFieldProps={{
-                        variant: 'outlined'
-                      }}
-                      options={inqTypeOption}
-                      hideSelectedOptions={false}
-                      closeMenuOnSelect={false}
-                      onChange={handleTypeChange}
-                      styles={{
-                        clearIndicator: (style) => ({
-                          ...style,
-                          padding: '0 0 0 5px'
-                        }),
-                        option: (styles, { isDisabled, isFocused, isSelected }) => {
-                          return {
-                            ...styles,
-                            fontSize: 15,
-                            cursor: 'pointer',
-                            whiteSpace: 'nowrap',
-                            overflow: "hidden",
-                            backgroundColor: isDisabled
-                              ? undefined
-                              : isSelected
-                                ? "#FDF2F2"
-                                : isFocused
-                                  ? "#FDF2F2"
-                                  : undefined,
-                            fontWeight: isSelected && 600,
-                            color: isSelected ? "#BD0F72" : isFocused
-                              ? "#BD0F72"
-                              : undefined,
-                          }
-                        }
-                      }}
-                      components={{
-                        Option: (props) => (
-                          <components.Option {...props} style={{
-                            backgroundColor: props.isSelected && "#FDF2F2",
-                            color: props.isSelected && "#BD0F72"
-                          }}>
-                            <Checkbox checked={props.isSelected} style={{ color: props.isSelected ? "#BD0F72" : '#BAC3CB' }} />
-                            <span>{props.data.label}</span>
-                          </components.Option>
-                        ),
-                      }}
-                      isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
-                    />
-                    <div style={{ height: '20px' }}>
-                      {!valid.inqType && (
-                        <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
-                      )}
-                    </div>
-                  </FormControl>
-                </div>
-              </Grid>
-              <Grid item xs={4}>
-                <FormControl error={!valid.ansType}>
-                  <FuseChipSelect
-                    value={valueAnsType}
-                    customStyle={styles(fullscreen ? 330 : 295)}
-                    isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
-                    onChange={handleAnswerTypeChange}
-                    placeholder="Type of Answer"
-                    textFieldProps={{
-                      variant: 'outlined'
-                    }}
-                    options={optionsAnsType}
-                    errorStyle={valid.ansType}
-                  />
-                  <div style={{ height: '15px' }}>
-                    {!valid.ansType && (
-                      <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
-                    )}
-                  </div>
-                </FormControl>
-              </Grid>
+              </div>
             </Grid>
-            {/* show Template */}
-            <>
-              {contentsInqCDCM.length ? (
-                contentsInqCDCM.map((val, index) => containerCheck.includes(currentEditInq.field) ?
-                  (
-                    <div key={val.type} className={classes.contentCDCM}>
-                      <div className="mt-24 mx-8 form-control-cdcm" style={{ display: 'flex', justifyContent: 'flex-end', position: 'relative' }} id={'content-temp-' + val.type}>
-                        <ReceiverComponent
-                          classes={classes}
-                          val={val}
-                          handleReceiverChangeCDCM={handleReceiverChangeCDCM}
-                        />
-                        <TemplateComponent
-                          classes={classes}
-                          val={val}
-                          handleShowTemplateCDCM={handleShowTemplateCDCM}
-                          handleCloseTemplateCDCM={handleCloseTemplateCDCM}
-                          handleChangeCDCM={handleChangeCDCM}
-                        />
-                      </div>
-                      <div className="mt-24 mx-8" style={{ minHeight: 32 }}>
-                        <ContentEditable
-                          html={val.contentShow} // innerHTML of the editable div
-                          disabled={false} // use true to disable editing
-                          onChange={(e) => handleNameChangeCDCM(e, val)} // handle innerHTML change
-                          style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
-                          innerRef={boxTextEl}
-                          onPaste={onPaste}
-                        />
-                      </div>
-                    </div>
-                  ) :
-                  (
-                    <div key={val.type} className={classes.contentCDCM}>
-                      <div style={{ display: 'flex', position: 'relative', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: 18, fontWeight: 600, color: '#BD0F72' }}>{`${index + 1}. ${Object.keys(metadata.inq_type).find(key => metadata.inq_type[key] === val.type)}`}</span>
-                        <div className="mx-8 form-control-cdcm" style={{ display: 'flex', justifyContent: 'flex-end', position: 'relative', alignItems: 'center' }} id={'content-temp-' + val.type}>
+            <Grid item xs={4}>
+              <FormControl error={!valid.ansType}>
+                <FuseChipSelect
+                  value={valueAnsType}
+                  customStyle={styles(fullscreen ? 330 : 295)}
+                  isDisabled={['ANS_DRF', 'INQ_SENT'].includes(currentEditInq.state)}
+                  onChange={handleAnswerTypeChange}
+                  placeholder="Type of Answer"
+                  textFieldProps={{
+                    variant: 'outlined'
+                  }}
+                  options={optionsAnsType}
+                  errorStyle={valid.ansType}
+                />
+                <div style={{ height: '15px' }}>
+                  {!valid.ansType && (
+                    <FormHelperText style={{ marginLeft: '4px' }}>This is required!</FormHelperText>
+                  )}
+                </div>
+              </FormControl>
+            </Grid>
+          </Grid>
+          {/* show Template */}
+          <>
+            {contentsInqCDCM.length ? (
+              <>
+                {containerCheck.includes(currentEditInq.field) ? (
+                  <Dropzone index={0} setDropfiles={setDropfiles}>
+                    {contentsInqCDCM.map((val, index) => (
+                      <div key={val.type} className={classes.contentCDCM}>
+                        <div
+                          className="mt-24 mx-8 form-control-cdcm"
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            position: 'relative'
+                          }}
+                          id={'content-temp-' + val.type}>
                           <ReceiverComponent
                             classes={classes}
                             val={val}
                             handleReceiverChangeCDCM={handleReceiverChangeCDCM}
                           />
-                          <AttachFile
-                            filepaste={val.type === filepaste.type ? filepaste.File : ''}
-                            dropfiles={dropfiles}
-                            typeMedia={2}
-                            indexMedia={index}
+                          <TemplateComponent
+                            classes={classes}
+                            val={val}
+                            handleShowTemplateCDCM={handleShowTemplateCDCM}
+                            handleCloseTemplateCDCM={handleCloseTemplateCDCM}
+                            handleChangeCDCM={handleChangeCDCM}
                           />
-                          <TrashIcon onDelete={() => removeSelectInqType(index)} />
+                        </div>
+                        <div className="mt-24 mx-8" style={{ minHeight: 32 }}>
+                          <ContentEditable
+                            html={val.contentShow} // innerHTML of the editable div
+                            disabled={false} // use true to disable editing
+                            onChange={(e) => handleNameChangeCDCM(e, val)} // handle innerHTML change
+                            style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
+                            innerRef={boxTextEl}
+                            onPaste={onPaste}
+                          />
                         </div>
                       </div>
-                      <TemplateComponent
-                        classes={classes}
-                        val={val}
-                        handleShowTemplateCDCM={handleShowTemplateCDCM}
-                        handleCloseTemplateCDCM={handleCloseTemplateCDCM}
-                        handleChangeCDCM={handleChangeCDCM}
-                      />
-                      <div className="mt-24 mx-8" style={{ minHeight: 32 }}>
-                        <ContentEditable
-                          html={val.contentShow} // innerHTML of the editable div
-                          disabled={false} // use true to disable editing
-                          onChange={(e) => handleNameChangeCDCM(e, val)} // handle innerHTML change
-                          style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
-                          innerRef={boxTextEl}
-                          onPaste={(e) => onPaste(e, val.type)}
-                        />
-                      </div>
-                      {currentEditInq.ansType === metadata.ans_type.choice && (
-                        <div className="mt-16">
-                          <ChoiceAnswerEditor indexType={index} />
-                        </div>
-                      )}
-                      {currentEditInq.ansType === metadata.ans_type.paragraph && (
-                        <div className="mt-16">
-                          <ParagraphAnswerEditor />
-                        </div>
-                      )}
-                      {currentEditInq.mediaFile?.length > 0 && currentEditInq.mediaFile.filter(m => m.index === index).length > 0 &&
-                        <>
-                          <h3>Attachment Inquiry:</h3>
-                          {currentEditInq.mediaFile.filter(m => m.index === index).map((file) => (
-                            <>
-                              <FileAttach
-                                file={file}
-                                files={currentEditInq.mediaFile}
-                                field={currentEditInq.field}
-                                question={currentEditInq}
-                                isEdit={true}
-                                indexType={index}
+                    ))}
+                  </Dropzone>
+                ) : (
+                  <>
+                    {contentsInqCDCM.map((val, index) => (
+                      <div key={val.type} className={classes.contentCDCM}>
+                        <Dropzone index={index} setDropfiles={setDropfiles}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              position: 'relative',
+                              alignItems: 'center',
+                              justifyContent: 'space-between'
+                            }}>
+                            <span style={{ fontSize: 18, fontWeight: 600, color: '#BD0F72' }}>{`${index + 1
+                              }. ${Object.keys(metadata.inq_type).find(
+                                (key) => metadata.inq_type[key] === val.type
+                              )}`}</span>
+                            <div
+                              className="mx-8 form-control-cdcm"
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                position: 'relative',
+                                alignItems: 'center'
+                              }}
+                              id={'content-temp-' + val.type}>
+                              <ReceiverComponent
+                                classes={classes}
+                                val={val}
+                                handleReceiverChangeCDCM={handleReceiverChangeCDCM}
                               />
-                            </>
-                          ))}
-                        </>
-                      }
-                    </div>
-                  )
-                )
-              ) : (
-                <div className="mt-32 mx-8" style={{ minHeight: 32 }}>
-                  <ContentEditable
-                    html={currentEditInq.content} // innerHTML of the editable div
-                    disabled={false} // use true to disable editing
-                    onChange={handleNameChange} // handle innerHTML change
-                    style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
-                    innerRef={boxTextEl}
-                    onPaste={onPaste}
-                  />
-                </div>
-              )}
-            </>
+                              <AttachFile
+                                filepaste={val.type === filepaste.type ? filepaste.File : ''}
+                                dropfiles={dropfiles[index]}
+                                typeMedia={2}
+                                indexMedia={index}
+                              />
+                              <TrashIcon onDelete={() => removeSelectInqType(index)} />
+                            </div>
+                          </div>
+                          <TemplateComponent
+                            classes={classes}
+                            val={val}
+                            handleShowTemplateCDCM={handleShowTemplateCDCM}
+                            handleCloseTemplateCDCM={handleCloseTemplateCDCM}
+                            handleChangeCDCM={handleChangeCDCM}
+                          />
+                          <div className="mt-24 mx-8" style={{ minHeight: 32 }}>
+                            <ContentEditable
+                              html={val.contentShow} // innerHTML of the editable div
+                              disabled={false} // use true to disable editing
+                              onChange={(e) => handleNameChangeCDCM(e, val)} // handle innerHTML change
+                              style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
+                              innerRef={boxTextEl}
+                              onPaste={(e) => onPaste(e, val.type)}
+                            />
+                          </div>
+                          {currentEditInq.ansType === metadata.ans_type.choice && (
+                            <div className="mt-16">
+                              <ChoiceAnswerEditor indexType={index} />
+                            </div>
+                          )}
+                          {currentEditInq.ansType === metadata.ans_type.paragraph && (
+                            <div className="mt-16">
+                              <ParagraphAnswerEditor />
+                            </div>
+                          )}
+                          {currentEditInq.mediaFile?.length > 0 &&
+                            currentEditInq.mediaFile.filter((m) => m.index === index).length >
+                            0 && (
+                              <>
+                                <h3>Attachment Inquiry:</h3>
+                                {currentEditInq.mediaFile
+                                  .filter((m) => m.index === index)
+                                  .map((file) => (
+                                    <>
+                                      <FileAttach
+                                        file={file}
+                                        files={currentEditInq.mediaFile}
+                                        field={currentEditInq.field}
+                                        question={currentEditInq}
+                                        isEdit={true}
+                                        indexType={index}
+                                      />
+                                    </>
+                                  ))}
+                              </>
+                            )}
+                        </Dropzone>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="mt-32 mx-8" style={{ minHeight: 32 }}>
+                <ContentEditable
+                  html={currentEditInq.content} // innerHTML of the editable div
+                  disabled={false} // use true to disable editing
+                  onChange={handleNameChange} // handle innerHTML change
+                  style={{ whiteSpace: 'pre-wrap', display: 'inline' }}
+                  innerRef={boxTextEl}
+                  onPaste={onPaste}
+                />
+              </div>
+            )}
+          </>
 
-            {containerCheck.includes(currentEditInq.field) && currentEditInq.ansType === metadata.ans_type.paragraph && (
+          {containerCheck.includes(currentEditInq.field) &&
+            currentEditInq.ansType === metadata.ans_type.paragraph && (
               <div className="mt-40">
                 <ParagraphAnswerEditor />
               </div>
             )}
-            {currentEditInq.ansType === metadata.ans_type.attachment && (
-              <AttachmentAnswer
-                style={{ marginTop: '1rem' }}
-                isPermissionAttach={allowCreateAttachmentAnswer}
-              />
-            )}
-            <Divider className="mt-12" />
-            {containerCheck.includes(currentEditInq.field) &&
-              <div className={'attachment'}>
-                {currentEditInq.mediaFile?.length > 0 &&
-                  <>
-                    <h3>Attachment Inquiry:</h3>
-                    {currentEditInq.mediaFile?.map((file, mediaIndex) => (
-                      <>
-                        <FileAttach
-                          file={file}
-                          files={currentEditInq.mediaFile}
-                          field={currentEditInq.field}
-                          question={currentEditInq}
-                          isEdit={true}
-                        />
-                      </>
-                    ))}
-                  </>
-                }
-              </div>
-            }
-            <>
-              {user.role !== 'Admin' && (
+          {currentEditInq.ansType === metadata.ans_type.attachment && (
+            <AttachmentAnswer
+              style={{ marginTop: '1rem' }}
+              isPermissionAttach={allowCreateAttachmentAnswer}
+            />
+          )}
+          <Divider className="mt-12" />
+          {containerCheck.includes(currentEditInq.field) && (
+            <div className={'attachment'}>
+              {currentEditInq.mediaFile?.length > 0 && (
                 <>
-                  {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
-                  {currentEditInq.mediaFilesAnswer?.map((file) => (
+                  <h3>Attachment Inquiry:</h3>
+                  {currentEditInq.mediaFile?.map((file, mediaIndex) => (
                     <>
                       <FileAttach
                         file={file}
-                        files={currentEditInq.mediaFilesAnswer}
+                        files={currentEditInq.mediaFile}
                         field={currentEditInq.field}
-                        isAnswer={true}
                         question={currentEditInq}
                         isEdit={true}
                       />
@@ -1736,30 +1764,49 @@ const InquiryEditor = (props) => {
                   ))}
                 </>
               )}
-            </>
+            </div>
+          )}
+          <>
+            {user.role !== 'Admin' && (
+              <>
+                {currentEditInq.mediaFilesAnswer?.length > 0 && <h3>Attachment Answer:</h3>}
+                {currentEditInq.mediaFilesAnswer?.map((file) => (
+                  <>
+                    <FileAttach
+                      file={file}
+                      files={currentEditInq.mediaFilesAnswer}
+                      field={currentEditInq.field}
+                      isAnswer={true}
+                      question={currentEditInq}
+                      isEdit={true}
+                    />
+                  </>
+                ))}
+              </>
+            )}
+          </>
+          <div className="flex">
             <div className="flex">
-              <div className="flex">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={isDisabled || !fieldValue || !valueType?.length || !valueAnsType?.length}
-                  onClick={() => onSave(containerCheck.includes(currentEditInq.field))}
-                  classes={{ root: classes.button }}>
-                  Save
-                </Button>
-                <Button
-                  variant="contained"
-                  classes={{ root: clsx(classes.button, 'reply') }}
-                  color="primary"
-                  onClick={onCancel}>
-                  Cancel
-                </Button>
-              </div>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={isDisabled || !fieldValue || !valueType?.length || !valueAnsType?.length}
+                onClick={() => onSave(containerCheck.includes(currentEditInq.field))}
+                classes={{ root: classes.button }}>
+                Save
+              </Button>
+              <Button
+                variant="contained"
+                classes={{ root: clsx(classes.button, 'reply') }}
+                color="primary"
+                onClick={onCancel}>
+                Cancel
+              </Button>
             </div>
           </div>
-        )}
-      </>
-    </div>
+        </div>
+      )}
+    </>
   );
 };
 
