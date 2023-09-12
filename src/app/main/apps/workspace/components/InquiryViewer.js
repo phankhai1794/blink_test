@@ -422,26 +422,8 @@ const InquiryViewer = (props) => {
     return response;
   }
 
-  const setDefaultAction = (val) => {
-    const optionsInquires = [...inquiries];
-    optionsInquires.forEach(op => {
-      op.showIconAttachAnswerFile = (val.type === 'ANS' || ['INQ_SENT'].includes(val.state)) && op.groupId === val.groupId;
-    });
-    dispatch(InquiryActions.setInquiries(optionsInquires));
-    //
-    const getQuestion = {...question};
-    if (getQuestion.groupId === val.groupId) {
-      if (val.state === 'OPEN' && !isResolve && !isResolveCDCM) {
-        dispatch(InquiryActions.setEditInq(val));
-      } else {
-        dispatch(InquiryActions.setEditInq());
-      }
-      if (!['INQ', 'ANS'].includes(val.type)) {
-        getQuestion.content = val.content;
-        setQuestion(getQuestion);
-      }
-    }
-    if (getQuestion.groupId !== val.groupId) {
+  const checkSetActionCurrentState = (getQuestion) => {
+    if (getQuestion.process === 'pending') {
       setIsReply(false);
       setIsReplyCDCM(false);
       setIsResolve(false);
@@ -510,7 +492,109 @@ const InquiryViewer = (props) => {
       }
       getQuestion.showIconAttachAnswerFile = false;
       getQuestion.showIconAttachReplyFile = false;
-      setQuestion(getQuestion);
+    } else {
+      getQuestion.showIconEdit = true;
+      getQuestion.showIconAttachAnswerFile = false;
+      getQuestion.showIconAttachReplyFile = false;
+      setIsReply(false);
+      setIsReplyCDCM(false);
+      setStateReplyDraft(false);
+      setIsResolve(false);
+      setIsResolveCDCM(false);
+      setDisableCDCM(true);
+      //
+      if (getQuestion.state === 'RESOLVED') {
+        setDisableReopen(false);
+        setIsReplyCDCM(false);
+        setIsResolveCDCM(false);
+      }
+      if (user.role === 'Admin') {
+        if (getQuestion.role === 'Guest') {
+          if (['REP_SENT', 'AME_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = true;
+            setTempReply({});
+          }
+        } else {
+          if (['REP_DRF'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = false;
+            setShowLabelSent(false);
+            setStateReplyDraft(true);
+          } else if (['REP_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = false;
+            setShowLabelSent(true);
+            setStateReplyDraft(true);
+          }
+        }
+        if (['REOPEN_A'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+        } else if (['REOPEN_Q'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+        }
+        if (['REOPEN_A', 'REOPEN_Q'].includes(getQuestion.state)) {
+          if (typeof getQuestion.content === 'string') {
+            setTempReply({})
+          }
+        }
+      }
+      else {
+        if (getQuestion.role === 'Guest') {
+          if (['REP_SENT', 'AME_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = false;
+            setSubmitLabel(true);
+            setStateReplyDraft(true);
+          } else if (['AME_DRF', 'REP_DRF'].includes(getQuestion.state)) {
+            setSubmitLabel(false);
+            setStateReplyDraft(true);
+          }
+        } else {
+          if (['REP_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = true;
+            getQuestion.showIconEdit = false;
+            setSubmitLabel(false);
+            setTempReply({});
+          }
+        }
+        if (['UPLOADED'].includes(getQuestion.state)) {
+          setStateReplyDraft(false);
+        } else if (['REOPEN_A'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+          getQuestion.showIconEdit = false;
+        } else if (['REOPEN_Q'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+          getQuestion.showIconEdit = false;
+        }
+        if (['REOPEN_A', 'REOPEN_Q'].includes(getQuestion.state)) {
+          // is CM CD Amendment
+          if (typeof getQuestion.content === 'string') setTempReply({});
+          setSubmitLabel(false);
+        }
+      }
+    }
+    return getQuestion
+  }
+
+  const setDefaultAction = (val) => {
+    const optionsInquires = [...inquiries];
+    optionsInquires.forEach(op => {
+      op.showIconAttachAnswerFile = (val.type === 'ANS' || ['INQ_SENT'].includes(val.state)) && op.groupId === val.groupId;
+    });
+    dispatch(InquiryActions.setInquiries(optionsInquires));
+    //
+    const getQuestion = {...question};
+    if (getQuestion.process === 'pending' ? getQuestion.groupId === val.groupId : getQuestion.id === val.id) {
+      if (val.state === 'OPEN' && !isResolve && !isResolveCDCM) {
+        dispatch(InquiryActions.setEditInq(val));
+      } else {
+        dispatch(InquiryActions.setEditInq());
+      }
+      if (!confirmClick && !['INQ', 'ANS'].includes(val.type)) {
+        getQuestion.content = val.content;
+        setQuestion(getQuestion);
+      }
+    }
+    if (getQuestion.process === 'pending' ? getQuestion.groupId !== val.groupId : getQuestion.id !== val.id) {
+      const currStateQuestion = checkSetActionCurrentState(getQuestion);
+      setQuestion(currStateQuestion);
     }
   }
   useEffect(() => {
@@ -885,6 +969,7 @@ const InquiryViewer = (props) => {
             lastest.sentAt = lastestComment.sentAt;
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
+            lastest.role = lastestComment.role;
             lastest.process = 'draft';
             if (containerCheck.includes(question.field)) {
               const lastestContentCDCM = res.filter(r => (r.state.includes('AME_') || r.state.includes('REOPEN_')) && !['REP_AME_DRF_DELETED', 'REP_AME_SENT_DELETED'].includes(r.state));
@@ -969,7 +1054,6 @@ const InquiryViewer = (props) => {
                 }
               }
               if (['UPLOADED'].includes(lastest.state)) {
-                setStateReplyDraft(false);
                 setStateReplyDraft(false);
               } else if (['REOPEN_A'].includes(lastest.state)) {
                 lastest.showIconReply = true;
@@ -1193,6 +1277,7 @@ const InquiryViewer = (props) => {
   }, []);
 
   useEffect(() => {
+    if (confirmClick) props.setDefaultAction({val: {}, action: false})
     if (confirmClick && confirmPopupType === 'removeInq' && replyRemove) {
       const optionsOfQuestion = [...inquiries];
       if (replyRemove.inqId) {
@@ -1626,6 +1711,8 @@ const InquiryViewer = (props) => {
     }
     if (question.process === 'pending') {
       confirmPopupType = 'removeReplyInquiry';
+    } else {
+      props.setDefaultAction({val: question, action: true})
     }
     setReplyRemove(question);
     dispatch(
@@ -2957,6 +3044,7 @@ const InquiryViewer = (props) => {
     setFilepaste('');
     setShowViewAll(false);
     if (user.role === 'Guest') {
+      dispatch(InquiryActions.addAmendment())
       setDisableCDCM(false);
       setDisableCDCMAmendment(false);
     }
@@ -3022,6 +3110,7 @@ const InquiryViewer = (props) => {
   }
 
   const reOpen = (idInq) => {
+    props.setDefaultAction({val: {}, action: false});
     reOpenInquiry(idInq)
       .then((res) => {
         const optionsInquires = [...inquiries];
