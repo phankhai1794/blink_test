@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
+const Amendment = ({ question, inquiriesLength, getUpdatedAt, setDefaultAction }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const socket = useContext(SocketContext);
@@ -211,6 +211,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   }
 
   const handleSave = () => {
+    setDefaultAction({val: {}, action: false})
     setDisableSave(true);
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     fieldValueSeparate.name = fieldValueSeparate.name.toUpperCase().trim();

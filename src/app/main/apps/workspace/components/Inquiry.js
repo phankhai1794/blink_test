@@ -180,10 +180,13 @@ const Inquiry = (props) => {
   };
 
   useEffect(() => {
-    if (currentAmendment !== undefined && inputAddAmendmentEndRef.current) {
+    if ((currentEditInq && !currentEditInq.id) || currentAmendment !== undefined) {
+      setInqActing({val: { id: null }, action: true})
+    }
+    if (currentAmendment && inputAddAmendmentEndRef.current) {
       inputAddAmendmentEndRef.current.scrollIntoView({ behavior: "smooth" })
     }
-  }, [currentAmendment]);
+  }, [currentEditInq, currentAmendment])
 
   return props.user === 'workspace' ? (
     <div ref={scrollTopPopup}>
@@ -310,7 +313,14 @@ const Inquiry = (props) => {
       <div ref={inputAddAmendmentEndRef}>
         {currentAmendment || currentAmendment === null &&
           <div style={{ marginTop: 30 }}>
-            <AmendmentEditor getUpdatedAt={() => { }} />
+            <AmendmentEditor
+              getUpdatedAt={() => { }}
+              setDefaultAction={(currQ) => {
+                if (currQ) {
+                  setInqActing(currQ);
+                }
+              }}
+            />
           </div>
         }
       </div>

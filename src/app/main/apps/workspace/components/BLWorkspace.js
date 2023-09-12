@@ -324,7 +324,7 @@ const BLWorkspace = (props) => {
         fabTitle: 'Amendment Form',
         title: labelAmendment,
         field: 'AMENDMENT_FORM',
-        child: <AmendmentEditor getUpdatedAt={() => { }} />
+        child: <AmendmentEditor getUpdatedAt={() => { }} setDefaultAction={() => { }} />
       };
     default:
       return {
