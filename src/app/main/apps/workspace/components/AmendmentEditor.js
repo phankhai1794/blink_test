@@ -5,9 +5,9 @@ import { Button, Typography, FormHelperText, FormControl, TextField } from "@mat
 import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
-import { saveEditedField } from 'app/services/draftblService';
-import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate, generateFileNameTimeFormat  } from '@shared';
-import { NO_CONTENT_AMENDMENT, CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN, DESCRIPTION_OF_GOODS1, DESCRIPTION_OF_GOODS2, DESCRIPTION_OF_GOODS, } from '@shared/keyword';
+import { saveEditedField, wraptextDummyField } from 'app/services/draftblService';
+import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate, generateFileNameTimeFormat, validateGroupOneTextBox } from '@shared';
+import { NO_CONTENT_AMENDMENT, CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN, DESCRIPTION_OF_GOODS1, DESCRIPTION_OF_GOODS2, DESCRIPTION_OF_GOODS, EXPORT_REF, } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
@@ -403,6 +403,14 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt, setDefaultAction }
     dispatch(FormActions.toggleCreateAmendment(false));
   }
 
+  const handleWrapText = () => {
+    wraptextDummyField({ content: fieldValue })
+      .then((res) => {
+        setFieldValue(res);
+      })
+      .catch((err) => handleError(dispatch, err));
+  };
+
   const containerCheck = [getField(CONTAINER_DETAIL), getField(CONTAINER_MANIFEST)];
 
 
@@ -533,6 +541,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt, setDefaultAction }
     const fieldId = field || fieldValueSelect?.value;
     if (isChange && fieldValueSelect && fieldValueSelect.keyword === BL_TYPE) {
       response = validateBLType(value);
+    }
+    if (isChange && fieldValueSelect && fieldValueSelect.keyword === EXPORT_REF) {
+      response = validateGroupOneTextBox(value);
     }
     return response;
   }
@@ -718,6 +729,15 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt, setDefaultAction }
         >
           Save
         </Button>
+        {user.role === 'Guest' && fieldValueSelect && fieldValueSelect.keyword === 'expRef' && (
+          <Button
+            className={clsx(classes.btn)}
+            onClick={handleWrapText}
+            color="primary"
+            variant="contained">
+            Wraptext
+          </Button>
+        )}
         {
           (
             (openAmendmentList && inquiriesLength > 0)

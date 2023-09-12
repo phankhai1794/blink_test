@@ -30,3 +30,8 @@ export async function getCommentDraftBl(blId, field) {
   const response = await axios().get(`${PATH}/getComment/${blId}/${field}`);
   return response.data;
 }
+
+export async function wraptextDummyField(body) {
+  const response = await axios().post(`${PATH}/WrapTextDummyField`, body);
+  return response.data;
+}

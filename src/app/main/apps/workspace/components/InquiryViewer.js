@@ -9,7 +9,7 @@ import {
   uploadOPUS
 } from 'app/services/inquiryService';
 import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateGroupOneTextBox, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileNameTimeFormat } from '@shared';
-import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
+import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply, wraptextDummyField } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import { sendmailResolve } from 'app/services/mailService';
@@ -2994,6 +2994,23 @@ const InquiryViewer = (props) => {
     dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id)));
   };
 
+  const hanldeWraptext = () => {
+    const body = {
+      content: tempReply.answer.content
+    };
+    wraptextDummyField(body)
+      .then((res) => {
+        setTempReply({
+          ...tempReply,
+          answer: {
+            ...tempReply.answer,
+            content: res
+          }
+        });
+      })
+      .catch((err) => handleError(dispatch, err));
+  };
+
   const onReply = (q) => {
     // case: Reply Answer
     props.setDefaultAction({val: question, action: true});
@@ -4089,6 +4106,16 @@ const InquiryViewer = (props) => {
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
                         </Button>
+                        {question.state.includes('AME_') &&
+                          question?.field === metadata.field[EXPORT_REF] && (
+                            <Button
+                              variant="contained"
+                              classes={{ root: clsx(classes.button, 'w120') }}
+                              color="primary"
+                              onClick={() => hanldeWraptext(tempReply)}>
+                              Wraptext
+                            </Button>
+                          )}
                         <Button
                           variant="contained"
                           classes={{ root: clsx(classes.button, 'w120', 'reply') }}
