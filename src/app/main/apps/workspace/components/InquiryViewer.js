@@ -87,7 +87,7 @@ import {
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Button,
@@ -348,6 +348,24 @@ const InquiryViewer = (props) => {
   const [isHasEditCdCm, setHasEditCdCm] = useState(false);
   const [isResolveAndUpload, setIsResolveAndUpload] = useState(false);
   const socket = useContext(SocketContext);
+  const [clickToOnPaste, setClickToOnPaste] = useState(false);
+
+  useEffect(() => {
+    const hiddenInput = document.getElementsByClassName('classTriggerOnPaste');
+    if (hiddenInput) {
+      for (const divElement of hiddenInput) {
+        const customData = divElement.getAttribute("data-paste");
+        if (customData) {
+          const splitAttr = customData.split('-');
+          if (splitAttr && splitAttr.length === 3)
+            if (splitAttr[0] === 'true' || splitAttr[1] === 'true' || splitAttr[2] === 'true') {
+              divElement.focus({ preventScroll: true });
+              break;
+            }
+        }
+      }
+    }
+  }, [question.showIconAttachAnswerFile, question.showIconAttachFile, question.showIconAttachReplyFile, clickToOnPaste]);
 
   const syncData = (data, syncOptSite = "") => {
     socket.emit("sync_data", { data, syncOptSite });
@@ -3012,6 +3030,7 @@ const InquiryViewer = (props) => {
   };
 
   const onReply = (q) => {
+    setClickToOnPaste(!clickToOnPaste)
     // case: Reply Answer
     props.setDefaultAction({val: question, action: true});
     const optionsInquires = [...inquiries];
@@ -3051,6 +3070,7 @@ const InquiryViewer = (props) => {
 
   // TODO
   const handleEdit = (q) => {
+    setClickToOnPaste(!clickToOnPaste)
     props.setDefaultAction({val: q, action: true});
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
@@ -3411,7 +3431,7 @@ const InquiryViewer = (props) => {
           onClick={() => dispatch(FormActions.inqViewerFocus(question.id))}
           {...getRootProps({})}>
           {(isReply || question.showIconAttachAnswerFile) && isDragActive && <div className='dropzone'>Drop files here</div>}
-          <div>
+          <div onClick={() => setClickToOnPaste(!clickToOnPaste)}>
             {(question?.process === 'draft') &&
               <TagsComponent tagName='AMENDMENT' tagColor='primary' question={question} isAllInq={isAllInq} />
             }
@@ -3724,7 +3744,17 @@ const InquiryViewer = (props) => {
             ) : ``}
             {/*Allow edit table when reply amendment*/}
 
-            <div style={{ display: 'block', margin: '1rem 0rem' }} onPaste={onPaste}>
+            <input
+              data-paste={`${question.showIconAttachAnswerFile}-${question.showIconAttachFile}-${question.showIconAttachReplyFile}`}
+              className={'classTriggerOnPaste'}
+              type="text"
+              style={{
+                position: 'absolute',
+                left: '-99999px',
+              }}
+              onPaste={onPaste}
+            />
+            <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'ANS_DRF', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
