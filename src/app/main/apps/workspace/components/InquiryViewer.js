@@ -59,28 +59,6 @@ import {
   FORWARDER,
   ORIGINAL_BL,
   SEAWAY_BILL,
-  HS_HTS_NCM_Code,
-  EVENT_DATE,
-  TOTAL_CONTAINERS,
-  HAZ_REF_OOG,
-  EQUIPMENT_SUB,
-  CONTAINER_INF_MISMATCH,
-  CONTAINER_STATUS_INQ,
-  TOTAL_CONTAINERS_PER_TP_SZ,
-  SPECIAL_CARGO_DETAIL,
-  MISSING_GATE_IN_EVENTS,
-  MISMATCH_DRAIN,
-  VOLUME_DIFFRENCE,
-  CTNR_NOT_LINK_IN_BOOKING,
-  MISSING_PACKAGING_GROUP,
-  MISSING_TEMPERATURE,
-  VENTILATION_MISMATCH,
-  MISSING_PACKAGE_INFORMATION,
-  MISSING_MISMATCH_UN,
-  MISSING_MISMATCH_IMDG,
-  VOLUME_DIFFERENCE,
-  SPECIAL_CARGO,
-  CM_CUSTOMS_DESCRIPTION,
   EXPORT_REF,
   T_VVD,
 } from '@shared/keyword';
@@ -105,9 +83,9 @@ import WarningIcon from '@material-ui/icons/Warning';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
 import { useDropzone } from 'react-dropzone';
-import Diff from "../shared-components/react-diff";
 import { SocketContext } from 'app/AppContext';
 
+import Diff from "../shared-components/react-diff";
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 import * as Actions from '../store/actions';
@@ -116,7 +94,6 @@ import { TrashIcon } from '../shared-components';
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
-import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import UserInfo from './UserInfo';
 import AttachFile from './AttachFile';
@@ -297,7 +274,6 @@ const InquiryViewer = (props) => {
   const expandFileQuestionIds = useSelector(({ workspace }) => workspace.inquiryReducer.enableExpandAttachment);
   const cancelAmePopup = useSelector(({ workspace }) => workspace.inquiryReducer.cancelAmePopup);
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
   const [question, setQuestion] = useState(props.question);
   const [type, setType] = useState(props.question.ansType);
@@ -394,8 +370,17 @@ const InquiryViewer = (props) => {
   }
 
   const isDateTimeField = () => {
-    setIsDateTime(isDateField(metadata, question.field));
-    setIsValidDate(isDateField(metadata, question.field));
+    const result = isDateField(metadata, question.field)
+    setIsDateTime(result);
+    if (result) {
+      if (question.process === 'pending') {
+        const originTime = content[question.field] ? formatDate(content[question.field], 'YYYY-MM-DD') : '';
+        const resolveVal = textResolve ? formatDate(textResolve, 'YYYY-MM-DD') : '';
+        setIsValidDate(originTime !== resolveVal);
+      } else {
+        setIsValidDate(true);
+      }
+    }
   }
 
   const handleViewMore = (id) => {
@@ -1687,7 +1672,6 @@ const InquiryViewer = (props) => {
   }, [disableCDCMAmendment]);
 
   const removeQuestion = (question) => {
-    setIndexQuestionRemove(inquiries.findIndex((q) => q.field === question.field && q.inqType === question.inqType));
     if (tempReply.answer) {
       question.inqId = tempReply.answer.id;
     }
@@ -2389,9 +2373,9 @@ const InquiryViewer = (props) => {
       const originTime = content[question.field] ? formatDate(content[question.field], 'YYYY-MM-DD') : '';
       if (!isNaN(e?.getTime())) {
         setTextResolve(e.toISOString());
-        if (originTime === formatDate(e?.toISOString(), 'YYYY-MM-DD') && question.process === 'pending')
-          setIsValidDate(true)
-        else setIsValidDate(false);
+        if (question.process === 'pending') {
+          setIsValidDate(originTime !== formatDate(e?.toISOString(), 'YYYY-MM-DD'))
+        } else setIsValidDate(true);
       } else {
         setTextResolve(e);
         setIsValidDate(true);
@@ -3958,7 +3942,7 @@ const InquiryViewer = (props) => {
                           (isSeparate ?
                             (validatePartiesContent(textResolveSeparate.name, 'name')?.isError
                               || validatePartiesContent(textResolveSeparate.address, 'address')?.isError)
-                            : validateField(question?.field, textResolve).isError) || disableAcceptResolve || !validationCDCM || isValidDate
+                            : validateField(question?.field, textResolve).isError) || disableAcceptResolve || !validationCDCM || (isDateTime && !isValidDate)
                         }
                         color="primary"
                         onClick={() => {
