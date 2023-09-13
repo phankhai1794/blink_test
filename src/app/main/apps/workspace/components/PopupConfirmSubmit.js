@@ -181,6 +181,7 @@ const PopupConfirmSubmit = (props) => {
         dispatch(Actions.showMessage({ message: 'Your answer has been submitted successfully.', variant: 'success' }));
       }
     } else {
+      dispatch(Actions.showMessage({ message: 'Your inquiries and amendments have been sent successfully.', variant: 'success' }));
       dispatch(InquiryActions.setOneInq({}));
     }
     dispatch(InquiryActions.checkSubmit(!enableSubmit));
