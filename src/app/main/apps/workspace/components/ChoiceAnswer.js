@@ -130,7 +130,7 @@ const ChoiceAnswer = (props) => {
                       className={classes.input}
                       fullWidth
                       value={otherOptionText}
-                      autoFocus
+                      // autoFocus
                       onChange={(e) => {
                         setOtherOptionText(e.target.value)
                         handleChange(question.answerObj[question.answerObj.length - 1].id, e.target.value)
