@@ -87,7 +87,7 @@ import {
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Button,
@@ -348,6 +348,7 @@ const InquiryViewer = (props) => {
   const [isHasEditCdCm, setHasEditCdCm] = useState(false);
   const [isResolveAndUpload, setIsResolveAndUpload] = useState(false);
   const socket = useContext(SocketContext);
+  const triggerOnpaste = useRef(null);
 
   const syncData = (data, syncOptSite = "") => {
     socket.emit("sync_data", { data, syncOptSite });
@@ -576,7 +577,7 @@ const InquiryViewer = (props) => {
   const setDefaultAction = (val) => {
     const optionsInquires = [...inquiries];
     optionsInquires.forEach(op => {
-      op.showIconAttachAnswerFile = (val.type === 'ANS' || ['INQ_SENT'].includes(val.state)) && op.groupId === val.groupId;
+      op.showIconAttachAnswerFile = (val.type === 'ANS' || ['INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(val.state)) && op.groupId === val.groupId;
     });
     dispatch(InquiryActions.setInquiries(optionsInquires));
     //
@@ -3012,6 +3013,9 @@ const InquiryViewer = (props) => {
   };
 
   const onReply = (q) => {
+    if (triggerOnpaste.current) {
+      triggerOnpaste.current.focus({preventScroll: true});
+    }
     // case: Reply Answer
     props.setDefaultAction({val: question, action: true});
     const optionsInquires = [...inquiries];
@@ -3051,6 +3055,9 @@ const InquiryViewer = (props) => {
 
   // TODO
   const handleEdit = (q) => {
+    if (triggerOnpaste.current) {
+      triggerOnpaste.current.focus({preventScroll: true});
+    }
     props.setDefaultAction({val: q, action: true});
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
@@ -3411,7 +3418,7 @@ const InquiryViewer = (props) => {
           onClick={() => dispatch(FormActions.inqViewerFocus(question.id))}
           {...getRootProps({})}>
           {(isReply || question.showIconAttachAnswerFile) && isDragActive && <div className='dropzone'>Drop files here</div>}
-          <div>
+          <div onPaste={onPaste}>
             {(question?.process === 'draft') &&
               <TagsComponent tagName='AMENDMENT' tagColor='primary' question={question} isAllInq={isAllInq} />
             }
@@ -3724,7 +3731,17 @@ const InquiryViewer = (props) => {
             ) : ``}
             {/*Allow edit table when reply amendment*/}
 
-            <div style={{ display: 'block', margin: '1rem 0rem' }} onPaste={onPaste}>
+            <input
+              ref={triggerOnpaste}
+              type="text"
+              style={{
+                position: 'absolute',
+                left: '-99999px',
+              }}
+              autoFocus
+              onPaste={onPaste}
+            />
+            <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'ANS_DRF', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
@@ -4040,6 +4057,7 @@ const InquiryViewer = (props) => {
                         className='attachment-reply'
                         style={{ width: 900 }}
                         onMouseLeave={() => { question.showIconEdit && dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
+                        onPaste={onPaste}
                       >
                         {tempReply?.mediaFiles?.map((file, mediaIndex) => (
                           <>
