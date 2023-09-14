@@ -213,7 +213,7 @@ const AllInquiry = (props) => {
       setSaveAnswer(!isSaveAnswer)
       setUpdateReply(false);
     }
-    if (scrollTopPopup.current && !scrollInquiry) {
+    if (scrollTopPopup.current && !scrollInquiry && !inqActing.action) {
       scrollTopPopup.current.scrollIntoView(true);
     }
   }, [isUpdateReply, inqActing.action]);

@@ -3722,7 +3722,6 @@ const InquiryViewer = (props) => {
                 position: 'absolute',
                 left: '-99999px',
               }}
-              autoFocus
               onPaste={onPaste}
             />
             <div style={{ display: 'block', margin: '1rem 0rem' }}>
