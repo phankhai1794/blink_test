@@ -19,6 +19,7 @@ import {
   TOTAL_MEASUREMENT_UNIT, CONTAINER_DETAIL,
   DESCRIPTION_OF_GOODS1,
   DESCRIPTION_OF_GOODS2,
+  SEQ
 } from '@shared/keyword';
 import { getTotalValueMDView, NumberFormat } from '@shared';
 import { packageUnitsJson } from '@shared/units';
@@ -145,6 +146,14 @@ const useStyles = makeStyles((theme) => ({
     flexBasis: '26%',
     maxWidth: '26%'
   },
+  styleGrid: {
+    '& .MuiGrid-grid-xs-2': {
+      maxWidth: '13.34%'
+    }
+  },
+  styleGridSeq: {
+    maxWidth: '6.5%'
+  }
 }));
 
 const TableCM = (props) => {
@@ -338,8 +347,8 @@ const TableCM = (props) => {
     <div
       className={clsx(
         classes.root,
-        checkClassName(hasInquiry, hasAmendment, hasAnswer, isResolved, isUploaded, classes)
-          .className
+        checkClassName(hasInquiry, hasAmendment, hasAnswer, isResolved, isUploaded, classes).className,
+        classes.styleGrid
       )}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -355,6 +364,11 @@ const TableCM = (props) => {
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         className="px-8 justify-between">
+        {drfView === 'CM' && (
+          <Grid container item xs={1} className={classes.styleGridSeq}>
+            <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '15px' }}>SEQ</Label>
+          </Grid>
+        )}
         <Grid container item xs={drfView === 'CM' ? 1 : 2} className={drfView === 'CM' ? clsx(classes['grid-xs-1']) : ''} spacing={1}>
           <Label className={clsx(classes.labelMargin)}>
             {'CNTR. NOS. W/SEAL NOS.\nMARKS & NUMBERS'}
@@ -408,7 +422,10 @@ const TableCM = (props) => {
           </Grid>
         ) : containerManifest?.length > 0 ? (
           containerManifest.map((cm, index) => (
-            <Grid container spacing={2} className="px-8 py-2" key={index}>
+            <Grid container spacing={2} className="py-2" key={index}>
+              <Grid container item xs={1} className={classes.styleGridSeq}>
+                <BLField multiline={true}>{cm?.[metadata?.inq_type?.[SEQ]]}</BLField>
+              </Grid>
               <Grid item xs={1} className={clsx(classes['grid-xs-1'])}>
                 <BLField multiline={true}>{cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>
               </Grid>

@@ -7,7 +7,7 @@ import {
   CONTAINER_MEASUREMENT,
   CONTAINER_PACKAGE_UNIT,
   CONTAINER_WEIGHT_UNIT,
-  CONTAINER_MEASUREMENT_UNIT
+  CONTAINER_MEASUREMENT_UNIT, SEQ
 } from '@shared/keyword';
 import { NumberFormat } from '@shared';
 import { packageUnitsJson, containerTypeUnit } from '@shared/units';
@@ -118,6 +118,14 @@ const useStyles = makeStyles((theme) => ({
   labelMargin: {
     marginTop: '0.6rem !important',
     display: 'flex',
+  },
+  styleGrid: {
+    '& .MuiGrid-grid-xs-2': {
+      maxWidth: '15.5%'
+    }
+  },
+  styleGridSeq: {
+    maxWidth: '6.5%'
   }
 }));
 
@@ -160,6 +168,7 @@ const TableCD = (props) => {
     });
   }
   cdSorted = [...cdSorted, ...cds];
+  console.log('cdSorted', cdSorted);
 
   const onMouseEnter = (e) => setIsHovering(true);
 
@@ -268,7 +277,8 @@ const TableCD = (props) => {
           isResolved,
           isUploaded,
           classes
-        ).className
+        ).className,
+        classes.styleGrid
       )}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -284,6 +294,9 @@ const TableCD = (props) => {
         container
         className="px-8 justify-between">
         <Grid container spacing={2}>
+          <Grid container item xs={1} className={classes.styleGridSeq}>
+            <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '15px' }}>SEQ</Label>
+          </Grid>
           <Grid container item xs={2}>
             <Label className={clsx(classes.labelMargin)} style={{ marginLeft: '15px' }}>CONTAINER NUMBER</Label>
           </Grid>
@@ -305,6 +318,11 @@ const TableCD = (props) => {
           {cdSorted?.length > 0 ? (
             cdSorted.map((cd, index) => (
               <Grid container spacing={2} className="px-8 py-2" key={index}>
+                <Grid item xs={1} className={classes.styleGridSeq}>
+                  <BLField>
+                    {cd?.[metadata?.inq_type?.[SEQ]]}
+                  </BLField>
+                </Grid>
                 <Grid item xs={2}>
                   <BLField>
                     {cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}
