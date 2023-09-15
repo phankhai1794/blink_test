@@ -290,7 +290,7 @@ const InquiryViewer = (props) => {
   const [validationCDCM, setValidationCDCM] = useState(true);
   const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS].map(key => metadata.field?.[key]).includes(question.field));
+  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS, EXPORT_REF].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
@@ -643,7 +643,7 @@ const InquiryViewer = (props) => {
     let isUnmounted = false;
     setTempReply({});
     setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-    setIsAlsoNotifies([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS].map(key => metadata.field?.[key]).includes(question.field));
+    setIsAlsoNotifies([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS, EXPORT_REF].map(key => metadata.field?.[key]).includes(question.field));
     setIsResolve(false);
     setIsResolveCDCM(false);
     setIsReply(false);
@@ -2107,10 +2107,16 @@ const InquiryViewer = (props) => {
       fieldContent: contentField,
       blId: myBL.id,
       contsNoChange,
-      fieldNameContent: (textResolveSeparate.name.trim() === '' && textResolveSeparate.address.trim() === '') ? NO_CONTENT_AMENDMENT : textResolveSeparate.name.toUpperCase().trim(),
+      fieldNameContent:
+        textResolveSeparate.name.trim() === '' && textResolveSeparate.address.trim() === ''
+          ? NO_CONTENT_AMENDMENT
+          : textResolveSeparate.name.toUpperCase().trim(),
       fieldAddressContent: textResolveSeparate.address.toUpperCase().trim() || '',
-      isWrapText,
-      hasUpload: isResolveAndUpload
+      isWrapText: [EXPORT_REF].map((key) => metadata.field?.[key]).includes(question.field)
+        ? true
+        : isWrapText,
+      hasUpload: isResolveAndUpload,
+      isExpRefField: [EXPORT_REF].map((key) => metadata.field?.[key]).includes(question.field)
     };
     if (containerCheck.includes(question.field)) {
       setIsResolveCDCM(true);
@@ -2977,23 +2983,6 @@ const InquiryViewer = (props) => {
     setDropfiles([]);
     setSaveComment(!isSaveComment);
     dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id)));
-  };
-
-  const hanldeWraptext = () => {
-    const body = {
-      content: tempReply.answer.content
-    };
-    wraptextDummyField(body)
-      .then((res) => {
-        setTempReply({
-          ...tempReply,
-          answer: {
-            ...tempReply.answer,
-            content: res
-          }
-        });
-      })
-      .catch((err) => handleError(dispatch, err));
   };
 
   const onReply = (q) => {
@@ -4107,16 +4096,6 @@ const InquiryViewer = (props) => {
                           classes={{ root: clsx(classes.button, 'w120') }}>
                           Save
                         </Button>
-                        {question.state.includes('AME_') &&
-                          question?.field === metadata.field[EXPORT_REF] && (
-                            <Button
-                              variant="contained"
-                              classes={{ root: clsx(classes.button, 'w120') }}
-                              color="primary"
-                              onClick={() => hanldeWraptext(tempReply)}>
-                              Wraptext
-                            </Button>
-                          )}
                         <Button
                           variant="contained"
                           classes={{ root: clsx(classes.button, 'w120', 'reply') }}
