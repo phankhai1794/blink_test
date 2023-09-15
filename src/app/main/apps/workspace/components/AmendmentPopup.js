@@ -398,7 +398,7 @@ const AmendmentPopup = (props) => {
   };
 
   const CustomSelect = (props) => {
-    const { title, options, required } = props;
+    const { title, options, required, lock } = props;
     const type = inqType === CONTAINER_DETAIL ? CDTitle : CMTitle;
     const field = type.find((f) => f.title === title);
     const isError = errors[title];
@@ -409,9 +409,10 @@ const AmendmentPopup = (props) => {
         handleChange(field, options[0].value);
     }, []);
 
+    const disabled = !isEdit || lock
     return (
       <>
-        {isEdit ? (
+        {isEdit && !lock ? (
           <FormControl style={{ width: '100%' }} error={isError}>
             <Controller
               control={control}
@@ -452,11 +453,11 @@ const AmendmentPopup = (props) => {
           <TextField
             fullWidth={true}
             variant="outlined"
-            className={clsx(classes.textField, !isEdit && classes.lock)}
+            className={clsx(classes.textField, disabled && classes.lock)}
             value={getType(CONTAINER_TYPE) === field.id ? containerTypeUnit.find(contType => contType.value === field.value)?.label : field.value}
             InputProps={{
-              disabled: !isEdit,
-              endAdornment: <>{!isEdit && <Icon>lock</Icon>}</>
+              disabled: disabled,
+              endAdornment: <>{disabled && <Icon>lock</Icon>}</>
             }}
           />
         )}
@@ -477,7 +478,7 @@ const AmendmentPopup = (props) => {
         <p style={{ fontWeight: 600 }}>CONTAINER SEAL</p>
         {CustomContainerSeal(data[getType(CONTAINER_SEAL)])}
         <p style={{ fontWeight: 600 }}>CONTAINER TYPE</p>
-        {CustomSelect({ options: containerTypeUnit, title: CONTAINER_TYPE })}
+        {CustomSelect({ options: containerTypeUnit, title: CONTAINER_TYPE, lock: true })}
         {cdUnit.map(({ field, title, unit, required, pattern }, i) => (
           <div key={i} className="flex justify-start">
             <div style={{ flex: '0 0 50%' }}>
