@@ -348,7 +348,7 @@ const TableCM = (props) => {
       className={clsx(
         classes.root,
         checkClassName(hasInquiry, hasAmendment, hasAnswer, isResolved, isUploaded, classes).className,
-        classes.styleGrid
+        drfView === 'CM' ? classes.styleGrid : ``
       )}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

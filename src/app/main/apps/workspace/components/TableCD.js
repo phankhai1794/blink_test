@@ -166,9 +166,12 @@ const TableCD = (props) => {
       ];
       cds = cds.filter((cm) => contNo !== cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
     });
+    cdSorted = cdSorted.map(c => {
+      const findCm = containerManifest.find(cM => cM?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === c?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+      return {...c, seq: findCm?.[metadata?.inq_type?.[SEQ]]}
+    })
   }
   cdSorted = [...cdSorted, ...cds];
-  console.log('cdSorted', cdSorted);
 
   const onMouseEnter = (e) => setIsHovering(true);
 
@@ -320,7 +323,7 @@ const TableCD = (props) => {
               <Grid container spacing={2} className="px-8 py-2" key={index}>
                 <Grid item xs={1} className={classes.styleGridSeq}>
                   <BLField>
-                    {cd?.[metadata?.inq_type?.[SEQ]]}
+                    {cd?.seq}
                   </BLField>
                 </Grid>
                 <Grid item xs={2}>
