@@ -427,18 +427,8 @@ const TableCM = (props) => {
           containerManifest.map((cm, index) => (
             <Grid container spacing={2} className="py-2" key={index}>
               <Grid container item xs={1} className={classes.styleGridSeq}>
-                <BLField multiline={true} isSeq={true} isEditSeq={props.isEditSeq} cmEditing={cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]} handleChangeSeqState={(val) => {
-                  if (props.mapContSeq.length) {
-                    props.mapContSeq.forEach(p => {
-                      if (p.contNo === val.contNo) {
-                        p.seq = val.seq
-                      }
-                    })
-                  }
-                }}>
-                  {!props.isEditSeq ? cm?.[metadata?.inq_type?.[SEQ]] :
-                      (props.mapContSeq.length ? props.mapContSeq.find(m => m.contNo === cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])?.seq : '')
-                  }
+                <BLField multiline={true} isSeq={true} isEditSeq={props.isEditSeq} cmEditing={cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]} handleChangeSeqState={(val) => props.setMapContSeq(val)}>
+                  {cm?.[metadata?.inq_type?.[SEQ]]}
                 </BLField>
               </Grid>
               <Grid item xs={1} className={clsx(classes['grid-xs-1'])}>

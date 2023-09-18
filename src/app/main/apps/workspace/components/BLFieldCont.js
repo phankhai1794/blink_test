@@ -86,10 +86,9 @@ const BLField = ({ multiline = false, children: _children, isSeq, isEditSeq, cmE
   };
 
   const handleChangeSeq = (e) => {
-    const valInput = e.target.value;
     handleChangeSeqState({
       contNo: cmEditing,
-      seq: valInput
+      seq: e.target.value || ''
     })
   }
 

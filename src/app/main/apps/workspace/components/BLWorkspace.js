@@ -140,7 +140,6 @@ const BLWorkspace = (props) => {
   const [inqCustomer, setInqCustomer] = useState([]);
   const [inqOnshore, setInqOnshore] = useState([]);
   const [isEditSeq, setEditSeq] = useState(false);
-  const [mapContSeq, setMapContSeq] = useState([]);
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
@@ -216,7 +215,6 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
     dispatch(Actions.loadMetadata());
-    console.log('getValueField(CONTAINER_DETAIL)', getValueField(CONTAINER_DETAIL))
 
     return () => dispatch(FormActions.resetLoading());
   }, []);
@@ -231,20 +229,6 @@ const BLWorkspace = (props) => {
     document.addEventListener('mousedown', handlerEvent);
     return () => document.removeEventListener('mousedown', handlerEvent);
   }, []);
-
-  useEffect(() => {
-    const contentManifestMap = content[getField(CONTAINER_MANIFEST)];
-    const mapSeqCont = [];
-    if (contentManifestMap) {
-      contentManifestMap.forEach(cm => {
-        mapSeqCont.push({
-          contNo: cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]],
-          seq: cm?.[metadata?.inq_type?.[SEQ]],
-        })
-      })
-      setMapContSeq(mapSeqCont)
-    }
-  }, [content]);
 
   useEffect(() => {
     if (openAttachment) {
@@ -697,9 +681,24 @@ const BLWorkspace = (props) => {
                 containerDetail={getValueField(CONTAINER_DETAIL)}
                 containerManifest={getValueField(CONTAINER_MANIFEST)}
                 isEditSeq={isEditSeq}
-                mapContSeq={mapContSeq}
                 setMapContSeq={(val) => {
-                  setMapContSeq(val)
+                  let contentCM = content[getField(CONTAINER_MANIFEST)];
+                  if (content && contentCM && contentCM.length) {
+                    contentCM = contentCM.map((c) => {
+                      if (c?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === val.contNo) {
+                        return {
+                          ...c,
+                          [metadata?.inq_type?.[SEQ]]: val.seq || ''
+                        }
+                      }
+                      return { ...c }
+                    })
+                    const newContent = {
+                      ...content,
+                      [getField(CONTAINER_MANIFEST)]: contentCM
+                    }
+                    dispatch(InquiryActions.setContent(newContent));
+                  }
                 }}
               />
             </Grid>
