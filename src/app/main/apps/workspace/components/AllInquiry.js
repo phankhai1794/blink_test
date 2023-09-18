@@ -213,7 +213,7 @@ const AllInquiry = (props) => {
       setSaveAnswer(!isSaveAnswer)
       setUpdateReply(false);
     }
-    if (scrollTopPopup.current && !scrollInquiry) {
+    if (scrollTopPopup.current && !scrollInquiry && !inqActing.action) {
       scrollTopPopup.current.scrollIntoView(true);
     }
   }, [isUpdateReply, inqActing.action]);
@@ -293,10 +293,13 @@ const AllInquiry = (props) => {
   };
 
   useEffect(() => {
+    if ((currentEditInq && !currentEditInq.id) || currentAmendment !== undefined) {
+      setInqActing({val: { id: null }, action: true})
+    }
     if (currentAmendment && inputAddAmendmentEndRef.current) {
       inputAddAmendmentEndRef.current.scrollIntoView({ behavior: "smooth" })
     }
-  }, [currentAmendment]);
+  }, [currentEditInq, currentAmendment])
 
   const getLabel = (id) => {
     const result = metadata['field_options'].filter(({ value }) => value === id);
@@ -501,6 +504,11 @@ const AllInquiry = (props) => {
                 inquiriesLength={inquiries.length}
                 getUpdatedAt={() => {
                   setUpdateReply(true);
+                }}
+                setDefaultAction={(currQ) => {
+                  if (currQ) {
+                    setInqActing(currQ);
+                  }
                 }}
               />
             </div>

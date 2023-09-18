@@ -797,5 +797,5 @@ export const containerTypeUnit = [
   { value: 'R7', label: '45HR' },
   { value: 'R8', label: '40RQ' },
   { value: 'T2', label: '20TK' },
-  { value: 'T4', label: '40TK' },
+  { value: 'T4', label: '40TK' }
 ];

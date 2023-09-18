@@ -9,7 +9,7 @@ import {
   uploadOPUS
 } from 'app/services/inquiryService';
 import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, validateBLType, groupBy, isJsonText, formatContainerNo, isSameFile, validateGroupOneTextBox, NumberFormat, compareObject, formatDate, isDateField, formatNumber, isSameDate, generateFileNameTimeFormat } from '@shared';
-import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply } from 'app/services/draftblService';
+import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply, wraptextDummyField } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
 import { sendmailResolve } from 'app/services/mailService';
@@ -59,35 +59,13 @@ import {
   FORWARDER,
   ORIGINAL_BL,
   SEAWAY_BILL,
-  HS_HTS_NCM_Code,
-  EVENT_DATE,
-  TOTAL_CONTAINERS,
-  HAZ_REF_OOG,
-  EQUIPMENT_SUB,
-  CONTAINER_INF_MISMATCH,
-  CONTAINER_STATUS_INQ,
-  TOTAL_CONTAINERS_PER_TP_SZ,
-  SPECIAL_CARGO_DETAIL,
-  MISSING_GATE_IN_EVENTS,
-  MISMATCH_DRAIN,
-  VOLUME_DIFFRENCE,
-  CTNR_NOT_LINK_IN_BOOKING,
-  MISSING_PACKAGING_GROUP,
-  MISSING_TEMPERATURE,
-  VENTILATION_MISMATCH,
-  MISSING_PACKAGE_INFORMATION,
-  MISSING_MISMATCH_UN,
-  MISSING_MISMATCH_IMDG,
-  VOLUME_DIFFERENCE,
-  SPECIAL_CARGO,
-  CM_CUSTOMS_DESCRIPTION,
   EXPORT_REF,
   T_VVD,
 } from '@shared/keyword';
 import { packageUnits, weightUnits, measurementUnits } from '@shared/units';
 import { handleError } from '@shared/handleError';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Button,
@@ -105,9 +83,9 @@ import WarningIcon from '@material-ui/icons/Warning';
 import clsx from 'clsx';
 import * as AppAction from 'app/store/actions';
 import { useDropzone } from 'react-dropzone';
-import Diff from "../shared-components/react-diff";
 import { SocketContext } from 'app/AppContext';
 
+import Diff from "../shared-components/react-diff";
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
 import * as Actions from '../store/actions';
@@ -116,7 +94,6 @@ import { TrashIcon } from '../shared-components';
 
 import ChoiceAnswer from './ChoiceAnswer';
 import ParagraphAnswer from './ParagraphAnswer';
-import ImageAttach from './ImageAttach';
 import FileAttach from './FileAttach';
 import UserInfo from './UserInfo';
 import AttachFile from './AttachFile';
@@ -297,7 +274,6 @@ const InquiryViewer = (props) => {
   const expandFileQuestionIds = useSelector(({ workspace }) => workspace.inquiryReducer.enableExpandAttachment);
   const cancelAmePopup = useSelector(({ workspace }) => workspace.inquiryReducer.cancelAmePopup);
   const fullscreen = useSelector(({ workspace }) => workspace.formReducer.fullscreen);
-  const [indexQuestionRemove, setIndexQuestionRemove] = useState(-1);
   const [replyRemove, setReplyRemove] = useState();
   const [question, setQuestion] = useState(props.question);
   const [type, setType] = useState(props.question.ansType);
@@ -314,7 +290,7 @@ const InquiryViewer = (props) => {
   const [validationCDCM, setValidationCDCM] = useState(true);
   const [textResolveSeparate, setTextResolveSeparate] = useState({ name: '', address: '' });
   const [isSeparate, setIsSeparate] = useState([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS].map(key => metadata.field?.[key]).includes(question.field));
+  const [isAlsoNotifies, setIsAlsoNotifies] = useState([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS, EXPORT_REF].map(key => metadata.field?.[key]).includes(question.field));
   const [tempReply, setTempReply] = useState({});
   const [showLabelSent, setShowLabelSent] = useState(false);
   const confirmClick = useSelector(({ workspace }) => workspace.formReducer.confirmClick);
@@ -348,6 +324,7 @@ const InquiryViewer = (props) => {
   const [isHasEditCdCm, setHasEditCdCm] = useState(false);
   const [isResolveAndUpload, setIsResolveAndUpload] = useState(false);
   const socket = useContext(SocketContext);
+  const triggerOnpaste = useRef(null);
 
   const syncData = (data, syncOptSite = "") => {
     socket.emit("sync_data", { data, syncOptSite });
@@ -393,8 +370,17 @@ const InquiryViewer = (props) => {
   }
 
   const isDateTimeField = () => {
-    setIsDateTime(isDateField(metadata, question.field));
-    setIsValidDate(isDateField(metadata, question.field));
+    const result = isDateField(metadata, question.field)
+    setIsDateTime(result);
+    if (result) {
+      if (question.process === 'pending') {
+        const originTime = content[question.field] ? formatDate(content[question.field], 'YYYY-MM-DD') : '';
+        const resolveVal = textResolve ? formatDate(textResolve, 'YYYY-MM-DD') : '';
+        setIsValidDate(originTime !== resolveVal);
+      } else {
+        setIsValidDate(true);
+      }
+    }
   }
 
   const handleViewMore = (id) => {
@@ -422,26 +408,8 @@ const InquiryViewer = (props) => {
     return response;
   }
 
-  const setDefaultAction = (val) => {
-    const optionsInquires = [...inquiries];
-    optionsInquires.forEach(op => {
-      op.showIconAttachAnswerFile = (val.type === 'ANS' || ['INQ_SENT'].includes(val.state)) && op.groupId === val.groupId;
-    });
-    dispatch(InquiryActions.setInquiries(optionsInquires));
-    //
-    const getQuestion = {...question};
-    if (getQuestion.groupId === val.groupId) {
-      if (val.state === 'OPEN' && !isResolve && !isResolveCDCM) {
-        dispatch(InquiryActions.setEditInq(val));
-      } else {
-        dispatch(InquiryActions.setEditInq());
-      }
-      if (!['INQ', 'ANS'].includes(val.type)) {
-        getQuestion.content = val.content;
-        setQuestion(getQuestion);
-      }
-    }
-    if (getQuestion.groupId !== val.groupId) {
+  const checkSetActionCurrentState = (getQuestion) => {
+    if (getQuestion.process === 'pending') {
       setIsReply(false);
       setIsReplyCDCM(false);
       setIsResolve(false);
@@ -510,7 +478,109 @@ const InquiryViewer = (props) => {
       }
       getQuestion.showIconAttachAnswerFile = false;
       getQuestion.showIconAttachReplyFile = false;
-      setQuestion(getQuestion);
+    } else {
+      getQuestion.showIconEdit = true;
+      getQuestion.showIconAttachAnswerFile = false;
+      getQuestion.showIconAttachReplyFile = false;
+      setIsReply(false);
+      setIsReplyCDCM(false);
+      setStateReplyDraft(false);
+      setIsResolve(false);
+      setIsResolveCDCM(false);
+      setDisableCDCM(true);
+      //
+      if (getQuestion.state === 'RESOLVED') {
+        setDisableReopen(false);
+        setIsReplyCDCM(false);
+        setIsResolveCDCM(false);
+      }
+      if (user.role === 'Admin') {
+        if (getQuestion.role === 'Guest') {
+          if (['REP_SENT', 'AME_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = true;
+            setTempReply({});
+          }
+        } else {
+          if (['REP_DRF'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = false;
+            setShowLabelSent(false);
+            setStateReplyDraft(true);
+          } else if (['REP_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = false;
+            setShowLabelSent(true);
+            setStateReplyDraft(true);
+          }
+        }
+        if (['REOPEN_A'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+        } else if (['REOPEN_Q'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+        }
+        if (['REOPEN_A', 'REOPEN_Q'].includes(getQuestion.state)) {
+          if (typeof getQuestion.content === 'string') {
+            setTempReply({})
+          }
+        }
+      }
+      else {
+        if (getQuestion.role === 'Guest') {
+          if (['REP_SENT', 'AME_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = false;
+            setSubmitLabel(true);
+            setStateReplyDraft(true);
+          } else if (['AME_DRF', 'REP_DRF'].includes(getQuestion.state)) {
+            setSubmitLabel(false);
+            setStateReplyDraft(true);
+          }
+        } else {
+          if (['REP_SENT'].includes(getQuestion.state)) {
+            getQuestion.showIconReply = true;
+            getQuestion.showIconEdit = false;
+            setSubmitLabel(false);
+            setTempReply({});
+          }
+        }
+        if (['UPLOADED'].includes(getQuestion.state)) {
+          setStateReplyDraft(false);
+        } else if (['REOPEN_A'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+          getQuestion.showIconEdit = false;
+        } else if (['REOPEN_Q'].includes(getQuestion.state)) {
+          getQuestion.showIconReply = true;
+          getQuestion.showIconEdit = false;
+        }
+        if (['REOPEN_A', 'REOPEN_Q'].includes(getQuestion.state)) {
+          // is CM CD Amendment
+          if (typeof getQuestion.content === 'string') setTempReply({});
+          setSubmitLabel(false);
+        }
+      }
+    }
+    return getQuestion
+  }
+
+  const setDefaultAction = (val) => {
+    const optionsInquires = [...inquiries];
+    optionsInquires.forEach(op => {
+      op.showIconAttachAnswerFile = (val.type === 'ANS' || ['INQ_SENT', 'ANS_DRF', 'ANS_SENT'].includes(val.state)) && op.groupId === val.groupId;
+    });
+    dispatch(InquiryActions.setInquiries(optionsInquires));
+    //
+    const getQuestion = {...question};
+    if (getQuestion.process === 'pending' ? getQuestion.groupId === val.groupId : getQuestion.id === val.id) {
+      if (val.state === 'OPEN' && !isResolve && !isResolveCDCM) {
+        dispatch(InquiryActions.setEditInq(val));
+      } else {
+        dispatch(InquiryActions.setEditInq());
+      }
+      if (!confirmClick && !['INQ', 'ANS'].includes(val.type)) {
+        getQuestion.content = val.content;
+        setQuestion(getQuestion);
+      }
+    }
+    if (getQuestion.process === 'pending' ? getQuestion.groupId !== val.groupId : getQuestion.id !== val.id) {
+      const currStateQuestion = checkSetActionCurrentState(getQuestion);
+      setQuestion(currStateQuestion);
     }
   }
   useEffect(() => {
@@ -573,7 +643,7 @@ const InquiryViewer = (props) => {
     let isUnmounted = false;
     setTempReply({});
     setIsSeparate([SHIPPER, CONSIGNEE, NOTIFY].map(key => metadata.field?.[key]).includes(question.field));
-    setIsAlsoNotifies([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS].map(key => metadata.field?.[key]).includes(question.field));
+    setIsAlsoNotifies([ALSO_NOTIFY, FORWARDER, DESCRIPTION_OF_GOODS, EXPORT_REF].map(key => metadata.field?.[key]).includes(question.field));
     setIsResolve(false);
     setIsResolveCDCM(false);
     setIsReply(false);
@@ -885,6 +955,7 @@ const InquiryViewer = (props) => {
             lastest.sentAt = lastestComment.sentAt;
             lastest.createdAt = lastestComment.createdAt;
             lastest.creator = lastestComment.creator;
+            lastest.role = lastestComment.role;
             lastest.process = 'draft';
             if (containerCheck.includes(question.field)) {
               const lastestContentCDCM = res.filter(r => (r.state.includes('AME_') || r.state.includes('REOPEN_')) && !['REP_AME_DRF_DELETED', 'REP_AME_SENT_DELETED'].includes(r.state));
@@ -969,7 +1040,6 @@ const InquiryViewer = (props) => {
                 }
               }
               if (['UPLOADED'].includes(lastest.state)) {
-                setStateReplyDraft(false);
                 setStateReplyDraft(false);
               } else if (['REOPEN_A'].includes(lastest.state)) {
                 lastest.showIconReply = true;
@@ -1193,6 +1263,7 @@ const InquiryViewer = (props) => {
   }, []);
 
   useEffect(() => {
+    if (confirmClick) props.setDefaultAction({val: {}, action: false})
     if (confirmClick && confirmPopupType === 'removeInq' && replyRemove) {
       const optionsOfQuestion = [...inquiries];
       if (replyRemove.inqId) {
@@ -1601,7 +1672,6 @@ const InquiryViewer = (props) => {
   }, [disableCDCMAmendment]);
 
   const removeQuestion = (question) => {
-    setIndexQuestionRemove(inquiries.findIndex((q) => q.field === question.field && q.inqType === question.inqType));
     if (tempReply.answer) {
       question.inqId = tempReply.answer.id;
     }
@@ -1626,6 +1696,8 @@ const InquiryViewer = (props) => {
     }
     if (question.process === 'pending') {
       confirmPopupType = 'removeReplyInquiry';
+    } else {
+      props.setDefaultAction({val: question, action: true})
     }
     setReplyRemove(question);
     dispatch(
@@ -1930,26 +2002,36 @@ const InquiryViewer = (props) => {
     // Check inquiry
     if (question.process === 'pending') {
       // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
-      const inqStillNotResolved = inqCheck.filter(inq => (!['COMPL', 'UPLOADED'].includes(inq.state) && inq.id !== question.id && !(fieldsNotSendOPUS.includes(metadata['field_options'].find(f => f.value === inq.field).keyword) && inq.state === 'COMPL')));
-      result = Boolean(!inqStillNotResolved.length);
+      result = !inqCheck.some(inq => (!['COMPL', 'UPLOADED'].includes(inq.state) && inq.id !== question.id && !(fieldsNotSendOPUS.includes(metadata['field_options'].find(f => f.value === inq.field).keyword) && inq.state === 'COMPL')));
     }
     // Check amendment
     if (question.process === 'draft') {
       // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
-      const ameStillNotUpload = ameCheck.filter(ame => (!['RESOLVED', 'UPLOADED'].includes(ame.state) && ame.id !== question.id && !(fieldsNotSendOPUS.includes(metadata['field_options'].find(f => f.value === ame.field).keyword) && ame.state === 'RESOLVED')));
-      result = Boolean(!ameStillNotUpload.length);
+      result = !ameCheck.some(ame => (!['RESOLVED', 'UPLOADED'].includes(ame.state) && ame.id !== question.id && !(fieldsNotSendOPUS.includes(metadata['field_options'].find(f => f.value === ame.field).keyword) && ame.state === 'RESOLVED')));
     }
     return result;
   }
 
-  const checkAllAmeResolved = (question) => {
+  const checkAllInqAmeResolved = (question) => {
+    let resultInq = false;
     let resultAme = false;
 
+    const inqCheck = inquiries.filter(inq => (inq.process === 'pending' && inq.receiver.includes(question.receiver[0])));
     const ameCheck = inquiries.filter(inq => (inq.process === 'draft' && inq.receiver.includes(question.receiver[0])));
 
+    // Check inquiry
+    // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
+    resultInq = !inqCheck.some(inq => (
+      !['COMPL', 'UPLOADED'].includes(inq.state)
+      && inq.id !== question.id
+      && !fieldsNotSendOPUS.includes(
+        metadata['field_options'].find(f => f.value === inq.field).keyword
+        && inq.state === 'COMPL'
+      )
+    ));
     // Check amendment
     // Check other field has been UPLOADED, field disable upload only State = 'COMPL'
-    const ameStillNotUpload = ameCheck.filter(ame => (
+    resultAme = !ameCheck.some(ame => (
       !['RESOLVED', 'UPLOADED'].includes(ame.state)
       && ame.id !== question.id
       && !fieldsNotSendOPUS.includes(
@@ -1957,9 +2039,8 @@ const InquiryViewer = (props) => {
         && ame.state === 'RESOLVED'
       )
     ));
-    resultAme = Boolean(!ameStillNotUpload.length);
 
-    return resultAme;
+    return resultInq && resultAme;
   }
 
   const onConfirm = (isWrapText = false) => {
@@ -2026,10 +2107,16 @@ const InquiryViewer = (props) => {
       fieldContent: contentField,
       blId: myBL.id,
       contsNoChange,
-      fieldNameContent: (textResolveSeparate.name.trim() === '' && textResolveSeparate.address.trim() === '') ? NO_CONTENT_AMENDMENT : textResolveSeparate.name.toUpperCase().trim(),
+      fieldNameContent:
+        textResolveSeparate.name.trim() === '' && textResolveSeparate.address.trim() === ''
+          ? NO_CONTENT_AMENDMENT
+          : textResolveSeparate.name.toUpperCase().trim(),
       fieldAddressContent: textResolveSeparate.address.toUpperCase().trim() || '',
-      isWrapText,
-      hasUpload: isResolveAndUpload
+      isWrapText: [EXPORT_REF].map((key) => metadata.field?.[key]).includes(question.field)
+        ? true
+        : isWrapText,
+      hasUpload: isResolveAndUpload,
+      isExpRefField: [EXPORT_REF].map((key) => metadata.field?.[key]).includes(question.field)
     };
     if (containerCheck.includes(question.field)) {
       setIsResolveCDCM(true);
@@ -2132,7 +2219,7 @@ const InquiryViewer = (props) => {
               action: 'pending'
             }));
           }
-          if (question.process === 'draft' && checkAllAmeResolved(question)) {
+          if (question.process === 'draft' && checkAllInqAmeResolved(question)) {
             // BL Inquired Resolved (BR), Upload all to Opus. RO: Return to Customer via BLink
             let filterDraft = optionsInquires.filter(inq => inq.process === 'draft')
             dispatch(Actions.updateOpusStatus(myBL.bkgNo, 'BS', '', {
@@ -2292,9 +2379,9 @@ const InquiryViewer = (props) => {
       const originTime = content[question.field] ? formatDate(content[question.field], 'YYYY-MM-DD') : '';
       if (!isNaN(e?.getTime())) {
         setTextResolve(e.toISOString());
-        if (originTime === formatDate(e?.toISOString(), 'YYYY-MM-DD') && question.process === 'pending')
-          setIsValidDate(true)
-        else setIsValidDate(false);
+        if (question.process === 'pending') {
+          setIsValidDate(originTime !== formatDate(e?.toISOString(), 'YYYY-MM-DD'))
+        } else setIsValidDate(true);
       } else {
         setTextResolve(e);
         setIsValidDate(true);
@@ -2899,6 +2986,9 @@ const InquiryViewer = (props) => {
   };
 
   const onReply = (q) => {
+    if (triggerOnpaste.current) {
+      triggerOnpaste.current.focus({preventScroll: true});
+    }
     // case: Reply Answer
     props.setDefaultAction({val: question, action: true});
     const optionsInquires = [...inquiries];
@@ -2938,6 +3028,9 @@ const InquiryViewer = (props) => {
 
   // TODO
   const handleEdit = (q) => {
+    if (triggerOnpaste.current) {
+      triggerOnpaste.current.focus({preventScroll: true});
+    }
     props.setDefaultAction({val: q, action: true});
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
@@ -2948,6 +3041,7 @@ const InquiryViewer = (props) => {
     setFilepaste('');
     setShowViewAll(false);
     if (user.role === 'Guest') {
+      dispatch(InquiryActions.addAmendment())
       setDisableCDCM(false);
       setDisableCDCMAmendment(false);
     }
@@ -3013,6 +3107,7 @@ const InquiryViewer = (props) => {
   }
 
   const reOpen = (idInq) => {
+    props.setDefaultAction({val: {}, action: false});
     reOpenInquiry(idInq)
       .then((res) => {
         const optionsInquires = [...inquiries];
@@ -3296,7 +3391,7 @@ const InquiryViewer = (props) => {
           onClick={() => dispatch(FormActions.inqViewerFocus(question.id))}
           {...getRootProps({})}>
           {(isReply || question.showIconAttachAnswerFile) && isDragActive && <div className='dropzone'>Drop files here</div>}
-          <div>
+          <div onPaste={onPaste}>
             {(question?.process === 'draft') &&
               <TagsComponent tagName='AMENDMENT' tagColor='primary' question={question} isAllInq={isAllInq} />
             }
@@ -3609,7 +3704,16 @@ const InquiryViewer = (props) => {
             ) : ``}
             {/*Allow edit table when reply amendment*/}
 
-            <div style={{ display: 'block', margin: '1rem 0rem' }} onPaste={onPaste}>
+            <input
+              ref={triggerOnpaste}
+              type="text"
+              style={{
+                position: 'absolute',
+                left: '-99999px',
+              }}
+              onPaste={onPaste}
+            />
+            <div style={{ display: 'block', margin: '1rem 0rem' }}>
               {type === metadata.ans_type.choice &&
                 ((['OPEN', 'ANS_DRF', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(question.state)) || question.showIconAttachAnswerFile) && !checkStateReplyDraft &&
                 (
@@ -3826,7 +3930,7 @@ const InquiryViewer = (props) => {
                           (isSeparate ?
                             (validatePartiesContent(textResolveSeparate.name, 'name')?.isError
                               || validatePartiesContent(textResolveSeparate.address, 'address')?.isError)
-                            : validateField(question?.field, textResolve).isError) || disableAcceptResolve || !validationCDCM || isValidDate
+                            : validateField(question?.field, textResolve).isError) || disableAcceptResolve || !validationCDCM || (isDateTime && !isValidDate)
                         }
                         color="primary"
                         onClick={() => {
@@ -3925,6 +4029,7 @@ const InquiryViewer = (props) => {
                         className='attachment-reply'
                         style={{ width: 900 }}
                         onMouseLeave={() => { question.showIconEdit && dispatch(InquiryActions.setExpand(expandFileQuestionIds.filter(item => item !== question.id))) }}
+                        onPaste={onPaste}
                       >
                         {tempReply?.mediaFiles?.map((file, mediaIndex) => (
                           <>

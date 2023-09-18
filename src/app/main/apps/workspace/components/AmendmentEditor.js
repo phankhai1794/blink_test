@@ -6,8 +6,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadFile } from 'app/services/fileService';
 import { saveEditedField } from 'app/services/draftblService';
-import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate, generateFileNameTimeFormat  } from '@shared';
-import { NO_CONTENT_AMENDMENT, CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN, DESCRIPTION_OF_GOODS1, DESCRIPTION_OF_GOODS2, DESCRIPTION_OF_GOODS, } from '@shared/keyword';
+import { validateBLType, compareObject, parseNumberValue, formatDate, isDateField, isSameDate, generateFileNameTimeFormat, validateGroupOneTextBox } from '@shared';
+import { NO_CONTENT_AMENDMENT, CONTAINER_DETAIL, CONTAINER_LIST, CONTAINER_MANIFEST, SHIPPER, CONSIGNEE, NOTIFY, CONTAINER_NUMBER, BL_TYPE, DATED, DATE_CARGO, DATE_LADEN, DESCRIPTION_OF_GOODS1, DESCRIPTION_OF_GOODS2, DESCRIPTION_OF_GOODS, EXPORT_REF, } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
 import { FuseChipSelect } from '@fuse';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
+const Amendment = ({ question, inquiriesLength, getUpdatedAt, setDefaultAction }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const socket = useContext(SocketContext);
@@ -211,6 +211,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
   }
 
   const handleSave = () => {
+    setDefaultAction({val: {}, action: false})
     setDisableSave(true);
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     fieldValueSeparate.name = fieldValueSeparate.name.toUpperCase().trim();
@@ -532,6 +533,9 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt }) => {
     const fieldId = field || fieldValueSelect?.value;
     if (isChange && fieldValueSelect && fieldValueSelect.keyword === BL_TYPE) {
       response = validateBLType(value);
+    }
+    if (isChange && fieldValueSelect && fieldValueSelect.keyword === EXPORT_REF) {
+      response = validateGroupOneTextBox(value);
     }
     return response;
   }

@@ -129,6 +129,7 @@ const BLWorkspace = (props) => {
   const objectNewAmendment = useSelector(({ workspace }) => workspace.inquiryReducer.objectNewAmendment);
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
   const openEmail = useSelector(({ workspace }) => workspace.formReducer.openEmail);
+  const drfView = useSelector(({ draftBL }) => draftBL.drfView);
 
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
@@ -220,6 +221,16 @@ const BLWorkspace = (props) => {
   useEffect(() => {
     setDisableSendBtn(!enableSend)
   }, [enableSend]);
+
+  // scroll to top if surpass document height when change view
+  useEffect(() => {
+    const bl = document.getElementById('blwork')
+    const boundingRect = bl.getBoundingClientRect()
+
+    if (window.innerHeight > boundingRect.bottom) {
+      bl.scrollIntoView()
+    }
+  }, [drfView])
 
   const countInq = (inqs, process, recevier) => {
     return inqs.filter((inq) => inq.process === process && inq.receiver.includes(recevier)).length;
@@ -324,7 +335,7 @@ const BLWorkspace = (props) => {
         fabTitle: 'Amendment Form',
         title: labelAmendment,
         field: 'AMENDMENT_FORM',
-        child: <AmendmentEditor getUpdatedAt={() => { }} />
+        child: <AmendmentEditor getUpdatedAt={() => { }} setDefaultAction={() => { }} />
       };
     default:
       return {
@@ -394,7 +405,7 @@ const BLWorkspace = (props) => {
         <>
           {openQueueList && <QueueList />}
           <ListNotification />
-          <div className={clsx('max-w-5xl', classes.root)}>
+          <div id='blwork' className={clsx('max-w-5xl', classes.root)}>
             <div style={{ position: 'fixed', right: '2rem', bottom: '5rem', zIndex: 999 }}>
               {isExpand && (
                 <div
