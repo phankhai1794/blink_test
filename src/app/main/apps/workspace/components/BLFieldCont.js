@@ -51,13 +51,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const BLField = ({ multiline = false, children: _children, isSeq, isEditSeq }) => {
+const BLField = ({ multiline = false, children: _children, isSeq, isEditSeq, cmEditing, handleChangeSeqState }) => {
   const dispatch = useDispatch()
   const classes = useStyles();
   const [anchorElCopy, setAnchorElCopy] = useState(null);
   const children = Array.isArray(_children) ? _children.join(',') : _children;
   const [popover, setPopover] = useState({ open: false, text: '' });
   const [anchorEl, setAnchorEl] = useState(null);
+  const [currentSeq, setCurrentSeq] = useState();
 
   const onMouseOver = (e) => {
     const { scrollWidth, clientWidth, scrollHeight, clientHeight } = e.target;
@@ -86,7 +87,10 @@ const BLField = ({ multiline = false, children: _children, isSeq, isEditSeq }) =
 
   const handleChangeSeq = (e) => {
     const valInput = e.target.value;
-    console.log('val input', valInput);
+    handleChangeSeqState({
+      contNo: cmEditing,
+      seq: valInput
+    })
   }
 
   return (
