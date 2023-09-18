@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const BLField = ({ multiline = false, children: _children }) => {
+const BLField = ({ multiline = false, children: _children, isSeq, isEditSeq }) => {
   const dispatch = useDispatch()
   const classes = useStyles();
   const [anchorElCopy, setAnchorElCopy] = useState(null);
@@ -84,6 +84,11 @@ const BLField = ({ multiline = false, children: _children }) => {
     dispatch(AppAction.showMessage({ message: 'Copy to clipboard !', variant: 'info', autoHideDuration: 2000 }));
   };
 
+  const handleChangeSeq = (e) => {
+    const valInput = e.target.value;
+    console.log('val input', valInput);
+  }
+
   return (
     <>
       <EllipsisPopper
@@ -115,8 +120,11 @@ const BLField = ({ multiline = false, children: _children }) => {
           multiline={multiline}
           rows={multiline ? 6 : null}
           className={clsx(classes.root)}
+          onChange={(e) => {
+            (isSeq && isEditSeq) ? handleChangeSeq(e) : e.preventDefault();
+          }}
           InputProps={{
-            readOnly: true,
+            readOnly: !(isSeq && isEditSeq),
             classes: {
               root: classes.root,
               input: classes.input,

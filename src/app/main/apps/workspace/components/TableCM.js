@@ -352,7 +352,9 @@ const TableCM = (props) => {
       )}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onClick={(e) => onClick(e, id)}>
+      onClick={(e) => {
+        !props.isEditSeq ? onClick(e, id) : e.preventDefault();
+      }}>
       <Grid style={{ height: 20, padding: '5px 5px 0 5px', textAlign: 'right' }}>
         {checkDisplayIcon()}
         {isHovering && allowAddInquiry && isEmpty && (
@@ -424,7 +426,7 @@ const TableCM = (props) => {
           containerManifest.map((cm, index) => (
             <Grid container spacing={2} className="py-2" key={index}>
               <Grid container item xs={1} className={classes.styleGridSeq}>
-                <BLField multiline={true}>{cm?.[metadata?.inq_type?.[SEQ]]}</BLField>
+                <BLField multiline={true} isSeq={true} isEditSeq={props.isEditSeq}>{cm?.[metadata?.inq_type?.[SEQ]]}</BLField>
               </Grid>
               <Grid item xs={1} className={clsx(classes['grid-xs-1'])}>
                 <BLField multiline={true}>{cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>

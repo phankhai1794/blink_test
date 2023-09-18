@@ -36,7 +36,7 @@ import * as AppActions from 'app/store/actions';
 import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import _ from 'lodash';
-import { Chip, Divider, Grid } from '@material-ui/core';
+import { Button, Chip, Divider, Grid } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import ExpandLess from '@material-ui/icons/ExpandLess';
@@ -96,6 +96,23 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 13,
     lineHeight: '14px',
     color: '#DC2626'
+  },
+  button: {
+    textTransform: 'none',
+    fontWeight: 'bold',
+    fontFamily: 'Montserrat',
+    marginLeft: 5
+  },
+  buttonEditSeq: {
+    padding: '10px 28.5px',
+    color: '#FFFFFF',
+    fontSize: 12,
+    borderRadius: 8,
+    lineHeight: '20px',
+    backgroundColor: '#BD0F72',
+    '&:hover': {
+      backgroundColor: '#BD0F72'
+    }
   }
 }));
 
@@ -122,6 +139,7 @@ const BLWorkspace = (props) => {
   const [confirmClick, form] = useSelector(({ workspace }) => [workspace.formReducer.confirmClick, workspace.formReducer.form]);
   const [inqCustomer, setInqCustomer] = useState([]);
   const [inqOnshore, setInqOnshore] = useState([]);
+  const [isEditSeq, setEditSeq] = useState(false);
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
@@ -398,6 +416,10 @@ const BLWorkspace = (props) => {
     setIsExpand(false);
   };
 
+  const enableEditSeq = () => {
+    setEditSeq(!isEditSeq)
+  }
+
   return (
     <>
       <BLProcessNotification />
@@ -648,9 +670,17 @@ const BLWorkspace = (props) => {
             <hr style={{ borderTop: '2px dashed #515E6A', marginTop: '2rem', marginBottom: '3rem' }} />
 
             <Grid container spacing={2}>
+              <Button
+                variant="contained"
+                className={clsx(classes.button, classes.buttonEditSeq)}
+                style={{ width: 110, height: 35 }}
+                onClick={enableEditSeq}>
+                {!isEditSeq ? `Edit Seq` : `Cancel`}
+              </Button>
               <TableCM
                 containerDetail={getValueField(CONTAINER_DETAIL)}
                 containerManifest={getValueField(CONTAINER_MANIFEST)}
+                isEditSeq={isEditSeq}
               />
             </Grid>
 
