@@ -117,6 +117,9 @@ const useStyles = makeStyles((theme) => ({
   styleEditSeq: {
     '& .MuiIconButton-root:hover': {
       backgroundColor: 'transparent'
+    },
+    '& .MuiButtonBase-root .icon-edit-seq': {
+      fontSize: 17
     }
   }
 }));
@@ -454,6 +457,34 @@ const BLWorkspace = (props) => {
         if (error && error.valid) {
           return;
         }
+        const cloneContent = {...content};
+        let contentCM = cloneContent[getField(CONTAINER_MANIFEST)];
+        if (contentCM.length && mapContSeq.length) {
+          contentCM = contentCM.map(m => {
+            const findSeqByContNo = mapContSeq.find(c => c.contNo === m?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+            if (findSeqByContNo) {
+              return {
+                ...m,
+                [metadata?.inq_type?.[SEQ]]: findSeqByContNo.seq || ''
+              }
+            }
+            return {
+              ...m,
+              [metadata?.inq_type?.[SEQ]]: ''
+            }
+          })
+          // sort by seq
+          contentCM.sort((a, b) => {
+            if (a?.[metadata?.inq_type?.[SEQ]] && b?.[metadata?.inq_type?.[SEQ]]) {
+              return parseInt(a?.[metadata?.inq_type?.[SEQ]]) - parseInt(b?.[metadata?.inq_type?.[SEQ]])
+            }
+          })
+          const contentCmUpdate = {
+            ...cloneContent,
+            [getField(CONTAINER_MANIFEST)]: contentCM
+          }
+          dispatch(InquiryActions.setContent(contentCmUpdate));
+        }
         setEditSeq(false);
       }
     } else {
@@ -775,10 +806,14 @@ const BLWorkspace = (props) => {
                   </div>
                 </>
               ) : (
-                <IconButton onClick={() => {
-                  enableEditSeq(false, true)
-                }} className="w-16 h-16 p-0" style={{ width: 60, height: 35, position: 'absolute', zIndex: '9999', top: 60, left: 10 }}>
-                  <Icon className="text-16 arrow-icon" color="disabled">
+                <IconButton
+                  onClick={() => {
+                    enableEditSeq(false, true)
+                  }}
+                  className="w-16 h-16 p-0"
+                  style={{ width: 60, height: 35, position: 'absolute', zIndex: '9999', top: 60, left: 10 }}
+                >
+                  <Icon className="text-16 arrow-icon icon-edit-seq" color="disabled">
                     edit_mode
                   </Icon>
                 </IconButton>

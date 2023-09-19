@@ -149,6 +149,9 @@ const useStyles = makeStyles((theme) => ({
   styleGrid: {
     '& .MuiGrid-grid-xs-2': {
       maxWidth: '13.34%'
+    },
+    '& .colorText .MuiOutlinedInput-multiline textarea': {
+      color: '#515e6a66'
     }
   },
   styleGridSeq: {
@@ -458,28 +461,28 @@ const TableCM = (props) => {
                   {props.mapContSeq.length ? props.mapContSeq.find(map => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === map.contNo).seq : cm?.[metadata?.inq_type?.[SEQ]]}
                 </BLField>
               </Grid>
-              <Grid item xs={1} className={clsx(classes['grid-xs-1'])}>
+              <Grid item xs={1} className={clsx(classes['grid-xs-1'], props.isEditSeq && 'colorText')}>
                 <BLField multiline={true}>{cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}</BLField>
               </Grid>
-              <Grid item xs={2} className={clsx(classes['grid-xs-2'])}>
+              <Grid item xs={2} className={clsx(classes['grid-xs-2'], props.isEditSeq && 'colorText')}>
                 <BLField multiline={true}>{cm?.[metadata?.inq_type?.[CM_MARK]]}</BLField>
               </Grid>
-              <Grid item xs={2} className={clsx(classes['grid-xs-2'])}>
+              <Grid item xs={2} className={clsx(classes['grid-xs-2'], props.isEditSeq && 'colorText')}>
                 <BLField multiline={true}>
                   {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_PACKAGE]], 0) || ''} ${getPackageName(
                     cm?.[metadata?.inq_type?.[CM_PACKAGE_UNIT]]
                   )}`}
                 </BLField>
               </Grid>
-              <Grid item xs={3} className={clsx(classes['grid-xs-3'])}>
+              <Grid item xs={3} className={clsx(classes['grid-xs-3'], props.isEditSeq && 'colorText')}>
                 <BLField multiline={true}>{cm?.[metadata?.inq_type?.[CM_DESCRIPTION]]}</BLField>
               </Grid>
-              <Grid item xs={2} className={clsx(classes['grid-xs-2'])}>
+              <Grid item xs={2} className={clsx(classes['grid-xs-2'], props.isEditSeq && 'colorText')}>
                 <BLField multiline={true}>
                   {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_WEIGHT]], 3) || ''} ${cm?.[metadata?.inq_type?.[CM_WEIGHT_UNIT]] || ''}`}
                 </BLField>
               </Grid>
-              <Grid item xs={2} className={clsx(classes['grid-xs-2'])}>
+              <Grid item xs={2} className={clsx(classes['grid-xs-2'], props.isEditSeq && 'colorText')}>
                 <BLField multiline={true}>
                   {`${NumberFormat(cm?.[metadata?.inq_type?.[CM_MEASUREMENT]], 3) || ''} ${cm?.[metadata?.inq_type?.[CM_MEASUREMENT_UNIT]] || ''}`}
                 </BLField>
