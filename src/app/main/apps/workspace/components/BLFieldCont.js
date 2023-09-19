@@ -58,7 +58,6 @@ const BLField = ({ multiline = false, children: _children, isSeq, isEditSeq, cmE
   const children = Array.isArray(_children) ? _children.join(',') : _children;
   const [popover, setPopover] = useState({ open: false, text: '' });
   const [anchorEl, setAnchorEl] = useState(null);
-  const [currentSeq, setCurrentSeq] = useState();
 
   const onMouseOver = (e) => {
     const { scrollWidth, clientWidth, scrollHeight, clientHeight } = e.target;

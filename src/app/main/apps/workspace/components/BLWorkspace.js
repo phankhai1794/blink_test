@@ -140,6 +140,8 @@ const BLWorkspace = (props) => {
   const [inqCustomer, setInqCustomer] = useState([]);
   const [inqOnshore, setInqOnshore] = useState([]);
   const [isEditSeq, setEditSeq] = useState(false);
+  const [mapContSeq, setMapContSeq] = useState([])
+  const [error, setError] = useState({valid: false, message: ''});
   const currentInq = useSelector(({ workspace }) => workspace.inquiryReducer.currentInq);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
@@ -416,8 +418,66 @@ const BLWorkspace = (props) => {
     setIsExpand(false);
   };
 
-  const enableEditSeq = () => {
-    setEditSeq(!isEditSeq)
+  const resetContentSeq = () => {
+    const cloneContent = {...content};
+    if (Object.keys(cloneContent).length) {
+      const contentCM = cloneContent[getField(CONTAINER_MANIFEST)];
+      const mapContSeqList = [];
+      contentCM.forEach(c => {
+        mapContSeqList.push({
+          contNo: c?.[metadata?.inq_type?.[CONTAINER_NUMBER]],
+          seq: c?.[metadata?.inq_type?.[SEQ]],
+        })
+      })
+      setMapContSeq(mapContSeqList);
+    }
+  }
+
+  useEffect(() => {
+    resetContentSeq();
+  }, [content]);
+
+  const enableEditSeq = (isCancelOrSave, isSave) => {
+    if (isCancelOrSave) {
+      if (!isSave) {
+        resetContentSeq();
+        setEditSeq(false);
+      } else {
+        setEditSeq(true);
+      }
+    } else {
+      setEditSeq(false);
+    }
+  }
+
+  const checkDuplicateSeq = (contMap) => {
+    console.log(contMap);
+    const excludeContNo = [];
+    let isDuplicate = false;
+    if (contMap.length) {
+      contMap.forEach(m => {
+        if (!excludeContNo.includes(m.contNo)) {
+          excludeContNo.push(m.contNo);
+        }
+      })
+    }
+    return isDuplicate
+  }
+
+  const validateInput = (valInput, contMap) => {
+    const getSeq = valInput?.seq || '';
+    const cmContent = content[getField(CONTAINER_MANIFEST)];
+    const regInteger = /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g;
+    checkDuplicateSeq(contMap);
+    if (getSeq.trim() === '') {
+      setError({ valid: true, message: 'Please enter sequence number' })
+    } else if (!getSeq.match(regInteger)) {
+      setError({ valid: true, message: 'Invalid number' })
+    } else if (parseInt(getSeq.trim()) > parseInt(cmContent.length)) {
+      setError({ valid: true, message: `The maximum value is not greater than ${cmContent.length}` })
+    } else {
+      setError({ valid: false, message: '' })
+    }
   }
 
   return (
@@ -674,33 +734,45 @@ const BLWorkspace = (props) => {
                 variant="contained"
                 className={clsx(classes.button, classes.buttonEditSeq)}
                 style={{ width: 110, height: 35 }}
-                onClick={enableEditSeq}>
-                {!isEditSeq ? `Edit Seq` : `Cancel`}
+                onClick={() => enableEditSeq(!isEditSeq, true)}>
+                {!isEditSeq ? `Edit Seq` : `Save`}
               </Button>
+              {isEditSeq && (
+                <Button
+                  variant="contained"
+                  className={clsx(classes.button, classes.buttonEditSeq)}
+                  style={{ width: 110, height: 35, marginLeft: 5 }}
+                  onClick={() => enableEditSeq(true, false)}>
+                  Cancel
+                </Button>
+              )}
               <TableCM
                 containerDetail={getValueField(CONTAINER_DETAIL)}
                 containerManifest={getValueField(CONTAINER_MANIFEST)}
                 isEditSeq={isEditSeq}
+                mapContSeq={mapContSeq}
                 setMapContSeq={(val) => {
-                  let contentCM = content[getField(CONTAINER_MANIFEST)];
-                  if (content && contentCM && contentCM.length) {
-                    contentCM = contentCM.map((c) => {
-                      if (c?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === val.contNo) {
-                        return {
-                          ...c,
-                          [metadata?.inq_type?.[SEQ]]: val.seq || ''
+                  if (Object.keys(val).length) {
+                    let contMap = [];
+                    if (mapContSeq.length) {
+                      contMap = mapContSeq.map(m => {
+                        if (val.contNo === m.contNo) {
+                          return {
+                            ...m,
+                            seq: val.seq
+                          }
                         }
-                      }
-                      return { ...c }
-                    })
-                    const newContent = {
-                      ...content,
-                      [getField(CONTAINER_MANIFEST)]: contentCM
+                        return {...m}
+                      })
                     }
-                    dispatch(InquiryActions.setContent(newContent));
+                    validateInput(val, contMap)
+                    setMapContSeq(contMap)
                   }
                 }}
               />
+              {error && error.valid && (
+                <span style={{ color: 'red' }}>{error.message}</span>
+              )}
             </Grid>
 
             <Grid container className="mt-20">

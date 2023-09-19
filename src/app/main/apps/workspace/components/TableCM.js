@@ -427,8 +427,35 @@ const TableCM = (props) => {
           containerManifest.map((cm, index) => (
             <Grid container spacing={2} className="py-2" key={index}>
               <Grid container item xs={1} className={classes.styleGridSeq}>
-                <BLField multiline={true} isSeq={true} isEditSeq={props.isEditSeq} cmEditing={cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]} handleChangeSeqState={(val) => props.setMapContSeq(val)}>
-                  {cm?.[metadata?.inq_type?.[SEQ]]}
+                <BLField
+                  multiline={true}
+                  isSeq={true}
+                  isEditSeq={props.isEditSeq}
+                  cmEditing={cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]}
+                  handleChangeSeqState={(val) => {
+                    if (Object.keys(val).length) {
+                      props.setMapContSeq(val);
+                      if (containerManifest.length) {
+                        const checkDuplicateContNo = [];
+                        const objContSeq = [];
+                        containerManifest.forEach(cm => {
+                          const contNumCm = cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
+                          const seqCm = cm?.[metadata?.inq_type?.[SEQ]];
+                          if (contNumCm && seqCm && !checkDuplicateContNo.includes(contNumCm)) {
+                            checkDuplicateContNo.push(contNumCm);
+                            objContSeq.push({ contNo: contNumCm, seq: seqCm })
+                          }
+                        })
+                        if (objContSeq.length) {
+                          objContSeq.forEach(o => {
+                            if (o.contNo === val.contNo && o.seq === val.seq) {
+                            }
+                          })
+                        }
+                      }
+                    }
+                  }}>
+                  {props.mapContSeq.length ? props.mapContSeq.find(map => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === map.contNo).seq : cm?.[metadata?.inq_type?.[SEQ]]}
                 </BLField>
               </Grid>
               <Grid item xs={1} className={clsx(classes['grid-xs-1'])}>
