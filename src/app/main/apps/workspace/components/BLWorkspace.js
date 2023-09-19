@@ -36,7 +36,7 @@ import * as AppActions from 'app/store/actions';
 import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import _ from 'lodash';
-import { Button, Chip, Divider, Grid } from '@material-ui/core';
+import {Button, Chip, Divider, Grid, Icon, IconButton} from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from '@material-ui/styles';
 import ExpandLess from '@material-ui/icons/ExpandLess';
@@ -112,6 +112,11 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: '#BD0F72',
     '&:hover': {
       backgroundColor: '#BD0F72'
+    }
+  },
+  styleEditSeq: {
+    '& .MuiIconButton-root:hover': {
+      backgroundColor: 'transparent'
     }
   }
 }));
@@ -440,41 +445,65 @@ const BLWorkspace = (props) => {
   const enableEditSeq = (isCancelOrSave, isSave) => {
     if (isCancelOrSave) {
       if (!isSave) {
+        // cancel
         resetContentSeq();
+        setError({valid: false, message: ''})
         setEditSeq(false);
       } else {
-        setEditSeq(true);
+        // save
+        if (error && error.valid) {
+          return;
+        }
+        setEditSeq(false);
       }
     } else {
-      setEditSeq(false);
+      // edit seq
+      setEditSeq(true);
     }
   }
 
+  function findDuplicateStrings(arr) {
+    const seenStrings = [];
+    const duplicates = [];
+    for (const str of arr) {
+      if (seenStrings.includes(str)) {
+        duplicates.push(str);
+      } else {
+        seenStrings.push(str);
+      }
+    }
+    return duplicates;
+  }
+
   const checkDuplicateSeq = (contMap) => {
-    console.log(contMap);
     const excludeContNo = [];
+    const listSeq = [];
     let isDuplicate = false;
     if (contMap.length) {
       contMap.forEach(m => {
         if (!excludeContNo.includes(m.contNo)) {
           excludeContNo.push(m.contNo);
+          listSeq.push(m.seq + '');
         }
       })
+      isDuplicate = findDuplicateStrings(listSeq).length > 0;
     }
-    return isDuplicate
+    return {isDuplicate, excludeContNo}
   }
 
   const validateInput = (valInput, contMap) => {
     const getSeq = valInput?.seq || '';
     const cmContent = content[getField(CONTAINER_MANIFEST)];
     const regInteger = /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g;
-    checkDuplicateSeq(contMap);
+    const {isDuplicate, excludeContNo} = checkDuplicateSeq(contMap);
     if (getSeq.trim() === '') {
       setError({ valid: true, message: 'Please enter sequence number' })
     } else if (!getSeq.match(regInteger)) {
       setError({ valid: true, message: 'Invalid number' })
-    } else if (parseInt(getSeq.trim()) > parseInt(cmContent.length)) {
+    } else if (parseInt(getSeq.trim()) > parseInt(excludeContNo.length)) {
       setError({ valid: true, message: `The maximum value is not greater than ${cmContent.length}` })
+    } else if (isDuplicate) {
+      setError({ valid: true, message: 'Duplicate sequence number' })
     } else {
       setError({ valid: false, message: '' })
     }
@@ -729,22 +758,30 @@ const BLWorkspace = (props) => {
 
             <hr style={{ borderTop: '2px dashed #515E6A', marginTop: '2rem', marginBottom: '3rem' }} />
 
-            <Grid container spacing={2}>
-              <Button
-                variant="contained"
-                className={clsx(classes.button, classes.buttonEditSeq)}
-                style={{ width: 110, height: 35 }}
-                onClick={() => enableEditSeq(!isEditSeq, true)}>
-                {!isEditSeq ? `Edit Seq` : `Save`}
-              </Button>
-              {isEditSeq && (
-                <Button
-                  variant="contained"
-                  className={clsx(classes.button, classes.buttonEditSeq)}
-                  style={{ width: 110, height: 35, marginLeft: 5 }}
-                  onClick={() => enableEditSeq(true, false)}>
-                  Cancel
-                </Button>
+            <Grid container spacing={2} style={{ position: 'relative' }} className={classes.styleEditSeq}>
+              {isEditSeq ? (
+                <>
+                  <div style={{ width: 60, height: 35, position: 'absolute', zIndex: '9999', top: 65, left: 18 }}>
+                    <img
+                        style={{ width: 20, cursor: 'pointer' }}
+                        src="/assets/images/icons/checkbox.svg"
+                        onClick={() => enableEditSeq(true, true)}
+                    />
+                    <img
+                        style={{ width: 20, cursor: 'pointer', marginLeft: 5 }}
+                        src="/assets/images/icons/slashes.svg"
+                        onClick={() => enableEditSeq(true, false)}
+                    />
+                  </div>
+                </>
+              ) : (
+                <IconButton onClick={() => {
+                  enableEditSeq(false, true)
+                }} className="w-16 h-16 p-0" style={{ width: 60, height: 35, position: 'absolute', zIndex: '9999', top: 60, left: 10 }}>
+                  <Icon className="text-16 arrow-icon" color="disabled">
+                    edit_mode
+                  </Icon>
+                </IconButton>
               )}
               <TableCM
                 containerDetail={getValueField(CONTAINER_DETAIL)}
