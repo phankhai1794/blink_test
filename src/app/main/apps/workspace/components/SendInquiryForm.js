@@ -293,12 +293,12 @@ const SendInquiryForm = (props) => {
   useEffect(() => {
     // call API suggest mail
     if (!suggestMails.length) dispatch(MailActions.suggestMail(''));
-    fetchData();
+    if (previewValue === 'default') fetchData();
     return () => {
       dispatch(MailActions.setTags({ toCustomer: [], toOnshore: [], toCustomerCc: [], toOnshoreCc: [], toCustomerBcc: [], toOnshoreBcc: [] }));
       dispatch(MailActions.inputMail({ toCustomer: '', toOnshore: '', toCustomerCc: '', toOnshoreCc: '', toCustomerBcc: '', toOnshoreBcc: '' }));
     }
-  }, []);
+  }, [previewValue]);
 
   useEffect(() => {
     if (tabValue === 'onshore') {
@@ -492,20 +492,20 @@ const SendInquiryForm = (props) => {
   };
 
   const countInq = (receiver) => {
-    if(previewValue === 'inquiry') {
+    if (previewValue === 'inquiry') {
       return inquiries.filter(
         (inq) =>
-          (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF' || inq.state === 'REOPEN_A' || inq.state === 'REOPEN_Q' )) ||
+          (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF' || inq.state === 'REOPEN_A' || inq.state === 'REOPEN_Q')) ||
           (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
       ).length;
     } else {
       return inquiries.filter(
         (inq) =>
-          (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF' )) ||
+          (inq.receiver.includes(receiver) && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')) ||
           (receiver === 'customer' && inq.process === 'draft' && inq.state === 'REP_DRF')
       ).length;
     }
-   
+
   };
 
   const handleTabSelected = () => {
