@@ -196,7 +196,6 @@ const TableCM = (props) => {
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
-  const [mapContSeq, setMapContSeq] = useState([]);
 
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
@@ -438,24 +437,6 @@ const TableCM = (props) => {
                   handleChangeSeqState={(val) => {
                     if (Object.keys(val).length) {
                       props.setMapContSeq(val);
-                      if (containerManifest.length) {
-                        const checkDuplicateContNo = [];
-                        const objContSeq = [];
-                        containerManifest.forEach(cm => {
-                          const contNumCm = cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]];
-                          const seqCm = cm?.[metadata?.inq_type?.[SEQ]];
-                          if (contNumCm && seqCm && !checkDuplicateContNo.includes(contNumCm)) {
-                            checkDuplicateContNo.push(contNumCm);
-                            objContSeq.push({ contNo: contNumCm, seq: seqCm })
-                          }
-                        })
-                        if (objContSeq.length) {
-                          objContSeq.forEach(o => {
-                            if (o.contNo === val.contNo && o.seq === val.seq) {
-                            }
-                          })
-                        }
-                      }
                     }
                   }}>
                   {props.mapContSeq.length ? props.mapContSeq.find(map => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === map.contNo).seq : cm?.[metadata?.inq_type?.[SEQ]]}

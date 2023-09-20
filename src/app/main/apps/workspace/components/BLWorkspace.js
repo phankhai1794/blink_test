@@ -434,7 +434,7 @@ const BLWorkspace = (props) => {
       contentCM.forEach(c => {
         mapContSeqList.push({
           contNo: c?.[metadata?.inq_type?.[CONTAINER_NUMBER]],
-          seq: c?.[metadata?.inq_type?.[SEQ]],
+          seq: c?.[metadata?.inq_type?.[SEQ]] + '' || '',
         })
       })
       setMapContSeq(mapContSeqList);
@@ -514,7 +514,7 @@ const BLWorkspace = (props) => {
       contMap.forEach(m => {
         if (!excludeContNo.includes(m.contNo)) {
           excludeContNo.push(m.contNo);
-          listSeq.push(m.seq + '');
+          listSeq.push(m.seq);
         }
       })
       isDuplicate = findDuplicateStrings(listSeq).length > 0;
@@ -523,20 +523,34 @@ const BLWorkspace = (props) => {
   }
 
   const validateInput = (valInput, contMap) => {
-    const getSeq = valInput?.seq || '';
     const cmContent = content[getField(CONTAINER_MANIFEST)];
     const regInteger = /^\s*[1-9]\d{0,2}(,?\d{3})*\s*$/g;
     const {isDuplicate, excludeContNo} = checkDuplicateSeq(contMap);
-    if (getSeq.trim() === '') {
-      setError({ valid: true, message: 'Please enter sequence number' })
-    } else if (!getSeq.match(regInteger)) {
-      setError({ valid: true, message: 'Invalid number' })
-    } else if (parseInt(getSeq.trim()) > parseInt(excludeContNo.length)) {
-      setError({ valid: true, message: `The maximum value is not greater than ${cmContent.length}` })
-    } else if (isDuplicate) {
-      setError({ valid: true, message: 'Duplicate sequence number' })
-    } else {
-      setError({ valid: false, message: '' })
+    if (contMap && contMap.length) {
+      let isNotError = true;
+      if (isDuplicate) {
+        setError({ valid: true, message: 'Duplicate sequence number' })
+      }
+      for (let i = 0; i < contMap.length - 1; i++) {
+        let isErrorCheck = true;
+        const getSeq = contMap[i]?.seq;
+        if (getSeq.trim() === '') {
+          setError({ valid: true, message: 'Please enter sequence number' })
+        } else if (!getSeq.trim().match(regInteger)) {
+          setError({ valid: true, message: 'Invalid number' })
+        } else if (parseInt(getSeq.trim()) > parseInt(excludeContNo.length)) {
+          setError({ valid: true, message: `The maximum value is not greater than ${cmContent.length}` })
+        } else {
+          isErrorCheck = false;
+        }
+        if (isErrorCheck) {
+          isNotError = false;
+          break;
+        }
+      }
+      if (isNotError && !isDuplicate) {
+        setError({ valid: false, message: '' });
+      }
     }
   }
 
@@ -790,7 +804,7 @@ const BLWorkspace = (props) => {
             <hr style={{ borderTop: '2px dashed #515E6A', marginTop: '2rem', marginBottom: '3rem' }} />
 
             <Grid container spacing={2} style={{ position: 'relative' }} className={classes.styleEditSeq}>
-              {isEditSeq ? (
+              {user.role === 'Admin' ? (isEditSeq ? (
                 <>
                   <div style={{ width: 60, height: 35, position: 'absolute', zIndex: '9999', top: 65, left: 18 }}>
                     <img
@@ -817,7 +831,7 @@ const BLWorkspace = (props) => {
                     edit_mode
                   </Icon>
                 </IconButton>
-              )}
+              )) : ``}
               <TableCM
                 containerDetail={getValueField(CONTAINER_DETAIL)}
                 containerManifest={getValueField(CONTAINER_MANIFEST)}
@@ -834,7 +848,9 @@ const BLWorkspace = (props) => {
                             seq: val.seq
                           }
                         }
-                        return {...m}
+                        return {
+                          ...m
+                        }
                       })
                     }
                     validateInput(val, contMap)
