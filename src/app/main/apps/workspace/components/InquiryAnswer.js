@@ -281,6 +281,8 @@ const InquiryAnswer = (props) => {
       }
     }
 
+    console.log('contentCDCM', contentCDCM)
+    return;
     await addTransactionAnswer({ inquiryId: question.id, contentCDCM, ansType: question.ansType }).catch(err => handleError(dispatch, err));
 
     if (metadata.ans_type['choice'] === question.ansType && question.selectChoice) {

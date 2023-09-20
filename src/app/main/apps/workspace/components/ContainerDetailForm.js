@@ -15,7 +15,7 @@ import {
   CM_MEASUREMENT,
   CM_DESCRIPTION,
   CM_MARK,
-  CONTAINER_TYPE, CONTAINER_PACKAGE_UNIT, CM_PACKAGE_UNIT
+  CONTAINER_TYPE, CONTAINER_PACKAGE_UNIT, CM_PACKAGE_UNIT, SEQ
 } from '@shared/keyword';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -114,7 +114,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
   const [isSave, setSaveCDCM] = useState(false);
 
   const CDTitle = CONTAINER_LIST.cd;
-  const CMTitle = [CONTAINER_NUMBER, ...CONTAINER_LIST.cm];
+  const CMTitle = [SEQ, CONTAINER_NUMBER, ...CONTAINER_LIST.cm];
   const type = (container === CONTAINER_DETAIL) ? CDTitle : CMTitle;
 
   const sortValues = (vals) => {
