@@ -31,7 +31,7 @@ import {
   HTS_CODE,
   NCM_CODE,
   mapUnit,
-  CONTAINER_MANIFEST
+  CONTAINER_MANIFEST, SEQ
 } from '@shared/keyword';
 import { packageUnits, weightUnits, measurementUnits, containerTypeUnit } from '@shared/units';
 import ClearIcon from '@material-ui/icons/Clear';
@@ -509,6 +509,8 @@ const AmendmentPopup = (props) => {
     ];
     return (
       <>
+        <p style={{ fontWeight: 600 }}>SEQ</p>
+        {CustomTextField({ fullWidth: true, title: SEQ })}
         <p style={{ fontWeight: 600 }}>CONTAINER NUMBER</p>
         {CustomTextField({ fullWidth: true, title: CONTAINER_NUMBER })}
         <p style={{ fontWeight: 600 }}>CONTAINER SEAL</p>

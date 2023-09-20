@@ -805,34 +805,6 @@ const BLWorkspace = (props) => {
             <hr style={{ borderTop: '2px dashed #515E6A', marginTop: '2rem', marginBottom: '3rem' }} />
 
             <Grid container spacing={2} style={{ position: 'relative' }} className={classes.styleEditSeq}>
-              {user.role === 'Admin' ? (isEditSeq ? (
-                <>
-                  <div style={{ width: 60, height: 35, position: 'absolute', zIndex: '9999', top: 65, left: 18 }}>
-                    <img
-                        style={{ width: 20, cursor: 'pointer' }}
-                        src="/assets/images/icons/checkbox.svg"
-                        onClick={() => enableEditSeq(true, true)}
-                    />
-                    <img
-                        style={{ width: 20, cursor: 'pointer', marginLeft: 5 }}
-                        src="/assets/images/icons/slashes.svg"
-                        onClick={() => enableEditSeq(true, false)}
-                    />
-                  </div>
-                </>
-              ) : (
-                <IconButton
-                  onClick={() => {
-                    enableEditSeq(false, true)
-                  }}
-                  className="w-16 h-16 p-0"
-                  style={{ width: 60, height: 35, position: 'absolute', zIndex: '9999', top: 60, left: 10 }}
-                >
-                  <Icon className="text-16 arrow-icon icon-edit-seq" color="disabled">
-                    edit_mode
-                  </Icon>
-                </IconButton>
-              )) : ``}
               <TableCM
                 containerDetail={getValueField(CONTAINER_DETAIL)}
                 containerManifest={getValueField(CONTAINER_MANIFEST)}

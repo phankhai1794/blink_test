@@ -439,7 +439,8 @@ const TableCM = (props) => {
                       props.setMapContSeq(val);
                     }
                   }}>
-                  {props.mapContSeq.length ? props.mapContSeq.find(map => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === map.contNo).seq : cm?.[metadata?.inq_type?.[SEQ]]}
+                  {/*{props.mapContSeq.length ? props.mapContSeq.find(map => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]] === map.contNo).seq : cm?.[metadata?.inq_type?.[SEQ]]}*/}
+                  {cm?.[metadata?.inq_type?.[SEQ]]}
                 </BLField>
               </Grid>
               <Grid item xs={1} className={clsx(classes['grid-xs-1'], props.isEditSeq && 'colorText')}>
