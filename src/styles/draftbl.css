@@ -1,0 +1,21 @@
+.watermarked {
+  position: relative;
+  overflow: hidden;
+}
+
+.watermarked::before {
+  position: absolute;
+
+  display: block;
+  width: 150%;
+  height: 150%;
+  font-size: 50px;
+  transform: rotate(-20deg);
+  white-space: pre-wrap;
+  content: attr(data-watermark);
+
+  opacity: 0.7;
+  line-height: 300px;
+  letter-spacing: 2px;
+  color: rgba(0, 0, 0, 0.3);
+}

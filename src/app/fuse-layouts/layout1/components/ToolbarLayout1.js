@@ -114,7 +114,7 @@ const useStyles = makeStyles((theme) => ({
     },
     '&:focus-within fieldset': {
       border: `1px solid ${themeColor} !important`
-    },
+    }
   },
   selectViewProps: {
     color: 'themeColor',
@@ -129,14 +129,14 @@ const useStyles = makeStyles((theme) => ({
       background: `${lightThemeColor} !important`,
       color: themeColor,
       fontWeight: 600
-    },
+    }
   },
   menuItemSelected: {
     background: `${lightThemeColor} !important`,
     color: themeColor,
     fontSize: 12,
     fontWeight: 600,
-    fontFamily: 'Montserrat',
+    fontFamily: 'Montserrat'
   },
   titleButton: {
     position: 'relative',
@@ -156,6 +156,30 @@ const useStyles = makeStyles((theme) => ({
     color: themeColor,
     paddingRight: 18
   },
+  warningHeader: {
+    top: 58,
+    width: '100%',
+    height: 36,
+    padding: '2px 13px 2px 13px',
+    position: 'fixed',
+    background: 'rgba(243, 146, 0, 1)',
+    zIndex: 10000,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  warningText: {
+    fontFamily: 'Montserrat',
+    fontSize: 14,
+    fontWeight: 600,
+    letterSpacing: '0em',
+    textAlign: 'left',
+    color: '#FAFAFA'
+  },
+  closeWarningIcon: {
+    cursor: 'pointer',
+    marginRight: 25
+  }
 }));
 
 function ToolbarLayout1(props) {
@@ -177,6 +201,7 @@ function ToolbarLayout1(props) {
   const [amendmentsLength, setAmendmentLength] = useState();
   const [inquiryLength, setInquiryLength] = useState();
   const [showBack, setShowBack] = useState(true);
+  const [isShowWarning, setShowWarning] = useState(pathname.includes('/draft-bl') ? true : false);
 
   const { showQueueList } = useShowQueueListCallback();
 
@@ -350,29 +375,30 @@ function ToolbarLayout1(props) {
 
   return (
     <ThemeProvider theme={toolbarTheme}>
-      {(isLoading <= 0) && (
-        <AppBar id="fuse-toolbar" className="flex relative z-10" color="inherit">
-          <Toolbar className="p-0">
-            {config.navbar.display && config.navbar.position === 'left' && (
-              <Hidden lgUp>
-                <NavbarMobileToggleButton className="w-64 h-64 p-0" />
-                <div className={classes.separator} />
-              </Hidden>
-            )}
+      {isLoading <= 0 && (
+        <>
+          <AppBar id="fuse-toolbar" className="flex relative z-10" color="inherit">
+            <Toolbar className="p-0">
+              {config.navbar.display && config.navbar.position === 'left' && (
+                <Hidden lgUp>
+                  <NavbarMobileToggleButton className="w-64 h-64 p-0" />
+                  <div className={classes.separator} />
+                </Hidden>
+              )}
 
-            <div className="flex flex-1" style={{ marginLeft: 35 }}>
-              <div className={classes.iconWrapper}>
-                {
-                  (
-                    showBack
-                    && pathname.includes('/draft-bl')
-                    && !PermissionProvider({ action: PERMISSION.VIEW_ACCESS_EDIT_DRAFT_BL })
-                  ) ?
-                    <Tooltip title="Back" onClick={() => dispatch(DraftBLActions.setPreviewingDraftBL(false))}>
+              <div className="flex flex-1" style={{ marginLeft: 35 }}>
+                <div className={classes.iconWrapper}>
+                  {showBack &&
+                    pathname.includes('/draft-bl') &&
+                    !PermissionProvider({ action: PERMISSION.VIEW_ACCESS_EDIT_DRAFT_BL }) ? (
+                    <Tooltip
+                      title="Back"
+                      onClick={() => dispatch(DraftBLActions.setPreviewingDraftBL(false))}>
                       <IconButton component="span">
                         <KeyboardBackspaceIcon />
                       </IconButton>
-                    </Tooltip> :
+                    </Tooltip>
+                  ) : (
                     <Button variant="text" size="medium">
                       <Avatar
                         src="assets/images/logos/one_ocean_network-logo.png"
@@ -385,202 +411,254 @@ function ToolbarLayout1(props) {
                       // })}
                       />
                     </Button>
-                }
-              </div>
+                  )}
+                </div>
 
-              <PermissionProvider
-                action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
-                extraCondition={['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage}
-              >
-                <Button
-                  variant="text"
-                  size="medium"
-                  className={clsx('h-64', classes.button)}
-                  onClick={openAllInquiry}>
-                  <Badge color="primary" badgeContent={inquiryLength}>
-                    <img src="assets/images/icons/inquiryIcon.svg" />
-                  </Badge>
-                  <span className={classes.titleButton}>Inquiries List</span>
-                </Button>
-              </PermissionProvider>
-
-              {
-                myBL?.state?.includes('DRF_')
-                && user?.userType !== 'ONSHORE'
-                && (['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage)
-                && (
+                <PermissionProvider
+                  action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
+                  extraCondition={
+                    ['/workspace', '/guest'].some((el) => pathname.includes(el)) ||
+                    !isPreviewingDraftPage
+                  }>
                   <Button
                     variant="text"
                     size="medium"
                     className={clsx('h-64', classes.button)}
-                    onClick={openAmendmentsList}>
-                    <Badge color="primary" badgeContent={amendmentsLength}>
-                      <img src="assets/images/icons/amendIcon.svg" />
-                      <img src="assets/images/icons/penIcon.svg" style={{ position: 'absolute', bottom: 0, left: 8 }} />
+                    onClick={openAllInquiry}>
+                    <Badge color="primary" badgeContent={inquiryLength}>
+                      <img src="assets/images/icons/inquiryIcon.svg" />
                     </Badge>
-                    <span className={classes.titleButton}>Amendments List</span>
+                    <span className={classes.titleButton}>Inquiries List</span>
                   </Button>
-                )
-              }
+                </PermissionProvider>
 
-              <PermissionProvider
-                action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
-                extraCondition={
-                  attachmentLength > 0
-                  && (['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage)
-                }
-              >
-                <Button
-                  variant="text"
-                  size="medium"
-                  className={clsx('h-64', classes.button)}
-                  onClick={openAttachment}>
-                  <Badge color="primary" badgeContent={attachmentLength} id="no-att">
-                    <img src="assets/images/icons/attachmentIcon.svg" />
-                  </Badge>
-                  <span className={classes.titleButton}>Attachments List</span>
-                </Button>
-              </PermissionProvider>
-            </div>
+                {myBL?.state?.includes('DRF_') &&
+                  user?.userType !== 'ONSHORE' &&
+                  (['/workspace', '/guest'].some((el) => pathname.includes(el)) ||
+                    !isPreviewingDraftPage) && (
+                    <Button
+                      variant="text"
+                      size="medium"
+                      className={clsx('h-64', classes.button)}
+                      onClick={openAmendmentsList}>
+                      <Badge color="primary" badgeContent={amendmentsLength}>
+                        <img src="assets/images/icons/amendIcon.svg" />
+                        <img
+                          src="assets/images/icons/penIcon.svg"
+                          style={{ position: 'absolute', bottom: 0, left: 8 }}
+                        />
+                      </Badge>
+                      <span className={classes.titleButton}>Amendments List</span>
+                    </Button>
+                  )}
 
-            <div className="flex" style={{ alignItems: 'center' }}>
-              {
-                (['/workspace', '/guest'].some((el) => pathname.includes(el)) || !isPreviewingDraftPage) &&
-                <TextField
-                  id="view"
-                  name="view"
-                  select
-                  value={drfView}
-                  onChange={(e) => handleSelectView(e)}
-                  variant="outlined"
-                  className={clsx(classes.button, classes.selectView)}
-                  InputProps={{
-                    className: classes.selectViewProps
-                  }}
-                  SelectProps={{
-                    MenuProps: {
-                      anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                      getContentAnchorEl: null,
-                      PaperProps: {
-                        style: {
-                          minWidth: 0,
-                          position: 'absolute',
-                          top: '-100px'
-                        }
-                      }
-                    }
-                  }}>
-                  {drfViews.map(view => (
-                    <MenuItem
-                      key={view.value}
-                      value={view.value}
-                      className={view.value === drfView ? classes.menuItemSelected : classes.menuItem}>
-                      <span className={classes.dratTypeText}>{view.label}</span>
-                    </MenuItem>
-                  ))}
-                </TextField>
-              }
-
-              <PermissionProvider
-                action={PERMISSION.MYBL_GET_QUEUE_LIST}
-                extraCondition={!pathname.includes('/draft') || !isPreviewingDraftPage}
-              >
-                <BtnQueueList />
-              </PermissionProvider>
-
-              <PermissionProvider
-                action={PERMISSION.VIEW_EDIT_DRAFT_BL}
-                extraCondition={pathname.includes('/draft-bl') && isPreviewingDraftPage}
-              >
-                <Button
-                  className={clsx(classes.button, classes.buttonEditDraftBL)}
-                  style={{ width: 110, fontSize: 12, height: 30 }}
-                  onClick={() => dispatch(DraftBLActions.setPreviewingDraftBL(false))}>
-                  <img src="assets/images/icons/amendIconPink.svg" style={{ width: 12, height: 12, position: 'relative', left: 5 }} />
-                  <img src="assets/images/icons/penIconPink.svg" style={{ position: 'relative', top: 5, width: 8 }} />
-                  <span claseeName={classes.dratTypeText}>Amendment</span>
-                </Button>
-                <Button
-                  variant="contained"
-                  className={clsx(classes.button, classes.buttonComfirm)}
-                  style={{ width: 85, height: 30 }}
-                  onClick={confirmBlDraft}>
-                  <img src="assets/images/icons/confirm.svg" style={{ position: 'relative', right: 2, width: 11, height: 11 }} />
-                  <span claseeName={classes.dratTypeText}>Confirm</span>
-                </Button>
-                <DialogConfirm open={open} handleClose={handleClose} msg={msgConfirmDrf} />
-              </PermissionProvider>
-
-              <PermissionProvider
-                action={PERMISSION.MAIL_SEND_MAIL}
-                extraCondition={pathname.includes('/workspace')}>
-                <div>
+                <PermissionProvider
+                  action={PERMISSION.VIEW_SHOW_ALL_INQUIRIES}
+                  extraCondition={
+                    attachmentLength > 0 &&
+                    (['/workspace', '/guest'].some((el) => pathname.includes(el)) ||
+                      !isPreviewingDraftPage)
+                  }>
                   <Button
-                    style={{
-                      width: 80,
-                      height: 30,
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
-                    disabled={inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED', 'AME_SENT', 'ANS_SENT', 'REP_A_SENT'].includes(inq.state)).length === inquiries.length}
-                    color="primary"
-                    variant="contained"
+                    variant="text"
                     size="medium"
                     className={clsx('h-64', classes.button)}
-                    onClick={openEmail}>
-                    <div style={{ textAlign: 'center'}}>
-                      <img src="assets/images/icons/email.svg" style={{width: 13, height: 9, display: 'inline-flex', position: 'relative', right: 2, textAlign: 'center'} }/>
-                      <span style={{ display: 'inline-block'}}>Email</span>
-                    </div>
-                    
+                    onClick={openAttachment}>
+                    <Badge color="primary" badgeContent={attachmentLength} id="no-att">
+                      <img src="assets/images/icons/attachmentIcon.svg" />
+                    </Badge>
+                    <span className={classes.titleButton}>Attachments List</span>
                   </Button>
-                </div>
-              </PermissionProvider>
+                </PermissionProvider>
+              </div>
 
-              {/* <PermissionProvider
-                action={PERMISSION.MAIL_SEND_MAIL}
-                extraCondition={pathname.includes('/guest')}
-              >
-                <div>
+              <div className="flex" style={{ alignItems: 'center' }}>
+                {(['/workspace', '/guest'].some((el) => pathname.includes(el)) ||
+                  !isPreviewingDraftPage) && (
+                    <TextField
+                      id="view"
+                      name="view"
+                      select
+                      value={drfView}
+                      onChange={(e) => handleSelectView(e)}
+                      variant="outlined"
+                      className={clsx(classes.button, classes.selectView)}
+                      InputProps={{
+                        className: classes.selectViewProps
+                      }}
+                      SelectProps={{
+                        MenuProps: {
+                          anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                          getContentAnchorEl: null,
+                          PaperProps: {
+                            style: {
+                              minWidth: 0,
+                              position: 'absolute',
+                              top: '-100px'
+                            }
+                          }
+                        }
+                      }}>
+                      {drfViews.map((view) => (
+                        <MenuItem
+                          key={view.value}
+                          value={view.value}
+                          className={
+                            view.value === drfView ? classes.menuItemSelected : classes.menuItem
+                          }>
+                          <span className={classes.dratTypeText}>{view.label}</span>
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+
+                <PermissionProvider
+                  action={PERMISSION.MYBL_GET_QUEUE_LIST}
+                  extraCondition={!pathname.includes('/draft') || !isPreviewingDraftPage}>
+                  <BtnQueueList />
+                </PermissionProvider>
+
+                <PermissionProvider
+                  action={PERMISSION.VIEW_EDIT_DRAFT_BL}
+                  extraCondition={pathname.includes('/draft-bl') && isPreviewingDraftPage}>
                   <Button
-                    //color="primary"
+                    className={clsx(classes.button, classes.buttonEditDraftBL)}
+                    style={{ width: 110, fontSize: 12, height: 30 }}
+                    onClick={() => dispatch(DraftBLActions.setPreviewingDraftBL(false))}>
+                    <img
+                      src="assets/images/icons/amendIconPink.svg"
+                      style={{ width: 12, height: 12, position: 'relative', left: 5 }}
+                    />
+                    <img
+                      src="assets/images/icons/penIconPink.svg"
+                      style={{ position: 'relative', top: 5, width: 8 }}
+                    />
+                    <span claseeName={classes.dratTypeText}>Amendment</span>
+                  </Button>
+                  <Button
+                    variant="contained"
+                    className={clsx(classes.button, classes.buttonComfirm)}
+                    style={{ width: 85, height: 30 }}
+                    onClick={confirmBlDraft}>
+                    <img
+                      src="assets/images/icons/confirm.svg"
+                      style={{ position: 'relative', right: 2, width: 11, height: 11 }}
+                    />
+                    <span claseeName={classes.dratTypeText}>Confirm</span>
+                  </Button>
+                  <DialogConfirm open={open} handleClose={handleClose} msg={msgConfirmDrf} />
+                </PermissionProvider>
+
+                <PermissionProvider
+                  action={PERMISSION.MAIL_SEND_MAIL}
+                  extraCondition={pathname.includes('/workspace')}>
+                  <div>
+                    <Button
+                      style={{
+                        width: 80,
+                        height: 30,
+                        borderRadius: '8px',
+                        fontSize: '12px'
+                      }}
+                      disabled={
+                        inquiries.filter((inq) =>
+                          [
+                            'UPLOADED',
+                            'COMPL',
+                            'RESOLVED',
+                            'AME_SENT',
+                            'ANS_SENT',
+                            'REP_A_SENT'
+                          ].includes(inq.state)
+                        ).length === inquiries.length
+                      }
+                      color="primary"
+                      variant="contained"
+                      size="medium"
+                      className={clsx('h-64', classes.button)}
+                      onClick={openEmail}>
+                      <div style={{ textAlign: 'center' }}>
+                        <img
+                          src="assets/images/icons/email.svg"
+                          style={{
+                            width: 13,
+                            height: 9,
+                            display: 'inline-flex',
+                            position: 'relative',
+                            right: 2,
+                            textAlign: 'center'
+                          }}
+                        />
+                        <span style={{ display: 'inline-block' }}>Email</span>
+                      </div>
+                    </Button>
+                  </div>
+                </PermissionProvider>
+
+                {/* <PermissionProvider
+                  action={PERMISSION.MAIL_SEND_MAIL}
+                  extraCondition={pathname.includes('/guest')}
+                >
+                  <div>
+                    <Button
+                      //color="primary"
+                      variant="contained"
+                      className={clsx(classes.button, classes.buttonSubmit)}
+                      style={{ width: 80, height: 30 }}
+                      // className={clsx('h-64', classes.button)}
+                      onClick={openEmail}>
+                      <img src="assets/images/icons/forwardMail.svg" style={{ position: 'relative', width: 10, height: 10 }} />
+                      <span className="pl-4">Forward</span>
+                    </Button>
+                  </div>
+                </PermissionProvider> */}
+
+                <PermissionProvider
+                  action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
+                  extraCondition={pathname.includes('/guest') || !isPreviewingDraftPage}>
+                  <Button
                     variant="contained"
                     className={clsx(classes.button, classes.buttonSubmit)}
                     style={{ width: 80, height: 30 }}
-                    // className={clsx('h-64', classes.button)}
-                    onClick={openEmail}>
-                    <img src="assets/images/icons/forwardMail.svg" style={{ position: 'relative', width: 10, height: 10 }} />
-                    <span className="pl-4">Forward</span>
+                    disabled={!enableSubmitInq}
+                    onClick={onSubmit}>
+                    <img
+                      src="assets/images/icons/submitIcon.svg"
+                      style={{ position: 'relative', width: 12, height: 12, right: 3 }}
+                    />
+                    Submit
                   </Button>
-                </div>
-              </PermissionProvider> */}
+                </PermissionProvider>
 
-              <PermissionProvider
-                action={PERMISSION.INQUIRY_SUBMIT_INQUIRY_ANSWER}
-                extraCondition={pathname.includes('/guest') || !isPreviewingDraftPage}>
-                <Button
-                  variant="contained"
-                  className={clsx(classes.button, classes.buttonSubmit)}
-                  style={{ width: 80, height: 30 }}
-                  disabled={!enableSubmitInq}
-                  onClick={onSubmit}>
-                  <img src="assets/images/icons/submitIcon.svg" style={{ position: 'relative', width: 12, height: 12, right: 3 }} />
-                  Submit
-                </Button>
-              </PermissionProvider>
+                <PreviewDraftBL />
 
-              {/* <PreviewDraftBL /> */}
+                <User />
+              </div>
 
-              <User />
+              {config.navbar.display && config.navbar.position === 'right' && (
+                <Hidden lgUp>
+                  <NavbarMobileToggleButton />
+                </Hidden>
+              )}
+            </Toolbar>
+          </AppBar>
+          {isShowWarning && isPreviewingDraftPage && (
+            <div className={classes.warningHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <img height="20px" src="/assets/images/icons/warningIcon.svg" />
+                <p className={classes.warningText}>
+                  This page is temporarily not available due to technical issues
+                </p>
+              </div>
+              <img
+                height="16px"
+                className={classes.closeWarningIcon}
+                src="/assets/images/icons/close_icon.svg"
+                onClick={() => setShowWarning(false)}
+              />
             </div>
-
-            {config.navbar.display && config.navbar.position === 'right' && (
-              <Hidden lgUp>
-                <NavbarMobileToggleButton />
-              </Hidden>
-            )}
-          </Toolbar>
-        </AppBar>
+          )}
+        </>
       )}
     </ThemeProvider>
   );
