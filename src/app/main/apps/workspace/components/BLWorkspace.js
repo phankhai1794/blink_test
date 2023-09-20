@@ -43,6 +43,7 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import * as Actions from '../store/actions';
 import * as FormActions from '../store/actions/form';
 import * as InquiryActions from '../store/actions/inquiry';
@@ -531,7 +532,7 @@ const BLWorkspace = (props) => {
       if (isDuplicate) {
         setError({ valid: true, message: 'Duplicate sequence number' })
       }
-      for (let i = 0; i < contMap.length - 1; i++) {
+      for (let i = 0; i < contMap.length; i++) {
         let isErrorCheck = true;
         const getSeq = contMap[i]?.seq;
         if (getSeq.trim() === '') {
@@ -859,7 +860,11 @@ const BLWorkspace = (props) => {
                 }}
               />
               {error && error.valid && (
-                <span style={{ color: 'red' }}>{error.message}</span>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <ErrorOutlineIcon
+                    style={{ height: '25px', width: '25px', color: '#DC2626', marginRight: 5 }} />
+                  <span style={{ color: 'red' }}>{error.message}</span>
+                </div>
               )}
             </Grid>
 
