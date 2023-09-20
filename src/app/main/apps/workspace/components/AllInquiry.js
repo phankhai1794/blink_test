@@ -267,11 +267,13 @@ const AllInquiry = (props) => {
         //reset data click cancel
         if (optionsInquires[editedIndex].id === ans.id) {
           if (ans.answerObj.length) {
-            if (!choiceAnswer && optionsInquires[editedIndex].paragraphAnswer) {
-              optionsInquires[editedIndex].paragraphAnswer.content = ans.answerObj[0].content
-            } else if (choiceAnswer && optionsInquires[editedIndex].selectChoice) {
+            if (choiceAnswer && optionsInquires[editedIndex].selectChoice) {
               const answerIndex = ans.answerObj.find((item) => item.confirmed);
               optionsInquires[editedIndex].selectChoice.answer = answerIndex.id;
+            }
+          } else {
+            if (!choiceAnswer && optionsInquires[editedIndex].paragraphAnswer) {
+              optionsInquires[editedIndex].paragraphAnswer.content = (ans.answerObj && ans.answerObj.length) ? ans.answerObj[0].content : ''
             }
           }
           optionsInquires[editedIndex].mediaFilesAnswer = ans.mediaFilesAnswer;
@@ -409,6 +411,7 @@ const AllInquiry = (props) => {
                           }
                         }}
                         inqActing={inqActing}
+                        onCancel={(val) => handleCancel(val)}
                       />
                     </div>
                   </div>
@@ -459,6 +462,7 @@ const AllInquiry = (props) => {
                         }
                       }}
                       inqActing={inqActing}
+                      onCancel={(val) => handleCancel(val)}
                     />
                     {(scrollInquiry && q.id === scrollInquiry) && scrollFunction()}
                     {(q.showIconAttachAnswerFile) && (['ANS_DRF', 'OPEN', 'INQ_SENT', 'ANS_SENT', 'REP_Q_DRF'].includes(q.state) || getStateReplyDraft) &&
