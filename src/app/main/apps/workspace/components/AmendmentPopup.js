@@ -161,7 +161,7 @@ const AmendmentPopup = (props) => {
     return { title: title, value: data[getType(title)], id: getType(title) };
   });
 
-  const CMTitle = [CONTAINER_NUMBER, CONTAINER_SEAL, ...CONTAINER_LIST.cm, mapUnit[CM_PACKAGE], mapUnit[CM_WEIGHT], mapUnit[CM_MEASUREMENT]].map((title) => {
+  const CMTitle = [SEQ, CONTAINER_NUMBER, CONTAINER_SEAL, ...CONTAINER_LIST.cm, mapUnit[CM_PACKAGE], mapUnit[CM_WEIGHT], mapUnit[CM_MEASUREMENT]].map((title) => {
     return {
       title: title,
       value:
