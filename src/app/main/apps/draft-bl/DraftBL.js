@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import history from '@history';
 import _ from 'lodash';
 import { SHIPPER, CONSIGNEE, NOTIFY, EXPORT_REF, FORWARDER, PLACE_OF_RECEIPT, PORT_OF_LOADING, PORT_OF_DISCHARGE, PLACE_OF_DELIVERY, FINAL_DESTINATION, VESSEL_VOYAGE, PRE_CARRIAGE, TYPE_OF_MOVEMENT, CONTAINER_DETAIL, CONTAINER_MANIFEST, FREIGHT_CHARGES, PLACE_OF_BILL, DATE_CARGO, DATE_LADEN, EXCHANGE_RATE, SERVICE_CONTRACT_NO, DOC_FORM_NO, TARIFF_ITEM, PREPAID, DATED, CONTAINER_PACKAGE, CONTAINER_WEIGHT, CONTAINER_MEASUREMENT, CM_PACKAGE, CM_WEIGHT, CM_MEASUREMENT, BOOKING_NO, BL_TYPE, RD_TERMS, NO_CONTENT_AMENDMENT, TOTAL_PREPAID, RATING_DETAIL, BL_COPY, TYPE_OF_ONBOARD, DESCRIPTION_OF_GOODS, DESCRIPTION_OF_GOODS1, DESCRIPTION_OF_GOODS2 } from '@shared/keyword';
@@ -207,7 +207,8 @@ const DraftPage = (props) => {
       [], // freight term, remark
     ],
   ]);
-
+  const watermarkRef = useRef(null);
+  const [showWatermark, setShowWatermark] = useState(false)
   const getField = (field) => {
     return metadata.field ? metadata.field[field] : '';
   };
@@ -239,14 +240,22 @@ const DraftPage = (props) => {
         const isAllow = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL });
         if (!isAllow) history.push({ pathname: '/login', cachePath: pathname, cacheSearch: search });
       } else {
+        setShowWatermark(true)
         dispatch(AppActions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', true)));
         dispatch(AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DRAFT_BL })));
         dispatch(Actions.setInquiries(props.bl));
+        const element = watermarkRef.current;
+
+        if (element) {
+          // Modify the element's data-watermark attribute
+          element.dataset.watermark = (element.dataset.watermark + new Array(20).join(' ')).repeat(15);
+        }
       }
 
       dispatch(Actions.loadMetadata());
       dispatch(Actions.loadContent(props.bl));
     }
+
   }, []);
 
   useEffect(() => {
@@ -298,145 +307,146 @@ const DraftPage = (props) => {
   return (
     <div className={classes.wrapper}>
       <div className={classes.layout}>
-        <div className={classes.header} style={{ display: 'flex' }}>
-          <img className={classes.logo} src="assets/images/logos/one_logo.svg" />
-          <div
-            className={classes.tittle_L}
-            style={{ color: 'rgb(0, 0, 255)', textAlign: 'center' }}>
-            DRAFT - NON NEGOTIABLE
-          </div>
-          <div style={{ width: '30%', paddingTop: 15 }}>
-            <div className={classes.page_Number}>
-              PAGE: <p className={classes.page_Count}>1</p> OF <p className={classes.page_Count}>{pages.length}</p>
+        <div className={showWatermark ? "watermarked" : ''} data-watermark="Under Construction" ref={watermarkRef}>
+          <div className={classes.header} style={{ display: 'flex' }}>
+            <img className={classes.logo} src="assets/images/logos/one_logo.svg" />
+            <div
+              className={classes.tittle_L}
+              style={{ color: 'rgb(0, 0, 255)', textAlign: 'center' }}>
+              DRAFT - NON NEGOTIABLE
             </div>
-            <span className={classes.blType}>
-              {getValueField(BL_TYPE) ? getValueField(BL_TYPE) === "W" ? "SEA WAYBILL" : "BILL OF LADING" : ""}
-            </span>
-          </div>
-        </div>
-
-        <Grid container style={{ display: 'flex', marginTop: 15 }}>
-          <Grid item xs={7} style={{
-            borderTop: BORDER,
-            borderBottom: BORDER,
-            borderRight: BORDER,
-          }}>
-            <div className={classes.tittle_M}>SHIPPER/EXPORTER</div>
-            <div className={classes.content_L} style={{ width: '70%' }}>
-              <span className={classes.shipper}>
-                {(getValueField(SHIPPER) && isJsonText(getValueField(SHIPPER))) ?
-                  ((JSON.parse(getValueField(SHIPPER)).name === NO_CONTENT_AMENDMENT) ? ''
-                    : `${JSON.parse(getValueField(SHIPPER)).name}\n${JSON.parse(getValueField(SHIPPER)).address}`)
-                  : getValueField(SHIPPER).replace(NO_CONTENT_AMENDMENT, '')}
+            <div style={{ width: '30%', paddingTop: 15 }}>
+              <div className={classes.page_Number}>
+                PAGE: <p className={classes.page_Count}>1</p> OF <p className={classes.page_Count}>{pages.length}</p>
+              </div>
+              <span className={classes.blType}>
+                {getValueField(BL_TYPE) ? getValueField(BL_TYPE) === "W" ? "SEA WAYBILL" : "BILL OF LADING" : ""}
               </span>
             </div>
-          </Grid>
-          <Grid container item xs={5} style={{
-            borderTop: BORDER,
-            borderBottom: BORDER,
-          }}>
-            <Grid container item style={{
-              borderBottom: BORDER,
-              maxHeight: '70px'
-            }}>
-              <Grid item xs={6} style={{
-                borderRight: BORDER,
-              }}>
-                <div className={classes.tittle_M}>BOOKING NO.</div>
-                <div className={clsx(classes.content_L, classes.bkgNo)} data-type="textarea">
-                  {getValueField(BOOKING_NO)}
-                </div>
-              </Grid>
-              <Grid item xs={6}>
-                <div className={classes.tittle_M}> {getValueField(BL_TYPE) === "W" ? "SEA WAYBILL NO." : "BILL OF LADING NO."}</div>
-                <div className={clsx(classes.content_L, classes.blNo)}>
-                  {myBL.bkgNo && `ONEY${myBL.bkgNo}`}
-                </div>
-              </Grid>
-            </Grid>
-            <Grid item>
-              <div className={classes.tittle_S} style={{ minHeight: 20 }}>
-                {`EXPORT REFERENCES(for the Merchant's and/or Carrier's reference only. See back clause 8. (4).)`}
-              </div>
-              <div className={clsx(classes.content_L, classes.exportFef)}>
-                {getValueField(EXPORT_REF)}
-              </div>
-            </Grid>
-          </Grid>
+          </div>
 
-          <Grid container item style={{
-            display: 'flex',
-            borderBottom: BORDER,
-          }}>
-            <Grid container item xs={7} style={{
+          <Grid container style={{ display: 'flex', marginTop: 15 }}>
+            <Grid item xs={7} style={{
+              borderTop: BORDER,
+              borderBottom: BORDER,
               borderRight: BORDER,
             }}>
-              <Grid item xs={12} style={{
+              <div className={classes.tittle_M}>SHIPPER/EXPORTER</div>
+              <div className={classes.content_L} style={{ width: '70%' }}>
+                <span className={classes.shipper}>
+                  {(getValueField(SHIPPER) && isJsonText(getValueField(SHIPPER))) ?
+                    ((JSON.parse(getValueField(SHIPPER)).name === NO_CONTENT_AMENDMENT) ? ''
+                      : `${JSON.parse(getValueField(SHIPPER)).name}\n${JSON.parse(getValueField(SHIPPER)).address}`)
+                    : getValueField(SHIPPER).replace(NO_CONTENT_AMENDMENT, '')}
+                </span>
+              </div>
+            </Grid>
+            <Grid container item xs={5} style={{
+              borderTop: BORDER,
+              borderBottom: BORDER,
+            }}>
+              <Grid container item style={{
                 borderBottom: BORDER,
+                maxHeight: '70px'
               }}>
-                <div className={classes.tittle_M}>CONSIGNEE</div>
-                <span className={clsx(classes.consignee, classes.content_L)} style={{ width: '70%' }}>
-                  {(getValueField(CONSIGNEE) && isJsonText(getValueField(CONSIGNEE))) ?
-                    ((JSON.parse(getValueField(CONSIGNEE)).name === NO_CONTENT_AMENDMENT) ? ''
-                      : `${JSON.parse(getValueField(CONSIGNEE)).name}\n${JSON.parse(getValueField(CONSIGNEE)).address}`)
-                    : getValueField(CONSIGNEE).replace(NO_CONTENT_AMENDMENT, '')}
-                </span>
-              </Grid>
-              <Grid item xs={12}>
-                <div className={classes.tittle_M}>
-                  {`NOTIFY PARTY (It is agreed that no responsibility shall be attached to the Carrier or its Agents for failure to notify)`}
-                </div>
-                <span className={clsx(classes.notify, classes.content_L)}>
-                  {(getValueField(NOTIFY) && isJsonText(getValueField(NOTIFY))) ?
-                    ((JSON.parse(getValueField(NOTIFY)).name === NO_CONTENT_AMENDMENT) ? ''
-                      : `${JSON.parse(getValueField(NOTIFY)).name}\n${JSON.parse(getValueField(NOTIFY)).address}`)
-                    : getValueField(NOTIFY).replace(NO_CONTENT_AMENDMENT, '')}
-                </span>
-              </Grid>
-
-              <Grid container item>
                 <Grid item xs={6} style={{
                   borderRight: BORDER,
                 }}>
-                  <div className={classes.tittle_M}>PRE-CARRIAGE BY</div>
-                  <span className={clsx(classes.content_L, classes.singleLine)}>
-                    {getValueField(PRE_CARRIAGE)}
-                  </span>
+                  <div className={classes.tittle_M}>BOOKING NO.</div>
+                  <div className={clsx(classes.content_L, classes.bkgNo)} data-type="textarea">
+                    {getValueField(BOOKING_NO)}
+                  </div>
                 </Grid>
                 <Grid item xs={6}>
-                  <div className={classes.tittle_M}>PLACE OF RECEIPT</div>
-                  <span className={clsx(classes.content_L, classes.singleLine)}>
-                    {getValueField(PLACE_OF_RECEIPT)}
-                  </span>
+                  <div className={classes.tittle_M}> {getValueField(BL_TYPE) === "W" ? "SEA WAYBILL NO." : "BILL OF LADING NO."}</div>
+                  <div className={clsx(classes.content_L, classes.blNo)}>
+                    {myBL.bkgNo && `ONEY${myBL.bkgNo}`}
+                  </div>
                 </Grid>
+              </Grid>
+              <Grid item>
+                <div className={classes.tittle_S} style={{ minHeight: 20 }}>
+                  {`EXPORT REFERENCES(for the Merchant's and/or Carrier's reference only. See back clause 8. (4).)`}
+                </div>
+                <div className={clsx(classes.content_L, classes.exportFef)}>
+                  {getValueField(EXPORT_REF)}
+                </div>
               </Grid>
             </Grid>
 
-            <Grid container item xs={5}>
-              <Grid item>
-                <div className={classes.tittle_S} style={{ width: '80%' }}>
-                  FORWARDING AGENT-REFERENCES FMC NO.
-                </div>
-                <span className={clsx(classes.content_L, classes.forwarding)}>
-                  {(getValueField(FORWARDER) || "")
-                    .split("\n")
-                    .map((line, idx) => {
-                      let res = lineBreakAtBoundary(line, MAX_CHARS.forwarder);
-                      if (idx === 2) { // if this is 3rd line
-                        while (res.length <= MAX_CHARS.forwarder + 3) // +3 to show as same as OPUS draft
-                          res += " ";
-                        res += "<"
-                      }
-                      return res;
-                    })
-                    .slice(0, 3)
-                    .join("\n")
-                  }
-                </span>
+            <Grid container item style={{
+              display: 'flex',
+              borderBottom: BORDER,
+            }}>
+              <Grid container item xs={7} style={{
+                borderRight: BORDER,
+              }}>
+                <Grid item xs={12} style={{
+                  borderBottom: BORDER,
+                }}>
+                  <div className={classes.tittle_M}>CONSIGNEE</div>
+                  <span className={clsx(classes.consignee, classes.content_L)} style={{ width: '70%' }}>
+                    {(getValueField(CONSIGNEE) && isJsonText(getValueField(CONSIGNEE))) ?
+                      ((JSON.parse(getValueField(CONSIGNEE)).name === NO_CONTENT_AMENDMENT) ? ''
+                        : `${JSON.parse(getValueField(CONSIGNEE)).name}\n${JSON.parse(getValueField(CONSIGNEE)).address}`)
+                      : getValueField(CONSIGNEE).replace(NO_CONTENT_AMENDMENT, '')}
+                  </span>
+                </Grid>
+                <Grid item xs={12}>
+                  <div className={classes.tittle_M}>
+                    {`NOTIFY PARTY (It is agreed that no responsibility shall be attached to the Carrier or its Agents for failure to notify)`}
+                  </div>
+                  <span className={clsx(classes.notify, classes.content_L)}>
+                    {(getValueField(NOTIFY) && isJsonText(getValueField(NOTIFY))) ?
+                      ((JSON.parse(getValueField(NOTIFY)).name === NO_CONTENT_AMENDMENT) ? ''
+                        : `${JSON.parse(getValueField(NOTIFY)).name}\n${JSON.parse(getValueField(NOTIFY)).address}`)
+                      : getValueField(NOTIFY).replace(NO_CONTENT_AMENDMENT, '')}
+                  </span>
+                </Grid>
+
+                <Grid container item>
+                  <Grid item xs={6} style={{
+                    borderRight: BORDER,
+                  }}>
+                    <div className={classes.tittle_M}>PRE-CARRIAGE BY</div>
+                    <span className={clsx(classes.content_L, classes.singleLine)}>
+                      {getValueField(PRE_CARRIAGE)}
+                    </span>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className={classes.tittle_M}>PLACE OF RECEIPT</div>
+                    <span className={clsx(classes.content_L, classes.singleLine)}>
+                      {getValueField(PLACE_OF_RECEIPT)}
+                    </span>
+                  </Grid>
+                </Grid>
               </Grid>
-              <Grid item style={{ borderTop: BORDER }}>
-                <div className={classes.declaration_M}>
-                  {`RECEIVED by the Carrier in apparent good order and condition (unless otherwise stated herein) the total
+
+              <Grid container item xs={5}>
+                <Grid item>
+                  <div className={classes.tittle_S} style={{ width: '80%' }}>
+                    FORWARDING AGENT-REFERENCES FMC NO.
+                  </div>
+                  <span className={clsx(classes.content_L, classes.forwarding)}>
+                    {(getValueField(FORWARDER) || "")
+                      .split("\n")
+                      .map((line, idx) => {
+                        let res = lineBreakAtBoundary(line, MAX_CHARS.forwarder);
+                        if (idx === 2) { // if this is 3rd line
+                          while (res.length <= MAX_CHARS.forwarder + 3) // +3 to show as same as OPUS draft
+                            res += " ";
+                          res += "<"
+                        }
+                        return res;
+                      })
+                      .slice(0, 3)
+                      .join("\n")
+                    }
+                  </span>
+                </Grid>
+                <Grid item style={{ borderTop: BORDER }}>
+                  <div className={classes.declaration_M}>
+                    {`RECEIVED by the Carrier in apparent good order and condition (unless otherwise stated herein) the total
                 number or quantity of Containers or other packages or units indicated in the box entitled "Carrier's
                 Receipt", to be carried subject to all the terms and conditions hereof from the Place of Receipt or Port of
                 Loading to the Port of Discharge or Place of Delivery, as applicable. Delivery of the Goods
@@ -452,218 +462,218 @@ const DraftPage = (props) => {
                 Place of Delivery as applicable. In their Agent has signed the number of Bills of
                 Lading stated at the top, and whenever one original Bill of Lading has
                 been surrendered all other Bills of Lading shall be void.`}
-                </div>
-              </Grid>
-            </Grid>
-          </Grid>
-
-          <Grid container item style={{ borderBottom: BORDER_BOLD }}>
-            <Grid container item xs={12} style={{ borderBottom: BORDER }}>
-              <Grid container item xs={7} style={{ borderRight: BORDER }}>
-                <Grid item xs={6} style={{ borderRight: BORDER }}>
-                  <div className={classes.tittle_M}>OCEAN VESSEL VOYAGE NO. FLAG</div>
-                  <span className={clsx(classes.content_L, classes.singleLine)}>
-                    {getValueField(VESSEL_VOYAGE)}
-                  </span>
-                </Grid>
-                <Grid item xs={6}>
-                  <div className={classes.tittle_M}>PORT OF LOADING</div>
-                  <span className={clsx(classes.content_L, classes.singleLine)}>
-                    {getValueField(PORT_OF_LOADING)}
-                  </span>
-                </Grid>
-              </Grid>
-              <Grid container item xs={5}>
-                <Grid item>
-                  <div className={classes.tittle_M}>{`FINAL DESTINATION(for the Merchant's reference only)`}</div>
-                  <span className={clsx(classes.content_L, classes.singleLine)}>
-                    {getValueField(FINAL_DESTINATION)}
-                  </span>
-                </Grid>
-              </Grid>
-            </Grid>
-
-            <Grid container item xs={12}>
-              <Grid container item xs={7} style={{ borderRight: BORDER }}>
-                <Grid item xs={6} style={{ borderRight: BORDER }}>
-                  <div className={classes.tittle_M}>PORT OF DISCHARGE</div>
-                  <span className={clsx(classes.content_L, classes.singleLine)}>
-                    {getValueField(PORT_OF_DISCHARGE)}
-                  </span>
-                </Grid>
-                <Grid item xs={6}>
-                  <div className={classes.tittle_M}>PLACE OF DELIVERY</div>
-                  <span className={clsx(classes.content_L, classes.singleLine)}>
-                    {getValueField(PLACE_OF_DELIVERY)}
-                  </span>
-                </Grid>
-              </Grid>
-
-              <Grid container item xs={5}>
-                <Grid item >
-                  <div className={classes.tittle_S}>
-                    TYPE OF MOVEMENT(IF MIXED, USE DESCRIPTION OF PACKAGES AND GOODS FIELD)
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span className={classes.content_L}>
-                      {getValueField(TYPE_OF_MOVEMENT)}
+                </Grid>
+              </Grid>
+            </Grid>
+
+            <Grid container item style={{ borderBottom: BORDER_BOLD }}>
+              <Grid container item xs={12} style={{ borderBottom: BORDER }}>
+                <Grid container item xs={7} style={{ borderRight: BORDER }}>
+                  <Grid item xs={6} style={{ borderRight: BORDER }}>
+                    <div className={classes.tittle_M}>OCEAN VESSEL VOYAGE NO. FLAG</div>
+                    <span className={clsx(classes.content_L, classes.singleLine)}>
+                      {getValueField(VESSEL_VOYAGE)}
                     </span>
-                    <span className={classes.content_L}>
-                      {getValueField(RD_TERMS)}
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className={classes.tittle_M}>PORT OF LOADING</div>
+                    <span className={clsx(classes.content_L, classes.singleLine)}>
+                      {getValueField(PORT_OF_LOADING)}
                     </span>
-                  </div>
+                  </Grid>
+                </Grid>
+                <Grid container item xs={5}>
+                  <Grid item>
+                    <div className={classes.tittle_M}>{`FINAL DESTINATION(for the Merchant's reference only)`}</div>
+                    <span className={clsx(classes.content_L, classes.singleLine)}>
+                      {getValueField(FINAL_DESTINATION)}
+                    </span>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              <Grid container item xs={12}>
+                <Grid container item xs={7} style={{ borderRight: BORDER }}>
+                  <Grid item xs={6} style={{ borderRight: BORDER }}>
+                    <div className={classes.tittle_M}>PORT OF DISCHARGE</div>
+                    <span className={clsx(classes.content_L, classes.singleLine)}>
+                      {getValueField(PORT_OF_DISCHARGE)}
+                    </span>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className={classes.tittle_M}>PLACE OF DELIVERY</div>
+                    <span className={clsx(classes.content_L, classes.singleLine)}>
+                      {getValueField(PLACE_OF_DELIVERY)}
+                    </span>
+                  </Grid>
+                </Grid>
+
+                <Grid container item xs={5}>
+                  <Grid item >
+                    <div className={classes.tittle_S}>
+                      TYPE OF MOVEMENT(IF MIXED, USE DESCRIPTION OF PACKAGES AND GOODS FIELD)
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span className={classes.content_L}>
+                        {getValueField(TYPE_OF_MOVEMENT)}
+                      </span>
+                      <span className={classes.content_L}>
+                        {getValueField(RD_TERMS)}
+                      </span>
+                    </div>
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
-          </Grid>
 
-          <Grid container item style={{ minHeight: 35 }}>
-            <Grid item xs={4}>
-              <div className={classes.declaration_L}>
-                {`(CHECK "HM" COLUMN IF HAZARDOUS MATERIAL)`}
-              </div>
-            </Grid>
-            <Grid item xs={8}>
-              <div className={classes.declaration_L}>
-                PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
-              </div>
-            </Grid>
-          </Grid>
-
-          <Grid container>
-            <Grid container item style={{ borderTop: BORDER, borderBottom: BORDER }}>
-              <Grid item className={classes.th} style={{ width: WIDTH_COL_MARK, borderRight: BORDER }}>
-                <div className={classes.tittle_S}>
-                  <span className={classes.tittle_S}>CNTR. NOS. W/SEAL NOS.</span>
-                  <br />
-                  <span className={classes.tittle_S}>{`MARKS & NUMBERS`}</span>
+            <Grid container item style={{ minHeight: 35 }}>
+              <Grid item xs={4}>
+                <div className={classes.declaration_L}>
+                  {`(CHECK "HM" COLUMN IF HAZARDOUS MATERIAL)`}
                 </div>
               </Grid>
-              <Grid item className={classes.th} style={{ width: WIDTH_COL_PKG, borderRight: BORDER }}>
+              <Grid item xs={8}>
                 <div className={classes.declaration_L}>
+                  PARTICULARS DECLARED BY SHIPPER BUT NOT ACKNOWLEDGED BY THE CARRIER
+                </div>
+              </Grid>
+            </Grid>
+
+            <Grid container>
+              <Grid container item style={{ borderTop: BORDER, borderBottom: BORDER }}>
+                <Grid item className={classes.th} style={{ width: WIDTH_COL_MARK, borderRight: BORDER }}>
                   <div className={classes.tittle_S}>
-                    <span className={classes.tittle_S}>QUANTITY</span>
+                    <span className={classes.tittle_S}>CNTR. NOS. W/SEAL NOS.</span>
                     <br />
-                    <span className={classes.tittle_S}>(FOR CUSTOMS</span>
-                    <br />
-                    <span className={classes.tittle_S}>DECLARATION ONLY)</span>
-                  </div>
-                </div>
-              </Grid>
-              <Grid item className={classes.th} style={{ width: WIDTH_COL_HM, borderRight: BORDER }}>
-                <div className={classes.declaration_L}>
-                  <div className={classes.tittle_S}>
-                    <span className={classes.tittle_S}>H</span>
-                    <br />
-                    <span className={classes.tittle_S}>M</span>
-                  </div>
-                </div>
-              </Grid>
-              <Grid item className={classes.th} style={{ width: WIDTH_COL_DOG, borderRight: BORDER }}>
-                <div className={classes.declaration_L}>
-                  <div className={classes.tittle_S}>
-                    DESCRIPTION OF GOODS
-                  </div>
-                </div>
-              </Grid>
-              <Grid item className={classes.th} style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }}>
-                <div className={classes.declaration_L}>
-                  <div className={classes.tittle_S}>
-                    GROSS WEIGHT
-                  </div>
-                </div>
-              </Grid>
-              <Grid item className={classes.th} style={{ width: WIDTH_COL_MEAS }}>
-                <div className={classes.declaration_L}>
-                  <div className={classes.tittle_S}>
-                    GROSS MEASUREMENT
-                  </div>
-                </div>
-              </Grid>
-            </Grid>
-
-            {/* Render CD, CM, ALSO NOTIFY, FREIGHT TERM, REMARKS */}
-            <Body
-              isFirstPage={true}
-              classes={classes}
-              data={pages[0]}
-              getInqType={getInqType}
-              getPackageName={getPackageName}
-            />
-          </Grid>
-
-          {pages.length > 1 &&
-            <Grid container justify="center">
-              <span className={classes.tittle_break_line}>** TO BE CONTINUED ON ATTACHED LIST **</span>
-            </Grid>
-          }
-
-          <Grid container style={{ display: 'flex', alignItems: 'center', paddingTop: '12px', paddingBottom: '12px' }}>
-            <span className={classes.note}>Declared Cargo Value US $</span>
-            <span className={classes.line_usd}>&emsp;_____________________&emsp;</span>
-            <span className={classes.note}>
-              {"If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged"}
-            </span>
-          </Grid>
-
-          <Grid container style={{ borderTop: BORDER_BOLD, borderBottom: BORDER }}>
-            <Grid container item xs={10}>
-              <Grid container item>
-                <Grid item xs={4}
-                  style={{
-                    borderRight: BORDER,
-                    borderBottom: BORDER,
-                  }}>
-                  <div className={classes.tittle_M}>FREIGHT & CHARGES PAYABLE AT / BY:</div>
-                  <div className={classes.content_L} style={{ minHeight: '35px', whiteSpace: 'pre-wrap' }}>
-                    <span>{getValueField(FREIGHT_CHARGES)}</span>
+                    <span className={classes.tittle_S}>{`MARKS & NUMBERS`}</span>
                   </div>
                 </Grid>
-                <Grid container item xs={6}
-                  style={{
-                    borderRight: BORDER,
-                    borderBottom: BORDER,
-                    textAlign: 'center'
-                  }}>
-                  <Grid item xs={4} style={{ borderRight: BORDER, textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ minWidth: '160px' }} >SERVICE CONTRACT NO.</div>
+                <Grid item className={classes.th} style={{ width: WIDTH_COL_PKG, borderRight: BORDER }}>
+                  <div className={classes.declaration_L}>
+                    <div className={classes.tittle_S}>
+                      <span className={classes.tittle_S}>QUANTITY</span>
+                      <br />
+                      <span className={classes.tittle_S}>(FOR CUSTOMS</span>
+                      <br />
+                      <span className={classes.tittle_S}>DECLARATION ONLY)</span>
+                    </div>
+                  </div>
+                </Grid>
+                <Grid item className={classes.th} style={{ width: WIDTH_COL_HM, borderRight: BORDER }}>
+                  <div className={classes.declaration_L}>
+                    <div className={classes.tittle_S}>
+                      <span className={classes.tittle_S}>H</span>
+                      <br />
+                      <span className={classes.tittle_S}>M</span>
+                    </div>
+                  </div>
+                </Grid>
+                <Grid item className={classes.th} style={{ width: WIDTH_COL_DOG, borderRight: BORDER }}>
+                  <div className={classes.declaration_L}>
+                    <div className={classes.tittle_S}>
+                      DESCRIPTION OF GOODS
+                    </div>
+                  </div>
+                </Grid>
+                <Grid item className={classes.th} style={{ width: WIDTH_COL_WEIGHT, borderRight: BORDER }}>
+                  <div className={classes.declaration_L}>
+                    <div className={classes.tittle_S}>
+                      GROSS WEIGHT
+                    </div>
+                  </div>
+                </Grid>
+                <Grid item className={classes.th} style={{ width: WIDTH_COL_MEAS }}>
+                  <div className={classes.declaration_L}>
+                    <div className={classes.tittle_S}>
+                      GROSS MEASUREMENT
+                    </div>
+                  </div>
+                </Grid>
+              </Grid>
+
+              {/* Render CD, CM, ALSO NOTIFY, FREIGHT TERM, REMARKS */}
+              <Body
+                isFirstPage={true}
+                classes={classes}
+                data={pages[0]}
+                getInqType={getInqType}
+                getPackageName={getPackageName}
+              />
+            </Grid>
+
+            {pages.length > 1 &&
+              <Grid container justify="center">
+                <span className={classes.tittle_break_line}>** TO BE CONTINUED ON ATTACHED LIST **</span>
+              </Grid>
+            }
+
+            <Grid container style={{ display: 'flex', alignItems: 'center', paddingTop: '12px', paddingBottom: '12px' }}>
+              <span className={classes.note}>Declared Cargo Value US $</span>
+              <span className={classes.line_usd}>&emsp;_____________________&emsp;</span>
+              <span className={classes.note}>
+                {"If Merchant enters a value, Carrier's limitation of liability shall not apply and the ad valorem rate will be charged"}
+              </span>
+            </Grid>
+
+            <Grid container style={{ borderTop: BORDER_BOLD, borderBottom: BORDER }}>
+              <Grid container item xs={10}>
+                <Grid container item>
+                  <Grid item xs={4}
+                    style={{
+                      borderRight: BORDER,
+                      borderBottom: BORDER,
+                    }}>
+                    <div className={classes.tittle_M}>FREIGHT & CHARGES PAYABLE AT / BY:</div>
+                    <div className={classes.content_L} style={{ minHeight: '35px', whiteSpace: 'pre-wrap' }}>
+                      <span>{getValueField(FREIGHT_CHARGES)}</span>
+                    </div>
+                  </Grid>
+                  <Grid container item xs={6}
+                    style={{
+                      borderRight: BORDER,
+                      borderBottom: BORDER,
+                      textAlign: 'center'
+                    }}>
+                    <Grid item xs={4} style={{ borderRight: BORDER, textAlign: 'center' }}>
+                      <div className={classes.tittle_M} style={{ minWidth: '160px' }} >SERVICE CONTRACT NO.</div>
+                      <div className={classes.content_L} style={{ minHeight: '35px' }}>
+                        <span>{getValueField(SERVICE_CONTRACT_NO)}</span>
+                      </div>
+                    </Grid>
+                    <Grid item xs={4} style={{ borderRight: BORDER, textAlign: 'center' }}>
+                      <div className={classes.tittle_M} >DOC FORM NO.</div>
+                      <div className={classes.content_L} style={{ minHeight: '35px' }}>
+                        <span>{getValueField(DOC_FORM_NO)}</span>
+                      </div>
+                    </Grid>
+                    <Grid item xs={4} style={{ textAlign: 'center' }}>
+                      <div className={classes.tittle_M}>COMMODITY CODE</div>
+                      <div className={classes.content_L} style={{ minHeight: '35px' }} />
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={2}
+                    style={{
+                      borderRight: BORDER,
+                      borderBottom: BORDER,
+                    }}>
+                    <div className={classes.tittle_M}>EXCHANGE RATE</div>
                     <div className={classes.content_L} style={{ minHeight: '35px' }}>
-                      <span>{getValueField(SERVICE_CONTRACT_NO)}</span>
+                      <span>{getValueField(EXCHANGE_RATE)}</span>
                     </div>
                   </Grid>
-                  <Grid item xs={4} style={{ borderRight: BORDER, textAlign: 'center' }}>
-                    <div className={classes.tittle_M} >DOC FORM NO.</div>
-                    <div className={classes.content_L} style={{ minHeight: '35px' }}>
-                      <span>{getValueField(DOC_FORM_NO)}</span>
-                    </div>
-                  </Grid>
-                  <Grid item xs={4} style={{ textAlign: 'center' }}>
-                    <div className={classes.tittle_M}>COMMODITY CODE</div>
-                    <div className={classes.content_L} style={{ minHeight: '35px' }} />
-                  </Grid>
                 </Grid>
-                <Grid item xs={2}
-                  style={{
-                    borderRight: BORDER,
-                    borderBottom: BORDER,
-                  }}>
-                  <div className={classes.tittle_M}>EXCHANGE RATE</div>
-                  <div className={classes.content_L} style={{ minHeight: '35px' }}>
-                    <span>{getValueField(EXCHANGE_RATE)}</span>
-                  </div>
-                </Grid>
-              </Grid>
 
-              <Grid container item style={{ borderRight: BORDER }}>
-                <Grid container item xs={10}
-                  style={{
-                    borderLeft: BORDER,
-                  }}>
-                  <Grid item xs={2} style={{ textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
-                      CODE
-                    </div>
-                    {/* <div className={classes.content_L} style={{ minHeight: '250px' }}>
+                <Grid container item style={{ borderRight: BORDER }}>
+                  <Grid container item xs={10}
+                    style={{
+                      borderLeft: BORDER,
+                    }}>
+                    <Grid item xs={2} style={{ textAlign: 'center' }}>
+                      <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
+                        CODE
+                      </div>
+                      {/* <div className={classes.content_L} style={{ minHeight: '250px' }}>
                       {getValueField(RATING_DETAIL) &&
                         <span style={{
                           position: 'relative',
@@ -678,20 +688,20 @@ const DraftPage = (props) => {
                           {getValueField(RATING_DETAIL).code}
                         </span>}
                     </div> */}
-                  </Grid>
-                  <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
-                      TARIFF ITEM
-                    </div>
-                    {/* <div className={classes.content_L}>
+                    </Grid>
+                    <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
+                      <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
+                        TARIFF ITEM
+                      </div>
+                      {/* <div className={classes.content_L}>
                       <span>{getValueField(TARIFF_ITEM)}</span>
                     </div> */}
-                  </Grid>
-                  <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
-                      FREIGHTED AS
-                    </div>
-                    {/* <div className={classes.content_L}>
+                    </Grid>
+                    <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
+                      <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
+                        FREIGHTED AS
+                      </div>
+                      {/* <div className={classes.content_L}>
                       {getValueField(RATING_DETAIL) &&
                         <span style={{
                           position: 'relative',
@@ -706,12 +716,12 @@ const DraftPage = (props) => {
                           {getValueField(RATING_DETAIL).freightedAs}
                         </span>}
                     </div> */}
-                  </Grid>
-                  <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
-                      RATE
-                    </div>
-                    {/* <div className={classes.content_L}>
+                    </Grid>
+                    <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
+                      <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
+                        RATE
+                      </div>
+                      {/* <div className={classes.content_L}>
                       {getValueField(RATING_DETAIL) &&
                         <span style={{
                           position: 'relative',
@@ -726,12 +736,12 @@ const DraftPage = (props) => {
                           {getValueField(RATING_DETAIL).rate}
                         </span>}
                     </div> */}
-                  </Grid>
-                  <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
-                      PREPAID
-                    </div>
-                    {/* <div className={classes.content_L} >
+                    </Grid>
+                    <Grid item xs={2} style={{ borderRight: BORDER, textAlign: 'center' }}>
+                      <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
+                        PREPAID
+                      </div>
+                      {/* <div className={classes.content_L} >
                       {getValueField(RATING_DETAIL) && getValueField(RATING_DETAIL).prepaid.map(item => {
                         if (item.currencyCode) {
                           return (
@@ -760,12 +770,12 @@ const DraftPage = (props) => {
                         }
                       })}
                     </div> */}
-                  </Grid>
-                  <Grid item xs={2} style={{ textAlign: 'center' }}>
-                    <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
-                      COLLECT
-                    </div>
-                    {/* <div className={classes.content_L}>
+                    </Grid>
+                    <Grid item xs={2} style={{ textAlign: 'center' }}>
+                      <div className={classes.tittle_M} style={{ borderBottom: BORDER }}>
+                        COLLECT
+                      </div>
+                      {/* <div className={classes.content_L}>
                       {getValueField(RATING_DETAIL) && getValueField(RATING_DETAIL).collect.map(item => {
                         if (item.currencyCode) {
                           return (
@@ -794,11 +804,11 @@ const DraftPage = (props) => {
                         }
                       })}
                     </div> */}
+                    </Grid>
                   </Grid>
-                </Grid>
 
-                <Grid container item xs={2} style={{ borderLeft: BORDER }}>
-                  {/* {getValueField(RATING_DETAIL) &&
+                  <Grid container item xs={2} style={{ borderLeft: BORDER }}>
+                    {/* {getValueField(RATING_DETAIL) &&
                     <span style={{
                       position: 'relative',
                       textTransform: 'none',
@@ -809,72 +819,72 @@ const DraftPage = (props) => {
                       textAlign: 'start',
                       fontFamily: 'Courier, serif',
                       fontSize: 16.5 /*1.7vw*/
-                    //lineHeight: '1.0',
-                    //color: '#4A4A4A',
-                    //top: 4,
-                    //}}>
-                    //</Grid> {"\n" + getValueField(RATING_DETAIL).exchangeRate}
-                    //</span> */}
-                  }
+                      //lineHeight: '1.0',
+                      //color: '#4A4A4A',
+                      //top: 4,
+                      //}}>
+                      //</Grid> {"\n" + getValueField(RATING_DETAIL).exchangeRate}
+                      //</span> */}
+                    }
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              <Grid container item xs={2} direction='column'>
+                <Grid item style={{ borderBottom: BORDER }}>
+                  <div className={classes.tittle_M_gray} style={{ minHeight: '150px' }}>{getContentBlCopy(getValueField(BL_TYPE), getValueField(BL_COPY))}</div>
+                </Grid>
+
+                <Grid item style={{ borderBottom: BORDER }}>
+                  <div className={classes.tittle_M}>DATE CARGO RECEIVED</div>
+                  <div className={classes.content_L} style={{ minHeight: '25px' }}>
+                    {/* if typeOfOnboard = R => show DATE_CARGO*/}
+                    <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')?.toUpperCase()}</span>
+                    <span></span>
+                  </div>
+                </Grid>
+                <Grid item style={{ borderBottom: BORDER }}>
+                  <div className={classes.tittle_M}>DATE LADEN ON BOARD</div>
+                  <div className={classes.content_L} style={{ minHeight: '25px' }}>
+                    <span>{getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')?.toUpperCase()}</span>
+                  </div>
+                </Grid>
+                <Grid item style={{ borderBottom: BORDER }}>
+                  <div className={classes.tittle_M}>PLACE OF BILL(S) ISSUE</div>
+                  <div className={classes.content_L} style={{ minHeight: '25px' }}>
+                    <span>{getValueField(PLACE_OF_BILL)}</span>
+                  </div>
+                </Grid>
+                <Grid item>
+                  <div className={classes.tittle_M}>DATED</div>
+                  <div className={classes.content_L} style={{ minHeight: '25px' }}>
+                    <span>{getValueField(DATED) && formatDate(getValueField(DATED), 'DD MMM YYYY')?.toUpperCase()}</span>
+                  </div>
                 </Grid>
               </Grid>
             </Grid>
 
-            <Grid container item xs={2} direction='column'>
-              <Grid item style={{ borderBottom: BORDER }}>
-                <div className={classes.tittle_M_gray} style={{ minHeight: '150px' }}>{getContentBlCopy(getValueField(BL_TYPE), getValueField(BL_COPY))}</div>
-              </Grid>
-
-              <Grid item style={{ borderBottom: BORDER }}>
-                <div className={classes.tittle_M}>DATE CARGO RECEIVED</div>
-                <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  {/* if typeOfOnboard = R => show DATE_CARGO*/}
-                  <span>{getValueField(DATE_CARGO) && formatDate(getValueField(DATE_CARGO), 'DD MMM YYYY')?.toUpperCase()}</span>
-                  <span></span>
-                </div>
-              </Grid>
-              <Grid item style={{ borderBottom: BORDER }}>
-                <div className={classes.tittle_M}>DATE LADEN ON BOARD</div>
-                <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATE_LADEN) && formatDate(getValueField(DATE_LADEN), 'DD MMM YYYY')?.toUpperCase()}</span>
-                </div>
-              </Grid>
-              <Grid item style={{ borderBottom: BORDER }}>
-                <div className={classes.tittle_M}>PLACE OF BILL(S) ISSUE</div>
-                <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(PLACE_OF_BILL)}</span>
-                </div>
-              </Grid>
-              <Grid item>
-                <div className={classes.tittle_M}>DATED</div>
-                <div className={classes.content_L} style={{ minHeight: '25px' }}>
-                  <span>{getValueField(DATED) && formatDate(getValueField(DATED), 'DD MMM YYYY')?.toUpperCase()}</span>
-                </div>
-              </Grid>
-            </Grid>
-          </Grid>
-
-          <Grid container item xs={10}>
             <Grid container item xs={10}>
-              <Grid item xs={8} style={{ minHeight: '100px', borderRight: BORDER }} >
-                <div>
-                  <div className={classes.tittle_M} style={{ width: 400, float: 'left' }}>
-                    {'The printed terms and conditions on this Bill are available at its website at www.one-line.com'}
-                  </div>
+              <Grid container item xs={10}>
+                <Grid item xs={8} style={{ minHeight: '100px', borderRight: BORDER }} >
+                  <div>
+                    <div className={classes.tittle_M} style={{ width: 400, float: 'left' }}>
+                      {'The printed terms and conditions on this Bill are available at its website at www.one-line.com'}
+                    </div>
 
-                  <div className={classes.tittle_M} style={{ float: 'right', paddingRight: 10 }} >
-                    TOTAL
+                    <div className={classes.tittle_M} style={{ float: 'right', paddingRight: 10 }} >
+                      TOTAL
+                    </div>
                   </div>
-                </div>
-                {/* {getValueField(TOTAL_PREPAID).freightTerm === 'PREPAID' && getValueField(TOTAL_PREPAID).currency !== '' &&
+                  {/* {getValueField(TOTAL_PREPAID).freightTerm === 'PREPAID' && getValueField(TOTAL_PREPAID).currency !== '' &&
                   <div className={classes.content_L} style={{ position: 'relative', top: '69.5%', textTransform: 'none', whiteSpace: 'pre-wrap	', wordWrap: 'break-word	', width: 800, float: 'left' }} >
                     {`TOTAL PREPAID IN PAYMENT CURRENT ${getValueField(TOTAL_PREPAID).currency}   ${getValueField(TOTAL_PREPAID).total}    ${getValueField(TOTAL_PREPAID).loc}`}
                   </div>
                 } */}
-              </Grid>
-              <Grid item xs={2} style={{ borderRight: BORDER }}>
-                <div className={classes.content_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
-                  {/* {getValueField(RATING_DETAIL) && Object.entries(findSumFromArray(getValueField(RATING_DETAIL).prepaid)).map(([key, value], idx) => {
+                </Grid>
+                <Grid item xs={2} style={{ borderRight: BORDER }}>
+                  <div className={classes.content_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
+                    {/* {getValueField(RATING_DETAIL) && Object.entries(findSumFromArray(getValueField(RATING_DETAIL).prepaid)).map(([key, value], idx) => {
                     return (
                       <div key={idx + key} role='group'>
                         <span style={{ float: 'left' }}>{key}</span>
@@ -883,11 +893,11 @@ const DraftPage = (props) => {
                       </div>
                     )
                   })} */}
-                </div>
-              </Grid>
-              <Grid item xs={2} style={{ borderRight: BORDER }}>
-                <div className={classes.content_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
-                  {/* {getValueField(RATING_DETAIL) && Object.entries(findSumFromArray(getValueField(RATING_DETAIL).collect)).map(([key, value], idx) => {
+                  </div>
+                </Grid>
+                <Grid item xs={2} style={{ borderRight: BORDER }}>
+                  <div className={classes.content_M} style={{ borderBottom: BORDER, minHeight: '100px' }}>
+                    {/* {getValueField(RATING_DETAIL) && Object.entries(findSumFromArray(getValueField(RATING_DETAIL).collect)).map(([key, value], idx) => {
                     return (
                       <div key={idx + key} role='group'>
                         <span style={{ float: 'left' }}>{key}</span>
@@ -896,28 +906,29 @@ const DraftPage = (props) => {
                       </div>
                     )
                   })} */}
+                  </div>
+                </Grid>
+              </Grid>
+              <Grid item xs={2} style={{ display: 'flex' }}>
+                <div className={classes.tittle_M}>
+                  SIGNED BY:
                 </div>
+                <span></span>
               </Grid>
             </Grid>
-            <Grid item xs={2} style={{ display: 'flex' }}>
+
+            <Grid item xs={2} style={{ display: 'flex', flexDirection: 'column-reverse' }}>
               <div className={classes.tittle_M}>
-                SIGNED BY:
+                , as agent for and on behalf of
               </div>
               <span></span>
             </Grid>
           </Grid>
-
-          <Grid item xs={2} style={{ display: 'flex', flexDirection: 'column-reverse' }}>
-            <div className={classes.tittle_M}>
-              , as agent for and on behalf of
-            </div>
-            <span></span>
-          </Grid>
-        </Grid>
-      </div>
+        </div>
+      </div >
 
       {pages.length > 1 && <Rider pages={pages.splice(1)} />}
-    </div >
+    </div>
   );
 };
 
