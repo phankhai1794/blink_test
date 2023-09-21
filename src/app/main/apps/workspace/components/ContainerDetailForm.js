@@ -40,6 +40,7 @@ import * as FormActions from '../store/actions/form';
 import Diff from "../shared-components/react-diff";
 
 import AmendmentPopup from './AmendmentPopup';
+import clsx from 'clsx';
 
 const useStyles = makeStyles(() => ({
   drawer: {
@@ -378,7 +379,7 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
             <TableRow>
               {type.map((cell, i) =>
                 <TableCell
-                  className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'}
+                  className={[0, 1].includes(i) ? clsx('cell_frozen cell_amend') : 'cell_amend'}
                   key={i}
                   style={{ backgroundColor: '#FDF2F2', fontSize: 14, color: '#132535' }}>
                   {cell.toUpperCase()}
@@ -394,12 +395,12 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                   return (
                     <TableCell
                       key={i}
-                      className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'}
+                      className={[0, 1].includes(i) ? 'cell_frozen cell_amend' : 'cell_amend'}
                       style={{ backgroundColor: isValueChange(cell, vindex, row) ? '#FEF4E6' : '' }}
                       onMouseEnter={(e) => checkPopover(e, renderContent(cell, row))}
                       onMouseLeave={closePopover}
                     >
-                      {i === 0 ?
+                      {i === 1 ?
                         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }} className={classes.actionCdCmStyle}>
                           {currentQuestion && currentQuestion.process === 'pending' ? (
                             <span className={'handleContNo'} onClick={() => handleClickConNo(vindex)}>{value}</span>
@@ -436,9 +437,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
               {type.map((cell, i) =>
                 <TableCell
                   style={{ color: '#BD0F72', fontWeight: 600 }}
-                  className={i === 0 ? 'cell_frozen cell_amend' : 'cell_amend'}
+                  className={[0, 1].includes(i) ? 'cell_frozen cell_amend' : 'cell_amend'}
                   key={i}>
-                  {i === 0 ? 'Total' : getTotals(values, cell)}
+                  {i === 1 ? 'Total' : getTotals(values, cell)}
                 </TableCell>
               )}
             </TableRow>
