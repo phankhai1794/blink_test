@@ -482,11 +482,7 @@ const AttachmentList = (props) => {
             newMediaId: res.id,
             process: currentOptionAtt.inqType ? 'pending' : 'draft'
           };
-          console.log(findInquiry)
           // check duplicated file
-          
-          // const file = optionsAttachmentList[attachmentIndex].fileUpload;
-          console.log(optionsAttachmentList)
           const isExist = handleDuplicateAttachment(
             dispatch,
             metadata,
