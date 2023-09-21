@@ -579,8 +579,17 @@ const InquiryViewer = (props) => {
       }
     }
     if (getQuestion.process === 'pending' ? getQuestion.groupId !== val.groupId : getQuestion.id !== val.id) {
-      const currStateQuestion = checkSetActionCurrentState(getQuestion);
-      setQuestion(currStateQuestion);
+      // reset answer
+      if (getQuestion.showIconAttachAnswerFile || getQuestion.showIconAttachFile || getQuestion.showIconAttachReplyFile) {
+        if (getQuestion.showIconAttachAnswerFile || getQuestion.showIconAttachFile) {
+          props.onCancel(getQuestion)
+        } else {
+          cancelReply(getQuestion)
+        }
+      } else if (isResolve || isResolveCDCM) {
+        const currStateQuestion = checkSetActionCurrentState(getQuestion);
+        setQuestion(currStateQuestion);
+      }
     }
   }
   useEffect(() => {
@@ -1136,7 +1145,7 @@ const InquiryViewer = (props) => {
       } else {
         answerObj = quest.answerObj;
       }
-      if (answerObj.length > 0) {
+      if (answerObj && answerObj.length > 0) {
         quest.creator = answerObj[0]?.updater;
         quest.createdAt = answerObj[0]?.updatedAt;
       }
@@ -1152,12 +1161,14 @@ const InquiryViewer = (props) => {
       quest.mediaFilesAnswer = [];
       const optionsInquires = [...inquiries];
       const editedIndex = optionsInquires.findIndex(inq => currentQuestion.id === inq.id);
-      quest.answerObj.forEach(ans => {
-        ans.confirmed = false;
-        if (ans.id === optionsInquires[editedIndex].selectChoice?.answer) {
-          ans.confirmed = true;
-        }
-      })
+      if (quest.answerObj && quest.answerObj.length && editedIndex !== -1) {
+        quest.answerObj.forEach(ans => {
+          ans.confirmed = false;
+          if (ans.id === optionsInquires[editedIndex].selectChoice?.answer) {
+            ans.confirmed = true;
+          }
+        })
+      }
       setQuestion(quest);
       setFilepaste('');
       setDropfiles([]);
