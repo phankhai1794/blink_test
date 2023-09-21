@@ -458,7 +458,11 @@ const AttachmentList = (props) => {
       else {
         const formData = new FormData();
         formData.append('file', file[0]);
-        const findInquiry = optionsOfQuestion.find(op => (optionsAttachmentList[attachmentIndex].field === op.field && op.inquiryId === optionsAttachmentList[attachmentIndex].listIdMedia));
+        const findInquiry = optionsOfQuestion.find(
+          (op) =>
+            optionsAttachmentList[attachmentIndex].field === op.field &&
+            optionsAttachmentList[attachmentIndex].inquiryId === op.id
+        );
         formData.append('bkgNo', myBL.bkgNo);
         uploadFile(formData).then((media) => {
           // update inquiries
