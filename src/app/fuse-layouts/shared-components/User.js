@@ -13,12 +13,12 @@ const useStyles = makeStyles((theme) => ({
     '& > img': {
       objectFit: 'contain'
     }
-  }
-}));
+  },
+}))
 
 function User(props) {
-  const { search } = window.location;
-  const classes = useStyles();
+  const { pathname, search } = window.location;
+  const classes = useStyles();;
   const dispatch = useDispatch();
   const user = useSelector(({ user }) => user);
   const [allowAccess, validToken] = useSelector(({ header }) => [
@@ -34,7 +34,7 @@ function User(props) {
         else history.push('/login');
       }
 
-      let userInfo = JSON.parse(sessionStorage.getItem('USER'));
+      let userInfo = JSON.parse(localStorage.getItem('USER'));
       if (userInfo) {
         let payload = {
           ...user,
