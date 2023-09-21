@@ -9,7 +9,13 @@ import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { createMuiTheme } from '@material-ui/core/styles';
 import OtpInput from 'react-otp-input';
 import { isEmail } from 'validator';
-import { verifyEmail, verifyGuest, isVerified, decodeAuthParam, requestCode } from 'app/services/authService';
+import {
+  verifyEmail,
+  verifyGuest,
+  isVerified,
+  decodeAuthParam,
+  requestCode
+} from 'app/services/authService';
 import * as Actions from 'app/store/actions';
 import history from '@history';
 import { PERMISSION } from '@shared/permission';
@@ -159,7 +165,7 @@ const useStyles = makeStyles((theme) => ({
   },
   disableResend: {
     color: `${mainColor} !important`,
-    textDecoration: 'none !important',
+    textDecoration: 'none !important'
   }
 }));
 
@@ -213,37 +219,44 @@ const OTP = ({ classes, handleChange }) => {
         Send
       </Button>
     </>
-  )
-}
+  );
+};
 
 const OtpCheck = ({ children }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const processUrl = window.location.pathname.includes("draft") ? "draft" : "pending";
+  const processUrl = window.location.pathname.includes('draft') ? 'draft' : 'pending';
 
-  const user = localStorage.getItem("USER");
-  const permissions = user ? (JSON.parse(user)?.permissions || []) : [];
-  const [canConfirmDraftBL, setCanConfirmDraftBL] = useState(permissions.filter(p => `${p.controller}_${p.action}` === PERMISSION.DRAFTBL_CONFIRM_DRAFT_BL && p.enable).length > 0);
+  const user = sessionStorage.getItem('USER');
+  const permissions = user ? JSON.parse(user)?.permissions || [] : [];
+  const [canConfirmDraftBL, setCanConfirmDraftBL] = useState(
+    permissions.filter(
+      (p) => `${p.controller}_${p.action}` === PERMISSION.DRAFTBL_CONFIRM_DRAFT_BL && p.enable
+    ).length > 0
+  );
 
   const [myBL, setMyBL] = useState({ id: '' });
   const [mail, setMail] = useState({ value: '', isValid: false, isSubmitted: false });
   const [otpCode, setOtpCode] = useState({ value: '', firstTimeInput: true, resendAfter: 0 });
   const [step, setStep] = useState(0);
+  const [auth, setAuth] = useState();
 
   const catchError = (error) => {
     console.error(error);
     const { message } = error.response.data.error || error.message;
 
-    if (message.includes("not ready yet")) dispatch(Actions.showMessage({ message, variant: 'warning' }));
-    else if (!["forbidden", "invalid token"].includes(message?.toLowerCase())) dispatch(Actions.showMessage({ message, variant: 'error' }));
-  }
+    if (message.includes('not ready yet'))
+      dispatch(Actions.showMessage({ message, variant: 'warning' }));
+    else if (!['forbidden', 'invalid token'].includes(message?.toLowerCase()))
+      dispatch(Actions.showMessage({ message, variant: 'error' }));
+  };
 
   const handleChangeMail = ({ target }) => {
     const { value } = target;
     setMail({
       ...mail,
       value,
-      isValid: isEmail(value?.trim() || "")
+      isValid: isEmail(value?.trim() || '')
     });
   };
 
@@ -253,22 +266,25 @@ const OtpCheck = ({ children }) => {
     const secondsLeft = Math.abs(new Date() - new Date(requestAt)) / 1000;
     if (blId === bl && secondsLeft < timeCodeMailDelay) isValidTime = false;
     return [isValidTime, secondsLeft];
-  }
+  };
 
   const handleCheckMail = () => {
-    const email = mail.value?.trim() || "";
+    const email = mail.value?.trim() || '';
     setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
     setMail({ ...mail, value: email, isSubmitted: true });
 
-    verifyEmail({ email, bl: myBL.id, processUrl })
+    verifyEmail({ email, bl: myBL.id, processUrl, auth })
       .then((res) => {
         if (res) {
-          localStorage.setItem("sentCode", JSON.stringify({
-            bl: myBL.id,
-            mail: email,
-            requestAt: new Date()
-          }));
-          localStorage.setItem("lastEmail", email);
+          localStorage.setItem(
+            'sentCode',
+            JSON.stringify({
+              bl: myBL.id,
+              mail: email,
+              requestAt: new Date()
+            })
+          );
+          localStorage.setItem('lastEmail', email);
           setStep(1);
         }
       })
@@ -282,11 +298,14 @@ const OtpCheck = ({ children }) => {
     if (otpCode.resendAfter <= 0) {
       requestCode({ email: mail.value, bl: myBL.id })
         .then(({ message }) => {
-          localStorage.setItem("sentCode", JSON.stringify({
-            bl: myBL.id,
-            mail: mail.value,
-            requestAt: new Date()
-          }));
+          localStorage.setItem(
+            'sentCode',
+            JSON.stringify({
+              bl: myBL.id,
+              mail: mail.value,
+              requestAt: new Date()
+            })
+          );
           setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay });
           dispatch(Actions.showMessage({ message, variant: 'success' }));
         })
@@ -294,7 +313,7 @@ const OtpCheck = ({ children }) => {
           catchError(error);
         });
     }
-  }
+  };
 
   const handleChangeCode = (code) => setOtpCode({ ...otpCode, value: code });
 
@@ -309,20 +328,21 @@ const OtpCheck = ({ children }) => {
       permissions
     };
 
-    localStorage.setItem('AUTH_TOKEN', res.token);
+    if (res.token) localStorage.setItem('AUTH_TOKEN', res.token);
     localStorage.setItem('USER', JSON.stringify(userInfo));
+    sessionStorage.setItem('USER', JSON.stringify(userInfo));
     // Auto save user data into redux store at ToolbarLayout1.js
 
     dispatch(Actions.hideMessage());
 
     const { pathname, search } = window.location;
-    const bl = new URLSearchParams(search).get('bl');
-    if (res.draft && pathname.includes("guest")) history.push(`/draft-bl?bl=${bl}`);
-    else setStep(2);
-  }
+    if (res.draft && pathname.includes('guest')) {
+      history.push(`/draft-bl${search}`);
+    } else setStep(2);
+  };
 
   const handleSendCode = () => {
-    verifyGuest({ email: mail.value, bl: myBL.id, otpCode: otpCode.value, processUrl })
+    verifyGuest({ email: mail.value, bl: myBL.id, otpCode: otpCode.value, processUrl, auth })
       .then((res) => {
         if (res) handleSuccess(res);
       })
@@ -333,75 +353,65 @@ const OtpCheck = ({ children }) => {
 
   useEffect(() => {
     const init = async () => {
-      const { pathname, search } = window.location;
+      const { search } = window.location;
       const bl = new URLSearchParams(search).get('bl');
       if (bl) setMyBL({ ...myBL, id: bl });
 
-      const auth = new URLSearchParams(search).get('auth');
-      if (bl && auth) { // verify token on url
+      // verify token on url
+      const authParam = new URLSearchParams(search).get('auth');
+      if (bl && authParam) {
         try {
-          const res = await decodeAuthParam(auth);
-          if (res) {
+          setAuth(authParam);
+          const decode = await decodeAuthParam(authParam);
+          if (decode) {
             setMail({
               ...mail,
-              value: res.email,
-              isValid: isEmail(res.email)
+              value: decode.email,
+              isValid: isEmail(decode.email)
             });
-            // Remove token from url
-            const url = new URL(window.location);
-            url.searchParams.set('bl', bl);
-            window.history.pushState({}, '', `/guest?bl=${bl}`);
+          }
+
+          // verify token in localStorage
+          let userInfo = localStorage.getItem('USER');
+          if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
+            try {
+              const res = await isVerified({ bl, processUrl, auth: authParam });
+              if (res) handleSuccess(res);
+            } catch (error) {
+              catchError(error);
+              setCanConfirmDraftBL(false);
+              dispatch(
+                Actions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', false))
+              );
+
+              // check request code delay time
+              let sentCode = localStorage.getItem('sentCode');
+              if (sentCode) {
+                sentCode = JSON.parse(sentCode);
+                if (sentCode.bl === bl) {
+                  const [__, secondsLeft] = validateTimeSendCode(sentCode);
+                  if (secondsLeft <= timeCodeMailDelay) {
+                    setOtpCode({
+                      ...otpCode,
+                      resendAfter: timeCodeMailDelay - parseInt(secondsLeft)
+                    });
+                    setMail({ ...mail, value: sentCode.mail, isValid: isEmail(sentCode.mail) });
+                    setStep(1);
+                  } else setStep(0);
+                }
+              } else setStep(0);
+            }
           }
         } catch (error) {
           catchError(error);
         }
+
+        // // refill email when code expires
+        // let lastEmail = localStorage.getItem('lastEmail');
+        // if (lastEmail && !['null', 'undefined'].includes(lastEmail))
+        //   setMail({ ...mail, value: lastEmail, isValid: isEmail(lastEmail) });
       }
-
-      // verify token in localStorage
-      let userInfo = localStorage.getItem('USER');
-      if (userInfo && localStorage.getItem('AUTH_TOKEN')) {
-        const { email, userType } = JSON.parse(userInfo);
-        if (email) {
-          setMail({
-            ...mail,
-            value: email,
-            isValid: isEmail(email)
-          });
-          try {
-            const res = await isVerified({ bl, userType, processUrl })
-            if (res) {
-              if (res.draft && pathname.includes("guest")) history.push(`/draft-bl?bl=${bl}`);
-              else if (!res.draft && pathname.includes("draft")) history.push(`/guest?bl=${bl}`);
-              else setStep(2);
-              return;
-            }
-          } catch (error) {
-            catchError(error);
-            setCanConfirmDraftBL(false);
-            dispatch(Actions.setDefaultSettings(_.set({}, 'layout.config.toolbar.display', false)));
-
-            // check request code delay time
-            let sentCode = localStorage.getItem('sentCode');
-            if (sentCode) {
-              sentCode = JSON.parse(sentCode);
-              if (sentCode.bl === bl) {
-                const [__, secondsLeft] = validateTimeSendCode(sentCode);
-                if (secondsLeft <= timeCodeMailDelay) {
-                  setOtpCode({ ...otpCode, resendAfter: timeCodeMailDelay - parseInt(secondsLeft) });
-                  setMail({ ...mail, value: sentCode.mail, isValid: isEmail(sentCode.mail) });
-                  setStep(1);
-                } else setStep(0);
-              }
-            } else setStep(0);
-          }
-        }
-      }
-
-      // refill email when code expires
-      let lastEmail = localStorage.getItem('lastEmail');
-      if (lastEmail && !["null", "undefined"].includes(lastEmail))
-        setMail({ ...mail, value: lastEmail, isValid: isEmail(lastEmail) });
-    }
+    };
 
     init();
   }, []);
@@ -424,7 +434,9 @@ const OtpCheck = ({ children }) => {
 
   return (
     <>
-      {step === 2 || (history.location.state?.skipVerification && canConfirmDraftBL) ? <>{children}</> : (
+      {step === 2 || (history.location.state?.skipVerification && canConfirmDraftBL) ? (
+        <>{children}</>
+      ) : (
         <div
           className={clsx(
             classes.root,
@@ -447,7 +459,9 @@ const OtpCheck = ({ children }) => {
                       <Formsy
                         onValidSubmit={handleCheckMail}
                         className="flex flex-col justify-center w-full">
-                        <Typography className={classes.boldLabel}>Please enter your email address for verification</Typography>
+                        <Typography className={classes.boldLabel}>
+                          Please enter your email address for verification
+                        </Typography>
                         <TextField
                           id="email"
                           name="email"
@@ -484,9 +498,10 @@ const OtpCheck = ({ children }) => {
                         <Typography className={classes.resendText}>
                           {`We just emailed ${mail.value} with a 6-digit code. If you don't see it, please check your spam folder or `}
                           <a
-                            className={otpCode.resendAfter > 0 ? classes.disableResend : classes.enableResend}
-                            onClick={() => handleRequestCode()}
-                          >
+                            className={
+                              otpCode.resendAfter > 0 ? classes.disableResend : classes.enableResend
+                            }
+                            onClick={() => handleRequestCode()}>
                             resend code{otpCode.resendAfter > 0 && `(${otpCode.resendAfter})`}
                           </a>
                           {'.'}
