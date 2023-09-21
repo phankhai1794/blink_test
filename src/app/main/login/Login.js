@@ -89,6 +89,7 @@ function Login(props) {
 
           localStorage.setItem('AUTH_TOKEN', token);
           localStorage.setItem('USER', JSON.stringify(userInfo));
+          sessionStorage.setItem('USER', JSON.stringify(userInfo));
 
           dispatch(Actions.setUser(payload));
           dispatch(Actions.checkAuthToken(true));
