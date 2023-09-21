@@ -458,7 +458,11 @@ const AttachmentList = (props) => {
       else {
         const formData = new FormData();
         formData.append('file', file[0]);
-        const findInquiry = optionsOfQuestion.find(op => optionsAttachmentList[attachmentIndex].field === op.field);
+        const findInquiry = optionsOfQuestion.find(
+          (op) =>
+            optionsAttachmentList[attachmentIndex].field === op.field &&
+            optionsAttachmentList[attachmentIndex].inquiryId === op.id
+        );
         formData.append('bkgNo', myBL.bkgNo);
         uploadFile(formData).then((media) => {
           // update inquiries
@@ -475,40 +479,52 @@ const AttachmentList = (props) => {
               if (tempMedia.length > 0) draftAnsId = draftItem.draftAnswerId || draftItem.id;
             }
           });
+          const currentOptionAtt = optionsAttachmentList[attachmentIndex];
           const data = {
             inquiryId: draftAnsId || findInquiry.id,
-            oldMediaId: optionsAttachmentList[attachmentIndex].id,
+            oldMediaId: currentOptionAtt.id,
             newMediaId: res.id,
-            process: findInquiry.process
+            process: currentOptionAtt.inqType ? 'pending' : 'draft'
           };
-          replaceFile(data).then(rt => {
-            // update attachment list
-            const objResponse = {
-              id: res.id,
-              src: urlMedia(ext, file[0]),
-              ext: `.${ext}`,
-              name: file[0].name,
-              field: optionsAttachmentList[attachmentIndex].field,
-              inquiryId: optionsAttachmentList[attachmentIndex].inquiryId,
-              creator: userType
-            };
-            if (findInquiry && findInquiry.mediaFile.length) {
-              findInquiry.mediaFile.forEach((f, index) => {
-                if (f.id === optionsAttachmentList[attachmentIndex].id) {
-                  findInquiry.mediaFile[index] = objResponse
-                }
-              })
-            }
-            optionsAttachmentList[attachmentIndex] = objResponse;
-            setAttachmentFiles(optionsAttachmentList);
-          }).catch((error) => {
-            handleError(dispatch, error);
-            optionsAttachmentList[attachmentIndex] = {
-              ...optionsAttachmentList[attachmentIndex],
-              success: false,
-            };
-            setAttachmentFiles(optionsAttachmentList);
-          });
+          // check duplicated file
+          const isExist = handleDuplicateAttachment(
+            dispatch,
+            metadata,
+            optionsAttachmentList,
+            [...[res]],
+            currentOptionAtt.field,
+            findInquiry.inqType
+          );
+          if(!isExist) {
+            replaceFile(data).then(rt => {
+              // update attachment list
+              const objResponse = {
+                id: res.id,
+                src: urlMedia(ext, file[0]),
+                ext: `.${ext}`,
+                name: file[0].name,
+                field: optionsAttachmentList[attachmentIndex].field,
+                inquiryId: optionsAttachmentList[attachmentIndex].inquiryId,
+                creator: userType
+              };
+              if (findInquiry && findInquiry.mediaFile.length) {
+                findInquiry.mediaFile.forEach((f, index) => {
+                  if (f.id === optionsAttachmentList[attachmentIndex].id) {
+                    findInquiry.mediaFile[index] = objResponse
+                  }
+                })
+              }
+              optionsAttachmentList[attachmentIndex] = objResponse;
+              setAttachmentFiles(optionsAttachmentList);
+            }).catch((error) => {
+              handleError(dispatch, error);
+              optionsAttachmentList[attachmentIndex] = {
+                ...optionsAttachmentList[attachmentIndex],
+                success: false,
+              };
+              setAttachmentFiles(optionsAttachmentList);
+            });
+          }  
         }).catch((error) => {
           handleError(dispatch, error);
           optionsAttachmentList[attachmentIndex] = {
