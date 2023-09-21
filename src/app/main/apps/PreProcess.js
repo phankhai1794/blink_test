@@ -102,9 +102,7 @@ const PreProcess = ({ bl, children }) => {
 
   useEffect(() => {
     if (myBL.id) {
-      const user = sessionStorage.getItem('USER')
-        ? JSON.parse(sessionStorage.getItem('USER'))
-        : JSON.parse(localStorage.getItem('USER'));
+      const user = JSON.parse(localStorage.getItem('USER'));
 
       // user connect
       const mybl = user.userType === 'ADMIN' ? [myBL.bkgNo, myBL.id] : [myBL.id, myBL.bkgNo];
@@ -138,8 +136,8 @@ const PreProcess = ({ bl, children }) => {
           user.userType === 'ADMIN' ||
           (user.userType === 'CUSTOMER' && myBL.state.includes('DRF_'))
         ) {
-          const userLocal = sessionStorage.getItem('USER')
-            ? JSON.parse(sessionStorage.getItem('USER'))
+          const userLocal = localStorage.getItem('USER')
+            ? JSON.parse(localStorage.getItem('USER'))
             : {};
           if (userLocal.displayName && usersAccessing.length) {
             let permissions = await getPermissionByRole(userLocal.role).catch((err) =>
