@@ -389,8 +389,8 @@ function ToolbarLayout1(props) {
               <div className="flex flex-1" style={{ marginLeft: 35 }}>
                 <div className={classes.iconWrapper}>
                   {showBack &&
-                    pathname.includes('/draft-bl') &&
-                    !PermissionProvider({ action: PERMISSION.VIEW_ACCESS_EDIT_DRAFT_BL }) ? (
+                  pathname.includes('/draft-bl') &&
+                  !PermissionProvider({ action: PERMISSION.VIEW_ACCESS_EDIT_DRAFT_BL }) ? (
                     <Tooltip
                       title="Back"
                       onClick={() => dispatch(DraftBLActions.setPreviewingDraftBL(false))}>
@@ -405,10 +405,10 @@ function ToolbarLayout1(props) {
                         className={clsx(classes.logo, classes.fitAvatar)}
                         alt="one-logo"
                         onClick={() => showQueueList()}
-                      // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
-                      //   component: Link,
-                      //   to: '/'
-                      // })}
+                        // {...(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_DASHBOARD }) && {
+                        //   component: Link,
+                        //   to: '/'
+                        // })}
                       />
                     </Button>
                   )}
@@ -475,42 +475,42 @@ function ToolbarLayout1(props) {
               <div className="flex" style={{ alignItems: 'center' }}>
                 {(['/workspace', '/guest'].some((el) => pathname.includes(el)) ||
                   !isPreviewingDraftPage) && (
-                    <TextField
-                      id="view"
-                      name="view"
-                      select
-                      value={drfView}
-                      onChange={(e) => handleSelectView(e)}
-                      variant="outlined"
-                      className={clsx(classes.button, classes.selectView)}
-                      InputProps={{
-                        className: classes.selectViewProps
-                      }}
-                      SelectProps={{
-                        MenuProps: {
-                          anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
-                          getContentAnchorEl: null,
-                          PaperProps: {
-                            style: {
-                              minWidth: 0,
-                              position: 'absolute',
-                              top: '-100px'
-                            }
+                  <TextField
+                    id="view"
+                    name="view"
+                    select
+                    value={drfView}
+                    onChange={(e) => handleSelectView(e)}
+                    variant="outlined"
+                    className={clsx(classes.button, classes.selectView)}
+                    InputProps={{
+                      className: classes.selectViewProps
+                    }}
+                    SelectProps={{
+                      MenuProps: {
+                        anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                        getContentAnchorEl: null,
+                        PaperProps: {
+                          style: {
+                            minWidth: 0,
+                            position: 'absolute',
+                            top: '-100px'
                           }
                         }
-                      }}>
-                      {drfViews.map((view) => (
-                        <MenuItem
-                          key={view.value}
-                          value={view.value}
-                          className={
-                            view.value === drfView ? classes.menuItemSelected : classes.menuItem
-                          }>
-                          <span className={classes.dratTypeText}>{view.label}</span>
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  )}
+                      }
+                    }}>
+                    {drfViews.map((view) => (
+                      <MenuItem
+                        key={view.value}
+                        value={view.value}
+                        className={
+                          view.value === drfView ? classes.menuItemSelected : classes.menuItem
+                        }>
+                        <span className={classes.dratTypeText}>{view.label}</span>
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
 
                 <PermissionProvider
                   action={PERMISSION.MYBL_GET_QUEUE_LIST}
@@ -630,7 +630,7 @@ function ToolbarLayout1(props) {
                   </Button>
                 </PermissionProvider>
 
-                <PreviewDraftBL />
+                {pathname.includes('/draft') && <PreviewDraftBL />}
 
                 <User />
               </div>
@@ -647,7 +647,9 @@ function ToolbarLayout1(props) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <img height="20px" src="/assets/images/icons/warningIcon.svg" />
                 <p className={classes.warningText}>
-                  This page is temporarily not available due to technical issues
+                  Please refer to the B/L draft attachment in your Draft B/L(s) email for more
+                  details. If you need to make any amendments to the BL, simply click on the
+                  "Amendment" button.
                 </p>
               </div>
               <img
