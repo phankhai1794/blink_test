@@ -137,9 +137,8 @@ const ParagraphAnswer = ({ questions, question, disable = false, saveStatus, cur
 
   useEffect(() => {
     if (
-      !paragraphText &&
       question.answerObj &&
-      question.answerObj.length > 0 &&
+      (question.answerObj.length === 0 || (question.answerObj.length && question.answerObj[0].content === '')) &&
       (
         (question.mediaFilesAnswer && question.mediaFilesAnswer.length > 0) ||
         (question.answersMedia && question.answersMedia.length > 0)
