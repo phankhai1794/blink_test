@@ -12,6 +12,10 @@ export const handleError = (dispatch, err) => {
   }
   if (!message) message = err.message || "Your token has expired";
 
+  if (status >= 500) {
+    message = `Blink API is not available now, Please try again!`;
+  }
+
   if ([401, 403].includes(status)) {
     dispatch(Actions.checkAuthToken(false));
     dispatch(Actions.checkAllow(false));
