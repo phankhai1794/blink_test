@@ -46,6 +46,7 @@ const ChoiceAnswer = (props) => {
       const inqConfirmed = currentQuestion.answerObj.filter(ans => ans.confirmed);
       if (!inqConfirmed.length) {
         setSelectedChoice('');
+        setOtherOptionText('');
       }
     }
   }, [saveStatus]);
@@ -87,7 +88,10 @@ const ChoiceAnswer = (props) => {
         const lastChoice = question.answerObj?.[question.answerObj.length - 1].content;
         setOtherOptionText(lastChoice || null);
       }
-      else setSelectedChoice('');
+      else {
+        setSelectedChoice('');
+        setOtherOptionText('');
+      }
     }
   }, [question?.answerObj]);
 
