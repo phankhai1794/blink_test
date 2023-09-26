@@ -196,7 +196,7 @@ const TableCM = (props) => {
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
-  const [cmData, setCmData] = useState(false);
+  const [cmData, setCmData] = useState([]);
 
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
