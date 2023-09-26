@@ -228,6 +228,7 @@ const ContainerDetailInquiry = ({
                 }}
                 setEditContent={(value) => {}}
                 originalValues={getDataCD}
+                dataCmMapSeq={getDataCM}
                 isPendingProcess={true}
                 disableInput={disableEdit}
                 isInqCDCM={true}

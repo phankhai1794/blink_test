@@ -79,7 +79,7 @@ const isArray = (value) => {
 }
 
 
-const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM, setAddContent, setEventClickContNo, isAllowEdit, currentQuestion, dataCdGetSeal }) => {
+const ContainerDetailForm = ({ container, originalValues, setEditContent, disableInput = false, isResolveCDCM, isPendingProcess, setDataCD, isInqCDCM, setAddContent, setEventClickContNo, isAllowEdit, currentQuestion, dataCdGetSeal, dataCmMapSeq }) => {
   const metadata = useSelector(({ workspace }) => workspace.inquiryReducer.metadata);
   const content = useSelector(({ workspace }) => workspace.inquiryReducer.content);
   const contentInqResolved = useSelector(({ workspace }) => workspace.inquiryReducer.contentInqResolved);
@@ -120,22 +120,26 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
   const sortValues = (vals) => {
     let valuesSorted = [];
-    if (container === CONTAINER_MANIFEST && !isResolveCDCM) {
-      let cms = [...vals];
-      const contentCD = getValueField(CONTAINER_DETAIL) || [];
-      const contsNo = [
-        ...new Set((contentCD || []).map((cd) => cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
-      ];
-      if (contsNo.length) {
-        contsNo.forEach((contNo) => {
-          valuesSorted = [
-            ...valuesSorted,
-            ...cms.filter((cm) => contNo === cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
-          ];
-          cms = cms.filter((cm) => contNo !== cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
-        });
+    if (!isResolveCDCM) {
+      let cms = container === CONTAINER_MANIFEST ? [...vals] : [...dataCmMapSeq];
+      cms = cms.sort((a, b) => (parseInt(a?.[metadata?.inq_type?.[SEQ]]) > parseInt(b?.[metadata?.inq_type?.[SEQ]]) ? 1 : -1));
+      if (container === CONTAINER_MANIFEST) {
+        valuesSorted = [...valuesSorted, ...cms];
+      } else if (container === CONTAINER_DETAIL) {
+        const cdContent = [...vals];
+        const contsNo = [
+          ...new Set((cms || []).map((cm) => cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]))
+        ];
+        if (contsNo.length) {
+          contsNo.forEach((contNo) => {
+            valuesSorted = [
+              ...valuesSorted,
+              ...cdContent.filter((cd) => contNo === cd?.[metadata?.inq_type?.[CONTAINER_NUMBER]])
+            ];
+            cms = cms.filter((cm) => contNo !== cm?.[metadata?.inq_type?.[CONTAINER_NUMBER]]);
+          });
+        }
       }
-      valuesSorted = [...valuesSorted, ...cms];
       return valuesSorted;
     }
     return vals;
@@ -395,12 +399,12 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
                   return (
                     <TableCell
                       key={i}
-                      className={[0, 1].includes(i) ? 'cell_frozen cell_amend' : 'cell_amend'}
+                      className={(container === CONTAINER_MANIFEST ? [0, 1].includes(i) : i === 0) ? 'cell_frozen cell_amend' : 'cell_amend'}
                       style={{ backgroundColor: isValueChange(cell, vindex, row) ? '#FEF4E6' : '' }}
                       onMouseEnter={(e) => checkPopover(e, renderContent(cell, row))}
                       onMouseLeave={closePopover}
                     >
-                      {i === 1 ?
+                      {(container === CONTAINER_MANIFEST ? i === 1 : i === 0) ?
                         <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between' }} className={classes.actionCdCmStyle}>
                           {currentQuestion && currentQuestion.process === 'pending' ? (
                             <span className={'handleContNo'} onClick={() => handleClickConNo(vindex)}>{value}</span>
@@ -437,9 +441,9 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
               {type.map((cell, i) =>
                 <TableCell
                   style={{ color: '#BD0F72', fontWeight: 600 }}
-                  className={[0, 1].includes(i) ? 'cell_frozen cell_amend' : 'cell_amend'}
+                  className={(container === CONTAINER_MANIFEST ? [0, 1].includes(i) : i === 0) ? 'cell_frozen cell_amend' : 'cell_amend'}
                   key={i}>
-                  {i === 1 ? 'Total' : getTotals(values, cell)}
+                  {i === 0 ? 'Total' : getTotals(values, cell)}
                 </TableCell>
               )}
             </TableRow>
