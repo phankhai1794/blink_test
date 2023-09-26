@@ -196,6 +196,7 @@ const TableCM = (props) => {
   const [hasAnswer, setHasAnswer] = useState(false);
   const [isResolved, setIsResolved] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
+  const [cmData, setCmData] = useState(false);
 
   const allowAddInquiry = PermissionProvider({ action: PERMISSION.INQUIRY_CREATE_INQUIRY });
   const allowCreateAmendment = PermissionProvider({ action: PERMISSION.VIEW_CREATE_AMENDMENT });
@@ -346,6 +347,13 @@ const TableCM = (props) => {
     setId(defaultId);
   }, [drfView, inquiries]);
 
+  useEffect(() => {
+    if (containerManifest) {
+      const cmsSort = containerManifest.sort((a, b) => (parseInt(a?.[metadata?.inq_type?.[SEQ]]) > parseInt(b?.[metadata?.inq_type?.[SEQ]]) ? 1 : -1));
+      setCmData(cmsSort);
+    }
+  }, [containerManifest]);
+
   return (
     <div
       className={clsx(
@@ -425,8 +433,8 @@ const TableCM = (props) => {
               </BLField>
             </Grid>
           </Grid>
-        ) : containerManifest?.length > 0 ? (
-          containerManifest.map((cm, index) => (
+        ) : cmData?.length > 0 ? (
+            cmData.map((cm, index) => (
             <Grid container spacing={2} className="py-2" key={index}>
               <Grid container item xs={1} className={classes.styleGridSeq}>
                 <BLField
