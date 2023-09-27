@@ -1,3 +1,12 @@
+export const getLocalUser = (param = '') => {
+  const offshorePaths = ['/admin', '/workspace'];
+  if (offshorePaths.some((path) => window.location.pathname.includes(path)))
+    return localStorage.getItem(`OFFSHORE${param}`);
+  else if ((window.location.pathname.includes('/draft-bl/preview')))
+    return localStorage.getItem(`GUEST${param}`) || localStorage.getItem(`OFFSHORE${param}`);
+  return localStorage.getItem(`GUEST${param}`);
+};
+
 export const PERMISSION = {
   // UI
   VIEW_ACCESS_DASHBOARD: 'view_accessDashboard',
@@ -46,11 +55,12 @@ export const PermissionProvider = ({
   children,
   fallback = null
 }) => {
-  const user = localStorage.getItem('USER');
-  if (!user) return null;
+  const permissions = sessionStorage.getItem('permissions');
+  if (!permissions) return null;
 
-  const permissionsSession = sessionStorage.getItem('permissions') || '';
-  const permissions = permissionsSession.length ? JSON.parse(permissionsSession) : JSON.parse(user).permissions;
-  const isAllowed = (permissions || []).filter((p) => `${p.controller}_${p.action}` === action && p.enable).length > 0;
+  const isAllowed = Boolean(
+    JSON.parse(permissions).filter((p) => `${p.controller}_${p.action}` === action && p.enable)
+      .length
+  );
   return isAllowed && extraCondition ? (children ? children : true) : fallback;
 };

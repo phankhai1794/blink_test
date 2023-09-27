@@ -415,20 +415,12 @@ export const checkBroadCastReload = (role, type) => {
   const url = pathname + search;
 
   const mapper = {
-    Admin: ["/workspace", "/admin"],
+    Admin: ["/workspace", "/admin", '/draft-bl/preview'],
     Guest: ["/guest", "/draft-bl?bl="],
     Viewer: ["/guest", "/draft-bl?bl="]
   }
 
-  if (
-    role
-    &&
-    (
-      (type === "access" && !mapper[role].some(route => url.includes(route)))
-      ||
-      (type === "logout" && mapper[role].some(route => url.includes(route)))
-    )
-  ) {
+  if (role && type === "logout" && mapper[role].some(route => url.includes(route))) {
     sessionStorage.clear();
     window.location.reload();
   }
