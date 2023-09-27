@@ -6,7 +6,7 @@ import Button from '@material-ui/core/Button';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { handleError } from '@shared/handleError';
-import { getMail } from 'app/services/mailService';
+import { getAllMailAccess, updateMailAccess } from 'app/services/mailService';
 import clsx from 'clsx';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
@@ -94,25 +94,41 @@ const ListEmailAccess = (props) => {
     toOnshoreCc: [],
     toOnshoreBcc: []
   });
+  const [emailOrigin, setEmailOrigin] = useState(emails);
+
   const dispatch = useDispatch();
 
   const handleChange = (e, newValue) => {
     setTab(newValue);
   };
 
-  const onSave = () => {};
+  const onSave = () => {
+    updateMailAccess({ action: 'delete', emails }, mybl.id)
+      .then(() => {
+        setEdit(false);
+      })
+      .catch((err) => handleError(dispatch, err));
+  };
 
   const onCancel = () => {
     setEdit(false);
   };
 
-  const onDelete = () => {};
+  const onDelete = (label, tag) => {
+    const key = `to${tab ? 'Onshore' : 'Customer'}${label === 'To' ? '' : label}`;
+    const result = emails[key];
+    result.splice(tag, 1);
+    setEmails((e) => ({
+      ...e,
+      [key]: result
+    }));
+  };
 
   useEffect(() => {
-    getMail(mybl.id)
+    getAllMailAccess(mybl.id)
       .then(({ data }) => {
-        setEmails(data);
-        console.log('data:', data);
+        setEmails(data.data);
+        setEmailOrigin(data.data);
       })
       .catch((err) => handleError(dispatch, err));
   }, []);
@@ -148,7 +164,7 @@ const ListEmailAccess = (props) => {
         { label: 'Bcc', value: tab ? emails.toOnshoreBcc : emails.toCustomerBcc }
       ].map(({ label, value }, index) => (
         <>
-          {value.length ? (
+          {value?.length ? (
             <fieldset style={{ border: '1px solid #E2E6EA', borderRadius: 8 }} key={index}>
               <legend style={{ color: '#7D7D7D' }}>{label}</legend>
               <div
@@ -162,7 +178,7 @@ const ListEmailAccess = (props) => {
                       clickable={false}
                       key={i}
                       label={tag}
-                      onDelete={onDelete}
+                      onDelete={() => onDelete(label, tag)}
                       deleteIcon={isEdit ? <ClearIcon fontSize="small" /> : <></>}
                     />
                   ))}

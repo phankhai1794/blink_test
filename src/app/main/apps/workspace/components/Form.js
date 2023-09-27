@@ -198,6 +198,7 @@ const useStyles = makeStyles(() => ({
     left: '50%'
   },
   mailList: {
+    maxWidth: 800,
     minWidth: 500,
     padding: '10px 24px 24px'
   }
