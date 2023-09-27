@@ -649,6 +649,7 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt, setDefaultAction }
             setEditContent={(value) => {
               setFieldValue(value);
             }}
+            dataCmMapSeq={[]}
             disableInput={false}
           />
         </div>

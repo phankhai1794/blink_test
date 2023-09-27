@@ -120,8 +120,8 @@ const ContainerDetailForm = ({ container, originalValues, setEditContent, disabl
 
   const sortValues = (vals) => {
     let valuesSorted = [];
-    if (!isResolveCDCM) {
-      let cms = container === CONTAINER_MANIFEST ? [...vals] : [...dataCmMapSeq];
+    let cms = container === CONTAINER_MANIFEST ? [...vals] : [...dataCmMapSeq];
+    if (!isResolveCDCM && cms && cms.length) {
       cms = cms.sort((a, b) => (parseInt(a?.[metadata?.inq_type?.[SEQ]]) > parseInt(b?.[metadata?.inq_type?.[SEQ]]) ? 1 : -1));
       if (container === CONTAINER_MANIFEST) {
         valuesSorted = [...valuesSorted, ...cms];

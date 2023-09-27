@@ -3628,6 +3628,7 @@ const InquiryViewer = (props) => {
                             }
                             question.contentReplyCDCM = value;
                           }}
+                          dataCmMapSeq={[]}
                           disableInput={(user.role === 'Guest') ? disableCDCMAmendment : (!isResolveCDCM && !isReplyCDCM)}
                           currentQuestion={question}
                         />
@@ -3708,6 +3709,7 @@ const InquiryViewer = (props) => {
                   setEditContent={(value) => {
                     question.contentReplyCDCM = value;
                   }}
+                  dataCmMapSeq={[]}
                   disableInput={disableCDCMAmendment}
                   currentQuestion={question}
                 />
@@ -3920,6 +3922,7 @@ const InquiryViewer = (props) => {
                           handleChangeContainerDetail(value);
                           setTextResolve(value)
                         }}
+                        dataCmMapSeq={[]}
                         originalValues={Array.isArray(question.content) ? question.content : question.contentCDCM}
                         setTextResolve={setTextResolve}
                         currentQuestion={question}

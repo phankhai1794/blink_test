@@ -160,6 +160,7 @@ const Comment = (props) => {
                   container={
                     question.field === containerCheck[0] ? CONTAINER_DETAIL : CONTAINER_MANIFEST
                   }
+                  dataCmMapSeq={[]}
                   setEditContent={() => null}
                   originalValues={content}
                   disableInput={true}

@@ -256,6 +256,7 @@ const ContainerDetailInquiry = ({
                   dispatch(InquiryActions.setDataCmInq(value));
                 }}
                 dataCdGetSeal={getDataCD}
+                dataCmMapSeq={[]}
                 setEditContent={(value) => {}}
                 originalValues={getDataCM}
                 isPendingProcess={true}
