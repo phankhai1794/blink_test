@@ -12,7 +12,7 @@ import { parseNumberValue, getLabelById, displayTime, validatePartiesContent, va
 import { saveEditedField, updateDraftBLReply, getCommentDraftBl, deleteDraftBLReply, wraptextDummyField } from 'app/services/draftblService';
 import { uploadFile } from 'app/services/fileService';
 import { getBlInfo, validateTextInput } from 'app/services/myBLService';
-import { sendmailResolve } from 'app/services/mailService';
+import { sendmailResolve, getMail } from 'app/services/mailService';
 import {
   CONSIGNEE,
   CONTAINER_DETAIL,
@@ -325,7 +325,14 @@ const InquiryViewer = (props) => {
   const [isResolveAndUpload, setIsResolveAndUpload] = useState(false);
   const socket = useContext(SocketContext);
   const triggerOnpaste = useRef(null);
-
+  const [mailHistory, setMailHistory] = useState({
+    toCustomer: [],
+    toCustomerCc: [],
+    toCustomerBcc: [],
+    toOnshore: [],
+    toOnshoreCc: [],
+    toOnshoreBcc: [],
+  });
   const syncData = (data, syncOptSite = "") => {
     socket.emit("sync_data", { data, syncOptSite });
   };
@@ -566,7 +573,7 @@ const InquiryViewer = (props) => {
     });
     dispatch(InquiryActions.setInquiries(optionsInquires));
     //
-    const getQuestion = {...question};
+    const getQuestion = { ...question };
     if (getQuestion.process === 'pending' ? getQuestion.groupId === val.groupId : getQuestion.id === val.id) {
       if (val.state === 'OPEN' && !isResolve && !isResolveCDCM) {
         dispatch(InquiryActions.setEditInq(val));
@@ -592,6 +599,22 @@ const InquiryViewer = (props) => {
       }
     }
   }
+
+  useEffect(() => {
+    getMail(myBL.id)
+      .then(({ data: { toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc } }) => {
+        setMailHistory({
+          toCustomer,
+          toCustomerCc,
+          toCustomerBcc,
+          toOnshore,
+          toOnshoreCc,
+          toOnshoreBcc
+        });
+      })
+      .catch((err) => handleError(dispatch, err));
+  }, []);
+
   useEffect(() => {
     if (props.inqActing && props.inqActing.val && props.inqActing.action) {
       setDefaultAction(props.inqActing.val);
@@ -1274,38 +1297,38 @@ const InquiryViewer = (props) => {
   }, []);
 
   useEffect(() => {
-    if (confirmClick) props.setDefaultAction({val: {}, action: false})
+    if (confirmClick) props.setDefaultAction({ val: {}, action: false })
     if (confirmClick && confirmPopupType === 'removeInq' && replyRemove) {
       const optionsOfQuestion = [...inquiries];
       if (replyRemove.inqId) {
         const indexInqRemove = optionsOfQuestion.findIndex(inq => replyRemove.inqId === inq.id);
         deleteInquiry(replyRemove.inqId)
-            .then(() => {
-              if (indexInqRemove !== -1) {
-                const inqDelete = optionsOfQuestion.splice(indexInqRemove, 1)[0];
-                const hidePopupEmpty = !optionsOfQuestion.filter(inq => inq.field === inqDelete.field).length;
-                dispatch(InquiryActions.setInquiries(optionsOfQuestion));
+          .then(() => {
+            if (indexInqRemove !== -1) {
+              const inqDelete = optionsOfQuestion.splice(indexInqRemove, 1)[0];
+              const hidePopupEmpty = !optionsOfQuestion.filter(inq => inq.field === inqDelete.field).length;
+              dispatch(InquiryActions.setInquiries(optionsOfQuestion));
 
-                // sync delete inquiry
-                syncData({ inquiries: optionsOfQuestion });
+              // sync delete inquiry
+              syncData({ inquiries: optionsOfQuestion });
 
-                if (hidePopupEmpty) {
-                  dispatch(InquiryActions.setOneInq({}));
-                  dispatch(FormActions.toggleCreateInquiry(false));
-                }
+              if (hidePopupEmpty) {
+                dispatch(InquiryActions.setOneInq({}));
+                dispatch(FormActions.toggleCreateInquiry(false));
               }
-              const isEmptyInq = optionsOfQuestion.filter(op => op.process === 'pending');
-              if (!isEmptyInq.length) {
-                (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
-                dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "", {
-                  idReply: myBL.id,
-                  action: 'deleteAll',
-                })) //BX: Delete all inquiries draft
-              }
-              dispatch(InquiryActions.checkSubmit(!enableSubmit));
-              props.getUpdatedAt();
-            })
-            .catch((error) => handleError(dispatch, error));
+            }
+            const isEmptyInq = optionsOfQuestion.filter(op => op.process === 'pending');
+            if (!isEmptyInq.length) {
+              (field === 'INQUIRY_LIST') && dispatch(FormActions.toggleAllInquiry(false));
+              dispatch(Actions.updateOpusStatus(myBL.bkgNo, "BX", "", {
+                idReply: myBL.id,
+                action: 'deleteAll',
+              })) //BX: Delete all inquiries draft
+            }
+            dispatch(InquiryActions.checkSubmit(!enableSubmit));
+            props.getUpdatedAt();
+          })
+          .catch((error) => handleError(dispatch, error));
       }
     } else if (confirmPopupType === 'removeReplyAmendment' && replyRemove && replyRemove?.draftId) {
       deleteDraftBLReply(replyRemove?.draftId, replyRemove.field, myBL.id)
@@ -1708,7 +1731,7 @@ const InquiryViewer = (props) => {
     if (question.process === 'pending') {
       confirmPopupType = 'removeReplyInquiry';
     } else {
-      props.setDefaultAction({val: question, action: true})
+      props.setDefaultAction({ val: question, action: true })
     }
     setReplyRemove(question);
     dispatch(
@@ -1725,7 +1748,7 @@ const InquiryViewer = (props) => {
     if (index >= 0) {
       const optionsOfQuestion = [...inquiries];
       const inqEdit = JSON.parse(JSON.stringify(inq));
-      props.setDefaultAction({val: inqEdit, action: true});
+      props.setDefaultAction({ val: inqEdit, action: true });
       inqEdit.answerObj = inqEdit.answerObj.map((ans) => ({ ...ans, index: 0 }))
       inqEdit.mediaFile = inqEdit.mediaFile.map((med) => ({ ...med, index: 0 }))
       inqEdit.ansType = optionsOfQuestion[index].ansType;
@@ -1898,7 +1921,7 @@ const InquiryViewer = (props) => {
   }
 
   const onResolve = (hasUpload = false) => {
-    props.setDefaultAction({val: question, action: true});
+    props.setDefaultAction({ val: question, action: true });
     if (Array.isArray(question.content)) {
       setIsResolveCDCM(true);
     } else {
@@ -2055,7 +2078,7 @@ const InquiryViewer = (props) => {
   }
 
   const onConfirm = (isWrapText = false) => {
-    props.setDefaultAction({val: {}, action: false});
+    props.setDefaultAction({ val: {}, action: false });
     let contentField = '';
     let isAllItemUpload = false;
     const contsNoChange = {};
@@ -2373,7 +2396,7 @@ const InquiryViewer = (props) => {
   };
 
   const cancelResolve = () => {
-    props.setDefaultAction({val: {}, action: false});
+    props.setDefaultAction({ val: {}, action: false });
     dispatch(FormActions.validateInput({ isValid: true, prohibitedInfo: null, handleConfirm: null }));
     setTextResolve(content[question.field] || '');
     setIsResolve(false);
@@ -2685,7 +2708,7 @@ const InquiryViewer = (props) => {
   }, [getDataCD, getDataCM, tempReply, question.oldData]);
 
   const onSaveReply = async () => {
-    props.setDefaultAction({val: {}, action: false});
+    props.setDefaultAction({ val: {}, action: false });
 
     setDisableSaveReply(true);
     dispatch(FormActions.setDirtyReload({ inputReply: false }))
@@ -2998,10 +3021,10 @@ const InquiryViewer = (props) => {
 
   const onReply = (q) => {
     if (triggerOnpaste.current) {
-      triggerOnpaste.current.focus({preventScroll: true});
+      triggerOnpaste.current.focus({ preventScroll: true });
     }
     // case: Reply Answer
-    props.setDefaultAction({val: question, action: true});
+    props.setDefaultAction({ val: question, action: true });
     const optionsInquires = [...inquiries];
     if (user.role === 'Guest') {
       setDisableCDCM(false);
@@ -3040,9 +3063,9 @@ const InquiryViewer = (props) => {
   // TODO
   const handleEdit = (q) => {
     if (triggerOnpaste.current) {
-      triggerOnpaste.current.focus({preventScroll: true});
+      triggerOnpaste.current.focus({ preventScroll: true });
     }
-    props.setDefaultAction({val: q, action: true});
+    props.setDefaultAction({ val: q, action: true });
     const optionsInquires = [...inquiries];
     const editedIndex = optionsInquires.findIndex(inq => q.id === inq.id);
     // case: Edit Answer
@@ -3118,7 +3141,7 @@ const InquiryViewer = (props) => {
   }
 
   const reOpen = (idInq) => {
-    props.setDefaultAction({val: {}, action: false});
+    props.setDefaultAction({ val: {}, action: false });
     reOpenInquiry(idInq)
       .then((res) => {
         const optionsInquires = [...inquiries];
@@ -3260,9 +3283,9 @@ const InquiryViewer = (props) => {
     const descriptionOfGoods2 = metadata.field[DESCRIPTION_OF_GOODS2];
     const contentDoG1 = content[descriptionOfGoods1] || '';
     const contentDoG2 = content[descriptionOfGoods2] || '';
-    return(
+    return (
       <>
-        {[contentDoG1, contentDoG2].map((item, index) => 
+        {[contentDoG1, contentDoG2].map((item, index) =>
           item && <TextField
             keu={index}
             className={classes.inputText}
@@ -3279,7 +3302,7 @@ const InquiryViewer = (props) => {
   const contentDoGLine1Line2 = (content) => {
     return content[metadata.field[DESCRIPTION_OF_GOODS1]] ?
       `${content[metadata.field[DESCRIPTION_OF_GOODS1]]}\n${content[metadata.field[DESCRIPTION_OF_GOODS2]]}`
-    : content[metadata.field[DESCRIPTION_OF_GOODS2]]
+      : content[metadata.field[DESCRIPTION_OF_GOODS2]]
   }
 
   // Separate Shipper/Consignee/Notify
@@ -3345,25 +3368,25 @@ const InquiryViewer = (props) => {
                     (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')
                   )
                 )
-              ||
-              (isLimitRows ? validateGroupOneTextBox(textResolve).isError : false)
-            }
-            helperText={!validateInput?.isValid ?
-              <>
-                {(validateInput?.prohibitedInfo?.countries.length > 0) &&
-                  <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
-                    <WarningIcon fontSize='small' />
-                    &nbsp;{`Countries: ${validateInput?.prohibitedInfo?.countries.join(', ')}`}
-                  </span>
-                }
-                {(validateInput?.prohibitedInfo?.danger_cargo.length > 0) &&
-                  <>
+                ||
+                (isLimitRows ? validateGroupOneTextBox(textResolve).isError : false)
+              }
+              helperText={!validateInput?.isValid ?
+                <>
+                  {(validateInput?.prohibitedInfo?.countries.length > 0) &&
                     <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
                       <WarningIcon fontSize='small' />
-                      &nbsp;{`Danger Cargo: ${validateInput?.prohibitedInfo?.danger_cargo.join(', ')}`}
+                      &nbsp;{`Countries: ${validateInput?.prohibitedInfo?.countries.join(', ')}`}
                     </span>
-                  </>
-                }
+                  }
+                  {(validateInput?.prohibitedInfo?.danger_cargo.length > 0) &&
+                    <>
+                      <span style={{ display: 'flex', alignItems: 'center', color: '#F39200' }}>
+                        <WarningIcon fontSize='small' />
+                        &nbsp;{`Danger Cargo: ${validateInput?.prohibitedInfo?.danger_cargo.join(', ')}`}
+                      </span>
+                    </>
+                  }
                 </>
                 : validateField(field, textResolve).errorType.split('\n').map((line, idx) => (
                   <span key={idx} style={{ display: 'block', lineHeight: '20px', color: (isResolve || (['AME_DRF', 'AME_SENT'].includes(question.state) && user.role === 'Guest')) ? 'red' : 'rgba(0, 0, 0, 0.54)' }}>{line}</span>
@@ -3386,7 +3409,7 @@ const InquiryViewer = (props) => {
         { type: "image/png" }
       );
       setFilepaste(myRenamedFile);
-      }
+    }
   }
 
   const { isDragActive, getRootProps } = useDropzone({
@@ -3413,6 +3436,8 @@ const InquiryViewer = (props) => {
                 avatar={question.creator?.avatar}
                 state={question.state}
                 status={question.status}
+                userType={user.role}
+                emails={mailHistory}
               />
               {user.role === 'Admin' ? (
                 <div className="flex items-center mr-2">

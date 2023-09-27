@@ -5,6 +5,7 @@ import { cyan } from '@material-ui/core/colors';
 import Popover from '@material-ui/core/Popover';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
   name: {
@@ -19,7 +20,8 @@ const useStyles = makeStyles((theme) => ({
     marginTop: '0px',
     whiteSpace: 'pre',
     color: '#666',
-    fontSize: 13
+    fontSize: 13,
+    display: 'flex'
   },
   message: {
     marginLeft: '1rem',
@@ -61,12 +63,12 @@ const MailInfo = (props) => {
         <span>Offshore</span>
       </div>
       {[
-        { label: 'to:', value: ['minhntvuo@gmail.com'] || emails.to },
+        { label: 'to:', value: emails.to },
         {
           label: 'cc:',
-          value: ['abc@gmail.com', 'abc1@@gmail.com', 'abc2@gmail.com'] || emails.cc
+          value: emails.cc
         },
-        { label: 'bcc:', value: [] || emails.bcc }
+        { label: 'bcc:', value: emails.bcc }
       ].map(({ label, value }, index) => (
         <>
           {value.length ? (
@@ -86,15 +88,24 @@ const MailInfo = (props) => {
 };
 
 const UserInfo = (props) => {
-  const { name, time, avatar, state, status, emails } = props;
+  const { name, time, avatar, state, status, emails: _emails, userType } = props;
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(false);
+  const currentTabs = useSelector(({ workspace }) => workspace.formReducer.tabs);
+
   const showMailInfo = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
+  const emails = {
+    to: currentTabs ? _emails['toOnshore'] : _emails['toCustomer'],
+    cc: currentTabs ? _emails['toOnshoreCc'] : _emails['toCustomerCc'],
+    bcc: currentTabs ? _emails['toOnshoreBcc'] : _emails['toCustomerBcc']
+  };
+
   return (
     <div className="flex">
-      <MailInfo anchorEl={anchorEl} setAnchorEl={setAnchorEl} />
+      <MailInfo anchorEl={anchorEl} setAnchorEl={setAnchorEl} emails={emails} />
       {avatar ? (
         <Avatar src={avatar} />
       ) : (
@@ -107,7 +118,7 @@ const UserInfo = (props) => {
           <p className={classes.name}>{name}</p>
           <div className="flex" style={{ marginLeft: '1rem' }}>
             <p className={classes.time}>
-              {time}
+              <span>{time}</span>
               {![
                 'REOPEN_A',
                 'REOPEN_Q',
@@ -121,10 +132,16 @@ const UserInfo = (props) => {
               {(['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(state) ||
                 status === 'DELETED') && <span className={classes.styleMark}> - Deleted</span>}
               <>
-                {['INQ_SENT', 'REP_Q_SENT'].includes(state) && ` | to ${emails}`}
-                <IconButton style={{ padding: 1 }} onClick={showMailInfo}>
-                  <Icon size="small">expand_more</Icon>
-                </IconButton>
+                {['INQ_SENT', 'REP_Q_SENT'].includes(state) && userType === 'Admin' && (
+                  <>
+                    <span style={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {` | to ${emails['to'].join(', ')}`}
+                    </span>
+                    <IconButton style={{ padding: 1 }} onClick={showMailInfo}>
+                      <Icon size="small">expand_more</Icon>
+                    </IconButton>
+                  </>
+                )}
               </>
             </p>
           </div>

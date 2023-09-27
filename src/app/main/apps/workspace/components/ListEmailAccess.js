@@ -111,6 +111,7 @@ const ListEmailAccess = (props) => {
   };
 
   const onCancel = () => {
+    setEmails(emailOrigin)
     setEdit(false);
   };
 
