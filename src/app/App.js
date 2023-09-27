@@ -1,5 +1,5 @@
 import '@fake-db';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FuseAuthorization, FuseLayout, FuseTheme } from '@fuse';
 import Provider from 'react-redux/es/components/Provider';
 import { Router } from 'react-router-dom';
@@ -22,12 +22,19 @@ const jss = create({
 const generateClassName = createGenerateClassName();
 
 const App = () => {
+  // remove old storage
+  useEffect(() => {
+    if (localStorage.getItem('USER') || localStorage.getItem('AUTH_TOKEN')) {
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+  }, []);
+
   return (
     <AppContext.Provider
       value={{
         routes
-      }}
-    >
+      }}>
       <SocketContext.Provider value={socket}>
         <StylesProvider jss={jss} generateClassName={generateClassName}>
           <Provider store={store}>

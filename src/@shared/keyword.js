@@ -263,7 +263,7 @@ export const mapperBlinkStatusCustomer = {
 };
 
 export const BROADCAST = {
-  ACCESS: "BLINK_ACCESS"
+  LOGOUT: 'LOGOUT'
 };
 
 export const BLANK = '<<Blank>>'

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import history from '@history';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -15,7 +15,6 @@ import { cyan } from '@material-ui/core/colors';
 import { Link } from 'react-router-dom';
 import { clearLocalStorage } from '@shared';
 import * as AppActions from 'app/store/actions';
-import { SocketContext } from 'app/AppContext';
 import { encodeAuthParam } from 'app/services/authService';
 import { BROADCAST } from '@shared/keyword';
 import { handleError } from '@shared/handleError';
@@ -25,22 +24,20 @@ function UserProfile(props) {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(null);
   const user = useSelector(({ user }) => user);
-  const socket = useContext(SocketContext);
-  const channel = new BroadcastChannel(BROADCAST.ACCESS);
+  const channel = new BroadcastChannel(BROADCAST.LOGOUT);
 
   const handleClick = ({ currentTarget }) => setOpen(currentTarget);
 
   const handleClose = () => setOpen(null);
 
   const handleChangePassword = async () => {
-    const { auth } = await encodeAuthParam().catch(err => handleError(dispatch, err));
+    const { auth } = await encodeAuthParam().catch((err) => handleError(dispatch, err));
     history.push(`/change-password?auth=${auth}`);
   };
 
   const handleLogOut = () => {
     clearLocalStorage();
-    channel.postMessage({ role: user.role, type: "logout" });
-    // socket.emit('user_logout');
+    channel.postMessage({ role: user.role, type: 'logout' });
     dispatch(AppActions.removeUser());
     dispatch(AppActions.checkAllow(false));
   };
@@ -63,9 +60,8 @@ function UserProfile(props) {
             fontStyle: 'normal',
             fontWeight: 600,
             fontSize: 12,
-            color: '#515E6A',
-          }}
-        >
+            color: '#515E6A'
+          }}>
           {user.displayName}
         </Typography>
         <Icon className="text-16 ml-4 hidden sm:flex" variant="action">

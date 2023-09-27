@@ -8,6 +8,7 @@ import { getBlInfo } from 'app/services/myBLService';
 import * as AppActions from 'app/store/actions';
 import { handleError } from '@shared/handleError';
 // import { categorizeInquiriesByUserType } from '@shared';
+import { getLocalUser } from '@shared/permission';
 
 import Deploying from '../pages/errors/deploying/Deploying';
 
@@ -21,6 +22,7 @@ const PreProcess = ({ bl, children }) => {
   const dispatch = useDispatch();
   const socket = useContext(SocketContext);
 
+  const user = useSelector(({ user }) => user);
   const deploying = useSelector(({ fuse }) => fuse.message.deploying);
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const isLoading = useSelector(({ workspace }) => workspace.formReducer.isLoading);
@@ -102,8 +104,6 @@ const PreProcess = ({ bl, children }) => {
 
   useEffect(() => {
     if (myBL.id) {
-      const user = JSON.parse(localStorage.getItem('USER'));
-
       // user connect
       const mybl = user.userType === 'ADMIN' ? [myBL.bkgNo, myBL.id] : [myBL.id, myBL.bkgNo];
       socket.emit('user_connect', {
@@ -136,9 +136,8 @@ const PreProcess = ({ bl, children }) => {
           user.userType === 'ADMIN' ||
           (user.userType === 'CUSTOMER' && myBL.state.includes('DRF_'))
         ) {
-          const userLocal = localStorage.getItem('USER')
-            ? JSON.parse(localStorage.getItem('USER'))
-            : {};
+          const userLocalStorage = getLocalUser();
+          const userLocal = userLocalStorage ? JSON.parse(userLocalStorage) : {};
           if (userLocal.displayName && usersAccessing.length) {
             let permissions = await getPermissionByRole(userLocal.role).catch((err) =>
               handleError(dispatch, err)

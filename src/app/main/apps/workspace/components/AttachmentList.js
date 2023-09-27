@@ -186,7 +186,7 @@ const AttachmentList = (props) => {
   const isAllSelected = attachmentFiles.length > 0 && selectedIndexFile.length === attachmentFiles.length;
   const myBL = useSelector(({ workspace }) => workspace.inquiryReducer.myBL);
   const listCommentDraft = useSelector(({ workspace }) => workspace.inquiryReducer.listCommentDraft);
-  const userType = useSelector(({ user }) => user.role?.toUpperCase());
+  const userType = useSelector(({ user }) => user.userType);
   const fileRemoveIndex = useSelector(({ workspace }) => workspace.formReducer.fileRemoveIndex);
   
   const styles = (validationAttachment, width) => {

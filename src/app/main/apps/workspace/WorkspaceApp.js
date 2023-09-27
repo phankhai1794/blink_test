@@ -3,7 +3,8 @@ import history from '@history';
 import { FusePageSimple } from '@fuse';
 import { useDispatch, useSelector } from 'react-redux';
 import * as AppActions from 'app/store/actions';
-import { PERMISSION, PermissionProvider } from '@shared/permission';
+import { PERMISSION, PermissionProvider, getLocalUser } from '@shared/permission';
+import { getPermissionByRole } from 'app/services/authService';
 import { validateBkgNo } from 'app/services/opusService';
 
 import PreProcess from '../PreProcess';
@@ -13,6 +14,7 @@ import BLWorkspace from './components/BLWorkspace';
 const MainWorkSpace = () => {
   const pageLayout = useRef(null);
   const dispatch = useDispatch();
+  const [allow, setAllow] = useState(false);
 
   useEffect(() => {
     sessionStorage.setItem(
@@ -22,29 +24,48 @@ const MainWorkSpace = () => {
         cacheSearch: window.location.search
       })
     );
-    dispatch(
-      AppActions.checkAllow(PermissionProvider({ action: PERMISSION.VIEW_ACCESS_WORKSPACE }))
-    );
+    const userLocal = getLocalUser();
+    getPermissionByRole('Admin')
+      .then((res) => {
+        const userType = 'ADMIN';
+        sessionStorage.setItem('permissions', JSON.stringify(res));
+        sessionStorage.setItem('userType', userType);
+
+        setTimeout(() => {
+          const isAllow = PermissionProvider({ action: PERMISSION.VIEW_ACCESS_WORKSPACE });
+          if (isAllow) {
+            setAllow(isAllow);
+            dispatch(AppActions.setUser({ ...JSON.parse(userLocal), permissions: res, userType }));
+          } else history.push('/login');
+        }, 500);
+      })
+      .catch(() => history.push('/login'));
   }, []);
 
   return (
-    <div className="flex flex-col flex-1 w-full">
-      <FusePageSimple
-        classes={{
-          contentWrapper: 'p-0 h-full',
-          content: 'flex flex-col h-full',
-          leftSidebar: 'w-256 border-0'
-        }}
-        content={
-          <PreProcess>
-            <BLWorkspace user="workspace" />
-          </PreProcess>
-        }
-        sidebarInner
-        ref={pageLayout}
-        innerScroll
-      />
-    </div>
+    <>
+      {allow ? (
+        <div className="flex flex-col flex-1 w-full">
+          <FusePageSimple
+            classes={{
+              contentWrapper: 'p-0 h-full',
+              content: 'flex flex-col h-full',
+              leftSidebar: 'w-256 border-0'
+            }}
+            content={
+              <PreProcess>
+                <BLWorkspace user="workspace" />
+              </PreProcess>
+            }
+            sidebarInner
+            ref={pageLayout}
+            innerScroll
+          />
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
   );
 };
 
@@ -60,7 +81,7 @@ function WorkspaceApp() {
     const urlSearchParams = new URLSearchParams(search);
     const usrId = urlSearchParams.get('usrId');
     const cntr = urlSearchParams.get('cntr');
-    const user = JSON.parse(localStorage.getItem('USER'));
+    const user = JSON.parse(getLocalUser());
     if (bkgNo && usrId && cntr) {
       try {
         const result = await validateBkgNo(bkgNo, cntr, {

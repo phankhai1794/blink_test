@@ -3,11 +3,12 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import { makeStyles, ThemeProvider } from '@material-ui/styles';
 import { Box, Card, CardContent, Typography } from '@material-ui/core';
 import * as Actions from 'app/store/actions';
-import { verifyToken, login } from 'app/services/authService';
+import { verifyToken, login, getPermissionByRole } from 'app/services/authService';
 import { PERMISSION, PermissionProvider } from '@shared/permission';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { handleError } from '@shared/handleError';
 
 import JWTLoginTab from './tabs/JWTLoginTab';
 import ForgotPasswordTab from './tabs/ForgotPasswordTab';
@@ -70,27 +71,31 @@ function Login(props) {
 
   function handleLogin(model) {
     login(model)
-      .then((res) => {
+      .then(async (res) => {
         if (res) {
           const { userData, token, message } = res;
-          const { userType, role, userName, avatar, email, permissions, countries, office } =
-            userData;
+          const { role, userName, avatar, email, countries, office } = userData;
           const userInfo = {
             displayName: userName,
             photoURL: avatar,
-            userType,
             role,
             email,
-            permissions,
             countries: countries || [],
             office: office || []
           };
           const payload = { ...user, ...userInfo };
 
-          localStorage.setItem('AUTH_TOKEN', token);
-          localStorage.setItem('USER', JSON.stringify(userInfo));
+          localStorage.setItem('OFFSHORE_TOKEN', token);
+          localStorage.setItem('OFFSHORE', JSON.stringify(userInfo));
 
-          dispatch(Actions.setUser(payload));
+          const permissions = await getPermissionByRole('Admin').catch((err) =>
+            handleError(dispatch, err)
+          );
+          sessionStorage.setItem('permissions', JSON.stringify(permissions));
+          const userType = 'ADMIN';
+          sessionStorage.setItem('userType', userType);
+          dispatch(Actions.setUser({ ...payload, permissions, userType }));
+
           dispatch(Actions.checkAuthToken(true));
           dispatch(Actions.showMessage({ message: message, variant: 'success' }));
 
@@ -111,7 +116,7 @@ function Login(props) {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem('AUTH_TOKEN');
+    const token = localStorage.getItem('OFFSHORE_TOKEN');
     if (token) {
       verifyToken(token)
         .then((res) => {

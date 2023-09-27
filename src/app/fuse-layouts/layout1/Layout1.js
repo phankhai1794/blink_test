@@ -96,13 +96,10 @@ function Layout1(props) {
   const dirtyReload = useSelector(({ workspace }) => workspace.formReducer.dirtyReload);
   const bcData = useSelector(({ broadcast }) => broadcast);
 
-  const channel = new BroadcastChannel(BROADCAST.ACCESS);
+  const channel = new BroadcastChannel(BROADCAST.LOGOUT);
 
   useEffect(() => {
     if (userRole) {
-      // post a signal
-      channel.postMessage({ role: userRole, type: "access" });
-
       // receive signal
       channel.onmessage = ({ data }) => {
         dispatch(FormActions.setDirtyReload({ forceReload: true }));

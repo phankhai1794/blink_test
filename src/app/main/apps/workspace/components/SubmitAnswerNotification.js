@@ -6,6 +6,7 @@ import { SocketContext } from 'app/AppContext';
 import { getPermissionByRole } from 'app/services/authService';
 import * as AppActions from 'app/store/actions';
 import { handleError } from '@shared/handleError';
+import { getLocalUser } from '@shared/permission';
 
 import * as InquiryActions from '../store/actions/inquiry';
 import * as FormActions from '../store/actions/form';
@@ -73,7 +74,8 @@ const SubmitAnswerNotification = ({ msg, msg2 = 'Thank you!', iconType, open }) 
 
   const handleClose = async () => {
     const { usersAccessing } = window;
-    const userLocal = localStorage.getItem('USER') ? JSON.parse(localStorage.getItem('USER')) : {};
+    let userLocal = getLocalUser();
+    userLocal = userLocal ? JSON.parse(userLocal) : {};
 
     if (userLocal.displayName && usersAccessing.length) {
       let permissions = await getPermissionByRole(userLocal.role).catch(err => handleError(dispatch, err));
