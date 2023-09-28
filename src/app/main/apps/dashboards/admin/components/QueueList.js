@@ -239,8 +239,7 @@ const SearchLayout = (props) => {
   const [isPickerOpen, setPickerOpen] = useState(false);
   const [labelDate, setLabelDate] = useState();
   const pickerRef = useRef(null);
-  const [stateReplaceText, setReplaceText] = useState();
-  const [isOnSelect, setOnSelect] = useState(false);
+  const [stateCopyText, setStateCopyText] = useState({ stateReplaceText: '', isOnSelect: false });
 
   const handleSelectStatus = (event) => {
     let values = event.target.value;
@@ -260,6 +259,7 @@ const SearchLayout = (props) => {
 
   const handleChange = (query) => {
     setState({ ...state, ...query });
+    setStateCopyText({ stateReplaceText: '', isOnSelect: false});
   };
 
   const handleSearch = () => {
@@ -358,8 +358,7 @@ const SearchLayout = (props) => {
   const onSelectText = (e) => {
     const selectedText = window.getSelection().toString();
     if (selectedText) {
-      setReplaceText(selectedText);
-      setOnSelect(true);
+      setStateCopyText({ stateReplaceText: selectedText, isOnSelect: true});
     }
   };
 
@@ -374,10 +373,16 @@ const SearchLayout = (props) => {
         .filter((str) => str) // filter empty string
     ].join(', ');
     let replacedText = bookingNo + bkgNosPaste;
-    if (stateReplaceText && bkgNosPaste && isOnSelect) {
-      replacedText = bookingNo.replace(new RegExp(stateReplaceText, 'g'), bkgNosPaste);
-      setOnSelect(false);
+    if (stateCopyText.stateReplaceText && bkgNosPaste && stateCopyText.isOnSelect) {
+      stateCopyText.stateReplaceText.toLowerCase() === bookingNo.toLowerCase()
+        ? (replacedText = bkgNosPaste)
+        : (replacedText = bookingNo
+            .toLowerCase()
+            .replace(new RegExp(stateCopyText.stateReplaceText.toLowerCase(), 'g'), bkgNosPaste.toLowerCase()));
+
+      setStateCopyText({ ...stateCopyText, isOnSelect: false});
     }
+    replacedText = replacedText.toUpperCase();
     const bkgNoArr = [...new Set(replacedText.split(','))].join();
     handleChange({ bookingNo: bkgNoArr });
   };
