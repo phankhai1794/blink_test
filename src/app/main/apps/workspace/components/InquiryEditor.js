@@ -331,7 +331,7 @@ const InquiryEditor = (props) => {
   const boxTextEl = React.createRef();
 
   const getValType = () => {
-    const types = currentEditInq.inqGroup && currentEditInq.inqGroup.length && currentEditInq.inqGroup.map(inq => inq.inqType);
+    const types = currentEditInq.inqGroup?.length && currentEditInq.inqGroup.map(inq => inq.inqType);
     if (types) {
       types.push(currentEditInq.inqType);
       return metadata.inq_type_options.filter((v) => types.includes(v.value))
@@ -387,7 +387,7 @@ const InquiryEditor = (props) => {
 
   const handleShowTemplateCDCM = (e, type) => {
     const objCdCm = [...contentsInqCDCM];
-    if (objCdCm && objCdCm.length) {
+    if (objCdCm?.length) {
       objCdCm.forEach(o => {
         if (o.type === type) o.showTemplate = e.currentTarget;
       })
@@ -397,7 +397,7 @@ const InquiryEditor = (props) => {
 
   const handleCloseTemplateCDCM = () => {
     const objCdCm = [...contentsInqCDCM];
-    if (objCdCm && objCdCm.length) {
+    if (objCdCm?.length) {
       objCdCm.forEach(o => {
         o.showTemplate = null;
       })
@@ -426,7 +426,7 @@ const InquiryEditor = (props) => {
   const handleChangeCDCM = (e, type) => {
     const index = e.target.value;
     const objCdCm = [...contentsInqCDCM];
-    if (objCdCm && objCdCm.length) {
+    if (objCdCm?.length) {
       objCdCm.forEach((o, i) => {
         if (o.type === type && o.content.length > 1) {
           o.contentShow = o.content[index];
@@ -444,7 +444,7 @@ const InquiryEditor = (props) => {
 
   const handleNameChangeCDCM = (e, valEdited) => {
     const inqCDCM = [...contentsInqCDCM];
-    if (inqCDCM && inqCDCM.length) {
+    if (inqCDCM?.length) {
       inqCDCM.forEach((inq, index) => {
         if (inq.type === valEdited.type) {
           inq.contentShow = e.currentTarget.textContent;
@@ -461,7 +461,7 @@ const InquiryEditor = (props) => {
 
   const handleReceiverChangeCDCM = (e, type) => {
     const inqCDCM = [...contentsInqCDCM];
-    if (inqCDCM && inqCDCM.length) {
+    if (inqCDCM?.length) {
       inqCDCM.forEach((inq, index) => {
         if (inq.type === type) {
           inq.receiver = e.target.value;
@@ -625,14 +625,6 @@ const InquiryEditor = (props) => {
     }
   }, showAddInquiry);
 
-  const isAllSelected = (
-    containerCheck.includes(currentEditInq.field)
-    && Array.isArray(inqTypeOption)
-    && Array.isArray(valueType)
-    && inqTypeOption.length
-    && inqTypeOption.length === valueType.length
-  );
-
   const containerFieldValueCheck = (inq) => {
     if (containerCheck.includes(inq.field) && inq.inqType) {
       const inqCdCm = [...contentsInqCDCM];
@@ -780,6 +772,8 @@ const InquiryEditor = (props) => {
         setFieldType(fieldDefault);
       }
       setInqTypeOption(metadata.inq_type_options)
+      setTrack({ ...keepTrack, blCreateChoice: null })
+
       setFieldValue(null);
       inq.field = ''
       dispatch(InquiryActions.setEditInq(inq));
@@ -870,6 +864,10 @@ const InquiryEditor = (props) => {
 
     if (e.keyword === BL_TYPE && valueAnsType[0]?.label === 'Option Selection') autoCreateChoiceBLType();
 
+    if (fieldValue?.keyword !== BL_TYPE) {
+      setTrack({ ...keepTrack, blCreateChoice: null })
+    }
+
     setTemplateList(filter?.content || []);
     setTemplate('0');
     dispatch(InquiryActions.validate({ ...valid, field: true }));
@@ -910,9 +908,7 @@ const InquiryEditor = (props) => {
       }
     }
 
-    if (!checkField || checkContent !== 0 || !checkAnsType || !checkReceiver || !isSameFile || !checkNewInq) return false;
-
-    return true;
+    return checkField && checkContent === 0 && checkAnsType && checkReceiver && isSameFile & checkNewInq
   }
 
   const handleNameChange = (e) => {
@@ -976,7 +972,7 @@ const InquiryEditor = (props) => {
         }
       });
       listInqOfField.forEach(l => {
-        if (l.inqGroup && l.inqGroup.length) {
+        if (l.inqGroup?.length) {
           l.inqGroup.forEach(inqG => {
             listInqType.push({
               inqType: inqG.inqType,
@@ -1092,7 +1088,6 @@ const InquiryEditor = (props) => {
       setDisabled(false);
       return;
     }
-    let error = false;
 
     let inquiry = inquiriesOp.find((q) => q.id === currentEditInq.id);
     if (inquiry) {
@@ -1115,13 +1110,11 @@ const InquiryEditor = (props) => {
           if (checkOptionEmpty.length > 0) {
             dispatch(InquiryActions.validate({ ...valid, answerContent: false }));
             setDisabled(false);
-            error = true;
             // break;
           }
         } else {
           dispatch(AppActions.showMessage({ message: 'Options not empty!', variant: 'error' }));
           setDisabled(false);
-          error = true;
           // break;
         }
       }
@@ -1525,10 +1518,10 @@ const InquiryEditor = (props) => {
                           backgroundColor: isDisabled
                             ? undefined
                             : isSelected
-                              ? '#FDF2F2'
-                              : isFocused
-                                ? '#FDF2F2'
-                                : undefined,
+                            ? '#FDF2F2'
+                            : isFocused
+                            ? '#FDF2F2'
+                            : undefined,
                           fontWeight: isSelected && 600,
                           color: isSelected ? '#BD0F72' : isFocused ? '#BD0F72' : undefined
                         };
