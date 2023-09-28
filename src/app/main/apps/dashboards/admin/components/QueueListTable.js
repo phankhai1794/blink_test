@@ -357,11 +357,11 @@ const Row = (props) => {
         <TableCell className={classes.cellBody}>
           {formatDate(row.lastUpdated, 'MMM DD YYYY HH:mm')}
         </TableCell>
-        {userType !== 'ONSHORE' && (
+        {/* {userType !== 'ONSHORE' && (
           <TableCell className={classes.cellBody}>
             {formatDate(row.lastUpdatedAction, 'MMM DD YYYY HH:mm')}
           </TableCell>
-        )}
+        )} */}
         {columns.etd && (
           <TableCell className={classes.cellBody}>
             {row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}
@@ -828,13 +828,13 @@ const QueueListTable = () => {
                       />
                     </div>
                   </TableCell>
-                  {userType !== 'ONSHORE' && (
+                  {/* {userType !== 'ONSHORE' && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
                         <span>Latest Action Update</span>
                       </div>
                     </TableCell>
-                  )}
+                  )} */}
                   {columns.etd && (
                     <TableCell className={classes.cellHead}>
                       <div className={clsx(classes.lineMinWidth, classes.lineColumn)}>
