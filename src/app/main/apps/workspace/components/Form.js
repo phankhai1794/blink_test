@@ -564,7 +564,7 @@ export default function Form(props) {
             <img src="assets/images/icons/people.svg"></img>
             <span style={{ color: '#515F6B', fontWeight: 600 }}>Email Recipients</span>
             <IconButton style={{ padding: 1 }} onClick={showEmailList}>
-              <Icon size="small">expand_more</Icon>
+              <Icon style={{ fontSize: 22 }}>expand_more</Icon>
             </IconButton>
           </div>
         )}

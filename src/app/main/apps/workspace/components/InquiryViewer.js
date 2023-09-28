@@ -601,18 +601,19 @@ const InquiryViewer = (props) => {
   }
 
   useEffect(() => {
-    getMail(myBL.id)
-      .then(({ data: { toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc } }) => {
-        setMailHistory({
-          toCustomer,
-          toCustomerCc,
-          toCustomerBcc,
-          toOnshore,
-          toOnshoreCc,
-          toOnshoreBcc
-        });
-      })
-      .catch((err) => handleError(dispatch, err));
+    if (['INQ_SENT', 'REP_Q_SENT'].includes(question.state))
+      getMail(myBL.id)
+        .then(({ data: { toCustomer, toCustomerCc, toCustomerBcc, toOnshore, toOnshoreCc, toOnshoreBcc } }) => {
+          setMailHistory({
+            toCustomer,
+            toCustomerCc,
+            toCustomerBcc,
+            toOnshore,
+            toOnshoreCc,
+            toOnshoreBcc
+          });
+        })
+        .catch((err) => handleError(dispatch, err));
   }, []);
 
   useEffect(() => {

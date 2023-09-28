@@ -21,7 +21,8 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: 'pre',
     color: '#666',
     fontSize: 13,
-    display: 'flex'
+    display: 'flex',
+    alignItems: 'center'
   },
   message: {
     marginLeft: '1rem',
@@ -63,15 +64,15 @@ const MailInfo = (props) => {
         <span>Offshore</span>
       </div>
       {[
-        { label: 'to:', value: emails.to },
+        { label: 'to:', value: emails?.to },
         {
           label: 'cc:',
-          value: emails.cc
+          value: emails?.cc
         },
-        { label: 'bcc:', value: emails.bcc }
+        { label: 'bcc:', value: emails?.bcc }
       ].map(({ label, value }, index) => (
         <>
-          {value.length ? (
+          {value?.length ? (
             <div style={{ display: 'flex', margin: '10px 16px', gap: '20px' }}>
               <span style={{ width: 30 }}>{label}</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -97,11 +98,11 @@ const UserInfo = (props) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const emails = {
+  const emails = _emails ? {
     to: currentTabs ? _emails['toOnshore'] : _emails['toCustomer'],
     cc: currentTabs ? _emails['toOnshoreCc'] : _emails['toCustomerCc'],
     bcc: currentTabs ? _emails['toOnshoreBcc'] : _emails['toCustomerBcc']
-  };
+  } : null;
 
   return (
     <div className="flex">
@@ -132,13 +133,13 @@ const UserInfo = (props) => {
               {(['REP_DRF_DELETED', 'REP_SENT_DELETED'].includes(state) ||
                 status === 'DELETED') && <span className={classes.styleMark}> - Deleted</span>}
               <>
-                {['INQ_SENT', 'REP_Q_SENT'].includes(state) && userType === 'Admin' && (
+                {['INQ_SENT', 'REP_Q_SENT'].includes(state) && userType === 'Admin' && emails && (
                   <>
                     <span style={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {` | to ${emails['to'].join(', ')}`}
                     </span>
                     <IconButton style={{ padding: 1 }} onClick={showMailInfo}>
-                      <Icon size="small">expand_more</Icon>
+                      <Icon style={{ fontSize: 18 }}>expand_more</Icon>
                     </IconButton>
                   </>
                 )}
