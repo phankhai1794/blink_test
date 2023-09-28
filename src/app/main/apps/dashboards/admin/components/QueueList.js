@@ -239,6 +239,8 @@ const SearchLayout = (props) => {
   const [isPickerOpen, setPickerOpen] = useState(false);
   const [labelDate, setLabelDate] = useState();
   const pickerRef = useRef(null);
+  const [stateReplaceText, setReplaceText] = useState();
+  const [isOnSelect, setOnSelect] = useState(false);
 
   const handleSelectStatus = (event) => {
     let values = event.target.value;
@@ -302,7 +304,7 @@ const SearchLayout = (props) => {
 
     const query = { ...initialState, sortField: ['lastUpdated', 'DESC'], isMe: false };
     dispatch(Actions.searchQueueQuery({ ...searchQueueQuery, ...query }));
-    if (userType === 'ONSHORE') setIsMe(false)
+    if (userType === 'ONSHORE') setIsMe(false);
 
     localStorage.removeItem('dashboard');
   };
@@ -353,6 +355,14 @@ const SearchLayout = (props) => {
     setLocalStorageItem('to', to);
   };
 
+  const onSelectText = (e) => {
+    const selectedText = window.getSelection().toString();
+    if (selectedText) {
+      setReplaceText(selectedText);
+      setOnSelect(true);
+    }
+  };
+
   const onPaste = (e) => {
     e.preventDefault();
     const { bookingNo } = state;
@@ -363,8 +373,12 @@ const SearchLayout = (props) => {
         .map((str) => str.trim()) // trim space
         .filter((str) => str) // filter empty string
     ].join(', ');
-    const bkgSearch = bookingNo + bkgNosPaste;
-    const bkgNoArr = [...new Set(bkgSearch.split(','))].join();
+    let replacedText = bookingNo + bkgNosPaste;
+    if (stateReplaceText && bkgNosPaste && isOnSelect) {
+      replacedText = bookingNo.replace(new RegExp(stateReplaceText, 'g'), bkgNosPaste);
+      setOnSelect(false);
+    }
+    const bkgNoArr = [...new Set(replacedText.split(','))].join();
     handleChange({ bookingNo: bkgNoArr });
   };
 
@@ -387,6 +401,7 @@ const SearchLayout = (props) => {
               inputProps={{ style: { textTransform: 'uppercase' } }}
               onChange={(e) => handleChange({ bookingNo: e.target.value.replace(/\s+|;+/g, ',') })}
               onPaste={onPaste}
+              onSelect={onSelectText}
               startAdornment={
                 <InputAdornment className={classes.searchBox} position="start">
                   {''}

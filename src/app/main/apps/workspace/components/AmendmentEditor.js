@@ -534,9 +534,6 @@ const Amendment = ({ question, inquiriesLength, getUpdatedAt, setDefaultAction }
     if (isChange && fieldValueSelect && fieldValueSelect.keyword === BL_TYPE) {
       response = validateBLType(value);
     }
-    if (isChange && fieldValueSelect && fieldValueSelect.keyword === EXPORT_REF) {
-      response = validateGroupOneTextBox(value);
-    }
     return response;
   }
 
