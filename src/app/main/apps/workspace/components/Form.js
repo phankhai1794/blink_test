@@ -559,7 +559,7 @@ export default function Form(props) {
           }}>
           <ListEmailAccess />
         </Popover>
-        {field === 'INQUIRY_LIST' && userType === 'ADMIN' && (
+        {openAllInquiry && field === 'INQUIRY_LIST' && userType === 'ADMIN' && (
           <div style={{ display: 'flex', alignItems: 'center', padding: '20px 0 0 30px' }}>
             <img src="assets/images/icons/people.svg"></img>
             <span style={{ color: '#515F6B', fontWeight: 600 }}>Email Recipients</span>
