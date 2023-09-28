@@ -652,12 +652,12 @@ function ToolbarLayout1(props) {
                   "Amendment" button.
                 </p>
               </div>
-              <img
+              {/* <img
                 height="16px"
                 className={classes.closeWarningIcon}
                 src="/assets/images/icons/close_icon.svg"
                 onClick={() => setShowWarning(false)}
-              />
+              /> */}
             </div>
           )}
         </>
