@@ -380,6 +380,11 @@ const InquiryViewer = (props) => {
     RD_TERMS,
     BL_TYPE,
     T_VVD,
+    SHIPPER,
+    CONSIGNEE,
+    FORWARDER,
+    ALSO_NOTIFY,
+    NOTIFY
   ];
 
   const isDisableBtnUpload = () => {
