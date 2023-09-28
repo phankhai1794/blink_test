@@ -325,7 +325,7 @@ const DraftPage = (props) => {
             </div>
           </div>
 
-          <Grid container style={{ display: 'flex', marginTop: 15 }}>
+          <Grid container style={{ display: 'flex', marginTop: 15, filter: 'blur(2.5px)' }}>
             <Grid item xs={7} style={{
               borderTop: BORDER,
               borderBottom: BORDER,
