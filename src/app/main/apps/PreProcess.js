@@ -139,9 +139,7 @@ const PreProcess = ({ bl, children }) => {
           const userLocalStorage = getLocalUser();
           const userLocal = userLocalStorage ? JSON.parse(userLocalStorage) : {};
           if (userLocal.displayName && usersAccessing.length) {
-            let permissions = await getPermissionByRole(userLocal.role).catch((err) =>
-              handleError(dispatch, err)
-            );
+            let permissions = null;
             if (userLocal.displayName === usersAccessing[0].userName) {
               // if to be the first user
               dispatch(FormActions.toggleOpenBLWarning(false));
@@ -171,10 +169,12 @@ const PreProcess = ({ bl, children }) => {
               }
             }
 
-            setTimeout(() => {
-              dispatch(AppActions.setUser({ ...userLocal, permissions }));
-            }, 500);
-            sessionStorage.setItem('permissions', JSON.stringify(permissions));
+            if (permissions) {
+              setTimeout(() => {
+                dispatch(AppActions.setUser({ ...userLocal, permissions }));
+              }, 500);
+              sessionStorage.setItem('permissions', JSON.stringify(permissions));
+            }
           }
         }
       });

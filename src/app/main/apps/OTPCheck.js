@@ -331,8 +331,8 @@ const OtpCheck = ({ children }) => {
 
     sessionStorage.setItem('userType', userType);
     sessionStorage.setItem('permissions', JSON.stringify(permissions));
-    // Auto save user data into redux store at PreProcess.js
 
+    dispatch(Actions.setUser({ ...userInfo, permissions, userType }));
     dispatch(Actions.hideMessage());
 
     const { pathname, search } = window.location;
