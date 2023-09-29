@@ -335,8 +335,8 @@ const SearchLayout = (props) => {
   const handleDateChange = (ranges) => {
     const { startDate, endDate } = ranges.selection;
 
-    const maxEndDate = addDays(startDate, 30);
-    const minStartDate = subDays(endDate, 30);
+    const maxEndDate = addDays(startDate, 90);
+    const minStartDate = subDays(endDate, 90);
     if (startDate.getTime() === endDate.getTime()) setStartingDate(endDate);
 
     // If the selected end date is beyond the maximum, adjust it
