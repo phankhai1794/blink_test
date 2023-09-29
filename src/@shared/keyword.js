@@ -260,6 +260,7 @@ export const mapperBlinkStatusCustomer = {
   'IN_QUEUE': 'In Queue',
   'PENDING': 'Pending',
   'COMPLETED': 'Completed',
+  'BLANK': '<<Blank>>'
 };
 
 export const BROADCAST = {

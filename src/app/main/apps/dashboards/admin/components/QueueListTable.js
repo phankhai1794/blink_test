@@ -367,7 +367,7 @@ const Row = (props) => {
             {row.etd && formatDate(row.etd, 'MMM DD YYYY HH:mm')}
           </TableCell>
         )}
-        {columns.status && userType === 'ONSHORE' && <TableCell className={classes.cellBody}>{row.statusOnshore}</TableCell>}
+        {columns.status && userType === 'ONSHORE' && <TableCell className={classes.cellBody}>{row.statusOnshore !== 'BLANK' ? row.statusOnshore : ''}</TableCell>}
         {columns.shipperN && <TableCell className={classes.cellBody}>{row.shipperName}</TableCell>}
         {columns.pol && <TableCell className={classes.cellBody}>{row.pol}</TableCell>}
         {columns.pod && <TableCell className={classes.cellBody}>{row.pod}</TableCell>}
