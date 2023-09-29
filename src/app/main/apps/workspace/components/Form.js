@@ -5,17 +5,24 @@ import { useDispatch, useSelector } from 'react-redux';
 import { withStyles, makeStyles, createMuiTheme } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import { ThemeProvider } from '@material-ui/styles';
-import Dialog from '@material-ui/core/Dialog';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
-import FilterNoneIcon from '@material-ui/icons/FilterNone';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
-import { Box, Tabs, Tab, Divider, Link, Chip, Button, Paper } from '@material-ui/core';
-import CropDinIcon from '@material-ui/icons/CropDin';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import {
+  Box,
+  Tabs,
+  Tab,
+  Divider,
+  Link,
+  Chip,
+  Button,
+  Paper,
+  Icon,
+  IconButton,
+  Dialog,
+  CircularProgress,
+  Popover
+} from '@material-ui/core';
 import * as DraftBLActions from 'app/main/apps/draft-bl/store/actions';
 import Draggable from 'react-draggable';
 
@@ -25,6 +32,7 @@ import * as InquiryActions from '../store/actions/inquiry';
 import PopoverFooter from './PopoverFooter';
 import PopupConfirmSubmit from './PopupConfirmSubmit';
 import PopupConfirm from './PopupConfirm';
+import ListEmailAccess from './ListEmailAccess';
 
 const theme = createMuiTheme({
   typography: {
@@ -82,7 +90,7 @@ const DialogTitle = withStyles(styles)((props) => {
           <IconButton
             aria-label="close"
             // onClick={handleOpenSnackBar}
-            onClick={() => { }}
+            onClick={() => {}}
             style={{ textAlign: 'center' }}>
             {/* <MinimizeIcon /> */}
           </IconButton>
@@ -91,14 +99,14 @@ const DialogTitle = withStyles(styles)((props) => {
               aria-label="close"
               onClick={() => openFullScreen(false)}
               style={{ textAlign: 'center' }}>
-              <FilterNoneIcon style={{ width: '20px' }} />
+              <Icon style={{ width: '20px' }}>filter_none</Icon>
             </IconButton>
           ) : (
             <IconButton
               aria-label="close"
               onClick={() => openFullScreen(true)}
               style={{ textAlign: 'center' }}>
-              <CropDinIcon />
+              <Icon>crop_din </Icon>
             </IconButton>
           )}
           {/* <IconButton aria-label="close">
@@ -110,7 +118,7 @@ const DialogTitle = withStyles(styles)((props) => {
               handleClose();
               openFullScreen(false);
             }}>
-            <CloseIcon />
+            <Icon> close </Icon>
           </IconButton>
         </div>
       </div>
@@ -131,7 +139,7 @@ const useStyles = makeStyles(() => ({
     minHeight: 600,
     maxHeight: '80%',
     margin: 0,
-    width: '100%',
+    width: '100%'
   },
   hideDialog: {
     display: 'none'
@@ -188,6 +196,11 @@ const useStyles = makeStyles(() => ({
     position: 'absolute',
     top: '50%',
     left: '50%'
+  },
+  mailList: {
+    maxWidth: 800,
+    minWidth: 500,
+    padding: '10px 24px 24px'
   }
 }));
 
@@ -201,15 +214,16 @@ const LinkButton = ({ text, disable, handleClick }) => {
         disabled={disable}
         style={{ display: 'flex', alignItems: 'center' }}
         onClick={handleClick}>
-        <AddCircleOutlineIcon
+        <Icon
           style={{
             color: disable ? '#d3d3d3' : '#BD0F72',
             left: '8.33%',
             right: '8.33%',
             border: '2px',
             width: 25
-          }}
-        />
+          }}>
+          add_circle_outline
+        </Icon>
         <span
           style={{
             color: disable ? '#d3d3d3' : '#BD0F72',
@@ -255,22 +269,26 @@ export default function Form(props) {
   const userType = useSelector(({ user }) => user.userType);
   const listInqMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listInqMinimize);
   const enableSubmit = useSelector(({ workspace }) => workspace.inquiryReducer.enableSubmit);
-  const reply = useSelector(({ workspace }) => workspace.inquiryReducer.reply);
-  const currentFieldAmend = useSelector(({ draftBL }) => draftBL.currentField);
-
+  const [anchorEmailList, setAnchorEmailList] = useState(false);
   const listMinimize = useSelector(({ workspace }) => workspace.inquiryReducer.listMinimize);
   const isShowBackground = useSelector(
     ({ workspace }) => workspace.inquiryReducer.isShowBackground
   );
 
-  const [openAllInquiry, openPreviewListSubmit, openInqReview, scrollInquiry, openAmendmentList, currentTabs, openPreviewFiles] = useSelector(({ workspace }) => [
+  const [
+    openAllInquiry,
+    openPreviewListSubmit,
+    openInqReview,
+    scrollInquiry,
+    openAmendmentList,
+    currentTabs
+  ] = useSelector(({ workspace }) => [
     workspace.formReducer.openAllInquiry,
     workspace.formReducer.openPreviewListSubmit,
     workspace.formReducer.openInqReview,
     workspace.formReducer.scrollInquiry,
     workspace.formReducer.openAmendmentList,
-    workspace.formReducer.tabs,
-    workspace.formReducer.openPreviewFiles
+    workspace.formReducer.tabs
   ]);
 
   const currentAmendment = useSelector(
@@ -285,7 +303,9 @@ export default function Form(props) {
   const [idBtn, setIdBtn] = useState('');
   const [checkSubmit, setCheckSubmit] = useState(true);
 
-  const enableSend = inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED'].includes(inq.state)).length !== inquiries.length;
+  const enableSend =
+    inquiries.filter((inq) => ['UPLOADED', 'COMPL', 'RESOLVED'].includes(inq.state)).length !==
+    inquiries.length;
 
   const handleOpenFab = () => {
     setIdBtn(currentField);
@@ -307,19 +327,28 @@ export default function Form(props) {
     }
   };
 
+  const showEmailList = (event) => {
+    setAnchorEmailList(event.currentTarget);
+  };
+
+  const closeEmailList = () => {
+    setAnchorEmailList(null);
+  };
+
   const PaperComponent = React.useMemo(
     () =>
       // eslint-disable-next-line react/display-name
-      (props) => isFullScreen ?
-        <Paper {...props} /> :
-        <Draggable
-          bounds="parent"
-          handle="#draggable-dialog-title"
-          cancel={'[class*="MuiDialogContent-root"]'}
-        >
-          <Paper {...props} id="paper" />
-        </Draggable>
-    ,
+      (props) =>
+        isFullScreen ? (
+          <Paper {...props} />
+        ) : (
+          <Draggable
+            bounds="parent"
+            handle="#draggable-dialog-title"
+            cancel={'[class*="MuiDialogContent-root"]'}>
+            <Paper {...props} id="paper" />
+          </Draggable>
+        ),
     []
   );
 
@@ -344,10 +373,10 @@ export default function Form(props) {
 
   const resetInquiry = () => {
     const optionsInquires = [...inquiries];
-    optionsInquires.forEach(op => op.showIconAttachFile = false);
-    optionsInquires.forEach(op => op.showIconReply = false);
-    optionsInquires.forEach(op => op.showIconAttachAnswerFile = false);
-    optionsInquires.forEach(op => {
+    optionsInquires.forEach((op) => (op.showIconAttachFile = false));
+    optionsInquires.forEach((op) => (op.showIconReply = false));
+    optionsInquires.forEach((op) => (op.showIconAttachAnswerFile = false));
+    optionsInquires.forEach((op) => {
       if (['OPEN', 'INQ_SENT', 'REP_SENT'].includes(op.state)) {
         op.showIconReply = true;
         op.showIconEditInq = true;
@@ -357,7 +386,7 @@ export default function Form(props) {
     });
     dispatch(InquiryActions.setInquiries(optionsInquires));
     //
-  }
+  };
 
   const handleClose = () => {
     toggleForm(false);
@@ -372,7 +401,7 @@ export default function Form(props) {
     sortListClose(listMinimize, field);
     dispatch(InquiryActions.setReply(false));
     dispatch(InquiryActions.setEditInq(null));
-    dispatch(FormActions.setScrollInquiry(''))
+    dispatch(FormActions.setScrollInquiry(''));
 
     if (field === 'ATTACHMENT_LIST') dispatch(FormActions.toggleReload());
 
@@ -396,14 +425,17 @@ export default function Form(props) {
   const handleChange = (_, newValue) => {
     dispatch(InquiryActions.setEditInq());
     props.tabChange(newValue);
-    dispatch(FormActions.setTabs(newValue))
+    dispatch(FormActions.setTabs(newValue));
   };
 
   useEffect(() => {
     let setNumber = 0;
     const countOnshore = inquiries.filter((inq) => {
-      return inq.process === 'pending' && inq.receiver.includes('onshore')
-        && (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')
+      return (
+        inq.process === 'pending' &&
+        inq.receiver.includes('onshore') &&
+        (inq.state === 'OPEN' || inq.state === 'REP_Q_DRF')
+      );
     }).length;
 
     if (countOnshore !== 0 && tabSelected === 1) setNumber = 1;
@@ -450,7 +482,7 @@ export default function Form(props) {
   };
 
   useEffect(() => {
-    const isEmptyPopup = inquiries.filter(inq => inq.field === currentField);
+    const isEmptyPopup = inquiries.filter((inq) => inq.field === currentField);
     if (!openAmendmentList) {
       if (!isEmptyPopup.length) dispatch(InquiryActions.addAmendment(null));
       else dispatch(InquiryActions.addAmendment());
@@ -463,20 +495,18 @@ export default function Form(props) {
     if (scrollInquiry) {
       props.tabChange(currentTabs);
     }
-  }, [scrollInquiry])
+  }, [scrollInquiry]);
 
   useEffect(() => {
     props.tabChange(currentTabs);
-  }, [currentTabs])
+  }, [currentTabs]);
 
   useEffect(() => {
     if (openAllInquiry && nums && nums.length) {
-      if (nums[0] !== 0 && nums[1] === 0)
-        dispatch(FormActions.setTabs(0));
-      else if (nums[0] === 0 && nums[1] !== 0)
-        dispatch(FormActions.setTabs(1));
+      if (nums[0] !== 0 && nums[1] === 0) dispatch(FormActions.setTabs(0));
+      else if (nums[0] === 0 && nums[1] !== 0) dispatch(FormActions.setTabs(1));
     }
-  }, [openAllInquiry])
+  }, [openAllInquiry]);
 
   return (
     <div>
@@ -496,7 +526,13 @@ export default function Form(props) {
         PaperComponent={PaperComponent}
         maxWidth="md"
         container={() => document.getElementById('content-wrapper')}
-        classes={{ paperScrollPaper: isPreviewFile ? classes.hideDialog : (isFullScreen ? classes.dialogFullWidth : classes.dialogPaper) }}>
+        classes={{
+          paperScrollPaper: isPreviewFile
+            ? classes.hideDialog
+            : isFullScreen
+            ? classes.dialogFullWidth
+            : classes.dialogPaper
+        }}>
         <DialogTitle
           id="draggable-dialog-title"
           style={isFullScreen ? null : { cursor: 'move' }}
@@ -508,53 +544,89 @@ export default function Form(props) {
           {title || null}
         </DialogTitle>
         <Divider classes={{ root: classes.divider }} />
-        {tabs?.length > 0 && ((nums && nums.some((num) => num > 0)) || openAllInquiry) && !openAmendmentList && (
-          <Box
-            style={{ marginLeft: 20, marginRight: 20, borderBottom: '1px solid #515F6B' }}
-            sx={{}}>
-            <Tabs
-              indicatorColor="primary"
-              style={{ display: 'flex', margin: 0, height: '50px' }}
-              value={tabSelected}
-              onChange={handleChange}>
-              {(nums[0] || (openAllInquiry && inquiries.some((inq) => inq.receiver.includes('customer')))) && (
-                <Tab
-                  classes={{ wrapper: classes.iconLabelWrapper }}
-                  className={clsx(classes.tab, tabSelected === 0 && classes.colorSelectedTab)}
-                  label="Customer"
-                  icon={
-                    nums[0] ?
-                      <div className={clsx(classes.countBtn, tabSelected === 0 && classes.colorCountBtn)}>
-                        {nums[0]}
-                      </div> : null
-                  }
-                />
-              )}
-              {(nums[1] || (openAllInquiry && inquiries.some((inq) => inq.receiver.includes('onshore')))) && (
-                <Tab
-                  classes={{ wrapper: classes.iconLabelWrapper }}
-                  className={clsx(classes.tab, tabSelected === 1 && classes.colorSelectedTab)}
-                  label="Onshore"
-                  icon={
-                    nums[1] ?
-                      <div
-                        className={clsx(
-                          classes.countBtn,
-                          (tabSelected === 1 || !nums[1]) && classes.colorCountBtn
-                        )}>
-                        {nums[1]}
-                      </div> : null
-                  }
-                />
-              )}
-            </Tabs>
-          </Box>
+        <Popover
+          classes={{ paper: classes.mailList }}
+          open={Boolean(anchorEmailList)}
+          anchorEl={anchorEmailList}
+          onClose={closeEmailList}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center'
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center'
+          }}>
+          <ListEmailAccess />
+        </Popover>
+        {openAllInquiry && field === 'INQUIRY_LIST' && userType === 'ADMIN' && (
+          <div style={{ display: 'flex', alignItems: 'center', padding: '20px 0 0 30px' }}>
+            <img src="assets/images/icons/people.svg"></img>
+            <span style={{ color: '#515F6B', fontWeight: 600 }}>Email Recipients</span>
+            <IconButton style={{ padding: 1 }} onClick={showEmailList}>
+              <Icon style={{ fontSize: 22 }}>expand_more</Icon>
+            </IconButton>
+          </div>
         )}
+        {tabs?.length > 0 &&
+          ((nums && nums.some((num) => num > 0)) || openAllInquiry) &&
+          !openAmendmentList && (
+            <Box
+              style={{ marginLeft: 20, marginRight: 20, borderBottom: '1px solid #515F6B' }}
+              sx={{}}>
+              <Tabs
+                indicatorColor="primary"
+                style={{ display: 'flex', margin: 0, height: '50px' }}
+                value={tabSelected}
+                onChange={handleChange}>
+                {(nums[0] ||
+                  (openAllInquiry &&
+                    inquiries.some((inq) => inq.receiver.includes('customer')))) && (
+                  <Tab
+                    classes={{ wrapper: classes.iconLabelWrapper }}
+                    className={clsx(classes.tab, tabSelected === 0 && classes.colorSelectedTab)}
+                    label="Customer"
+                    icon={
+                      nums[0] ? (
+                        <div
+                          className={clsx(
+                            classes.countBtn,
+                            tabSelected === 0 && classes.colorCountBtn
+                          )}>
+                          {nums[0]}
+                        </div>
+                      ) : null
+                    }
+                  />
+                )}
+                {(nums[1] ||
+                  (openAllInquiry &&
+                    inquiries.some((inq) => inq.receiver.includes('onshore')))) && (
+                  <Tab
+                    classes={{ wrapper: classes.iconLabelWrapper }}
+                    className={clsx(classes.tab, tabSelected === 1 && classes.colorSelectedTab)}
+                    label="Onshore"
+                    icon={
+                      nums[1] ? (
+                        <div
+                          className={clsx(
+                            classes.countBtn,
+                            (tabSelected === 1 || !nums[1]) && classes.colorCountBtn
+                          )}>
+                          {nums[1]}
+                        </div>
+                      ) : null
+                    }
+                  />
+                )}
+              </Tabs>
+            </Box>
+          )}
         <MuiDialogContent
           classes={{
             root:
               field === 'ATTACHMENT_LIST' ||
-                ((field === 'INQUIRY_LIST' || field === currentField) && isShowBackground)
+              ((field === 'INQUIRY_LIST' || field === currentField) && isShowBackground)
                 ? classes.dialogContentAttachment
                 : classes.dialogContent
           }}
@@ -613,13 +685,39 @@ export default function Form(props) {
                       fontWeight: 'bold',
                       width: 120,
                       color: 'white',
-                      backgroundColor: (!enableSend || isLoading || inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED', 'AME_SENT', 'ANS_SENT', 'REP_A_SENT'].includes(inq.state)).length === inquiries.length) ? '#CCD3D1' : '#bd1874',
+                      backgroundColor:
+                        !enableSend ||
+                        isLoading ||
+                        inquiries.filter((inq) =>
+                          [
+                            'UPLOADED',
+                            'COMPL',
+                            'RESOLVED',
+                            'AME_SENT',
+                            'ANS_SENT',
+                            'REP_A_SENT'
+                          ].includes(inq.state)
+                        ).length === inquiries.length
+                          ? '#CCD3D1'
+                          : '#bd1874',
                       borderRadius: '8px',
                       fontFamily: 'Montserrat'
                     }}
-                    disabled={!enableSend || isLoading || inquiries.filter(inq => ['UPLOADED', 'COMPL', 'RESOLVED', 'AME_SENT', 'ANS_SENT', 'REP_A_SENT'].includes(inq.state)).length === inquiries.length}
-                    onClick={sendMailClick}
-                  >
+                    disabled={
+                      !enableSend ||
+                      isLoading ||
+                      inquiries.filter((inq) =>
+                        [
+                          'UPLOADED',
+                          'COMPL',
+                          'RESOLVED',
+                          'AME_SENT',
+                          'ANS_SENT',
+                          'REP_A_SENT'
+                        ].includes(inq.state)
+                      ).length === inquiries.length
+                    }
+                    onClick={sendMailClick}>
                     Email
                   </Button>
                   {isLoading && (
